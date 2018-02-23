@@ -1,0 +1,31 @@
+namespace: ${namespace}
+stacker_bucket: ${stacker_bucket_name}
+
+sys_path: ./  # For local classes
+# package_sources:
+#   git:
+#     - uri: https://github.com/remind101/stacker_blueprints.git
+#       tag: 1.0.3
+#   s3:
+#     - bucket: sturdy-platform-releases
+#       key: infrastructure/sturdy-platform-infrastructure-1.17.0.tar.gz
+#       requester_pays: true
+#       use_latest: false
+#       paths:
+#         - stacker_platform_modules/lambda_ebs_snapshot
+#       configs:
+#         - stacker_platform_modules/lambda_ebs_snapshot/lambda_ebs_snapshot.yaml
+
+stacks:
+  sampleapp:
+    class_path: sampleapp_blueprints.bucket.Bucket
+    variables:
+      ApplicationName: sampleapp
+      CustomerName: ${customer}
+      EnvironmentName: ${environment}
+  sampleappstack2:
+    template_path: templates/bucket.json
+    variables:
+      ApplicationName: sampleapp
+      CustomerName: ${customer}
+      EnvironmentName: ${environment}

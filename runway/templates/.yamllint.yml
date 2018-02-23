@@ -1,0 +1,15 @@
+extends: default
+
+ignore: |
+  node_modules
+
+rules:
+  # Don't need --- in our single doc files
+  document-start: disable
+
+  # Don't warn on line length
+  line-length: disable
+
+  comments:
+    # Cloudinit configs can't have the normal starting space in a comment
+    require-starting-space: false

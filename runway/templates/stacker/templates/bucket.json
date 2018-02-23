@@ -1,0 +1,186 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Conditions": {
+        "BucketNameOmitted": {
+            "Fn::Or": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "BucketName"
+                        },
+                        ""
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "BucketName"
+                        },
+                        "undefined"
+                    ]
+                }
+            ]
+        }
+    },
+    "Description": "Sample app",
+    "Outputs": {
+        "BucketArn": {
+            "Description": "Arn of bucket",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Bucket",
+                    "Arn"
+                ]
+            }
+        },
+        "BucketName": {
+            "Description": "Name of bucket",
+            "Value": {
+                "Ref": "Bucket"
+            }
+        }
+    },
+    "Parameters": {
+        "ApplicationName": {
+            "Description": "Application name",
+            "Type": "String"
+        },
+        "BucketName": {
+            "Default": "",
+            "Description": "Name of bucket",
+            "Type": "String"
+        },
+        "CustomerName": {
+            "AllowedPattern": "[-_ a-z]*",
+            "Default": "",
+            "Description": "The nickname for the new customer. Must be all lowercase letters, should not contain spaces or special characters, nor should it include any part of EnvironmentName.",
+            "Type": "String"
+        },
+        "EnvironmentName": {
+            "Default": "common",
+            "Description": "Name of Environment",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "Bucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName": {
+                    "Fn::If": [
+                        "BucketNameOmitted",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "BucketName"
+                        }
+                    ]
+                },
+                "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "NoncurrentVersionExpirationInDays": 90,
+                            "Status": "Enabled"
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "application",
+                        "Value": {
+                            "Ref": "ApplicationName"
+                        }
+                    },
+                    {
+                        "Key": "customer",
+                        "Value": {
+                            "Ref": "CustomerName"
+                        }
+                    },
+                    {
+                        "Key": "environment",
+                        "Value": {
+                            "Ref": "EnvironmentName"
+                        }
+                    }
+                ],
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "RequireBucketEncryption": {
+            "Properties": {
+                "Bucket": {
+                    "Ref": "Bucket"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:PutObject"
+                            ],
+                            "Condition": {
+                                "StringNotEquals": {
+                                    "s3:x-amz-server-side-encryption": "AES256"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Bucket",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ],
+                            "Sid": "DenyIncorrectEncryptionHeader"
+                        },
+                        {
+                            "Action": [
+                                "s3:PutObject"
+                            ],
+                            "Condition": {
+                                "Null": {
+                                    "s3:x-amz-server-side-encryption": "true"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Bucket",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ],
+                            "Sid": "DenyUnEncryptedObjectUploads"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "sampleapp",
+  "version": "1.0.0",
+  "description": "Serverless Python Hello World app",
+  "main": "handler.py",
+  "devDependencies": {
+    "serverless": "^1.25.0"
+  },
+  "scripts": {
+    "deploy": "sls deploy"
+  },
+  "author": "Serverless Devs",
+  "license": "ISC"
+}
