@@ -70,7 +70,7 @@ INSTALL_REQUIRES = [
 setup(
     name='runway',
     version=__version__,
-    description='Runway simplifies infrastructure/app testing/deployment.',
+    description='Simplify infrastructure/app testing/deployment',
     long_description=LONG_DESCRIPTION,
     url='https://github.com/onicagroup/runway',
     author='Onica Group LLC',
