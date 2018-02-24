@@ -31,7 +31,7 @@ Very simple configuration to:
     * Mappings of modules to regions, optionally with AWS IAM roles to assume
 * runway.yml:
     * List of deployments
-    * When the ``CI`` environment variable is set, all deployments are run in order; otherwise, the user is prompted for deployments to run.
+    * When the `CI` environment variable is set, all deployments are run in order; otherwise, the user is prompted for deployments to run.
 
 ### Repo Structure
 
@@ -125,13 +125,13 @@ deployments:
 ## Installation
 * Install Python 2
     * On Linux:
-        * ``sudo apt-get -y install python-pip python-minimal``
-        * ``echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc``
-        * ``source ${HOME}/.bashrc``
+        * `sudo apt-get -y install python-pip python-minimal`
+        * `echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc`
+        * `source ${HOME}/.bashrc`
     * On macOS:
-        * ``if ! which pip > /dev/null; then easy_install --user pip; fi``
-        * ``echo 'export PATH="${HOME}/Library/Python/2.7/bin:${PATH}"' >> ${HOME}/.bash_profile``
-        * ``source ${HOME}/.${SHELL_NAME}_profile``
+        * `if ! which pip > /dev/null; then easy_install --user pip; fi`
+        * `echo 'export PATH="${HOME}/Library/Python/2.7/bin:${PATH}"' >> ${HOME}/.bash_profile`
+        * `source ${HOME}/.${SHELL_NAME}_profile`
 * Install runway:
     * `pip install --user runway`
 
