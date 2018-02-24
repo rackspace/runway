@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key = "sampleapp"
+    key = "sampleapp.tfstate"
   }
 }
 
