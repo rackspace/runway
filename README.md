@@ -168,6 +168,11 @@ stacker_bucket: ${stacker_bucket_name}
 stacks:
   myvpcstack:  # will be deployed as contoso-dev-myvpcstack
     template_path: templates/vpc.yaml
+    # The enabled option is optional and defaults to true. You can use it to
+    # enable/disable stacks per-environment (i.e. like the namespace
+    # substitution above, but with the value of either true or false for the
+    # enabled option here)
+    enabled: true
   myvpcendpoint:
     template_path: templates/vpcendpoint.yaml
     # variables map directly to CFN parameters; here used to supply the
