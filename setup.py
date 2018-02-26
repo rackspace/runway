@@ -65,7 +65,7 @@ INSTALL_REQUIRES = [
 # and the following deleted:
 #   * tests
 #   * blueprints/testutil.py
-
+SCRIPTS = ['scripts/stacker-runway', 'scripts/stacker-runway.cmd']
 
 setup(
     name='runway',
@@ -103,6 +103,7 @@ setup(
             'runway=runway.cli:main',
         ],
     },
+    scripts=SCRIPTS,
     include_package_data=True,  # needed for templates
     cmdclass={'test': RunTests},
 )

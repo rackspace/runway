@@ -181,6 +181,8 @@ stacks:
       VpcId: ${output myvpcstack::VpcId}
 ```
 
+The config yaml supports many more features; see the full Stacker documentation for more detail (e.g. [stack configuration options](http://stacker.readthedocs.io/en/latest/config.html#stacks), [additional lookups](http://stacker.readthedocs.io/en/latest/lookups.html) in addition to output (e.g. SSM, DynamoDB))
+
 ### Serverless
 
 Standard [Serverless](https://serverless.com/framework/) rules apply, with the following recommendations/caveats:
