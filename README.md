@@ -124,14 +124,14 @@ deployments:
 
 ## Installation
 * Install Python 2
-    * On Linux:
+    * On Linux (assuming default Bash shell; adjust for others appropriately):
         * `sudo apt-get -y install python-pip python-minimal`
         * `echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc`
         * `source ${HOME}/.bashrc`
-    * On macOS:
+    * On macOS (assuming default Bash shell; adjust for others appropriately):
         * `if ! which pip > /dev/null; then easy_install --user pip; fi`
         * `echo 'export PATH="${HOME}/Library/Python/2.7/bin:${PATH}"' >> ${HOME}/.bash_profile`
-        * `source ${HOME}/.${SHELL_NAME}_profile`
+        * `source ${HOME}/.bash_profile`
 * Install runway:
     * `pip install --user runway`
 
