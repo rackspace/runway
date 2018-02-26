@@ -89,6 +89,9 @@ setup(
         # 'Programming Language :: Python :: 3.3',
         # 'Programming Language :: Python :: 3.4',
     ],
+    # Python 3 support blocked by
+    # https://github.com/remind101/stacker/issues/465
+    python_requires='~=2.6',
     keywords='cli',
     packages=find_packages(exclude=['docs', 'tests*']),
     install_requires=INSTALL_REQUIRES,
