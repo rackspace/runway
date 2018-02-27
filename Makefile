@@ -18,3 +18,5 @@ build_whl: clean create_readme
 
 release: clean create_readme build
 	twine upload dist/*
+
+travis: test clean create_readme build

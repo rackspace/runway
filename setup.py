@@ -97,7 +97,7 @@ setup(
     packages=find_packages(exclude=['docs', 'tests*']),
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'test': ['coverage', 'pytest', 'pytest-cov'],
+        'test': ['flake8', 'pep8-naming', 'flake8-docstrings', 'pylint'],
     },
     entry_points={
         'console_scripts': [
