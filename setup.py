@@ -48,7 +48,7 @@ INSTALL_REQUIRES = [
 ] + [  # stacker dependencies
     'troposphere>=1.9.0',
     'botocore>=1.6.0',
-    'boto3>=1.3.1,<1.5.0',
+    'boto3>=1.3.1',
     "colorama~=0.3.7",  # likely won't be needed w/ Stacker 1.2
     'PyYAML~=3.12',
     'awacs>=0.6.0',
@@ -62,7 +62,7 @@ INSTALL_REQUIRES = [
 # https://github.com/remind101/stacker/pull/536 (in master)
 # https://github.com/remind101/stacker/pull/538 (in master)
 # https://github.com/remind101/stacker/pull/540 (in master)
-# https://github.com/remind101/stacker/pull/541 (fixes for #540)
+# https://github.com/remind101/stacker/pull/541 (in master)
 # and the following deleted:
 #   * tests
 #   * blueprints/testutil.py
