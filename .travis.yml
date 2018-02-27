@@ -4,6 +4,7 @@ addons:
   apt:
     packages:
       - pandoc
+      - sed
 python:
   - "2.7"
   # See setup.py for notes about pending Python 3 support

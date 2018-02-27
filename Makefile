@@ -9,7 +9,7 @@ test:
 	find runway/templates/stacker -name '*.py' | xargs pylint --disable=import-error --disable=too-few-public-methods
 
 create_readme:
-	pandoc --from=markdown --to=rst --output=README.rst README.md
+	sed '/^\[!\[Build Status\]/d' README.md | pandoc --from=markdown --to=rst --output=README.rst
 
 build: clean create_readme
 	python setup.py sdist

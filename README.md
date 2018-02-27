@@ -1,4 +1,5 @@
 # Runway
+[![Build Status](https://travis-ci.org/onicagroup/runway.svg?branch=master)](https://travis-ci.org/onicagroup/runway)
 
 ## What?
 A lightweight wrapper around linting (e.g. yamllint) & infrastructure deployment tools (e.g. CloudFormation, Terraform, Serverless) to ease management of per-environment configs & deployment.
