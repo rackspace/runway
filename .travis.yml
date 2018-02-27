@@ -5,15 +5,11 @@ addons:
     packages:
       - pandoc
 python:
-  - "2.6"
   - "2.7"
   # See setup.py for notes about pending Python 3 support
   # - "3.4"
   # - "3.5"
   # - "3.6"
-  # PyPy versions
-  - "pypy2.7"
-  # - "pypy3.5"
 install:
   - pip install flake8 pep8-naming flake8-docstrings pylint
 script: make travis
