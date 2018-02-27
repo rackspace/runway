@@ -5,7 +5,8 @@ clean:
 
 test:
 	flake8 --exclude=runway/embedded runway
-	find runway -name '*.py' -not -path "runway/embedded*" | xargs pylint
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' | xargs pylint
+	find runway/templates/stacker -name '*.py' | xargs pylint --disable=import-error --disable=too-few-public-methods
 
 create_readme:
 	pandoc --from=markdown --to=rst --output=README.rst README.md
