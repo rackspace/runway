@@ -315,6 +315,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                                                region))
                             )
                             continue
+                        self.ensure_stacker_compat_config(
+                            os.path.join(self.module_root, name)
+                        )
                         LOGGER.info("Running stacker %s on %s",
                                     command,
                                     name)
@@ -459,6 +462,24 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError('You must implement the execute() method '
                                   'yourself!')
+
+    @staticmethod
+    def ensure_stacker_compat_config(config_filename):
+        """Ensure config file can be loaded by Stacker."""
+        try:
+            with open(config_filename, 'r') as stream:
+                yaml.load(stream)
+        except yaml.constructor.ConstructorError as yaml_error:
+            if yaml_error.problem.startswith(
+                    'could not determine a constructor for the tag \'!'):
+                LOGGER.error('"%s" appears to be a CloudFormation template, '
+                             'but is located in the top level of a module '
+                             'alongside the CloudFormation config files (i.e. '
+                             'the file or files indicating the stack names & '
+                             'parameters). Please move the template to a '
+                             'subdirectory.',
+                             config_filename)
+                sys.exit(1)
 
     @staticmethod
     def get_env_from_branch(branch_name):
