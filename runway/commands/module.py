@@ -339,6 +339,14 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
 
     def determine_module_type(self):
         """Determine type of module."""
+        # First check directory name for type-indicating suffix
+        if os.path.basename(self.module_root).endswith('.sls'):
+            return 'serverless'
+        elif os.path.basename(self.module_root).endswith('.tf'):
+            return 'terraform'
+        elif os.path.basename(self.module_root).endswith('.cfn'):
+            return 'stacker'
+        # Fallback to autodetection
         if os.path.isfile(os.path.join(self.module_root, 'serverless.yml')):
             return 'serverless'
         elif glob.glob(os.path.join(self.module_root, '*.tf')):

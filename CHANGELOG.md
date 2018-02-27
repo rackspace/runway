@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2018-02-26
+### Changed
+- Override module-type autodetection when README-recommended module suffixes are used.
+
 ## [0.5.1] - 2018-02-26
 ### Changed
 - Fix missing colorama runtime dependency for embedded Stacker.
@@ -22,7 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/onicagroup/runway/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/onicagroup/runway/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/onicagroup/runway/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/onicagroup/runway/compare/v0.4.1...v0.4.2
