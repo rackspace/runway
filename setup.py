@@ -47,8 +47,15 @@ INSTALL_REQUIRES = [
     'yamllint'
 ] + [  # stacker dependencies
     'troposphere>=1.9.0',
-    'botocore>=1.6.0',
-    'boto3>=1.3.1',
+    # upstream stacker requires boto3>=1.3.1 & botocore>=1.6.0, but
+    # unfortunately pip will mess up on transitive dependecies
+    # https://github.com/pypa/pip/issues/988
+    # Best option here seems to be to just require the latest version of boto3
+    # (since that's what's most often going to be installed) and the matching
+    # compatible botocore version. It's more rigid than necessary, but should
+    # hopefully make users less likely to encounter an error OOTB.
+    'botocore>=1.9.0',
+    'boto3>=1.6.0',
     "colorama~=0.3.7",  # likely won't be needed w/ Stacker 1.2
     'PyYAML~=3.12',
     'awacs>=0.6.0',

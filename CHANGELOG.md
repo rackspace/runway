@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.6.2] - 2018-02-28
+### Changed
+- Bump boto3/botocore dependencies to work around pip dependency resolution (removes the need to manually upgrade botocore after installation on Amazon Linux).
+
 ## [0.6.1] - 2018-02-27
 ### Changed
 - Add helper message when CloudFormation templates are incorrectly placed alongside stack config files.
@@ -30,7 +34,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/onicagroup/runway/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/onicagroup/runway/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/onicagroup/runway/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/onicagroup/runway/compare/v0.5.0...v0.5.1

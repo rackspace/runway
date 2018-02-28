@@ -126,7 +126,9 @@ deployments:
 ## Installation
 * Install Python 2
     * On Linux (assuming default Bash shell; adjust for others appropriately):
-        * `sudo apt-get -y install python-pip python-minimal`
+        * Install Python/pip:
+            * Debian-family (e.g. Ubuntu): `sudo apt-get -y install python-pip python-minimal`
+            * Amazon Linux should should work out of the box
         * `echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc`
         * `source ${HOME}/.bashrc`
     * On macOS (assuming default Bash shell; adjust for others appropriately):
