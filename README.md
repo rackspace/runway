@@ -27,6 +27,7 @@ Very simple configuration to:
     * Environments are determined automatically from:
         1. Git branches. We recommend promoting changes through clear environment branches (prefixed with `ENV-`). For example, when running a deployment in the `ENV-dev` branch `dev` will be the environment. The `master` branch can also be used as a special 'shared' environment called `common` (e.g. for modules not normally promoted through other environments).
         2. The parent folder name of each module. For teams with a preference or technical requirement to not use git branches, each environment can be represented on disk as a folder. Instead of promoting changes via git merges, changes can be promoted by copying the files between the environment folders. See the `ignore_git_branch` runway.yml config option.
+            * The folder name of the module itself (not its parent folder) if the `ignore_git_branch` and `current_dir` runway.yml config config options are both used (see "Directories as Environments with a Single Module" in "Repo Structure").
         3. The `DEPLOY_ENVIRONMENT` environment variable.
 * Deployments:
     * Mappings of modules to regions, optionally with AWS IAM roles to assume
@@ -35,6 +36,8 @@ Very simple configuration to:
     * When the `CI` environment variable is set, all deployments are run in order; otherwise, the user is prompted for deployments to run.
 
 ### Repo Structure
+
+#### Git Branches as Environments
 
 Sample repo structure, showing 2 modules using environment git branches (these same files would be present in each environment branch, with changes to any environment promoted through branches):
 ```
@@ -52,6 +55,8 @@ Sample repo structure, showing 2 modules using environment git branches (these s
 │   └── main.tf
 └── runway.yml
 ```
+
+#### Directories as Environments
 
 Another sample repo structure, showing the same modules nested in environment folders:
 ```
@@ -84,15 +89,36 @@ Another sample repo structure, showing the same modules nested in environment fo
     └── runway.yml
 ```
 
+#### Directories as Environments with a Single Module
+
+Another sample repo structure, showing environment folders containing a single CloudFormation module at their root (combining the `current_dir` & `ignore_git_branch` "Runway Config File" options to merge the Environment & Module folders):
+```
+.
+├── dev
+│   ├── dev-us-west-2.env
+│   ├── prod-us-west-2.env
+│   ├── myapp.yaml
+│   ├── runway.yml
+│   └── templates
+│       └── myapp_cf_template.json
+└── prod
+    ├── dev-us-west-2.env
+    ├── prod-us-west-2.env
+    ├── myapp.yaml
+    ├── runway.yml
+    └── templates
+        └── myapp_cf_template.json
+```
+
 ### Runway Config File
 
 runway.yml example:
 ```
 ---
 # Order that modules will be deployed. A module will be skipped if a
-# corresponding env/config file is not present in its directory.
+# corresponding env/config file is not present in its folder.
 # (e.g., for cfn modules, if a dev-us-west-2.env file is not in the 'app.cfn'
-# directory when running a dev deployment of 'app' to us-west-2 then it will be
+# folder when running a dev deployment of 'app' to us-west-2 then it will be
 # skipped.)
 deployments:
   - modules:
@@ -115,7 +141,7 @@ deployments:
 # ignore_git_branch: true
 ```
 
-runway.yml can also be placed in a module directory (e.g. a repo/environment containing only one module doesn't need to nest the module in a subdirectory):
+runway.yml can also be placed in a module folder (e.g. a repo/environment containing only one module doesn't need to nest the module in a subfolder):
 ```
 ---
 # This will deploy the module in which runway.yml is located
@@ -125,6 +151,11 @@ deployments:
       - us-west-2
     assume-role:
       arn: arn:aws:iam::account-id:role/role-name
+
+# If using environment folders instead of git branches, git branch lookup can
+# be disabled entirely (see "Repo Structure"). See "Directories as Environments
+# with a Single Module" in "Repo Structure".
+# ignore_git_branch: true
 ```
 
 ## Installation

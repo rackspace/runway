@@ -69,9 +69,8 @@ class Env(Base):
                     if deployment.get('current_dir', False):
                         getattr(Module(options=self.options,
                                        env_vars=self.env_vars,
-                                       env_root=os.path.dirname(self.env_root),
-                                       module_root=self.env_root,
-                                       runway_config_dir=self.env_root),
+                                       env_root=self.env_root,
+                                       module_root=self.env_root),
                                 command)()
                 if deployment.get('assume-role'):
                     self.post_deploy_assume_role(deployment['assume-role'])

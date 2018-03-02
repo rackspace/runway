@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2018-03-02
+### Changed
+- Make `current_dir` & `ignore_git_branch` options work together more intuitively (now doesn't require nested module directories)
+
 ## [0.6.2] - 2018-02-28
 ### Changed
 - Bump boto3/botocore dependencies to work around pip dependency resolution (removes the need to manually upgrade botocore after installation on Amazon Linux).
@@ -34,7 +38,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/onicagroup/runway/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/onicagroup/runway/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/onicagroup/runway/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/onicagroup/runway/compare/v0.5.1...v0.6.0
