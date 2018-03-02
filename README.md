@@ -59,22 +59,26 @@ Another sample repo structure, showing the same modules nested in environment fo
 ├── dev
 │   ├── myapp.cfn
 │   │   ├── dev-us-west-2.env
+|   │   ├── prod-us-west-2.env
 │   │   ├── myapp.yaml
 │   │   └── templates
 │   │       └── myapp_cf_template.json
 │   ├── myapp.tf
 │   │   ├── backend.tfvars
 │   │   ├── dev-us-east-1.tfvars
+|   │   ├── prod-us-east-1.tfvars
 │   │   └── main.tf
 │   └── runway.yml
 └── prod
     ├── myapp.cfn
+    │   ├── dev-us-west-2.env
     │   ├── prod-us-west-2.env
     │   ├── myapp.yaml
     │   └── templates
     │       └── myapp_cf_template.json
     ├── myapp.tf
     │   ├── backend.tfvars
+    │   ├── dev-us-east-1.tfvars
     │   ├── prod-us-east-1.tfvars
     │   └── main.tf
     └── runway.yml
