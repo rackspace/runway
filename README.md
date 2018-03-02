@@ -170,7 +170,12 @@ deployments:
         * `if ! which pip > /dev/null; then easy_install --user pip; fi`
         * `echo 'export PATH="${HOME}/Library/Python/2.7/bin:${PATH}"' >> ${HOME}/.bash_profile`
         * `source ${HOME}/.bash_profile`
-* Install runway:
+    * On Windows:
+        * This can be done via the Chocolately package manager (e.g. `choco install python2`), or manually from their website
+            * If installing via Chocolately, default options will be sufficient. Close/reopen terminals after installation to use the updated PATH
+            * If installing manually, use the default options with the exception of the "Add python to Path" (it should be enabled).
+        * Add `%USERPROFILE%\AppData\Roaming\Python\Scripts` to PATH environment variable
+* Install runway (doesn't require sudo/admin permissions):
     * `pip install --user runway`
 
 ## Use
