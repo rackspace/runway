@@ -523,7 +523,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
     def gen_sls_config_files(stage, region):
         """Generate possible SLS config files names."""
         names = []
-        for ext in ['yaml', 'yml', 'json']:
+        for ext in ['yml', 'json']:
             # Give preference to explicit stage-region files
             names.append("config-%s-%s.%s" % (stage, region, ext))
             # Fallback to stage name only
