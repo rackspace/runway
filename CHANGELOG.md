@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
+- Automatically use `npm ci` if available
 - Remove erroneous Serverless `.yaml` variables file extension.
 
 ## [0.7.0] - 2018-03-02

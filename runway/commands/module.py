@@ -1,12 +1,11 @@
 """runway module aka app module."""
 from __future__ import print_function
 
-from subprocess import check_call, check_output
-
 import glob
 import logging
 import os
 import re
+import subprocess
 import sys
 
 from builtins import input  # pylint: disable=redefined-builtin
@@ -89,7 +88,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
             )
         for filepath in glob.glob(os.path.join(blueprint_dir, '*.py')):
             if os.path.basename(filepath) != '__init__.py':
-                cfn_template = check_output([filepath])
+                cfn_template = subprocess.check_output([filepath])
                 try:
                     parsed_cfn_template = parse_cloudformation_template(
                         cfn_template
@@ -147,13 +146,19 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         if os.path.isfile(os.path.join(self.module_root, sls_env_file)):
             if os.path.isfile(os.path.join(self.module_root, 'package.json')):
                 with self.change_dir(self.module_root):
-                    LOGGER.info("Running npm install on %s...",
-                                os.path.basename(self.module_root))
-                    check_call(['npm', 'install'])
+                    # Use npm ci if available (npm v5.7+)
+                    if self.use_npm_ci():
+                        LOGGER.info("Running npm ci on %s...",
+                                    os.path.basename(self.module_root))
+                        subprocess.check_call(['npm', 'ci'])
+                    else:
+                        LOGGER.info("Running npm install on %s...",
+                                    os.path.basename(self.module_root))
+                        subprocess.check_call(['npm', 'install'])
                     LOGGER.info("Running sls build on %s (\"%s\")",
                                 os.path.basename(self.module_root),
                                 " ".join(sls_cmd))
-                    check_call(sls_cmd)
+                    subprocess.check_call(sls_cmd)
             else:
                 LOGGER.warn(
                     "Skipping serverless deploy of %s; no \"package.json\" "
@@ -208,7 +213,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     if backend_tfvar_present:
                         LOGGER.info('Using backend config file %s',
                                     backend_tfvars_file)
-                        check_call(
+                        subprocess.check_call(
                             init_cmd + ['-backend-config=%s' % backend_tfvars_file]  # noqa
                         )
                     else:
@@ -219,11 +224,13 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             ', '.join(self.gen_backend_tfvars_files(
                                 environment,
                                 region)))
-                        check_call(init_cmd)
+                        subprocess.check_call(init_cmd)
                 LOGGER.debug('Checking current Terraform workspace...')
-                current_tf_workspace = check_output(['terraform',
-                                                     'workspace',
-                                                     'show']).strip()
+                current_tf_workspace = subprocess.check_output(
+                    ['terraform',
+                     'workspace',
+                     'show']
+                ).strip()
                 if current_tf_workspace != environment:
                     LOGGER.info("Terraform workspace current set to %s; "
                                 "switching to %s...",
@@ -231,12 +238,12 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                 environment)
                     LOGGER.debug('Checking available Terraform '
                                  'workspaces...')
-                    available_tf_envs = check_output(['terraform',
-                                                      'workspace',
-                                                      'list'])
+                    available_tf_envs = subprocess.check_output(['terraform',
+                                                                 'workspace',
+                                                                 'list'])
                     if re.compile("^[*\\s]\\s%s$" % environment,
                                   re.M).search(available_tf_envs):
-                        check_call(
+                        subprocess.check_call(
                             ['terraform',
                              'workspace',
                              'select',
@@ -245,7 +252,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info("Terraform workspace %s not found; "
                                     "creating it...",
                                     environment)
-                        check_call(
+                        subprocess.check_call(
                             ['terraform',
                              'workspace',
                              'new',
@@ -253,7 +260,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                 if 'SKIP_TF_GET' not in self.env_vars:
                     LOGGER.info('Executing "terraform get" to update remote '
                                 'modules')
-                    check_call(['terraform', 'get', '-update=true'])
+                    subprocess.check_call(['terraform', 'get', '-update=true'])
                 else:
                     LOGGER.info('Skipping "terraform get" due to '
                                 '"SKIP_TF_GET" environment variable...')
@@ -261,7 +268,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             command,
                             os.path.basename(self.module_root),
                             " ".join(tf_cmd))
-                check_call(tf_cmd)
+                subprocess.check_call(tf_cmd)
         else:
             response['skipped_configs'] = True
             LOGGER.info("Skipping Terraform %s of %s",
@@ -457,6 +464,22 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         LOGGER.info('Deriving environment name from directory %s...',
                     self.env_root)
         return self.get_env_from_directory(os.path.basename(self.env_root))
+
+    def use_npm_ci(self):
+        """Return true if npm ci should be used in lieu of npm install."""
+        # https://docs.npmjs.com/cli/ci#description
+        with open(os.devnull, 'w') as fnull:
+            if ((os.path.isfile(os.path.join(self.module_root,
+                                             'package-lock.json')) or
+                 os.path.isfile(os.path.join(self.module_root,
+                                             'npm-shrinkwrap.json'))) and
+                    subprocess.call(
+                        ['npm', 'ci', '-h'],
+                        stdout=fnull,
+                        stderr=subprocess.STDOUT
+                    ) == 0):
+                return True
+        return False
 
     def execute(self):
         """Implement dummy method (set in consuming classes)."""
