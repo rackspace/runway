@@ -7,7 +7,7 @@
     "serverless": "^1.25.0"
   },
   "scripts": {
-    "deploy": "sls deploy"
+    "sls": "sls"
   },
   "author": "Serverless Devs",
   "license": "ISC"

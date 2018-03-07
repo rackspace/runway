@@ -5,8 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Fixed
+### Changed
+- Change Serverless `sls deploy` run-script to just `sls`
+    * This is necessary for the upcoming `destroy`/`dismantle` (e.g. `sls remove`) support
 - Automatically use `npm ci` if available
+
+### Fixed
 - Remove erroneous Serverless `.yaml` variables file extension.
 
 ## [0.7.0] - 2018-03-02

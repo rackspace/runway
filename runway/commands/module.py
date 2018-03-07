@@ -126,7 +126,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
     def deploy_serverless(self, environment, region):
         """Deploy Serverless app."""
         response = {'skipped_configs': False}
-        sls_cmd = ['npm', 'run-script', 'deploy', '--']
+        sls_cmd = ['npm', 'run-script', 'sls', '--', 'deploy']
 
         if not self.which('npm'):
             LOGGER.error('"npm" not found in path or is not executable; '

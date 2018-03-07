@@ -231,7 +231,7 @@ The config yaml supports many more features; see the full Stacker documentation 
 Standard [Serverless](https://serverless.com/framework/) rules apply, with the following recommendations/caveats:
 
 * Runway environments map directly to Serverless stages.
-* A `package.json` file is required, specifying the serverless dependency and a deploy script, e.g.:
+* A `package.json` file is required, specifying the serverless dependency and a sls script, e.g.:
 ```
 {
   "name": "mymodulename",
@@ -242,7 +242,7 @@ Standard [Serverless](https://serverless.com/framework/) rules apply, with the f
     "serverless": "^1.25.0"
   },
   "scripts": {
-    "deploy": "sls deploy"
+    "sls": "sls"
   },
   "author": "Serverless Devs",
   "license": "ISC"
@@ -251,8 +251,6 @@ Standard [Serverless](https://serverless.com/framework/) rules apply, with the f
 * We strongly recommend you commit the package-lock.json that is generated after running `npm install`
 * Each stage requires its own config file (even if empty for a particular stage), in one of the following forms:
 ```
-config-STAGE-REGION.yaml
-config-STAGE.yaml
 config-STAGE-REGION.yml
 config-STAGE.yml
 config-STAGE-REGION.json
