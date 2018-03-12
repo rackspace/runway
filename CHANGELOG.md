@@ -5,12 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.8.0] - 2018-03-12
 ### Changed
 - Change Serverless `sls deploy` run-script to just `sls`
     * This is necessary for the upcoming `destroy`/`dismantle` (e.g. `sls remove`) support
 - Automatically use `npm ci` if available
 
 ### Fixed
+- Fixed broken assume-role capability.
 - Remove erroneous Serverless `.yaml` variables file extension.
 
 ## [0.7.0] - 2018-03-02
@@ -45,7 +48,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/onicagroup/runway/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/onicagroup/runway/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/onicagroup/runway/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/onicagroup/runway/compare/v0.6.0...v0.6.1

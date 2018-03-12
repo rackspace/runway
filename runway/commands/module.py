@@ -8,6 +8,8 @@ import re
 import subprocess
 import sys
 
+from contextlib import contextmanager
+
 from builtins import input  # pylint: disable=redefined-builtin
 
 import yaml
@@ -158,7 +160,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     LOGGER.info("Running sls build on %s (\"%s\")",
                                 os.path.basename(self.module_root),
                                 " ".join(sls_cmd))
-                    subprocess.check_call(sls_cmd)
+                    subprocess.check_call(sls_cmd, env=self.env_vars)
             else:
                 LOGGER.warn(
                     "Skipping serverless deploy of %s; no \"package.json\" "
@@ -214,7 +216,8 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info('Using backend config file %s',
                                     backend_tfvars_file)
                         subprocess.check_call(
-                            init_cmd + ['-backend-config=%s' % backend_tfvars_file]  # noqa
+                            init_cmd + ['-backend-config=%s' % backend_tfvars_file],  # noqa
+                            env=self.env_vars
                         )
                     else:
                         LOGGER.info(
@@ -224,12 +227,13 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             ', '.join(self.gen_backend_tfvars_files(
                                 environment,
                                 region)))
-                        subprocess.check_call(init_cmd)
+                        subprocess.check_call(init_cmd, env=self.env_vars)
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(
                     ['terraform',
                      'workspace',
-                     'show']
+                     'show'],
+                    env=self.env_vars
                 ).strip()
                 if current_tf_workspace != environment:
                     LOGGER.info("Terraform workspace current set to %s; "
@@ -238,16 +242,18 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                 environment)
                     LOGGER.debug('Checking available Terraform '
                                  'workspaces...')
-                    available_tf_envs = subprocess.check_output(['terraform',
-                                                                 'workspace',
-                                                                 'list'])
+                    available_tf_envs = subprocess.check_output(
+                        ['terraform', 'workspace', 'list'],
+                        env=self.env_vars
+                    )
                     if re.compile("^[*\\s]\\s%s$" % environment,
                                   re.M).search(available_tf_envs):
                         subprocess.check_call(
                             ['terraform',
                              'workspace',
                              'select',
-                             environment])
+                             environment],
+                            env=self.env_vars)
                     else:
                         LOGGER.info("Terraform workspace %s not found; "
                                     "creating it...",
@@ -256,11 +262,13 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             ['terraform',
                              'workspace',
                              'new',
-                             environment])
+                             environment],
+                            env=self.env_vars)
                 if 'SKIP_TF_GET' not in self.env_vars:
                     LOGGER.info('Executing "terraform get" to update remote '
                                 'modules')
-                    subprocess.check_call(['terraform', 'get', '-update=true'])
+                    subprocess.check_call(['terraform', 'get', '-update=true'],
+                                          env=self.env_vars)
                 else:
                     LOGGER.info('Skipping "terraform get" due to '
                                 '"SKIP_TF_GET" environment variable...')
@@ -268,7 +276,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             command,
                             os.path.basename(self.module_root),
                             " ".join(tf_cmd))
-                subprocess.check_call(tf_cmd)
+                subprocess.check_call(tf_cmd, env=self.env_vars)
         else:
             response['skipped_configs'] = True
             LOGGER.info("Skipping Terraform %s of %s",
@@ -337,13 +345,14 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             # stacker
                             with self.use_embedded_pkgs():
                                 with self.turn_down_stacker_logging(command):
-                                    from ..embedded.stacker.commands import Stacker  # noqa
-                                    stacker = Stacker()
-                                    args = stacker.parse_args(
-                                        stacker_cmd + [name]
-                                    )
-                                    stacker.configure(args)
-                                    args.run(args)
+                                    with self.override_env_vars():
+                                        from ..embedded.stacker.commands import Stacker  # noqa
+                                        stacker = Stacker()
+                                        args = stacker.parse_args(
+                                            stacker_cmd + [name]
+                                        )
+                                        stacker.configure(args)
+                                        args.run(args)
                 break  # only need top level files
         return response
 
@@ -480,6 +489,18 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     ) == 0):
                 return True
         return False
+
+    @contextmanager
+    def override_env_vars(self, env_vars=None):
+        """Temporarily use the class env_vars as the os env vars."""
+        if env_vars is None:
+            env_vars = self.env_vars
+        orig_env_vars = os.environ
+        os.environ = env_vars
+        try:
+            yield
+        finally:
+            os.environ = orig_env_vars
 
     def execute(self):
         """Implement dummy method (set in consuming classes)."""
