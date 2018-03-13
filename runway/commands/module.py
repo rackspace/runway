@@ -21,7 +21,6 @@ from .base import Base
 from ..embedded.stacker.awscli_yamlhelper import yaml_parse as parse_cloudformation_template  # noqa
 
 logging.basicConfig(level=logging.INFO)
-# logging.getLogger('botocore').setLevel(logging.ERROR)  # their info is spammy
 LOGGER = logging.getLogger('runway')
 
 
@@ -386,7 +385,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
 
     def plan(self):
         """Determine what will happen on a deploy run."""
-        environment = self.get_env()
+        environment = self.environment_name
         aws_region = self.get_and_update_region()
         LOGGER.info("Planning deployment to %s environment in region %s...",
                     environment,
@@ -414,7 +413,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
 
     def deploy(self):
         """Deploy apps/code."""
-        environment = self.get_env()
+        environment = self.environment_name
         aws_region = self.get_and_update_region()
         LOGGER.info("Deploying to %s environment in region %s...",
                     environment,
@@ -442,37 +441,6 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         if ('skipped_configs' in deploy_result and
                 deploy_result['skipped_configs']):
             LOGGER.info(self.display_env_source_help(environment))
-
-    def get_env(self, directory=None):
-        """Determine environment name."""
-        if self.environment_override_name in self.env_vars:
-            return self.env_vars[self.environment_override_name]
-
-        if self.runway_config.get('ignore_git_branch', False):
-            LOGGER.info('Skipping environment lookup from current git branch '
-                        '("ignore_git_branch" is set to true in the runway '
-                        'config)')
-        else:
-            # These are not located with the top imports because they throw an
-            # error if git isn't installed
-            from git import Repo as GitRepo
-            from git.exc import InvalidGitRepositoryError
-
-            if directory is None:
-                directory = self.module_root
-            try:
-                b_name = GitRepo(
-                    directory,
-                    search_parent_directories=True
-                ).active_branch.name
-                LOGGER.info('Deriving environment name from git branch %s...',
-                            b_name)
-                return self.get_env_from_branch(b_name)
-            except InvalidGitRepositoryError:
-                pass
-        LOGGER.info('Deriving environment name from directory %s...',
-                    self.env_root)
-        return self.get_env_from_directory(os.path.basename(self.env_root))
 
     def use_npm_ci(self):
         """Return true if npm ci should be used in lieu of npm install."""
@@ -524,24 +492,6 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                              'subdirectory.',
                              config_filename)
                 sys.exit(1)
-
-    @staticmethod
-    def get_env_from_branch(branch_name):
-        """Determine environment name from git branch name."""
-        if branch_name.startswith('ENV-'):
-            return branch_name[4:]
-        elif branch_name == 'master':
-            LOGGER.info('Translating git branch "master" to environment '
-                        '"common"')
-            return 'common'
-        return branch_name
-
-    @staticmethod
-    def get_env_from_directory(directory_name):
-        """Determine environment name from directory name."""
-        if directory_name.startswith('ENV-'):
-            return directory_name[4:]
-        return directory_name
 
     @staticmethod
     def gen_backend_tfvars_files(environment, region):

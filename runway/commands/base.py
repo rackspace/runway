@@ -26,7 +26,7 @@ EMBEDDED_LIB_PATH = os.path.join(
 )
 
 
-class Base(object):  # noqa pylint: disable=too-many-public-methods
+class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Base class for deployer classes."""
 
     def __init__(self, options, env_vars=None, env_root=None,  # noqa pylint: disable=too-many-arguments
@@ -59,6 +59,7 @@ class Base(object):  # noqa pylint: disable=too-many-public-methods
         self._runway_config = None
 
         self.environment_override_name = 'DEPLOY_ENVIRONMENT'
+        self._environment_name = None
 
     def update_env_vars(self, val):
         """Update env_vars dict with provided dict."""
@@ -91,12 +92,16 @@ class Base(object):  # noqa pylint: disable=too-many-public-methods
                 '.yamllint.yml'
             )
         with self.change_dir(base_dir):
+            LOGGER.info('Starting Flake8 linting...')
             flake8_run = flake8_app.Application()
             flake8_run.run(['--exclude=node_modules'] + dirs_to_scan)
+            LOGGER.info('Flake8 linting complete.')
             with self.ignore_exit_code_0():
+                LOGGER.info('Starting yamllint...')
                 yamllint_run(
                     ["--config-file=%s" % yamllint_config] + dirs_to_scan
                 )
+                LOGGER.info('yamllint complete.')
 
     def get_cookbook_dirs(self, base_dir=None):
         """Find cookbook directories."""
@@ -236,17 +241,25 @@ class Base(object):  # noqa pylint: disable=too-many-public-methods
         if isinstance(assume_role_config, dict):
             if assume_role_config.get('post_deploy_env_revert'):
                 self.save_existing_iam_env_vars()
-            if assume_role_config.get('session_name'):
-                self.assume_role(
-                    role_arn=assume_role_config['arn'],
-                    session_name=assume_role_config['session_name'],
-                    region=region
-                )
+            if assume_role_config.get('arn'):
+                assume_role_arn = assume_role_config['arn']
+            elif assume_role_config.get(self.environment_name):
+                assume_role_arn = assume_role_config[self.environment_name]
             else:
-                self.assume_role(role_arn=assume_role_config['arn'],
-                                 region=region)
+                LOGGER.info('Skipping assume-role; no role found for '
+                            'environment %s...',
+                            self.environment_name)
+                return True
+
+            self.assume_role(
+                role_arn=assume_role_arn,
+                session_name=assume_role_config.get('session_name', None),
+                region=region
+            )
+            return True
         else:
             self.assume_role(role_arn=assume_role_config, region=region)
+            return True
 
     def post_deploy_assume_role(self, assume_role_config):
         """Assume role (prior to deployment)."""
@@ -367,6 +380,37 @@ class Base(object):  # noqa pylint: disable=too-many-public-methods
         LOGGER.info("Sample Terraform app created at %s",
                     module_dir)
 
+    def get_env(self, directory=None):
+        """Determine environment name."""
+        if self.environment_override_name in self.env_vars:
+            return self.env_vars[self.environment_override_name]
+
+        if self.runway_config.get('ignore_git_branch', False):
+            LOGGER.info('Skipping environment lookup from current git branch '
+                        '("ignore_git_branch" is set to true in the runway '
+                        'config)')
+        else:
+            # These are not located with the top imports because they throw an
+            # error if git isn't installed
+            from git import Repo as GitRepo
+            from git.exc import InvalidGitRepositoryError
+
+            if directory is None:
+                directory = self.module_root
+            try:
+                b_name = GitRepo(
+                    directory,
+                    search_parent_directories=True
+                ).active_branch.name
+                LOGGER.info('Deriving environment name from git branch %s...',
+                            b_name)
+                return self.get_env_from_branch(b_name)
+            except InvalidGitRepositoryError:
+                pass
+        LOGGER.info('Deriving environment name from directory %s...',
+                    self.env_root)
+        return self.get_env_from_directory(os.path.basename(self.env_root))
+
     def parse_runway_config(self):
         """Read and parse runway.yml."""
         if os.path.isfile(self.runway_config_path):
@@ -384,11 +428,36 @@ class Base(object):  # noqa pylint: disable=too-many-public-methods
                                   'yourself!')
 
     @property
+    def environment_name(self):
+        """Return environment name."""
+        if not self._environment_name:
+            self._environment_name = self.get_env()
+        return self._environment_name
+
+    @property
     def runway_config(self):
         """Return parsed runway.yml."""
         if not self._runway_config:
             self._runway_config = self.parse_runway_config()
         return self._runway_config
+
+    @staticmethod
+    def get_env_from_branch(branch_name):
+        """Determine environment name from git branch name."""
+        if branch_name.startswith('ENV-'):
+            return branch_name[4:]
+        elif branch_name == 'master':
+            LOGGER.info('Translating git branch "master" to environment '
+                        '"common"')
+            return 'common'
+        return branch_name
+
+    @staticmethod
+    def get_env_from_directory(directory_name):
+        """Determine environment name from directory name."""
+        if directory_name.startswith('ENV-'):
+            return directory_name[4:]
+        return directory_name
 
     @staticmethod
     def version():

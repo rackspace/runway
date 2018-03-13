@@ -134,7 +134,10 @@ deployments:
       # to revert the AWS credentials in the environment to their previous
       # values
       # post_deploy_env_revert: true
-      arn: arn:aws:iam::account-id:role/role-name
+      dev: arn:aws:iam::account-id1:role/role-name
+      prod: arn:aws:iam::account-id2:role/role-name
+      # A single ARN can be specified instead, to apply to all environments
+      # arn: arn:aws:iam::account-id:role/role-name
 
 # If using environment folders instead of git branches, git branch lookup can
 # be disabled entirely (see "Repo Structure")
