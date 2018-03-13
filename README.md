@@ -164,11 +164,15 @@ deployments:
 ## Installation
 * Install Python 2
     * On Linux (assuming default Bash shell; adjust for others appropriately):
+        * Setup your shell for user-installed (non-root) pip packages:
+            * `echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc`
+            * `source ${HOME}/.bashrc`
         * Install Python/pip:
             * Debian-family (e.g. Ubuntu): `sudo apt-get -y install python-pip python-minimal`
             * Amazon Linux should should work out of the box
-        * `echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc`
-        * `source ${HOME}/.bashrc`
+            * RHEL-family:
+                * If easy_install is available: `easy_install --user pip`
+                * Otherwise, enable EPEL and `sudo yum install python-pip`
     * On macOS (assuming default Bash shell; adjust for others appropriately):
         * `if ! which pip > /dev/null; then easy_install --user pip; fi`
         * `echo 'export PATH="${HOME}/Library/Python/2.7/bin:${PATH}"' >> ${HOME}/.bash_profile`
@@ -180,6 +184,7 @@ deployments:
         * Add `%USERPROFILE%\AppData\Roaming\Python\Scripts` to PATH environment variable
 * Install runway (doesn't require sudo/admin permissions):
     * `pip install --user runway`
+        * If this produces an error like `Unknown distribution option: 'python_requires'`, upgrade setuptools first `pip install --user --upgrade setuptools`
 
 ## Use
 * `runway test` (aka `runway preflight`)  - execute this in your environment to catch errors; if it exits `0`, you're ready for...
