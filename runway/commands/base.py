@@ -167,6 +167,9 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             for name in files:
                 if name[-3:] == ".py":
                     filepath = os.path.join(root, name)
+                    LOGGER.info("Checking %s with pylint (\"No config file "
+                                "found...\" messages can be ignored)",
+                                filepath)
                     with self.use_embedded_pkgs():  # for embedded stacker
                         with self.ignore_exit_code_0():
                             PylintRun(pylint_rc_config + ['-E',  # ignore warn
