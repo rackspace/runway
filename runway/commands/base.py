@@ -150,15 +150,6 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             else:
                 pylint_rc_config = []
 
-        # Ensure python 'Makefiles' are executable
-        for directory in os.listdir(base_dir):
-            dir_path = os.path.join(base_dir, directory)
-            if not os.path.isdir(dir_path):
-                continue
-            makefile_path = os.path.join(dir_path, 'Makefile.py')
-            if os.path.isfile(makefile_path):
-                self.ensure_file_is_executable(makefile_path)
-
         # Check all python files in repo
         dirs_to_skip = set(['.git',
                             'node_modules'])
