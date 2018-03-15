@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Allow per-environment assume-role ARNs.
 - Add additional logging messages during `preflight` to clarify checks being performed.
+- Add yaml & python checking to files at root of env (i.e. for use with `current_dir: true`)
 - Drop legacy check for 'Makefile.py' executable status
 
 ## [0.8.0] - 2018-03-12

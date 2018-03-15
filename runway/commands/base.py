@@ -4,6 +4,7 @@ from __future__ import print_function
 from contextlib import contextmanager
 from subprocess import check_call, check_output
 
+import glob
 import logging
 import os
 import shutil
@@ -73,6 +74,20 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             repo_dirs.remove('.git')  # not relevant for any repo operations
         return repo_dirs
 
+    def get_python_files_at_env_root(self):
+        """Return list of python files in env_root."""
+        return glob.glob(os.path.join(self.env_root, '*.py'))
+
+    def get_yaml_files_at_env_root(self):
+        """Return list of yaml files in env_root."""
+        yaml_files = glob.glob(
+            os.path.join(self.env_root, '*.yaml')
+        )
+        yml_files = glob.glob(
+            os.path.join(self.env_root, '*.yml')
+        )
+        return yaml_files + yml_files
+
     def lint(self, base_dir=None, dirs_to_scan=None):
         """Call code linters."""
         from flake8.main import application as flake8_app
@@ -94,12 +109,14 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         with self.change_dir(base_dir):
             LOGGER.info('Starting Flake8 linting...')
             flake8_run = flake8_app.Application()
-            flake8_run.run(['--exclude=node_modules'] + dirs_to_scan)
+            flake8_run.run(
+                ['--exclude=node_modules'] + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
+            )
             LOGGER.info('Flake8 linting complete.')
             with self.ignore_exit_code_0():
                 LOGGER.info('Starting yamllint...')
                 yamllint_run(
-                    ["--config-file=%s" % yamllint_config] + dirs_to_scan
+                    ["--config-file=%s" % yamllint_config] + dirs_to_scan + self.get_yaml_files_at_env_root()  # noqa pylint: disable=line-too-long
                 )
                 LOGGER.info('yamllint complete.')
 
