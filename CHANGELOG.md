@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.1] - 2018-03-15
+### Changed
+- Update Terraform sample template to bump aws provider version from ~>v0.1 to ~>v1.0
+
 ## [0.9.0] - 2018-03-15
 ### Changed
 - Allow per-environment assume-role ARNs.
