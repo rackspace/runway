@@ -118,7 +118,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                 yamllint_run(
                     ["--config-file=%s" % yamllint_config] + dirs_to_scan + self.get_yaml_files_at_env_root()  # noqa pylint: disable=line-too-long
                 )
-                LOGGER.info('yamllint complete.')
+            LOGGER.info('yamllint complete.')
 
     def get_cookbook_dirs(self, base_dir=None):
         """Find cookbook directories."""
