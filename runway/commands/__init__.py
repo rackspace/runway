@@ -1,5 +1,7 @@
 """Import classes."""
 from .deploy import Deploy # noqa
+from .destroy import Destroy # noqa
+from .dismantle import Dismantle # noqa
 from .gitclean import GitClean # noqa
 from .plan import Plan  # noqa
 from .preflight import Preflight  # noqa

@@ -1,8 +1,25 @@
 #!/usr/bin/env python
 
+import inspect
+import sys
+
+from os import path
+
 from runway.embedded.stacker.commands import Stacker
 
+EMBEDDED_LIB_PATH = path.dirname(
+    # .../site-packages/runway/embedded/stacker/commands/stacker/__init__.pyc
+    # ->
+    # .../site-packages/runway/embedded
+    path.dirname(path.dirname(path.dirname(inspect.getfile(Stacker))))
+)
+
 if __name__ == "__main__":
+    # Ensure any blueprints/hooks use the embedded version of stacker
+    sys.path.insert(
+        1,  # https://stackoverflow.com/a/10097543
+        EMBEDDED_LIB_PATH
+    )
     stacker = Stacker()
     args = stacker.parse_args()
     stacker.configure(args)

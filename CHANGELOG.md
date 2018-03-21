@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Runway now has a `destroy`/`dismantle` command for removing deployments
+
+### Changed
+- Fixed errors with embedded `runway-stacker` script not setting the proper sys.path
 
 ## [0.9.1] - 2018-03-15
 ### Changed

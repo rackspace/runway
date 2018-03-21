@@ -124,17 +124,17 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                 if os.path.isfile(fqp):
                     os.remove(fqp)
 
-    def deploy_serverless(self, environment, region):
-        """Deploy Serverless app."""
+    def run_serverless(self, environment, region, command='deploy'):
+        """Run Serverless."""
         response = {'skipped_configs': False}
-        sls_cmd = ['npm', 'run-script', 'sls', '--', 'deploy']
+        sls_cmd = ['npm', 'run-script', 'sls', '--', command]
 
         if not self.which('npm'):
             LOGGER.error('"npm" not found in path or is not executable; '
                          'please ensure it is installed correctly.')
             sys.exit(1)
 
-        if 'CI' in self.env_vars:
+        if 'CI' in self.env_vars and command != 'remove':
             sls_cmd.append('--conceal')  # Hide secrets from serverless output
 
         if 'DEBUG' in self.env_vars:
@@ -156,28 +156,31 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info("Running npm install on %s...",
                                     os.path.basename(self.module_root))
                         subprocess.check_call(['npm', 'install'])
-                    LOGGER.info("Running sls build on %s (\"%s\")",
+                    LOGGER.info("Running sls %s on %s (\"%s\")",
+                                command,
                                 os.path.basename(self.module_root),
                                 " ".join(sls_cmd))
                     subprocess.check_call(sls_cmd, env=self.env_vars)
             else:
                 LOGGER.warn(
-                    "Skipping serverless deploy of %s; no \"package.json\" "
+                    "Skipping serverless %s of %s; no \"package.json\" "
                     "file was found (need a package file specifying "
-                    "serverless in devDependencies & a \"deploy\" script "
-                    "invoking \"sls deploy\")",
+                    "serverless in devDependencies & a \"sls\" script "
+                    "invoking \"sls\")",
+                    command,
                     os.path.basename(self.module_root))
         else:
             response['skipped_configs'] = True
             LOGGER.info(
-                "Skipping serverless deploy of %s; no config file for "
+                "Skipping serverless %s of %s; no config file for "
                 "this stage/region found (looking for one of \"%s\")",
+                command,
                 os.path.basename(self.module_root),
                 ', '.join(self.gen_sls_config_files(environment, region)))
         return response
 
-    def run_terraform(self, environment, region, command='plan'):  # noqa pylint: disable=too-many-branches
-        """Deploy Terraform app."""
+    def run_terraform(self, environment, region, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-statements
+        """Run Terraform."""
         response = {'skipped_configs': False}
         tf_cmd = ['terraform', command]
 
@@ -186,7 +189,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                          'please ensure it is installed correctly.')
             sys.exit(1)
 
-        if command != 'plan':
+        if command == 'destroy':
+            tf_cmd.append('-force')
+        elif command == 'apply':
             if 'CI' in self.env_vars:
                 tf_cmd.append('-auto-approve=true')
             else:
@@ -294,7 +299,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         response = {'skipped_configs': False}
         stacker_cmd = [command, "--region=%s" % region]
 
-        if command != 'diff':
+        if command == 'destroy':
+            stacker_cmd.append('--force')
+        elif command == 'build':
             if 'CI' in self.env_vars:
                 stacker_cmd.append('--recreate-failed')
             else:
@@ -422,9 +429,10 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         module_type = self.determine_module_type()
         deploy_result = {}
         if module_type == 'serverless':
-            deploy_result = self.deploy_serverless(
+            deploy_result = self.run_serverless(
                 environment=environment,
-                region=aws_region
+                region=aws_region,
+                command='deploy'
             )
         elif module_type == 'terraform':
             deploy_result = self.run_terraform(
@@ -437,6 +445,38 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                 environment=environment,
                 region=aws_region,
                 command='build'
+            )
+        if ('skipped_configs' in deploy_result and
+                deploy_result['skipped_configs']):
+            LOGGER.info(self.display_env_source_help(environment))
+
+    def destroy(self):
+        """Destroy apps/code."""
+        environment = self.environment_name
+        aws_region = self.get_and_update_region()
+        LOGGER.info("Removing deployment in %s environment in region %s...",
+                    environment,
+                    aws_region)
+
+        module_type = self.determine_module_type()
+        deploy_result = {}
+        if module_type == 'serverless':
+            deploy_result = self.run_serverless(
+                environment=environment,
+                region=aws_region,
+                command='remove'
+            )
+        elif module_type == 'terraform':
+            deploy_result = self.run_terraform(
+                environment=environment,
+                region=aws_region,
+                command='destroy'
+            )
+        elif module_type == 'stacker':
+            deploy_result = self.run_stacker(
+                environment=environment,
+                region=aws_region,
+                command='destroy'
             )
         if ('skipped_configs' in deploy_result and
                 deploy_result['skipped_configs']):

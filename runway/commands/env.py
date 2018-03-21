@@ -47,9 +47,15 @@ class Env(Base):
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
+        if command == 'destroy':
+            LOGGER.info('WARNING!')
+            LOGGER.info('Runway is running in DESTROY mode.')
         if self.env_vars.get('CI', None):
             deployments_to_run = deployments
         else:
+            if command == 'destroy':
+                LOGGER.info('Any/all deployment(s) selected will be '
+                            'irrecoverably DESTROYED.')
             deployments_to_run = self.select_deployment_to_run(deployments)
         for deployment in deployments_to_run:
             if deployment.get('regions'):
@@ -82,6 +88,10 @@ class Env(Base):
     def deploy(self, deployments=None):
         """Deploy apps/code."""
         self.run(deployments=deployments, command='deploy')
+
+    def destroy(self, deployments=None):
+        """Deploy apps/code."""
+        self.run(deployments=deployments, command='destroy')
 
     def execute(self):
         """Implement dummy method (set in consuming classes)."""
@@ -133,7 +143,7 @@ class Env(Base):
                 pretty_index += 1
             print('')
             print('')
-            selected_index = input('Enter number of module to deploy '
+            selected_index = input('Enter number of module to run '
                                    '(or "all"): ')
             if selected_index == 'all':
                 deployments_to_run.append(selected_deploy)
