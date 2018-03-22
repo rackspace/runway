@@ -41,6 +41,7 @@ import sys
 
 from os import path
 
+from stacker.logger import setup_logging
 from runway.embedded.stacker.commands import Stacker
 
 EMBEDDED_LIB_PATH = path.dirname(
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         1,  # https://stackoverflow.com/a/10097543
         EMBEDDED_LIB_PATH
     )
-    stacker = Stacker()
+    stacker = Stacker(setup_logging=setup_logging)
     args = stacker.parse_args()
     stacker.configure(args)
     args.run(args)

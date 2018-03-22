@@ -64,10 +64,12 @@ INSTALL_REQUIRES = [
 ]
 # embedded stacker is v1.2.0 with the following patches applied:
 # https://github.com/remind101/stacker/pull/556 (change to dateutil dependency)
+# https://github.com/remind101/stacker/pull/573
 # and the LICENSE file added to its root folder
 # and the following files/folders deleted:
 #   * tests
 #   * blueprints/testutil.py
+# and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
 SCRIPTS = ['scripts/stacker-runway', 'scripts/stacker-runway.cmd']
 
 setup(
