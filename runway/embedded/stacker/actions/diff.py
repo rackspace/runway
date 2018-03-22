@@ -3,11 +3,16 @@ import json
 import logging
 from operator import attrgetter
 
+from .base import plan, build_walker
 from . import build
 from .. import exceptions
 from ..util import parse_cloudformation_template
-from ..plan import COMPLETE, Plan
-from ..status import NotSubmittedStatus, NotUpdatedStatus
+from ..status import (
+    NotSubmittedStatus,
+    NotUpdatedStatus,
+    COMPLETE,
+    INTERRUPTED,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -199,16 +204,21 @@ class Action(build.Action):
 
     def _diff_stack(self, stack, **kwargs):
         """Handles the diffing a stack in CloudFormation vs our config"""
+        if self.cancel.wait(0):
+            return INTERRUPTED
+
         if not build.should_submit(stack):
             return NotSubmittedStatus()
 
         if not build.should_update(stack):
             return NotUpdatedStatus()
 
+        provider_stack = self.provider.get_stack(stack.fqn)
+
         # get the current stack template & params from AWS
         try:
             [old_template, old_params] = self.provider.get_stack_info(
-                stack.fqn)
+                provider_stack)
         except exceptions.StackDoesNotExist:
             old_template = None
             old_params = {}
@@ -242,26 +252,24 @@ class Action(build.Action):
             )
             print_stack_changes(stack.name, new_stack, old_stack, new_params,
                                 old_params)
+
+        self.provider.set_outputs(stack.fqn, provider_stack)
+
         return COMPLETE
 
     def _generate_plan(self):
-        plan = Plan(description="Diff stacks")
-        stacks = self.context.get_stacks_dict()
-        dependencies = self._get_dependencies()
-        for stack_name in self.get_stack_execution_order(dependencies):
-            plan.add(
-                stacks[stack_name],
-                run_func=self._diff_stack,
-                requires=dependencies.get(stack_name),
-            )
-        return plan
+        return plan(
+            description="Diff stacks",
+            action=self._diff_stack,
+            stacks=self.context.get_stacks(),
+            targets=self.context.stack_names)
 
-    def run(self, *args, **kwargs):
+    def run(self, concurrency=0, *args, **kwargs):
         plan = self._generate_plan()
-        debug_plan = self._generate_plan()
-        debug_plan.outline(logging.DEBUG)
+        plan.outline(logging.DEBUG)
         logger.info("Diffing stacks: %s", ", ".join(plan.keys()))
-        plan.execute()
+        walker = build_walker(concurrency)
+        plan.execute(walker)
 
     """Don't ever do anything for pre_run or post_run"""
     def pre_run(self, *args, **kwargs):

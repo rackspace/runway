@@ -43,7 +43,7 @@ INSTALL_REQUIRES = [
     'pep8-naming',
     'future',
     'pylint',
-    # 'stacker>=1.1.5',
+    # 'stacker==1.2.0',
     'yamllint'
 ] + [  # stacker dependencies
     'troposphere>=1.9.0',
@@ -56,21 +56,16 @@ INSTALL_REQUIRES = [
     # hopefully make users less likely to encounter an error OOTB.
     'botocore>=1.9.0',
     'boto3>=1.6.0',
-    "colorama~=0.3.7",  # likely won't be needed w/ Stacker 1.2
     'PyYAML~=3.12',
     'awacs>=0.6.0',
     'formic~=0.9b',
     'gitpython~=2.0',
-    'schematics~=2.0.1',
-    'python-dateutil~=2.0'
+    'schematics~=2.0.1'
 ]
-# embedded stacker is v1.1.4 with the following patches applied:
-# https://github.com/remind101/stacker/pull/530 (slated for v1.2.0)
-# https://github.com/remind101/stacker/pull/536 (in master)
-# https://github.com/remind101/stacker/pull/538 (in master)
-# https://github.com/remind101/stacker/pull/540 (in master)
-# https://github.com/remind101/stacker/pull/541 (in master)
-# and the following deleted:
+# embedded stacker is v1.2.0 with the following patches applied:
+# https://github.com/remind101/stacker/pull/556 (change to dateutil dependency)
+# and the LICENSE file added to its root folder
+# and the following files/folders deleted:
 #   * tests
 #   * blueprints/testutil.py
 SCRIPTS = ['scripts/stacker-runway', 'scripts/stacker-runway.cmd']

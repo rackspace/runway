@@ -214,6 +214,20 @@ class PlanFailed(Exception):
         self.failed_stacks = failed_stacks
 
         stack_names = ', '.join(stack.name for stack in failed_stacks)
-        message = "The following stacks failed: %s\n" % (stack_names,)
+        message = "The following stacks failed: %s" % (stack_names,)
 
         super(PlanFailed, self).__init__(message, *args, **kwargs)
+
+
+class GraphError(Exception):
+    """Raised when the graph is invalid (e.g. acyclic dependencies)
+    """
+
+    def __init__(self, exception, stack, dependency):
+        self.stack = stack
+        self.dependency = dependency
+        self.exception = exception
+        message = ("Error detected when adding '%s' "
+                   "as a dependency of '%s': %s") % (
+                           dependency, stack, exception.message)
+        super(GraphError, self).__init__(message)

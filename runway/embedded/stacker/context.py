@@ -45,11 +45,9 @@ class Context(object):
     def __init__(self, environment=None,
                  stack_names=None,
                  config=None,
-                 logger_type=None,
                  force_stacks=None):
         self.environment = environment
         self.stack_names = stack_names or []
-        self.logger_type = logger_type
         self.config = config or Config()
         self.force_stacks = force_stacks or []
         self.hook_data = {}
@@ -119,10 +117,7 @@ class Context(object):
         return self.config.mappings or {}
 
     def _get_stack_definitions(self):
-        if not self.stack_names:
-            return self.config.stacks
-        return [s for s in self.config.stacks if s.name in
-                self.stack_names]
+        return self.config.stacks
 
     def get_stacks(self):
         """Get the stacks for the current action.

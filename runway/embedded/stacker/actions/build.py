@@ -1,6 +1,7 @@
 import logging
 
-from .base import BaseAction
+from .base import BaseAction, plan, build_walker
+from .base import STACK_POLL_TIME
 
 from ..providers.base import Template
 from .. import util
@@ -10,7 +11,6 @@ from ..exceptions import (
     StackDoesNotExist,
 )
 
-from ..plan import Plan
 from ..status import (
     NotSubmittedStatus,
     NotUpdatedStatus,
@@ -18,7 +18,8 @@ from ..status import (
     SubmittedStatus,
     CompleteStatus,
     FailedStatus,
-    SUBMITTED
+    SUBMITTED,
+    INTERRUPTED
 )
 
 
@@ -210,6 +211,11 @@ class Action(BaseAction):
         it is already updating or creating.
 
         """
+        old_status = kwargs.get("status")
+        wait_time = STACK_POLL_TIME if old_status == SUBMITTED else 0
+        if self.cancel.wait(wait_time):
+            return INTERRUPTED
+
         if not should_submit(stack):
             return NotSubmittedStatus()
 
@@ -218,7 +224,6 @@ class Action(BaseAction):
         except StackDoesNotExist:
             provider_stack = None
 
-        old_status = kwargs.get("status")
         recreate = False
         if provider_stack and old_status == SUBMITTED:
             logger.debug(
@@ -255,6 +260,7 @@ class Action(BaseAction):
 
                 return FailedStatus(reason)
             elif self.provider.is_stack_completed(provider_stack):
+                self.provider.set_outputs(stack.fqn, provider_stack)
                 return CompleteStatus(old_status.reason)
             else:
                 return old_status
@@ -282,7 +288,7 @@ class Action(BaseAction):
             return NotUpdatedStatus()
 
         try:
-            if self.provider.prepare_stack_for_update(stack.fqn, tags):
+            if self.provider.prepare_stack_for_update(provider_stack, tags):
                 existing_params = provider_stack.get('Parameters', [])
                 self.provider.update_stack(
                     stack.fqn,
@@ -299,6 +305,7 @@ class Action(BaseAction):
             else:
                 return SubmittedStatus("destroying stack for re-creation")
         except StackDidNotChange:
+            self.provider.set_outputs(stack.fqn, provider_stack)
             return DidNotChangeStatus()
 
     def _template(self, blueprint):
@@ -315,31 +322,12 @@ class Action(BaseAction):
             return Template(body=blueprint.rendered)
 
     def _generate_plan(self, tail=False):
-        plan_kwargs = {}
-        if tail:
-            plan_kwargs["watch_func"] = self.provider.tail_stack
-
-        plan = Plan(description="Create/Update stacks",
-                    logger_type=self.context.logger_type, **plan_kwargs)
-        stacks = self.context.get_stacks_dict()
-        dependencies = self._get_dependencies()
-        for stack_name in self.get_stack_execution_order(dependencies):
-            try:
-                stack = stacks[stack_name]
-            except KeyError:
-                raise StackDoesNotExist(stack_name)
-            plan.add(
-                stack,
-                run_func=self._launch_stack,
-                requires=dependencies.get(stack_name),
-            )
-        return plan
-
-    def _get_dependencies(self):
-        dependencies = {}
-        for stack in self.context.get_stacks():
-            dependencies[stack.fqn] = stack.requires
-        return dependencies
+        return plan(
+            description="Create/Update stacks",
+            action=self._launch_stack,
+            tail=self.provider.tail_stack if tail else None,
+            stacks=self.context.get_stacks(),
+            targets=self.context.stack_names)
 
     def pre_run(self, outline=False, dump=False, *args, **kwargs):
         """Any steps that need to be taken prior to running the action."""
@@ -353,7 +341,8 @@ class Action(BaseAction):
             outline
         )
 
-    def run(self, outline=False, tail=False, dump=False, *args, **kwargs):
+    def run(self, concurrency=0, outline=False,
+            tail=False, dump=False, *args, **kwargs):
         """Kicks off the build/update of the stacks in the stack_definitions.
 
         This is the main entry point for the Builder.
@@ -363,7 +352,8 @@ class Action(BaseAction):
         if not outline and not dump:
             plan.outline(logging.DEBUG)
             logger.debug("Launching stacks: %s", ", ".join(plan.keys()))
-            plan.execute()
+            walker = build_walker(concurrency)
+            plan.execute(walker)
         else:
             if outline:
                 plan.outline()
