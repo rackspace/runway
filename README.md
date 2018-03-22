@@ -191,6 +191,9 @@ deployments:
 * `runway plan`  (aka `runway taxi`) - this optional step will show the diff/plan of what will be changed. With a satisfactory plan you can...
 * `runway deploy` (aka `runway takeoff`) - if running interactively, you can choose which deployment to run; otherwise (i.e. on your CI system) each deployment will be run in sequence.
 
+### Removing Deployments
+* `runway destroy` (aka `runway dismantle`) - if running interactively, you can choose which deployment to remove; otherwise (i.e. on your CI system) every deployment will be run in sequence (use with caution).
+
 ## Module Configurations
 
 ### CloudFormation
