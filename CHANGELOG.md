@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Drop support for generic `backend.tfvars` terraform backend config
     * Any previous `backend.tfvars` values should be moved into the primary (e.g. main.tf) backend config
 - On destroy/dismantle, reverse order of deployments and their contained modules
-- Fix backend initialization when switching backend configs
 - Update terraform sample template to use a region-specific backend
+
+### Fixed
+- Fix backend initialization when switching backend configs
+- Lower botocore logging messages (to pre v0.11.0 levels)
 
 ## [0.11.1] - 2018-03-22
 ### Changed

@@ -24,6 +24,7 @@ from .base import Base
 from ..embedded.stacker.awscli_yamlhelper import yaml_parse as parse_cloudformation_template  # noqa
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger('botocore').setLevel(logging.ERROR)  # their info is spammy
 LOGGER = logging.getLogger('runway')
 
 
