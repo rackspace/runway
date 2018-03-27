@@ -247,6 +247,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
             os.path.join(self.module_root, workspace_tfvars_file)
         )
         if workspace_tfvar_present:
+            LOGGER.info("Preparing to run terraform %s on %s...",
+                        command,
+                        os.path.basename(self.module_root))
             with self.change_dir(self.module_root):
                 if not os.path.isdir(os.path.join(self.module_root,
                                                   '.terraform')):
