@@ -43,7 +43,7 @@ INSTALL_REQUIRES = [
     'flake8-docstrings',
     'pep8-naming',
     'future',
-    'pyhcl'
+    'pyhcl',
     'pylint',
     # 'stacker==1.2.0',
     'yamllint'
