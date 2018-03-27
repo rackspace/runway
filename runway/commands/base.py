@@ -380,7 +380,8 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         if module_dir is None:
             module_dir = os.path.join(self.env_root, 'sampleapp.tf')
         self.generate_sample_module(module_dir)
-        for i in ['backend.tfvars', 'dev-us-east-1.tfvars', 'main.tf']:
+        for i in ['backend-us-east-1.tfvars', 'dev-us-east-1.tfvars',
+                  'main.tf']:
             shutil.copyfile(
                 os.path.join(os.path.dirname(os.path.dirname(__file__)),
                              'templates',

@@ -192,7 +192,7 @@ deployments:
 * `runway deploy` (aka `runway takeoff`) - if running interactively, you can choose which deployment to run; otherwise (i.e. on your CI system) each deployment will be run in sequence.
 
 ### Removing Deployments
-* `runway destroy` (aka `runway dismantle`) - if running interactively, you can choose which deployment to remove; otherwise (i.e. on your CI system) every deployment will be run in sequence (use with caution).
+* `runway destroy` (aka `runway dismantle`) - if running interactively, you can choose which deployment to remove; otherwise (i.e. on your CI system) every deployment will be run in reverse sequence (use with caution).
 
 ## Module Configurations
 
@@ -273,7 +273,7 @@ config-STAGE.json
 Standard Terraform rules apply, with the following recommendations/caveats:
 
 * Each environment requires its own tfvars file, in the form of ENV-REGION.tfvars (e.g. dev-contoso.tfvars).
-* We recommend having a backend configuration separate from the terraform module code:
+* We recommend (but do not require) having a backend configuration separate from the terraform module code:
 
 main.tf:
 ```
@@ -284,7 +284,7 @@ terraform {
 }
 # continue with code here...
 ```
-backend.tfvars (or backend-ENV-REGION.tfvars, or backend-ENV.tfvars, or backend-REGION.tfvars):
+backend-REGION.tfvars, or backend-ENV-REGION.tfvars, or backend-ENV.tfvars (e.g. backend-us-east-1.tfvars):
 ```
 bucket = "SOMEBUCKNAME"
 region = "SOMEREGION"

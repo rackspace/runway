@@ -37,11 +37,13 @@ class RunTests(Command):
 
 
 INSTALL_REQUIRES = [
+    'Send2Trash',
     'docopt',
     'flake8',
     'flake8-docstrings',
     'pep8-naming',
     'future',
+    'pyhcl'
     'pylint',
     # 'stacker==1.2.0',
     'yamllint'

@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Drop support for generic `backend.tfvars` terraform backend config
+    * Any previous `backend.tfvars` values should be moved into the primary (e.g. main.tf) backend config
+- On destroy/dismantle, reverse order of deployments and their contained modules
+- Fix backend initialization when switching backend configs
+- Update terraform sample template to use a region-specific backend
 
 ## [0.11.1] - 2018-03-22
 ### Changed

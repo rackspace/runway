@@ -7,6 +7,7 @@ from distutils.util import strtobool  # noqa pylint: disable=no-name-in-module,i
 
 from subprocess import check_call, check_output
 
+import copy
 import json
 import logging
 import os
@@ -51,12 +52,24 @@ class Env(Base):
             LOGGER.info('WARNING!')
             LOGGER.info('Runway is running in DESTROY mode.')
         if self.env_vars.get('CI', None):
-            deployments_to_run = deployments
+            if command == 'destroy':
+                deployments_to_run = self.reverse_deployments(deployments)
+            else:
+                deployments_to_run = deployments
         else:
             if command == 'destroy':
                 LOGGER.info('Any/all deployment(s) selected will be '
                             'irrecoverably DESTROYED.')
-            deployments_to_run = self.select_deployment_to_run(deployments)
+                deployments_to_run = self.reverse_deployments(
+                    self.select_deployment_to_run(
+                        deployments,
+                        command=command
+                    )
+                )
+            else:
+                deployments_to_run = self.select_deployment_to_run(
+                    deployments
+                )
         for deployment in deployments_to_run:
             if deployment.get('regions'):
                 for region in deployment['regions']:
@@ -99,7 +112,22 @@ class Env(Base):
                                   'yourself!')
 
     @staticmethod
-    def select_deployment_to_run(deployments=None):  # noqa pylint: disable=too-many-branches
+    def reverse_deployments(deployments=None):
+        """Reverse deployments and the modules/regions in them."""
+        if deployments is None:
+            deployments = []
+
+        reversed_deployments = []
+        for i in deployments[::-1]:
+            deployment = copy.deepcopy(i)
+            for config in ['modules', 'regions']:
+                if deployment.get(config):
+                    deployment[config] = deployment[config][::-1]
+            reversed_deployments.append(deployment)
+        return reversed_deployments
+
+    @staticmethod
+    def select_deployment_to_run(deployments=None, command='build'):  # noqa pylint: disable=too-many-branches
         """Query user for deployments to run."""
         if deployments is None or not deployments:
             return []
@@ -116,6 +144,9 @@ class Env(Base):
                 pretty_index += 1
             print('')
             print('')
+            if command == 'destroy':
+                print('(Operating in destroy mode -- "all" will destroy all '
+                      'deployments in reverse order)')
             selected_index = input('Enter number of deployment to run '
                                    '(or "all"): ')
 
@@ -143,6 +174,9 @@ class Env(Base):
                 pretty_index += 1
             print('')
             print('')
+            if command == 'destroy':
+                print('(Operating in destroy mode -- "all" will destroy all '
+                      'deployments in reverse order)')
             selected_index = input('Enter number of module to run '
                                    '(or "all"): ')
             if selected_index == 'all':

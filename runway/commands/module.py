@@ -11,7 +11,10 @@ import sys
 from contextlib import contextmanager
 
 from builtins import input  # pylint: disable=redefined-builtin
+from future.utils import viewitems
+from send2trash import send2trash
 
+import hcl
 import yaml
 
 from .base import Base
@@ -43,10 +46,11 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
 
     def get_backend_tfvars_file(self, environment, region):
         """Determine Terraform backend file."""
-        for name in self.gen_backend_tfvars_files(environment, region):
+        backend_filenames = self.gen_backend_tfvars_files(environment, region)
+        for name in backend_filenames:
             if os.path.isfile(os.path.join(self.module_root, name)):
                 return name
-        return "backend.tfvars"  # fallback to generic name
+        return backend_filenames[-1]  # file not found; fallback to last item
 
     def get_workspace_tfvars_file(self, environment, region):
         """Determine Terraform workspace-specific tfvars file name."""
@@ -123,6 +127,38 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                 )
                 if os.path.isfile(fqp):
                     os.remove(fqp)
+
+    def remove_stale_tf_config(self, backend_tfvars_file):
+        """Ensure TF is ready for init.
+
+        If deploying a TF module to multiple regions (or any scenario requiring
+        multiple backend configs), switching the backend will cause TF to
+        compare the old and new backends. This will frequently cause an access
+        error as the creds/role for the new backend won't always have access to
+        the old one.
+
+        This method compares the defined & initialized backend configs and
+        trashes the terraform directory if they're out of sync.
+        """
+        terrform_dir = os.path.join(self.module_root, '.terraform')
+        tfstate_filepath = os.path.join(terrform_dir, 'terraform.tfstate')
+        if os.path.isfile(tfstate_filepath):
+            LOGGER.debug('Comparing previous & desired Terraform backend '
+                         'configs')
+            with open(tfstate_filepath, 'r') as fco:
+                state_config = hcl.load(fco)
+
+            if state_config.get('backend') and state_config['backend'].get('config'):  # noqa
+                backend_tfvars_filepath = os.path.join(self.module_root,
+                                                       backend_tfvars_file)
+                with open(backend_tfvars_filepath, 'r') as fco:
+                    backend_config = hcl.load(fco)
+                if any(state_config['backend']['config'][key] != value for (key, value) in viewitems(backend_config)):  # noqa pylint: disable=line-too-long
+                    LOGGER.info("Desired and previously initialized TF "
+                                "backend config is out of sync; trashing "
+                                "local TF state directory %s",
+                                terrform_dir)
+                    send2trash(terrform_dir)
 
     def run_serverless(self, environment, region, command='deploy'):
         """Run Serverless."""
@@ -219,6 +255,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     if backend_tfvar_present:
                         LOGGER.info('Using backend config file %s',
                                     backend_tfvars_file)
+                        self.remove_stale_tf_config(backend_tfvars_file)
                         subprocess.check_call(
                             init_cmd + ['-backend-config=%s' % backend_tfvars_file],  # noqa
                             env=self.env_vars
