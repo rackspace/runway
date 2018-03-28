@@ -110,7 +110,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             LOGGER.info('Starting Flake8 linting...')
             flake8_run = flake8_app.Application()
             flake8_run.run(
-                ['--exclude=node_modules'] + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
+                ['--exclude=node_modules,.serverless'] + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
             )
             LOGGER.info('Flake8 linting complete.')
             with self.ignore_exit_code_0():
@@ -169,7 +169,8 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
 
         # Check all python files in repo
         dirs_to_skip = set(['.git',
-                            'node_modules'])
+                            'node_modules',
+                            '.serverless'])
         for root, dirs, files in os.walk(base_dir):  # noqa pylint: disable=too-many-nested-blocks
             dirs[:] = [d for d in dirs if d not in dirs_to_skip]
             for name in files:

@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update terraform sample template to use a region-specific backend
 
 ### Fixed
-- Fix backend initialization when switching backend configs
+- Fix Terraform backend initialization when switching backend configs
+- Exclude .serverless directory from `runway test/preflight`
 - Lower botocore logging messages (to pre v0.11.0 levels)
 
 ## [0.11.1] - 2018-03-22

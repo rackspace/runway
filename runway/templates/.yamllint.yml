@@ -2,6 +2,7 @@ extends: default
 
 ignore: |
   node_modules
+  .serverless
 
 rules:
   # Don't need --- in our single doc files
