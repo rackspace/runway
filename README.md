@@ -129,7 +129,7 @@ deployments:
       - myapp.tf
     regions:
       - us-east-1
-    assume-role:
+    assume-role:  # optional
       # When running multiple deployments, post_deploy_env_revert can be used
       # to revert the AWS credentials in the environment to their previous
       # values
@@ -138,6 +138,18 @@ deployments:
       prod: arn:aws:iam::account-id2:role/role-name
       # A single ARN can be specified instead, to apply to all environments
       # arn: arn:aws:iam::account-id:role/role-name
+    account_alias:  # optional
+      # A mapping of environment -> alias mappings can be provided to have
+      # Runway verify the current assumed role / credentials match the
+      # necessary account
+      dev: my_dev_account
+      prod: my_dev_account
+    account_id:  # optional
+      # A mapping of environment -> id mappings can be provided to have Runway
+      # verify the current assumed role / credentials match the necessary
+      # account
+      dev: 123456789012
+      prod: 345678901234
 
 # If using environment folders instead of git branches, git branch lookup can
 # be disabled entirely (see "Repo Structure")
@@ -290,3 +302,7 @@ bucket = "SOMEBUCKNAME"
 region = "SOMEREGION"
 dynamodb_table = "SOMETABLENAME"
 ```
+
+#### tfenv
+
+If a `.terraform-version` file is placed in the module, [tfenv](https://github.com/kamatama41/tfenv) will be invoked to ensure the appropriate version is installed prior to module deployment.

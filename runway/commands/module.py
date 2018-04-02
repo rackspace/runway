@@ -250,6 +250,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
             LOGGER.info("Preparing to run terraform %s on %s...",
                         command,
                         os.path.basename(self.module_root))
+            if os.path.isfile(os.path.join(self.module_root,
+                                           '.terraform-version')):
+                self.run_tfenv_install()
             with self.change_dir(self.module_root):
                 if not os.path.isdir(os.path.join(self.module_root,
                                                   '.terraform')):
@@ -538,6 +541,16 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     ) == 0):
                 return True
         return False
+
+    def run_tfenv_install(self):
+        """Ensure appropriate Terraform version is installed."""
+        if self.which('tfenv') is None:
+            LOGGER.error('"tfenv" not found (and a Terraform version is '
+                         'specified in .terraform-version). Please install '
+                         'tfenv.')
+            sys.exit(1)
+        with self.change_dir(self.module_root):
+            subprocess.check_call(['tfenv', 'install'], env=self.env_vars)
 
     @contextmanager
     def override_env_vars(self, env_vars=None):

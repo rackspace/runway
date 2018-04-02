@@ -16,6 +16,8 @@ import sys
 
 from builtins import input  # pylint: disable=redefined-builtin
 
+import boto3
+
 from .base import Base
 from .module import Module
 
@@ -77,6 +79,9 @@ class Env(Base):
                         self.pre_deploy_assume_role(deployment['assume-role'],
                                                     region)
                     self.update_env_vars({'AWS_DEFAULT_REGION': region})
+                    if deployment.get('account_id') or (
+                            deployment.get('account_alias')):
+                        self.validate_account_credentials(deployment)
                     for module in deployment.get('modules', []):
                         module_root = os.path.join(self.env_root, module)
                         with self.change_dir(module_root):
@@ -105,6 +110,34 @@ class Env(Base):
     def destroy(self, deployments=None):
         """Deploy apps/code."""
         self.run(deployments=deployments, command='destroy')
+
+    def validate_account_credentials(self, deployment=None):
+        """Exit if requested deployment account doesn't match credentials."""
+        if deployment is None:
+            deployment = {}
+        boto_args = {'region_name': self.env_vars['AWS_DEFAULT_REGION']}
+        for i in ['aws_access_key_id', 'aws_secret_access_key',
+                  'aws_session_token']:
+            if self.env_vars.get(i.upper()):
+                boto_args[i] = self.env_vars[i.upper()]
+        if isinstance(deployment.get('account_id'), (int, str, unicode)):
+            account_id = str(deployment['account_id'])
+        elif deployment.get('account_id', {}).get(self.environment_name):
+            account_id = str(deployment['account_id'][self.environment_name])
+        else:
+            account_id = None
+        if account_id:
+            self.validate_account_id(boto3.client('sts', **boto_args),
+                                     account_id)
+        if isinstance(deployment.get('account_alias'), (str, unicode)):
+            account_alias = deployment['account_alias']
+        elif deployment.get('account_alias', {}).get(self.environment_name):
+            account_alias = deployment['account_alias'][self.environment_name]
+        else:
+            account_alias = None
+        if account_alias:
+            self.validate_account_alias(boto3.client('iam', **boto_args),
+                                        account_alias)
 
     def execute(self):
         """Implement dummy method (set in consuming classes)."""
@@ -191,3 +224,44 @@ class Env(Base):
 
         LOGGER.debug('Selected deployment is %s...', deployments_to_run)
         return deployments_to_run
+
+    @staticmethod
+    def validate_account_alias(iam_client, account_alias):
+        """Exit if list_account_aliases doesn't include account_alias."""
+        # Super overkill here using pagination when an account can only
+        # have a single alias, but at least this implementation should be
+        # future-proof
+        current_account_aliases = []
+        paginator = iam_client.get_paginator('list_account_aliases')
+        response_iterator = paginator.paginate()
+        for page in response_iterator:
+            current_account_aliases.extend(page.get('AccountAliases', []))
+        if account_alias in current_account_aliases:
+            LOGGER.info('Verified current AWS account alias matches required '
+                        'alias %s.',
+                        account_alias)
+        else:
+            LOGGER.error('Current AWS account aliases "%s" do not match '
+                         'required account alias %s in Runway config.',
+                         ','.join(current_account_aliases),
+                         account_alias)
+            sys.exit(1)
+
+    @staticmethod
+    def validate_account_id(sts_client, account_id):
+        """Exit if get_caller_identity doesn't match account_id."""
+        resp = sts_client.get_caller_identity()
+        if 'Account' in resp:
+            if resp['Account'] == account_id:
+                LOGGER.info('Verified current AWS account matches required '
+                            'account id %s.',
+                            account_id)
+            else:
+                LOGGER.error('Current AWS account %s does not match '
+                             'required account %s in Runway config.',
+                             resp['Account'],
+                             account_id)
+                sys.exit(1)
+        else:
+            LOGGER.error('Error checking current account ID')
+            sys.exit(1)

@@ -5,10 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.12.0] - 2018-04-02
 ### Changed
 - Drop support for generic `backend.tfvars` terraform backend config
     * Any previous `backend.tfvars` values should be moved into the primary (e.g. main.tf) backend config
 - On destroy/dismantle, reverse order of deployments and their contained modules
+- Add `account_id` and `account_alias` deployment config options for account verification
+- Add support for [tfenv](https://github.com/kamatama41/tfenv)
 - Update terraform sample template to use a region-specific backend
 
 ### Fixed
@@ -84,7 +88,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/onicagroup/runway/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/onicagroup/runway/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/onicagroup/runway/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/onicagroup/runway/compare/v0.9.0...v0.10.0
