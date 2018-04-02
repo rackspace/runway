@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.1] - 2018-04-02
+### Changed
+- Rename `account-id` and `account-alias` to match `assume-role` hyphen use
+
 ## [0.12.0] - 2018-04-02
 ### Changed
 - Drop support for generic `backend.tfvars` terraform backend config
@@ -88,7 +92,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/onicagroup/runway/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/onicagroup/runway/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/onicagroup/runway/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/onicagroup/runway/compare/v0.10.0...v0.11.0

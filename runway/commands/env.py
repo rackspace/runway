@@ -79,8 +79,8 @@ class Env(Base):
                         self.pre_deploy_assume_role(deployment['assume-role'],
                                                     region)
                     self.update_env_vars({'AWS_DEFAULT_REGION': region})
-                    if deployment.get('account_id') or (
-                            deployment.get('account_alias')):
+                    if deployment.get('account-id') or (
+                            deployment.get('account-alias')):
                         self.validate_account_credentials(deployment)
                     for module in deployment.get('modules', []):
                         module_root = os.path.join(self.env_root, module)
@@ -120,19 +120,19 @@ class Env(Base):
                   'aws_session_token']:
             if self.env_vars.get(i.upper()):
                 boto_args[i] = self.env_vars[i.upper()]
-        if isinstance(deployment.get('account_id'), (int, str, unicode)):
-            account_id = str(deployment['account_id'])
-        elif deployment.get('account_id', {}).get(self.environment_name):
-            account_id = str(deployment['account_id'][self.environment_name])
+        if isinstance(deployment.get('account-id'), (int, str, unicode)):
+            account_id = str(deployment['account-id'])
+        elif deployment.get('account-id', {}).get(self.environment_name):
+            account_id = str(deployment['account-id'][self.environment_name])
         else:
             account_id = None
         if account_id:
             self.validate_account_id(boto3.client('sts', **boto_args),
                                      account_id)
-        if isinstance(deployment.get('account_alias'), (str, unicode)):
-            account_alias = deployment['account_alias']
-        elif deployment.get('account_alias', {}).get(self.environment_name):
-            account_alias = deployment['account_alias'][self.environment_name]
+        if isinstance(deployment.get('account-alias'), (str, unicode)):
+            account_alias = deployment['account-alias']
+        elif deployment.get('account-alias', {}).get(self.environment_name):
+            account_alias = deployment['account-alias'][self.environment_name]
         else:
             account_alias = None
         if account_alias:
