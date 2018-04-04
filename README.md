@@ -212,7 +212,7 @@ deployments:
 
 CloudFormation modules are managed by 2 files: a key/value environment file, and a yaml file defining the stacks/templates/params.
 
-Environment - name these in the form of env-region.env (e.g. dev-contoso.env):
+Environment - name these in the form of ENV-REGION.env (e.g. dev-us-east-1.env) or ENV.env (e.g. dev.env):
 ```
 # Namespace is used as each stack's prefix
 # We recommend an (org/customer)/environment delineation

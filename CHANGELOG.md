@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.12.2] - 2018-04-04
+### Fixed
+- Fix Cloudformation environment file name options (now correctly supports ENV-REGION.env & ENV.env)
+
 ## [0.12.1] - 2018-04-02
 ### Changed
 - Rename `account-id` and `account-alias` to match `assume-role` hyphen use
@@ -92,7 +96,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/onicagroup/runway/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/onicagroup/runway/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/onicagroup/runway/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/onicagroup/runway/compare/v0.11.0...v0.11.1

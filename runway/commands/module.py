@@ -355,7 +355,6 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
             stacker_cmd.append('--verbose')  # Increase logging if requested
 
         stacker_env_file = self.get_stacker_env_file(environment, region)
-        stacker_env_file = "%s-%s.env" % (environment, region)
         stacker_cmd.append(stacker_env_file)
 
         with self.change_dir(self.module_root):
