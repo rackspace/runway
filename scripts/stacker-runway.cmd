@@ -41,7 +41,7 @@ import sys
 
 from os import path
 
-from stacker.logger import setup_logging
+from runway.embedded.stacker.logger import setup_logging
 from runway.embedded.stacker.commands import Stacker
 
 EMBEDDED_LIB_PATH = path.dirname(
