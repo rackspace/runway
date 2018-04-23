@@ -98,6 +98,18 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         if dirs_to_scan is None:
             dirs_to_scan = self.get_env_dirs()
 
+        if os.path.isfile(os.path.join(base_dir, '.flake8')):
+            # config file in env will be picked up automatically
+            flake8_config = []
+        else:
+            # no config file in env; use runway defaults
+            flake8_config = [
+                ('--append-config=' + os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),  # noqa
+                    'templates',
+                    '.flake8'
+                ))
+            ]
         if os.path.isfile(os.path.join(base_dir, '.yamllint.yml')):
             yamllint_config = os.path.join(base_dir, '.yamllint.yml')
         else:
@@ -111,7 +123,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                 LOGGER.info('Starting Flake8 linting...')
                 flake8_run = flake8_app.Application()
                 flake8_run.run(
-                    ['--exclude=node_modules,.serverless'] + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
+                    flake8_config + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
                 )
                 flake8_run.exit()
                 LOGGER.info('Flake8 linting complete.')

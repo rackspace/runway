@@ -1,0 +1,4 @@
+[flake8]
+exclude =
+    node_modules,
+    .serverless

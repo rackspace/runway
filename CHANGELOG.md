@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Flake8 now correctly exits non-zero on errors
 
+### Changed
+- Add support for environment `.flake8` config files
+
 ## [0.12.3] - 2018-04-16
 ### Fixed
 - Fix stacker-runway command execution
