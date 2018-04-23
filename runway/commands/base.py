@@ -107,13 +107,14 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                 '.yamllint.yml'
             )
         with self.change_dir(base_dir):
-            LOGGER.info('Starting Flake8 linting...')
-            flake8_run = flake8_app.Application()
-            flake8_run.run(
-                ['--exclude=node_modules,.serverless'] + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
-            )
-            LOGGER.info('Flake8 linting complete.')
             with self.ignore_exit_code_0():
+                LOGGER.info('Starting Flake8 linting...')
+                flake8_run = flake8_app.Application()
+                flake8_run.run(
+                    ['--exclude=node_modules,.serverless'] + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
+                )
+                flake8_run.exit()
+                LOGGER.info('Flake8 linting complete.')
                 LOGGER.info('Starting yamllint...')
                 yamllint_run(
                     ["--config-file=%s" % yamllint_config] + dirs_to_scan + self.get_yaml_files_at_env_root()  # noqa pylint: disable=line-too-long
