@@ -378,7 +378,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
             # Iterate through any stacker yaml configs to deploy them in order
             for _root, _dirs, files in os.walk(self.module_root):
                 for name in sorted(files):
-                    if name == 'runway.yml':
+                    if name == 'runway.yml' or name.startswith('.'):
+                        # Hidden files (e.g. .gitlab-ci.yml) or runway configs
+                        # definitely aren't stacker config files
                         continue
                     file_extension = os.path.splitext(name)[1]
                     if file_extension in ['.yaml', '.yml']:

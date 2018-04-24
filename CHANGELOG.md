@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - Serverless modules no longer require a `sls` script
+- CloudFormation modules will no longer treat hidden files (files prefixed with a period) as stack configuration files (i.e. `.gitlab-ci.yml` will be ignored)
 
 ## [0.13.0] - 2018-04-23
 ### Fixed
