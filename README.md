@@ -254,7 +254,7 @@ The config yaml supports many more features; see the full Stacker documentation 
 Standard [Serverless](https://serverless.com/framework/) rules apply, with the following recommendations/caveats:
 
 * Runway environments map directly to Serverless stages.
-* A `package.json` file is required, specifying the serverless dependency and a sls script, e.g.:
+* A `package.json` file is required, specifying the serverless dependency, e.g.:
 ```
 {
   "name": "mymodulename",
@@ -263,9 +263,6 @@ Standard [Serverless](https://serverless.com/framework/) rules apply, with the f
   "main": "handler.py",
   "devDependencies": {
     "serverless": "^1.25.0"
-  },
-  "scripts": {
-    "sls": "sls"
   },
   "author": "Serverless Devs",
   "license": "ISC"

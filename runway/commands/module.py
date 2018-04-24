@@ -164,7 +164,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
     def run_serverless(self, environment, region, command='deploy'):
         """Run Serverless."""
         response = {'skipped_configs': False}
-        sls_cmd = ['npm', 'run-script', 'sls', '--', command]
+        sls_opts = [command]
 
         if not self.which('npm'):
             LOGGER.error('"npm" not found in path or is not executable; '
@@ -172,14 +172,30 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
             sys.exit(1)
 
         if 'CI' in self.env_vars and command != 'remove':
-            sls_cmd.append('--conceal')  # Hide secrets from serverless output
+            sls_opts.append('--conceal')  # Hide secrets from serverless output
 
         if 'DEBUG' in self.env_vars:
-            sls_cmd.append('-v')  # Increase logging if requested
+            sls_opts.append('-v')  # Increase logging if requested
 
-        sls_cmd.extend(['-r', region])
+        sls_opts.extend(['-r', region])
+        sls_opts.extend(['--stage', environment])
         sls_env_file = self.get_sls_config_file(environment, region)
-        sls_cmd.extend(['--stage', environment])
+
+        if self.which('npx'):
+            # Use npx if available (npm v5.2+)
+            LOGGER.debug('Using npx to invoke sls.')
+            # The nested sls-through-npx-via-subprocess command invocation
+            # requires this redundant quoting
+            sls_cmd = ['npx', '-c', "''sls %s''" % ' '.join(sls_opts)]
+        else:
+            LOGGER.debug('npx not found; falling back invoking sls shell '
+                         'script directly.')
+            sls_cmd = [
+                os.path.join(self.module_root,
+                             'node_modules',
+                             '.bin',
+                             'sls')
+            ] + sls_opts
 
         if os.path.isfile(os.path.join(self.module_root, sls_env_file)):
             if os.path.isfile(os.path.join(self.module_root, 'package.json')):
@@ -196,14 +212,15 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 os.path.basename(self.module_root),
-                                " ".join(sls_cmd))
+                                # Strip out redundant npx quotes not needed
+                                # when executing the command directly
+                                " ".join(sls_cmd).replace('\'\'', '\''))
                     subprocess.check_call(sls_cmd, env=self.env_vars)
             else:
                 LOGGER.warn(
                     "Skipping serverless %s of %s; no \"package.json\" "
                     "file was found (need a package file specifying "
-                    "serverless in devDependencies & a \"sls\" script "
-                    "invoking \"sls\")",
+                    "serverless in devDependencies)",
                     command,
                     os.path.basename(self.module_root))
         else:
