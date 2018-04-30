@@ -126,6 +126,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                     flake8_config + dirs_to_scan +  self.get_python_files_at_env_root()  # noqa pylint: disable=line-too-long
                 )
                 flake8_run.exit()
+            with self.ignore_exit_code_0():
                 LOGGER.info('Flake8 linting complete.')
                 LOGGER.info('Starting yamllint...')
                 yamllint_run(
