@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.14.1] - 2018-04-30
+### Fixed
+- Corrected 0.14 error causing yamllint to not run
+
 ## [0.14.0] - 2018-04-24
 ### Changed
 - Serverless modules no longer require a `sls` script
@@ -113,7 +117,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/onicagroup/runway/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/onicagroup/runway/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/onicagroup/runway/compare/v0.12.3...v0.13.0
 [0.12.3]: https://github.com/onicagroup/runway/compare/v0.12.2...v0.12.3
