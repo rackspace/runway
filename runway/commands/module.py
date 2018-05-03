@@ -382,8 +382,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         # Hidden files (e.g. .gitlab-ci.yml) or runway configs
                         # definitely aren't stacker config files
                         continue
-                    file_extension = os.path.splitext(name)[1]
-                    if file_extension in ['.yaml', '.yml']:
+                    if os.path.splitext(name)[1] in ['.yaml', '.yml']:
                         if not os.path.isfile(os.path.join(self.module_root,
                                                            stacker_env_file)):
                             response['skipped_configs'] = True
@@ -414,8 +413,13 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             with self.use_embedded_pkgs():
                                 with self.turn_down_stacker_logging(command):
                                     with self.override_env_vars():
+                                        # Stacker invocation script here with
+                                        # adapted arg parsing
+                                        from ..embedded.stacker.logger import setup_logging  # noqa
                                         from ..embedded.stacker.commands import Stacker  # noqa
-                                        stacker = Stacker()
+                                        stacker = Stacker(
+                                            setup_logging=setup_logging
+                                        )
                                         args = stacker.parse_args(
                                             stacker_cmd + [name]
                                         )
