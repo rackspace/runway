@@ -376,8 +376,12 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
 
         with self.change_dir(self.module_root):
             # Iterate through any stacker yaml configs to deploy them in order
+            # or destroy them in reverse order
             for _root, _dirs, files in os.walk(self.module_root):
-                for name in sorted(files):
+                for name in (
+                        reversed(sorted(files))
+                        if command == 'destroy'
+                        else sorted(files)):
                     if name == 'runway.yml' or name.startswith('.'):
                         # Hidden files (e.g. .gitlab-ci.yml) or runway configs
                         # definitely aren't stacker config files
