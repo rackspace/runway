@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.15.0] - 2018-05-17
 ### Added
 - Add `whichenv` command
 
@@ -127,7 +129,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.14.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/onicagroup/runway/compare/v0.14.3...v0.15.0
 [0.14.3]: https://github.com/onicagroup/runway/compare/v0.14.2...v0.14.3
 [0.14.2]: https://github.com/onicagroup/runway/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/onicagroup/runway/compare/v0.14.0...v0.14.1
