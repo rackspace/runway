@@ -303,3 +303,9 @@ dynamodb_table = "SOMETABLENAME"
 #### tfenv
 
 If a `.terraform-version` file is placed in the module, [tfenv](https://github.com/kamatama41/tfenv) will be invoked to ensure the appropriate version is installed prior to module deployment.
+
+## Additional Functionality
+
+### whichenv
+
+Execute `runway whichenv` to output the name of the currently detected environment (see `Basic Concepts` for an overview of how runway determines the environment name).

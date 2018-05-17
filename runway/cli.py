@@ -8,6 +8,7 @@ Usage:
   runway (destroy|dismantle)
   runway gitclean
   runway gen-sample (cfn|sls|stacker|tf)
+  runway whichenv
   runway -h | --help
   runway --version
 

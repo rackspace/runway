@@ -9,3 +9,4 @@ from .test import Test  # noqa
 from .takeoff import Takeoff  # noqa
 from .taxi import Taxi  # noqa
 from .gen_sample import GenSample  # noqa
+from .whichenv import WhichEnv  # noqa
