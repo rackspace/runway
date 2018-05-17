@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.15.2] - 2018-05-17
+### Fixed
+- Fix `stacker-runway` command error on importing Stacker before syspath update
+
 ## [0.15.1] - 2018-05-17
 ### Fixed
 - Allow use of `whichenv` command in module directories

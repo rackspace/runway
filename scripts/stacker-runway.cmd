@@ -42,13 +42,12 @@ import sys
 from os import path
 
 from runway.embedded.stacker.logger import setup_logging
-from runway.embedded.stacker.commands import Stacker
 
 EMBEDDED_LIB_PATH = path.dirname(
-    # .../site-packages/runway/embedded/stacker/commands/stacker/__init__.pyc
+    # .../site-packages/runway/embedded/stacker/logger/__init__.py
     # ->
     # .../site-packages/runway/embedded
-    path.dirname(path.dirname(path.dirname(inspect.getfile(Stacker))))
+    path.dirname(path.dirname(inspect.getfile(setup_logging)))
 )
 
 if __name__ == "__main__":
@@ -57,6 +56,7 @@ if __name__ == "__main__":
         1,  # https://stackoverflow.com/a/10097543
         EMBEDDED_LIB_PATH
     )
+    from runway.embedded.stacker.commands import Stacker
     stacker = Stacker(setup_logging=setup_logging)
     args = stacker.parse_args()
     stacker.configure(args)
