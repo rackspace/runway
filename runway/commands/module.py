@@ -457,7 +457,8 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         """Find AWS region, prompting if necessary."""
         if 'AWS_DEFAULT_REGION' not in self.env_vars:
             aws_region = input("Please enter the AWS region: ")
-            self.update_env_vars({'AWS_DEFAULT_REGION': aws_region})
+            self.update_env_vars({'AWS_DEFAULT_REGION': aws_region,
+                                  'AWS_REGION': aws_region})
         return self.env_vars['AWS_DEFAULT_REGION']
 
     def plan(self):

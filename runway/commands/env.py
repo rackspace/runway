@@ -78,7 +78,8 @@ class Env(Base):
                     if deployment.get('assume-role'):
                         self.pre_deploy_assume_role(deployment['assume-role'],
                                                     region)
-                    self.update_env_vars({'AWS_DEFAULT_REGION': region})
+                    self.update_env_vars({'AWS_DEFAULT_REGION': region,
+                                          'AWS_REGION': region})
                     if deployment.get('account-id') or (
                             deployment.get('account-alias')):
                         self.validate_account_credentials(deployment)
