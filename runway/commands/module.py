@@ -200,15 +200,16 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         if os.path.isfile(os.path.join(self.module_root, sls_env_file)):
             if os.path.isfile(os.path.join(self.module_root, 'package.json')):
                 with self.change_dir(self.module_root):
-                    # Use npm ci if available (npm v5.7+)
-                    if self.use_npm_ci():
-                        LOGGER.info("Running npm ci on %s...",
-                                    os.path.basename(self.module_root))
-                        subprocess.check_call(['npm', 'ci'])
-                    else:
-                        LOGGER.info("Running npm install on %s...",
-                                    os.path.basename(self.module_root))
-                        subprocess.check_call(['npm', 'install'])
+                    if not self.deploy_opts.get('skip-npm-ci'):
+                        # Use npm ci if available (npm v5.7+)
+                        if self.use_npm_ci():
+                            LOGGER.info("Running npm ci on %s...",
+                                        os.path.basename(self.module_root))
+                            subprocess.check_call(['npm', 'ci'])
+                        else:
+                            LOGGER.info("Running npm install on %s...",
+                                        os.path.basename(self.module_root))
+                            subprocess.check_call(['npm', 'install'])
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 os.path.basename(self.module_root),

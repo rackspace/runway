@@ -31,7 +31,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
     """Base class for deployer classes."""
 
     def __init__(self, options, env_vars=None, env_root=None,  # noqa pylint: disable=too-many-arguments
-                 module_root=None, runway_config_dir=None):
+                 deploy_opts=None, module_root=None, runway_config_dir=None):
         """Initialize base class."""
         self.options = options
 
@@ -46,6 +46,11 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             self.env_root = env_root
 
         self.module_root = module_root
+
+        if deploy_opts is None:
+            self.deploy_opts = {}
+        else:
+            self.deploy_opts = deploy_opts
 
         if runway_config_dir is None:
             self.runway_config_path = os.path.join(

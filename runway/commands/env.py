@@ -83,18 +83,24 @@ class Env(Base):
                     if deployment.get('account-id') or (
                             deployment.get('account-alias')):
                         self.validate_account_credentials(deployment)
+                    if deployment.get('skip-npm-ci'):
+                        deploy_opts = {'skip-npm-ci': True}
+                    else:
+                        deploy_opts = {}
                     for module in deployment.get('modules', []):
                         module_root = os.path.join(self.env_root, module)
                         with self.change_dir(module_root):
                             getattr(Module(options=self.options,
                                            env_vars=self.env_vars,
                                            env_root=self.env_root,
+                                           deploy_opts=deploy_opts,
                                            module_root=module_root),
                                     command)()
                     if deployment.get('current_dir', False):
                         getattr(Module(options=self.options,
                                        env_vars=self.env_vars,
                                        env_root=self.env_root,
+                                       deploy_opts=deploy_opts,
                                        module_root=self.env_root),
                                 command)()
                 if deployment.get('assume-role'):

@@ -150,6 +150,9 @@ deployments:
       # account
       dev: 123456789012
       prod: 345678901234
+    skip-npm-ci: false  # optional, and should rarely be used. Omits npm ci
+                        # execution during Serverless deployments
+                        # (i.e. for use with pre-packaged node_modules)
 
 # If using environment folders instead of git branches, git branch lookup can
 # be disabled entirely (see "Repo Structure")
