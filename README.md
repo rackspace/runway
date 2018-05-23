@@ -269,11 +269,15 @@ Standard [Serverless](https://serverless.com/framework/) rules apply, with the f
 }
 ```
 * We strongly recommend you commit the package-lock.json that is generated after running `npm install`
-* Each stage requires its own config file (even if empty for a particular stage), in one of the following forms:
+* Each stage requires its own variables file (even if empty for a particular stage), in one of the following forms:
 ```
+env/STAGE-REGION.yml
 config-STAGE-REGION.yml
+env/STAGE.yml
 config-STAGE.yml
+env/STAGE-REGION.json
 config-STAGE-REGION.json
+env/STAGE.json
 config-STAGE.json
 ```
 

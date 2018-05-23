@@ -640,8 +640,16 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
         names = []
         for ext in ['yml', 'json']:
             # Give preference to explicit stage-region files
+            names.append(
+                os.path.join('env',
+                             "%s-%s.%s" % (stage, region, ext))
+            )
             names.append("config-%s-%s.%s" % (stage, region, ext))
             # Fallback to stage name only
+            names.append(
+                os.path.join('env',
+                             "%s.%s" % (stage, ext))
+            )
             names.append("config-%s.%s" % (stage, ext))
         return names
 
