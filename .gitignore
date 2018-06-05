@@ -6,3 +6,6 @@
 *.egg-info
 build
 dist
+
+# This is dynamically built at build-time via make
+runway/templates/terraform/.terraform-version

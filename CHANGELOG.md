@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.18.0] - 2018-06-05
+### Added
+- Add `.terraform-version` file to terraform sample module
+
 ## [0.17.0] - 2018-05-23
 ### Added
 - Add `skip-npm-ci` deployment option

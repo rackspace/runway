@@ -400,8 +400,8 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         if module_dir is None:
             module_dir = os.path.join(self.env_root, 'sampleapp.tf')
         self.generate_sample_module(module_dir)
-        for i in ['backend-us-east-1.tfvars', 'dev-us-east-1.tfvars',
-                  'main.tf']:
+        for i in ['.terraform-version', 'backend-us-east-1.tfvars',
+                  'dev-us-east-1.tfvars', 'main.tf']:
             shutil.copyfile(
                 os.path.join(os.path.dirname(os.path.dirname(__file__)),
                              'templates',
@@ -445,14 +445,13 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
 
     def parse_runway_config(self):
         """Read and parse runway.yml."""
-        if os.path.isfile(self.runway_config_path):
-            with open(self.runway_config_path) as data_file:
-                return yaml.safe_load(data_file)
-        else:
+        if not os.path.isfile(self.runway_config_path):
             LOGGER.error("Runway config file was not found (looking for "
                          "%s)",
                          self.runway_config_path)
             sys.exit(1)
+        with open(self.runway_config_path) as data_file:
+            return yaml.safe_load(data_file)
 
     def execute(self):
         """Implement dummy method (set in consuming classes)."""
