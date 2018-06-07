@@ -3,7 +3,7 @@ stacker_bucket: ${stacker_bucket_name}
 
 stacks:
   sampleapp:
-    template_path: templates/bucket.json
+    template_path: templates/bucket.json  # also supports yaml templates
     variables:
       ApplicationName: sampleapp
       CustomerName: ${customer}

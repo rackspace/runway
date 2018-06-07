@@ -16,6 +16,31 @@ Very simple configuration to:
 
 ## How?
 
+### Quick Start - Deploy a CloudFormation Stack
+
+```
+mkdir my-app
+cd my-app
+git init
+git checkout -b ENV-dev
+runway gen-sample cfn
+sed -i 's/CUSTOMERNAMEHERE/mydemo/g' sampleapp.cfn/dev-us-east-1.env
+sed -i 's/ENVIRONMENTNAMEHERE/dev/g' sampleapp.cfn/dev-us-east-1.env
+sed -i "s/stacker-/stacker-$(uuidgen)-/g" sampleapp.cfn/dev-us-east-1.env
+cat <<EOF >> runway.yml
+---
+# Full syntax at https://github.com/onicagroup/runway
+deployments:
+  - modules:
+      - sampleapp.cfn
+    regions:
+      - us-east-1
+EOF
+runway takeoff
+# Now our stack is available at mydemo-dev-sampleapp, e.g.:
+aws cloudformation describe-stack-resources --region us-east-1 --stack-name mydemo-dev-sampleapp
+```
+
 ### Basic Concepts
 
 * Modules:
