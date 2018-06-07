@@ -7,6 +7,7 @@ from subprocess import check_call, check_output
 import glob
 import logging
 import os
+import platform
 import shutil
 import stat
 import sys
@@ -530,7 +531,8 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
     @staticmethod
     def ensure_file_is_executable(path):
         """Exit if file is not executable."""
-        if not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]:
+        if platform.system() != 'Windows' and (
+                not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]):
             print("Error: File %s is not executable" % path)
             sys.exit(1)
 
