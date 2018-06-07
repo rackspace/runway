@@ -435,24 +435,28 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
 
     def determine_module_type(self):
         """Determine type of module."""
+        module_type = ''
         # First check directory name for type-indicating suffix
         if os.path.basename(self.module_root).endswith('.sls'):
-            return 'serverless'
+            module_type = 'serverless'
         elif os.path.basename(self.module_root).endswith('.tf'):
-            return 'terraform'
+            module_type = 'terraform'
         elif os.path.basename(self.module_root).endswith('.cfn'):
-            return 'stacker'
+            module_type = 'stacker'
         # Fallback to autodetection
-        if os.path.isfile(os.path.join(self.module_root, 'serverless.yml')):
-            return 'serverless'
-        elif glob.glob(os.path.join(self.module_root, '*.tf')):
-            return 'terraform'
-        elif glob.glob(os.path.join(self.module_root, '*.env')):
-            return 'stacker'
-        else:
+        if module_type == '':
+            if os.path.isfile(os.path.join(self.module_root,
+                                           'serverless.yml')):
+                module_type = 'serverless'
+            elif glob.glob(os.path.join(self.module_root, '*.tf')):
+                module_type = 'terraform'
+            elif glob.glob(os.path.join(self.module_root, '*.env')):
+                module_type = 'stacker'
+        if module_type == '':
             LOGGER.error('No valid deployment configurations found for %s',
                          os.path.basename(self.module_root))
             sys.exit(1)
+        return module_type
 
     def get_and_update_region(self):
         """Find AWS region, prompting if necessary."""
