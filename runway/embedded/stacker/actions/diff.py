@@ -213,17 +213,19 @@ class Action(build.Action):
         if not build.should_update(stack):
             return NotUpdatedStatus()
 
-        provider_stack = self.provider.get_stack(stack.fqn)
+        provider = self.build_provider(stack)
+
+        provider_stack = provider.get_stack(stack.fqn)
 
         # get the current stack template & params from AWS
         try:
-            [old_template, old_params] = self.provider.get_stack_info(
+            [old_template, old_params] = provider.get_stack_info(
                 provider_stack)
         except exceptions.StackDoesNotExist:
             old_template = None
             old_params = {}
 
-        stack.resolve(self.context, self.provider)
+        stack.resolve(self.context, provider)
         # generate our own template & params
         parameters = self.build_parameters(stack)
         new_params = dict()
@@ -253,7 +255,8 @@ class Action(build.Action):
             print_stack_changes(stack.name, new_stack, old_stack, new_params,
                                 old_params)
 
-        self.provider.set_outputs(stack.fqn, provider_stack)
+        stack.set_outputs(
+            provider.get_output_dict(provider_stack))
 
         return COMPLETE
 

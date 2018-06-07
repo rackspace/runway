@@ -354,6 +354,10 @@ def handle_hooks(stage, hooks, provider, context):
         data_key = hook.data_key
         required = hook.required
         kwargs = hook.args or {}
+        if not hook.enabled:
+            logger.debug("hook with method %s is disabled, skipping",
+                         hook.path)
+            continue
         try:
             method = load_object_from_string(hook.path)
         except (AttributeError, ImportError):

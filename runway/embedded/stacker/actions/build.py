@@ -9,6 +9,7 @@ from ..exceptions import (
     MissingParameterException,
     StackDidNotChange,
     StackDoesNotExist,
+    CancelExecution,
 )
 
 from ..status import (
@@ -18,6 +19,7 @@ from ..status import (
     SubmittedStatus,
     CompleteStatus,
     FailedStatus,
+    SkippedStatus,
     SUBMITTED,
     INTERRUPTED
 )
@@ -219,20 +221,27 @@ class Action(BaseAction):
         if not should_submit(stack):
             return NotSubmittedStatus()
 
+        provider = self.build_provider(stack)
+
         try:
-            provider_stack = self.provider.get_stack(stack.fqn)
+            provider_stack = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
             provider_stack = None
+
+        if provider_stack and not should_update(stack):
+            stack.set_outputs(
+                self.provider.get_output_dict(provider_stack))
+            return NotUpdatedStatus()
 
         recreate = False
         if provider_stack and old_status == SUBMITTED:
             logger.debug(
                 "Stack %s provider status: %s",
                 stack.fqn,
-                self.provider.get_stack_status(provider_stack),
+                provider.get_stack_status(provider_stack),
             )
 
-            if self.provider.is_stack_rolling_back(provider_stack):
+            if provider.is_stack_rolling_back(provider_stack):
                 if 'rolling back' in old_status.reason:
                     return old_status
 
@@ -243,24 +252,25 @@ class Action(BaseAction):
                     reason = 'rolling back new stack'
 
                 return SubmittedStatus(reason)
-            elif self.provider.is_stack_in_progress(provider_stack):
+            elif provider.is_stack_in_progress(provider_stack):
                 logger.debug("Stack %s in progress.", stack.fqn)
                 return old_status
-            elif self.provider.is_stack_destroyed(provider_stack):
+            elif provider.is_stack_destroyed(provider_stack):
                 logger.debug("Stack %s finished deleting", stack.fqn)
                 recreate = True
                 # Continue with creation afterwards
             # Failure must be checked *before* completion, as both will be true
             # when completing a rollback, and we don't want to consider it as
             # a successful update.
-            elif self.provider.is_stack_failed(provider_stack):
+            elif provider.is_stack_failed(provider_stack):
                 reason = old_status.reason
                 if 'rolling' in reason:
                     reason = reason.replace('rolling', 'rolled')
 
                 return FailedStatus(reason)
-            elif self.provider.is_stack_completed(provider_stack):
-                self.provider.set_outputs(stack.fqn, provider_stack)
+            elif provider.is_stack_completed(provider_stack):
+                stack.set_outputs(
+                    provider.get_output_dict(provider_stack))
                 return CompleteStatus(old_status.reason)
             else:
                 return old_status
@@ -270,42 +280,46 @@ class Action(BaseAction):
 
         logger.debug("Launching stack %s now.", stack.fqn)
         template = self._template(stack.blueprint)
+        stack_policy = self._stack_policy(stack)
         tags = build_stack_tags(stack)
         parameters = self.build_parameters(stack, provider_stack)
         force_change_set = stack.blueprint.requires_change_set
 
         if recreate:
             logger.debug("Re-creating stack: %s", stack.fqn)
-            self.provider.create_stack(stack.fqn, template, parameters,
-                                       tags)
+            provider.create_stack(stack.fqn, template, parameters,
+                                  tags, stack_policy=stack_policy)
             return SubmittedStatus("re-creating stack")
         elif not provider_stack:
             logger.debug("Creating new stack: %s", stack.fqn)
-            self.provider.create_stack(stack.fqn, template, parameters, tags,
-                                       force_change_set)
+            provider.create_stack(stack.fqn, template, parameters, tags,
+                                  force_change_set,
+                                  stack_policy=stack_policy)
             return SubmittedStatus("creating new stack")
-        elif not should_update(stack):
-            return NotUpdatedStatus()
 
         try:
-            if self.provider.prepare_stack_for_update(provider_stack, tags):
+            if provider.prepare_stack_for_update(provider_stack, tags):
                 existing_params = provider_stack.get('Parameters', [])
-                self.provider.update_stack(
+                provider.update_stack(
                     stack.fqn,
                     template,
                     existing_params,
                     parameters,
                     tags,
                     force_interactive=stack.protected,
-                    force_change_set=force_change_set
+                    force_change_set=force_change_set,
+                    stack_policy=stack_policy,
                 )
 
                 logger.debug("Updating existing stack: %s", stack.fqn)
                 return SubmittedStatus("updating existing stack")
             else:
                 return SubmittedStatus("destroying stack for re-creation")
+        except CancelExecution:
+            stack.set_outputs(provider.get_output_dict(provider_stack))
+            return SkippedStatus(reason="canceled execution")
         except StackDidNotChange:
-            self.provider.set_outputs(stack.fqn, provider_stack)
+            stack.set_outputs(provider.get_output_dict(provider_stack))
             return DidNotChangeStatus()
 
     def _template(self, blueprint):
@@ -321,16 +335,23 @@ class Action(BaseAction):
         else:
             return Template(body=blueprint.rendered)
 
+    def _stack_policy(self, stack):
+        """Returns a Template object for the stacks stack policy, or None if
+        the stack doesn't have a stack policy."""
+        if stack.stack_policy:
+            return Template(body=stack.stack_policy)
+
     def _generate_plan(self, tail=False):
         return plan(
             description="Create/Update stacks",
             action=self._launch_stack,
-            tail=self.provider.tail_stack if tail else None,
+            tail=self._tail_stack if tail else None,
             stacks=self.context.get_stacks(),
             targets=self.context.stack_names)
 
     def pre_run(self, outline=False, dump=False, *args, **kwargs):
         """Any steps that need to be taken prior to running the action."""
+        self.ensure_cfn_bucket()
         hooks = self.context.config.pre_build
         handle_hooks(
             "pre_build",

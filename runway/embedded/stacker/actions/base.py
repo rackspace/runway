@@ -121,36 +121,27 @@ class BaseAction(object):
     Args:
         context (:class:`stacker.context.Context`): The stacker context for
             the current run.
-        provider (:class:`stacker.providers.base.BaseProvider`, optional):
-            The provider that will be interacted with in order to perform
-            the necessary actions.
+        provider_builder (:class:`stacker.providers.base.BaseProviderBuilder`,
+            optional): An object that will build a provider that will be
+            interacted with in order to perform the necessary actions.
     """
 
-    def __init__(self, context, provider=None, cancel=None):
+    def __init__(self, context, provider_builder=None, cancel=None):
         self.context = context
-        self.provider = provider
+        self.provider_builder = provider_builder
         self.bucket_name = context.bucket_name
         self.cancel = cancel or threading.Event()
-        self._conn = None
-
-    @property
-    def s3_conn(self):
-        """The boto s3 connection object used for communication with S3."""
-        if not hasattr(self, "_s3_conn"):
-            # Always use the global client for s3
-            session = get_session(self.bucket_region)
-            self._s3_conn = session.client('s3')
-
-        return self._s3_conn
-
-    @property
-    def bucket_region(self):
-        return self.context.config.stacker_bucket_region \
-                or self.provider.region
+        self.bucket_region = context.config.stacker_bucket_region
+        if not self.bucket_region and provider_builder:
+            self.bucket_region = provider_builder.region
+        self.s3_conn = get_session(self.bucket_region).client('s3')
 
     def ensure_cfn_bucket(self):
         """The CloudFormation bucket where templates will be stored."""
-        ensure_s3_bucket(self.s3_conn, self.bucket_name, self.bucket_region)
+        if self.bucket_name:
+            ensure_s3_bucket(self.s3_conn,
+                             self.bucket_name,
+                             self.bucket_region)
 
     def stack_template_url(self, blueprint):
         return stack_template_url(
@@ -167,7 +158,6 @@ class BaseAction(object):
         """
         key_name = stack_template_key_name(blueprint)
         template_url = self.stack_template_url(blueprint)
-        self.ensure_cfn_bucket()
         try:
             template_exists = self.s3_conn.head_object(
                 Bucket=self.bucket_name, Key=key_name) is not None
@@ -206,3 +196,19 @@ class BaseAction(object):
 
     def post_run(self, *args, **kwargs):
         pass
+
+    def build_provider(self, stack):
+        """Builds a :class:`stacker.providers.base.Provider` suitable for
+        operating on the given :class:`stacker.Stack`."""
+        return self.provider_builder.build(region=stack.region,
+                                           profile=stack.profile)
+
+    @property
+    def provider(self):
+        """Some actions need a generic provider using the default region (e.g.
+        hooks)."""
+        return self.provider_builder.build()
+
+    def _tail_stack(self, stack, cancel, retries=0, **kwargs):
+        provider = self.build_provider(stack)
+        return provider.tail_stack(stack, cancel, retries, **kwargs)

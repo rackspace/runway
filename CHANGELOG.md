@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Bypass CFN blueprint file execution mode check on Windows.
 
+### Changed
+- Update embedded stacker to v1.3
+- Add stacker as a requirement of runway
+    * This should provide a better experience for user IDEs when editing stacker blueprints
+
 ## [0.18.0] - 2018-06-05
 ### Added
 - Add `.terraform-version` file to terraform sample module

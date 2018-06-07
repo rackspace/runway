@@ -1,7 +1,6 @@
 import json
 import yaml
 import logging
-import os
 import time
 import urlparse
 import sys
@@ -41,6 +40,15 @@ MAX_ATTEMPTS = 10
 
 MAX_TAIL_RETRIES = 5
 DEFAULT_CAPABILITIES = ["CAPABILITY_NAMED_IAM", ]
+
+
+def get_cloudformation_client(session):
+    config = Config(
+        retries=dict(
+            max_attempts=MAX_ATTEMPTS
+        )
+    )
+    return session.client('cloudformation', config=config)
 
 
 def get_output_dict(stack):
@@ -358,6 +366,7 @@ def generate_cloudformation_args(stack_name, parameters, tags, template,
                                  capabilities=DEFAULT_CAPABILITIES,
                                  change_set_type=None,
                                  service_role=None,
+                                 stack_policy=None,
                                  change_set_name=None):
     """Used to generate the args for common cloudformation API interactions.
 
@@ -406,7 +415,43 @@ def generate_cloudformation_args(stack_name, parameters, tags, template,
     else:
         args["TemplateBody"] = template.body
 
+    # When creating args for CreateChangeSet, don't include the stack policy,
+    # since ChangeSets don't support it.
+    if not change_set_name:
+        args.update(generate_stack_policy_args(stack_policy))
+
     return args
+
+
+def generate_stack_policy_args(stack_policy=None):
+    args = {}
+    if stack_policy:
+        logger.debug("Stack has a stack policy")
+        if stack_policy.url:
+            # stacker currently does not support uploading stack policies to
+            # S3, so this will never get hit (unless your implementing S3
+            # uploads, and then you're probably reading this comment about why
+            # the exception below was raised :))
+            #
+            # args["StackPolicyURL"] = stack_policy.url
+            raise NotImplementedError
+        else:
+            args["StackPolicyBody"] = stack_policy.body
+    return args
+
+
+class ProviderBuilder(object):
+    """Implements a ProviderBuilder for the AWS provider."""
+
+    def __init__(self, region=None, **kwargs):
+        self.region = region
+        self.kwargs = kwargs
+
+    def build(self, region=None, profile=None):
+        if not region:
+            region = self.region
+        session = get_session(region=region, profile=profile)
+        return Provider(session, region=region, **self.kwargs)
 
 
 class Provider(BaseProvider):
@@ -452,37 +497,17 @@ class Provider(BaseProvider):
         "ROLLBACK_COMPLETE",
     )
 
-    def __init__(self, region, interactive=False, replacements_only=False,
-                 recreate_failed=False, service_role=None, **kwargs):
-        self.region = region
+    def __init__(self, session, region=None, interactive=False,
+                 replacements_only=False, recreate_failed=False,
+                 service_role=None, **kwargs):
         self._outputs = {}
-        self._cloudformation = None
+        self.region = region
+        self.cloudformation = get_cloudformation_client(session)
         self.interactive = interactive
         # replacements only is only used in interactive mode
         self.replacements_only = interactive and replacements_only
         self.recreate_failed = interactive or recreate_failed
         self.service_role = service_role
-
-        # Necessary to deal w/ multiprocessing issues w/ sharing ssl conns
-        # see: https://github.com/remind101/stacker/issues/196
-        self._pid = os.getpid()
-
-    @property
-    def cloudformation(self):
-        # deals w/ multiprocessing issues w/ sharing ssl conns
-        # see https://github.com/remind101/stacker/issues/196
-        pid = os.getpid()
-        if pid != self._pid or not self._cloudformation:
-            config = Config(
-                retries=dict(
-                    max_attempts=MAX_ATTEMPTS
-                )
-            )
-            session = get_session(self.region)
-            self._cloudformation = session.client('cloudformation',
-                                                  config=config)
-
-        return self._cloudformation
 
     def get_stack(self, stack_name, **kwargs):
         try:
@@ -598,7 +623,8 @@ class Provider(BaseProvider):
         return True
 
     def create_stack(self, fqn, template, parameters, tags,
-                     force_change_set=False, **kwargs):
+                     force_change_set=False, stack_policy=None,
+                     **kwargs):
         """Create a new Cloudformation stack.
 
         Args:
@@ -635,6 +661,7 @@ class Provider(BaseProvider):
             args = generate_cloudformation_args(
                 fqn, parameters, tags, template,
                 service_role=self.service_role,
+                stack_policy=stack_policy,
             )
 
             try:
@@ -737,7 +764,7 @@ class Provider(BaseProvider):
 
     def update_stack(self, fqn, template, old_parameters, parameters, tags,
                      force_interactive=False, force_change_set=False,
-                     **kwargs):
+                     stack_policy=None, **kwargs):
         """Update a Cloudformation stack.
 
         Args:
@@ -768,10 +795,11 @@ class Provider(BaseProvider):
                                                   force_change_set)
 
         return update_method(fqn, template, old_parameters, parameters, tags,
-                             **kwargs)
+                             stack_policy=stack_policy, **kwargs)
 
     def interactive_update_stack(self, fqn, template, old_parameters,
-                                 parameters, tags, **kwargs):
+                                 parameters, tags, stack_policy=None,
+                                 **kwargs):
         """Update a Cloudformation stack in interactive mode.
 
         Args:
@@ -812,6 +840,13 @@ class Provider(BaseProvider):
             finally:
                 ui.unlock()
 
+        # ChangeSets don't support specifying a stack policy inline, like
+        # CreateStack/UpdateStack, so we just SetStackPolicy if there is one.
+        if stack_policy:
+            kwargs = generate_stack_policy_args(stack_policy)
+            kwargs["StackName"] = fqn
+            self.cloudformation.set_stack_policy(**kwargs)
+
         self.cloudformation.execute_change_set(
             ChangeSetName=change_set_id,
         )
@@ -846,7 +881,7 @@ class Provider(BaseProvider):
         )
 
     def default_update_stack(self, fqn, template, old_parameters, parameters,
-                             tags, **kwargs):
+                             tags, stack_policy=None, **kwargs):
         """Update a Cloudformation stack in default mode.
 
         Args:
@@ -865,6 +900,7 @@ class Provider(BaseProvider):
         args = generate_cloudformation_args(
             fqn, parameters, tags, template,
             service_role=self.service_role,
+            stack_policy=stack_policy,
         )
 
         try:
@@ -895,12 +931,11 @@ class Provider(BaseProvider):
     def get_outputs(self, stack_name, *args, **kwargs):
         if stack_name not in self._outputs:
             stack = self.get_stack(stack_name)
-            self.set_outputs(stack_name, stack)
+            self._outputs[stack_name] = get_output_dict(stack)
         return self._outputs[stack_name]
 
-    def set_outputs(self, stack_name, stack):
-        self._outputs[stack_name] = get_output_dict(stack)
-        return
+    def get_output_dict(self, stack):
+        return get_output_dict(stack)
 
     def get_stack_info(self, stack):
         """ Get the template and parameters of the stack currently in AWS

@@ -263,6 +263,8 @@ class Hook(Model):
 
     required = BooleanType(default=True)
 
+    enabled = BooleanType(default=True)
+
     data_key = StringType(serialize_when_none=False)
 
     args = DictType(AnyType)
@@ -270,6 +272,12 @@ class Hook(Model):
 
 class Stack(Model):
     name = StringType(required=True)
+
+    stack_name = StringType(serialize_when_none=False)
+
+    region = StringType(serialize_when_none=False)
+
+    profile = StringType(serialize_when_none=False)
 
     class_path = StringType(serialize_when_none=False)
 
@@ -291,6 +299,8 @@ class Stack(Model):
 
     tags = DictType(StringType, serialize_when_none=False)
 
+    stack_policy_path = StringType(serialize_when_none=False)
+
     def validate_class_path(self, data, value):
         if value and data["template_path"]:
             raise ValidationError(
@@ -306,6 +316,11 @@ class Stack(Model):
         self.validate_stack_source(data)
 
     def validate_stack_source(self, data):
+        # Locked stacks don't actually need a template, since they're
+        # read-only.
+        if data["locked"]:
+            return
+
         if not (data["class_path"] or data["template_path"]):
             raise ValidationError(
                 "class_path or template_path is required.")

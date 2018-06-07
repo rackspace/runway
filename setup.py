@@ -45,10 +45,16 @@ INSTALL_REQUIRES = [
     'future',
     'pyhcl',
     'pylint',
-    # 'stacker==1.2.0',
-    'yamllint'
-] + [  # stacker dependencies
-    'troposphere>=1.9.0',
+    'yamllint',
+    # embedded stacker is v1.3.0 with the following patches applied:
+    # https://github.com/cloudtools/stacker/pull/565 (arbitrary command hook)
+    # https://github.com/cloudtools/stacker/pull/607 (per hook enable/disable)
+    # and the LICENSE file added to its root folder
+    # and the following files/folders deleted:
+    #   * tests
+    #   * blueprints/testutil.py
+    # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
+    'stacker~=1.3',
     # upstream stacker requires boto3>=1.3.1 & botocore>=1.6.0, but
     # unfortunately pip will mess up on transitive dependecies
     # https://github.com/pypa/pip/issues/988
@@ -57,21 +63,8 @@ INSTALL_REQUIRES = [
     # compatible botocore version. It's more rigid than necessary, but should
     # hopefully make users less likely to encounter an error OOTB.
     'botocore>=1.9.0',
-    'boto3>=1.6.0',
-    'PyYAML~=3.12',
-    'awacs>=0.6.0',
-    'formic~=0.9b',
-    'gitpython~=2.0',
-    'schematics~=2.0.1'
+    'boto3>=1.6.0'
 ]
-# embedded stacker is v1.2.0 with the following patches applied:
-# https://github.com/remind101/stacker/pull/556 (change to dateutil dependency)
-# https://github.com/remind101/stacker/pull/573
-# and the LICENSE file added to its root folder
-# and the following files/folders deleted:
-#   * tests
-#   * blueprints/testutil.py
-# and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
 SCRIPTS = ['scripts/stacker-runway', 'scripts/stacker-runway.cmd']
 
 setup(
@@ -91,9 +84,8 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         # 'Programming Language :: Python :: 3',
-        # 'Programming Language :: Python :: 3.2',
-        # 'Programming Language :: Python :: 3.3',
-        # 'Programming Language :: Python :: 3.4',
+        # 'Programming Language :: Python :: 3.5',
+        # 'Programming Language :: Python :: 3.6',
     ],
     # Python 3 support blocked by
     # https://github.com/remind101/stacker/issues/465

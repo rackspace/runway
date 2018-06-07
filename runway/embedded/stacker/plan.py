@@ -6,7 +6,6 @@ import threading
 
 from .util import stack_template_key_name
 from .exceptions import (
-    CancelExecution,
     GraphError,
     PlanFailed,
 )
@@ -14,7 +13,6 @@ from .ui import ui
 from .dag import DAG, DAGValidationError, walk
 from .status import (
     FailedStatus,
-    SkippedStatus,
     PENDING,
     SUBMITTED,
     COMPLETE,
@@ -32,7 +30,7 @@ COLOR_CODES = {
 
 
 def log_step(step):
-    msg = "%s: %s" % (step.name, step.status.name)
+    msg = "%s: %s" % (step, step.status.name)
     if step.status.reason:
         msg += " (%s)" % (step.status.reason)
     color_code = COLOR_CODES.get(step.status.code, 37)
@@ -60,6 +58,9 @@ class Step(object):
     def __repr__(self):
         return "<stacker.plan.Step:%s>" % (self.stack.fqn,)
 
+    def __str__(self):
+        return self.stack.name
+
     def run(self):
         """Runs this step until it has completed successfully, or been
         skipped.
@@ -86,8 +87,6 @@ class Step(object):
     def _run_once(self):
         try:
             status = self.fn(self.stack, status=self.status)
-        except CancelExecution:
-            status = SkippedStatus(reason="canceled execution")
         except Exception as e:
             logger.exception(e)
             status = FailedStatus(reason=e.message)
@@ -96,10 +95,6 @@ class Step(object):
 
     @property
     def name(self):
-        return self.stack.fqn
-
-    @property
-    def short_name(self):
         return self.stack.name
 
     @property
@@ -189,7 +184,7 @@ def build_plan(description, steps,
         nodes = []
         for target in targets:
             for step in steps:
-                if step.short_name == target:
+                if step.name == target:
                     nodes.append(step.name)
         graph = graph.filtered(nodes)
 
@@ -253,6 +248,9 @@ class Graph(object):
         except DAGValidationError as e:
             raise GraphError(e, step.name, dep)
 
+    def transitive_reduction(self):
+        self.dag.transitive_reduction()
+
     def walk(self, walker, walk_func):
         def fn(step_name):
             step = self.steps[step_name]
@@ -311,7 +309,7 @@ class Plan(object):
                 level,
                 "  - step: %s: target: \"%s\", action: \"%s\"",
                 steps,
-                step.short_name,
+                step.name,
                 step.fn.__name__,
             )
             steps += 1
