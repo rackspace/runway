@@ -420,11 +420,8 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                     with self.override_env_vars():
                                         # Stacker invocation script here with
                                         # adapted arg parsing
-                                        from ..embedded.stacker.logger import setup_logging  # noqa
                                         from ..embedded.stacker.commands import Stacker  # noqa
-                                        stacker = Stacker(
-                                            setup_logging=setup_logging
-                                        )
+                                        stacker = Stacker(setup_logging=None)
                                         args = stacker.parse_args(
                                             stacker_cmd + [name]
                                         )

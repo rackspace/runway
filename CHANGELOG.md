@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- Bypass CFN blueprint file execution mode check on Windows.
+- Remove duplicate stacker logging output
+- Bypass CFN blueprint file execution mode check on Windows
 
 ### Changed
 - Update embedded stacker to v1.3
