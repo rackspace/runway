@@ -251,17 +251,19 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             elif i in self.env_vars:
                 self.env_vars.pop(i)
 
-    def assume_role(self, role_arn, session_name=None, region='us-east-1'):
+    def assume_role(self, role_arn, session_name=None, duration_seconds=None,
+                    region='us-east-1'):
         """Assume IAM role."""
         import boto3
         if session_name is None:
             session_name = 'runway'
+        assume_role_opts = {'RoleArn': role_arn,
+                            'RoleSessionName': session_name}
+        if duration_seconds:
+            assume_role_opts['DurationSeconds'] = int(duration_seconds)
         sts_client = boto3.client('sts', region_name=region)
         LOGGER.info("Assuming role %s...", role_arn)
-        response = sts_client.assume_role(
-            RoleArn=role_arn,
-            RoleSessionName=session_name
-        )
+        response = sts_client.assume_role(**assume_role_opts)
         self.update_env_vars(
             {'AWS_ACCESS_KEY_ID': response['Credentials']['AccessKeyId'],
              'AWS_SECRET_ACCESS_KEY': response['Credentials']['SecretAccessKey'],  # noqa
@@ -275,8 +277,14 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                 self.save_existing_iam_env_vars()
             if assume_role_config.get('arn'):
                 assume_role_arn = assume_role_config['arn']
+                assume_role_duration = assume_role_config.get('duration')
             elif assume_role_config.get(self.environment_name):
-                assume_role_arn = assume_role_config[self.environment_name]
+                if isinstance(assume_role_config[self.environment_name], dict):
+                    assume_role_arn = assume_role_config[self.environment_name]['arn']  # noqa
+                    assume_role_duration = assume_role_config[self.environment_name].get('duration')  # noqa pylint: disable=line-too-long
+                else:
+                    assume_role_arn = assume_role_config[self.environment_name]
+                    assume_role_duration = None
             else:
                 LOGGER.info('Skipping assume-role; no role found for '
                             'environment %s...',
@@ -286,6 +294,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             self.assume_role(
                 role_arn=assume_role_arn,
                 session_name=assume_role_config.get('session_name', None),
+                duration_seconds=assume_role_duration,
                 region=region
             )
             return True

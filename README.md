@@ -190,6 +190,11 @@ deployments:
       prod: arn:aws:iam::account-id2:role/role-name
       # A single ARN can be specified instead, to apply to all environments
       # arn: arn:aws:iam::account-id:role/role-name
+      # Role duration can be set at the top level, or in a specific environment
+      # duration: 7200
+      # dev:
+      #   arn: arn:aws:iam::account-id1:role/role-name
+      #   duration: 7200
     account-alias:  # optional
       # A mapping of environment -> alias mappings can be provided to have
       # Runway verify the current assumed role / credentials match the
