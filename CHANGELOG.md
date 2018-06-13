@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.20.2] - 2018-06-13
+### Fixed
+- Fix stacker invocation error introduced in v0.20.1
+
 ## [0.20.1] - 2018-06-13
 ### Fixed
 - Multiple CFN modules can now use the same remote Stacker package at different versions
@@ -172,7 +176,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.2...HEAD
+[0.20.2]: https://github.com/onicagroup/runway/compare/v0.20.1...v0.20.2
+[0.20.1]: https://github.com/onicagroup/runway/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/onicagroup/runway/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/onicagroup/runway/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/onicagroup/runway/compare/v0.17.0...v0.18.0

@@ -562,24 +562,6 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
 
     @staticmethod
     @contextmanager
-    def override_sysargv(new_args=None):
-        """Temporarily spoof the arguments provided in calling the application.
-
-        Some applications will only detect their configuration from the command
-        line. A list provided to this method will override what they detect.
-
-        """
-        if new_args is None:
-            new_args = []
-        orig_args = list(sys.argv)
-        sys.argv = new_args
-        try:
-            yield
-        finally:
-            sys.argv = orig_args
-
-    @staticmethod
-    @contextmanager
     def use_embedded_pkgs():
         """Temporarily prepend embedded packages to sys.path."""
         old_sys_path = list(sys.path)

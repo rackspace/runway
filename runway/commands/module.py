@@ -32,9 +32,12 @@ def make_stacker_cmd_string(args):
     """Generate stacker invocation script from command line arg list.
 
     This is the standard stacker invocation script, with the addition of our
-    explicit arguments to parse_args (instead of leaving it empty).
+    explicit arguments to parse_args (instead of leaving it empty) and override
+    of sys.argv
     """
-    return ("from stacker.logger import setup_logging;"
+    return ("import sys;"
+            "sys.argv = {args};"
+            "from stacker.logger import setup_logging;"
             "from stacker.commands import Stacker;"
             "stacker = Stacker(setup_logging=setup_logging);"
             "args = stacker.parse_args({args});"
@@ -421,20 +424,14 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info("Running stacker %s on %s",
                                     command,
                                     name)
-                        # Need to override command line arguments (even when
-                        # overriding stacker argument parsing directly like
-                        # this) because its hooks may call
-                        # util.get_config_directory() which checks the command
-                        # line arguments directly
-                        with self.override_sysargv(['stacker'] + stacker_cmd):
-                            # Ensure the embedded version of stacker is used
-                            with self.use_embedded_pkgs():
-                                subprocess.check_call(
-                                    [sys.executable] + (
-                                        ['-c',
-                                         make_stacker_cmd_string(stacker_cmd + [name])]),  # noqa
-                                    env=self.env_vars
-                                )
+                        # Ensure the embedded version of stacker is used
+                        with self.use_embedded_pkgs():
+                            subprocess.check_call(
+                                [sys.executable] + (
+                                    ['-c',
+                                     make_stacker_cmd_string(['stacker'] + stacker_cmd + [name])]),  # noqa
+                                env=self.env_vars
+                            )
                 break  # only need top level files
         return response
 
