@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.20.1] - 2018-06-13
+### Fixed
+- Multiple CFN modules can now use the same remote Stacker package at different versions
+    * Previously, the first module to load a remote package (e.g. stacker_blueprints at tag v1.0.3) would have that tagged version stuck for the rest of the runway deployment. Now, subsequent modules can specify other tags/commits/etc of the same remote package.
+
 ## [0.20.0] - 2018-06-11
 ### Added
 - Add `duration` option to assume role operations

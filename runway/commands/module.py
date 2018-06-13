@@ -28,6 +28,19 @@ logging.getLogger('botocore').setLevel(logging.ERROR)  # their info is spammy
 LOGGER = logging.getLogger('runway')
 
 
+def make_stacker_cmd_string(args):
+    """Generate stacker invocation script from command line arg list.
+
+    This is the standard stacker invocation script, with the addition of our
+    explicit arguments to parse_args (instead of leaving it empty).
+    """
+    return ("from stacker.logger import setup_logging;"
+            "from stacker.commands import Stacker;"
+            "stacker = Stacker(setup_logging=setup_logging);"
+            "args = stacker.parse_args({args});"
+            "stacker.configure(args);args.run(args)".format(args=str(args)))
+
+
 class Module(Base):  # noqa pylint: disable=too-many-public-methods
     """Module deployment class."""
 
@@ -409,24 +422,19 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                     command,
                                     name)
                         # Need to override command line arguments (even when
-                        # running stacker directly like this) because its
-                        # hooks may call util.get_config_directory() which
-                        # checks the command line arguments directly
+                        # overriding stacker argument parsing directly like
+                        # this) because its hooks may call
+                        # util.get_config_directory() which checks the command
+                        # line arguments directly
                         with self.override_sysargv(['stacker'] + stacker_cmd):
-                            # Ensure any blueprints use our embedded version of
-                            # stacker
+                            # Ensure the embedded version of stacker is used
                             with self.use_embedded_pkgs():
-                                with self.turn_down_stacker_logging(command):
-                                    with self.override_env_vars():
-                                        # Stacker invocation script here with
-                                        # adapted arg parsing
-                                        from ..embedded.stacker.commands import Stacker  # noqa
-                                        stacker = Stacker(setup_logging=None)
-                                        args = stacker.parse_args(
-                                            stacker_cmd + [name]
-                                        )
-                                        stacker.configure(args)
-                                        args.run(args)
+                                subprocess.check_call(
+                                    [sys.executable] + (
+                                        ['-c',
+                                         make_stacker_cmd_string(stacker_cmd + [name])]),  # noqa
+                                    env=self.env_vars
+                                )
                 break  # only need top level files
         return response
 

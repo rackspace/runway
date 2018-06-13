@@ -571,7 +571,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         """
         if new_args is None:
             new_args = []
-        orig_args = sys.argv
+        orig_args = list(sys.argv)
         sys.argv = new_args
         try:
             yield
@@ -580,29 +580,9 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
 
     @staticmethod
     @contextmanager
-    def turn_down_stacker_logging(command):
-        """Disable duplicate Stacker logging."""
-        stacker_loggers = [
-            'runway.embedded.stacker.actions.diff',
-            'runway.embedded.stacker.commands.stacker',
-            'runway.embedded.stacker.plan'
-        ]
-        if command == 'diff':
-            try:
-                for i in stacker_loggers:
-                    logging.getLogger(i).setLevel(logging.ERROR)
-                yield
-            finally:
-                for i in stacker_loggers:
-                    logging.getLogger(i).setLevel(logging.INFO)
-        else:
-            yield
-
-    @staticmethod
-    @contextmanager
     def use_embedded_pkgs():
         """Temporarily prepend embedded packages to sys.path."""
-        old_sys_path = sys.path
+        old_sys_path = list(sys.path)
         sys.path.insert(
             1,  # https://stackoverflow.com/a/10097543
             EMBEDDED_LIB_PATH
