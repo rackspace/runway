@@ -36,7 +36,7 @@ def make_stacker_cmd_string(args):
     of sys.argv
     """
     return ("import sys;"
-            "sys.argv = {args};"
+            "sys.argv = ['stacker'] + {args};"
             "from stacker.logger import setup_logging;"
             "from stacker.commands import Stacker;"
             "stacker = Stacker(setup_logging=setup_logging);"
@@ -429,7 +429,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             subprocess.check_call(
                                 [sys.executable] + (
                                     ['-c',
-                                     make_stacker_cmd_string(['stacker'] + stacker_cmd + [name])]),  # noqa
+                                     make_stacker_cmd_string(stacker_cmd + [name])]),  # noqa
                                 env=self.env_vars
                             )
                 break  # only need top level files
