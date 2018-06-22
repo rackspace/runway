@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploys an ec2 instance with Runway pre-configured for evaluation
+
+Parameters:
+  OS:
+    Type: String
+    Description: The preferred OS type (Windows/Linux) of the Runway instance
+    AllowedValues:
+    - Windows
+    - Linux
+
+  KeyPair: 
+    Description: The existing EC2 KeyPair to be used to access the Runway instance
+    Type: AWS::EC2::KeyPair::KeyName
+
+  SourceIP: 
+    Description: The egress (public) IPv4 address from which you plan to access your Runway instance.  Hint- https://whatismyip.com .  Specify address only, do not include /CIDR designator, example 157.123.231.123
+    Type: String
+
+  IamRole:
+    Type: String
+    Description: Choose 'auto/admin' to have this CloudFormation template deploy an ADMIN IAM Role for Runway to use to call AWS services.  Choose 'manual' to specify an existing IAM Role with more restrictive permissions.
+    AllowedValues:
+    - auto/admin
+    - manual
+
+  IamRoleName: 
+    Description: If you chose 'manual' for IamRole, specify the name of an existing IAM Role here, otherwise leave as the default value of 'none'
+    Type: String
+    Default: none
+
+
+Conditions: 
+  DeployWindows: !Equals [!Ref OS, Windows]
+  DeployLinux: !Equals [!Ref OS, Linux]
+  DeployIamRole: !Equals [!Ref IamRole, auto/admin]
+
+
+Mappings:
+  AMIs:
+    us-east-1:
+      Linux: ami-a4dc46db
+      Windows: ami-0327667c
+    us-east-2:
+      Linux: ami-6a003c0f
+      Windows: ami-fd0f3298
+    us-west-1:
+      Linux: ami-8d948ced
+      Windows: ami-b236d2d1
+    us-west-2:
+      Linux: ami-db710fa3
+      Windows: ami-3703414f
+    ap-south-1:
+      Linux: ami-41e9c52e
+      Windows: ami-5f95bd30
+    ap-northeast-2:
+      Linux: ami-f030989e
+      Windows: ami-7969c317
+    ap-southeast-1:
+      Linux: ami-81cefcfd
+      Windows: ami-053d3a79
+    ap-southeast-2:
+      Linux: ami-963cecf4
+      Windows: ami-42f02f20
+    ap-northeast-1:
+      Linux: ami-48a45937
+      Windows: ami-120cc36d
+    ca-central-1:
+      Linux: ami-7e21a11a
+      Windows: ami-140b8870
+    eu-central-1:
+      Linux: ami-c7e0c82c
+      Windows: ami-63f5c688
+    eu-west-1:
+      Linux: ami-58d7e821
+      Windows: ami-987a76e1
+    eu-west-2:
+      Linux: ami-5daa463a
+      Windows: ami-479b7520
+    eu-west-3:
+      Linux: ami-1960d164
+      Windows: ami-1511a068
+    sa-east-1:
+      Linux: ami-67fca30b
+      Windows: ami-ff6e3593
+      
+
+Resources:
+  RunwayLinuxInstance:
+    Condition: DeployLinux
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.medium
+      ImageId: 
+        Fn::FindInMap: 
+          - AMIs
+          - Ref: AWS::Region
+          - Linux
+      KeyName: 
+        Ref: KeyPair
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - !Ref RunwaySecurityGroup
+          SubnetId:
+            Ref: PublicSubnet
+      IamInstanceProfile: !Ref RunwayInstanceProfile
+      Tags:
+      - Key: Name
+        Value: runway-linux
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+            # dependencies
+            apt-get update && apt-get install -y \
+              curl \
+              python-pip \
+              python-minimal \
+              unzip \
+              git \
+              uuid-runtime \
+              nano && \
+            curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+            apt-get install -y nodejs
+            # serverless
+            npm install -g serverless
+            # terraform
+            curl -o tf.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
+                unzip tf.zip && \
+                mv terraform /usr/local/bin/
+            # runway
+            pip install runway
+
+  RunwayWindowsInstance:
+    Condition: DeployWindows
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.medium
+      ImageId: 
+        Fn::FindInMap: 
+          - AMIs
+          - Ref: AWS::Region
+          - Windows
+      KeyName: 
+        Ref: KeyPair
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - !Ref RunwaySecurityGroup
+          SubnetId:
+            Ref: PublicSubnet
+      IamInstanceProfile: !Ref RunwayInstanceProfile
+      Tags:
+      - Key: Name
+        Value: runway-windows
+      UserData:
+        Fn::Base64: !Sub |
+          <powershell>
+          # dependencies
+          Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+          choco install -y python2 nodejs vscode git
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
+          # serverless
+          npm install -g serverless
+          # terraform
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_windows_amd64.zip -OutFile tf.zip
+          Expand-Archive .\tf.zip
+          mv .\tf\terraform.exe C:\Windows\System32\
+          # runway
+          pip install runway
+          </powershell>
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value: runway-quickstart
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: runway-quickstart
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: VPC
+      InternetGatewayId:
+        Ref: InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select ['0', !GetAZs {Ref: 'AWS::Region'}]
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: runway-quickstart
+ 
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+ 
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  RunwaySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupName: runway-quickstart
+      GroupDescription: runway-quickstart
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Join ['/', [!Ref SourceIP, 32]]
+      - IpProtocol: tcp
+        FromPort: 3389
+        ToPort: 3389
+        CidrIp: !Join ['/', [!Ref SourceIP, 32]]
+      Tags:
+        - Key: Name
+          Value: runway-quickstart
+      VpcId: !Ref VPC
+
+  RunwayInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      Roles:
+        - !If [DeployIamRole, !Ref RunwayIamRole, !Ref IamRoleName]
+      InstanceProfileName: runway-quickstart-InstanceProfile
+
+  RunwayIamRole: 
+    Type: AWS::IAM::Role
+    Condition: DeployIamRole
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - 
+            Effect: Allow
+            Principal: 
+              Service: 
+                - ec2.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      Policies: 
+        - 
+          PolicyName: RunwayIamRolePolicy
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement: 
+              - 
+                Effect: Allow
+                Action: '*'
+                Resource: '*'
