@@ -132,8 +132,6 @@ Resources:
               nano && \
             curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
             apt-get install -y nodejs
-            # serverless
-            npm install -g serverless
             # terraform
             curl -o tf.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
                 unzip tf.zip && \
@@ -171,8 +169,6 @@ Resources:
           Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
           choco install -y python2 nodejs vscode git
           $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-          # serverless
-          npm install -g serverless
           # terraform
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_windows_amd64.zip -OutFile tf.zip
