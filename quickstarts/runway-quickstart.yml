@@ -124,14 +124,15 @@ Resources:
             # dependencies
             apt-get update && apt-get install -y \
               curl \
-              python-pip \
-              python-minimal \
-              unzip \
               git \
+              nano \
+              npm \
+              python-pip \
+              unzip \
               uuid-runtime \
-              nano && \
-            curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
-            apt-get install -y nodejs
+              vim && \
+            update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10 && \
+            npm install npm@latest -g && \
             # terraform
             curl -o tf.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
                 unzip tf.zip && \
