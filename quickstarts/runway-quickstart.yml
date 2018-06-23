@@ -6,31 +6,40 @@ Parameters:
     Type: String
     Description: The preferred OS type (Windows/Linux) of the Runway instance
     AllowedValues:
-    - Windows
-    - Linux
+      - Windows
+      - Linux
 
-  KeyPair: 
-    Description: The existing EC2 KeyPair to be used to access the Runway instance
+  KeyPair:
+    Description: "The existing EC2 KeyPair to be used to access the Runway \
+                  instance"
     Type: AWS::EC2::KeyPair::KeyName
 
-  SourceIP: 
-    Description: The egress (public) IPv4 address from which you plan to access your Runway instance.  Hint- https://whatismyip.com .  Specify address only, do not include /CIDR designator, example 157.123.231.123
+  SourceIP:
+    Description: "The egress (public) IPv4 address from which you plan to \
+                  access your Runway instance.  Hint- https://whatismyip.com . \
+                  Specify address only, do not include /CIDR designator, \
+                  example 157.123.231.123"
     Type: String
 
   IamRole:
     Type: String
-    Description: Choose 'auto/admin' to have this CloudFormation template deploy an ADMIN IAM Role for Runway to use to call AWS services.  Choose 'manual' to specify an existing IAM Role with more restrictive permissions.
+    Description: "Choose 'auto/admin' to have this CloudFormation template \
+                  deploy an ADMIN IAM Role for Runway to use to call AWS \
+                  services.  Choose 'manual' to specify an existing IAM Role \
+                  with more restrictive permissions."
     AllowedValues:
-    - auto/admin
-    - manual
+      - auto/admin
+      - manual
 
-  IamRoleName: 
-    Description: If you chose 'manual' for IamRole, specify the name of an existing IAM Role here, otherwise leave as the default value of 'none'
+  IamRoleName:
+    Description: "If you chose 'manual' for IamRole, specify the name of an \
+                  existing IAM Role here, otherwise leave as the default value \
+                  of 'none'"
     Type: String
     Default: none
 
 
-Conditions: 
+Conditions:
   DeployWindows: !Equals [!Ref OS, Windows]
   DeployLinux: !Equals [!Ref OS, Linux]
   DeployIamRole: !Equals [!Ref IamRole, auto/admin]
@@ -83,7 +92,7 @@ Mappings:
     sa-east-1:
       Linux: ami-67fca30b
       Windows: ami-ff6e3593
-      
+
 
 Resources:
   RunwayLinuxInstance:
@@ -91,14 +100,14 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.medium
-      ImageId: 
-        Fn::FindInMap: 
+      ImageId:
+        Fn::FindInMap:
           - AMIs
           - Ref: AWS::Region
           - Linux
-      KeyName: 
+      KeyName:
         Ref: KeyPair
-      NetworkInterfaces: 
+      NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
           GroupSet:
@@ -107,8 +116,8 @@ Resources:
             Ref: PublicSubnet
       IamInstanceProfile: !Ref RunwayInstanceProfile
       Tags:
-      - Key: Name
-        Value: runway-linux
+        - Key: Name
+          Value: runway-linux
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -137,14 +146,14 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.medium
-      ImageId: 
-        Fn::FindInMap: 
+      ImageId:
+        Fn::FindInMap:
           - AMIs
           - Ref: AWS::Region
           - Windows
-      KeyName: 
+      KeyName:
         Ref: KeyPair
-      NetworkInterfaces: 
+      NetworkInterfaces:
         - AssociatePublicIpAddress: true
           DeviceIndex: 0
           GroupSet:
@@ -153,15 +162,15 @@ Resources:
             Ref: PublicSubnet
       IamInstanceProfile: !Ref RunwayInstanceProfile
       Tags:
-      - Key: Name
-        Value: runway-windows
+        - Key: Name
+          Value: runway-windows
       UserData:
         Fn::Base64: !Sub |
           <powershell>
           # dependencies
           Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
           choco install -y python2 nodejs vscode git
-          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
           # serverless
           npm install -g serverless
           # terraform
@@ -180,15 +189,15 @@ Resources:
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
-      - Key: Name
-        Value: runway-quickstart
+        - Key: Name
+          Value: runway-quickstart
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-      - Key: Name
-        Value: runway-quickstart
+        - Key: Name
+          Value: runway-quickstart
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -212,7 +221,7 @@ Resources:
       Tags:
         - Key: Name
           Value: runway-quickstart
- 
+
   PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: VPCGatewayAttachment
@@ -220,7 +229,7 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
- 
+
   PublicSubnetRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -229,18 +238,18 @@ Resources:
 
   RunwaySecurityGroup:
     Type: AWS::EC2::SecurityGroup
-    Properties: 
+    Properties:
       GroupName: runway-quickstart
       GroupDescription: runway-quickstart
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: !Join ['/', [!Ref SourceIP, 32]]
-      - IpProtocol: tcp
-        FromPort: 3389
-        ToPort: 3389
-        CidrIp: !Join ['/', [!Ref SourceIP, 32]]
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Join ['/', [!Ref SourceIP, 32]]
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: !Join ['/', [!Ref SourceIP, 32]]
       Tags:
         - Key: Name
           Value: runway-quickstart
@@ -248,32 +257,32 @@ Resources:
 
   RunwayInstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Properties: 
+    Properties:
       Roles:
         - !If [DeployIamRole, !Ref RunwayIamRole, !Ref IamRoleName]
       InstanceProfileName: runway-quickstart-InstanceProfile
 
-  RunwayIamRole: 
+  RunwayIamRole:
     Type: AWS::IAM::Role
     Condition: DeployIamRole
-    Properties: 
-      AssumeRolePolicyDocument: 
+    Properties:
+      AssumeRolePolicyDocument:
         Version: 2012-10-17
-        Statement: 
-          - 
+        Statement:
+          -
             Effect: Allow
-            Principal: 
-              Service: 
+            Principal:
+              Service:
                 - ec2.amazonaws.com
-            Action: 
+            Action:
               - sts:AssumeRole
-      Policies: 
-        - 
+      Policies:
+        -
           PolicyName: RunwayIamRolePolicy
-          PolicyDocument: 
+          PolicyDocument:
             Version: 2012-10-17
-            Statement: 
-              - 
+            Statement:
+              -
                 Effect: Allow
                 Action: '*'
                 Resource: '*'

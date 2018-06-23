@@ -3,7 +3,7 @@ For production use, or persistent daily use on a development workstation, consid
 
 * A [CloudFormation template](https://github.com/onicagroup/runway/blob/master/quickstarts/runway-quickstart.yml).  This is probably the easiest way to go from "zero to Runway" as quickly as possible, as it allows for using an IAM Role which eliminates the need to configure API keys.  The template will deploy your preference of Linux or Windows Runway host.  Windows Runway host includes vsCode, which some users may find easier for manipulating Runway config files.
 
-* A [Dockerfile](https://github.com/onicagroup/runway/blob/master/quickstarts/Dockerfile).  Docker users can build thier own Docker image to run a local Runway container, or modify the Dockerfile to build a Runway image to suit specific needs.  Requires an AWS Access/Secret keypair to use Runway.
+* A [Dockerfile](https://github.com/onicagroup/runway/blob/master/quickstarts/Dockerfile).  Docker users can build their own Docker image to run a local Runway container, or modify the Dockerfile to build a Runway image to suit specific needs.  Requires an AWS Access/Secret keypair to use Runway.
 
 * A prebuilt [Docker image](https://hub.docker.com/r/onica/runway-quickstart/).  Docker users can run the following to spin up a local Docker Runway container.  Requires an AWS Access/Secret keypair to use Runway.
 
