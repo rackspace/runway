@@ -1,5 +1,5 @@
-FROM ubuntu:xenial
-MAINTAINER Onica Group <https://github.com/onicagroup>
+FROM ubuntu:bionic
+MAINTAINER Onica Group LLC <https://github.com/onicagroup>
 
 # dependencies
 RUN apt-get update && apt-get install -y \

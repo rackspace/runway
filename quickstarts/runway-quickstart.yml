@@ -48,49 +48,49 @@ Conditions:
 Mappings:
   AMIs:
     us-east-1:
-      Linux: ami-a4dc46db
+      Linux: ami-85f9b8fa
       Windows: ami-0327667c
     us-east-2:
-      Linux: ami-6a003c0f
+      Linux: ami-46fec023
       Windows: ami-fd0f3298
     us-west-1:
-      Linux: ami-8d948ced
+      Linux: ami-ea34d089
       Windows: ami-b236d2d1
     us-west-2:
-      Linux: ami-db710fa3
+      Linux: ami-04f8bb7c
       Windows: ami-3703414f
     ap-south-1:
-      Linux: ami-41e9c52e
+      Linux: ami-2396be4c
       Windows: ami-5f95bd30
     ap-northeast-2:
-      Linux: ami-f030989e
+      Linux: ami-6969c307
       Windows: ami-7969c317
     ap-southeast-1:
-      Linux: ami-81cefcfd
+      Linux: ami-053f3879
       Windows: ami-053d3a79
     ap-southeast-2:
-      Linux: ami-963cecf4
+      Linux: ami-20f32c42
       Windows: ami-42f02f20
     ap-northeast-1:
-      Linux: ami-48a45937
+      Linux: ami-5017d82f
       Windows: ami-120cc36d
     ca-central-1:
-      Linux: ami-7e21a11a
+      Linux: ami-5906853d
       Windows: ami-140b8870
     eu-central-1:
-      Linux: ami-c7e0c82c
+      Linux: ami-b50b385e
       Windows: ami-63f5c688
     eu-west-1:
-      Linux: ami-58d7e821
+      Linux: ami-477b773e
       Windows: ami-987a76e1
     eu-west-2:
-      Linux: ami-5daa463a
+      Linux: ami-299d734e
       Windows: ami-479b7520
     eu-west-3:
-      Linux: ami-1960d164
+      Linux: ami-2b12a356
       Windows: ami-1511a068
     sa-east-1:
-      Linux: ami-67fca30b
+      Linux: ami-4b6a3127
       Windows: ami-ff6e3593
 
 
