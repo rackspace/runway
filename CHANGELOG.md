@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Suppress stacktrace when stacker/terraform/serverless fail
     * They provide their own error messages/stacktrace; runway errors just obfuscate them
+- Fix 0.20.1 regression of global stacker install use (instead of embedded version)
 
 ## [0.20.3] - 2018-06-13
 ### Fixed

@@ -28,20 +28,23 @@ logging.getLogger('botocore').setLevel(logging.ERROR)  # their info is spammy
 LOGGER = logging.getLogger('runway')
 
 
-def make_stacker_cmd_string(args):
+def make_stacker_cmd_string(args, lib_path):
     """Generate stacker invocation script from command line arg list.
 
-    This is the standard stacker invocation script, with the addition of our
-    explicit arguments to parse_args (instead of leaving it empty) and override
-    of sys.argv
+    This is the standard stacker invocation script, with the following changes:
+    * Adding our explicit arguments to parse_args (instead of leaving it empty)
+    * Overriding sys.argv
+    * Adding embedded runway lib directory to sys.path
     """
     return ("import sys;"
             "sys.argv = ['stacker'] + {args};"
+            "sys.path.insert(1, '{lib_path}');"
             "from stacker.logger import setup_logging;"
             "from stacker.commands import Stacker;"
             "stacker = Stacker(setup_logging=setup_logging);"
             "args = stacker.parse_args({args});"
-            "stacker.configure(args);args.run(args)".format(args=str(args)))
+            "stacker.configure(args);args.run(args)".format(args=str(args),
+                                                            lib_path=lib_path))
 
 
 def run_module_command(cmd_list, env_vars):
@@ -433,16 +436,16 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info("Running stacker %s on %s",
                                     command,
                                     name)
-                        with self.use_embedded_pkgs():
-                            run_module_command(
-                                cmd_list=[sys.executable] + (
-                                    ['-c',
-                                     make_stacker_cmd_string(
-                                         stacker_cmd + [name]
-                                     )]
-                                ),
-                                env_vars=self.env_vars
-                            )
+                        run_module_command(
+                            cmd_list=[sys.executable] + (
+                                ['-c',
+                                 make_stacker_cmd_string(
+                                     stacker_cmd + [name],
+                                     self.embedded_lib_path
+                                 )]
+                            ),
+                            env_vars=self.env_vars
+                        )
                 break  # only need top level files
         return response
 

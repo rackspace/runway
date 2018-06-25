@@ -68,6 +68,8 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         self.environment_override_name = 'DEPLOY_ENVIRONMENT'
         self._environment_name = None
 
+        self.embedded_lib_path = EMBEDDED_LIB_PATH
+
     def update_env_vars(self, val):
         """Update env_vars dict with provided dict."""
         for key, value in list(val.items()):
@@ -211,11 +213,11 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                             shell_out_env = os.environ.copy()
                             if 'PYTHONPATH' in shell_out_env:
                                 shell_out_env['PYTHONPATH'] = (
-                                    "%s:%s" % (EMBEDDED_LIB_PATH,
+                                    "%s:%s" % (self.embedded_lib_path,
                                                shell_out_env['PYTHONPATH'])
                                 )
                             else:
-                                shell_out_env['PYTHONPATH'] = EMBEDDED_LIB_PATH
+                                shell_out_env['PYTHONPATH'] = self.embedded_lib_path  # noqa
                             cfn_template = check_output(
                                 [sys.executable, filepath],
                                 env=shell_out_env
@@ -482,6 +484,19 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             self._runway_config = self.parse_runway_config()
         return self._runway_config
 
+    @contextmanager
+    def use_embedded_pkgs(self):
+        """Temporarily prepend embedded packages to sys.path."""
+        old_sys_path = list(sys.path)
+        sys.path.insert(
+            1,  # https://stackoverflow.com/a/10097543
+            self.embedded_lib_path
+        )
+        try:
+            yield
+        finally:
+            sys.path = old_sys_path
+
     @staticmethod
     def get_env_from_branch(branch_name):
         """Determine environment name from git branch name."""
@@ -559,20 +574,6 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             yield
         finally:
             os.chdir(prevdir)
-
-    @staticmethod
-    @contextmanager
-    def use_embedded_pkgs():
-        """Temporarily prepend embedded packages to sys.path."""
-        old_sys_path = list(sys.path)
-        sys.path.insert(
-            1,  # https://stackoverflow.com/a/10097543
-            EMBEDDED_LIB_PATH
-        )
-        try:
-            yield
-        finally:
-            sys.path = old_sys_path
 
     @staticmethod
     @contextmanager
