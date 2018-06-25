@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.20.4] - 2018-06-25
 ### Fixed
 - Suppress stacktrace when stacker/terraform/serverless fail
     * They provide their own error messages/stacktrace; runway errors just obfuscate them
@@ -180,7 +182,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.4...HEAD
+[0.20.4]: https://github.com/onicagroup/runway/compare/v0.20.3...v0.20.4
 [0.20.3]: https://github.com/onicagroup/runway/compare/v0.20.1...v0.20.3
 [0.20.1]: https://github.com/onicagroup/runway/compare/v0.20.0...v0.20.1
 [0.20.0]: https://github.com/onicagroup/runway/compare/v0.19.0...v0.20.0
