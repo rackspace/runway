@@ -167,7 +167,7 @@ class Env(Base):
         return reversed_deployments
 
     @staticmethod
-    def select_deployment_to_run(deployments=None, command='build'):  # noqa pylint: disable=too-many-branches
+    def select_deployment_to_run(deployments=None, command='build'):  # noqa pylint: disable=too-many-branches,too-many-statements
         """Query user for deployments to run."""
         if deployments is None or not deployments:
             return []
@@ -204,6 +204,11 @@ class Env(Base):
             sys.exit(1)
         elif len(selected_deploy['modules']) == 1:
             # No need to select a module in the deployment - there's only one
+            if command == 'destroy':
+                LOGGER.info('(only one deployment detected; all modules '
+                            'automatically selected for termination)')
+                if not strtobool(input('Proceed?: ')):
+                    sys.exit(0)
             deployments_to_run.append(selected_deploy)
         else:
             print('')

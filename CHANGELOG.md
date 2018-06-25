@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.20.5] - 2018-06-25
+### Fixed
+- Add prompt before initiating `destroy` when only one deployment configured
+
 ## [0.20.4] - 2018-06-25
 ### Fixed
 - Suppress stacktrace when stacker/terraform/serverless fail
@@ -182,7 +186,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.5...HEAD
+[0.20.5]: https://github.com/onicagroup/runway/compare/v0.20.4...v0.20.5
 [0.20.4]: https://github.com/onicagroup/runway/compare/v0.20.3...v0.20.4
 [0.20.3]: https://github.com/onicagroup/runway/compare/v0.20.1...v0.20.3
 [0.20.1]: https://github.com/onicagroup/runway/compare/v0.20.0...v0.20.1
