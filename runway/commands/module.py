@@ -44,6 +44,14 @@ def make_stacker_cmd_string(args):
             "stacker.configure(args);args.run(args)".format(args=str(args)))
 
 
+def run_module_command(cmd_list, env_vars):
+    """Shell out to provisioner command."""
+    try:
+        subprocess.check_call(cmd_list, env=env_vars)
+    except subprocess.CalledProcessError as shelloutexc:
+        sys.exit(shelloutexc.returncode)
+
+
 class Module(Base):  # noqa pylint: disable=too-many-public-methods
     """Module deployment class."""
 
@@ -232,7 +240,8 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                 # Strip out redundant npx quotes not needed
                                 # when executing the command directly
                                 " ".join(sls_cmd).replace('\'\'', '\''))
-                    subprocess.check_call(sls_cmd, env=self.env_vars)
+                    run_module_command(cmd_list=sls_cmd,
+                                       env_vars=self.env_vars)
             else:
                 LOGGER.warn(
                     "Skipping serverless %s of %s; no \"package.json\" "
@@ -358,7 +367,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             command,
                             os.path.basename(self.module_root),
                             " ".join(tf_cmd))
-                subprocess.check_call(tf_cmd, env=self.env_vars)
+                run_module_command(cmd_list=tf_cmd, env_vars=self.env_vars)
         else:
             response['skipped_configs'] = True
             LOGGER.info("Skipping Terraform %s of %s",
@@ -425,14 +434,14 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                                     command,
                                     name)
                         with self.use_embedded_pkgs():
-                            subprocess.check_call(
-                                [sys.executable] + (
+                            run_module_command(
+                                cmd_list=[sys.executable] + (
                                     ['-c',
                                      make_stacker_cmd_string(
                                          stacker_cmd + [name]
                                      )]
                                 ),
-                                env=self.env_vars
+                                env_vars=self.env_vars
                             )
                 break  # only need top level files
         return response
