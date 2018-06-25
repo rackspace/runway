@@ -424,12 +424,14 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info("Running stacker %s on %s",
                                     command,
                                     name)
-                        # Ensure the embedded version of stacker is used
                         with self.use_embedded_pkgs():
                             subprocess.check_call(
                                 [sys.executable] + (
                                     ['-c',
-                                     make_stacker_cmd_string(stacker_cmd + [name])]),  # noqa
+                                     make_stacker_cmd_string(
+                                         stacker_cmd + [name]
+                                     )]
+                                ),
                                 env=self.env_vars
                             )
                 break  # only need top level files
