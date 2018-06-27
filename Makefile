@@ -3,7 +3,7 @@ clean:
 	rm -rf dist/
 	rm -rf runway.egg-info/
 
-test:
+test: create_readme
 	python setup.py test
 	flake8 --exclude=runway/embedded runway
 	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' | xargs pylint
@@ -25,4 +25,4 @@ build_whl: clean create_readme create_tfenv_ver_file
 release: clean create_readme create_tfenv_ver_file build
 	twine upload dist/*
 
-travis: test clean create_readme create_tfenv_ver_file build
+travis: test clean create_tfenv_ver_file build
