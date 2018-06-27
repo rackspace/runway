@@ -2,9 +2,8 @@
 
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
-from subprocess import call
 
-from setuptools import Command, find_packages, setup
+from setuptools import find_packages, setup
 
 from runway import __version__
 
@@ -12,28 +11,6 @@ from runway import __version__
 THIS_DIR = abspath(dirname(__file__))
 with codecs_open(join(THIS_DIR, 'README.rst'), encoding='utf-8') as readfile:
     LONG_DESCRIPTION = readfile.read()
-
-
-class RunTests(Command):
-    """Run all tests."""
-
-    description = 'run tests'
-    user_options = []
-
-    def initialize_options(self):
-        """Implement dummy initialize_options method."""
-        pass
-
-    def finalize_options(self):
-        """Implement dummy finalize_options method."""
-        pass
-
-    def run(self):  # pylint: disable=no-self-use
-        """Run all tests."""
-        errno = call(['py.test',
-                      '--cov=runway',
-                      '--cov-report=term-missing'])
-        raise SystemExit(errno)
 
 
 INSTALL_REQUIRES = [
@@ -103,5 +80,5 @@ setup(
     },
     scripts=SCRIPTS,
     include_package_data=True,  # needed for templates
-    cmdclass={'test': RunTests},
+    test_suite='tests'
 )

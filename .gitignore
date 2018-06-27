@@ -3,6 +3,7 @@
 /README.rst
 .cache
 .coverage
+.eggs
 *.egg-info
 build
 dist

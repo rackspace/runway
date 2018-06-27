@@ -4,6 +4,7 @@ clean:
 	rm -rf runway.egg-info/
 
 test:
+	python setup.py test
 	flake8 --exclude=runway/embedded runway
 	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' | xargs pylint
 	find runway/templates/stacker -name '*.py' | xargs pylint --disable=import-error --disable=too-few-public-methods
