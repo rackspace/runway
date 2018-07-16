@@ -21,7 +21,6 @@ INSTALL_REQUIRES = [
     'pep8-naming',
     'future',
     'pyhcl',
-    'pylint',
     # pylint v2+ is only py3 compatible; doesn't make sense to offer it
     # until runway is py3 compatible
     'pylint~=1.9',
