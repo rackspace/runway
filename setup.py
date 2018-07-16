@@ -22,6 +22,9 @@ INSTALL_REQUIRES = [
     'future',
     'pyhcl',
     'pylint',
+    # pylint v2+ is only py3 compatible; doesn't make sense to offer it
+    # until runway is py3 compatible
+    'pylint~=1.9',
     'yamllint',
     # embedded stacker is v1.3.0 with the following patches applied:
     # https://github.com/cloudtools/stacker/pull/565 (arbitrary command hook)
