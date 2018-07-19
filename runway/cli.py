@@ -28,6 +28,8 @@ Help:
 
 
 from inspect import getmembers, isclass
+import logging
+import os
 
 from docopt import docopt
 
@@ -44,6 +46,13 @@ def fix_hyphen_commands(raw_options):
 
 def main():
     """Provide main CLI entrypoint."""
+    if os.environ.get('DEBUG'):
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+        # botocore info is spammy
+        logging.getLogger('botocore').setLevel(logging.ERROR)
+
     from . import commands
     options = fix_hyphen_commands(docopt(__doc__, version=version))
 

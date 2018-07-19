@@ -20,7 +20,6 @@ import yaml
 from ..embedded.stacker.awscli_yamlhelper import yaml_parse as parse_cloudformation_template  # noqa
 from .. import __version__ as version
 
-logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger('runway')
 EMBEDDED_LIB_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),

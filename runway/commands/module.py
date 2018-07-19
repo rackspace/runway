@@ -23,8 +23,6 @@ from .base import Base
 # from util but that would require sys.path shenanigans here
 from ..embedded.stacker.awscli_yamlhelper import yaml_parse as parse_cloudformation_template  # noqa
 
-logging.basicConfig(level=logging.INFO)
-logging.getLogger('botocore').setLevel(logging.ERROR)  # their info is spammy
 LOGGER = logging.getLogger('runway')
 
 
@@ -436,14 +434,18 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info("Running stacker %s on %s",
                                     command,
                                     name)
+                        stacker_cmd_str = make_stacker_cmd_string(
+                            stacker_cmd + [name],
+                            self.embedded_lib_path
+                        )
+                        stacker_cmd_list = [sys.executable, '-c']
+                        LOGGER.debug(
+                            "Stacker command being executed: %s \"%s\"",
+                            ' '.join(stacker_cmd_list),
+                            stacker_cmd_str
+                        )
                         run_module_command(
-                            cmd_list=[sys.executable] + (
-                                ['-c',
-                                 make_stacker_cmd_string(
-                                     stacker_cmd + [name],
-                                     self.embedded_lib_path
-                                 )]
-                            ),
+                            cmd_list=stacker_cmd_list + [stacker_cmd_str],
                             env_vars=self.env_vars
                         )
                 break  # only need top level files

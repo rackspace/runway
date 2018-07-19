@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.21.0] - 2018-07-19
+### Fixed
+- Debug logging now properly invoked across all commands
+- CFN deployments run in debug mode will display the exact Stacker command being run
+
 ## [0.20.7] - 2018-07-16
 ### Fixed
 - Restrict pylint version dependency to match Runway's Python 2 requirement
@@ -190,7 +195,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.20.7...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/onicagroup/runway/compare/v0.20.7...v0.21.0
 [0.20.7]: https://github.com/onicagroup/runway/compare/v0.20.5...v0.20.7
 [0.20.5]: https://github.com/onicagroup/runway/compare/v0.20.4...v0.20.5
 [0.20.4]: https://github.com/onicagroup/runway/compare/v0.20.3...v0.20.4

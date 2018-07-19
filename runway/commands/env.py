@@ -21,7 +21,6 @@ import boto3
 from .base import Base
 from .module import Module
 
-logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger('runway')
 
 
