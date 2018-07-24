@@ -182,53 +182,60 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             base_dir = self.env_root
         if pylint_rc_file is None:
             if os.path.isfile(os.path.join(base_dir, '.pylintrc')):
-                pylint_rc_config = [
+                pylint_config = [
                     "--rcfile=%s" % os.path.join(base_dir, '.pylintrc')
                 ]
             else:
-                pylint_rc_config = []
+                # Only reporting on errors ('-E') overrides any ignored errors
+                # set in .pylintrc, so it is only being used here when a
+                # pylint configuration file is not being used.
+                pylint_config = ['-E']
 
         # Check all python files in repo
         dirs_to_skip = set(['.git',
                             'node_modules',
                             '.serverless'])
-        for root, dirs, files in os.walk(base_dir):  # noqa pylint: disable=too-many-nested-blocks
+        nonblueprint_files = []
+        blueprint_files = []
+        for root, dirs, files in os.walk(base_dir):
             dirs[:] = [d for d in dirs if d not in dirs_to_skip]
             for name in files:
-                if name[-3:] == ".py":
-                    filepath = os.path.join(root, name)
-                    LOGGER.info("Checking %s with pylint (\"No config file "
-                                "found...\" messages can be ignored)",
-                                filepath)
-                    with self.use_embedded_pkgs():  # for embedded stacker
-                        with self.ignore_exit_code_0():
-                            PylintRun(pylint_rc_config + ['-E',  # ignore warn
-                                                          filepath])
-                    # Blueprints should output their template when executed
-                    if (root.endswith('blueprints') and
-                            not filepath.endswith('__init__.py')):
-                        self.ensure_file_is_executable(filepath)
-                        try:
-                            shell_out_env = os.environ.copy()
-                            if 'PYTHONPATH' in shell_out_env:
-                                shell_out_env['PYTHONPATH'] = (
-                                    "%s:%s" % (self.embedded_lib_path,
-                                               shell_out_env['PYTHONPATH'])
-                                )
-                            else:
-                                shell_out_env['PYTHONPATH'] = self.embedded_lib_path  # noqa
-                            cfn_template = check_output(
-                                [sys.executable, filepath],
-                                env=shell_out_env
-                            )
-                            if cfn_template == '':
-                                raise ValueError("Template output should not "
-                                                 "be empty!")
-                            parse_cloudformation_template(cfn_template)
-                        except:  # noqa - Bare except fine in this context
-                            print("Error while checking %s for valid "
-                                  "YAML/JSON output" % filepath)
-                            raise
+                filepath = os.path.join(root, name)
+                if name[-3:] == '.py' and (
+                        root.endswith('blueprints') and
+                        not filepath.endswith('__init__.py')):
+                    blueprint_files.append(filepath)
+                elif name[-3:] == '.py':
+                    nonblueprint_files.append(filepath)
+
+        LOGGER.info("Checking python files with pylint (\"No config file "
+                    "found...\" messages can be ignored)")
+        with self.use_embedded_pkgs():  # for embedded stacker
+            with self.ignore_exit_code_0():
+                PylintRun(pylint_config + nonblueprint_files + blueprint_files)
+        for filepath in blueprint_files:
+            # Blueprints should output their template when executed
+            self.ensure_file_is_executable(filepath)
+            try:
+                shell_out_env = os.environ.copy()
+                if 'PYTHONPATH' in shell_out_env:
+                    shell_out_env['PYTHONPATH'] = (
+                        "%s:%s" % (self.embedded_lib_path,
+                                   shell_out_env['PYTHONPATH'])
+                    )
+                else:
+                    shell_out_env['PYTHONPATH'] = self.embedded_lib_path
+                cfn_template = check_output(
+                    [sys.executable, filepath],
+                    env=shell_out_env
+                )
+                if cfn_template == '':
+                    raise ValueError('Template output should not be empty!')
+                parse_cloudformation_template(cfn_template)
+            except:  # noqa - Bare except fine in this context
+                print("Error while checking %s for valid "
+                      "YAML/JSON output" % filepath)
+                raise
 
     def test(self):
         """Execute tests."""
