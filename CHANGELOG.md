@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.22.2] - 2018-07-27
+### Fixed
+- Skip attempt at pylint during preflight when no python files are detected
+
 ## [0.22.1] - 2018-07-27
 ### Added
 - Adding debugging statements prior to pylint runs
@@ -208,7 +212,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.22.2...HEAD
+[0.22.2]: https://github.com/onicagroup/runway/compare/v0.22.1...v0.22.2
 [0.22.1]: https://github.com/onicagroup/runway/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/onicagroup/runway/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/onicagroup/runway/compare/v0.20.7...v0.21.0
