@@ -212,7 +212,10 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
                     "found...\" messages can be ignored)")
         with self.use_embedded_pkgs():  # for embedded stacker
             with self.ignore_exit_code_0():
+                LOGGER.debug("Executing pylint with the following options: \"%s\"",  # noqa
+                             ' '.join(pylint_config + nonblueprint_files + blueprint_files))  # noqa pylint: disable=line-too-long
                 PylintRun(pylint_config + nonblueprint_files + blueprint_files)
+        LOGGER.info('pylint complete.')
         for filepath in blueprint_files:
             # Blueprints should output their template when executed
             self.ensure_file_is_executable(filepath)
