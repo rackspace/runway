@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.22.3] - 2018-08-03
+### Fixed
+- Suppress runway stacktraces when terraform setup commands fail
+
 ## [0.22.2] - 2018-07-27
 ### Fixed
 - Skip attempt at pylint during preflight when no python files are detected
@@ -212,7 +216,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.22.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.22.3...HEAD
+[0.22.3]: https://github.com/onicagroup/runway/compare/v0.22.2...v0.22.3
 [0.22.2]: https://github.com/onicagroup/runway/compare/v0.22.1...v0.22.2
 [0.22.1]: https://github.com/onicagroup/runway/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/onicagroup/runway/compare/v0.21.0...v0.22.0

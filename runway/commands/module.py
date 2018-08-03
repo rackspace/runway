@@ -307,9 +307,9 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                         LOGGER.info('Using backend config file %s',
                                     backend_tfvars_file)
                         self.remove_stale_tf_config(backend_tfvars_file)
-                        subprocess.check_call(
-                            init_cmd + ['-backend-config=%s' % backend_tfvars_file],  # noqa
-                            env=self.env_vars
+                        run_module_command(
+                            cmd_list=init_cmd + ['-backend-config=%s' % backend_tfvars_file],  # noqa pylint: disable=line-too-long
+                            env_vars=self.env_vars
                         )
                     else:
                         LOGGER.info(
@@ -319,7 +319,8 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                             ', '.join(self.gen_backend_tfvars_files(
                                 environment,
                                 region)))
-                        subprocess.check_call(init_cmd, env=self.env_vars)
+                        run_module_command(cmd_list=init_cmd,
+                                           env_vars=self.env_vars)
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(
                     ['terraform',
@@ -340,27 +341,27 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     )
                     if re.compile("^[*\\s]\\s%s$" % environment,
                                   re.M).search(available_tf_envs):
-                        subprocess.check_call(
-                            ['terraform',
-                             'workspace',
-                             'select',
-                             environment],
-                            env=self.env_vars)
+                        run_module_command(
+                            cmd_list=['terraform', 'workspace', 'select',
+                                      environment],
+                            env_vars=self.env_vars
+                        )
                     else:
                         LOGGER.info("Terraform workspace %s not found; "
                                     "creating it...",
                                     environment)
-                        subprocess.check_call(
-                            ['terraform',
-                             'workspace',
-                             'new',
-                             environment],
-                            env=self.env_vars)
+                        run_module_command(
+                            cmd_list=['terraform', 'workspace', 'new',
+                                      environment],
+                            env_vars=self.env_vars
+                        )
                 if 'SKIP_TF_GET' not in self.env_vars:
                     LOGGER.info('Executing "terraform get" to update remote '
                                 'modules')
-                    subprocess.check_call(['terraform', 'get', '-update=true'],
-                                          env=self.env_vars)
+                    run_module_command(
+                        cmd_list=['terraform', 'get', '-update=true'],
+                        env_vars=self.env_vars
+                    )
                 else:
                     LOGGER.info('Skipping "terraform get" due to '
                                 '"SKIP_TF_GET" environment variable...')
