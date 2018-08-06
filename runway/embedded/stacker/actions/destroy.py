@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 import logging
 
 from .base import BaseAction, plan, build_walker
@@ -87,6 +90,8 @@ class Action(BaseAction):
 
     def run(self, force, concurrency=0, tail=False, *args, **kwargs):
         plan = self._generate_plan(tail=tail)
+        if not plan.keys():
+            logger.warn('WARNING: No stacks detected (error in config?)')
         if force:
             # need to generate a new plan to log since the outline sets the
             # steps to COMPLETE in order to log them

@@ -17,6 +17,7 @@ import sys
 from builtins import input  # pylint: disable=redefined-builtin
 
 import boto3
+import six
 
 from .base import Base
 from .module import Module
@@ -126,7 +127,7 @@ class Env(Base):
                   'aws_session_token']:
             if self.env_vars.get(i.upper()):
                 boto_args[i] = self.env_vars[i.upper()]
-        if isinstance(deployment.get('account-id'), (int, str, unicode)):
+        if isinstance(deployment.get('account-id'), (int, six.string_types)):
             account_id = str(deployment['account-id'])
         elif deployment.get('account-id', {}).get(self.environment_name):
             account_id = str(deployment['account-id'][self.environment_name])
@@ -135,7 +136,7 @@ class Env(Base):
         if account_id:
             self.validate_account_id(boto3.client('sts', **boto_args),
                                      account_id)
-        if isinstance(deployment.get('account-alias'), (str, unicode)):
+        if isinstance(deployment.get('account-alias'), six.string_types):
             account_alias = deployment['account-alias']
         elif deployment.get('account-alias', {}).get(self.environment_name):
             account_alias = deployment['account-alias'][self.environment_name]

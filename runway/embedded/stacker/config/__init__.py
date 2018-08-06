@@ -1,13 +1,23 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import copy
 import sys
 import logging
 
 from string import Template
-from StringIO import StringIO
+from io import StringIO
 
 from schematics import Model
 from schematics.exceptions import ValidationError
-from schematics.exceptions import BaseError as SchematicsError
+from schematics.exceptions import (
+    BaseError as SchematicsError,
+    UndefinedValueError
+)
+
 from schematics.types import (
     ModelType,
     ListType,
@@ -87,13 +97,17 @@ def render(raw_config, environment=None):
     if not environment:
         environment = {}
     try:
-        buff.write(t.substitute(environment))
-    except KeyError, e:
+        substituted = t.substitute(environment)
+    except KeyError as e:
         raise exceptions.MissingEnvironment(e.args[0])
     except ValueError:
         # Support "invalid" placeholders for lookup placeholders.
-        buff.write(t.safe_substitute(environment))
+        substituted = t.safe_substitute(environment)
 
+    if not isinstance(substituted, str):
+        substituted = substituted.decode('utf-8')
+
+    buff.write(substituted)
     buff.seek(0)
     return buff.read()
 
@@ -120,26 +134,19 @@ def parse(raw_config):
             top_level_value = config_dict.get(top_level_key)
             if isinstance(top_level_value, dict):
                 tmp_list = []
-                for key, value in top_level_value.iteritems():
+                for key, value in top_level_value.items():
                     tmp_dict = copy.deepcopy(value)
                     if top_level_key == 'stacks':
                         tmp_dict['name'] = key
                     tmp_list.append(tmp_dict)
                 config_dict[top_level_key] = tmp_list
 
-    # We have to enable non-strict mode, because people may be including top
-    # level keys for re-use with stacks (e.g. including something like
-    # `common_variables: &common_variables`).
-    #
-    # The unfortunate side effect of this is that it propagates down to every
-    # schematics model, and there doesn't seem to be a good way to only disable
-    # strict mode on a single model.
-    #
-    # If we enabled strict mode, it would break backwards compatibility, so we
-    # should consider enabling this in the future.
-    strict = False
-
-    return Config(config_dict, strict=strict)
+    # Top-level excess keys are removed by Config._convert, so enabling strict
+    # mode is fine here.
+    try:
+        return Config(config_dict, strict=True)
+    except SchematicsError as e:
+        raise exceptions.InvalidConfig(e.errors)
 
 
 def load(config):
@@ -159,7 +166,7 @@ def load(config):
         sys.path.append(config.sys_path)
         logger.debug("sys.path is now %s", sys.path)
     if config.lookups:
-        for key, handler in config.lookups.iteritems():
+        for key, handler in config.lookups.items():
             register_lookup_handler(key, handler)
 
     return config
@@ -251,6 +258,10 @@ class S3PackageSource(Model):
 
     requester_pays = BooleanType(serialize_when_none=False)
 
+    paths = ListType(StringType, serialize_when_none=False)
+
+    configs = ListType(StringType, serialize_when_none=False)
+
 
 class PackageSources(Model):
     git = ListType(ModelType(GitPackageSource))
@@ -329,12 +340,12 @@ class Stack(Model):
         if value:
             stack_name = data['name']
             raise ValidationError(
-                    "DEPRECATION: Stack definition %s contains "
-                    "deprecated 'parameters', rather than 'variables'. You are"
-                    " required to update your config. See https://stacker.rea"
-                    "dthedocs.io/en/latest/config.html#variables for "
-                    "additional information."
-                    % stack_name)
+                "DEPRECATION: Stack definition %s contains "
+                "deprecated 'parameters', rather than 'variables'. You are"
+                " required to update your config. See https://stacker.rea"
+                "dthedocs.io/en/latest/config.html#variables for "
+                "additional information."
+                % stack_name)
         return value
 
 
@@ -395,11 +406,38 @@ class Config(Model):
     lookups = DictType(StringType, serialize_when_none=False)
 
     stacks = ListType(
-        ModelType(Stack), default=[], validators=[not_empty_list])
+        ModelType(Stack), default=[])
 
-    def validate(self):
+    def _remove_excess_keys(self, data):
+        excess_keys = set(data.keys())
+        excess_keys -= self._schema.valid_input_keys
+        if not excess_keys:
+            return data
+
+        logger.debug('Removing excess keys from config input: %s',
+                     excess_keys)
+        clean_data = data.copy()
+        for key in excess_keys:
+            del clean_data[key]
+
+        return clean_data
+
+    def _convert(self, raw_data=None, context=None, **kwargs):
+        if raw_data is not None:
+            # Remove excess top-level keys, since we want to allow them to be
+            # used for custom user variables to be reference later. This is
+            # preferable to just disabling strict mode, as we can still
+            # disallow excess keys in the inner models.
+            raw_data = self._remove_excess_keys(raw_data)
+
+        return super(Config, self)._convert(raw_data=raw_data, context=context,
+                                            **kwargs)
+
+    def validate(self, *args, **kwargs):
         try:
-            super(Config, self).validate()
+            return super(Config, self).validate(*args, **kwargs)
+        except UndefinedValueError as e:
+            raise exceptions.InvalidConfig([e.message])
         except SchematicsError as e:
             raise exceptions.InvalidConfig(e.errors)
 

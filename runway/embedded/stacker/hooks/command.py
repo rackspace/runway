@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+
 import logging
 import os
 from subprocess import PIPE, Popen
@@ -48,11 +52,13 @@ def run_command(provider, context, command, capture=False, interactive=False,
             pre_build:
               - path: stacker.hooks.command.run_command
                 required: true
+                enabled: true
                 data_key: copy_env
                 args:
                   command: ['cp', 'environment.template', 'environment']
               - path: stacker.hooks.command.run_command
                 required: true
+                enabled: true
                 data_key: get_git_commit
                 args:
                   command: ['git', 'rev-parse', 'HEAD']
@@ -100,9 +106,9 @@ def run_command(provider, context, command, capture=False, interactive=False,
 
         if status == 0 or ignore_status:
             return {
-              'returncode': proc.returncode,
-              'stdout': out,
-              'stderr': err
+                'returncode': proc.returncode,
+                'stdout': out,
+                'stderr': err
             }
 
         # Don't print the command line again if we already did earlier

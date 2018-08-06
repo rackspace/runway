@@ -76,7 +76,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
 
     def get_env_dirs(self):
         """Return list of directories in env_root."""
-        repo_dirs = os.walk(self.env_root).next()[1]
+        repo_dirs = next(os.walk(self.env_root))[1]
         if '.git' in repo_dirs:
             repo_dirs.remove('.git')  # not relevant for any repo operations
         return repo_dirs
@@ -412,7 +412,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
             os.path.join(module_dir, 'sampleapp_blueprints', 'bucket.py'),
             os.stat(os.path.join(module_dir,
                                  'sampleapp_blueprints',
-                                 'bucket.py')).st_mode | 0111
+                                 'bucket.py')).st_mode | 0o0111
         )
         LOGGER.info("Sample Stacker module created at %s",
                     module_dir)

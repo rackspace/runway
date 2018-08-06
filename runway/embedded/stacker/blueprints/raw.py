@@ -1,10 +1,37 @@
 """Blueprint representing raw template module."""
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 
 import hashlib
 import json
+import os
+import sys
 
 from ..util import parse_cloudformation_template
-from ..exceptions import MissingVariable, UnresolvedVariable
+from ..exceptions import InvalidConfig, UnresolvedVariable
+from .base import Blueprint
+
+
+def get_template_path(filename):
+    """Find raw template in working directory or in sys.path.
+
+    template_path from config may refer to templates colocated with the Stacker
+    config, or files in remote package_sources. Here, we emulate python module
+    loading to find the path to the template.
+
+    Args:
+        filename (str): Template filename.
+    Returns:
+        Optional[str]: Path to file, or None if no file found
+
+    """
+    if os.path.isfile(filename):
+        return filename
+    for i in sys.path:
+        if os.path.isfile(os.path.join(i, filename)):
+            return os.path.join(i, filename)
+    return None
 
 
 def get_template_params(template):
@@ -49,23 +76,17 @@ def resolve_variable(var_name, var_def, provided_variable, blueprint_name):
             resolved.
 
     """
+    value = None
     if provided_variable:
         if not provided_variable.resolved:
             raise UnresolvedVariable(blueprint_name, provided_variable)
 
         value = provided_variable.value
-    else:
-        # Variable value not provided, try using the default, if it exists
-        # in the definition
-        try:
-            value = var_def["Default"]
-        except KeyError:
-            raise MissingVariable(blueprint_name, var_name)
 
     return value
 
 
-class RawTemplateBlueprint(object):
+class RawTemplateBlueprint(Blueprint):
     """Blueprint class for blueprints auto-generated from raw templates."""
 
     def __init__(self, name, context, raw_template_path, mappings=None, # noqa pylint: disable=too-many-arguments
@@ -131,14 +152,15 @@ class RawTemplateBlueprint(object):
         self.resolved_variables = {}
         defined_variables = self.get_parameter_definitions()
         variable_dict = dict((var.name, var) for var in provided_variables)
-        for var_name, var_def in defined_variables.iteritems():
+        for var_name, var_def in defined_variables.items():
             value = resolve_variable(
                 var_name,
                 var_def,
                 variable_dict.get(var_name),
                 self.name
             )
-            self.resolved_variables[var_name] = value
+            if value is not None:
+                self.resolved_variables[var_name] = value
 
     def get_parameter_values(self):
         """Return a dictionary of variables with `type` :class:`CFNType`.
@@ -151,21 +173,6 @@ class RawTemplateBlueprint(object):
         """
         return self.resolved_variables
 
-    def get_required_parameter_definitions(self):  # noqa pylint: disable=invalid-name
-        """Return all template parameters that do not have a default value.
-
-        Returns:
-            dict: dict of required CloudFormation Parameters for the blueprint.
-                Will be a dictionary of <parameter name>: <parameter
-                attributes>.
-
-        """
-        required = {}
-        for i in list(self.get_parameter_definitions().items()):
-            if i[1].get('Default', None) is None:
-                required[i[0]] = i[1]
-        return required
-
     @property
     def requires_change_set(self):
         """Return True if the underlying template has transforms."""
@@ -175,13 +182,19 @@ class RawTemplateBlueprint(object):
     def rendered(self):
         """Return (generating first if needed) rendered template."""
         if not self._rendered:
-            with open(self.raw_template_path, 'r') as template:
-                self._rendered = template.read()
+            template_path = get_template_path(self.raw_template_path)
+            if template_path:
+                with open(template_path, 'r') as template:
+                    self._rendered = template.read()
+            else:
+                raise InvalidConfig(
+                    'Could not find template %s' % self.raw_template_path
+                )
         return self._rendered
 
     @property
     def version(self):
         """Return (generating first if needed) version hash."""
         if not self._version:
-            self._version = hashlib.md5(self.rendered).hexdigest()[:8]
+            self._version = hashlib.md5(self.rendered.encode()).hexdigest()[:8]
         return self._version

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.23.0] - 2018-08-06
+### Added
+- Python 3 support
+- Updated embedded Stacker to v1.4
+
 ## [0.22.3] - 2018-08-03
 ### Fixed
 - Suppress runway stacktraces when terraform setup commands fail

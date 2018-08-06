@@ -2,6 +2,7 @@
 
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
+from sys import version_info
 
 from setuptools import find_packages, setup
 
@@ -21,19 +22,17 @@ INSTALL_REQUIRES = [
     'pep8-naming',
     'future',
     'pyhcl',
-    # pylint v2+ is only py3 compatible; doesn't make sense to offer it
-    # until runway is py3 compatible
-    'pylint~=1.9',
+    'six',
     'yamllint',
-    # embedded stacker is v1.3.0 with the following patches applied:
-    # https://github.com/cloudtools/stacker/pull/565 (arbitrary command hook)
-    # https://github.com/cloudtools/stacker/pull/607 (per hook enable/disable)
+    # embedded stacker is v1.4.0 with the following patches applied:
+    # https://github.com/cloudtools/stacker/pull/638 (support remote templates)
+    # https://github.com/cloudtools/stacker/pull/642 (v1.4 regression fix)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
-    'stacker~=1.3',
+    'stacker~=1.4',
     # upstream stacker requires boto3>=1.3.1 & botocore>=1.6.0, but
     # unfortunately pip will mess up on transitive dependecies
     # https://github.com/pypa/pip/issues/988
@@ -44,7 +43,12 @@ INSTALL_REQUIRES = [
     'botocore>=1.9.0',
     'boto3>=1.6.0'
 ]
-SCRIPTS = ['scripts/stacker-runway', 'scripts/stacker-runway.cmd']
+
+# pylint v2+ is only py3 compatible
+if version_info[0] == 2:
+    INSTALL_REQUIRES.append('pylint~=1.9')
+else:
+    INSTALL_REQUIRES.append('pylint')
 
 setup(
     name='runway',
@@ -62,13 +66,11 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        # 'Programming Language :: Python :: 3',
-        # 'Programming Language :: Python :: 3.5',
-        # 'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
-    # Python 3 support blocked by
-    # https://github.com/remind101/stacker/issues/465
-    python_requires='~=2.6',
+    python_requires='>=2.6',
     keywords='cli',
     packages=find_packages(exclude=['docs', 'tests*']),
     install_requires=INSTALL_REQUIRES,
@@ -80,7 +82,7 @@ setup(
             'runway=runway.cli:main',
         ],
     },
-    scripts=SCRIPTS,
+    scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd'],
     include_package_data=True,  # needed for templates
     test_suite='tests'
 )

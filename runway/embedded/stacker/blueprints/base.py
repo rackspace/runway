@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import str
+from past.builtins import basestring
+from builtins import object
 import copy
 import hashlib
 import logging
@@ -6,9 +12,10 @@ from stacker.util import read_value_from_path
 from stacker.variables import Variable
 
 from troposphere import (
+    Output,
     Parameter,
     Ref,
-    Template
+    Template,
 )
 
 from ..exceptions import (
@@ -260,11 +267,11 @@ def parse_user_data(variables, raw_user_data, blueprint_name):
     """
     variable_values = {}
 
-    for key in variables.keys():
-        if type(variables[key]) is CFNParameter:
-            variable_values[key] = variables[key].to_parameter_value()
+    for key, value in variables.items():
+        if type(value) is CFNParameter:
+            variable_values[key] = value.to_parameter_value()
         else:
-            variable_values[key] = variables[key]
+            variable_values[key] = value
 
     template = string.Template(raw_user_data)
 
@@ -311,21 +318,6 @@ class Blueprint(object):
                                  "html#variables for aditional information."
                                  % name)
 
-    def get_required_parameter_definitions(self):
-        """Returns all template parameters that do not have a default value.
-
-        Returns:
-            dict: dict of required CloudFormation Parameters for the blueprint.
-                Will be a dictionary of <parameter name>: <parameter
-                attributes>.
-
-        """
-        required = {}
-        for name, attrs in self.template.parameters.iteritems():
-            if not hasattr(attrs, "Default"):
-                required[name] = attrs
-        return required
-
     def get_parameter_definitions(self):
         """Get the parameter definitions to submit to CloudFormation.
 
@@ -339,13 +331,28 @@ class Blueprint(object):
 
         """
         output = {}
-        for var_name, attrs in self.defined_variables().iteritems():
+        for var_name, attrs in self.defined_variables().items():
             var_type = attrs.get("type")
             if isinstance(var_type, CFNType):
                 cfn_attrs = copy.deepcopy(attrs)
                 cfn_attrs["type"] = var_type.parameter_type
                 output[var_name] = cfn_attrs
         return output
+
+    def get_required_parameter_definitions(self):
+        """Returns all template parameters that do not have a default value.
+
+        Returns:
+            dict: dict of required CloudFormation Parameters for the blueprint.
+                Will be a dictionary of <parameter name>: <parameter
+                attributes>.
+
+        """
+        required = {}
+        for name, attrs in self.get_parameter_definitions().items():
+            if "Default" not in attrs:
+                required[name] = attrs
+        return required
 
     def get_parameter_values(self):
         """Return a dictionary of variables with `type` :class:`CFNType`.
@@ -358,7 +365,7 @@ class Blueprint(object):
         """
         variables = self.get_variables()
         output = {}
-        for key, value in variables.iteritems():
+        for key, value in variables.items():
             try:
                 output[key] = value.to_parameter_value()
             except AttributeError:
@@ -418,7 +425,7 @@ class Blueprint(object):
         """
         variables = self.get_variables()
         output = {}
-        for key, value in variables.iteritems():
+        for key, value in variables.items():
             if hasattr(value, "to_parameter_value"):
                 output[key] = value.to_parameter_value()
         return output
@@ -437,7 +444,7 @@ class Blueprint(object):
         self.resolved_variables = {}
         defined_variables = self.defined_variables()
         variable_dict = dict((var.name, var) for var in provided_variables)
-        for var_name, var_def in defined_variables.iteritems():
+        for var_name, var_def in defined_variables.items():
             value = resolve_variable(
                 var_name,
                 var_def,
@@ -450,7 +457,7 @@ class Blueprint(object):
         if not self.mappings:
             return
 
-        for name, mapping in self.mappings.iteritems():
+        for name, mapping in self.mappings.items():
             logger.debug("Adding mapping %s.", name)
             self.template.add_mapping(name, mapping)
 
@@ -467,7 +474,7 @@ class Blueprint(object):
             self.set_template_description(self.description)
         self.setup_parameters()
         rendered = self.template.to_json(indent=self.context.template_indent)
-        version = hashlib.md5(rendered).hexdigest()[:8]
+        version = hashlib.md5(rendered.encode()).hexdigest()[:8]
         return (version, rendered)
 
     def to_json(self, variables=None):
@@ -483,7 +490,7 @@ class Blueprint(object):
 
         variables_to_resolve = []
         if variables:
-            for key, value in variables.iteritems():
+            for key, value in variables.items():
                 variables_to_resolve.append(Variable(key, value))
         for k in self.get_parameter_definitions():
             if not variables or k not in variables:
@@ -521,6 +528,15 @@ class Blueprint(object):
 
         """
         self.template.add_description(description)
+
+    def add_output(self, name, value):
+        """Simple helper for adding outputs.
+
+        Args:
+            name (str): The name of the output to create.
+            value (str): The value to put in the output.
+        """
+        self.template.add_output(Output(name, Value=value))
 
     @property
     def requires_change_set(self):

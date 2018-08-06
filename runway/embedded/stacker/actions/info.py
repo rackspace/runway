@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 import logging
 
 from .base import BaseAction
@@ -15,6 +18,8 @@ class Action(BaseAction):
 
     def run(self, *args, **kwargs):
         logger.info('Outputs for stacks: %s', self.context.get_fqn())
+        if not self.context.get_stacks():
+            logger.warn('WARNING: No stacks detected (error in config?)')
         for stack in self.context.get_stacks():
             provider = self.build_provider(stack)
 
