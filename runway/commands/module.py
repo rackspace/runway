@@ -10,7 +10,7 @@ import sys
 
 from contextlib import contextmanager
 
-from builtins import input  # pylint: disable=redefined-builtin
+from builtins import input
 from future.utils import viewitems
 from send2trash import send2trash
 
@@ -244,7 +244,7 @@ class Module(Base):  # noqa pylint: disable=too-many-public-methods
                     run_module_command(cmd_list=sls_cmd,
                                        env_vars=self.env_vars)
             else:
-                LOGGER.warn(
+                LOGGER.warning(
                     "Skipping serverless %s of %s; no \"package.json\" "
                     "file was found (need a package file specifying "
                     "serverless in devDependencies)",

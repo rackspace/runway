@@ -6,7 +6,7 @@ clean:
 test: create_readme
 	python setup.py test
 	flake8 --exclude=runway/embedded runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' | xargs pylint
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' | xargs pylint --rcfile=.pylintrc
 	find runway/templates/stacker -name '*.py' | xargs pylint --disable=import-error --disable=too-few-public-methods
 
 create_readme:

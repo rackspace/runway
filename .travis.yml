@@ -7,10 +7,8 @@ addons:
       - sed
 python:
   - "2.7"
-  # See setup.py for notes about pending Python 3 support
-  # - "3.4"
-  # - "3.5"
-  # - "3.6"
+  - "3.5"
+  - "3.6"
 install:
   - "pip install Send2Trash docopt flake8 flake8-docstrings pep8-naming \
      future pyhcl pylint yamllint troposphere>=1.9.0 botocore>=1.6.0 \

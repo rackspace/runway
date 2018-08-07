@@ -325,7 +325,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         pathlistdir = os.listdir(path)
         if pathlistdir == []:
             return True
-        elif any(os.path.isfile(os.path.join(path, i)) for i in pathlistdir):
+        if any(os.path.isfile(os.path.join(path, i)) for i in pathlistdir):
             return False
         return all(self.path_only_contains_dirs(os.path.join(path, i)) for i in pathlistdir)  # noqa
 
@@ -512,7 +512,7 @@ class Base(object):  # noqa pylint: disable=too-many-instance-attributes,too-man
         """Determine environment name from git branch name."""
         if branch_name.startswith('ENV-'):
             return branch_name[4:]
-        elif branch_name == 'master':
+        if branch_name == 'master':
             LOGGER.info('Translating git branch "master" to environment '
                         '"common"')
             return 'common'

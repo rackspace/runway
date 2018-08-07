@@ -14,7 +14,7 @@ import os
 import shutil
 import sys
 
-from builtins import input  # pylint: disable=redefined-builtin
+from builtins import input
 
 import boto3
 import six
@@ -192,7 +192,7 @@ class Env(Base):
 
         if selected_index == 'all':
             return deployments
-        elif selected_index == '':
+        if selected_index == '':
             LOGGER.error('Please select a valid number (or "all")')
             sys.exit(1)
 
