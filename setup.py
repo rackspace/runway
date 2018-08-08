@@ -27,6 +27,8 @@ INSTALL_REQUIRES = [
     # embedded stacker is v1.4.0 with the following patches applied:
     # https://github.com/cloudtools/stacker/pull/638 (support remote templates)
     # https://github.com/cloudtools/stacker/pull/642 (v1.4 regression fix)
+    # https://github.com/cloudtools/stacker/pull/644 (v1.4 regression fix)
+    # https://github.com/cloudtools/stacker/issues/645 (v1.4 regression fix)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests

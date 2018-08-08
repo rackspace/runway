@@ -164,7 +164,7 @@ def parameterized_codec(raw, b64):
     # Note, since we want a raw JSON object (not a string) output in the
     # template, we wrap the result in GenericHelperFn (not needed if we're
     # using Base64)
-    return Base64(result.data) if b64 else result
+    return Base64(result) if b64 else GenericHelperFn(result)
 
 
 def _parameterize_obj(obj):
