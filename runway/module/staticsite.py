@@ -31,11 +31,6 @@ class StaticSite(RunwayModule):
                     "module %s in %s",
                     name,
                     module_dir)
-        # for (env, vals) in self.options.get('environments', {}).items():
-        #     region = vals.get('region') if vals.get('region') else self.context.env_region  # noqa
-        #     with open(os.path.join(module_dir, "%s-%s.env" % (env, region)), 'w') as output_stream:  # noqa pylint: disable=line-too-long
-        #         for (envkey, envval) in vals.items():
-        #             output_stream.write("%s: %s\n" % (envkey, envval))
 
         # Default parameter name matches build_staticsite hook
         hash_param = self.options.get('options', {}).get('source_hashing', {}).get('parameter') if self.options.get('options', {}).get('source_hashing', {}).get('parameter') else "${namespace}-%s-hash" % name # noqa pylint: disable=line-too-long
