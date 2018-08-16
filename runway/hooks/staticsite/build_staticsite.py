@@ -119,8 +119,7 @@ def does_s3_object_exist(bucket_name, key, session=None):
     except ClientError as exc:
         if exc.response['Error']['Code'] == '404':
             return False
-        else:
-            raise
+        raise
     return True
 
 
