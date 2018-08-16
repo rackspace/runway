@@ -16,6 +16,7 @@ with codecs_open(join(THIS_DIR, 'README.rst'), encoding='utf-8') as readfile:
 
 INSTALL_REQUIRES = [
     'Send2Trash',
+    'awacs',  # for embedded hooks
     'awscli',  # for embedded hooks
     'docopt',
     'flake8',
