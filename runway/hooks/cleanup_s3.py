@@ -37,7 +37,7 @@ def purge_bucket(context, provider, **kwargs):
                 StackName=context.get_fqn(value.split('::')[0])
             )
         except ClientError as exc:
-            if 'does not exist' in exc.message:
+            if 'does not exist' in exc.response['Error']['Message']:
                 LOGGER.info('S3 bucket stack appears to have already been '
                             'deleted...')
                 return True
@@ -57,8 +57,7 @@ def purge_bucket(context, provider, **kwargs):
             LOGGER.info("%s S3 bucket appears to have already been deleted...",
                         bucket_name)
             return True
-        else:
-            raise
+        raise
 
     bucket = s3_resource.Bucket(bucket_name)
     bucket.object_versions.delete()

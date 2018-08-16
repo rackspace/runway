@@ -87,10 +87,10 @@ def get_hash_of_files(root_path, directories=None):
 
 
 def run_commands(commands, directory):
-    """Run list of commands."""
     # type: (List[Union[str, List[str], Dict[str, Union[str, List[str]]]]],
     #        str)
     # -> None
+    """Run list of commands."""
     for step in commands:
         if isinstance(step, (list, six.string_types)):
             execution_dir = directory
