@@ -16,6 +16,7 @@ with codecs_open(join(THIS_DIR, 'README.rst'), encoding='utf-8') as readfile:
 
 INSTALL_REQUIRES = [
     'Send2Trash',
+    'awscli',  # for embedded hooks
     'docopt',
     'flake8',
     'flake8-docstrings',
@@ -23,7 +24,9 @@ INSTALL_REQUIRES = [
     'future',
     'pyhcl',
     'six',
+    'typing',
     'yamllint',
+    'zgitignore',  # for embedded hooks
     # embedded stacker is v1.4.0 with the following patches applied:
     # https://github.com/cloudtools/stacker/pull/638 (support remote templates)
     # https://github.com/cloudtools/stacker/pull/642 (v1.4 regression fix)
@@ -85,6 +88,6 @@ setup(
         ],
     },
     scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd'],
-    include_package_data=True,  # needed for templates
+    include_package_data=True,  # needed for templates,blueprints,hooks
     test_suite='tests'
 )

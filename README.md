@@ -15,7 +15,7 @@ Very simple configuration to:
     * runway is a simple wrapper around standard tools. It simply helps to avoid convoluted Makefiles / CI jobs
 
 ## How?
-Complete quickstart documentation, including Docker images,  CloudFormation templates, and walkthrough can be found [here](https://github.com/onicagroup/runway/blob/master/quickstarts/README.md)
+Complete quickstart documentation, including Docker images, CloudFormation templates, and walkthrough can be found [here](https://github.com/onicagroup/runway/blob/master/quickstarts/README.md)
 
 ### Basic Concepts
 
@@ -183,7 +183,7 @@ deployments:
 ```
 
 ## Installation
-* Install Python 2
+* Install Python
     * On Linux (assuming default Bash shell; adjust for others appropriately):
         * Setup your shell for user-installed (non-root) pip packages:
             * `echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc`
@@ -258,6 +258,32 @@ stacks:
 
 The config yaml supports many more features; see the full Stacker documentation for more detail (e.g. [stack configuration options](http://stacker.readthedocs.io/en/latest/config.html#stacks), [additional lookups](http://stacker.readthedocs.io/en/latest/lookups.html) in addition to output (e.g. SSM, DynamoDB))
 
+#### Environment Values Via Runway Module Options
+
+In addition or in place of the environment file(s), environment values can be provided via module options.
+
+In runway.yaml:
+```
+---
+
+deployments:
+  - modules:
+      - path: mycfnstacks
+        environments:
+          dev:
+            namespace: contoso-dev
+            foo: bar
+```
+
+or in a module directory, in runway.module.yaml:
+```
+---
+environments:
+  dev:
+    namespace: contoso-dev
+    foo: bar
+```
+
 ### Serverless
 
 Standard [Serverless](https://serverless.com/framework/) rules apply, with the following recommendations/caveats:
@@ -278,7 +304,7 @@ Standard [Serverless](https://serverless.com/framework/) rules apply, with the f
 }
 ```
 * We strongly recommend you commit the package-lock.json that is generated after running `npm install`
-* Each stage requires its own variables file (even if empty for a particular stage), in one of the following forms:
+* Each stage requires either its own variables file (even if empty for a particular stage) in one of the following forms, or a configured environment in the module options (see `Specifying Environments Via Runway Module Options` below):
 ```
 env/STAGE-REGION.yml
 config-STAGE-REGION.yml
@@ -289,6 +315,31 @@ config-STAGE-REGION.json
 env/STAGE.json
 config-STAGE.json
 ```
+
+#### Specifying Environments Via Runway Module Options
+
+In addition or in place of the variable file(s), environments can be specified via module options.
+
+In runway.yaml:
+```
+---
+
+deployments:
+  - modules:
+      - path: myslsmodule
+        environments:
+          dev: true
+          prod: true
+```
+
+or in a module directory, in runway.module.yaml:
+```
+---
+environments:
+  dev: true
+  prod: true
+```
+
 
 ### Terraform
 
@@ -317,8 +368,54 @@ dynamodb_table = "SOMETABLENAME"
 
 If a `.terraform-version` file is placed in the module, [tfenv](https://github.com/kamatama41/tfenv) will be invoked to ensure the appropriate version is installed prior to module deployment.
 
+#### Environment Values Via Runway Module Options
+
+In addition or in place of the variable file(s), variable values can be provided via module options.
+
+In runway.yaml:
+```
+---
+
+deployments:
+  - modules:
+      - path: mytfmodule
+        environments:
+          dev:
+            foo: bar
+```
+
+or in a module directory, in runway.module.yaml:
+```
+---
+environments:
+  dev:
+    foo: bar
+```
+
 ## Additional Functionality
 
 ### whichenv
 
 Execute `runway whichenv` to output the name of the currently detected environment (see `Basic Concepts` for an overview of how runway determines the environment name).
+
+### Static Website Deployment
+
+Runway comes pre-packaged with a module plugin for performing idempotent deployments of static websites. It can be used with a configuration like the following:
+```
+deployments:
+  - modules:
+      - path: conduit
+        class_path: runway.module.staticsite.StaticSite
+        environments:
+          dev:
+            namespace: contoso-dev
+        options:
+          build_steps:
+            - npm ci
+            - npm run build
+          build_output: dist
+    regions:
+      - us-west-2
+```
+
+This will build the website in `conduit` via the specified build_steps and then upload the contents of `dist` to a S3 bucket created in the CloudFormation stack `contoso-dev-conduit`.

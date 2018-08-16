@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Additional Python 3 fixes (check_output bytes -> str decoding)
+
+### Added
+- Static website deployment module
+- Module options in runway.yaml (or runway.module.yaml in a module)
+    * These can be used to make Terraform, Serverless, and CloudFormation (Stacker) variable/environment files optional.
 
 ## [0.23.3] - 2018-08-08
 ### Changed

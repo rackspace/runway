@@ -1,14 +1,14 @@
-"""The show-env command."""
+"""The whichenv command."""
 from __future__ import print_function
 
 import logging
 import os
 
-from .base import Base
+from .env import Env, get_env
 
 
-class WhichEnv(Base):
-    """Extend Base with execute to run the get_env method."""
+class WhichEnv(Env):
+    """Extend Env with execute to run the get_env method."""
 
     def execute(self):
         """Output environment name."""
@@ -18,8 +18,10 @@ class WhichEnv(Base):
         # This may be invoked from a module directory in an environment;
         # account for that here if necessary
         if not os.path.isfile('runway.yml'):
-            self.runway_config_path = os.path.join(
-                os.path.dirname(os.getcwd()),
-                'runway.yml')
+            self.env_root = os.path.dirname(os.getcwd())
+            self.runway_config_path = os.path.join(self.env_root, 'runway.yml')
 
-        print(self.get_env())
+        print(get_env(
+            self.env_root,
+            self.runway_config.get('ignore_git_branch',
+                                   False)))
