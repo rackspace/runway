@@ -1,21 +1,21 @@
 ## Deploying the Conduit Web App
 
-The [Medium.com-clone "RealWorld" demo app](https://github.com/gothinkster/realworld) named Conduit provides a simple demonstration of using Runway to deploy Serverless Framework backend with an Angular frontend.
+The [Medium.com-clone "RealWorld" demo app](https://github.com/gothinkster/realworld) named Conduit provides a simple demonstration of using Runway to deploy a Serverless Framework backend with an Angular frontend.
 
 ### Prerequisites
 
 1. An AWS account, and configured terminal environment for interacting with it with an admin role.
 2. The following installed tools:
-
-  * [pipenv](https://docs.pipenv.org/) (e.g. `pip install --user pipenv`)
-  * [npm](https://nodejs.org/en/)
-  * [yarn](https://yarnpkg.com)
-  * [curl](https://curl.haxx.se/)  (Available out of the box on macOS)
-  * [git](https://git-scm.com/)  (Available out of the box on macOS)
+    * [pipenv](https://docs.pipenv.org/) (e.g. `pip install --user pipenv`)
+    * [npm](https://nodejs.org/en/)
+    * [yarn](https://yarnpkg.com)
+    * [curl](https://curl.haxx.se/)  (Available out of the box on macOS)
+    * [git](https://git-scm.com/)  (Available out of the box on macOS)
+    * [sed](https://www.gnu.org/software/sed/)  (Available out of the box on macOS)
 
 ### Setup
 
-Execute the following to setup your conduit repo:
+Execute the following to setup your Conduit repo:
 ```
 mkdir conduit
 cd conduit
@@ -60,6 +60,6 @@ staticsite: sync & CF invalidation of E17B5JWPMTX5Z8 (domain ddy1q4je03d7u.cloud
 Execute `runway destroy`, enter `all`.
 
 The backend DynamoDB tables will still be retained after the destroy is complete. They must be deleted separately, e.g.:
-````
+```
 for i in realworld-dev-articles realworld-dev-comments realworld-dev-users; do aws dynamodb delete-table --region us-east-1 --table-name $i; done
 ```
