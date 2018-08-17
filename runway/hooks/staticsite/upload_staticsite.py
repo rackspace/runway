@@ -43,9 +43,16 @@ def sync(context, provider, **kwargs):
     bucket_name = output_handler(kwargs.get('bucket_output_lookup'),
                                  provider=provider,
                                  context=context)
-    distribution_id = output_handler(kwargs.get('distribution_output_lookup'),
-                                     provider=provider,
-                                     context=context)
+    distribution_id = output_handler(
+        kwargs.get('distributionid_output_lookup'),
+        provider=provider,
+        context=context
+    )
+    distribution_domain = output_handler(
+        kwargs.get('distributiondomain_output_lookup'),
+        provider=provider,
+        context=context
+    )
 
     # Using the awscli for s3 syncing is incredibly suboptimal, but on balance
     # it's probably the most stable/efficient option for syncing the files
@@ -63,10 +70,14 @@ def sync(context, provider, **kwargs):
         InvalidationBatch={'Paths': {'Quantity': 1, 'Items': ['/*']},
                            'CallerReference': str(time.time())}
     )
+    LOGGER.info("staticsite: sync & CF invalidation of %s (domain %s) "
+                "complete",
+                distribution_id,
+                distribution_domain)
 
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
-        LOGGER.info("staticsite: sync & CF invalidation complete; updating "
-                    "environment SSM parameter %s with hash %s",
+        LOGGER.info("staticsite: updating environment SSM parameter %s with "
+                    "hash %s",
                     context.hook_data['staticsite']['hash_tracking_parameter'],
                     context.hook_data['staticsite']['hash'])
         ssm_client = session.client('ssm')

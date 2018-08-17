@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.24.0] - 2018-08-17
 ### Fixed
 - Additional Python 3 fixes (check_output bytes -> str decoding)
 
@@ -12,6 +14,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Static website deployment module
 - Module options in runway.yaml (or runway.module.yaml in a module)
     * These can be used to make Terraform, Serverless, and CloudFormation (Stacker) variable/environment files optional.
+
+### Changed
+- Only use `npm ci` when `CI` environment variable is set
 
 ## [0.23.3] - 2018-08-08
 ### Changed
@@ -240,7 +245,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.23.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.24.0...HEAD
+[0.23.3]: https://github.com/onicagroup/runway/compare/v0.23.3...v0.24.0
 [0.23.3]: https://github.com/onicagroup/runway/compare/v0.23.2...v0.23.3
 [0.23.2]: https://github.com/onicagroup/runway/compare/v0.23.1...v0.23.2
 [0.23.1]: https://github.com/onicagroup/runway/compare/v0.23.0...v0.23.1

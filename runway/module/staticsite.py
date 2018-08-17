@@ -62,6 +62,16 @@ class StaticSite(RunwayModule):
                 output_stream,
                 default_flow_style=False
             )
+        site_stack_variables = {
+            'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',  # noqa
+            'Aliases': '${default staticsite_aliases::undefined}',  # noqa
+            'WAFWebACL': '${default staticsite_web_acl::undefined}'  # noqa
+        }
+        if self.options.get('environments',
+                            {}).get(self.context.env_name,
+                                    {}).get('staticsite_enable_cf_logging',
+                                            True):
+            site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
         with open(os.path.join(module_dir, '02-staticsite.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
                 {'namespace': '${namespace}',
@@ -75,14 +85,14 @@ class StaticSite(RunwayModule):
                  'stacks': {
                      name: {
                          'class_path': 'runway.blueprints.staticsite.staticsite.StaticSite',  # noqa
-                         'variables': {
-                             'LogBucketName': "${rxref %s-dependencies::AWSLogBucketName}" % name}}},  # noqa pylint: disable=line-too-long
+                         'variables': site_stack_variables}},
                  'post_build': [
                      {'path': 'runway.hooks.staticsite.upload_staticsite.sync',
                       'required': True,
                       'args': {
                           'bucket_output_lookup': '%s::BucketName' % name,
-                          'distribution_output_lookup': '%s::CFDistributionId' % name}}  # noqa
+                          'distributionid_output_lookup': '%s::CFDistributionId' % name,  # noqa
+                          'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % name}}  # noqa pylint: disable=line-too-long
                  ],
                  'pre_destroy': [
                      {'path': 'runway.hooks.cleanup_s3.purge_bucket',

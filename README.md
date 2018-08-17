@@ -318,7 +318,7 @@ config-STAGE.json
 
 #### Specifying Environments Via Runway Module Options
 
-In addition or in place of the variable file(s), environments can be specified via module options.
+Environments can be specified via module options in lieu of variable files.
 
 In runway.yaml:
 ```
@@ -400,15 +400,18 @@ Execute `runway whichenv` to output the name of the currently detected environme
 
 ### Static Website Deployment
 
-Runway comes pre-packaged with a module plugin for performing idempotent deployments of static websites. It can be used with a configuration like the following:
+Runway comes pre-packaged with a module plugin for performing idempotent deployments of static websites. It combines CloudFormation stacks (for S3 buckets & CloudFront Distribution) with additional logic to build & sync the sites.
+
+It can be used with a configuration like the following:
 ```
 deployments:
   - modules:
-      - path: conduit
+      - path: web
         class_path: runway.module.staticsite.StaticSite
         environments:
           dev:
             namespace: contoso-dev
+            staticsite_cert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
         options:
           build_steps:
             - npm ci
@@ -418,4 +421,8 @@ deployments:
       - us-west-2
 ```
 
-This will build the website in `conduit` via the specified build_steps and then upload the contents of `dist` to a S3 bucket created in the CloudFormation stack `contoso-dev-conduit`.
+This will build the website in `web` via the specified build_steps and then upload the contents of `web/dist` to a S3 bucket created in the CloudFormation stack `web-dev-conduit`. On subsequent deploys, the website will be built and synced only if the (non-git-ignored) files in `web` change.
+
+The site domain name is available via the `CFDistributionDomainName` output of the  `<namespace>-<path>` stack (e.g. `contoso-dev-web` above) and will be displayed on stack creation/updates.
+
+See additional options [here](https://github.com/onicagroup/runway/blob/master/docs/staticsite.md), or a start-to-finish example walkthrough [here](https://github.com/onicagroup/runway/blob/master/quickstarts/conduit/README.md).

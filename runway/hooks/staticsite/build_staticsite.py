@@ -1,6 +1,5 @@
 """Stacker hook for building static website."""
 
-import hashlib
 import logging
 import os
 from subprocess import check_call
@@ -10,80 +9,15 @@ import zipfile
 from boto3.s3.transfer import S3Transfer
 import boto3
 import six
-import zgitignore
 
 from botocore.exceptions import ClientError
 from stacker.lookups.handlers.rxref import handler as rxref_handler
 from stacker.session_cache import get_session
 
+from .util import get_hash_of_files
 from ...util import change_dir
 
 LOGGER = logging.getLogger(__name__)
-
-
-def calculate_hash_of_files(files, root):
-    """Return a hash of all of the given files at the given root.
-
-    Args:
-        files (list[str]): file names to include in the hash calculation,
-            relative to ``root``.
-        root (str): base directory to analyze files in.
-    Returns:
-        str: A hash of the hashes of the given files.
-
-    """
-    file_hash = hashlib.md5()
-    for fname in sorted(files):
-        fileobj = os.path.join(root, fname)
-        file_hash.update((fname + "\0").encode())
-        with open(fileobj, "rb") as filedes:
-            for chunk in iter(lambda: filedes.read(4096), ""):  # noqa pylint: disable=cell-var-from-loop
-                if not chunk:
-                    break
-                file_hash.update(chunk)
-            file_hash.update("\0".encode())
-
-    return file_hash.hexdigest()
-
-
-def get_ignorer(path, additional_exclusions=None):
-    """Create ignorer with directory gitignore file."""
-    ignorefile = zgitignore.ZgitIgnore()
-    gitignore_file = os.path.join(path, '.gitignore')
-    if os.path.isfile(gitignore_file):
-        with open(gitignore_file, 'r') as fileobj:
-            ignorefile.add_patterns(fileobj.read().splitlines())
-
-    if additional_exclusions is not None:
-        ignorefile.add_patterns(additional_exclusions)
-
-    return ignorefile
-
-
-def get_hash_of_files(root_path, directories=None):
-    """Generate md5 hash of files."""
-    if not directories:
-        directories = [{'path': './'}]
-
-    files_to_hash = []
-    for i in directories:
-        ignorer = get_ignorer(os.path.join(root_path, i['path']),
-                              i.get('exclusions'))
-
-        with change_dir(root_path):
-            for root, dirs, files in os.walk(i['path'], topdown=True):
-                if (root != './') and ignorer.is_ignored(root, True):
-                    dirs[:] = []
-                    files[:] = []
-                else:
-                    for filename in files:
-                        filepath = os.path.join(root, filename)
-                        if not ignorer.is_ignored(filepath):
-                            files_to_hash.append(
-                                filepath[2:] if filepath.startswith('./') else filepath  # noqa
-                            )
-
-    return calculate_hash_of_files(files_to_hash, root_path)
 
 
 def run_commands(commands, directory):
@@ -153,6 +87,8 @@ def zip_and_upload(app_dir, bucket, key, session=None):
 
     filedes, temp_file = tempfile.mkstemp()
     os.close(filedes)
+    LOGGER.info("staticsite: archiving app at %s to s3://%s/%s",
+                app_dir, bucket, key)
     with zipfile.ZipFile(temp_file, 'w', zipfile.ZIP_DEFLATED) as filehandle:
         with change_dir(app_dir):
             for dirname, _subdirs, files in os.walk('./'):
@@ -195,7 +131,7 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
     )
 
     # Now determine if the current staticsite has already been deployed
-    if options.get('source_hashing', {'enabled': True}).get('enabled', True):
+    if options.get('source_hashing', {}).get('enabled', True):
         context_dict['hash_tracking_parameter'] = options.get(
             'source_hashing', {}).get('parameter', default_param_name)
 
@@ -225,6 +161,7 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
         )
     else:
         if options.get('build_steps'):
+            LOGGER.info('staticsite: executing build commands')
             run_commands(options['build_steps'], options['path'])
         zip_and_upload(build_output, artifact_bucket_name, archive_key,
                        session)

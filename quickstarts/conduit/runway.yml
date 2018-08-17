@@ -1,0 +1,22 @@
+---
+# See full syntax at https://github.com/onicagroup/runway
+
+deployments:
+  - modules:
+      - path: backend
+        environments:
+          dev: true
+      - path: frontend
+        class_path: runway.module.staticsite.StaticSite
+        environments:
+          dev:
+            namespace: realworld-dev
+        options:
+          pre_build_steps:
+            - pipenv run python update_env_endpoint.py
+          build_steps:
+            - npm install
+            - npm run build
+          build_output: dist
+    regions:
+      - us-east-1

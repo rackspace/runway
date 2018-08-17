@@ -2,22 +2,38 @@
 """Module with static website bucket and CloudFront distribution."""
 from __future__ import print_function
 
-from troposphere import Join, Output, cloudfront, s3
+from troposphere import (
+    And, Equals, If, Join, Not, NoValue, Output, Select, cloudfront, s3
+)
 
 import awacs.s3
 from awacs.aws import Allow, Policy, Principal, Statement
 
 from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
+from stacker.blueprints.variables.types import CFNCommaDelimitedList, CFNString
 
 
-class StaticSite(Blueprint):
+class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
     """Stacker blueprint for creating S3 bucket and CloudFront distribution."""
 
     VARIABLES = {
+        'AcmCertificateArn': {'type': CFNString,
+                              'default': '',
+                              'description': '(Optional) Cert ARN for site'},
+        'Aliases': {'type': CFNCommaDelimitedList,
+                    'default': '',
+                    'description': '(Optional) Domain aliases the '
+                                   'distribution'},
         'LogBucketName': {'type': CFNString,
                           'default': '',
-                          'description': 'S3 bucket for CF logs'}
+                          'description': 'S3 bucket for CF logs'},
+        'PriceClass': {'type': CFNString,
+                       'default': 'PriceClass_100',  # US/Europe
+                       'description': 'CF price class for the distribution.'},
+        'WAFWebACL': {'type': CFNString,
+                      'default': '',
+                      'description': '(Optional) WAF id to associate with the '
+                                     'distribution.'}
     }
 
     def create_template(self):
@@ -26,6 +42,28 @@ class StaticSite(Blueprint):
         variables = self.get_variables()
         template.add_version('2010-09-09')
         template.add_description('Static Website - Bucket and Distribution')
+
+        # Conditions
+        template.add_condition(
+            'AcmCertSpecified',
+            And(Not(Equals(variables['AcmCertificateArn'].ref, '')),
+                Not(Equals(variables['AcmCertificateArn'].ref, 'undefined')))
+        )
+        template.add_condition(
+            'AliasesSpecified',
+            And(Not(Equals(Select(0, variables['Aliases'].ref), '')),
+                Not(Equals(Select(0, variables['Aliases'].ref), 'undefined')))
+        )
+        template.add_condition(
+            'CFLoggingEnabled',
+            And(Not(Equals(variables['LogBucketName'].ref, '')),
+                Not(Equals(variables['LogBucketName'].ref, 'undefined')))
+        )
+        template.add_condition(
+            'WAFNameSpecified',
+            And(Not(Equals(variables['WAFWebACL'].ref, '')),
+                Not(Equals(variables['WAFWebACL'].ref, 'undefined')))
+        )
 
         # Resources
         oai = template.add_resource(
@@ -93,6 +131,11 @@ class StaticSite(Blueprint):
                 'CFDistribution',
                 DependsOn=allowcfaccess.title,
                 DistributionConfig=cloudfront.DistributionConfig(
+                    Aliases=If(
+                        'AliasesSpecified',
+                        variables['Aliases'].ref,
+                        NoValue
+                    ),
                     Origins=[
                         cloudfront.Origin(
                             DomainName=Join(
@@ -120,18 +163,30 @@ class StaticSite(Blueprint):
                         ViewerProtocolPolicy='redirect-to-https'
                     ),
                     DefaultRootObject='index.html',
-                    # Aliases=['example.com'],
-                    Logging=cloudfront.Logging(
-                        Bucket=Join('.',
-                                    [variables['LogBucketName'].ref,
-                                     's3.amazonaws.com'])
+                    Logging=If(
+                        'CFLoggingEnabled',
+                        cloudfront.Logging(
+                            Bucket=Join('.',
+                                        [variables['LogBucketName'].ref,
+                                         's3.amazonaws.com'])
+                        ),
+                        NoValue
                     ),
-                    PriceClass='PriceClass_100',
+                    PriceClass=variables['PriceClass'].ref,
                     Enabled=True,
-                    # ViewerCertificate=cloudfront.ViewerCertificate(
-                    #     AcmCertificateArn=variables['AcmCertificateArn'].ref,
-                    #     SslSupportMethod='sni-only'
-                    # )
+                    WebACLId=If(
+                        'WAFNameSpecified',
+                        variables['WAFWebACL'].ref,
+                        NoValue
+                    ),
+                    ViewerCertificate=If(
+                        'AcmCertSpecified',
+                        cloudfront.ViewerCertificate(
+                            AcmCertificateArn=variables['AcmCertificateArn'].ref,  # noqa
+                            SslSupportMethod='sni-only'
+                        ),
+                        NoValue
+                    )
                 )
             )
         )

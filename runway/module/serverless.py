@@ -96,20 +96,20 @@ class Serverless(RunwayModule):
                              'sls')
             ] + sls_opts
 
-        if self.options.get('environments', {}).get(self.context.env_name) or (
-                os.path.isfile(os.path.join(self.path, sls_env_file))):
+        if (not self.options.get('environments') and os.path.isfile(os.path.join(self.path, sls_env_file))) or (  # noqa pylint: disable=line-too-long
+                self.options.get('environments', {}).get(self.context.env_name)):  # noqa
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
-                    if not self.options.get('skip_npm_ci'):
-                        # Use npm ci if available (npm v5.7+)
-                        if use_npm_ci(self.path):
-                            LOGGER.info("Running npm ci on %s...",
-                                        os.path.basename(self.path))
-                            subprocess.check_call(['npm', 'ci'])
-                        else:
-                            LOGGER.info("Running npm install on %s...",
-                                        os.path.basename(self.path))
-                            subprocess.check_call(['npm', 'install'])
+                    # Use npm ci if available (npm v5.7+)
+                    if not self.options.get('skip_npm_ci') and (
+                            self.context.env_vars.get('CI') and use_npm_ci(self.path)):  # noqa
+                        LOGGER.info("Running npm ci on %s...",
+                                    os.path.basename(self.path))
+                        subprocess.check_call(['npm', 'ci'])
+                    else:
+                        LOGGER.info("Running npm install on %s...",
+                                    os.path.basename(self.path))
+                        subprocess.check_call(['npm', 'install'])
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 os.path.basename(self.path),
