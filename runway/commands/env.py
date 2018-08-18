@@ -313,6 +313,9 @@ class Env(Base):
                         {'AWS_DEFAULT_REGION': context.env_region,
                          'AWS_REGION': context.env_region}
                     )
+                    module_opts = {}
+                    if deployment.get('environments'):
+                        module_opts['environments'] = deployment['environments'].copy()  # noqa
                     if deployment.get('assume-role'):
                         pre_deploy_assume_role(deployment['assume-role'],
                                                context)
@@ -322,11 +325,10 @@ class Env(Base):
                     for module in deployment.get('modules', []):
                         if isinstance(module, six.string_types):
                             module_root = os.path.join(self.env_root, module)
-                            module_opts = {}
                         else:
                             module_root = os.path.join(self.env_root,
                                                        module['path'])
-                            module_opts = module
+                            module_opts = merge_dicts(module_opts, module)
                         module_opts = load_module_opts_from_file(module_root,
                                                                  module_opts)
                         if deployment.get('skip-npm-ci'):

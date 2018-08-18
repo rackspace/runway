@@ -258,11 +258,11 @@ stacks:
 
 The config yaml supports many more features; see the full Stacker documentation for more detail (e.g. [stack configuration options](http://stacker.readthedocs.io/en/latest/config.html#stacks), [additional lookups](http://stacker.readthedocs.io/en/latest/lookups.html) in addition to output (e.g. SSM, DynamoDB))
 
-#### Environment Values Via Runway Module Options
+#### Environment Values Via Runway Deployment/Module Options
 
-In addition or in place of the environment file(s), environment values can be provided via module options.
+In addition or in place of the environment file(s), environment values can be provided via deployment and module options.
 
-In runway.yaml:
+##### Top-level Runway Config
 ```
 ---
 
@@ -274,8 +274,20 @@ deployments:
             namespace: contoso-dev
             foo: bar
 ```
+and/or
+```
+---
 
-or in a module directory, in runway.module.yaml:
+deployments:
+  - environments:
+      dev:
+        namespace: contoso-dev
+        foo: bar
+    modules:
+      - mycfnstacks
+```
+
+##### In Module Directory
 ```
 ---
 environments:
@@ -283,6 +295,7 @@ environments:
     namespace: contoso-dev
     foo: bar
 ```
+(in `runway.module.yaml`)
 
 ### Serverless
 
@@ -316,11 +329,11 @@ env/STAGE.json
 config-STAGE.json
 ```
 
-#### Specifying Environments Via Runway Module Options
+#### Specifying Environments Via Runway Deployment/Module Options
 
-Environments can be specified via module options in lieu of variable files.
+Environments can be specified via deployment and module options in lieu of variable files.
 
-In runway.yaml:
+##### Top-level Runway Config
 ```
 ---
 
@@ -331,15 +344,26 @@ deployments:
           dev: true
           prod: true
 ```
+and/or:
+```
+---
 
-or in a module directory, in runway.module.yaml:
+deployments:
+  - environments:
+      dev: true
+      prod: true
+    modules:
+      - myslsmodule
+```
+
+##### In Module Directory
 ```
 ---
 environments:
   dev: true
   prod: true
 ```
-
+(in `runway.module.yaml`)
 
 ### Terraform
 
@@ -368,11 +392,11 @@ dynamodb_table = "SOMETABLENAME"
 
 If a `.terraform-version` file is placed in the module, [tfenv](https://github.com/kamatama41/tfenv) will be invoked to ensure the appropriate version is installed prior to module deployment.
 
-#### Environment Values Via Runway Module Options
+#### Environment Values Via Runway Deployment/Module Options
 
-In addition or in place of the variable file(s), variable values can be provided via module options.
+In addition or in place of the variable file(s), variable values can be provided via deployment and module options.
 
-In runway.yaml:
+##### Top-level Runway Config
 ```
 ---
 
@@ -383,14 +407,27 @@ deployments:
           dev:
             foo: bar
 ```
+and/or
+```
+---
 
-or in a module directory, in runway.module.yaml:
+deployments:
+  - environments:
+      dev:
+        foo: bar
+    modules:
+      - mytfmodule
+```
+
+##### In Module Directory
 ```
 ---
 environments:
   dev:
+    namespace: contoso-dev
     foo: bar
 ```
+(in `runway.module.yaml`)
 
 ## Additional Functionality
 
