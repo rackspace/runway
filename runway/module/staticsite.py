@@ -63,15 +63,20 @@ class StaticSite(RunwayModule):
                 default_flow_style=False
             )
         site_stack_variables = {
-            'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',  # noqa
-            'Aliases': '${default staticsite_aliases::undefined}',  # noqa
-            'WAFWebACL': '${default staticsite_web_acl::undefined}'  # noqa
+            'Aliases': '${default staticsite_aliases::undefined}',
+            'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
         if self.options.get('environments',
                             {}).get(self.context.env_name,
                                     {}).get('staticsite_enable_cf_logging',
                                             True):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
+        if self.options.get('environments',
+                            {}).get(self.context.env_name,
+                                    {}).get('staticsite_acmcert_ssm_param'):
+            site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
+        else:
+            site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'  # noqa pylint: disable=line-too-long
         with open(os.path.join(module_dir, '02-staticsite.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
                 {'namespace': '${namespace}',
