@@ -463,3 +463,11 @@ This will build the website in `web` via the specified build_steps and then uplo
 The site domain name is available via the `CFDistributionDomainName` output of the  `<namespace>-<path>` stack (e.g. `contoso-dev-web` above) and will be displayed on stack creation/updates.
 
 See additional options [here](https://github.com/onicagroup/runway/blob/master/docs/staticsite.md), or a start-to-finish example walkthrough [here](https://github.com/onicagroup/runway/blob/master/quickstarts/conduit/README.md).
+
+### gen-sample
+
+Execute `runway gen-sample` followed by a module type to create a sample module directory, containing example files appropriate for the module type:
+* `runway gen-sample cfn`: Creates a sample CloudFormation module in `sampleapp.cfn`
+* `runway gen-sample sls`: Creates a sample Serverless Framework module in `sampleapp.sls`
+* `runway gen-sample stacker`: Creates a sample CloudFormation module (with Python templates using Troposphere and awacs) in `runway-sample-tfstate.cfn`
+* `runway gen-sample tf`: Creates a sample Terraform module in `sampleapp.tf`

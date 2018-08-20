@@ -285,9 +285,10 @@ class Base(object):
     def generate_sample_stacker_module(self, module_dir=None):
         """Generate skeleton Stacker sample module."""
         if module_dir is None:
-            module_dir = os.path.join(self.env_root, 'sampleapp.cfn')
+            module_dir = os.path.join(self.env_root,
+                                      'runway-sample-tfstate.cfn')
         self.generate_sample_module(module_dir)
-        for i in ['01-sampleapp.yaml', 'dev-us-east-1.env']:
+        for i in ['stacks.yaml', 'dev-us-east-1.env']:
             shutil.copyfile(
                 os.path.join(os.path.dirname(os.path.dirname(__file__)),
                              'templates',
@@ -295,24 +296,21 @@ class Base(object):
                              i),
                 os.path.join(module_dir, i)
             )
-        for i in ['sampleapp_blueprints', 'templates']:
-            os.mkdir(os.path.join(module_dir, i))
-        for i in list({'sampleapp_blueprints': ['__init__.py', 'bucket.py'],
-                       'templates': ['bucket.json']}.items()):
-            for template in i[1]:
-                shutil.copyfile(
-                    os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                 'templates',
-                                 'stacker',
-                                 i[0],
-                                 template),
-                    os.path.join(module_dir, i[0], template)
-                )
+        os.mkdir(os.path.join(module_dir, 'tfstate_blueprints'))
+        for i in ['__init__.py', 'tf_state.py']:
+            shutil.copyfile(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             'templates',
+                             'stacker',
+                             'tfstate_blueprints',
+                             i),
+                os.path.join(module_dir, 'tfstate_blueprints', i)
+            )
         os.chmod(  # make blueprint executable
-            os.path.join(module_dir, 'sampleapp_blueprints', 'bucket.py'),
+            os.path.join(module_dir, 'tfstate_blueprints', 'tf_state.py'),
             os.stat(os.path.join(module_dir,
-                                 'sampleapp_blueprints',
-                                 'bucket.py')).st_mode | 0o0111
+                                 'tfstate_blueprints',
+                                 'tf_state.py')).st_mode | 0o0111
         )
         LOGGER.info("Sample Stacker module created at %s",
                     module_dir)
