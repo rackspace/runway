@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.27.1] - 2018-08-21
+### Fixed
+- Fixed module options regression introduced in v0.25
+
 ## [0.27.0] - 2018-08-20
 ### Added
 - Support SSM Parameters for static site module ACM cert ARN lookups
@@ -260,7 +264,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.27.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.27.1...HEAD
+[0.27.1]: https://github.com/onicagroup/runway/compare/v0.27.0...v0.27.1
 [0.27.0]: https://github.com/onicagroup/runway/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/onicagroup/runway/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/onicagroup/runway/compare/v0.24.0...v0.25.0

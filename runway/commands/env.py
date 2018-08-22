@@ -313,9 +313,6 @@ class Env(Base):
                         {'AWS_DEFAULT_REGION': context.env_region,
                          'AWS_REGION': context.env_region}
                     )
-                    module_opts = {}
-                    if deployment.get('environments'):
-                        module_opts['environments'] = deployment['environments'].copy()  # noqa
                     if deployment.get('assume-role'):
                         pre_deploy_assume_role(deployment['assume-role'],
                                                context)
@@ -323,6 +320,9 @@ class Env(Base):
                             deployment.get('account-alias')):
                         validate_account_credentials(deployment, context)
                     for module in deployment.get('modules', []):
+                        module_opts = {}
+                        if deployment.get('environments'):
+                            module_opts['environments'] = deployment['environments'].copy()  # noqa
                         if isinstance(module, six.string_types):
                             module_root = os.path.join(self.env_root, module)
                         else:
