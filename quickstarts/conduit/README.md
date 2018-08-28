@@ -48,7 +48,7 @@ Notes:
 
 ### Deploying
 
-Execute `runway deploy`, enter `all` (to deploy the backend followed by the frontend). Deployment will take some time (mostly waiting for the CloudFront distribution to stabilize).
+Execute `pipenv run runway deploy`, enter `all` (to deploy the backend followed by the frontend). Deployment will take some time (mostly waiting for the CloudFront distribution to stabilize).
 
 The CloudFront domain at which the site can be reached will be displayed near the last lines of output once deployment is complete, e.g.:
 ```
@@ -57,7 +57,7 @@ staticsite: sync & CF invalidation of E17B5JWPMTX5Z8 (domain ddy1q4je03d7u.cloud
 
 ### Teardown
 
-Execute `runway destroy`, enter `all`.
+Execute `pipenv run runway destroy`, enter `all`.
 
 The backend DynamoDB tables will still be retained after the destroy is complete. They must be deleted separately, e.g.:
 ```
