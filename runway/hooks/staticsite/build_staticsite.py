@@ -104,9 +104,9 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
     """Build static site."""
     session = get_session(provider.region)
     options = kwargs.get('options', {})
-    artifact_key_prefix = "%s-%s-" % (options['namespace'], options['name'])
-    default_param_name = "%shash" % artifact_key_prefix
     context_dict = {}
+    context_dict['artifact_key_prefix'] = "%s-%s-" % (options['namespace'], options['name'])  # noqa
+    default_param_name = "%shash" % context_dict['artifact_key_prefix']
 
     if options.get('build_output'):
         build_output = os.path.join(
@@ -116,7 +116,7 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
     else:
         build_output = options['path']
 
-    artifact_bucket_name = rxref_handler(
+    context_dict['artifact_bucket_name'] = rxref_handler(
         kwargs.get('artifact_bucket_rxref_lookup'),
         provider=provider,
         context=context
@@ -147,6 +147,14 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
         context_dict['hash_tracking_disabled'] = True
         old_parameter_value = None
 
+    context_dict['current_archive_filename'] = (
+        context_dict['artifact_key_prefix'] + context_dict['hash'] + '.zip'
+    )
+    if old_parameter_value:
+        context_dict['old_archive_filename'] = (
+            context_dict['artifact_key_prefix'] + old_parameter_value + '.zip'
+        )
+
     if old_parameter_value == context_dict['hash']:
         LOGGER.info("staticsite: skipping build; app hash %s already deployed "
                     "in this environment",
@@ -154,17 +162,19 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
         context_dict['deploy_is_current'] = True
         return context_dict
 
-    archive_key = artifact_key_prefix + context_dict['hash'] + '.zip'
-    if does_s3_object_exist(artifact_bucket_name, archive_key, session):
+    if does_s3_object_exist(context_dict['artifact_bucket_name'],
+                            context_dict['current_archive_filename'],
+                            session):
         context_dict['app_directory'] = download_and_extract_to_mkdtemp(
-            artifact_bucket_name, archive_key, session
+            context_dict['artifact_bucket_name'],
+            context_dict['current_archive_filename'], session
         )
     else:
         if options.get('build_steps'):
             LOGGER.info('staticsite: executing build commands')
             run_commands(options['build_steps'], options['path'])
-        zip_and_upload(build_output, artifact_bucket_name, archive_key,
-                       session)
+        zip_and_upload(build_output, context_dict['artifact_bucket_name'],
+                       context_dict['current_archive_filename'], session)
         context_dict['app_directory'] = build_output
 
     context_dict['deploy_is_current'] = False
