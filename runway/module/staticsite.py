@@ -13,19 +13,26 @@ from .cloudformation import CloudFormation
 LOGGER = logging.getLogger('runway')
 
 
+def ensure_valid_environment_config(module_name, config):
+    """Exit if config is invalid."""
+    if not config.get('namespace'):
+        LOGGER.fatal("staticsite: module %s's environment configuration is "
+                     "missing a namespace definition!",
+                     module_name)
+        sys.exit(1)
+
+
 class StaticSite(RunwayModule):
     """Static website Runway Module."""
 
     def setup_website_module(self, command):
         """Create stacker configuration for website module."""
         name = self.options.get('name') if self.options.get('name') else self.options.get('path')  # noqa pylint: disable=line-too-long
-        if not self.options.get('environments',
-                                {}).get(self.context.env_name,
-                                        {}).get('namespace'):
-            LOGGER.fatal("staticsite: module %s's environment configuration "
-                         "is missing a namespace definition!",
-                         name)
-            sys.exit(1)
+        ensure_valid_environment_config(
+            name,
+            self.options.get('environments',
+                             {}).get(self.context.env_name,
+                                     {}))
         module_dir = tempfile.mkdtemp()
         LOGGER.info("staticsite: Generating CloudFormation configuration for "
                     "module %s in %s",
@@ -64,6 +71,7 @@ class StaticSite(RunwayModule):
             )
         site_stack_variables = {
             'Aliases': '${default staticsite_aliases::undefined}',
+            'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
         if self.options.get('environments',
@@ -125,12 +133,27 @@ class StaticSite(RunwayModule):
 
     def plan(self):
         """Create website CFN module and run stacker diff."""
-        self.setup_website_module(command='plan')
+        if self.options.get('environments', {}).get(self.context.env_name):
+            self.setup_website_module(command='plan')
+        else:
+            LOGGER.info("Skipping staticsite plan of %s; no environment "
+                        "config found for this environment/region",
+                        self.options['path'])
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
-        self.setup_website_module(command='deploy')
+        if self.options.get('environments', {}).get(self.context.env_name):
+            self.setup_website_module(command='deploy')
+        else:
+            LOGGER.info("Skipping staticsite deploy of %s; no environment "
+                        "config found for this environment/region",
+                        self.options['path'])
 
     def destroy(self):
         """Create website CFN module and run stacker destroy."""
-        self.setup_website_module(command='destroy')
+        if self.options.get('environments', {}).get(self.context.env_name):
+            self.setup_website_module(command='destroy')
+        else:
+            LOGGER.info("Skipping staticsite destroy of %s; no environment "
+                        "config found for this environment/region",
+                        self.options['path'])

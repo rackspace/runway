@@ -17,8 +17,11 @@ deployments:
             staticsite_acmcert_ssm_param: us-west-2@MySSMParamName...
             staticsite_aliases: example.com,foo.example.com
             staticsite_web_acl: arn:aws:waf::123456789012:webacl/...
-            staticsite_enable_cf_logging: true
             # staticsite_enable_cf_logging defaults to true
+            staticsite_enable_cf_logging: true
+            # Deploy Lambda@Edge to rewrite directory indexes
+            # e.g. support accessing example.org/foo/
+            staticsite_rewrite_directory_index: index.html
         options:
           pre_build_steps:  # commands to run before generating hash of files
             - command: npm ci

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.28.0] - 2018-08-27
+### Added
+- Static sites can now use Lambda@Edge to support default directory indexes (e.g. example.org/foo/)
+
+### Fixed
+- Fixed stacker git remote package support on Python 3
+- Static site modules will no longer error when an environment config is missing
+
 ## [0.27.1] - 2018-08-21
 ### Fixed
 - Fixed module options regression introduced in v0.25
@@ -264,7 +272,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.27.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.28.0...HEAD
+[0.28.0]: https://github.com/onicagroup/runway/compare/v0.27.1...v0.28.0
 [0.27.1]: https://github.com/onicagroup/runway/compare/v0.27.0...v0.27.1
 [0.27.0]: https://github.com/onicagroup/runway/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/onicagroup/runway/compare/v0.25.0...v0.26.0

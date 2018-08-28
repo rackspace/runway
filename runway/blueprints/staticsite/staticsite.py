@@ -2,15 +2,21 @@
 """Module with static website bucket and CloudFront distribution."""
 from __future__ import print_function
 
+import hashlib
+
 from troposphere import (
-    And, Equals, If, Join, Not, NoValue, Output, Select, cloudfront, s3
+    And, Equals, If, Join, Not, NoValue, Output, Select, awslambda, cloudfront,
+    iam, s3
 )
 
 import awacs.s3
-from awacs.aws import Allow, Policy, Principal, Statement
+import awacs.sts
+from awacs.aws import Allow, PolicyDocument, Principal, Statement
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import CFNCommaDelimitedList, CFNString
+
+IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
 
 
 class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
@@ -30,6 +36,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         'PriceClass': {'type': CFNString,
                        'default': 'PriceClass_100',  # US/Europe
                        'description': 'CF price class for the distribution.'},
+        'RewriteDirectoryIndex': {'type': CFNString,
+                                  'default': '',
+                                  'description': '(Optional) File name to '
+                                                 'append to directory '
+                                                 'requests.'},
         'WAFWebACL': {'type': CFNString,
                       'default': '',
                       'description': '(Optional) WAF id to associate with the '
@@ -58,6 +69,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             'CFLoggingEnabled',
             And(Not(Equals(variables['LogBucketName'].ref, '')),
                 Not(Equals(variables['LogBucketName'].ref, 'undefined')))
+        )
+        template.add_condition(
+            'DirectoryIndexSpecified',
+            And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
+                Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')))  # noqa
         )
         template.add_condition(
             'WAFNameSpecified',
@@ -106,7 +122,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             s3.BucketPolicy(
                 'AllowCFAccess',
                 Bucket=bucket.ref(),
-                PolicyDocument=Policy(
+                PolicyDocument=PolicyDocument(
                     Version='2012-10-17',
                     Statement=[
                         Statement(
@@ -123,6 +139,78 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                         )
                     ]
                 )
+            )
+        )
+
+        cfdirectoryindexrewriterole = template.add_resource(
+            iam.Role(
+                'CFDirectoryIndexRewriteRole',
+                Condition='DirectoryIndexSpecified',
+                AssumeRolePolicyDocument=PolicyDocument(
+                    Version='2012-10-17',
+                    Statement=[
+                        Statement(
+                            Effect=Allow,
+                            Action=[awacs.sts.AssumeRole],
+                            Principal=Principal('Service',
+                                                ['lambda.amazonaws.com',
+                                                 'edgelambda.amazonaws.com'])
+                        )
+                    ]
+                ),
+                ManagedPolicyArns=[
+                    IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
+                ]
+            )
+        )
+
+        cfdirectoryindexrewrite = template.add_resource(
+            awslambda.Function(
+                'CFDirectoryIndexRewrite',
+                Condition='DirectoryIndexSpecified',
+                Code=awslambda.Code(
+                    ZipFile=Join(
+                        '',
+                        ["'use strict';\n",
+                         "exports.handler = (event, context, callback) => {\n",
+                         "\n",
+                         "    // Extract the request from the CloudFront event that is sent to Lambda@Edge\n",  # noqa pylint: disable=line-too-long
+                         "    var request = event.Records[0].cf.request;\n",
+                         "    // Extract the URI from the request\n",
+                         "    var olduri = request.uri;\n",
+                         "    // Match any '/' that occurs at the end of a URI. Replace it with a default index\n",  # noqa pylint: disable=line-too-long
+                         "    var newuri = olduri.replace(/\\/$/, '\\/",
+                         variables['RewriteDirectoryIndex'].ref,
+                         "');\n",  # noqa
+                         "    // Log the URI as received by CloudFront and the new URI to be used to fetch from origin\n",  # noqa pylint: disable=line-too-long
+                         "    console.log(\"Old URI: \" + olduri);\n",
+                         "    console.log(\"New URI: \" + newuri);\n",
+                         "    // Replace the received URI with the URI that includes the index page\n",  # noqa pylint: disable=line-too-long
+                         "    request.uri = newuri;\n",
+                         "    // Return to CloudFront\n",
+                         "    return callback(null, request);\n",
+                         "\n",
+                         "};\n"]
+                    )
+                ),
+                Description='Rewrites CF directory HTTP requests to default page',  # noqa
+                Handler='index.handler',
+                Role=cfdirectoryindexrewriterole.get_att('Arn'),
+                Runtime='nodejs8.10'
+            )
+        )
+
+        # Generating a unique resource name here for the Lambda version, so it
+        # updates automatically if the lambda code changes
+        code_hash = hashlib.md5(
+            str(cfdirectoryindexrewrite.properties['Code'].properties['ZipFile'].to_dict()).encode()  # noqa pylint: disable=line-too-long
+        ).hexdigest()
+
+        cfdirectoryindexrewritever = template.add_resource(
+            awslambda.Version(
+                'CFDirectoryIndexRewriteVer' + code_hash,
+                Condition='DirectoryIndexSpecified',
+                FunctionName=cfdirectoryindexrewrite.ref()
             )
         )
 
@@ -158,6 +246,14 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                         ForwardedValues=cloudfront.ForwardedValues(
                             Cookies=cloudfront.Cookies(Forward='none'),
                             QueryString=False,
+                        ),
+                        LambdaFunctionAssociations=If(
+                            'DirectoryIndexSpecified',
+                            [cloudfront.LambdaFunctionAssociation(
+                                EventType='origin-request',
+                                LambdaFunctionARN=cfdirectoryindexrewritever.ref()  # noqa
+                            )],
+                            NoValue
                         ),
                         TargetOriginId='S3Origin',
                         ViewerProtocolPolicy='redirect-to-https'
