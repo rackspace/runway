@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.29.1] - 2018-09-04
+### Fixed
+- Update embedded stacker to fix interative CFN stack updates with empty string parameters
+
 ## [0.29.0] - 2018-08-28
 ### Added
 - Static sites archives will now be automatically pruned (keeping only the 15 latest)
@@ -276,7 +280,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.1...HEAD
+[0.29.1]: https://github.com/onicagroup/runway/compare/v0.29.0...v0.29.1
 [0.29.0]: https://github.com/onicagroup/runway/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/onicagroup/runway/compare/v0.27.1...v0.28.0
 [0.27.1]: https://github.com/onicagroup/runway/compare/v0.27.0...v0.27.1

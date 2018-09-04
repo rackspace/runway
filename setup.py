@@ -28,27 +28,22 @@ INSTALL_REQUIRES = [
     'typing',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # embedded stacker is v1.4.0 with the following patches applied:
-    # https://github.com/cloudtools/stacker/pull/638 (support remote templates)
-    # https://github.com/cloudtools/stacker/pull/642 (v1.4 regression fix)
-    # https://github.com/cloudtools/stacker/pull/644 (v1.4 regression fix)
-    # https://github.com/cloudtools/stacker/pull/646 (v1.4 regression fix)
-    # https://github.com/cloudtools/stacker/pull/649 (v1.4 python3 bug)
+    # embedded stacker is v1.4.1 with the following patches applied:
+    # https://github.com/cloudtools/stacker/pull/658 (v1.4 regression fix)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
     'stacker~=1.4',
-    # upstream stacker requires boto3>=1.3.1 & botocore>=1.6.0, but
+    # upstream stacker requires boto3~=1.7.0 & botocore<1.11, but
     # unfortunately pip will mess up on transitive dependecies
     # https://github.com/pypa/pip/issues/988
-    # Best option here seems to be to just require the latest version of boto3
-    # (since that's what's most often going to be installed) and the matching
-    # compatible botocore version. It's more rigid than necessary, but should
-    # hopefully make users less likely to encounter an error OOTB.
-    'botocore>=1.9.0',
-    'boto3>=1.6.0'
+    # Best option here seems to be to just require the matching compatible
+    # botocore version. It's more rigid than necessary, but should hopefully
+    # make users less likely to encounter an error OOTB.
+    'botocore<1.11.0',
+    'boto3~=1.7.0'
 ]
 
 # pylint v2+ is only py3 compatible

@@ -22,6 +22,7 @@ def get_template_path(filename):
 
     Args:
         filename (str): Template filename.
+
     Returns:
         Optional[str]: Path to file, or None if no file found
 
@@ -190,6 +191,7 @@ class RawTemplateBlueprint(Blueprint):
                 raise InvalidConfig(
                     'Could not find template %s' % self.raw_template_path
                 )
+
         return self._rendered
 
     @property
