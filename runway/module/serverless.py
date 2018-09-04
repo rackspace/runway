@@ -101,8 +101,10 @@ class Serverless(RunwayModule):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     # Use npm ci if available (npm v5.7+)
-                    if not self.options.get('skip_npm_ci') and (
-                            self.context.env_vars.get('CI') and use_npm_ci(self.path)):  # noqa
+                    if self.options.get('skip_npm_ci'):
+                        LOGGER.info("Skipping npm ci or npm install on %s...",
+                                    os.path.basename(self.path))
+                    elif self.context.env_vars.get('CI') and use_npm_ci(self.path):  # noqa
                         LOGGER.info("Running npm ci on %s...",
                                     os.path.basename(self.path))
                         subprocess.check_call(['npm', 'ci'])
