@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.29.2] - 2018-09-04
+### Fixed
+- Fixed skip-npm-ci option
+
 ## [0.29.1] - 2018-09-04
 ### Fixed
 - Update embedded stacker to fix interative CFN stack updates with empty string parameters
@@ -280,7 +284,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.2...HEAD
+[0.29.2]: https://github.com/onicagroup/runway/compare/v0.29.1...v0.29.2
 [0.29.1]: https://github.com/onicagroup/runway/compare/v0.29.0...v0.29.1
 [0.29.0]: https://github.com/onicagroup/runway/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/onicagroup/runway/compare/v0.27.1...v0.28.0
