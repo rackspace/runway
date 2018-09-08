@@ -18,6 +18,7 @@ RUN set -xe && \
   curl -o tf.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
   unzip tf.zip && \
   mv terraform /usr/local/bin/ && \
-  pip install runway
+  pip install ply && \
+  pip install pipenv runway
 
 CMD ["bash"]

@@ -27,6 +27,7 @@ rm v1.0.0
 mv realworld-dynamodb-lambda-1.0.0 backend
 cd backend
 sed -i '/package-lock\.json/d' .gitignore
+echo '.dynamodb' >> .gitignore
 npm install
 cd ..
 curl -O https://codeload.github.com/gothinkster/angular-realworld-example-app/zip/35a66d144d8def340278cd55080d5c745714aca4
