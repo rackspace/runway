@@ -86,6 +86,30 @@ def remove_stale_tf_config(path, backend_tfvars_file):
                 send2trash(terrform_dir)
 
 
+def run_terraform_init(module_path, backend_file_name, env_name, env_region,
+                       env_vars):
+    """Run Terraform init."""
+    init_cmd = ['terraform', 'init']
+    if os.path.isfile(os.path.join(module_path, backend_file_name)):  # noqa
+        LOGGER.info('Using backend config file %s',
+                    backend_file_name)
+        remove_stale_tf_config(module_path, backend_file_name)
+        run_module_command(
+            cmd_list=init_cmd + ['-backend-config=%s' % backend_file_name],  # noqa pylint: disable=line-too-long
+            env_vars=env_vars
+        )
+    else:
+        LOGGER.info(
+            "No backend tfvars file found -- looking for one "
+            "of \"%s\" (proceeding with bare 'terraform "
+            "init')",
+            ', '.join(gen_backend_tfvars_files(
+                env_name,
+                env_region)))
+        run_module_command(cmd_list=init_cmd,
+                           env_vars=env_vars)
+
+
 def run_tfenv_install(path, env_vars):
     """Ensure appropriate Terraform version is installed."""
     if which('tfenv') is None:
@@ -148,25 +172,13 @@ class Terraform(RunwayModule):
                                                   '.terraform')):
                     LOGGER.info('.terraform directory missing; running '
                                 '"terraform init"...')
-                    init_cmd = ['terraform', 'init']
-                    if os.path.isfile(os.path.join(self.path, backend_tfvars_file)):  # noqa
-                        LOGGER.info('Using backend config file %s',
-                                    backend_tfvars_file)
-                        remove_stale_tf_config(self.path, backend_tfvars_file)
-                        run_module_command(
-                            cmd_list=init_cmd + ['-backend-config=%s' % backend_tfvars_file],  # noqa pylint: disable=line-too-long
-                            env_vars=self.context.env_vars
-                        )
-                    else:
-                        LOGGER.info(
-                            "No backend tfvars file found -- looking for one "
-                            "of \"%s\" (proceeding with bare 'terraform "
-                            "init')",
-                            ', '.join(gen_backend_tfvars_files(
-                                self.context.env_name,
-                                self.context.env_region)))
-                        run_module_command(cmd_list=init_cmd,
-                                           env_vars=self.context.env_vars)
+                    run_terraform_init(
+                        module_path=self.path,
+                        backend_file_name=backend_tfvars_file,
+                        env_name=self.context.env_name,
+                        env_region=self.context.env_region,
+                        env_vars=self.context.env_vars
+                    )
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(
                     ['terraform',
@@ -201,6 +213,15 @@ class Terraform(RunwayModule):
                                       self.context.env_name],
                             env_vars=self.context.env_vars
                         )
+                    LOGGER.info('Running "terraform init" after workspace '
+                                'creation/switch...')
+                    run_terraform_init(
+                        module_path=self.path,
+                        backend_file_name=backend_tfvars_file,
+                        env_name=self.context.env_name,
+                        env_region=self.context.env_region,
+                        env_vars=self.context.env_vars
+                    )
                 if 'SKIP_TF_GET' not in self.context.env_vars:
                     LOGGER.info('Executing "terraform get" to update remote '
                                 'modules')

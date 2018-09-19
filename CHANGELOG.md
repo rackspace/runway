@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.29.5] - 2018-09-19
+### Fixed
+- Re-initialize Terraform modules after workspace switching (ensure providers are downloaded)
+
 ## [0.29.4] - 2018-09-18
 ### Fixed
 - Avoid error when assume-role config does not specify a role for the current environment
