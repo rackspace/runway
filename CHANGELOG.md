@@ -296,7 +296,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.5...HEAD
+[0.29.5]: https://github.com/onicagroup/runway/compare/v0.29.4...v0.29.5
 [0.29.4]: https://github.com/onicagroup/runway/compare/v0.29.3...v0.29.4
 [0.29.3]: https://github.com/onicagroup/runway/compare/v0.29.2...v0.29.3
 [0.29.2]: https://github.com/onicagroup/runway/compare/v0.29.1...v0.29.2
