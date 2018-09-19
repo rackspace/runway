@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.29.4] - 2018-09-18
+### Fixed
+- Avoid error when assume-role config does not specify a role for the current environment
+
 ## [0.29.3] - 2018-09-04
 ### Fixed
 - Update dependencies to prevent pip errors
@@ -288,7 +292,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.4...HEAD
+[0.29.4]: https://github.com/onicagroup/runway/compare/v0.29.3...v0.29.4
 [0.29.3]: https://github.com/onicagroup/runway/compare/v0.29.2...v0.29.3
 [0.29.2]: https://github.com/onicagroup/runway/compare/v0.29.1...v0.29.2
 [0.29.1]: https://github.com/onicagroup/runway/compare/v0.29.0...v0.29.1
@@ -333,7 +338,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [0.12.0]: https://github.com/onicagroup/runway/compare/v0.11.1...v0.12.0
 [0.11.1]: https://github.com/onicagroup/runway/compare/v0.11.0...v0.11.1
 [0.11.0]: https://github.com/onicagroup/runway/compare/v0.10.0...v0.11.0
-[0.10.0]: https://github.com/onicagroup/runway/compare/v0.9.0...v0.10.0
+[0.10.0]: https://github.com/onicagroup/runway/compare/v0.9.1...v0.10.0
+[0.9.1]: https://github.com/onicagroup/runway/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/onicagroup/runway/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/onicagroup/runway/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/onicagroup/runway/compare/v0.6.2...v0.7.0

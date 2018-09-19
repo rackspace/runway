@@ -145,6 +145,7 @@ def post_deploy_assume_role(assume_role_config, context):
 def pre_deploy_assume_role(assume_role_config, context):
     """Assume role (prior to deployment)."""
     if isinstance(assume_role_config, dict):
+        assume_role_arn = ''
         if assume_role_config.get('post_deploy_env_revert'):
             context.save_existing_iam_env_vars()
         if assume_role_config.get('arn'):
@@ -162,16 +163,17 @@ def pre_deploy_assume_role(assume_role_config, context):
                         'environment %s...',
                         context.env_name)
 
-        context.env_vars = merge_dicts(
-            context.env_vars,
-            assume_role(
-                role_arn=assume_role_arn,
-                session_name=assume_role_config.get('session_name', None),
-                duration_seconds=assume_role_duration,
-                region=context.env_region,
-                env_vars=context.env_vars
+        if assume_role_arn:
+            context.env_vars = merge_dicts(
+                context.env_vars,
+                assume_role(
+                    role_arn=assume_role_arn,
+                    session_name=assume_role_config.get('session_name', None),
+                    duration_seconds=assume_role_duration,
+                    region=context.env_region,
+                    env_vars=context.env_vars
+                )
             )
-        )
     else:
         context.env_vars = merge_dicts(
             context.env_vars,
