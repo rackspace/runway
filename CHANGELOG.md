@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.29.6] - 2018-09-24
+### Fixed
+- Fix `current_dir` deployment option
+
 ## [0.29.5] - 2018-09-19
 ### Fixed
 - Re-initialize Terraform modules after workspace switching (ensure providers are downloaded)
@@ -296,7 +300,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.5...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.6...HEAD
+[0.29.6]: https://github.com/onicagroup/runway/compare/v0.29.5...v0.29.6
 [0.29.5]: https://github.com/onicagroup/runway/compare/v0.29.4...v0.29.5
 [0.29.4]: https://github.com/onicagroup/runway/compare/v0.29.3...v0.29.4
 [0.29.3]: https://github.com/onicagroup/runway/compare/v0.29.2...v0.29.3

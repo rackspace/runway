@@ -124,6 +124,13 @@ def get_env(path, ignore_git_branch=False):
     return get_env_from_directory(os.path.basename(path))
 
 
+def path_is_current_dir(path):
+    """Determine if defined path is reference to current directory."""
+    if path in ['.', '.' + os.sep]:
+        return True
+    return False
+
+
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
     module_options_file = os.path.join(path,
@@ -321,16 +328,21 @@ class Env(Base):
                     if deployment.get('account-id') or (
                             deployment.get('account-alias')):
                         validate_account_credentials(deployment, context)
-                    for module in deployment.get('modules', []):
+                    modules = deployment.get('modules', [])
+                    if deployment.get('current_dir'):
+                        modules.append('.' + os.sep)
+                    for module in modules:
                         module_opts = {}
                         if deployment.get('environments'):
                             module_opts['environments'] = deployment['environments'].copy()  # noqa
                         if isinstance(module, six.string_types):
-                            module_root = os.path.join(self.env_root, module)
+                            module = {'path': module}
+                        if path_is_current_dir(module['path']):
+                            module_root = self.env_root
                         else:
                             module_root = os.path.join(self.env_root,
                                                        module['path'])
-                            module_opts = merge_dicts(module_opts, module)
+                        module_opts = merge_dicts(module_opts, module)
                         module_opts = load_module_opts_from_file(module_root,
                                                                  module_opts)
                         if deployment.get('skip-npm-ci'):
@@ -343,14 +355,6 @@ class Env(Base):
                                     options=module_opts
                                 ),
                                 command)()
-                    if deployment.get('current_dir', False):
-                        getattr(
-                            determine_module_class(module_root, module_opts)(
-                                context=context,
-                                path=context.env_root,
-                                options=module_opts
-                            ),
-                            command)()
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
 
