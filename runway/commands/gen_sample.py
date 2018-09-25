@@ -15,3 +15,5 @@ class GenSample(Base):
             self.generate_sample_stacker_module()
         elif self.options['tf']:
             self.generate_sample_tf_module()
+        elif self.options['cdk']:
+            self.generate_sample_cdk_module()

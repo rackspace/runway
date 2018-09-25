@@ -59,7 +59,9 @@ def determine_module_class(path, module_options):
         if os.path.basename(path).endswith('.sls'):
             module_options['class_path'] = 'runway.module.serverless.Serverless'  # noqa
         elif os.path.basename(path).endswith('.tf'):
-            module_options['class_path'] = 'runway.module.terraform.Terraform'  # noqa
+            module_options['class_path'] = 'runway.module.terraform.Terraform'
+        elif os.path.basename(path).endswith('.cdk'):
+            module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
         elif os.path.basename(path).endswith('.cfn'):
             module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
         # Fallback to autodetection
@@ -67,7 +69,10 @@ def determine_module_class(path, module_options):
                                          'serverless.yml')):
             module_options['class_path'] = 'runway.module.serverless.Serverless'  # noqa
         elif glob.glob(os.path.join(path, '*.tf')):
-            module_options['class_path'] = 'runway.module.terraform.Terraform'  # noqa
+            module_options['class_path'] = 'runway.module.terraform.Terraform'
+        elif os.path.isfile(os.path.join(path, 'cdk.json')) and (
+                os.path.isfile(os.path.join(path, 'package.json'))):
+            module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
         elif glob.glob(os.path.join(path, '*.env')):
             module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
     if not module_options.get('class_path'):

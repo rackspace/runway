@@ -20,7 +20,7 @@ Complete quickstart documentation, including Docker images, CloudFormation templ
 ### Basic Concepts
 
 * Modules:
-    * A single-tool configuration of an application/component/infrastructure (e.g. a set of CloudFormation stacks to deploy a VPC, a Serverless app)
+    * A single-tool configuration of an application/component/infrastructure (e.g. a set of CloudFormation stacks to deploy a VPC, a Serverless or CDK app)
 * Regions:
     * AWS regions
 * Environments:
@@ -426,6 +426,82 @@ environments:
   dev:
     namespace: contoso-dev
     foo: bar
+```
+(in `runway.module.yaml`)
+
+### CDK
+
+Standard [AWS CDK](https://awslabs.github.io/aws-cdk/) rules apply, with the following recommendations/caveats:
+
+* A `package.json` file is required, specifying the aws-cdk dependency. E.g.:
+```
+{
+  "name": "mymodulename",
+  "version": "1.0.0",
+  "description": "My CDK module",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-cdk/cdk": "^0.9.2",
+    "@types/node": "^10.10.1"
+  },
+  "devDependencies": {
+    "aws-cdk": "^0.9.2",
+    "typescript": "^3.0.3"
+  }
+  "author": "My Org",
+  "license": "Apache-2.0"
+}
+```
+* We strongly recommend you commit the package-lock.json that is generated after running `npm install`
+
+#### Build Steps
+
+Build steps (e.g. for compiling TypeScript) can be specified in the module options. These steps will be run before each diff, deploy, or destroy.
+
+```
+deployments:
+  - modules:
+      - path: mycdkmodule
+        environments:
+          dev: true
+        options:
+          build_steps:
+            - npx tsc
+```
+
+#### Environment Configs
+
+Environments can be specified via deployment and/or module options. Each example below shows the explicit CDK `ACCOUNT/REGION` environment mapping; these can be alternately be specified with a simple boolean (e.g. `dev: true`).
+
+##### Top-level Runway Config
+```
+---
+
+deployments:
+  - modules:
+      - path: mycdkmodule
+        environments:
+          dev: 987654321098/us-west-2
+          prod: 123456789012/us-west-2
+```
+and/or:
+```
+---
+
+deployments:
+  - environments:
+      dev: 987654321098/us-west-2
+      prod: 123456789012/us-west-2
+    modules:
+      - mycdkmodule
+```
+
+##### In Module Directory
+```
+---
+environments:
+  dev: 987654321098/us-west-2
+  prod: 123456789012/us-west-2
 ```
 (in `runway.module.yaml`)
 

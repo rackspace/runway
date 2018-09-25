@@ -1,0 +1,22 @@
+{
+  "name": "sampleapp",
+  "version": "1.0.0",
+  "description": "Sample CDK Project",
+  "author": "Onica",
+  "homepage": "https://www.onica.com",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-s3": "^0.9.1",
+    "@aws-cdk/cdk": "^0.9.1",
+    "@types/node": "^10.10.1"
+  },
+  "devDependencies": {
+    "aws-cdk": "^0.9.1",
+    "typescript": "^3.0.3"
+  }
+}

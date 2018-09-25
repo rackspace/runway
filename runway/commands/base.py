@@ -257,6 +257,21 @@ class Base(object):
         LOGGER.info("Sample Serverless module created at %s",
                     module_dir)
 
+    def generate_sample_cdk_module(self, module_dir=None):
+        """Generate skeleton CDK sample module."""
+        if module_dir is None:
+            module_dir = os.path.join(self.env_root, 'sampleapp.cdk')
+        self.generate_sample_module(module_dir)
+        for i in ['cdk.json', 'index.ts', 'package.json', 'tsconfig.json']:
+            shutil.copyfile(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             'templates',
+                             'cdk',
+                             i),
+                os.path.join(module_dir, i),
+            )
+        LOGGER.info("Sample CDK module created at %s", module_dir)
+
     def generate_sample_cfn_module(self, module_dir=None):
         """Generate skeleton CloudFormation sample module."""
         if module_dir is None:

@@ -25,5 +25,6 @@ build_whl: clean create_readme create_tfenv_ver_file
 
 release: clean create_readme create_tfenv_ver_file build
 	twine upload dist/*
+	curl -D - -X PURGE https://pypi.org/simple/runway
 
 travis: test clean create_tfenv_ver_file build

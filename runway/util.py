@@ -6,7 +6,10 @@ import importlib
 import os
 import platform
 import stat
+from subprocess import check_call
 import sys
+
+import six
 
 EMBEDDED_LIB_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -81,6 +84,29 @@ def ignore_exit_code_0():
     except SystemExit as exit_exc:
         if exit_exc.code != 0:
             raise
+
+
+def run_commands(commands, directory, env=None):
+    # type: (List[Union[str, List[str], Dict[str, Union[str, List[str]]]]],
+    #        str)
+    # -> None
+    """Run list of commands."""
+    if env is None:
+        env = os.environ.copy()
+    for step in commands:
+        if isinstance(step, (list, six.string_types)):
+            execution_dir = directory
+            raw_command = step
+        elif step.get('command'):  # dictionary
+            execution_dir = os.path.join(directory,
+                                         step.get('cwd')) if step.get('cwd') else directory  # noqa pylint: disable=line-too-long
+            raw_command = step['command']
+        else:
+            raise AttributeError("Invalid command step: %s" % step)
+        command_list = raw_command.split(' ') if isinstance(raw_command, six.string_types) else raw_command  # noqa pylint: disable=line-too-long
+
+        with change_dir(execution_dir):
+            check_call(command_list, env=env)
 
 
 @contextmanager

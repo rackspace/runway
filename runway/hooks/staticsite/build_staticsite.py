@@ -2,43 +2,20 @@
 
 import logging
 import os
-from subprocess import check_call
 import tempfile
 import zipfile
 
 from boto3.s3.transfer import S3Transfer
 import boto3
-import six
 
 from botocore.exceptions import ClientError
 from stacker.lookups.handlers.rxref import handler as rxref_handler
 from stacker.session_cache import get_session
 
 from .util import get_hash_of_files
-from ...util import change_dir
+from ...util import change_dir, run_commands
 
 LOGGER = logging.getLogger(__name__)
-
-
-def run_commands(commands, directory):
-    # type: (List[Union[str, List[str], Dict[str, Union[str, List[str]]]]],
-    #        str)
-    # -> None
-    """Run list of commands."""
-    for step in commands:
-        if isinstance(step, (list, six.string_types)):
-            execution_dir = directory
-            raw_command = step
-        elif step.get('command'):  # dictionary
-            execution_dir = os.path.join(directory,
-                                         step.get('cwd')) if step.get('cwd') else directory  # noqa pylint: disable=line-too-long
-            raw_command = step['command']
-        else:
-            raise AttributeError("Invalid command step: %s" % step)
-        command_list = raw_command.split(' ') if isinstance(raw_command, six.string_types) else raw_command  # noqa pylint: disable=line-too-long
-
-        with change_dir(execution_dir):
-            check_call(command_list, env=os.environ)
 
 
 def does_s3_object_exist(bucket_name, key, session=None):

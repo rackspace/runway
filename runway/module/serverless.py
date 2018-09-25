@@ -1,11 +1,13 @@
-"""Terraform module."""
+"""Serverless module."""
 
 import logging
 import os
-import subprocess
 import sys
 
-from . import RunwayModule, run_module_command, warn_on_skipped_configs
+from . import (
+    RunwayModule, format_npm_command_for_logging, generate_node_command,
+    run_module_command, run_npm_install, warn_on_skipped_configs
+)
 from ..util import change_dir, which
 
 LOGGER = logging.getLogger('runway')
@@ -38,25 +40,8 @@ def get_sls_config_file(path, stage, region):
     return "config-%s.json" % stage  # fallback to generic json name
 
 
-def use_npm_ci(path):
-    """Return true if npm ci should be used in lieu of npm install."""
-    # https://docs.npmjs.com/cli/ci#description
-    with open(os.devnull, 'w') as fnull:
-        if ((os.path.isfile(os.path.join(path,
-                                         'package-lock.json')) or
-             os.path.isfile(os.path.join(path,
-                                         'npm-shrinkwrap.json'))) and
-                subprocess.call(
-                    ['npm', 'ci', '-h'],
-                    stdout=fnull,
-                    stderr=subprocess.STDOUT
-                ) == 0):
-            return True
-    return False
-
-
 class Serverless(RunwayModule):
-    """Terraform Serverless Module."""
+    """Serverless Runway Module."""
 
     def run_serverless(self, command='deploy'):
         """Run Serverless."""
@@ -80,44 +65,19 @@ class Serverless(RunwayModule):
                                            self.context.env_name,
                                            self.context.env_region)
 
-        if which('npx'):
-            # Use npx if available (npm v5.2+)
-            LOGGER.debug('Using npx to invoke sls.')
-            # The nested sls-through-npx-via-subprocess command invocation
-            # requires this redundant quoting
-            sls_cmd = ['npx', '-c', "''sls %s''" % ' '.join(sls_opts)]
-        else:
-            LOGGER.debug('npx not found; falling back invoking sls shell '
-                         'script directly.')
-            sls_cmd = [
-                os.path.join(self.path,
-                             'node_modules',
-                             '.bin',
-                             'sls')
-            ] + sls_opts
+        sls_cmd = generate_node_command(command='sls',
+                                        command_opts=sls_opts,
+                                        path=self.path)
 
         if (not self.options.get('environments') and os.path.isfile(os.path.join(self.path, sls_env_file))) or (  # noqa pylint: disable=line-too-long
                 self.options.get('environments', {}).get(self.context.env_name)):  # noqa
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
-                    # Use npm ci if available (npm v5.7+)
-                    if self.options.get('skip_npm_ci'):
-                        LOGGER.info("Skipping npm ci or npm install on %s...",
-                                    os.path.basename(self.path))
-                    elif self.context.env_vars.get('CI') and use_npm_ci(self.path):  # noqa
-                        LOGGER.info("Running npm ci on %s...",
-                                    os.path.basename(self.path))
-                        subprocess.check_call(['npm', 'ci'])
-                    else:
-                        LOGGER.info("Running npm install on %s...",
-                                    os.path.basename(self.path))
-                        subprocess.check_call(['npm', 'install'])
+                    run_npm_install(self.path, self.options, self.context)
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 os.path.basename(self.path),
-                                # Strip out redundant npx quotes not needed
-                                # when executing the command directly
-                                " ".join(sls_cmd).replace('\'\'', '\''))
+                                format_npm_command_for_logging(sls_cmd))
                     run_module_command(cmd_list=sls_cmd,
                                        env_vars=self.context.env_vars)
             else:
