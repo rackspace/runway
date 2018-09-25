@@ -64,6 +64,8 @@ def determine_module_class(path, module_options):
             module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
         elif os.path.basename(path).endswith('.cfn'):
             module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
+        elif os.path.basename(path).endswith('.kustomize'):
+            module_options['class_path'] = 'runway.module.kustomize.Kustomize'  # noqa
         # Fallback to autodetection
         elif os.path.isfile(os.path.join(path,
                                          'serverless.yml')):
@@ -73,6 +75,12 @@ def determine_module_class(path, module_options):
         elif os.path.isfile(os.path.join(path, 'cdk.json')) and (
                 os.path.isfile(os.path.join(path, 'package.json'))):
             module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
+        elif os.path.isdir(os.path.join(path, 'overlays')) and (
+                glob.glob(os.path.join(path,
+                                       'overlays',
+                                       '*',
+                                       'kustomization.yaml'))):
+            module_options['class_path'] = 'runway.module.kustomize.Kustomize'
         elif glob.glob(os.path.join(path, '*.env')):
             module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
     if not module_options.get('class_path'):

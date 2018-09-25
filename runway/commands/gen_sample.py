@@ -17,3 +17,5 @@ class GenSample(Base):
             self.generate_sample_tf_module()
         elif self.options['cdk']:
             self.generate_sample_cdk_module()
+        elif self.options['kustomize']:
+            self.generate_sample_k8s_module()

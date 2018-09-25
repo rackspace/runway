@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.30.0] - 2018-10-01
 ### Added
 - Add AWS CDK support
+- Add K8s support via Kustomize
 
 ### Fixed
 - Destroys on Serverless modules will no longer exit code 1 if the destroy has been run previously.

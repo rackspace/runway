@@ -1,0 +1,13 @@
+resources:
+  - gp2-storage-class.yaml
+  - io1-storage-class.yaml
+  - sc1-storage-class.yaml
+  - st1-storage-class.yaml
+
+patchesJson6902:
+  - target:
+      group: storage.k8s.io
+      version: v1
+      kind: StorageClass
+      name: gp2
+    path: gp2-storage-class-default-patch.json

@@ -1,0 +1,9 @@
+[
+  {
+    "op": "add",
+    "path": "/metadata/annotations",
+    "value": {
+      "storageclass.kubernetes.io/is-default-class": "true"
+    }
+  }
+]

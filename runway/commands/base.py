@@ -347,6 +347,46 @@ class Base(object):
         LOGGER.info("Sample Terraform app created at %s",
                     module_dir)
 
+    def generate_sample_k8s_module(self, module_dir=None):
+        """Generate skeleton Kustomize sample module."""
+        if module_dir is None:
+            module_dir = os.path.join(self.env_root,
+                                      'volume_storage_classes.kustomize')
+        self.generate_sample_module(module_dir)
+        shutil.copyfile(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                         'templates',
+                         'kustomize',
+                         'README.md'),
+            os.path.join(module_dir, 'README.md'),
+        )
+        os.mkdir(os.path.join(module_dir, 'base'))
+        for i in ['gp2-storage-class-default-patch.json',
+                  'gp2-storage-class.yaml', 'io1-storage-class.yaml',
+                  'sc1-storage-class.yaml', 'st1-storage-class.yaml',
+                  'kustomization.yaml']:
+            shutil.copyfile(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             'templates',
+                             'kustomize',
+                             'base',
+                             i),
+                os.path.join(module_dir, 'base', i),
+            )
+        os.makedirs(os.path.join(module_dir, 'overlays', 'common'))
+        shutil.copyfile(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                         'templates',
+                         'kustomize',
+                         'overlays',
+                         'common',
+                         'kustomization.yaml'),
+            os.path.join(module_dir, 'overlays', 'common',
+                         'kustomization.yaml'),
+        )
+        LOGGER.info("Sample Kustomize module created at %s",
+                    module_dir)
+
     def parse_runway_config(self):
         """Read and parse runway.yml."""
         if not os.path.isfile(self.runway_config_path):

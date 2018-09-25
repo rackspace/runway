@@ -11,6 +11,7 @@ Very simple configuration to:
 * Ensure deployments are only performed when an environment config is present
 * Define an IAM role to assume for each deployment
 * Wrangle Terraform backend/workspace configs w/ per-environment tfvars
+* Deploy to Kubernetes/EKS via Kustomize w/ per-environment overlays
 * Avoid long-term tool lock-in
     * runway is a simple wrapper around standard tools. It simply helps to avoid convoluted Makefiles / CI jobs
 
@@ -24,7 +25,7 @@ Complete quickstart documentation, including Docker images, CloudFormation templ
 * Regions:
     * AWS regions
 * Environments:
-    * A Serverless stage, a Terraform workspace, etc.
+    * A Serverless stage, a Terraform workspace, a Kustomize overlay, etc.
     * Environments are determined automatically from:
         1. Git branches. We recommend promoting changes through clear environment branches (prefixed with `ENV-`). For example, when running a deployment in the `ENV-dev` branch `dev` will be the environment. The `master` branch can also be used as a special 'shared' environment called `common` (e.g. for modules not normally promoted through other environments).
         2. The parent folder name of each module. For teams with a preference or technical requirement to not use git branches, each environment can be represented on disk as a folder. Instead of promoting changes via git merges, changes can be promoted by copying the files between the environment folders. See the `ignore_git_branch` runway.yml config option.
@@ -54,6 +55,20 @@ Sample repo structure, showing 2 modules using environment git branches (these s
 │   ├── dev-us-east-1.tfvars
 │   ├── prod-us-east-1.tfvars
 │   └── main.tf
+├── myapp.kustomize
+│   ├── base
+│   │   ├── kustomization.yaml
+│   │   ├── service.yaml
+│   │   └── deployment.yaml
+│   └── overlays
+│       ├── dev
+│       │   ├── cpu_count.yaml
+│       │   ├── kustomization.yaml
+│       │   └── replica_count.yaml
+│       └── prod
+│           ├── cpu_count.yaml
+│           ├── kustomization.yaml
+│           └── replica_count.yaml
 └── runway.yml
 ```
 
@@ -74,6 +89,10 @@ Another sample repo structure, showing the same modules nested in environment fo
 │   │   ├── dev-us-east-1.tfvars
 |   │   ├── prod-us-east-1.tfvars
 │   │   └── main.tf
+│   ├── myapp.kustomize
+│   │   ├── kustomization.yaml
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
 │   └── runway.yml
 └── prod
     ├── myapp.cfn
@@ -87,6 +106,10 @@ Another sample repo structure, showing the same modules nested in environment fo
     │   ├── dev-us-east-1.tfvars
     │   ├── prod-us-east-1.tfvars
     │   └── main.tf
+    ├── myapp.kustomize
+    │   ├── kustomization.yaml
+    │   ├── deployment.yaml
+    │   └── service.yaml
     └── runway.yml
 ```
 
@@ -128,6 +151,7 @@ deployments:
       - us-west-2
   - modules:
       - myapp.tf
+      - myapp.kustomize
     regions:
       - us-east-1
     assume-role:  # optional
@@ -518,6 +542,12 @@ environments:
 ```
 (in `runway.module.yaml`)
 
+### Kustomize
+
+Standard [Kustomize](https://github.com/kubernetes-sigs/kustomize) rules apply, with the following recommendations/caveats:
+
+* The use of overlay configuration for each environment is required; these map directly to Runway environments.
+
 ## Additional Functionality
 
 ### whichenv
@@ -560,3 +590,4 @@ Execute `runway gen-sample` followed by a module type to create a sample module 
 * `runway gen-sample sls`: Creates a sample Serverless Framework module in `sampleapp.sls`
 * `runway gen-sample stacker`: Creates a sample CloudFormation module (with Python templates using Troposphere and awacs) in `runway-sample-tfstate.cfn`
 * `runway gen-sample tf`: Creates a sample Terraform module in `sampleapp.tf`
+* `runway gen-sample kustomize`: Creates a sample kustomize module that adds all AWS storage classes to your k8s cluster in `allstorageclasses.kustomize`
