@@ -1,7 +1,10 @@
 """Serverless module."""
+from __future__ import print_function
 
 import logging
 import os
+import re
+import subprocess
 import sys
 
 from . import (
@@ -38,6 +41,19 @@ def get_sls_config_file(path, stage, region):
         if os.path.isfile(os.path.join(path, name)):
             return name
     return "config-%s.json" % stage  # fallback to generic json name
+
+
+def run_sls_remove(sls_cmd, env_vars):
+    """Run sls remove command."""
+    sls_process = subprocess.Popen(sls_cmd,
+                                   stdout=subprocess.PIPE,
+                                   env=env_vars)
+    stdoutdata, _stderrdata = sls_process.communicate()
+    sls_return = sls_process.wait()
+    print(stdoutdata)
+    if sls_return != 0 and (sls_return == 1 and not (
+            re.search(r"Stack '.*' does not exist", stdoutdata))):
+        sys.exit(sls_return)
 
 
 class Serverless(RunwayModule):
@@ -78,8 +94,13 @@ class Serverless(RunwayModule):
                                 command,
                                 os.path.basename(self.path),
                                 format_npm_command_for_logging(sls_cmd))
-                    run_module_command(cmd_list=sls_cmd,
-                                       env_vars=self.context.env_vars)
+                    if command == 'remove':
+                        # Need to account for exit code 1 on any removals after
+                        # the first
+                        run_sls_remove(sls_cmd, self.context.env_vars)
+                    else:
+                        run_module_command(cmd_list=sls_cmd,
+                                           env_vars=self.context.env_vars)
             else:
                 LOGGER.warning(
                     "Skipping serverless %s of %s; no \"package.json\" "

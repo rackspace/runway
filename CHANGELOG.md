@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.30.0] - 2018-10-01
 ### Added
 - Add AWS CDK support
+
+### Fixed
+- Destroys on Serverless modules will no longer exit code 1 if the destroy has been run previously.
 
 ## [0.29.6] - 2018-09-24
 ### Fixed
@@ -302,7 +307,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.29.6...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.30.0...HEAD
+[0.30.0]: https://github.com/onicagroup/runway/compare/v0.29.6...v0.30.0
 [0.29.6]: https://github.com/onicagroup/runway/compare/v0.29.5...v0.29.6
 [0.29.5]: https://github.com/onicagroup/runway/compare/v0.29.4...v0.29.5
 [0.29.4]: https://github.com/onicagroup/runway/compare/v0.29.3...v0.29.4
