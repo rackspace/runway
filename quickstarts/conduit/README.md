@@ -9,9 +9,7 @@ The [Medium.com-clone "RealWorld" demo app](https://github.com/gothinkster/realw
     * [pipenv](https://docs.pipenv.org/) (e.g. `pip install --user pipenv`)
     * [npm](https://nodejs.org/en/)
     * [yarn](https://yarnpkg.com)
-    * [curl](https://curl.haxx.se/)  (Available out of the box on macOS)
     * [git](https://git-scm.com/)  (Available out of the box on macOS)
-    * [sed](https://www.gnu.org/software/sed/)  (Available out of the box on macOS)
 
 ### Setup
 
@@ -99,7 +97,7 @@ for i in realworld-dev-articles realworld-dev-comments realworld-dev-users; do a
 ```
 foreach($table in @("realworld-dev-articles", "realworld-dev-comments", "realworld-dev-users"))
 {
-  Remove-DDBTable -TableName $table -Region us-east-1
+  CMD /C "pipenv run aws dynamodb delete-table --region us-east-1 --table-name $table"
 }
 ```
 
