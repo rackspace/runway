@@ -44,6 +44,36 @@ curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/c
 pipenv update
 ```
 
+### Setup (Windows)
+Execute the following to setup your Conduit repo:
+```
+mkdir conduit
+cd conduit
+git init
+git checkout -b ENV-dev
+Invoke-WebRequest https://codeload.github.com/anishkny/realworld-dynamodb-lambda/zip/v1.0.0 -OutFile v1.0.0.zip
+Expand-Archive v1.0.0.zip .
+Remove-Item v1.0.0.zip -Force
+Rename-Item realworld-dynamodb-lambda-1.0.0 backend
+cd backend
+(gc .\.gitignore -raw).Replace("package-lock.json`r`n", "") | sc .\.gitignore
+".dynamodb`r`n" | Out-File .\.gitignore -Append -Encoding UTF8
+npm install
+cd ..
+Invoke-WebRequest https://codeload.github.com/gothinkster/angular-realworld-example-app/zip/35a66d144d8def340278cd55080d5c745714aca4 -OutFile 35a66d144d8def340278cd55080d5c745714aca4.zip
+Expand-Archive 35a66d144d8def340278cd55080d5c745714aca4.zip .
+Remove-Item 35a66d144d8def340278cd55080d5c745714aca4.zip -Force
+Rename-Item angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend
+cd frontend
+$(gc .\package.json) -replace "^\s*`"build`":\s.*$", "    `"build`": `"if test \`"`$(pipenv run runway whichenv)\`" = \`"prod\`" ; then ng build --prod --base-href .\/ && cp CNAME dist\/CNAME; else ng build --base-href .\/ && cp CNAME dist\/CNAME; fi`"," | Out-File .\package.json -Force -Encoding UTF8
+npm install
+Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py -OutFile update_env_endpoint.py
+cd ..
+Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/Pipfile -OutFile Pipfile
+Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml -OutFile runway.yml
+pipenv update 
+```
+
 Notes:
   * The [serverless-plugin-export-endpoints plugin](https://github.com/ar90n/serverless-plugin-export-endpoints) is a good alternative to the custom `update_env_endpoint.py` script deployed above to update the environment file.
 
