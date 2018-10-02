@@ -1,3 +1,2 @@
-### Quickstart Guides
-* [conduit](conduit/)
-* [runway](runway/)
+* [CloudFormation](runway/)
+* [Conduit (Serverless & CloudFront)](conduit/)
