@@ -95,6 +95,14 @@ The backend DynamoDB tables will still be retained after the destroy is complete
 for i in realworld-dev-articles realworld-dev-comments realworld-dev-users; do aws dynamodb delete-table --region us-east-1 --table-name $i; done
 ```
 
+#### Teardown (Windows)
+```
+foreach($table in @("realworld-dev-articles", "realworld-dev-comments", "realworld-dev-users"))
+{
+  Remove-DDBTable -TableName $table -Region us-east-1
+}
+```
+
 ### Permissions
 
 The specific IAM permissions required to manage the resources in this demo are as follows:
