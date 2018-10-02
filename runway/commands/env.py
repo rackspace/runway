@@ -352,6 +352,9 @@ class Env(Base):
                                                                  module_opts)
                         if deployment.get('skip-npm-ci'):
                             module_opts['skip_npm_ci'] = True
+                        LOGGER.info("Processing module %s...\n",
+                                    module['path'])
+                        LOGGER.debug("Module options are: %s", module_opts)
                         with change_dir(module_root):
                             getattr(
                                 determine_module_class(module_root, module_opts)(  # noqa

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.31.0] - 2018-10-01
+### Added
+- Add clear logging of each module being processed
+
 ## [0.30.0] - 2018-10-01
 ### Added
 - Add AWS CDK support
@@ -307,7 +311,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.30.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.31.0...HEAD
+[0.31.0]: https://github.com/onicagroup/runway/compare/v0.30.6...v0.31.0
 [0.30.0]: https://github.com/onicagroup/runway/compare/v0.29.6...v0.30.0
 [0.29.6]: https://github.com/onicagroup/runway/compare/v0.29.5...v0.29.6
 [0.29.5]: https://github.com/onicagroup/runway/compare/v0.29.4...v0.29.5
