@@ -136,6 +136,9 @@ def which(program):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, _fname = os.path.split(program)
+    opsys = platform.system().lower()
+    if opsys == 'windows' and not program.endswith('.exe'):
+        program = program + '.exe'
     if fpath:
         if is_exe(program):
             return program
