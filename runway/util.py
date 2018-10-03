@@ -136,14 +136,13 @@ def which(program):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, _fname = os.path.split(program)
-    opsys = platform.system().lower()
-    if opsys == 'windows' and not program.endswith('.exe'):
+    if platform.system().lower() == 'windows' and not program.endswith('.exe'):
         program = program + '.exe'
     if fpath:
         if is_exe(program):
             return program
     else:
-        for path in os.environ["PATH"].split(os.pathsep):
+        for path in os.environ['PATH'].split(os.pathsep):
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):
                 return exe_file
