@@ -14,6 +14,8 @@ The [Medium.com-clone "RealWorld" demo app](https://github.com/gothinkster/realw
 ### Setup
 
 Execute the following to setup your Conduit repo:
+
+#### macOS/Linux
 ```
 mkdir conduit
 cd conduit
@@ -42,8 +44,7 @@ curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/c
 pipenv update
 ```
 
-### Setup (Windows)
-Execute the following to setup your Conduit repo:
+#### Windows
 ```
 mkdir conduit
 cd conduit
@@ -69,12 +70,8 @@ Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/qui
 cd ..
 Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/Pipfile -OutFile Pipfile
 Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml -OutFile runway.yml
-pipenv update 
+pipenv update
 ```
-
-Notes:
-  * The [serverless-plugin-export-endpoints plugin](https://github.com/ar90n/serverless-plugin-export-endpoints) is a good alternative to the custom `update_env_endpoint.py` script deployed above to update the environment file.
-
 ### Deploying
 
 Execute `pipenv run runway deploy`, enter `all` (to deploy the backend followed by the frontend). Deployment will take some time (mostly waiting for the CloudFront distribution to stabilize).
@@ -88,12 +85,14 @@ staticsite: sync & CF invalidation of E17B5JWPMTX5Z8 (domain ddy1q4je03d7u.cloud
 
 Execute `pipenv run runway destroy`, enter `all`.
 
-The backend DynamoDB tables will still be retained after the destroy is complete. They must be deleted separately, e.g.:
+The backend DynamoDB tables will still be retained after the destroy is complete. They must be deleted separately:
+
+On macOS/Linux:
 ```
 for i in realworld-dev-articles realworld-dev-comments realworld-dev-users; do aws dynamodb delete-table --region us-east-1 --table-name $i; done
 ```
 
-#### Teardown (Windows)
+On Windows:
 ```
 foreach($table in @("realworld-dev-articles", "realworld-dev-comments", "realworld-dev-users"))
 {
@@ -101,7 +100,11 @@ foreach($table in @("realworld-dev-articles", "realworld-dev-comments", "realwor
 }
 ```
 
-### Permissions
+### Next Steps / Additional Notes
+
+* The [serverless-plugin-export-endpoints plugin](https://github.com/ar90n/serverless-plugin-export-endpoints) is a good alternative to the custom `update_env_endpoint.py` script deployed above to update the environment file.
+
+#### Permissions
 
 The specific IAM permissions required to manage the resources in this demo are as follows:
 ```
