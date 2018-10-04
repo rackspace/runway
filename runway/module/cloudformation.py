@@ -2,6 +2,7 @@
 
 import logging
 import os
+import platform
 import re
 import sys
 
@@ -57,6 +58,10 @@ def make_stacker_cmd_string(args, lib_path):
     * Overriding sys.argv
     * Adding embedded runway lib directory to sys.path
     """
+    if platform.system().lower() == 'windows':
+        # Because this will be run via subprocess, the backslashes on Windows
+        # will cause command errors
+        lib_path = lib_path.replace('\\', '/')
     return ("import sys;"
             "sys.argv = ['stacker'] + {args};"
             "sys.path.insert(1, '{lib_path}');"

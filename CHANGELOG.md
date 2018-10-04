@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.31.2] - 2018-10-04
+### Fixed
+- Fixed stacker execution in virtualenvs on Windows
+
 ## [0.31.1] - 2018-10-03
 ### Fixed
 - Fixed executable detection on Windows
@@ -315,7 +319,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.31.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.31.2...HEAD
+[0.31.2]: https://github.com/onicagroup/runway/compare/v0.31.1...v0.31.2
 [0.31.1]: https://github.com/onicagroup/runway/compare/v0.31.0...v0.31.1
 [0.31.0]: https://github.com/onicagroup/runway/compare/v0.30.6...v0.31.0
 [0.30.0]: https://github.com/onicagroup/runway/compare/v0.29.6...v0.30.0
