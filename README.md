@@ -62,13 +62,23 @@ Sample repo structure, showing 2 modules using environment git branches (these s
 │   │   └── deployment.yaml
 │   └── overlays
 │       ├── dev
-│       │   ├── cpu_count.yaml
-│       │   ├── kustomization.yaml
-│       │   └── replica_count.yaml
+│       │   ├── us-east-1
+│       │   │   ├── cpu_count.yaml
+│       │   │   ├── kustomization.yaml
+│       │   │   └── replica_count.yaml
+│       │   └── us-west-2
+│       │       ├── cpu_count.yaml
+│       │       ├── kustomization.yaml
+│       │       └── replica_count.yaml
 │       └── prod
-│           ├── cpu_count.yaml
-│           ├── kustomization.yaml
-│           └── replica_count.yaml
+│       │   ├── us-east-1
+│       │   │   ├── cpu_count.yaml
+│       │   │   ├── kustomization.yaml
+│       │   │   └── replica_count.yaml
+│       │   └── us-west-2
+│       │       ├── cpu_count.yaml
+│       │       ├── kustomization.yaml
+│       │       └── replica_count.yaml
 └── runway.yml
 ```
 
@@ -547,6 +557,15 @@ environments:
 Standard [Kustomize](https://github.com/kubernetes-sigs/kustomize) rules apply, with the following recommendations/caveats:
 
 * The use of overlay configuration for each environment is required; these map directly to Runway environments.
+* The overlay file structure runway uses with kustomize includes an additional layer for region. The file structure should look as follows:
+    * base: /base
+    * overlay for dev in us-west-2: /overlays/dev/us-west-2
+    * overlay for dev in us-east-1: /overlays/dev/us-east-1
+    * overlay for prod in us-east-1: /overlays/prod/us-east-1
+* only a single kubeconfig file is supported per region defined, and will be sourced in the following precedence:
+    * .kube/<environment>-<region>
+    * <modulename.kustomize>/.kube/<environment>-<region>
+    * KUBECONFIG environment variable with a single file location listed
 
 ## Additional Functionality
 
