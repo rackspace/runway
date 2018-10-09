@@ -725,7 +725,7 @@ It can be used with a configuration like the following:
             environments:
               dev:
                 namespace: contoso-dev
-                staticsite_cert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
+                staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
             options:
               build_steps:
                 - npm ci
