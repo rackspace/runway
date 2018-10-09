@@ -61,24 +61,14 @@ Sample repo structure, showing 2 modules using environment git branches (these s
 │   │   ├── service.yaml
 │   │   └── deployment.yaml
 │   └── overlays
-│       ├── dev
-│       │   ├── us-east-1
-│       │   │   ├── cpu_count.yaml
-│       │   │   ├── kustomization.yaml
-│       │   │   └── replica_count.yaml
-│       │   └── us-west-2
-│       │       ├── cpu_count.yaml
-│       │       ├── kustomization.yaml
-│       │       └── replica_count.yaml
-│       └── prod
-│       │   ├── us-east-1
-│       │   │   ├── cpu_count.yaml
-│       │   │   ├── kustomization.yaml
-│       │   │   └── replica_count.yaml
-│       │   └── us-west-2
-│       │       ├── cpu_count.yaml
-│       │       ├── kustomization.yaml
-│       │       └── replica_count.yaml
+│       ├── dev-us-east-1
+│       │   ├── cpu_count.yaml
+│       │   ├── kustomization.yaml
+│       │   └── replica_count.yaml
+│       └── prod-us-west-2
+│       │   ├── cpu_count.yaml
+│       │   ├── kustomization.yaml
+│       │   └── replica_count.yaml
 └── runway.yml
 ```
 
@@ -100,9 +90,19 @@ Another sample repo structure, showing the same modules nested in environment fo
 |   │   ├── prod-us-east-1.tfvars
 │   │   └── main.tf
 │   ├── myapp.kustomize
-│   │   ├── kustomization.yaml
-│   │   ├── deployment.yaml
-│   │   └── service.yaml
+│   │   ├── base
+│   |   │   ├── kustomization.yaml
+│   |   │   ├── service.yaml
+│   │   |   └── deployment.yaml
+│   │   └── overlays
+│   |       ├── dev-us-east-1
+│   |       |   ├── cpu_count.yaml
+│   |       |   ├── kustomization.yaml
+│   │       |   └── deployment.yaml
+│   |       └── prod-us-west-2
+│   |           ├── cpu_count.yaml
+│   |           ├── kustomization.yaml
+│   │           └── deployment.yaml
 │   └── runway.yml
 └── prod
     ├── myapp.cfn
@@ -116,10 +116,20 @@ Another sample repo structure, showing the same modules nested in environment fo
     │   ├── dev-us-east-1.tfvars
     │   ├── prod-us-east-1.tfvars
     │   └── main.tf
-    ├── myapp.kustomize
-    │   ├── kustomization.yaml
-    │   ├── deployment.yaml
-    │   └── service.yaml
+    ├── myapp.kustomize
+    │   ├── base
+    |   │   ├── kustomization.yaml
+    |   │   ├── service.yaml
+    │   |   └── deployment.yaml
+    │   └── overlays
+    |       ├── dev-us-east-1
+    |       |   ├── cpu_count.yaml
+    |       |   ├── kustomization.yaml
+    │       |   └── deployment.yaml
+    |       └── prod-us-west-2
+    |           ├── cpu_count.yaml
+    |           ├── kustomization.yaml
+    │           └── deployment.yaml
     └── runway.yml
 ```
 
@@ -557,15 +567,21 @@ environments:
 Standard [Kustomize](https://github.com/kubernetes-sigs/kustomize) rules apply, with the following recommendations/caveats:
 
 * The use of overlay configuration for each environment is required; these map directly to Runway environments.
-* The overlay file structure runway uses with kustomize includes an additional layer for region. The file structure should look as follows:
-    * base: /base
-    * overlay for dev in us-west-2: /overlays/dev/us-west-2
-    * overlay for dev in us-east-1: /overlays/dev/us-east-1
-    * overlay for prod in us-east-1: /overlays/prod/us-east-1
-* only a single kubeconfig file is supported per region defined, and will be sourced in the following precedence:
-    * .kube/<environment>-<region>
-    * <modulename.kustomize>/.kube/<environment>-<region>
-    * KUBECONFIG environment variable with a single file location listed
+* Environment overlay directories can be suffixed with `-REGION` (e.g. `dev-us-east-1`), which will restrict deployment to that combination of environment & region.
+* When using multiple k8s clusters, runway environment variable overrides can be used to set the appropriate `KUBECONFIG` value for each environment, e.g.:
+```
+deployments:
+  - modules:
+      - myapp.kustomize
+    regions:
+      - us-east-1
+      - us-west-2
+    env_vars:
+      dev:
+        KUBECONFIG: .kube/dev/config
+      prod:
+        KUBECONFIG: .kube/prod/config
+```
 
 ## Additional Functionality
 

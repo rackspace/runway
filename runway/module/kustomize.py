@@ -11,55 +11,38 @@ from ..util import which
 LOGGER = logging.getLogger('runway')
 
 
-def generate_response(path):
+def gen_overlay_dirs(environment, region):
+    """Generate possible overlay directories."""
+    return [
+        # Give preference to explicit environment-region dirs
+        "%s-%s" % (environment, region),
+        # Fallback to environment name only
+        environment
+    ]
+
+
+def get_overlay_dir(overlays_path, environment, region):
+    """Determine overlay directory to use."""
+    for name in gen_overlay_dirs(environment, region):
+        if os.path.isfile(os.path.join(overlays_path, name)):
+            return name
+    return gen_overlay_dirs(environment, region)[-1]  # fallback to last dir
+
+
+def generate_response(overlay_path, module_path, environment, region):
     """Determine if environment is defined."""
-    configfile = os.path.join(path, 'kustomization.yaml')
-    if os.path.isdir(path) and os.path.isfile(configfile):
+    configfile = os.path.join(overlay_path, 'kustomization.yaml')
+    if os.path.isdir(overlay_path) and os.path.isfile(configfile):
         LOGGER.info("Processing kustomize overlay: %s", configfile)
         return {'skipped_configs': False}
-    LOGGER.error("No kustomize overlay found for this environment "
-                 "region combination (expected "
-                 "overlay at %s)", configfile)
+    LOGGER.error("No kustomize overlay for this environment/region found -- "
+                 "looking for one of \"%s\"",
+                 ', '.join(
+                     [os.path.join(module_path, 'overlays', i, 'kustomization.yaml')  # noqa
+                      for i in gen_overlay_dirs(environment, region)]
+                 ))
     return {'skipped_configs': True}
 
-def get_kube_config(path, env, region):
-    """Determine the kubeconfig to use.
-    Returns the config file path
-    """
-    # checking first at base of repo, which should be one layer prior
-    # from this module
-    kube_config_basepath = os.path.join(path, '../.kube')
-    kube_config = os.path.join(kube_config_basepath, env + "-" + region)
-    if os.path.isdir(kube_config_basepath) and os.path.isfile(kube_config):
-        LOGGER.info("Using config: "  + str(kube_config))
-        return kube_config
-    # checking within the module itself, for single module deployments
-    kube_config_basepath = os.path.join(path, './.kube')
-    kube_config = os.path.join(kube_config_basepath, env + "-" + region)
-    if os.path.isdir(kube_config_basepath) and os.path.isfile(kube_config):
-        LOGGER.info("Using config: "  + str(kube_config))
-        return kube_config
-    # now checking KUBECONFIG in os.environ
-    if "KUBECONFIG" in os.environ:
-        kube_config = os.environ['KUBECONFIG']
-        kube_config = kube_config[1:]
-        if os.path.isfile(kube_config):
-            LOGGER.info("Using config: "  + str(kube_config))
-            return kube_config
-        else:
-            LOGGER.error("KUBECONFIG variable set, but file not "
-                         "found at: " + kube_config)
-            LOGGER.error("Please update KUBECONFIG variable to valid "
-                         "config or store config in base of repo. "
-                         "Exiting Runway Run...")
-            sys.exit(1)
-    else:
-        LOGGER.error("KUBECONFIG variable NOT set, nor kubeconfig "
-                     "found in base of runway")
-        LOGGER.error("Please update KUBECONFIG variable to valid "
-                     "config or store config in base of repo. "
-                     "Exiting Runway Run...")
-        sys.exit(1)
 
 class Kustomize(RunwayModule):
     """Kustomize Runway Module."""
@@ -71,11 +54,18 @@ class Kustomize(RunwayModule):
                    ' please ensure it is installed correctly.')
             LOGGER.error(msg)
             sys.exit(1)
-        kustomize_config_path = os.path.join(self.path,
-                                             'overlays',
-                                             self.context.env_name,
-                                             self.context.env_region)
-        response = generate_response(kustomize_config_path)
+        kustomize_config_path = os.path.join(
+            self.path,
+            'overlays',
+            get_overlay_dir(os.path.join(self.path,
+                                         'overlays'),
+                            self.context.env_name,
+                            self.context.env_region)
+        )
+        response = generate_response(kustomize_config_path,
+                                     self.path,
+                                     self.context.env_name,
+                                     self.context.env_region)
         if response['skipped_configs']:
             return response
         kustomize_cmd = ['kustomize', 'build', kustomize_config_path]
@@ -93,11 +83,7 @@ class Kustomize(RunwayModule):
                              'executable; please ensure it is installed'
                              'correctly.')
                 sys.exit(1)
-            kubeconfig = get_kube_config(self.path,
-                                         self.context.env_name,
-                                         self.context.env_region)
-            kubectl_cmd = ['kubectl', '--kubeconfig', kubeconfig,
-                           'apply', '-f', '-']
+            kubectl_cmd = ['kubectl', 'apply', '-f', '-']
             LOGGER.info("Running kubectl apply, passing in "
                         "kustomize generated yaml")
             kubctl_process = subprocess.Popen(kubectl_cmd,
