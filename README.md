@@ -156,6 +156,13 @@ deployments:
       # account
       dev: 123456789012
       prod: 345678901234
+    env_vars:  # optional environment variable overrides
+      dev:
+        AWS_PROFILE: foo
+      prod:
+        AWS_PROFILE: bar
+      "*":  # Applied to all environments
+        ANOTHER_VAR: foo
     skip-npm-ci: false  # optional, and should rarely be used. Omits npm ci
                         # execution during Serverless deployments
                         # (i.e. for use with pre-packaged node_modules)

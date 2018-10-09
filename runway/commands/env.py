@@ -82,6 +82,19 @@ def determine_module_class(path, module_options):
     return load_object_from_string(module_options['class_path'])
 
 
+def get_deployment_env_vars(env_name, env_var_config=None):
+    """Return applicable environment variables."""
+    if env_var_config is None:
+        env_var_config = {}
+    if env_var_config.get('*'):
+        env_vars = env_var_config['*'].copy()
+    else:
+        env_vars = {}
+    if env_var_config.get(env_name):
+        env_vars = merge_dicts(env_vars, env_var_config[env_name])
+    return env_vars
+
+
 def get_env_from_branch(branch_name):
     """Determine environment name from git branch name."""
     if branch_name.startswith('ENV-'):
@@ -320,6 +333,12 @@ class Env(Base):
                 )
         for deployment in deployments_to_run:
             if deployment.get('regions'):
+                if deployment.get('env_vars'):
+                    context.env_vars = merge_dicts(
+                        context.env_vars,
+                        get_deployment_env_vars(context.env_name,
+                                                deployment['env_vars'])
+                    )
                 for region in deployment['regions']:
                     context.env_region = region
                     context.env_vars = merge_dicts(
