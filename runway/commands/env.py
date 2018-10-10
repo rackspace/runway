@@ -82,7 +82,7 @@ def determine_module_class(path, module_options):
     return load_object_from_string(module_options['class_path'])
 
 
-def get_deployment_env_vars(env_name, env_var_config=None):
+def get_deployment_env_vars(env_name, env_var_config=None, env_root=None):
     """Return applicable environment variables."""
     if env_var_config is None:
         env_var_config = {}
@@ -91,6 +91,11 @@ def get_deployment_env_vars(env_name, env_var_config=None):
     else:
         env_vars = {}
     if env_var_config.get(env_name):
+        for (key, val) in env_var_config[env_name].items():
+            # Lists are presumed to be path components and will be turned back
+            # to strings
+            if isinstance(val, list):
+                env_var_config[env_name][key] = os.path.join(env_root, os.path.join(*val)) if (env_root and not os.path.isabs(os.path.join(*val))) else os.path.join(*val)  # noqa pylint: disable=line-too-long
         env_vars = merge_dicts(env_vars, env_var_config[env_name])
     return env_vars
 
@@ -337,7 +342,8 @@ class Env(Base):
                     context.env_vars = merge_dicts(
                         context.env_vars,
                         get_deployment_env_vars(context.env_name,
-                                                deployment['env_vars'])
+                                                deployment['env_vars'],
+                                                self.env_root)
                     )
                 for region in deployment['regions']:
                     context.env_region = region

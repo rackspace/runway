@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.33.0] - 2018-10-09
+### Added
+- Environment variable values can now be specified as relative or absolute paths (via yaml lists) in addition to regular strings
+
 ## [0.32.0] - 2018-10-08
 ### Added
 - Added per-environment, per-deployment environment variable values
@@ -323,7 +327,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.32.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.33.0...HEAD
+[0.33.0]: https://github.com/onicagroup/runway/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/onicagroup/runway/compare/v0.31.2...v0.32.0
 [0.31.2]: https://github.com/onicagroup/runway/compare/v0.31.1...v0.31.2
 [0.31.1]: https://github.com/onicagroup/runway/compare/v0.31.0...v0.31.1
