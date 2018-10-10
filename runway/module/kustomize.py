@@ -24,9 +24,10 @@ def gen_overlay_dirs(environment, region):
 def get_overlay_dir(overlays_path, environment, region):
     """Determine overlay directory to use."""
     for name in gen_overlay_dirs(environment, region):
-        if os.path.isfile(os.path.join(overlays_path, name)):
-            return name
-    return gen_overlay_dirs(environment, region)[-1]  # fallback to last dir
+        overlay_dir = os.path.join(overlays_path, name)
+        if os.path.isfile(os.path.join(overlay_dir, 'kustomization.yaml')):
+            return overlay_dir
+    return overlay_dir  # fallback to last dir
 
 
 def generate_response(overlay_path, module_path, environment, region):
