@@ -159,8 +159,14 @@ deployments:
     env_vars:  # optional environment variable overrides
       dev:
         AWS_PROFILE: foo
+        APP_PATH:  # When specified as list, will be treated as components of a path on disk
+          - myapp.tf
+          - foo
       prod:
         AWS_PROFILE: bar
+        APP_PATH:
+          - myapp.tf
+          - foo
       "*":  # Applied to all environments
         ANOTHER_VAR: foo
     skip-npm-ci: false  # optional, and should rarely be used. Omits npm ci
