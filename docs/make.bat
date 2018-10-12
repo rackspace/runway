@@ -5,13 +5,13 @@ pushd %~dp0
 REM Command file for Sphinx documentation
 
 if "%SPHINXBUILD%" == "" (
-	set SPHINXBUILD=sphinx-build
+	set SPHINXBUILD=pipenv run sphinx-build
 )
 set SOURCEDIR=source
 set BUILDDIR=build
 
 if "%1" == "" goto help
-
+pipenv sync
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
 	echo.
