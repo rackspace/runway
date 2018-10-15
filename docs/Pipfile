@@ -1,0 +1,11 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+Sphinx = "===1.8.1"
+sphinx_rtd_theme = "===0.4.2"
+
+# just for http.server py2/py3 syntax consistency in manual doc testing
+future = "~= 0.16"

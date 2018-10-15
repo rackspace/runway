@@ -1,11 +1,11 @@
 *.pyc
-
+.vscode
 .cache
 .coverage
 .eggs
 *.egg-info
 build
 dist
-
+docs/source/_build
 # This is dynamically built at build-time via make
 runway/templates/terraform/.terraform-version
