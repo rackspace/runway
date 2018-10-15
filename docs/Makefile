@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = pipenv run sphinx-build
+SPHINXBUILD   = pipenv sync && pipenv run sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
