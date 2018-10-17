@@ -1,40 +1,16 @@
 Installation
 ============
-Installing Python
-^^^^^^^^^^^^^^^^^
-- On Linux (assuming default Bash shell; adjust for others appropriately):
-    - Setup your shell for user-installed (non-root) pip packages::
-        
-        echo 'export PATH=$HOME/.local/bin:$PATH' >> ${HOME}/.bashrc
-        source ${HOME}/.bashrc
-
-    - Install Python/pip:
-        - Debian-family (e.g. Ubuntu): 
-          ``sudo apt-get -y install python-pip python-minimal``
-        - Amazon Linux should should work out of the box
-        - RHEL-family:
-            - If easy_install is available: ``easy_install --user pip``
-            - Otherwise, enable EPEL and ``sudo yum install python-pip``
-
-- On macOS (assuming default Bash shell; adjust for others appropriately)::
-
-    if ! which pip > /dev/null; then easy_install --user pip; fi
-    echo 'export PATH="${HOME}/Library/Python/2.7/bin:${PATH}"' >> ${HOME}/.bash_profile
-    source ${HOME}/.bash_profile
-
-- On Windows:
-    - This can be done via the Chocolately package manager (e.g. ``choco install python2``), or manually from their website
-        - If installing via Chocolately, default options will be sufficient. Close/reopen terminals after installation to use the updated PATH
-        - If installing manually, use the default options with the exception of the "Add python to Path" (it should be enabled).
-    - Add ``%USERPROFILE%\AppData\Roaming\Python\Scripts`` to PATH environment variable
 
 Installing runway 
 ^^^^^^^^^^^^^^^^^
-(doesn't require sudo/admin permissions)
 
-- ``pip install --user runway``
-    - If this produces an error like ``Unknown distribution option: 'python_requires'``, 
-      upgrade setuptools first ``pip install --user --upgrade setuptools``
+Runway runs on Python 2.7 and Python 3.5+.
+
+Runway is hosted on PyPI as the package named ``runway``. You can install Runway with `pip <https://pypi.org/project/pip/>`_:
+
+``pip install runway``
+
+It is recommended to install runway using `pipenv <https://pypi.org/project/pipenv/>`_ or `virtualenv <https://pypi.org/project/virtualenv/>`_.
 
 How To Use
 ==========
