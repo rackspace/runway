@@ -48,7 +48,14 @@ logger = logging.getLogger(__name__)
 # https://github.com/boto/botocore/blob/1.6.1/botocore/data/_retry.json#L97-L121
 MAX_ATTEMPTS = 10
 
-MAX_TAIL_RETRIES = 5
+# Updated this to 15 retries with a 1 second sleep between retries. This is
+# only used when a call to `get_events` fails due to the stack not being
+# found. This is often the case because Cloudformation is taking too long
+# to create the stack. 15 seconds should, hopefully, be plenty of time for
+# the stack to start showing up in the API.
+MAX_TAIL_RETRIES = 15
+TAIL_RETRY_SLEEP = 1
+GET_EVENTS_SLEEP = 1
 DEFAULT_CAPABILITIES = ["CAPABILITY_NAMED_IAM", ]
 
 
@@ -397,6 +404,8 @@ def generate_cloudformation_args(stack_name, parameters, tags, template,
             with create_change_set.
         service_role (str, optional): An optional service role to use when
             interacting with Cloudformation.
+        stack_policy (:class:`stacker.providers.base.Template`): A template
+            object representing a stack policy.
         change_set_name (str, optional): An optional change set name to use
             with create_change_set.
 
@@ -434,6 +443,16 @@ def generate_cloudformation_args(stack_name, parameters, tags, template,
 
 
 def generate_stack_policy_args(stack_policy=None):
+    """ Converts a stack policy object into keyword args.
+
+    Args:
+        stack_policy (:class:`stacker.providers.base.Template`): A template
+            object representing a stack policy.
+
+    Returns:
+        dict: A dictionary of keyword arguments to be used elsewhere.
+    """
+
     args = {}
     if stack_policy:
         logger.debug("Stack has a stack policy")
@@ -569,8 +588,8 @@ class Provider(BaseProvider):
     def is_stack_failed(self, stack, **kwargs):
         return self.get_stack_status(stack) in self.FAILED_STATUSES
 
-    def tail_stack(self, stack, cancel, retries=0, **kwargs):
-        def log_func(e):
+    def tail_stack(self, stack, cancel, log_func=None, **kwargs):
+        def _log_func(e):
             event_args = [e['ResourceStatus'], e['ResourceType'],
                           e.get('ResourceStatusReason', None)]
             # filter out any values that are empty
@@ -578,22 +597,26 @@ class Provider(BaseProvider):
             template = " ".join(["[%s]"] + ["%s" for _ in event_args])
             logger.info(template, *([stack.fqn] + event_args))
 
-        if not retries:
-            logger.info("Tailing stack: %s", stack.fqn)
+        log_func = log_func or _log_func
 
-        try:
-            self.tail(stack.fqn,
-                      cancel=cancel,
-                      log_func=log_func,
-                      include_initial=False)
-        except botocore.exceptions.ClientError as e:
-            if "does not exist" in str(e) and retries < MAX_TAIL_RETRIES:
-                # stack might be in the process of launching, wait for a second
-                # and try again
-                time.sleep(1)
-                self.tail_stack(stack, cancel, retries=retries + 1, **kwargs)
-            else:
-                raise
+        logger.info("Tailing stack: %s", stack.fqn)
+
+        attempts = 0
+        while True:
+            attempts += 1
+            try:
+                self.tail(stack.fqn, cancel=cancel, log_func=log_func,
+                          include_initial=False)
+                break
+            except botocore.exceptions.ClientError as e:
+                if "does not exist" in str(e) and attempts < MAX_TAIL_RETRIES:
+                    # stack might be in the process of launching, wait for a
+                    # second and try again
+                    if cancel.wait(TAIL_RETRY_SLEEP):
+                        return
+                    continue
+                else:
+                    raise
 
     @staticmethod
     def _tail_print(e):
@@ -601,24 +624,24 @@ class Provider(BaseProvider):
                             e['ResourceType'],
                             e['EventId']))
 
-    def get_events(self, stackname):
+    def get_events(self, stack_name):
         """Get the events in batches and return in chronological order"""
         next_token = None
         event_list = []
-        while 1:
+        while True:
             if next_token is not None:
                 events = self.cloudformation.describe_stack_events(
-                    StackName=stackname, NextToken=next_token
+                    StackName=stack_name, NextToken=next_token
                 )
             else:
                 events = self.cloudformation.describe_stack_events(
-                    StackName=stackname
+                    StackName=stack_name
                 )
             event_list.append(events['StackEvents'])
             next_token = events.get('NextToken', None)
             if next_token is None:
                 break
-            time.sleep(1)
+            time.sleep(GET_EVENTS_SLEEP)
         return reversed(sum(event_list, []))
 
     def tail(self, stack_name, cancel, log_func=_tail_print, sleep_time=5,
@@ -634,7 +657,7 @@ class Provider(BaseProvider):
             seen.add(e['EventId'])
 
         # Now keep looping through and dump the new events
-        while 1:
+        while True:
             events = self.get_events(stack_name)
             for e in events:
                 if e['EventId'] not in seen:
@@ -666,6 +689,8 @@ class Provider(BaseProvider):
             tags (list): A list of dictionaries that defines the tags
                 that should be applied to the Cloudformation stack.
             force_change_set (bool): Whether or not to force change set use.
+            stack_policy (:class:`stacker.providers.base.Template`): A template
+                object representing a stack policy.
         """
 
         logger.debug("Attempting to create stack %s:.", fqn)
@@ -813,6 +838,8 @@ class Provider(BaseProvider):
                 not. False will follow the behavior of the provider.
             force_change_set (bool): A flag that indicates whether the update
                 must be executed with a change set.
+            stack_policy (:class:`stacker.providers.base.Template`): A template
+                object representing a stack policy.
         """
         logger.debug("Attempting to update stack %s:", fqn)
         logger.debug("    parameters: %s", parameters)
@@ -824,11 +851,28 @@ class Provider(BaseProvider):
         update_method = self.select_update_method(force_interactive,
                                                   force_change_set)
 
-        return update_method(fqn, template, old_parameters, parameters, tags,
-                             stack_policy=stack_policy, **kwargs)
+        return update_method(fqn, template, old_parameters, parameters,
+                             stack_policy=stack_policy, tags=tags, **kwargs)
+
+    def deal_with_changeset_stack_policy(self, fqn, stack_policy):
+        """ Set a stack policy when using changesets.
+
+        ChangeSets don't allow you to set stack policies in the same call to
+        update them. This sets it before executing the changeset if the
+        stack policy is passed in.
+
+        Args:
+            stack_policy (:class:`stacker.providers.base.Template`): A template
+                object representing a stack policy.
+        """
+        if stack_policy:
+            kwargs = generate_stack_policy_args(stack_policy)
+            kwargs["StackName"] = fqn
+            logger.debug("Setting stack policy on %s.", fqn)
+            self.cloudformation.set_stack_policy(**kwargs)
 
     def interactive_update_stack(self, fqn, template, old_parameters,
-                                 parameters, tags, stack_policy=None,
+                                 parameters, stack_policy, tags,
                                  **kwargs):
         """Update a Cloudformation stack in interactive mode.
 
@@ -840,6 +884,8 @@ class Provider(BaseProvider):
                 parameter list on the existing Cloudformation stack.
             parameters (list): A list of dictionaries that defines the
                 parameter list to be applied to the Cloudformation stack.
+            stack_policy (:class:`stacker.providers.base.Template`): A template
+                object representing a stack policy.
             tags (list): A list of dictionaries that defines the tags
                 that should be applied to the Cloudformation stack.
         """
@@ -878,19 +924,15 @@ class Provider(BaseProvider):
             finally:
                 ui.unlock()
 
-        # ChangeSets don't support specifying a stack policy inline, like
-        # CreateStack/UpdateStack, so we just SetStackPolicy if there is one.
-        if stack_policy:
-            kwargs = generate_stack_policy_args(stack_policy)
-            kwargs["StackName"] = fqn
-            self.cloudformation.set_stack_policy(**kwargs)
+        self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
         self.cloudformation.execute_change_set(
             ChangeSetName=change_set_id,
         )
 
     def noninteractive_changeset_update(self, fqn, template, old_parameters,
-                                        parameters, tags, **kwargs):
+                                        parameters, stack_policy, tags,
+                                        **kwargs):
         """Update a Cloudformation stack using a change set.
 
         This is required for stacks with a defined Transform (i.e. SAM), as the
@@ -904,6 +946,8 @@ class Provider(BaseProvider):
                 parameter list on the existing Cloudformation stack.
             parameters (list): A list of dictionaries that defines the
                 parameter list to be applied to the Cloudformation stack.
+            stack_policy (:class:`stacker.providers.base.Template`): A template
+                object representing a stack policy.
             tags (list): A list of dictionaries that defines the tags
                 that should be applied to the Cloudformation stack.
         """
@@ -913,6 +957,8 @@ class Provider(BaseProvider):
             self.cloudformation, fqn, template, parameters, tags,
             'UPDATE', service_role=self.service_role, **kwargs
         )
+
+        self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
         self.cloudformation.execute_change_set(
             ChangeSetName=change_set_id,
@@ -932,6 +978,8 @@ class Provider(BaseProvider):
                 parameter list to be applied to the Cloudformation stack.
             tags (list): A list of dictionaries that defines the tags
                 that should be applied to the Cloudformation stack.
+            stack_policy (:class:`stacker.providers.base.Template`): A template
+                object representing a stack policy.
         """
 
         logger.debug("Using default provider mode for %s.", fqn)

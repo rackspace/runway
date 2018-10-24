@@ -29,14 +29,15 @@ INSTALL_REQUIRES = [
     'typing',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # embedded stacker is v1.4.1 with the following patches applied:
-    # https://github.com/cloudtools/stacker/pull/658 (v1.4 regression fix)
+    # embedded stacker is v1.5.0 with the following patches applied:
+    # https://github.com/cloudtools/stacker/pull/670 (py3 fix; in master)
+    # https://github.com/cloudtools/stacker/pull/676 (aws lookup fix)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
-    'stacker~=1.4',
+    'stacker~=1.5',
     # upstream stacker requires boto3~=1.7.0 & botocore<1.11, but
     # unfortunately pip will mess up on transitive dependecies
     # https://github.com/pypa/pip/issues/988

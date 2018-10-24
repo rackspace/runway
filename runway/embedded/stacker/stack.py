@@ -65,6 +65,7 @@ class Stack(object):
 
     def __init__(self, definition, context, variables=None, mappings=None,
                  locked=False, force=False, enabled=True, protected=False):
+        self.logging = True
         self.name = definition.name
         self.fqn = context.get_fqn(definition.stack_name or self.name)
         self.region = definition.region
@@ -83,7 +84,17 @@ class Stack(object):
         return self.fqn
 
     @property
+    def required_by(self):
+        return self.definition.required_by or []
+
+    @property
     def requires(self):
+        # By definition, a locked stack has no dependencies, because we won't
+        # be performing an update operation on the stack. This means, resolving
+        # outputs from dependencies is unnecessary.
+        if self.locked and not self.force:
+            return []
+
         requires = set(self.definition.requires or [])
 
         # Add any dependencies based on output lookups
