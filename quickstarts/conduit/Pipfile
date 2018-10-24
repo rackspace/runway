@@ -4,4 +4,4 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-runway = "~= 0.23"
+runway = "~= 0.34"
