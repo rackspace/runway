@@ -138,9 +138,10 @@ class CloudFormation(RunwayModule):
                         ensure_stacker_compat_config(
                             os.path.join(self.path, name)
                         )
-                        LOGGER.info("Running stacker %s on %s",
+                        LOGGER.info("Running stacker %s on %s in region %s",
                                     command,
-                                    name)
+                                    name,
+                                    self.context.env_region)
                         stacker_cmd_str = make_stacker_cmd_string(
                             stacker_cmd + [name],
                             get_embedded_lib_path()
