@@ -1,5 +1,4 @@
 *.pyc
-.vscode
 .cache
 .coverage
 .eggs

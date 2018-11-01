@@ -235,6 +235,14 @@ class AnyType(BaseType):
     pass
 
 
+class LocalPackageSource(Model):
+    source = StringType(required=True)
+
+    paths = ListType(StringType, serialize_when_none=False)
+
+    configs = ListType(StringType, serialize_when_none=False)
+
+
 class GitPackageSource(Model):
     uri = StringType(required=True)
 
@@ -264,6 +272,8 @@ class S3PackageSource(Model):
 
 
 class PackageSources(Model):
+    local = ListType(ModelType(LocalPackageSource))
+
     git = ListType(ModelType(GitPackageSource))
 
     s3 = ListType(ModelType(S3PackageSource))

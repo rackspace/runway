@@ -1,0 +1,5 @@
+{
+    "files.insertFinalNewline": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": false
+}
