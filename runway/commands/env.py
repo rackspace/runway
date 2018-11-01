@@ -390,6 +390,9 @@ class Env(Base):
                                 command)()
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
+            else:
+                LOGGER.error('No region configured for any deployment')
+                sys.exit(1)
 
     def plan(self, deployments=None):
         """Plan apps/code deployment."""
