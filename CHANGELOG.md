@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.35.1] - 2018-11-01
+### Fixed
+- Added error message when a deployment specifies no regions
+
 ## [0.35.0] - 2018-11-01
 ### Added
 - CloudFormation modules can now locally reference other CloudFormation modules
@@ -338,7 +342,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.35.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.35.1...HEAD
+[0.35.1]: https://github.com/onicagroup/runway/compare/v0.35.0...v0.35.1
 [0.35.0]: https://github.com/onicagroup/runway/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/onicagroup/runway/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/onicagroup/runway/compare/v0.32.0...v0.33.0

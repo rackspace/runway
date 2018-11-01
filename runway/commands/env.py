@@ -301,7 +301,7 @@ class Env(Base):
             shutil.rmtree(os.path.join(self.env_root, directory))
         return True
 
-    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches
+    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-statements
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
