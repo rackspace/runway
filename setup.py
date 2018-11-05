@@ -31,8 +31,9 @@ INSTALL_REQUIRES = [
     'zgitignore',  # for embedded hooks
     # embedded stacker is v1.5.0 with the following patches applied:
     # https://github.com/cloudtools/stacker/pull/670 (py3 fix; in master)
-    # https://github.com/cloudtools/stacker/pull/676 (aws lookup fix)
-    # https://github.com/cloudtools/stacker/pull/677 (local package sources)
+    # https://github.com/cloudtools/stacker/pull/674 (query fix; in master)
+    # https://github.com/cloudtools/stacker/pull/676 (lookup fix; in master)
+    # https://github.com/cloudtools/stacker/pull/677 (local pkgs; in master)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
