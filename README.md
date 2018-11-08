@@ -15,6 +15,6 @@ Very simple configuration to:
     * runway is a simple wrapper around standard tools. It simply helps to avoid convoluted Makefiles / CI jobs
 
 ## How?
-See the [doc site](https://onica-runway.readthedocs-hosted.com/).
+See the [doc site](https://docs.onica.com/projects/onica-runway).
 
-Complete quickstart documentation, including Docker images, CloudFormation templates, and walkthrough can be found [here](https://onica-runway.readthedocs-hosted.com/en/latest/quickstart.html)
+Complete quickstart documentation, including Docker images, CloudFormation templates, and walkthrough can be found [here](https://docs.onica.com/projects/onica-runway/en/latest/quickstart.html)
