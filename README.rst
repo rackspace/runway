@@ -26,8 +26,8 @@ Very simple configuration to:
 How?
 ----
 
-See the `doc site <https://docs.onica.com/projects/onica-runway>`__.
+See the `doc site <https://docs.onica.com/projects/runway>`__.
 
 Complete quickstart documentation, including Docker images,
 CloudFormation templates, and walkthrough can be found
-`here <https://docs.onica.com/projects/onica-runway/en/latest/quickstart.html>`__
+`here <https://docs.onica.com/projects/runway/en/latest/quickstart.html>`__
