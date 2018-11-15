@@ -1,11 +1,16 @@
+.. _repo-structure:
+
 Repo Structure
 ==============
 
+Projects deployed via runway can be structured in a few ways; some examples
+follow:
+
 Git Branches as Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Sample repo structure, showing 2 modules using environment git branches (these 
-same files would be present in each environment branch, with changes to any 
-environment promoted through branches)::
+This example shows 2 modules using environment git branches (these same files
+would be present in each environment branch, with changes to any environment
+promoted through branches)::
 
     .
     ├── myapp.cfn

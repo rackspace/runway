@@ -23,9 +23,10 @@ Very simple configuration to:
    :caption: Contents:
 
    basic_concepts
+   installation
+   how_to_use
    repo_structure
    runway_config
-   installation_use
    module_configuration
    additional_functionality
    quickstart

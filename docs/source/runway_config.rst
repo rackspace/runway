@@ -1,3 +1,5 @@
+.. _runway-config-options:
+
 Runway Config File
 ==================
 
