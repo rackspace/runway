@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.35.3] - 2018-11-16
+### Fixed
+- Add egg files to source packaging (i.e. fix easy_install installs)
+
 ## [0.35.2] - 2018-11-05
 ### Fixed
 - Improve approval resilency on CFN stack updates (Stacker #674)
@@ -346,7 +350,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.35.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.35.3...HEAD
+[0.35.3]: https://github.com/onicagroup/runway/compare/v0.35.2...v0.35.3
 [0.35.2]: https://github.com/onicagroup/runway/compare/v0.35.1...v0.35.2
 [0.35.1]: https://github.com/onicagroup/runway/compare/v0.35.0...v0.35.1
 [0.35.0]: https://github.com/onicagroup/runway/compare/v0.34.0...v0.35.0
