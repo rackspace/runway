@@ -30,7 +30,7 @@ def generate_node_command(command, command_opts, path):
                     "''%s %s''" % (command, ' '.join(command_opts))]
     else:
         LOGGER.debug('npx not found; falling back invoking %s shell script '
-                     'script directly.', command)
+                     'directly.', command)
         cmd_list = [
             os.path.join(path,
                          'node_modules',
