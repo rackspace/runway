@@ -41,6 +41,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                   'description': '(Optional) File name to '
                                                  'append to directory '
                                                  'requests.'},
+        'lambda_function_associations': {'type': list,
+                                         'default': [],
+                                         'description': '(Optional) Lambda '
+                                                        'function '
+                                                        'assocations.'},
         'WAFWebACL': {'type': CFNString,
                       'default': '',
                       'description': '(Optional) WAF id to associate with the '
@@ -214,6 +219,24 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
+        # If custom associations defined, use them
+        if variables['lambda_function_associations']:
+            lambda_function_associations = [
+                cloudfront.LambdaFunctionAssociation(
+                    EventType=x['type'],
+                    LambdaFunctionARN=x['arn']
+                ) for x in variables['lambda_function_associations']
+            ]
+        else:  # otherwise fallback to pure CFN condition
+            lambda_function_associations = If(
+                'DirectoryIndexSpecified',
+                [cloudfront.LambdaFunctionAssociation(
+                    EventType='origin-request',
+                    LambdaFunctionARN=cfdirectoryindexrewritever.ref()
+                )],
+                NoValue
+            )
+
         cfdistribution = template.add_resource(
             cloudfront.Distribution(
                 'CFDistribution',
@@ -247,14 +270,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                             Cookies=cloudfront.Cookies(Forward='none'),
                             QueryString=False,
                         ),
-                        LambdaFunctionAssociations=If(
-                            'DirectoryIndexSpecified',
-                            [cloudfront.LambdaFunctionAssociation(
-                                EventType='origin-request',
-                                LambdaFunctionARN=cfdirectoryindexrewritever.ref()  # noqa
-                            )],
-                            NoValue
-                        ),
+                        LambdaFunctionAssociations=lambda_function_associations,  # noqa
                         TargetOriginId='S3Origin',
                         ViewerProtocolPolicy='redirect-to-https'
                     ),

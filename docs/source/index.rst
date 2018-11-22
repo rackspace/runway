@@ -30,6 +30,7 @@ Very simple configuration to:
    module_configuration
    additional_functionality
    quickstart
+   staticsite_config
    license
 
 

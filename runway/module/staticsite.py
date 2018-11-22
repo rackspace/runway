@@ -85,6 +85,19 @@ class StaticSite(RunwayModule):
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
         else:
             site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'  # noqa pylint: disable=line-too-long
+        # If staticsite_lambda_function_associations defined, add to stack
+        # config
+        if self.options.get('environments',
+                            {}).get(self.context.env_name,
+                                    {}).get('staticsite_lambda_function_associations'):  # noqa
+            site_stack_variables['lambda_function_associations'] = self.options.get(  # noqa
+                'environments',
+                {}
+            ).get(self.context.env_name,
+                  {}).get('staticsite_lambda_function_associations')
+            self.options.get('environments',
+                             {}).get(self.context.env_name,
+                                     {}).pop('staticsite_lambda_function_associations')  # noqa
         with open(os.path.join(module_dir, '02-staticsite.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
                 {'namespace': '${namespace}',
