@@ -7,7 +7,6 @@ import glob
 import logging
 import os
 import shutil
-import subprocess
 import sys
 
 import cfn_flip
@@ -293,13 +292,13 @@ class Base(object):
                                'tf_state.yml'), 'w') as stream:
             stream.write(
                 cfn_flip.flip(
-                    subprocess.check_output(
+                    check_output(
                         [sys.executable,
                         os.path.join(os.path.dirname(os.path.dirname(__file__)),  # noqa
-                                    'templates',
-                                    'stacker',
-                                    'tfstate_blueprints',
-                                    'tf_state.py')]
+                                     'templates',
+                                     'stacker',
+                                     'tfstate_blueprints',
+                                     'tf_state.py')]
                     )
 
                 )

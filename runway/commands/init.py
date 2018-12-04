@@ -10,7 +10,7 @@ from .base import Base
 class Init(Base):
     """Extend Base with init command."""
 
-    def execute(self):
+    def execute(self):  # pylint disable=no-self-use
         """Generate runway.yml."""
         if os.path.isfile('runway.yml'):
             print('Runway config already present')
@@ -27,4 +27,4 @@ deployments:
 """)
         print('runway.yml generated')
         print('See additional getting started information at '
-               'https://docs.onica.com/projects/runway/en/latest/how_to_use.html')  # noqa pylint: disable=line-too-long
+              'https://docs.onica.com/projects/runway/en/latest/how_to_use.html')  # noqa pylint: disable=line-too-long
