@@ -7,8 +7,10 @@ import glob
 import logging
 import os
 import shutil
+import subprocess
 import sys
 
+import cfn_flip
 import yaml
 
 # from stacker.util import parse_cloudformation_template
@@ -277,7 +279,7 @@ class Base(object):
         if module_dir is None:
             module_dir = os.path.join(self.env_root, 'sampleapp.cfn')
         self.generate_sample_module(module_dir)
-        for i in ['01-sampleapp.yaml', 'dev-us-east-1.env']:
+        for i in ['stacks.yaml', 'dev-us-east-1.env']:
             shutil.copyfile(
                 os.path.join(os.path.dirname(os.path.dirname(__file__)),
                              'templates',
@@ -286,14 +288,22 @@ class Base(object):
                 os.path.join(module_dir, i)
             )
         os.mkdir(os.path.join(module_dir, 'templates'))
-        shutil.copyfile(
-            os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                         'templates',
-                         'cfn',
-                         'templates',
-                         'bucket.json'),
-            os.path.join(module_dir, 'templates', 'bucket.json')
-        )
+        with open(os.path.join(module_dir,
+                               'templates',
+                               'tf_state.yml'), 'w') as stream:
+            stream.write(
+                cfn_flip.flip(
+                    subprocess.check_output(
+                        [sys.executable,
+                        os.path.join(os.path.dirname(os.path.dirname(__file__)),  # noqa
+                                    'templates',
+                                    'stacker',
+                                    'tfstate_blueprints',
+                                    'tf_state.py')]
+                    )
+
+                )
+            )
         LOGGER.info("Sample CloudFormation module created at %s",
                     module_dir)
 

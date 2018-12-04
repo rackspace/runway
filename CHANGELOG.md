@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.37.0] - 2018-12-03
+### Added
+- New `init` command for generating runway.yml
+
+### Changed
+- Updated cfn gen-sample to deploy tf state bucket (matching stacker sample)
+
 ## [0.36.0] - 2018-11-21
 ### Fixed
 - Documentation cleanup
@@ -357,7 +364,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.36.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.37.0...HEAD
+[0.37.0]: https://github.com/onicagroup/runway/compare/v0.36.0...v0.37.0
 [0.36.0]: https://github.com/onicagroup/runway/compare/v0.35.3...v0.36.0
 [0.35.3]: https://github.com/onicagroup/runway/compare/v0.35.2...v0.35.3
 [0.35.2]: https://github.com/onicagroup/runway/compare/v0.35.1...v0.35.2

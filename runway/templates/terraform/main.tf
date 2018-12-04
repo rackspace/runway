@@ -15,3 +15,6 @@ provider "aws" {
 }
 
 # Data and resources
+resource "aws_sqs_queue" "terraform_queue" {
+  delay_seconds = 90
+}

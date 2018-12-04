@@ -40,6 +40,9 @@ INSTALL_REQUIRES = [
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
     'stacker~=1.5',
+    # Stacker also pulls in our cfn-flip dependency (template generation)
+    # via troposphere
+    #
     # upstream stacker requires boto3~=1.7.0 & botocore<1.11, but
     # unfortunately pip will mess up on transitive dependecies
     # https://github.com/pypa/pip/issues/988

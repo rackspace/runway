@@ -5,20 +5,8 @@ Getting Started
 ^^^^^^^^^^^^^^^
 - Structure your project repo with environments & modules (see
   :ref:`repo-structure` )
-- Create a ``runway.yml`` file at the root of each environment. Most options
-  detailed in :ref:`runway-config-options` are not required. E.g., the
-  following is sufficient to deploy the module in
-  ``nameofmycloudformationfolder.cfn`` to us-west-2:
-
-::
-
-    ---
-    deployments:
-      - modules:
-          - nameofmycloudformationfolder.cfn
-        regions:
-          - us-west-2
-
+- Execute ``runway init`` to create a ``runway.yml`` file at the root of the
+  environment (e.g. at the repo root)
 - Define per-environment config options/enablement for each module (see
   :ref:`module-configurations` )
 
