@@ -10,7 +10,7 @@ from .base import Base
 class Init(Base):
     """Extend Base with init command."""
 
-    def execute(self):  # pylint disable=no-self-use
+    def execute(self):  # pylint: disable=no-self-use
         """Generate runway.yml."""
         if os.path.isfile('runway.yml'):
             print('Runway config already present')

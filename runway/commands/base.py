@@ -294,11 +294,11 @@ class Base(object):
                 cfn_flip.flip(
                     check_output(
                         [sys.executable,
-                        os.path.join(os.path.dirname(os.path.dirname(__file__)),  # noqa
-                                     'templates',
-                                     'stacker',
-                                     'tfstate_blueprints',
-                                     'tf_state.py')]
+                         os.path.join(os.path.dirname(os.path.dirname(__file__)),  # noqa
+                                      'templates',
+                                      'stacker',
+                                      'tfstate_blueprints',
+                                      'tf_state.py')]
                     )
 
                 )
