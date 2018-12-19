@@ -135,16 +135,22 @@ def which(program):
         """Determine if program exists and is executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-    fpath, _fname = os.path.split(program)
-    if platform.system().lower() == 'windows' and not program.endswith('.exe'):
-        program = program + '.exe'
-    if fpath:
-        if is_exe(program):
-            return program
+    fpath, fname = os.path.split(program)
+    if platform.system().lower() == 'windows' and not (
+            fname.endswith('.exe') or fname.endswith('.cmd')):
+        fnames = [fname + '.exe', fname + '.cmd']
     else:
-        for path in os.environ['PATH'].split(os.pathsep):
-            exe_file = os.path.join(path, program)
+        fnames = [fname]
+
+    for i in fnames:
+        if fpath:
+            exe_file = os.path.join(fpath, i)
             if is_exe(exe_file):
                 return exe_file
+        else:
+            for path in os.environ['PATH'].split(os.pathsep):
+                exe_file = os.path.join(path, i)
+                if is_exe(exe_file):
+                    return exe_file
 
     return None
