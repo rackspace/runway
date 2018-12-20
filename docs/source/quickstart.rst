@@ -123,6 +123,7 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
 **Windows**
 ::
 
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     mkdir conduit
     cd conduit
     git init
@@ -134,6 +135,7 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     cd backend
     (gc .\.gitignore -raw).Replace("package-lock.json`r`n", "") | sc .\.gitignore
     ".dynamodb`r`n" | Out-File .\.gitignore -Append -Encoding UTF8
+    $(gc .\package.json) -replace "dynamodb install .*$", "dynamodb install`"" | Out-File .\package.json -Force -Encoding UTF8
     npm install
     cd ..
     Invoke-WebRequest https://codeload.github.com/gothinkster/angular-realworld-example-app/zip/35a66d144d8def340278cd55080d5c745714aca4 -OutFile 35a66d144d8def340278cd55080d5c745714aca4.zip
