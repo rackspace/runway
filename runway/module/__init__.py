@@ -19,12 +19,10 @@ def format_npm_command_for_logging(command):
     if platform.system().lower() == 'windows':
         if command[0] == 'npx.cmd' and command[1] == '-c':
             return "npx.cmd -c \"%s\"" % " ".join(command[2:])
-        else:
-            return " ".join(command)
-    else:
-        # Strip out redundant npx quotes not needed when executing the command
-        # directly
-        return " ".join(command).replace('\'\'', '\'')
+        return " ".join(command)
+    # Strip out redundant npx quotes not needed when executing the command
+    # directly
+    return " ".join(command).replace('\'\'', '\'')
 
 
 def generate_node_command(command, command_opts, path):
