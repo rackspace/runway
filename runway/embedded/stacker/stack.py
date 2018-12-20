@@ -109,7 +109,7 @@ class Stack(object):
 
                     if d.stack_name == self.name:
                         message = (
-                            "Variable %s in stack %s has a ciruclar reference "
+                            "Variable %s in stack %s has a circular reference "
                             "within lookup: %s"
                         ) % (variable.name, self.name, lookup.raw)
                         raise ValueError(message)

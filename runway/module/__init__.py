@@ -3,12 +3,15 @@
 
 import logging
 import os
+import platform
 import subprocess
 import sys
 
 from ..util import which
 
 LOGGER = logging.getLogger('runway')
+NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
+NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
 
 
 def format_npm_command_for_logging(command):
@@ -20,12 +23,12 @@ def format_npm_command_for_logging(command):
 
 def generate_node_command(command, command_opts, path):
     """Return node bin command list for subprocess execution."""
-    if which('npx'):
+    if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
         LOGGER.debug("Using npx to invoke %s.", command)
         # The nested cdk-through-npx-via-subprocess command invocation
         # requires this redundant quoting
-        cmd_list = ['npx',
+        cmd_list = [NPX_BIN,
                     '-c',
                     "''%s %s''" % (command, ' '.join(command_opts))]
     else:
@@ -79,7 +82,7 @@ def use_npm_ci(path):
              os.path.isfile(os.path.join(path,
                                          'npm-shrinkwrap.json'))) and
                 subprocess.call(
-                    ['npm', 'ci', '-h'],
+                    [NPM_BIN, 'ci', '-h'],
                     stdout=fnull,
                     stderr=subprocess.STDOUT
                 ) == 0):
@@ -96,11 +99,11 @@ def run_npm_install(path, options, context):
     elif context.env_vars.get('CI') and use_npm_ci(path):  # noqa
         LOGGER.info("Running npm ci on %s...",
                     os.path.basename(path))
-        subprocess.check_call(['npm', 'ci'])
+        subprocess.check_call([NPM_BIN, 'ci'])
     else:
         LOGGER.info("Running npm install on %s...",
                     os.path.basename(path))
-        subprocess.check_call(['npm', 'install'])
+        subprocess.check_call([NPM_BIN, 'install'])
 
 
 class RunwayModule(object):

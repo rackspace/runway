@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.38.0] - 2018-12-19
+### Fixed
+- Additional Windows npm/npx command fixes
+
+### Added
+- Incorporate stacker typo & stack rollback fixes
+
 ## [0.37.2] - 2018-12-19
 ### Fixed
 - Fix file detection on Windows (find `npm.cmd`)
@@ -372,7 +379,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.37.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.38.0...HEAD
+[0.38.0]: https://github.com/onicagroup/runway/compare/v0.37.2...v0.38.0
 [0.37.2]: https://github.com/onicagroup/runway/compare/v0.37.1...v0.37.2
 [0.37.1]: https://github.com/onicagroup/runway/compare/v0.37.0...v0.37.1
 [0.37.0]: https://github.com/onicagroup/runway/compare/v0.36.0...v0.37.0

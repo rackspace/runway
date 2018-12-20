@@ -35,6 +35,8 @@ INSTALL_REQUIRES = [
     # https://github.com/cloudtools/stacker/pull/676 (lookup fix; in master)
     # https://github.com/cloudtools/stacker/pull/677 (local pkgs; in master)
     # https://github.com/cloudtools/stacker/pull/682 (aws_lambda fix in master)
+    # https://github.com/cloudtools/stacker/pull/687 (rollback ux; in master)
+    # https://github.com/cloudtools/stacker/pull/690 (typo fix; in master)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
