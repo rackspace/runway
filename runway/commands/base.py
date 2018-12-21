@@ -92,7 +92,9 @@ class Base(object):
                     '.flake8'
                 ))
             ]
-        if os.path.isfile(os.path.join(base_dir, '.yamllint.yml')):
+        if os.path.isfile(os.path.join(base_dir, '.yamllint')):
+            yamllint_config = os.path.join(base_dir, '.yamllint')
+        elif os.path.isfile(os.path.join(base_dir, '.yamllint.yml')):
             yamllint_config = os.path.join(base_dir, '.yamllint.yml')
         else:
             yamllint_config = os.path.join(
