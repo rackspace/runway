@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with Terraform state resources."""
+from __future__ import print_function
 
 from troposphere import (
     Equals, If, Join, NoValue, Or, Output, dynamodb, iam, s3
