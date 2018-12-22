@@ -34,26 +34,22 @@ Another sample repo structure, showing the same modules nested in environment fo
     ├── dev
     │   ├── myapp.cfn
     │   │   ├── dev-us-west-2.env
-    |   │   ├── prod-us-west-2.env
     │   │   ├── myapp.yaml
     │   │   └── templates
     │   │       └── myapp_cf_template.json
     │   ├── myapp.tf
     │   │   ├── backend.tfvars
     │   │   ├── dev-us-east-1.tfvars
-    |   │   ├── prod-us-east-1.tfvars
     │   │   └── main.tf
     │   └── runway.yml
     └── prod
         ├── myapp.cfn
-        │   ├── dev-us-west-2.env
         │   ├── prod-us-west-2.env
         │   ├── myapp.yaml
         │   └── templates
         │       └── myapp_cf_template.json
         ├── myapp.tf
         │   ├── backend.tfvars
-        │   ├── dev-us-east-1.tfvars
         │   ├── prod-us-east-1.tfvars
         │   └── main.tf
         └── runway.yml
@@ -67,13 +63,11 @@ CloudFormation module at their root (combining the `current_dir` & `ignore_git_b
     .
     ├── dev
     │   ├── dev-us-west-2.env
-    │   ├── prod-us-west-2.env
     │   ├── myapp.yaml
     │   ├── runway.yml
     │   └── templates
     │       └── myapp_cf_template.json
     └── prod
-        ├── dev-us-west-2.env
         ├── prod-us-west-2.env
         ├── myapp.yaml
         ├── runway.yml
