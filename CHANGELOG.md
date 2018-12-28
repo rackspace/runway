@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.39.1] - 2018-12-28
+### Fixed
+- Remove default yamllint truthy check to allow yes/no values
+
 ## [0.39.0] - 2018-12-27
 ### Added
 - CFN SSM parameter types
@@ -391,7 +395,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.39.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.39.1...HEAD
+[0.39.1]: https://github.com/onicagroup/runway/compare/v0.39.0...v0.39.1
 [0.39.0]: https://github.com/onicagroup/runway/compare/v0.38.2...v0.39.0
 [0.38.2]: https://github.com/onicagroup/runway/compare/v0.38.1...v0.38.2
 [0.38.1]: https://github.com/onicagroup/runway/compare/v0.38.0...v0.38.1

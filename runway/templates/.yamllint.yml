@@ -12,6 +12,9 @@ rules:
   # Don't warn on line length
   line-length: disable
 
+  # Certain systems (e.g. ansible) document yes/no as valid values
+  truthy: disable
+
   comments:
     # Cloudinit configs can't have the normal starting space in a comment
     require-starting-space: false
