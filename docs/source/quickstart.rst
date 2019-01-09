@@ -3,7 +3,7 @@ Quickstart Guides
 
 CloudFormation
 ^^^^^^^^^^^^^^
-For production use, or persistent daily use on a development workstation, consider the full Runway installation here. 
+For production use, or persistent daily use on a development workstation, consider the full Runway installation `here <installation.html>`_. 
 To quickly evaluate Runway without installing anything, a number of resources are available:
 
 - A `CloudFormation template <https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml>`_. 
