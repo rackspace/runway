@@ -1,12 +1,12 @@
 """runway base module."""
 from __future__ import print_function
 
-from subprocess import check_call, check_output
-
 import glob
 import logging
 import os
 import shutil
+from subprocess import check_call, check_output
+from subprocess import CalledProcessError
 import sys
 
 import cfn_flip
@@ -17,8 +17,8 @@ import yaml
 # from util but that would require sys.path shenanigans here
 from ..embedded.stacker.awscli_yamlhelper import yaml_parse as parse_cloudformation_template  # noqa
 from ..util import (
-    change_dir, ensure_file_is_executable, get_embedded_lib_path,
-    ignore_exit_code_0, use_embedded_pkgs, which
+    change_dir, get_embedded_lib_path, ignore_exit_code_0, use_embedded_pkgs,
+    which
 )
 from .. import __version__ as version
 
@@ -194,8 +194,6 @@ class Base(object):
                     PylintRun(pylint_config + nonblueprint_files + blueprint_files)  # noqa
             LOGGER.info('pylint complete.')
             for filepath in blueprint_files:
-                # Blueprints should output their template when executed
-                ensure_file_is_executable(filepath)
                 try:
                     shell_out_env = os.environ.copy()
                     if 'PYTHONPATH' in shell_out_env:
@@ -217,11 +215,28 @@ class Base(object):
                           "YAML/JSON output" % filepath)
                     raise
 
+    def cfn_lint(self):
+        """Run cfn-lint on templates."""
+        if os.path.isfile(os.path.join(self.env_root,
+                                       '.cfnlintrc')):
+            LOGGER.info('Starting cfn-lint checks...')
+            try:
+                check_call([sys.executable,
+                            '-c',
+                            "import sys;from cfnlint.__main__ import main;sys.argv = ['cfn-lint'];sys.exit(main())"])  # noqa pylint: disable=line-too-long
+            except CalledProcessError:
+                sys.exit(1)
+            LOGGER.info('cfn-lint complete')
+        else:
+            LOGGER.debug('Skipping cfn-lint checks (no .cfnlintrc file '
+                         'defined)')
+
     def test(self):
         """Execute tests."""
         self.lint()
         self.cookbook_tests()
         self.python_tests()
+        self.cfn_lint()
 
     def path_only_contains_dirs(self, path):
         """Return boolean on whether a path only contains directories."""

@@ -19,6 +19,7 @@ INSTALL_REQUIRES = [
     'awacs',  # for embedded hooks
     # awscli version pinned to match stacker botocore pinning
     'awscli<1.16.0',  # for embedded hooks
+    'cfn-lint',
     'docopt',
     'flake8',
     'flake8-docstrings',

@@ -16,6 +16,12 @@ files appropriate for the module type:
 - ``runway gen-sample stacker``: Creates a sample CloudFormation module (with Python templates using Troposphere and awacs) in ``runway-sample-tfstate.cfn``
 - ``runway gen-sample tf``: Creates a sample Terraform module in ``sampleapp.tf``
 
+cfn-lint
+^^^^^^^^^^
+If a ``.cfnlintrc`` file is placed alongside an environment's ``runway.yml``, cfn-lint will be invoked
+automatically during runway test aka preflight.
+
+Specify the templates to be included via the `config file. <https://github.com/awslabs/cfn-python-lint#config-file>`_
 
 Runway Plugin Support
 ^^^^^^^^^^^^^^^^^^^^^
