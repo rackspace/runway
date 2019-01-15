@@ -44,6 +44,7 @@ if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
 
     class DistributionConfig(AWSProperty):
         """Backported cf config class for broken troposphere release."""
+
         props = {
             'Aliases': (list, False),
             'CacheBehaviors': ([cloudfront.CacheBehavior], False),
