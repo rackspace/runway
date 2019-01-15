@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.40.1] - 2019-01-15
 ### Fixed
 - Fixed staticsite module use with troposphere 2.4+
 
@@ -405,7 +407,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.40.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.40.1...HEAD
+[0.40.1]: https://github.com/onicagroup/runway/compare/v0.40.0...v0.40.1
 [0.40.0]: https://github.com/onicagroup/runway/compare/v0.39.1...v0.40.0
 [0.39.1]: https://github.com/onicagroup/runway/compare/v0.39.0...v0.39.1
 [0.39.0]: https://github.com/onicagroup/runway/compare/v0.38.2...v0.39.0
