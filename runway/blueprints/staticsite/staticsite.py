@@ -3,10 +3,13 @@
 from __future__ import print_function
 
 import hashlib
+from distutils.version import LooseVersion
+from past.builtins import basestring
 
+import troposphere
 from troposphere import (
-    And, Equals, If, Join, Not, NoValue, Output, Select, awslambda, cloudfront,
-    iam, s3
+    AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
+    awslambda, cloudfront, iam, s3
 )
 
 import awacs.s3
@@ -17,6 +20,47 @@ from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import CFNCommaDelimitedList, CFNString
 
 IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
+if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
+    from troposphere.validators import boolean, priceclass_type
+
+    class S3OriginConfig(AWSProperty):
+        """Backported s3 origin config class for broken troposphere release."""
+
+        props = {
+            'OriginAccessIdentity': (basestring, False),
+        }
+
+    class Origin(AWSProperty):
+        """Backported origin config class for broken troposphere release."""
+
+        props = {
+            'CustomOriginConfig': (cloudfront.CustomOriginConfig, False),
+            'DomainName': (basestring, True),
+            'Id': (basestring, True),
+            'OriginCustomHeaders': ([cloudfront.OriginCustomHeader], False),
+            'OriginPath': (basestring, False),
+            'S3OriginConfig': (S3OriginConfig, False),
+        }
+
+    class DistributionConfig(AWSProperty):
+        """Backported cf config class for broken troposphere release."""
+        props = {
+            'Aliases': (list, False),
+            'CacheBehaviors': ([cloudfront.CacheBehavior], False),
+            'Comment': (basestring, False),
+            'CustomErrorResponses': ([cloudfront.CustomErrorResponse], False),
+            'DefaultCacheBehavior': (cloudfront.DefaultCacheBehavior, True),
+            'DefaultRootObject': (basestring, False),
+            'Enabled': (boolean, True),
+            'HttpVersion': (basestring, False),
+            'IPV6Enabled': (boolean, False),
+            'Logging': (cloudfront.Logging, False),
+            'Origins': ([Origin], True),
+            'PriceClass': (priceclass_type, False),
+            'Restrictions': (cloudfront.Restrictions, False),
+            'ViewerCertificate': (cloudfront.ViewerCertificate, False),
+            'WebACLId': (basestring, False),
+        }
 
 
 class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
@@ -238,22 +282,22 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
 
         cfdistribution = template.add_resource(
-            cloudfront.Distribution(
+            get_cf_distribution_class()(
                 'CFDistribution',
                 DependsOn=allowcfaccess.title,
-                DistributionConfig=cloudfront.DistributionConfig(
+                DistributionConfig=get_cf_distro_conf_class()(
                     Aliases=If(
                         'AliasesSpecified',
                         variables['Aliases'].ref,
                         NoValue
                     ),
                     Origins=[
-                        cloudfront.Origin(
+                        get_cf_origin_class()(
                             DomainName=Join(
                                 '.',
                                 [bucket.ref(),
                                  's3.amazonaws.com']),
-                            S3OriginConfig=cloudfront.S3Origin(
+                            S3OriginConfig=get_s3_origin_conf_class()(
                                 OriginAccessIdentity=Join(
                                     '',
                                     ['origin-access-identity/cloudfront/',
@@ -314,6 +358,38 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 Value=cfdistribution.get_att('DomainName')
             )
         )
+
+
+def get_cf_distribution_class():
+    """Return the correct troposphere CF distribution class."""
+    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
+        cf_dist = cloudfront.Distribution
+        cf_dist.props['DistributionConfig'] = (DistributionConfig, True)
+        return cf_dist
+    return cloudfront.Distribution
+
+
+def get_cf_distro_conf_class():
+    """Return the correct troposphere CF distribution class."""
+    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
+        return DistributionConfig
+    return cloudfront.DistributionConfig
+
+
+def get_cf_origin_class():
+    """Return the correct Origin class for troposphere."""
+    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
+        return Origin
+    return cloudfront.Origin
+
+
+def get_s3_origin_conf_class():
+    """Return the correct S3 Origin Config class for troposphere."""
+    if LooseVersion(troposphere.__version__) > LooseVersion('2.4.0'):
+        return cloudfront.S3OriginConfig
+    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
+        return S3OriginConfig
+    return cloudfront.S3Origin
 
 
 # Helper section to enable easy blueprint -> template generation
