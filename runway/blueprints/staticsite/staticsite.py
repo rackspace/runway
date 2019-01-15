@@ -3,14 +3,9 @@
 from __future__ import print_function
 
 import hashlib
-from distutils.version import LooseVersion
+# https://github.com/PyCQA/pylint/issues/73
+from distutils.version import LooseVersion  # noqa pylint: disable=no-name-in-module,import-error
 from past.builtins import basestring
-
-import troposphere
-from troposphere import (
-    AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
-    awslambda, cloudfront, iam, s3
-)
 
 import awacs.s3
 import awacs.sts
@@ -18,6 +13,13 @@ from awacs.aws import Allow, PolicyDocument, Principal, Statement
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import CFNCommaDelimitedList, CFNString
+from stacker.context import Context
+
+import troposphere
+from troposphere import (
+    AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
+    awslambda, cloudfront, iam, s3
+)
 
 IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
 if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
@@ -396,5 +398,4 @@ def get_s3_origin_conf_class():
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from stacker.context import Context
     print(StaticSite('test', Context({"namespace": "test"}), None).to_json())
