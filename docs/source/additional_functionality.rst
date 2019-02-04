@@ -1,4 +1,4 @@
-Addtional Functionality
+Additional Functionality
 =======================
 
 whichenv
@@ -62,13 +62,13 @@ After you have written your Runway Plugin, you need to add the module ``class_pa
           - us-east-1
 
 
-The below is an example Runway Plugin that wraps the ``anisble-playbook`` command to deploy a EC2 Security Group from a playbook yaml under the naming convention of ``<env>-<region>.yaml`` within a fictional ``security_group.ansible`` runway module folder. In this example, the ``anisble-playbook`` binary would already have been installed prior to a runway deploy, but this example does check to see if it is installed before execution and logs an error if that is the case. The Runway plugin also will only execute the ansible-playbook against a yaml file for the environment set for thr runway execution and region defined in the runway.yaml. 
+The below is an example Runway Plugin that wraps the ``ansible-playbook`` command to deploy a EC2 Security Group from a playbook yaml under the naming convention of ``<env>-<region>.yaml`` within a fictional ``security_group.ansible`` runway module folder. In this example, the ``ansible-playbook`` binary would already have been installed prior to a runway deploy, but this example does check to see if it is installed before execution and logs an error if that is the case. The Runway plugin also will only execute the ansible-playbook against a yaml file for the environment set for thr runway execution and region defined in the runway.yaml. 
 
-Using the above runway.yaml, the below plugin and below playbook saved in the runway module folder, you will only have a deployment occur in the ``dev`` environment in ``us-east-1``.  If you decide to perform a runway deployment in a the ``prod`` environment or in a different region, the anisble-playbook deployment will be skipped. This matches the built in behavior of the native modules runway includes. 
+Using the above runway.yaml, the below plugin and below playbook saved in the runway module folder, you will only have a deployment occur in the ``dev`` environment in ``us-east-1``.  If you decide to perform a runway deployment in a the ``prod`` environment or in a different region, the ansible-playbook deployment will be skipped. This matches the built in behavior of the native modules runway includes. 
 
 ::
 
-    """Anisble Plugin example for Runway."""
+    """Ansible Plugin example for Runway."""
 
     import logging
     import subprocess
@@ -93,17 +93,17 @@ Using the above runway.yaml, the below plugin and below playbook saved in the ru
 
 
     class DeployToAWS(RunwayModule):
-        """Anisble Runway Module."""
+        """Ansible Runway Module."""
 
         def plan(self):
             """Skip plan"""
-            LOGGER.info('plan not currently supported for Anisble')
+            LOGGER.info('plan not currently supported for Ansible')
             pass
 
         def deploy(self):
-            """Run anisble-playbook."""
-            if not which('anisble-playbook'):
-                LOGGER.error('"anisble-playbook" not found in path or is not '
+            """Run ansible-playbook."""
+            if not which('ansible-playbook'):
+                LOGGER.error('"ansible-playbook" not found in path or is not '
                              'executable; please ensure it is installed'
                              'correctly.')
                 sys.exit(1)
@@ -118,12 +118,12 @@ Using the above runway.yaml, the below plugin and below playbook saved in the ru
 
         def destroy(self):
             """Skip destroy."""
-            LOGGER.info('Destroy not currently supported for Anisble')
+            LOGGER.info('Destroy not currently supported for Ansible')
             pass
 
 
 
-And below is the example Ansible playbook itself, saved as ``dev-us-east-1.yaml`` in the security_group.anisble folder:
+And below is the example Ansible playbook itself, saved as ``dev-us-east-1.yaml`` in the security_group.ansible folder:
 
 ::
 
