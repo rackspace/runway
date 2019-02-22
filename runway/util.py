@@ -1,5 +1,6 @@
 """Utility functions."""
 from __future__ import print_function
+from typing import Dict, List, Optional, Union  # noqa pylint: disable=unused-import
 
 from contextlib import contextmanager
 import importlib
@@ -86,10 +87,11 @@ def ignore_exit_code_0():
             raise
 
 
-def run_commands(commands, directory, env=None):
-    # type: (List[Union[str, List[str], Dict[str, Union[str, List[str]]]]],
-    #        str)
-    # -> None
+def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+                 directory,  # type: str
+                 env=None  # type: Optional[Dict[str, Union[str, int]]]
+                ):  # noqa
+    # type: (...) -> None
     """Run list of commands."""
     if env is None:
         env = os.environ.copy()

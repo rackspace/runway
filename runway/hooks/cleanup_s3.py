@@ -4,9 +4,9 @@ import logging
 
 from botocore.exceptions import ClientError
 
-from stacker.lookups.handlers import output as output_module
-from stacker.lookups.handlers import rxref as rxref_module
-from stacker.lookups.handlers import xref as xref_module
+from stacker.lookups.handlers.output import OutputLookup
+from stacker.lookups.handlers.rxref import RxrefLookup
+from stacker.lookups.handlers.xref import XrefLookup
 from stacker.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
@@ -21,13 +21,13 @@ def purge_bucket(context, provider, **kwargs):
     else:
         if kwargs.get('bucket_output_lookup'):
             value = kwargs['bucket_output_lookup']
-            handler = getattr(output_module, 'handler')
+            handler = OutputLookup.handle
         elif kwargs.get('bucket_rxref_lookup'):
             value = kwargs['bucket_rxref_lookup']
-            handler = getattr(rxref_module, 'handler')
+            handler = RxrefLookup.handle
         elif kwargs.get('bucket_xref_lookup'):
             value = kwargs['bucket_xref_lookup']
-            handler = getattr(xref_module, 'handler')
+            handler = XrefLookup.handle
         else:
             LOGGER.fatal('No bucket name/source provided.')
             return False

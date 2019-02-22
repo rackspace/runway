@@ -8,7 +8,7 @@ from operator import itemgetter
 
 from awscli.clidriver import create_clidriver
 
-from stacker.lookups.handlers.output import handler as output_handler
+from stacker.lookups.handlers.output import OutputLookup
 from stacker.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
@@ -50,20 +50,20 @@ def get_archives_to_prune(archives, hook_data):
 def sync(context, provider, **kwargs):  # pylint: disable=too-many-locals
     """Sync static website to S3 bucket."""
     session = get_session(provider.region)
-    bucket_name = output_handler(kwargs.get('bucket_output_lookup'),
-                                 provider=provider,
-                                 context=context)
+    bucket_name = OutputLookup.handle(kwargs.get('bucket_output_lookup'),
+                                      provider=provider,
+                                      context=context)
 
     if context.hook_data['staticsite']['deploy_is_current']:
         LOGGER.info('staticsite: skipping upload; latest version already '
                     'deployed')
     else:
-        distribution_id = output_handler(
+        distribution_id = OutputLookup.handle(
             kwargs.get('distributionid_output_lookup'),
             provider=provider,
             context=context
         )
-        distribution_domain = output_handler(
+        distribution_domain = OutputLookup.handle(
             kwargs.get('distributiondomain_output_lookup'),
             provider=provider,
             context=context

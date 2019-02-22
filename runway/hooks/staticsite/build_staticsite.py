@@ -9,7 +9,7 @@ from boto3.s3.transfer import S3Transfer
 import boto3
 
 from botocore.exceptions import ClientError
-from stacker.lookups.handlers.rxref import handler as rxref_handler
+from stacker.lookups.handlers.rxref import RxrefLookup
 from stacker.session_cache import get_session
 
 from .util import get_hash_of_files
@@ -93,7 +93,7 @@ def build(context, provider, **kwargs):  # pylint: disable=unused-argument
     else:
         build_output = options['path']
 
-    context_dict['artifact_bucket_name'] = rxref_handler(
+    context_dict['artifact_bucket_name'] = RxrefLookup.handle(
         kwargs.get('artifact_bucket_rxref_lookup'),
         provider=provider,
         context=context

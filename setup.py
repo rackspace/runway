@@ -30,21 +30,16 @@ INSTALL_REQUIRES = [
     'typing',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # embedded stacker is v1.5.0 with the following patches applied:
-    # https://github.com/cloudtools/stacker/pull/670 (py3 fix; in master)
-    # https://github.com/cloudtools/stacker/pull/674 (query fix; in master)
-    # https://github.com/cloudtools/stacker/pull/676 (lookup fix; in master)
-    # https://github.com/cloudtools/stacker/pull/677 (local pkgs; in master)
-    # https://github.com/cloudtools/stacker/pull/682 (aws_lambda fix in master)
-    # https://github.com/cloudtools/stacker/pull/687 (rollback ux; in master)
-    # https://github.com/cloudtools/stacker/pull/690 (typo fix; in master)
-    # https://github.com/cloudtools/stacker/pull/692 (ssm param types)
+    # embedded stacker is v1.6.0 with the following patches applied:
+    # https://github.com/cloudtools/stacker/pull/701 (jinja2 templating)
     # and the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
-    'stacker~=1.5',
+    'stacker~=1.6',
+    # Temporary duplicated jinja2 dep until stacker #701 is cut in a release
+    'jinja2~=2.7',
     # Stacker also pulls in our cfn-flip dependency (template generation)
     # via troposphere
     #

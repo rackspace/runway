@@ -86,16 +86,51 @@ def remove_stale_tf_config(path, backend_tfvars_file):
                 send2trash(terrform_dir)
 
 
+def prep_workspace_switch(module_path, backend_file_name, env_name, env_region,
+                          env_vars):
+    """Clean terraform directory and run init if necessary.
+
+    Creating a new workspace after a previous workspace has been created with
+    a defined 'key' will result in the new workspace retaining the same key.
+    Additionally, existing workspaces will not show up in a `tf workspace
+    list` if they have a different custom key than the previously
+    initialized workspace.
+
+    This function will check for a custom key and re-init.
+    """
+    terrform_dir = os.path.join(module_path, '.terraform')
+    if os.path.isdir(terrform_dir) and (
+            os.path.isfile(os.path.join(module_path, backend_file_name))):
+        with open(backend_file_name, 'r') as stream:
+            state_config = hcl.load(stream)
+        if 'key' in state_config:
+            LOGGER.info("Backend config file %s defines a custom state key, "
+                        "which Terraform will not respect when listing/"
+                        "switching workspaces. Deleting the current "
+                        ".terraform directory to ensure the key is used.",
+                        backend_file_name)
+            send2trash(terrform_dir)
+            LOGGER.info(".terraform directory removed; proceeding with "
+                        "init...")
+            run_terraform_init(
+                module_path=module_path,
+                backend_file_name=backend_file_name,
+                env_name=env_name,
+                env_region=env_region,
+                env_vars=env_vars
+            )
+
+
 def run_terraform_init(module_path, backend_file_name, env_name, env_region,
                        env_vars):
     """Run Terraform init."""
     init_cmd = ['terraform', 'init']
-    if os.path.isfile(os.path.join(module_path, backend_file_name)):  # noqa
+    if os.path.isfile(os.path.join(module_path, backend_file_name)):
         LOGGER.info('Using backend config file %s',
                     backend_file_name)
         remove_stale_tf_config(module_path, backend_file_name)
         run_module_command(
-            cmd_list=init_cmd + ['-backend-config=%s' % backend_file_name],  # noqa pylint: disable=line-too-long
+            cmd_list=init_cmd + ['-backend-config=%s' % backend_file_name],
             env_vars=env_vars
         )
     else:
@@ -187,12 +222,19 @@ class Terraform(RunwayModule):
                     env=self.context.env_vars
                 ).strip().decode()
                 if current_tf_workspace != self.context.env_name:
-                    LOGGER.info("Terraform workspace current set to %s; "
+                    LOGGER.info("Terraform workspace currently set to %s; "
                                 "switching to %s...",
                                 current_tf_workspace,
                                 self.context.env_name)
                     LOGGER.debug('Checking available Terraform '
                                  'workspaces...')
+                    prep_workspace_switch(
+                        module_path=self.path,
+                        backend_file_name=backend_tfvars_file,
+                        env_name=self.context.env_name,
+                        env_region=self.context.env_region,
+                        env_vars=self.context.env_vars
+                    )
                     available_tf_envs = subprocess.check_output(
                         ['terraform', 'workspace', 'list'],
                         env=self.context.env_vars
