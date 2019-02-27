@@ -30,9 +30,7 @@ Walkthrough - Deploy a CloudFormation Stack
     git init
     git checkout -b ENV-dev
     runway gen-sample cfn
-    sed -i'.backup' -e 's/CUSTOMERNAMEHERE/mydemo/g' sampleapp.cfn/dev-us-east-1.env
-    sed -i'' -e 's/ENVIRONMENTNAMEHERE/dev/g' sampleapp.cfn/dev-us-east-1.env
-    sed -i'' -e "s/stacker-/stacker-$(uuidgen)-/g" sampleapp.cfn/dev-us-east-1.env
+    sed -i'.backup' -e "s/CUSTOMERNAMEHERE/mydemo/g; s/ENVIRONMENTNAMEHERE/dev/g; s/stacker-/stacker-$(uuidgen|tr "[:upper:]" "[:lower:]")-/g" sampleapp.cfn/dev-us-east-1.env
     cat <<EOF >> runway.yml
     ---
     # Full syntax at https://github.com/onicagroup/runway
