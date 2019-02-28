@@ -87,6 +87,25 @@ def ignore_exit_code_0():
             raise
 
 
+def fix_windows_command_list(commands):
+    # type: (List[str]) -> List[str]
+    """Return command list with working Windows commands.
+
+    npm on windows is npm.cmd, which will blow up
+    subprocess.check_call(['npm', '...'])
+    """
+    # This could theoretically be run for for every command, instead of just
+    # limiting it to known problem commands here. Unclear which approach will
+    # better, so starting with just this small list.
+    for i in ['npm', 'npx']:
+        if commands[0] == i:
+            fully_qualified_cmd_path = which(i)
+            if fully_qualified_cmd_path and (
+                    not which(i, add_win_suffixes=False)):
+                commands[0] = os.path.basename(fully_qualified_cmd_path)
+    return commands
+
+
 def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
                  directory,  # type: str
                  env=None  # type: Optional[Dict[str, Union[str, int]]]
@@ -106,6 +125,8 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
         else:
             raise AttributeError("Invalid command step: %s" % step)
         command_list = raw_command.split(' ') if isinstance(raw_command, six.string_types) else raw_command  # noqa pylint: disable=line-too-long
+        if platform.system().lower() == 'windows':
+            command_list = fix_windows_command_list(command_list)
 
         with change_dir(execution_dir):
             check_call(command_list, env=env)
@@ -128,7 +149,7 @@ def use_embedded_pkgs(embedded_lib_path=None):
         sys.path = old_sys_path
 
 
-def which(program):
+def which(program, add_win_suffixes=True):
     """Mimic 'which' command behavior.
 
     Adapted from https://stackoverflow.com/a/377028
@@ -138,7 +159,7 @@ def which(program):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, fname = os.path.split(program)
-    if platform.system().lower() == 'windows' and not (
+    if add_win_suffixes and platform.system().lower() == 'windows' and not (
             fname.endswith('.exe') or fname.endswith('.cmd')):
         fnames = [fname + '.exe', fname + '.cmd']
     else:

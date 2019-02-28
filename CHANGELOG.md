@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.41.1] - 2019-02-28
+### Fixed
+- Correct Terraform workspace creation/selection with custom backend keys
+
 ## [0.41.0] - 2019-02-22
 ### Fixed
 - Correct Terraform workspace creation/selection with custom backend keys
@@ -414,7 +418,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.41.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.41.1...HEAD
+[0.41.1]: https://github.com/onicagroup/runway/compare/v0.41.0...v0.41.1
 [0.41.0]: https://github.com/onicagroup/runway/compare/v0.40.1...v0.41.0
 [0.40.1]: https://github.com/onicagroup/runway/compare/v0.40.0...v0.40.1
 [0.40.0]: https://github.com/onicagroup/runway/compare/v0.39.1...v0.40.0
