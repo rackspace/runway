@@ -28,7 +28,17 @@ promoted through branches)::
 
 Directories as Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Another sample repo structure, showing the same modules nested in environment folders::
+The same 2 modules from the above Git Branches as Environments structure can
+instead be stored in a normal single-branch git repo. Each directory
+correlates with an environment (dev and prod in this example).
+
+Environment changes are done by copying the environments' contents between
+each other. E.g., promotion from dev to prod would then look like
+``diff -u dev/ prod/`` and then ``rsync -r --delete dev/ prod/``
+
+Enabling that automated promotion is one of the reasons this example below has
+prod config files in the dev folder and vice versa. When promotions between
+environments are more hand managed, this is not technically required::
 
     .
     ├── dev
@@ -61,8 +71,12 @@ Another sample repo structure, showing the same modules nested in environment fo
 Directories as Environments with a Single Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Another sample repo structure, showing environment folders containing a single 
-CloudFormation module at their root (combining the `current_dir` & `ignore_git_branch` 
-"Runway Config File" options to merge the Environment & Module folders)::
+CloudFormation module at their root (combining the ``current_dir`` &
+``ignore_git_branch`` "Runway Config File" options to merge the Environment &
+Module folders).
+
+See the Directories as Environments example above for more information on
+why this shows prod config files in the dev folder and vice versa::
 
     .
     ├── dev
