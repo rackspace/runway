@@ -33,8 +33,8 @@ instead be stored in a normal single-branch git repo. Each directory
 correlates with an environment (dev and prod in this example).
 
 Environment changes are done by copying the environments' contents between
-each other. E.g., promotion from dev to prod would then look like
-``diff -u dev/ prod/`` and then ``rsync -r --delete dev/ prod/``
+each other. E.g., promotion from dev to prod could be as simple as
+``diff -u dev/ prod/`` followed by ``rsync -r --delete dev/ prod/``
 
 Enabling that automated promotion is one of the reasons this example below has
 prod config files in the dev folder and vice versa. When promotions between
