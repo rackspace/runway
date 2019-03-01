@@ -1,5 +1,6 @@
 {
     "files.insertFinalNewline": true,
     "python.linting.flake8Enabled": true,
-    "python.linting.mypyEnabled": false
+    "python.linting.mypyEnabled": false,
+    "restructuredtext.confPath": "${workspaceFolder}\\docs\\source"
 }
