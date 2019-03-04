@@ -112,7 +112,7 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     cd frontend
     mkdir scripts
     cd scripts && { curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js ; cd -; }
-    sed -i 's/^\s*"build":\s.*$/    "build": "node scripts/build",/' package.json
+    sed -i 's/^\s*"build":\s.*$/    "build": "node scripts\/build",/' package.json
     sed -i 's/^\s*"rxjs":\s.*$/    "rxjs": "~6.3.3",/' package.json
     npm install
     curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py
