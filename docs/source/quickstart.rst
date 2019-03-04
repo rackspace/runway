@@ -131,7 +131,7 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     Remove-Item v1.0.0.zip -Force
     Rename-Item realworld-dynamodb-lambda-1.0.0 backend
     cd backend
-    (gc .\.gitignore -raw).Replace("package-lock.json`r`n", "") | sc .\.gitignore
+    (gc .\.gitignore -raw).Replace("package-lock.json`n", "") | sc .\.gitignore
     ".dynamodb`r`n" | Out-File .\.gitignore -Append -Encoding UTF8
     $(gc .\package.json) -replace "dynamodb install .*$", "dynamodb install`"" | Out-File .\package.json -Force -Encoding UTF8
     npm install
@@ -141,8 +141,11 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     Remove-Item 35a66d144d8def340278cd55080d5c745714aca4.zip -Force
     Rename-Item angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend
     cd frontend
-    $(gc .\package.json) -replace "^\s*`"build`":\s.*$", "    `"build`": `"if test \`"`$(pipenv run runway whichenv)\`" = \`"prod\`" ; then ng build --prod --base-href .\/ && cp CNAME dist\/CNAME; else ng build --base-href .\/ && cp CNAME dist\/CNAME; fi`"," | Out-File .\package.json -Force -Encoding UTF8
+    (gc .\package.json -raw).Replace("`"rxjs`": `"^6.2.1`"", "`"rxjs`": `"~6.3.3`"") | sc .\package.json
+    Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js -OutFile scripts/build.js
+    $(gc .\package.json) -replace "^\s*`"build`":\s.*$", "    `"build`": `"node scripts/build`"," | Out-File .\package.json -Force -Encoding UTF8
     npm install
+    mkdir scripts
     Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py -OutFile update_env_endpoint.py
     cd ..
     Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/Pipfile -OutFile Pipfile
