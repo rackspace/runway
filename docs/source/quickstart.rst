@@ -110,7 +110,10 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     rm 35a66d144d8def340278cd55080d5c745714aca4
     mv angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend
     cd frontend
-    sed -i 's/^\s*"build":\s.*$/    "build": "if test \\"$(pipenv run runway whichenv)\\" = \\"prod\\" ; then ng build --prod --base-href .\/ \&\& cp CNAME dist\/CNAME; else ng build --base-href .\/ \&\& cp CNAME dist\/CNAME; fi",/' package.json
+    mkdir scripts
+    cd scripts && { curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js ; cd -; }
+    sed -i 's/^\s*"build":\s.*$/    "build": "node scripts/build",/' package.json
+    sed -i 's/^\s*"rxjs":\s.*$/    "rxjs": "~6.3.3",/' package.json
     npm install
     curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py
     cd ..
@@ -142,10 +145,10 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     Rename-Item angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend
     cd frontend
     (gc .\package.json -raw).Replace("`"rxjs`": `"^6.2.1`"", "`"rxjs`": `"~6.3.3`"") | sc .\package.json
+    mkdir scripts
     Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js -OutFile scripts/build.js
     $(gc .\package.json) -replace "^\s*`"build`":\s.*$", "    `"build`": `"node scripts/build`"," | Out-File .\package.json -Force -Encoding UTF8
     npm install
-    mkdir scripts
     Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py -OutFile update_env_endpoint.py
     cd ..
     Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/Pipfile -OutFile Pipfile
