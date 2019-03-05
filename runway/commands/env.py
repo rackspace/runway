@@ -481,7 +481,7 @@ class Env(Base):
                                    '(or "all"): ')
             if selected_index == 'all':
                 deployments_to_run.append(selected_deploy)
-            elif selected_index == '':
+            elif selected_index == '' or not selected_index.isdigit() or not 0 < int(selected_index) <= len(selected_deploy):
                 LOGGER.error('Please select a valid number (or "all")')
                 sys.exit(1)
             else:
