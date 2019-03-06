@@ -5,10 +5,11 @@ clean:
 
 test: create_readme
 	python setup.py test
-	flake8 --exclude=runway/embedded runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/blueprints/*' | xargs pylint --rcfile=.pylintrc
-	find runway/templates/stacker -name '*.py' | xargs pylint --disable=import-error --disable=too-few-public-methods
-	find runway/blueprints -name '*.py' | xargs pylint --disable=duplicate-code
+	pipenv sync -d
+	pipenv run flake8 --exclude=runway/embedded runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
+	find runway/templates/stacker -name '*.py' | xargs pipenv run pylint --disable=import-error --disable=too-few-public-methods
+	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 create_readme:
 	sed '/^\[!\[Build Status\]/d' README.md | pandoc --from=markdown --to=rst --output=README.rst
