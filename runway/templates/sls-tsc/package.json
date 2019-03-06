@@ -1,0 +1,29 @@
+{
+  "name": "replaceme-myslsservice",
+  "version": "1.0.0",
+  "description": "Replace Me - My Serverless Service",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -r ts-node/register ./**/*.spec.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "source-map-support": "^0.5.10"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.20",
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^11.10.4",
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2",
+    "serverless": "^1.38.0",
+    "serverless-webpack": "^5.2.0",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

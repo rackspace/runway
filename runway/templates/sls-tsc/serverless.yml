@@ -1,0 +1,23 @@
+service: replaceme-myslsservice
+
+plugins:
+- serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+custom:
+  webpack:
+    includeModules:
+      forceExclude:
+        - aws-sdk
+
+functions:
+  helloWorld:
+    handler: src/handler.helloWorld
+    events:
+      - http:
+          path: hello-world
+          method: get
+          cors: true

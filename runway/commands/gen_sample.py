@@ -11,6 +11,8 @@ class GenSample(Base):
             self.generate_sample_cfn_module()
         elif self.options['sls']:
             self.generate_sample_sls_module()
+        elif self.options['sls-tsc']:
+            self.generate_sample_sls_tsc_module()
         elif self.options['stacker']:
             self.generate_sample_stacker_module()
         elif self.options['tf']:

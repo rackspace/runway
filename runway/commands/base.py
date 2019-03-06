@@ -275,6 +275,33 @@ class Base(object):
         LOGGER.info("Sample Serverless module created at %s",
                     module_dir)
 
+    def generate_sample_sls_tsc_module(self, module_dir=None):
+        """Generate skeleton Serverless TypeScript sample module."""
+        if module_dir is None:
+            module_dir = os.path.join(self.env_root, 'sampleapp.sls')
+        self.generate_sample_module(module_dir)
+        for i in ['package.json', 'serverless.yml', 'tsconfig.json',
+                  'webpack.config.js']:
+            shutil.copyfile(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             'templates',
+                             'sls-tsc',
+                             i),
+                os.path.join(module_dir, i),
+            )
+        os.mkdir(os.path.join(module_dir, 'src'))
+        for i in ['handler.spec.ts', 'handler.ts']:
+            shutil.copyfile(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             'templates',
+                             'sls-tsc',
+                             'src',
+                             i),
+                os.path.join(module_dir, 'src', i),
+            )
+        LOGGER.info("Sample Serverless TypeScript module created at %s",
+                    module_dir)
+
     def generate_sample_cdk_module(self, module_dir=None):
         """Generate skeleton CDK sample module."""
         if module_dir is None:
