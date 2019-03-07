@@ -31,6 +31,7 @@ Very simple configuration to:
    additional_functionality
    quickstart
    staticsite_config
+   developers
    license
 
 
