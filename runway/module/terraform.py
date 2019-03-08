@@ -131,7 +131,7 @@ def prep_workspace_switch(module_path, backend_options, env_name, env_region,
                         "init...")
             run_terraform_init(
                 module_path=module_path,
-                backend_file_name=backend_options,
+                backend_options=backend_options,
                 env_name=env_name,
                 env_region=env_region,
                 env_vars=env_vars
