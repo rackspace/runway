@@ -112,7 +112,7 @@ backend-REGION.tfvars, or backend-ENV-REGION.tfvars, or backend-ENV.tfvars (e.g.
     dynamodb_table = "SOMETABLENAME"
 
 | **tfenv**
-| If a ``.terraform-version`` file is placed in the module, tfenv_ will be invoked to ensure the appropriate version is installed prior to module deployment.
+| If a ``.terraform-version`` file is placed in the module (this is recommended), tfenv_ will be invoked to ensure the appropriate version is installed prior to module deployment.
 
 | **Environment Values Via Runway Deployment/Module Options**
 | In addition or in place of the variable file(s), variable values can be provided via deployment and module options.
@@ -152,6 +152,49 @@ and/or
 
 (in ``runway.module.yaml``)
 
+| **Backend Values Via Runway Deployment/Module Options**
+| Terraform backend options can be specified in the runway config yaml via deployment and module options.
+
+**Top-level Runway Config**
+::
+
+    ---
+
+    deployments:
+      - modules:
+          - path: mytfmodule
+            options:
+              terraform_backend_config:
+                bucket: mybucket
+                region: us-east-1
+                dynamodb_table: mytable
+
+and/or
+::
+
+    ---
+
+    deployments:
+      - modules:
+          - path: mytfmodule
+          - path: anothermytfmodule
+        module_options:  # shared between all modules in deployment
+          terraform_backend_config:
+            bucket: mybucket
+            region: us-east-1
+            dynamodb_table: mytable
+
+**In Module Directory**
+::
+
+    ---
+    options:
+      terraform_backend_config:
+        bucket: mybucket
+        region: us-east-1
+        dynamodb_table: mytable
+
+(in ``runway.module.yaml``)
 
 .. _tfenv: https://github.com/kamatama41/tfenv
 

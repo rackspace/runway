@@ -365,6 +365,8 @@ class Env(Base):
                         module_opts = {}
                         if deployment.get('environments'):
                             module_opts['environments'] = deployment['environments'].copy()  # noqa
+                        if deployment.get('module_options'):
+                            module_opts['options'] = deployment['module_options'].copy()  # noqa
                         if isinstance(module, six.string_types):
                             module = {'path': module}
                         if path_is_current_dir(module['path']):

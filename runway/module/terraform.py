@@ -16,6 +16,15 @@ from ..util import change_dir, which
 LOGGER = logging.getLogger('runway')
 
 
+def get_backend_init_list(backend_vals):
+    """Turn backend config dict into command line items."""
+    cmd_list = []
+    for (key, val) in backend_vals.items():
+        cmd_list.append('-backend-config')
+        cmd_list.append(key + '=' + val)
+    return cmd_list
+
+
 def gen_backend_tfvars_files(environment, region):
     """Generate possible Terraform backend tfvars filenames."""
     return [
@@ -53,7 +62,7 @@ def get_workspace_tfvars_file(path, environment, region):
     return "%s.tfvars" % environment  # fallback to generic name
 
 
-def remove_stale_tf_config(path, backend_tfvars_file):
+def remove_stale_tf_config(path, backend_options):
     """Ensure TF is ready for init.
 
     If deploying a TF module to multiple regions (or any scenario requiring
@@ -74,10 +83,15 @@ def remove_stale_tf_config(path, backend_tfvars_file):
             state_config = hcl.load(fco)
 
         if state_config.get('backend') and state_config['backend'].get('config'):  # noqa
-            backend_tfvars_filepath = os.path.join(path,
-                                                   backend_tfvars_file)
-            with open(backend_tfvars_filepath, 'r') as fco:
-                backend_config = hcl.load(fco)
+            if backend_options.get('config'):
+                backend_config = backend_options.get('config')
+            else:
+                backend_tfvars_filepath = os.path.join(
+                    path,
+                    backend_options.get('filename')
+                )
+                with open(backend_tfvars_filepath, 'r') as fco:
+                    backend_config = hcl.load(fco)
             if any(state_config['backend']['config'][key] != value for (key, value) in viewitems(backend_config)):  # noqa pylint: disable=line-too-long
                 LOGGER.info("Desired and previously initialized TF "
                             "backend config is out of sync; trashing "
@@ -86,7 +100,7 @@ def remove_stale_tf_config(path, backend_tfvars_file):
                 send2trash(terrform_dir)
 
 
-def prep_workspace_switch(module_path, backend_file_name, env_name, env_region,
+def prep_workspace_switch(module_path, backend_options, env_name, env_region,
                           env_vars):
     """Clean terraform directory and run init if necessary.
 
@@ -99,38 +113,49 @@ def prep_workspace_switch(module_path, backend_file_name, env_name, env_region,
     This function will check for a custom key and re-init.
     """
     terrform_dir = os.path.join(module_path, '.terraform')
+    backend_filepath = os.path.join(module_path, backend_options.get('filename'))
     if os.path.isdir(terrform_dir) and (
-            os.path.isfile(os.path.join(module_path, backend_file_name))):
-        with open(backend_file_name, 'r') as stream:
-            state_config = hcl.load(stream)
+            backend_options.get('config') or os.path.isfile(backend_filepath)):
+        if backend_options.get('config'):
+            state_config = backend_options.get('config')
+        else:
+            with open(backend_filepath, 'r') as stream:
+                state_config = hcl.load(stream)
         if 'key' in state_config:
-            LOGGER.info("Backend config file %s defines a custom state key, "
+            LOGGER.info("Backend config defines a custom state key, "
                         "which Terraform will not respect when listing/"
                         "switching workspaces. Deleting the current "
-                        ".terraform directory to ensure the key is used.",
-                        backend_file_name)
+                        ".terraform directory to ensure the key is used.")
             send2trash(terrform_dir)
             LOGGER.info(".terraform directory removed; proceeding with "
                         "init...")
             run_terraform_init(
                 module_path=module_path,
-                backend_file_name=backend_file_name,
+                backend_file_name=backend_options,
                 env_name=env_name,
                 env_region=env_region,
                 env_vars=env_vars
             )
 
 
-def run_terraform_init(module_path, backend_file_name, env_name, env_region,
+def run_terraform_init(module_path, backend_options, env_name, env_region,
                        env_vars):
     """Run Terraform init."""
     init_cmd = ['terraform', 'init']
-    if os.path.isfile(os.path.join(module_path, backend_file_name)):
-        LOGGER.info('Using backend config file %s',
-                    backend_file_name)
-        remove_stale_tf_config(module_path, backend_file_name)
+    if backend_options.get('config'):
+        LOGGER.info('Using provided backend values "%s"',
+                    str(backend_options.get('config')))
+        remove_stale_tf_config(module_path, backend_options)
         run_module_command(
-            cmd_list=init_cmd + ['-backend-config=%s' % backend_file_name],
+            cmd_list=init_cmd + get_backend_init_list(backend_options.get('config')),  # noqa
+            env_vars=env_vars
+        )
+    elif os.path.isfile(os.path.join(module_path, backend_options.get('filename'))):  # noqa
+        LOGGER.info('Using backend config file %s',
+                    backend_options.get('filename'))
+        remove_stale_tf_config(module_path, backend_options)
+        run_module_command(
+            cmd_list=init_cmd + ['-backend-config=%s' % backend_options.get('filename')],  # noqa
             env_vars=env_vars
         )
     else:
@@ -180,9 +205,15 @@ class Terraform(RunwayModule):
         workspace_tfvars_file = get_workspace_tfvars_file(self.path,
                                                           self.context.env_name,  # noqa
                                                           self.context.env_region)  # noqa
-        backend_tfvars_file = get_backend_tfvars_file(self.path,
-                                                      self.context.env_name,
-                                                      self.context.env_region)
+        backend_options = {
+            'filename': get_backend_tfvars_file(self.path,
+                                                self.context.env_name,
+                                                self.context.env_region)
+        }
+        if self.options.get('options', {}).get('terraform_backend_config'):
+            backend_options['config'] = self.options.get('options').get(
+                'terraform_backend_config'
+            )
         workspace_tfvar_present = os.path.isfile(
             os.path.join(self.path, workspace_tfvars_file)
         )
@@ -209,7 +240,7 @@ class Terraform(RunwayModule):
                                 '"terraform init"...')
                     run_terraform_init(
                         module_path=self.path,
-                        backend_file_name=backend_tfvars_file,
+                        backend_options=backend_options,
                         env_name=self.context.env_name,
                         env_region=self.context.env_region,
                         env_vars=self.context.env_vars
@@ -230,7 +261,7 @@ class Terraform(RunwayModule):
                                  'workspaces...')
                     prep_workspace_switch(
                         module_path=self.path,
-                        backend_file_name=backend_tfvars_file,
+                        backend_options=backend_options,
                         env_name=self.context.env_name,
                         env_region=self.context.env_region,
                         env_vars=self.context.env_vars
@@ -259,7 +290,7 @@ class Terraform(RunwayModule):
                                 'creation/switch...')
                     run_terraform_init(
                         module_path=self.path,
-                        backend_file_name=backend_tfvars_file,
+                        backend_options=backend_options,
                         env_name=self.context.env_name,
                         env_region=self.context.env_region,
                         env_vars=self.context.env_vars
