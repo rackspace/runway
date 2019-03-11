@@ -359,16 +359,29 @@ class Env(Base):
                 deployments_to_run = self.select_deployment_to_run(
                     deployments
                 )
-        for deployment in deployments_to_run:
+
+        LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
+        for i, deployment in enumerate(deployments_to_run):
+            LOGGER.info("")
+            LOGGER.info("======= Processing deployment %d ===========================", i)
+
             if deployment.get('regions'):
                 if deployment.get('env_vars'):
-                    context.env_vars = merge_dicts(
-                        context.env_vars,
-                        get_deployment_env_vars(context.env_name,
-                                                deployment['env_vars'],
-                                                self.env_root)
-                    )
+                    deployment_env_vars = get_deployment_env_vars(context.env_name,
+                                                              deployment['env_vars'],
+                                                              self.env_root)
+                    LOGGER.info("env_vars for this deployment: %s", str(deployment_env_vars))
+                    context.env_vars = merge_dicts(context.env_vars, deployment_env_vars)
+
+                LOGGER.info("")
+                LOGGER.info("Attempting to deploy '%s' to region(s): %s",
+                            context.env_name,
+                            ", ".join(deployment['regions']))
+
                 for region in deployment['regions']:
+                    LOGGER.info("")
+                    LOGGER.info("======= Processing region %s ===========================", region)
+
                     context.env_region = region
                     context.env_vars = merge_dicts(
                         context.env_vars,
@@ -376,11 +389,10 @@ class Env(Base):
                          'AWS_REGION': context.env_region}
                     )
                     if deployment.get('assume-role'):
-                        pre_deploy_assume_role(deployment['assume-role'],
-                                               context)
-                    if deployment.get('account-id') or (
-                            deployment.get('account-alias')):
+                        pre_deploy_assume_role(deployment['assume-role'], context)
+                    if deployment.get('account-id') or (deployment.get('account-alias')):
                         validate_account_credentials(deployment, context)
+
                     modules = deployment.get('modules', [])
                     if deployment.get('current_dir'):
                         modules.append('.' + os.sep)
@@ -395,16 +407,18 @@ class Env(Base):
                         if path_is_current_dir(module['path']):
                             module_root = self.env_root
                         else:
-                            module_root = os.path.join(self.env_root,
-                                                       module['path'])
+                            module_root = os.path.join(self.env_root, module['path'])
                         module_opts = merge_dicts(module_opts, module)
-                        module_opts = load_module_opts_from_file(module_root,
-                                                                 module_opts)
+                        module_opts = load_module_opts_from_file(module_root, module_opts)
                         if deployment.get('skip-npm-ci'):
                             module_opts['skip_npm_ci'] = True
-                        LOGGER.info("Processing module %s...\n",
-                                    module['path'])
-                        LOGGER.debug("Module options are: %s", module_opts)
+
+                        LOGGER.info("")
+                        LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
+                                    module['path'],
+                                    context.env_name,
+                                    region)
+                        LOGGER.info("Module options: %s", module_opts)
                         with change_dir(module_root):
                             getattr(
                                 determine_module_class(module_root, module_opts)(  # noqa
@@ -413,6 +427,7 @@ class Env(Base):
                                     options=module_opts
                                 ),
                                 command)()
+
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
             else:
