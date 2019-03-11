@@ -368,8 +368,8 @@ class Env(Base):
             if deployment.get('regions'):
                 if deployment.get('env_vars'):
                     deployment_env_vars = get_deployment_env_vars(context.env_name,
-                                                              deployment['env_vars'],
-                                                              self.env_root)
+                                                                  deployment['env_vars'],
+                                                                  self.env_root)
                     LOGGER.info("env_vars for this deployment: %s", str(deployment_env_vars))
                     context.env_vars = merge_dicts(context.env_vars, deployment_env_vars)
 
@@ -380,7 +380,8 @@ class Env(Base):
 
                 for region in deployment['regions']:
                     LOGGER.info("")
-                    LOGGER.info("======= Processing region %s ===========================", region)
+                    LOGGER.info("======= Processing region %s ================"
+                                "===========", region)
 
                     context.env_region = region
                     context.env_vars = merge_dicts(
