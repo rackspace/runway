@@ -280,6 +280,27 @@ def validate_account_credentials(deployment, context):
                                account_alias)
 
 
+def echo_detected_environment(env_name, env_vars):
+    """Print a helper note about how the environment was determined."""
+    env_override_name = 'DEPLOY_ENVIRONMENT'
+    LOGGER.info("")
+    if env_override_name in env_vars:
+        LOGGER.info("Environment \"%s\" was determined from the %s environment variable.",
+                    env_name,
+                    env_override_name)
+        LOGGER.info("If this is not correct, update "
+                    "the value (or unset it to fall back to the name of "
+                    "the current git branch or parent directory).")
+    else:
+        LOGGER.info("Environment \"%s\" was determined from the current "
+                    "git branch or parent directory.",
+                    env_name)
+        LOGGER.info("If this is not the environment name, update the branch/folder name or "
+                    "set an override value via the %s environment variable",
+                    env_override_name)
+    LOGGER.info("")
+
+
 class Env(Base):
     """Env deployment class."""
 
@@ -314,6 +335,8 @@ class Env(Base):
                           env_region=None,
                           env_root=self.env_root,
                           env_vars=os.environ.copy())
+        echo_detected_environment(context.env_name, context.env_vars)
+
         if command == 'destroy':
             LOGGER.info('WARNING!')
             LOGGER.info('Runway is running in DESTROY mode.')

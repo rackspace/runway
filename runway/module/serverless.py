@@ -9,7 +9,7 @@ import sys
 
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
-    run_module_command, run_npm_install, warn_on_skipped_configs
+    run_module_command, run_npm_install
 )
 from ..util import change_dir, which
 
@@ -125,12 +125,8 @@ class Serverless(RunwayModule):
 
     def deploy(self):
         """Run sls deploy."""
-        result = self.run_serverless(command='deploy')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_serverless(command='deploy')
 
     def destroy(self):
         """Run serverless remove."""
-        result = self.run_serverless(command='remove')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_serverless(command='remove')
