@@ -8,7 +8,7 @@ import sys
 
 import yaml
 
-from . import RunwayModule, run_module_command, warn_on_skipped_configs
+from . import RunwayModule, run_module_command
 from ..util import change_dir, get_embedded_lib_path
 
 LOGGER = logging.getLogger('runway')
@@ -161,18 +161,12 @@ class CloudFormation(RunwayModule):
 
     def plan(self):
         """Run stacker diff."""
-        result = self.run_stacker(command='diff')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_stacker(command='diff')
 
     def deploy(self):
         """Run stacker build."""
-        result = self.run_stacker(command='build')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_stacker(command='build')
 
     def destroy(self):
         """Run stacker destroy."""
-        result = self.run_stacker(command='destroy')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_stacker(command='destroy')

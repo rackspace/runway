@@ -10,7 +10,7 @@ import six
 
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
-    run_module_command, run_npm_install, warn_on_skipped_configs
+    run_module_command, run_npm_install
 )
 from ..util import change_dir, run_commands, which
 
@@ -143,18 +143,12 @@ class CloudDevelopmentKit(RunwayModule):
 
     def plan(self):
         """Run cdk diff."""
-        result = self.run_cdk(command='diff')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_cdk(command='diff')
 
     def deploy(self):
         """Run cdk deploy."""
-        result = self.run_cdk(command='deploy')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_cdk(command='deploy')
 
     def destroy(self):
         """Run cdk destroy."""
-        result = self.run_cdk(command='destroy')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_cdk(command='destroy')

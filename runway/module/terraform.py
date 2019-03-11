@@ -10,7 +10,7 @@ from future.utils import viewitems
 import hcl
 from send2trash import send2trash
 
-from . import RunwayModule, run_module_command, warn_on_skipped_configs
+from . import RunwayModule, run_module_command
 from ..util import change_dir, which
 
 LOGGER = logging.getLogger('runway')
@@ -326,18 +326,12 @@ class Terraform(RunwayModule):
 
     def plan(self):
         """Run tf plan."""
-        result = self.run_terraform(command='plan')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_terraform(command='plan')
 
     def deploy(self):
         """Run tf apply."""
-        result = self.run_terraform(command='apply')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_terraform(command='apply')
 
     def destroy(self):
         """Run tf destroy."""
-        result = self.run_terraform(command='destroy')
-        warn_on_skipped_configs(result, self.context.env_name,
-                                self.context.env_vars)
+        self.run_terraform(command='destroy')
