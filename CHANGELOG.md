@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.44.0] - 2019-03-11
+### Changed
+- Output environment message only once on startup
+- Improve deployment progress messages
+
 ## [0.43.0] - 2019-03-07
 ### Added
 - Add module_options deployment parameter for shared module options
@@ -433,7 +438,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.43.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.44.0...HEAD
+[0.44.0]: https://github.com/onicagroup/runway/compare/v0.43.0...v0.44.0
 [0.43.0]: https://github.com/onicagroup/runway/compare/v0.42.0...v0.43.0
 [0.42.0]: https://github.com/onicagroup/runway/compare/v0.41.2...v0.42.0
 [0.41.2]: https://github.com/onicagroup/runway/compare/v0.41.1...v0.41.2

@@ -370,7 +370,10 @@ class Env(Base):
                     deployment_env_vars = get_deployment_env_vars(context.env_name,
                                                                   deployment['env_vars'],
                                                                   self.env_root)
-                    LOGGER.info("env_vars for this deployment: %s", str(deployment_env_vars))
+                    if deployment_env_vars:
+                        LOGGER.info("OS environment variable overrides being "
+                                    "applied this deployment: %s",
+                                    str(deployment_env_vars))
                     context.env_vars = merge_dicts(context.env_vars, deployment_env_vars)
 
                 LOGGER.info("")
