@@ -203,39 +203,31 @@ class Terraform(RunwayModule):
                 tf_cmd.append('-auto-approve=false')
 
         workspace_tfvars_file = get_workspace_tfvars_file(self.path,
-                                                          self.context.env_name,  # noqa
-                                                          self.context.env_region)  # noqa
+                                                          self.context.env_name,
+                                                          self.context.env_region)
+        workspace_tfvar_present = self.folder.isfile(workspace_tfvars_file)
+
         backend_options = {
+            'config': self.module_options.get('terraform_backend_config'),
             'filename': get_backend_tfvars_file(self.path,
                                                 self.context.env_name,
                                                 self.context.env_region)
         }
-        if self.options.get('options', {}).get('terraform_backend_config'):
-            backend_options['config'] = self.options.get('options').get(
-                'terraform_backend_config'
-            )
-        workspace_tfvar_present = os.path.isfile(
-            os.path.join(self.path, workspace_tfvars_file)
-        )
+
         if workspace_tfvar_present:
             tf_cmd.append("-var-file=%s" % workspace_tfvars_file)
-        if isinstance(self.options.get('environments',
-                                       {}).get(self.context.env_name),
-                      dict):
-            for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
+        if self.environment_options:
+            for (key, val) in self.environment_options.items():
                 tf_cmd.extend(['-var', "%s=%s" % (key, val)])
 
-        if self.options.get('environments', {}).get(self.context.env_name) or (
-                workspace_tfvar_present):
+        if self.environment_options or workspace_tfvar_present:
             LOGGER.info("Preparing to run terraform %s on %s...",
                         command,
-                        os.path.basename(self.path))
-            if os.path.isfile(os.path.join(self.path,
-                                           '.terraform-version')):
+                        self.name)
+            if self.folder.isfile('.terraform-version'):
                 run_tfenv_install(self.path, self.context.env_vars)
             with change_dir(self.path):
-                if not os.path.isdir(os.path.join(self.path,
-                                                  '.terraform')):
+                if not self.folder.isdir('.terraform'):
                     LOGGER.info('.terraform directory missing; running '
                                 '"terraform init"...')
                     run_terraform_init(
@@ -307,7 +299,7 @@ class Terraform(RunwayModule):
                                 '"SKIP_TF_GET" environment variable...')
                 LOGGER.info("Running Terraform %s on %s (\"%s\")",
                             command,
-                            os.path.basename(self.path),
+                            self.name,
                             " ".join(tf_cmd))
                 run_module_command(cmd_list=tf_cmd,
                                    env_vars=self.context.env_vars)
@@ -315,7 +307,7 @@ class Terraform(RunwayModule):
             response['skipped_configs'] = True
             LOGGER.info("Skipping Terraform %s of %s",
                         command,
-                        os.path.basename(self.path))
+                        self.name)
             LOGGER.info(
                 "(no tfvars file for this environment/region found -- looking "
                 "for one of \"%s\")",

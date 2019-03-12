@@ -323,7 +323,7 @@ class ModulesCommand(RunwayCommand):
                     if deployment.get('current_dir'):
                         modules.append('.' + os.sep)
                     for module in modules:
-                        self._deploy_module(module, deployment, context, command)
+                        self._process_module(module, deployment, context, command)
 
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
@@ -331,7 +331,7 @@ class ModulesCommand(RunwayCommand):
                 LOGGER.error('No region configured for any deployment')
                 sys.exit(1)
 
-    def _deploy_module(self, module, deployment, context, command):
+    def _process_module(self, module, deployment, context, command):
         module_opts = {}
         if deployment.get('environments'):
             module_opts['environments'] = deployment['environments'].copy()  # noqa
@@ -362,7 +362,7 @@ class ModulesCommand(RunwayCommand):
             module_instance = module_class(
                 context=context,
                 path=module_root,
-                options=module_opts
+                runway_file_options=module_opts
             )
             if hasattr(module_instance, command):
                 command_method = getattr(module_instance, command)
