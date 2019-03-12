@@ -7,7 +7,7 @@ import sys
 
 import cfn_flip
 
-from .base import Base
+from ..runway_command import RunwayCommand
 
 LOGGER = logging.getLogger('runway')
 
@@ -170,7 +170,7 @@ def generate_sample_tf_module(env_root, module_dir=None):
                 module_dir)
 
 
-class GenSample(Base):
+class GenSample(RunwayCommand):
     """Extend Base with execute to run the module generators."""
 
     def execute(self):

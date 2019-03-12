@@ -23,7 +23,7 @@ from .. import __version__ as version
 LOGGER = logging.getLogger('runway')
 
 
-class Base(object):
+class RunwayCommand(object):
     """Base class for deployer classes."""
 
     def __init__(self, options, env_root=None, runway_config_dir=None):

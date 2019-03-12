@@ -28,13 +28,16 @@ Help:
 """
 
 
-from inspect import getmembers, isclass
 import logging
 import os
 
 from docopt import docopt
 
 from . import __version__ as version
+
+from .commands.command_loader import find_command_class
+
+LOGGER = logging.getLogger('runway')
 
 
 def fix_hyphen_commands(raw_options):
@@ -54,15 +57,12 @@ def main():
         # botocore info is spammy
         logging.getLogger('botocore').setLevel(logging.ERROR)
 
-    from . import commands
-    options = fix_hyphen_commands(docopt(__doc__, version=version))
+    # at least one of these must be 'True'
+    possible_commands_tuples = fix_hyphen_commands(docopt(__doc__, version=version)).items()
+    command_name = [command for command, enabled in possible_commands_tuples if enabled][0]
 
-    # Here we'll try to dynamically match the command the user is trying to run
-    # with a pre-defined command class we've already created.
-    for (key, val) in options.items():
-        if hasattr(commands, key) and val:
-            module = getattr(commands, key)
-            commands = getmembers(module, isclass)
-            command = [command[1] for command in commands if command[0] not in ['Base', 'Env', 'Module']][0]  # noqa pylint: disable=line-too-long
-            command = command(options)
-            command.execute()
+    command_class = find_command_class(command_name)
+    if command_class:
+        command_class(None).execute()
+    else:
+        LOGGER.error("class not found for command '%s'", command_name)

@@ -4,10 +4,10 @@ from __future__ import print_function
 import os
 import sys
 
-from .base import Base
+from ..runway_command import RunwayCommand
 
 
-class Init(Base):
+class Init(RunwayCommand):
     """Extend Base with init command."""
 
     def execute(self):  # pylint: disable=no-self-use

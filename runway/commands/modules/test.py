@@ -1,8 +1,11 @@
 """The test command."""
-from .env import Env
+
+from ..modules_command import ModulesCommand
+
+# THIS SHOULD BE A RUNWAY COMMAND?
 
 
-class Test(Env):
+class Test(ModulesCommand):
     """Extend Env with execute to run the test method."""
 
     def execute(self):

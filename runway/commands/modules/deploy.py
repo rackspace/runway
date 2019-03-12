@@ -1,8 +1,8 @@
-"""The takeoff command."""
-from .env import Env
+"""The deploy command."""
+from ..modules_command import ModulesCommand
 
 
-class Takeoff(Env):
+class Deploy(ModulesCommand):
     """Extend Env with execute to run the deploy method."""
 
     def execute(self):
