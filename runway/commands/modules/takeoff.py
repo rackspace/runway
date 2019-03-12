@@ -3,7 +3,7 @@ from ..modules_command import ModulesCommand
 
 
 class Takeoff(ModulesCommand):
-    """Extend Env with execute to run the deploy method."""
+    """Extend ModulesCommand with execute to run the deploy method."""
 
     def execute(self):
         """Run deployments."""

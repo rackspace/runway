@@ -6,11 +6,9 @@ import os
 
 from ..modules_command import ModulesCommand, get_env
 
-# THIS SHOULD BE A RUNWAY COMMAND?
-
 
 class WhichEnv(ModulesCommand):
-    """Extend Env with execute to run the get_env method."""
+    """Extend ModulesCommand with execute to run the get_env method."""
 
     def execute(self):
         """Output environment name."""
