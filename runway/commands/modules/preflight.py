@@ -1,8 +1,8 @@
 """The preflight command."""
-from .env import Env
+from ..modules_command import ModulesCommand
 
 
-class Preflight(Env):
+class Preflight(ModulesCommand):
     """Extend Env with execute to run the test method."""
 
     def execute(self):

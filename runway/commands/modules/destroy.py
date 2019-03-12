@@ -1,8 +1,8 @@
 """The destroy command."""
-from .env import Env
+from ..modules_command import ModulesCommand
 
 
-class Destroy(Env):
+class Destroy(ModulesCommand):
     """Extend Env with execute to run the destroy method."""
 
     def execute(self):

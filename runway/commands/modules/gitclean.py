@@ -1,8 +1,11 @@
 """The gitclean command."""
-from .env import Env
+
+from ..modules_command import ModulesCommand
+
+# THIS SHOULD BE RUNWAY COMMAND?
 
 
-class GitClean(Env):
+class GitClean(ModulesCommand):
     """Extend Env with execute to run the gitclean method."""
 
     def execute(self):

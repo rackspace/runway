@@ -1,8 +1,8 @@
-"""The taxi command."""
-from .env import Env
+"""The plan command."""
+from ..modules_command import ModulesCommand
 
 
-class Taxi(Env):
+class Plan(ModulesCommand):
     """Extend Env with execute to run the plan method."""
 
     def execute(self):
