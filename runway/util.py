@@ -60,13 +60,31 @@ def load_object_from_string(fqcn):
 
 
 def merge_dicts(dict1, dict2):
-    """Merge y into x."""
+    """Merge dict2 into a copy of dict1."""
     dict3 = dict1.copy()
     dict3.update(dict2)
     return dict3
     # Alternate py3 version:
     # if sys.version_info > (3, 4):
     #     return {**dict1, **dict2}
+
+
+#
+# YAML files can result in None values when they are parsed into a dict
+#
+# for example a file containing just 'foo:' will be parsed as `{'foo': None}`
+#
+# thus we can't rely on `dict.get(key, default)` as it will return `None` in those cases :-(
+#
+# not that this is something we should encourage, but at least using the function
+#  saves a lot of None checking
+#
+def better_dict_get(dict1, key, default):
+    """Return the default even if the key exists but is None."""
+    value = dict1.get(key)
+    if value:
+        return value
+    return default
 
 
 def get_embedded_lib_path():

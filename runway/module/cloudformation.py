@@ -5,49 +5,12 @@ import os
 import platform
 import re
 import sys
-
 import yaml
 
 from . import RunwayModule, run_module_command
 from ..util import change_dir, get_embedded_lib_path
 
 LOGGER = logging.getLogger('runway')
-
-
-def ensure_stacker_compat_config(config_filename):
-    """Ensure config file can be loaded by Stacker."""
-    try:
-        with open(config_filename, 'r') as stream:
-            yaml.load(stream)
-    except yaml.constructor.ConstructorError as yaml_error:
-        if yaml_error.problem.startswith(
-                'could not determine a constructor for the tag \'!'):
-            LOGGER.error('"%s" appears to be a CloudFormation template, '
-                         'but is located in the top level of a module '
-                         'alongside the CloudFormation config files (i.e. '
-                         'the file or files indicating the stack names & '
-                         'parameters). Please move the template to a '
-                         'subdirectory.',
-                         config_filename)
-            sys.exit(1)
-
-
-def gen_stacker_env_files(environment, region):
-    """Generate possible Stacker environment filenames."""
-    return [
-        # Give preference to explicit environment-region files
-        "%s-%s.env" % (environment, region),
-        # Fallback to environment name only
-        "%s.env" % environment
-    ]
-
-
-def get_stacker_env_file(path, environment, region):
-    """Determine Stacker environment file name."""
-    for name in gen_stacker_env_files(environment, region):
-        if os.path.isfile(os.path.join(path, name)):
-            return name
-    return "%s-%s.env" % (environment, region)  # fallback to env & region
 
 
 def make_stacker_cmd_string(args, lib_path):
@@ -76,6 +39,35 @@ def make_stacker_cmd_string(args, lib_path):
 class CloudFormation(RunwayModule):
     """CloudFormation (Stacker) Runway Module."""
 
+    def gen_stacker_env_files(self):
+        """Generate possible Stacker environment filenames."""
+        return [
+            # Give preference to explicit environment-region files
+            "%s-%s.env" % (self.context.env_name, self.context.env_region),
+            # Fallback to environment name only
+            "%s.env" % self.context.env_name
+        ]
+
+    def get_stacker_env_file(self):
+        """Determine Stacker environment file name."""
+        return self.folder.locate_file(self.gen_stacker_env_files())
+
+    def ensure_stacker_compat_config(self, config_filename):
+        """Ensure config file can be loaded by Stacker."""
+        try:
+            self.folder.load_yaml_file(config_filename)
+        except yaml.constructor.ConstructorError as yaml_error:
+            if yaml_error.problem.startswith(
+                    'could not determine a constructor for the tag \'!'):
+                LOGGER.error('"%s" appears to be a CloudFormation template, '
+                             'but is located in the top level of a module '
+                             'alongside the CloudFormation config files (i.e. '
+                             'the file or files indicating the stack names & '
+                             'parameters). Please move the template to a '
+                             'subdirectory.',
+                             config_filename)
+                sys.exit(1)
+
     def run_stacker(self, command='diff'):  # pylint: disable=too-many-branches
         """Run Stacker."""
         response = {'skipped_configs': False}
@@ -92,18 +84,12 @@ class CloudFormation(RunwayModule):
         if 'DEBUG' in self.context.env_vars:
             stacker_cmd.append('--verbose')  # Increase logging if requested
 
-        stacker_env_file = get_stacker_env_file(self.path,
-                                                self.context.env_name,
-                                                self.context.env_region)
-        stacker_env_file_present = os.path.isfile(
-            os.path.join(self.path, stacker_env_file)
-        )
-        if isinstance(self.options.get('environments',
-                                       {}).get(self.context.env_name),
-                      dict):
-            for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
+        stacker_env_file = self.get_stacker_env_file()
+
+        if self.environment:
+            for (key, val) in self.environment.items():
                 stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
-        if stacker_env_file_present:
+        if stacker_env_file:
             stacker_cmd.append(stacker_env_file)
 
         with change_dir(self.path):
@@ -120,9 +106,7 @@ class CloudFormation(RunwayModule):
                         # definitely aren't stacker config files
                         continue
                     if os.path.splitext(name)[1] in ['.yaml', '.yml']:
-                        if not (stacker_env_file_present or self.options.get(
-                                'environments',
-                                {}).get(self.context.env_name)):
+                        if not (stacker_env_file or self.environment):
                             response['skipped_configs'] = True
                             LOGGER.info(
                                 "Skipping stacker %s of %s; no environment "
@@ -130,14 +114,9 @@ class CloudFormation(RunwayModule):
                                 "(looking for one of \"%s\")",
                                 command,
                                 name,
-                                ', '.join(
-                                    gen_stacker_env_files(self.context.env_name,  # noqa
-                                                          self.context.env_region))  # noqa
-                            )
+                                ', '.join(self.gen_stacker_env_files()))
                             continue
-                        ensure_stacker_compat_config(
-                            os.path.join(self.path, name)
-                        )
+                        self.ensure_stacker_compat_config(name)
                         LOGGER.info("Running stacker %s on %s in region %s",
                                     command,
                                     name,

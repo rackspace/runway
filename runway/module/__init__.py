@@ -6,8 +6,10 @@ import os
 import platform
 import subprocess
 import sys
+import json
+import yaml
 
-from ..util import which
+from ..util import which, better_dict_get
 
 LOGGER = logging.getLogger('runway')
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
@@ -98,14 +100,29 @@ class RunwayModule(object):
 
     def __init__(self, context, path, options=None):
         """Initialize base class."""
+        self.name = os.path.basename(path)
+
         self.context = context
 
+        # it would be good to remove the need for sub-classes to refer
+        #  to this directly, and have them rely on 'folder' instead
         self.path = path
+
+        self.folder = RunwayModuleFolder(path)
 
         if options is None:
             self.options = {}
         else:
             self.options = options
+
+        self.environment = better_dict_get(self.options, 'environments', {}).get(context.env_name)
+        if self.environment is not None:
+            # a boolean indicates we want (or don't want) the module, and we have no values to set
+            if isinstance(self.environment, bool):
+                if self.environment:
+                    self.environment = {}
+                else:
+                    self.environment = None
 
     def plan(self):
         """Implement dummy method (set in consuming classes)."""
@@ -121,3 +138,53 @@ class RunwayModule(object):
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError('You must implement the destroy() method '
                                   'yourself!')
+
+
+class RunwayModuleFolder(object):
+    """Functions to manage filesystem access in a module folder."""
+
+    def __init__(self, path):
+        """Initialize base class."""
+        self._path = path
+
+    def fullpath(self, name):
+        """Return the absolute path to the given file."""
+        return os.path.join(self._path, name)
+
+    def isfile(self, name):
+        """Determine if the given file exist relative to the module."""
+        return os.path.isfile(self.fullpath(name))
+
+    def isdir(self, name):
+        """Determine if the given folder exist relative to the module."""
+        return os.path.isdir(self.fullpath(name))
+
+    def locate_file(self, names):
+        """Given a list of files, find one that exists (if any) in the root folder."""
+        for name in names:
+            if self.isfile(name):
+                return name
+        # IDEA: it might be better to find *all* of the existing files,
+        #  and log a warning if more than one is found?
+        return None
+
+    def locate_env_file(self, names):
+        """Given a list of files, find one that exists (if any) in the root or `env` folders."""
+        # first try in the root of the module folder
+        location = self.locate_file(names)
+        if not location:
+            # next try in the 'env' folder
+            env_names = [os.path.join('env', name) for name in names]
+            location = self.locate_file(env_names)
+        return location
+
+    def load_json_file(self, name):
+        """Load the contents of the JSON file into a dict."""
+        with open(self.fullpath(name), 'r') as stream:
+            return json.load(stream)
+
+    def load_yaml_file(self, name):
+        """Load the contents of the YAML file into a dict."""
+        with open(self.fullpath(name), 'r') as stream:
+            # load() returns None on an existing but empty file, so provide a default
+            return yaml.load(stream) or {}

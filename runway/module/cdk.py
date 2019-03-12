@@ -73,7 +73,7 @@ class CloudDevelopmentKit(RunwayModule):
         if cdk_module_matches_env(self.context.env_name,
                                   self.options.get('environments', {}),
                                   self.context.env_vars):
-            if os.path.isfile(os.path.join(self.path, 'package.json')):
+            if self.folder.isfile('package.json'):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
                     if self.options.get('options', {}).get('build_steps',

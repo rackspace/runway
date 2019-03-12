@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import logging
-import os
 import re
 import subprocess
 import sys
@@ -14,33 +13,6 @@ from . import (
 from ..util import change_dir, which
 
 LOGGER = logging.getLogger('runway')
-
-
-def gen_sls_config_files(stage, region):
-    """Generate possible SLS config files names."""
-    names = []
-    for ext in ['yml', 'json']:
-        # Give preference to explicit stage-region files
-        names.append(
-            os.path.join('env',
-                         "%s-%s.%s" % (stage, region, ext))
-        )
-        names.append("config-%s-%s.%s" % (stage, region, ext))
-        # Fallback to stage name only
-        names.append(
-            os.path.join('env',
-                         "%s.%s" % (stage, ext))
-        )
-        names.append("config-%s.%s" % (stage, ext))
-    return names
-
-
-def get_sls_config_file(path, stage, region):
-    """Determine Serverless config file name."""
-    for name in gen_sls_config_files(stage, region):
-        if os.path.isfile(os.path.join(path, name)):
-            return name
-    return "config-%s.json" % stage  # fallback to generic json name
 
 
 def run_sls_remove(sls_cmd, env_vars):
@@ -58,6 +30,34 @@ def run_sls_remove(sls_cmd, env_vars):
 
 class Serverless(RunwayModule):
     """Serverless Runway Module."""
+
+    def gen_sls_config_files(self):
+        """Generate possible SLS config files names."""
+        names = []
+        for ext in ['yml', 'json']:
+            # Give preference to explicit stage-region files
+            names.append("config-%s-%s.%s"
+                         % (self.context.env_name, self.context.env_region, ext))
+            names.append("%s-%s.%s"
+                         % (self.context.env_name, self.context.env_region, ext))
+            # stage name only
+            names.append("config-%s.%s" % (self.context.env_name, ext))
+            names.append("%s.%s" % (self.context.env_name, ext))
+        return names
+
+    def get_sls_config_file(self):
+        """Determine Stacker environment file name."""
+        return self.folder.locate_env_file(self.gen_sls_config_files())
+
+    def load_sls_config_file(self, name):
+        """Load the contents of the file into a dict."""
+        try:
+            if name.endswith(".yml"):
+                return self.folder.load_yaml_file(name)
+            return self.folder.load_json_file(name)
+        except Exception as ex:    # pylint: disable=broad-except
+            LOGGER.error('failed to load configuration file "%s": %s', name, ex)
+            sys.exit(1)
 
     def run_serverless(self, command='deploy'):
         """Run Serverless."""
@@ -77,22 +77,21 @@ class Serverless(RunwayModule):
 
         sls_opts.extend(['-r', self.context.env_region])
         sls_opts.extend(['--stage', self.context.env_name])
-        sls_env_file = get_sls_config_file(self.path,
-                                           self.context.env_name,
-                                           self.context.env_region)
+
+        sls_env_file = self.get_sls_config_file()
 
         sls_cmd = generate_node_command(command='sls',
                                         command_opts=sls_opts,
                                         path=self.path)
 
-        if (not self.options.get('environments') and os.path.isfile(os.path.join(self.path, sls_env_file))) or (  # noqa pylint: disable=line-too-long
-                self.options.get('environments', {}).get(self.context.env_name)):  # noqa
-            if os.path.isfile(os.path.join(self.path, 'package.json')):
+        # for now, an environment file merely need exist, we don't read it
+        if self.environment or (sls_env_file and self.folder.isfile(sls_env_file)):  # noqa
+            if self.folder.isfile('package.json'):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
-                                os.path.basename(self.path),
+                                self.name,
                                 format_npm_command_for_logging(sls_cmd))
                     if command == 'remove':
                         # Need to account for exit code 1 on any removals after
@@ -103,20 +102,23 @@ class Serverless(RunwayModule):
                                            env_vars=self.context.env_vars)
             else:
                 LOGGER.warning(
-                    "Skipping serverless %s of %s; no \"package.json\" "
+                    "Skipping 'serverless %s' for %s; no \"package.json\" "
                     "file was found (need a package file specifying "
                     "serverless in devDependencies)",
                     command,
-                    os.path.basename(self.path))
+                    self.name)
         else:
             response['skipped_configs'] = True
             LOGGER.info(
-                "Skipping serverless %s of %s; no config file for "
-                "this stage/region found (looking for one of \"%s\")",
+                "Skipping 'serverless %s' for '%s' in %s; "
+                "no configuration found for this stage/region.",
                 command,
-                os.path.basename(self.path),
-                ', '.join(gen_sls_config_files(self.context.env_name,
-                                               self.context.env_region)))
+                self.name,
+                self.context.env_region)
+            LOGGER.info("Looking for one of the following in root or 'env' folder:")
+            for config_file in self.gen_sls_config_files():
+                LOGGER.info("\t%s", config_file)
+
         return response
 
     def plan(self):
