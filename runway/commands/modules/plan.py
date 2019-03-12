@@ -7,4 +7,4 @@ class Plan(ModulesCommand):
 
     def execute(self):
         """Generate plans."""
-        self.plan()
+        self.run(deployments=None, command='plan')

@@ -12,10 +12,11 @@ def find_command_class(command_name):
     if hasattr(ALL_COMMANDS_MODULE, command_name):
         command_module = getattr(ALL_COMMANDS_MODULE, command_name)
         command_class_hierarchy = getmembers(command_module, isclass)
-        command_class_tuple = list(filter(_not_base_class, command_class_hierarchy))[0]
+        command_class_tuple = list(filter(_not_command_class, command_class_hierarchy))[0]
         return command_class_tuple[1]
     return None
 
 
-def _not_base_class(name_class_pair):
-    return name_class_pair[0] not in ['RunwayCommand', 'ModuleCommand']
+def _not_command_class(name_class_pair):
+    # CPE unfortunately is picked up as part of the module...
+    return name_class_pair[0] not in ['CalledProcessError', 'RunwayCommand', 'ModulesCommand']

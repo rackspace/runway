@@ -4,11 +4,11 @@ from __future__ import print_function
 import logging
 import os
 
-from ..modules_command import ModulesCommand, get_env
+from ..runway_command import RunwayCommand, get_env
 
 
-class WhichEnv(ModulesCommand):
-    """Extend ModulesCommand with execute to run the get_env method."""
+class WhichEnv(RunwayCommand):
+    """Extend RunwayCommand with execute to run the get_env method."""
 
     def execute(self):
         """Output environment name."""
@@ -23,5 +23,5 @@ class WhichEnv(ModulesCommand):
 
         print(get_env(
             self.env_root,
-            self.runway_config.get('ignore_git_branch',
-                                   False)))
+            self.runway_config.get('ignore_git_branch', False)
+        ))

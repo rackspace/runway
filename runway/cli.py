@@ -57,12 +57,13 @@ def main():
         # botocore info is spammy
         logging.getLogger('botocore').setLevel(logging.ERROR)
 
+    options = fix_hyphen_commands(docopt(__doc__, version=version))
+
     # at least one of these must be 'True'
-    possible_commands_tuples = fix_hyphen_commands(docopt(__doc__, version=version)).items()
-    command_name = [command for command, enabled in possible_commands_tuples if enabled][0]
+    command_name = [command for command, enabled in options.items() if enabled][0]
 
     command_class = find_command_class(command_name)
     if command_class:
-        command_class(None).execute()
+        command_class(options).execute()
     else:
         LOGGER.error("class not found for command '%s'", command_name)
