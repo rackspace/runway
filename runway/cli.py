@@ -57,12 +57,15 @@ def main():
         # botocore info is spammy
         logging.getLogger('botocore').setLevel(logging.ERROR)
 
-    # at least one of these must be 'True'
-    possible_commands_tuples = fix_hyphen_commands(docopt(__doc__, version=version)).items()
-    command_name = [command for command, enabled in possible_commands_tuples if enabled][0]
+    arguments = fix_hyphen_commands(docopt(__doc__, version=version))
 
-    command_class = find_command_class(command_name)
+    # at least one of these must be 'True'... but unfortunately `docopts` doesn't give
+    #  you the hierarchy... so given 'gen-sample cfn', there are TWO enabled items in the
+    #  list, 'gen-sample' and 'cfn'
+    possible_commands = [command for command, enabled in arguments.items() if enabled]
+
+    command_class = find_command_class(possible_commands)
     if command_class:
-        command_class(None).execute()
+        command_class(arguments).execute()
     else:
-        LOGGER.error("class not found for command '%s'", command_name)
+        LOGGER.error("class not found for command '%s'", possible_commands)
