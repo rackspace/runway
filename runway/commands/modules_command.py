@@ -21,7 +21,7 @@ import boto3
 import six
 import yaml
 
-from .base import Base
+from .runway_command import RunwayCommand
 from ..context import Context
 from ..util import change_dir, load_object_from_string, merge_dicts
 
@@ -301,7 +301,7 @@ def echo_detected_environment(env_name, env_vars):
     LOGGER.info("")
 
 
-class Env(Base):
+class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
     def gitclean(self):
