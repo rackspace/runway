@@ -225,6 +225,9 @@ class Terraform(RunwayModule):
             for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
                 tf_cmd.extend(['-var', "%s=%s" % (key, val)])
 
+        for (key, val) in self.context.env_vars.items():  # noqa
+            tf_cmd.extend(['-var', "%s=%s" % (key, val)])
+
         if self.options.get('environments', {}).get(self.context.env_name) or (
                 workspace_tfvar_present):
             LOGGER.info("Preparing to run terraform %s on %s...",
