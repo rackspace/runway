@@ -28,7 +28,7 @@ class StaticSite(RunwayModule):
     def setup_website_module(self, command):
         """Create stacker configuration for website module."""
         name = self.options.get('name') if self.options.get('name') else self.options.get('path')  # noqa pylint: disable=line-too-long
-        ensure_valid_environment_config(name, self.environment)
+        ensure_valid_environment_config(name, self.environment_config)
         module_dir = tempfile.mkdtemp()
         LOGGER.info("staticsite: Generating CloudFormation configuration for "
                     "module %s in %s",
@@ -71,18 +71,18 @@ class StaticSite(RunwayModule):
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
 
-        if self.environment.get('staticsite_enable_cf_logging', True):
+        if self.environment_config.get('staticsite_enable_cf_logging', True):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
-        if self.environment.get('staticsite_acmcert_ssm_param'):
+        if self.environment_config.get('staticsite_acmcert_ssm_param'):
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
         else:
             site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'  # noqa pylint: disable=line-too-long
 
         # If staticsite_lambda_function_associations defined, add to stack config
-        if self.environment.get('staticsite_lambda_function_associations'):  # noqa
+        if self.environment_config.get('staticsite_lambda_function_associations'):  # noqa
             site_stack_variables['lambda_function_associations'] = \
-                self.environment.get('staticsite_lambda_function_associations')
-            self.environment.pop('staticsite_lambda_function_associations')  # noqa
+                self.environment_config.get('staticsite_lambda_function_associations')
+            self.environment_config.pop('staticsite_lambda_function_associations')  # noqa
 
         with open(os.path.join(module_dir, '02-staticsite.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
@@ -132,7 +132,7 @@ class StaticSite(RunwayModule):
 
     def plan(self):
         """Create website CFN module and run stacker diff."""
-        if self.environment:
+        if self.environment_config:
             self.setup_website_module(command='plan')
         else:
             LOGGER.info("Skipping staticsite plan of %s; no environment "
@@ -141,7 +141,7 @@ class StaticSite(RunwayModule):
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
-        if self.environment:
+        if self.environment_config:
             self.setup_website_module(command='deploy')
         else:
             LOGGER.info("Skipping staticsite deploy of %s; no environment "
@@ -150,7 +150,7 @@ class StaticSite(RunwayModule):
 
     def destroy(self):
         """Create website CFN module and run stacker destroy."""
-        if self.environment:
+        if self.environment_config:
             self.setup_website_module(command='destroy')
         else:
             LOGGER.info("Skipping staticsite destroy of %s; no environment "

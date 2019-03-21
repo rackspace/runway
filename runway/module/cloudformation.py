@@ -86,8 +86,8 @@ class CloudFormation(RunwayModule):
 
         stacker_env_file = self.get_stacker_env_file()
 
-        if self.environment:
-            for (key, val) in self.environment.items():
+        if self.environment_config:
+            for (key, val) in self.environment_config.items():
                 stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
         if stacker_env_file:
             stacker_cmd.append(stacker_env_file)
@@ -106,7 +106,7 @@ class CloudFormation(RunwayModule):
                         # definitely aren't stacker config files
                         continue
                     if os.path.splitext(name)[1] in ['.yaml', '.yml']:
-                        if not (stacker_env_file or self.environment):
+                        if not (stacker_env_file or self.environment_config):
                             response['skipped_configs'] = True
                             LOGGER.info(
                                 "Skipping stacker %s of %s; no environment "

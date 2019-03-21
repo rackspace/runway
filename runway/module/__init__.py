@@ -9,7 +9,7 @@ import sys
 import json
 import yaml
 
-from ..util import which, better_dict_get
+from ..util import which, better_dict_get, merge_dicts
 
 LOGGER = logging.getLogger('runway')
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
@@ -110,19 +110,28 @@ class RunwayModule(object):
 
         self.folder = RunwayModuleFolder(path)
 
+        # FUTURE: break out the pieces we actually care about, rather passing the whole dict along
         if options is None:
             self.options = {}
         else:
             self.options = options
 
-        self.environment = better_dict_get(self.options, 'environments', {}).get(context.env_name)
-        if self.environment is not None:
-            # a boolean indicates we want (or don't want) the module, and we have no values to set
-            if isinstance(self.environment, bool):
-                if self.environment:
-                    self.environment = {}
-                else:
-                    self.environment = None
+        # while the environment config is indeed part of 'options', we can save ourselves
+        #  work later by pulling the environment-specific parts out here
+        all_environments_node = better_dict_get(self.options, 'environments', {})
+        self.environment_config = all_environments_node.get(context.env_name)
+
+        # `dev: True` is valid in `runway.yml` but we need it to be a dict
+        if self.environment_config and isinstance(self.environment_config, bool):
+            self.environment_config = {}
+
+        # we might have some shared values to combine with the values specific to this environment
+        shared_config = all_environments_node.get("*")
+        if shared_config:
+            if self.environment_config:
+                self.environment_config = merge_dicts(shared_config, self.environment_config)
+            else:
+                self.environment_config = shared_config
 
     def plan(self):
         """Implement dummy method (set in consuming classes)."""

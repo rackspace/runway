@@ -85,7 +85,7 @@ class Serverless(RunwayModule):
                                         path=self.path)
 
         # for now, an environment file merely need exist, we don't read it
-        if self.environment or (sls_env_file and self.folder.isfile(sls_env_file)):  # noqa
+        if self.environment_config or (sls_env_file and self.folder.isfile(sls_env_file)):  # noqa
             if self.folder.isfile('package.json'):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)

@@ -220,11 +220,11 @@ class Terraform(RunwayModule):
 
         if workspace_tfvar_present:
             tf_cmd.append("-var-file=%s" % workspace_tfvars_file)
-        if self.environment:
-            for (key, val) in self.environment.items():
+        if self.environment_config:
+            for (key, val) in self.environment_config.items():
                 tf_cmd.extend(['-var', "%s=%s" % (key, val)])
 
-        if self.environment or workspace_tfvar_present:
+        if self.environment_config or workspace_tfvar_present:
             LOGGER.info("Preparing to run terraform %s on %s...",
                         command,
                         os.path.basename(self.path))
