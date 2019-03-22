@@ -3,12 +3,12 @@ Runway Overview.
 
 Usage:
   runway (test|preflight)
-  runway (plan|taxi)
-  runway (deploy|takeoff)
-  runway (destroy|dismantle)
+  runway (plan|taxi) [--deployment-index=<i> [--module-index=<i>]]
+  runway (deploy|takeoff) [--deployment-index=<i> [--module-index=<i>]]
+  runway (destroy|dismantle) [--deployment-index=<i> [--module-index=<i>]]
   runway init
   runway gitclean
-  runway gen-sample (cfn|sls-tsc|tf|stacker|cdk|sls)
+  runway gen-sample (cdk|cfn|sls|sls-tsc|stacker|tf)
   runway whichenv
   runway -h | --help
   runway --version
@@ -16,14 +16,17 @@ Usage:
 Options:
   -h --help                         Show this screen.
   --version                         Show version.
+  --deployment-index=<i>            The deployment index or 'all'.
+  --module-index=<i>                The module index or 'all'.
 
 Help:
   * Set the DEPLOY_ENVIRONMENT environment variable to set/override the
     autodetected environment. Autodetection is done from git branches in the
     form of ENV- (e.g. the dev environment is deployed from ENV-dev branch)
     falling back to name of the parent folder of the module.
-  * All deploy commands (e.g. sls deploy, tf apply) will be run interactively
-    unless the CI environment variable is set.
+  * Deploy, destroy and plan commands will be run interactively
+    unless the CI environment variable is set, or unless you specify
+    the index arguments.
 
 """
 
