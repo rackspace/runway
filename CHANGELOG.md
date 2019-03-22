@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.44.2] - 2019-03-21
+### Fixed
+- Fixed module config options completely overriding deployment options
+    * Options will now be deeply merged, allowing selective overrides per-module
+
 ## [0.44.1] - 2019-03-16
 ### Fixed
 - Corrected bug in module selection
@@ -442,7 +447,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.44.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.44.2...HEAD
+[0.44.2]: https://github.com/onicagroup/runway/compare/v0.44.1...v0.44.2
 [0.44.1]: https://github.com/onicagroup/runway/compare/v0.44.0...v0.44.1
 [0.44.0]: https://github.com/onicagroup/runway/compare/v0.43.0...v0.44.0
 [0.43.0]: https://github.com/onicagroup/runway/compare/v0.42.0...v0.43.0
