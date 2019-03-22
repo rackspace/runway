@@ -9,7 +9,6 @@ from subprocess import check_call, check_output
 
 import copy
 import glob
-import json
 import logging
 import os
 import shutil
@@ -351,12 +350,14 @@ class ModulesCommand(RunwayCommand):
                             'irrecoverably DESTROYED.')
                 deployments_to_run = self.reverse_deployments(
                     self.select_deployment_to_run(
+                        context.env_name,
                         deployments,
                         command=command
                     )
                 )
             else:
                 deployments_to_run = self.select_deployment_to_run(
+                    context.env_name,
                     deployments
                 )
 
@@ -466,7 +467,7 @@ class ModulesCommand(RunwayCommand):
         return reversed_deployments
 
     @staticmethod
-    def select_deployment_to_run(deployments=None, command='build'):  # noqa pylint: disable=too-many-branches,too-many-statements
+    def select_deployment_to_run(env_name, deployments=None, command='build'):  # noqa pylint: disable=too-many-branches,too-many-statements
         """Query user for deployments to run."""
         if deployments is None or not deployments:
             return []
@@ -478,8 +479,8 @@ class ModulesCommand(RunwayCommand):
             print('')
             print('Configured deployments:')
             pretty_index = 1
-            for i in deployments:
-                print("%s: %s" % (pretty_index, json.dumps(i)))
+            for deployment in deployments:
+                print("%s: %s" % (pretty_index, _deployment_menu_entry(deployment)))
                 pretty_index += 1
             print('')
             print('')
@@ -513,8 +514,8 @@ class ModulesCommand(RunwayCommand):
             print('')
             print('Configured modules in deployment:')
             pretty_index = 1
-            for i in selected_deploy['modules']:
-                print("%s: %s" % (pretty_index, json.dumps(i)))
+            for module in selected_deploy['modules']:
+                print("%s: %s" % (pretty_index, _module_menu_entry(module, env_name)))
                 pretty_index += 1
             print('')
             print('')
@@ -537,3 +538,26 @@ class ModulesCommand(RunwayCommand):
 
         LOGGER.debug('Selected deployment is %s...', deployments_to_run)
         return deployments_to_run
+
+
+def _module_name_for_display(module):
+    """Extract a name for the module."""
+    if isinstance(module, dict):
+        return module['path']
+    return str(module)
+
+
+def _module_menu_entry(module, environment_name):
+    """Build a string to display in the 'select module' menu."""
+    name = _module_name_for_display(module)
+    if isinstance(module, dict):
+        environment_config = module.get('environments', {}).get(environment_name)
+        return "%s (%s)" % (name, environment_config)
+    return "%s" % (name)
+
+
+def _deployment_menu_entry(deployment):
+    """Build a string to display in the 'select deployment' menu."""
+    paths = ", ".join([_module_name_for_display(module) for module in deployment['modules']])
+    regions = ", ".join(deployment.get('regions', []))
+    return "%s (%s)" % (paths, regions)
