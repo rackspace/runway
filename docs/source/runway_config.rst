@@ -227,7 +227,7 @@ operating system environment variables.
 
 Each module will receive a copy of the OS environment variables active when Runway is executed.
 
-Additional environment variables may be specified in the ``runway.yml`` file by adding an ``env_var`` node to a given
+Additional environment variables may be specified in the ``runway.yml`` file by adding an ``env_vars`` node to a given
 deployment node. Thus they are specific to each deployment, and not shared between them.
 
 Under ``env_vars`` create a node using the name of the environment, or using ``'*'`` (with the quotes) if the values should
@@ -237,9 +237,9 @@ applicable to all environments::
     deployments:
         - modules:
             ...
-        - regions:
+          regions:
             ...
-        - env_vars:
+          env_vars:
             dev:
                 AWS_PROFILE: foo
                 LOG_LEVEL: info
@@ -264,11 +264,11 @@ either an ``account-alias`` or ``account-id`` node to a deployment::
     deployments:
         - modules:
             ...
-        - regions:
+          regions:
             ...
-        - account-alias:
+          account-alias:
             qa: myaccount
-        - account-id:
+          account-id:
             prod: 123456789
 
 In this example, Runway will attempt to deploy the environment ``qa`` only to the AWS account that
@@ -289,9 +289,9 @@ any environment that requires it::
     deployments:
         - modules:
             ...
-        - regions:
+          regions:
             ...
-        - account-role:
+          account-role:
             qa: arn:aws:iam::123456789:role/role-name1
             prod:
                 arn: arn:aws:iam::987654321:role/role-name2
