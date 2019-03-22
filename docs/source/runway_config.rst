@@ -7,7 +7,7 @@ The Basics
 ^^^^^^^^^^
 
 At its simplest, a Runway project consists of a single module folder (for a Serverless application, say) and
-a `runway.yml` at the same level::
+a ``runway.yml`` at the same level::
 
     .
     ├── myapp.sls
@@ -16,7 +16,7 @@ a `runway.yml` at the same level::
     └── runway.yml
 
 
-The `runway.yml` configuration file then consists of one "deployment" which contains just the one module which is deployable to just one region::
+The ``runway.yml`` configuration file then consists of one "deployment" which contains just the one module which is deployable to just one region::
 
     ---
     deployments:
@@ -37,7 +37,7 @@ You can specify as many module folders and regions as you like, where each modul
           - us-east-2
           - us-west-1
 
-*(Note that stating just the module folder name is equivalent to explicitly specifying the folder name as the ``path``.)*
+*(Note that stating just the module folder name on its own is equivalent to explicitly specifying the folder name as the ``path``.)*
 
 In this case, Runway *may* deploy the Cloudformation and Serverless modules each into one, two, or all three regions --
 or even into none of them.  The particular combinations of modules and regions will depend on the configurations provided for
@@ -74,16 +74,16 @@ The example above could be broken into two separate deployments within the same 
           - us-east-2
           - us-west-1
 
-Here we are stating that the Cloudformation stacks may be deployed to `us-east-2` only, while the Serverless
+Here we are stating that the Cloudformation stacks may be deployed to ``us-east-2`` only, while the Serverless
 application may be deployed to three US regions.
 
-When there are multiple deployments, they are created in the order they are listed in `runway.yml`
+When there are multiple deployments, they are created in the order they are listed in ``runway.yml``
 (or destroyed in reverse order).  Runway does not attempt to determine the order itself based on
-dependencies between the deployments.  **((VERIFY!!))**
+dependencies between the deployments.
 
-Whether to use one deployment or many is currently mostly a stylistic choice.  **((Other reasons TBA...))**
+Whether to use one deployment or many is currently mostly a stylistic choice.
 Typically, modules that are tightly coupled should be in the same deployment, so in this particular
-example a single deployment would be preferred.
+example the earlier single deployment would be preferred.
 
 
 Environments
@@ -98,13 +98,134 @@ underscores.
 Environment names must also be unique within a given Runway project.
 
 Most of the configuration values for an environment are specific to the various tools used to
-deploy the various modules.  However, there do all have some things in common.
+deploy the various modules.  However, there are some configurations that are common to all of them
+
+
+Environment Configuration in `runway.yml`
+-----------------------------------------
+
+Once you have a name for your environment, you can specify its setting directly in the main ``runway.yml``
+file.
+
+For example, say the one thing that differs between your QA and production environments is the S3 bucket they use::
+
+    ---
+    deployments:
+        - modules:
+            - path: myapp.sls
+              environments:
+                qa:
+                   data_bucket: qa-data
+                prod:
+                   data_bucket: prod-data
+                '*':
+                   email_contact: foo@bar.com
+
+Using the special environment name `'*'` as above, you can also specify values that apply to all
+environments this module is deployed to.
+
+If you have multiple modules that share values, you can specify them in each::
+
+            - path: myapp1.sls
+              environments:
+                qa:
+                   data_bucket: qa-data
+                prod:
+                   data_bucket: prod-data
+                '*':
+                   email_contact: foo@bar.com
+            - path: myapp2.sls
+              environments:
+                qa:
+                   data_bucket: qa-data
+                prod:
+                   data_bucket: prod-data
+                '*':
+                   email_contact: foo@bar.com
+
+Or you can provide the values at the deployment level.  Or even at both levels::
+
+    ---
+    deployments:
+        - modules:
+            - path: myapp1.sls
+              environments:
+                qa:
+                   data_bucket: qa-data-1
+            - path: myapp2.sls
+              environments:
+                qa:
+                   data_bucket: qa-data-2
+          environments:
+            prod:
+               data_bucket: prod-data
+            '*':
+               email_contact: foo@bar.com
+
+Here both applications will use the same bucket for production, and different buckets for QA.
+
+This can be a bit confusing, especially in longer ``runway.yml`` files, and it also does not allow
+you to have different values in different regions for the same environment.  As well, as the number
+of environments grows (you might have one environment for every developer and for every QA), this
+file will grow, and the risk of breaking things accidentally becomes a problem.
+
+So a better approach would be to use a separate file for each environment and region.
+
+
+
+Separate Environment Configuration Files
+----------------------------------------
+
+For a given module, configuration files in a module sub-folder called ``env`` *(recommended)* or in the module
+folder itself *(deprecated)*.::
+
+   .
+    ├── mymod.cfn
+    │   ├── env
+    │   │   ├── qa-us-west-2.env
+    │   │   └── prod-us-east-1.env
+    │   └── ...
+    └── runway.yml
+
+For each environment, and for each region that particular environment should be deployed to, create a
+file there called ``{env}-{region}.{extension}``, even if the file is empty
+
+(Each type of module has its own particular file format and file extensions (e.g. ``.tfvars`` for Terraform, ``.env`` for
+Stacker, and ``.yml`` for Serverless) for configuration, but they all use the same naming conventions.)
+
+So in the above example, a Stacker module, we can deploy the ``qa`` environment to us-west-2 using the settings in that
+file, while production would be deployed to us-east-1, using the settings in that file.
+
+Further, for values that are common across regions, files named ``{env}.{extension}``, where values in these files
+can be overridden by values in the corresponding ``{env}-{region}.{extension}`` files.::
+
+   .
+    ├── mymod.cfn
+    │   ├── env
+    │   │   ├── qa.env
+    │   │   ├── qa-us-west-2.env
+    │   │   ├── prod.env
+    │   │   └── prod-us-east-1.env
+    │   └── ...
+    └── runway.yml
+
+One nice benefit is it's now easier and more clean for individuals to create their own environment:  just copy the appropriate file::
+    env
+    ├── dev-alice-us-west-2.tfvars
+    ├── dev-bob-us-west-2.tfvars
+    ├── dev-fred-us-west-1.tfvars
+    ├── qa-susan-us-west-2.tfvars
+    └── ...
+
 
 Environment Variables
 ---------------------
+In a handful of situations the only way to pass a setting to the deployment tools is via
+operating system environment variables.
+
 Each module will receive a copy of the OS environment variables active when Runway is executed.
 
-Additional environment variables may be specified in the `runway.yml` file by adding an ``env_var`` node to a given
+Additional environment variables may be specified in the ``runway.yml`` file by adding an ``env_var`` node to a given
 deployment node. Thus they are specific to each deployment, and not shared between them.
 
 Under ``env_vars`` create a node using the name of the environment, or using ``'*'`` (with the quotes) if the values should
@@ -123,67 +244,9 @@ applicable to all environments::
             prod:
                 AWS_PROFILE: bar
             '*':
-                owner_email: alice@bob.com
+                LOG_LEVEL: warn
 
-
-**((IS THERE ANOTHER WAY?))**
-
-
-Module Configuration Files
---------------------------
-
-Each type of module has its own particular file format and file extensions (e.g. ``.tfvars`` for Terraform, ``.env`` for
-Stacker, and ``.yml`` for Serverless) for configuration, but they all use the same naming conventions.
-
-For a given module, put configuration files in a module sub-folder called ``env`` *(recommended)* or in the module
-folder itself *(deprecated)*.
-
-For each environment, and for each region that particular environment should be deployed to, create a
-file there called ``{env}-{region}.{extension}``, even if the file is empty
-
-For example, ``dev-us-east-1.env``, ``qa-us-west-1.env`` and ``prod-us-west-2.env`` would result in a Stacker
-module being deployed once each to three different regions, while ``foo-us-west-2.yml`` and
-``bar-us-west-2.yml`` would result in two deployments of the same Serverless code into the same region.
-
-Optionally, files called ``{env}.{extension}`` can be used to specify configuration
-values shared for all regions an environment is deployed to. Values in these files can be overridden by values
-in the corresponding ``{env}-{region}.{extension}`` files.
-
-* **((IS THIS TRUE??))**
-
-Module Configuration in `runway.yml`
-------------------------------------
-
-Alternatively, the contents that would otherwise be included a shared ``{env}.{extension}`` config files may be
-included in ``runway.yml``, under an ``environments`` node in either a module or deployment node.  The same naming rules apply.
-
-For example::
-
-    ---
-    deployments:
-        - modules:
-            - path: myapp.sls
-              environments:
-                # these apply just to this module
-                dev:
-                   data_bucket: dev-data
-                prod:
-                   data_bucket: prod-data
-          environments:
-            # these apply to all modules in this deployment
-            dev:
-               support_email: foo@bar.com
-            prod:
-               support_email: bar@foo.com
-
-**((WHAT ABOUT '*' HERE?))**
-
-**((Do Module values override deployment values?))**
-
-**((nesting?))**
-
-**((WHAT IF BOTH runway.yml and separate files are found?))**
-
+This should be used sparingly.
 
 
 Multiple Accounts
