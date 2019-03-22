@@ -7,11 +7,9 @@ import sys
 
 import cfn_flip
 
-from ..runway_command import RunwayCommand
+from .base import Base
 
 LOGGER = logging.getLogger('runway')
-
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
 def generate_sample_module(module_dir):
@@ -32,7 +30,7 @@ def generate_sample_sls_module(env_root, module_dir=None):
     for i in ['config-dev-us-east-1.json', 'handler.py', 'package.json',
               'serverless.yml']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'serverless',
                          i),
@@ -50,7 +48,7 @@ def generate_sample_sls_tsc_module(env_root, module_dir=None):
     for i in ['package.json', 'serverless.yml', 'tsconfig.json',
               'webpack.config.js']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'sls-tsc',
                          i),
@@ -59,7 +57,7 @@ def generate_sample_sls_tsc_module(env_root, module_dir=None):
     os.mkdir(os.path.join(module_dir, 'src'))
     for i in ['handler.spec.ts', 'handler.ts']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'sls-tsc',
                          'src',
@@ -77,7 +75,7 @@ def generate_sample_cdk_module(env_root, module_dir=None):
     generate_sample_module(module_dir)
     for i in ['cdk.json', 'index.ts', 'package.json', 'tsconfig.json']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'cdk',
                          i),
@@ -93,7 +91,7 @@ def generate_sample_cfn_module(env_root, module_dir=None):
     generate_sample_module(module_dir)
     for i in ['stacks.yaml', 'dev-us-east-1.env']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'cfn',
                          i),
@@ -107,7 +105,7 @@ def generate_sample_cfn_module(env_root, module_dir=None):
             cfn_flip.flip(
                 check_output(
                     [sys.executable,
-                     os.path.join(ROOT,
+                     os.path.join(os.path.dirname(os.path.dirname(__file__)),  # noqa
                                   'templates',
                                   'stacker',
                                   'tfstate_blueprints',
@@ -128,7 +126,7 @@ def generate_sample_stacker_module(env_root, module_dir=None):
     generate_sample_module(module_dir)
     for i in ['stacks.yaml', 'dev-us-east-1.env']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'stacker',
                          i),
@@ -137,7 +135,7 @@ def generate_sample_stacker_module(env_root, module_dir=None):
     os.mkdir(os.path.join(module_dir, 'tfstate_blueprints'))
     for i in ['__init__.py', 'tf_state.py']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'stacker',
                          'tfstate_blueprints',
@@ -162,7 +160,7 @@ def generate_sample_tf_module(env_root, module_dir=None):
     for i in ['.terraform-version', 'backend-us-east-1.tfvars',
               'dev-us-east-1.tfvars', 'main.tf']:
         shutil.copyfile(
-            os.path.join(ROOT,
+            os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'templates',
                          'terraform',
                          i),
@@ -172,7 +170,7 @@ def generate_sample_tf_module(env_root, module_dir=None):
                 module_dir)
 
 
-class GenSample(RunwayCommand):
+class GenSample(Base):
     """Extend Base with execute to run the module generators."""
 
     def execute(self):
