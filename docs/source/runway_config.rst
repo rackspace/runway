@@ -241,12 +241,12 @@ applicable to all environments::
             ...
           env_vars:
             dev:
-                AWS_PROFILE: foo
-                LOG_LEVEL: info
+              AWS_PROFILE: foo
+              LOG_LEVEL: info
             prod:
-                AWS_PROFILE: bar
+              AWS_PROFILE: bar
             '*':
-                LOG_LEVEL: warn
+              LOG_LEVEL: warn
 
 This should be used sparingly.
 
@@ -294,8 +294,8 @@ any environment that requires it::
           account-role:
             qa: arn:aws:iam::123456789:role/role-name1
             prod:
-                arn: arn:aws:iam::987654321:role/role-name2
-                duration: 300
+              arn: arn:aws:iam::987654321:role/role-name2
+              duration: 300
             post_deploy_env_revert: true
             duration: 600
 
