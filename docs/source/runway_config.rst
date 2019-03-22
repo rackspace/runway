@@ -203,13 +203,15 @@ can be overridden by values in the corresponding ``{env}-{region}.{extension}`` 
     ├── mymod.cfn
     │   ├── env
     │   │   ├── qa.env
+    │   │   ├── qa-us-west-1.env
     │   │   ├── qa-us-west-2.env
     │   │   ├── prod.env
     │   │   └── prod-us-east-1.env
     │   └── ...
     └── runway.yml
 
-One nice benefit is it's now easier and more clean for individuals to create their own environment:  just copy the appropriate file::
+One benefit is it's now easier and more clean for individuals to create their own environment:  just copy the appropriate file::
+
     env
     ├── dev-alice-us-west-2.tfvars
     ├── dev-bob-us-west-2.tfvars
