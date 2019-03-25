@@ -40,12 +40,12 @@ from .commands.command_loader import find_command_class
 LOGGER = logging.getLogger('runway')
 
 
-def fix_hyphen_commands(raw_options):
+def fix_hyphen_commands(raw_cli_arguments):
     """Update options to match their module names with underscores."""
     for i in ['gen-sample']:
-        raw_options[i.replace('-', '_')] = raw_options[i]
-        raw_options.pop(i)
-    return raw_options
+        raw_cli_arguments[i.replace('-', '_')] = raw_cli_arguments[i]
+        raw_cli_arguments.pop(i)
+    return raw_cli_arguments
 
 
 def main():
@@ -57,15 +57,15 @@ def main():
         # botocore info is spammy
         logging.getLogger('botocore').setLevel(logging.ERROR)
 
-    arguments = fix_hyphen_commands(docopt(__doc__, version=version))
+    cli_arguments = fix_hyphen_commands(docopt(__doc__, version=version))
 
-    # at least one of these must be 'True'... but unfortunately `docopts` doesn't give
-    #  you the hierarchy... so given 'gen-sample cfn', there are TWO enabled items in the
-    #  list, 'gen-sample' and 'cfn'
-    possible_commands = [command for command, enabled in arguments.items() if enabled]
+    # at least one of these must be enabled, i.e. the value is 'True'... but unfortunately
+    #  `docopts` doesn't give you the hierarchy... so given 'gen-sample cfn', there are
+    #  TWO enabled items in the list, 'gen-sample' and 'cfn'
+    possible_commands = [command for command, enabled in cli_arguments.items() if enabled]
 
     command_class = find_command_class(possible_commands)
     if command_class:
-        command_class(arguments).execute()
+        command_class(cli_arguments).execute()
     else:
         LOGGER.error("class not found for command '%s'", possible_commands)
