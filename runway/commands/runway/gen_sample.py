@@ -177,15 +177,15 @@ class GenSample(RunwayCommand):
 
     def execute(self):
         """Run selected module generator."""
-        if self.options['cfn']:
+        if self._cli_arguments['cfn']:
             generate_sample_cfn_module(self.env_root)
-        elif self.options['sls']:
+        elif self._cli_arguments['sls']:
             generate_sample_sls_module(self.env_root)
-        elif self.options['sls-tsc']:
+        elif self._cli_arguments['sls-tsc']:
             generate_sample_sls_tsc_module(self.env_root)
-        elif self.options['stacker']:
+        elif self._cli_arguments['stacker']:
             generate_sample_stacker_module(self.env_root)
-        elif self.options['tf']:
+        elif self._cli_arguments['tf']:
             generate_sample_tf_module(self.env_root)
-        elif self.options['cdk']:
+        elif self._cli_arguments['cdk']:
             generate_sample_cdk_module(self.env_root)
