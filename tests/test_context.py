@@ -9,7 +9,7 @@ class ContextTester(unittest.TestCase):
 
     def test_save_existing_iam_env_vars(self):
         """Test save_existing_iam_env_vars."""
-        context = Context(env_name='dev', env_region='us-east-1',
+        context = Context(options={}, env_name='dev', env_region='us-east-1',
                           env_root='./', env_vars={'AWS_ACCESS_KEY_ID': 'foo',
                                                    'AWS_SECRET_ACCESS_KEY': 'bar',  # noqa
                                                    'AWS_SESSION_TOKEN': 'foobar'})  # noqa
