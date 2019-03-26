@@ -4,11 +4,11 @@ from __future__ import print_function
 import logging
 import os
 
-from .env import Env, get_env
+from ..modules_command import ModulesCommand, get_env
 
 
-class WhichEnv(Env):
-    """Extend Env with execute to run the get_env method."""
+class WhichEnv(ModulesCommand):
+    """Extend ModulesCommand with execute to run the get_env method."""
 
     def execute(self):
         """Output environment name."""

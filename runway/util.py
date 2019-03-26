@@ -71,13 +71,12 @@ def merge_dicts(dict1, dict2, deep_merge=True):
         for key in dict2:
             dict1[key] = merge_dicts(dict1[key], dict2[key]) if key in dict1 else dict2[key]  # noqa pylint: disable=line-too-long
         return dict1
-    else:
-        dict3 = dict1.copy()
-        dict3.update(dict2)
-        return dict3
-        # Alternate py3 version:
-        # if sys.version_info > (3, 4):
-        #     return {**dict1, **dict2}
+    dict3 = dict1.copy()
+    dict3.update(dict2)
+    return dict3
+    # Alternate py3 version:
+    # if sys.version_info > (3, 4):
+    #     return {**dict1, **dict2}
 
 
 def get_embedded_lib_path():

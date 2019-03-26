@@ -6,10 +6,9 @@ import os
 class Context(object):
     """Runway execution context."""
 
-    def __init__(self, options, env_name,  # pylint: disable=too-many-arguments
+    def __init__(self, env_name,  # pylint: disable=too-many-arguments
                  env_region, env_root, env_vars=None):
         """Initialize base class."""
-        self.options = options
         self.env_name = env_name
         self.env_region = env_region
         self.env_root = env_root

@@ -28,7 +28,6 @@ Help:
 """
 
 
-from inspect import getmembers, isclass
 import logging
 import os
 
@@ -36,13 +35,17 @@ from docopt import docopt
 
 from . import __version__ as version
 
+from .commands.command_loader import find_command_class
 
-def fix_hyphen_commands(raw_options):
+LOGGER = logging.getLogger('runway')
+
+
+def fix_hyphen_commands(raw_cli_arguments):
     """Update options to match their module names with underscores."""
     for i in ['gen-sample']:
-        raw_options[i.replace('-', '_')] = raw_options[i]
-        raw_options.pop(i)
-    return raw_options
+        raw_cli_arguments[i.replace('-', '_')] = raw_cli_arguments[i]
+        raw_cli_arguments.pop(i)
+    return raw_cli_arguments
 
 
 def main():
@@ -54,15 +57,15 @@ def main():
         # botocore info is spammy
         logging.getLogger('botocore').setLevel(logging.ERROR)
 
-    from . import commands
-    options = fix_hyphen_commands(docopt(__doc__, version=version))
+    cli_arguments = fix_hyphen_commands(docopt(__doc__, version=version))
 
-    # Here we'll try to dynamically match the command the user is trying to run
-    # with a pre-defined command class we've already created.
-    for (key, val) in options.items():
-        if hasattr(commands, key) and val:
-            module = getattr(commands, key)
-            commands = getmembers(module, isclass)
-            command = [command[1] for command in commands if command[0] not in ['Base', 'Env', 'Module']][0]  # noqa pylint: disable=line-too-long
-            command = command(options)
-            command.execute()
+    # at least one of these must be enabled, i.e. the value is 'True'... but unfortunately
+    #  `docopts` doesn't give you the hierarchy... so given 'gen-sample cfn', there are
+    #  TWO enabled items in the list, 'gen-sample' and 'cfn'
+    possible_commands = [command for command, enabled in cli_arguments.items() if enabled]
+
+    command_class = find_command_class(possible_commands)
+    if command_class:
+        command_class(cli_arguments).execute()
+    else:
+        LOGGER.error("class not found for command '%s'", possible_commands)
