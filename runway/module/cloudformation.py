@@ -18,7 +18,7 @@ def ensure_stacker_compat_config(config_filename):
     """Ensure config file can be loaded by Stacker."""
     try:
         with open(config_filename, 'r') as stream:
-            yaml.load(stream)
+            yaml.safe_load(stream)
     except yaml.constructor.ConstructorError as yaml_error:
         if yaml_error.problem.startswith(
                 'could not determine a constructor for the tag \'!'):
