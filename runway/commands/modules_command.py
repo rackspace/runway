@@ -51,34 +51,37 @@ def assume_role(role_arn, session_name=None, duration_seconds=None,
             'AWS_SESSION_TOKEN': response['Credentials']['SessionToken']}
 
 
-def determine_module_class(path, module_options):
+def determine_module_class(path, class_path):
     """Determine type of module and return deployment module class."""
-    if not module_options.get('class_path'):
+    if not class_path:
         # First check directory name for type-indicating suffix
-        if os.path.basename(path).endswith('.sls'):
-            module_options['class_path'] = 'runway.module.serverless.Serverless'  # noqa
-        elif os.path.basename(path).endswith('.tf'):
-            module_options['class_path'] = 'runway.module.terraform.Terraform'
-        elif os.path.basename(path).endswith('.cdk'):
-            module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
-        elif os.path.basename(path).endswith('.cfn'):
-            module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
+        basename = os.path.basename(path)
+        if basename.endswith('.sls'):
+            class_path = 'runway.module.serverless.Serverless'
+        elif basename.endswith('.tf'):
+            class_path = 'runway.module.terraform.Terraform'
+        elif basename.endswith('.cdk'):
+            class_path = 'runway.module.cdk.CloudDevelopmentKit'
+        elif basename.endswith('.cfn'):
+            class_path = 'runway.module.cloudformation.CloudFormation'
+
+    if not class_path:
         # Fallback to autodetection
-        elif os.path.isfile(os.path.join(path,
-                                         'serverless.yml')):
-            module_options['class_path'] = 'runway.module.serverless.Serverless'  # noqa
+        if os.path.isfile(os.path.join(path, 'serverless.yml')):
+            class_path = 'runway.module.serverless.Serverless'
         elif glob.glob(os.path.join(path, '*.tf')):
-            module_options['class_path'] = 'runway.module.terraform.Terraform'
-        elif os.path.isfile(os.path.join(path, 'cdk.json')) and (
-                os.path.isfile(os.path.join(path, 'package.json'))):
-            module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
+            class_path = 'runway.module.terraform.Terraform'
+        elif os.path.isfile(os.path.join(path, 'cdk.json')) \
+                and os.path.isfile(os.path.join(path, 'package.json')):
+            class_path = 'runway.module.cdk.CloudDevelopmentKit'
         elif glob.glob(os.path.join(path, '*.env')):
-            module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
-    if not module_options.get('class_path'):
-        LOGGER.error('No valid deployment configurations found for %s',
-                     os.path.basename(path))
+            class_path = 'runway.module.cloudformation.CloudFormation'
+
+    if not class_path:
+        LOGGER.error('No module class found for %s', os.path.basename(path))
         sys.exit(1)
-    return load_object_from_string(module_options['class_path'])
+
+    return load_object_from_string(class_path)
 
 
 def get_deployment_env_vars(env_name, env_var_config=None, env_root=None):
@@ -321,7 +324,7 @@ class ModulesCommand(RunwayCommand):
             shutil.rmtree(os.path.join(self.env_root, directory))
         return True
 
-    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-statements
+    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-statements,too-many-locals
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
@@ -421,13 +424,16 @@ class ModulesCommand(RunwayCommand):
                                     region)
                         LOGGER.info("Module options: %s", module_opts)
                         with change_dir(module_root):
-                            getattr(
-                                determine_module_class(module_root, module_opts)(  # noqa
-                                    context=context,
-                                    path=module_root,
-                                    options=module_opts
-                                ),
-                                command)()
+                            module_class = determine_module_class(module_root,
+                                                                  module_opts.get('class_path'))
+                            LOGGER.debug("creating instance of '%s'", module_class)
+                            module_instance = module_class(
+                                context=context,
+                                path=module_root,
+                                options=module_opts
+                            )
+                            command_function = getattr(module_instance, command)
+                            command_function()
 
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
