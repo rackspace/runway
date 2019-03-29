@@ -18,9 +18,9 @@ LOGGER = logging.getLogger('runway')
 class RunwayCommand(object):
     """Base class for deployer classes."""
 
-    def __init__(self, options, env_root=None, runway_config_dir=None):
+    def __init__(self, cli_arguments, env_root=None, runway_config_dir=None):
         """Initialize base class."""
-        self.options = options
+        self._cli_arguments = cli_arguments
 
         if env_root is None:
             self.env_root = os.getcwd()

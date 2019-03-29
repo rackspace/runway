@@ -59,8 +59,18 @@ def load_object_from_string(fqcn):
     return getattr(sys.modules[module_path], object_name)
 
 
-def merge_dicts(dict1, dict2):
+def merge_dicts(dict1, dict2, deep_merge=True):
     """Merge y into x."""
+    if deep_merge:
+        if isinstance(dict1, list) and isinstance(dict2, list):
+            return dict1 + dict2
+
+        if not isinstance(dict1, dict) or not isinstance(dict2, dict):
+            return dict2
+
+        for key in dict2:
+            dict1[key] = merge_dicts(dict1[key], dict2[key]) if key in dict1 else dict2[key]  # noqa pylint: disable=line-too-long
+        return dict1
     dict3 = dict1.copy()
     dict3.update(dict2)
     return dict3

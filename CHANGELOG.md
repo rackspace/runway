@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Cleanup command class code
 
+## [0.44.3] - 2019-03-26
+### Fixed
+- Ensure PyYaml.load is not used (work around CVE-2017-18342)
+
+## [0.44.2] - 2019-03-21
+### Fixed
+- Fixed module config options completely overriding deployment options
+    * Options will now be deeply merged, allowing selective overrides per-module
+
+## [0.44.1] - 2019-03-16
+### Fixed
+- Corrected bug in module selection
+
 ## [0.44.0] - 2019-03-11
 ### Changed
 - Output environment message only once on startup
@@ -440,7 +453,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.44.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.44.3...HEAD
+[0.44.3]: https://github.com/onicagroup/runway/compare/v0.44.2...v0.44.3
+[0.44.2]: https://github.com/onicagroup/runway/compare/v0.44.1...v0.44.2
+[0.44.1]: https://github.com/onicagroup/runway/compare/v0.44.0...v0.44.1
 [0.44.0]: https://github.com/onicagroup/runway/compare/v0.43.0...v0.44.0
 [0.43.0]: https://github.com/onicagroup/runway/compare/v0.42.0...v0.43.0
 [0.42.0]: https://github.com/onicagroup/runway/compare/v0.41.2...v0.42.0

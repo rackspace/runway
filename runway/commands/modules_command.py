@@ -7,7 +7,6 @@ from distutils.util import strtobool  # noqa pylint: disable=no-name-in-module,i
 
 import copy
 import glob
-import json
 import logging
 import os
 import sys
@@ -49,34 +48,37 @@ def assume_role(role_arn, session_name=None, duration_seconds=None,
             'AWS_SESSION_TOKEN': response['Credentials']['SessionToken']}
 
 
-def determine_module_class(path, module_options):
+def determine_module_class(path, class_path):
     """Determine type of module and return deployment module class."""
-    if not module_options.get('class_path'):
+    if not class_path:
         # First check directory name for type-indicating suffix
-        if os.path.basename(path).endswith('.sls'):
-            module_options['class_path'] = 'runway.module.serverless.Serverless'  # noqa
-        elif os.path.basename(path).endswith('.tf'):
-            module_options['class_path'] = 'runway.module.terraform.Terraform'
-        elif os.path.basename(path).endswith('.cdk'):
-            module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
-        elif os.path.basename(path).endswith('.cfn'):
-            module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
+        basename = os.path.basename(path)
+        if basename.endswith('.sls'):
+            class_path = 'runway.module.serverless.Serverless'
+        elif basename.endswith('.tf'):
+            class_path = 'runway.module.terraform.Terraform'
+        elif basename.endswith('.cdk'):
+            class_path = 'runway.module.cdk.CloudDevelopmentKit'
+        elif basename.endswith('.cfn'):
+            class_path = 'runway.module.cloudformation.CloudFormation'
+
+    if not class_path:
         # Fallback to autodetection
-        elif os.path.isfile(os.path.join(path,
-                                         'serverless.yml')):
-            module_options['class_path'] = 'runway.module.serverless.Serverless'  # noqa
+        if os.path.isfile(os.path.join(path, 'serverless.yml')):
+            class_path = 'runway.module.serverless.Serverless'
         elif glob.glob(os.path.join(path, '*.tf')):
-            module_options['class_path'] = 'runway.module.terraform.Terraform'
-        elif os.path.isfile(os.path.join(path, 'cdk.json')) and (
-                os.path.isfile(os.path.join(path, 'package.json'))):
-            module_options['class_path'] = 'runway.module.cdk.CloudDevelopmentKit'  # noqa
+            class_path = 'runway.module.terraform.Terraform'
+        elif os.path.isfile(os.path.join(path, 'cdk.json')) \
+                and os.path.isfile(os.path.join(path, 'package.json')):
+            class_path = 'runway.module.cdk.CloudDevelopmentKit'
         elif glob.glob(os.path.join(path, '*.env')):
-            module_options['class_path'] = 'runway.module.cloudformation.CloudFormation'  # noqa
-    if not module_options.get('class_path'):
-        LOGGER.error('No valid deployment configurations found for %s',
-                     os.path.basename(path))
+            class_path = 'runway.module.cloudformation.CloudFormation'
+
+    if not class_path:
+        LOGGER.error('No module class found for %s', os.path.basename(path))
         sys.exit(1)
-    return load_object_from_string(module_options['class_path'])
+
+    return load_object_from_string(class_path)
 
 
 def path_is_current_dir(path):
@@ -240,12 +242,8 @@ class ModulesCommand(RunwayCommand):
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
-        context = Context(options=self.options,
-                          env_name=get_env(
-                              self.env_root,
-                              self.runway_config.get('ignore_git_branch',
-                                                     False)
-                          ),
+        context = Context(env_name=get_env(self.env_root,
+                                           self.runway_config.get('ignore_git_branch', False)),
                           env_region=None,
                           env_root=self.env_root,
                           env_vars=os.environ.copy())
@@ -266,12 +264,14 @@ class ModulesCommand(RunwayCommand):
                             'irrecoverably DESTROYED.')
                 deployments_to_run = self.reverse_deployments(
                     self.select_deployment_to_run(
+                        context.env_name,
                         deployments,
                         command=command
                     )
                 )
             else:
                 deployments_to_run = self.select_deployment_to_run(
+                    context.env_name,
                     deployments
                 )
 
@@ -317,6 +317,7 @@ class ModulesCommand(RunwayCommand):
                         modules.append('.' + os.sep)
                     for module in modules:
                         self._deploy_module(module, deployment, context, command)
+
 
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
@@ -380,36 +381,37 @@ class ModulesCommand(RunwayCommand):
         return reversed_deployments
 
     @staticmethod
-    def select_deployment_to_run(deployments=None, command='build'):  # noqa pylint: disable=too-many-branches,too-many-statements
+    def select_deployment_to_run(env_name, deployments=None, command='build'):  # noqa pylint: disable=too-many-branches,too-many-statements,too-many-locals
         """Query user for deployments to run."""
         if deployments is None or not deployments:
             return []
         deployments_to_run = []
 
-        if len(deployments) == 1:
-            selected_index = 1
+        num_deployments = len(deployments)
+
+        if num_deployments == 1:
+            selected_deployment_index = 1
         else:
             print('')
             print('Configured deployments:')
             pretty_index = 1
-            for i in deployments:
-                print("%s: %s" % (pretty_index, json.dumps(i)))
+            for deployment in deployments:
+                print("%s: %s" % (pretty_index, _deployment_menu_entry(deployment)))
                 pretty_index += 1
             print('')
             print('')
             if command == 'destroy':
                 print('(Operating in destroy mode -- "all" will destroy all '
                       'deployments in reverse order)')
-            selected_index = input('Enter number of deployment to run '
-                                   '(or "all"): ')
+            selected_deployment_index = input('Enter number of deployment to run (or "all"): ')
 
-        if selected_index == 'all':
+        if selected_deployment_index == 'all':
             return deployments
-        if selected_index == '':
+        if selected_deployment_index == '':
             LOGGER.error('Please select a valid number (or "all")')
             sys.exit(1)
 
-        selected_deploy = deployments[int(selected_index) - 1]
+        selected_deploy = deployments[int(selected_deployment_index) - 1]
         if selected_deploy.get('current_dir', False):
             deployments_to_run.append(selected_deploy)
         elif not selected_deploy.get('modules', []):
@@ -427,27 +429,49 @@ class ModulesCommand(RunwayCommand):
             print('')
             print('Configured modules in deployment:')
             pretty_index = 1
-            for i in selected_deploy['modules']:
-                print("%s: %s" % (pretty_index, json.dumps(i)))
+            for module in selected_deploy['modules']:
+                print("%s: %s" % (pretty_index, _module_menu_entry(module, env_name)))
                 pretty_index += 1
             print('')
             print('')
             if command == 'destroy':
                 print('(Operating in destroy mode -- "all" will destroy all '
                       'deployments in reverse order)')
-            selected_index = input('Enter number of module to run '
-                                   '(or "all"): ')
-            if selected_index == 'all':
+            selected_module_index = input('Enter number of module to run (or "all"): ')
+            if selected_module_index == 'all':
                 deployments_to_run.append(selected_deploy)
-            elif selected_index == '' or (
-                    not selected_index.isdigit() or (
-                        not 0 < int(selected_index) <= len(selected_deploy))):
+            elif selected_module_index == '' or (
+                    not selected_module_index.isdigit() or (
+                        not 0 < int(selected_module_index) <= len(selected_deploy['modules']))):  # noqa pylint: disable=line-too-long
                 LOGGER.error('Please select a valid number (or "all")')
                 sys.exit(1)
             else:
-                module_list = [selected_deploy['modules'][int(selected_index) - 1]]  # noqa
+                module_list = [selected_deploy['modules'][int(selected_module_index) - 1]]  # noqa
                 selected_deploy['modules'] = module_list
                 deployments_to_run.append(selected_deploy)
 
         LOGGER.debug('Selected deployment is %s...', deployments_to_run)
         return deployments_to_run
+
+
+def _module_name_for_display(module):
+    """Extract a name for the module."""
+    if isinstance(module, dict):
+        return module['path']
+    return str(module)
+
+
+def _module_menu_entry(module, environment_name):
+    """Build a string to display in the 'select module' menu."""
+    name = _module_name_for_display(module)
+    if isinstance(module, dict):
+        environment_config = module.get('environments', {}).get(environment_name)
+        return "%s (%s)" % (name, environment_config)
+    return "%s" % (name)
+
+
+def _deployment_menu_entry(deployment):
+    """Build a string to display in the 'select deployment' menu."""
+    paths = ", ".join([_module_name_for_display(module) for module in deployment['modules']])
+    regions = ", ".join(deployment.get('regions', []))
+    return "%s (%s)" % (paths, regions)
