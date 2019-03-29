@@ -1,10 +1,6 @@
 """The dismantle command."""
-from ..modules_command import ModulesCommand
 
+from .destroy import Destroy
 
-class Dismantle(ModulesCommand):
-    """Extend ModulesCommand with execute to run the destroy method."""
-
-    def execute(self):
-        """Destroy deployments."""
-        self.destroy()
+# just an alias
+Dismantle = Destroy

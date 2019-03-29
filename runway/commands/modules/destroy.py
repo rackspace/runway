@@ -7,4 +7,4 @@ class Destroy(ModulesCommand):
 
     def execute(self):
         """Destroy deployments."""
-        self.destroy()
+        self.run(deployments=None, command='destroy')

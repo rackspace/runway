@@ -107,6 +107,9 @@ class RunwayModule(object):
         else:
             self.options = options
 
+    # the rest of these 'abstract' methods must have names which match
+    #  the commands defined in `cli.py`
+
     def plan(self):
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError('You must implement the plan() method '

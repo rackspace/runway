@@ -7,4 +7,4 @@ class Deploy(ModulesCommand):
 
     def execute(self):
         """Run deployments."""
-        self.deploy()
+        self.run(deployments=None, command='deploy')
