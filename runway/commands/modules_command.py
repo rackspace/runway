@@ -318,7 +318,6 @@ class ModulesCommand(RunwayCommand):
                     for module in modules:
                         self._deploy_module(module, deployment, context, command)
 
-
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
             else:
