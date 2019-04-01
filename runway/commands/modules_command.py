@@ -249,6 +249,11 @@ class ModulesCommand(RunwayCommand):
                           env_vars=os.environ.copy())
         echo_detected_environment(context.env_name, context.env_vars)
 
+        # set default names if needed
+        for i, deployment in enumerate(deployments):
+            if not deployment.get('name'):
+                deployment['name'] = 'deployment_' + str(i+1)
+
         if command == 'destroy':
             LOGGER.info('WARNING!')
             LOGGER.info('Runway is running in DESTROY mode.')
@@ -278,7 +283,9 @@ class ModulesCommand(RunwayCommand):
         LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
         for i, deployment in enumerate(deployments_to_run):
             LOGGER.info("")
-            LOGGER.info("======= Processing deployment %d ===========================", i)
+            LOGGER.info("")
+            LOGGER.info("======= Processing deployment '%s' ===========================",
+                        deployment.get('name'))
 
             if deployment.get('regions'):
                 if deployment.get('env_vars'):
@@ -350,7 +357,7 @@ class ModulesCommand(RunwayCommand):
         with change_dir(module_root):
             # dynamically load the particular module's class, 'get' the method
             #  associated with the command, and call the method
-            module_class = determine_module_class(module_root, module_opts)
+            module_class = determine_module_class(module_root, module_opts.get('class_path'))
             module_instance = module_class(
                 context=context,
                 path=module_root,
@@ -393,10 +400,8 @@ class ModulesCommand(RunwayCommand):
         else:
             print('')
             print('Configured deployments:')
-            pretty_index = 1
-            for deployment in deployments:
-                print("%s: %s" % (pretty_index, _deployment_menu_entry(deployment)))
-                pretty_index += 1
+            for i, deployment in enumerate(deployments):
+                print(" %d: %s" % (i+1, _deployment_menu_entry(deployment)))
             print('')
             print('')
             if command == 'destroy':
@@ -410,27 +415,26 @@ class ModulesCommand(RunwayCommand):
             LOGGER.error('Please select a valid number (or "all")')
             sys.exit(1)
 
-        selected_deploy = deployments[int(selected_deployment_index) - 1]
-        if selected_deploy.get('current_dir', False):
-            deployments_to_run.append(selected_deploy)
-        elif not selected_deploy.get('modules', []):
+        selected_deployment = deployments[int(selected_deployment_index) - 1]
+        if selected_deployment.get('current_dir', False):
+            deployments_to_run.append(selected_deployment)
+        elif not selected_deployment.get('modules', []):
             LOGGER.error('No modules configured in selected deployment')
             sys.exit(1)
-        elif len(selected_deploy['modules']) == 1:
+        elif len(selected_deployment['modules']) == 1:
             # No need to select a module in the deployment - there's only one
             if command == 'destroy':
                 LOGGER.info('(only one deployment detected; all modules '
                             'automatically selected for termination)')
                 if not strtobool(input('Proceed?: ')):
                     sys.exit(0)
-            deployments_to_run.append(selected_deploy)
+            deployments_to_run.append(selected_deployment)
         else:
+            modules = selected_deployment['modules']
             print('')
-            print('Configured modules in deployment:')
-            pretty_index = 1
-            for module in selected_deploy['modules']:
-                print("%s: %s" % (pretty_index, _module_menu_entry(module, env_name)))
-                pretty_index += 1
+            print('Configured modules in deployment \'%s\':' % selected_deployment.get('name'))
+            for i, module in enumerate(modules):
+                print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
             print('')
             print('')
             if command == 'destroy':
@@ -438,16 +442,15 @@ class ModulesCommand(RunwayCommand):
                       'deployments in reverse order)')
             selected_module_index = input('Enter number of module to run (or "all"): ')
             if selected_module_index == 'all':
-                deployments_to_run.append(selected_deploy)
+                deployments_to_run.append(selected_deployment)
             elif selected_module_index == '' or (
                     not selected_module_index.isdigit() or (
-                        not 0 < int(selected_module_index) <= len(selected_deploy['modules']))):  # noqa pylint: disable=line-too-long
+                        not 0 < int(selected_module_index) <= len(modules))):
                 LOGGER.error('Please select a valid number (or "all")')
                 sys.exit(1)
             else:
-                module_list = [selected_deploy['modules'][int(selected_module_index) - 1]]  # noqa
-                selected_deploy['modules'] = module_list
-                deployments_to_run.append(selected_deploy)
+                selected_deployment['modules'] = [modules[int(selected_module_index) - 1]]
+                deployments_to_run.append(selected_deployment)
 
         LOGGER.debug('Selected deployment is %s...', deployments_to_run)
         return deployments_to_run
@@ -473,4 +476,4 @@ def _deployment_menu_entry(deployment):
     """Build a string to display in the 'select deployment' menu."""
     paths = ", ".join([_module_name_for_display(module) for module in deployment['modules']])
     regions = ", ".join(deployment.get('regions', []))
-    return "%s (%s)" % (paths, regions)
+    return "%s - %s (%s)" % (deployment.get('name'), paths, regions)
