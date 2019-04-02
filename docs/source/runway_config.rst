@@ -6,17 +6,17 @@ Runway Config File
 The Basics
 ^^^^^^^^^^
 
-At its simplest, a Runway project consists of a single module folder (for a Serverless application, say) and
+At its simplest, a Runway project consists of a single "module" (for a Serverless application, say) in its own folder, along with
 a ``runway.yml`` at the same level::
 
     .
     ├── myapp.sls
-    │   ├── serverless.yaml
+    │   ├── serverless.yml
     │   └── ...
     └── runway.yml
 
-
-The ``runway.yml`` configuration file then consists of one "deployment" which contains just the one module which is deployable to just one region::
+The ``runway.yml`` configuration file then consists of one "deployment", which consists of a list of one or more
+ modules, along with a list of one or more regions that the module may be deployed to::
 
     ---
     deployments:
@@ -25,7 +25,8 @@ The ``runway.yml`` configuration file then consists of one "deployment" which co
         regions:
           - us-west-2
 
-You can specify as many module folders and regions as you like, where each module *may* be deployed into each region::
+You can specify as many module folders and regions as you like, where each module *may* be deployed into each region.
+Say we add a Cloudformation module to deploy the database for our Serverless app::
 
     ---
     deployments:
@@ -39,7 +40,7 @@ You can specify as many module folders and regions as you like, where each modul
 
 *(Note that stating just the module folder name on its own is equivalent to explicitly specifying the folder name as the ``path``.)*
 
-In this case, Runway *may* deploy the Cloudformation and Serverless modules each into one, two, or all three regions --
+In the above example, Runway *may* deploy the Cloudformation and Serverless modules each into one, two, or all three regions --
 or even into none of them.  The particular combinations of modules and regions will depend on the configurations provided for
 each module, but the regions here the only allowable ones.
 
@@ -62,20 +63,23 @@ The example above could be broken into two separate deployments within the same 
 
     ---
     deployments:
-      - modules:
+      - name: backend
+        modules:
           - database.cfn
         regions:
           - us-east-2
 
-      - modules:
+      - name: frontend
+        modules:
           - myapp.sls
         regions:
           - us-east-1
           - us-east-2
           - us-west-1
 
-Here we are stating that the Cloudformation stacks may be deployed to ``us-east-2`` only, while the Serverless
-application may be deployed to three US regions.
+(Note that we've given each deployment a name; this is optional, but is helpful when reading the Runway console output.)
+
+Here we are stating that ``backend`` may be deployed to ``us-east-2`` only, while ``frontend`` may be deployed to three US regions.
 
 When there are multiple deployments, they are created in the order they are listed in ``runway.yml``
 (or destroyed in reverse order).  Runway does not attempt to determine the order itself based on
@@ -210,7 +214,7 @@ can be overridden by values in the corresponding ``{env}-{region}.{extension}`` 
     │   └── ...
     └── runway.yml
 
-One benefit is it's now easier and more clean for individuals to create their own environment:  just copy the appropriate file::
+One benefit is that it's now easier and more clean for individuals to create their own environment:  just copy the appropriate file::
 
     env
     ├── dev-alice-us-west-2.tfvars
@@ -230,7 +234,7 @@ Each module will receive a copy of the OS environment variables active when Runw
 Additional environment variables may be specified in the ``runway.yml`` file by adding an ``env_vars`` node to a given
 deployment node. Thus they are specific to each deployment, and not shared between them.
 
-Under ``env_vars`` create a node using the name of the environment, or using ``'*'`` (with the quotes) if the values should
+Under ``env_vars`` create a node using the name of the environment, or using ``'*'`` (with the quotes) if the values are
 applicable to all environments::
 
     ---
