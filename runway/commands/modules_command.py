@@ -356,8 +356,9 @@ class ModulesCommand(RunwayCommand):
         LOGGER.info("Module options: %s", module_opts)
         with change_dir(module_root):
             # dynamically load the particular module's class, 'get' the method
-            #  associated with the command, and call the method
-            module_class = determine_module_class(module_root, module_opts.get('class_path'))
+            # associated with the command, and call the method
+            module_class = determine_module_class(module_root,
+                                                  module_opts.get('class_path'))
             module_instance = module_class(
                 context=context,
                 path=module_root,

@@ -1,10 +1,14 @@
 """The gen-sample command."""
+from distutils.version import LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
+import json
 import logging
 import os
+import re
 import shutil
 from subprocess import check_output
 import sys
 
+from botocore.vendored import requests
 import cfn_flip
 
 from ..runway_command import RunwayCommand
@@ -83,7 +87,33 @@ def generate_sample_cdk_module(env_root, module_dir=None):
                          i),
             os.path.join(module_dir, i),
         )
+    with open(os.path.join(module_dir, '.gitignore'), 'w') as stream:
+        stream.write('node_modules')
     LOGGER.info("Sample CDK module created at %s", module_dir)
+    LOGGER.info('To finish its setup, change to the %s directory and execute '
+                '"npm install" to generate its lockfile.', module_dir)
+
+
+def generate_sample_cdk_py_module(env_root, module_dir=None):
+    """Generate skeleton CDK python sample module."""
+    if module_dir is None:
+        module_dir = os.path.join(env_root, 'sampleapp.cdk')
+    generate_sample_module(module_dir)
+    for i in ['app.py', 'cdk.json', 'lambda-index.py', 'package.json',
+              'Pipfile']:
+        shutil.copyfile(
+            os.path.join(ROOT,
+                         'templates',
+                         'cdk-py',
+                         i),
+            os.path.join(module_dir, i),
+        )
+    with open(os.path.join(module_dir, '.gitignore'), 'w') as stream:
+        stream.write('node_modules')
+    LOGGER.info("Sample CDK module created at %s", module_dir)
+    LOGGER.info('To finish its setup, change to the %s directory and execute '
+                '"npm install" and "pipenv update -d --three" to generate its '
+                'lockfiles.', module_dir)
 
 
 def generate_sample_cfn_module(env_root, module_dir=None):
@@ -159,8 +189,7 @@ def generate_sample_tf_module(env_root, module_dir=None):
     if module_dir is None:
         module_dir = os.path.join(env_root, 'sampleapp.tf')
     generate_sample_module(module_dir)
-    for i in ['.terraform-version', 'backend-us-east-1.tfvars',
-              'dev-us-east-1.tfvars', 'main.tf']:
+    for i in ['backend-us-east-1.tfvars', 'dev-us-east-1.tfvars', 'main.tf']:
         shutil.copyfile(
             os.path.join(ROOT,
                          'templates',
@@ -168,6 +197,28 @@ def generate_sample_tf_module(env_root, module_dir=None):
                          i),
             os.path.join(module_dir, i),
         )
+    tf_ver_template = os.path.join(ROOT,
+                                   'templates',
+                                   'terraform',
+                                   '.terraform-version')
+    if os.path.isfile(tf_ver_template):
+        shutil.copyfile(
+            tf_ver_template,
+            os.path.join(module_dir, '.terraform-version'),
+        )
+    else:  # running directly from git
+        tf_releases = json.loads(
+            requests.get('https://releases.hashicorp.com/index.json').text
+        )['terraform']
+        tf_vers = [k
+                   for k, _v in tf_releases['versions'].items()
+                   if '-' not in k]
+        tf_ver = re.match(r'^[0-9]*\.[0-9]*\.',
+                          sorted(tf_vers, key=LooseVersion)[-1]).group()
+        with open(os.path.join(module_dir,
+                               '.terraform-version'), 'w') as stream:
+            stream.write('latest:^' + tf_ver)
+
     LOGGER.info("Sample Terraform app created at %s",
                 module_dir)
 
@@ -189,3 +240,5 @@ class GenSample(RunwayCommand):
             generate_sample_tf_module(self.env_root)
         elif self._cli_arguments['cdk']:
             generate_sample_cdk_module(self.env_root)
+        elif self._cli_arguments['cdk-py']:
+            generate_sample_cdk_py_module(self.env_root)

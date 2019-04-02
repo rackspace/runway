@@ -12,13 +12,12 @@ runway.yml sample::
     # folder when running a dev deployment of 'app' to us-west-2 then it will be
     # skipped.)
     deployments:
-      - name: app1
-        modules:
+      - modules:
           - myapp.cfn
         regions:
           - us-west-2
 
-      - name: app2
+      - name: terraformapp  # deployments can optionally have names
         modules:
           - myapp.tf
         regions:

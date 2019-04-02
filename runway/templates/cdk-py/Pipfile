@@ -1,0 +1,10 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+"aws-cdk.cdk" = "~=0.27"
+"aws-cdk.aws-lambda" = "~=0.27"
+
+[packages]

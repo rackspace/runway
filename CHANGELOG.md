@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - Cleanup command class code
+- Add optional deployment names
+
+### Added
+- Python CDK support and sample generator
+
+### Fixed
+- Support terraform sample generator use directly from git master
 
 ## [0.44.3] - 2019-03-26
 ### Fixed

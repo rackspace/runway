@@ -54,10 +54,24 @@ def get_cdk_stacks(module_path, env_vars):
     ).strip().split('\n')
 
 
+def run_pipenv_sync(path):
+    """Ensure python libraries are up to date, if applicable."""
+    if os.path.isfile(os.path.join(path, 'Pipfile.lock')):
+        LOGGER.info('Module has a Pipfile.lock file defining python '
+                    'dependencies; invocating pipenv to install/update '
+                    'them...')
+        pipenv_path = which('pipenv')
+        if not pipenv_path:
+            LOGGER.error('"pipenv" not found in path or is not executable; '
+                         'please ensure it is installed correctly.')
+            sys.exit(1)
+        subprocess.check_call([pipenv_path, 'sync', '-d', '--three'])
+
+
 class CloudDevelopmentKit(RunwayModule):
     """CDK Runway Module."""
 
-    def run_cdk(self, command='deploy'):
+    def run_cdk(self, command='deploy'):  # pylint: disable=too-many-branches
         """Run CDK."""
         response = {'skipped_configs': False}
         cdk_opts = [command]
@@ -76,6 +90,7 @@ class CloudDevelopmentKit(RunwayModule):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
+                    run_pipenv_sync(self.path)
                     if self.options.get('options', {}).get('build_steps',
                                                            []):
                         LOGGER.info("Running build steps for %s...",
@@ -103,6 +118,8 @@ class CloudDevelopmentKit(RunwayModule):
                             )
                     else:
                         if command == 'deploy':
+                            if 'CI' in self.context.env_vars:
+                                cdk_opts.append('--require-approval=never')
                             bootstrap_command = generate_node_command(
                                 'cdk',
                                 ['bootstrap'],

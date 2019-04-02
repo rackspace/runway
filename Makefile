@@ -6,8 +6,8 @@ clean:
 test: create_readme
 	python setup.py test
 	pipenv sync -d
-	pipenv run flake8 --exclude=runway/embedded runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
+	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
 	find runway/templates/stacker -name '*.py' | xargs pipenv run pylint --disable=import-error --disable=too-few-public-methods
 	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
