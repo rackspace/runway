@@ -2,11 +2,11 @@
 from aws_cdk import aws_lambda, cdk
 
 
-class LambdaStack(cdk.Stack):
+class SampleStack(cdk.Stack):
     """CFN stack class."""
 
     def __init__(self, app: cdk.App, id: str) -> None:
-        """Create LambdaStack."""
+        """Create SampleStack."""
         super().__init__(app, id)
 
         with open('lambda-index.py', encoding='utf8') as stream:
@@ -29,7 +29,7 @@ class App(cdk.App):
         """Create App."""
         super().__init__()
 
-        LambdaStack(self, 'LambdaStack')
+        SampleStack(self, 'SampleStack')
 
 
 def main() -> None:

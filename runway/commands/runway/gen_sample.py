@@ -74,21 +74,34 @@ def generate_sample_sls_tsc_module(env_root, module_dir=None):
                 module_dir)
 
 
-def generate_sample_cdk_module(env_root, module_dir=None):
-    """Generate skeleton CDK sample module."""
+def generate_sample_cdk_tsc_module(env_root, module_dir=None):
+    """Generate skeleton CDK TS sample module."""
     if module_dir is None:
         module_dir = os.path.join(env_root, 'sampleapp.cdk')
     generate_sample_module(module_dir)
-    for i in ['cdk.json', 'index.ts', 'package.json', 'tsconfig.json']:
+    for i in ['.npmignore', 'cdk.json', 'package.json', 'runway.module.yml',
+              'tsconfig.json', 'README.md']:
         shutil.copyfile(
             os.path.join(ROOT,
                          'templates',
-                         'cdk',
+                         'cdk-tsc',
                          i),
             os.path.join(module_dir, i),
         )
+    for i in [['bin', 'sample.ts'], ['lib', 'sample-stack.ts']]:
+        os.mkdir(os.path.join(module_dir, i[0]))
+        shutil.copyfile(
+            os.path.join(ROOT,
+                         'templates',
+                         'cdk-tsc',
+                         i[0],
+                         i[1]),
+            os.path.join(module_dir, i[0], i[1]),
+        )
     with open(os.path.join(module_dir, '.gitignore'), 'w') as stream:
-        stream.write('node_modules')
+        stream.write('*.js\n')
+        stream.write('*.d.ts\n')
+        stream.write('node_modules\n')
     LOGGER.info("Sample CDK module created at %s", module_dir)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
                 '"npm install" to generate its lockfile.', module_dir)
@@ -100,7 +113,7 @@ def generate_sample_cdk_py_module(env_root, module_dir=None):
         module_dir = os.path.join(env_root, 'sampleapp.cdk')
     generate_sample_module(module_dir)
     for i in ['app.py', 'cdk.json', 'lambda-index.py', 'package.json',
-              'Pipfile']:
+              'runway.module.yml', 'Pipfile']:
         shutil.copyfile(
             os.path.join(ROOT,
                          'templates',
@@ -238,7 +251,7 @@ class GenSample(RunwayCommand):
             generate_sample_stacker_module(self.env_root)
         elif self._cli_arguments['tf']:
             generate_sample_tf_module(self.env_root)
-        elif self._cli_arguments['cdk']:
-            generate_sample_cdk_module(self.env_root)
+        elif self._cli_arguments['cdk-tsc']:
+            generate_sample_cdk_tsc_module(self.env_root)
         elif self._cli_arguments['cdk-py']:
             generate_sample_cdk_py_module(self.env_root)

@@ -38,34 +38,22 @@ def cdk_module_matches_env(env_name, env_config, env_vars):
                 )
                 if sts_client.get_caller_identity()['Account'] == account_id:
                     return True
+        if isinstance(current_env_config, dict):
+            return True
     return False
 
 
-def get_cdk_stacks(module_path, env_vars):
+def get_cdk_stacks(module_path, env_vars, context_opts):
     """Return list of CDK stacks."""
     LOGGER.debug('Listing stacks in the CDK app prior to '
                  'diff')
     return subprocess.check_output(
         generate_node_command(
             command='cdk',
-            command_opts=['list'],
+            command_opts=['list'] + context_opts,
             path=module_path),
         env=env_vars
     ).strip().split('\n')
-
-
-def run_pipenv_sync(path):
-    """Ensure python libraries are up to date, if applicable."""
-    if os.path.isfile(os.path.join(path, 'Pipfile.lock')):
-        LOGGER.info('Module has a Pipfile.lock file defining python '
-                    'dependencies; invocating pipenv to install/update '
-                    'them...')
-        pipenv_path = which('pipenv')
-        if not pipenv_path:
-            LOGGER.error('"pipenv" not found in path or is not executable; '
-                         'please ensure it is installed correctly.')
-            sys.exit(1)
-        subprocess.check_call([pipenv_path, 'sync', '-d', '--three'])
 
 
 class CloudDevelopmentKit(RunwayModule):
@@ -90,7 +78,6 @@ class CloudDevelopmentKit(RunwayModule):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
-                    run_pipenv_sync(self.path)
                     if self.options.get('options', {}).get('build_steps',
                                                            []):
                         LOGGER.info("Running build steps for %s...",
@@ -102,12 +89,20 @@ class CloudDevelopmentKit(RunwayModule):
                             directory=self.path,
                             env=self.context.env_vars
                         )
+                    cdk_context_opts = []
+                    if isinstance(self.options.get('environments',
+                                                   {}).get(self.context.env_name),  # noqa
+                                  dict):
+                        for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa pylint: disable=line-too-long
+                            cdk_context_opts.extend(['-c', "%s=%s" % (key, val)])
+                        cdk_opts.extend(cdk_context_opts)
                     if command == 'diff':
                         LOGGER.info("Running cdk %s on each stack in %s",
                                     command,
                                     os.path.basename(self.path))
                         for i in get_cdk_stacks(self.path,
-                                                self.context.env_vars):
+                                                self.context.env_vars,
+                                                cdk_context_opts):
                             subprocess.call(
                                 generate_node_command(
                                     'cdk',
@@ -119,10 +114,11 @@ class CloudDevelopmentKit(RunwayModule):
                     else:
                         if command == 'deploy':
                             if 'CI' in self.context.env_vars:
+                                cdk_opts.append('--ci')
                                 cdk_opts.append('--require-approval=never')
                             bootstrap_command = generate_node_command(
                                 'cdk',
-                                ['bootstrap'],
+                                ['bootstrap'] + cdk_context_opts,
                                 self.path
                             )
                             LOGGER.info('Running cdk bootstrap...')

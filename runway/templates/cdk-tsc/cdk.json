@@ -1,4 +1,4 @@
 {
-  "app": "node index.js",
+  "app": "node bin/sample.js",
   "versionReporting": false
 }

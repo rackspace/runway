@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Cleanup command class code
 - Add optional deployment names
+- Update TypeScript CDK sample generator
 
 ### Added
-- Python CDK support and sample generator
+- Support CDK context values
+- Python CDK sample generator
 
 ### Fixed
 - Support terraform sample generator use directly from git master

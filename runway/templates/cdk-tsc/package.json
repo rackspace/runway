@@ -1,0 +1,21 @@
+{
+  "name": "sampleapp",
+  "version": "0.1.0",
+  "bin": {
+    "newbase": "bin/sample.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/node": "8.10.40",
+    "typescript": "^3.3.3333",
+    "aws-cdk": "^0.27.0"
+  },
+  "dependencies": {
+    "@aws-cdk/cdk": "^0.27.0",
+    "source-map-support": "^0.5.9"
+  }
+}

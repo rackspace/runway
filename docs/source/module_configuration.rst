@@ -84,7 +84,7 @@ and/or
         namespace: contoso-dev
         foo: bar
 
-(in ``runway.module.yaml``)
+(in ``runway.module.yml``)
 
 Terraform
 ^^^^^^^^^
@@ -150,7 +150,7 @@ and/or
         namespace: contoso-dev
         foo: bar
 
-(in ``runway.module.yaml``)
+(in ``runway.module.yml``)
 
 | **Backend Values Via Runway Deployment/Module Options**
 | Terraform backend options can be specified in the runway config yaml via deployment and module options.
@@ -194,7 +194,7 @@ and/or
         region: us-east-1
         dynamodb_table: mytable
 
-(in ``runway.module.yaml``)
+(in ``runway.module.yml``)
 
 .. _tfenv: https://github.com/kamatama41/tfenv
 
@@ -276,7 +276,7 @@ and/or
       dev: true
       prod: true
 
-(in ``runway.module.yaml``)
+(in ``runway.module.yml``)
 
 CDK
 ^^^
@@ -330,8 +330,14 @@ these can be alternately be specified with a simple boolean (e.g. ``dev: true``)
       - modules:
           - path: mycdkmodule
             environments:
-              dev: 987654321098/us-west-2
-              prod: 123456789012/us-west-2
+              # CDK environment values can be specified in 3 forms:
+              # Opt 1 - A yaml mapping, in which case each key:val pair will be provided as context options
+              # dev:
+              #   route_53_zone_id: Z3P5QSUBK4POTI
+              # Opt 2 - A string, in which case the explicit CDK ``ACCOUNT/REGION`` environment will be verified
+              # dev: 987654321098/us-west-2
+              # Opt 3 - Booleans, in which case the module will always be deployed in the given environment
+              # dev: true
 
 and/or:
 ::
@@ -340,8 +346,14 @@ and/or:
 
     deployments:
       - environments:
-          dev: 987654321098/us-west-2
-          prod: 123456789012/us-west-2
+          # CDK environment values can be specified in 3 forms:
+          # Opt 1 - A yaml mapping, in which case each key:val pair will be provided as context options
+          # dev:
+          #   route_53_zone_id: Z3P5QSUBK4POTI
+          # Opt 2 - A string, in which case the explicit CDK ``ACCOUNT/REGION`` environment will be verified
+          # dev: 987654321098/us-west-2
+          # Opt 3 - Booleans, in which case the module will always be deployed in the given environment
+          # dev: true
         modules:
           - mycdkmodule
 
@@ -350,10 +362,16 @@ and/or:
 
     ---
     environments:
-      dev: 987654321098/us-west-2
-      prod: 123456789012/us-west-2
+      # CDK environment values can be specified in 3 forms:
+      # Opt 1 - A yaml mapping, in which case each key:val pair will be provided as context options
+      # dev:
+      #   route_53_zone_id: Z3P5QSUBK4POTI
+      # Opt 2 - A string, in which case the explicit CDK ``ACCOUNT/REGION`` environment will be verified
+      # dev: 987654321098/us-west-2
+      # Opt 3 - Booleans, in which case the module will always be deployed in the given environment
+      # dev: true
 
-(in ``runway.module.yaml``)
+(in ``runway.module.yml``)
 
 Static Site
 ^^^^^^^^^^^
