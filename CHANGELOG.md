@@ -5,10 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.45.0] - 2019-04-02
 ### Changed
-- Cleanup command class code
 - Add optional deployment names
 - Update TypeScript CDK sample generator
+- Cleanup command class code
 
 ### Added
 - Support CDK context values
@@ -463,7 +465,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.44.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.45.0...HEAD
+[0.45.0]: https://github.com/onicagroup/runway/compare/v0.44.3...v0.45.0
 [0.44.3]: https://github.com/onicagroup/runway/compare/v0.44.2...v0.44.3
 [0.44.2]: https://github.com/onicagroup/runway/compare/v0.44.1...v0.44.2
 [0.44.1]: https://github.com/onicagroup/runway/compare/v0.44.0...v0.44.1
