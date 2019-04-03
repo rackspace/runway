@@ -107,7 +107,7 @@ def generate_sample_cdk_tsc_module(env_root, module_dir=None):
                 '"npm install" to generate its lockfile.', module_dir)
 
 
-def generate_sample_cdk_csharp_module(env_root, module_dir=None):
+def generate_sample_cdk_cs_module(env_root, module_dir=None):
     """Generate skeleton CDK C# sample module."""
     if module_dir is None:
         module_dir = os.path.join(env_root, 'sampleapp.cdk')
@@ -303,4 +303,4 @@ class GenSample(RunwayCommand):
         elif self._cli_arguments['cdk-py']:
             generate_sample_cdk_py_module(self.env_root)
         elif self._cli_arguments['cdk-csharp']:
-            generate_sample_cdk_csharp_module(self.env_root)
+            generate_sample_cdk_cs_module(self.env_root)
