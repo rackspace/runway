@@ -42,7 +42,7 @@ class CloudFormation(RunwayModule):
     def ensure_stacker_compat_config(self, config_filename):
         """Ensure config file can be loaded by Stacker."""
         try:
-            self.folder.load_yaml_file(config_filename)
+            self.loader.load_yaml_file(config_filename)
         except yaml.constructor.ConstructorError as yaml_error:
             if yaml_error.problem.startswith(
                     'could not determine a constructor for the tag \'!'):
@@ -66,7 +66,7 @@ class CloudFormation(RunwayModule):
 
     def get_stacker_env_file(self):
         """Determine Stacker environment file name."""
-        return self.folder.locate_file(self.gen_stacker_env_files())
+        return self.loader.locate_env_file(self.gen_stacker_env_files())
 
     def run_stacker(self, command='diff'):  # pylint: disable=too-many-branches
         """Run Stacker."""
@@ -102,10 +102,10 @@ class CloudFormation(RunwayModule):
                 ', '.join(self.gen_stacker_env_files())
             )
         else:
-            with change_dir(self.path):
+            with change_dir(self.module_folder_name):
                 # Iterate through any stacker yaml configs to deploy them in order
                 # or destroy them in reverse order
-                for _root, _dirs, files in os.walk(self.path):
+                for _root, _dirs, files in os.walk(self.module_folder_name):
                     sorted_files = sorted(files)
                     if command == 'destroy':
                         sorted_files = reversed(sorted_files)

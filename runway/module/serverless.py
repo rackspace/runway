@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 
-from . import RunwayModule, run_module_command
+from . import RunwayModule, run_module_command, NpmHelper
 from ..util import change_dir, which
 
 LOGGER = logging.getLogger('runway')
@@ -44,14 +44,14 @@ class Serverless(RunwayModule):
 
     def get_sls_config_file(self):
         """Determine Stacker environment file name."""
-        return self.folder.locate_env_file(self.gen_sls_config_files())
+        return self.loader.locate_env_file(self.gen_sls_config_files())
 
     def load_sls_config_file(self, name):
         """Load the contents of the file into a dict."""
         try:
             if name.endswith(".yml"):
-                return self.folder.load_yaml_file(name)
-            return self.folder.load_json_file(name)
+                return self.loader.load_yaml_file(name)
+            return self.loader.load_json_file(name)
         except Exception as ex:    # pylint: disable=broad-except
             LOGGER.error('failed to load configuration file "%s": %s', name, ex)
             sys.exit(1)
@@ -76,21 +76,26 @@ class Serverless(RunwayModule):
         sls_opts.extend(['--stage', self.context.env_name])
 
         sls_env_file = self.get_sls_config_file()
-        sls_env_file_exists = self.folder.isfile(sls_env_file)
+        sls_env_file_exists = self.path.isfile(sls_env_file)
 
-        sls_cmd = self.npm.generate_node_command(command='sls',
-                                                 command_opts=sls_opts,
-                                                 path=self.path)
+        npm = NpmHelper(self.name,
+                        self.module_options,
+                        self.context.env_vars,
+                        self.module_folder_name)
+
+        sls_cmd = npm.generate_node_command(command='sls',
+                                            command_opts=sls_opts,
+                                            path=self.module_folder_name)
 
         # for now, an environment file merely need exist, we don't read it
         if self.environment_options or sls_env_file_exists:
-            if self.folder.isfile('package.json'):
-                with change_dir(self.path):
-                    self.npm.run_npm_install()
+            if self.path.isfile('package.json'):
+                with change_dir(self.module_folder_name):
+                    npm.run_npm_install()
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 self.name,
-                                self.npm.format_npm_command_for_logging(sls_cmd))
+                                npm.format_npm_command_for_logging(sls_cmd))
                     if command == 'remove':
                         # Need to account for exit code 1 on any removals after
                         # the first

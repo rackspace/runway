@@ -8,7 +8,7 @@ import sys
 import boto3
 import six
 
-from . import RunwayModule, run_module_command
+from . import RunwayModule, run_module_command, NpmHelper
 from ..util import change_dir, run_commands, which
 
 LOGGER = logging.getLogger('runway')
@@ -84,30 +84,34 @@ class CloudDevelopmentKit(RunwayModule):
         if cdk_module_matches_env(self.context.env_name,
                                   self.environment_options,
                                   self.context.env_vars):
-            if self.folder.isfile('package.json'):
-                with change_dir(self.path):
-                    self.npm.run_npm_install()
-                    run_pipenv_sync(self.path)
+            if self.path.isfile('package.json'):
+                with change_dir(self.module_folder_name):
+                    npm = NpmHelper(self.name,
+                                    self.module_options,
+                                    self.context.env_vars,
+                                    self.path)
+                    npm.run_npm_install()
+                    run_pipenv_sync(self.module_folder_name)
                     build_steps = self.module_options.get('build_steps', [])
                     if build_steps:
                         LOGGER.info("Running build steps for %s...", self.name)
                         run_commands(
                             commands=build_steps,
-                            directory=self.path,
+                            directory=self.module_folder_name,
                             env=self.context.env_vars
                         )
                     if command == 'diff':
                         LOGGER.info("Running cdk %s on each stack in %s",
                                     command,
                                     self.name)
-                        for i in get_cdk_stacks(self.npm,
-                                                self.path,
+                        for i in get_cdk_stacks(npm,
+                                                self.module_folder_name,
                                                 self.context.env_vars):
                             subprocess.call(
-                                self.npm.generate_node_command(
+                                npm.generate_node_command(
                                     'cdk',
                                     cdk_opts + [i],  # 'diff <stack>'
-                                    self.path
+                                    self.module_folder_name
                                 ),
                                 env=self.context.env_vars
                             )
@@ -115,25 +119,25 @@ class CloudDevelopmentKit(RunwayModule):
                         if command == 'deploy':
                             if 'CI' in self.context.env_vars:
                                 cdk_opts.append('--require-approval=never')
-                            bootstrap_command = self.npm.generate_node_command(
+                            bootstrap_command = npm.generate_node_command(
                                 'cdk',
                                 ['bootstrap'],
-                                self.path
+                                self.module_folder_name
                             )
                             LOGGER.info('Running cdk bootstrap...')
                             run_module_command(cmd_list=bootstrap_command,
                                                env_vars=self.context.env_vars)
                         elif command == 'destroy' and 'CI' in self.context.env_vars:  # noqa
                             cdk_opts.append('-f')  # Don't prompt
-                        cdk_command = self.npm.generate_node_command(
+                        cdk_command = npm.generate_node_command(
                             'cdk',
                             cdk_opts,
-                            self.path
+                            self.module_folder_name
                         )
                         LOGGER.info("Running cdk %s on %s (\"%s\")",
                                     command,
                                     self.name,
-                                    self.npm.format_npm_command_for_logging(cdk_command))  # noqa
+                                    npm.format_npm_command_for_logging(cdk_command))  # noqa
                         run_module_command(cmd_list=cdk_command,
                                            env_vars=self.context.env_vars)
             else:

@@ -7,9 +7,10 @@ import platform
 import subprocess
 import sys
 import json
+import hcl
 import yaml
 
-from ..util import which, better_dict_get
+from ..util import which
 
 LOGGER = logging.getLogger('runway')
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
@@ -24,44 +25,22 @@ def run_module_command(cmd_list, env_vars):
         sys.exit(shelloutexc.returncode)
 
 
-class RunwayModule(object):  # noqa pylint: disable=too-many-instance-attributes
+class RunwayModule(object):
     """Base class for Runway modules."""
 
-    def __init__(self, context, path, runway_file_options=None):
+    def __init__(self, context, name, module_folder_name, module_options, environment_options):  # noqa pylint: disable=too-many-arguments
         """Initialize base class."""
-        self.name = os.path.basename(path)
-
         self.context = context
+        self.name = name
+        self.module_folder_name = module_folder_name
+        self.module_options = module_options
+        self.environment_options = environment_options
 
-        self.folder = RunwayModuleFolder(path)
+        self.path = RunwayModulePath(module_folder_name)
 
-        # it would be good to remove the need for sub-classes to refer
-        #  to this directly, and have them rely on 'folder' instead
-        self.path = path
-
-        environments_options = better_dict_get(runway_file_options, 'environments', {})
-        self.environment_options = environments_options.get(context.env_name)
-        if self.environment_options is not None:
-            # it will almost always be a 'dict', but some modules (like serverless) support
-            #  a boolean, which indicates we want the module, and we have no values to set
-            if isinstance(self.environment_options, bool):
-                if self.environment_options:
-                    self.environment_options = {}
-                else:
-                    self.environment_options = None
-
-        self.module_options = better_dict_get(runway_file_options, 'options', {})
-
-        # should global options be in the context instead?
-        self.project_options = {}
-        self.project_options['skip_npm_ci'] = runway_file_options.get('skip_npm_ci')
-
-        self.npm = NpmHelper(self.name, self.project_options, self.context.env_vars, self.folder)
-
-        # ideally we don't need this, but there are extreme situations (like creating
-        #  a Cloudformation module inside the StaticSite module) that are currently
-        #  very hard without access to this
-        self._runway_file_options = runway_file_options
+        # in a later refactoring this loader will not be needed, as the appropriate
+        #  environment file(s) will be loaded by the caller instead of by the sub-classes
+        self.loader = RunwayModuleEnvironmentFileLoader(self.path)
 
     def plan(self):
         """Implement dummy method (set in consuming classes)."""
@@ -76,16 +55,16 @@ class RunwayModule(object):  # noqa pylint: disable=too-many-instance-attributes
         raise NotImplementedError('You must implement the destroy() method yourself!')
 
 
-class RunwayModuleFolder(object):
-    """Functions to manage filesystem access in a module folder."""
+class RunwayModulePath(object):
+    """Functions to simplify most of the filesystem access needed by modules."""
 
-    def __init__(self, path):
+    def __init__(self, module_folder_name):
         """Initialize base class."""
-        self._path = path
+        self._module_folder_name = module_folder_name
 
     def fullpath(self, name):
-        """Return the absolute path to the given file."""
-        return os.path.join(self._path, name)
+        """Return the path to the given file from the Runway folder."""
+        return os.path.join(self._module_folder_name, name)
 
     def isfile(self, name):
         """Determine if the given file exist relative to the module."""
@@ -95,8 +74,16 @@ class RunwayModuleFolder(object):
         """Determine if the given folder exist relative to the module."""
         return name and os.path.isdir(self.fullpath(name))
 
+
+class RunwayModuleEnvironmentFileLoader(object):
+    """Functions to load environment files from standard places in a module folder."""
+
+    def __init__(self, module_path):
+        """Initialize base class."""
+        self._module_path = module_path
+
     def locate_file(self, names):
-        """Given a list of files, find one that exists (if any) in the root folder."""
+        """Given a list of filenames, find one that exists (if any) relative to the root."""
         for name in names:
             if self.isfile(name):
                 return name
@@ -105,21 +92,26 @@ class RunwayModuleFolder(object):
     def locate_env_file(self, names):
         """Given a list of files, find one that exists (if any) in the root or `env` folders."""
         # first try in the root of the module folder
-        location = self.locate_file(names)
+        location = self._module_path.locate_file(names)
         if not location:
             # next try in the 'env' folder
             env_names = [os.path.join('env', name) for name in names]
-            location = self.locate_file(env_names)
+            location = self._module_path.locate_file(env_names)
         return location
+
+    def load_hcl_file(self, name):
+        """Load the contents of the HCL file into a dict."""
+        with open(self._module_path.fullpath(name), 'r') as stream:
+            return hcl.load(stream)
 
     def load_json_file(self, name):
         """Load the contents of the JSON file into a dict."""
-        with open(self.fullpath(name), 'r') as stream:
+        with open(self._module_path.fullpath(name), 'r') as stream:
             return json.load(stream)
 
     def load_yaml_file(self, name):
         """Load the contents of the YAML file into a dict."""
-        with open(self.fullpath(name), 'r') as stream:
+        with open(self._module_path.fullpath(name), 'r') as stream:
             # load() returns None on an existing but empty file, so provide a default
             return yaml.load(stream) or {}
 
@@ -127,17 +119,17 @@ class RunwayModuleFolder(object):
 class NpmHelper(object):
     """Functions to wrap around npm for use by the various modules."""
 
-    def __init__(self, module_name, project_options, env_vars, folder):
+    def __init__(self, module_name, module_options, env_vars, module_path):
         """Create an instance."""
         self._module_name = module_name
-        self._project_options = project_options
+        self._module_options = module_options
         self._env_vars = env_vars
-        self._folder = folder
+        self._module_path = module_path
 
     def run_npm_install(self):
         """Run npm install/ci."""
         # Use npm ci if available (npm v5.7+)
-        if self._project_options['skip_npm_ci']:
+        if self._module_options['skip_npm_ci']:
             LOGGER.info("Skipping npm ci or npm install on %s...", self._module_name)
         elif self._env_vars.get('CI') and self._use_npm_ci():
             LOGGER.info("Running npm ci on %s...", self._module_name)
@@ -150,8 +142,8 @@ class NpmHelper(object):
         """Return true if npm ci should be used in lieu of npm install."""
         # https://docs.npmjs.com/cli/ci#description
         with open(os.devnull, 'w') as fnull:
-            file_exists = self._folder.isfile('package-lock.json') or \
-                          self._folder.isfile('npm-shrinkwrap.json')
+            file_exists = self._module_path.isfile('package-lock.json') or \
+                          self._module_path.isfile('npm-shrinkwrap.json')
             if file_exists and subprocess.call([NPM_BIN, 'ci', '-h'],
                                                stdout=fnull,
                                                stderr=subprocess.STDOUT) == 0:
