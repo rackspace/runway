@@ -126,9 +126,13 @@ class StaticSite(RunwayModule):
                 default_flow_style=False
             )
 
-        cfn_options = copy.deepcopy(self._runway_file_options)
-        cfn_options.pop('class_path', None)
-        cfn_module_instance = CloudFormation(self.context, module_dir, cfn_options)
+        cfn_module_instance = CloudFormation(
+            context=self.context,
+            name=self.name,
+            module_folder_name=self.module_folder_name,
+            module_options=self.module_options,
+            environment_options=self.environment_options
+        )
         command_function = getattr(cfn_module_instance, command)
         command_function()
 

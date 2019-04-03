@@ -335,8 +335,6 @@ class ModulesCommand(RunwayCommand):
 
     def _process_module(self, module, deployment, context, command):
         module_opts = {}
-        if deployment.get('environments'):
-            module_opts['environments'] = deployment['environments'].copy()  # noqa
         if deployment.get('module_options'):
             module_opts['options'] = deployment['module_options'].copy()  # noqa
         if isinstance(module, six.string_types):
@@ -347,8 +345,15 @@ class ModulesCommand(RunwayCommand):
             module_root = os.path.join(self.env_root, module['path'])
         module_opts = merge_dicts(module_opts, module)
         module_opts = load_module_opts_from_file(module_root, module_opts)
-        if deployment.get('skip-npm-ci'):
-            module_opts['skip_npm_ci'] = True
+
+        module_name = module_opts.get('name') or os.path.basename(module_root)
+
+        if 'skip-npm-ci' in deployment:
+            LOGGER.warn("Specifying 'skip-npm-ci' in a deployment node is deprecated,"
+                        " and will be invalid as of version 1.0 of Runway. ")
+            LOGGER.warn("It should instead be specified in the `options` node"
+                        " of each affected module.")
+            module_opts['skip_npm_ci'] = deployment.get('skip-npm-ci')
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
@@ -356,22 +361,34 @@ class ModulesCommand(RunwayCommand):
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
+
+        environment_options = deployment.get('environments', {}).get(context.env_name)
+        if environment_options is not None:
+            # it will almost always be a 'dict', but some modules (like serverless) support
+            #  a boolean, which indicates we want the module, and we have no values to set
+            if isinstance(environment_options, bool):
+                if environment_options:
+                    environment_options = {}
+                else:
+                    environment_options = None
+        LOGGER.info("Environment options from runway.yml: %s", environment_options)
+
         with change_dir(module_root):
             # dynamically load the particular module's class, 'get' the method
-            # associated with the command, and call the method
-            module_class = determine_module_class(module_root,
-                                                  module_opts.get('class_path'))
+            #  associated with the command, and call the method
+            module_class = determine_module_class(module_root, module_opts.get('class_path'))
             module_instance = module_class(
                 context=context,
-                path=module_root,
-                runway_file_options=module_opts
+                name=module_name,
+                folder_name=module_root,
+                module_options=module_opts['options'],
+                environment_options=environment_options
             )
             if hasattr(module_instance, command):
                 command_method = getattr(module_instance, command)
                 command_method()
             else:
-                LOGGER.error("'%s' is missing method '%s'",
-                             module_instance, command)
+                LOGGER.error("'%s' is missing method '%s'", module_class, command)
                 sys.exit(1)
 
     @staticmethod
