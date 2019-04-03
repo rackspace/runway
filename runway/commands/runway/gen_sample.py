@@ -107,6 +107,53 @@ def generate_sample_cdk_tsc_module(env_root, module_dir=None):
                 '"npm install" to generate its lockfile.', module_dir)
 
 
+def generate_sample_cdk_csharp_module(env_root, module_dir=None):
+    """Generate skeleton CDK C# sample module."""
+    if module_dir is None:
+        module_dir = os.path.join(env_root, 'sampleapp.cdk')
+    generate_sample_module(module_dir)
+    for i in ['add-project.hook.d.ts', 'cdk.json', 'package.json',
+              'runway.module.yml', 'README.md']:
+        shutil.copyfile(
+            os.path.join(ROOT,
+                         'templates',
+                         'cdk-csharp',
+                         i),
+            os.path.join(module_dir, i),
+        )
+    shutil.copyfile(
+        os.path.join(ROOT,
+                     'templates',
+                     'cdk-csharp',
+                     'dot_gitignore'),
+        os.path.join(module_dir, '.gitignore'),
+    )
+    os.mkdir(os.path.join(module_dir, 'src'))
+    shutil.copyfile(
+        os.path.join(ROOT,
+                     'templates',
+                     'cdk-csharp',
+                     'src',
+                     'HelloCdk.sln'),
+        os.path.join(module_dir, 'src', 'HelloCdk.sln'),
+    )
+    os.mkdir(os.path.join(module_dir, 'src', 'HelloCdk'))
+    for i in ['HelloCdk.csproj', 'HelloConstruct.cs', 'HelloStack.cs',
+              'Program.cs']:
+        shutil.copyfile(
+            os.path.join(ROOT,
+                         'templates',
+                         'cdk-csharp',
+                         'src',
+                         'HelloCdk',
+                         i),
+            os.path.join(module_dir, 'src', 'HelloCdk', i),
+        )
+    LOGGER.info("Sample C# CDK module created at %s", module_dir)
+    LOGGER.info('To finish its setup, change to the %s directory and execute '
+                '"npm install" to generate its lockfile.', module_dir)
+
+
 def generate_sample_cdk_py_module(env_root, module_dir=None):
     """Generate skeleton CDK python sample module."""
     if module_dir is None:
@@ -255,3 +302,5 @@ class GenSample(RunwayCommand):
             generate_sample_cdk_tsc_module(self.env_root)
         elif self._cli_arguments['cdk-py']:
             generate_sample_cdk_py_module(self.env_root)
+        elif self._cli_arguments['cdk-csharp']:
+            generate_sample_cdk_csharp_module(self.env_root)

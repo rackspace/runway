@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Support CDK context values
 - Python CDK sample generator
+- C# CDK sample generator
 
 ### Fixed
 - Support terraform sample generator use directly from git master
