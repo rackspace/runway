@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.45.2] - 2019-04-08
+### Changed
+- Update stacker to v1.7
+
 ## [0.45.1] - 2019-04-03
 ### Fixed
 - Correct test command invocation bug introduced in 0.45
@@ -469,7 +473,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.45.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.45.2...HEAD
+[0.45.2]: https://github.com/onicagroup/runway/compare/v0.45.1...v0.45.2
 [0.45.1]: https://github.com/onicagroup/runway/compare/v0.45.0...v0.45.1
 [0.45.0]: https://github.com/onicagroup/runway/compare/v0.44.3...v0.45.0
 [0.44.3]: https://github.com/onicagroup/runway/compare/v0.44.2...v0.44.3

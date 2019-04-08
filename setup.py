@@ -17,9 +17,10 @@ with codecs_open(join(THIS_DIR, 'README.rst'), encoding='utf-8') as readfile:
 INSTALL_REQUIRES = [
     'Send2Trash',
     'awacs',  # for embedded hooks
-    # awscli version pinned to match stacker botocore pinning
-    'awscli<1.16.0',  # for embedded hooks
-    'PyYAML~=3.13',  # matching awscli ~1.15 requirement
+    'awscli>=1.16.121<2.0'  # for embedded hooks; matching stacker requirement
+    'botocore>=1.12.111',  # matching awscli/boto3 requirement
+    'boto3>=1.9.111<2.0'  # matching stacker requirement
+    'PyYAML~=3.13',  # matching awscli requirement
     'cfn-lint',
     'docopt',
     'flake8',
@@ -31,27 +32,13 @@ INSTALL_REQUIRES = [
     'typing',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # embedded stacker is v1.6.0 with the following patches applied:
-    # https://github.com/cloudtools/stacker/pull/701 (jinja2 templating)
-    # and the LICENSE file added to its root folder
+    # embedded stacker is v1.7.0
+    # with the LICENSE file added to its root folder
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
-    'stacker~=1.6',
-    # Temporary duplicated jinja2 dep until stacker #701 is cut in a release
-    'jinja2~=2.7',
-    # Stacker also pulls in our cfn-flip dependency (template generation)
-    # via troposphere
-    #
-    # upstream stacker requires boto3~=1.7.0 & botocore<1.11, but
-    # unfortunately pip will mess up on transitive dependecies
-    # https://github.com/pypa/pip/issues/988
-    # Best option here seems to be to just require the matching compatible
-    # botocore version. It's more rigid than necessary, but should hopefully
-    # make users less likely to encounter an error OOTB.
-    'botocore<1.11.0',
-    'boto3~=1.7.0'
+    'stacker~=1.7'
 ]
 
 # pylint v2+ is only py3 compatible
