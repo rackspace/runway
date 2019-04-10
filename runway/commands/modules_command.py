@@ -71,7 +71,9 @@ def determine_module_class(path, class_path):
         elif os.path.isfile(os.path.join(path, 'cdk.json')) \
                 and os.path.isfile(os.path.join(path, 'package.json')):
             class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif glob.glob(os.path.join(path, '*.env')):
+        elif glob.glob(os.path.join(path, '*.env')) or (
+                glob.glob(os.path.join(path, '*.yaml'))) or (
+                    glob.glob(os.path.join(path, '*.yml'))):
             class_path = 'runway.module.cloudformation.CloudFormation'
 
     if not class_path:
