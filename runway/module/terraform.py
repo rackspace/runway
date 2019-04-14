@@ -181,11 +181,10 @@ def run_tfenv_install(path, env_vars):
                            'for Windows). Please ensure your Terraform version '
                            'matches the version in this file.')
             return False
-        else:
-            LOGGER.error('"tfenv" not found (and a Terraform version is '
-                         'specified in .terraform-version). Please install '
-                         'tfenv.')
-            sys.exit(1)
+        LOGGER.error('"tfenv" not found (and a Terraform version is specified '
+                     'in this module\'s .terraform-version file). Please '
+                     'install tfenv.')
+        sys.exit(1)
     with change_dir(path):
         subprocess.check_call(['tfenv', 'install'], env=env_vars)
         return True
