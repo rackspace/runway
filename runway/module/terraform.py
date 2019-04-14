@@ -2,6 +2,7 @@
 
 import logging
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -173,12 +174,21 @@ def run_terraform_init(module_path, backend_options, env_name, env_region,
 def run_tfenv_install(path, env_vars):
     """Ensure appropriate Terraform version is installed."""
     if which('tfenv') is None:
-        LOGGER.error('"tfenv" not found (and a Terraform version is '
-                     'specified in .terraform-version). Please install '
-                     'tfenv.')
-        sys.exit(1)
+        if platform.system().lower() == 'windows':
+            LOGGER.warning('A required Terraform version for this module is '
+                           'specified in a .terraform-version file for use '
+                           'with tfenv (which is unfortunately not available '
+                           'for Windows). Please ensure your Terraform version '
+                           'matches the version in this file.')
+            return False
+        else:
+            LOGGER.error('"tfenv" not found (and a Terraform version is '
+                         'specified in .terraform-version). Please install '
+                         'tfenv.')
+            sys.exit(1)
     with change_dir(path):
         subprocess.check_call(['tfenv', 'install'], env=env_vars)
+        return True
 
 
 class Terraform(RunwayModule):

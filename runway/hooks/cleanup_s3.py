@@ -43,11 +43,11 @@ def purge_bucket(context, provider, **kwargs):
                 return True
             raise
 
-    bucket_name = handler(
-        value,
-        provider=provider,
-        context=context
-    )
+        bucket_name = handler(
+            value,
+            provider=provider,
+            context=context
+        )
 
     s3_resource = session.resource('s3')
     try:
