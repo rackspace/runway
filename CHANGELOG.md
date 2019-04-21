@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Catch failed `terraform init` executions on subsequent plan/deploys
 
 ### Changed
-- Add warning incorrect AWS_PROFILE environment variable usage with Serverless/CDK
+- Add warning about incorrect AWS_PROFILE environment variable usage with Serverless/CDK
 
 ## [0.45.4] - 2019-04-13
 ### Fixed
