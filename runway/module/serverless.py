@@ -9,7 +9,7 @@ import sys
 
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
-    run_module_command, run_npm_install
+    run_module_command, run_npm_install, warn_on_boto_env_vars
 )
 from ..util import change_dir, which
 
@@ -74,6 +74,8 @@ class Serverless(RunwayModule):
 
         if 'DEBUG' in self.context.env_vars:
             sls_opts.append('-v')  # Increase logging if requested
+
+        warn_on_boto_env_vars(self.context.env_vars)
 
         sls_opts.extend(['-r', self.context.env_region])
         sls_opts.extend(['--stage', self.context.env_name])

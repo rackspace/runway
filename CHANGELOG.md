@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.46.0] - 2019-04-20
+### Added
+- In-app Terraform management (no longer needs to be downloaded separately)
+
+### Fixed
+- Fix Terraform module not detecting backend config changes
+- Remove unnecessary `terraform init` executions after workspace switches
+- Catch failed `terraform init` executions on subsequent plan/deploys
+
+### Changed
+- Add warning incorrect AWS_PROFILE environment variable usage with Serverless/CDK
+
 ## [0.45.4] - 2019-04-13
 ### Fixed
 - Stacker `cleanup_s3` hook `bucket_name` option
@@ -484,7 +496,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.45.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.0...HEAD
+[0.46.0]: https://github.com/onicagroup/runway/compare/v0.45.4...v0.46.0
 [0.45.4]: https://github.com/onicagroup/runway/compare/v0.45.3...v0.45.4
 [0.45.3]: https://github.com/onicagroup/runway/compare/v0.45.2...v0.45.3
 [0.45.2]: https://github.com/onicagroup/runway/compare/v0.45.1...v0.45.2

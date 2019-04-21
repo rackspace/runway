@@ -20,8 +20,8 @@ Very simple configuration to:
 -  Wrangle Terraform backend/workspace configs w/ per-environment tfvars
 -  Avoid long-term tool lock-in
 
-   -  runway is a simple wrapper around standard tools. It simply helps
-      to avoid convoluted Makefiles / CI jobs
+   -  Runway is a simple wrapper around standard tools. It simply helps
+      to avoid convoluted Makefiles/CI jobs and encourage best practices
 
 How?
 ----

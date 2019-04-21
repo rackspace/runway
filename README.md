@@ -12,7 +12,7 @@ Very simple configuration to:
 * Define an IAM role to assume for each deployment
 * Wrangle Terraform backend/workspace configs w/ per-environment tfvars
 * Avoid long-term tool lock-in
-    * runway is a simple wrapper around standard tools. It simply helps to avoid convoluted Makefiles / CI jobs
+    * Runway is a simple wrapper around standard tools. It simply helps to avoid convoluted Makefiles/CI jobs and encourage best practices
 
 ## How?
 See the [doc site](https://docs.onica.com/projects/runway).

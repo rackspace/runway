@@ -79,7 +79,9 @@ setup(
             'runway=runway.cli:main',
         ],
     },
-    scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd'],
+    scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd',
+             'scripts/tf-runway', 'scripts/tf-runway.cmd',
+             'scripts/tfenv-runway', 'scripts/tfenv-runway.cmd'],
     include_package_data=True,  # needed for templates,blueprints,hooks
     test_suite='tests'
 )

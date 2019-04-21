@@ -3,9 +3,11 @@ from __future__ import print_function
 from typing import Dict, List, Optional, Union  # noqa pylint: disable=unused-import
 
 from contextlib import contextmanager
+import hashlib
 import importlib
 import os
 import platform
+import re
 import stat
 from subprocess import check_call
 import sys
@@ -60,7 +62,7 @@ def load_object_from_string(fqcn):
 
 
 def merge_dicts(dict1, dict2, deep_merge=True):
-    """Merge y into x."""
+    """Merge dict2 into dict1."""
     if deep_merge:
         if isinstance(dict1, list) and isinstance(dict2, list):
             return dict1 + dict2
@@ -75,8 +77,58 @@ def merge_dicts(dict1, dict2, deep_merge=True):
     dict3.update(dict2)
     return dict3
     # Alternate py3 version:
+    # (tbd if it does or doesn't deep merge, and if that is needed)
     # if sys.version_info > (3, 4):
     #     return {**dict1, **dict2}
+
+
+def extract_boto_args_from_env(env_vars):
+    """Return boto3 client args dict with environment creds."""
+    boto_args = {}
+    for i in ['aws_access_key_id', 'aws_secret_access_key',
+              'aws_session_token']:
+        if env_vars.get(i.upper()):
+            boto_args[i] = env_vars[i.upper()]
+    return boto_args
+
+
+def flatten_path_lists(env_dict, env_root=None):
+    """Join paths in environment dict down to strings."""
+    for (key, val) in env_dict.items():
+        # Lists are presumed to be path components and will be turned back
+        # to strings
+        if isinstance(val, list):
+            env_dict[key] = os.path.join(env_root, os.path.join(*val)) if (env_root and not os.path.isabs(os.path.join(*val))) else os.path.join(*val)  # noqa pylint: disable=line-too-long
+    return env_dict
+
+
+def merge_nested_environment_dicts(env_dicts, env_name=None, env_root=None):
+    """Return single-level dictionary from dictionary of dictionaries."""
+    # If the provided dictionary is just a single "level" (no nested
+    # environments), it applies to all environments
+    if all(isinstance(val, (six.string_types, list))
+           for (_key, val) in env_dicts.items()):
+        return flatten_path_lists(env_dicts, env_root)
+
+    if env_name is None:
+        if env_dicts.get('*'):
+            return flatten_path_lists(env_dicts.get('*'), env_root)
+        raise AttributeError("Provided config key:val pairs %s aren't usable with no environment provided" % env_dicts)  # noqa pylint: disable=line-too-long
+
+    if not env_dicts.get('*') and not env_dicts.get(env_name):
+        raise AttributeError("Provided config key:val pairs %s aren't usable with environment %s" % (env_dicts, env_name))  # noqa pylint: disable=line-too-long
+
+    combined_dicts = merge_dicts(env_dicts.get('*', {}),
+                                 env_dicts.get(env_name, {}))
+    return flatten_path_lists(combined_dicts, env_root)
+
+
+def find_cfn_output(key, outputs):
+    """Return CFN output value."""
+    for i in outputs:
+        if i['OutputKey'] == key:
+            return i['OutputValue']
+    return None
 
 
 def get_embedded_lib_path():
@@ -85,6 +137,19 @@ def get_embedded_lib_path():
         os.path.dirname(os.path.abspath(__file__)),
         'embedded'
     )
+
+
+def get_hash_for_filename(filename, hashfile_path):
+    """Return hash for filename in the hashfile."""
+    filehash = ''
+    with open(hashfile_path, 'r') as stream:
+        for _cnt, line in enumerate(stream):
+            if line.rstrip().endswith(filename):
+                filehash = re.match(r'^[A-Za-z0-9]*', line).group(0)
+                break
+    if filehash:
+        return filehash
+    raise AttributeError("Filename %s not found in hash file" % filename)
 
 
 @contextmanager
@@ -138,6 +203,16 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
 
         with change_dir(execution_dir):
             check_call(command_list, env=env)
+
+
+def sha256sum(filename):
+    """Return SHA256 hash of file."""
+    sha256 = hashlib.sha256()
+    mem_view = memoryview(bytearray(128*1024))
+    with open(filename, 'rb', buffering=0) as stream:
+        for i in iter(lambda: stream.readinto(mem_view), 0):
+            sha256.update(mem_view[:i])
+    return sha256.hexdigest()
 
 
 @contextmanager

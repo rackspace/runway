@@ -1,17 +1,14 @@
 """The gen-sample command."""
-from distutils.version import LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
-import json
 import logging
 import os
-import re
 import shutil
 from subprocess import check_output
 import sys
 
-from botocore.vendored import requests
 import cfn_flip
 
 from ..runway_command import RunwayCommand
+from ...tfenv import get_latest_tf_version
 
 LOGGER = logging.getLogger('runway')
 
@@ -267,17 +264,10 @@ def generate_sample_tf_module(env_root, module_dir=None):
             os.path.join(module_dir, '.terraform-version'),
         )
     else:  # running directly from git
-        tf_releases = json.loads(
-            requests.get('https://releases.hashicorp.com/index.json').text
-        )['terraform']
-        tf_vers = [k
-                   for k, _v in tf_releases['versions'].items()
-                   if '-' not in k]
-        tf_ver = re.match(r'^[0-9]*\.[0-9]*\.',
-                          sorted(tf_vers, key=LooseVersion)[-1]).group()
+        latest_tf_ver = get_latest_tf_version()
         with open(os.path.join(module_dir,
                                '.terraform-version'), 'w') as stream:
-            stream.write('latest:^' + tf_ver)
+            stream.write(latest_tf_ver)
 
     LOGGER.info("Sample Terraform app created at %s",
                 module_dir)

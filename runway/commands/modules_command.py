@@ -17,9 +17,12 @@ import boto3
 import six
 import yaml
 
-from .runway_command import RunwayCommand, get_env, get_deployment_env_vars
+from .runway_command import RunwayCommand, get_env
 from ..context import Context
-from ..util import change_dir, load_object_from_string, merge_dicts
+from ..util import (
+    change_dir, load_object_from_string, merge_dicts,
+    merge_nested_environment_dicts
+)
 
 LOGGER = logging.getLogger('runway')
 
@@ -291,9 +294,10 @@ class ModulesCommand(RunwayCommand):
 
             if deployment.get('regions'):
                 if deployment.get('env_vars'):
-                    deployment_env_vars = get_deployment_env_vars(context.env_name,
-                                                                  deployment['env_vars'],
-                                                                  self.env_root)
+                    deployment_env_vars = merge_nested_environment_dicts(
+                        deployment.get('env_vars'), env_name=context.env_name,
+                        env_root=self.env_root
+                    )
                     if deployment_env_vars:
                         LOGGER.info("OS environment variable overrides being "
                                     "applied this deployment: %s",
@@ -471,7 +475,8 @@ def _module_menu_entry(module, environment_name):
     name = _module_name_for_display(module)
     if isinstance(module, dict):
         environment_config = module.get('environments', {}).get(environment_name)
-        return "%s (%s)" % (name, environment_config)
+        if environment_config:
+            return "%s (%s)" % (name, environment_config)
     return "%s" % (name)
 
 

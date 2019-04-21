@@ -7,10 +7,17 @@ runway.yml sample::
 
     ---
     # Order that modules will be deployed. A module will be skipped if a
-    # corresponding env/config file is not present in its folder.
-    # (e.g., for cfn modules, if a dev-us-west-2.env file is not in the 'app.cfn'
-    # folder when running a dev deployment of 'app' to us-west-2 then it will be
-    # skipped.)
+    # corresponding env/config is not present (either in a file in its folder
+    # or via an environments option specified here on the deployment or
+    # module)
+    # E.g., for cfn modules, if
+    # 1) a dev-us-west-2.env file is not in the 'app.cfn' folder when running
+    #    a dev deployment of 'app' to us-west-2,
+    # and
+    # 2) dev is not specified under the deployment or module's environments
+    #
+    # then it will be skipped.
+
     deployments:
       - modules:
           - myapp.cfn
@@ -36,6 +43,15 @@ runway.yml sample::
           # dev:
           #   arn: arn:aws:iam::account-id1:role/role-name
           #   duration: 7200
+
+        # Environment options (e.g. values for CFN .env file, TF .tfvars) can
+        # be provided at the deployment level -- the options will be applied to
+        # every module in the environment
+        environments:
+          dev:
+            region: us-east-1
+            image_id: ami-abc123
+
         account-alias:  # optional
           # A mapping of environment -> alias mappings can be provided to have
           # Runway verify the current assumed role / credentials match the
@@ -48,6 +64,12 @@ runway.yml sample::
           # account
           dev: 123456789012
           prod: 345678901234
+
+        # env_vars set OS environment variables for the module (not logical
+        # environment values like those in a CFN .env or TF .tfvars file).
+        # They should generally not be used (they are provided for use with
+        # tools that absolutely require it, like Terraform's
+        # TF_PLUGIN_CACHE_DIR option)
         env_vars:  # optional environment variable overrides
           dev:
             AWS_PROFILE: foo
@@ -61,10 +83,24 @@ runway.yml sample::
               - foo
           "*":  # Applied to all environments
             ANOTHER_VAR: foo
+
         skip-npm-ci: false  # optional, and should rarely be used. Omits npm ci
                             # execution during Serverless deployments
                             # (i.e. for use with pre-packaged node_modules)
-    
+
+      # Start of another deployment
+      - modules:
+          - path: myapp.cfn
+            # Environment options (e.g. values for CFN .env file, TF .tfvars) can
+            # be provided for a single module (replacing or supplementing the
+            # use of environment/tfvars/etc files in the module)
+            environments:
+              dev:
+                region: us-east-1
+                image_id: ami-abc123
+        regions:
+          - us-west-2
+
     # If using environment folders instead of git branches, git branch lookup can
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true

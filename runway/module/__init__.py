@@ -52,12 +52,15 @@ def generate_node_command(command, command_opts, path):
     return cmd_list
 
 
-def run_module_command(cmd_list, env_vars):
+def run_module_command(cmd_list, env_vars, exit_on_error=True):
     """Shell out to provisioner command."""
-    try:
+    if exit_on_error:
+        try:
+            subprocess.check_call(cmd_list, env=env_vars)
+        except subprocess.CalledProcessError as shelloutexc:
+            sys.exit(shelloutexc.returncode)
+    else:
         subprocess.check_call(cmd_list, env=env_vars)
-    except subprocess.CalledProcessError as shelloutexc:
-        sys.exit(shelloutexc.returncode)
 
 
 def use_npm_ci(path):
@@ -91,6 +94,16 @@ def run_npm_install(path, options, context):
         LOGGER.info("Running npm install on %s...",
                     os.path.basename(path))
         subprocess.check_call([NPM_BIN, 'install'])
+
+
+def warn_on_boto_env_vars(env_vars):
+    """Inform user if boto-specific environment variables are in use."""
+    # https://github.com/serverless/serverless/issues/2151#issuecomment-255646512
+    if env_vars.get('AWS_DEFAULT_PROFILE') and not (
+            env_vars.get('AWS_PROFILE')):
+        LOGGER.warning('AWS_DEFAULT_PROFILE environment variable is set '
+                       'during use of nodejs-based module and AWS_PROFILE is '
+                       'not set -- you likely want to set AWS_PROFILE instead')
 
 
 class RunwayModule(object):

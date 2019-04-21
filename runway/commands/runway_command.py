@@ -10,8 +10,6 @@ import yaml
 
 from .. import __version__ as version
 
-from ..util import merge_dicts
-
 LOGGER = logging.getLogger('runway')
 
 
@@ -116,24 +114,6 @@ class RunwayCommand(object):
     def version():
         """Show current package version."""
         print(version)
-
-
-def get_deployment_env_vars(env_name, env_var_config=None, env_root=None):
-    """Return applicable environment variables."""
-    if env_var_config is None:
-        env_var_config = {}
-    if env_var_config.get('*'):
-        env_vars = env_var_config['*'].copy()
-    else:
-        env_vars = {}
-    if env_var_config.get(env_name):
-        for (key, val) in env_var_config[env_name].items():
-            # Lists are presumed to be path components and will be turned back
-            # to strings
-            if isinstance(val, list):
-                env_var_config[env_name][key] = os.path.join(env_root, os.path.join(*val)) if (env_root and not os.path.isabs(os.path.join(*val))) else os.path.join(*val)  # noqa pylint: disable=line-too-long
-        env_vars = merge_dicts(env_vars, env_var_config[env_name])
-    return env_vars
 
 
 def get_env_from_branch(branch_name):

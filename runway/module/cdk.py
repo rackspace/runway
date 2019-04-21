@@ -10,9 +10,11 @@ import six
 
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
-    run_module_command, run_npm_install
+    run_module_command, run_npm_install, warn_on_boto_env_vars
 )
-from ..util import change_dir, run_commands, which
+from ..util import (
+    change_dir, extract_boto_args_from_env, run_commands, which
+)
 
 LOGGER = logging.getLogger('runway')
 
@@ -26,11 +28,7 @@ def cdk_module_matches_env(env_name, env_config, env_vars):
         if isinstance(current_env_config, six.string_types):
             (account_id, region) = current_env_config.split('/')
             if region == env_vars['AWS_DEFAULT_REGION']:
-                boto_args = {}
-                for i in ['aws_access_key_id', 'aws_secret_access_key',
-                          'aws_session_token']:
-                    if env_vars.get(i.upper()):
-                        boto_args[i] = env_vars[i.upper()]
+                boto_args = extract_boto_args_from_env(env_vars)
                 sts_client = boto3.client(
                     'sts',
                     region_name=env_vars['AWS_DEFAULT_REGION'],
@@ -71,6 +69,8 @@ class CloudDevelopmentKit(RunwayModule):
 
         if 'DEBUG' in self.context.env_vars:
             cdk_opts.append('-v')  # Increase logging if requested
+
+        warn_on_boto_env_vars(self.context.env_vars)
 
         if cdk_module_matches_env(self.context.env_name,
                                   self.options.get('environments', {}),
