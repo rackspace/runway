@@ -11,7 +11,8 @@ import sys
 import tempfile
 import zipfile
 
-from six.moves.urllib.request import urlretrieve
+# Old pylint on py2.7 incorrectly flags this
+from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
 from botocore.vendored import requests
 import hcl
 
@@ -161,7 +162,7 @@ class TFEnv(object):  # pylint: disable=too-few-public-methods
         else:
             self.path = path
 
-        if platform.system == 'Windows':
+        if platform.system() == 'Windows':
             if 'APPDATA' in os.environ:
                 self.tfenv_dir = os.path.join(os.environ['APPDATA'],
                                               'tfenv')
@@ -181,7 +182,7 @@ class TFEnv(object):  # pylint: disable=too-few-public-methods
 
     def install(self, version_requested=None):
         """Ensure terraform is available."""
-        command_suffix = '.exe' if platform.system == 'Windows' else ''
+        command_suffix = '.exe' if platform.system() == 'Windows' else ''
         versions_dir = ensure_versions_dir_exists(self.tfenv_dir)
 
         if not version_requested:
