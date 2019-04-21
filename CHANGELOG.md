@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.46.0] - 2019-04-20
 ### Added
 - In-app Terraform management (no longer needs to be downloaded separately)
+- Terraform backend config lookup from CloudFormation
 
 ### Fixed
 - Fix Terraform module not detecting backend config changes
