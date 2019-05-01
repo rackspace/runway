@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.46.1] - 2019-05-01
+### Fixed
+- Terraform platform being incorrectly detected on Windows
+
 ## [0.46.0] - 2019-04-20
 ### Added
 - In-app Terraform management (no longer needs to be downloaded separately)
@@ -497,7 +501,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.1...HEAD
+[0.46.1]: https://github.com/onicagroup/runway/compare/v0.46.0...v0.46.1
 [0.46.0]: https://github.com/onicagroup/runway/compare/v0.45.4...v0.46.0
 [0.45.4]: https://github.com/onicagroup/runway/compare/v0.45.3...v0.45.4
 [0.45.3]: https://github.com/onicagroup/runway/compare/v0.45.2...v0.45.3

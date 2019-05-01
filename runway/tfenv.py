@@ -37,9 +37,10 @@ def download_tf_release(version, versions_dir, command_suffix,
     else:
         if platform.system().startswith('Darwin'):
             tfver_os = "darwin_%s" % arch
-        elif platform.system().startswith('MINGW64') or (
-                platform.system().startswith('MSYS_NT') or (
-                    platform.system().startswith('CYGWIN_NT'))):
+        elif platform.system().startswith('Windows') or (
+                platform.system().startswith('MINGW64') or (
+                    platform.system().startswith('MSYS_NT') or (
+                        platform.system().startswith('CYGWIN_NT')))):
             tfver_os = "windows_%s" % arch
         else:
             tfver_os = "linux_%s" % arch
