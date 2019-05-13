@@ -13,7 +13,7 @@ import zipfile
 
 # Old pylint on py2.7 incorrectly flags these
 from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
-from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,line-too-long
+from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
 
 from botocore.vendored import requests
 import hcl
@@ -24,8 +24,10 @@ LOGGER = logging.getLogger('runway')
 TF_VERSION_FILENAME = '.terraform-version'
 
 
-def download_tf_release(version, versions_dir, command_suffix,
-                        tf_platform=None, arch=None):
+# Branch and local variable count will go down when py2 support is dropped
+def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-many-branches
+                        versions_dir, command_suffix, tf_platform=None,
+                        arch=None):
     """Download Terraform archive and return path to it."""
     version_dir = os.path.join(versions_dir, version)
 
