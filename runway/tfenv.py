@@ -11,8 +11,10 @@ import sys
 import tempfile
 import zipfile
 
-# Old pylint on py2.7 incorrectly flags this
+# Old pylint on py2.7 incorrectly flags these
 from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
+from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,line-too-long
+
 from botocore.vendored import requests
 import hcl
 
@@ -50,9 +52,33 @@ def download_tf_release(version, versions_dir, command_suffix,
     shasums_name = "terraform_%s_SHA256SUMS" % version
     tf_url = "https://releases.hashicorp.com/terraform/" + version
 
-    for i in [filename, shasums_name]:
-        urlretrieve(tf_url + '/' + i,
-                    os.path.join(download_dir, i))
+    try:
+        for i in [filename, shasums_name]:
+            urlretrieve(tf_url + '/' + i,
+                        os.path.join(download_dir, i))
+    # IOError in py2; URLError in 3+
+    except (IOError, URLError) as exc:
+        if sys.version_info[0] == 2:
+            url_error_msg = str(exc.strerror)
+        else:
+            url_error_msg = str(exc.reason)
+
+        if 'CERTIFICATE_VERIFY_FAILED' in url_error_msg:
+            LOGGER.error('Attempted to download Terraform but was unable to '
+                         'verify the TLS certificate on its download site.')
+            LOGGER.error("Full TLS error message: %s", url_error_msg)
+            if platform.system().startswith('Darwin') and (
+                    'unable to get local issuer certificate' in url_error_msg):
+                LOGGER.error("This is likely caused by your Python "
+                             "installation missing root certificates. Run "
+                             "\"/Applications/Python %s.%s/"
+                             "\"Install Certificates.command\" to fix it "
+                             "(https://stackoverflow.com/a/42334357/2547802)",
+                             sys.version_info[0],
+                             sys.version_info[1])
+            sys.exit(1)
+        else:
+            raise
 
     tf_hash = get_hash_for_filename(filename, os.path.join(download_dir,
                                                            shasums_name))
@@ -91,9 +117,6 @@ def get_available_tf_versions(include_prerelease=False):
 def get_latest_tf_version(include_prerelease=False):
     """Return latest Terraform version."""
     return get_available_tf_versions(include_prerelease)[0]
-    # tf_vers = get_available_tf_versions(exclude_pre)
-    # tf_ver = re.match(r'^[0-9]*\.[0-9]*\.[0-9]*',
-    #                   sorted(tf_vers, key=LooseVersion)[-1]).group()
 
 
 def find_min_required(path):
