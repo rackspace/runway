@@ -20,8 +20,8 @@ class Dependencies(Blueprint):
         """Create template (main function called by Stacker)."""
         template = self.template
         # variables = self.get_variables()
-        template.add_version('2010-09-09')
-        template.add_description('Static Website - Dependencies')
+        template.set_version('2010-09-09')
+        template.set_description('Static Website - Dependencies')
 
         # Resources
         awslogbucket = template.add_resource(

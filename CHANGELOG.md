@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Stop troposphere deprecation warnings on 2.4.2+
+
 ## [0.46.2] - 2019-05-13
 ### Fixed
 - Better error handling during Terraform downloads

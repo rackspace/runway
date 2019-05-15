@@ -38,7 +38,10 @@ INSTALL_REQUIRES = [
     #   * tests
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
-    'stacker~=1.7'
+    'stacker~=1.7',
+    # stacker's troposphere dep is more loose, and we need to ensure we use a
+    # sufficiently recent version for compatibility embedded blueprints
+    'troposphere>=2.4.2'
 ]
 
 # pylint v2+ is only py3 compatible

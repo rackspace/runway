@@ -103,8 +103,8 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """Create template (main function called by Stacker)."""
         template = self.template
         variables = self.get_variables()
-        template.add_version('2010-09-09')
-        template.add_description('Static Website - Bucket and Distribution')
+        template.set_version('2010-09-09')
+        template.set_description('Static Website - Bucket and Distribution')
 
         # Conditions
         template.add_condition(
