@@ -41,9 +41,12 @@ INSTALL_REQUIRES = [
     #   * blueprints/testutil.py
     # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
     'stacker~=1.7',
-    # stacker's troposphere dep is more loose, and we need to ensure we use a
+    # stacker's troposphere dep is more loose, but we need to ensure we use a
     # sufficiently recent version for compatibility embedded blueprints
-    'troposphere>=2.4.2'
+    'troposphere>=2.4.2',
+    # botocore pins its urllib3 dependency like this, so we need to do the
+    # same to ensure v1.25+ isn't pulled in by pip
+    'urllib3>=1.20,<1.25'
 ]
 
 # pylint v2+ is only py3 compatible
