@@ -347,10 +347,16 @@ class Terraform(RunwayModule):
                                       self.context.env_name],
                             env_vars=self.context.env_vars
                         )
-                    # Previously, another tf init was run here after every
-                    # workspace switch/creation. That does not appear to be
-                    # necessary now (this note can be removed in the future,
-                    # i.e. after 1.0)
+                    LOGGER.info('Re-running terraform init after workspace '
+                                'change...')
+                    run_terraform_init(
+                        tf_bin=tf_bin,
+                        module_path=self.path,
+                        backend_options=backend_options,
+                        env_name=self.context.env_name,
+                        env_region=self.context.env_region,
+                        env_vars=self.context.env_vars
+                    )
                 if 'SKIP_TF_GET' not in self.context.env_vars:
                     LOGGER.info('Executing "terraform get" to update remote '
                                 'modules')

@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.46.3] - 2019-05-15
 ### Fixed
 - Stop troposphere deprecation warnings on 2.4.2+
+- Re-add `terraform init` execution after workspace switches
+    * This appears to be required to ensure all plugins are downloaded
 
 ## [0.46.2] - 2019-05-13
 ### Fixed
@@ -508,7 +511,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.3...HEAD
+[0.46.3]: https://github.com/onicagroup/runway/compare/v0.46.2...v0.46.3
 [0.46.2]: https://github.com/onicagroup/runway/compare/v0.46.1...v0.46.2
 [0.46.1]: https://github.com/onicagroup/runway/compare/v0.46.0...v0.46.1
 [0.46.0]: https://github.com/onicagroup/runway/compare/v0.45.4...v0.46.0
