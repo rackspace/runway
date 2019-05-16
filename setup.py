@@ -34,6 +34,8 @@ INSTALL_REQUIRES = [
     'zgitignore',  # for embedded hooks
     # embedded stacker is v1.7.0
     # with the LICENSE file added to its root folder
+    # and the following patches applied
+    # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
