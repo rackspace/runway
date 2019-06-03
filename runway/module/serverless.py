@@ -50,6 +50,8 @@ def run_sls_remove(sls_cmd, env_vars):
                                    env=env_vars)
     stdoutdata, _stderrdata = sls_process.communicate()
     sls_return = sls_process.wait()
+    if int(sys.version[0]) > 2:
+        stdoutdata = stdoutdata.decode('UTF-8')  # bytes -> string
     print(stdoutdata)
     if sls_return != 0 and (sls_return == 1 and not (
             re.search(r"Stack '.*' does not exist", stdoutdata))):
