@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.46.5] - 2019-06-04
 ### Fixed
+- Fix PyYAML dependency issue on new installs
 - Serverless string handling cosmetic error during destroy
 
 ## [0.46.4] - 2019-05-16
@@ -517,7 +520,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.5...HEAD
+[0.46.5]: https://github.com/onicagroup/runway/compare/v0.46.4...v0.46.5
 [0.46.4]: https://github.com/onicagroup/runway/compare/v0.46.3...v0.46.4
 [0.46.3]: https://github.com/onicagroup/runway/compare/v0.46.2...v0.46.3
 [0.46.2]: https://github.com/onicagroup/runway/compare/v0.46.1...v0.46.2

@@ -21,6 +21,7 @@ INSTALL_REQUIRES = [
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
     'boto3>=1.9.111<2.0'  # matching stacker requirement
     'PyYAML~=3.13',  # matching awscli requirement
+    'cfn_flip<=1.2.0',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
     'flake8',
