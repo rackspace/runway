@@ -28,12 +28,12 @@ class RunwayCommand(object):
         if runway_config_dir is None:
             self.runway_config_path = os.path.join(
                 self.env_root,
-                'runway.yml'
+                os.getenv('RUNWAY', 'runway.yml')
             )
         else:
             self.runway_config_path = os.path.join(
                 runway_config_dir,
-                'runway.yml'
+                os.getenv('RUNWAY', 'runway.yml')
             )
         self._runway_config = None
 

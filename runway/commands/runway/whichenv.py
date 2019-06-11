@@ -14,12 +14,12 @@ class WhichEnv(RunwayCommand):
         """Output environment name."""
         # Disable other runway logging so the only response is the env name
         logging.getLogger('runway').setLevel(logging.ERROR)
-
+        runway_file = os.getenv('RUNWAY', 'runway.yml')
         # This may be invoked from a module directory in an environment;
         # account for that here if necessary
-        if not os.path.isfile('runway.yml'):
+        if not os.path.isfile(runway_file):
             self.env_root = os.path.dirname(os.getcwd())
-            self.runway_config_path = os.path.join(self.env_root, 'runway.yml')
+            self.runway_config_path = os.path.join(self.env_root, runway_file)
 
         print(get_env(
             self.env_root,
