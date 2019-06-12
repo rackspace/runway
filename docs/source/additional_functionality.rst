@@ -19,9 +19,9 @@ files appropriate for the module type:
 
 tfenv-runway
 ============
-The ``tfenv-runway`` command shipped with runway provides a way to install
-Terraform versions (placing the binary in $HOME/.tfenv/versions/X.X.X) outside
-of a Runway deployment (e.g. during a CI build process).
+The ``tfenv-runway`` command shipped with runway provides a way to install Terraform versions by
+placing the binary in ``$HOME/.tfenv/versions/X.X.X`` outside of a Runway deployment (e.g.
+during a CI build process).
 
 ``tfenv-runway install`` can be executed in a directory with a
 ``.terraform-version`` file to install the version listed in the file.
@@ -38,8 +38,8 @@ Use it just like the terraform command (e.g. ``tf-runway plan``).
 
 cfn-lint
 ========
-If a ``.cfnlintrc`` file is placed alongside an environment's ``runway.yml``, cfn-lint will be invoked
-automatically during runway test aka preflight.
+If a ``.cfnlintrc`` file is placed alongside an environment's ``runway.yml``, ``cfn-lint`` will be invoked
+automatically during ``runway test`` a.k.a. ``preflight``.
 
 Specify the templates to be included via the `config file. <https://github.com/awslabs/cfn-python-lint#config-file>`_
 
@@ -85,11 +85,10 @@ module. Some notable examples are::
 
 runway.yml Example
 -------------------
-After you have written your plugin, you need to add the module
-``class_path`` to your module's configuration. Below is an example runway.yml
-containing a single module that looks for an Ansible playbook in a
-folder at the root of your Runway environment (i.e. repo) named
-"security_group.ansible".
+After you have written your plugin, you need to add the module ``class_path``
+to your module's configuration. Below is an example ``runway.yml`` containing a
+single module that looks for an Ansible playbook in a folder at the root of
+your Runway environment (i.e. repo) named "security_group.ansible".
 
 Setting ``class_path`` tells runway to import the DeployToAWS Python class,
 from a file named Ansible.py in a folder named "local_runway_extensions"
@@ -106,20 +105,20 @@ function in your class when you perform a ``runway deploy`` (AKA takeoff).
           - us-east-1
 
 
-Below is ``Ansible.py`` python module reference above that wraps the
-``ansible-playbook`` command to deploy a EC2 Security Group from a playbook
-yaml under the naming convention of ``<env>-<region>.yaml`` within a fictional
+Below is the ``Ansible.py`` module referenced above that wraps the
+``ansible-playbook`` command. It will be responsible for deploying an EC2 Security Group from the playbook
+with a naming convention of ``<env>-<region>.yaml`` within a fictional
 ``security_group.ansible`` runway module folder. In this example, the
 ``ansible-playbook`` binary would already have been installed prior to a runway
 deploy, but this example does check to see if it is installed before execution
-and logs an error if that is the case. The Runway plugin also will only execute
-the ansible-playbook against a yaml file for the environment set for the Runway
-execution and region defined in the runway.yml.
+and logs an error if not. The Runway plugin will only execute
+the ansible-playbook against a ``yaml`` file associated with the environment and set for the Runway
+execution and region defined in the ``runway.yml``.
 
-Using the above runway.yml, the plugin and playbook below saved in the Runway
-module folder, you will only have a deployment occur in the ``dev`` environment
+Using the above ``runway.yml`` and the plugin/playbook below saved to the Runway
+module folder you will only have a deployment occur in the ``dev`` environment
 in ``us-east-1``.  If you decide to perform a runway deployment in the ``prod``
-environment or in a different region, the ansible-playbook deployment will be
+environment, or in a different region, the ansible-playbook deployment will be
 skipped. This matches the behavior of the Runway's native modules.
 
 ::
@@ -202,4 +201,4 @@ And below is the example Ansible playbook itself, saved as
 
 
 The above would be deployed if ``runway deploy`` was executed in the ``dev``
-environment to us-east-1.
+environment to ``us-east-1``.
