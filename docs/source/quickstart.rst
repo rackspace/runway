@@ -3,19 +3,26 @@ Quickstart Guides
 
 CloudFormation
 ^^^^^^^^^^^^^^
-For production use, or persistent daily use on a development workstation, consider the full Runway installation `here <installation.html>`_. 
-To quickly evaluate Runway without installing anything, a number of resources are available:
+For production use, or persistent daily use on a development workstation,
+consider the full Runway installation found `here <installation.html>`_. To
+quickly evaluate Runway without installing anything a number of resources are
+available:
 
-- A `CloudFormation template <https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml>`_. 
-  This is probably the easiest way to go from "zero to Runway" as quickly as possible, 
-  as it allows for using an IAM Role which eliminates the need to configure API keys. The template will deploy your 
-  preference of Linux or Windows Runway host. Windows Runway host includes vsCode, which some users may find easier 
-  for manipulating Runway config files.
-- A `Dockerfile <https://github.com/onicagroup/runway/blob/master/quickstarts/runway/Dockerfile>`_. Docker users can 
-  build their own Docker image to run a local Runway container, or modify the Dockerfile 
-  to build a Runway image to suit specific needs. Requires an AWS Access/Secret keypair to use Runway.
-- A prebuilt Docker image. Docker users can run the following to spin up a local Docker Runway container. 
-  Requires an AWS Access/Secret keypair to use Runway.
+- A `CloudFormation template
+<https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml>`_:
+This is probably the easiest and quickest way to go from "zero to Runway" as it
+allows for using an IAM Role eliminate the need to configure API keys. The
+template will deploy your preference of Linux or Windows Runway host. Windows
+Runway host includes vsCode, which some users may find easier for manipulating
+Runway config files.
+- A `Dockerfile
+<https://github.com/onicagroup/runway/blob/master/quickstarts/runway/Dockerfile>`_:
+Docker users can build their own Docker image to run a local Runway container,
+or modify the Dockerfile to build a Runway image to suit specific needs.
+Requires an AWS Access/Secret keypair to use Runway.
+- A prebuilt Docker image: Docker users can run the following to spin up a
+local Docker Runway container. Requires an AWS Access/Secret keypair to use
+Runway.
 
 ``$ docker run -it --rm onica/runway-quickstart``
 
@@ -65,7 +72,7 @@ Walkthrough - Deploy a CloudFormation Stack
     $RunwayTemplate | Out-File -FilePath runway.yml -Encoding ASCII
     runway takeoff
 
-| Now our stack is available at mydemo-dev-sampleapp, e.g.:
+| Now our stack is available at ``mydemo-dev-sampleapp``, e.g.:
 | ``aws cloudformation describe-stack-resources --region us-east-1 --stack-name mydemo-dev-sampleapp``
 
 Conduit (Serverless & CloudFront)
@@ -74,7 +81,7 @@ Conduit (Serverless & CloudFront)
 
 Deploying the Conduit Web App
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The `Medium.com-clone "RealWorld" demo app <https://github.com/gothinkster/realworld>`_ named Conduit provides a 
+The `Medium.com-clone "RealWorld" demo app <https://github.com/gothinkster/realworld>`_ named Conduit provides a
 simple demonstration of using Runway to deploy a Serverless Framework backend with an Angular frontend.
 
 | **Prerequisites**
@@ -156,10 +163,10 @@ simple demonstration of using Runway to deploy a Serverless Framework backend wi
     pipenv update
 
 | **Deploying**
-| Execute ``pipenv run runway deploy``, enter ``all`` (to deploy the backend followed by the frontend). 
+| Execute ``pipenv run runway deploy``, enter ``all`` (to deploy the backend followed by the frontend).
 | Deployment will take some time (mostly waiting for the CloudFront distribution to stabilize).
 |
-| The CloudFront domain at which the site can be reached will be displayed near the last lines of output 
+| The CloudFront domain at which the site can be reached will be displayed near the last lines of output
 | once deployment is complete, e.g.:
 
 ``staticsite: sync & CF invalidation of E17B5JWPMTX5Z8 (domain ddy1q4je03d7u.cloudfront.net) complete``
@@ -183,7 +190,7 @@ On Windows:
     }
 
 | **Next Steps / Additional Notes**
-| The `serverless-plugin-export-endpoints plugin <https://github.com/ar90n/serverless-plugin-export-endpoints>`_ is a good alternative 
+| The `serverless-plugin-export-endpoints plugin <https://github.com/ar90n/serverless-plugin-export-endpoints>`_ is a good alternative
 | to the custom update_env_endpoint.py script deployed above to update the environment file.
 
 | **Permissions**
