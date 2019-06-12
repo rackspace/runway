@@ -6,9 +6,9 @@ Module Configurations
 
 CloudFormation
 ==============
-CloudFormation modules are managed by 2 files: 
+CloudFormation modules are managed by 2 files:
 
-- a key/value environment file 
+- a key/value environment file
 - a yaml file defining the stacks/templates/params.
 
 Environment - name these in the form of ENV-REGION.env (e.g. dev-us-east-1.env) or ENV.env (e.g. dev.env)::
@@ -44,7 +44,7 @@ Stack config - these can have any name ending in .yaml (they will be evaluated i
         variables:
           VpcId: ${output myvpcstack::VpcId}
 
-The config yaml supports many more features; see the full Stacker documentation for more detail 
+The config yaml supports many more features; see the full Stacker documentation for more detail
 (e.g. stack configuration options, additional lookups in addition to output (e.g. SSM, DynamoDB))
 
 Environment Values Via Runway Deployment/Module Options
@@ -128,11 +128,10 @@ runway.yml:
 
 Part 2: Specify the Terraform Version
 -------------------------------------
-By creating specifying a specific Terraform version (either via a
-``.terraform-version`` file in your Terraform directory or a module option),
-Runway will automatically download & use that version for the module. This
-(alongside tightly pinning Terraform provider versions) is highly recommended
-to keep a predictable experience when deploying your module.
+By specifying the version via a ``.terraform-version`` file in your Terraform directory, or a module
+option, Runway will automatically download & use that version for the module. This, alongside
+tightly pinning Terraform provider versions, is highly recommended to keep a predictable experience
+when deploying your module.
 
 .terraform-version::
 
@@ -193,11 +192,15 @@ from the rest of the Terraform code. Choose from one of the following options.
 Backend Config in File
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Backend config options can be specified in a separate file (or multiple files
-per environment and/or region):
+Backend config options can be specified in a separate file or multiple files
+per environment and/or region:
 
-backend-ENV-REGION.tfvars, or backend-ENV.tfvars, or backend-REGION.tfvars, or
-backend.tfvars::
+- ``backend-ENV-REGION.tfvars``
+- ``backend-ENV.tfvars``
+- ``backend-REGION.tfvars``
+- ``backend.tfvars``
+
+::
 
         region = "us-east-1"
         bucket = "some_s3_bucket_name"
@@ -353,22 +356,20 @@ recommendations/caveats:
     }
 
 - We strongly recommend you commit the package-lock.json that is generated
-  after running `npm install`
+  after running ``npm install``
 - Each stage requires either its own variables file (even if empty for a
   particular stage) in one of the following forms, or a configured environment
   in the module options (see ``Enabling Environments Via Runway
   Deployment/Module Options`` below):
 
-::
-
-    env/STAGE-REGION.yml
-    config-STAGE-REGION.yml
-    env/STAGE.yml
-    config-STAGE.yml
-    env/STAGE-REGION.json
-    config-STAGE-REGION.json
-    env/STAGE.json
-    config-STAGE.json
+- ``env/STAGE-REGION.yml``
+- ``config-STAGE-REGION.yml``
+- ``env/STAGE.yml``
+- ``config-STAGE.yml``
+- ``env/STAGE-REGION.json``
+- ``config-STAGE-REGION.json``
+- ``env/STAGE.json``
+- ``config-STAGE.json``
 
 
 Enabling Environments Via Runway Deployment/Module Options
@@ -454,7 +455,7 @@ Build steps (e.g. for compiling TypeScript) can be specified in the module optio
 
 Environment Configs
 -------------------
-Environments can be specified via deployment and/or module options. Each example below shows the explicit CDK ``ACCOUNT/REGION`` environment mapping; 
+Environments can be specified via deployment and/or module options. Each example below shows the explicit CDK ``ACCOUNT/REGION`` environment mapping;
 these can be alternately be specified with a simple boolean (e.g. ``dev: true``).
 
 Top-level Runway Config
@@ -538,8 +539,8 @@ It can be used with a configuration like the following::
           - us-west-2
 
 This will build the website in ``web`` via the specified build_steps and then upload the contents of ``web/dist``
-to a S3 bucket created in the CloudFormation stack ``web-dev-conduit``. On subsequent deploys, the website will
-be built and synced only if the (non-git-ignored) files in ``web`` change.
+to an S3 bucket created in the CloudFormation stack ``web-dev-conduit``. On subsequent deploys, the website will
+be built and synced only if the non-git-ignored files in ``web`` change.
 
 The site domain name is available via the ``CFDistributionDomainName`` output of the ``<namespace>-<path>`` stack
 (e.g. ``contoso-dev-web`` above) and will be displayed on stack creation/updates.
