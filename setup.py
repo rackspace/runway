@@ -47,7 +47,8 @@ INSTALL_REQUIRES = [
     'troposphere>=2.4.2',
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
-    'urllib3>=1.20,<1.25'
+    'urllib3>=1.20,<1.25',
+    "pydocstyle<=3.0.0; python_version<'3'"
 ]
 
 # pylint v2+ is only py3 compatible
