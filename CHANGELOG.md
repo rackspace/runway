@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.46.6] - 2019-07-08
 ### Added
-- conditional requirement for `pydocstyle<=3.0.0` for python2
+- requirement for `pydocstyle<=3.0.0`
 
 ## [0.46.5] - 2019-06-04
 ### Fixed
