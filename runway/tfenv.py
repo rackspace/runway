@@ -16,7 +16,8 @@ from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-
 from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
 
 from botocore.vendored import requests
-import hcl
+# embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
+from runway.embedded import hcl
 
 from .util import get_hash_for_filename, sha256sum
 

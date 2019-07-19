@@ -7,10 +7,11 @@ import subprocess
 import sys
 
 import boto3
-import hcl
 from send2trash import send2trash
 import six
 
+# embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
+from runway.embedded import hcl
 from . import RunwayModule, run_module_command
 from ..tfenv import TFEnv
 from ..util import (
