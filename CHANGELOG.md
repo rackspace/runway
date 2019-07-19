@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.47.0] - 2019-07-19
+### Added
+- Terraform 0.12 support
+
 ## [0.46.6] - 2019-07-08
 ### Added
 - requirement for `pydocstyle<=3.0.0`

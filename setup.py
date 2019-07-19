@@ -28,7 +28,11 @@ INSTALL_REQUIRES = [
     'flake8-docstrings',
     'pep8-naming',
     'future',
-    'pyhcl',
+    # embedded pyhcl is 0.3.12
+    # with the LICENSE file added to its root folder
+    # and the following patches applied
+    # https://github.com/virtuald/pyhcl/pull/57
+    'pyhcl~=0.3',
     'six',
     'typing',
     'yamllint',
