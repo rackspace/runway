@@ -152,16 +152,21 @@ def reinit_on_backend_changes(tf_bin,  # pylint: disable=too-many-arguments
     # backend files; merge in the values defined in main.tf
     # (or whatever tf file)
     for filename in ['main.tf'] + glob.glob(os.path.join(module_path, '*.tf')):
-        if os.path.isfile(filename):
-            with open(filename, 'r') as stream:
-                tf_config = hcl.load(stream)
-                if tf_config.get('terraform', {}).get('backend'):
-                    [(_s3key, tffile_backend_config)] = tf_config['terraform']['backend'].items()  # noqa pylint: disable=line-too-long
-                    desired_backend_config = merge_dicts(
-                        desired_backend_config,
-                        tffile_backend_config
-                    )
-                    break
+        LOGGER.debug('parsing for backend: %s', filename)
+        try:
+            if os.path.isfile(filename):
+                with open(filename, 'r') as stream:
+                    tf_config = hcl.load(stream)
+                    if tf_config.get('terraform', {}).get('backend'):
+                        [(_s3key, tffile_backend_config)] = tf_config['terraform']['backend'].items()  # noqa pylint: disable=line-too-long
+                        desired_backend_config = merge_dicts(
+                            desired_backend_config,
+                            tffile_backend_config
+                        )
+                        break
+        except ValueError:
+            LOGGER.warning('Could not parse %s for backend configuration',
+                           filename)
 
     if current_backend_config != desired_backend_config:
         LOGGER.info("Desired and previously initialized TF backend config is "
