@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.47.1] - 2019-07-19
+### Fixed
+- Workaround PyHCL error on empty files
+
 ## [0.47.0] - 2019-07-19
 ### Added
 - Terraform 0.12 support
@@ -528,7 +532,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.46.6...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.47.1...HEAD
+[0.47.1]: https://github.com/onicagroup/runway/compare/v0.47.0...v0.47.1
+[0.47.0]: https://github.com/onicagroup/runway/compare/v0.46.6...v0.47.0
 [0.46.6]: https://github.com/onicagroup/runway/compare/v0.46.5...v0.46.6
 [0.46.5]: https://github.com/onicagroup/runway/compare/v0.46.4...v0.46.5
 [0.46.4]: https://github.com/onicagroup/runway/compare/v0.46.3...v0.46.4
