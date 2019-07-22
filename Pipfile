@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 "send2trash" = "*"
 awacs = "*"
-awscli = "<1.16.0"
+awscli = ">=1.16.121<2.0"
 docopt = "*"
 future = "*"
 pyhcl = "*"
@@ -14,15 +14,14 @@ typing = "*"
 yamllint = "*"
 zgitignore = "*"
 stacker = "~=1.6"
-botocore = "<1.11.0"
-"boto3" = "~=1.7.0"
+botocore = ">=1.12.111"
+"boto3" = ">=1.9.111<2.0"
 pyyaml = "~=3.13"
-
-[dev-packages]
+cfn_flip = "<=1.2.0"
 "flake8" = "*"
-"pep8-naming" = "*"
-"flake8-docstrings" = "*"
 pylint = "*"
 
-[requires]
-python_version = "2.7"
+[dev-packages]
+"pep8-naming" = "*"
+"flake8-docstrings" = "*"
+pyinstaller = "*"

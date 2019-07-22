@@ -10,6 +10,8 @@ Usage:
   runway gitclean
   runway gen-sample (cfn|sls-tsc|sls|tf|stacker|cdk-tsc|cdk-py|cdk-csharp)
   runway whichenv
+  runway run-stacker <stacker-args>...
+  runway run-python <filename>
   runway -h | --help
   runway --version
 
@@ -42,7 +44,7 @@ LOGGER = logging.getLogger('runway')
 
 def fix_hyphen_commands(raw_cli_arguments):
     """Update options to match their module names with underscores."""
-    for i in ['gen-sample']:
+    for i in ['gen-sample', 'run-python', 'run-stacker']:
         raw_cli_arguments[i.replace('-', '_')] = raw_cli_arguments[i]
         raw_cli_arguments.pop(i)
     return raw_cli_arguments

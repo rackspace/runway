@@ -4,6 +4,7 @@ from .runway import gen_sample  # noqa
 from .runway import gitclean  # noqa
 from .runway import init # noqa
 from .runway import preflight   # noqa
+from .runway import run_stacker  # noqa
 from .runway import test  # noqa
 from .runway import whichenv  # noqa
 

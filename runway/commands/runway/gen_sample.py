@@ -2,10 +2,7 @@
 import logging
 import os
 import shutil
-from subprocess import check_output
 import sys
-
-import cfn_flip
 
 from ..runway_command import RunwayCommand
 from ...tfenv import get_latest_tf_version
@@ -187,22 +184,14 @@ def generate_sample_cfn_module(env_root, module_dir=None):
             os.path.join(module_dir, i)
         )
     os.mkdir(os.path.join(module_dir, 'templates'))
-    with open(os.path.join(module_dir,
-                           'templates',
-                           'tf_state.yml'), 'w') as stream:
-        stream.write(
-            cfn_flip.flip(
-                check_output(
-                    [sys.executable,
-                     os.path.join(ROOT,
-                                  'templates',
-                                  'stacker',
-                                  'tfstate_blueprints',
-                                  'tf_state.py')]
-                )
-
-            )
-        )
+    shutil.copyfile(
+        os.path.join(ROOT,
+                     'templates',
+                     'cfn',
+                     'templates',
+                     'tf_state.yml'),
+        os.path.join(module_dir, 'templates', 'tf_state.yml')
+    )
     LOGGER.info("Sample CloudFormation module created at %s",
                 module_dir)
 

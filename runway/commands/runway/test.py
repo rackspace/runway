@@ -22,6 +22,27 @@ from ..runway_command import RunwayCommand
 LOGGER = logging.getLogger('runway')
 
 
+def get_template_from_blueprint(filepath):
+    """Run blueprint file and return template."""
+    if getattr(sys, 'frozen', False):
+        # running in pyinstaller single-exe, so sys.executable will
+        # be the all-in-one runway binary
+        return check_output(
+            [sys.executable, 'run-python', filepath],
+        ).decode()
+    # traditional python execution
+    shell_out_env = os.environ.copy()
+    if 'PYTHONPATH' in shell_out_env:
+        shell_out_env['PYTHONPATH'] = (
+            "%s:%s" % (get_embedded_lib_path(),
+                       shell_out_env['PYTHONPATH'])
+        )
+    else:
+        shell_out_env['PYTHONPATH'] = get_embedded_lib_path()
+    return check_output([sys.executable, filepath],
+                        env=shell_out_env).decode()
+
+
 class Test(RunwayCommand):
     """Extend RunwayCommand with execute to run the test method."""
 
@@ -142,16 +163,9 @@ class Test(RunwayCommand):
             LOGGER.info('pylint complete.')
             for filepath in blueprint_files:
                 try:
-                    shell_out_env = os.environ.copy()
-                    if 'PYTHONPATH' in shell_out_env:
-                        shell_out_env['PYTHONPATH'] = ("%s:%s" % (get_embedded_lib_path(),
-                                                                  shell_out_env['PYTHONPATH']))
-                    else:
-                        shell_out_env['PYTHONPATH'] = get_embedded_lib_path()
-                    cfn_template = check_output(
-                        [sys.executable, filepath],
-                        env=shell_out_env
-                    ).decode()
+                    cfn_template = get_template_from_blueprint(
+                        filepath
+                    )
                     if not cfn_template:
                         raise ValueError('Template output should not be empty!')  # noqa
                     parse_cloudformation_template(cfn_template)
