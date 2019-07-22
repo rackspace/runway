@@ -16,4 +16,4 @@ class RunPython(RunwayCommand):
         """Execute python script."""
         sys.path.insert(1, get_embedded_lib_path())
         with open(self._cli_arguments.get('<filename>'), 'r') as stream:
-            exec(stream.read())
+            exec(stream.read())  # pylint: disable=exec-used
