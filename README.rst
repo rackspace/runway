@@ -4,8 +4,8 @@ Runway
 What?
 -----
 
-A lightweight wrapper around linting (e.g. yamllint) & infrastructure
-deployment tools (e.g. CloudFormation, Terraform, Serverless) to ease
+A lightweight wrapper around linting (e.g. yamllint) & infrastructure
+deployment tools (e.g. CloudFormation, Terraform, Serverless) to ease
 management of per-environment configs & deployment.
 
 Why?
