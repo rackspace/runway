@@ -20,6 +20,7 @@ pyyaml = "~=3.13"
 cfn_flip = "<=1.2.0"
 "flake8" = "*"
 pylint = "*"
+six = "*"
 
 [dev-packages]
 "pep8-naming" = "*"
