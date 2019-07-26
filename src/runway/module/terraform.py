@@ -1,5 +1,4 @@
 """Terraform module."""
-import glob
 import logging
 import os
 import re
@@ -10,13 +9,11 @@ import boto3
 from send2trash import send2trash
 import six
 
-# embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
-from runway.embedded import hcl
 from . import RunwayModule, run_module_command
 from ..tfenv import TFEnv
 from ..util import (
     change_dir, extract_boto_args_from_env, find_cfn_output,
-    merge_dicts, merge_nested_environment_dicts, which
+    merge_nested_environment_dicts, which
 )
 
 FAILED_INIT_FILENAME = '.init_failed'
