@@ -114,7 +114,7 @@ def run_terraform_init(tf_bin,  # pylint: disable=too-many-arguments
                        module_path, backend_options, env_name, env_region,
                        env_vars):
     """Run Terraform init."""
-    init_cmd = [tf_bin, 'init']
+    init_cmd = [tf_bin, 'init', '-reconfigure']
     cmd_opts = {'env_vars': env_vars, 'exit_on_error': False}
 
     if backend_options.get('config'):
