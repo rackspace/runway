@@ -49,7 +49,7 @@ def run_test(test_name):
         with change_dir(WORKING_DIR):
             try:
                 subprocess.check_call('runway deploy', shell=True)
-            except subprocess.CalledProcessError as shelloutexc:
+            except subprocess.CalledProcessError:
                 # We don't want to stop the other tests.
                 # Just return an error code of 1
                 return 1
