@@ -47,7 +47,12 @@ def run_test(test_name):
 
         LOGGER.info('Running test "%s"', test_name)
         with change_dir(WORKING_DIR):
-            subprocess.check_call('runway deploy', shell=True)
+            try:
+                subprocess.check_call('runway deploy', shell=True)
+            except subprocess.CalledProcessError as shelloutexc:
+                # We don't want to stop the other tests.
+                # Just return an error code of 1
+                return 1
     else:
         LOGGER.warning('Test not found "%s"; skipping...', test_name)
         return
@@ -76,8 +81,9 @@ def teardown():
 def run_tests():
     """Run all tests."""
     # --- Test Backend Change Local -> S3 ---
-    run_test('no-backend.tf')
-    run_test('s3-backend.tf')
+    results = [run_test('no-backend.tf'), run_test('s3-backend.tf')]
+    if 1 in results:
+        LOGGER.error('TEST FAILED: Local to S3 Backend')
     # ---------------------------------------
 
     # cleanup between tests
@@ -93,11 +99,12 @@ def run_tests():
     # ------------------------------------------
 
     # cleanup between tests
-    #clean()
+    # clean()
 
     # --- Test Provider Version Change ---
-    run_test('provider-version1.tf')
-    run_test('provider-version2.tf')
+    results = [run_test('provider-version1.tf'), run_test('provider-version2.tf')]
+    if 1 in results:
+        LOGGER.error('TEST FAILED: Provider Version Change')
     # ------------------------------------
 
     # teardown AWS resources
