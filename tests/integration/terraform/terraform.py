@@ -48,14 +48,14 @@ def run_test(test_name):
         LOGGER.info('Running test "%s"', test_name)
         with change_dir(WORKING_DIR):
             try:
-                subprocess.check_call('runway deploy', shell=True)
+                subprocess.check_call(['runway', 'deploy'])
             except subprocess.CalledProcessError:
                 # We don't want to stop the other tests.
                 # Just return an error code of 1
                 return 1
     else:
         LOGGER.warning('Test not found "%s"; skipping...', test_name)
-        return
+        return 0
 
 
 def run_stacker(command='build'):
@@ -80,38 +80,37 @@ def teardown():
 
 def run_tests():
     """Run all tests."""
-    # --- Test Backend Change Local -> S3 ---
-    results = [run_test('no-backend.tf'), run_test('s3-backend.tf')]
-    if 1 in results:
-        LOGGER.error('TEST FAILED: Local to S3 Backend')
-    # ---------------------------------------
+    try:
+        # --- Test Backend Change Local -> S3 ---
+        results = [run_test('no-backend.tf'), run_test('s3-backend.tf')]
+        if 1 in results:
+            LOGGER.error('TEST FAILED: Local to S3 Backend')
+        # ---------------------------------------
 
-    # cleanup between tests
-    clean()
+        # cleanup between tests
+        clean()
 
-    # --- Test Backend Change Local -> Local ---
-    # This test will always fail because of how Terraform handles
-    # changing from no backend (local) to a local backend with a path
-    # specified. No matter what path you set, it won't copy the configuration
-    # to the correct new local backend file.
-    # run_test('no-backend.tf')
-    # run_test('local-backend.tf')
-    # ------------------------------------------
+        # --- Test Provider Version Change ---
+        results = [run_test('provider-version1.tf'), run_test('provider-version2.tf')]
+        if 1 in results:
+            LOGGER.error('TEST FAILED: Provider Version Change')
+        # ------------------------------------
 
-    # cleanup between tests
-    # clean()
-
-    # --- Test Provider Version Change ---
-    results = [run_test('provider-version1.tf'), run_test('provider-version2.tf')]
-    if 1 in results:
-        LOGGER.error('TEST FAILED: Provider Version Change')
-    # ------------------------------------
-
-    # teardown AWS resources
-    # try/catch subprocess call
+        # --- Test Backend Change Local -> Local ---
+        # This test will always fail because of how Terraform handles
+        # changing from no backend (local) to a local backend with a path
+        # specified. No matter what path you set, it won't copy the configuration
+        # to the correct new local backend file.
+        # results = [run_test('no-backend.tf'), run_test('local-backend.tf')]
+        # if 1 in results:
+        #     LOGGER.error('TEST FAILED: Local to Local Backend')
+        # ------------------------------------------      
+    except:  # noqa: E722 pylint: disable=bare-except
+        LOGGER.error('TESTS FAILED, CHECK LOG')
+    finally:
+        teardown()
 
 
 if __name__ == "__main__":
     run_stacker()
     run_tests()
-    teardown()
