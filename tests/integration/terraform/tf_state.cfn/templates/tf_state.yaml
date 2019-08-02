@@ -16,11 +16,6 @@ Conditions:
       - undefined
 Description: Create Terraform backend components - 1.19.0
 Outputs:
-  PolicyArn:
-    Description: Managed policy Arn
-    Export:
-      Name: !Sub '${AWS::StackName}-PolicyArn'
-    Value: !Ref 'ManagementPolicy'
   TerraformLockTableName:
     Description: Name of DynamoDB table for Terraform locks
     Export:
@@ -46,35 +41,6 @@ Parameters:
     Description: (optional) Name for the DynamoDB table
     Type: String
 Resources:
-  ManagementPolicy:
-    Properties:
-      Description: Managed policy for Terraform state management.
-      Path: /
-      PolicyDocument:
-        Statement:
-          - Action:
-              - s3:ListBucket
-            Effect: Allow
-            Resource:
-              - !GetAtt 'TerraformStateBucket.Arn'
-          - Action:
-              - s3:GetObject
-              - s3:PutObject
-            Effect: Allow
-            Resource:
-              - !Join
-                - ''
-                - - !GetAtt 'TerraformStateBucket.Arn'
-                  - /*
-          - Action:
-              - dynamodb:GetItem
-              - dynamodb:PutItem
-              - dynamodb:DeleteItem
-            Effect: Allow
-            Resource:
-              - !GetAtt 'TerraformLockTable.Arn'
-        Version: '2012-10-17'
-    Type: AWS::IAM::ManagedPolicy
   TerraformLockTable:
     Properties:
       AttributeDefinitions:

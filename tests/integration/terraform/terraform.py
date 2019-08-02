@@ -37,13 +37,19 @@ def clean():
 
 def run_test(test_name):
     """Rename test_name to main.tf and run runway."""
+    extension = os.path.splitext(test_name)[1]
+    file_rename = {
+        '.tf': 'main.tf',
+        '.version': '.terraform-version'
+    }
+
     if not test_name.endswith('.test'):
         test_name += '.test'
 
     if os.path.isfile(os.path.join(TERRAFORM_TESTS_DIR, test_name)):
         LOGGER.debug('Copying Terraform test: "%s" to main.tf', test_name)
         shutil.copy(os.path.join(TERRAFORM_TESTS_DIR, test_name),
-                    os.path.join(TERRAFORM_TF_DIR, 'main.tf'))
+                    os.path.join(TERRAFORM_TF_DIR, file_rename.get(extension)))
 
         LOGGER.info('Running test "%s"', test_name)
         with change_dir(WORKING_DIR):
@@ -55,7 +61,7 @@ def run_test(test_name):
                 return 1
     else:
         LOGGER.warning('Test not found "%s"; skipping...', test_name)
-        return 0
+    return 0
 
 
 def run_stacker(command='build'):
@@ -96,6 +102,19 @@ def run_tests():
             LOGGER.error('TEST FAILED: Provider Version Change')
         # ------------------------------------
 
+        # cleanup between tests
+        clean()
+
+        # --- Test Terraform Version Change ---
+        # We run the s3-backend test to get a proper main.tf, then
+        # run the Terraform version test
+        results = [run_test('s3-backend.tf'),
+                   run_test('tf-v11.version'),
+                   run_test('tf-v12.version')]
+        if 1 in results:
+            LOGGER.error('TEST FAILED: Terraform Version Change')
+        # -------------------------------------
+
         # --- Test Backend Change Local -> Local ---
         # This test will always fail because of how Terraform handles
         # changing from no backend (local) to a local backend with a path
@@ -104,7 +123,7 @@ def run_tests():
         # results = [run_test('no-backend.tf'), run_test('local-backend.tf')]
         # if 1 in results:
         #     LOGGER.error('TEST FAILED: Local to Local Backend')
-        # ------------------------------------------      
+        # ------------------------------------------
     except:  # noqa: E722 pylint: disable=bare-except
         LOGGER.error('TESTS FAILED, CHECK LOG')
     finally:
