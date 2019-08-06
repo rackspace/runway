@@ -1,0 +1,11 @@
+namespace: ${namespace}
+stacker_bucket: ""
+
+sys_path: ./
+
+stacks:
+  codebuild:
+    class_path: blueprints.codebuild.CodeBuild
+    variables:
+      EnvironmentName: ${environment}
+      GitHubUrl: https://github.com/cmilam87/runway

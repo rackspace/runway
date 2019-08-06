@@ -1,0 +1,8 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - cd $CODEBUILD_SRC_DIR/tests/integration/terraform
+      - pipenv sync
+      - pipenv run python terraform.py
