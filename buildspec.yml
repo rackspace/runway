@@ -1,8 +1,11 @@
 version: 0.2
 
 phases:
+  install:
+    runtime-versions:
+        python: 3.7
   build:
     commands:
-      - cd $CODEBUILD_SRC_DIR/tests/integration/terraform
+      - cd $CODEBUILD_SRC_DIR/tests/integration
       - pipenv sync
-      - pipenv run python terraform.py
+      - pipenv run python runner.py

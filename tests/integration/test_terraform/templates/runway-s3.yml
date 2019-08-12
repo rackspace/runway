@@ -8,7 +8,7 @@ commonmodopts: &commonmodopts
 
 deployments:
   - modules:
-    - test_terraform.tf
+    - terraform_test.tf
     regions:
       - us-east-1
     module_options:

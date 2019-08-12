@@ -3,13 +3,16 @@
 from __future__ import print_function
 
 from troposphere import (
-    AccountId, Join, Partition, Region, iam, codebuild
+    AccountId, Join, Partition, Region, iam, codebuild, Sub
 )
 
 import awacs.codebuild
-import awacs.logs
-import awacs.s3
-from awacs.aws import Allow, PolicyDocument, Statement
+
+from awacs import (
+    logs, cloudformation, dynamodb, s3
+)
+
+from awacs.aws import Action, Allow, Deny, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
 
 from stacker.blueprints.base import Blueprint
@@ -39,6 +42,7 @@ class CodeBuild(Blueprint):
 
         # Resources
         deploy_name = 'runway-codebuild'
+        test_suite_prefix = 'testsuite-tf-state'
         codebuild_role = template.add_resource(
             iam.Role(
                 'CodeBuildRole',
@@ -70,9 +74,81 @@ class CodeBuild(Blueprint):
                                                 AccountId,
                                                 ':log-group:/aws/codebuild/',
                                                 deploy_name,
-                                                '-*'
+                                                '*'
                                             ] + x
                                         ) for x in [[':*'], [':*/*']]
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('cloudformation', '*')],
+                                    Effect=Allow,
+                                    Resource=[
+                                        Join(':', ['arn', Partition, 'cloudformation',
+                                                   Region, AccountId,
+                                                   Sub('stack/${prefix}/*',
+                                                       {'prefix': test_suite_prefix})])
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('cloudformation', '*')],
+                                    Effect=Deny,
+                                    NotResource=[
+                                        Join(':', ['arn', Partition, 'cloudformation',
+                                                   Region, AccountId,
+                                                   Sub('stack/${prefix}/*',
+                                                       {'prefix': test_suite_prefix})])
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('dynamodb', '*')],
+                                    Effect=Allow,
+                                    Resource=[
+                                        Join(':', ['arn', Partition, 'dynamodb',
+                                                   Region, AccountId,
+                                                   Sub('table/${prefix}-*',
+                                                       {'prefix': test_suite_prefix})])
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('dynamodb', '*')],
+                                    Effect=Deny,
+                                    NotResource=[
+                                        Join(':', ['arn', Partition, 'dynamodb',
+                                                   Region, AccountId,
+                                                   Sub('table/${prefix}-*',
+                                                       {'prefix': test_suite_prefix})])
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('s3', '*')],
+                                    Effect=Allow,
+                                    Resource=[
+                                        Join(':', ['arn', Partition,
+                                                   Sub('s3:::${prefix}',
+                                                       {'prefix': test_suite_prefix})]),
+                                        Join(':', ['arn', Partition,
+                                                   Sub('s3:::${prefix}/*',
+                                                       {'prefix': test_suite_prefix})])
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('s3', '*')],
+                                    Effect=Deny,
+                                    NotResource=[
+                                        Join(':', ['arn', Partition,
+                                                   Sub('s3:::${prefix}',
+                                                       {'prefix': test_suite_prefix})]),
+                                        Join(':', ['arn', Partition,
+                                                   Sub('s3:::${prefix}/*',
+                                                       {'prefix': test_suite_prefix})])
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[Action('sqs', '*')],
+                                    Effect=Allow,
+                                    Resource=[
+                                        Join(':', ['arn', Partition, 'sqs', Region, AccountId,
+                                                   'terraform-*'])
                                     ]
                                 )
                             ]
@@ -121,7 +197,7 @@ class CodeBuild(Blueprint):
                             ),
                             codebuild.WebhookFilter(
                                 Type='EVENT',
-                                Pattern='PULL_REQUEST_CREATED'
+                                Pattern='PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED,PULL_REQUEST_REOPENED' # noqa
                             ),
                             codebuild.WebhookFilter(
                                 Type='BASE_REF',
