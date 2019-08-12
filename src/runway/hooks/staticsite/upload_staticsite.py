@@ -68,6 +68,7 @@ def sync(context, provider, **kwargs):  # pylint: disable=too-many-locals
             provider=provider,
             context=context
         )
+        distribution_path = kwargs.get('distribution_path', '/*')
 
         # Using the awscli for s3 syncing is incredibly suboptimal, but on
         # balance it's probably the most stable/efficient option for syncing
@@ -81,8 +82,11 @@ def sync(context, provider, **kwargs):  # pylint: disable=too-many-locals
         cf_client = session.client('cloudfront')
         cf_client.create_invalidation(
             DistributionId=distribution_id,
-            InvalidationBatch={'Paths': {'Quantity': 1, 'Items': ['/*']},
-                               'CallerReference': str(time.time())}
+            InvalidationBatch={
+                'Paths': {
+                    'Quantity': 1,
+                    'Items': [distribution_path]},
+                'CallerReference': str(time.time())}
         )
         LOGGER.info("staticsite: sync & CF invalidation of %s (domain %s) "
                     "complete",
