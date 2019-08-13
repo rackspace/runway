@@ -1,10 +1,11 @@
 """Test changing terraform versions."""
 from runway.util import change_dir
-from tests.integration.test_terraform.test_terraform import Terraform
+from test_terraform.test_terraform import Terraform
 
 
 class VersionTest(Terraform):
     """Test changing between terraform versions."""
+
     TEST_NAME = __name__
 
     def deploy_version(self, version):

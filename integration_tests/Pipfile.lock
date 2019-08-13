@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c392af5b377efa07dab8eacba1ef727c8ad2cb67b3e235006f33314e18b0a42f"
+            "sha256": "b453f57c18446df9967b43cc2081a1b9cb4ea0886bc8fab09b78e88a459208d0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -44,31 +44,24 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:0853dc93b7a69648d9f11981b548ecfe8ccdbda08606e4ee7e447d1fd117238f",
-                "sha256:5e0b99adc97ed0558622726eb54d9e6c2be93a502ea02cd97eaf1eb159dfa094"
+                "sha256:2cf09d4fa67670bb265fc6522dd870ad3f86a2245a6bb578aec8ef8fba35bf22",
+                "sha256:3369bed215b5ee8314f5a4bbcfdc811fb41d1500a8a854c23fb6afe475e94437"
             ],
-            "version": "==1.16.215"
+            "version": "==1.16.216"
         },
         "boto3": {
             "hashes": [
-                "sha256:19a77d8ecb05d87123e88a65cba49cdbc8c66717ced21c2093a6f091492c22da",
-                "sha256:e184590781c127358c2d9ae1eab6607441d92fbddd88ba08b891b8c14d0bbfff"
+                "sha256:932a9c0c6978a6d6421335e077f233bd6d1c6f6e7879293fc7488471f67ad319",
+                "sha256:c98edda030456fdf910cd672d5ab0d1a8847b8587e81fe50a4df4292a704dd76"
             ],
-            "version": "==1.9.205"
+            "version": "==1.9.206"
         },
         "botocore": {
             "hashes": [
-                "sha256:0d6290f725a69a5950785fb058c2405e438674011eff7c11ce192b561b3c9aa6",
-                "sha256:e9452a8e48aea82157e846eb8ec2e8e57f52366ba3362ec5128ecff2c8b52e2f"
+                "sha256:7213a4d9482c753badbc405c1ff657accb842618ffb56e3c8ca91f697c745e13",
+                "sha256:e96242bd5915fb722f9a1926352aca3bf12b755146cb1826c27a766a14361b80"
             ],
-            "version": "==1.12.205"
-        },
-        "certifi": {
-            "hashes": [
-                "sha256:046832c04d4e752f37383b628bc601a7ea7211496b4638f6514d0e5b9acc4939",
-                "sha256:945e3ba63a0b9f577b1395204e13c3a231f9bc0223888be653286534e5873695"
-            ],
-            "version": "==2019.6.16"
+            "version": "==1.12.206"
         },
         "cfn-flip": {
             "hashes": [
@@ -78,17 +71,10 @@
         },
         "cfn-lint": {
             "hashes": [
-                "sha256:1a52cfb391ade08287c3f1a1f7c61715826e4b6ab2cdabe4e54676d2812778ff",
-                "sha256:c8db39b43e50012dc53a7cd23e3e541cc34d0e4274f524072a10846f185e07e8"
+                "sha256:355ed9e6e8778a488da57f91eb99a1121da18233a9a8863d7e1d5bf35d81c958",
+                "sha256:db5fdd11f93d1b15b5fb9633fecc0456c4ea6755b57f75d15bf7f6958bbf5230"
             ],
-            "version": "==0.23.2"
-        },
-        "chardet": {
-            "hashes": [
-                "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae",
-                "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"
-            ],
-            "version": "==3.0.4"
+            "version": "==0.23.3"
         },
         "click": {
             "hashes": [
@@ -174,13 +160,6 @@
                 "sha256:df752b6b6f06f11213e91c4925aea7eaf9e37e88fb71c8a7a1aa0a5c10852120"
             ],
             "version": "==2.1.13"
-        },
-        "idna": {
-            "hashes": [
-                "sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407",
-                "sha256:ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"
-            ],
-            "version": "==2.8"
         },
         "isort": {
             "hashes": [
@@ -380,13 +359,6 @@
             "markers": "python_version != '2.6'",
             "version": "==5.1"
         },
-        "requests": {
-            "hashes": [
-                "sha256:11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4",
-                "sha256:9cf5292fcd0f598c671cfc1e0d7d1a7f13bb8085e9a590f48c010551dc6c4b31"
-            ],
-            "version": "==2.22.0"
-        },
         "rsa": {
             "hashes": [
                 "sha256:25df4e10c263fb88b5ace923dd84bf9aa7f5019687b5e55382ffcdb8bede9db5",
@@ -396,7 +368,7 @@
         },
         "runway": {
             "editable": true,
-            "path": "./../../../runway"
+            "path": "./../../runway"
         },
         "s3transfer": {
             "hashes": [

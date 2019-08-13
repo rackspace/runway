@@ -1,10 +1,11 @@
 """Test changing provider versions."""
 from runway.util import change_dir
-from tests.integration.test_terraform.test_terraform import Terraform
+from test_terraform.test_terraform import Terraform
 
 
 class ProviderTest(Terraform):
     """Test changing between provider versions."""
+
     TEST_NAME = __name__
 
     def deploy_provider(self, version):

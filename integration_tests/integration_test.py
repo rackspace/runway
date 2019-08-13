@@ -6,6 +6,7 @@ import os
 
 class IntegrationTest(object):
     """Base class for Integration Tests."""
+
     WORKING_DIR = os.path.abspath(os.path.dirname(__file__))
     LOGGER = logging.getLogger('testsuite')
 
