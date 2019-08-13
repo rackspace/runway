@@ -1,6 +1,6 @@
 """Test changing provider versions."""
 from runway.util import change_dir
-from test_terraform.test_terraform import Terraform
+from tests.integration.test_terraform.test_terraform import Terraform
 
 
 class ProviderTest(Terraform):

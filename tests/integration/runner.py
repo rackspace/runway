@@ -2,14 +2,14 @@
 from __future__ import print_function
 import os
 import logging
-from util import import_tests, execute_tests
 from integration_test import IntegrationTest
+from util import (execute_tests, import_tests)
 
 
 class Runner(object):
     """Runner for all integration tests."""
 
-    # Set working directory, logger, test pattern
+    # Set working directory and logger
     WORKING_DIR = os.path.abspath(os.path.dirname(__file__))
     LOGGER = logging.getLogger('testsuite')
 

@@ -2,10 +2,11 @@
 from __future__ import print_function
 import os
 import glob
+import platform
 from send2trash import send2trash
-from integration_test import IntegrationTest
 from runway.util import change_dir
-from util import import_tests, copy_file, execute_tests
+from integration_test import IntegrationTest
+from util import (copy_file, import_tests, execute_tests)
 
 
 class Terraform(IntegrationTest):
@@ -35,7 +36,7 @@ class Terraform(IntegrationTest):
         for file_type in file_types:
             templates.extend(glob.glob(os.path.join(self.tf_test_dir, file_type)))
             templates.extend(glob.glob(os.path.join(self.base_dir, file_type)))
-        
+
         for template in templates:
             if os.path.isfile(template):
                 self.LOGGER.debug('send2trash: "%s"', template)
@@ -60,8 +61,8 @@ class Terraform(IntegrationTest):
         self.LOGGER.info('Running "%s" on tf_state.cfn ...', command)
         self.LOGGER.debug('tf_state_dir: %s', self.tf_state_dir)
         with change_dir(self.tf_state_dir):
-            stacker_cmd = ['stacker.cmd' if os.name == 'nt' else 'stacker', command,
-                           '-i', '-r', 'us-east-1']
+            stacker_cmd = ['stacker.cmd' if platform.system().lower() == 'windows' else 'stacker',
+                           command, '-i', '-r', 'us-east-1']
             if command == 'destroy':
                 stacker_cmd = stacker_cmd + ['-f']
             stacker_cmd = stacker_cmd + ['dev-us-east-1.env', 'tfstate.yaml']

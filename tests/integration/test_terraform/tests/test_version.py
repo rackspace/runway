@@ -1,6 +1,6 @@
 """Test changing terraform versions."""
 from runway.util import change_dir
-from test_terraform.test_terraform import Terraform
+from tests.integration.test_terraform.test_terraform import Terraform
 
 
 class VersionTest(Terraform):

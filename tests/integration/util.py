@@ -16,7 +16,7 @@ def import_tests(path, pattern='test_*/test_*'):
         try:
             importlib.import_module(test_name)
         except ModuleNotFoundError as moderr:
-            print('Failed to import test: %s. %s' % test_name, moderr)
+            print('Failed to import test: %s. %s' % (test_name, moderr))
 
 
 def execute_tests(self, tests):
