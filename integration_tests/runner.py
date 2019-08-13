@@ -25,7 +25,7 @@ class Runner(object):
         else:
             logging.basicConfig(level=logging.INFO)
 
-        import_tests(self.WORKING_DIR)
+        import_tests(self, self.WORKING_DIR)
         errs = self.run_tests()
         return 1 if errs > 0 else 0
 

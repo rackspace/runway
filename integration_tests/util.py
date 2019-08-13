@@ -5,18 +5,18 @@ import importlib
 import shutil
 
 
-def import_tests(path, pattern='test_*/test_*'):
+def import_tests(self, path, pattern='test_*/test_*'):
     """Find and import all tests from a given path."""
-    print('PATH: %s' % path)
+    self.LOGGER.info('Loading tests from "%s" with pattern:', path)
     tests = glob.glob(os.path.join(path, '{}.py'.format(pattern)))
     for test in tests:
         relpath = os.path.relpath(test)[:-3]
         test_name = relpath.replace(os.path.sep, '.')
-        print('Found test: %s. Attempting to import...' % test_name)
+        self.LOGGER.info('Found test: "%s". Attempting to import...', test_name)
         try:
             importlib.import_module(test_name)
         except ModuleNotFoundError as moderr:
-            print('Failed to import test: %s. %s' % (test_name, moderr))
+            self.LOGGER.info('Failed to import test: "%s". Error: "%s"', test_name, moderr)
             raise moderr
 
 

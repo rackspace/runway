@@ -74,7 +74,7 @@ class Terraform(IntegrationTest):
         """Initialize backend."""
         # create dynamodb table and s3 bcuket
         self.run_stacker()
-        import_tests(self.tests_dir, 'test_*')
+        import_tests(self, self.tests_dir, 'test_*')
 
     def run(self):
         """Find all Terraform tests and run them."""
