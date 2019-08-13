@@ -11,12 +11,13 @@ def import_tests(path, pattern='test_*/test_*'):
     tests = glob.glob(os.path.join(path, '{}.py'.format(pattern)))
     for test in tests:
         relpath = os.path.relpath(test)[:-3]
-        test_name = relpath.replace('\\', '.')
+        test_name = relpath.replace(os.path.sep, '.')
         print('Found test: %s. Attempting to import...' % test_name)
         try:
             importlib.import_module(test_name)
         except ModuleNotFoundError as moderr:
             print('Failed to import test: %s. %s' % (test_name, moderr))
+            raise moderr
 
 
 def execute_tests(self, tests):
