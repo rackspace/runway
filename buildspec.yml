@@ -6,6 +6,6 @@ phases:
         python: 3.7
   build:
     commands:
-      - cd $CODEBUILD_SRC_DIR/tests/integration
+      - cd $CODEBUILD_SRC_DIR/integration_tests
       - pipenv sync
       - pipenv run python runner.py
