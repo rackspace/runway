@@ -5,6 +5,7 @@ import importlib
 import shutil
 from prettytable import PrettyTable
 
+
 def import_tests(self, path, pattern='test_*/test_*'):
     """Find and import all tests from a given path."""
     self.LOGGER.info('Loading tests from "%s" with pattern:', path)
