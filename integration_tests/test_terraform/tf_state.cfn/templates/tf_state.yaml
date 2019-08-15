@@ -14,7 +14,7 @@ Conditions:
     - !Equals
       - !Ref 'TableName'
       - undefined
-Description: Create Terraform backend components - 1.19.0
+Description: Create Terraform backend components
 Outputs:
   TerraformLockTableName:
     Description: Name of DynamoDB table for Terraform locks

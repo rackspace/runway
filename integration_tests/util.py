@@ -30,8 +30,9 @@ def execute_tests(self, tests):
         itest = test(self)
         test_name = test.__name__
 
-        if not issubclass(itest, IntegrationTest):
-            self.LOGGER.error('%s does not inherit from "IntegrationTest", skipping...', test_name)
+        if not issubclass(itest.__class__, IntegrationTest):
+            self.LOGGER.error('%s does not inherit from "IntegrationTest", skipping...',
+                              test_name)
             continue
 
         self.LOGGER.info('==========================Executing test "%s"' +
