@@ -27,6 +27,8 @@ class Runner(object):
 
         import_tests(self, self.WORKING_DIR)
         errs = self.run_tests()
+        if errs > 0:
+            self.LOGGER.error('Tests failed; Check logs.')
         return 1 if errs > 0 else 0
 
 

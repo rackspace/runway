@@ -1,17 +1,21 @@
-"""Test changing provider versions."""
+"""Test changing backends between local and S3."""
 from runway.util import change_dir
 from test_terraform.test_terraform import Terraform
 
 
-class ProviderTest(Terraform):
-    """Test changing between provider versions."""
+class LocalToS3Backend(Terraform):
+    """Test changing between local and S3 backends."""
 
     TEST_NAME = __name__
 
-    def deploy_provider(self, version):
+    def deploy_backend(self, backend):
         """Deploy provider."""
-        self.copy_template('provider-version{}.tf'.format(version))
-        self.copy_runway('s3')
+        self.copy_template('{}-backend.tf'.format(backend))
+        if backend == 's3':
+            self.copy_runway('s3')
+        else:
+            self.copy_runway('nos3')
+
         with change_dir(self.base_dir):
             return self.run_command(['runway', 'deploy'])
 
@@ -23,8 +27,8 @@ class ProviderTest(Terraform):
 
     def run(self):
         """Run tests."""
-        assert self.deploy_provider(1) == 0, '{}: Provider version 1 failed'.format(__name__)
-        assert self.deploy_provider(2) == 0, '{}: Provider version 2 failed'.format(__name__)
+        assert self.deploy_backend('local') == 0, '{}: Local backend failed'.format(__name__)
+        assert self.deploy_backend('s3') == 0, '{}: S3 backend failed'.format(__name__)
 
     def teardown(self):
         """Teardown any created resources."""

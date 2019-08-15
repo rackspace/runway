@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 "runway" = {editable = true, path = "./../../runway"}
 stacker = "*"
+prettytable = "*"
 
 [dev-packages]
 

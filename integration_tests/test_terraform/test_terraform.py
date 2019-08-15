@@ -31,7 +31,7 @@ class Terraform(IntegrationTest):
 
     def clean(self):
         """Clean up Terraform module directory."""
-        file_types = ('*.tf', '.terraform-version', '*.yaml', '*.yml')
+        file_types = ('*.tf', '.terraform-version', '*.yaml', '*.yml', 'local_backend')
         templates = []
         for file_type in file_types:
             templates.extend(glob.glob(os.path.join(self.tf_test_dir, file_type)))
@@ -41,12 +41,15 @@ class Terraform(IntegrationTest):
             if os.path.isfile(template):
                 self.LOGGER.debug('send2trash: "%s"', template)
                 send2trash(template)
-        folders = ('.terraform', '.terraform.tfsate.d')
+        folders = ('.terraform', 'terraform.tfstate.d')
         for folder in folders:
             folder_path = os.path.join(self.tf_test_dir, folder)
             if os.path.isdir(folder_path):
                 self.LOGGER.debug('send2trash: "%s"', folder_path)
                 send2trash(folder_path)
+
+        # destroy stacker tf-state
+        self.run_stacker('destroy')
 
     def set_tf_version(self, version=11):
         """Copy version file to module directory."""
@@ -72,17 +75,14 @@ class Terraform(IntegrationTest):
 
     def init(self):
         """Initialize backend."""
-        # create dynamodb table and s3 bcuket
-        self.run_stacker()
         import_tests(self, self.tests_dir, 'test_*')
 
     def run(self):
         """Find all Terraform tests and run them."""
         tests = Terraform.__subclasses__()
         self.LOGGER.debug('FOUND TESTS: %s', tests)
-        execute_tests(self, tests)
+        return execute_tests(self, tests)
 
     def teardown(self):
         """Teardown resources create during init."""
-        self.run_stacker('destroy')
         self.clean()

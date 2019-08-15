@@ -18,6 +18,8 @@ class VersionTest(Terraform):
 
     def init(self):
         """Initialize test."""
+        self.clean()
+        self.run_stacker()
 
     def run(self):
         """Run tests."""

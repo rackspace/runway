@@ -3,7 +3,7 @@ import glob
 import os
 import importlib
 import shutil
-
+from prettytable import PrettyTable
 
 def import_tests(self, path, pattern='test_*/test_*'):
     """Find and import all tests from a given path."""
@@ -23,19 +23,23 @@ def import_tests(self, path, pattern='test_*/test_*'):
 def execute_tests(self, tests):
     """Run the given set of tests."""
     err_count = 0
+    results = {}
     for test in tests:
         itest = test(self)
         test_name = test.__name__
-        self.LOGGER.info('Executing test "%s"...', test_name)
+        self.LOGGER.info('==========================Executing test "%s"' +
+                         '==========================', test_name)
 
         try:
             self.LOGGER.info('Executing "init" for "%s"...', test_name)
             itest.init()
             self.LOGGER.info('Executing "run" for "%s"...', test_name)
             itest.run()
+            results[test_name] = 'Success'
         except AssertionError as assert_err:
             self.LOGGER.error('AssertionError: "%s"', assert_err)
             err_count += 1
+            results[test_name] = 'Failed'
         finally:
             try:
                 self.LOGGER.info('Executing "teardown" for "%s"...', test_name)
@@ -46,6 +50,15 @@ def execute_tests(self, tests):
                                   test.__name__)
                 self.LOGGER.error(err)
 
+    tbl = PrettyTable(['Test Name', 'Result'])
+    tbl.align['Test Name'] = 'l'
+
+    for key, value in results.items():
+        tbl.add_row([key, value])
+
+    self.LOGGER.info('\r\n==========================Test Results==========================' +
+                     '\r\n' + str(tbl) + '\r\n%s out of %s Tests Passed',
+                     (len(tests) - err_count), len(tests))
     return err_count
 
 
