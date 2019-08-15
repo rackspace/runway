@@ -4,6 +4,7 @@ import os
 import importlib
 import shutil
 from prettytable import PrettyTable
+from integration_test import IntegrationTest
 
 
 def import_tests(self, path, pattern='test_*/test_*'):
@@ -28,6 +29,11 @@ def execute_tests(self, tests):
     for test in tests:
         itest = test(self)
         test_name = test.__name__
+
+        if not issubclass(itest, IntegrationTest):
+            self.LOGGER.error('%s does not inherit from "IntegrationTest", skipping...', test_name)
+            continue
+
         self.LOGGER.info('==========================Executing test "%s"' +
                          '==========================', test_name)
 
