@@ -8,4 +8,4 @@ stacks:
     class_path: blueprints.codebuild.CodeBuild
     variables:
       EnvironmentName: ${environment}
-      GitHubUrl: https://github.com/cmilam87/runway
+      GitHubUrl: https://github.com/onicagroup/runway

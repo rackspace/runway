@@ -41,7 +41,11 @@ class CodeBuild(Blueprint):
         template.set_description('Runway CodeBuild Project')
 
         # Resources
-        deploy_name = 'runway-codebuild'
+        deploy_name = 'runway-integration-tests'
+
+        # This must match what is in the the Terraform
+        # integration tests. This corresponds to the template listed in
+        # integration_tests\test_terraform\tf_state.cfn
         test_suite_prefix = 'testsuite-tf-state'
         codebuild_role = template.add_resource(
             iam.Role(
@@ -160,7 +164,7 @@ class CodeBuild(Blueprint):
 
         template.add_resource(
             codebuild.Project(
-                'RunwayBuildProject',
+                'RunwayIntegrationTests',
                 Artifacts=codebuild.Artifacts(
                     Type='NO_ARTIFACTS'
                 ),
