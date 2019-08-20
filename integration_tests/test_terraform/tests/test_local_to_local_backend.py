@@ -19,7 +19,6 @@ class LocalToLocalBackend(Terraform):
     def init(self):
         """Initialize test."""
         self.clean()
-        self.run_stacker()
         self.set_tf_version(11)
 
     def run(self):
