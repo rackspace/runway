@@ -1,4 +1,5 @@
 """Terraform module."""
+import copy
 import logging
 import os
 import re
@@ -10,7 +11,7 @@ from send2trash import send2trash
 import six
 
 from . import RunwayModule, run_module_command
-from ..tfenv import TFEnv
+from ..tfenv import TFEnvManager
 from ..util import (
     change_dir, extract_boto_args_from_env, find_cfn_output,
     merge_nested_environment_dicts, which
@@ -200,11 +201,12 @@ class Terraform(RunwayModule):
         )
         if workspace_tfvar_present:
             tf_cmd.append("-var-file=%s" % workspace_tfvars_file)
+        env_vars = copy.deepcopy(self.context.env_vars)
         if isinstance(self.options.get('environments',
                                        {}).get(self.context.env_name),
                       dict):
             for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
-                tf_cmd.extend(['-var', "%s=%s" % (key, val)])
+                env_vars["TF_VAR_%s" % key] = val
 
         if self.options.get('environments', {}).get(self.context.env_name) or (
                 workspace_tfvar_present):
@@ -216,10 +218,13 @@ class Terraform(RunwayModule):
                 self.context.env_name
             )
             if module_defined_tf_var:
-                tf_bin = TFEnv(self.path).install(module_defined_tf_var)
+                tf_bin = TFEnvManager(self.path).install(module_defined_tf_var)
             elif os.path.isfile(os.path.join(self.path,
                                              '.terraform-version')):
-                tf_bin = TFEnv(self.path).install()
+                tf_bin = TFEnvManager(self.path).install()
+            elif os.path.isfile(os.path.join(self.context.env_root,
+                                             '.terraform-version')):
+                tf_bin = TFEnvManager(self.context.env_root).install()
             else:
                 if not which('terraform'):
                     LOGGER.error('Terraform not available (a '
@@ -244,7 +249,7 @@ class Terraform(RunwayModule):
                     backend_options=backend_options,
                     env_name=self.context.env_name,
                     env_region=self.context.env_region,
-                    env_vars=self.context.env_vars
+                    env_vars=env_vars
                     )
 
                 LOGGER.debug('Checking current Terraform workspace...')
@@ -252,7 +257,7 @@ class Terraform(RunwayModule):
                     [tf_bin,
                      'workspace',
                      'show'],
-                    env=self.context.env_vars
+                    env=env_vars
                 ).strip().decode()
                 if current_tf_workspace != self.context.env_name:
                     LOGGER.info("Terraform workspace currently set to %s; "
@@ -263,14 +268,14 @@ class Terraform(RunwayModule):
                                  'workspaces...')
                     available_tf_envs = subprocess.check_output(
                         [tf_bin, 'workspace', 'list'],
-                        env=self.context.env_vars
+                        env=env_vars
                     ).decode()
                     if re.compile("^[*\\s]\\s%s$" % self.context.env_name,
                                   re.M).search(available_tf_envs):
                         run_module_command(
                             cmd_list=[tf_bin, 'workspace', 'select',
                                       self.context.env_name],
-                            env_vars=self.context.env_vars
+                            env_vars=env_vars
                         )
                     else:
                         LOGGER.info("Terraform workspace %s not found; "
@@ -279,7 +284,7 @@ class Terraform(RunwayModule):
                         run_module_command(
                             cmd_list=[tf_bin, 'workspace', 'new',
                                       self.context.env_name],
-                            env_vars=self.context.env_vars
+                            env_vars=env_vars
                         )
                     LOGGER.info('Re-running terraform init after workspace '
                                 'change...')
@@ -289,14 +294,14 @@ class Terraform(RunwayModule):
                         backend_options=backend_options,
                         env_name=self.context.env_name,
                         env_region=self.context.env_region,
-                        env_vars=self.context.env_vars
+                        env_vars=env_vars
                     )
-                if 'SKIP_TF_GET' not in self.context.env_vars:
+                if 'SKIP_TF_GET' not in env_vars:
                     LOGGER.info('Executing "terraform get" to update remote '
                                 'modules')
                     run_module_command(
                         cmd_list=[tf_bin, 'get', '-update=true'],
-                        env_vars=self.context.env_vars
+                        env_vars=env_vars
                     )
                 else:
                     LOGGER.info('Skipping "terraform get" due to '
@@ -305,8 +310,17 @@ class Terraform(RunwayModule):
                             command,
                             os.path.basename(self.path),
                             " ".join(tf_cmd))
+                if any(key.startswith('TF_VAR_') for key, _val in env_vars.items()):
+                    LOGGER.info(
+                        "With terraform variable environment variables \"%s\"",
+                        " ".join(
+                            ["%s=%s" % (key, val)
+                             for key, val in env_vars.items()
+                             if key.startswith('TF_VAR_')]
+                        )
+                    )
                 run_module_command(cmd_list=tf_cmd,
-                                   env_vars=self.context.env_vars)
+                                   env_vars=env_vars)
         else:
             response['skipped_configs'] = True
             LOGGER.info("Skipping Terraform %s of %s",

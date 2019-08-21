@@ -112,10 +112,10 @@ def merge_nested_environment_dicts(env_dicts, env_name=None, env_root=None):
     if env_name is None:
         if env_dicts.get('*'):
             return flatten_path_lists(env_dicts.get('*'), env_root)
-        raise AttributeError("Provided config key:val pairs %s aren't usable with no environment provided" % env_dicts)  # noqa pylint: disable=line-too-long
+        return {}
 
     if not env_dicts.get('*') and not env_dicts.get(env_name):
-        raise AttributeError("Provided config key:val pairs %s aren't usable with environment %s" % (env_dicts, env_name))  # noqa pylint: disable=line-too-long
+        return {}
 
     combined_dicts = merge_dicts(env_dicts.get('*', {}),
                                  env_dicts.get(env_name, {}))
@@ -217,6 +217,18 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
                     sys.exit(1)
 
 
+def md5sum(filename):
+    """Return MD5 hash of file."""
+    md5 = hashlib.md5()
+    with open(filename, 'rb') as stream:
+        while True:
+            data = stream.read(65536)  # 64kb chunks
+            if not data:
+                break
+            md5.update(data)
+    return md5.hexdigest()
+
+
 def sha256sum(filename):
     """Return SHA256 hash of file."""
     sha256 = hashlib.sha256()
@@ -225,6 +237,17 @@ def sha256sum(filename):
         for i in iter(lambda: stream.readinto(mem_view), 0):
             sha256.update(mem_view[:i])
     return sha256.hexdigest()
+
+
+def strip_leading_option_delim(args):
+    """Remove leading -- if present.
+
+    Using the "--" end of options syntax bypasses docopt's parsing of options.
+    """
+    if len(args) > 1:
+        if args[0] == '--':
+            return args[1:]
+    return args
 
 
 @contextmanager

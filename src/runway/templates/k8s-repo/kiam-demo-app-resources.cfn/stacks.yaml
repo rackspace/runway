@@ -1,0 +1,10 @@
+namespace: ${namespace}
+stacker_bucket: ""  # not needed for these small templates
+sys_path: ./
+
+stacks:
+  - name: k8s-kiam-demo-app-resources
+    template_path: templates/kiam_demo_resources.yaml
+    variables:
+      Namespace: ${namespace}
+      RoleName: k8s-${namespace}-pod-role-demo-app

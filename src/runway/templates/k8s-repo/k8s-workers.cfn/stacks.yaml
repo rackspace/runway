@@ -1,0 +1,31 @@
+namespace: ${namespace}
+stacker_bucket: ""  # not needed for these small templates
+sys_path: ./
+
+lookups:
+  bootstrap_value: local_lookups.bootstrap_value.bootstrap_value
+
+# Could specify a SSH keypair to allow access to the instances
+# pre_build:
+#   - path: stacker.hooks.keypair.ensure_keypair_exists
+#     required: true
+#     args:
+#       keypair: &keypairname mykeypairnamehere
+
+stacks:
+  - name: k8s-workers
+    template_path: templates/k8s_workers.yaml
+    variables:
+      NodeImageId: ${eks_node_image_id}
+      NodeInstanceType: ${default eks_node_instance_type::c5.large}
+      NodeInstanceProfile: ${rxref k8s-iam::NodeInstanceProfile}
+      ClusterName: ${rxref k8s-eks::EksClusterName}
+      NodeGroupName: k8s-workers
+      ClusterControlPlaneSecurityGroup: ${rxref k8s-eks::ClusterControlPlaneSecurityGroup}
+      VpcId: ${rxref k8s-eks::VpcId}
+      Subnets: ${rxref k8s-eks::Subnets}
+      UseSpotInstances: "${eks_use_spot_instances}"
+      SpotBidPrice: "${eks_spot_bid_price}"
+      BootstrapArguments: "--kubelet-extra-args '--node-labels=node-role.kubernetes.io/worker=true'"
+      UseDesiredInstanceCount: ${bootstrap_value k8s-workers::true::false}  # set ASG DesiredCount only on iniital deployment
+      # KeyName: *keypairname

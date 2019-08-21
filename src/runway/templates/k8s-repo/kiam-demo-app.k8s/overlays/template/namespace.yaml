@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-app
+  annotations:
+    # regex (not just wildcard), and name alone (i.e. not full arn) is
+    # permitted
+    iam.amazonaws.com/permitted: k8s-REPLACEMEENV-pod-role-demo-.*
+

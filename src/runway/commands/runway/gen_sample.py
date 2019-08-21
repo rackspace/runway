@@ -50,6 +50,8 @@ import os
 import shutil
 import sys
 
+from cfn_flip import to_yaml
+
 from ..runway_command import RunwayCommand
 from ...tfenv import get_latest_tf_version
 
@@ -66,6 +68,81 @@ def generate_sample_module(module_dir):
                      module_dir)
         sys.exit(1)
     os.mkdir(module_dir)
+
+
+def generate_sample_k8s_repo(env_root):
+    """Generate sample k8s infrastructure repo."""
+    repo_dir = os.path.join(env_root, 'k8s-infrastructure')
+    if os.path.isdir(repo_dir):
+        LOGGER.error("Error generating sample repo -- directory %s "
+                     "already exists!",
+                     repo_dir)
+        sys.exit(1)
+
+    from stacker.context import Context
+    from runway.blueprints.k8s.k8s_master import Cluster
+    from runway.blueprints.k8s.k8s_iam import Iam
+    from runway.blueprints.k8s.k8s_workers import NodeGroup as WorkerNodeGroup
+    from runway.blueprints.k8s.k8s_kiam_workers import NodeGroup as KiamNodeGroup
+    from runway.blueprints.k8s.kiam_demo_resources import KiamDemo
+
+    shutil.copytree(
+        os.path.join(ROOT,
+                     'templates',
+                     'k8s-repo'),
+        repo_dir
+    )
+    os.rename(os.path.join(repo_dir, '_gitignore'),
+              os.path.join(repo_dir, '.gitignore'))
+
+    # Generate masters CFN templates from blueprints
+    master_template_dir = os.path.join(repo_dir, 'k8s-master.cfn', 'templates')
+    os.mkdir(master_template_dir)
+    with open(os.path.join(master_template_dir, 'k8s_iam.yaml'), 'w') as stream:
+        stream.write(to_yaml(Iam('test',
+                                 Context({"namespace": "test"}),
+                                 None).to_json()))
+    with open(os.path.join(master_template_dir, 'k8s_master.yaml'), 'w') as stream:
+        stream.write(to_yaml(Cluster('test',
+                                     Context({"namespace": "test"}),
+                                     None).to_json()))
+
+    # Generate workers CFN template from blueprint
+    worker_template_dir = os.path.join(repo_dir,
+                                       'k8s-workers.cfn',
+                                       'templates')
+    os.mkdir(worker_template_dir)
+    with open(os.path.join(worker_template_dir,
+                           'k8s_workers.yaml'), 'w') as stream:
+        stream.write(to_yaml(WorkerNodeGroup('test',
+                                             Context({"namespace": "test"}),
+                                             None).to_json()))
+
+    # Generate kiam workers CFN template from blueprint
+    kiam_worker_template_dir = os.path.join(repo_dir,
+                                            'kiam-workers.cfn',
+                                            'templates')
+    os.mkdir(kiam_worker_template_dir)
+    with open(os.path.join(kiam_worker_template_dir,
+                           'kiam_workers.yaml'), 'w') as stream:
+        stream.write(to_yaml(KiamNodeGroup('test',
+                                           Context({"namespace": "test"}),
+                                           None).to_json()))
+
+    # Generate kiam demo app CFN template from blueprint
+    kiam_demo_template_dir = os.path.join(repo_dir,
+                                          'kiam-demo-app-resources.cfn',
+                                          'templates')
+    os.mkdir(kiam_demo_template_dir)
+    with open(os.path.join(kiam_demo_template_dir,
+                           'kiam_demo_resources.yaml'), 'w') as stream:
+        stream.write(to_yaml(KiamDemo('test',
+                                      Context({"namespace": "test"}),
+                                      None).to_json()))
+
+    LOGGER.info("Sample k8s infrastructure repo created at %s",
+                repo_dir)
+    LOGGER.info('(see its README for setup and deployment instructions)')
 
 
 def generate_sample_sls_module(env_root, module_dir=None):
@@ -325,6 +402,8 @@ class GenSample(RunwayCommand):
             generate_sample_stacker_module(self.env_root)
         elif self._cli_arguments['tf']:
             generate_sample_tf_module(self.env_root)
+        elif self._cli_arguments['k8s-repo']:
+            generate_sample_k8s_repo(self.env_root)
         elif self._cli_arguments['cdk-tsc']:
             generate_sample_cdk_tsc_module(self.env_root)
         elif self._cli_arguments['cdk-py']:

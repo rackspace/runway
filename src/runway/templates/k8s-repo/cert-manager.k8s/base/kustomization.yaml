@@ -1,0 +1,5 @@
+resources:
+  - cert-manager.yaml  # https://github.com/jetstack/cert-manager/releases/tag/v0.9.0
+  - self-signing-issuer.yaml
+  - ca-cert.yaml
+  - ca-issuer.yaml

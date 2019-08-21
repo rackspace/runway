@@ -14,24 +14,12 @@ Example:
 """
 
 import logging
-# import platform
 import sys
 
 from ..runway_command import RunwayCommand
-from ...util import get_embedded_lib_path
+from ...util import get_embedded_lib_path, strip_leading_option_delim
 
 LOGGER = logging.getLogger('runway')
-
-
-def strip_leading_option_delim(args):
-    """Remove leading -- if present.
-
-    Using the "--" end of options syntax bypasses docopt's parsing of options.
-    """
-    if len(args) > 1:
-        if args[0] == '--':
-            return args[1:]
-    return args
 
 
 class RunStacker(RunwayCommand):
@@ -45,11 +33,6 @@ class RunStacker(RunwayCommand):
             self._cli_arguments.get('<stacker-args>', [])
         )
         lib_path = get_embedded_lib_path()
-        # this shouldn't be an issue anymore
-        # if platform.system().lower() == 'windows':
-        #     # Because this will be run via subprocess, the backslashes on Windows
-        #     # will cause command errors
-        #     lib_path = lib_path.replace('\\', '/')
         sys.argv = ['stacker'] + cmd_line_args
         sys.path.insert(1, lib_path)
         from stacker.logger import setup_logging

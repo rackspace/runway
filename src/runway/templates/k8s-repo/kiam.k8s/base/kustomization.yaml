@@ -1,0 +1,5 @@
+resources:
+  - certs.yaml
+  - server.yaml  # https://github.com/uswitch/kiam/blob/master/deploy/server.yaml
+  - server-rbac.yaml  # https://github.com/uswitch/kiam/blob/master/deploy/server-rbac.yaml
+  - agent.yaml  # https://github.com/uswitch/kiam/blob/master/deploy/agent.yaml

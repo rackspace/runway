@@ -21,10 +21,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - class for handling the runway config file that warns on invalid keys
 - new top level `tests` to the runway config for user defined tests (cfn-lint, script, and yamllint)
 - alternative runway config file name `runway.yaml`
+- run-aws command (for awscli use in single-binary mode)
+- tfenv and kbenv commands (for installing terraform/kubectl prior to a runway deployment)
+- envars command (for setting shell variables from environment variables defined in runway.yml)
+- Kubernetes support (for kustomize-organized configurations)
 
 ### Removed
 - _default_ tests. trying to run the test command with no tests defined will now result in an error.
 - chef, flake8, pylint, and stacker blueprint tests (for single-binary compatibility)
+
+### Changed
+- Terraform initialization should be considerably faster via use of `init --reconfigure`
+- Updated CDK typescript sample generator to v1 syntax
+- Terraform variables from runway.yml passed as environment variables (fixes https://github.com/hashicorp/terraform/issues/19424#issuecomment-472186386)
 
 ## [0.47.1] - 2019-07-19
 ### Fixed

@@ -1,0 +1,11 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: demo-app
+  labels:
+    app: demo-app
+spec:
+  template:
+    metadata:
+      annotations:
+        iam.amazonaws.com/role: k8s-dev-pod-role-demo-app

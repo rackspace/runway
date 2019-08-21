@@ -1,0 +1,9 @@
+namePrefix: REPLACEMEENV-
+namespace: REPLACEMEENV-demo-app
+
+bases:
+  - ../../base
+patchesStrategicMerge:
+  - deployment.yaml
+resources:
+  - namespace.yaml

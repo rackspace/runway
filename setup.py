@@ -16,19 +16,23 @@ with codecs_open(join(THIS_DIR, 'README.rst'), encoding='utf-8') as readfile:
 INSTALL_REQUIRES = [
     'Send2Trash',
     'awacs',  # for embedded hooks
-    'awscli>=1.16.121<2.0'  # for embedded hooks; matching stacker requirement
+    # awscli included for embedded hooks and aws subcommand
+    # version set to match stacker requirement and include awscli fix #4182
+    'awscli>=1.16.191<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
     'boto3>=1.9.111<2.0'  # matching stacker requirement
     'PyYAML~=3.13',  # matching awscli requirement
     'cfn_flip<=1.2.0',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
+    'requests',
     'future',
     # embedded pyhcl is 0.3.12
     # with the LICENSE file added to its root folder
     # and the following patches applied
     # https://github.com/virtuald/pyhcl/pull/57
     'pyhcl~=0.3',
+    'pyOpenSSL',  # For embedded hook & associated script usage
     'six',
     'typing',
     'yamllint',

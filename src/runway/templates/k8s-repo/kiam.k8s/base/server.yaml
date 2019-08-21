@@ -1,0 +1,116 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  namespace: kube-system
+  name: kiam-server
+spec:
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9620"
+      labels:
+        app: kiam
+        role: server
+    spec:
+      serviceAccountName: kiam-server
+      nodeSelector:
+        node-role.kubernetes.io/kiam-server: "true"
+      tolerations:
+        - key: "kiam-server"
+          operator: "Equal"        
+          value: "false"        
+          effect: "NoExecute"
+        # kops master nodes requires this tolerations
+        # - key: "node-role.kubernetes.io/master"
+        #   effect: "NoSchedule"
+        #   operator: "Exists"        
+      volumes:
+        - name: ssl-certs
+          hostPath:
+            # for AWS linux or RHEL distros
+            path: /etc/pki/ca-trust/extracted/pem/
+            # debian or ubuntu distros
+            # path: /etc/ssl/certs
+            # default
+            # path: /usr/share/ca-certificates
+        - name: tls
+          secret:
+            secretName: kiam-server-tls
+      containers:
+        - name: kiam
+          image: quay.io/uswitch/kiam:v3.4
+          imagePullPolicy: Always
+          command:
+            - /kiam
+          args:
+            - server
+            - --json-log
+            - --level=warn
+            - --bind=0.0.0.0:443
+            # - --cert=/etc/kiam/tls/server.pem
+            # - --key=/etc/kiam/tls/server-key.pem
+            # - --ca=/etc/kiam/tls/ca.pem
+            - &certopt --cert=/etc/kiam/tls/tls.crt
+            - &keyopt --key=/etc/kiam/tls/tls.key
+            - &caopt --ca=/etc/kiam/tls/ca.crt
+            - --role-base-arn-autodetect
+            - --sync=1m
+            - --prometheus-listen-addr=0.0.0.0:9620
+            - --prometheus-sync-interval=5s
+          volumeMounts:
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs
+            - mountPath: /etc/kiam/tls
+              name: tls
+          resources:
+            requests:
+              cpu: 500m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command:
+                - /kiam
+                - health
+                - *certopt
+                - *keyopt
+                - *caopt
+                - --server-address=127.0.0.1:443
+                - --gateway-timeout-creation=1s
+                - --timeout=5s
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - /kiam
+                - health
+                - *certopt
+                - *keyopt
+                - *caopt
+                - --server-address=127.0.0.1:443
+                - --gateway-timeout-creation=1s
+                - --timeout=5s
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiam-server
+  namespace: kube-system
+spec:
+  clusterIP: None
+  selector:
+    app: kiam
+    role: server
+  ports:
+    - name: grpclb
+      port: 443
+      targetPort: 443
+      protocol: TCP
