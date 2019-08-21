@@ -12,6 +12,6 @@ python:
 install:
   - "pip install Send2Trash awacs 'awscli<1.16.0' docopt flake8 \
      flake8-docstrings pep8-naming future pyhcl pylint typing yamllint \
-     zgitignore 'stacker~=1.4' 'botocore<1.11.0' 'boto3~=1.7.0' pylint \
-     'pydocstyle<=3.0.0'"
+     zgitignore 'stacker~=1.7' 'botocore<1.11.0' 'boto3~=1.7.0' pylint \
+     'pydocstyle<=3.0.0' cfn-lint"
 script: make travis

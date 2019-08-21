@@ -36,13 +36,6 @@ version of Terraform specified in your module.
 
 Use it just like the terraform command (e.g. ``tf-runway plan``).
 
-cfn-lint
-========
-If a ``.cfnlintrc`` file is placed alongside an environment's ``runway.yml``, ``cfn-lint`` will be invoked
-automatically during ``runway test`` a.k.a. ``preflight``.
-
-Specify the templates to be included via the `config file. <https://github.com/awslabs/cfn-python-lint#config-file>`_
-
 Runway Plugin Support
 =====================
 Need to expand runway to wrap other tools? Yes - you can do that with Runway Plugin Support.
