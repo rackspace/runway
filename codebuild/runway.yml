@@ -1,0 +1,13 @@
+---
+
+deployments:
+  - modules:
+    - ./
+    regions: 
+      - us-east-1
+    environments:
+      dev:
+        namespace: dev
+        environment: dev
+
+ignore_git_branch: true

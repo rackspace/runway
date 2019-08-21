@@ -1,0 +1,6 @@
+---
+deployments:
+  - modules:
+    - terraform_test.tf
+    regions:
+      - us-east-1

@@ -1,5 +1,4 @@
 """Terraform module."""
-import glob
 import logging
 import os
 import re
@@ -10,13 +9,11 @@ import boto3
 from send2trash import send2trash
 import six
 
-# embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
-from runway.embedded import hcl
 from . import RunwayModule, run_module_command
 from ..tfenv import TFEnv
 from ..util import (
     change_dir, extract_boto_args_from_env, find_cfn_output,
-    merge_dicts, merge_nested_environment_dicts, which
+    merge_nested_environment_dicts, which
 )
 
 FAILED_INIT_FILENAME = '.init_failed'
@@ -113,81 +110,11 @@ def get_workspace_tfvars_file(path, environment, region):
     return "%s.tfvars" % environment  # fallback to generic name
 
 
-def reinit_on_backend_changes(tf_bin,  # pylint: disable=too-many-arguments
-                              module_path, backend_options, env_name,
-                              env_region, env_vars):
-    """Clean terraform directory and run init if necessary.
-
-    If deploying a TF module to multiple regions (or any scenario requiring
-    multiple backend configs), switching the backend will cause TF to
-    compare the old and new backends. This will frequently cause an access
-    error as the creds/role for the new backend won't always have access to
-    the old one.
-
-    This method compares the defined & initialized backend configs and
-    trashes the terraform directory & re-inits if they're out of sync.
-    """
-    terraform_dir = os.path.join(module_path, '.terraform')
-    local_tfstate_path = os.path.join(terraform_dir, 'terraform.tfstate')
-    current_backend_config = {}
-    desired_backend_config = {}
-
-    LOGGER.debug('Comparing previous & desired Terraform backend configs')
-    if os.path.isfile(local_tfstate_path):
-        with open(local_tfstate_path, 'r') as stream:
-            current_backend_config = hcl.load(stream).get('backend',
-                                                          {}).get('config',
-                                                                  {})
-
-    if backend_options.get('config'):
-        desired_backend_config = backend_options.get('config')
-    elif os.path.isfile(os.path.join(module_path,
-                                     backend_options.get('filename'))):
-        with open(os.path.join(module_path,
-                               backend_options.get('filename')),
-                  'r') as stream:
-            desired_backend_config = hcl.load(stream)
-
-    # Can't solely rely on the backend info defined in runway options or
-    # backend files; merge in the values defined in main.tf
-    # (or whatever tf file)
-    for filename in ['main.tf'] + glob.glob(os.path.join(module_path, '*.tf')):
-        LOGGER.debug('parsing for backend: %s', filename)
-        try:
-            if os.path.isfile(filename):
-                with open(filename, 'r') as stream:
-                    tf_config = hcl.load(stream)
-                    if tf_config.get('terraform', {}).get('backend'):
-                        [(_s3key, tffile_backend_config)] = tf_config['terraform']['backend'].items()  # noqa pylint: disable=line-too-long
-                        desired_backend_config = merge_dicts(
-                            desired_backend_config,
-                            tffile_backend_config
-                        )
-                        break
-        except ValueError:
-            LOGGER.warning('Could not parse %s for backend configuration',
-                           filename)
-
-    if current_backend_config != desired_backend_config:
-        LOGGER.info("Desired and previously initialized TF backend config is "
-                    "out of sync; trashing local TF state directory %s",
-                    terraform_dir)
-        send2trash(terraform_dir)
-        run_terraform_init(
-            tf_bin=tf_bin,
-            module_path=module_path,
-            backend_options=backend_options,
-            env_name=env_name,
-            env_region=env_region,
-            env_vars=env_vars
-        )
-
-
 def run_terraform_init(tf_bin,  # pylint: disable=too-many-arguments
                        module_path, backend_options, env_name, env_region,
                        env_vars):
     """Run Terraform init."""
-    init_cmd = [tf_bin, 'init']
+    init_cmd = [tf_bin, 'init', '-reconfigure']
     cmd_opts = {'env_vars': env_vars, 'exit_on_error': False}
 
     if backend_options.get('config'):
@@ -288,37 +215,21 @@ class Terraform(RunwayModule):
                 tf_bin = 'terraform'
             tf_cmd.insert(0, tf_bin)
             with change_dir(self.path):
-                if not os.path.isdir(os.path.join(self.path, '.terraform')) or (  # noqa
-                        os.path.isfile(os.path.join(self.path,
-                                                    '.terraform',
-                                                    FAILED_INIT_FILENAME))):
-                    if os.path.isfile(os.path.join(self.path,
-                                                   '.terraform',
-                                                   FAILED_INIT_FILENAME)):
-                        LOGGER.info('Previous init failed; trashing '
-                                    '.terraform directory and running it '
-                                    'again...')
-                        send2trash(os.path.join(self.path, '.terraform'))
-                    else:
-                        LOGGER.info('.terraform directory missing; running '
-                                    '"terraform init"...')
-                    run_terraform_init(
-                        tf_bin=tf_bin,
-                        module_path=self.path,
-                        backend_options=backend_options,
-                        env_name=self.context.env_name,
-                        env_region=self.context.env_region,
-                        env_vars=self.context.env_vars
+                if os.path.isfile(os.path.join(self.path, '.terraform', FAILED_INIT_FILENAME)):
+                    LOGGER.info('Previous init failed; trashing '
+                                '.terraform directory...')
+                    send2trash(os.path.join(self.path, '.terraform'))
+
+                LOGGER.info('Running "terraform init"...')
+                run_terraform_init(
+                    tf_bin=tf_bin,
+                    module_path=self.path,
+                    backend_options=backend_options,
+                    env_name=self.context.env_name,
+                    env_region=self.context.env_region,
+                    env_vars=self.context.env_vars
                     )
-                else:
-                    reinit_on_backend_changes(
-                        tf_bin=tf_bin,
-                        module_path=self.path,
-                        backend_options=backend_options,
-                        env_name=self.context.env_name,
-                        env_region=self.context.env_region,
-                        env_vars=self.context.env_vars
-                    )
+
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(
                     [tf_bin,
