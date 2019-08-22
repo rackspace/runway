@@ -1,7 +1,0 @@
-deployments:
-  - modules:
-      - path: sampleapp.cfn
-    regions:
-      - us-west-2
-    account-id:
-      dev: test

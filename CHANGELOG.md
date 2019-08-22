@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - run-python & run-stacker commands (for single-binary compatibility)
+-  class for handling the runway config file
+-  new top level `tests` to the runway config for user defined tests (cfn-lint, script, and yamllint)
+-  alternative runway config file name `runway.yaml`
 - Custom error responses support for static sites
 - `--tag <tag>...` option for deploy/destroy
     - select modules based on a list of tags applied in the runway file (ex. `deployments[].modules[].tags[]`)
@@ -22,14 +25,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - _default_ tests. trying to run the test command with no tests defined will now result in an error.
 - chef, flake8, pylint, and stacker blueprint tests (for single-binary compatibility)
-
-## [0.48.0] - 2019-08-21
-### Added
--  run-stacker command (for single-binary compatibility)
--  class for handling the runway config file
--  new top level `tests` to the runway config for user defined tests (cfn-lint, script, and yamllint)
--  alternative runway config file name `runway.yaml`
-
 
 ## [0.47.1] - 2019-07-19
 ### Fixed

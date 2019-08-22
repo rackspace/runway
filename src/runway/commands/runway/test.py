@@ -4,7 +4,7 @@ import sys
 import traceback
 
 from ..base_command import BaseCommand
-from ...tests.regestry import TEST_HANDLERS
+from ...tests.registry import TEST_HANDLERS
 
 LOGGER = logging.getLogger('runway')
 
