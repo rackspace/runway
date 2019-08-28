@@ -1,14 +1,17 @@
 Installation
 ============
 
-Installing Runway 
+Installing Runway
 ^^^^^^^^^^^^^^^^^
 
-Runway runs on Python 2.7 and Python 3.5+.
+Runway runs on Python 2.7 and Python 3.5+. It is also packaged as a
+single-binary bundled with python for distribution through non-python
+package managers.
 
-Runway is hosted on PyPI as the package named ``runway``. It can be installed
-like any other Python package, but we instead strongly recommend using it
-per-project with `pipenv <https://pypi.org/project/pipenv/>`_.
+Runway is hosted on PyPI and npm as the package named ``runway``.
+It can be installed like any other Python or Node package.
+We strongly recommend locking the version per-project.
+For Python, this can be done with `pipenv <https://pypi.org/project/pipenv/>`_.
 
 
 Version Locking with Pipenv

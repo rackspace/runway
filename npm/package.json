@@ -1,0 +1,50 @@
+{
+  "name": "undefined",
+  "description": "Simplify infrastructure/app testing/deployment",
+  "main": "NA",
+  "scripts": {
+    "postinstall": "node ./postinstall.js",
+    "preuninstall": "node ./preuninstall.js"
+  },
+  "files": [
+    "src/osx/*",
+    "src/linux/*",
+    "src/windows/*",
+    "postinstall.js",
+    "preuninstall.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onicagroup/runway"
+  },
+  "keywords": [
+    "aws",
+    "ci",
+    "cd",
+    "cli",
+    "test",
+    "tool",
+    "serverless",
+    "terraform",
+    "cloudformation",
+    "cdk"
+  ],
+  "author": {
+    "name": "Onica Group LLC",
+    "email": "opensource@onica.com",
+    "url": "https://onica.com"
+  },
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/onicagroup/runway/issues"
+  },
+  "homepage": "https://github.com/onicagroup/runway",
+  "os": ["darwin", "linux", "win32"],
+  "version": "0.0.0"
+}

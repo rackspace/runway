@@ -7,8 +7,12 @@ Getting Started
   :ref:`repo-structure` )
 - Execute ``runway init`` to create a ``runway.yml`` file at the root of the
   environment (e.g. at the repo root)
+    - If runway was installed from npm, you many need to add
+      ``$projectdir/node_modules/bin`` to your ``PATH`` or supply the
+      relative path to use the runway CLI.
 - Define per-environment config options/enablement for each module (see
   :ref:`runway-config` & :ref:`module-configurations` )
+
 
 Basic Deployment Commands
 ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -32,7 +32,7 @@ INSTALL_REQUIRES = [
     'pyhcl~=0.3',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'six',
-    'typing',
+    'typing;python_version<"3.5"',
     'yamllint',
     'zgitignore',  # for embedded hooks
     # embedded stacker is v1.7.0

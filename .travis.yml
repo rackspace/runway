@@ -1,20 +1,122 @@
 ---
-language: python
+stages:
+  - test
+  # build is only run for PRs, tags, or if fork is configured.
+  # PRs skip uploading artifacts since we just want to ensure
+  # they can be properly built.
+  - name: build
+    if: |
+      type == pull_request OR \
+      tag IS present OR \
+      env(FORKED) == true
+  - name: deploy
+    if: tag IS present OR env(FORKED) == true
+
+language: python  # this works for Linux but is an error on macOS or Windows
+
+jobs:
+  include:
+    - name: "Python 2.7 Compatibility Test"
+      stage: test
+      python: 2.7
+      env: PIP=pip PYTHON_VERSION=2.7
+      script: make travistest clean
+    - name: "Python 3.5 Compatibility Test"
+      stage: test
+      python: 3.5
+      env: PIP=pip3 PYTHON_VERSION=3.5
+      script: make travistest clean
+    - name: "Python 3.6 Compatibility Test"
+      stage: test
+      python: 3.6
+      env: PIP=pip3 PYTHON_VERSION=3.6
+      script: make travistest clean
+    - name: "Python 3.7 Compatibility Test"
+      stage: test
+      python: 3.7
+      env: PIP=pip3 PYTHON_VERSION=3.7
+      script: make travistest clean
+    - name: "Python 3.7 Linux Build"
+      stage: build
+      python: 3.7
+      env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
+      script: make travisbuild
+    - name: "Python 3.7 macOS Build"
+      stage: build
+      os: osx
+      osx_image: xcode11  # Python 3.7.4 running on macOS 10.14.4
+      language: shell  # 'language: python' is an error on Travis CI macOS
+      env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
+      script: make travisbuild
+    - name: "Python 3.7 Windows Build"
+      stage: build
+      os: windows  # Windows 10.0.17134 N/A Build 17134
+      language: shell  # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python make sed pandoc jq
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
+      script: make travisbuild
+    - name: Publish
+      stage: deploy
+      python: 3.7
+      env: PIP=pip3 PYTHON_VERSION=3.7 PUBLISH=true
+      script:
+        # wrapped in if statement so it does not fail the build if env vars are not set yet
+        - |
+          if [ ! -z "${AWS_ACCESS_KEY_ID}" ]; then
+            pip install awscli
+            make npm_prep
+            aws s3 sync s3://${AWS_BUCKET}/${AWS_BUCKET_PREFIX}/$(cat tmp/version.txt) ./src/ --exclude "*pypi/*"
+            chmod -R +x ./src/osx ./src/linux ./src/windows
+          else
+            echo "Unable to find the required environment variable."
+            exit 0
+          fi
+
 addons:
   apt:
     packages:
       - pandoc
       - sed
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
+  homebrew:
+    packages:
+      - pandoc
+      - jq
+
 install:
-  # astroid & pylint pinned back to fix
-  # https://github.com/PyCQA/pylint/issues/3134
-  - "pip install Send2Trash awacs 'awscli<1.16.0' docopt flake8 \
-     flake8-docstrings pep8-naming future 'mock~=3.0.5' pyhcl pyOpenSSL \
-     'pylint<=2.3.1' requests typing yamllint zgitignore 'stacker~=1.7' \
-     'botocore<1.11.0' 'boto3~=1.7.0' 'pydocstyle<=3.0.0' cfn-lint \
-     'astroid<=2.2.0'"
-script: make travis
+  - ./.travis/install.sh
+
+deploy:
+  # used more for build artifact storage than "deploying"
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $AWS_BUCKET
+    skip_cleanup: true
+    acl: public_read
+    region: $AWS_DEFAULT_REGION
+    local-dir: "artifacts/"
+    upload-dir: $AWS_BUCKET_PREFIX
+    on:
+      # This condition allows for onicagroup/runway to only supply AWS environment
+      # variables on select branches that should be used for deployment of build
+      # artifacts.
+      # Forks are welcome to set these environment variables in their own travis-ci
+      # environment to use their own AWS account during development. Forks that
+      # wish to use this must create and environment variable "FORKED=true".
+      all_branches: true
+      condition: $DEPLOY = true && ${AWS_ACCESS_KEY_ID:?} && ${AWS_SECRET_ACCESS_KEY:?} && ("${TRAVIS_TAG:-undefined}" != "undefined" || ${FORKED} = true)
+
+  - provider: npm
+    email: $NPM_EMAIL
+    api_key: $NPM_API_KEY
+    skip_cleanup: true
+    on:
+      # This condition allows for onicagroup/runway to only supply AWS environment
+      # variables on select branches that should be used for deployment of build
+      # artifacts.
+      # Forks are welcome to set these environment variables in their own travis-ci
+      # environment to use their own AWS account during development. Forks that
+      # wish to use this must create and environment variable "FORKED=true".
+      all_branches: true
+      condition: $PUBLISH = true && ${AWS_ACCESS_KEY_ID:?} && ${AWS_SECRET_ACCESS_KEY:?} && ${NPM_API_KEY:?}
