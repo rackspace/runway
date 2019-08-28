@@ -10,7 +10,7 @@ awscli = ">=1.16.191<2.0"
 docopt = "*"
 future = "*"
 pyhcl = "*"
-typing = "*"
+typing = {version = "~= 3.7",markers = "python_version < '3.6'"}
 yamllint = "*"
 zgitignore = "*"
 stacker = "~=1.6"
@@ -31,5 +31,8 @@ pep8-naming = "*"
 flake8-docstrings = "*"
 flake8 = "*"
 pylint = "*"
-pyinstaller = "*"
+pyinstaller = "~=3.5"
 mock = "~=3.0.5"
+pywin32 = {version = "*", os_name = "== 'nt'"}  # windows only
+pywin32-ctypes = {version = "*", os_name = "== 'nt'"}  # windows only
+pefile = {version = "*", os_name = "== 'nt'"}  # windows only

@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - envvars command (for setting shell variables from environment variables defined in runway.yml)
 - Kubernetes support (for kustomize-organized configurations)
 - Parallel module execution
+- single-binary build and the pipeline to support it
 
 ### Removed
 - _default_ tests. trying to run the test command with no tests defined will now result in an error.

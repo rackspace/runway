@@ -13,3 +13,14 @@ src/runway/templates/terraform/.terraform-version
 node_modules
 .serverless
 .venv
+# paths usind during build
+src/osx
+src/linux
+src/windows
+tmp/*
+artifacts/*
+# npm files copied and modified at runtime
+.npmignore
+package.json
+postinstall.js
+preuninstall.js
