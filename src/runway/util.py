@@ -212,7 +212,8 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
             else:
                 try:
                     check_call(command_list, env=env)
-                except FileNotFoundError:  # noqa: F821
+                # The noqa/pylint overrides can be dropped alongside python 2
+                except FileNotFoundError:  # noqa pylint: disable=undefined-variable
                     print(failed_to_find_error, file=sys.stderr)
                     sys.exit(1)
 
