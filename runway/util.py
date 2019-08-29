@@ -212,7 +212,7 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
             else:
                 try:
                     check_call(command_list, env=env)
-                except FileNotFoundError:
+                except FileNotFoundError:  # noqa: F821
                     print(failed_to_find_error, file=sys.stderr)
                     sys.exit(1)
 
