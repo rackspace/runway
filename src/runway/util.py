@@ -253,8 +253,8 @@ def which(program):
         return exts.split(';')
 
     fpath, fname = os.path.split(program)
-    fname, ext = os.path.splitext(program)
-    if not ext and platform.system().lower() == 'windows':
+    fname, file_ext = os.path.splitext(program)
+    if not file_ext and platform.system().lower() == 'windows':
         fnames = [fname + ext for ext in get_extensions()]
     else:
         fnames = [fname]
