@@ -173,8 +173,7 @@ def fix_windows_command_list(commands):
     a windows-only suffix applied to them
     """
     fully_qualified_cmd_path = which(commands[0])
-    if fully_qualified_cmd_path and (
-            not which(commands[0], add_win_suffixes=False)):
+    if fully_qualified_cmd_path:
         commands[0] = os.path.basename(fully_qualified_cmd_path)
     return commands
 
