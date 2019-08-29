@@ -200,6 +200,9 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
         if platform.system().lower() == 'windows':
             command_list = fix_windows_command_list(command_list)
 
+        if not which(command_list[0]):
+            raise OSError('"{0}" not found. Are you sure "{0}" is installed and added to your PATH?'.format(command_list[0]))
+
         with change_dir(execution_dir):
             check_call(command_list, env=env)
 
