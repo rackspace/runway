@@ -173,8 +173,7 @@ def fix_windows_command_list(commands):
     a windows-only suffix applied to them
     """
     fully_qualified_cmd_path = which(commands[0])
-    if fully_qualified_cmd_path and (
-            not which(commands[0], add_win_suffixes=False)):
+    if fully_qualified_cmd_path:
         commands[0] = os.path.basename(fully_qualified_cmd_path)
     return commands
 
@@ -200,6 +199,9 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
         command_list = raw_command.split(' ') if isinstance(raw_command, six.string_types) else raw_command  # noqa pylint: disable=line-too-long
         if platform.system().lower() == 'windows':
             command_list = fix_windows_command_list(command_list)
+
+        if not which(command_list[0]):
+            raise OSError('"{0}" not found. Are you sure "{0}" is installed and added to your PATH?'.format(command_list[0]))  # noqa pylint: disable=line-too-long
 
         with change_dir(execution_dir):
             check_call(command_list, env=env)
@@ -232,7 +234,7 @@ def use_embedded_pkgs(embedded_lib_path=None):
         sys.path = old_sys_path
 
 
-def which(program, add_win_suffixes=True):
+def which(program):
     """Mimic 'which' command behavior.
 
     Adapted from https://stackoverflow.com/a/377028
@@ -241,10 +243,19 @@ def which(program, add_win_suffixes=True):
         """Determine if program exists and is executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
+    def get_extensions():
+        """Get PATHEXT if the exist, otherwise use default."""
+        exts = ['.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC']
+
+        if os.environ.get('PATHEXT', []):
+            exts = os.environ['PATHEXT']
+
+        return exts.split(';')
+
     fpath, fname = os.path.split(program)
-    if add_win_suffixes and platform.system().lower() == 'windows' and not (
-            fname.endswith('.exe') or fname.endswith('.cmd')):
-        fnames = [fname + '.exe', fname + '.cmd']
+    fname, file_ext = os.path.splitext(program)
+    if not file_ext and platform.system().lower() == 'windows':
+        fnames = [fname + ext for ext in get_extensions()]
     else:
         fnames = [fname]
 
