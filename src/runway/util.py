@@ -234,7 +234,7 @@ def use_embedded_pkgs(embedded_lib_path=None):
         sys.path = old_sys_path
 
 
-def which(program, add_win_suffixes=True):
+def which(program):
     """Mimic 'which' command behavior.
 
     Adapted from https://stackoverflow.com/a/377028
@@ -243,10 +243,19 @@ def which(program, add_win_suffixes=True):
         """Determine if program exists and is executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
+    def get_extensions():
+        """Get PATHEXT if the exist, otherwise use default."""
+        exts = ['.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC']
+
+        if os.environ.get('PATHEXT', []):
+            exts = os.environ['PATHEXT']
+
+        return exts.split(';')
+
     fpath, fname = os.path.split(program)
-    if add_win_suffixes and platform.system().lower() == 'windows' and not (
-            fname.endswith('.exe') or fname.endswith('.cmd')):
-        fnames = [fname + '.exe', fname + '.cmd']
+    fname, ext = os.path.splitext(program)
+    if not ext and platform.system().lower() == 'windows':
+        fnames = [fname + ext for ext in get_extensions()]
     else:
         fnames = [fname]
 
