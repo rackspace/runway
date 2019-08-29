@@ -9,20 +9,20 @@ quickly evaluate Runway without installing anything a number of resources are
 available:
 
 - A `CloudFormation template
-<https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml>`_:
-This is probably the easiest and quickest way to go from "zero to Runway" as it
-allows for using an IAM Role eliminate the need to configure API keys. The
-template will deploy your preference of Linux or Windows Runway host. Windows
-Runway host includes vsCode, which some users may find easier for manipulating
-Runway config files.
+  <https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml>`_:
+  This is probably the easiest and quickest way to go from "zero to Runway"
+  as it allows for using an IAM Role eliminate the need to configure API keys.
+  The template will deploy your preference of Linux or Windows Runway host.
+  Windows Runway host includes vsCode, which some users may find easier for
+  manipulating Runway config files.
 - A `Dockerfile
-<https://github.com/onicagroup/runway/blob/master/quickstarts/runway/Dockerfile>`_:
-Docker users can build their own Docker image to run a local Runway container,
-or modify the Dockerfile to build a Runway image to suit specific needs.
-Requires an AWS Access/Secret keypair to use Runway.
+  <https://github.com/onicagroup/runway/blob/master/quickstarts/runway/Dockerfile>`_:
+  Docker users can build their own Docker image to run a local Runway
+  container, or modify the Dockerfile to build a Runway image to suit specific
+  needs. Requires an AWS Access/Secret keypair to use Runway.
 - A prebuilt Docker image: Docker users can run the following to spin up a
-local Docker Runway container. Requires an AWS Access/Secret keypair to use
-Runway.
+  local Docker Runway container. Requires an AWS Access/Secret keypair to use
+  Runway.
 
 ``$ docker run -it --rm onica/runway-quickstart``
 
