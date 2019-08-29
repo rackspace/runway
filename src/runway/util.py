@@ -200,11 +200,21 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
         if platform.system().lower() == 'windows':
             command_list = fix_windows_command_list(command_list)
 
-        if not which(command_list[0]):
-            raise OSError('"{0}" not found. Are you sure "{0}" is installed and added to your PATH?'.format(command_list[0]))  # noqa pylint: disable=line-too-long
-
         with change_dir(execution_dir):
-            check_call(command_list, env=env)
+            failed_to_find_error = "Attempted to run \"%s\" and failed to find it (are you sure it is installed and added to your PATH?)" % command_list[0]  # noqa pylint: disable=line-too-long
+            if sys.version_info[0] < 3:
+                # Legacy exception version for python 2
+                try:
+                    check_call(command_list, env=env)
+                except OSError:
+                    print(failed_to_find_error, file=sys.stderr)
+                    sys.exit(1)
+            else:
+                try:
+                    check_call(command_list, env=env)
+                except FileNotFoundError:
+                    print(failed_to_find_error, file=sys.stderr)
+                    sys.exit(1)
 
 
 def sha256sum(filename):

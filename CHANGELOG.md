@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fix cross-platform subprocess execution (e.g. yarn specified without a file extension in staticsite build_steps)
+- Better error messages for subprocess commands that fail to run
+
 ### Added
 - run-python & run-stacker commands (for single-binary compatibility)
 
