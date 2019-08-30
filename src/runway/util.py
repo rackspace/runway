@@ -246,10 +246,7 @@ def use_embedded_pkgs(embedded_lib_path=None):
 
 
 def which(program):
-    """Mimic 'which' command behavior.
-
-    Adapted from https://stackoverflow.com/a/377028
-    """
+    """Mimic 'which' command behavior."""
     def is_exe(fpath):
         """Determine if program exists and is executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -277,7 +274,7 @@ def which(program):
             if is_exe(exe_file):
                 return exe_file
         else:
-            for path in os.environ['PATH'].split(os.pathsep):
+            for path in os.environ.get('PATH').split(os.pathsep) if 'PATH' in os.environ else [os.getcwd()]:  # noqa pylint: disable=line-too-long
                 exe_file = os.path.join(path, i)
                 if is_exe(exe_file):
                     return exe_file
