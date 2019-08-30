@@ -32,14 +32,14 @@ if (os.platform() === 'darwin') {
   osName = os.platform();
 }
 
-fs.mkdirSync(`${basepath}/bin`, { recursive: true });
+fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
 
 if (os.platform() !== 'win32') {
   // create symlink in bin to the appropriate runway binary
-  symLink(`${moduleDir}/${osName}/runway`, `${basepath}/bin/runway`);
+  symLink(`${moduleDir}/${osName}/runway`, `${basepath}/.bin/runway`);
 } else {
   // windows does not play nice with a symlink of an exe
-  fs.copyFile(`${__dirname}/src/windows/runway.exe`, path.resolve(__dirname, '../bin/runway.exe'), (err, data) => {
+  fs.copyFile(`${__dirname}/src/windows/runway.exe`, path.resolve(__dirname, '../.bin/runway.exe'), (err, data) => {
     if (err) throw err;
   });
 }

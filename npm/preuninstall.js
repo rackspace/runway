@@ -10,7 +10,7 @@ if (os.platform() === 'win32') {
 }
 
 // remove symlink/exe from bin created by postinstall script
-fs.unlink(path.resolve(__dirname, `../bin/${runwayExe}`), (err, data) => {
+fs.unlink(path.resolve(__dirname, `../.bin/${runwayExe}`), (err, data) => {
   if (err) {
     // ignore file/dir missing
     if (err.code !== 'ENOENT') {
