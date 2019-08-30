@@ -10,7 +10,7 @@ awscli = ">=1.16.191<2.0"
 docopt = "*"
 future = "*"
 pyhcl = "*"
-typing = {version = "~= 3.7",markers = "python_version < '3.6'"}
+typing = {version = "~= 3.7",markers = "python_version < '3.5'"}
 yamllint = "*"
 zgitignore = "*"
 stacker = "~=1.6"
