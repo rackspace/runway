@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.47.3] - 2019-08-30
+### Fixed
+- Additional fixes for v0.47.2 cross-platform subprocess execution (ensure specified paths/extensions work as expected)
+
 ## [0.47.2] - 2019-08-29
 ### Fixed
 - Fix cross-platform subprocess execution (e.g. yarn specified without a file extension in staticsite build_steps)
