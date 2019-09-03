@@ -88,15 +88,19 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                   'description': '(Optional) File name to '
                                                  'append to directory '
                                                  'requests.'},
+        'WAFWebACL': {'type': CFNString,
+                      'default': '',
+                      'description': '(Optional) WAF id to associate with the '
+                                     'distribution.'},
+        'custom_error_responses': {'type': list,
+                                   'default': [],
+                                   'description': '(Optional) Custom error '
+                                                  'responses.'},
         'lambda_function_associations': {'type': list,
                                          'default': [],
                                          'description': '(Optional) Lambda '
                                                         'function '
                                                         'assocations.'},
-        'WAFWebACL': {'type': CFNString,
-                      'default': '',
-                      'description': '(Optional) WAF id to associate with the '
-                                     'distribution.'}
     }
 
     def create_template(self):
@@ -284,68 +288,80 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 NoValue
             )
 
+        cf_dist_opts = {
+            'Aliases': If(
+                'AliasesSpecified',
+                variables['Aliases'].ref,
+                NoValue
+            ),
+            'Origins': [
+                get_cf_origin_class()(
+                    DomainName=Join(
+                        '.',
+                        [bucket.ref(),
+                         's3.amazonaws.com']),
+                    S3OriginConfig=get_s3_origin_conf_class()(
+                        OriginAccessIdentity=Join(
+                            '',
+                            ['origin-access-identity/cloudfront/',
+                             oai.ref()])
+                    ),
+                    Id='S3Origin'
+                )
+            ],
+            'DefaultCacheBehavior': cloudfront.DefaultCacheBehavior(
+                AllowedMethods=['GET', 'HEAD'],
+                Compress=False,
+                DefaultTTL='86400',
+                ForwardedValues=cloudfront.ForwardedValues(
+                    Cookies=cloudfront.Cookies(Forward='none'),
+                    QueryString=False,
+                ),
+                LambdaFunctionAssociations=lambda_function_associations,
+                TargetOriginId='S3Origin',
+                ViewerProtocolPolicy='redirect-to-https'
+            ),
+            'DefaultRootObject': 'index.html',
+            'Logging': If(
+                'CFLoggingEnabled',
+                cloudfront.Logging(
+                    Bucket=Join('.',
+                                [variables['LogBucketName'].ref,
+                                 's3.amazonaws.com'])
+                ),
+                NoValue
+            ),
+            'PriceClass': variables['PriceClass'].ref,
+            'Enabled': True,
+            'WebACLId': If(
+                'WAFNameSpecified',
+                variables['WAFWebACL'].ref,
+                NoValue
+            ),
+            'ViewerCertificate': If(
+                'AcmCertSpecified',
+                cloudfront.ViewerCertificate(
+                    AcmCertificateArn=variables['AcmCertificateArn'].ref,
+                    SslSupportMethod='sni-only'
+                ),
+                NoValue
+            )
+        }
+
+        # If custom error responses defined, use them
+        if variables['custom_error_responses']:
+            cf_dist_opts['CustomErrorResponses'] = [
+                cloudfront.CustomErrorResponse(
+                    **x
+                ) for x in variables['custom_error_responses']
+            ]
+
         cfdistribution = template.add_resource(
             get_cf_distribution_class()(
                 'CFDistribution',
                 DependsOn=allowcfaccess.title,
                 DistributionConfig=get_cf_distro_conf_class()(
-                    Aliases=If(
-                        'AliasesSpecified',
-                        variables['Aliases'].ref,
-                        NoValue
-                    ),
-                    Origins=[
-                        get_cf_origin_class()(
-                            DomainName=Join(
-                                '.',
-                                [bucket.ref(),
-                                 's3.amazonaws.com']),
-                            S3OriginConfig=get_s3_origin_conf_class()(
-                                OriginAccessIdentity=Join(
-                                    '',
-                                    ['origin-access-identity/cloudfront/',
-                                     oai.ref()])
-                            ),
-                            Id='S3Origin'
-                        )
-                    ],
-                    DefaultCacheBehavior=cloudfront.DefaultCacheBehavior(
-                        AllowedMethods=['GET', 'HEAD'],
-                        Compress=False,
-                        DefaultTTL='86400',
-                        ForwardedValues=cloudfront.ForwardedValues(
-                            Cookies=cloudfront.Cookies(Forward='none'),
-                            QueryString=False,
-                        ),
-                        LambdaFunctionAssociations=lambda_function_associations,  # noqa
-                        TargetOriginId='S3Origin',
-                        ViewerProtocolPolicy='redirect-to-https'
-                    ),
-                    DefaultRootObject='index.html',
-                    Logging=If(
-                        'CFLoggingEnabled',
-                        cloudfront.Logging(
-                            Bucket=Join('.',
-                                        [variables['LogBucketName'].ref,
-                                         's3.amazonaws.com'])
-                        ),
-                        NoValue
-                    ),
-                    PriceClass=variables['PriceClass'].ref,
-                    Enabled=True,
-                    WebACLId=If(
-                        'WAFNameSpecified',
-                        variables['WAFWebACL'].ref,
-                        NoValue
-                    ),
-                    ViewerCertificate=If(
-                        'AcmCertSpecified',
-                        cloudfront.ViewerCertificate(
-                            AcmCertificateArn=variables['AcmCertificateArn'].ref,  # noqa
-                            SslSupportMethod='sni-only'
-                        ),
-                        NoValue
-                    )
+                    **cf_dist_opts
                 )
             )
         )
