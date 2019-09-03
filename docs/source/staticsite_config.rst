@@ -16,21 +16,32 @@ Most of these options are not required, but are listed here for reference::
               dev:
                 namespace: contoso-dev
                 staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
+
                 # A cert ARN can also be looked up dynamically via SSM
                 staticsite_acmcert_ssm_param: us-west-2@MySSMParamName...
+
                 staticsite_aliases: example.com,foo.example.com
                 staticsite_web_acl: arn:aws:waf::123456789012:webacl/...
+
                 # staticsite_enable_cf_logging defaults to true
                 staticsite_enable_cf_logging: true
+
                 # Deploy Lambda@Edge to rewrite directory indexes
                 # e.g. support accessing example.org/foo/
                 staticsite_rewrite_directory_index: index.html
-                # Youcan also deploy custom Lambda@Edge associations with your
+
+                # You can also deploy custom Lambda@Edge associations with your
                 # pre-built function versions
                 # (this takes precedence over staticsite_rewrite_directory_index)
                 staticsite_lambda_function_associations:
                   - type: origin-request
                     arn: arn:aws:lambda:us-east-1:123456789012:function:foo:1
+
+                # Custom error response options can be defined
+                staticsite_custom_error_responses:
+                  - ErrorCode: 404
+                    ResponseCode: 200
+                    ResponsePagePath: /index.html
             options:
               pre_build_steps:  # commands to run before generating hash of files
                 - command: npm ci
