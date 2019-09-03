@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - run-python & run-stacker commands (for single-binary compatibility)
+- Custom error responses support for static sites
 
 ## [0.47.1] - 2019-07-19
 ### Fixed
