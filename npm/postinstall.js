@@ -51,6 +51,8 @@ fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
     gzip: true,
     unlink: true
   }, (err, data) => {
+    if (err) throw err;
+
     if (os.platform() !== 'win32') {
       // create symlink in bin to the appropriate runway binary
       symLink(`${moduleDir}/runway/runway-cli`, `${basepath}/.bin/runway`, (err, data) => {
