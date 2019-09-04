@@ -36,26 +36,46 @@ jobs:
       python: 3.7
       env: PIP=pip3 PYTHON_VERSION=3.7
       script: make travistest clean
-    - name: "Python 3.7 Linux Build"
+    - name: "Python 3.7 Linux Single Binary Build"
       stage: build
       python: 3.7
       env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
-      script: make travisbuild
-    - name: "Python 3.7 macOS Build"
+      script: make travisbuild_file
+    - name: "Python 3.7 macOS Single Binary Build"
       stage: build
       os: osx
       osx_image: xcode11  # Python 3.7.4 running on macOS 10.14.4
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
-      script: make travisbuild
-    - name: "Python 3.7 Windows Build"
+      script: make travisbuild_file
+    - name: "Python 3.7 Windows Single Binary Build"
       stage: build
       os: windows  # Windows 10.0.17134 N/A Build 17134
       language: shell  # 'language: python' is an error on Travis CI Windows
       before_install:
         - choco install python make sed pandoc jq
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
-      script: make travisbuild
+      script: make travisbuild_file
+    - name: "Python 3.7 Linux npm Build"
+      stage: build
+      python: 3.7
+      env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
+      script: make travisbuild_folder
+    - name: "Python 3.7 macOS npm Build"
+      stage: build
+      os: osx
+      osx_image: xcode11  # Python 3.7.4 running on macOS 10.14.4
+      language: shell  # 'language: python' is an error on Travis CI macOS
+      env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
+      script: make travisbuild_folder
+    - name: "Python 3.7 Windows npm Build"
+      stage: build
+      os: windows  # Windows 10.0.17134 N/A Build 17134
+      language: shell  # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python make sed pandoc jq 7zip
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
+      script: make travisbuild_folder
     - name: Publish
       stage: deploy
       python: 3.7
@@ -66,8 +86,7 @@ jobs:
           if [ ! -z "${AWS_ACCESS_KEY_ID}" ]; then
             pip install awscli
             make npm_prep
-            aws s3 sync s3://${AWS_BUCKET}/${AWS_BUCKET_PREFIX}/$(cat tmp/version.txt) ./src/ --exclude "*pypi/*"
-            chmod -R +x ./src/osx ./src/linux ./src/windows
+            aws s3 sync s3://${AWS_BUCKET}/${AWS_BUCKET_PREFIX}/$(cat tmp/version.txt)/npm ./src/
           else
             echo "Unable to find the required environment variable."
             exit 0

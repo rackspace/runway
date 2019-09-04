@@ -6,7 +6,7 @@ const path = require('path');
 var runwayExe = 'runway';
 
 if (os.platform() === 'win32') {
-  runwayExe = 'runway.exe';
+  runwayExe = 'runway.bat';
 }
 
 // remove symlink/exe from bin created by postinstall script

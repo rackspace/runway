@@ -46,5 +46,8 @@
   },
   "homepage": "https://github.com/onicagroup/runway",
   "os": ["darwin", "linux", "win32"],
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "dependencies": {
+    "tar": "^4.4.10"
+  }
 }

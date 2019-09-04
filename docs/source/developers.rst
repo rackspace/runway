@@ -62,7 +62,9 @@ Travis CI Environment Variables
 +---------------------------+----------------------------------------------+
 | ``NPM_EMAIL``             | Your email address tied to the API key.      |
 +---------------------------+----------------------------------------------+
-| ``NPM_PACKAGE_NAME``      | Name to use when publishing an npm package   |
+| ``NPM_PACKAGE_NAME``      | Name to use when publishing an npm package.  |
++---------------------------+----------------------------------------------+
+| ``NPM_PACKAGE_VERSION``   | Override the version number used for npm.    |
 +---------------------------+----------------------------------------------+
 
 **Travis CI User Permissions Example**

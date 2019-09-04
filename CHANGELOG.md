@@ -26,7 +26,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - envvars command (for setting shell variables from environment variables defined in runway.yml)
 - Kubernetes support (for kustomize-organized configurations)
 - single-binary build and the pipeline to support it
-- published npm package using the single-binary build and the pipeline to support it
+- published npm package using the pyinstaller one-folder build
+    - built and published by travis
+- single-binary build published to s3 for download
+    - build and published by travis
+    - windows single-binary is slow, its a known limitation of pyinstaller
 
 ### Removed
 - _default_ tests. trying to run the test command with no tests defined will now result in an error.
