@@ -98,6 +98,15 @@ runway.yml sample::
               dev:
                 region: us-east-1
                 image_id: ami-abc123
+            tags:  # Modules can optionally have tags.
+              # This is a list of strings that can be "targeted"
+              # by passing arguments to the deploy/destroy command.
+              - some-string
+              - app:example
+              - tier:web
+              - owner:onica
+              # example: `runway deploy --tag app:example --tag tier:web`
+              #   This would select any modules with BOTH app:example AND tier:web
         regions:
           - us-west-2
 
@@ -105,7 +114,7 @@ runway.yml sample::
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-runway.yml can also be placed in a module folder (e.g. a repo/environment containing 
+runway.yml can also be placed in a module folder (e.g. a repo/environment containing
 only one module doesn't need to nest the module in a subfolder)::
 
     ---
@@ -116,7 +125,7 @@ only one module doesn't need to nest the module in a subfolder)::
           - us-west-2
         assume-role:
           arn: arn:aws:iam::account-id:role/role-name
-    
+
     # If using environment folders instead of git branches, git branch lookup can
     # be disabled entirely (see "Repo Structure"). See "Directories as Environments
     # with a Single Module" in "Repo Structure".

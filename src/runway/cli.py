@@ -4,8 +4,8 @@ Runway Overview.
 Usage:
   runway (test|preflight)
   runway (plan|taxi)
-  runway (deploy|takeoff)
-  runway (destroy|dismantle)
+  runway (deploy|takeoff) [--tag <tag>...]
+  runway (destroy|dismantle) [--tag <tag>...]
   runway init
   runway gitclean
   runway gen-sample (cfn|sls-tsc|sls|tf|stacker|cdk-tsc|cdk-py|cdk-csharp)
@@ -18,6 +18,16 @@ Usage:
 Options:
   -h --help                         Show this screen.
   --version                         Show version.
+  --tag <tag>...                    Select modules for processing by tag
+                                    or tags. This option can be specified
+                                    more than once to build a list of tags
+                                    that are treated as "AND". (ex.
+                                    "--tag <tag1> --tag <tag2>" would select
+                                    all modules with BOTH tags).
+
+Example:
+  runway deploy --tag app:some-app --tag tier:web  # app:some-app AND tier:web
+  runway destroy --tag app:some-app --tag tier:web  # app:some-app AND tier:web
 
 Help:
   * Set the DEPLOY_ENVIRONMENT environment variable to set/override the
