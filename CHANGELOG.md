@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix cross-platform subprocess execution (e.g. yarn specified without a file extension in staticsite build_steps)
 - Better error messages for subprocess commands that fail to run
+- cloudformation modules now ignore `docker-compose.yml` in the root of the module directory
 
 ### Added
 - run-python & run-stacker commands (for single-binary compatibility)
