@@ -129,9 +129,11 @@ class CloudFormation(RunwayModule):
                         sorted_files = reversed(sorted_files)
                     for name in sorted_files:
                         if re.match(r"runway(\..*)?\.yml", name) or (
-                                name.startswith('.')):
-                            # Hidden files (e.g. .gitlab-ci.yml) or runway configs
-                            # definitely aren't stacker config files
+                                name.startswith('.') or
+                                name == 'docker-compose.yml'):
+                            # Hidden files (e.g. .gitlab-ci.yml), runway configs,
+                            # and docker-compose files definitely aren't stacker
+                            # config files
                             continue
                         if os.path.splitext(name)[1] in ['.yaml', '.yml']:
                             ensure_stacker_compat_config(
