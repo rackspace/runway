@@ -68,6 +68,10 @@ data_files.append(('{}/yamllint/conf'.format(get_distribution('yamllint').locati
                    'yamllint/conf/'))
 data_files.append(('{}/cfnlint/data'.format(get_distribution('cfn-lint').location),
                    'cfnlint/data/'))
+data_files.append(('{}/botocore/data'.format(get_distribution('botocore').location),
+                   'botocore/data/'))
+data_files.append(('{}/awscli/data'.format(get_distribution('awscli').location),
+                   'awscli/data/'))
 
 # pyinstaller is not able to find dependencies of dependencies
 # unless a hook already exists for pyinstaller so we have to
@@ -78,9 +82,14 @@ hiddenimports = []
 import runway  # noqa
 import troposphere  # noqa
 import awacs  # noqa
+import awscli  # noqa
+import botocore  # noqa
 hiddenimports.extend(get_submodules(runway))
 hiddenimports.extend(get_submodules(troposphere))
 hiddenimports.extend(get_submodules(awacs))
+hiddenimports.extend(get_submodules(awscli))
+hiddenimports.extend(get_submodules(awscli))
+hiddenimports.extend(get_submodules(botocore))
 
 a = Entrypoint('runway',
                'console_scripts',
