@@ -9,6 +9,7 @@ const packageJsonContent = JSON.parse(fs.readFileSync(packageJsonPath));
 const basepath = `${path.resolve(process.cwd(), '../..')}/node_modules`; // goes to the top level node_modules
 const moduleDir = `${basepath}/${packageJsonContent.name}/src`;
 let osName;
+let binPath;
 
 function symLink(target, dest_path, callback) {
   return fs.symlink(target, dest_path, 'file', (err, data) => {
@@ -40,7 +41,6 @@ switch (os.platform()) {
     osName = os.platform();
 }
 
-fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
 fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
   if (err) throw err;
 
@@ -54,11 +54,25 @@ fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
     if (err) throw err;
 
     if (os.platform() !== 'win32') {
+      // determine correct bin path to use based on global/local install
+      if (process.env.npm_config_global) {
+        binPath = '/usr/local/bin/runway';
+      } else {
+        fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
+        binPath = `${basepath}/.bin/runway`;
+      }
       // create symlink in bin to the appropriate runway binary
-      symLink(`${moduleDir}/runway/runway-cli`, `${basepath}/.bin/runway`, (err, data) => {
+      symLink(`${moduleDir}/runway/runway-cli`, binPath, (err, data) => {
         if (err) throw err;
       });
     } else {
+      // determine correct bin path to use based on global/local install
+      if (process.env.npm_config_global) {
+        binPath = path.resolve(process.env.APPDATA, './npm/runway.bat');
+      } else {
+        fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
+        binPath = `${basepath}/.bin/runway.bat`;
+      }
       // symlink does not work for windows so we need to use a bat file
       // this will overwrite the file if it already exists so no fancy error handling needed
       fs.writeFile(`${basepath}/.bin/runway.bat`, `@${moduleDir}/runway/runway-cli.exe %*`, (err, data) => {
