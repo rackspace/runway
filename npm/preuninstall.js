@@ -13,7 +13,7 @@ if (os.platform() === 'win32') {
   }
 } else {
   if (process.env.npm_config_global) {
-    binPath = '/usr/local/bin/runway';
+    binPath = `${process.env.NVM_BIN || '/usr/local/bin'}/runway`;
   } else {
     binPath = `${basepath}/.bin/runway`;
   }
