@@ -75,7 +75,7 @@ fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
       }
       // symlink does not work for windows so we need to use a bat file
       // this will overwrite the file if it already exists so no fancy error handling needed
-      fs.writeFile(`${basepath}/.bin/runway.bat`, `@${moduleDir}/runway/runway-cli.exe %*`, (err, data) => {
+      fs.writeFile(binPath, `@${moduleDir}/runway/runway-cli.exe %*`, (err, data) => {
         if (err) throw err;
       })
     }
