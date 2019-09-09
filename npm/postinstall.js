@@ -4,10 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const tar = require('tar');
 
-const packageJsonPath = `${__dirname}/package.json`;
-const packageJsonContent = JSON.parse(fs.readFileSync(packageJsonPath));
 const basepath = `${path.resolve(process.cwd(), '../..')}/node_modules`; // goes to the top level node_modules
-const moduleDir = `${basepath}/${packageJsonContent.name}/src`;
+const moduleDir = `${basepath}/${process.env.npm_package_name}/src`;
 let osName;
 let binPath;
 
@@ -56,14 +54,19 @@ fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
     if (os.platform() !== 'win32') {
       // determine correct bin path to use based on global/local install
       if (process.env.npm_config_global) {
-        binPath = '/usr/local/bin/runway';
+        binPath = `${process.env.NVM_BIN || '/usr/local/bin'}/runway`;
       } else {
         fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
         binPath = `${basepath}/.bin/runway`;
       }
       // create symlink in bin to the appropriate runway binary
       symLink(`${moduleDir}/runway/runway-cli`, binPath, (err, data) => {
-        if (err) throw err;
+        if (err) {
+          if (err.code === 'EACCES') {
+            console.log('User does not have sufficient privileges to install. Please try again with sudo.')
+          }
+          throw err;
+        }
       });
     } else {
       // determine correct bin path to use based on global/local install
