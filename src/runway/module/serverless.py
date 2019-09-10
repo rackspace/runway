@@ -6,12 +6,15 @@ import os
 import re
 import subprocess
 import sys
+import yaml
 
+from runway.hooks.staticsite.util import get_hash_of_files
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
     run_module_command, run_npm_install, warn_on_boto_env_vars
 )
 from ..util import change_dir, which
+from ..s3_util import ensure_bucket_exists, does_s3_object_exist, download, upload
 
 LOGGER = logging.getLogger('runway')
 
@@ -56,6 +59,68 @@ def run_sls_remove(sls_cmd, env_vars):
     if sls_return != 0 and (sls_return == 1 and not (
             re.search(r"Stack '.*' does not exist", stdoutdata))):
         sys.exit(sls_return)
+
+
+def run_sls_print(sls_opts, env_vars, path):
+    """Run sls print command."""
+    sls_info_opts = sls_opts
+    sls_info_opts[0] = 'print'
+    sls_info_opts.extend(['--format', 'yaml'])
+    sls_info_cmd = generate_node_command(command='sls',
+                                         command_opts=sls_info_opts,
+                                         path=path)
+
+    return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
+
+
+def run_sls_package(sls_opts, options, context, path):
+    """Run sls package command."""
+    promotezip = options.get('options', {}).get('promotezip', {})
+    bucketname = promotezip.get('bucketname')
+
+    if promotezip.get('package', {}):
+        package_dir = promotezip.get('package')
+    else:
+        package_dir = 'sls-runway-package'
+
+    if not bucketname:
+        raise ValueError('"bucketname" must be specified when using "promotezip"')
+
+    ensure_bucket_exists(bucketname, context.env_region)
+    sls_config = run_sls_print(sls_opts, context.env_vars, path)
+    funcs = sls_config['functions']
+
+    if sls_config.get('package', {}).get('individually'):
+        hashes = {key: get_hash_of_files(os.path.dirname(funcs[key].get('handler')))
+                  for key in funcs.keys()}
+    else:
+        directories = []
+        for key in funcs.keys():
+            func_path = {'path': os.path.dirname(funcs[key].get('handler'))}
+            if func_path not in directories:
+                directories.extend(func_path)
+        hashes = {sls_config['service']: get_hash_of_files(path, directories)}
+
+    sls_package_opts = sls_opts
+    sls_package_opts[0] = 'package'
+    sls_package_opts.extend(['--package', package_dir])
+    sls_package_cmd = generate_node_command(command='sls',
+                                            command_opts=sls_package_opts,
+                                            path=path)
+    run_module_command(cmd_list=sls_package_cmd,
+                       env_vars=context.env_vars)
+
+    for key in hashes.keys():
+        hash_zip = hashes[key] + ".zip"
+        func_zip = os.path.basename(key) + ".zip"
+        if does_s3_object_exist(bucketname, hash_zip):
+            LOGGER.info('Found existing package "s3://%s/%s" for %s', bucketname, hash_zip, key)
+            download(bucketname, hash_zip, os.path.join(path, package_dir, func_zip))
+        else:
+            LOGGER.info('No existing package found, uploading to s3://%s/%s', bucketname,
+                        hash_zip)
+            zip_name = os.path.join(path, package_dir, func_zip)
+            upload(bucketname, hash_zip, zip_name)
 
 
 class Serverless(RunwayModule):
@@ -103,6 +168,13 @@ class Serverless(RunwayModule):
                         # the first
                         run_sls_remove(sls_cmd, self.context.env_vars)
                     else:
+                        if self.options.get('options', {}).get('promotezip', {}):
+                            run_sls_package(sls_opts,
+                                            self.options,
+                                            self.context,
+                                            self.path)
+                            sls_cmd.extend(['--package', 'sls-runway-package'])
+                        
                         run_module_command(cmd_list=sls_cmd,
                                            env_vars=self.context.env_vars)
             else:
