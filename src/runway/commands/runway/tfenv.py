@@ -3,7 +3,7 @@
 import subprocess
 import sys
 
-from runway.tfenv import TFEnvManager
+from runway.env_mgr.tfenv import TFEnvManager
 from ..runway_command import RunwayCommand
 from ...util import strip_leading_option_delim
 

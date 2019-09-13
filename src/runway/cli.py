@@ -8,7 +8,7 @@ Usage:
   runway (destroy|dismantle) [--tag <tag>...]
   runway init
   runway gitclean
-  runway gen-sample (cfn|sls-tsc|sls|tf|k8s-repo|stacker|cdk-tsc|cdk-py|cdk-csharp)
+  runway gen-sample [<samplename>]
   runway whichenv
   runway envvars
   runway run-aws <awscli-args>...

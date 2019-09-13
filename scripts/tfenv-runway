@@ -3,7 +3,7 @@ from __future__ import print_function
 import logging
 import sys
 
-from runway.tfenv import TFEnvManager
+from runway.env_mgr.tfenv import TFEnvManager
 
 
 if __name__ == "__main__":

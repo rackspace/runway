@@ -8,7 +8,7 @@ import sys
 import six
 
 from runway.module import RunwayModule, run_module_command
-from runway.kbenv import KBEnvManager
+from runway.env_mgr.kbenv import KBEnvManager
 from runway.util import which
 
 LOGGER = logging.getLogger('runway')

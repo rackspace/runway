@@ -24,6 +24,6 @@ deployments:
     env_vars:
       dev:
         KUBECONFIG:
-        - .kube
-        - dev
-        - config
+          - .kube
+          - dev
+          - config

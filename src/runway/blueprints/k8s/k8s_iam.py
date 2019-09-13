@@ -2,15 +2,15 @@
 """Module with k8s IAM resources."""
 from __future__ import print_function
 
-from troposphere import AccountId, Join, Output, iam
+from troposphere import Output, iam
 
 import awacs.autoscaling
 import awacs.sts
-from awacs.aws import Allow, PolicyDocument, Principal, Statement
+from awacs.aws import Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
 
 from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
+# from stacker.blueprints.variables.types import CFNString
 
 IAM_POLICY_ARN_PREFIX = 'arn:aws:iam::aws:policy/'
 
@@ -18,17 +18,17 @@ IAM_POLICY_ARN_PREFIX = 'arn:aws:iam::aws:policy/'
 class Iam(Blueprint):
     """Stacker blueprint for creating k8s IAM resources."""
 
-    VARIABLES = {
-        'EksClusterName': {'type': CFNString,
-                           'description': 'Name of the Kubernetes cluster',
-                           'min_length': 2,
-                           'max_length': 40}
-    }
+    # VARIABLES = {
+    #     'EksClusterName': {'type': CFNString,
+    #                        'description': 'Name of the Kubernetes cluster',
+    #                        'min_length': 2,
+    #                        'max_length': 40}
+    # }
 
     def create_template(self):
         """Create template (main function called by Stacker)."""
         template = self.template
-        variables = self.get_variables()
+        # variables = self.get_variables()
         template.add_version('2010-09-09')
         template.add_description('Kubernetes IAM policies - V1.0.0')
 

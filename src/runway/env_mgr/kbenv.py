@@ -10,7 +10,8 @@ import tempfile
 from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
 from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
 
-from .util import md5sum
+from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
+from ..util import md5sum
 
 LOGGER = logging.getLogger('runway')
 KB_VERSION_FILENAME = '.kubectl-version'
@@ -48,27 +49,7 @@ def download_kb_release(version,  # noqa pylint: disable=too-many-locals,too-man
                         os.path.join(download_dir, i))
     # IOError in py2; URLError in 3+
     except (IOError, URLError) as exc:
-        if sys.version_info[0] == 2:
-            url_error_msg = str(exc.strerror)
-        else:
-            url_error_msg = str(exc.reason)
-
-        if 'CERTIFICATE_VERIFY_FAILED' in url_error_msg:
-            LOGGER.error('Attempted to download kubectl but was unable to '
-                         'verify the TLS certificate on its download site.')
-            LOGGER.error("Full TLS error message: %s", url_error_msg)
-            if platform.system().startswith('Darwin') and (
-                    'unable to get local issuer certificate' in url_error_msg):
-                LOGGER.error("This is likely caused by your Python "
-                             "installation missing root certificates. Run "
-                             "\"/Applications/Python %s.%s/"
-                             "\"Install Certificates.command\" to fix it "
-                             "(https://stackoverflow.com/a/42334357/2547802)",
-                             sys.version_info[0],
-                             sys.version_info[1])
-            sys.exit(1)
-        else:
-            raise
+        handle_bin_download_error(exc, 'kubectl')
 
     with open(os.path.join(download_dir, filename + '.md5'), 'r') as stream:
         kb_hash = stream.read().rstrip('\n')
@@ -104,17 +85,7 @@ def get_version_requested(path):
     return ver
 
 
-def ensure_versions_dir_exists(kbenv_path):
-    """Ensure versions directory is available."""
-    versions_dir = os.path.join(kbenv_path, 'versions')
-    if not os.path.isdir(kbenv_path):
-        os.mkdir(kbenv_path)
-    if not os.path.isdir(versions_dir):
-        os.mkdir(versions_dir)
-    return versions_dir
-
-
-class KBEnvManager(object):  # pylint: disable=too-few-public-methods
+class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """kubectl version management.
 
     Designed to be compatible with https://github.com/alexppg/kbenv .
@@ -122,33 +93,11 @@ class KBEnvManager(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, path=None):
         """Initialize class."""
-        if path is None:
-            self.path = os.getcwd()
-        else:
-            self.path = path
-
-        if platform.system() == 'Windows':
-            if 'APPDATA' in os.environ:
-                self.kbenv_dir = os.path.join(os.environ['APPDATA'],
-                                              'kbenv')
-            else:
-                for i in [['AppData'], ['AppData', 'Roaming']]:
-                    if not os.path.isdir(os.path.join(os.path.expanduser('~'),
-                                                      *i)):
-                        os.mkdir(os.path.join(os.path.expanduser('~'),
-                                              *i))
-                self.kbenv_dir = os.path.join(os.path.expanduser('~'),
-                                              'AppData',
-                                              'Roaming',
-                                              'kbenv')
-        else:
-            self.kbenv_dir = os.path.join(os.path.expanduser('~'),
-                                          '.kbenv')
+        super(KBEnvManager, self).__init__('kbenv', path)
 
     def install(self, version_requested=None):
         """Ensure kubectl is available."""
-        command_suffix = '.exe' if platform.system() == 'Windows' else ''
-        versions_dir = ensure_versions_dir_exists(self.kbenv_dir)
+        versions_dir = ensure_versions_dir_exists(self.env_dir)
 
         if not version_requested:
             version_requested = get_version_requested(self.path)
@@ -164,10 +113,12 @@ class KBEnvManager(object):  # pylint: disable=too-few-public-methods
                         "it...", version_requested)
             return os.path.join(versions_dir,
                                 version_requested,
-                                'kubectl') + command_suffix
+                                'kubectl') + self.command_suffix
 
         LOGGER.info("Downloading and using kubectl version %s ...",
                     version_requested)
         download_kb_release(version_requested, versions_dir)
         LOGGER.info("Downloaded kubectl %s successfully", version_requested)
-        return os.path.join(versions_dir, version_requested, 'kubectl') + command_suffix
+        return os.path.join(versions_dir,
+                            version_requested,
+                            'kubectl') + self.command_suffix

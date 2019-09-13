@@ -11,7 +11,7 @@ from send2trash import send2trash
 import six
 
 from . import RunwayModule, run_module_command
-from ..tfenv import TFEnvManager
+from ..env_mgr.tfenv import TFEnvManager
 from ..util import (
     change_dir, extract_boto_args_from_env, find_cfn_output,
     merge_nested_environment_dicts, which

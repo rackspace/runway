@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - alternative runway config file name `runway.yaml`
 - run-aws command (for awscli use in single-binary mode)
 - tfenv and kbenv commands (for installing terraform/kubectl prior to a runway deployment)
-- envars command (for setting shell variables from environment variables defined in runway.yml)
+- envvars command (for setting shell variables from environment variables defined in runway.yml)
 - Kubernetes support (for kustomize-organized configurations)
 
 ### Removed

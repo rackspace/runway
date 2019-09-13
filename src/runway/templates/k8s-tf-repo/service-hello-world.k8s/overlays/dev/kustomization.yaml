@@ -1,0 +1,10 @@
+bases:
+  - ../../base
+commonAnnotations:
+  note: Hello, I am dev!
+commonLabels:
+  org: myorg
+  variant: dev
+namePrefix: dev-
+patchesStrategicMerge:
+  - map.yaml

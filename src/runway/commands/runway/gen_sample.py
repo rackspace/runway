@@ -51,13 +51,23 @@ import shutil
 import sys
 
 from cfn_flip import to_yaml
+from stacker.context import Context
 
 from ..runway_command import RunwayCommand
-from ...tfenv import get_latest_tf_version
+from ...env_mgr.tfenv import get_latest_tf_version
 
 LOGGER = logging.getLogger('runway')
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+
+def generate_tfstate_cfn_template():
+    """Return rendered CFN template yaml."""
+    from runway.blueprints.tf_state import TfState
+
+    return to_yaml(TfState('test',
+                           Context({"namespace": "test"}),
+                           None).to_json())
 
 
 def generate_sample_module(module_dir):
@@ -70,16 +80,15 @@ def generate_sample_module(module_dir):
     os.mkdir(module_dir)
 
 
-def generate_sample_k8s_repo(env_root):
+def generate_sample_k8s_cfn_repo(env_root):
     """Generate sample k8s infrastructure repo."""
-    repo_dir = os.path.join(env_root, 'k8s-infrastructure')
+    repo_dir = os.path.join(env_root, 'k8s-cfn-infrastructure')
     if os.path.isdir(repo_dir):
         LOGGER.error("Error generating sample repo -- directory %s "
                      "already exists!",
                      repo_dir)
         sys.exit(1)
 
-    from stacker.context import Context
     from runway.blueprints.k8s.k8s_master import Cluster
     from runway.blueprints.k8s.k8s_iam import Iam
     from runway.blueprints.k8s.k8s_workers import NodeGroup as WorkerNodeGroup
@@ -87,7 +96,7 @@ def generate_sample_k8s_repo(env_root):
     shutil.copytree(
         os.path.join(ROOT,
                      'templates',
-                     'k8s-repo'),
+                     'k8s-cfn-repo'),
         repo_dir
     )
     os.rename(os.path.join(repo_dir, '_gitignore'),
@@ -115,6 +124,35 @@ def generate_sample_k8s_repo(env_root):
         stream.write(to_yaml(WorkerNodeGroup('test',
                                              Context({"namespace": "test"}),
                                              None).to_json()))
+
+    LOGGER.info("Sample k8s infrastructure repo created at %s",
+                repo_dir)
+    LOGGER.info('(see its README for setup and deployment instructions)')
+
+
+def generate_sample_k8s_tf_repo(env_root):
+    """Generate sample k8s infrastructure repo."""
+    repo_dir = os.path.join(env_root, 'k8s-tf-infrastructure')
+    if os.path.isdir(repo_dir):
+        LOGGER.error("Error generating sample repo -- directory %s "
+                     "already exists!",
+                     repo_dir)
+        sys.exit(1)
+
+    shutil.copytree(
+        os.path.join(ROOT,
+                     'templates',
+                     'k8s-tf-repo'),
+        repo_dir
+    )
+    os.rename(os.path.join(repo_dir, '_gitignore'),
+              os.path.join(repo_dir, '.gitignore'))
+
+    # Generate tfstate CFN template from blueprints
+    tfstate_template_dir = os.path.join(repo_dir, 'tfstate.cfn', 'templates')
+    os.mkdir(tfstate_template_dir)
+    with open(os.path.join(tfstate_template_dir, 'tf_state.yml'), 'w') as stream:
+        stream.write(generate_tfstate_cfn_template())
 
     LOGGER.info("Sample k8s infrastructure repo created at %s",
                 repo_dir)
@@ -283,14 +321,10 @@ def generate_sample_cfn_module(env_root, module_dir=None):
             os.path.join(module_dir, i)
         )
     os.mkdir(os.path.join(module_dir, 'templates'))
-    shutil.copyfile(
-        os.path.join(ROOT,
-                     'templates',
-                     'cfn',
-                     'templates',
-                     'tf_state.yml'),
-        os.path.join(module_dir, 'templates', 'tf_state.yml')
-    )
+    with open(os.path.join(module_dir,
+                           'templates',
+                           'tf_state.yml'), 'w') as stream:
+        stream.write(generate_tfstate_cfn_template())
     LOGGER.info("Sample CloudFormation module created at %s",
                 module_dir)
 
@@ -313,9 +347,7 @@ def generate_sample_stacker_module(env_root, module_dir=None):
     for i in ['__init__.py', 'tf_state.py']:
         shutil.copyfile(
             os.path.join(ROOT,
-                         'templates',
-                         'stacker',
-                         'tfstate_blueprints',
+                         'blueprints',
                          i),
             os.path.join(module_dir, 'tfstate_blueprints', i)
         )
@@ -368,21 +400,29 @@ class GenSample(RunwayCommand):
 
     def execute(self):
         """Run selected module generator."""
-        if self._cli_arguments['cfn']:
+        if self._cli_arguments.get('<samplename>') == 'cfn':
             generate_sample_cfn_module(self.env_root)
-        elif self._cli_arguments['sls']:
+        elif self._cli_arguments.get('<samplename>') == 'sls':
             generate_sample_sls_module(self.env_root)
-        elif self._cli_arguments['sls-tsc']:
+        elif self._cli_arguments.get('<samplename>') == 'sls-tsc':
             generate_sample_sls_tsc_module(self.env_root)
-        elif self._cli_arguments['stacker']:
+        elif self._cli_arguments.get('<samplename>') == 'stacker':
             generate_sample_stacker_module(self.env_root)
-        elif self._cli_arguments['tf']:
+        elif self._cli_arguments.get('<samplename>') == 'tf':
             generate_sample_tf_module(self.env_root)
-        elif self._cli_arguments['k8s-repo']:
-            generate_sample_k8s_repo(self.env_root)
-        elif self._cli_arguments['cdk-tsc']:
+        elif self._cli_arguments.get('<samplename>') == 'k8s-cfn-repo':
+            generate_sample_k8s_cfn_repo(self.env_root)
+        elif self._cli_arguments.get('<samplename>') == 'k8s-tf-repo':
+            generate_sample_k8s_tf_repo(self.env_root)
+        elif self._cli_arguments.get('<samplename>') == 'cdk-tsc':
             generate_sample_cdk_tsc_module(self.env_root)
-        elif self._cli_arguments['cdk-py']:
+        elif self._cli_arguments.get('<samplename>') == 'cdk-py':
             generate_sample_cdk_py_module(self.env_root)
-        elif self._cli_arguments['cdk-csharp']:
+        elif self._cli_arguments.get('<samplename>') == 'cdk-csharp':
             generate_sample_cdk_cs_module(self.env_root)
+        else:
+            LOGGER.info("Available samples to generate:")
+            for i in ['cfn', 'sls-tsc', 'sls', 'tf', 'k8s-cfn-repo',
+                      'k8s-tf-repo', 'stacker', 'cdk-tsc', 'cdk-py',
+                      'cdk-csharp']:
+                LOGGER.info(i)

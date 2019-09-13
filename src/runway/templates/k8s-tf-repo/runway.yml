@@ -1,0 +1,28 @@
+---
+deployments:
+  - modules:
+      - tfstate.cfn
+      - eks-base.tf
+      - job-s3-echo.tf
+      - service-hello-world.k8s
+    env_vars:
+      dev:
+        KUBECONFIG:
+          - .kube
+          - dev
+          - config
+    environments:
+      dev:
+        namespace: dev
+        region: &devregion us-west-2
+        kubectl-access-role-arn: YOURROLEARNHERE
+    module_options:
+      terraform_backend_config:
+        dev:
+          region: *devregion
+      terraform_backend_cfn_outputs:
+        dev:
+          bucket: dev-tf-state::TerraformStateBucketName
+          dynamodb_table: dev-tf-state::TerraformStateTableName
+    regions:
+      - *devregion

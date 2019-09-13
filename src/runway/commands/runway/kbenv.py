@@ -3,7 +3,7 @@
 import subprocess
 import sys
 
-from runway.kbenv import KBEnvManager
+from runway.env_mgr.kbenv import KBEnvManager
 from ..runway_command import RunwayCommand
 from ...util import strip_leading_option_delim
 
