@@ -87,101 +87,11 @@ class Iam(Blueprint):
             )
         )
 
-        kiaminstancerole = template.add_resource(
-            iam.Role(
-                'KiamInstanceRole',
-                AssumeRolePolicyDocument=make_simple_assume_policy(
-                    'ec2.amazonaws.com'
-                ),
-                ManagedPolicyArns=[
-                    IAM_POLICY_ARN_PREFIX + i for i in [
-                        'AmazonEKSWorkerNodePolicy',
-                        'AmazonEKS_CNI_Policy',
-                        'AmazonEC2ContainerRegistryReadOnly'
-                    ]
-                ],
-                Policies=[
-                    iam.Policy(
-                        PolicyName='sts-assumerole',
-                        PolicyDocument=PolicyDocument(
-                            Version='2012-10-17',
-                            Statement=[
-                                Statement(
-                                    Action=[awacs.sts.AssumeRole],
-                                    Effect=Allow,
-                                    Resource=[
-                                        Join('',
-                                             ['arn:aws:iam::',
-                                              AccountId,
-                                              ':role/',
-                                              variables['EksClusterName'].ref,
-                                              '-pod-role-*'])
-                                    ]
-                                )
-                            ]
-                        )
-                    )
-                ]
-            )
-        )
-        template.add_output(
-            Output(
-                'KiamInstanceRole',
-                Description='The kiam instance role name',
-                Value=kiaminstancerole.ref()
-            )
-        )
-        template.add_output(
-            Output(
-                'KiamInstanceRoleArn',
-                Description='The kiam instance role ARN',
-                Value=kiaminstancerole.get_att('Arn')
-            )
-        )
-
-        kiaminstanceprofile = template.add_resource(
-            iam.InstanceProfile(
-                'KiamInstanceProfile',
-                Path='/',
-                Roles=[kiaminstancerole.ref()]
-            )
-        )
-        template.add_output(
-            Output(
-                'KiamInstanceProfile',
-                Description='The kiam instance profile',
-                Value=kiaminstanceprofile.ref()
-            )
-        )
-        template.add_output(
-            Output(
-                'KiamInstanceProfileArn',
-                Description='The kiam instance profile ARN',
-                Value=kiaminstanceprofile.get_att('Arn')
-            )
-        )
-
         template.add_resource(
             iam.Role(
                 'ClusterAutoScalerInstanceRole',
-                AssumeRolePolicyDocument=PolicyDocument(
-                    Version='2012-10-17',
-                    Statement=[
-                        Statement(
-                            Effect=Allow,
-                            Action=[awacs.sts.AssumeRole],
-                            Principal=Principal('Service',
-                                                'ec2.amazonaws.com')
-                        ),
-                        Statement(
-                            Effect=Allow,
-                            Action=[awacs.sts.AssumeRole],
-                            Principal=Principal(
-                                'AWS',
-                                kiaminstancerole.get_att('Arn')
-                            )
-                        )
-                    ]
+                AssumeRolePolicyDocument=make_simple_assume_policy(
+                    'ec2.amazonaws.com'
                 ),
                 Policies=[
                     iam.Policy(

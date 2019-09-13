@@ -1,20 +1,10 @@
 ---
 deployments:
   - modules:
-      - k8s-master.cfn  # also defines kiam role and writes its arn into next auth configmap module
-      - aws-auth-cm.k8s  # includes kiam role from k8s-masters
+      - k8s-master.cfn
+      - aws-auth-cm.k8s
       - k8s-workers.cfn
-      # Sample apps
-      - service-hello-world.k8s
-      - cert-manager.k8s
-      # kiam
-      # (used until https://github.com/aws/containers-roadmap/issues/23 is solved with a native solution)
-      - kiam-workers.cfn
-      - kiam.k8s  # depends on cert-manager above
-      # Demo kiam app
-      - kiam-demo-app-resources.cfn
-      - kiam-demo-app.k8s
-      # End kiam
+      - service-hello-world.k8s  # sample app
     regions:
       - us-west-2
     environments:
@@ -23,9 +13,7 @@ deployments:
         namespace: dev
         region: us-west-2
         VPCid: VPCIDHERE
-        # 3 subnets must be defined currently (kiam CFN template is currently
-        # hardcoded to deploy separate ASGs in each subnet)
-        EksSubnets: SUBNETID1HERE,SUBNETID2HERE,SUBNETID3HERE
+        EksSubnets: SUBNETID1HERE,SUBNETID2HERE,etc
         EksVersion: "'1.14'"
         # worker settings
         # https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html
@@ -33,8 +21,6 @@ deployments:
         eks_node_instance_type: t2.medium
         eks_use_spot_instances: "no"
         eks_spot_bid_price: "0.68"
-        # kiam worker settings
-        eks_kiam_node_instance_type: t2.medium
     env_vars:
       dev:
         KUBECONFIG:

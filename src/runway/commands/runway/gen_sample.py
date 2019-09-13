@@ -83,8 +83,6 @@ def generate_sample_k8s_repo(env_root):
     from runway.blueprints.k8s.k8s_master import Cluster
     from runway.blueprints.k8s.k8s_iam import Iam
     from runway.blueprints.k8s.k8s_workers import NodeGroup as WorkerNodeGroup
-    from runway.blueprints.k8s.k8s_kiam_workers import NodeGroup as KiamNodeGroup
-    from runway.blueprints.k8s.kiam_demo_resources import KiamDemo
 
     shutil.copytree(
         os.path.join(ROOT,
@@ -117,28 +115,6 @@ def generate_sample_k8s_repo(env_root):
         stream.write(to_yaml(WorkerNodeGroup('test',
                                              Context({"namespace": "test"}),
                                              None).to_json()))
-
-    # Generate kiam workers CFN template from blueprint
-    kiam_worker_template_dir = os.path.join(repo_dir,
-                                            'kiam-workers.cfn',
-                                            'templates')
-    os.mkdir(kiam_worker_template_dir)
-    with open(os.path.join(kiam_worker_template_dir,
-                           'kiam_workers.yaml'), 'w') as stream:
-        stream.write(to_yaml(KiamNodeGroup('test',
-                                           Context({"namespace": "test"}),
-                                           None).to_json()))
-
-    # Generate kiam demo app CFN template from blueprint
-    kiam_demo_template_dir = os.path.join(repo_dir,
-                                          'kiam-demo-app-resources.cfn',
-                                          'templates')
-    os.mkdir(kiam_demo_template_dir)
-    with open(os.path.join(kiam_demo_template_dir,
-                           'kiam_demo_resources.yaml'), 'w') as stream:
-        stream.write(to_yaml(KiamDemo('test',
-                                      Context({"namespace": "test"}),
-                                      None).to_json()))
 
     LOGGER.info("Sample k8s infrastructure repo created at %s",
                 repo_dir)

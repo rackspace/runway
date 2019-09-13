@@ -6,11 +6,6 @@ metadata:
   namespace: kube-system
 data:
   mapRoles: |
-    - rolearn: KIAMROLEARNHERE
-      username: system:node:{{EC2PrivateDNSName}}
-      groups:
-        - system:bootstrappers
-        - system:nodes
     - rolearn: INSTANCEROLEARNHERE
       username: system:node:{{EC2PrivateDNSName}}
       groups:

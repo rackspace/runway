@@ -49,11 +49,6 @@ def generate(provider, context, **kwargs):  # pylint: disable=W0613
         os.makedirs(overlay_path)
     principal_arn = get_principal_arn(provider)
     stack_name = kwargs['stack']
-    kiam_instancerole_arn = OutputLookup.handle(
-        "%s::KiamInstanceRoleArn" % stack_name,
-        provider=provider,
-        context=context
-    )
     node_instancerole_arn = OutputLookup.handle(
         "%s::NodeInstanceRoleArn" % stack_name,
         provider=provider,
@@ -65,9 +60,6 @@ def generate(provider, context, **kwargs):  # pylint: disable=W0613
     with open(filename, 'w') as out:
         out.write(
             aws_authmap_template.replace(
-                'KIAMROLEARNHERE',
-                kiam_instancerole_arn
-            ).replace(
                 'INSTANCEROLEARNHERE',
                 node_instancerole_arn
             ).replace(

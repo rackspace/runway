@@ -63,12 +63,3 @@ Write-Host "http://$(runway kbenv run -- get svc $RUNWAY_ENV-the-service -o json
 ```
 
 Compare its dev & prod overlays for examples on per-environment app kustomization.
-
-## Kiam
-
-kiam-server nodes proxy AssumeRole requests on behalf of pods calling for instance credentials and can assume any IAM roles names matching `EKSCLUSTERNAME-pod-role-*` (e.g. `k8s-dev-pod-role-foo` in the runway environment `dev`).
-
-See the kiam-demo app (`kiam-demo-app.k8s` directory) for:
-
-* namespace annotation allowing pods in the namespace to access roles matching a regex
-* pod annotation specifying the pod's iam role
