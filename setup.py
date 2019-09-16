@@ -41,6 +41,7 @@ INSTALL_REQUIRES = [
     # with the LICENSE file added to its root folder
     # and the following patches applied
     # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
+    # https://github.com/cloudtools/stacker/pull/744 (diffs via CFN changesets)
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
