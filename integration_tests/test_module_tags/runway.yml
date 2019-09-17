@@ -1,0 +1,36 @@
+deployments:
+  - name: deployment_1
+    modules:
+      - path: sampleapp1
+        tags:
+          - app1
+          - group-1-4
+      - path: sampleapp2
+        tags:
+          - app2
+    regions:
+      - us-east-1
+    environments:
+      dev:
+        run: true
+  - name: deployment_2
+    modules:
+      - sampleapp3
+    regions:
+      - us-east-1
+    environments:
+      dev:
+        run: true
+  - name: deployment_3
+    modules:
+      - path: sampleapp4
+        tags:
+          - app4
+          - group-1-4
+      - path: sampleapp5
+      - sampleapp6
+    regions:
+      - us-east-1
+    environments:
+      dev:
+        run: true

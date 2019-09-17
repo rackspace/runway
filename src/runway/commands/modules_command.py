@@ -262,35 +262,53 @@ class ModulesCommand(RunwayCommand):
         if command == 'destroy':
             LOGGER.info('WARNING!')
             LOGGER.info('Runway is running in DESTROY mode.')
+            LOGGER.info('Any/all deployment(s) selected will be '
+                        'irrecoverably DESTROYED.')
+            if not context.env_vars.get('CI', None):
+                if not strtobool(input('Proceed?: ')):
+                    sys.exit(0)
 
-        if context.env_vars.get('CI', None):
-            if command == 'destroy':
-                deployments_to_run = self.reverse_deployments(deployments)
-            else:
-                deployments_to_run = deployments
+        if context.env_vars.get('CI', None) or self._cli_arguments.get('--tag'):
+            selected_deployments = deployments
         else:
-            if command == 'destroy':
-                LOGGER.info('Any/all deployment(s) selected will be '
-                            'irrecoverably DESTROYED.')
-                deployments_to_run = self.reverse_deployments(
-                    self.select_deployment_to_run(
-                        context.env_name,
-                        deployments,
-                        command=command
-                    )
-                )
-            else:
-                deployments_to_run = self.select_deployment_to_run(
-                    context.env_name,
-                    deployments
-                )
+            selected_deployments = self.select_deployment_to_run(
+                deployments, command
+            )
 
+        deployments_to_run = [
+            self.select_modules_to_run(deployment,
+                                       self._cli_arguments.get('--tag'),
+                                       command,
+                                       context.env_vars.get('CI', None),
+                                       context.env_name)
+            for deployment in selected_deployments
+        ]
+
+        if command == 'destroy':
+            deployments_to_run = self.reverse_deployments(
+                deployments_to_run
+            )
+
+        LOGGER.info("")
         LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
         for i, deployment in enumerate(deployments_to_run):
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Processing deployment '%s' ===========================",
                         deployment.get('name'))
+
+            # a deployment with no modules is possible here - check before processing
+            if not deployment.get('modules', []):
+                LOGGER.warning('No modules found for deployment "%s"',
+                               deployment.get('name'))
+                if self._cli_arguments.get('--tag'):
+                    # added info about what could have caused the module to not be found
+                    LOGGER.warning('Missing modules could be caused by an '
+                                   'invalid value passed to the "--tag" '
+                                   'argument: %s', str(self._cli_arguments['--tag']))
+                # this is not necessarily a cause for concern so continue
+                # to the next deployment rather than exiting
+                continue
 
             if deployment.get('regions'):
                 if deployment.get('env_vars'):
@@ -394,11 +412,84 @@ class ModulesCommand(RunwayCommand):
         return reversed_deployments
 
     @staticmethod
-    def select_deployment_to_run(env_name, deployments=None, command='build'):  # noqa pylint: disable=too-many-branches,too-many-statements,too-many-locals
+    def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disable=too-many-branches,invalid-name
+                              ci=False, env_name=None):
+        """Select modules to run based on tags.
+
+        Args:
+            deployment (Dict[str, Any): A deployment definition.
+            tags (Optional[List[str]]): List of required tags that must
+                exist on a module for it to be returned.
+            command (str): Command used to initiate this process.
+            ci (Optional[str]): Value of CI environment variable.
+            env_name (Optional[str]): Name of environment being processed.
+
+        Returns:
+            Deployment with filtered modules.
+
+        """
+        if ci and not tags:
+            return deployment
+        modules_to_deploy = []
+
+        if deployment.get('current_dir', False):
+            return deployment
+        if not deployment.get('modules'):
+            LOGGER.error('No modules configured in deployment "%s"',
+                         deployment['name'])
+            sys.exit(1)
+        if len(deployment['modules']) == 1 and not tags:
+            # No need to select a module in the deployment - there's only one
+            if command == 'destroy':
+                LOGGER.info('(only one deployment detected; all modules '
+                            'automatically selected for termination)')
+                if not ci:
+                    if not strtobool(input('Proceed?: ')):
+                        sys.exit(0)
+            return deployment
+
+        modules = deployment['modules']
+
+        if not tags and not ci:
+            print('')
+            print('Configured modules in deployment \'%s\':' % deployment.get('name'))
+            for i, module in enumerate(modules):
+                print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
+            print('')
+            print('')
+            if command == 'destroy':
+                print('(Operating in destroy mode -- "all" will destroy all '
+                      'deployments in reverse order)')
+            selected_module_index = input('Enter number of module to run (or "all"): ')
+            if selected_module_index == 'all':
+                return deployment
+            if selected_module_index == '' or (
+                    not selected_module_index.isdigit() or (
+                        not 0 < int(selected_module_index) <= len(modules))):
+                LOGGER.error('Please select a valid number (or "all")')
+                sys.exit(1)
+            deployment['modules'] = [modules[int(selected_module_index) - 1]]
+            return deployment
+
+        for module in modules:
+            if isinstance(module, str):
+                LOGGER.warning('Module "%s.%s" is defined as a string '
+                               'which cannot be used with the "--tag" '
+                               'option so it has been skipped. Please '
+                               'update this module definition to a dict '
+                               'to use "--tag".', deployment['name'],
+                               module)
+                continue  # this doesn't need to return an error
+            if module.get('tags') and all(i in module['tags'] for i in tags):
+                modules_to_deploy.append(module)
+        deployment['modules'] = modules_to_deploy
+        return deployment
+
+    @staticmethod
+    def select_deployment_to_run(deployments=None, command='build'):
         """Query user for deployments to run."""
         if deployments is None or not deployments:
             return []
-        deployments_to_run = []
 
         num_deployments = len(deployments)
 
@@ -423,44 +514,10 @@ class ModulesCommand(RunwayCommand):
             sys.exit(1)
 
         selected_deployment = deployments[int(selected_deployment_index) - 1]
-        if selected_deployment.get('current_dir', False):
-            deployments_to_run.append(selected_deployment)
-        elif not selected_deployment.get('modules', []):
-            LOGGER.error('No modules configured in selected deployment')
-            sys.exit(1)
-        elif len(selected_deployment['modules']) == 1:
-            # No need to select a module in the deployment - there's only one
-            if command == 'destroy':
-                LOGGER.info('(only one deployment detected; all modules '
-                            'automatically selected for termination)')
-                if not strtobool(input('Proceed?: ')):
-                    sys.exit(0)
-            deployments_to_run.append(selected_deployment)
-        else:
-            modules = selected_deployment['modules']
-            print('')
-            print('Configured modules in deployment \'%s\':' % selected_deployment.get('name'))
-            for i, module in enumerate(modules):
-                print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
-            print('')
-            print('')
-            if command == 'destroy':
-                print('(Operating in destroy mode -- "all" will destroy all '
-                      'deployments in reverse order)')
-            selected_module_index = input('Enter number of module to run (or "all"): ')
-            if selected_module_index == 'all':
-                deployments_to_run.append(selected_deployment)
-            elif selected_module_index == '' or (
-                    not selected_module_index.isdigit() or (
-                        not 0 < int(selected_module_index) <= len(modules))):
-                LOGGER.error('Please select a valid number (or "all")')
-                sys.exit(1)
-            else:
-                selected_deployment['modules'] = [modules[int(selected_module_index) - 1]]
-                deployments_to_run.append(selected_deployment)
 
-        LOGGER.debug('Selected deployment is %s...', deployments_to_run)
-        return deployments_to_run
+        LOGGER.debug('Selected deployment is %s...', selected_deployment)
+
+        return [selected_deployment]
 
 
 def _module_name_for_display(module):
