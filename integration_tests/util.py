@@ -3,13 +3,23 @@ import glob
 import os
 import importlib
 import shutil
+import subprocess
 from prettytable import PrettyTable
 from integration_test import IntegrationTest
 
 
+def run_command(cmd_list, env_vars=None):
+    """Shell out to provisioner command."""
+    try:
+        subprocess.check_call(cmd_list, env=env_vars)
+    except subprocess.CalledProcessError as shelloutexc:
+        return shelloutexc.returncode
+    return 0
+
+
 def import_tests(self, path, pattern='test_*/test_*'):
     """Find and import all tests from a given path."""
-    self.LOGGER.info('Loading tests from "%s" with pattern:', path)
+    self.LOGGER.info('Loading tests from "%s" with pattern: "%s"', path, pattern)
     tests = glob.glob(os.path.join(path, '{}.py'.format(pattern)))
     for test in tests:
         relpath = os.path.relpath(test)[:-3]
@@ -27,10 +37,10 @@ def execute_tests(self, tests):
     err_count = 0
     results = {}
     for test in tests:
-        itest = test(self)
-        test_name = test.__name__
+        # itest = test(self)
+        test_name = test.__class__.__name__
 
-        if not issubclass(itest.__class__, IntegrationTest):
+        if not issubclass(test.__class__, IntegrationTest):
             self.LOGGER.error('%s does not inherit from "IntegrationTest", skipping...',
                               test_name)
             continue
@@ -40,9 +50,9 @@ def execute_tests(self, tests):
 
         try:
             self.LOGGER.info('Executing "init" for "%s"...', test_name)
-            itest.init()
+            test.init()
             self.LOGGER.info('Executing "run" for "%s"...', test_name)
-            itest.run()
+            test.run()
             results[test_name] = 'Success'
         except AssertionError as assert_err:
             self.LOGGER.error('AssertionError: "%s"', assert_err)
@@ -51,11 +61,11 @@ def execute_tests(self, tests):
         finally:
             try:
                 self.LOGGER.info('Executing "teardown" for "%s"...', test_name)
-                itest.teardown()
+                test.teardown()
             except BaseException as err:
                 self.LOGGER.error("""Teardown failed for test "%s".
                                   Some resources may need to be cleaned up manually.""",
-                                  test.__name__)
+                                  test_name)
                 self.LOGGER.error(err)
 
     tbl = PrettyTable(['Test Name', 'Result'])

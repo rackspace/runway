@@ -1,7 +1,7 @@
 """Test changing backends between local and S3."""
 from runway.util import change_dir
 from test_terraform.test_terraform import Terraform
-
+from util import run_command
 
 class LocalToS3Backend(Terraform):
     """Test changing between local and S3 backends."""
@@ -17,7 +17,7 @@ class LocalToS3Backend(Terraform):
             self.copy_runway('nos3')
 
         with change_dir(self.base_dir):
-            return self.run_command(['runway', 'deploy'])
+            return run_command(['runway', 'deploy'])
 
     def init(self):
         """Initialize test."""
@@ -34,5 +34,5 @@ class LocalToS3Backend(Terraform):
         """Teardown any created resources."""
         self.LOGGER.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.base_dir):
-            self.run_command(['runway', 'destroy'])
+            run_command(['runway', 'destroy'])
         self.clean()

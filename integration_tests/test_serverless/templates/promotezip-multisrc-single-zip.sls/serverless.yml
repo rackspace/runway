@@ -1,0 +1,12 @@
+service: runway-serverless-integration-test-pzmssz
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  helloWorld:
+    handler: frontend/func1/handler.hello
+
+  helloWorld2:
+    handler: backend/func2/handler.hello2

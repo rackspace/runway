@@ -10,3 +10,5 @@ docs/source/_build
 # This is dynamically built at build-time via make
 src/runway/templates/terraform/.terraform-version
 .idea
+node_modules
+.serverless

@@ -6,7 +6,7 @@ import platform
 from send2trash import send2trash
 from runway.util import change_dir
 from integration_test import IntegrationTest
-from util import (copy_file, import_tests, execute_tests)
+from util import (copy_file, import_tests, execute_tests, run_command)
 
 
 class Terraform(IntegrationTest):
@@ -71,7 +71,7 @@ class Terraform(IntegrationTest):
             stacker_cmd = stacker_cmd + ['dev-us-east-1.env', 'tfstate.yaml']
             self.LOGGER.debug('STACKER_CMD: %s', stacker_cmd)
             cmd_opts = {'cmd_list': stacker_cmd}
-            return self.run_command(**cmd_opts) # noqa
+            return run_command(**cmd_opts) # noqa
 
     def init(self):
         """Initialize backend."""
@@ -79,7 +79,7 @@ class Terraform(IntegrationTest):
 
     def run(self):
         """Find all Terraform tests and run them."""
-        tests = Terraform.__subclasses__()
+        tests = [test(self) for test in Terraform.__subclasses__()]
         self.LOGGER.debug('FOUND TESTS: %s', tests)
         return execute_tests(self, tests)
 

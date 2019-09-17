@@ -15,8 +15,7 @@ class Runner(object):
 
     def run_tests(self):
         """Run all integration test."""
-        tests = IntegrationTest.__subclasses__()
-        return execute_tests(self, tests)
+        return execute_tests(self, (test(self) for test in IntegrationTest.__subclasses__()))
 
     def main(self):
         """Main entry."""

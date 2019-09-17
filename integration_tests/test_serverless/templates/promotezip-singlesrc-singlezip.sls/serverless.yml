@@ -1,0 +1,12 @@
+service: runway-serverless-integration-test-sssz
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  helloWorld:
+    handler: src/func1/handler.hello
+
+  helloWorld2:
+    handler: src/func2/handler.hello2
