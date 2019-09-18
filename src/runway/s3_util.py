@@ -34,7 +34,15 @@ def ensure_bucket_exists(bucket_name, region=None):
         if exc.response['Error']['Message'] == 'Not Found':
             LOGGER.info("Bucket \"%s\" does not exist, creating...", bucket_name)
             s3_client = boto3.client('s3', region_name=region)
-            s3_client.create_bucket(Bucket=bucket_name)
+            if region == 'us-east-1':
+                create_bucket_opts = {}
+            else:
+                create_bucket_opts = {
+                    'CreateBucketConfiguration': {
+                        'LocationConstraint': region
+                    }
+                }
+            s3_client.create_bucket(Bucket=bucket_name, **create_bucket_opts)
 
             # enable default encryption
             s3_client.put_bucket_encryption(Bucket=bucket_name,

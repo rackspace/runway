@@ -1,7 +1,7 @@
 """Integration test module."""
-import subprocess
 import logging
 import os
+from copy import deepcopy
 
 
 class IntegrationTest(object):
@@ -16,6 +16,14 @@ class IntegrationTest(object):
             self.options = {}
         else:
             self.options = options
+
+    def set_environment(self, env):
+        """Set deploy environment."""
+        self.LOGGER.info('Setting "DEPLOY_ENVIRONMENT" to "%s"', env)
+        copy_env = deepcopy(os.environ)
+        if not isinstance(env, dict):
+            env = {'DEPLOY_ENVIRONMENT': env}
+        copy_env.update(env)
 
     def init(self):
         """Implement dummy method (set in consuming classes)."""

@@ -1,4 +1,4 @@
-service: runway-serverless-integration-test-sssz
+service: serverless-test-sssz
 
 provider:
   name: aws

@@ -23,8 +23,12 @@ class Serverless(IntegrationTest):
 
         tests = []
         for template in os.listdir(self.templates_dir):
-            test = serverless_test(template, self.templates_dir, self.LOGGER)
-            tests.append(test)
+            if os.path.isdir(os.path.join(self.templates_dir, template)):
+                self.LOGGER.info('Found template "%s"', template)
+                test = serverless_test(template, self.templates_dir, self.LOGGER)
+                tests.append(test)
+            else:
+                self.LOGGER.warning('"%s" is not a directory, skipping...', template)
 
         return execute_tests(self, tests)
 

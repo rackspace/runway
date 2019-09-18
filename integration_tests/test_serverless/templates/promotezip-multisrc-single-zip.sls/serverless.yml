@@ -1,4 +1,4 @@
-service: runway-serverless-integration-test-pzmssz
+service: serverless-test-pzmssz
 
 provider:
   name: aws

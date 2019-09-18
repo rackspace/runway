@@ -8,6 +8,8 @@ from test_serverless.test_serverless import Serverless
 class ServerlessTest(Serverless):
     """Class for Serverless tests."""
 
+    ENVS = ('dev', 'test')
+
     def __init__(self, template, templates_dir, logger):
         """Initialize class."""
         self.template_name = template
@@ -20,6 +22,7 @@ class ServerlessTest(Serverless):
         if os.path.isdir(template_dir):
             self.logger.info('Executing test "%s" in directory "%s"', template, template_dir)
             with change_dir(template_dir):
+                self.logger.info('Running "runway %s" on %s', command, template_dir)
                 return run_command(['runway', command])
         else:
             self.logger.error('Directory not found: %s', template_dir)
@@ -30,10 +33,15 @@ class ServerlessTest(Serverless):
 
     def run(self):
         """Run tests."""
-        assert self.run_runway(self.template_name) == 0,\
-            '{}: Failed to deploy'.format(self.template_name)
+        print('what')
+        for env in self.ENVS:
+            self.set_environment(env)
+            assert self.run_runway(self.template_name) == 0,\
+                '{}: Failed to deploy in {} environment'.format(self.template_name, env)
 
     def teardown(self):
         """Teardown any created resources."""
         self.logger.info('Tearing down: %s', self.template_name)
-        self.run_runway(self.template_name, 'destroy')
+        for env in self.ENVS:
+            self.set_environment(env)
+            self.run_runway(self.template_name, 'destroy')
