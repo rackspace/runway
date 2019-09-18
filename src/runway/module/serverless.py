@@ -71,13 +71,12 @@ def run_sls_print(sls_opts, env_vars, path):
     sls_info_cmd = generate_node_command(command='sls',
                                          command_opts=sls_info_opts,
                                          path=path)
-    print('PATH (SLSPRINT): %s' % path)
+
     return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
 
 
 def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too-many-locals
     """Run sls package command."""
-    print('PATH: %s' % path)
     bucketname = options.get('options', {}).get('promotezip', {}).get('bucketname', {})
     package_dir = tempfile.mkdtemp()
     LOGGER.debug('Package directory: %s', package_dir)
@@ -101,7 +100,7 @@ def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too
         hashes = {sls_config['service']: get_hash_of_files(path, directories)}
 
     sls_opts[0] = 'package'
-    sls_opts.extend(['--package', package_dir])
+    sls_opts.extend(['--package', os.path.relpath(package_dir)])
     sls_package_cmd = generate_node_command(command='sls',
                                             command_opts=sls_opts,
                                             path=path)
@@ -109,7 +108,7 @@ def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too
     LOGGER.info("Running sls package on %s (\"%s\")",
                 os.path.basename(path),
                 format_npm_command_for_logging(sls_package_cmd))
-    print('SLS_PACKAGE_CMD: %s' % sls_package_cmd)
+
     run_module_command(cmd_list=sls_package_cmd,
                        env_vars=context.env_vars)
 
@@ -118,11 +117,11 @@ def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too
         func_zip = os.path.basename(key) + ".zip"
         if does_s3_object_exist(bucketname, hash_zip):
             LOGGER.info('Found existing package "s3://%s/%s" for %s', bucketname, hash_zip, key)
-            download(bucketname, hash_zip, os.path.join(path, package_dir, func_zip))
+            download(bucketname, hash_zip, os.path.join(package_dir, func_zip))
         else:
             LOGGER.info('No existing package found, uploading to s3://%s/%s', bucketname,
                         hash_zip)
-            zip_name = os.path.join(path, package_dir, func_zip)
+            zip_name = os.path.join(package_dir, func_zip)
             upload(bucketname, hash_zip, zip_name)
 
     sls_opts[0] = 'deploy'
@@ -172,6 +171,12 @@ class Serverless(RunwayModule):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
+                    if command == 'deploy' and self.options.get('options', {}).get('promotezip', {}): # noqa pylint: disable=line-too-long
+                        deploy_package(sls_opts,
+                                       self.options,
+                                       self.context,
+                                       self.path)
+
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 os.path.basename(self.path),
@@ -181,14 +186,8 @@ class Serverless(RunwayModule):
                         # the first
                         run_sls_remove(sls_cmd, self.context.env_vars)
                     else:
-                        if command == 'deploy' and self.options.get('options', {}).get('promotezip', {}): # noqa pylint: disable=line-too-long
-                            deploy_package(sls_opts,
-                                           self.options,
-                                           self.context,
-                                           self.path)
-                        else:
-                            run_module_command(cmd_list=sls_cmd,
-                                               env_vars=self.context.env_vars)
+                        run_module_command(cmd_list=sls_cmd,
+                                           env_vars=self.context.env_vars)
             else:
                 LOGGER.warning(
                     "Skipping serverless %s of %s; no \"package.json\" "
