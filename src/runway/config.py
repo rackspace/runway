@@ -43,8 +43,10 @@ class ModuleDefinition(ConfigComponent):
     def __init__(self,
                  name,  # type: str
                  path,  # type: str
+                 class_path=None,  # type: Optional[str]
                  environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
-                 options=None  # type: Optional[Dict[str, Any]]
+                 options=None,  # type: Optional[Dict[str, Any]]
+                 tags=None  # type: Optional[Dict[str, str]]
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
@@ -53,6 +55,8 @@ class ModuleDefinition(ConfigComponent):
         Args:
             name (str): Name of the module. Used to easily parse logs.
             path (str): Path to the module.
+            class_path (Optional[str]): Path to custom runway module class.
+                Also used for static site deployments.
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
                 variables to environment names. When run, the variables
                 defined here are merged with those in the .env file. If
@@ -60,12 +64,16 @@ class ModuleDefinition(ConfigComponent):
             options (Optional[Dict[str, Any]]): Module specific options.
                 See the Module Configurations section of the docs for more
                 details.
+            tags (Optional[Dict[str, str]]): Module tags used to select which
+                modules to process using CLI arguments. (`--tag`)
 
         """
         self.name = name
         self.path = path
+        self.class_path = class_path
         self.environments = environments
         self.options = options
+        self.tags = tags
 
     @classmethod
     def from_list(cls, modules):
@@ -76,8 +84,11 @@ class ModuleDefinition(ConfigComponent):
                 results.append(cls(mod, mod, {}))
                 continue
             results.append(cls(mod.get('name', mod['path']),
-                               mod['path'], mod.get('environments', {}),
-                               mod.get('options', {})))
+                               mod['path'],
+                               class_path=mod.get('class_path', None),
+                               environments=mod.get('environments', {}),
+                               options=mod.get('options', {}),
+                               tags=mod.get('tags', {})))
         return results
 
 
@@ -143,7 +154,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             'env_vars', {}
         )  # type: Optional[Dict[str, Dict[str, Any]]]
         self.modules = ModuleDefinition.from_list(
-            deployment['modules']
+            deployment.get('modules', [])  # can be none if current_dir
         )  # type: List[ModuleDefinition]
         self.module_options = deployment.get(
             'module_options', {}
