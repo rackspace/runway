@@ -40,7 +40,7 @@ class ConfigComponent(object):
 class ModuleDefinition(ConfigComponent):
     """Items in the modules definition block of a deployment."""
 
-    def __init__(self,
+    def __init__(self,  # pylint: disable=too-many-arguments
                  name,  # type: str
                  path,  # type: str
                  class_path=None,  # type: Optional[str]
@@ -71,9 +71,9 @@ class ModuleDefinition(ConfigComponent):
         self.name = name
         self.path = path
         self.class_path = class_path
-        self.environments = environments
-        self.options = options
-        self.tags = tags
+        self.environments = environments or {}
+        self.options = options or {}
+        self.tags = tags or {}
 
     @classmethod
     def from_list(cls, modules):
@@ -83,12 +83,19 @@ class ModuleDefinition(ConfigComponent):
             if isinstance(mod, str):
                 results.append(cls(mod, mod, {}))
                 continue
-            results.append(cls(mod.get('name', mod['path']),
-                               mod['path'],
-                               class_path=mod.get('class_path', None),
-                               environments=mod.get('environments', {}),
-                               options=mod.get('options', {}),
-                               tags=mod.get('tags', {})))
+            name = mod.pop('name', mod['path'])
+            results.append(cls(name,
+                               mod.pop('path'),
+                               class_path=mod.pop('class_path', None),
+                               environments=mod.pop('environments', {}),
+                               options=mod.pop('options', {}),
+                               tags=mod.pop('tags', {})))
+
+            if mod:
+                LOGGER.warning(
+                    'Invalid keys found in module %s have been ignored: %s',
+                    name, ', '.join(mod.keys())
+                )
         return results
 
 
@@ -137,31 +144,37 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 pre-packaged node_modules)
 
         """
-        self.account_alias = deployment.get(
+        self.account_alias = deployment.pop(
             'account-alias', {}
         )  # type: Optional[Dict[str, str]]
-        self.account_id = deployment.get(
+        self.account_id = deployment.pop(
             'account-id', {}
         )  # type: Optional[Dict[str, Union[str, int]]]
-        self.assume_role = deployment.get(
+        self.assume_role = deployment.pop(
             'assume-role', {}
         )  # type: Optional[Dict[str, Union[str, Dict[str, str]]]]
-        self.current_dir = deployment.get('current_dir', False)  # type: bool
-        self.environments = deployment.get(
+        self.current_dir = deployment.pop('current_dir', False)  # type: bool
+        self.environments = deployment.pop(
             'environments', {}
         )  # type: Optional[Dict[str, Dict[str, Any]]]
-        self.env_vars = deployment.get(
+        self.env_vars = deployment.pop(
             'env_vars', {}
         )  # type: Optional[Dict[str, Dict[str, Any]]]
         self.modules = ModuleDefinition.from_list(
-            deployment.get('modules', [])  # can be none if current_dir
+            deployment.pop('modules', [])  # can be none if current_dir
         )  # type: List[ModuleDefinition]
-        self.module_options = deployment.get(
+        self.module_options = deployment.pop(
             'module_options', {}
         )  # type: Optional(Dict[str, Any])
-        self.name = deployment['name']  # type: str
-        self.regions = deployment.get('regions', [])  # type: List[str]
-        self.skip_npm_ci = deployment.get('skip-npm-ci', False)  # type: bool
+        self.name = deployment.pop('name')  # type: str
+        self.regions = deployment.pop('regions', [])  # type: List[str]
+        self.skip_npm_ci = deployment.pop('skip-npm-ci', False)  # type: bool
+
+        if deployment:
+            LOGGER.warning(
+                'Invalid keys found in deployment %s have been ignored: %s',
+                self.name, ', '.join(deployment.keys())
+            )
 
     @classmethod
     def from_list(cls, deployments):
@@ -197,17 +210,27 @@ class TestDefinition(ConfigComponent):
         """
         self.name = name
         self.type = test_type
-        self.args = args
+        self.args = args or {}
         self.required = required
 
     @classmethod
     def from_list(cls, tests):
         # type: (List[Dict[str, Any]]) -> List[TestDefinition]
         """Instantiate TestDefinitions from a list."""
-        return [cls(t.get('name', 'test_{}'.format(i + 1)),
-                    t['type'], t.pop('args', {}),
-                    t.get('required', True))
-                for i, t in enumerate(tests)]
+        results = []
+
+        for index, test in enumerate(tests):
+            name = test.pop('name', 'test_{}'.format(index + 1))
+            results.append(cls(name, test.pop('type'),
+                               test.pop('args', {}),
+                               test.pop('required', False)))
+
+            if test:
+                LOGGER.warning(
+                    'Invalid keys found in test %s have been ignored: %s',
+                    name, ', '.join(test.keys())
+                )
+        return results
 
 
 class Config(ConfigComponent):
@@ -250,9 +273,16 @@ class Config(ConfigComponent):
             sys.exit(1)
         with open(config_path) as data_file:
             config_file = yaml.safe_load(data_file)
-            return Config(config_file['deployments'],
-                          config_file.get('tests', []),
-                          config_file.get('ignore_git_branch', False))
+            result = Config(config_file.pop('deployments'),
+                            config_file.pop('tests', []),
+                            config_file.pop('ignore_git_branch', False))
+
+            if config_file:
+                LOGGER.warning(
+                    'Invalid keys found in runway file have been ignored: %s',
+                    ', '.join(config_file.keys())
+                )
+            return result
 
     @classmethod
     def find_config_file(cls, config_dir=None):
