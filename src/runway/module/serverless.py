@@ -93,14 +93,15 @@ def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too
                   for key in funcs.keys()}
     else:
         directories = []
-        for key in funcs.keys():
-            func_path = {'path': os.path.dirname(funcs[key].get('handler'))}
+        for (key, value) in funcs.items():
+            func_path = {'path': os.path.dirname(value.get('handler'))}
             if func_path not in directories:
-                directories.extend(func_path)
+                directories.append(func_path)
         hashes = {sls_config['service']: get_hash_of_files(path, directories)}
 
     sls_opts[0] = 'package'
-    sls_opts.extend(['--package', os.path.relpath(package_dir)])
+    sls_opts.extend(['--package', os.path.relpath(package_dir,
+                                                  path)])
     sls_package_cmd = generate_node_command(command='sls',
                                             command_opts=sls_opts,
                                             path=path)

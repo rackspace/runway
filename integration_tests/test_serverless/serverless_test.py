@@ -10,10 +10,11 @@ class ServerlessTest(Serverless):
 
     ENVS = ('dev', 'test')
 
-    def __init__(self, template, templates_dir, logger):
+    def __init__(self, template, templates_dir, environment, logger):
         """Initialize class."""
         self.template_name = template
         self.templates_dir = templates_dir
+        self.environment = environment
         self.logger = logger
 
     def run_runway(self, template, command='deploy'):
@@ -23,7 +24,7 @@ class ServerlessTest(Serverless):
             self.logger.info('Executing test "%s" in directory "%s"', template, template_dir)
             with change_dir(template_dir):
                 self.logger.info('Running "runway %s" on %s', command, template_dir)
-                return run_command(['runway', command])
+                return run_command(['runway', command], self.environment)
         else:
             self.logger.error('Directory not found: %s', template_dir)
             return 1

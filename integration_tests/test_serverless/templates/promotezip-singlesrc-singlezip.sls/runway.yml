@@ -11,5 +11,11 @@ deployments:
       dev:
         namespace: dev
         region: us-east-1
+      test:
+        namespace: test
+        region: us-east-1
     regions:
       - us-east-1
+    assume-role:
+      dev: &altaccountrole arn:aws:iam::395611358874:role/runway-integration-test-role
+      test: *altaccountrole

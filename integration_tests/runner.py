@@ -13,21 +13,25 @@ class Runner(object):
     WORKING_DIR = os.path.abspath(os.path.dirname(__file__))
     LOGGER = logging.getLogger('testsuite')
 
-    def run_tests(self):
-        """Run all integration test."""
-        return execute_tests(self, (test(self) for test in IntegrationTest.__subclasses__()))
-
-    def main(self):
-        """Main entry."""
+    def __init__(self):
+        """Initialize object."""
         if os.environ.get('DEBUG'):
             logging.basicConfig(level=logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger('testsuite')
+        self.working_dir = os.path.abspath(os.path.dirname(__file__))
 
-        import_tests(self, self.WORKING_DIR)
+    def run_tests(self):
+        """Run all integration test."""
+        return execute_tests([test(self.logger) for test in IntegrationTest.__subclasses__()], self.logger)
+
+    def main(self):
+        """Main entry."""
+        import_tests(self.logger, self.working_dir)
         errs = self.run_tests()
         if errs > 0:
-            self.LOGGER.error('Tests failed; Check logs.')
+            self.logger.error('Tests failed; Check logs.')
         return 1 if errs > 0 else 0
 
 
