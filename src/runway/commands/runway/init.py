@@ -10,6 +10,8 @@ from ..runway_command import RunwayCommand
 class Init(RunwayCommand):
     """Extend Base with init command."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):  # pylint: disable=no-self-use
         """Generate runway.yml."""
         if os.path.isfile('runway.yml'):

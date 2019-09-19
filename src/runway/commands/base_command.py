@@ -1,5 +1,5 @@
 """Base class for commands that need to parse the runway config."""
-from typing import List, Union  # pylint: disable=unused-import
+from typing import List, Optional, Union  # pylint: disable=unused-import
 import os
 import logging
 
@@ -9,10 +9,12 @@ from ..config import Config
 class BaseCommand(object):
     """Base class for commands."""
 
+    SKIP_FIND_CONFIG = False  # set to true for commands that don't need config
+
     def __init__(self,
                  cli_arguments,  # type: List[Union[str, list, bool]]
-                 env_root=None,  # type: str
-                 runway_config_dir=None  # type: str
+                 env_root=None,  # type: Optional[str]
+                 runway_config_dir=None  # type: Optional[str]
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
@@ -23,6 +25,11 @@ class BaseCommand(object):
             self.env_root = os.getcwd()
         else:
             self.env_root = env_root
+
+        if self.SKIP_FIND_CONFIG:
+            self.runway_config_path = None
+            self._runway_config = None
+            return
 
         # This may be invoked from a module directory in an environment;
         # account for that here if necessary
