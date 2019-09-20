@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - select modules based on a list of tags applied in the runway file (ex. `deployments[].modules[].tags[]`)
     - can be used to construct a list of tags a module must have to be selected
 - Terraform backend lookup via SSM params
+- class for handling the runway config file that warns on invalid keys
+- new top level `tests` to the runway config for user defined tests (cfn-lint, script, and yamllint)
+- alternative runway config file name `runway.yaml`
+
+### Removed
+- _default_ tests. trying to run the test command with no tests defined will now result in an error.
+- chef, flake8, pylint, and stacker blueprint tests (for single-binary compatibility)
 
 ## [0.47.1] - 2019-07-19
 ### Fixed

@@ -265,6 +265,8 @@ def generate_sample_tf_module(env_root, module_dir=None):
 class GenSample(RunwayCommand):
     """Extend Base with execute to run the module generators."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):
         """Run selected module generator."""
         if self._cli_arguments['cfn']:

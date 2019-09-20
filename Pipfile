@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"send2trash" = "*"
+send2trash = "*"
 awacs = "*"
 awscli = ">=1.16.121<2.0"
 docopt = "*"
@@ -15,15 +15,21 @@ yamllint = "*"
 zgitignore = "*"
 stacker = "~=1.6"
 botocore = ">=1.12.111"
-"boto3" = ">=1.9.111<2.0"
+boto3 = ">=1.9.111<2.0"
 pyyaml = "~=3.13"
 cfn_flip = "<=1.2.0"
-"flake8" = "*"
-pylint = "*"
 six = "*"
+cfn-lint = "*"
 
 [dev-packages]
-"pep8-naming" = "*"
-"flake8-docstrings" = "*"
+# python3 flake8-docstrings fails with pydocstyle 4:
+# https://github.com/PyCQA/pydocstyle/issues/375
+# newer versions do not support python2:
+# https://github.com/PyCQA/pydocstyle/pull/374
+pydocstyle = "<4.0.0"
+pep8-naming = "*"
+flake8-docstrings = "*"
+flake8 = "*"
+pylint = "*"
 pyinstaller = "*"
 mock = "~=3.0.5"

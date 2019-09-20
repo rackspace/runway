@@ -355,6 +355,12 @@ class ModulesCommand(RunwayCommand):
                 LOGGER.error('No region configured for any deployment')
                 sys.exit(1)
 
+    def execute(self):
+        # type: () -> None
+        """Execute the command."""
+        raise NotImplementedError('execute must be implimented for '
+                                  'subclasses of BaseCommand.')
+
     def _deploy_module(self, module, deployment, context, command):
         module_opts = {}
         if deployment.get('environments'):
@@ -367,7 +373,7 @@ class ModulesCommand(RunwayCommand):
             module_root = self.env_root
         else:
             module_root = os.path.join(self.env_root, module['path'])
-        module_opts = merge_dicts(module_opts, module)
+        module_opts = merge_dicts(module_opts, module.__dict__)
         module_opts = load_module_opts_from_file(module_root, module_opts)
         if deployment.get('skip-npm-ci'):
             module_opts['skip_npm_ci'] = True
@@ -524,7 +530,10 @@ def _module_name_for_display(module):
     """Extract a name for the module."""
     if isinstance(module, dict):
         return module['path']
-    return str(module)
+    try:
+        return module.path
+    except Exception:  # pylint: disable=broad-except
+        return str(module)
 
 
 def _module_menu_entry(module, environment_name):
