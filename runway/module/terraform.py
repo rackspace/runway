@@ -52,6 +52,23 @@ def create_config_backend_options(module_opts, env_name, env_vars):
                     StackName=val.split('::')[0]
                 )['Stacks'][0]['Outputs']
             )
+    if module_opts.get('terraform_backend_ssm_params'):
+        if not backend_opts.get('config'):
+            backend_opts['config'] = {}
+        if not backend_opts['config'].get('region'):
+            backend_opts['config']['region'] = env_vars['AWS_DEFAULT_REGION']
+
+        boto_args = extract_boto_args_from_env(env_vars)
+        ssm_client = boto3.client(
+            'ssm',
+            region_name=backend_opts['config']['region'],
+            **boto_args
+        )
+        for (key, val) in merge_nested_environment_dicts(module_opts.get('terraform_backend_ssm_params'),  # noqa pylint: disable=line-too-long
+                                                         env_name).items():
+            backend_opts['config'][key] = ssm_client.get_parameter(
+                Name=val
+            )['Parameter']['Value']
 
     return backend_opts
 
