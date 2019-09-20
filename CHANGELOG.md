@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `--tag <tag>...` option for deploy/destroy
     - select modules based on a list of tags applied in the runway file (ex. `deployments[].modules[].tags[]`)
     - can be used to construct a list of tags a module must have to be selected
+- Terraform backend lookup via SSM params
 
 ## [0.47.1] - 2019-07-19
 ### Fixed
