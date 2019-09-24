@@ -9,6 +9,10 @@ class LocalToLocalBackend(Terraform):
 
     TEST_NAME = __name__
 
+    def __init__(self, logger):
+        """Init class."""
+        self.logger = logger
+
     def deploy_backend(self, backend):
         """Deploy provider."""
         self.copy_template('{}-backend.tf'.format(backend))
@@ -17,13 +21,11 @@ class LocalToLocalBackend(Terraform):
         with change_dir(self.base_dir):
             return run_command(['runway', 'deploy'])
 
-    def init(self):
-        """Initialize test."""
+    def run(self):
+        """Run tests."""
         self.clean()
         self.set_tf_version(11)
 
-    def run(self):
-        """Run tests."""
         assert self.deploy_backend('no') == 0,\
             '{}: "No local backend" failed'.format(self.TEST_NAME)
         # https://github.com/hashicorp/terraform/issues/17663
@@ -32,7 +34,7 @@ class LocalToLocalBackend(Terraform):
 
     def teardown(self):
         """Teardown any created resources."""
-        self.LOGGER.info('Tearing down: %s', self.TEST_NAME)
+        self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.base_dir):
             run_command(['runway', 'destroy'])
         self.clean()

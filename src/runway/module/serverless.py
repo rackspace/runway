@@ -71,25 +71,17 @@ def run_sls_print(sls_opts, env_vars, path):
     sls_info_cmd = generate_node_command(command='sls',
                                          command_opts=sls_info_opts,
                                          path=path)
+    return yaml.safe_load(subprocess.check_output(sls_info_cmd,
+                                                  env=env_vars))
 
-    return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
 
-
-def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too-many-locals
-    """Run sls package command."""
-    bucketname = options.get('options', {}).get('promotezip', {}).get('bucketname', {})
-    package_dir = tempfile.mkdtemp()
-    LOGGER.debug('Package directory: %s', package_dir)
-
-    if not bucketname:
-        raise ValueError('"bucketname" must be specified when using "promotezip"')
-
-    ensure_bucket_exists(bucketname, context.env_region)
-    sls_config = run_sls_print(sls_opts, context.env_vars, path)
+def get_src_hash(sls_config, path):
+    """Get hash(es) of serverless source."""
     funcs = sls_config['functions']
 
     if sls_config.get('package', {}).get('individually'):
-        hashes = {key: get_hash_of_files(os.path.dirname(funcs[key].get('handler')))
+        hashes = {key: get_hash_of_files(os.path.join(path,
+                                                      os.path.dirname(funcs[key].get('handler'))))
                   for key in funcs.keys()}
     else:
         directories = []
@@ -98,6 +90,21 @@ def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too
             if func_path not in directories:
                 directories.append(func_path)
         hashes = {sls_config['service']: get_hash_of_files(path, directories)}
+
+    return hashes
+
+def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too-many-locals
+    """Run sls package command."""
+    bucketname = options.get('options', {}).get('promotezip', {}).get('bucketname', {})
+    if not bucketname:
+        raise ValueError('"bucketname" must be specified when using "promotezip"')
+
+    package_dir = tempfile.mkdtemp()
+    LOGGER.debug('Package directory: %s', package_dir)
+
+    ensure_bucket_exists(bucketname, context.env_region)
+    sls_config = run_sls_print(sls_opts, context.env_vars, path)
+    hashes = get_src_hash(sls_config, path)
 
     sls_opts[0] = 'package'
     sls_opts.extend(['--package', os.path.relpath(package_dir,
@@ -130,6 +137,9 @@ def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too
                                            command_opts=sls_opts,
                                            path=path)
 
+    LOGGER.info("Running sls deploy on %s (\"%s\")",
+                os.path.basename(path),
+                format_npm_command_for_logging(sls_deploy_cmd))
     run_module_command(cmd_list=sls_deploy_cmd,
                        env_vars=context.env_vars)
 
@@ -177,6 +187,7 @@ class Serverless(RunwayModule):
                                        self.options,
                                        self.context,
                                        self.path)
+                        return response
 
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,

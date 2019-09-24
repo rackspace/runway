@@ -2,6 +2,7 @@
 from __future__ import print_function
 import os
 import logging
+import argparse
 from integration_test import IntegrationTest
 from util import (execute_tests, import_tests)
 
@@ -9,11 +10,7 @@ from util import (execute_tests, import_tests)
 class Runner(object):
     """Runner for all integration tests."""
 
-    # Set working directory and logger
-    WORKING_DIR = os.path.abspath(os.path.dirname(__file__))
-    LOGGER = logging.getLogger('testsuite')
-
-    def __init__(self):
+    def __init__(self, test_to_run):
         """Initialize object."""
         if os.environ.get('DEBUG'):
             logging.basicConfig(level=logging.DEBUG)
@@ -21,14 +18,19 @@ class Runner(object):
             logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger('testsuite')
         self.working_dir = os.path.abspath(os.path.dirname(__file__))
+        if test_to_run:
+            self.test_to_run = 'test_{0}/test_{0}'.format(test_to_run)
+        else:
+            self.test_to_run = 'test_*/test_*'
 
     def run_tests(self):
         """Run all integration test."""
-        return execute_tests([test(self.logger) for test in IntegrationTest.__subclasses__()], self.logger)
+        return execute_tests([test(self.logger) for test in IntegrationTest.__subclasses__()],
+                             self.logger)
 
     def main(self):
-        """Main entry."""
-        import_tests(self.logger, self.working_dir)
+        """Import and run tests."""
+        import_tests(self.logger, self.working_dir, self.test_to_run)
         errs = self.run_tests()
         if errs > 0:
             self.logger.error('Tests failed; Check logs.')
@@ -36,5 +38,5 @@ class Runner(object):
 
 
 if __name__ == "__main__":
-    RUNNER = Runner()
+    RUNNER = Runner(None)
     RUNNER.main()

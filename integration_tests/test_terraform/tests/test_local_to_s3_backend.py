@@ -3,10 +3,15 @@ from runway.util import change_dir
 from test_terraform.test_terraform import Terraform
 from util import run_command
 
+
 class LocalToS3Backend(Terraform):
     """Test changing between local and S3 backends."""
 
     TEST_NAME = __name__
+
+    def __init__(self, logger):
+        """Init class."""
+        self.logger = logger
 
     def deploy_backend(self, backend):
         """Deploy provider."""
@@ -19,20 +24,18 @@ class LocalToS3Backend(Terraform):
         with change_dir(self.base_dir):
             return run_command(['runway', 'deploy'])
 
-    def init(self):
-        """Initialize test."""
+    def run(self):
+        """Run tests."""
         self.clean()
         self.run_stacker()
         self.set_tf_version(11)
 
-    def run(self):
-        """Run tests."""
         assert self.deploy_backend('local') == 0, '{}: Local backend failed'.format(__name__)
         assert self.deploy_backend('s3') == 0, '{}: S3 backend failed'.format(__name__)
 
     def teardown(self):
         """Teardown any created resources."""
-        self.LOGGER.info('Tearing down: %s', self.TEST_NAME)
+        self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.base_dir):
             run_command(['runway', 'destroy'])
         self.clean()

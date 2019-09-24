@@ -17,7 +17,7 @@ def run_command(cmd_list, env_vars=None):
     return 0
 
 
-def import_tests(logger, path, pattern='test_*/test_*'):
+def import_tests(logger, path, pattern):
     """Find and import all tests from a given path."""
     logger.info('Loading tests from "%s" with pattern: "%s"', path, pattern)
     tests = glob.glob(os.path.join(path, '{}.py'.format(pattern)))
