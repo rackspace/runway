@@ -1,4 +1,4 @@
-"""The dismantle command."""
+"""Alias of `destroy`_."""
 
 from .destroy import Destroy
 

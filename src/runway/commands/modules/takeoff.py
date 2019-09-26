@@ -1,4 +1,4 @@
-"""The takeoff command."""
+"""Alias of `deploy`_."""
 
 from .deploy import Deploy
 

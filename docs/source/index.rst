@@ -29,6 +29,7 @@ Very simple configuration to:
    runway_config
    module_configuration
    defining_tests
+   commands
    additional_functionality
    quickstart
    staticsite_config

@@ -454,7 +454,7 @@ class Config(ConfigComponent):
             deployments (List[Dict[str, Any]]): A list of
                 :class:`deployments<runway.config.DeploymentDefinition>`
                 that are processed in the order they are defined.
-            tests (List[Dict[str, Any]]): A list of
+            tests (Optional[List[Dict[str, Any]]]): A list of
                 :class:`tests<runway.config.TestDefinition>` that are
                 processed in the order they are defined.
             ignore_git_branch (bool): Disable git branch lookup when

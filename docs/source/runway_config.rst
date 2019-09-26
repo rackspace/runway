@@ -15,15 +15,21 @@ Top-Level Configuration
 
 .. autoclass:: runway.config.Config
 
+.. _runway-deployment:
+
 Deployment
 ^^^^^^^^^^
 
 .. autoclass:: runway.config.DeploymentDefinition
 
+.. _runway-module:
+
 Module
 ^^^^^^
 
 .. autoclass:: runway.config.ModuleDefinition
+
+.. _runway-test:
 
 Test
 ^^^^
