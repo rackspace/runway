@@ -117,7 +117,8 @@ class ModuleDefinition(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """
+        """.. Runway module definition.
+
         Keyword Args:
             name (str): Name of the module. Used to more easily identify
                 where different modules begin/end in the logs.
@@ -151,6 +152,9 @@ class ModuleDefinition(ConfigComponent):
               detailed module ``options``
             - :ref:`Repo Structure<repo-structure>` - examples of
               directory structure
+            - :ref:`command-deploy`
+            - :ref:`command-destroy`
+            - :ref:`command-plan`
 
         """
         self.name = name
@@ -250,7 +254,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
     def __init__(self, deployment):
         # type: (Dict[str, Any]) -> None
-        """
+        """.. Runway deployment definition.
+
         Keyword Args:
             account-alias (Optional[Dict[str, str]]): A mapping of
                 ``$environment: $alias`` that, if provided, is used to
@@ -291,6 +296,9 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
         References:
             - :class:`module<runway.config.ModuleDefinition>`
+            - :ref:`command-deploy`
+            - :ref:`command-destroy`
+            - :ref:`command-plan`
 
         """
         self.account_alias = deployment.pop(
@@ -366,7 +374,8 @@ class TestDefinition(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """
+        """.. Runway test definitions.
+
         Keyword Args:
             name (str): Name of the test. Used to more easily identify
                 where different tests begin/end in the logs.
@@ -381,8 +390,10 @@ class TestDefinition(ConfigComponent):
                 fails. *(default: true)*
 
         References:
-            - :ref:`Build-in Test Types<built-in-test-types>` - Supported test types and their
+            - :ref:`Build-in Test Types<built-in-test-types>` - Supported
+              test types and their
               arguments
+            - :ref:`test command<command-test>`
 
         """
         self.name = name
@@ -449,7 +460,8 @@ class Config(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """
+        """.. Top-level runway config file.
+
         Keyword Args:
             deployments (List[Dict[str, Any]]): A list of
                 :class:`deployments<runway.config.DeploymentDefinition>`
