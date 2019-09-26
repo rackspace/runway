@@ -5,12 +5,13 @@
 
 When run, the environment is determined from the current git branch
 unless ``ignore_git_branch: true`` is specified in the
-:ref:`runway config file<runway-config-options>`. If the
-``DEPLOY_ENVIRONMENT`` environment variable is set, it's
-value will be used. The environment identified here is used to determine
-the env/config files to use. It is also used with options defined in the
-runway config file such as ``assume-role``, ``account-id``, etc. See
-:ref:`Runway Config<runway-config-options>` for details on these options.
+:ref:`runway config file<runway-config>`. If the ``DEPLOY_ENVIRONMENT``
+environment variable is set, it's value will be used. If neither the git
+branch or environment variable are available, the directory name is used.
+The environment identified here is used to determine the env/config files
+to use. It is also used with options defined in the runway config file
+such as ``assume-role``, ``account-id``, etc. See
+:ref:`Runway Config<runway-config>` for details on these options.
 
 Plan will always be run against all deployments for the determined
 environment.

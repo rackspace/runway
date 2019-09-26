@@ -1,4 +1,27 @@
-"""The init command."""
+"""Creates a sample :ref:`runway-config` in the current directory.
+
+If a :ref:`runway config file<runway-config>` is already present, no
+action is taken.
+
+Example:
+  .. code-block:: shell
+
+    $ runway init
+
+.. rubric:: Sample Runway Config File
+.. code-block:: yaml
+
+    ---
+    # See full syntax at https://docs.onica.com/projects/runway/en/latest/
+    deployments:
+      - modules:
+          - nameofmyfirstmodulefolder
+          - nameofmysecondmodulefolder
+          # - etc...
+        regions:
+          - us-east-1
+
+"""
 from __future__ import print_function
 
 import os
@@ -19,6 +42,7 @@ class Init(RunwayCommand):
             sys.exit(1)
         with open('runway.yml', 'w') as stream:
             stream.write("""---
+# See full syntax at https://docs.onica.com/projects/runway/en/latest/
 deployments:
   - modules:
       - nameofmyfirstmodulefolder

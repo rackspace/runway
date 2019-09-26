@@ -8,9 +8,9 @@ follow:
 
 Git Branches as Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This example shows 2 modules using environment git branches (these same files
-would be present in each environment branch, with changes to any environment
-promoted through branches)::
+This example shows two :ref:`modules<runway-module>` using environment git
+branches (these same files would be present in each environment branch, with
+changes to any environment promoted through branches)::
 
     .
     ├── myapp.cfn
@@ -28,9 +28,10 @@ promoted through branches)::
 
 Directories as Environments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The same 2 modules from the above Git Branches as Environments structure can
-instead be stored in a normal single-branch git repo. Each directory
-correlates with an environment (dev and prod in this example).
+The same two :ref:`modules<runway-module>` from the above `Git Branches as
+Environments`_ structure can instead be stored in a normal single-branch git
+repo. Each directory correlates with an environment (dev and prod in this
+example).
 
 Environment changes are done by copying the environments' contents between
 each other. E.g., promotion from dev to prod could be as simple as
@@ -70,12 +71,12 @@ environments are more hand managed, this is not technically required::
 
 Directories as Environments with a Single Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Another sample repo structure, showing environment folders containing a single 
-CloudFormation module at their root (combining the ``current_dir`` &
-``ignore_git_branch`` "Runway Config File" options to merge the Environment &
-Module folders).
+Another sample repo structure, showing environment folders containing a single
+CloudFormation :ref:`modules<runway-module>` at their root (combining the
+``current_dir`` & ``ignore_git_branch`` :ref:`runway config file
+<runway-config>` options to merge the Environment & Module folders).
 
-See the Directories as Environments example above for more information on
+See the `Directories as Environments`_ example above for more information on
 why this shows prod config files in the dev folder and vice versa::
 
     .

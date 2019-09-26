@@ -5,7 +5,7 @@
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
 
-.. _runway-config-options:
+.. _runway-config:
 
 Runway Config File
 ==================

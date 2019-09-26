@@ -25,12 +25,11 @@ Very simple configuration to:
    basic_concepts
    installation
    how_to_use
+   commands
    repo_structure
    runway_config
    module_configuration
    defining_tests
-   commands
-   additional_functionality
    quickstart
    staticsite_config
    developers

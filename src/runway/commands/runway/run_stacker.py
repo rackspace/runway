@@ -1,4 +1,17 @@
-"""The run-stacker command."""
+"""Execute they embedded copy of `Stacker`_.
+
+Runway's embedded version of `Stacker`_ is generally updated with new
+features much quicker then mainstream `Stacker`_. There are times when
+a `Stacker`_ deployment will be successful with runway and not with
+mainstream `Stacker`_ because of this so, runway exposes it's embedded
+`Stacker`_ for standalone use.
+
+Example:
+  .. code-block:: shell
+
+    $ runway run-stacker build example.env example.yaml
+
+"""
 
 import logging
 # import platform

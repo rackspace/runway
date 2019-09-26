@@ -1,4 +1,14 @@
-"""The test command."""
+"""Execute :ref:`tests<runway-test>` as defined in the :ref:`runway-config`.
+
+If one of the tests fails, the command will exit unless the ``required``
+option is set to ``false`` for the failing test. If it is not required,
+the next test will be executed.
+
+References:
+    - :ref:`Runway Config File/Test<runway-test>`
+    - :ref:`Defining Tests<defining-tests>`
+
+"""
 import logging
 import sys
 import traceback

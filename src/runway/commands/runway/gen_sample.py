@@ -1,4 +1,50 @@
-"""The gen-sample command."""
+"""Generate a sample :ref:`runway module<runway-module>` directory.
+
+The sample module is created in the current directory. If a directory
+already exists with the name it tries to use, it will not create the
+sample directory.
+
+.. rubric:: Available Samples
+
++----------------+-----------------------------------------------------+
+|      Name      |  Description                                        |
++================+=====================================================+
+| ``cdk-csharp`` | `AWS CDK`_ :ref:`module<runway-module>` using C#    |
++----------------+-----------------------------------------------------+
+| ``cdk-py``     | `AWS CDK`_ :ref:`module<runway-module>` using Python|
++----------------+-----------------------------------------------------+
+| ``cdk-tsc``    | `AWS CDK`_ :ref:`module<runway-module>` using       |
+|                | TypeScript                                          |
++----------------+-----------------------------------------------------+
+| ``cfn``        | `CloudFormation`_ :ref:`module<runway-module>` to   |
+|                | deploy a `Terraform`_ backend.                      |
++----------------+-----------------------------------------------------+
+| ``sls``        | `Serverless Framework`_ :ref:`module<runway-module>`|
++----------------+-----------------------------------------------------+
+| ``sls-tsc``    | `Serverless Framework`_ :ref:`module<runway-module>`|
+|                | using TypeScript                                    |
++----------------+-----------------------------------------------------+
+| ``stacker``    | `Troposphere`_/`Stacker`_                           |
+|                | :ref:`module<runway-module>` to deploy a            |
+|                | `Terraform`_ backend                                |
++----------------+-----------------------------------------------------+
+| ``tf``         | `Terraform`_ :ref:`module<runway-module>`           |
++----------------+-----------------------------------------------------+
+
+.. rubric:: Example
+
+.. code-block:: shell
+
+    # create a "sampleapp.cfn" sample module directory
+    $ runway gen-sample cfn
+
+    # create a "runway-sample-tfstate.cfn" sample module directory
+    $ runway gen-sample stacker
+
+    # create a "sampleapp.sls" sample module directory
+    $ runway gen-sample sls
+
+"""
 import logging
 import os
 import shutil
