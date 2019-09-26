@@ -2,7 +2,7 @@
 from __future__ import print_function
 import os
 import logging
-import argparse
+import sys
 from integration_test import IntegrationTest
 from util import (execute_tests, import_tests)
 
@@ -38,5 +38,8 @@ class Runner(object):
 
 
 if __name__ == "__main__":
-    RUNNER = Runner(None)
+    TEST_NAME = None
+    if len(sys.argv) > 1:
+        TEST_NAME = sys.argv[1]
+    RUNNER = Runner(TEST_NAME)
     RUNNER.main()

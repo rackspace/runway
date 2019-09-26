@@ -11,12 +11,12 @@ from botocore.exceptions import ClientError
 LOGGER = logging.getLogger('runway')
 
 
-def _get_client(session=None, region='us-east-1'):
+def _get_client(session=None, region=None):
     """Get S3 boto client."""
     return session.client('s3') if session else boto3.client('s3', region_name=region)
 
 
-def _get_resource(session=None, region='us-east-1'):
+def _get_resource(session=None, region=None):
     """Get S3 boto resource."""
     return session.resource('s3') if session else boto3.resource('s3', region_name=region)
 
@@ -91,9 +91,9 @@ def ensure_bucket_exists(bucket_name, region='us-east-1', session=None):
                                         })
 
 
-def does_s3_object_exist(bucket, key, session=None):
+def does_s3_object_exist(bucket, key, session=None, region='us-east-1'):
     """Determine if object exists on s3."""
-    s3_resource = _get_resource(session)
+    s3_resource = _get_resource(session, region)
 
     try:
         s3_resource.Object(bucket, key).load()
