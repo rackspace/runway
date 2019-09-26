@@ -24,6 +24,8 @@ def strip_leading_option_delim(args):
 class RunStacker(RunwayCommand):
     """Extend RunwayCommand with execution of Stacker."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):
         """Execute stacker."""
         cmd_line_args = strip_leading_option_delim(

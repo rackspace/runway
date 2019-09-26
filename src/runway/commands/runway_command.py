@@ -1,77 +1,17 @@
 """runway base module."""
 from __future__ import print_function
 
-import glob
 import logging
 import os
-import sys
 
-import yaml
-
+from .base_command import BaseCommand
 from .. import __version__ as version
 
 LOGGER = logging.getLogger('runway')
 
 
-class RunwayCommand(object):
+class RunwayCommand(BaseCommand):
     """Base class for deployer classes."""
-
-    def __init__(self, cli_arguments, env_root=None, runway_config_dir=None):
-        """Initialize base class."""
-        self._cli_arguments = cli_arguments
-
-        if env_root is None:
-            self.env_root = os.getcwd()
-        else:
-            self.env_root = env_root
-
-        if runway_config_dir is None:
-            self.runway_config_path = os.path.join(
-                self.env_root,
-                'runway.yml'
-            )
-        else:
-            self.runway_config_path = os.path.join(
-                runway_config_dir,
-                'runway.yml'
-            )
-        self._runway_config = None
-
-    def get_env_dirs(self):
-        """Return list of directories in env_root."""
-        repo_dirs = next(os.walk(self.env_root))[1]
-        if '.git' in repo_dirs:
-            repo_dirs.remove('.git')  # not relevant for any repo operations
-        return repo_dirs
-
-    def get_python_files_at_env_root(self):
-        """Return list of python files in env_root."""
-        return glob.glob(os.path.join(self.env_root, '*.py'))
-
-    def get_yaml_files_at_env_root(self):
-        """Return list of yaml files in env_root."""
-        yaml_files = glob.glob(
-            os.path.join(self.env_root, '*.yaml')
-        )
-        yml_files = glob.glob(
-            os.path.join(self.env_root, '*.yml')
-        )
-        return yaml_files + yml_files
-
-    def get_cookbook_dirs(self, base_dir=None):
-        """Find cookbook directories."""
-        if base_dir is None:
-            base_dir = self.env_root
-
-        cookbook_dirs = []
-        dirs_to_skip = set(['.git'])
-        for root, dirs, files in os.walk(base_dir):  # pylint: disable=W0612
-            dirs[:] = [d for d in dirs if d not in dirs_to_skip]
-            for name in files:
-                if name == 'metadata.rb':
-                    if 'cookbook' in os.path.basename(os.path.dirname(root)):
-                        cookbook_dirs.append(root)
-        return cookbook_dirs
 
     def path_only_contains_dirs(self, path):
         """Return boolean on whether a path only contains directories."""
@@ -93,27 +33,16 @@ class RunwayCommand(object):
                 empty_dirs.append(i)
         return empty_dirs
 
-    def parse_runway_config(self):
-        """Read and parse runway.yml."""
-        if not os.path.isfile(self.runway_config_path):
-            LOGGER.error("Runway config file was not found (looking for "
-                         "%s)",
-                         self.runway_config_path)
-            sys.exit(1)
-        with open(self.runway_config_path) as data_file:
-            return yaml.safe_load(data_file)
-
-    @property
-    def runway_config(self):
-        """Return parsed runway.yml."""
-        if not self._runway_config:
-            self._runway_config = self.parse_runway_config()
-        return self._runway_config
-
     @staticmethod
     def version():
         """Show current package version."""
         print(version)
+
+    def execute(self):
+        # type: () -> None
+        """Execute the command."""
+        raise NotImplementedError('execute must be implimented for '
+                                  'subclasses of BaseCommand.')
 
 
 def get_env_from_branch(branch_name):

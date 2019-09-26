@@ -284,6 +284,40 @@ and/or for a group of modules:
             bucket: StackName::OutputName  # e.g. common-tf-state::TerraformStateBucketName
             dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
 
+Backend SSM Parameters in runway.yml
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Similar to the CloudFormation lookup, backend config options can be looked up
+directly from SSM Parameters.
+
+Either for a single module::
+
+    ---
+    deployments:
+      - modules:
+          - path: mytfmodule
+            options:
+              terraform_backend_config:
+                region: us-east-1
+              terraform_backend_ssm_params:
+                bucket: ParamNameHere
+                dynamodb_table: ParamNameHere
+
+
+and/or for a group of modules:
+::
+
+    ---
+    deployments:
+      - modules:
+          - path: mytfmodule
+          - path: anothermytfmodule
+        module_options:  # shared between all modules in deployment
+          terraform_backend_config:
+            region: us-east-1
+          terraform_backend_ssm_params:
+            bucket: ParamNameHere
+            dynamodb_table: ParamNameHere
+
 
 Part 4: Variable Values
 -----------------------

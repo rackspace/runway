@@ -28,6 +28,7 @@ Very simple configuration to:
    repo_structure
    runway_config
    module_configuration
+   defining_tests
    additional_functionality
    quickstart
    staticsite_config

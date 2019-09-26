@@ -19,4 +19,6 @@ def find_command_class(possible_command_names):
 
 
 def _not_base_class(name_class_pair):
-    return name_class_pair[0] not in ['CalledProcessError', 'RunwayCommand', 'ModulesCommand']
+    return name_class_pair[0] not in ['BaseCommand', 'CalledProcessError',
+                                      'RunwayCommand', 'ModulesCommand',
+                                      'Config']

@@ -15,6 +15,8 @@ LOGGER = logging.getLogger('runway')
 class GitClean(RunwayCommand):
     """Extend RunwayCommand with execute to run the gitclean method."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):
         """Execute git clean to remove untracked/build files."""
         clean_cmd = ['git', 'clean', '-X', '-d']

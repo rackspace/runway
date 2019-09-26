@@ -1,4 +1,5 @@
 .. _runway-config-options:
+.. highlight:: yaml
 
 Runway Config File
 ==================
@@ -6,6 +7,24 @@ Runway Config File
 runway.yml sample::
 
     ---
+    # Order that tests will be run. Test execution is triggered with the
+    # 'runway test' command. Testing will fail and exit if any of the
+    # individual tests fail unless they are marked with 'required: false'.
+    # Please see the doc section dedicated to tests for more details.
+
+    tests:
+      - name: test-names-are-optional
+        type: script  # there are a few built in test types
+        args:  # each test has their own set of arguments they can accept
+          commands:
+            - echo "Beginning a test..."
+            - cd app.sls && npm test && cd ..
+            - echo "Test complete!"
+      - name: unimportant-test
+        type: cfn-lint
+        required: false  # tests will still pass if this fails
+      - type: yamllint  # not all tests accept arguments
+
     # Order that modules will be deployed. A module will be skipped if a
     # corresponding env/config is not present (either in a file in its folder
     # or via an environments option specified here on the deployment or
@@ -98,6 +117,15 @@ runway.yml sample::
               dev:
                 region: us-east-1
                 image_id: ami-abc123
+            tags:  # Modules can optionally have tags.
+              # This is a list of strings that can be "targeted"
+              # by passing arguments to the deploy/destroy command.
+              - some-string
+              - app:example
+              - tier:web
+              - owner:onica
+              # example: `runway deploy --tag app:example --tag tier:web`
+              #   This would select any modules with BOTH app:example AND tier:web
         regions:
           - us-west-2
 
@@ -105,7 +133,7 @@ runway.yml sample::
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-runway.yml can also be placed in a module folder (e.g. a repo/environment containing 
+runway.yml can also be placed in a module folder (e.g. a repo/environment containing
 only one module doesn't need to nest the module in a subfolder)::
 
     ---
@@ -116,7 +144,7 @@ only one module doesn't need to nest the module in a subfolder)::
           - us-west-2
         assume-role:
           arn: arn:aws:iam::account-id:role/role-name
-    
+
     # If using environment folders instead of git branches, git branch lookup can
     # be disabled entirely (see "Repo Structure"). See "Directories as Environments
     # with a Single Module" in "Repo Structure".

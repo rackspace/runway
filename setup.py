@@ -2,7 +2,6 @@
 
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
-from sys import version_info
 
 from setuptools import find_packages, setup
 
@@ -24,9 +23,6 @@ INSTALL_REQUIRES = [
     'cfn_flip<=1.2.0',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
-    'flake8',
-    'flake8-docstrings',
-    'pep8-naming',
     'future',
     # embedded pyhcl is 0.3.12
     # with the LICENSE file added to its root folder
@@ -41,6 +37,7 @@ INSTALL_REQUIRES = [
     # with the LICENSE file added to its root folder
     # and the following patches applied
     # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
+    # https://github.com/cloudtools/stacker/pull/744 (diffs via CFN changesets)
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
@@ -52,18 +49,7 @@ INSTALL_REQUIRES = [
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
     'urllib3>=1.20,<1.25',
-    # python3 flake8-docstrings fails with pydocstyle 4:
-    # https://github.com/PyCQA/pydocstyle/issues/375
-    # newer versions do not support python2:
-    # https://github.com/PyCQA/pydocstyle/pull/374
-    "pydocstyle<=3.0.0"
 ]
-
-# pylint v2+ is only py3 compatible
-if version_info[0] == 2:
-    INSTALL_REQUIRES.append('pylint~=1.9')
-else:
-    INSTALL_REQUIRES.append('pylint')
 
 setup(
     name='runway',
@@ -92,7 +78,12 @@ setup(
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'test': ['flake8', 'pep8-naming', 'flake8-docstrings', 'pylint'],
+        'test': ['flake8', 'pep8-naming', 'flake8-docstrings', 'pylint',
+                 # python3 flake8-docstrings fails with pydocstyle 4:
+                 # https://github.com/PyCQA/pydocstyle/issues/375
+                 # newer versions do not support python2:
+                 # https://github.com/PyCQA/pydocstyle/pull/374
+                 'pydocstyle<4.0.0'],
     },
     entry_points={
         'console_scripts': [

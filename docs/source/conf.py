@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: skip-file
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -12,21 +13,25 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+from os.path import dirname, realpath
+import os.path
+import sys
+root_dir = dirname(dirname(dirname(realpath(__file__))))
+sys.path.insert(0, os.path.join(root_dir, 'src'))
+
+from runway import __version__  # noqa
 
 
 # -- Project information -----------------------------------------------------
 
 project = u'runway'
-copyright = u'2018, Onica Group'
+copyright = u'2019, Onica Group'
 author = u'Onica Group'
 
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u'0.32.0'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------

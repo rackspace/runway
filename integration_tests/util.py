@@ -84,3 +84,9 @@ def copy_file(src, dest):
         shutil.copy(src, dest)
     else:
         print('copy: File not found: %s' % src)
+
+
+def copy_dir(src, dest):
+    """Copy dir to destination."""
+    if os.path.isdir(src):
+        shutil.copytree(src, dest, copy_function=shutil.copy2)

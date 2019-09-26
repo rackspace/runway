@@ -12,6 +12,8 @@ LOGGER = logging.getLogger('runway')
 class RunPython(RunwayCommand):
     """Extend RunwayCommand with execution of python files."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):
         """Execute python script."""
         sys.path.insert(1, get_embedded_lib_path())
