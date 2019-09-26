@@ -38,7 +38,74 @@ class ConfigComponent(object):
 
 
 class ModuleDefinition(ConfigComponent):
-    """Items in the modules definition block of a deployment."""
+    """A module defines the directory to be processed and applicable options.
+
+    It can consist of `CloudFormation`_ (using `Stacker`_),
+    `Troposphere`_ (using `Stacker`_), `Terraform`_,
+    `Serverless Framework`_, or `AWS CDK`_. Each directory should end
+    with their corresponding suffix for identification but, this is not
+    required. See :ref:`Repo Structure<repo-structure>` for examples for
+    module directory structure.
+
+    +------------------+-----------------------------------------------+
+    | Suffix/Extension | IaC Tool/Framework                            |
+    +==================+===============================================+
+    | ``.cdk``         | `AWS CDK`_                                    |
+    +------------------+-----------------------------------------------+
+    | ``.cfn``         | `CloudFormation`_, `Troposphere`_ (`Stacker`_)|
+    +------------------+-----------------------------------------------+
+    | ``.sls``         | `Serverless Framework`_                       |
+    +------------------+-----------------------------------------------+
+    | ``.tf``          | `Terraform`_                                  |
+    +------------------+-----------------------------------------------+
+
+    A module is only deployed if there is a corresponding env/config
+    present. This can take the form of either a file in the module folder
+    or the ``environments`` option being defined. The naming format
+    varies per-module type. See
+    :ref:`Module Configurations<module-configurations>` for acceptable
+    env/config file name formats.
+
+    Modules can be defined as a string or a mapping. The minimum
+    requirement for a module is a string that is equal to the name of
+    the module directory. Providing a string is the same as providing a
+    value for ``path`` in a mapping definition.
+
+    Example:
+      .. code-block:: yaml
+
+        deployments:
+          - modules:
+              - my-module.cfn  # this
+              - path: my-module.cfn  # is the same as this
+
+    Using a map to define a module provides the ability to specify
+    per-module ``options``, environment values, tags, and even a custom
+    class for processing the module. The options that can be used with
+    each module vary. For detailed information about module specific
+    options, see :ref:`Module Configurations<module-configurations>`.
+
+    Example:
+      .. code-block:: yaml
+
+        deployments:
+          - modules:
+              - name: my-module
+                path: my-module.tf
+                environments:
+                  dev:
+                    image_id: ami-1234
+                tags:
+                  - app:example
+                  - my-tag
+                options:
+                  terraform_backend_config:
+                    region: us-east-1
+                  terraform_backend_cfn_outputs:
+                    bucket: StackName::OutputName
+                    dynamodb_table: StackName::OutputName
+
+    """
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  name,  # type: str
@@ -50,22 +117,40 @@ class ModuleDefinition(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """Runway module definition.
-
-        Args:
-            name (str): Name of the module. Used to easily parse logs.
-            path (str): Path to the module.
+        """
+        Keyword Args:
+            name (str): Name of the module. Used to more easily identify
+                where different modules begin/end in the logs.
+            path (str): Path to the module relative to the runway config
+                file. This cannot be higher than the runway config file.
             class_path (Optional[str]): Path to custom runway module class.
-                Also used for static site deployments.
+                Also used for static site deployments. See
+                :ref:`Module Configurations<module-configurations>` for
+                detailed usage.
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
                 variables to environment names. When run, the variables
-                defined here are merged with those in the .env file. If
-                this is defined, the .env files can be omitted.
+                defined here are merged with those in the
+                ``.env``/``.tfenv``/environment config file. If this is
+                defined, ``.env`` files can be omitted and the module
+                will still be processed.
             options (Optional[Dict[str, Any]]): Module specific options.
-                See the Module Configurations section of the docs for more
-                details.
-            tags (Optional[Dict[str, str]]): Module tags used to select which
-                modules to process using CLI arguments. (`--tag`)
+                See :ref:`Module Configurations<module-configurations>`
+                for detailed usage.
+            tags (Optional[Dict[str, str]]): Module tags used to select
+                which modules to process using CLI arguments.
+                (``--tag <tag>...``)
+
+        References:
+            - `AWS CDK`_
+            - `CloudFormation`_
+            - `Serverless Framework`_
+            - `Stacker`_
+            - `Troposphere`_
+            - `Terraform`_
+            - :ref:`Module Configurations<module-configurations>` -
+              detailed module ``options``
+            - :ref:`Repo Structure<repo-structure>` - examples of
+              directory structure
 
         """
         self.name = name
@@ -100,58 +185,122 @@ class ModuleDefinition(ConfigComponent):
 
 
 class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
-    """Items in the deployments definition block of a runway config."""
+    """A deployment defines modules and options that effect the modules.
+
+    Deployments are processed during a ``deploy``/``destroy``/``plan``
+    action. If processing of one deployment fails, the action with end.
+
+    During a ``deploy``/``destroy`` action, the user has the option to
+    select which deployment will run unless the ``CI`` environment
+    variable is set, the ``--tag <tag>...`` cli option was provided, or
+    only one deployment is defined.
+
+    Example:
+      .. code-block:: yaml
+
+        deployments:
+          - modules:  # minimum requirements for a deployment
+              - my-module.cfn
+            regions:
+              - us-east-1
+          - name: detailed-deployment  # optional
+            modules:
+              - path: my-other-modules.cfn
+            regions:
+              - us-east-1
+            account-id:  # optional
+              - dev: 0000
+              - prod: 1111
+            assume-role:  # optional
+              dev: arn:aws:iam::0000:role/role-name
+              prod: arn:aws:iam::1111:role/role-name
+            environments:  # optional
+              dev:
+                region: us-east-1
+                image_id: ami-abc123
+            env_vars:  # optional environment variable overrides
+              dev:
+                AWS_PROFILE: foo
+                APP_PATH:  # a list will be treated as components of a path on disk
+                  - myapp.tf
+                  - foo
+              prod:
+                AWS_PROFILE: bar
+                APP_PATH:
+                  - myapp.tf
+                  - foo
+              "*":  # applied to all environments
+                ANOTHER_VAR: foo
+              skip-npm-ci: false  # optional
+
+    A deployment can be defined without modules if the directory
+    containing the runway config file is a module directory.
+
+    Example:
+      .. code-block:: yaml
+
+        deployments:
+          - current_dir: true
+            regions:
+              - us-west-2
+            assume-role:
+              arn: arn:aws:iam::0000:role/role-name
+
+    """
 
     def __init__(self, deployment):
         # type: (Dict[str, Any]) -> None
-        """Runway deployment definition.
-
-        Arguments are read from a dict for initialization. All dashes are
-        converted to underscores when being added as attributes.
-
-        Args:
+        """
+        Keyword Args:
             account-alias (Optional[Dict[str, str]]): A mapping of
-                'environment: alias' that, if provided, is used to very
-                the currently assumed role or credentials.
-            account-id (Optional[Dict[str, Union[str, int]]]): A mapping of
-                'environment: id' that, if provided, is used to very
-                the currently assumed role or credentials.
+                ``$environment: $alias`` that, if provided, is used to
+                verify the currently assumed role or credentials.
+            account-id (Optional[Dict[str, Union[str, int]]]): A mapping
+                of ``$environment: $id`` that, if provided, is used to
+                verify the currently assumed role or credentials.
             assume-role (Optional[Dict[str, Union[str, Dict[str, str]]]]):
-                A mapping of 'environment: role' or
-                'environment: {arn: role, duration: int}' to assume a role
-                when processing a deployment. 'arn: role' can be used to apply
-                the same role to all environment. 'post_deploy_env_revert: true'
-                can also be provided to revert credentials to their original
-                after processing.
-            current_dir (bool): Used to deploy the module in which the runway
-                config file is located.
+                A mapping of ``$environment: $role`` or
+                ``$environment: {arn: $role, duration: $int}`` to assume
+                a role when processing a deployment. ``arn: $role`` can
+                be used to apply the same role to all environment.
+                ``post_deploy_env_revert: true`` can also be provided to
+                revert credentials after processing.
+            current_dir (bool): Used to deploy the module in which the
+                runway config file is located. *(default: false)*
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
                 variables to environment names. When run, the variables
-                defined here are merged with those in the .env file and
+                defined here are merged with those in the
+                ``.env``/``.tfenv``/environment config file and
                 environments section of each modules.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
-                modules in the deployment. Can be defined per environment or
-                for all environments.
-            modules (List[Dict[str, Any]]): The modules to be processed in
-                order of definition.
-            module_options (Dict[str, Any]): Options that are shared among all
-                modules in the deployment.
-            name (str): Name of the deployment. Used to easily parse logs.
-            regions (List[str]): AWS regions where modules will be applied.
-            skip-npm-ci (bool): Should rarely be used. Omits npm ci
-                execution during Serverless deployments. (i.e. for use with
-                pre-packaged node_modules)
+                modules in the deployment. Can be defined per environment
+                or for all environments using ``"*"`` as the environment
+                name.
+            modules (Optional[List[Dict[str, Any]]]): A list of modules
+                to be processed in the order they are defined.
+            module_options (Optional[Dict[str, Any]]): Options that are
+                shared among all modules in the deployment.
+            name (str): Name of the deployment. Used to more easily
+                identify where different deployments begin/end in the logs.
+            regions (List[str]): AWS region names where modules will be
+                deployed/destroyed.
+            skip-npm-ci (bool): Omits npm ci execution during Serverless
+                deployments. (i.e. for use with pre-packaged
+                node_modules) *(default: false)*
+
+        References:
+            - :class:`module<runway.config.ModuleDefinition>`
 
         """
         self.account_alias = deployment.pop(
-            'account-alias', {}
+            'account_alias', deployment.pop('account-alias', {})
         )  # type: Optional[Dict[str, str]]
         self.account_id = deployment.pop(
-            'account-id', {}
+            'account_id', deployment.pop('account-id', {})
         )  # type: Optional[Dict[str, Union[str, int]]]
         self.assume_role = deployment.pop(
-            'assume-role', {}
+            'assume_role', deployment.pop('assume-role', {})
         )  # type: Optional[Dict[str, Union[str, Dict[str, str]]]]
         self.current_dir = deployment.pop('current_dir', False)  # type: bool
         self.environments = deployment.pop(
@@ -168,7 +317,9 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         )  # type: Optional(Dict[str, Any])
         self.name = deployment.pop('name')  # type: str
         self.regions = deployment.pop('regions', [])  # type: List[str]
-        self.skip_npm_ci = deployment.pop('skip-npm-ci', False)  # type: bool
+        self.skip_npm_ci = deployment.pop(
+            'skip_npm_ci', deployment.pop('skip-npm-ci', False)
+        )  # type: bool
 
         if deployment:
             LOGGER.warning(
@@ -188,7 +339,24 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
 
 class TestDefinition(ConfigComponent):
-    """Item in the tests definition block of a runway config."""
+    """Tests can be defined as part of the runway config file.
+
+    This is to remove the need for complex Makefiles or scripts to initate
+    test runners. Simply define all tests for a repo in runway and use
+    the ``runway test`` command to execute them.
+
+    Example:
+      .. code-block:: yaml
+
+        tests:
+          - name: my-test
+            type: script
+            required: false
+            args:
+              commands:
+                - echo "Hello World!"
+
+    """
 
     def __init__(self,
                  name,  # type: str
@@ -198,14 +366,23 @@ class TestDefinition(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """Runway test definition.
+        """
+        Keyword Args:
+            name (str): Name of the test. Used to more easily identify
+                where different tests begin/end in the logs.
+            type (str): The type of test to run. See
+                :ref:`Build-in Test Types<built-in-test-types>`
+                for supported test types.
+            args (Optional[Dict[str, Any]]): Arguments to be passed to
+                the test. Supported arguments vary by test type. See
+                :ref:`Build-in Test Types<built-in-test-types>` for the
+                list of arguments supported by each test type.
+            required (bool):  If false, testing will continue if the test
+                fails. *(default: true)*
 
-        Args:
-            name (str): Can be used to describe the test for debugging.
-            type (str): The type of test to run.
-            args (Dict[str, Any]): Arguments to be passed to the test. Defining
-                arguments is implimented in the test itself.
-            required (bool):  If false, testing will continue if the test fails.
+        References:
+            - :ref:`Build-in Test Types<built-in-test-types>` - Supported test types and their
+              arguments
 
         """
         self.name = name
@@ -234,7 +411,34 @@ class TestDefinition(ConfigComponent):
 
 
 class Config(ConfigComponent):
-    """Runway config."""
+    """The runway config file is where all options are defined.
+
+    It contains definitions for deployments, tests, and some global
+    options that impact core functionality.
+
+    The runway config file can have two possible names, ``runway.yml``
+    or ``runway.yaml``. It must be stored at the root of the directory
+    containing all modules to be deployed.
+
+    Example:
+        .. code-block:: yaml
+
+            ---
+            # See full syntax at https://github.com/onicagroup/runway
+            ignore_git_branch: true
+            tests:
+              - name: example
+                type: script
+                args:
+                  commands:
+                    - echo "Hello world"
+            deployments:
+              - modules:
+                  - path: my-modules.cfn
+                regions:
+                  - us-east-1
+
+    """
 
     accepted_names = ['runway.yml', 'runway.yaml']
 
@@ -245,17 +449,23 @@ class Config(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """Runway config.
-
-        Args:
-            deployments (List[Dict[str, Any]]): Deployment definitions
-                in raw format that will be instantiated into the appropriate
-                class.
-            tests (List[Dict[str, Any]]): Test definitions in raw format
-                that will be instantiated into the appropriate class.
+        """
+        Keyword Args:
+            deployments (List[Dict[str, Any]]): A list of
+                :class:`deployments<runway.config.DeploymentDefinition>`
+                that are processed in the order they are defined.
+            tests (List[Dict[str, Any]]): A list of
+                :class:`tests<runway.config.TestDefinition>` that are
+                processed in the order they are defined.
             ignore_git_branch (bool): Disable git branch lookup when
                 using environment folders, Mercurial, or defining the
-                DEPLOY_ENVIRONMENT environment variable before execution.
+                ``DEPLOY_ENVIRONMENT`` environment variable before
+                execution. Note that defining ``DEPLOY_ENVIRONMENT``
+                will automatically ignore the git branch.
+
+        References:
+            - :class:`deployment<runway.config.DeploymentDefinition>`
+            - :class:`test<runway.config.TestDefinition>`
 
         """
         self.deployments = DeploymentDefinition.from_list(deployments)

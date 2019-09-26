@@ -44,6 +44,8 @@ code on a per-test basis by adding ``required: false`` to the test definition.
             - echo "Hello World!"  && exit 1
 
 
+.. _built-in-test-types:
+
 Built-in Test Types
 ===================
 
