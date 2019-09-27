@@ -44,8 +44,8 @@ class ModuleDefinition(ConfigComponent):
     `Troposphere`_ (using `Stacker`_), `Terraform`_,
     `Serverless Framework`_, or `AWS CDK`_. Each directory should end
     with their corresponding suffix for identification but, this is not
-    required. See :ref:`Repo Structure<repo-structure>` for examples for
-    module directory structure.
+    required. See :ref:`Repo Structure<repo-structure>` for examples of
+    a module directory structure.
 
     +------------------+-----------------------------------------------+
     | Suffix/Extension | IaC Tool/Framework                            |
@@ -82,7 +82,7 @@ class ModuleDefinition(ConfigComponent):
     Using a map to define a module provides the ability to specify
     per-module ``options``, environment values, tags, and even a custom
     class for processing the module. The options that can be used with
-    each module vary. For detailed information about module specific
+    each module vary. For detailed information about module-specific
     options, see :ref:`Module Configurations<module-configurations>`.
 
     Example:
@@ -134,7 +134,7 @@ class ModuleDefinition(ConfigComponent):
                 ``.env``/``.tfenv``/environment config file. If this is
                 defined, ``.env`` files can be omitted and the module
                 will still be processed.
-            options (Optional[Dict[str, Any]]): Module specific options.
+            options (Optional[Dict[str, Any]]): Module-specific options.
                 See :ref:`Module Configurations<module-configurations>`
                 for detailed usage.
             tags (Optional[Dict[str, str]]): Module tags used to select
@@ -189,10 +189,11 @@ class ModuleDefinition(ConfigComponent):
 
 
 class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
-    """A deployment defines modules and options that effect the modules.
+    """A deployment defines modules and options that affect the modules.
 
     Deployments are processed during a ``deploy``/``destroy``/``plan``
-    action. If processing of one deployment fails, the action with end.
+    action. If the processing of one deployment fails, the action will
+    end.
 
     During a ``deploy``/``destroy`` action, the user has the option to
     select which deployment will run unless the ``CI`` environment
@@ -276,7 +277,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 variables to environment names. When run, the variables
                 defined here are merged with those in the
                 ``.env``/``.tfenv``/environment config file and
-                environments section of each modules.
+                environments section of each module.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
@@ -349,9 +350,10 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 class TestDefinition(ConfigComponent):
     """Tests can be defined as part of the runway config file.
 
-    This is to remove the need for complex Makefiles or scripts to initate
-    test runners. Simply define all tests for a repo in runway and use
-    the ``runway test`` command to execute them.
+    This is to remove the need for complex Makefiles or scripts to initiate
+    test runners. Simply define all tests for a project in the runway
+    config file and use the ``runway test`` :ref:`command<command-test>`
+    to execute them.
 
     Example:
       .. code-block:: yaml

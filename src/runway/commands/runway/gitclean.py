@@ -1,4 +1,4 @@
-"""Executes ``git clean -X -d`` to remove untracked files form a directory.
+"""Executes ``git clean -X -d`` to remove untracked files from a directory.
 
 Runs against the current working directory.
 

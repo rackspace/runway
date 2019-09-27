@@ -14,7 +14,7 @@ The user will be prompted to select which
 :ref:`deployment(s)<runway-deployment>` and
 :ref:`module(s)<runway-module>` to process unless there is only one
 :ref:`deployment<runway-deployment>` and/or
-:ref:`module<runway-module>`, the environment variable ``CI`` is set
+:ref:`module<runway-module>`, the environment variable ``CI`` is set,
 or the ``--tag <tag>...`` option provided is used.
 
 .. rubric:: Options
