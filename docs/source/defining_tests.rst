@@ -1,11 +1,12 @@
 .. _defining-tests:
 .. highlight:: yaml
 
+==============
 Defining Tests
 ==============
 
 Overview
-^^^^^^^^
+========
 
 :ref:`Tests<runway-test>` can be defined in the
 :ref:`runway config file<runway-config>` to test your
@@ -49,7 +50,7 @@ to the :ref:`test definition<runway-test>`.
 .. _built-in-test-types:
 
 Built-in Test Types
-^^^^^^^^^^^^^^^^^^^
+===================
 
 cfn-lint
 --------
