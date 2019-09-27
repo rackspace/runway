@@ -8,50 +8,14 @@ import zipfile
 from boto3.s3.transfer import S3Transfer
 import boto3
 
-from botocore.exceptions import ClientError
 from stacker.lookups.handlers.rxref import RxrefLookup
 from stacker.session_cache import get_session
 
 from .util import get_hash_of_files
 from ...util import change_dir, run_commands
+from ...s3_util import download_and_extract_to_mkdtemp, does_s3_object_exist
 
 LOGGER = logging.getLogger(__name__)
-
-
-def does_s3_object_exist(bucket_name, key, session=None):
-    """Determine if object exists on s3."""
-    if session:
-        s3_resource = session.resource('s3')
-    else:
-        s3_resource = boto3.resource('s3')
-
-    try:
-        s3_resource.Object(bucket_name, key).load()
-    except ClientError as exc:
-        if exc.response['Error']['Code'] == '404':
-            return False
-        raise
-    return True
-
-
-def download_and_extract_to_mkdtemp(bucket, key, session=None):
-    """Download zip archive and extract it to temporary directory."""
-    if session:
-        s3_client = session.client('s3')
-    else:
-        s3_client = boto3.client('s3')
-    transfer = S3Transfer(s3_client)
-
-    filedes, temp_file = tempfile.mkstemp()
-    os.close(filedes)
-    transfer.download_file(bucket, key, temp_file)
-
-    output_dir = tempfile.mkdtemp()
-    zip_ref = zipfile.ZipFile(temp_file, 'r')
-    zip_ref.extractall(output_dir)
-    zip_ref.close()
-    os.remove(temp_file)
-    return output_dir
 
 
 def zip_and_upload(app_dir, bucket, key, session=None):

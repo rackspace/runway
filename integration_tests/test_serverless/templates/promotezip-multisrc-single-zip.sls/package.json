@@ -1,0 +1,14 @@
+{
+  "name": "promotezip-multisrc-single-zip.sls",
+  "version": "1.0.0",
+  "description": "",
+  "main": "frontend/func1/handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "serverless": "^1.52.0"
+  }
+}

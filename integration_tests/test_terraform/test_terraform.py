@@ -6,7 +6,7 @@ import platform
 from send2trash import send2trash
 from runway.util import change_dir
 from integration_test import IntegrationTest
-from util import (copy_file, import_tests, execute_tests)
+from util import (copy_file, import_tests, execute_tests, run_command)
 
 
 class Terraform(IntegrationTest):
@@ -39,13 +39,13 @@ class Terraform(IntegrationTest):
 
         for template in templates:
             if os.path.isfile(template):
-                self.LOGGER.debug('send2trash: "%s"', template)
+                self.logger.debug('send2trash: "%s"', template)
                 send2trash(template)
         folders = ('.terraform', 'terraform.tfstate.d')
         for folder in folders:
             folder_path = os.path.join(self.tf_test_dir, folder)
             if os.path.isdir(folder_path):
-                self.LOGGER.debug('send2trash: "%s"', folder_path)
+                self.logger.debug('send2trash: "%s"', folder_path)
                 send2trash(folder_path)
 
         # destroy stacker tf-state
@@ -61,27 +61,25 @@ class Terraform(IntegrationTest):
         if command not in ('build', 'destroy'):
             raise ValueError('run_stacker: command must be one of %s' % ['build', 'destroy'])
 
-        self.LOGGER.info('Running "%s" on tf_state.cfn ...', command)
-        self.LOGGER.debug('tf_state_dir: %s', self.tf_state_dir)
+        self.logger.info('Running "%s" on tf_state.cfn ...', command)
+        self.logger.debug('tf_state_dir: %s', self.tf_state_dir)
         with change_dir(self.tf_state_dir):
             stacker_cmd = ['stacker.cmd' if platform.system().lower() == 'windows' else 'stacker',
                            command, '-i', '-r', 'us-east-1']
             if command == 'destroy':
                 stacker_cmd = stacker_cmd + ['-f']
             stacker_cmd = stacker_cmd + ['dev-us-east-1.env', 'tfstate.yaml']
-            self.LOGGER.debug('STACKER_CMD: %s', stacker_cmd)
+            self.logger.debug('STACKER_CMD: %s', stacker_cmd)
             cmd_opts = {'cmd_list': stacker_cmd}
-            return self.run_command(**cmd_opts) # noqa
-
-    def init(self):
-        """Initialize backend."""
-        import_tests(self, self.tests_dir, 'test_*')
+            return run_command(**cmd_opts) # noqa
 
     def run(self):
         """Find all Terraform tests and run them."""
-        tests = Terraform.__subclasses__()
-        self.LOGGER.debug('FOUND TESTS: %s', tests)
-        return execute_tests(self, tests)
+        import_tests(self.logger, self.tests_dir, 'test_*')
+        tests = [test(self.logger) for test in Terraform.__subclasses__()]
+        self.logger.debug('FOUND TESTS: %s', tests)
+        self.set_environment('dev')
+        return execute_tests(tests, self.logger)
 
     def teardown(self):
         """Teardown resources create during init."""

@@ -4,14 +4,19 @@ from __future__ import print_function
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+import yaml
 
+from runway.hooks.staticsite.util import get_hash_of_files
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
     run_module_command, run_npm_install, warn_on_boto_env_vars
 )
 from ..util import change_dir, which
+from ..s3_util import ensure_bucket_exists, does_s3_object_exist, download, upload
 
 LOGGER = logging.getLogger('runway')
 
@@ -58,6 +63,89 @@ def run_sls_remove(sls_cmd, env_vars):
         sys.exit(sls_return)
 
 
+def run_sls_print(sls_opts, env_vars, path):
+    """Run sls print command."""
+    sls_info_opts = sls_opts
+    sls_info_opts[0] = 'print'
+    sls_info_opts.extend(['--format', 'yaml'])
+    sls_info_cmd = generate_node_command(command='sls',
+                                         command_opts=sls_info_opts,
+                                         path=path)
+    return yaml.safe_load(subprocess.check_output(sls_info_cmd,
+                                                  env=env_vars))
+
+
+def get_src_hash(sls_config, path):
+    """Get hash(es) of serverless source."""
+    funcs = sls_config['functions']
+
+    if sls_config.get('package', {}).get('individually'):
+        hashes = {key: get_hash_of_files(os.path.join(path,
+                                                      os.path.dirname(funcs[key].get('handler'))))
+                  for key in funcs.keys()}
+    else:
+        directories = []
+        for (key, value) in funcs.items():
+            func_path = {'path': os.path.dirname(value.get('handler'))}
+            if func_path not in directories:
+                directories.append(func_path)
+        hashes = {sls_config['service']: get_hash_of_files(path, directories)}
+
+    return hashes
+
+def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too-many-locals
+    """Run sls package command."""
+    bucketname = options.get('options', {}).get('promotezip', {}).get('bucketname', {})
+    if not bucketname:
+        raise ValueError('"bucketname" must be specified when using "promotezip"')
+
+    package_dir = tempfile.mkdtemp()
+    LOGGER.debug('Package directory: %s', package_dir)
+
+    ensure_bucket_exists(bucketname, context.env_region)
+    sls_config = run_sls_print(sls_opts, context.env_vars, path)
+    hashes = get_src_hash(sls_config, path)
+
+    sls_opts[0] = 'package'
+    sls_opts.extend(['--package', os.path.relpath(package_dir,
+                                                  path)])
+    sls_package_cmd = generate_node_command(command='sls',
+                                            command_opts=sls_opts,
+                                            path=path)
+
+    LOGGER.info("Running sls package on %s (\"%s\")",
+                os.path.basename(path),
+                format_npm_command_for_logging(sls_package_cmd))
+
+    run_module_command(cmd_list=sls_package_cmd,
+                       env_vars=context.env_vars)
+
+    for key in hashes.keys():
+        hash_zip = hashes[key] + ".zip"
+        func_zip = os.path.basename(key) + ".zip"
+        if does_s3_object_exist(bucketname, hash_zip):
+            LOGGER.info('Found existing package "s3://%s/%s" for %s', bucketname, hash_zip, key)
+            download(bucketname, hash_zip, os.path.join(package_dir, func_zip))
+        else:
+            LOGGER.info('No existing package found, uploading to s3://%s/%s', bucketname,
+                        hash_zip)
+            zip_name = os.path.join(package_dir, func_zip)
+            upload(bucketname, hash_zip, zip_name)
+
+    sls_opts[0] = 'deploy'
+    sls_deploy_cmd = generate_node_command(command='sls',
+                                           command_opts=sls_opts,
+                                           path=path)
+
+    LOGGER.info("Running sls deploy on %s (\"%s\")",
+                os.path.basename(path),
+                format_npm_command_for_logging(sls_deploy_cmd))
+    run_module_command(cmd_list=sls_deploy_cmd,
+                       env_vars=context.env_vars)
+
+    shutil.rmtree(package_dir)
+
+
 class Serverless(RunwayModule):
     """Serverless Runway Module."""
 
@@ -94,6 +182,13 @@ class Serverless(RunwayModule):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
+                    if command == 'deploy' and self.options.get('options', {}).get('promotezip', {}): # noqa pylint: disable=line-too-long
+                        deploy_package(sls_opts,
+                                       self.options,
+                                       self.context,
+                                       self.path)
+                        return response
+
                     LOGGER.info("Running sls %s on %s (\"%s\")",
                                 command,
                                 os.path.basename(self.path),

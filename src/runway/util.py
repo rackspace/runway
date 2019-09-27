@@ -11,7 +11,6 @@ import re
 import stat
 from subprocess import check_call
 import sys
-
 import six
 
 EMBEDDED_LIB_PATH = os.path.join(

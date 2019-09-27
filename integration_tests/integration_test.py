@@ -1,35 +1,34 @@
 """Integration test module."""
-import subprocess
-import logging
 import os
+from copy import deepcopy
+import yaml
 
 
 class IntegrationTest(object):
     """Base class for Integration Tests."""
 
     WORKING_DIR = os.path.abspath(os.path.dirname(__file__))
-    LOGGER = logging.getLogger('testsuite')
 
-    def __init__(self, options=None):
+    def __init__(self, logger):
         """Initialize base class."""
-        if options is None:
-            self.options = {}
-        else:
-            self.options = options
+        self.logger = logger
+        self.environment = deepcopy(os.environ)
+        self.runway_config_path = None
 
-    @staticmethod
-    def run_command(cmd_list, env_vars=None):
-        """Shell out to provisioner command."""
-        try:
-            subprocess.check_call(cmd_list, env=env_vars)
-        except subprocess.CalledProcessError as shelloutexc:
-            return shelloutexc.returncode
-        return 0
+    def parse_config(self, path):
+        """Read and parse yml."""
+        if not os.path.isfile(path):
+            self.logger.error("Config file was not found (looking for \"%s\")",
+                              path)
+        with open(path) as data_file:
+            return yaml.safe_load(data_file)
 
-    def init(self):
-        """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError('You must implement the init() method '
-                                  'yourself!')
+    def set_environment(self, env):
+        """Set deploy environment."""
+        self.logger.info('Setting "DEPLOY_ENVIRONMENT" to "%s"', env)
+        if not isinstance(env, dict):
+            env = {'DEPLOY_ENVIRONMENT': env}
+        self.environment.update(env)
 
     def run(self):
         """Implement dummy method (set in consuming classes)."""
