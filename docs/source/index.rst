@@ -16,7 +16,9 @@ Very simple configuration to:
 - Define an IAM role to assume for each deployment
 - Wrangle Terraform backend/workspace configs w/ per-environment tfvars
 - Avoid long-term tool lock-in
-    + Runway is a simple wrapper around standard tools. It simply helps to avoid convoluted Makefiles / CI jobs
+
+  - Runway is a simple wrapper around standard tools. It simply helps to
+    avoid convoluted Makefiles / CI jobs
 
 .. toctree::
    :maxdepth: 2
@@ -25,11 +27,11 @@ Very simple configuration to:
    basic_concepts
    installation
    how_to_use
+   commands
    repo_structure
    runway_config
    module_configuration
    defining_tests
-   additional_functionality
    quickstart
    staticsite_config
    developers

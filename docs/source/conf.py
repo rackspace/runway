@@ -44,6 +44,9 @@ release = __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -176,3 +179,11 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
+
+# -- Options for autodoc  -----------------------------------------------------
+
+autoclass_content = 'both'
+
+# -- Options for napoleon  ----------------------------------------------------
+napoleon_google_docstring = True
+napoleon_include_init_with_doc = False

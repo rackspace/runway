@@ -1,4 +1,4 @@
-"""The preflight command."""
+"""Alias of `test`_."""
 from .test import Test
 
 # just an classname alias

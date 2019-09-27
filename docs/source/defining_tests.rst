@@ -8,11 +8,13 @@ Defining Tests
 Overview
 ========
 
-Tests can be defined in the runway config file to test your modules in any way
-you desire before deploying. They are run by using the ``runway test`` command.
-Tests are run in the order they are defined.
+:ref:`Tests<runway-test>` can be defined in the
+:ref:`runway config file<runway-config>` to test your
+:ref:`modules<runway-module>` in any way you desire before deploying. They are
+run by using the ``runway test`` :ref:`command<command-test>`.
+:ref:`Tests<runway-test>` are run in the order they are defined.
 
-**Example:**
+.. rubric:: Example:
 
 ::
 
@@ -26,12 +28,13 @@ Tests are run in the order they are defined.
 Test Failures
 -------------
 
-The default behavior if one of the tests fails is to terminate execution. The
-subsequent commands will not be run and a non-zero exit code returned. This
-behavior can modified to continue testing and not result in a non-zero exit
-code on a per-test basis by adding ``required: false`` to the test definition.
+The default behavior if one of the :ref:`tests<runway-test>` fails is to
+terminate execution. The subsequent commands will not be run and a non-zero
+exit code returned. This behavior can modified to continue testing and not
+result in a non-zero exit code on a per-test basis by adding ``required: false``
+to the :ref:`test definition<runway-test>`.
 
-**Example:**
+.. rubric:: Example:
 
 ::
 
@@ -43,6 +46,8 @@ code on a per-test basis by adding ``required: false`` to the test definition.
           commands:
             - echo "Hello World!"  && exit 1
 
+
+.. _built-in-test-types:
 
 Built-in Test Types
 ===================
@@ -56,10 +61,10 @@ Source: https://github.com/aws-cloudformation/cfn-python-lint
   *and additional checks. Includes checking valid values for resource properties*
   *and best practices*.
 
-In order to use this test, there must be a ``.cfnlintrc`` file in the same
-directory as the runway config file.
+In order to use this :ref:`test<runway-test>`, there must be a ``.cfnlintrc``
+file in the same directory as the :ref:`runway config file<runway-config>`.
 
-**Example:**
+.. rubric:: Example:
 
 ::
 
@@ -76,7 +81,7 @@ subprocess.
 
 Commands are passed into the test using the ``commands`` argument.
 
-**Example:**
+.. rubric:: Example:
 
 ::
 
@@ -98,10 +103,10 @@ Source: https://github.com/adrienverge/yamllint
   *problems such as lines length, trailing spaces, indentation, etc*.
 
 A ``.yamllint`` file can be placed at in the same directory as the
-runway config file to customize the linter or, the runway provided
-template will be used.
+:ref:`runway config file<runway-config>` to customize the linter or, the runway
+provided template will be used.
 
-**Example:**
+.. rubric:: Example:
 
 ::
 

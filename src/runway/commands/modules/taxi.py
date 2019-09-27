@@ -1,4 +1,4 @@
-"""The taxi command."""
+"""Alias of `plan`_."""
 
 from .plan import Plan
 

@@ -1,10 +1,45 @@
-.. _runway-config-options:
-.. highlight:: yaml
+.. _AWS CDK: https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html
+.. _CloudFormation: https://aws.amazon.com/cloudformation/
+.. _Serverless Framework: https://serverless.com/
+.. _Stacker: https://stacker.readthedocs.io/en/stable/
+.. _Terraform: https://www.terraform.io
+.. _Troposphere: https://github.com/cloudtools/troposphere
+
+.. _runway-config:
 
 Runway Config File
 ==================
 
-runway.yml sample::
+Top-Level Configuration
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: runway.config.Config
+
+.. _runway-deployment:
+
+Deployment
+^^^^^^^^^^
+
+.. autoclass:: runway.config.DeploymentDefinition
+
+.. _runway-module:
+
+Module
+^^^^^^
+
+.. autoclass:: runway.config.ModuleDefinition
+
+.. _runway-test:
+
+Test
+^^^^
+
+.. autoclass:: runway.config.TestDefinition
+
+Sample
+^^^^^^
+
+.. code-block:: yaml
 
     ---
     # Order that tests will be run. Test execution is triggered with the
@@ -133,8 +168,10 @@ runway.yml sample::
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-runway.yml can also be placed in a module folder (e.g. a repo/environment containing
-only one module doesn't need to nest the module in a subfolder)::
+The runway config file can also be placed in a module folder
+(e.g. a repo/environment containing only one module doesn't need to nest the module in a subfolder)
+
+.. code-block:: yaml
 
     ---
     # This will deploy the module in which runway.yml is located
