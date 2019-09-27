@@ -134,7 +134,6 @@ def download_and_extract_to_mkdtemp(bucket, key, session=None):
     return output_dir
 
 
-# https://alexwlchan.net/2019/07/listing-s3-keys/
 def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
     """
     Generate objects in an S3 bucket.
@@ -172,7 +171,6 @@ def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
                     yield obj
 
 
-# https://alexwlchan.net/2019/07/listing-s3-keys/
 def get_matching_s3_keys(bucket, prefix="", suffix="", session=None):
     """
     Generate the keys in an S3 bucket.

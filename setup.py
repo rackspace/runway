@@ -70,6 +70,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     python_requires='>=2.6',
     keywords='cli',
@@ -78,7 +79,8 @@ setup(
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        'test': ['flake8', 'pep8-naming', 'flake8-docstrings', 'pylint',
+        'test': ['flake8', 'pep8-naming', 'flake8-docstrings',
+                 'mock~=3.0.5', 'pylint',
                  # python3 flake8-docstrings fails with pydocstyle 4:
                  # https://github.com/PyCQA/pydocstyle/issues/375
                  # newer versions do not support python2:
