@@ -34,8 +34,10 @@ your user will be able to install additional Python packages via
             - In the User variables for your username, select ``Path`` and click ``Edit...``
             - Append ``%USERPROFILE%\AppData\Roaming\Python\Python37\Scripts`` & ``%USERPROFILE%\.local\bin`` to the current Variable values and click Ok
                 - Change ``Python37`` to the appropriate directory for the installed version (e.g. ``Python38`` for Python 3.8)
-                - In Windows Server 2016, the value is shown in a single line -- add it with semicolons
-                    - e.g. ``%USERPROFILE%\AppData\Roaming\Python\Python37\Scripts;%USERPROFILE%\.local\bin;``
+                - In Windows Server 2016, the value is shown in a single line -- add it with semicolons::
+
+                    %USERPROFILE%\AppData\Roaming\Python\Python37\Scripts;%USERPROFILE%\.local\bin;
+
             - Click Ok to close the Environment Variables window.
             - Close all existing PowerShell windows and launch a new one to use the updated PATH.
 
