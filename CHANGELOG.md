@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.47.6] - 2019-10-07
 ### Added
 - Terraform backend lookup via SSM params
 
@@ -551,7 +553,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.47.5...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v0.47.6...HEAD
+[0.47.6]: https://github.com/onicagroup/runway/compare/v0.47.5...v0.47.6
 [0.47.5]: https://github.com/onicagroup/runway/compare/v0.47.4...v0.47.5
 [0.47.4]: https://github.com/onicagroup/runway/compare/v0.47.3...v0.47.4
 [0.47.3]: https://github.com/onicagroup/runway/compare/v0.47.2...v0.47.3
