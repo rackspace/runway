@@ -100,7 +100,7 @@ class CodeBuild(Blueprint):
                                             '',
                                             ['arn:', Partition, ':iam::',
                                              ALT_TESTING_ACCOUNT_ID,
-                                             ':role/runway-integration-test-',
+                                             ':role/runway-integration-test-role-',  # noqa
                                              variables['EnvironmentName'].ref])
                                     ]
                                 ),
