@@ -20,6 +20,7 @@ from stacker.blueprints.variables.types import CFNString
 
 # The github accounts that are allowed to trigger the
 # build tests
+# (ids available via https://api.github.com/users/USERNAME)
 GITHUB_ACCOUNT_IDS = [627555]
 
 
@@ -41,7 +42,8 @@ class CodeBuild(Blueprint):
         template.set_description('Runway CodeBuild Project')
 
         # Resources
-        deploy_name = 'runway-integration-tests'
+        deploy_name_list = ['runway-integration-tests-',
+                            variables['EnvironmentName'].ref]
 
         # This must match what is in the the Terraform
         # integration tests. This corresponds to the template listed in
@@ -55,7 +57,7 @@ class CodeBuild(Blueprint):
                 ),
                 Policies=[
                     iam.Policy(
-                        PolicyName=Join('', [deploy_name, '-policy']),
+                        PolicyName=Join('', deploy_name_list + ['-policy']),
                         PolicyDocument=PolicyDocument(
                             Version='2012-10-17',
                             Statement=[
@@ -76,8 +78,8 @@ class CodeBuild(Blueprint):
                                                 Region,
                                                 ':',
                                                 AccountId,
-                                                ':log-group:/aws/codebuild/',
-                                                deploy_name,
+                                                ':log-group:/aws/codebuild/'
+                                            ] + deploy_name_list + [
                                                 '*'
                                             ] + x
                                         ) for x in [[':*'], [':*/*']]
@@ -185,7 +187,7 @@ class CodeBuild(Blueprint):
                     Image='aws/codebuild/standard:2.0',
                     Type='LINUX_CONTAINER'
                 ),
-                Name=deploy_name,
+                Name=Join('', deploy_name_list),
                 ServiceRole=codebuild_role.get_att('Arn'),
                 Source=codebuild.Source(
                     Type='GITHUB',

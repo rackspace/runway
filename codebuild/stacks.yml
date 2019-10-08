@@ -4,8 +4,8 @@ stacker_bucket: ""
 sys_path: ./
 
 stacks:
-  codebuild:
+  runway-integration-testing-project:
     class_path: blueprints.codebuild.CodeBuild
     variables:
-      EnvironmentName: ${environment}
+      EnvironmentName: ${namespace}
       GitHubUrl: https://github.com/onicagroup/runway

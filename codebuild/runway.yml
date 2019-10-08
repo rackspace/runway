@@ -6,8 +6,9 @@ deployments:
     regions: 
       - us-east-1
     environments:
-      dev:
-        namespace: dev
-        environment: dev
+      common:
+        namespace: common
+    account-id:
+      common: "523485371024"
 
 ignore_git_branch: true
