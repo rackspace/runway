@@ -21,7 +21,12 @@ from stacker.blueprints.variables.types import CFNString
 # The github accounts that are allowed to trigger the
 # build tests
 # (ids available via https://api.github.com/users/USERNAME)
-GITHUB_ACCOUNT_IDS = [627555]
+GITHUB_ACCOUNT_IDS = [
+    149096,  # Tolga
+    1806418,  # Troy
+    23145462,  # Kyle
+    627555  # Craig
+]
 
 
 class CodeBuild(Blueprint):
