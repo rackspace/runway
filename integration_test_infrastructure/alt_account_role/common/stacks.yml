@@ -1,0 +1,10 @@
+namespace: ${namespace}
+stacker_bucket: ""
+
+sys_path: ./
+
+stacks:
+  runway-integration-testing-role:
+    class_path: role_blueprints.iam.CrossAccountRole
+    variables:
+      EnvironmentName: ${namespace}

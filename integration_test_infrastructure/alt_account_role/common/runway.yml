@@ -1,0 +1,14 @@
+---
+
+deployments:
+  - modules:
+    - ./
+    regions: 
+      - us-east-1
+    environments:
+      common:
+        namespace: common
+    account-id:
+      common: "395611358874"
+
+ignore_git_branch: true

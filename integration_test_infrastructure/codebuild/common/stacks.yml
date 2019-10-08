@@ -5,7 +5,7 @@ sys_path: ./
 
 stacks:
   runway-integration-testing-project:
-    class_path: blueprints.codebuild.CodeBuild
+    class_path: codebuild_blueprints.codebuild.CodeBuild
     variables:
       EnvironmentName: ${namespace}
       GitHubUrl: https://github.com/onicagroup/runway

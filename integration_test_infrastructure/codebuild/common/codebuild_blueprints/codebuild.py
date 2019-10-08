@@ -9,7 +9,7 @@ from troposphere import (
 import awacs.codebuild
 
 from awacs import (
-    logs, cloudformation, dynamodb, s3
+    logs, cloudformation, dynamodb, s3, sts
 )
 
 from awacs.aws import Action, Allow, Deny, PolicyDocument, Statement
@@ -27,6 +27,8 @@ GITHUB_ACCOUNT_IDS = [
     23145462,  # Kyle
     627555  # Craig
 ]
+
+ALT_TESTING_ACCOUNT_ID = '395611358874'
 
 
 class CodeBuild(Blueprint):
@@ -88,6 +90,18 @@ class CodeBuild(Blueprint):
                                                 '*'
                                             ] + x
                                         ) for x in [[':*'], [':*/*']]
+                                    ]
+                                ),
+                                Statement(
+                                    Action=[awacs.sts.AssumeRole],
+                                    Effect=Allow,
+                                    Resource=[
+                                        Join(
+                                            '',
+                                            ['arn:', Partition, ':iam::',
+                                             ALT_TESTING_ACCOUNT_ID,
+                                             ':role/runway-integration-test-',
+                                             variables['EnvironmentName'].ref])
                                     ]
                                 ),
                                 Statement(

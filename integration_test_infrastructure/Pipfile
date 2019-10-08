@@ -4,9 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"runway" = {editable = true, path = "./../../runway"}
+runway = "~=0.46"
 
 [dev-packages]
-
-[requires]
-python_version = "3.7"
