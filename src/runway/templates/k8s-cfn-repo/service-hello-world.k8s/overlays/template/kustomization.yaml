@@ -1,0 +1,10 @@
+bases:
+  - ../../base
+commonAnnotations:
+  note: Hello, I am REPLACEMEENV!
+commonLabels:
+  org: myorg
+  variant: REPLACEMEENV
+namePrefix: REPLACEMEENV-
+patchesStrategicMerge:
+  - map.yaml

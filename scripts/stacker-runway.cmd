@@ -35,7 +35,7 @@ goto :EOF
 # ===================================================
 
 #!/usr/bin/env python
-
+from __future__ import print_function
 import inspect
 import sys
 
@@ -51,6 +51,10 @@ EMBEDDED_LIB_PATH = path.dirname(
 )
 
 if __name__ == "__main__":
+    # No immediate plans to remove. Not to be done prior to 2.0
+    print('DEPRECATION NOTICE: the "stacker-runway" command has been '
+          'deprecated in favor of "runway run-stacker"', file=sys.stderr)
+
     # Ensure any blueprints/hooks use the embedded version of stacker
     sys.path.insert(
         1,  # https://stackoverflow.com/a/10097543

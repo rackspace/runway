@@ -11,15 +11,16 @@ import sys
 import tempfile
 import zipfile
 
+import requests
 # Old pylint on py2.7 incorrectly flags these
 from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
 from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
 
-from botocore.vendored import requests
 # embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
 from runway.embedded import hcl
 
-from .util import get_hash_for_filename, sha256sum
+from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
+from ..util import get_hash_for_filename, sha256sum
 
 LOGGER = logging.getLogger('runway')
 TF_VERSION_FILENAME = '.terraform-version'
@@ -61,27 +62,7 @@ def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-man
                         os.path.join(download_dir, i))
     # IOError in py2; URLError in 3+
     except (IOError, URLError) as exc:
-        if sys.version_info[0] == 2:
-            url_error_msg = str(exc.strerror)
-        else:
-            url_error_msg = str(exc.reason)
-
-        if 'CERTIFICATE_VERIFY_FAILED' in url_error_msg:
-            LOGGER.error('Attempted to download Terraform but was unable to '
-                         'verify the TLS certificate on its download site.')
-            LOGGER.error("Full TLS error message: %s", url_error_msg)
-            if platform.system().startswith('Darwin') and (
-                    'unable to get local issuer certificate' in url_error_msg):
-                LOGGER.error("This is likely caused by your Python "
-                             "installation missing root certificates. Run "
-                             "\"/Applications/Python %s.%s/"
-                             "\"Install Certificates.command\" to fix it "
-                             "(https://stackoverflow.com/a/42334357/2547802)",
-                             sys.version_info[0],
-                             sys.version_info[1])
-            sys.exit(1)
-        else:
-            raise
+        handle_bin_download_error(exc, 'Terraform')
 
     tf_hash = get_hash_for_filename(filename, os.path.join(download_dir,
                                                            shasums_name))
@@ -166,17 +147,7 @@ def get_version_requested(path):
     return ver
 
 
-def ensure_versions_dir_exists(tfenv_path):
-    """Ensure versions directory is available."""
-    versions_dir = os.path.join(tfenv_path, 'versions')
-    if not os.path.isdir(tfenv_path):
-        os.mkdir(tfenv_path)
-    if not os.path.isdir(versions_dir):
-        os.mkdir(versions_dir)
-    return versions_dir
-
-
-class TFEnv(object):  # pylint: disable=too-few-public-methods
+class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Terraform version management.
 
     Designed to be compatible with https://github.com/tfutils/tfenv .
@@ -184,33 +155,11 @@ class TFEnv(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, path=None):
         """Initialize class."""
-        if path is None:
-            self.path = os.getcwd()
-        else:
-            self.path = path
-
-        if platform.system() == 'Windows':
-            if 'APPDATA' in os.environ:
-                self.tfenv_dir = os.path.join(os.environ['APPDATA'],
-                                              'tfenv')
-            else:
-                for i in [['AppData'], ['AppData', 'Roaming']]:
-                    if not os.path.isdir(os.path.join(os.path.expanduser('~'),
-                                                      *i)):
-                        os.mkdir(os.path.join(os.path.expanduser('~'),
-                                              *i))
-                self.tfenv_dir = os.path.join(os.path.expanduser('~'),
-                                              'AppData',
-                                              'Roaming',
-                                              'tfenv')
-        else:
-            self.tfenv_dir = os.path.join(os.path.expanduser('~'),
-                                          '.tfenv')
+        super(TFEnvManager, self).__init__('tfenv', path)
 
     def install(self, version_requested=None):
         """Ensure terraform is available."""
-        command_suffix = '.exe' if platform.system() == 'Windows' else ''
-        versions_dir = ensure_versions_dir_exists(self.tfenv_dir)
+        versions_dir = ensure_versions_dir_exists(self.env_dir)
 
         if not version_requested:
             version_requested = get_version_requested(self.path)
@@ -236,7 +185,7 @@ class TFEnv(object):  # pylint: disable=too-few-public-methods
                             "it...", version_requested)
                 return os.path.join(versions_dir,
                                     version_requested,
-                                    'terraform') + command_suffix
+                                    'terraform') + self.command_suffix
 
         try:
             version = next(i
@@ -256,10 +205,12 @@ class TFEnv(object):  # pylint: disable=too-few-public-methods
                         version)
             return os.path.join(versions_dir,
                                 version,
-                                'terraform') + command_suffix
+                                'terraform') + self.command_suffix
 
         LOGGER.info("Downloading and using Terraform version %s ...",
                     version)
-        download_tf_release(version, versions_dir, command_suffix)
+        download_tf_release(version, versions_dir, self.command_suffix)
         LOGGER.info("Downloaded Terraform %s successfully", version)
-        return os.path.join(versions_dir, version, 'terraform') + command_suffix
+        return os.path.join(versions_dir,
+                            version,
+                            'terraform') + self.command_suffix

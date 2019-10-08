@@ -1,0 +1,41 @@
+namespace: ${namespace}
+stacker_bucket: ""  # not needed for these small templates
+sys_path: ./
+
+stacks:
+  - name: &iamstackname k8s-iam
+    template_path: templates/k8s_iam.yaml
+    variables:
+      EksClusterName: &eksclustername k8s-${namespace}
+  - name: &clusterstackname k8s-eks
+    template_path: templates/k8s_master.yaml
+    variables:
+      EksClusterName: *eksclustername
+      EksSubnets: ${EksSubnets}
+      EksVersion: ${EksVersion}
+      VPC: ${VPCid}
+
+post_build:
+  - path: k8s_hooks.bootstrap.create_runway_environments
+    required: true
+    args:
+      namespace: ${namespace}
+  - path: k8s_hooks.auth_map.generate
+    required: true
+    args: &auth_map_generate_args
+      path:
+        - ".."
+        - aws-auth-cm.k8s
+        - overlays
+        - ${namespace}
+      file: aws-auth-cm.yaml
+      stack: *iamstackname
+  - path: k8s_hooks.awscli.aws_eks_update_kubeconfig
+    required: true
+    args:
+      stack: *clusterstackname
+
+post_destroy:
+  - path: k8s_hooks.auth_map.remove
+    args:
+      <<: *auth_map_generate_args

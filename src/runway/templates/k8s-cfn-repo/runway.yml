@@ -1,0 +1,29 @@
+---
+deployments:
+  - modules:
+      - k8s-master.cfn
+      - aws-auth-cm.k8s
+      - k8s-workers.cfn
+      - service-hello-world.k8s  # sample app
+    regions:
+      - us-west-2
+    environments:
+      dev:
+        # master settings
+        namespace: dev
+        region: us-west-2
+        VPCid: VPCIDHERE
+        EksSubnets: SUBNETID1HERE,SUBNETID2HERE,etc
+        EksVersion: "'1.14'"
+        # worker settings
+        # https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html
+        eks_node_image_id: ami-038a987c6425a84ad  # us-west-2 1.14.6
+        eks_node_instance_type: t2.medium
+        eks_use_spot_instances: "no"
+        eks_spot_bid_price: "0.68"
+    env_vars:
+      dev:
+        KUBECONFIG:
+          - .kube
+          - dev
+          - config

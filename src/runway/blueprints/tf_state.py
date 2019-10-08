@@ -77,6 +77,7 @@ class TfState(Blueprint):
         terraformstatebucket = template.add_resource(
             s3.Bucket(
                 'TerraformStateBucket',
+                DeletionPolicy='Retain',
                 AccessControl=s3.Private,
                 BucketName=If(
                     'BucketNameOmitted',

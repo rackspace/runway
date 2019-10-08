@@ -27,6 +27,15 @@ from ..util import (
 LOGGER = logging.getLogger('runway')
 
 
+def find_kustomize_files(path):
+    """Return true if kustomize yaml file found."""
+    for _root, _dirnames, filenames in os.walk(path):
+        for filename in filenames:
+            if filename == 'kustomization.yaml':
+                return True
+    return False
+
+
 def assume_role(role_arn, session_name=None, duration_seconds=None,
                 region='us-east-1', env_vars=None):
     """Assume IAM role."""
@@ -51,7 +60,7 @@ def assume_role(role_arn, session_name=None, duration_seconds=None,
             'AWS_SESSION_TOKEN': response['Credentials']['SessionToken']}
 
 
-def determine_module_class(path, class_path):
+def determine_module_class(path, class_path):  # pylint: disable=too-many-branches
     """Determine type of module and return deployment module class."""
     if not class_path:
         # First check directory name for type-indicating suffix
@@ -62,6 +71,8 @@ def determine_module_class(path, class_path):
             class_path = 'runway.module.terraform.Terraform'
         elif basename.endswith('.cdk'):
             class_path = 'runway.module.cdk.CloudDevelopmentKit'
+        elif basename.endswith('.k8s'):
+            class_path = 'runway.module.k8s.K8s'
         elif basename.endswith('.cfn'):
             class_path = 'runway.module.cloudformation.CloudFormation'
 
@@ -74,6 +85,9 @@ def determine_module_class(path, class_path):
         elif os.path.isfile(os.path.join(path, 'cdk.json')) \
                 and os.path.isfile(os.path.join(path, 'package.json')):
             class_path = 'runway.module.cdk.CloudDevelopmentKit'
+        elif os.path.isdir(os.path.join(path, 'overlays')) \
+                and find_kustomize_files(path):
+            class_path = 'runway.module.k8s.K8s'
         elif glob.glob(os.path.join(path, '*.env')) or (
                 glob.glob(os.path.join(path, '*.yaml'))) or (
                     glob.glob(os.path.join(path, '*.yml'))):
@@ -252,6 +266,7 @@ class ModulesCommand(RunwayCommand):
                           env_region=None,
                           env_root=self.env_root,
                           env_vars=os.environ.copy())
+        context.env_vars['RUNWAYCONFIG'] = self.runway_config_path
         echo_detected_environment(context.env_name, context.env_vars)
 
         # set default names if needed

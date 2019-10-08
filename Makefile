@@ -8,14 +8,12 @@ test: create_readme
 	pipenv run python setup.py test
 	pipenv run flake8 --exclude=src/runway/embedded,src/runway/templates src/runway
 	find src/runway -name '*.py' -not -path 'src/runway/embedded*' -not -path 'src/runway/templates/stacker/*' -not -path 'src/runway/templates/cdk-py/*' -not -path 'src/runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
-	find src/runway/templates/stacker -name '*.py' | xargs pipenv run pylint --disable=import-error --disable=too-few-public-methods
 	find src/runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 travistest: create_readme
 	python setup.py test
 	flake8 --exclude=src/runway/embedded,src/runway/templates src/runway
 	find src/runway -name '*.py' -not -path 'src/runway/embedded*' -not -path 'src/runway/templates/stacker/*' -not -path 'src/runway/templates/cdk-py/*' -not -path 'src/runway/blueprints/*' | PYTHONPATH=src xargs pylint --rcfile=.pylintrc
-	find src/runway/templates/stacker -name '*.py' | xargs pylint --disable=import-error --disable=too-few-public-methods
 	find src/runway/blueprints -name '*.py' | xargs pylint --disable=duplicate-code
 
 create_readme:
