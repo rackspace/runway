@@ -6,13 +6,14 @@ from troposphere import (
     AccountId, Join, Partition, Region, iam, codebuild, Sub
 )
 
+import awacs.cloudformation
 import awacs.codebuild
+import awacs.dynamodb
+import awacs.logs
+import awacs.s3
+import awacs.sts
 
-from awacs import (
-    logs, cloudformation, dynamodb, s3, sts
-)
-
-from awacs.aws import Action, Allow, Deny, PolicyDocument, Statement
+from awacs.aws import Action, Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
 
 from stacker.blueprints.base import Blueprint
@@ -62,6 +63,12 @@ class CodeBuild(Blueprint):
                 AssumeRolePolicyDocument=make_simple_assume_policy(
                     'codebuild.amazonaws.com'
                 ),
+                # todo: drop this broad access in favor of more narrow
+                # permissions (will mean identifying all the needed
+                # permissions across all tests)
+                ManagedPolicyArns=[
+                    'arn:aws:iam::aws:policy/AdministratorAccess'
+                ],
                 Policies=[
                     iam.Policy(
                         PolicyName=Join('', deploy_name_list + ['-policy']),
@@ -115,16 +122,6 @@ class CodeBuild(Blueprint):
                                     ]
                                 ),
                                 Statement(
-                                    Action=[Action('cloudformation', '*')],
-                                    Effect=Deny,
-                                    NotResource=[
-                                        Join(':', ['arn', Partition, 'cloudformation',
-                                                   Region, AccountId,
-                                                   Sub('stack/${prefix}/*',
-                                                       {'prefix': test_suite_prefix})])
-                                    ]
-                                ),
-                                Statement(
                                     Action=[Action('dynamodb', '*')],
                                     Effect=Allow,
                                     Resource=[
@@ -135,31 +132,9 @@ class CodeBuild(Blueprint):
                                     ]
                                 ),
                                 Statement(
-                                    Action=[Action('dynamodb', '*')],
-                                    Effect=Deny,
-                                    NotResource=[
-                                        Join(':', ['arn', Partition, 'dynamodb',
-                                                   Region, AccountId,
-                                                   Sub('table/${prefix}-*',
-                                                       {'prefix': test_suite_prefix})])
-                                    ]
-                                ),
-                                Statement(
                                     Action=[Action('s3', '*')],
                                     Effect=Allow,
                                     Resource=[
-                                        Join(':', ['arn', Partition,
-                                                   Sub('s3:::${prefix}',
-                                                       {'prefix': test_suite_prefix})]),
-                                        Join(':', ['arn', Partition,
-                                                   Sub('s3:::${prefix}/*',
-                                                       {'prefix': test_suite_prefix})])
-                                    ]
-                                ),
-                                Statement(
-                                    Action=[Action('s3', '*')],
-                                    Effect=Deny,
-                                    NotResource=[
                                         Join(':', ['arn', Partition,
                                                    Sub('s3:::${prefix}',
                                                        {'prefix': test_suite_prefix})]),
