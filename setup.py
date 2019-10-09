@@ -1,5 +1,5 @@
 """Packaging settings."""
-
+import sys
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
 
@@ -21,8 +21,6 @@ INSTALL_REQUIRES = [
     'awscli>=1.16.191<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
     'boto3>=1.9.111<2.0'  # matching stacker requirement
-    'PyYAML~=3.13',  # matching awscli requirement
-    'cfn_flip<=1.2.0',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
     'requests',
@@ -54,6 +52,15 @@ INSTALL_REQUIRES = [
     # same to ensure v1.25+ isn't pulled in by pip
     'urllib3>=1.20,<1.25',
 ]
+
+# ensuring pyyaml dep matches awscli
+if sys.version_info[:2] == (2, 6):
+    INSTALL_REQUIRES.append('PyYAML>=3.10,<=3.13')
+    INSTALL_REQUIRES.append('cfn_flip<=1.2.0')  # 1.2.1+ require PyYAML 4.1+
+else:
+    INSTALL_REQUIRES.append('PyYAML>=4.1,<=5.1')
+    INSTALL_REQUIRES.append('cfn_flip>=1.2.1')
+
 
 setup(
     name='runway',
