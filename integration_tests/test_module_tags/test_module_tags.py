@@ -96,9 +96,9 @@ class ModuleTags(IntegrationTest):
 
     def run(self):
         """Find all tests and run them."""
-        tests = ModuleTags.__subclasses__()
+        tests = [test(self.logger) for test in ModuleTags.__subclasses__()]
         self.logger.debug('FOUND TESTS: %s', tests)
-        return execute_tests(self, tests)
+        return execute_tests(tests, self.logger)
 
     def teardown(self):
         """Teardown resources create during init."""
