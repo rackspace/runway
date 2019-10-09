@@ -9,7 +9,7 @@ from send2trash import send2trash
 
 from runway.util import change_dir
 from integration_test import IntegrationTest
-from util import (copy_dir, import_tests, execute_tests)
+from util import (copy_dir, import_tests, execute_tests, run_command)
 
 CFN_CLIENT = boto3.client('cloudformation', region_name='us-east-1')
 
@@ -50,7 +50,7 @@ class ModuleTags(IntegrationTest):
                     stacks[stack_name] = True
                 else:
                     stacks[stack_name] = False
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 stacks[stack_name] = False
         for stack, status in stacks.items():
             if stack[-1] in should_exist:
@@ -77,9 +77,9 @@ class ModuleTags(IntegrationTest):
         for tag in tags:
             cmd.append('--tag')
             cmd.append(tag)
-        self.LOGGER.info('Running command: %s', str(cmd))
+        self.logger.info('Running command: %s', str(cmd))
         with change_dir(self.base_dir):
-            return self.run_command(cmd)
+            return run_command(cmd)
 
     def clean(self):
         """Delete test resources."""
@@ -97,10 +97,10 @@ class ModuleTags(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         tests = ModuleTags.__subclasses__()
-        self.LOGGER.debug('FOUND TESTS: %s', tests)
+        self.logger.debug('FOUND TESTS: %s', tests)
         return execute_tests(self, tests)
 
     def teardown(self):
         """Teardown resources create during init."""
-        self.LOGGER.debug('Teardown is defined in the submodules, not '
+        self.logger.debug('Teardown is defined in the submodules, not '
                           'the "ModuleTags" parent class.')
