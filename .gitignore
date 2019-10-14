@@ -12,3 +12,4 @@ src/runway/templates/terraform/.terraform-version
 .idea
 node_modules
 .serverless
+.venv
