@@ -1,6 +1,6 @@
 """Base module for test handlers."""
 import os
-from typing import Dict, Any, List    # pylint: disable=unused-import
+from typing import Dict, Any, List  # pylint: disable=unused-import
 
 
 class TestHandler(object):

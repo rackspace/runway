@@ -5,10 +5,9 @@ import logging
 import os
 from typing import Dict, Any, List  # pylint: disable=unused-import
 
-from yamllint.cli import run as yamllint_run
-
 from runway.tests.handlers.base import TestHandler
-from runway.util import change_dir, ignore_exit_code_0
+from runway.tests.handlers.script import ScriptHandler
+from runway.util import change_dir
 
 TYPE_NAME = 'yamllint'
 LOGGER = logging.getLogger('runway')
@@ -35,9 +34,7 @@ class YamllintHandler(TestHandler):
         """Perform the actual test."""
         base_dir = os.getcwd()
         dirs_to_scan = cls.get_dirs(base_dir)
-
-        if '.git' in dirs_to_scan:
-            dirs_to_scan.remove('.git')  # not relevant for any repo operations
+        files_at_base = cls.get_yaml_files_at_path(base_dir)
 
         if os.path.isfile(os.path.join(base_dir, '.yamllint')):
             yamllint_config = os.path.join(base_dir, '.yamllint')
@@ -52,9 +49,13 @@ class YamllintHandler(TestHandler):
                 '.yamllint.yml'
             )
 
+        yl_cmd = "yamllint --config-file=%s" % yamllint_config
+        if dirs_to_scan:
+            yl_cmd += " " + ' '.join(["\"%s\"" % x for x in dirs_to_scan])
+        if files_at_base:
+            yl_cmd += " " + ' '.join(["\"%s\"" % x for x in files_at_base])
         with change_dir(base_dir):
-            with ignore_exit_code_0():
-                yamllint_run(
-                    ["--config-file=%s" % yamllint_config] + dirs_to_scan +
-                    cls.get_yaml_files_at_path(base_dir)
-                )
+            ScriptHandler().handle(
+                'yamllint',
+                {'commands': [yl_cmd]}
+            )
