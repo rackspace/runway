@@ -110,6 +110,7 @@ install:
 deploy:
   # used more for build artifact storage than "deploying"
   - provider: s3
+    edge: true  # https://travis-ci.community/t/aws-s3-deploy-fails-to-run/5297/5
     access_key_id: $AWS_ACCESS_KEY_ID
     secret_access_key: $AWS_SECRET_ACCESS_KEY
     bucket: $AWS_BUCKET
