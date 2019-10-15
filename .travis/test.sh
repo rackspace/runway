@@ -18,5 +18,4 @@ ${PIPENV}${PYTHON} setup.py test
 
 ${PIPENV}flake8 --exclude=src/runway/embedded,src/runway/templates src/runway
 find src/runway -name '*.py' -not -path 'src/runway/embedded*' -not -path 'src/runway/templates/stacker/*' -not -path 'src/runway/templates/cdk-py/*' -not -path 'src/runway/blueprints/*' | PYTHONPATH=src xargs ${PIPENV}pylint --rcfile=.pylintrc
-find src/runway/templates/stacker -name '*.py' | xargs ${PIPENV}pylint --disable=import-error --disable=too-few-public-methods
 find src/runway/blueprints -name '*.py' | xargs ${PIPENV}pylint --disable=duplicate-code
