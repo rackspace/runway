@@ -9,6 +9,8 @@ else
     PYTHON="python"
 fi
 
+${PYTHON} -m ensurepip
+
 if [ "$TRAVIS_OS_NAME" = "osx" ] || [ "$TRAVIS_OS_NAME" = "windows" ]; then
     # these setup steps are already taken care of for linux in travis's
     # images. but, since windows and osx don't 'support' the python language
