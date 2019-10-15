@@ -6,14 +6,16 @@ else
 endif
 
 
+sync:
+	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
+
 clean:
 	rm -rf build/
 	rm -rf dist/
 	rm -rf runway.egg-info/
 	rm -rf tmp/
 
-test: create_readme
-	pipenv sync -d
+test: sync create_readme
 	pipenv run python setup.py test
 	pipenv run flake8 --exclude=src/runway/embedded,src/runway/templates src/runway
 	find src/runway -name '*.py' -not -path 'src/runway/embedded*' -not -path 'src/runway/templates/stacker/*' -not -path 'src/runway/templates/cdk-py/*' -not -path 'src/runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
@@ -31,8 +33,7 @@ create_tfenv_ver_file:
 build: clean create_readme create_tfenv_ver_file
 	python setup.py sdist
 
-travisbuild_file: clean create_readme create_tfenv_ver_file
-	pipenv sync --dev
+travisbuild_file: clean sync create_readme create_tfenv_ver_file
 	pipenv run $(PYTHON) setup.py sdist
 	mkdir -p tmp
 	pipenv run pip install .
@@ -43,8 +44,7 @@ travisbuild_file: clean create_readme create_tfenv_ver_file
 	pipenv run pyinstaller --noconfirm --clean runway.file.spec
 	mv dist/* artifacts/$$(cat tmp/version.txt)/$(TRAVIS_OS_NAME)
 
-travisbuild_folder: clean create_readme create_tfenv_ver_file
-	pipenv sync --dev
+travisbuild_folder: clean sync create_readme create_tfenv_ver_file
 	mkdir -p tmp
 	pipenv run pip install .
 	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt

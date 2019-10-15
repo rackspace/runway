@@ -32,7 +32,7 @@ pydocstyle = "<4.0.0"
 pep8-naming = "*"
 flake8-docstrings = "*"
 flake8 = "*"
-pylint = "*"
+pylint = "<=2.3.1"
 pyinstaller = "~=3.5"
 mock = "~=3.0.5"
 pywin32 = {version = "*", os_name = "== 'nt'"}  # windows only
