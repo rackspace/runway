@@ -17,7 +17,7 @@ from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-
 from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
 
 # embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
-from .embedded import hcl
+from ..embedded import hcl
 
 from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
 from ..util import get_hash_for_filename, sha256sum
