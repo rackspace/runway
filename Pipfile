@@ -13,13 +13,15 @@ pyhcl = "*"
 typing = {version = "~= 3.7",markers = "python_version < '3.5'"}
 yamllint = "*"
 zgitignore = "*"
-stacker = "~=1.6"
+stacker = "~=1.7"
 botocore = ">=1.12.111"
 boto3 = ">=1.9.111<2.0"
 pyyaml = ">=4.1,<=5.1"
 cfn_flip = ">=1.2.1"
 six = "*"
 cfn-lint = "*"
+pyOpenSSL = "*"
+requests = "*"
 
 [dev-packages]
 # python3 flake8-docstrings fails with pydocstyle 4:
