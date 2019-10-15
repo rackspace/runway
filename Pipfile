@@ -32,7 +32,10 @@ pydocstyle = "<4.0.0"
 pep8-naming = "*"
 flake8-docstrings = "*"
 flake8 = "*"
-pylint = "<=2.3.1"
+# pylint and astroid pinned to avoid "Instance of '' has no 'Bucket' member"
+# error when using boto3. https://github.com/PyCQA/pylint/issues/3134
+pylint = "<2.3.1"
+astroid = "<2.2.5"
 pyinstaller = "~=3.5"
 mock = "~=3.0.5"
 pywin32 = {version = "*", os_name = "== 'nt'"}  # windows only
