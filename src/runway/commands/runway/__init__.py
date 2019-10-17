@@ -4,7 +4,6 @@
 
 from .envvars import *  # noqa
 from .gen_sample import *  # noqa
-from .gitclean import *  # noqa
 from .init import *  # noqa
 from .preflight import *  # noqa
 from .run_aws import *  # noqa

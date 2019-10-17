@@ -46,13 +46,6 @@ gen-sample
 
 .. automodule:: runway.commands.gen_sample
 
-.. _command-gitclean:
-
-gitclean
-^^^^^^^^
-
-.. automodule:: runway.commands.gitclean
-
 .. _command-init:
 
 init
