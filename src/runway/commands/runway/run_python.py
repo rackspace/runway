@@ -1,8 +1,8 @@
 """Execute a python script using a bundled copy of python.
 
-By using this command runway can execute actions using a bundled copy of
+By using this command Runway can execute actions using a bundled copy of
 python without requiring python to be installed on a system. This is only
-applicable when installing the bundled version of runway, not from
+applicable when installing the bundled version of Runway, not from
 PyPI (``pip install runway``). When installed from PyPI, the system's
 python is used.
 

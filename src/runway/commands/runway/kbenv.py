@@ -1,4 +1,25 @@
-"""The kbenv command."""
+"""Manage versions and execute `Kubernetes`_ commands.
+
+Runway's built-in kubectl version management ensure the correct version
+is used for a given environment. Define a ``.kubectl-version`` file
+in your k8s module and that version will be automatically downloaded &
+used during Runway operations.
+
+The ``tfenv`` subcommand supplements this functionality in 2 ways:
+
+* The ``install`` option will download kubectl (e.g. for
+  pre-seeding a deployment system)
+* The ``run`` option will execute arbitrary kubectl commands
+
+Examples:
+  .. code-block:: shell
+
+    $ runway kbenv install 1.14.5
+    $ runway kbenv install  # retrieves version from .kubectl-version
+
+    $ runway kbenv run -- get namespace
+
+"""
 
 import subprocess
 import sys

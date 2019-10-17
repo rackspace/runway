@@ -1,4 +1,14 @@
-"""The run-aws command."""
+"""Execute aws cli commands using the version bundled with Runway.
+
+This command gives access to the ``aws`` CLI when it might not
+otherwise be installed (e.g. when using the bundled version of Runway).
+
+Example:
+  .. code-block:: shell
+
+    $ runway run-aws -- s3 ls
+
+"""
 
 import logging
 import os

@@ -6,30 +6,41 @@ sample directory.
 
 .. rubric:: Available Samples
 
-+----------------+-----------------------------------------------------+
-|      Name      |  Description                                        |
-+================+=====================================================+
-| ``cdk-csharp`` | `AWS CDK`_ :ref:`module<runway-module>` using C#    |
-+----------------+-----------------------------------------------------+
-| ``cdk-py``     | `AWS CDK`_ :ref:`module<runway-module>` using Python|
-+----------------+-----------------------------------------------------+
-| ``cdk-tsc``    | `AWS CDK`_ :ref:`module<runway-module>` using       |
-|                | TypeScript                                          |
-+----------------+-----------------------------------------------------+
-| ``cfn``        | `CloudFormation`_ :ref:`module<runway-module>` to   |
-|                | deploy a `Terraform`_ backend.                      |
-+----------------+-----------------------------------------------------+
-| ``sls``        | `Serverless Framework`_ :ref:`module<runway-module>`|
-+----------------+-----------------------------------------------------+
-| ``sls-tsc``    | `Serverless Framework`_ :ref:`module<runway-module>`|
-|                | using TypeScript                                    |
-+----------------+-----------------------------------------------------+
-| ``stacker``    | `Troposphere`_/`Stacker`_                           |
-|                | :ref:`module<runway-module>` to deploy a            |
-|                | `Terraform`_ backend                                |
-+----------------+-----------------------------------------------------+
-| ``tf``         | `Terraform`_ :ref:`module<runway-module>`           |
-+----------------+-----------------------------------------------------+
++------------------+---------------------------------------------------+
+|      Name        |  Description                                      |
++==================+===================================================+
+| ``cdk-csharp``   | `AWS CDK`_ :ref:`module<runway-module>` using C#  |
++------------------+---------------------------------------------------+
+| ``cdk-py``       | `AWS CDK`_ :ref:`module<runway-module>` using     |
+|                  | Python                                            |
++------------------+---------------------------------------------------+
+| ``cdk-tsc``      | `AWS CDK`_ :ref:`module<runway-module>` using     |
+|                  | TypeScript                                        |
++------------------+---------------------------------------------------+
+| ``cfn``          | `CloudFormation`_ :ref:`module<runway-module>`    |
+|                  | stack with S3 bucket & DDB table (perfect for     |
+|                  | storing Terraform backend state)                  |
++------------------+---------------------------------------------------+
+| ``k8s-cfn-repo`` | `Kubernetes`_                                     |
+|                  | :ref:`module<runway-module>` EKS cluster & sample |
+|                  | app using CloudFormation                          |
++------------------+---------------------------------------------------+
+| ``k8s-tf-repo``  | `Kubernetes`_                                     |
+|                  | :ref:`module<runway-module>` EKS cluster & sample |
+|                  | app using Terraform                               |
++------------------+---------------------------------------------------+
+| ``sls``          | `Serverless Framework`_                           |
+|                  | :ref:`module<runway-module>`                      |
++------------------+---------------------------------------------------+
+| ``sls-tsc``      | `Serverless Framework`_                           |
+|                  | :ref:`module<runway-module>` using TypeScript     |
++------------------+---------------------------------------------------+
+| ``stacker``      | `Troposphere`_/`Stacker`_                         |
+|                  | :ref:`module<runway-module>` identical the ``cfn``|
+|                  | sample but with the template written in python    |
++------------------+---------------------------------------------------+
+| ``tf``           | `Terraform`_ :ref:`module<runway-module>`         |
++------------------+---------------------------------------------------+
 
 .. rubric:: Example
 

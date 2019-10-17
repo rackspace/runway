@@ -1,4 +1,16 @@
-"""The envvars command."""
+"""Output ``runway.yml``-defined environment variables.
+
+OS environment variables can be set in ``runway.yml`` for different
+Runway environments (e.g. dev & prod ``KUBECONFIG`` values). The
+``envvars`` command allows access to these values for use outside of
+Runway.
+
+Example:
+  .. code-block:: shell
+
+    $ source $(runway envvars)
+
+"""
 from __future__ import print_function
 from typing import Dict  # noqa pylint: disable=unused-import
 import logging
