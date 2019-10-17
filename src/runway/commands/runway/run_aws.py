@@ -43,6 +43,8 @@ def aws_cli(*cmd):
 class RunAws(RunwayCommand):
     """Extend RunwayCommand with execution of awscli."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):
         """Execute awscli."""
         if not os.environ.get('DEBUG'):

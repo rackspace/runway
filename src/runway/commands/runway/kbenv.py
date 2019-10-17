@@ -32,6 +32,8 @@ from ...util import strip_leading_option_delim
 class KBEnv(RunwayCommand):
     """Extend RunwayCommand with execution of kbenv."""
 
+    SKIP_FIND_CONFIG = True
+
     def execute(self):
         """Execute kbenv."""
         if self._cli_arguments.get('install'):
