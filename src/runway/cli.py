@@ -7,7 +7,6 @@ Usage:
   runway (deploy|takeoff) [--tag <tag>...]
   runway (destroy|dismantle) [--tag <tag>...]
   runway init
-  runway gitclean
   runway gen-sample [<samplename>]
   runway whichenv
   runway envvars
