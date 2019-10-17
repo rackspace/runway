@@ -45,13 +45,16 @@ def get_cdk_stacks(module_path, env_vars, context_opts):
     """Return list of CDK stacks."""
     LOGGER.debug('Listing stacks in the CDK app prior to '
                  'diff')
-    return subprocess.check_output(
+    result = subprocess.check_output(
         generate_node_command(
             command='cdk',
             command_opts=['list'] + context_opts,
             path=module_path),
         env=env_vars
-    ).strip().split('\n')
+    )
+    if isinstance(result, bytes):  # python3 returns encoded bytes
+        result = result.decode()
+    return result.strip().split('\n')
 
 
 class CloudDevelopmentKit(RunwayModule):
