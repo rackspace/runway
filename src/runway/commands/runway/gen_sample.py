@@ -314,8 +314,7 @@ def generate_sample_cdk_py_module(env_root, module_dir=None):
         stream.write('node_modules')
     LOGGER.info("Sample CDK module created at %s", module_dir)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
-                '"npm install" and "pipenv update -d --three" to generate its '
-                'lockfiles.', module_dir)
+                '"npm install" to generate its lockfile.', module_dir)
 
 
 def generate_sample_cfn_module(env_root, module_dir=None):
