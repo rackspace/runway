@@ -554,7 +554,7 @@ configuration of clusters. Perform the following steps to align your k8s
 directories with Runway's requirements & best practices.
 
 Part 1: Adding Kubernetes to Deployment
---------------------------------------
+---------------------------------------
 Start by adding your
 `Kustomize overlay organized <https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays>`_
 Kubernetes directory to your runway.yml's list of modules.

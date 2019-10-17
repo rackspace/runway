@@ -4,6 +4,7 @@
 .. _Stacker: https://stacker.readthedocs.io/en/stable/
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
+.. _Kubernetes: https://kubernetes.io/
 
 .. _commands:
 
@@ -52,6 +53,13 @@ init
 
 .. automodule:: runway.commands.init
 
+.. _command-kbenv:
+
+kbenv
+^^^^^
+
+.. automodule:: runway.commands.kbenv
+
 .. _command-plan:
 
 plan
@@ -65,6 +73,13 @@ preflight
 ^^^^^^^^^
 
 .. automodule:: runway.commands.preflight
+
+.. _command-run-aws:
+
+run-aws
+^^^^^^^
+
+.. automodule:: runway.commands.run_aws
 
 .. _command-run-python:
 
@@ -100,6 +115,13 @@ test
 ^^^^
 
 .. automodule:: runway.commands.test
+
+.. _command-tfenv:
+
+tfenv
+^^^^^
+
+.. automodule:: runway.commands.tfenv
 
 .. _command-whichenv:
 
