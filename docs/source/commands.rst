@@ -1,5 +1,6 @@
 .. _AWS CDK: https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
+.. _Kubernetes: https://kubernetes.io/
 .. _Serverless Framework: https://serverless.com/
 .. _Stacker: https://stacker.readthedocs.io/en/stable/
 .. _Terraform: https://www.terraform.io
@@ -31,6 +32,13 @@ dismantle
 
 .. automodule:: runway.commands.dismantle
 
+.. _command-envvars:
+
+envvars
+^^^^^^^
+
+.. automodule:: runway.commands.envvars
+
 .. _command-gen-sample:
 
 gen-sample
@@ -52,6 +60,13 @@ init
 
 .. automodule:: runway.commands.init
 
+.. _command-kbenv:
+
+kbenv
+^^^^^
+
+.. automodule:: runway.commands.kbenv
+
 .. _command-plan:
 
 plan
@@ -65,6 +80,13 @@ preflight
 ^^^^^^^^^
 
 .. automodule:: runway.commands.preflight
+
+.. _command-run-aws:
+
+run-aws
+^^^^^^^
+
+.. automodule:: runway.commands.run_aws
 
 .. _command-run-python:
 
@@ -93,6 +115,13 @@ taxi
 ^^^^
 
 .. automodule:: runway.commands.taxi
+
+.. _command-tfenv:
+
+tfenv
+^^^^^
+
+.. automodule:: runway.commands.tfenv
 
 .. _command-test:
 
