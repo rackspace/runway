@@ -43,8 +43,10 @@ executed. (eg. macOS/Ubuntu:``chmod +x runway``)
 
     $ ./runway deploy
 
-.. _install-npm:
+**Suggested use:** CloudFormation or TerraForm projects
 
+
+.. _install-npm:
 
 npm
 ^^^
@@ -66,8 +68,10 @@ recommend using it per-project as a dev dependency. See
 
     $ npx runway deploy
 
-.. _install-python:
+**Suggested use:** Serverless or AWS CDK projects
 
+
+.. _install-python:
 
 pip
 ^^^
@@ -78,6 +82,8 @@ Runway is hosted on PyPI as the package named ``runway``. It can be installed
 like any other Python package, but we instead strongly recommend using it
 per-project with `pipenv <https://pypi.org/project/pipenv/>`_. See
 `Why Version Lock Per-Project`_ for more info regarding this suggestion.
+
+**Suggested use:** Python projects
 
 
 Version Locking with Pipenv
