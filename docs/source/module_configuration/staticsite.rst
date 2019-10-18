@@ -1,9 +1,49 @@
+.. _mod-staticsite:
+
+Static Site
+===========
+
+This module type performs idempotent deployments of static websites. It
+combines CloudFormation stacks (for S3 buckets & CloudFront Distribution) with
+additional logic to build & sync the sites.
+
+It can be used with a configuration like the following::
+
+    deployments:
+      - modules:
+          - path: web
+            class_path: runway.module.staticsite.StaticSite
+            environments:
+              dev:
+                namespace: contoso-dev
+                staticsite_aliases: web.example.com,foo.web.example.com
+                staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
+            options:
+              build_steps:
+                - npm ci
+                - npm run build
+              build_output: dist
+        regions:
+          - us-west-2
+
+This will build the website in ``web`` via the specified build_steps and then
+upload the contents of ``web/dist`` to an S3 bucket created in the
+CloudFormation stack ``web-dev-conduit``. On subsequent deploys, the website
+will be built and synced only if the non-git-ignored files in ``web`` change.
+
+The site domain name is available via the ``CFDistributionDomainName`` output
+of the ``<namespace>-<path>`` stack (e.g. ``contoso-dev-web`` above) and will
+be displayed on stack creation/updates.
+
+A start-to-finish example walkthrough is available
+in the :ref:`Conduit quickstart<qs-conduit>`.
+
+
 .. _staticsite-config-options:
 
-Static Site Config Options
-==========================
+Example of all Static Site Options
+----------------------------------
 
-Full list of options for the `Static Site module <module_configuration.html#static-site>`_.
 Most of these options are not required, but are listed here for reference::
 
     deployments:
