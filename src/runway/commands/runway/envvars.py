@@ -8,7 +8,7 @@ Runway.
 Example:
   .. code-block:: shell
 
-    $ source $(runway envvars)
+    $ eval "$(runway envvars)"
 
 """
 from __future__ import print_function
