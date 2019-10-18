@@ -8,3 +8,4 @@ Quickstart Guides
 
     cloudformation
     conduit
+    other_ways_to_use
