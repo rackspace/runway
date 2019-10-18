@@ -24,16 +24,14 @@ Very simple configuration to:
    :maxdepth: 2
    :caption: Contents:
 
-   basic_concepts
    installation
-   how_to_use
+   getting_started
+   quickstart/index
    commands
-   repo_structure
    runway_config
-   module_configuration
+   module_configuration/index
    defining_tests
-   quickstart
-   staticsite_config
+   repo_structure
    developers
    license
 
