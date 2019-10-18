@@ -1,6 +1,6 @@
 """Creates a sample :ref:`runway-config` in the current directory.
 
-If a :ref:`runway config file<runway-config>` is already present, no
+If a :ref:`Runway config file<runway-config>` is already present, no
 action is taken.
 
 Example:

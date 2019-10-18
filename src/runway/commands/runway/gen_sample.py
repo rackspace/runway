@@ -1,4 +1,4 @@
-"""Generate a sample :ref:`runway module<runway-module>` directory.
+"""Generate a sample :ref:`Runway module<runway-module>` directory.
 
 The sample module is created in the current directory. If a directory
 already exists with the name it tries to use, it will not create the

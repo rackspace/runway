@@ -42,7 +42,7 @@ class EnvVars(RunwayCommand):
     """Extend RunwayCommand with execution of envvars."""
 
     def execute(self):
-        """Output runway-defined environment variables."""
+        """Output Runway-defined environment variables."""
         if self.runway_config.get('deployments'):
             env_vars = {}
             for i in self.runway_config.get('deployments'):

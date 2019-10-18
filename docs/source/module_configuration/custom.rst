@@ -3,7 +3,8 @@
 Custom Plugin Support
 =====================
 
-Need to expand runway to wrap other tools? Yes - you can do that with custom plugin support.
+Need to expand Runway to wrap other tools? Yes - you can do that with custom
+plugin support.
 
 
 Overview
@@ -12,7 +13,7 @@ Overview
 Runway can import Python modules that can perform custom deployments with your
 own set of Runway modules. Let's say for example you want to have Runway
 execute an Ansible playbook to create an EC2 security group as one of the steps
-in the middle of your runway deployment list - this is possible with your own
+in the middle of your Runway deployment list - this is possible with your own
 plugin. The custom plugin support allows you to mix-and-match natively
 supported modules (e.g. CloudFormation, Terraform) with plugins you write
 providing additional support for non-native modules. Although written in
@@ -45,7 +46,7 @@ module. Some notable examples are::
 - self.context.env_name - name of the environment
 - self.context.env_region - region in which the module is being executed
 - self.context.env_vars - OS environment variables provided to the module
-- self.path - path to your runway module folder
+- self.path - path to your Runway module folder
 
 
 runway.yml Example
@@ -56,7 +57,7 @@ to your module's configuration. Below is an example ``runway.yml`` containing a
 single module that looks for an Ansible playbook in a folder at the root of
 your Runway environment (i.e. repo) named "security_group.ansible".
 
-Setting ``class_path`` tells runway to import the DeployToAWS Python class,
+Setting ``class_path`` tells Runway to import the DeployToAWS Python class,
 from a file named Ansible.py in a folder named "local_runway_extensions"
 (Standard Python import conventions apply). Runway will execute the ``deploy``
 function in your class when you perform a ``runway deploy`` (AKA takeoff).
@@ -74,8 +75,8 @@ function in your class when you perform a ``runway deploy`` (AKA takeoff).
 Below is the ``Ansible.py`` module referenced above that wraps the
 ``ansible-playbook`` command. It will be responsible for deploying an EC2 Security Group from the playbook
 with a naming convention of ``<env>-<region>.yaml`` within a fictional
-``security_group.ansible`` runway module folder. In this example, the
-``ansible-playbook`` binary would already have been installed prior to a runway
+``security_group.ansible`` Runway module folder. In this example, the
+``ansible-playbook`` binary would already have been installed prior to a Runway
 deploy, but this example does check to see if it is installed before execution
 and logs an error if not. The Runway plugin will only execute
 the ansible-playbook against a ``yaml`` file associated with the environment and set for the Runway

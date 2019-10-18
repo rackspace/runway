@@ -1,4 +1,4 @@
-"""runway base module."""
+"""Runway base module."""
 from __future__ import print_function
 
 import logging
@@ -71,7 +71,7 @@ def get_env(path, ignore_git_branch=False):
 
     if ignore_git_branch:
         LOGGER.info('Skipping environment lookup from current git branch '
-                    '("ignore_git_branch" is set to true in the runway '
+                    '("ignore_git_branch" is set to true in the Runway '
                     'config)')
     else:
         # These are not located with the top imports because they throw an

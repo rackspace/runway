@@ -1,4 +1,4 @@
-"""Used to destroy :ref:`modules<runway-module>` with runway.
+"""Used to destroy :ref:`modules<runway-module>` with Runway.
 
 .. danger:: Use extreme caution when using with ``CI`` or
             ``--tag <tag>...``. You will **not** be prompted before
@@ -7,11 +7,11 @@
 
 When run, the environment is determined from the current git branch
 unless ``ignore_git_branch: true`` is specified in the
-:ref:`runway config file<runway-config>`. If the ``DEPLOY_ENVIRONMENT``
+:ref:`Runway config file<runway-config>`. If the ``DEPLOY_ENVIRONMENT``
 environment variable is set, it's value will be used. If neither the git
 branch or environment variable are available, the directory name is used.
 The environment identified here is used to determine the env/config files
-to use. It is also used with options defined in the runway config file
+to use. It is also used with options defined in the Runway config file
 such as ``assume_role``, ``account_id``, etc. See
 :ref:`Runway Config<runway-config>` for details on these options.
 

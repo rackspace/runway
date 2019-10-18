@@ -3,7 +3,7 @@
 Installation
 ============
 
-To enable runway to confirm to our users' varying use cases, we have made it
+To enable Runway to confirm to our users' varying use cases, we have made it
 available via three different install methods - `cURL`_, `npm`_, and `pip`_.
 
 .. _install-curl:
@@ -12,8 +12,8 @@ available via three different install methods - `cURL`_, `npm`_, and `pip`_.
 cURL
 ^^^^
 
-Arguably the easiest way to install runway is by using curl. Use one of the
-endpoints below to download a single-binary executable version of runway based
+Arguably the easiest way to install Runway is by using curl. Use one of the
+endpoints below to download a single-binary executable version of Runway based
 on your operating system.
 
 +------------------+---------------------------------------------------+
@@ -30,7 +30,7 @@ on your operating system.
 
     $ curl -L https://oni.ca/latest/osx/runway -o runway
 
-.. note:: To install a specific version of runway, you can replace ``latest``
+.. note:: To install a specific version of Runway, you can replace ``latest``
           with a version number.
 
 .. rubric:: Usage
@@ -52,7 +52,7 @@ npm
 Runway is published on npm as ``@onica/runway``. It currently contains binary
 to support macOS, Ubuntu, and Windows.
 
-While runway can be installed globally like any other npm package, we strongly
+While Runway can be installed globally like any other npm package, we strongly
 recommend using it per-project as a dev dependency. See
 `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
@@ -85,20 +85,20 @@ Version Locking with Pipenv
 
 In your project's directory, execute ``pipenv install runway``. This will:
 
-#. Update (creating if missing) a ``Pipfile`` file with your project's runway
+#. Update (creating if missing) a ``Pipfile`` file with your project's Runway
    dependency
 #. Create a Python virtual environment (hidden in your user profile folder)
-   dedicated to your project, with runway installed in it
+   dedicated to your project, with Runway installed in it
 #. Update (creating if missing) a ``Pipfile.lock`` file containing the exact
-   versions/crypto-hashes of runway (and dependencies) installed in your
+   versions/crypto-hashes of Runway (and dependencies) installed in your
    python virtual environment
 
-Now runway can be used in the project via ``pipenv run runway ...``
+Now Runway can be used in the project via ``pipenv run runway ...``
 (e.g. ``pipenv run runway takeoff``).
 
-To ensure future users of the project use the same version of runway,
+To ensure future users of the project use the same version of Runway,
 direct them (e.g. via a Makefile) to invoke it via
-``pipenv sync; pipenv run runway ...`` -- this will ensure the version in
+``pipenv sync; pipenv run Runway ...`` -- this will ensure the version in
 their virtual environment is kept in sync with the project's lock file.
 
 
@@ -118,8 +118,8 @@ If pipenv isn't available after installation (via
 Why Version Lock Per-Project
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Locking the version of runway per-project will allow you to:
+Locking the version of Runway per-project will allow you to:
 
-- Specify the version(s) of runway compatible with your deployments config
-- Ensure runway executions are performed with the same version (regardless of
+- Specify the version(s) of Runway compatible with your deployments config
+- Ensure Runway executions are performed with the same version (regardless of
   where/when they occur -- avoids the dreaded "works on my machine")
