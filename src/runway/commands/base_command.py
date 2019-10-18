@@ -1,4 +1,4 @@
-"""Base class for commands that need to parse the runway config."""
+"""Base class for commands that need to parse the Runway config."""
 from typing import List, Optional, Union  # pylint: disable=unused-import
 import os
 import logging

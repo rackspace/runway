@@ -62,7 +62,7 @@ Source: https://github.com/aws-cloudformation/cfn-python-lint
   *and best practices*.
 
 In order to use this :ref:`test<runway-test>`, there must be a ``.cfnlintrc``
-file in the same directory as the :ref:`runway config file<runway-config>`.
+file in the same directory as the :ref:`Runway config file<runway-config>`.
 
 .. rubric:: Example:
 
@@ -103,7 +103,7 @@ Source: https://github.com/adrienverge/yamllint
   *problems such as lines length, trailing spaces, indentation, etc*.
 
 A ``.yamllint`` file can be placed at in the same directory as the
-:ref:`runway config file<runway-config>` to customize the linter or, the runway
+:ref:`Runway config file<runway-config>` to customize the linter or, the Runway
 provided template will be used.
 
 .. rubric:: Example:

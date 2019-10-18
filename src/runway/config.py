@@ -9,7 +9,7 @@ LOGGER = logging.getLogger('runway')
 
 
 class ConfigComponent(object):
-    """Base class for runway config components."""
+    """Base class for Runway config components."""
 
     def get(self, key, default=None):
         # type: (str, Any) -> Any
@@ -122,9 +122,9 @@ class ModuleDefinition(ConfigComponent):
         Keyword Args:
             name (str): Name of the module. Used to more easily identify
                 where different modules begin/end in the logs.
-            path (str): Path to the module relative to the runway config
-                file. This cannot be higher than the runway config file.
-            class_path (Optional[str]): Path to custom runway module class.
+            path (str): Path to the module relative to the Runway config
+                file. This cannot be higher than the Runway config file.
+            class_path (Optional[str]): Path to custom Runway module class.
                 Also used for static site deployments. See
                 :ref:`Module Configurations<module-configurations>` for
                 detailed usage.
@@ -239,7 +239,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               skip-npm-ci: false  # optional
 
     A deployment can be defined without modules if the directory
-    containing the runway config file is a module directory.
+    containing the Runway config file is a module directory.
 
     Example:
       .. code-block:: yaml
@@ -272,7 +272,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
             current_dir (bool): Used to deploy the module in which the
-                runway config file is located. *(default: false)*
+                Runway config file is located. *(default: false)*
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
                 variables to environment names. When run, the variables
                 defined here are merged with those in the
@@ -348,10 +348,10 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
 
 class TestDefinition(ConfigComponent):
-    """Tests can be defined as part of the runway config file.
+    """Tests can be defined as part of the Runway config file.
 
     This is to remove the need for complex Makefiles or scripts to initiate
-    test runners. Simply define all tests for a project in the runway
+    test runners. Simply define all tests for a project in the Runway
     config file and use the ``runway test`` :ref:`command<command-test>`
     to execute them.
 
@@ -424,12 +424,12 @@ class TestDefinition(ConfigComponent):
 
 
 class Config(ConfigComponent):
-    """The runway config file is where all options are defined.
+    """The Runway config file is where all options are defined.
 
     It contains definitions for deployments, tests, and some global
     options that impact core functionality.
 
-    The runway config file can have two possible names, ``runway.yml``
+    The Runway config file can have two possible names, ``runway.yml``
     or ``runway.yaml``. It must be stored at the root of the directory
     containing all modules to be deployed.
 
@@ -462,7 +462,7 @@ class Config(ConfigComponent):
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
-        """.. Top-level runway config file.
+        """.. Top-level Runway config file.
 
         Keyword Args:
             deployments (List[Dict[str, Any]]): A list of
@@ -511,7 +511,7 @@ class Config(ConfigComponent):
     @classmethod
     def find_config_file(cls, config_dir=None):
         # type: (Optional[str]) -> str
-        """Find the runway config file."""
+        """Find the Runway config file."""
         if not config_dir:
             config_dir = os.getcwd()
 

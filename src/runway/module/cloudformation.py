@@ -56,13 +56,13 @@ def make_stacker_cmd_string(args, lib_path):
     This is the standard stacker invocation script, with the following changes:
     * Adding our explicit arguments to parse_args (instead of leaving it empty)
     * Overriding sys.argv
-    * Adding embedded runway lib directory to sys.path
+    * Adding embedded Runway lib directory to sys.path
     """
     if platform.system().lower() == 'windows':
         # Because this will be run via subprocess, the backslashes on Windows
         # will cause command errors
         lib_path = lib_path.replace('\\', '/')
-    # This same code is duplicated in the base runway command `run-stacker`
+    # This same code is duplicated in the base Runway command `run-stacker`
     return ("import sys;"
             "sys.argv = ['stacker'] + {args};"
             "sys.path.insert(1, '{lib_path}');"
@@ -81,7 +81,7 @@ class CloudFormation(RunwayModule):
         """Run Stacker in child process."""
         if getattr(sys, 'frozen', False):
             # running in pyinstaller single-exe, so sys.executable will
-            # be the all-in-one runway binary
+            # be the all-in-one Runway binary
             executable_cmd_list = [sys.executable, 'run-stacker', '--']
             LOGGER.debug(
                 "Stacker command being executed: runway-cli %s %s",
@@ -164,7 +164,7 @@ class CloudFormation(RunwayModule):
                         if re.match(r"runway(\..*)?\.yml", name) or (
                                 name.startswith('.') or
                                 name == 'docker-compose.yml'):
-                            # Hidden files (e.g. .gitlab-ci.yml), runway configs,
+                            # Hidden files (e.g. .gitlab-ci.yml), Runway configs,
                             # and docker-compose files definitely aren't stacker
                             # config files
                             continue

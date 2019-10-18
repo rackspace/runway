@@ -15,7 +15,8 @@ Serverless Framework backend with an Angular frontend.
 Prerequisites
 ^^^^^^^^^^^^^
 
-- An AWS account, and configured terminal environment for interacting with it with an admin role.
+- An AWS account, and configured terminal environment for interacting with it
+  with an admin role.
 - The following installed tools:
 
     - npm

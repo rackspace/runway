@@ -7,7 +7,7 @@ Getting Started Guide
 Basic Concepts
 ^^^^^^^^^^^^^^
 
-Welcome to runway! To get a basic understanding of runway, we have listed out
+Welcome to Runway! To get a basic understanding of Runway, we have listed out
 the key concepts below that you will need to get started with deploying your
 first `module`_.
 
@@ -15,9 +15,9 @@ first `module`_.
 Runway Config File
 ~~~~~~~~~~~~~~~~~~
 
-The :ref:`runway config file<runway-config>` is usually stored at the root of
+The :ref:`Runway config file<runway-config>` is usually stored at the root of
 a project repo. It defines the `modules <module>`_ that will be managed by
-runway.
+Runway.
 
 
 Deployment
@@ -25,7 +25,7 @@ Deployment
 
 A :ref:`deployment<runway-deployment>` contains a list of `modules <module>`_
 and options for all the `modules <module>`_ in the
-:ref:`deployment<runway-deployment>`. A `runway config file`_ can contain
+:ref:`deployment<runway-deployment>`. A `Runway config file`_ can contain
 multiple :ref:`deployments<runway-deployment>` and a
 :ref:`deployment<runway-deployment>` can contain multiple `modules <module>`_.
 
@@ -71,7 +71,7 @@ Deploying Your First Module
        $ git init
        $ git checkout -b ENV-dev
 
-#. Download runway using :ref:`curl<install-curl>`. Be sure to use the endpoint
+#. Download Runway using :ref:`curl<install-curl>`. Be sure to use the endpoint
    that corresponds to your operating system. Then, change the downloaded
    file's permissions to allow execution.
 
@@ -81,7 +81,7 @@ Deploying Your First Module
        $ curl -L https://oni.ca/latest/osx/runway -o runway
        $ chmod +x runway
 
-#. Use runway to generate a sample :ref:`module<runway-module>` using the
+#. Use Runway to generate a sample :ref:`module<runway-module>` using the
    :ref:`gen-sample<command-gen-sample>` command. This will give us a
    preformatted :ref:`module<runway-module>` that is ready to be deployed after
    we change a few variables. To read more about the directory structure,
@@ -110,7 +110,7 @@ Deploying Your First Module
        stacker_bucket_name: stacker-onica-us-east-1
 
 #. With the :ref:`module<runway-module>` ready to deploy, now we need to create
-   our :ref:`runway config file<runway-config>`. Do to this, use the
+   our :ref:`Runway config file<runway-config>`. Do to this, use the
    :ref:`init<command-init>` command to generate a sample file at the root of
    the project repo.
 
@@ -192,11 +192,11 @@ From the root of the project directory we created in
 Execution Without A TTY (non-interactive)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Runway allows you to set an environment variable to allow execution without a
-TTY or if STDIN is closed. This allows users to execute runway
+TTY or if STDIN is closed. This allows users to execute Runway
 :ref:`deployments<runway-deployment>` in their CI/CD infrastructure as code
 deployment systems avoiding the ``EOF when reading a line`` error message.
 In order to execute runway without a TTY, set the ``CI`` environment variable
 before your ``runway [deploy|destroy]`` execution.
 
-.. important:: Executing runway in this way will cause runway to perform updates
+.. important:: Executing Runway in this way will cause Runway to perform updates
                in your environment without prompt.  Use with caution.

@@ -60,7 +60,7 @@ class CfnLintHandler(TestHandler):
         # type: (str, Dict[str, Any]) -> None
         """Perform the actual test.
 
-        Relies on .cfnlintrc file to be located beside the runway config file.
+        Relies on .cfnlintrc file to be located beside the Runway config file.
 
         """
         cfnlintrc_path = os.path.join(os.getcwd(), '.cfnlintrc')

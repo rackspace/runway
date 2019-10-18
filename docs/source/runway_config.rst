@@ -168,7 +168,7 @@ Sample
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-The runway config file can also be placed in a module folder
+The Runway config file can also be placed in a module folder
 (e.g. a repo/environment containing only one module doesn't need to nest the module in a subfolder)
 
 .. code-block:: yaml

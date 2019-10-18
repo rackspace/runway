@@ -3,7 +3,7 @@
 Repo Structure
 ==============
 
-Projects deployed via runway can be structured in a few ways; some examples
+Projects deployed via Runway can be structured in a few ways; some examples
 follow:
 
 Git Branches as Environments
@@ -73,7 +73,7 @@ Directories as Environments with a Single Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Another sample repo structure, showing environment folders containing a single
 CloudFormation :ref:`modules<runway-module>` at their root (combining the
-``current_dir`` & ``ignore_git_branch`` :ref:`runway config file
+``current_dir`` & ``ignore_git_branch`` :ref:`Runway config file
 <runway-config>` options to merge the Environment & Module folders).
 
 See the `Directories as Environments`_ example above for more information on
