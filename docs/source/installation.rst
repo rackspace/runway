@@ -3,7 +3,7 @@
 Installation
 ============
 
-To enable Runway to confirm to our users' varying use cases, we have made it
+To enable Runway to conform to our users' varying use cases, we have made it
 available via three different install methods - `cURL`_, `npm`_, and `pip`_.
 
 .. _install-curl:
