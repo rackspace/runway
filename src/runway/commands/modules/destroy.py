@@ -20,7 +20,9 @@ The user will be prompted to select which
 :ref:`module(s)<runway-module>` to process unless there is only one
 :ref:`deployment<runway-deployment>` and/or
 :ref:`module<runway-module>`, the environment variable ``CI`` is set,
-or the ``--tag <tag>...`` option provided is used.
+or the ``--tag <tag>...`` option provided is used. In which case, the
+:ref:`deployment(s)<runway-deployment>` and :ref:`module(s)<runway-module>`
+will be processed in sequence, in reverse of the order they are defined.
 
 .. rubric:: Options
 
