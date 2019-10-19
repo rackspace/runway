@@ -34,7 +34,7 @@ Module
 ~~~~~~
 
 A :ref:`module<runway-module>` is a directory containing a single
-infrastructure as code tool configuration of an application, a component, or
+infrastructure-as-code tool configuration of an application, a component, or
 some infrastructure (eg. a set of `CloudFormation`_ templates). It is
 defined in a `deployment`_ by path. Modules can also contain granular options
 that only pertain to it.
@@ -78,7 +78,7 @@ Deploying Your First Module
    .. code-block:: shell
 
        # macOS example
-       $ curl -L https://oni.ca/latest/osx/runway -o runway
+       $ curl -L https://oni.ca/runway/latest/osx -o runway
        $ chmod +x runway
 
 #. Use Runway to generate a sample :ref:`module<runway-module>` using the
