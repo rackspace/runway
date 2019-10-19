@@ -19,16 +19,16 @@ on your operating system.
 +------------------+---------------------------------------------------+
 | Operating System | Endpoint                                          |
 +==================+===================================================+
-| macOS            | https://oni.ca/latest/osx/runway                  |
+| Linux            | https://oni.ca/runway/latest/linux                |
 +------------------+---------------------------------------------------+
-| Ubuntu           | https://oni.ca/latest/ubnt/runway                 |
+| macOS            | https://oni.ca/runway/latest/osx                  |
 +------------------+---------------------------------------------------+
-| Windows          | https://oni.ca/latest/win/runway                  |
+| Windows          | https://oni.ca/runway/latest/win                  |
 +------------------+---------------------------------------------------+
 
 .. code-block:: shell
 
-    $ curl -L https://oni.ca/latest/osx/runway -o runway
+    $ curl -L https://oni.ca/runway/latest/osx -o runway
 
 .. note:: To install a specific version of Runway, you can replace ``latest``
           with a version number.
@@ -43,7 +43,7 @@ executed. (eg. macOS/Ubuntu:``chmod +x runway``)
 
     $ ./runway deploy
 
-**Suggested use:** CloudFormation or TerraForm projects
+**Suggested use:** CloudFormation or Terraform projects
 
 
 .. _install-npm:
@@ -51,7 +51,7 @@ executed. (eg. macOS/Ubuntu:``chmod +x runway``)
 npm
 ^^^
 
-Runway is published on npm as ``@onica/runway``. It currently contains binary
+Runway is published on npm as ``@onica/runway``. It currently contains binaries
 to support macOS, Ubuntu, and Windows.
 
 While Runway can be installed globally like any other npm package, we strongly
