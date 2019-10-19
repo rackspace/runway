@@ -4,43 +4,43 @@
 [![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
 [![npm](https://img.shields.io/npm/v/@onica/runway?style=flat)](https://www.npmjs.com/package/@onica/runway)
 
-![runway-exmaple.gif](docs/runway-example.gif)
+![runway-example.gif](docs/runway-example.gif)
 
-Runway is the perfect companion for full stack development.
-It's a lightweight integration library to ease management of multiple infrastructure deployment tools
+Runway is a lightweight integration app designed to ease management of infrastructure tools.
 
-Runway's main goal is to avoid convoluted Makefiles/CI by simplifying the deployment by integrating multiple tools into single build process with centralized environment-specific settings, e.g. dev, test, prod.
+Its main goals are to encourage GitOps best-practices, avoid convoluted Makefiles/scripts (enabling identical deployments from a workstation or CI job), and enable developers/admins to use the best tool for any given job.
 
 
 ## Features
 
 * Centralized environment-specific configuration
-* Automatic environment identification from GIT branches
+* Automatic environment identification from git branches
 * Automatic linting/verification
 * Support of IAM roles to assume for each deployment
-* Wrangle Terraform backend/workspace configs w/per-environment tfvars
+* Terraform backend/workspace config management w/per-environment tfvars
+* Automatic kubectl/terraform version management per-environment
 
 ### Supported deployment tools
 
-* AWS Cloudformation
 * AWS CDK
+* Kubectl
+* Serverless Framework
+* Stacker (CloudFormation)
+* Static websites (build & deploy to S3+CloudFront)
 * Terraform
-* Stacker
-* Serverless
 
 
 ## Example
 
-A typical Runway configuration is unobtrusive, it just contains references to the paths of the inner deployments.
+A typical Runway configuration is unobtrusive -- it just lists the deployment order and locations (regions).
 
 ```yml
 deployments:
   - modules:
-    - path: ./resources.tf # terraform resources
-    - path: ./backend.sls # serverless lambda functions
-    - path: ./frontend # static web site
-      class_path: runway.module.staticsite.StaticSite
-    environments: # Environment settings
+    - resources.tf  # terraform resources
+    - backend.sls  # serverless lambda functions
+    - frontend  # static web site
+    environments:  # Environment settings
         dev:
             foo: dev-bar
         prod:
@@ -52,24 +52,25 @@ The example above contains enough information for Runway to deploy all resources
 
 ## Install
 
+Runway is available via any of the following installation methods. Use whatever works best for your project/team (it's the same application no matter how you obtain it).
 
-### cURL
+### HTTPS Download (e.g cURL)
 
 Use one of the endpoints below to download a single-binary executable version of Runway based on your operating system.
 
 | Operating System | Endpoint                             |
 |------------------|--------------------------------------|
-| macOS            | https://oni.ca/latest/osx/runway     |
-| Ubuntu           | https://oni.ca/latest/ubnt/runway    |
-| Windows          | https://oni.ca/latest/win/runway     |
+| Linux            | https://oni.ca/runway/latest/linux   |
+| macOS            | https://oni.ca/runway/latest/osx     |
+| Windows          | https://oni.ca/runway/latest/win     |
 
 ```shell
-$ curl -L https://oni.ca/latest/osx/runway -o runway
+$ curl -L oni.ca/runway/latest/osx -o runway
 $ chmod +x runway
 $ ./runway init
 ```
 
-**Suggested use:** CloudFormation or TerraForm projects
+**Suggested use:** CloudFormation or Terraform projects
 
 
 ### npm
@@ -82,7 +83,7 @@ $ npx runway init
 **Suggested use:** Serverless or AWS CDK projects
 
 
-### pip/pipenv
+### pip (or pipenv,poetry,etc)
 
 ```shell
 $ pip install runway
@@ -95,8 +96,8 @@ $ pipenv run runway init
 **Suggested use:** Python projects
 
 
-## How?
+## Documentation
 
-See the [doc site](https://docs.onica.com/projects/runway).
+See the [doc site](https://docs.onica.com/projects/runway) for full documentation.
 
-Complete quickstart documentation, including Docker images, CloudFormation templates, and walkthrough can be found [here](https://docs.onica.com/projects/runway/en/latest/quickstart.html)
+Quickstart documentation, including CloudFormation templates and walkthrough can be found [here](https://docs.onica.com/projects/runway/en/latest/quickstart.html)
