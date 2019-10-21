@@ -20,7 +20,7 @@ INSTALL_REQUIRES = [
     # version set to match stacker requirement and include awscli fix #4182
     'awscli>=1.16.191<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
-    'boto3>=1.9.111<2.0'  # matching stacker requirement
+    'boto3>=1.9.111<2.0',  # matching stacker requirement
     'cfn-lint',
     'docopt',
     'requests',
