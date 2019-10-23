@@ -107,23 +107,26 @@ class ModuleDefinition(ConfigComponent):
                     bucket: StackName::OutputName
                     dynamodb_table: StackName::OutputName
 
-    One special map keyword, parallel, indicates that a list of child
-    modules that (when executing in CI mode) will be executted
-    simultaneously.
+    One special map keyword, ``parallel``, indicates a list of child
+    modules that will be executed in parallel (simultaneously) if the
+    ``CI`` :ref:`environment variable is set<non-interactive-mode>`.
 
     Example:
       .. code-block:: yaml
 
         deployments:
           - modules:
-              - backend.tf
-              - parallel:
-                  - servicea.cfn  # any normal module option can be used here
-                  - serviceb.cfn
-                  - servicec.cfn
-              - frontend.tf
-          - regions:
-            - us-east-1
+            - backend.tf
+            - parallel:
+              - servicea.cfn  # any normal module option can be used here
+              - path: serviceb.cfn
+              - path: servicec.cfn
+                environments:
+                  dev:
+                    count: 1
+                  prod:
+                    count: 3
+            - frontend.tf
 
     """
 
