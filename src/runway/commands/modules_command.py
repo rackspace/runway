@@ -227,10 +227,10 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
             LOGGER.error('Please select a valid number (or "all")')
             sys.exit(1)
         deployment['modules'] = [modules[int(selected_module_index) - 1]]
-        if deployment['modules'][0].child_modules:
+        if deployment['modules'][0].get('child_modules'):
             # Allow user to select individual module out of list of child
             # modules that can be run in parallel
-            deployment['modules'] = deployment['modules'][0].child_modules
+            deployment['modules'] = deployment['modules'][0].get('child_modules')
             deployment['name'] = deployment['name'] + '_parallel_modules_' + selected_module_index
             deployment = select_modules_to_run(deployment,
                                                tags,
@@ -248,10 +248,10 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
                            'to use "--tag".', deployment['name'],
                            module)
             continue  # this doesn't need to return an error
-        if module.child_modules:
-            module.child_modules = [x for x in module.child_modules
-                                    if x.get('tags') and all(i in x['tags'] for i in tags)]
-            if module.child_modules:
+        if module.get('child_modules'):
+            module['child_modules'] = [x for x in module['child_modules']
+                                       if x.get('tags') and all(i in x['tags'] for i in tags)]
+            if module.get('child_modules'):
                 modules_to_deploy.append(module)
         elif module.get('tags') and all(i in module['tags'] for i in tags):
             modules_to_deploy.append(module)
