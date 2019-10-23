@@ -11,7 +11,6 @@ import logging
 import os
 import sys
 
-import concurrent.futures
 from builtins import input
 
 import boto3
@@ -24,6 +23,10 @@ from ..util import (
     change_dir, load_object_from_string, merge_dicts,
     merge_nested_environment_dicts
 )
+
+if sys.version_info[0] > 2:
+    import concurrent.futures
+
 
 LOGGER = logging.getLogger('runway')
 
@@ -364,7 +367,13 @@ class ModulesCommand(RunwayCommand):
                         modules.append('.' + os.sep)
                     for module in modules:
                         if module.child_modules:
-                            if context.env_vars.get('CI'):
+                            # CI is required for concurrent execution to prevent weird
+                            # user-input behavior
+                            # py3+ is required because backported futures has issues with
+                            # ProcessPoolExecutor, and alternatives # (like ThreadPoolExecuter)
+                            # won't work properly (e.g. working directory changes aren't
+                            # thread-safe)
+                            if context.env_vars.get('CI') and sys.version_info[0] > 2:
                                 LOGGER.info("Processing parallel modules %s",
                                             [x.path for x in module.child_modules])
                                 LOGGER.info('(output will be interwoven)')
@@ -376,8 +385,12 @@ class ModulesCommand(RunwayCommand):
                                 for job in futures:
                                     job.result()  # Raise exceptions / exit as needed
                             else:
-                                LOGGER.info('Not running in CI mode - processing the following '
-                                            'parallel modules sequentially...')
+                                LOGGER.info(
+                                    '%s - processing the following '
+                                    'parallel modules sequentially...',
+                                    ('Not running in CI mode' if sys.version_info[0] > 2
+                                     else 'Parallel execution requires Python 3+')
+                                )
                                 for child_module in module.child_modules:
                                     self._deploy_module(child_module,
                                                         deployment,

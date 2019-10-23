@@ -90,8 +90,6 @@ setup(
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
     extras_require={
-        ':python_version == "2.6"': ['futures'],
-        ':python_version == "2.7"': ['futures'],
         'test': ['flake8', 'pep8-naming', 'flake8-docstrings',
                  'mock~=3.0.5', 'pylint',
                  # python3 flake8-docstrings fails with pydocstyle 4:
