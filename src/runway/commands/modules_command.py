@@ -24,6 +24,9 @@ from ..util import (
     merge_nested_environment_dicts
 )
 
+if sys.version_info[0] > 2:
+    import concurrent.futures
+
 LOGGER = logging.getLogger('runway')
 
 
@@ -166,6 +169,95 @@ def pre_deploy_assume_role(assume_role_config, context):
         )
 
 
+def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disable=too-many-branches,invalid-name
+                          ci=False, env_name=None):
+    """Select modules to run based on tags.
+
+    Args:
+        deployment (Dict[str, Any): A deployment definition.
+        tags (Optional[List[str]]): List of required tags that must
+            exist on a module for it to be returned.
+        command (str): Command used to initiate this process.
+        ci (Optional[str]): Value of CI environment variable.
+        env_name (Optional[str]): Name of environment being processed.
+
+    Returns:
+        Deployment with filtered modules.
+
+    """
+    if ci and not tags:
+        return deployment
+    modules_to_deploy = []
+
+    if deployment.get('current_dir', False):
+        return deployment
+    if not deployment.get('modules'):
+        LOGGER.error('No modules configured in deployment "%s"',
+                     deployment['name'])
+        sys.exit(1)
+    if len(deployment['modules']) == 1 and not tags:
+        # No need to select a module in the deployment - there's only one
+        if command == 'destroy':
+            LOGGER.info('(only one deployment detected; all modules '
+                        'automatically selected for termination)')
+            if not ci:
+                if not strtobool(input('Proceed?: ')):
+                    sys.exit(0)
+        return deployment
+
+    modules = deployment['modules']
+
+    if not tags and not ci:
+        print('')
+        print('Configured modules in deployment \'%s\':' % deployment.get('name'))
+        for i, module in enumerate(modules):
+            print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
+        print('')
+        print('')
+        if command == 'destroy':
+            print('(Operating in destroy mode -- "all" will destroy all '
+                  'deployments in reverse order)')
+        selected_module_index = input('Enter number of module to run (or "all"): ')
+        if selected_module_index == 'all':
+            return deployment
+        if selected_module_index == '' or (
+                not selected_module_index.isdigit() or (
+                    not 0 < int(selected_module_index) <= len(modules))):
+            LOGGER.error('Please select a valid number (or "all")')
+            sys.exit(1)
+        deployment['modules'] = [modules[int(selected_module_index) - 1]]
+        if deployment['modules'][0].get('child_modules'):
+            # Allow user to select individual module out of list of child
+            # modules that can be run in parallel
+            deployment['modules'] = deployment['modules'][0].get('child_modules')
+            deployment['name'] = deployment['name'] + '_parallel_modules_' + selected_module_index
+            deployment = select_modules_to_run(deployment,
+                                               tags,
+                                               command,
+                                               ci,
+                                               env_name)
+        return deployment
+
+    for module in modules:
+        if isinstance(module, str):
+            LOGGER.warning('Module "%s.%s" is defined as a string '
+                           'which cannot be used with the "--tag" '
+                           'option so it has been skipped. Please '
+                           'update this module definition to a dict '
+                           'to use "--tag".', deployment['name'],
+                           module)
+            continue  # this doesn't need to return an error
+        if module.get('child_modules'):
+            module['child_modules'] = [x for x in module['child_modules']
+                                       if x.get('tags') and all(i in x['tags'] for i in tags)]
+            if module.get('child_modules'):
+                modules_to_deploy.append(module)
+        elif module.get('tags') and all(i in module['tags'] for i in tags):
+            modules_to_deploy.append(module)
+    deployment['modules'] = modules_to_deploy
+    return deployment
+
+
 def validate_account_alias(iam_client, account_alias):
     """Exit if list_account_aliases doesn't include account_alias."""
     # Super overkill here using pagination when an account can only
@@ -257,7 +349,7 @@ def echo_detected_environment(env_name, env_vars):
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
-    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-statements
+    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-locals,too-many-statements
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
@@ -291,11 +383,11 @@ class ModulesCommand(RunwayCommand):
             )
 
         deployments_to_run = [
-            self.select_modules_to_run(deployment,
-                                       self._cli_arguments.get('--tag'),
-                                       command,
-                                       context.env_vars.get('CI', None),
-                                       context.env_name)
+            select_modules_to_run(deployment,
+                                  self._cli_arguments.get('--tag'),
+                                  command,
+                                  context.env_vars.get('CI', None),
+                                  context.env_name)
             for deployment in selected_deployments
         ]
 
@@ -306,7 +398,7 @@ class ModulesCommand(RunwayCommand):
 
         LOGGER.info("")
         LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
-        for i, deployment in enumerate(deployments_to_run):
+        for i, deployment in enumerate(deployments_to_run):  # noqa pylint: disable=too-many-nested-blocks,line-too-long
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Processing deployment '%s' ===========================",
@@ -362,7 +454,38 @@ class ModulesCommand(RunwayCommand):
                     if deployment.get('current_dir'):
                         modules.append('.' + os.sep)
                     for module in modules:
-                        self._deploy_module(module, deployment, context, command)
+                        if module.child_modules:
+                            # CI is required for concurrent execution to prevent weird
+                            # user-input behavior
+                            # py3+ is required because backported futures has issues with
+                            # ProcessPoolExecutor, and alternatives (like ThreadPoolExecuter)
+                            # won't work properly (e.g. working directory changes aren't
+                            # thread-safe)
+                            if context.env_vars.get('CI') and sys.version_info[0] > 2:
+                                LOGGER.info("Processing parallel modules %s",
+                                            [x.path for x in module.child_modules])
+                                LOGGER.info('(output will be interwoven)')
+                                executor = concurrent.futures.ProcessPoolExecutor()
+                                futures = [executor.submit(self._deploy_module,
+                                                           *[x, deployment, context, command])
+                                           for x in module.child_modules]
+                                concurrent.futures.wait(futures)
+                                for job in futures:
+                                    job.result()  # Raise exceptions / exit as needed
+                            else:
+                                LOGGER.info(
+                                    '%s - processing the following '
+                                    'parallel modules sequentially...',
+                                    ('Not running in CI mode' if sys.version_info[0] > 2
+                                     else 'Parallel execution requires Python 3+')
+                                )
+                                for child_module in module.child_modules:
+                                    self._deploy_module(child_module,
+                                                        deployment,
+                                                        context,
+                                                        command)
+                        else:
+                            self._deploy_module(module, deployment, context, command)
 
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
@@ -431,80 +554,6 @@ class ModulesCommand(RunwayCommand):
                     deployment[config] = deployment[config][::-1]
             reversed_deployments.append(deployment)
         return reversed_deployments
-
-    @staticmethod
-    def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disable=too-many-branches,invalid-name
-                              ci=False, env_name=None):
-        """Select modules to run based on tags.
-
-        Args:
-            deployment (Dict[str, Any): A deployment definition.
-            tags (Optional[List[str]]): List of required tags that must
-                exist on a module for it to be returned.
-            command (str): Command used to initiate this process.
-            ci (Optional[str]): Value of CI environment variable.
-            env_name (Optional[str]): Name of environment being processed.
-
-        Returns:
-            Deployment with filtered modules.
-
-        """
-        if ci and not tags:
-            return deployment
-        modules_to_deploy = []
-
-        if deployment.get('current_dir', False):
-            return deployment
-        if not deployment.get('modules'):
-            LOGGER.error('No modules configured in deployment "%s"',
-                         deployment['name'])
-            sys.exit(1)
-        if len(deployment['modules']) == 1 and not tags:
-            # No need to select a module in the deployment - there's only one
-            if command == 'destroy':
-                LOGGER.info('(only one deployment detected; all modules '
-                            'automatically selected for termination)')
-                if not ci:
-                    if not strtobool(input('Proceed?: ')):
-                        sys.exit(0)
-            return deployment
-
-        modules = deployment['modules']
-
-        if not tags and not ci:
-            print('')
-            print('Configured modules in deployment \'%s\':' % deployment.get('name'))
-            for i, module in enumerate(modules):
-                print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
-            print('')
-            print('')
-            if command == 'destroy':
-                print('(Operating in destroy mode -- "all" will destroy all '
-                      'deployments in reverse order)')
-            selected_module_index = input('Enter number of module to run (or "all"): ')
-            if selected_module_index == 'all':
-                return deployment
-            if selected_module_index == '' or (
-                    not selected_module_index.isdigit() or (
-                        not 0 < int(selected_module_index) <= len(modules))):
-                LOGGER.error('Please select a valid number (or "all")')
-                sys.exit(1)
-            deployment['modules'] = [modules[int(selected_module_index) - 1]]
-            return deployment
-
-        for module in modules:
-            if isinstance(module, str):
-                LOGGER.warning('Module "%s.%s" is defined as a string '
-                               'which cannot be used with the "--tag" '
-                               'option so it has been skipped. Please '
-                               'update this module definition to a dict '
-                               'to use "--tag".', deployment['name'],
-                               module)
-                continue  # this doesn't need to return an error
-            if module.get('tags') and all(i in module['tags'] for i in tags):
-                modules_to_deploy.append(module)
-        deployment['modules'] = modules_to_deploy
-        return deployment
 
     @staticmethod
     def select_deployment_to_run(deployments=None, command='build'):

@@ -41,22 +41,24 @@ class ModuleDefinition(ConfigComponent):
     """A module defines the directory to be processed and applicable options.
 
     It can consist of `CloudFormation`_ (using `Stacker`_),
-    `Troposphere`_ (using `Stacker`_), `Terraform`_,
-    `Serverless Framework`_, or `AWS CDK`_. Each directory should end
-    with their corresponding suffix for identification but, this is not
-    required. See :ref:`Repo Structure<repo-structure>` for examples of
-    a module directory structure.
+    `Terraform`_, `Serverless Framework`_, `AWS CDK`_, or `Kubernetes`_.
+    It is recommended to place the appropriate extension on each directory
+    for identification (but it is not required). See
+    :ref:`Repo Structure<repo-structure>` for examples of a module
+    directory structure.
 
     +------------------+-----------------------------------------------+
     | Suffix/Extension | IaC Tool/Framework                            |
     +==================+===============================================+
     | ``.cdk``         | `AWS CDK`_                                    |
     +------------------+-----------------------------------------------+
-    | ``.cfn``         | `CloudFormation`_, `Troposphere`_ (`Stacker`_)|
+    | ``.cfn``         | `CloudFormation`_                             |
     +------------------+-----------------------------------------------+
     | ``.sls``         | `Serverless Framework`_                       |
     +------------------+-----------------------------------------------+
     | ``.tf``          | `Terraform`_                                  |
+    +------------------+-----------------------------------------------+
+    | ``.k8s``         | `Kubernetes`_                                 |
     +------------------+-----------------------------------------------+
 
     A module is only deployed if there is a corresponding env/config
@@ -105,6 +107,30 @@ class ModuleDefinition(ConfigComponent):
                     bucket: StackName::OutputName
                     dynamodb_table: StackName::OutputName
 
+    One special map keyword, ``parallel``, indicates a list of child
+    modules that will be executed in parallel (simultaneously) if the
+    ``CI`` :ref:`environment variable is set<non-interactive-mode>`.
+
+    Example:
+      .. code-block:: yaml
+
+        deployments:
+          - modules:
+            - backend.tf
+            - parallel:
+              - servicea.cfn  # any normal module option can be used here
+              - path: serviceb.cfn
+              - path: servicec.cfn
+                environments:
+                  dev:
+                    count: 1
+                  prod:
+                    count: 3
+            - frontend.tf
+
+    (in that ^ example, backend.tf will be deployed, the services will be all
+    be deployed simultaneously, followed by frontend.tf)
+
     """
 
     def __init__(self,  # pylint: disable=too-many-arguments
@@ -113,7 +139,8 @@ class ModuleDefinition(ConfigComponent):
                  class_path=None,  # type: Optional[str]
                  environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  options=None,  # type: Optional[Dict[str, Any]]
-                 tags=None  # type: Optional[Dict[str, str]]
+                 tags=None,  # type: Optional[Dict[str, str]]
+                 child_modules=None  # type: Optional[List[Union[str, Dict[str, Any]]]]
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
@@ -140,6 +167,8 @@ class ModuleDefinition(ConfigComponent):
             tags (Optional[Dict[str, str]]): Module tags used to select
                 which modules to process using CLI arguments.
                 (``--tag <tag>...``)
+            child_modules (Optional[List[Union[str, Dict[str, Any]]]]):
+                Child modules that can be executed in parallel
 
         References:
             - `AWS CDK`_
@@ -148,6 +177,7 @@ class ModuleDefinition(ConfigComponent):
             - `Stacker`_
             - `Troposphere`_
             - `Terraform`_
+            - `Kubernetes`_
             - :ref:`Module Configurations<module-configurations>` -
               detailed module ``options``
             - :ref:`Repo Structure<repo-structure>` - examples of
@@ -163,6 +193,7 @@ class ModuleDefinition(ConfigComponent):
         self.environments = environments or {}
         self.options = options or {}
         self.tags = tags or {}
+        self.child_modules = child_modules
 
     @classmethod
     def from_list(cls, modules):
@@ -172,13 +203,26 @@ class ModuleDefinition(ConfigComponent):
             if isinstance(mod, str):
                 results.append(cls(mod, mod, {}))
                 continue
-            name = mod.pop('name', mod['path'])
+            if mod.get('parallel'):
+                name = 'parallel_parent'
+                child_modules = ModuleDefinition.from_list(mod.pop('parallel'))
+                path = '[' + ', '.join([x.path for x in child_modules]) + ']'
+                if mod:
+                    LOGGER.warning(
+                        'Invalid keys found in parallel module config have been ignored: %s',
+                        ', '.join(mod.keys())
+                    )
+            else:
+                name = mod.pop('name', mod['path'])
+                child_modules = None
+                path = mod.pop('path')
             results.append(cls(name,
-                               mod.pop('path'),
+                               path,
                                class_path=mod.pop('class_path', None),
                                environments=mod.pop('environments', {}),
                                options=mod.pop('options', {}),
-                               tags=mod.pop('tags', {})))
+                               tags=mod.pop('tags', {}),
+                               child_modules=child_modules))
 
             if mod:
                 LOGGER.warning(
