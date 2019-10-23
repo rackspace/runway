@@ -217,7 +217,7 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         print('')
         if command == 'destroy':
             print('(Operating in destroy mode -- "all" will destroy all '
-                    'deployments in reverse order)')
+                  'deployments in reverse order)')
         selected_module_index = input('Enter number of module to run (or "all"): ')
         if selected_module_index == 'all':
             return deployment
