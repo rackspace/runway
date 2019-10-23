@@ -128,6 +128,9 @@ class ModuleDefinition(ConfigComponent):
                     count: 3
             - frontend.tf
 
+    (in that ^ example, backend.tf will be deployed, the services will be all
+    be deployed simultaneously, followed by frontend.tf)
+
     """
 
     def __init__(self,  # pylint: disable=too-many-arguments
