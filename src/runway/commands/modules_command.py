@@ -11,6 +11,7 @@ import logging
 import os
 import sys
 
+import concurrent.futures
 from builtins import input
 
 import boto3
@@ -257,7 +258,7 @@ def echo_detected_environment(env_name, env_vars):
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
-    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-statements
+    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-locals,too-many-statements
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
@@ -306,7 +307,7 @@ class ModulesCommand(RunwayCommand):
 
         LOGGER.info("")
         LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
-        for i, deployment in enumerate(deployments_to_run):
+        for i, deployment in enumerate(deployments_to_run):  # noqa pylint: disable=too-many-nested-blocks,line-too-long
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Processing deployment '%s' ===========================",
@@ -362,7 +363,28 @@ class ModulesCommand(RunwayCommand):
                     if deployment.get('current_dir'):
                         modules.append('.' + os.sep)
                     for module in modules:
-                        self._deploy_module(module, deployment, context, command)
+                        if module.child_modules:
+                            if context.env_vars.get('CI'):
+                                LOGGER.info("Processing parallel modules %s",
+                                            [x.path for x in module.child_modules])
+                                LOGGER.info('(output will be interwoven)')
+                                executor = concurrent.futures.ProcessPoolExecutor()
+                                futures = [executor.submit(self._deploy_module,
+                                                           *[x, deployment, context, command])
+                                           for x in module.child_modules]
+                                concurrent.futures.wait(futures)
+                                for job in futures:
+                                    job.result()  # Raise exceptions / exit as needed
+                            else:
+                                LOGGER.info('Not running in CI mode - processing the following '
+                                            'parallel modules sequentially...')
+                                for child_module in module.child_modules:
+                                    self._deploy_module(child_module,
+                                                        deployment,
+                                                        context,
+                                                        command)
+                        else:
+                            self._deploy_module(module, deployment, context, command)
 
                 if deployment.get('assume-role'):
                     post_deploy_assume_role(deployment['assume-role'], context)
