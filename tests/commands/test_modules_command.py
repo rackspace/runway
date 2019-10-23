@@ -5,7 +5,9 @@ from copy import deepcopy
 from mock import patch
 import yaml
 
-from runway.commands.modules_command import ModulesCommand
+from runway.commands.modules_command import (
+    ModulesCommand, select_modules_to_run
+)
 
 
 def module_tag_config():
@@ -29,7 +31,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         tags = ['app:test-app']
 
         result = [
-            ModulesCommand.select_modules_to_run(deployment, tags)
+            select_modules_to_run(deployment, tags)
             for deployment in config['deployments']
         ]
         self.assertEqual(len(result[0]['modules']), 1)
@@ -44,7 +46,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         tags = ['tier:iac']
 
         result = [
-            ModulesCommand.select_modules_to_run(deployment, tags)
+            select_modules_to_run(deployment, tags)
             for deployment in config['deployments']
         ]
         self.assertEqual(len(result[0]['modules']), 2)
@@ -58,7 +60,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['tier:iac', 'app:test-app']
         result = [
-            ModulesCommand.select_modules_to_run(deployment, tags)
+            select_modules_to_run(deployment, tags)
             for deployment in config['deployments']
         ]
         self.assertEqual(len(result[0]['modules']), 1)
@@ -72,7 +74,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         user_input = ['1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
-            result = ModulesCommand.select_modules_to_run(
+            result = select_modules_to_run(
                 config['deployments'][0], []
             )
         self.assertEqual(result['modules'][0],
@@ -82,7 +84,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         """tag=[], ci=true should not request input and return everything."""
         config = deepcopy(ModulesCommandTestCase.tag_yml)
         result = [
-            ModulesCommand.select_modules_to_run(deployment, [], ci='true')
+            select_modules_to_run(deployment, [], ci='true')
             for deployment in config['deployments']
         ]
         self.assertEqual(result, config['deployments'])
@@ -93,23 +95,23 @@ class ModulesCommandTestCase(unittest.TestCase):
         user_input = ['y', '1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
-            result_single_no_tag = ModulesCommand.select_modules_to_run(
+            result_single_no_tag = select_modules_to_run(
                 deepcopy(config['deployments'][1]), [], command='destroy'
             )
-            result_no_tag = ModulesCommand.select_modules_to_run(
+            result_no_tag = select_modules_to_run(
                 deepcopy(config['deployments'][0]), [], command='destroy'
             )
         self.assertEqual(result_single_no_tag['modules'][0],
                          config['deployments'][1]['modules'][0])
         self.assertEqual(result_no_tag['modules'][0],
                          config['deployments'][0]['modules'][0])
-        result_tag = ModulesCommand.select_modules_to_run(
+        result_tag = select_modules_to_run(
             deepcopy(config['deployments'][0]), ['app:test-app'],
             command='destroy'
         )
         self.assertEqual(result_tag['modules'][0],
                          config['deployments'][0]['modules'][0])
-        result_tag_ci = ModulesCommand.select_modules_to_run(
+        result_tag_ci = select_modules_to_run(
             deepcopy(config['deployments'][0]), [], command='destroy',
             ci='true'
         )
