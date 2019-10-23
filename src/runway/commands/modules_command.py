@@ -27,7 +27,6 @@ from ..util import (
 if sys.version_info[0] > 2:
     import concurrent.futures
 
-
 LOGGER = logging.getLogger('runway')
 
 
