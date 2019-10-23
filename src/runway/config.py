@@ -199,12 +199,17 @@ class ModuleDefinition(ConfigComponent):
                 continue
             if mod.get('parallel'):
                 name = 'parallel_parent'
-                path = os.getcwd()
                 child_modules = ModuleDefinition.from_list(mod.pop('parallel'))
+                path = '[' + ', '.join([x.path for x in child_modules]) + ']'
+                if mod:
+                    LOGGER.warning(
+                        'Invalid keys found in parallel module config have been ignored: %s',
+                        ', '.join(mod.keys())
+                    )
             else:
                 name = mod.pop('name', mod['path'])
-                path = mod.pop('path')
                 child_modules = None
+                path = mod.pop('path')
             results.append(cls(name,
                                path,
                                class_path=mod.pop('class_path', None),
