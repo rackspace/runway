@@ -83,10 +83,10 @@ def use_npm_ci(path):
 def run_npm_install(path, options, context):
     """Run npm install/ci."""
     # Use npm ci if available (npm v5.7+)
-    if options.get('skip_npm_ci'):
+    if options.get('options', {}).get('skip_npm_ci'):
         LOGGER.info("Skipping npm ci or npm install on %s...",
                     os.path.basename(path))
-    elif context.env_vars.get('CI') and use_npm_ci(path):  # noqa
+    elif context.env_vars.get('CI') and use_npm_ci(path):
         LOGGER.info("Running npm ci on %s...",
                     os.path.basename(path))
         subprocess.check_call([NPM_BIN, 'ci'])

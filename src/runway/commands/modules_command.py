@@ -513,8 +513,6 @@ class ModulesCommand(RunwayCommand):
             module_root = os.path.join(self.env_root, module['path'])
         module_opts = merge_dicts(module_opts, module.__dict__)
         module_opts = load_module_opts_from_file(module_root, module_opts)
-        if deployment.get('skip-npm-ci'):
-            module_opts['skip_npm_ci'] = True
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",

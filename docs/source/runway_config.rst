@@ -138,10 +138,6 @@ Sample
           "*":  # Applied to all environments
             ANOTHER_VAR: foo
 
-        skip-npm-ci: false  # optional, and should rarely be used. Omits npm ci
-                            # execution during Serverless deployments
-                            # (i.e. for use with pre-packaged node_modules)
-
       # Start of another deployment
       - modules:
           - path: myapp.cfn

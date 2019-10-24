@@ -48,7 +48,7 @@ The config yaml supports many more features; see the full Stacker documentation 
 (e.g. stack configuration options, additional lookups in addition to output (e.g. SSM, DynamoDB))
 
 Environment Values Via Runway Deployment/Module Options
----------------------------------------------------------
+-------------------------------------------------------
 
 In addition or in place of the environment file(s), environment values can be provided via deployment and module options.
 
@@ -447,6 +447,22 @@ In Module Directory
 
 (in ``runway.module.yml``)
 
+Disabling NPM CI
+----------------
+At the start of each module execution, Runway will execute ``npm ci`` to ensure
+Serverless Framework is installed in the project (so Runway can execute it via
+``npx sls``. This can be disabled (e.g. for use when the ``node_modules``
+directory is pre-compiled) via the ``skip_npm_ci`` module option:
+::
+
+    ---
+    deployments:
+      - modules:
+          - path: myslsproject.sls
+            options:
+              skip_npm_ci: true
+
+
 CDK
 ===
 Standard `AWS CDK
@@ -545,6 +561,22 @@ In Module Directory
       # dev: true
 
 (in ``runway.module.yml``)
+
+Disabling NPM CI
+----------------
+At the start of each module execution, Runway will execute ``npm ci`` to ensure
+the CDK is installed in the project (so Runway can execute it via
+``npx cdk``. This can be disabled (e.g. for use when the ``node_modules``
+directory is pre-compiled) via the ``skip_npm_ci`` module option:
+::
+
+    ---
+    deployments:
+      - modules:
+          - path: mycdkproject.cdk
+            options:
+              skip_npm_ci: true
+
 
 Kubernetes
 ===========

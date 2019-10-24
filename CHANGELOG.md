@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Terraform initialization should be considerably faster via use of `init --reconfigure`
 - Updated CDK typescript sample generator to v1 syntax
 - Terraform variables from runway.yml passed as environment variables (fixes https://github.com/hashicorp/terraform/issues/19424#issuecomment-472186386)
+- CDK/Serverless `npm ci` skip option (formerly `skip-npm-ci`) moved to module options
 
 ## [0.47.1] - 2019-07-19
 ### Fixed

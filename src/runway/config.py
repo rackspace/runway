@@ -280,7 +280,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                   - foo
               "*":  # applied to all environments
                 ANOTHER_VAR: foo
-              skip-npm-ci: false  # optional
 
     A deployment can be defined without modules if the directory
     containing the runway config file is a module directory.
@@ -335,9 +334,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 identify where different deployments begin/end in the logs.
             regions (List[str]): AWS region names where modules will be
                 deployed/destroyed.
-            skip-npm-ci (bool): Omits npm ci execution during Serverless
-                deployments. (i.e. for use with pre-packaged
-                node_modules) *(default: false)*
 
         References:
             - :class:`module<runway.config.ModuleDefinition>`
@@ -370,9 +366,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         )  # type: Optional(Dict[str, Any])
         self.name = deployment.pop('name')  # type: str
         self.regions = deployment.pop('regions', [])  # type: List[str]
-        self.skip_npm_ci = deployment.pop(
-            'skip_npm_ci', deployment.pop('skip-npm-ci', False)
-        )  # type: bool
 
         if deployment:
             LOGGER.warning(
