@@ -5,7 +5,7 @@ deployments:
       - eks-base.tf
       - job-s3-echo.tf
       - service-hello-world.k8s
-    env_vars:
+    env-vars:
       dev:
         KUBECONFIG:
           - .kube
@@ -16,7 +16,7 @@ deployments:
         namespace: dev
         region: &devregion us-west-2
         kubectl-access-role-arn: YOURROLEARNHERE
-    module_options:
+    module-options:
       terraform_backend_config:
         dev:
           region: *devregion

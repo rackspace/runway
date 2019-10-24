@@ -223,7 +223,6 @@ class ModuleDefinition(ConfigComponent):
                                options=mod.pop('options', {}),
                                tags=mod.pop('tags', {}),
                                child_modules=child_modules))
-
             if mod:
                 LOGGER.warning(
                     'Invalid keys found in module %s have been ignored: %s',
@@ -281,19 +280,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               "*":  # applied to all environments
                 ANOTHER_VAR: foo
 
-    A deployment can be defined without modules if the directory
-    containing the runway config file is a module directory.
-
-    Example:
-      .. code-block:: yaml
-
-        deployments:
-          - current_dir: true
-            regions:
-              - us-west-2
-            assume-role:
-              arn: arn:aws:iam::0000:role/role-name
-
     """
 
     def __init__(self, deployment):
@@ -314,21 +300,19 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 be used to apply the same role to all environment.
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
-            current_dir (bool): Used to deploy the module in which the
-                runway config file is located. *(default: false)*
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
                 variables to environment names. When run, the variables
                 defined here are merged with those in the
                 ``.env``/``.tfenv``/environment config file and
                 environments section of each module.
-            env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
+            env-vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
                 or for all environments using ``"*"`` as the environment
                 name.
             modules (Optional[List[Dict[str, Any]]]): A list of modules
                 to be processed in the order they are defined.
-            module_options (Optional[Dict[str, Any]]): Options that are
+            module-options (Optional[Dict[str, Any]]): Options that are
                 shared among all modules in the deployment.
             name (str): Name of the deployment. Used to more easily
                 identify where different deployments begin/end in the logs.
@@ -351,18 +335,30 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self.assume_role = deployment.pop(
             'assume_role', deployment.pop('assume-role', {})
         )  # type: Optional[Dict[str, Union[str, Dict[str, str]]]]
-        self.current_dir = deployment.pop('current_dir', False)  # type: bool
         self.environments = deployment.pop(
             'environments', {}
         )  # type: Optional[Dict[str, Dict[str, Any]]]
         self.env_vars = deployment.pop(
-            'env_vars', {}
+            'env_vars', deployment.pop('env-vars', {})
         )  # type: Optional[Dict[str, Dict[str, Any]]]
+        if deployment.pop('current_dir', False):
+            # Deprecated in 1.0 (late 2019). Retain for at least a major version.
+            LOGGER.warning('DEPRECATION WARNING: The "current_dir" option has '
+                           'been deprecated in favor of a "./" module '
+                           'definition. Please update your config.')
+            modules = ['.' + os.sep]
+        else:
+            if not deployment.get('modules'):
+                LOGGER.error('No modules have been defined in your Runway '
+                             'deployment.')
+                sys.exit(1)
+            modules = deployment.pop('modules')
         self.modules = ModuleDefinition.from_list(
-            deployment.pop('modules', [])  # can be none if current_dir
+            modules
         )  # type: List[ModuleDefinition]
+        self.current_dir = deployment.pop('current_dir', False)  # type: bool
         self.module_options = deployment.pop(
-            'module_options', {}
+            'module_options', deployment.pop('module-options', {})
         )  # type: Optional(Dict[str, Any])
         self.name = deployment.pop('name')  # type: str
         self.regions = deployment.pop('regions', [])  # type: List[str]
@@ -475,7 +471,7 @@ class Config(ConfigComponent):
 
             ---
             # See full syntax at https://github.com/onicagroup/runway
-            ignore_git_branch: true
+            ignore-git-branch: true
             tests:
               - name: example
                 type: script
@@ -509,7 +505,7 @@ class Config(ConfigComponent):
                 :class:`tests<runway.config.TestDefinition>` that are
                 processed in the order they are defined.
             ignore_git_branch (bool): Disable git branch lookup when
-                using environment folders, Mercurial, or defining the
+                using environment folders, non-git VCS, or defining the
                 ``DEPLOY_ENVIRONMENT`` environment variable before
                 execution. Note that defining ``DEPLOY_ENVIRONMENT``
                 will automatically ignore the git branch.
@@ -536,7 +532,8 @@ class Config(ConfigComponent):
             config_file = yaml.safe_load(data_file)
             result = Config(config_file.pop('deployments'),
                             config_file.pop('tests', []),
-                            config_file.pop('ignore_git_branch', False))
+                            (config_file.pop('ignore-git-branch', False) or
+                             config_file.pop('ignore_git_branch', False)))
 
             if config_file:
                 LOGGER.warning(

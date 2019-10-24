@@ -1,7 +1,7 @@
 """Used to deploy :ref:`modules<runway-module>` with runway.
 
 When run, the environment is determined from the current git branch
-unless ``ignore_git_branch: true`` is specified in the
+unless ``ignore-git-branch: true`` is specified in the
 :ref:`runway config file<runway-config>`. If the ``DEPLOY_ENVIRONMENT``
 environment variable is set, it's value will be used. If neither the git
 branch or environment variable are available, the directory name is used.

@@ -1,5 +1,4 @@
 """Runway module module."""
-# (couldn't resist ^)
 
 import logging
 import os

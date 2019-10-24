@@ -189,8 +189,6 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         return deployment
     modules_to_deploy = []
 
-    if deployment.get('current_dir', False):
-        return deployment
     if not deployment.get('modules'):
         LOGGER.error('No modules configured in deployment "%s"',
                      deployment['name'])
@@ -354,7 +352,7 @@ class ModulesCommand(RunwayCommand):
         if deployments is None:
             deployments = self.runway_config['deployments']
         context = Context(env_name=get_env(self.env_root,
-                                           self.runway_config.get('ignore_git_branch', False)),
+                                           self.runway_config.get('ignore-git-branch', False)),
                           env_region=None,
                           env_root=self.env_root,
                           env_vars=os.environ.copy())
@@ -451,8 +449,6 @@ class ModulesCommand(RunwayCommand):
                         validate_account_credentials(deployment, context)
 
                     modules = deployment.get('modules', [])
-                    if deployment.get('current_dir'):
-                        modules.append('.' + os.sep)
                     for module in modules:
                         if module.child_modules:
                             # CI is required for concurrent execution to prevent weird

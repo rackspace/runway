@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import logging
 import os
+import sys
 
 from .base_command import BaseCommand
 from .. import __version__ as version
@@ -70,7 +71,7 @@ def get_env(path, ignore_git_branch=False):
 
     if ignore_git_branch:
         LOGGER.info('Skipping environment lookup from current git branch '
-                    '("ignore_git_branch" is set to true in the runway '
+                    '("ignore-git-branch" is set to true in the runway '
                     'config)')
     else:
         # These are not located with the top imports because they throw an
@@ -88,5 +89,14 @@ def get_env(path, ignore_git_branch=False):
             return get_env_from_branch(b_name)
         except InvalidGitRepositoryError:
             pass
+        except TypeError:
+            LOGGER.warning('Unable to retrieve the current git branch name!')
+            LOGGER.warning('Typically this occurs when operating in a '
+                           'detached-head state (e.g. what Jenkins uses when '
+                           'checking out a git branch). Set the '
+                           'DEPLOY_ENVIRONMENT environment variable to the '
+                           'name of the logical environment (e.g. "export '
+                           'DEPLOY_ENVIRONMENT=dev") to bypass this error.')
+            sys.exit(1)
     LOGGER.info('Deriving environment name from directory %s...', path)
     return get_env_from_directory(os.path.basename(path))

@@ -1,7 +1,7 @@
 """Identify the current environment and print it to the terminal.
 
 When run, the environment is determined from the current git branch
-unless ``ignore_git_branch: true`` is specified in the
+unless ``ignore-git-branch: true`` is specified in the
 :ref:`runway config file<runway-config>`. If the ``DEPLOY_ENVIRONMENT``
 environment variable is set, it's value will be used. If neither the git
 branch or environment variable are available, the directory name is used.
@@ -31,5 +31,5 @@ class WhichEnv(RunwayCommand):
         logging.getLogger('runway').setLevel(logging.ERROR)  # suppress warnings
         print(get_env(
             self.env_root,
-            self.runway_config.get('ignore_git_branch', False)
+            self.runway_config.get('ignore-git-branch', False)
         ))
