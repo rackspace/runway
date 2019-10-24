@@ -296,16 +296,12 @@ class Terraform(RunwayModule):
                         env_region=self.context.env_region,
                         env_vars=env_vars
                     )
-                if 'SKIP_TF_GET' not in env_vars:
-                    LOGGER.info('Executing "terraform get" to update remote '
-                                'modules')
-                    run_module_command(
-                        cmd_list=[tf_bin, 'get', '-update=true'],
-                        env_vars=env_vars
-                    )
-                else:
-                    LOGGER.info('Skipping "terraform get" due to '
-                                '"SKIP_TF_GET" environment variable...')
+                LOGGER.info('Executing "terraform get" to update remote '
+                            'modules')
+                run_module_command(
+                    cmd_list=[tf_bin, 'get', '-update=true'],
+                    env_vars=env_vars
+                )
                 LOGGER.info("Running Terraform %s on %s (\"%s\")",
                             command,
                             os.path.basename(self.path),

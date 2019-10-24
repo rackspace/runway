@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - _default_ tests. trying to run the test command with no tests defined will now result in an error.
 - chef, flake8, pylint, and stacker blueprint tests (for single-binary compatibility)
+- `SKIP_TF_GET` environment variable option for Terraform modules
 - `gitclean` subcommand (rarely used and functionality is trivial to replicate in other scripts)
 
 ### Changed
