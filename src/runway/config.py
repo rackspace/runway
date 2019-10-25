@@ -223,7 +223,6 @@ class ModuleDefinition(ConfigComponent):
                                options=mod.pop('options', {}),
                                tags=mod.pop('tags', {}),
                                child_modules=child_modules))
-
             if mod:
                 LOGGER.warning(
                     'Invalid keys found in module %s have been ignored: %s',
@@ -249,6 +248,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
         deployments:
           - modules:  # minimum requirements for a deployment
+              # "./" can alternatively be used for the module name to indicate
+              # the current directory
               - my-module.cfn
             regions:
               - us-east-1
@@ -257,10 +258,10 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               - path: my-other-modules.cfn
             regions:
               - us-east-1
-            account-id:  # optional
+            account_id:  # optional
               - dev: 0000
               - prod: 1111
-            assume-role:  # optional
+            assume_role:  # optional
               dev: arn:aws:iam::0000:role/role-name
               prod: arn:aws:iam::1111:role/role-name
             environments:  # optional
@@ -281,19 +282,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               "*":  # applied to all environments
                 ANOTHER_VAR: foo
 
-    A deployment can be defined without modules if the directory
-    containing the runway config file is a module directory.
-
-    Example:
-      .. code-block:: yaml
-
-        deployments:
-          - current_dir: true
-            regions:
-              - us-west-2
-            assume-role:
-              arn: arn:aws:iam::0000:role/role-name
-
     """
 
     def __init__(self, deployment):
@@ -301,21 +289,19 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         """.. Runway deployment definition.
 
         Keyword Args:
-            account-alias (Optional[Dict[str, str]]): A mapping of
+            account_alias (Optional[Dict[str, str]]): A mapping of
                 ``$environment: $alias`` that, if provided, is used to
                 verify the currently assumed role or credentials.
-            account-id (Optional[Dict[str, Union[str, int]]]): A mapping
+            account_id (Optional[Dict[str, Union[str, int]]]): A mapping
                 of ``$environment: $id`` that, if provided, is used to
                 verify the currently assumed role or credentials.
-            assume-role (Optional[Dict[str, Union[str, Dict[str, str]]]]):
+            assume_role (Optional[Dict[str, Union[str, Dict[str, str]]]]):
                 A mapping of ``$environment: $role`` or
                 ``$environment: {arn: $role, duration: $int}`` to assume
                 a role when processing a deployment. ``arn: $role`` can
                 be used to apply the same role to all environment.
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
-            current_dir (bool): Used to deploy the module in which the
-                runway config file is located. *(default: false)*
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
                 variables to environment names. When run, the variables
                 defined here are merged with those in the
@@ -351,18 +337,29 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self.assume_role = deployment.pop(
             'assume_role', deployment.pop('assume-role', {})
         )  # type: Optional[Dict[str, Union[str, Dict[str, str]]]]
-        self.current_dir = deployment.pop('current_dir', False)  # type: bool
         self.environments = deployment.pop(
             'environments', {}
         )  # type: Optional[Dict[str, Dict[str, Any]]]
         self.env_vars = deployment.pop(
-            'env_vars', {}
+            'env_vars', deployment.pop('env-vars', {})
         )  # type: Optional[Dict[str, Dict[str, Any]]]
+        if deployment.pop('current_dir', False):
+            # Deprecated in 1.0 (late 2019). Retain for at least a major version.
+            LOGGER.warning('DEPRECATION WARNING: The "current_dir" option has '
+                           'been deprecated in favor of a "./" module '
+                           'definition. Please update your config.')
+            modules = ['.' + os.sep]
+        else:
+            if not deployment.get('modules'):
+                LOGGER.error('No modules have been defined in your Runway '
+                             'deployment.')
+                sys.exit(1)
+            modules = deployment.pop('modules')
         self.modules = ModuleDefinition.from_list(
-            deployment.pop('modules', [])  # can be none if current_dir
+            modules
         )  # type: List[ModuleDefinition]
         self.module_options = deployment.pop(
-            'module_options', {}
+            'module_options', deployment.pop('module-options', {})
         )  # type: Optional(Dict[str, Any])
         self.name = deployment.pop('name')  # type: str
         self.regions = deployment.pop('regions', [])  # type: List[str]
@@ -509,7 +506,7 @@ class Config(ConfigComponent):
                 :class:`tests<runway.config.TestDefinition>` that are
                 processed in the order they are defined.
             ignore_git_branch (bool): Disable git branch lookup when
-                using environment folders, Mercurial, or defining the
+                using environment folders, non-git VCS, or defining the
                 ``DEPLOY_ENVIRONMENT`` environment variable before
                 execution. Note that defining ``DEPLOY_ENVIRONMENT``
                 will automatically ignore the git branch.
@@ -536,7 +533,10 @@ class Config(ConfigComponent):
             config_file = yaml.safe_load(data_file)
             result = Config(config_file.pop('deployments'),
                             config_file.pop('tests', []),
-                            config_file.pop('ignore_git_branch', False))
+                            config_file.pop('ignore_git_branch',
+                                            config_file.pop(
+                                                'ignore-git-branch',
+                                                False)))
 
             if config_file:
                 LOGGER.warning(

@@ -10,7 +10,7 @@ environment variable is set, it's value will be used. If neither the git
 branch or environment variable are available, the directory name is used.
 The environment identified here is used to determine the env/config files
 to use. It is also used with options defined in the runway config file
-such as ``assume-role``, ``account-id``, etc. See
+such as ``assume_role``, ``account_id``, etc. See
 :ref:`Runway Config<runway-config>` for details on these options.
 
 Plan will always be run against all deployments for the determined

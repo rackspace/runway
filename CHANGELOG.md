@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Better error messages for subprocess commands that fail to run
 - cloudformation modules now ignore `docker-compose.yml` in the root of the module directory
 - `diff` run against CloudFormation modules will now correctly handle missing/dependent stacks
+- Environment detection from git branches will now fail gracefully when in a detached-HEAD state
 
 ### Added
 - run-python & run-stacker commands (for single-binary compatibility)
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated CDK typescript sample generator to v1 syntax
 - Terraform variables from runway.yml passed as environment variables (fixes https://github.com/hashicorp/terraform/issues/19424#issuecomment-472186386)
 - CDK/Serverless `npm ci` skip option (formerly `skip-npm-ci`) moved to module options
+- Top-level & deployment options now consistently documented with underscores (e.g. `account_id:` vs `account-id:`).
 
 ## [0.47.1] - 2019-07-19
 ### Fixed

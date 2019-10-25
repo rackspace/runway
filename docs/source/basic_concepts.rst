@@ -25,9 +25,9 @@ Environments
        by copying the files between the environment folders. See the ignore_git_branch 
        runway.yml config option.
 
-        - The folder name of the module itself (not its parent folder) if the 
-          ignore_git_branch and current_dir runway.yml config config options are both 
-          used (see "Directories as Environments with a Single Module" in "Repo Structure").
+        - The folder name of the module itself (not its parent folder) will be used in this 
+          case if the module is located in the same directory as the runway config (e.g. in 
+          the case of a simple ``deployments: [modules: [./], regions: [us-east-1]]`` config.
     c. The DEPLOY_ENVIRONMENT environment variable.
 
 Deployments

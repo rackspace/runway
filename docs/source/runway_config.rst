@@ -4,6 +4,7 @@
 .. _Stacker: https://stacker.readthedocs.io/en/stable/
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
+.. _Kubernetes: https://kubernetes.io/
 
 .. _runway-config:
 
@@ -83,7 +84,7 @@ Sample
           - myapp.tf
         regions:
           - us-east-1
-        assume-role:  # optional
+        assume_role:  # optional
           # When running multiple deployments, post_deploy_env_revert can be used
           # to revert the AWS credentials in the environment to their previous
           # values
@@ -106,13 +107,13 @@ Sample
             region: us-east-1
             image_id: ami-abc123
 
-        account-alias:  # optional
+        account_alias:  # optional
           # A mapping of environment -> alias mappings can be provided to have
           # Runway verify the current assumed role / credentials match the
           # necessary account
           dev: my_dev_account
           prod: my_dev_account
-        account-id:  # optional
+        account_id:  # optional
           # A mapping of environment -> id mappings can be provided to have Runway
           # verify the current assumed role / credentials match the necessary
           # account
@@ -162,23 +163,4 @@ Sample
 
     # If using environment folders instead of git branches, git branch lookup can
     # be disabled entirely (see "Repo Structure")
-    # ignore_git_branch: true
-
-The runway config file can also be placed in a module folder
-(e.g. a repo/environment containing only one module doesn't need to nest the module in a subfolder)
-
-.. code-block:: yaml
-
-    ---
-    # This will deploy the module in which runway.yml is located
-    deployments:
-      - current_dir: true
-        regions:
-          - us-west-2
-        assume-role:
-          arn: arn:aws:iam::account-id:role/role-name
-
-    # If using environment folders instead of git branches, git branch lookup can
-    # be disabled entirely (see "Repo Structure"). See "Directories as Environments
-    # with a Single Module" in "Repo Structure".
     # ignore_git_branch: true
