@@ -11,14 +11,14 @@ deployments:
           - app:other-app
     regions:
       - us-east-1
-    account-id:
+    account_id:
       dev: 00000000000
   - name: deployment_2
     modules:
       - sampleapp3.cfn
     regions:
       - us-east-1
-    account-id:
+    account_id:
       dev: 00000000000
   - name: deployment_3
     modules:

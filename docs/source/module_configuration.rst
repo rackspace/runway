@@ -158,7 +158,7 @@ and/or for a group of modules:
       - modules:
           - path: mytfmodule
           - path: anothermytfmodule
-        module-options:  # shared between all modules in deployment
+        module_options:  # shared between all modules in deployment
           terraform_version:
             "*": 0.11.13  # applies to all environments
             # prod: 0.9.0  # can also be specified for a specific environment
@@ -241,7 +241,7 @@ and/or for a group of modules:
       - modules:
           - path: mytfmodule
           - path: anothermytfmodule
-        module-options:  # shared between all modules in deployment
+        module_options:  # shared between all modules in deployment
           terraform_backend_config:
             bucket: mybucket
             region: us-east-1
@@ -277,7 +277,7 @@ and/or for a group of modules:
       - modules:
           - path: mytfmodule
           - path: anothermytfmodule
-        module-options:  # shared between all modules in deployment
+        module_options:  # shared between all modules in deployment
           terraform_backend_config:
             region: us-east-1
           terraform_backend_cfn_outputs:
@@ -311,7 +311,7 @@ and/or for a group of modules:
       - modules:
           - path: mytfmodule
           - path: anothermytfmodule
-        module-options:  # shared between all modules in deployment
+        module_options:  # shared between all modules in deployment
           terraform_backend_config:
             region: us-east-1
           terraform_backend_ssm_params:
@@ -664,7 +664,7 @@ and/or for a group of modules:
       - modules:
           - path: myk8smodule
           - path: anotherk8smodule
-        module-options:  # shared between all modules in deployment
+        module_options:  # shared between all modules in deployment
           kubectl_version:
             "*": 1.14.5  # applies to all environments
             # prod: 1.13.0  # can also be specified for a specific environment
@@ -687,7 +687,7 @@ or an absolute one. E.g.::
               kubectl_version:
       - regions:
           - us-east-1
-    env-vars:
+    env_vars:
       staging:
         KUBECONFIG:
           - .kube

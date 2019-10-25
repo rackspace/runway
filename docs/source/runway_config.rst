@@ -84,7 +84,7 @@ Sample
           - myapp.tf
         regions:
           - us-east-1
-        assume-role:  # optional
+        assume_role:  # optional
           # When running multiple deployments, post_deploy_env_revert can be used
           # to revert the AWS credentials in the environment to their previous
           # values
@@ -107,25 +107,25 @@ Sample
             region: us-east-1
             image_id: ami-abc123
 
-        account-alias:  # optional
+        account_alias:  # optional
           # A mapping of environment -> alias mappings can be provided to have
           # Runway verify the current assumed role / credentials match the
           # necessary account
           dev: my_dev_account
           prod: my_dev_account
-        account-id:  # optional
+        account_id:  # optional
           # A mapping of environment -> id mappings can be provided to have Runway
           # verify the current assumed role / credentials match the necessary
           # account
           dev: 123456789012
           prod: 345678901234
 
-        # env-vars set OS environment variables for the module (not logical
+        # env_vars set OS environment variables for the module (not logical
         # environment values like those in a CFN .env or TF .tfvars file).
         # They should generally not be used (they are provided for use with
         # tools that absolutely require it, like Terraform's
         # TF_PLUGIN_CACHE_DIR option)
-        env-vars:  # optional environment variable overrides
+        env_vars:  # optional environment variable overrides
           dev:
             AWS_PROFILE: foo
             APP_PATH:  # When specified as list, will be treated as components of a path on disk
@@ -163,4 +163,4 @@ Sample
 
     # If using environment folders instead of git branches, git branch lookup can
     # be disabled entirely (see "Repo Structure")
-    # ignore-git-branch: true
+    # ignore_git_branch: true

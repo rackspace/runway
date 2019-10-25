@@ -64,7 +64,7 @@ class ServerlessTest(Serverless):
         configs = self.get_configs()
         promotezip_bucket = self.get_promote_zip_bucket(configs['Runway'])
 
-        session = self.get_session(configs['Runway']['deployments'][0].get('assume-role')[env])
+        session = self.get_session(configs['Runway']['deployments'][0].get('assume_role')[env])
         sls_bucket = self.get_serverless_bucket('-'.join([configs['Serverless'].get('service'),
                                                           env]),
                                                 session)
@@ -125,7 +125,7 @@ class ServerlessTest(Serverless):
         for env in self.ENVS:
             self.set_environment(env)
             session = self.get_session(configs['Runway']['deployments'][0]
-                                       .get('assume-role')[env])
+                                       .get('assume_role')[env])
             sls_bucket = self.get_serverless_bucket('-'.join([configs['Serverless']
                                                               .get('service'),
                                                               env]),

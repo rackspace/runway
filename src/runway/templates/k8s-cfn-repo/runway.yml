@@ -21,7 +21,7 @@ deployments:
         eks_node_instance_type: t2.medium
         eks_use_spot_instances: "no"
         eks_spot_bid_price: "0.68"
-    env-vars:
+    env_vars:
       dev:
         KUBECONFIG:
           - .kube

@@ -22,7 +22,7 @@ Environments
     b. The parent folder name of each module. For teams with a preference or technical 
        requirement to not use git branches, each environment can be represented on disk 
        as a folder. Instead of promoting changes via git merges, changes can be promoted 
-       by copying the files between the environment folders. See the ignore-git-branch 
+       by copying the files between the environment folders. See the ignore_git_branch 
        runway.yml config option.
 
         - The folder name of the module itself (not its parent folder) will be used in this 

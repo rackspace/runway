@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated CDK typescript sample generator to v1 syntax
 - Terraform variables from runway.yml passed as environment variables (fixes https://github.com/hashicorp/terraform/issues/19424#issuecomment-472186386)
 - CDK/Serverless `npm ci` skip option (formerly `skip-npm-ci`) moved to module options
-- Top-level & deployment options now consistently allow hyphen or underscores, and docs have been updated to be consistent with hyphens (e.g. `env-vars:` vs `env_vars:`)
+- Top-level & deployment options now consistently documented with underscores (e.g. `account_id:` vs `account-id:`).
 
 ## [0.47.1] - 2019-07-19
 ### Fixed

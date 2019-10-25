@@ -72,9 +72,10 @@ environments are more hand managed, this is not technically required::
 Directories as Environments with a Single Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Another sample repo structure, showing environment folders containing a single
-CloudFormation :ref:`modules<runway-module>` at their root (combining the
-``current_dir`` & ``ignore-git-branch`` :ref:`runway config file
-<runway-config>` options to merge the Environment & Module folders).
+CloudFormation :ref:`modules<runway-module>` at their root (using the
+``ignore_git_branch`` :ref:`runway config file
+<runway-config>` option and a single declared module of ``./`` to merge the
+Environment & Module folders).
 
 See the `Directories as Environments`_ example above for more information on
 why this shows prod config files in the dev folder and vice versa::

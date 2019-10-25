@@ -145,7 +145,7 @@ def pre_deploy_assume_role(assume_role_config, context):
                 assume_role_arn = assume_role_config[context.env_name]
                 assume_role_duration = None
         else:
-            LOGGER.info('Skipping assume-role; no role found for '
+            LOGGER.info('Skipping iam:AssumeRole; no role found for '
                         'environment %s...',
                         context.env_name)
 
@@ -304,18 +304,18 @@ def validate_account_credentials(deployment, context):
               'aws_session_token']:
         if context.env_vars.get(i.upper()):
             boto_args[i] = context.env_vars[i.upper()]
-    if isinstance(deployment.get('account-id'), (int, six.string_types)):
-        account_id = str(deployment['account-id'])
-    elif deployment.get('account-id', {}).get(context.env_name):
-        account_id = str(deployment['account-id'][context.env_name])
+    if isinstance(deployment.get('account_id'), (int, six.string_types)):
+        account_id = str(deployment['account_id'])
+    elif deployment.get('account_id', {}).get(context.env_name):
+        account_id = str(deployment['account_id'][context.env_name])
     else:
         account_id = None
     if account_id:
         validate_account_id(boto3.client('sts', **boto_args), account_id)
-    if isinstance(deployment.get('account-alias'), six.string_types):
-        account_alias = deployment['account-alias']
-    elif deployment.get('account-alias', {}).get(context.env_name):
-        account_alias = deployment['account-alias'][context.env_name]
+    if isinstance(deployment.get('account_alias'), six.string_types):
+        account_alias = deployment['account_alias']
+    elif deployment.get('account_alias', {}).get(context.env_name):
+        account_alias = deployment['account_alias'][context.env_name]
     else:
         account_alias = None
     if account_alias:
@@ -352,7 +352,7 @@ class ModulesCommand(RunwayCommand):
         if deployments is None:
             deployments = self.runway_config['deployments']
         context = Context(env_name=get_env(self.env_root,
-                                           self.runway_config.get('ignore-git-branch', False)),
+                                           self.runway_config.ignore_git_branch),
                           env_region=None,
                           env_root=self.env_root,
                           env_vars=os.environ.copy())
@@ -443,9 +443,9 @@ class ModulesCommand(RunwayCommand):
                         {'AWS_DEFAULT_REGION': context.env_region,
                          'AWS_REGION': context.env_region}
                     )
-                    if deployment.get('assume-role'):
-                        pre_deploy_assume_role(deployment['assume-role'], context)
-                    if deployment.get('account-id') or (deployment.get('account-alias')):
+                    if deployment.get('assume_role'):
+                        pre_deploy_assume_role(deployment['assume_role'], context)
+                    if deployment.get('account_id') or (deployment.get('account_alias')):
                         validate_account_credentials(deployment, context)
 
                     modules = deployment.get('modules', [])
@@ -483,8 +483,8 @@ class ModulesCommand(RunwayCommand):
                         else:
                             self._deploy_module(module, deployment, context, command)
 
-                if deployment.get('assume-role'):
-                    post_deploy_assume_role(deployment['assume-role'], context)
+                if deployment.get('assume_role'):
+                    post_deploy_assume_role(deployment['assume_role'], context)
             else:
                 LOGGER.error('No region configured for any deployment')
                 sys.exit(1)

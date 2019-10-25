@@ -71,7 +71,7 @@ def get_env(path, ignore_git_branch=False):
 
     if ignore_git_branch:
         LOGGER.info('Skipping environment lookup from current git branch '
-                    '("ignore-git-branch" is set to true in the runway '
+                    '("ignore_git_branch" is set to true in the runway '
                     'config)')
     else:
         # These are not located with the top imports because they throw an

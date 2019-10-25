@@ -248,6 +248,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
         deployments:
           - modules:  # minimum requirements for a deployment
+              # "./" can alternatively be used for the module name to indicate
+              # the current directory
               - my-module.cfn
             regions:
               - us-east-1
@@ -256,10 +258,10 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               - path: my-other-modules.cfn
             regions:
               - us-east-1
-            account-id:  # optional
+            account_id:  # optional
               - dev: 0000
               - prod: 1111
-            assume-role:  # optional
+            assume_role:  # optional
               dev: arn:aws:iam::0000:role/role-name
               prod: arn:aws:iam::1111:role/role-name
             environments:  # optional
@@ -287,13 +289,13 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         """.. Runway deployment definition.
 
         Keyword Args:
-            account-alias (Optional[Dict[str, str]]): A mapping of
+            account_alias (Optional[Dict[str, str]]): A mapping of
                 ``$environment: $alias`` that, if provided, is used to
                 verify the currently assumed role or credentials.
-            account-id (Optional[Dict[str, Union[str, int]]]): A mapping
+            account_id (Optional[Dict[str, Union[str, int]]]): A mapping
                 of ``$environment: $id`` that, if provided, is used to
                 verify the currently assumed role or credentials.
-            assume-role (Optional[Dict[str, Union[str, Dict[str, str]]]]):
+            assume_role (Optional[Dict[str, Union[str, Dict[str, str]]]]):
                 A mapping of ``$environment: $role`` or
                 ``$environment: {arn: $role, duration: $int}`` to assume
                 a role when processing a deployment. ``arn: $role`` can
@@ -305,14 +307,14 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 defined here are merged with those in the
                 ``.env``/``.tfenv``/environment config file and
                 environments section of each module.
-            env-vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
+            env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
                 or for all environments using ``"*"`` as the environment
                 name.
             modules (Optional[List[Dict[str, Any]]]): A list of modules
                 to be processed in the order they are defined.
-            module-options (Optional[Dict[str, Any]]): Options that are
+            module_options (Optional[Dict[str, Any]]): Options that are
                 shared among all modules in the deployment.
             name (str): Name of the deployment. Used to more easily
                 identify where different deployments begin/end in the logs.
@@ -356,7 +358,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self.modules = ModuleDefinition.from_list(
             modules
         )  # type: List[ModuleDefinition]
-        self.current_dir = deployment.pop('current_dir', False)  # type: bool
         self.module_options = deployment.pop(
             'module_options', deployment.pop('module-options', {})
         )  # type: Optional(Dict[str, Any])
@@ -471,7 +472,7 @@ class Config(ConfigComponent):
 
             ---
             # See full syntax at https://github.com/onicagroup/runway
-            ignore-git-branch: true
+            ignore_git_branch: true
             tests:
               - name: example
                 type: script
@@ -532,8 +533,10 @@ class Config(ConfigComponent):
             config_file = yaml.safe_load(data_file)
             result = Config(config_file.pop('deployments'),
                             config_file.pop('tests', []),
-                            (config_file.pop('ignore-git-branch', False) or
-                             config_file.pop('ignore_git_branch', False)))
+                            config_file.pop('ignore_git_branch',
+                                            config_file.pop(
+                                                  'ignore-git-branch',
+                                                  False)))
 
             if config_file:
                 LOGGER.warning(
