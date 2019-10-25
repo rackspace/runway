@@ -21,8 +21,8 @@ def copy_template_to_env(path, env, region):
             LOGGER.info("Bootstrap of k8s module at \"%s\" skipped; module "
                         "already has a config for this environment", path)
         else:
-            LOGGER.info("Copying overlay template at \"%s\" to new environment "
-                        "directory \"%s\"", template_dir, env_dir)
+            LOGGER.info("Copying overlay template at \"%s\" to new "
+                        "environment directory \"%s\"", template_dir, env_dir)
             shutil.copytree(template_dir, env_dir, symlinks=True)
             # Update templated environment name in files
             for i in ['kustomization.yaml',
