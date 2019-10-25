@@ -535,8 +535,8 @@ class Config(ConfigComponent):
                             config_file.pop('tests', []),
                             config_file.pop('ignore_git_branch',
                                             config_file.pop(
-                                                  'ignore-git-branch',
-                                                  False)))
+                                                'ignore-git-branch',
+                                                False)))
 
             if config_file:
                 LOGGER.warning(
