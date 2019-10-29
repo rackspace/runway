@@ -20,7 +20,7 @@ Its main goals are to encourage GitOps best-practices, avoid convoluted Makefile
 * Terraform backend/workspace config management w/per-environment tfvars
 * Automatic kubectl/terraform version management per-environment
 
-### Supported deployment tools
+### Supported Deployment Tools
 
 * AWS CDK
 * Kubectl
