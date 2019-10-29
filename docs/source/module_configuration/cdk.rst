@@ -107,3 +107,18 @@ In Module Directory
       # dev: true
 
 (in ``runway.module.yml``)
+
+Disabling NPM CI
+----------------
+At the start of each module execution, Runway will execute ``npm ci`` to ensure
+the CDK is installed in the project (so Runway can execute it via
+``npx cdk``. This can be disabled (e.g. for use when the ``node_modules``
+directory is pre-compiled) via the ``skip_npm_ci`` module option:
+::
+
+    ---
+    deployments:
+      - modules:
+          - path: mycdkproject.cdk
+            options:
+              skip_npm_ci: true

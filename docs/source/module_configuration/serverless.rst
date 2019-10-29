@@ -86,3 +86,18 @@ In Module Directory
       prod: true
 
 (in ``runway.module.yml``)
+
+Disabling NPM CI
+----------------
+At the start of each module execution, Runway will execute ``npm ci`` to ensure
+Serverless Framework is installed in the project (so Runway can execute it via
+``npx sls``. This can be disabled (e.g. for use when the ``node_modules``
+directory is pre-compiled) via the ``skip_npm_ci`` module option:
+::
+
+    ---
+    deployments:
+      - modules:
+          - path: myslsproject.sls
+            options:
+              skip_npm_ci: true
