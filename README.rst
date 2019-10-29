@@ -36,7 +36,7 @@ Example
 A typical Runway configuration is unobtrusive – it just lists the
 deployment order and locations (regions).
 
-.. code:: yml
+::
 
    deployments:
      - modules:
@@ -76,7 +76,7 @@ version of Runway based on your operating system.
 | Windows          | https://oni.ca/runway/latest/win   |
 +------------------+------------------------------------+
 
-.. code:: shell
+::
 
    $ curl -L oni.ca/runway/latest/osx -o runway
    $ chmod +x runway
@@ -87,7 +87,7 @@ version of Runway based on your operating system.
 npm
 ~~~
 
-.. code:: shell
+::
 
    $ npm i -D @onica/runway
    $ npx runway init
@@ -97,7 +97,7 @@ npm
 pip (or pipenv,poetry,etc)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: shell
+::
 
    $ pip install runway
    $ runway init
