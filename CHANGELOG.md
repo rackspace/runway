@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - 2019-10-30
 ### Fixed
 - Fix cross-platform subprocess execution (e.g. yarn specified without a file extension in staticsite build_steps)
 - Better error messages for subprocess commands that fail to run
@@ -568,7 +570,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v0.47.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/onicagroup/runway/compare/v0.47.1...v1.0.0
 [0.47.1]: https://github.com/onicagroup/runway/compare/v0.47.0...v0.47.1
 [0.47.0]: https://github.com/onicagroup/runway/compare/v0.46.6...v0.47.0
 [0.46.6]: https://github.com/onicagroup/runway/compare/v0.46.5...v0.46.6
