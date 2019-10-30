@@ -4,7 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const tar = require('tar');
 
-const basepath = `${path.resolve(process.cwd(), '../..')}/node_modules`; // goes to the top level node_modules
+// e.g. '../..' for 'runway'; '../../..' for `@onica/runway', etc
+let pathTraversal = '..'
+for (var i = 0; i < process.env.npm_package_name.split("/").length; i++) {
+    pathTraversal += '/..'
+}
+
+const basepath = `${path.resolve(process.cwd(), pathTraversal)}/node_modules`; // goes to the top level node_modules
 const moduleDir = `${basepath}/${process.env.npm_package_name}/src`;
 let osName;
 let binPath;
