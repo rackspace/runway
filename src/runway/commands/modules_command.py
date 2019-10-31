@@ -516,6 +516,17 @@ class ModulesCommand(RunwayCommand):
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
+        if module_opts.get('env_vars'):
+            module_env_vars = merge_nested_environment_dicts(
+                module_opts.get('env_vars'), env_name=context.env_name,
+                env_root=self.env_root
+            )
+            if module_env_vars:
+                context = copy.deepcopy(context)  # changes for this mod only
+                LOGGER.info("OS environment variable overrides being "
+                            "applied this module: %s",
+                            str(module_env_vars))
+                context.env_vars = merge_dicts(context.env_vars, module_env_vars)
         with change_dir(module_root):
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method

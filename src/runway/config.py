@@ -37,7 +37,7 @@ class ConfigComponent(object):
         return iter(self.__dict__)
 
 
-class ModuleDefinition(ConfigComponent):
+class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
     """A module defines the directory to be processed and applicable options.
 
     It can consist of `CloudFormation`_ (using `Stacker`_),
@@ -138,6 +138,7 @@ class ModuleDefinition(ConfigComponent):
                  path,  # type: str
                  class_path=None,  # type: Optional[str]
                  environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
+                 env_vars=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  options=None,  # type: Optional[Dict[str, Any]]
                  tags=None,  # type: Optional[Dict[str, str]]
                  child_modules=None  # type: Optional[List[Union[str, Dict[str, Any]]]]
@@ -161,6 +162,12 @@ class ModuleDefinition(ConfigComponent):
                 ``.env``/``.tfenv``/environment config file. If this is
                 defined, ``.env`` files can be omitted and the module
                 will still be processed.
+            env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
+                OS environment variable overrides to apply when processing
+                modules in the deployment. Can be defined per environment
+                or for all environments using ``"*"`` as the environment
+                name. Takes precendence over values set at the deployment-
+                level.
             options (Optional[Dict[str, Any]]): Module-specific options.
                 See :ref:`Module Configurations<module-configurations>`
                 for detailed usage.
@@ -191,6 +198,7 @@ class ModuleDefinition(ConfigComponent):
         self.path = path
         self.class_path = class_path
         self.environments = environments or {}
+        self.env_vars = env_vars or {}
         self.options = options or {}
         self.tags = tags or {}
         self.child_modules = child_modules
@@ -220,6 +228,7 @@ class ModuleDefinition(ConfigComponent):
                                path,
                                class_path=mod.pop('class_path', None),
                                environments=mod.pop('environments', {}),
+                               env_vars=mod.pop('env_vars', {}),
                                options=mod.pop('options', {}),
                                tags=mod.pop('tags', {}),
                                child_modules=child_modules))
