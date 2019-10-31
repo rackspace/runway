@@ -87,6 +87,36 @@ In Module Directory
 
 (in ``runway.module.yml``)
 
+Promoting Builds Through Environments
+-------------------------------------
+
+Serverless build ``.zips`` can be used between environments by setting the
+``promotezip`` module option and providing a bucket name in which to cache
+the builds.
+
+The first time the Serverless module is deployed using this option, it will
+build/deploy as normal and cache the artifact on S3. On subsequent deploys,
+Runway will used that cached artifact (finding it by comparing the module
+source code).
+
+This enables a common build account to deploy new builds in a dev/test
+environment, and then promote that same zip through other environments.
+
+The CloudFormation stack deploying the zip will be re-generated on each
+deployment (so environment-specific values/lookups will work as normal).
+
+Example config:
+::
+
+    ---
+    deployments:
+      - modules:
+        - path: myslsproject.sls
+          options:
+            promotezip:
+              bucketname: my-shared-services-bucket-build
+
+
 Disabling NPM CI
 ----------------
 At the start of each module execution, Runway will execute ``npm ci`` to ensure
