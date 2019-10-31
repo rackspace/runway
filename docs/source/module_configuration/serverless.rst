@@ -100,7 +100,8 @@ Runway will used that cached artifact (finding it by comparing the module
 source code).
 
 This enables a common build account to deploy new builds in a dev/test
-environment, and then promote that same zip through other environments.
+environment, and then promote that same zip through other environments
+(any of these environments can be in the same or different AWS accounts).
 
 The CloudFormation stack deploying the zip will be re-generated on each
 deployment (so environment-specific values/lookups will work as normal).
@@ -114,7 +115,7 @@ Example config:
         - path: myslsproject.sls
           options:
             promotezip:
-              bucketname: my-shared-services-bucket-build
+              bucketname: my-build-account-bucket-name
 
 
 Disabling NPM CI
