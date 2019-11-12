@@ -183,7 +183,7 @@ Either for a single module::
                 region: us-east-1
               terraform_backend_cfn_outputs:
                 bucket: StackName::OutputName  # e.g. common-tf-state::TerraformStateBucketName
-                dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
+                dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformStateTableName
 
 
 and/or for a group of modules:
