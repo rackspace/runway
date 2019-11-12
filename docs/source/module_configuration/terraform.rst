@@ -274,6 +274,12 @@ runway.yml::
               dev:
                 region: us-east-1
                 image_id: ami-abc123
+                mylist:
+                  - item1
+                  - item2
+                mymap:
+                  key1: value1
+                  key2: value1
 
 and/or
 ::
@@ -285,5 +291,11 @@ and/or
           dev:
             region: us-east-1
             image_id: ami-abc123
+            mylist:
+              - item1
+              - item2
+            mymap:
+              key1: value1
+              key2: value1
         modules:
           - mytfmodule
