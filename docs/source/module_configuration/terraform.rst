@@ -183,7 +183,7 @@ Either for a single module::
                 region: us-east-1
               terraform_backend_cfn_outputs:
                 bucket: StackName::OutputName  # e.g. common-tf-state::TerraformStateBucketName
-                dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
+                dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformStateTableName
 
 
 and/or for a group of modules:
@@ -274,6 +274,12 @@ runway.yml::
               dev:
                 region: us-east-1
                 image_id: ami-abc123
+                mylist:
+                  - item1
+                  - item2
+                mymap:
+                  key1: value1
+                  key2: value1
 
 and/or
 ::
@@ -285,5 +291,11 @@ and/or
           dev:
             region: us-east-1
             image_id: ami-abc123
+            mylist:
+              - item1
+              - item2
+            mymap:
+              key1: value1
+              key2: value1
         modules:
           - mytfmodule

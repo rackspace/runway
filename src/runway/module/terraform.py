@@ -75,8 +75,12 @@ def get_backend_init_list(backend_vals):
     """Turn backend config dict into command line items."""
     cmd_list = []
     for (key, val) in backend_vals.items():
-        cmd_list.append('-backend-config')
-        cmd_list.append(key + '=' + val)
+        if val:
+            cmd_list.append('-backend-config')
+            cmd_list.append(key + '=' + val)
+        else:
+            LOGGER.warning("Skipping terraform backend config option \"%s\" "
+                           "-- no value provided", key)
     return cmd_list
 
 
@@ -168,6 +172,23 @@ def run_terraform_init(tf_bin,  # pylint: disable=too-many-arguments
         sys.exit(shelloutexc.returncode)
 
 
+def update_env_vars_with_tf_var_values(os_env_vars, tf_vars):
+    """Return os_env_vars with TF_VAR_ values for each tf_var."""
+    # https://www.terraform.io/docs/commands/environment-variables.html#tf_var_name
+    for (key, val) in tf_vars.items():
+        if isinstance(val, dict):
+            os_env_vars["TF_VAR_%s" % key] = "{ %s }" % str(
+                # e.g. TF_VAR_amap='{ foo = "bar", baz = "qux" }'
+                ', '.join([nestedkey + ' = "' + nestedval + '"'
+                           for (nestedkey, nestedval) in val.items()])
+            )
+        elif isinstance(val, list):
+            os_env_vars["TF_VAR_%s" % key] = '[' + ','.join(val) + ']'
+        else:
+            os_env_vars["TF_VAR_%s" % key] = val
+    return os_env_vars
+
+
 class Terraform(RunwayModule):
     """Terraform Runway Module."""
 
@@ -205,8 +226,10 @@ class Terraform(RunwayModule):
         if isinstance(self.options.get('environments',
                                        {}).get(self.context.env_name),
                       dict):
-            for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
-                env_vars["TF_VAR_%s" % key] = val
+            env_vars = update_env_vars_with_tf_var_values(
+                env_vars,
+                self.options['environments'][self.context.env_name]
+            )
 
         if self.options.get('environments', {}).get(self.context.env_name) or (
                 workspace_tfvar_present):
