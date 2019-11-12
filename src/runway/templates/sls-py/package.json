@@ -1,0 +1,11 @@
+{
+  "name": "sampleapp",
+  "version": "1.0.0",
+  "description": "Serverless Python app",
+  "devDependencies": {
+    "serverless": "^1.57.0",
+    "serverless-python-requirements": "^5.0.1"
+  },
+  "author": "unused",
+  "license": "unused"
+}

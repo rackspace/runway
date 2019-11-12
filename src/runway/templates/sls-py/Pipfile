@@ -1,0 +1,6 @@
+[packages]
+# Actual function code (under src/src)
+src = {path = "./src"}
+
+# Package dependencies (specified here & more generally in src/setup.py)
+PyYAML = "~= 5.1"

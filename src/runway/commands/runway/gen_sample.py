@@ -29,8 +29,8 @@ sample directory.
 |                  | :ref:`module<runway-module>` EKS cluster & sample |
 |                  | app using Terraform                               |
 +------------------+---------------------------------------------------+
-| ``sls``          | `Serverless Framework`_                           |
-|                  | :ref:`module<runway-module>`                      |
+| ``sls-py``       | `Serverless Framework`_                           |
+|                  | :ref:`module<runway-module>` using Python         |
 +------------------+---------------------------------------------------+
 | ``sls-tsc``      | `Serverless Framework`_                           |
 |                  | :ref:`module<runway-module>` using TypeScript     |
@@ -53,9 +53,10 @@ sample directory.
     $ runway gen-sample stacker
 
     # create a "sampleapp.sls" sample module directory
-    $ runway gen-sample sls
+    $ runway gen-sample sls-py
 
 """
+from __future__ import print_function
 import logging
 import os
 import shutil
@@ -170,22 +171,29 @@ def generate_sample_k8s_tf_repo(env_root):
     LOGGER.info('(see its README for setup and deployment instructions)')
 
 
-def generate_sample_sls_module(env_root, module_dir=None):
-    """Generate skeleton Serverless sample module."""
+def generate_sample_sls_py_module(env_root, module_dir=None):
+    """Generate skeleton Serverless python sample module."""
     if module_dir is None:
         module_dir = os.path.join(env_root, 'sampleapp.sls')
-    generate_sample_module(module_dir)
-    for i in ['config-dev-us-east-1.json', 'handler.py', 'package.json',
-              'serverless.yml']:
-        shutil.copyfile(
-            os.path.join(ROOT,
-                         'templates',
-                         'serverless',
-                         i),
-            os.path.join(module_dir, i),
-        )
+
+    if os.path.isdir(module_dir):
+        LOGGER.error("Error generating sample module -- directory %s "
+                     "already exists!",
+                     module_dir)
+        sys.exit(1)
+
+    shutil.copytree(
+        os.path.join(ROOT,
+                     'templates',
+                     'sls-py'),
+        module_dir
+    )
+    os.rename(os.path.join(module_dir, '_gitignore'),
+              os.path.join(module_dir, '.gitignore'))
     LOGGER.info("Sample Serverless module created at %s",
                 module_dir)
+    LOGGER.info('To finish its setup, change to the %s directory and execute '
+                '"npm install" to generate its lockfile.', module_dir)
 
 
 def generate_sample_sls_tsc_module(env_root, module_dir=None):
@@ -412,8 +420,8 @@ class GenSample(RunwayCommand):
         """Run selected module generator."""
         if self._cli_arguments.get('<samplename>') == 'cfn':
             generate_sample_cfn_module(self.env_root)
-        elif self._cli_arguments.get('<samplename>') == 'sls':
-            generate_sample_sls_module(self.env_root)
+        elif self._cli_arguments.get('<samplename>') == 'sls-py':
+            generate_sample_sls_py_module(self.env_root)
         elif self._cli_arguments.get('<samplename>') == 'sls-tsc':
             generate_sample_sls_tsc_module(self.env_root)
         elif self._cli_arguments.get('<samplename>') == 'stacker':
@@ -432,7 +440,7 @@ class GenSample(RunwayCommand):
             generate_sample_cdk_cs_module(self.env_root)
         else:
             LOGGER.info("Available samples to generate:")
-            for i in ['cfn', 'sls-tsc', 'sls', 'tf', 'k8s-cfn-repo',
+            for i in ['cfn', 'sls-tsc', 'sls-py', 'tf', 'k8s-cfn-repo',
                       'k8s-tf-repo', 'stacker', 'cdk-tsc', 'cdk-py',
                       'cdk-csharp']:
-                LOGGER.info(i)
+                print(i)
