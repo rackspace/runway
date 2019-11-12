@@ -1,0 +1,24 @@
+service: sampleapp
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+
+provider:
+  name: aws
+  runtime: python3.7
+
+functions:
+  helloWorld:
+    handler: src.hello_world.handler
+
+package:
+  include:
+    - Pipfile
+  exclude:
+    # Broad exclusion here will ensure only function code & deps
+    # (from Pipfile.lock) & included files ^ are shipped in the package
+    - "**"

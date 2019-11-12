@@ -2,7 +2,7 @@
 import json
 
 
-def hello(event, context):  # pylint: disable=unused-argument
+def handler(event, context):  # pylint: disable=unused-argument
     """Return Serverless Hello World."""
     body = {
         "message": "Go Serverless v1.0! Your function executed successfully!",
