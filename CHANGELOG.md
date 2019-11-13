@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.1] - 2019-11-13
+### Fixed
+- `--tag` docopt option to plan and updated docs
+  - the backend already supports/handles this option. now docopt will allow it to be provided.
+
 ## [1.2.0] - 2019-11-12
 ### Added
 - Terraform list/map variables can now be provided via runway.yml environment values
