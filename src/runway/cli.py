@@ -3,7 +3,7 @@ Runway Overview.
 
 Usage:
   runway (test|preflight)
-  runway (plan|taxi)
+  runway (plan|taxi) [--tag <tag>...]
   runway (deploy|takeoff) [--tag <tag>...]
   runway (destroy|dismantle) [--tag <tag>...]
   runway init
