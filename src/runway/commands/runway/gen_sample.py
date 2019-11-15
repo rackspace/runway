@@ -309,8 +309,10 @@ def generate_sample_cdk_py_module(env_root, module_dir=None):
     if module_dir is None:
         module_dir = os.path.join(env_root, 'sampleapp.cdk')
     generate_sample_module(module_dir)
-    for i in ['app.py', 'cdk.json', 'lambda-index.py', 'package.json',
-              'runway.module.yml', 'Pipfile']:
+    os.mkdir(os.path.join(module_dir, 'hello'))
+    for i in ['hello/__init__.py', 'hello/hello_construct.py',
+              'hello/hello_stack.py', '.gitignore', 'app.py', 'cdk.json',
+              'package.json', 'Pipfile', 'Pipfile.lock', 'runway.module.yml']:
         shutil.copyfile(
             os.path.join(ROOT,
                          'templates',

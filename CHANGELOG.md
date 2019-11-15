@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- `gen-sample cdk-py` now correctly generates a sample instead of trying to copy files that don't exist
+
 ### Added
 - parallel region execution
   - `deployments[].regions.parallel[]` similar to parallel modules **OR**
