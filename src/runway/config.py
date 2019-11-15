@@ -328,7 +328,18 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             name (str): Name of the deployment. Used to more easily
                 identify where different deployments begin/end in the logs.
             regions (List[str]): AWS region names where modules will be
-                deployed/destroyed.
+                deployed/destroyed. Can optionally define as a map with
+                ``parallel`` as the key and a list of regions as the value.
+                See **parallel_regions** for more info.
+            parallel_regions: Can be defined in place of ``regions.parallel[]``.
+                This will cause all modules in the deployment to be executed
+                in all provided regions in parallel (at the same time).
+                Only takes effect when the ``CI`` environment variable is set,
+                enabling non-interactive mode, as prompts will not be able
+                to be presented. If ``CI`` is not set, the regions will be
+                processed one at a time. This can be used in tandom with
+                **parallel modules**. ``assume_role.post_deploy_env_revert``
+                will always be ``true`` when run in parallel.
 
         References:
             - :class:`module<runway.config.ModuleDefinition>`
@@ -371,7 +382,20 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             'module_options', deployment.pop('module-options', {})
         )  # type: Optional(Dict[str, Any])
         self.name = deployment.pop('name')  # type: str
-        self.regions = deployment.pop('regions', [])  # type: List[str]
+        self.regions = deployment.pop(
+            'regions', []
+        )  # type: Union[List[str], Dict[str, List[str]]]
+
+        if self.regions and deployment.get('parallel_regions'):
+            LOGGER.error('Found "regions" and "parallel_regions" in '
+                         'deployment "%s"; only one can be defined',
+                         self.name)
+            sys.exit(1)
+        if isinstance(self.regions, dict) and self.regions.get('parallel'):
+            self.parallel_regions = self.regions.pop('parallel')
+            self.regions = []
+        else:
+            self.parallel_regions = deployment.pop('parallel_regions', [])
 
         if deployment:
             LOGGER.warning(
