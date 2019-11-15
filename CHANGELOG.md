@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- parallel region execution
+  - `deployments[].regions.parallel[]` similar to parallel modules **OR**
+  - `deployments[].parallel_regions[]` which is what the above translates to
+  - cannot use parallel and non-parallel regions in the same deployment
+  - requires `CI` mode and python >3
 
 ## [1.2.1] - 2019-11-13
 ### Fixed

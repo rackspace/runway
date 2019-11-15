@@ -347,7 +347,7 @@ def echo_detected_environment(env_name, env_vars):
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
-    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    def run(self, deployments=None, command='plan'):
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
