@@ -347,7 +347,7 @@ def echo_detected_environment(env_name, env_vars):
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
-    def run(self, deployments=None, command='plan'):  # noqa pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    def run(self, deployments=None, command='plan'):
         """Execute apps/code command."""
         if deployments is None:
             deployments = self.runway_config['deployments']
@@ -355,7 +355,8 @@ class ModulesCommand(RunwayCommand):
                                            self.runway_config.ignore_git_branch),
                           env_region=None,
                           env_root=self.env_root,
-                          env_vars=os.environ.copy())
+                          env_vars=os.environ.copy(),
+                          command=command)
         context.env_vars['RUNWAYCONFIG'] = self.runway_config_path
         echo_detected_environment(context.env_name, context.env_vars)
 
@@ -396,16 +397,27 @@ class ModulesCommand(RunwayCommand):
 
         LOGGER.info("")
         LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
-        for i, deployment in enumerate(deployments_to_run):  # noqa pylint: disable=too-many-nested-blocks,line-too-long
+
+        self._process_deployments(deployments, context)
+
+    def execute(self):
+        # type: () -> None
+        """Execute the command."""
+        raise NotImplementedError('execute must be implimented for '
+                                  'subclasses of BaseCommand.')
+
+    def _process_deployments(self, deployments, context):
+        """Process deployments."""
+        for _, deployment in enumerate(deployments):
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Processing deployment '%s' ===========================",
-                        deployment.get('name'))
+                        deployment.name)
 
             # a deployment with no modules is possible here - check before processing
-            if not deployment.get('modules', []):
+            if not deployment.modules:
                 LOGGER.warning('No modules found for deployment "%s"',
-                               deployment.get('name'))
+                               deployment.name)
                 if self._cli_arguments.get('--tag'):
                     # added info about what could have caused the module to not be found
                     LOGGER.warning('Missing modules could be caused by an '
@@ -415,87 +427,121 @@ class ModulesCommand(RunwayCommand):
                 # to the next deployment rather than exiting
                 continue
 
-            if deployment.get('regions'):
-                if deployment.get('env_vars'):
+            if deployment.regions or deployment.parallel_regions:
+                if deployment.env_vars:
                     deployment_env_vars = merge_nested_environment_dicts(
-                        deployment.get('env_vars'), env_name=context.env_name,
+                        deployment.env_vars, env_name=context.env_name,
                         env_root=self.env_root
                     )
                     if deployment_env_vars:
                         LOGGER.info("OS environment variable overrides being "
                                     "applied this deployment: %s",
                                     str(deployment_env_vars))
-                    context.env_vars = merge_dicts(context.env_vars, deployment_env_vars)
+                    context.env_vars = merge_dicts(context.env_vars,
+                                                   deployment_env_vars)
 
                 LOGGER.info("")
+
+                if (deployment.parallel_regions and
+                        context.env_vars.get('CI') and
+                        sys.version_info[0] > 2):
+                    # CI is required for concurrent execution to prevent weird
+                    # user-input behavior
+                    # py3+ is required because backported futures has issues with
+                    # ProcessPoolExecutor
+                    LOGGER.info("Processing parallel regions %s",
+                                deployment.parallel_regions)
+                    LOGGER.info('(output will be interwoven)')
+                    executor = concurrent.futures.ProcessPoolExecutor()
+                    futures = [executor.submit(self._execute_deployment,
+                                               *[deployment, context,
+                                                 region, True])
+                               for region in deployment.parallel_regions]
+                    concurrent.futures.wait(futures)
+                    for job in futures:
+                        job.result()  # Raise exceptions / exit as needed
+                    return
+
+                if deployment.parallel_regions:
+                    LOGGER.info(
+                        '%s - processing the regions sequentially...',
+                        ('Not running in CI mode' if sys.version_info[0] > 2
+                         else 'Parallel execution requires Python 3+')
+                    )
+                    deployment.regions += deployment.parallel_regions
+
                 LOGGER.info("Attempting to deploy '%s' to region(s): %s",
                             context.env_name,
-                            ", ".join(deployment['regions']))
+                            ", ".join(deployment.regions))
 
-                for region in deployment['regions']:
+                for region in deployment.regions:
                     LOGGER.info("")
                     LOGGER.info("======= Processing region %s ================"
                                 "===========", region)
 
-                    context.env_region = region
-                    context.env_vars = merge_dicts(
-                        context.env_vars,
-                        {'AWS_DEFAULT_REGION': context.env_region,
-                         'AWS_REGION': context.env_region}
-                    )
-                    if deployment.get('assume_role'):
-                        pre_deploy_assume_role(deployment['assume_role'], context)
-                    if deployment.get('account_id') or (deployment.get('account_alias')):
-                        validate_account_credentials(deployment, context)
-
-                    modules = deployment.get('modules', [])
-                    for module in modules:
-                        if module.child_modules:
-                            # CI is required for concurrent execution to prevent weird
-                            # user-input behavior
-                            # py3+ is required because backported futures has issues with
-                            # ProcessPoolExecutor, and alternatives (like ThreadPoolExecuter)
-                            # won't work properly (e.g. working directory changes aren't
-                            # thread-safe)
-                            if context.env_vars.get('CI') and sys.version_info[0] > 2:
-                                LOGGER.info("Processing parallel modules %s",
-                                            [x.path for x in module.child_modules])
-                                LOGGER.info('(output will be interwoven)')
-                                executor = concurrent.futures.ProcessPoolExecutor()
-                                futures = [executor.submit(self._deploy_module,
-                                                           *[x, deployment, context, command])
-                                           for x in module.child_modules]
-                                concurrent.futures.wait(futures)
-                                for job in futures:
-                                    job.result()  # Raise exceptions / exit as needed
-                            else:
-                                LOGGER.info(
-                                    '%s - processing the following '
-                                    'parallel modules sequentially...',
-                                    ('Not running in CI mode' if sys.version_info[0] > 2
-                                     else 'Parallel execution requires Python 3+')
-                                )
-                                for child_module in module.child_modules:
-                                    self._deploy_module(child_module,
-                                                        deployment,
-                                                        context,
-                                                        command)
-                        else:
-                            self._deploy_module(module, deployment, context, command)
-
-                if deployment.get('assume_role'):
-                    post_deploy_assume_role(deployment['assume_role'], context)
+                    self._execute_deployment(deployment, context, region)
             else:
                 LOGGER.error('No region configured for any deployment')
                 sys.exit(1)
 
-    def execute(self):
-        # type: () -> None
-        """Execute the command."""
-        raise NotImplementedError('execute must be implimented for '
-                                  'subclasses of BaseCommand.')
+    def _execute_deployment(self, deployment, context, region,
+                            is_parallel_regions=False):
+        """Execute a single deployment."""
+        # this is going to invalidate the use post_deploy_assume_role
+        # since assumed roles will never remain in the active context
+        if is_parallel_regions:
+            context = copy.deepcopy(context)  # in case of parallel regions
 
-    def _deploy_module(self, module, deployment, context, command):
+        context.env_region = region
+        context.env_vars.update({'AWS_DEFAULT_REGION': region,
+                                 'AWS_REGION': region})
+
+        if deployment.assume_role:
+            pre_deploy_assume_role(deployment.assume_role, context)
+        if deployment.account_id or deployment.account_alias:
+            validate_account_credentials(deployment, context)
+
+        self._process_modules(deployment, context)
+
+        if deployment.assume_role:
+            post_deploy_assume_role(deployment.assume_role, context)
+
+    def _process_modules(self, deployment, context):
+        """Process the modules of a deployment."""
+        for module in deployment.modules:
+            if module.child_modules:
+                # CI is required for concurrent execution to prevent weird
+                # user-input behavior
+                # py3+ is required because backported futures has issues with
+                # ProcessPoolExecutor, and alternatives (like ThreadPoolExecuter)
+                # won't work properly (e.g. working directory changes aren't
+                # thread-safe)
+                if context.env_vars.get('CI') and sys.version_info[0] > 2:
+                    LOGGER.info("Processing parallel modules %s",
+                                [x.path for x in module.child_modules])
+                    LOGGER.info('(output will be interwoven)')
+                    executor = concurrent.futures.ProcessPoolExecutor()
+                    futures = [executor.submit(self._deploy_module,
+                                               *[x, deployment, context])
+                               for x in module.child_modules]
+                    concurrent.futures.wait(futures)
+                    for job in futures:
+                        job.result()  # Raise exceptions / exit as needed
+                else:
+                    LOGGER.info(
+                        '%s - processing the following '
+                        'parallel modules sequentially...',
+                        ('Not running in CI mode' if sys.version_info[0] > 2
+                         else 'Parallel execution requires Python 3+')
+                    )
+                    for child_module in module.child_modules:
+                        self._deploy_module(child_module,
+                                            deployment,
+                                            context)
+            else:
+                self._deploy_module(module, deployment, context)
+
+    def _deploy_module(self, module, deployment, context):
         module_opts = {}
         if deployment.get('environments'):
             module_opts['environments'] = deployment['environments'].copy()  # noqa
@@ -537,12 +583,12 @@ class ModulesCommand(RunwayCommand):
                 path=module_root,
                 options=module_opts
             )
-            if hasattr(module_instance, command):
-                command_method = getattr(module_instance, command)
+            if hasattr(module_instance, context.command):
+                command_method = getattr(module_instance, context.command)
                 command_method()
             else:
                 LOGGER.error("'%s' is missing method '%s'",
-                             module_instance, command)
+                             module_instance, context.command)
                 sys.exit(1)
 
     @staticmethod

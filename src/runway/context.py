@@ -7,11 +7,13 @@ class Context(object):
     """Runway execution context."""
 
     def __init__(self, env_name,  # pylint: disable=too-many-arguments
-                 env_region, env_root, env_vars=None):
+                 env_region, env_root, env_vars=None,
+                 command=None):
         """Initialize base class."""
         self.env_name = env_name
         self.env_region = env_region
         self.env_root = env_root
+        self.command = command
 
         if env_vars is None:
             self.env_vars = os.environ.copy()
