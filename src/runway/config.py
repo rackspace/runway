@@ -268,8 +268,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             regions:
               - us-east-1
             account_id:  # optional
-              - dev: 0000
-              - prod: 1111
+              dev: 0000
+              prod: 1111
             assume_role:  # optional
               dev: arn:aws:iam::0000:role/role-name
               prod: arn:aws:iam::1111:role/role-name
