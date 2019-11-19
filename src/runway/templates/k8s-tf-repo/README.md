@@ -53,7 +53,7 @@ macOS/Linux:
 ```
 eval $(runway envvars)
 RUNWAY_ENV=$(runway whichenv)
-cd hello-world.k8s/overlays/$RUNWAY_ENV
+cd service-hello-world.k8s/overlays/$RUNWAY_ENV
 echo "http://$(runway kbenv run -- get svc $RUNWAY_ENV-the-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"):8666/"
 ```
 
@@ -61,7 +61,7 @@ Windows:
 ```
 runway envvars | iex
 $RUNWAY_ENV = $(runway whichenv)
-cd hello-world.k8s/overlays/$RUNWAY_ENV
+cd service-hello-world.k8s/overlays/$RUNWAY_ENV
 Write-Host "http://$(runway kbenv run -- get svc $RUNWAY_ENV-the-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"):8666/"
 ```
 
