@@ -398,7 +398,7 @@ class ModulesCommand(RunwayCommand):
         LOGGER.info("")
         LOGGER.info("Found %d deployment(s)", len(deployments_to_run))
 
-        self._process_deployments(deployments, context)
+        self._process_deployments(deployments_to_run, context)
 
     def execute(self):
         # type: () -> None
