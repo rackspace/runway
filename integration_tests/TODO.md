@@ -1,3 +1,8 @@
+# Tests to Fix
+
+* ModuleTags test is currently broken; appears no tests are being run
+    * This was developed during reworking of the integration tests. Should be updated to match the error number returns as shown in the commands test
+
 # Tests to Write
 
 ## CloudFormation
