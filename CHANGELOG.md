@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.3.2] - 2019-11-22
 ### Fixed
 - `run-python` subcommand now supports most python files
 
@@ -615,7 +617,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/onicagroup/runway/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/onicagroup/runway/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/onicagroup/runway/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/onicagroup/runway/compare/v1.1.0...v1.2.0
