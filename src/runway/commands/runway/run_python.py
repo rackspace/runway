@@ -29,6 +29,14 @@ class RunPython(RunwayCommand):
 
     def execute(self):
         """Execute python script."""
+        filename = self._cli_arguments.get('<filename>')
+
+        execglobals = globals().copy()
+        # override name & file so exec'd file operates as if it were invoked
+        # directly
+        execglobals.update({'__name__': '__main__',
+                            '__file__': filename})
+
         sys.path.insert(1, get_embedded_lib_path())
-        with open(self._cli_arguments.get('<filename>'), 'r') as stream:
-            exec(stream.read())  # pylint: disable=exec-used
+        with open(filename, 'r') as stream:
+            exec(stream.read(), execglobals, execglobals)  # pylint: disable=exec-used

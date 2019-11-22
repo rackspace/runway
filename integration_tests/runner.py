@@ -24,7 +24,7 @@ class Runner(object):
             self.test_to_run = 'test_*/test_*'
 
     def run_tests(self):
-        """Run all integration test."""
+        """Run all integration tests."""
         return execute_tests([test(self.logger) for test in IntegrationTest.__subclasses__()],
                              self.logger)
 
@@ -42,4 +42,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         TEST_NAME = sys.argv[1]
     RUNNER = Runner(TEST_NAME)
-    RUNNER.main()
+    sys.exit(RUNNER.main())
