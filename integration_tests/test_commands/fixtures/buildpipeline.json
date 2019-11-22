@@ -1,0 +1,830 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "App - Build Pipeline",
+    "Outputs": {
+        "AppRepoArn": {
+            "Description": "Arn of app source repo",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AppSource",
+                    "Arn"
+                ]
+            }
+        },
+        "AppRepoName": {
+            "Description": "Name of app source repo",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AppSource",
+                    "Name"
+                ]
+            }
+        },
+        "PipelineBucketName": {
+            "Description": "Name of pipeline bucket",
+            "Value": {
+                "Ref": "Bucket"
+            }
+        }
+    },
+    "Parameters": {
+        "AppPrefix": {
+            "Description": "Application prefix (for roles, etc)",
+            "Type": "String"
+        },
+        "EcrRepoName": {
+            "Description": "Name of ECR repo",
+            "Type": "String"
+        },
+        "RolePermissionsBoundaryName": {
+            "Description": "Roles' boundary name",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AllowCWLambdaInvocation": {
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "CleanupFunction"
+                },
+                "Principal": "events.amazonaws.com",
+                "SourceArn": {
+                    "Fn::GetAtt": [
+                        "CleanupRule",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "AppSource": {
+            "Properties": {
+                "RepositoryName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "AppPrefix"
+                            },
+                            "source"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CodeCommit::Repository"
+        },
+        "Bucket": {
+            "Properties": {
+                "AccessControl": "Private",
+                "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "NoncurrentVersionExpirationInDays": 90,
+                            "Status": "Enabled"
+                        }
+                    ]
+                },
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "BuildProject": {
+            "Properties": {
+                "Artifacts": {
+                    "Type": "CODEPIPELINE"
+                },
+                "Environment": {
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "EnvironmentVariables": [
+                        {
+                            "Name": "AWS_DEFAULT_REGION",
+                            "Type": "PLAINTEXT",
+                            "Value": {
+                                "Ref": "AWS::Region"
+                            }
+                        },
+                        {
+                            "Name": "AWS_ACCOUNT_ID",
+                            "Type": "PLAINTEXT",
+                            "Value": {
+                                "Ref": "AWS::AccountId"
+                            }
+                        },
+                        {
+                            "Name": "IMAGE_REPO_NAME",
+                            "Type": "PLAINTEXT",
+                            "Value": {
+                                "Ref": "EcrRepoName"
+                            }
+                        }
+                    ],
+                    "Image": "aws/codebuild/docker:18.09.0",
+                    "Type": "LINUX_CONTAINER"
+                },
+                "Name": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "AppPrefix"
+                            },
+                            "-build"
+                        ]
+                    ]
+                },
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "BuildRole",
+                        "Arn"
+                    ]
+                },
+                "Source": {
+                    "BuildSpec": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "version: 0.2\n\nphases:\n  pre_build:\n    commands:\n      - echo Calculating source hash...\n      # `git ls-tree -r HEAD --name-only | sort` would probably be better than\n      # `find` here, if not for lack of .git directory in the pipeline\n      # https://forums.aws.amazon.com/thread.jspa?threadID=248267\n      - unset IMAGE_TAG\n      - for i in $(find . -path ./.git -prune -o -type f -print | sort); do IMAGE_TAG=$(echo $IMAGE_TAG$(md5sum $i | cut -d ' ' -f 1) | md5sum | cut -d ' ' -f 1);done\n      - echo Source hash for image tag is $IMAGE_TAG\n      - echo Logging in to Amazon ECR...\n      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)\n  build:\n    commands:\n      - echo Checking for existing Docker image tag and building new image if missing\n      - >2\n        OLD_IMG_TAGS=$(aws ecr describe-images --repository-name=$IMAGE_REPO_NAME --image-ids=imageTag=$IMAGE_TAG --query imageDetails[0].imageTags --output text) || {\n        echo Build started on $(date) &&\n        echo Building the Docker image... &&\n        docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG . &&\n        docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG &&\n        docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest &&\n        echo Build completed on $(date) &&\n        echo Pushing the Docker image... &&\n        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG &&\n        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest ; }\n      - echo Checking for previously built image that needs to be updated to \"latest\" tag\n      - >2\n        grep latest $OLD_IMG_TAGS > /dev/null 2>&1 || {\n        docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG &&\n        docker tag $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest &&\n        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest ; }\n  post_build:\n    commands:\n      - |\n        if [ \"$CODEBUILD_BUILD_SUCCEEDING\" = \"1\" ]; then\n          if [ \"$(aws ssm get-parameter --name \"/",
+                                {
+                                    "Ref": "AppPrefix"
+                                },
+                                "/current-hash\" --query Parameter.Value --output text)\" = \"$IMAGE_TAG\" ]; then\n            echo \"Current hash SSM parameter is already up to date\";\n          else\n            aws ssm put-parameter --name \"/",
+                                {
+                                    "Ref": "AppPrefix"
+                                },
+                                "/current-hash\" --overwrite --type \"String\" --value $IMAGE_TAG;\n          fi\n        fi\n"
+                            ]
+                        ]
+                    },
+                    "Type": "CODEPIPELINE"
+                }
+            },
+            "Type": "AWS::CodeBuild::Project"
+        },
+        "BuildRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codebuild.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PermissionsBoundary": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":iam::",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":policy/",
+                            {
+                                "Ref": "RolePermissionsBoundaryName"
+                            }
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:GetObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "Bucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "ecr:GetAuthorizationToken"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "ecr:BatchCheckLayerAvailability",
+                                        "ecr:BatchGetImage",
+                                        "ecr:CompleteLayerUpload",
+                                        "ecr:DescribeImages",
+                                        "ecr:GetDownloadUrlForLayer",
+                                        "ecr:InitiateLayerUpload",
+                                        "ecr:PutImage",
+                                        "ecr:UploadLayerPart"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:",
+                                                    {
+                                                        "Ref": "AWS::Partition"
+                                                    },
+                                                    ":ecr:",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    ":",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":repository/",
+                                                    {
+                                                        "Ref": "EcrRepoName"
+                                                    }
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "ssm:GetParameter",
+                                        "ssm:PutParameter"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:",
+                                                    {
+                                                        "Ref": "AWS::Partition"
+                                                    },
+                                                    ":ssm:",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    ":",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":parameter",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                "/",
+                                                                {
+                                                                    "Ref": "AppPrefix"
+                                                                },
+                                                                "/current-hash"
+                                                            ]
+                                                        ]
+                                                    }
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:",
+                                                    {
+                                                        "Ref": "AWS::Partition"
+                                                    },
+                                                    ":logs:",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    ":",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":log-group:/aws/codebuild/",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                {
+                                                                    "Ref": "AppPrefix"
+                                                                },
+                                                                "-build"
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ":*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:",
+                                                    {
+                                                        "Ref": "AWS::Partition"
+                                                    },
+                                                    ":logs:",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    ":",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":log-group:/aws/codebuild/",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                {
+                                                                    "Ref": "AppPrefix"
+                                                                },
+                                                                "-build"
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ":*/*"
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                {
+                                                    "Ref": "AppPrefix"
+                                                },
+                                                "-build"
+                                            ]
+                                        ]
+                                    },
+                                    "-policy"
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CleanupFunction": {
+            "Properties": {
+                "Code": {
+                    "ZipFile": "#!/usr/bin/env python\n\"\"\"Clean out old ECR images.\"\"\"\nfrom builtins import input  # pylint: disable=redefined-builtin\n\nimport os\nimport logging\n\nimport boto3\n\nLOGGER = logging.getLogger()\nLOGGER.setLevel(logging.INFO)\nIMAGES_TO_RETAIN = int(os.environ.get('IMAGES_TO_RETAIN', '75'))\n\n\ndef handler(event, context):  # pylint: disable=unused-argument\n    \"\"\"Lambda entry point.\"\"\"\n    LOGGER.info('Retrieving current image tag from parameter %s',\n                SSM_PARAM)\n    ssm_client = boto3.client('ssm')\n    current_tag = ssm_client.get_parameter(\n        Name=SSM_PARAM\n    )['Parameter']['Value']\n    LOGGER.info('Current task tag is %s', current_tag)\n\n    LOGGER.info('Looking up ECR images from repo %s', REPO_NAME)\n    ecr_client = boto3.client('ecr')\n    images = []\n    paginator = ecr_client.get_paginator('describe_images')\n    response_iterator = paginator.paginate(\n        repositoryName=REPO_NAME,\n        filter={'tagStatus': 'TAGGED'}\n    )\n    for page in response_iterator:\n        images.extend(page.get('imageDetails', []))\n\n    images = sorted(images, key=lambda k: k['imagePushedAt'])\n    if len(images) > IMAGES_TO_RETAIN:\n        images_to_delete = [i['imageDigest']\n                            for i in images[:len(images) - IMAGES_TO_RETAIN]\n                            if current_tag not in i.get('imageTags', [])]\n        LOGGER.info(\"Deleting images %s\",\n                    ','.join(images_to_delete))\n        ecr_client.batch_delete_image(\n            repositoryName=REPO_NAME,\n            imageIds=[{'imageDigest': i} for i in images_to_delete]\n        )\n    else:\n        LOGGER.info(\"Less than %s images found; skipping cleanup...\",\n                    str(IMAGES_TO_RETAIN))\n\n\nif __name__ == \"__main__\":\n    SSM_PARAM = input('Enter SSM param (eg \"/myapp/image\"): ')\n    REPO_NAME = input('Enter ECR repo name: ')\n    handler(None, None)\nelse:\n    SSM_PARAM = os.environ['SSM_PARAM']\n    REPO_NAME = os.environ['ECR_REPO_NAME']\n"
+                },
+                "Description": "Cleanup stale ECR images",
+                "Environment": {
+                    "Variables": {
+                        "ECR_REPO_NAME": {
+                            "Ref": "EcrRepoName"
+                        },
+                        "SSM_PARAM": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    "/",
+                                    {
+                                        "Ref": "AppPrefix"
+                                    },
+                                    "/current-hash"
+                                ]
+                            ]
+                        }
+                    }
+                },
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "CleanupLambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 120
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "CleanupLambdaRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "PermissionsBoundary": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":iam::",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":policy/",
+                            {
+                                "Ref": "RolePermissionsBoundaryName"
+                            }
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ssm:GetParameter"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:",
+                                                    {
+                                                        "Ref": "AWS::Partition"
+                                                    },
+                                                    ":ssm:",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    ":",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":parameter",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                "/",
+                                                                {
+                                                                    "Ref": "AppPrefix"
+                                                                },
+                                                                "/current-hash"
+                                                            ]
+                                                        ]
+                                                    }
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "ecr:DescribeImages",
+                                        "ecr:BatchDeleteImage"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:",
+                                                    {
+                                                        "Ref": "AWS::Partition"
+                                                    },
+                                                    ":ecr:",
+                                                    {
+                                                        "Ref": "AWS::Region"
+                                                    },
+                                                    ":",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":repository/",
+                                                    {
+                                                        "Ref": "EcrRepoName"
+                                                    }
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "AppPrefix"
+                                    },
+                                    "-ecrcleanup"
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CleanupRule": {
+            "Properties": {
+                "Description": "Regularly invoke CleanupFunction",
+                "ScheduleExpression": "rate(7 days)",
+                "State": "ENABLED",
+                "Targets": [
+                    {
+                        "Arn": {
+                            "Fn::GetAtt": [
+                                "CleanupFunction",
+                                "Arn"
+                            ]
+                        },
+                        "Id": "CleanupFunction"
+                    }
+                ]
+            },
+            "Type": "AWS::Events::Rule"
+        },
+        "Pipeline": {
+            "Properties": {
+                "ArtifactStore": {
+                    "Location": {
+                        "Ref": "Bucket"
+                    },
+                    "Type": "S3"
+                },
+                "Name": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            {
+                                "Ref": "AppPrefix"
+                            },
+                            "-build"
+                        ]
+                    ]
+                },
+                "RoleArn": {
+                    "Fn::GetAtt": [
+                        "PipelineRole",
+                        "Arn"
+                    ]
+                },
+                "Stages": [
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Source",
+                                    "Owner": "AWS",
+                                    "Provider": "CodeCommit",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "BranchName": "master",
+                                    "RepositoryName": {
+                                        "Fn::GetAtt": [
+                                            "AppSource",
+                                            "Name"
+                                        ]
+                                    }
+                                },
+                                "Name": "CodeCommit",
+                                "OutputArtifacts": [
+                                    {
+                                        "Name": "CodeCommitRepo"
+                                    }
+                                ]
+                            }
+                        ],
+                        "Name": "Source"
+                    },
+                    {
+                        "Actions": [
+                            {
+                                "ActionTypeId": {
+                                    "Category": "Build",
+                                    "Owner": "AWS",
+                                    "Provider": "CodeBuild",
+                                    "Version": "1"
+                                },
+                                "Configuration": {
+                                    "ProjectName": {
+                                        "Ref": "BuildProject"
+                                    }
+                                },
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "CodeCommitRepo"
+                                    }
+                                ],
+                                "Name": "Build"
+                            }
+                        ],
+                        "Name": "Build"
+                    }
+                ]
+            },
+            "Type": "AWS::CodePipeline::Pipeline"
+        },
+        "PipelineRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codepipeline.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PermissionsBoundary": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":iam::",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":policy/",
+                            {
+                                "Ref": "RolePermissionsBoundaryName"
+                            }
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "codecommit:GetBranch",
+                                        "codecommit:GetCommit",
+                                        "codecommit:UploadArchive",
+                                        "codecommit:GetUploadArchiveStatus",
+                                        "codecommit:CancelUploadArchive"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "AppSource",
+                                                "Arn"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetBucketVersioning"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "Bucket",
+                                                "Arn"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "Bucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "codebuild:BatchGetBuilds",
+                                        "codebuild:StartBuild"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "BuildProject",
+                                                "Arn"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                {
+                                                    "Ref": "AppPrefix"
+                                                },
+                                                "-build"
+                                            ]
+                                        ]
+                                    },
+                                    "-pipeline-policy"
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
