@@ -19,9 +19,17 @@ This repo represents a sample Terraform infrastructure deployment of EKS, featur
 
 ### Deployment
 
-Update the kubectl-access-role-arn to specify the IAM role to which cluster admin access should be granted.
+Update the kubectl-access-role-arn to specify the IAM role to which cluster admin access should be granted. E.g., if you assume an IAM role for operating in your account `aws sts get-caller-identity --query 'Arn' --output text` will show you the assumed role principal like:
+```
+arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
+```
+You can use that arn to determine the IAM role arn for runway.yml:
 
-Then deploy to the dev environment via:
+```
+        kubectl-access-role-arn: arn:aws:iam::123456789012:assumed-role/myIamRole
+```
+
+After updating the role ARN, deploy to the dev environment via:
 
 macOS/Linux:
 ```
