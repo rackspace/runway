@@ -110,13 +110,6 @@ taxi
 
 .. automodule:: runway.commands.taxi
 
-.. _command-tfenv:
-
-tfenv
-^^^^^
-
-.. automodule:: runway.commands.tfenv
-
 .. _command-test:
 
 test
