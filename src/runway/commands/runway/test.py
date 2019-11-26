@@ -9,6 +9,7 @@ References:
     - :ref:`Defining Tests<defining-tests>`
 
 """
+from __future__ import print_function
 import logging
 import sys
 import traceback
@@ -27,9 +28,19 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
         test_definitions = self.runway_config.tests
 
         if not test_definitions:
-            LOGGER.warning('Use of "runway test" without defining '
-                           'tests in the runway config file has been '
-                           'deprecated.')
+            LOGGER.error('Use of "runway test" without defining '
+                         'tests in the runway config file has been '
+                         'removed. See '
+                         'https://docs.onica.com/projects/runway/en/release/defining_tests.html')
+            LOGGER.error('E.g.:')
+            for i in ['tests:',
+                      '  - name: example-test',
+                      '    type: script',
+                      '    args:',
+                      '      commands:',
+                      '        - echo "Success!"',
+                      '']:
+                print(i, file=sys.stderr)
             sys.exit(1)
 
         LOGGER.info('Found %i test(s)', len(test_definitions))
