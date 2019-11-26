@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.3.3] - 2019-11-26
 ### Changed
 - Updated `runway test` error message to give direction on next steps when no tests are defined
 
@@ -619,7 +621,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/onicagroup/runway/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/onicagroup/runway/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/onicagroup/runway/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/onicagroup/runway/compare/v1.2.0...v1.3.0
