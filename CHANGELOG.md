@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Updated `runway test` error message to give direction on next steps when no tests are defined
 
 ## [1.3.2] - 2019-11-22
 ### Fixed
