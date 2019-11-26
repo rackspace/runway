@@ -3,6 +3,8 @@
 import glob
 import logging
 import os
+import sys
+import tempfile
 from typing import Dict, Any, List  # pylint: disable=unused-import
 
 from runway.tests.handlers.base import TestHandler
@@ -28,13 +30,29 @@ class YamllintHandler(TestHandler):
         )
         return yaml_files + yml_files
 
+    def get_yamllint_options(self, path, quote_paths=True):
+        # type: (str, bool) -> List[str]
+        """Return yamllint option list."""
+        dirs_to_scan = self.get_dirs(path)
+        files_at_base = self.get_yaml_files_at_path(path)
+        yamllint_options = []
+
+        if dirs_to_scan:
+            yamllint_options.extend(
+                ["\"%s\"" % x if quote_paths else x for x in dirs_to_scan]
+            )
+        if files_at_base:
+            yamllint_options.extend(
+                ["\"%s\"" % x if quote_paths else x for x in files_at_base]
+            )
+
+        return yamllint_options
+
     @classmethod
     def handle(cls, name, args):
         # type: (str, Dict[str, Any]) -> None
         """Perform the actual test."""
         base_dir = os.getcwd()
-        dirs_to_scan = cls.get_dirs(base_dir)
-        files_at_base = cls.get_yaml_files_at_path(base_dir)
 
         if os.path.isfile(os.path.join(base_dir, '.yamllint')):
             yamllint_config = os.path.join(base_dir, '.yamllint')
@@ -49,13 +67,37 @@ class YamllintHandler(TestHandler):
                 '.yamllint.yml'
             )
 
-        yl_cmd = "yamllint --config-file=%s" % yamllint_config
-        if dirs_to_scan:
-            yl_cmd += " " + ' '.join(["\"%s\"" % x for x in dirs_to_scan])
-        if files_at_base:
-            yl_cmd += " " + ' '.join(["\"%s\"" % x for x in files_at_base])
+        yamllint_options = ["--config-file=%s" % yamllint_config]
+        yamllint_options.extend(cls.get_yamllint_options(cls,
+                                                         base_dir,
+                                                         not getattr(sys, 'frozen', False)))
+
+        if getattr(sys, 'frozen', False):
+            # running in pyinstaller single-exe, so sys.executable will
+            # be the all-in-one Runway binary
+
+            yamllint_invocation_script = (
+                "import sys;"
+                "from yamllint.cli import run;"
+                "sys.argv = [%s];"
+                "sys.exit(run());" % ','.join(
+                    "'%s'" % i for i in ['yamllint'] + yamllint_options
+                )
+            )
+
+            temp_fd, temp_path = tempfile.mkstemp(prefix='yamllint')
+            os.close(temp_fd)
+            with open(temp_path, 'w') as fileobj:
+                fileobj.write(yamllint_invocation_script)
+
+            yl_cmd = sys.executable + ' run-python ' + temp_path
+        else:
+            # traditional python execution
+            yl_cmd = "yamllint " + ' '.join(yamllint_options)
         with change_dir(base_dir):
             ScriptHandler().handle(
                 'yamllint',
                 {'commands': [yl_cmd]}
             )
+            if getattr(sys, 'frozen', False):
+                os.remove(temp_path)
