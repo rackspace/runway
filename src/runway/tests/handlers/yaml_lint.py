@@ -30,11 +30,12 @@ class YamllintHandler(TestHandler):
         )
         return yaml_files + yml_files
 
-    def get_yamllint_options(self, path, quote_paths=True):
+    @classmethod
+    def get_yamllint_options(cls, path, quote_paths=True):
         # type: (str, bool) -> List[str]
         """Return yamllint option list."""
-        dirs_to_scan = self.get_dirs(path)
-        files_at_base = self.get_yaml_files_at_path(path)
+        dirs_to_scan = cls.get_dirs(path)
+        files_at_base = cls.get_yaml_files_at_path(path)
         yamllint_options = []
 
         if dirs_to_scan:
@@ -68,14 +69,17 @@ class YamllintHandler(TestHandler):
             )
 
         yamllint_options = ["--config-file=%s" % yamllint_config]
-        yamllint_options.extend(cls.get_yamllint_options(cls,
-                                                         base_dir,
+        yamllint_options.extend(cls.get_yamllint_options(base_dir,
                                                          not getattr(sys, 'frozen', False)))
 
         if getattr(sys, 'frozen', False):
             # running in pyinstaller single-exe, so sys.executable will
             # be the all-in-one Runway binary
 
+            # This would be a little more natural if yamllint was imported
+            # directly, but that has unclear license implications so instead
+            # we'll generate the setuptools invocation script here and shell
+            # out to it
             yamllint_invocation_script = (
                 "import sys;"
                 "from yamllint.cli import run;"
@@ -95,9 +99,11 @@ class YamllintHandler(TestHandler):
             # traditional python execution
             yl_cmd = "yamllint " + ' '.join(yamllint_options)
         with change_dir(base_dir):
-            ScriptHandler().handle(
-                'yamllint',
-                {'commands': [yl_cmd]}
-            )
-            if getattr(sys, 'frozen', False):
-                os.remove(temp_path)
+            try:
+                ScriptHandler().handle(
+                    'yamllint',
+                    {'commands': [yl_cmd]}
+                )
+            finally:
+                if getattr(sys, 'frozen', False):
+                    os.remove(temp_path)
