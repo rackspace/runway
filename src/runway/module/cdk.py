@@ -115,8 +115,11 @@ class CloudDevelopmentKit(RunwayModule):
                                 env=self.context.env_vars
                             )
                     else:
+                        # Make sure we're targeting all stacks
+                        if command == 'deploy' or command == 'destroy':
+                            cdk_opts.append('"*"')
+
                         if command == 'deploy':
-                            cdk_options.append('"*"')
                             if 'CI' in self.context.env_vars:
                                 cdk_opts.append('--ci')
                                 cdk_opts.append('--require-approval=never')
