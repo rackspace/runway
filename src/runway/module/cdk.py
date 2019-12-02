@@ -116,6 +116,7 @@ class CloudDevelopmentKit(RunwayModule):
                             )
                     else:
                         if command == 'deploy':
+                            cdk_options.append('"*"')
                             if 'CI' in self.context.env_vars:
                                 cdk_opts.append('--ci')
                                 cdk_opts.append('--require-approval=never')
