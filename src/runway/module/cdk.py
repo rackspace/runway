@@ -116,7 +116,7 @@ class CloudDevelopmentKit(RunwayModule):
                             )
                     else:
                         # Make sure we're targeting all stacks
-                        if command == 'deploy' or command == 'destroy':
+                        if command in ['deploy', 'destroy']:
                             cdk_opts.append('"*"')
 
                         if command == 'deploy':
