@@ -78,6 +78,8 @@ def determine_module_class(path, class_path):  # pylint: disable=too-many-branch
             class_path = 'runway.module.k8s.K8s'
         elif basename.endswith('.cfn'):
             class_path = 'runway.module.cloudformation.CloudFormation'
+        elif basename.endswith('.helm'):
+            class_path = 'runway.module.helm.Helm'
 
     if not class_path:
         # Fallback to autodetection
