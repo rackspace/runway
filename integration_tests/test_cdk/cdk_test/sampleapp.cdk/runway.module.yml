@@ -1,4 +1,0 @@
----
-options:
-  build_steps:
-    - pipenv sync -d --three
