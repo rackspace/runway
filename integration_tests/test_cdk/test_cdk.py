@@ -1,11 +1,13 @@
 """Tests for the CDK module."""
 import os
+import glob
 
 from integration_test import IntegrationTest
+from send2trash import send2trash
 from util import (copy_file, copy_dir, import_tests, execute_tests)
 
 class TestCDK(IntegrationTest):
-    """Test"""
+    """Test CDK based module scenarios"""
     base_dir = os.path.abspath(os.path.dirname(__file__))
     fixtures_dir = os.path.join(base_dir, 'fixtures')
     sample_app_dir = os.path.join(fixtures_dir, 'sampleapp.cdk')
@@ -14,6 +16,7 @@ class TestCDK(IntegrationTest):
     cdk_test_dir = os.path.join(base_dir, 'cdk_test')
 
     def copy_fixture(self):
+        """Copy fixture files for test"""
         copy_dir(self.sample_app_dir, os.path.join(self.cdk_test_dir, 'sampleapp.cdk'))
 
     def copy_runway(self, template):
@@ -26,10 +29,29 @@ class TestCDK(IntegrationTest):
         import_tests(self.logger, self.tests_dir, 'test_*')
         tests = [test(self.logger) for test in TestCDK.__subclasses__()]
         self.logger.debug('FOUND TESTS: %s', tests)
+        self.set_environment('dev')
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0
         return err_count
 
+    def clean(self):
+        """Clean up CDK module directory."""
+        file_types = ('*.yaml', '*.yml')
+        templates = []
+        for file_type in file_types:
+            templates.extend(glob.glob(os.path.join(self.cdk_test_dir, file_type)))
+        for template in templates:
+            if os.path.isfile(template):
+                self.logger.debug('send2trash: "%s"', template)
+                send2trash(template)
+        folders = ['sampleapp.cdk']
+        for folder in folders:
+            folder_path = os.path.join(self.cdk_test_dir, folder)
+            self.logger.info('folderpath: %s', folder_path)
+            if os.path.isdir(folder_path):
+                self.logger.debug('send2trash: "%s"', folder_path)
+                send2trash(folder_path)
+
     def teardown(self):
         """Teardown resources create during init."""
-        self.logger.debug('Nothing to do during test teardown')
+        self.clean()

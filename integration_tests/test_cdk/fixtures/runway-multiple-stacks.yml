@@ -4,3 +4,6 @@ deployments:
     - sampleapp.cdk
     regions:
       - us-east-1
+    environments:
+      dev:
+        region: us-east-1

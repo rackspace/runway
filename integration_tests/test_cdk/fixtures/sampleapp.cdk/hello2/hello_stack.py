@@ -9,7 +9,7 @@ from aws_cdk import (
 from .hello_construct import Hello2Construct
 
 
-class MyStacak2(core.Stack):
+class MyStack2(core.Stack):
 
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)

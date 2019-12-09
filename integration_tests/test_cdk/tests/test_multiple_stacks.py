@@ -21,9 +21,11 @@ class TestMultipleStacks(TestCDK):
 
     def run(self):
         """Run tests."""
-        self.deploy()
+        self.clean()
+        assert self.deploy() == 0, '{}: Multiple Stacks failed'.format(__name__)
 
     def teardown(self):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
-        with change_dir(self.base_dir):
+        with change_dir(self.cdk_test_dir):
             run_command(['runway', 'destroy'])
+        self.clean()
