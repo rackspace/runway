@@ -2,11 +2,24 @@
 import os
 
 from integration_test import IntegrationTest
-from util import (import_tests, execute_tests)
+from util import (copy_file, copy_dir, import_tests, execute_tests)
 
 class TestCDK(IntegrationTest):
+    """Test"""
     base_dir = os.path.abspath(os.path.dirname(__file__))
+    fixtures_dir = os.path.join(base_dir, 'fixtures')
+    sample_app_dir = os.path.join(fixtures_dir, 'sampleapp.cdk')
     tests_dir = os.path.join(base_dir, 'tests')
+
+    cdk_test_dir = os.path.join(base_dir, 'cdk_test')
+
+    def copy_fixture(self):
+        copy_dir(self.sample_app_dir, os.path.join(self.cdk_test_dir, 'sampleapp.cdk'))
+
+    def copy_runway(self, template):
+        """Copy runway template to proper directory."""
+        template_file = os.path.join(self.fixtures_dir, 'runway-{}.yml'.format(template))
+        copy_file(template_file, os.path.join(self.cdk_test_dir, 'runway.yml'))
 
     def run(self):
         """Find all tests and run them."""
