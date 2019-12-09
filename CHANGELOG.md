@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Allow single-binary use of bundled yamllint
 
+### Changed
+- embedded stacker will not resolve dependancies for `locked` stacks when they rely on other stacks
+  - accepted upstream in https://github.com/cloudtools/stacker/pull/746
+
 ## [1.3.3] - 2019-11-26
 ### Changed
 - Updated `runway test` error message to give direction on next steps when no tests are defined
