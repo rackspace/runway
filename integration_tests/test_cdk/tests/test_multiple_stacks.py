@@ -10,6 +10,7 @@ class TestMultipleStacks(TestCDK):
     TEST_NAME = __name__
 
     def __init__(self, logger):
+        TestCDK.__init__(self, logger)
         """Init class."""
         self.logger = logger
 
@@ -23,6 +24,7 @@ class TestMultipleStacks(TestCDK):
     def run(self):
         """Run tests."""
         self.clean()
+        self.set_env_var('CI', '1')
         assert self.deploy() == 0, '{}: Multiple Stacks failed'.format(__name__)
 
     def teardown(self):
@@ -30,3 +32,4 @@ class TestMultipleStacks(TestCDK):
         with change_dir(self.cdk_test_dir):
             run_command(['runway', 'destroy'])
         self.clean()
+        self.unset_env_var('CI')

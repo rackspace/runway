@@ -15,6 +15,9 @@ class TestCDK(IntegrationTest):
 
     cdk_test_dir = os.path.join(base_dir, 'cdk_test')
 
+    def __init__(self, logger):
+        IntegrationTest.__init__(self, logger)
+
     def copy_fixture(self, name='multiple-stacks-app.cdk'):
         """Copy fixture files for test"""
         copy_dir(
