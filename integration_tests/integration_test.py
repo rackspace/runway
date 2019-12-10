@@ -41,7 +41,6 @@ class IntegrationTest(object):
     def unset_env_var(self, var):
         self.logger.info('Unsetting "%s" Environment Variable', var)
         del os.environ[var]
-        self.logger.info(os.environ[var])
 
     def run(self):
         """Implement dummy method (set in consuming classes)."""
