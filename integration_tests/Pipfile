@@ -8,6 +8,7 @@ runway = {editable = true,path = "./../../runway"}
 prettytable = "*"
 colorama = "<=0.3.9,>=0.2.5"
 "d2e25bf" = {editable = true, path = "./../../runway"}
+pexpect = "*"
 
 [dev-packages]
 

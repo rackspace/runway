@@ -22,6 +22,8 @@ six = "*"
 cfn-lint = "*"
 pyOpenSSL = "*"
 requests = "*"
+pylint = "*"
+pexpect = "*"
 
 [dev-packages]
 # python3 flake8-docstrings fails with pydocstyle 4:
@@ -38,6 +40,6 @@ pylint = "<2.3.1"
 astroid = "<2.2.5"
 pyinstaller = "~=3.5"
 mock = "~=3.0.5"
-pywin32 = {version = "*", os_name = "== 'nt'"}  # windows only
-pywin32-ctypes = {version = "*", os_name = "== 'nt'"}  # windows only
-pefile = {version = "*", os_name = "== 'nt'"}  # windows only
+pywin32 = {version = "*",os_name = "== 'nt'"}  # windows only
+pywin32-ctypes = {version = "*",os_name = "== 'nt'"}  # windows only
+pefile = {version = "*",os_name = "== 'nt'"}  # windows only
