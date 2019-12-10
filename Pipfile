@@ -23,7 +23,6 @@ cfn-lint = "*"
 pyOpenSSL = "*"
 requests = "*"
 pylint = "*"
-pexpect = "*"
 
 [dev-packages]
 # python3 flake8-docstrings fails with pydocstyle 4:
