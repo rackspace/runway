@@ -19,7 +19,7 @@ class TestDeclineDeploy(TestCDK):
         self.copy_runway('decline-deploy')
         self.copy_fixture('decline-deploy-app.cdk')
         with change_dir(self.cdk_test_dir):
-            child = pexpect.spawn('runway deploy')
+            child = pexpect.popen_spawn.PopenSpawn('runway deploy')
             try:
                 child.logfile = sys.stdout.buffer
                 child.expect('Do you wish to deploy these changes (y/n)?', timeout=120)
