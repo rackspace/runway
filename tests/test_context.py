@@ -38,7 +38,7 @@ class ContextTester(unittest.TestCase):
 
     def test_echo_detected_environment_not_env(self):
         """Environment helper note when DEPLOY_ENVIRONMENT is not set."""
-        if sys.version_info[0] < 3 and sys.version_info[1] < 4:
+        if sys.version_info[0] < 3:
             return  # this test method was not added until 3.4
 
         context = Context(env_name='test', env_region='us-east-1',
@@ -58,7 +58,7 @@ class ContextTester(unittest.TestCase):
 
     def test_echo_detected_environment_from_env(self):
         """Environment helper note when DEPLOY_ENVIRONMENT is set."""
-        if sys.version_info[0] < 3 and sys.version_info[1] < 4:
+        if sys.version_info[0] < 3:
             return  # this test method was not added until 3.4
 
         context = Context(env_name='test', env_region='us-east-1',
