@@ -1,4 +1,4 @@
-"""Test changing provider versions."""
+"""Test that multiple CDK stacks does not prompt a failure"""
 from test_cdk.test_cdk import TestCDK
 from runway.util import change_dir
 from util import run_command
