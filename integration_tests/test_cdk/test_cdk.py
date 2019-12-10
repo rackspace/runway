@@ -50,7 +50,6 @@ class TestCDK(IntegrationTest):
         folders = ['multiple-stacks-app.cdk']
         for folder in folders:
             folder_path = os.path.join(self.cdk_test_dir, folder)
-            self.logger.info('folderpath: %s', folder_path)
             if os.path.isdir(folder_path):
                 self.logger.debug('send2trash: "%s"', folder_path)
                 send2trash(folder_path)
