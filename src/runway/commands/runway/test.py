@@ -36,6 +36,7 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
             for i in ['tests:',
                       '  - name: example-test',
                       '    type: script',
+                      '    required: true',
                       '    args:',
                       '      commands:',
                       '        - echo "Success!"',
