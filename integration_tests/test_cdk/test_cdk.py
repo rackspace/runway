@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """Tests for the CDK module."""
 import os
 import glob
