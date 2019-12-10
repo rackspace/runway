@@ -44,7 +44,9 @@ class Context(object):
         self._env_name_from_env = bool(self.env_vars.get(self.env_override_name))
 
         self.echo_detected_environment()
-        self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
+
+        if not self._env_name_from_env:
+            self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
 
     def echo_detected_environment(self):
         """Print a helper note about how the environment was determined."""
