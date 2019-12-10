@@ -16,14 +16,13 @@ class TestMultipleStacks(TestCDK):
     def deploy(self):
         """Deploy provider."""
         self.copy_runway('multiple-stacks')
-        self.copy_fixture()
+        self.copy_fixture('multiple-stacks-app.cdk')
         with change_dir(self.cdk_test_dir):
             return run_command(['runway', 'deploy'])
 
     def run(self):
         """Run tests."""
         self.clean()
-        self.deploy()
         assert self.deploy() == 0, '{}: Multiple Stacks failed'.format(__name__)
 
     def teardown(self):
