@@ -5,12 +5,13 @@ from util import run_command
 
 
 class LocalToLocalBackend(Terraform):
-    """Test changing between a speific and non-specific local backends."""
+    """Test changing between a specific and non-specific local backends."""
 
     TEST_NAME = __name__
 
     def __init__(self, logger):
         """Init class."""
+        Terraform.__init__(self, logger)
         self.logger = logger
 
     def deploy_backend(self, backend):
@@ -25,6 +26,7 @@ class LocalToLocalBackend(Terraform):
         """Run tests."""
         self.clean()
         self.set_tf_version(11)
+        self.set_env_var('CI', '1')
 
         assert self.deploy_backend('no') == 0,\
             '{}: "No local backend" failed'.format(self.TEST_NAME)
@@ -37,4 +39,5 @@ class LocalToLocalBackend(Terraform):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.base_dir):
             run_command(['runway', 'destroy'])
+        self.unset_env_var('CI')
         self.clean()

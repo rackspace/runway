@@ -11,6 +11,7 @@ class LocalToS3Backend(Terraform):
 
     def __init__(self, logger):
         """Init class."""
+        Terraform.__init__(self, logger)
         self.logger = logger
 
     def deploy_backend(self, backend):
@@ -27,6 +28,7 @@ class LocalToS3Backend(Terraform):
     def run(self):
         """Run tests."""
         self.clean()
+        self.set_env_var('CI', '1')
         self.run_stacker()
         self.set_tf_version(11)
 
@@ -38,4 +40,5 @@ class LocalToS3Backend(Terraform):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.base_dir):
             run_command(['runway', 'destroy'])
+        self.unset_env_var('CI')
         self.clean()

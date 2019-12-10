@@ -11,6 +11,7 @@ class VersionTest(Terraform):
 
     def __init__(self, logger):
         """Init class."""
+        Terraform.__init__(self, logger)
         self.logger = logger
 
     def deploy_version(self, version):
@@ -25,6 +26,7 @@ class VersionTest(Terraform):
         """Run tests."""
         self.clean()
         self.run_stacker()
+        self.set_env_var('CI', '1')
 
         assert self.deploy_version(11) == 0, '{}: Terraform version 11 failed'.format(__name__)
         assert self.deploy_version(12) == 0, '{}: Terraform version 12 failed'.format(__name__)
@@ -34,4 +36,5 @@ class VersionTest(Terraform):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.base_dir):
             run_command(['runway', 'destroy'])
+        self.unset_env_var('CI')
         self.clean()
