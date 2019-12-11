@@ -41,7 +41,6 @@ def execute_tests(tests, logger):
     err_count = 0
     results = {}
     for test in tests:
-        # itest = test(self)
         test_name = test.__class__.__name__
 
         if not issubclass(test.__class__, IntegrationTest):

@@ -44,7 +44,9 @@ class Serverless(IntegrationTest):
         if not tests:
             raise Exception('No tests were found.')
 
-        return execute_tests(tests, self.logger)
+        err_count = execute_tests(tests, self.logger)
+        assert err_count == 0  # assert that all subtests were successful
+        return err_count
 
     def teardown(self):
         """Teardown resources create during init."""

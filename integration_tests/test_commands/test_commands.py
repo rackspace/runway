@@ -19,7 +19,7 @@ class Commands(IntegrationTest):
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
         err_count = execute_tests(tests, self.logger)
-        assert err_count == 0
+        assert err_count == 0  # assert that all subtests were successful
         return err_count
 
     def teardown(self):
