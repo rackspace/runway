@@ -1,0 +1,11 @@
+namespace: ${namespace}
+stacker_bucket: ${stacker_bucket_name}
+
+sys_path: ./
+
+stacks:
+  tf-state:
+    template_path: templates/tf_state.yml  # also supports json templates
+    variables:
+      BucketName: ${default tf_state_bucket_name::undefined}
+      TableName: ${default tf_state_table_name::undefined}

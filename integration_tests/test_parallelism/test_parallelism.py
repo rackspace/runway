@@ -21,7 +21,7 @@ class TestParallelism(IntegrationTest):
         """Initialize."""
         IntegrationTest.__init__(self, logger)
 
-    def copy_fixture(self, name='two-regions-app.sls'):
+    def copy_fixture(self, name='sampleapp.cfn'):
         """Copy fixture files for test."""
         copy_dir(
             os.path.join(self.fixtures_dir, name),
@@ -56,7 +56,7 @@ class TestParallelism(IntegrationTest):
             if os.path.isfile(template):
                 self.logger.debug('send2trash: "%s"', template)
                 send2trash(template)
-        folders = ['two-regions-app.sls']
+        folders = ['sampleapp.cfn']
         for folder in folders:
             folder_path = os.path.join(self.parallelism_test_dir, folder)
             if os.path.isdir(folder_path):

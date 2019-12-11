@@ -1,6 +1,6 @@
 deployments:
   - modules:
-    - two-regions-app.sls
+    - sampleapp.cfn
     regions:
       parallel:
         - us-east-1

@@ -18,7 +18,7 @@ class TestTwoRegions(TestParallelism):
     def deploy(self):
         """Deploy provider."""
         self.copy_runway('two-regions')
-        self.copy_fixture('two-regions-app.sls')
+        self.copy_fixture('sampleapp.cfn')
         with change_dir(self.parallelism_test_dir):
             return run_command(['runway', 'deploy'])
 
@@ -27,7 +27,7 @@ class TestTwoRegions(TestParallelism):
         self.clean()
         self.set_environment('dev')
         self.set_env_var('CI', '1')
-        assert self.deploy() != 0, '{}: Two regions deployed in parallel failed'.format(__name__)
+        assert self.deploy() == 0, '{}: Two regions deployed in parallel failed'.format(__name__)
 
     def teardown(self):
         """Teardown scaffolding."""
