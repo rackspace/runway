@@ -11,10 +11,10 @@ import sys
 import tempfile
 import zipfile
 
+import requests
 # Old pylint on py2.7 incorrectly flags these
 from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
 from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
-import requests
 
 # embedded until this is merged - https://github.com/virtuald/pyhcl/pull/57
 from ..embedded import hcl
