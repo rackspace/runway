@@ -31,6 +31,7 @@ test.
 - Any infrastructure created by a test must have stack names and resources names unique to that test to avoid collisions since tests will be run concurrently.
 - All import must be absolute with `integration_tests` as the base. This is due to the mechanics used to import the tests.
 - For a top-level test to run properly, it **MUST** inherit from the `IntegrationTest` class located in `integration_test.py`.
+- If using pipenv within a test (CDK for python does this) you must use `pipenv --rm` BEFORE syncing. Since its being run in a nested copy of pipenv, it will result in a prompt
 
 
 ## Helper Functions
