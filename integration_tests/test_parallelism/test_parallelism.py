@@ -56,7 +56,7 @@ class TestParallelism(IntegrationTest):
             if os.path.isfile(template):
                 self.logger.debug('send2trash: "%s"', template)
                 send2trash(template)
-        folders = ['two-regions-app.cfn']
+        folders = ['two-regions-app.cfn', 'default-to-series-app.cfn']
         for folder in folders:
             folder_path = os.path.join(self.parallelism_test_dir, folder)
             if os.path.isdir(folder_path):
