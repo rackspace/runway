@@ -19,14 +19,18 @@ test.
 
 ## Creating Tests
 
-**IMPORTANT:** Any infrastructure created by a test must have stack names and resources names unique to that test to avoid collisions since tests will be run concurrently.
+**IMPORTANT: Read the Caveats section below BEFORE trying a write integration tests.**
 
 1. Create a new folder that starts with `test_` and place it in the `integration_tests` folder. The folder name after the prefix must contain **lowercase alphanumeric characters only**.
 2. Create a new python file that starts with `test_` and place it in the root of your new folder. The file must be named the same as the folder in **step 1**.
 3. Create a class in the python file that inherits from `IntegrationTest` located in the root of this folder in `integration_test.py`. The class name must be the same as the folder/filename suffix but, can have any number of capital letters.
 4. Create 3 methods `init()`, `run()`, and `teardown()` that take the `self` parameter.
 
-**NOTE:** For a test to run properly, it **MUST** inherit from the `IntegrationTest` class located in `integration_test.py`.
+### Caveats
+
+- Any infrastructure created by a test must have stack names and resources names unique to that test to avoid collisions since tests will be run concurrently.
+- All import must be absolute with `integration_tests` as the base. This is due to the mechanics used to import the tests.
+- For a top-level test to run properly, it **MUST** inherit from the `IntegrationTest` class located in `integration_test.py`.
 
 
 ## Helper Functions

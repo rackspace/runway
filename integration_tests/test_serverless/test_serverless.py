@@ -3,8 +3,8 @@ from __future__ import print_function
 import os
 from send2trash import send2trash
 
-from ..integration_test import IntegrationTest
-from ..util import (import_tests, execute_tests)
+from integration_tests.integration_test import IntegrationTest
+from integration_tests.util import (import_tests, execute_tests)
 
 
 class Serverless(IntegrationTest):
@@ -17,7 +17,9 @@ class Serverless(IntegrationTest):
     def clean(self):
         """Cleanup serverless folder."""
         # cleanup any leftover .serverless folder
-        serverless_folder = os.path.join(self.templates_dir, self.template_name, '.serverless')
+        serverless_folder = os.path.join(self.templates_dir,
+                                         self.template_name,
+                                         '.serverless')
         if os.path.isdir(serverless_folder):
             self.logger.debug('send2trash: "%s"', serverless_folder)
             send2trash(serverless_folder)
@@ -38,6 +40,9 @@ class Serverless(IntegrationTest):
                 tests.append(test)
             else:
                 self.logger.warning('"%s" is not a directory, skipping...', template)
+
+        if not tests:
+            raise Exception('No tests were found.')
 
         return execute_tests(tests, self.logger)
 

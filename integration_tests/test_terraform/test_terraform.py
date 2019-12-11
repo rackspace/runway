@@ -6,8 +6,9 @@ import platform
 from send2trash import send2trash
 from runway.util import change_dir
 
-from ..integration_test import IntegrationTest
-from ..util import (copy_file, import_tests, execute_tests, run_command)
+from integration_tests.integration_test import IntegrationTest
+from integration_tests.util import (copy_file, import_tests,
+                                    execute_tests, run_command)
 
 
 class Terraform(IntegrationTest):
@@ -81,6 +82,8 @@ class Terraform(IntegrationTest):
         """Find all Terraform tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
         tests = [test(self.logger) for test in Terraform.__subclasses__()]
+        if not tests:
+            raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
         self.set_environment('dev')
         return execute_tests(tests, self.logger)

@@ -1,5 +1,5 @@
 """Test deploying stacks using tags."""
-from test_module_tags.test_module_tags import ModuleTags
+from integration_tests.test_moduletags.test_moduletags import ModuleTags
 
 
 class TestDeploy(ModuleTags):
@@ -14,6 +14,7 @@ class TestDeploy(ModuleTags):
 
     def run(self):
         """Run tests."""
+        self.init()
         assert self.runway_cmd('deploy', ['app1']) == 0
         self.check_stacks(['1'])
         assert self.runway_cmd('deploy', ['app2']) == 0

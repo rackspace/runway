@@ -1,7 +1,8 @@
 """Test that multiple CDK stacks does not prompt a failure"""
-from test_cdk.test_cdk import CDK
 from runway.util import change_dir
-from util import run_command
+
+from integration_tests.test_cdk.test_cdk import CDK
+from integration_tests.util import run_command
 
 
 class TestMultipleStacks(CDK):

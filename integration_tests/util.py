@@ -5,7 +5,7 @@ import importlib
 import shutil
 import subprocess
 from prettytable import PrettyTable
-from .integration_test import IntegrationTest
+from integration_tests.integration_test import IntegrationTest
 
 
 def run_command(cmd_list, env_vars=None):
@@ -17,7 +17,7 @@ def run_command(cmd_list, env_vars=None):
     return 0
 
 
-def import_tests(logger, path, pattern, use_abs=False):
+def import_tests(logger, path, pattern, use_abs=True):
     """Find and import all tests from a given path."""
     logger.info('Loading tests from "%s" with pattern: "%s"', path, pattern)
     tests = glob.glob(os.path.join(path, '{}.py'.format(pattern)))

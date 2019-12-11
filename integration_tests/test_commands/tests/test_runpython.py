@@ -1,7 +1,8 @@
 """Test deploying stacks using tags."""
 import os
 from subprocess import check_output
-from test_commands.test_commands import Commands
+
+from integration_tests.test_commands.test_commands import Commands
 
 
 class TestRunPython(Commands):
