@@ -18,7 +18,7 @@ class TestTwoRegions(TestParallelism):
     def deploy(self):
         """Deploy provider."""
         self.copy_runway('two-regions')
-        self.copy_fixture('two-regions-app.cfn')
+        self.copy_fixture('sampleapp.cfn')
         with change_dir(self.parallelism_test_dir):
             return run_command(['runway', 'deploy'])
 

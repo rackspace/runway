@@ -18,7 +18,7 @@ class TestDefaultToSeries(TestParallelism):
     def deploy(self):
         """Deploy provider."""
         self.copy_runway('default-to-series')
-        self.copy_fixture('default-to-series-app.cfn')
+        self.copy_fixture('sampleapp.cfn')
         with change_dir(self.parallelism_test_dir):
             return run_command(['runway', 'deploy'])
 

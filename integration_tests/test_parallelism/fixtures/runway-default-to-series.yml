@@ -1,6 +1,6 @@
 deployments:
   - modules:
-    - default-to-series-app.cfn
+    - sampleapp.cfn
     regions:
       parallel:
         - us-east-1
