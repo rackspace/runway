@@ -1,0 +1,7 @@
+deployments:
+  - modules:
+    - two-regions-app.sls
+    regions:
+      parallel:
+        - us-east-1
+        - us-east-2
