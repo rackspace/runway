@@ -15,11 +15,14 @@ class TestCDK(IntegrationTest):
 
     cdk_test_dir = os.path.join(base_dir, 'cdk_test')
 
-    def copy_fixture(self):
+    def __init__(self, logger):
+        IntegrationTest.__init__(self, logger)
+
+    def copy_fixture(self, name='multiple-stacks-app.cdk'):
         """Copy fixture files for test"""
         copy_dir(
-            self.multiple_stacks_dir,
-            os.path.join(self.cdk_test_dir, 'multiple-stacks-app.cdk')
+            os.path.join(self.fixtures_dir, name),
+            os.path.join(self.cdk_test_dir, name)
         )
 
     def copy_runway(self, template):
@@ -47,7 +50,7 @@ class TestCDK(IntegrationTest):
             if os.path.isfile(template):
                 self.logger.debug('send2trash: "%s"', template)
                 send2trash(template)
-        folders = ['multiple-stacks-app.cdk']
+        folders = ['multiple-stacks-app.cdk', 'decline-deploy-app.cdk']
         for folder in folders:
             folder_path = os.path.join(self.cdk_test_dir, folder)
             if os.path.isdir(folder_path):

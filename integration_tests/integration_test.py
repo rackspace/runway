@@ -30,6 +30,18 @@ class IntegrationTest(object):
             env = {'DEPLOY_ENVIRONMENT': env}
         self.environment.update(env)
 
+    def set_env_var(self, var_name, var):
+        """Set an environment variable"""
+        self.logger.info('Setting "%s" to "%s"', var_name, var)
+        if not isinstance(var, dict):
+            env = {}
+            env[var_name] = var
+        self.environment.update(env)
+
+    def unset_env_var(self, var):
+        self.logger.info('Unsetting "%s" Environment Variable', var)
+        del os.environ[var]
+
     def run(self):
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError('You must implement the run() method '

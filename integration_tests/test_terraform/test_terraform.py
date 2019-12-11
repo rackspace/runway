@@ -19,6 +19,9 @@ class Terraform(IntegrationTest):
     tf_test_dir = os.path.join(base_dir, 'terraform_test.tf')
     tf_state_dir = os.path.join(base_dir, 'tf_state.cfn')
 
+    def __init__(self, logger):
+        IntegrationTest.__init__(self, logger)
+
     def copy_runway(self, template):
         """Copy runway template to proper directory."""
         template_file = os.path.join(self.template_dir, 'runway-{}.yml'.format(template))
