@@ -49,6 +49,10 @@ directory (if its not a git repo), git branch, or environment variable
 (``DEPLOY_ENVIRONMENT``). Standard environments would be something like prod,
 dev, and test.
 
+No matter how the environment is determined, the name is made available
+to be consumed by your `modules <module>`_ as the ``DEPLOY_ENVIRONMENT``
+environment variable.
+
 
 Deploying Your First Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

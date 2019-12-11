@@ -323,27 +323,6 @@ def validate_account_credentials(deployment, context):
                                account_alias)
 
 
-def echo_detected_environment(env_name, env_vars):
-    """Print a helper note about how the environment was determined."""
-    env_override_name = 'DEPLOY_ENVIRONMENT'
-    LOGGER.info("")
-    if env_override_name in env_vars:
-        LOGGER.info("Environment \"%s\" was determined from the %s environment variable.",
-                    env_name,
-                    env_override_name)
-        LOGGER.info("If this is not correct, update "
-                    "the value (or unset it to fall back to the name of "
-                    "the current git branch or parent directory).")
-    else:
-        LOGGER.info("Environment \"%s\" was determined from the current "
-                    "git branch or parent directory.",
-                    env_name)
-        LOGGER.info("If this is not the environment name, update the branch/folder name or "
-                    "set an override value via the %s environment variable",
-                    env_override_name)
-    LOGGER.info("")
-
-
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
@@ -358,7 +337,6 @@ class ModulesCommand(RunwayCommand):
                           env_vars=os.environ.copy(),
                           command=command)
         context.env_vars['RUNWAYCONFIG'] = self.runway_config_path
-        echo_detected_environment(context.env_name, context.env_vars)
 
         # set default names if needed
         for i, deployment in enumerate(deployments):

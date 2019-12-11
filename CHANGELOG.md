@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Allow single-binary use of bundled yamllint
 
+### Changed
+- `DEPLOY_ENVIRONMENT` is available to all module deployments as an environment variable
+  - if it does not exist in the current environment, value is derived from branch or directory name
+
 ## [1.3.3] - 2019-11-26
 ### Changed
 - Updated `runway test` error message to give direction on next steps when no tests are defined
