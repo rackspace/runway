@@ -1,10 +1,10 @@
 """Test deploying stacks using tags."""
 import os
 from subprocess import check_output
-from test_commands.test_commands import TestRunwayCommands
+from test_commands.test_commands import Commands
 
 
-class TestRunPython(TestRunwayCommands):
+class TestRunPython(Commands):
     """Tests run-python subcommand."""
 
     TEST_NAME = __name__

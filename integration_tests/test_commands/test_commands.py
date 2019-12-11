@@ -1,11 +1,11 @@
 """Tests for runway commands."""
 import os
 
-from integration_test import IntegrationTest
-from util import (import_tests, execute_tests)
+from ..integration_test import IntegrationTest
+from ..util import (import_tests, execute_tests)
 
 
-class TestRunwayCommands(IntegrationTest):
+class Commands(IntegrationTest):
     """Base class for all runway command testing testing."""
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -14,7 +14,7 @@ class TestRunwayCommands(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
-        tests = [test(self.logger) for test in TestRunwayCommands.__subclasses__()]
+        tests = [test(self.logger) for test in Commands.__subclasses__()]
         self.logger.debug('FOUND TESTS: %s', tests)
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0

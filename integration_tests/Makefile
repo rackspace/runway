@@ -1,3 +1,4 @@
 test:
 	pipenv sync
-	pipenv run python runner.py
+	CI=1 \
+	pipenv run python run_test.py

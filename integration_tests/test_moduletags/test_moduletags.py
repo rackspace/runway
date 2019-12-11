@@ -8,8 +8,9 @@ import yaml
 from send2trash import send2trash
 
 from runway.util import change_dir
-from integration_test import IntegrationTest
-from util import (copy_dir, import_tests, execute_tests, run_command)
+
+from ..integration_test import IntegrationTest
+from ..util import (copy_dir, import_tests, execute_tests, run_command)
 
 CFN_CLIENT = boto3.client('cloudformation', region_name='us-east-1')
 

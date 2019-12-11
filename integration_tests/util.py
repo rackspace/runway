@@ -5,7 +5,7 @@ import importlib
 import shutil
 import subprocess
 from prettytable import PrettyTable
-from integration_test import IntegrationTest
+from .integration_test import IntegrationTest
 
 
 def run_command(cmd_list, env_vars=None):
@@ -17,7 +17,7 @@ def run_command(cmd_list, env_vars=None):
     return 0
 
 
-def import_tests(logger, path, pattern):
+def import_tests(logger, path, pattern, use_abs=False):
     """Find and import all tests from a given path."""
     logger.info('Loading tests from "%s" with pattern: "%s"', path, pattern)
     tests = glob.glob(os.path.join(path, '{}.py'.format(pattern)))
@@ -25,8 +25,12 @@ def import_tests(logger, path, pattern):
         relpath = os.path.relpath(test)[:-3]
         test_name = relpath.replace(os.path.sep, '.')
         logger.info('Found test: "%s". Attempting to import...', test_name)
+        if use_abs:
+            final_path = os.path.abspath(relpath).split('/runway/')[1].replace('/', '.')
+        else:
+            final_path = relpath
         try:
-            importlib.import_module(test_name)
+            importlib.import_module(final_path)
         except ModuleNotFoundError as moderr:
             logger.info('Failed to import test: "%s". Error: "%s"', test_name, moderr)
             raise moderr

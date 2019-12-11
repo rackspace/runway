@@ -2,11 +2,13 @@
 import os
 import glob
 
-from integration_test import IntegrationTest
 from send2trash import send2trash
-from util import (copy_file, copy_dir, import_tests, execute_tests)
 
-class TestCDK(IntegrationTest):
+from ..integration_test import IntegrationTest
+from ..util import (copy_file, copy_dir, import_tests, execute_tests)
+
+
+class CDK(IntegrationTest):
     """Test CDK based module scenarios"""
     base_dir = os.path.abspath(os.path.dirname(__file__))
     fixtures_dir = os.path.join(base_dir, 'fixtures')
@@ -33,7 +35,7 @@ class TestCDK(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
-        tests = [test(self.logger) for test in TestCDK.__subclasses__()]
+        tests = [test(self.logger) for test in CDK.__subclasses__()]
         self.logger.debug('FOUND TESTS: %s', tests)
         self.set_environment('dev')
         err_count = execute_tests(tests, self.logger)

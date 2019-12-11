@@ -2,9 +2,9 @@
 from __future__ import print_function
 import os
 from send2trash import send2trash
-from runway.util import change_dir
-from integration_test import IntegrationTest
-from util import (import_tests, execute_tests, run_command)
+
+from ..integration_test import IntegrationTest
+from ..util import (import_tests, execute_tests)
 
 
 class Serverless(IntegrationTest):

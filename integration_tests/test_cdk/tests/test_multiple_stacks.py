@@ -1,10 +1,10 @@
 """Test that multiple CDK stacks does not prompt a failure"""
-from test_cdk.test_cdk import TestCDK
+from test_cdk.test_cdk import CDK
 from runway.util import change_dir
 from util import run_command
 
 
-class TestMultipleStacks(TestCDK):
+class TestMultipleStacks(CDK):
     """Test deploying multiple stacks and ensure all are deployed"""
 
     TEST_NAME = __name__
