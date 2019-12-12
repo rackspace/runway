@@ -26,6 +26,7 @@ class Serverless(IntegrationTest):
 
     def run(self):
         """Find all Serverless tests and run them."""
+        self.set_env_var('CI', '1')
         import_tests(self.logger, self.base_dir, 'serverless_test')
         serverless_test = Serverless.__subclasses__()[0]
 
@@ -50,4 +51,5 @@ class Serverless(IntegrationTest):
 
     def teardown(self):
         """Teardown resources create during init."""
+        self.unset_env_var('CI')
         # all resources should have been torn down in ServerlessTest class

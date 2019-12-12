@@ -21,9 +21,6 @@ class Terraform(IntegrationTest):
     tf_test_dir = os.path.join(base_dir, 'terraform_test.tf')
     tf_state_dir = os.path.join(base_dir, 'tf_state.cfn')
 
-    def __init__(self, logger):
-        IntegrationTest.__init__(self, logger)
-
     def copy_runway(self, template):
         """Copy runway template to proper directory."""
         template_file = os.path.join(self.template_dir, 'runway-{}.yml'.format(template))
@@ -86,10 +83,12 @@ class Terraform(IntegrationTest):
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
         self.set_environment('dev')
+        self.set_env_var('CI', '1')
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0  # assert that all subtests were successful
         return err_count
 
     def teardown(self):
         """Teardown resources create during init."""
+        self.unset_env_var('CI')
         self.clean()

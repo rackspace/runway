@@ -9,11 +9,6 @@ class LocalToLocalBackend(Terraform):
 
     TEST_NAME = __name__
 
-    def __init__(self, logger):
-        """Init class."""
-        Terraform.__init__(self, logger)
-        self.logger = logger
-
     def deploy_backend(self, backend):
         """Deploy provider."""
         self.copy_template('{}-backend.tf'.format(backend))

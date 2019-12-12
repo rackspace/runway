@@ -9,11 +9,6 @@ class VersionTest(Terraform):
 
     TEST_NAME = __name__
 
-    def __init__(self, logger):
-        """Init class."""
-        Terraform.__init__(self, logger)
-        self.logger = logger
-
     def deploy_version(self, version):
         """Deploy provider."""
         self.set_tf_version(version)

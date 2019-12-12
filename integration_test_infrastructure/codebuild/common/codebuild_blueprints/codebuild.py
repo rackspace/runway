@@ -170,14 +170,10 @@ class CodeBuild(Blueprint):
                 Artifacts=codebuild.Artifacts(
                     Type='NO_ARTIFACTS'
                 ),
+                Description=f'{name} runway integration tests',
                 Environment=codebuild.Environment(
                     ComputeType='BUILD_GENERAL1_SMALL',
                     EnvironmentVariables=[
-                        codebuild.EnvironmentVariable(
-                            Name='CI',
-                            Type='PLAINTEXT',
-                            Value='1'
-                        ),
                         codebuild.EnvironmentVariable(
                             Name='DEPLOY_ENVIRONMENT',
                             Type='PLAINTEXT',

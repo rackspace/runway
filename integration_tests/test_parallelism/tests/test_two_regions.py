@@ -1,19 +1,14 @@
 """Test that two regions can be deployed in parallel."""
-
-from test_parallelism.test_parallelism import TestParallelism
 from runway.util import change_dir
-from util import run_command
+
+from integration_tests.test_parallelism.test_parallelism import Parallelism
+from integration_tests.util import run_command
 
 
-class TestTwoRegions(TestParallelism):
+class TestTwoRegions(Parallelism):
     """Test deploying two regions in parallel."""
 
     TEST_NAME = __name__
-
-    def __init__(self, logger):
-        """Init class."""
-        TestParallelism.__init__(self, logger)
-        self.logger = logger
 
     def deploy(self):
         """Deploy provider."""
