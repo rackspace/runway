@@ -22,7 +22,7 @@ deployments:
       dev:
         namespace: dev
         region: &devregion us-east-1
-        kubectl-access-role-arn: arn:aws:sts::700887101195:assumed-role/onica-sso-OnicaSsoRole-WUXLV8UR7XQF/epoce-phipeeps
+        kubectl-access-role-arn: arn:aws:iam::523485371024:role/common-runway-integration-testing-pr-CodeBuildRole-GTQ43SC4OUD7
     module_options:
       terraform_backend_config:
         dev:
