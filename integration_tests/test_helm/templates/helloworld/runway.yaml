@@ -1,0 +1,36 @@
+---
+# only modules with the tag will included in the test
+deployments:
+  - modules:
+      - path: tfstate.cfn
+        tags:
+          - app:runway-helm-test
+      - path: eks.tf
+        tags:
+          - app:runway-helm-test
+      - path: helloworld.helm
+        tags:
+          - app:runway-helm-test
+    env_vars:
+      dev:
+        KUBECONFIG: 
+          - eks.tf
+          - .kube
+          - dev
+          - config
+    environments:
+      dev:
+        namespace: dev
+        region: &devregion us-east-1
+        kubectl-access-role-arn: arn:aws:sts::700887101195:assumed-role/onica-sso-OnicaSsoRole-WUXLV8UR7XQF/epoce-phipeeps
+    module_options:
+      terraform_backend_config:
+        dev:
+          region: *devregion
+      terraform_backend_cfn_outputs:
+        dev:
+          bucket: dev-tf-state::TerraformStateBucketName
+          dynamodb_table: dev-tf-state::TerraformStateTableName
+
+    regions:
+      - *devregion

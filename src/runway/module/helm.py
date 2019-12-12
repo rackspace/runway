@@ -4,6 +4,7 @@ from __future__ import print_function
 import logging
 import os
 import subprocess
+import sys
 
 from runway.module import RunwayModule
 from runway.env_mgr.helmenv import HelmEnvManager
@@ -26,7 +27,7 @@ class Helm(RunwayModule):
         env_name = self.context.env_name
         application_name = '%s-%s' % (module_name, env_name)
 
-        # Execute command
+        # Create command
         response = None
         cmd = None
         if command in ['plan', 'deploy']:
@@ -47,11 +48,24 @@ class Helm(RunwayModule):
                 'uninstall',
                 application_name
             ]
+
+        # execute command
         LOGGER.info('Running helm %s ("%s")...', command, ' '.join(cmd))
         response = subprocess.check_output(cmd, env=self.context.env_vars)
         if isinstance(response, bytes):  # python3 returns encoded bytes
             response = response.decode()
-        print(response)
+
+        # check deploy response
+        if command == 'deploy':
+            if 'STATUS: deployed' not in response:
+                LOGGER.error('Helm failed to deploy chart.')
+                sys.exit(1)
+
+        # check destroy response
+        if command == 'destroy':
+            if 'uninstalled' not in response:
+                LOGGER.error('Helm failed to destroy chart.')
+                sys.exit(1)
 
         # Response
         skipped_configs = command == "plan"

@@ -5,6 +5,7 @@
 .coverage
 .eggs
 *.egg-info
+.mypy_cache/
 build
 dist
 docs/source/_build

@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monopole
+  namespace: default
+spec:
+  ports:
+    - name: monopole
+      port: 8080
+  selector:
+    name: monopole
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monopole
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: monopole
+  template:
+    metadata:
+      labels:
+        name: monopole
+        author: Edgar
+    spec:
+      containers:
+      - name: monopole-container
+        image: monopole/hello:1
+        command: ["/hello",
+                  "--port=8080",
+                  "--enableRiskyFeature=false"]
+        ports:
+        - containerPort: 8080
