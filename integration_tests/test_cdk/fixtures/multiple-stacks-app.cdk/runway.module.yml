@@ -1,5 +1,4 @@
 ---
 options:
   build_steps:
-    - pipenv --rm  # remove the existing venv before sync, prevents prompt in nested pipenv
     - pipenv sync -d --three

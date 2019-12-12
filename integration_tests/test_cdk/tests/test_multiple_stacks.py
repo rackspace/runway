@@ -9,10 +9,11 @@ class TestMultipleStacks(CDK):
     """Test deploying multiple stacks and ensure all are deployed"""
 
     TEST_NAME = __name__
+    module_dir = 'multiple-stacks-app.cdk'
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_fixture('multiple-stacks-app.cdk')
+        self.copy_fixture(self.module_dir)
         self.copy_runway('multiple-stacks')
         with change_dir(self.cdk_test_dir):
             return run_command(['runway', 'deploy'])
@@ -25,6 +26,7 @@ class TestMultipleStacks(CDK):
 
     def teardown(self):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
+        self.delete_venv(self.module_dir)
         with change_dir(self.cdk_test_dir):
             run_command(['runway', 'destroy'])
         self.clean()

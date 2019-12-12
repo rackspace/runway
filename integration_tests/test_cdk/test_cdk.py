@@ -18,9 +18,6 @@ class CDK(IntegrationTest):
 
     cdk_test_dir = os.path.join(base_dir, 'cdk_test')
 
-    def __init__(self, logger):
-        IntegrationTest.__init__(self, logger)
-
     def copy_fixture(self, name='multiple-stacks-app.cdk'):
         """Copy fixture files for test"""
         copy_dir(
@@ -41,6 +38,7 @@ class CDK(IntegrationTest):
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
         self.set_environment('dev')
+        self.set_env_var('PIPENV_VENV_IN_PROJECT', '1')
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0  # assert that all subtests were successful
         return err_count
@@ -62,6 +60,15 @@ class CDK(IntegrationTest):
                 self.logger.debug('send2trash: "%s"', folder_path)
                 send2trash(folder_path)
 
+    def delete_venv(self, module_directory):
+        """Delete pipenv venv before running destroy."""
+        folder_path = os.path.join(self.cdk_test_dir,
+                                   f'{module_directory}/.venv')
+        if os.path.isdir(folder_path):
+            self.logger.debug('send2trash: "%s"', folder_path)
+            send2trash(folder_path)
+
     def teardown(self):
         """Teardown resources create during init."""
+        self.unset_env_var('PIPENV_VENV_IN_PROJECT')
         self.clean()
