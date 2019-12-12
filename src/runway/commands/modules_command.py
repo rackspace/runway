@@ -109,6 +109,12 @@ def path_is_current_dir(path):
         return True
     return False
 
+def path_is_remote(path):
+    """Determine if the path specified is a remote resource"""
+    for prefix in ['git://', 's3://']:
+        if path.startswith(prefix):
+            return True
+    return False
 
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
@@ -322,6 +328,18 @@ def validate_account_credentials(deployment, context):
         validate_account_alias(boto3.client('iam', **boto_args),
                                account_alias)
 
+class SourceProcessor(object):
+    def __init__(self, path, cache_dir=None):
+        if not cache_dir:
+            cache_dir = os.path.expanduser("~/.runway_cache")
+
+        self.cache_dir = cache_dir
+        self.path = path
+        self.create_cache_directories()
+
+    def create_cache_directories(self):
+        if not os.path.isdir(self.cache_dir):
+            os.mkdir(self.cache_dir)
 
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
@@ -529,6 +547,11 @@ class ModulesCommand(RunwayCommand):
             module = {'path': module}
         if path_is_current_dir(module['path']):
             module_root = self.env_root
+        if path_is_remote(module['path']):
+            processor = SourceProcessor(
+                module['path'],
+                os.path.join(self.env_root, '.runway_cache')
+            )
         else:
             module_root = os.path.join(self.env_root, module['path'])
         module_opts = merge_dicts(module_opts, module.__dict__)
