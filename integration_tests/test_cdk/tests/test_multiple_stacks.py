@@ -10,11 +10,6 @@ class TestMultipleStacks(CDK):
 
     TEST_NAME = __name__
 
-    def __init__(self, logger):
-        TestCDK.__init__(self, logger)
-        """Init class."""
-        self.logger = logger
-
     def deploy(self):
         """Deploy provider."""
         self.copy_fixture('multiple-stacks-app.cdk')
