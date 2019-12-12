@@ -10,6 +10,9 @@ import glob
 import logging
 import os
 import sys
+import shutil
+import tempfile
+
 
 from builtins import input
 
@@ -336,10 +339,46 @@ class SourceProcessor(object):
         self.cache_dir = cache_dir
         self.path = path
         self.create_cache_directories()
+        self.get_source()
 
     def create_cache_directories(self):
         if not os.path.isdir(self.cache_dir):
             os.mkdir(self.cache_dir)
+
+    def get_source(self):
+        if self.path.startswith('git://'):
+            self.fetch_git_package()
+
+    def fetch_git_package(self):
+        from git import Repo
+
+        dir_name = self.sanitize_git_path(self.path)
+        cached_dir_path = os.path.join(self.cache_dir, dir_name)
+
+        if not os.path.isdir(cached_dir_path):
+            tmp_dir = tempfile.mkdtemp()
+            try:
+                tmp_repo_path = os.path.join(tmp_dir, dir_name)
+                Repo.clone_from(self.path, tmp_repo_path)
+                shutil.move(tmp_repo_path, self.cache_dir)
+            finally:
+                shutil.rmtree(tmp_dir)
+
+    def sanitize_git_path(self, path):
+        dir_name = path
+
+        if path.endswith('.git'):
+            dir_name = path[6:-4]
+
+        return self.sanitize_directory_path(dir_name)
+
+    def sanitize_directory_path(self, uri):
+        for i in ['@', '/', ':']:
+            uri = uri.replace(i, '_')
+        return uri
+
+
+
 
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
