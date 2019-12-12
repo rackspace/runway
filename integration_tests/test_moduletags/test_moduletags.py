@@ -95,6 +95,7 @@ class ModuleTags(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
+        self.set_environment('dev')
         tests = [test(self.logger) for test in ModuleTags.__subclasses__()]
         if not tests:
             raise Exception('No tests were found.')
