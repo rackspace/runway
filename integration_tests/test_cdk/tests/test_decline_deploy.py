@@ -16,8 +16,8 @@ class TestDeclineDeploy(TestCDK):
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_runway('decline-deploy')
         self.copy_fixture('decline-deploy-app.cdk')
+        self.copy_runway('decline-deploy')
         with change_dir(self.cdk_test_dir):
             child = pexpect.spawn('runway deploy')
             try:
