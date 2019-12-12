@@ -16,8 +16,8 @@ class TestMultipleStacks(TestCDK):
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_runway('multiple-stacks')
         self.copy_fixture('multiple-stacks-app.cdk')
+        self.copy_runway('multiple-stacks')
         with change_dir(self.cdk_test_dir):
             return run_command(['runway', 'deploy'])
 
