@@ -2,7 +2,7 @@
 import os
 import tempfile
 import boto3
-from util import run_command
+
 from runway.s3_util import (download,
                             get_matching_s3_keys,
                             purge_and_delete_bucket,
@@ -11,7 +11,9 @@ from runway.util import change_dir, find_cfn_output
 from runway.module.serverless import get_src_hash
 from runway.commands.modules_command import assume_role
 from runway.hooks.staticsite.util import get_hash_of_files
-from test_serverless.test_serverless import Serverless
+
+from integration_tests.test_serverless.test_serverless import Serverless
+from integration_tests.util import run_command
 
 
 class ServerlessTest(Serverless):

@@ -4,6 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-runway = "~=0.46"
+runway = {editable = true, path = "./../../runway"}
+prettytable = "*"
+colorama = ">=0.2.5,<=0.3.9"
 
 [dev-packages]

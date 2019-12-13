@@ -2,11 +2,14 @@
 import os
 import glob
 
-from integration_test import IntegrationTest
 from send2trash import send2trash
-from util import (copy_file, copy_dir, import_tests, execute_tests)
 
-class TestCDK(IntegrationTest):
+from integration_tests.integration_test import IntegrationTest
+from integration_tests.util import (copy_file, copy_dir, import_tests,
+                                    execute_tests)
+
+
+class CDK(IntegrationTest):
     """Test CDK based module scenarios"""
     base_dir = os.path.abspath(os.path.dirname(__file__))
     fixtures_dir = os.path.join(base_dir, 'fixtures')
@@ -14,9 +17,6 @@ class TestCDK(IntegrationTest):
     tests_dir = os.path.join(base_dir, 'tests')
 
     cdk_test_dir = os.path.join(base_dir, 'cdk_test')
-
-    def __init__(self, logger):
-        IntegrationTest.__init__(self, logger)
 
     def copy_fixture(self, name='multiple-stacks-app.cdk'):
         """Copy fixture files for test"""
@@ -33,11 +33,14 @@ class TestCDK(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
-        tests = [test(self.logger) for test in TestCDK.__subclasses__()]
+        tests = [test(self.logger) for test in CDK.__subclasses__()]
+        if not tests:
+            raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
         self.set_environment('dev')
+        self.set_env_var('PIPENV_VENV_IN_PROJECT', '1')
         err_count = execute_tests(tests, self.logger)
-        assert err_count == 0
+        assert err_count == 0  # assert that all subtests were successful
         return err_count
 
     def clean(self):
@@ -57,6 +60,15 @@ class TestCDK(IntegrationTest):
                 self.logger.debug('send2trash: "%s"', folder_path)
                 send2trash(folder_path)
 
+    def delete_venv(self, module_directory):
+        """Delete pipenv venv before running destroy."""
+        folder_path = os.path.join(self.cdk_test_dir,
+                                   f'{module_directory}/.venv')
+        if os.path.isdir(folder_path):
+            self.logger.debug('send2trash: "%s"', folder_path)
+            send2trash(folder_path)
+
     def teardown(self):
         """Teardown resources create during init."""
+        self.unset_env_var('PIPENV_VENV_IN_PROJECT')
         self.clean()

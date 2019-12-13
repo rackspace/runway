@@ -1,23 +1,21 @@
 """Test to verify behavior on declining deployment"""
 import sys
-import pexpect
 
-from test_cdk.test_cdk import TestCDK
+import pexpect
 from runway.util import change_dir
 
-class TestDeclineDeploy(TestCDK):
+from integration_tests.test_cdk.test_cdk import CDK
+
+
+class TestDeclineDeploy(CDK):
     """Test to verify behavior on declining deployment"""
 
     TEST_NAME = __name__
 
-    def __init__(self, logger):
-        """Init class."""
-        self.logger = logger
-
     def deploy(self):
         """Deploy provider."""
-        self.copy_runway('decline-deploy')
         self.copy_fixture('decline-deploy-app.cdk')
+        self.copy_runway('decline-deploy')
         with change_dir(self.cdk_test_dir):
             child = pexpect.spawn('runway deploy')
             try:

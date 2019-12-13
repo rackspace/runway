@@ -7,5 +7,5 @@ phases:
   build:
     commands:
       - cd $CODEBUILD_SRC_DIR/integration_tests
-      - pipenv install
-      - pipenv run python runner.py
+      - pipenv sync
+      - pipenv run python run_test.py $TEST_TO_RUN

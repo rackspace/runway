@@ -1,22 +1,19 @@
 """Test that multiple CDK stacks does not prompt a failure"""
-from test_cdk.test_cdk import TestCDK
 from runway.util import change_dir
-from util import run_command
+
+from integration_tests.test_cdk.test_cdk import CDK
+from integration_tests.util import run_command
 
 
-class TestMultipleStacks(TestCDK):
+class TestMultipleStacks(CDK):
     """Test deploying multiple stacks and ensure all are deployed"""
 
     TEST_NAME = __name__
-
-    def __init__(self, logger):
-        TestCDK.__init__(self, logger)
-        """Init class."""
-        self.logger = logger
+    module_dir = 'multiple-stacks-app.cdk'
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_fixture('multiple-stacks-app.cdk')
+        self.copy_fixture(self.module_dir)
         self.copy_runway('multiple-stacks')
         with change_dir(self.cdk_test_dir):
             return run_command(['runway', 'deploy'])
@@ -29,6 +26,7 @@ class TestMultipleStacks(TestCDK):
 
     def teardown(self):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
+        self.delete_venv(self.module_dir)
         with change_dir(self.cdk_test_dir):
             run_command(['runway', 'destroy'])
         self.clean()
