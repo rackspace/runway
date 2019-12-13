@@ -107,19 +107,6 @@ def determine_module_class(path, class_path):  # pylint: disable=too-many-branch
     return load_object_from_string(class_path)
 
 
-def path_is_current_dir(path):
-    """Determine if defined path is reference to current directory."""
-    if path in ['.', '.' + os.sep]:
-        return True
-    return False
-
-def path_is_remote(path):
-    """Determine if the path specified is a remote resource"""
-    for prefix in ['git://', 's3://']:
-        if path.startswith(prefix):
-            return True
-    return False
-
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
     module_options_file = os.path.join(path,
@@ -332,16 +319,41 @@ def validate_account_credentials(deployment, context):
         validate_account_alias(boto3.client('iam', **boto_args),
                                account_alias)
 
-class SourceProcessor(object):
-    def __init__(self, path, cache_dir=None):
+class Path(object):
+    def __init__(self, module, env_root, cache_dir=None):
         if not cache_dir:
             cache_dir = os.path.expanduser("~/.runway_cache")
 
+        self.module = module
+        self.env_root = env_root
         self.cache_dir = cache_dir
-        self.path = path
+        self.path = module['path']
         self.config = self.get_config(self.path)
-        self.create_cache_directory()
-        self.get_source()
+        self.module_root = self.get_module_root()
+
+    def get_module_root(self):
+        if isinstance(self.module, six.string_types):
+            self.module = {'path': self.module}
+
+        if self.path_is_current_dir(self.module['path']):
+            return self.env_root
+        if self.path_is_remote(self.module['path']):
+            self.create_cache_directory()
+            return self.get_remote_source()
+        return os.path.join(self.env_root, module['path'])
+
+    def path_is_current_dir(self, path):
+        """Determine if defined path is reference to current directory."""
+        if path in ['.', '.' + os.sep]:
+            return True
+        return False
+
+    def path_is_remote(self, path):
+        """Determine if the path specified is a remote resource"""
+        for prefix in ['git://', 's3://']:
+            if path.startswith(prefix):
+                return True
+        return False
 
     def get_config(self, path):
        conf = {}
@@ -355,9 +367,9 @@ class SourceProcessor(object):
         if not os.path.isdir(self.cache_dir):
             os.mkdir(self.cache_dir)
 
-    def get_source(self):
+    def get_remote_source(self):
         if self.path.startswith('git://'):
-            self.fetch_git_package()
+            return self.fetch_git_package()
 
     def fetch_git_package(self):
         from git import Repo
@@ -380,7 +392,7 @@ class SourceProcessor(object):
         else:
             self.config['cached_path'] = cached_dir_path
 
-        self.config['full_path'] = os.path.join(self.config['cached_path'], self.config['location'])
+        return os.path.join(self.config['cached_path'], self.config['location'])
 
     def git_ls_remote(self, ref):
         LOGGER.debug("Invoking git to retrieve commit id for repo %s...", self.config['uri'])
@@ -639,20 +651,11 @@ class ModulesCommand(RunwayCommand):
             module_opts['environments'] = deployment['environments'].copy()  # noqa
         if deployment.get('module_options'):
             module_opts['options'] = deployment['module_options'].copy()  # noqa
-        if isinstance(module, six.string_types):
-            module = {'path': module}
-        if path_is_current_dir(module['path']):
-            module_root = self.env_root
-        if path_is_remote(module['path']):
-            processor = SourceProcessor(
-                module['path'],
-                os.path.join(self.env_root, '.runway_cache')
-            )
-            module_root = processor.config.get('full_path')
-        else:
-            module_root = os.path.join(self.env_root, module['path'])
+
+        path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))
+
         module_opts = merge_dicts(module_opts, module.__dict__)
-        module_opts = load_module_opts_from_file(module_root, module_opts)
+        module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
@@ -671,14 +674,14 @@ class ModulesCommand(RunwayCommand):
                             "applied this module: %s",
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
-        with change_dir(module_root):
+        with change_dir(path.module_root):
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method
-            module_class = determine_module_class(module_root,
+            module_class = determine_module_class(path.module_root,
                                                   module_opts.get('class_path'))
             module_instance = module_class(
                 context=context,
-                path=module_root,
+                path=path.module_root,
                 options=module_opts
             )
             if hasattr(module_instance, context.command):
