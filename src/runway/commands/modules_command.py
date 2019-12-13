@@ -338,10 +338,22 @@ class SourceProcessor(object):
 
         self.cache_dir = cache_dir
         self.path = path
-        self.create_cache_directories()
+        self.config = self.get_config(self.path)
+        self.create_cache_directory()
         self.get_source()
 
-    def create_cache_directories(self):
+    def get_config(self, path):
+       conf = {}
+       params = path.split('>')
+       conf['uri'] = params[0]
+
+       for x in range(1, len(params)):
+           key, value = params[x].split('=')
+           conf[key] = value
+
+       return conf
+
+    def create_cache_directory(self):
         if not os.path.isdir(self.cache_dir):
             os.mkdir(self.cache_dir)
 
@@ -352,15 +364,16 @@ class SourceProcessor(object):
     def fetch_git_package(self):
         from git import Repo
 
-        dir_name = self.sanitize_git_path(self.path)
+        dir_name = self.sanitize_git_path(self.config['uri'])
         cached_dir_path = os.path.join(self.cache_dir, dir_name)
 
         if not os.path.isdir(cached_dir_path):
             tmp_dir = tempfile.mkdtemp()
             try:
                 tmp_repo_path = os.path.join(tmp_dir, dir_name)
-                Repo.clone_from(self.path, tmp_repo_path)
+                Repo.clone_from(self.config['uri'], tmp_repo_path)
                 shutil.move(tmp_repo_path, self.cache_dir)
+                config['cached_path'] = os.path.join(self.cache_dir, dir_name)
             finally:
                 shutil.rmtree(tmp_dir)
 
@@ -376,8 +389,6 @@ class SourceProcessor(object):
         for i in ['@', '/', ':']:
             uri = uri.replace(i, '_')
         return uri
-
-
 
 
 class ModulesCommand(RunwayCommand):
