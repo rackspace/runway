@@ -17,37 +17,35 @@ class Path(object):
         self.module = module
         self.env_root = env_root
         self.cache_dir = cache_dir
-        self.path = module['path']
-        self.config = self.get_config(self.path)
+        self.source, self.path = self.get_source_and_path()
+        self.config = self.get_config()
         self.module_root = self.get_module_root()
+
+    def get_source_and_path(self):
+        res = ['local', '']
+        sp = self.module['path'].split('::')
+
+        if len(sp) == 2:
+            res[0] = sp[0]
+            res[1] = sp[1]
+        else:
+            res[1] = sp[0]
+        return res
 
     def get_module_root(self):
         if isinstance(self.module, six.string_types):
             self.module = {'path': self.module}
 
-        if self.path_is_current_dir(self.module['path']):
+        if self.path in ['.', '.' + os.sep]:
             return self.env_root
-        if self.path_is_remote(self.module['path']):
+        if self.source != 'local':
             self.create_cache_directory()
-            return self.get_remote_source()
-        return os.path.join(self.env_root, module['path'])
+            return self.fetch_remote_source()
+        return os.path.join(self.env_root, self.path)
 
-    def path_is_current_dir(self, path):
-        """Determine if defined path is reference to current directory."""
-        if path in ['.', '.' + os.sep]:
-            return True
-        return False
-
-    def path_is_remote(self, path):
-        """Determine if the path specified is a remote resource"""
-        for prefix in ['git://', 's3://']:
-            if path.startswith(prefix):
-                return True
-        return False
-
-    def get_config(self, path):
+    def get_config(self):
        conf = {}
-       params = path.split('>')
+       params = self.path.split('>')
        conf = { key: value for key, value in [param.split('=') for param in params[1:]] }
        conf['uri'] = params[0]
 
@@ -57,11 +55,11 @@ class Path(object):
         if not os.path.isdir(self.cache_dir):
             os.mkdir(self.cache_dir)
 
-    def get_remote_source(self):
-        if self.path.startswith('git://'):
-            return self.fetch_git_package()
+    def fetch_remote_source(self):
+        if self.source == 'git':
+            return self.fetch_git_source()
 
-    def fetch_git_package(self):
+    def fetch_git_source(self):
         from git import Repo
 
         ref = self.determine_git_ref()
@@ -127,9 +125,11 @@ class Path(object):
 
     def sanitize_git_path(self, path):
         dir_name = path
+        split = path.split('//')
+        domain = split[len(split)-1]
 
-        if path.endswith('.git'):
-            dir_name = path[6:-4]
+        if domain.endswith('.git'):
+            dir_name = domain[:-4]
 
         return self.sanitize_directory_path(dir_name)
 
