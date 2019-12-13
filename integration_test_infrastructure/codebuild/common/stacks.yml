@@ -8,4 +8,4 @@ stacks:
     class_path: codebuild_blueprints.codebuild.CodeBuild
     variables:
       EnvironmentName: ${namespace}
-      GitHubUrl: https://github.com/onicagroup/runway
+      GitHubUrl: ${repo_url}

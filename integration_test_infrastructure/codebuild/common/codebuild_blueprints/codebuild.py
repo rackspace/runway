@@ -204,16 +204,18 @@ class CodeBuild(Blueprint):
                             ),
                             codebuild.WebhookFilter(
                                 Type='EVENT',
-                                Pattern='PUSH,PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED,PULL_REQUEST_REOPENED' # noqa
+                                Pattern='PULL_REQUEST_CREATED,'
+                                        'PULL_REQUEST_UPDATED,'
+                                        'PULL_REQUEST_REOPENED'
                             ),
-                            # codebuild.WebhookFilter(
-                            #     Type='BASE_REF',
-                            #     Pattern='^refs/heads/release$'
-                            # ),
-                            # codebuild.WebhookFilter(
-                            #     Type='HEAD_REF',
-                            #     Pattern='^refs/heads/master$'
-                            # )
+                            codebuild.WebhookFilter(
+                                Type='BASE_REF',
+                                Pattern='^refs/heads/release$'
+                            ),
+                            codebuild.WebhookFilter(
+                                Type='HEAD_REF',
+                                Pattern='^refs/heads/master$'
+                            )
                         ]
                     ]
                 )
