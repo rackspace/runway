@@ -171,8 +171,8 @@ def generate_sample_k8s_tf_repo(env_root):
     LOGGER.info('(see its README for setup and deployment instructions)')
 
 
-def generate_sample_sls_py_module(env_root, module_dir=None):
-    """Generate skeleton Serverless python sample module."""
+def generate_sample_sls_module(env_root, template_dir, module_dir=None):
+    """Generate skeleton Serverless sample module."""
     if module_dir is None:
         module_dir = os.path.join(env_root, 'sampleapp.sls')
 
@@ -185,7 +185,7 @@ def generate_sample_sls_py_module(env_root, module_dir=None):
     shutil.copytree(
         os.path.join(ROOT,
                      'templates',
-                     'sls-py'),
+                     template_dir),
         module_dir
     )
     os.rename(os.path.join(module_dir, '_gitignore'),
@@ -194,34 +194,6 @@ def generate_sample_sls_py_module(env_root, module_dir=None):
                 module_dir)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
                 '"npm install" to generate its lockfile.', module_dir)
-
-
-def generate_sample_sls_tsc_module(env_root, module_dir=None):
-    """Generate skeleton Serverless TypeScript sample module."""
-    if module_dir is None:
-        module_dir = os.path.join(env_root, 'sampleapp.sls')
-    generate_sample_module(module_dir)
-    for i in ['package.json', 'serverless.yml', 'tsconfig.json',
-              'webpack.config.js']:
-        shutil.copyfile(
-            os.path.join(ROOT,
-                         'templates',
-                         'sls-tsc',
-                         i),
-            os.path.join(module_dir, i),
-        )
-    os.mkdir(os.path.join(module_dir, 'src'))
-    for i in ['handler.spec.ts', 'handler.ts']:
-        shutil.copyfile(
-            os.path.join(ROOT,
-                         'templates',
-                         'sls-tsc',
-                         'src',
-                         i),
-            os.path.join(module_dir, 'src', i),
-        )
-    LOGGER.info("Sample Serverless TypeScript module created at %s",
-                module_dir)
 
 
 def generate_sample_cdk_tsc_module(env_root, module_dir=None):
@@ -423,9 +395,9 @@ class GenSample(RunwayCommand):
         if self._cli_arguments.get('<samplename>') == 'cfn':
             generate_sample_cfn_module(self.env_root)
         elif self._cli_arguments.get('<samplename>') == 'sls-py':
-            generate_sample_sls_py_module(self.env_root)
+            generate_sample_sls_module(self.env_root, 'sls-py')
         elif self._cli_arguments.get('<samplename>') == 'sls-tsc':
-            generate_sample_sls_tsc_module(self.env_root)
+            generate_sample_sls_module(self.env_root, 'sls-tsc')
         elif self._cli_arguments.get('<samplename>') == 'stacker':
             generate_sample_stacker_module(self.env_root)
         elif self._cli_arguments.get('<samplename>') == 'tf':

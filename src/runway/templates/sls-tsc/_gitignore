@@ -1,0 +1,4 @@
+.serverless
+/coverage
+docs
+node_modules
