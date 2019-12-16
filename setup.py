@@ -25,6 +25,7 @@ INSTALL_REQUIRES = [
     'docopt',
     'requests',
     'future',
+    'gcg',
     'gitpython',
     # embedded pyhcl is 0.3.12
     # with the LICENSE file added to its root folder
