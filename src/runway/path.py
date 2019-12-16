@@ -81,6 +81,7 @@ class Path(object):
         return [location, options]
 
     def __parse_options_dict(self, options_str):
+        """ Convert the options string into a dict """
         opts = options_str.split('&')
         res = {}
 
@@ -117,3 +118,4 @@ class Path(object):
 
         if self.source == 'git':
             return Git(self.configuration(), self.cache_dir).fetch()
+        return None
