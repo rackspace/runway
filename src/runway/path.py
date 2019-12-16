@@ -73,17 +73,22 @@ class Path(object):
         """
         split_location_options = loc_opt_str.split('?')
         location = split_location_options[0]
+        options = {}
 
-        if len(split_location_options) != 2:
-            options = ''
-        else:
+        if len(split_location_options) == 2:
             options = self.__parse_options_dict(split_location_options[1])
 
         return [location, options]
 
     def __parse_options_dict(self, options_str):
         opts = options_str.split('&')
-        return {key: value for key, value in [opt.split('=') for opt in opts[1:]]}
+        res = {}
+
+        for opt in opts:
+            key, value = opt.split('=')
+            res[key] = value
+
+        return res
 
     def __get_module_root_dir(self, module):
         """ Retrieve the root directory location of the module being parsed """
