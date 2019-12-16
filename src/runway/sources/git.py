@@ -1,4 +1,5 @@
 """'Git' type Path Source."""
+from __future__ import absolute_import
 
 import tempfile
 import shutil
@@ -8,7 +9,6 @@ import os
 import sys
 import logging
 
-from git import Repo
 from .source import Source
 
 LOGGER = logging.getLogger('runway')
@@ -19,6 +19,8 @@ class Git(Source):
 
     def fetch(self):
         """Retrieve the git repository from it's remote location."""
+        from git import Repo
+
         ref = self.determine_git_ref()
         dir_name = '_'.join([self.sanitize_git_path(self.config.get('uri', '')), ref])
         cached_dir_path = os.path.join(self.cache_dir, dir_name)
