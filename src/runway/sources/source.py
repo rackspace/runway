@@ -23,7 +23,8 @@ class Source(object):
         """Retrieve remote source. To be implemented in each subclass."""
         raise NotImplementedError
 
-    def sanitize_directory_path(self, uri):
+    @staticmethod
+    def sanitize_directory_path(uri):
         """Sanitize a Source directory path string."""
         for i in ['@', '/', ':']:
             uri = uri.replace(i, '_')

@@ -43,17 +43,20 @@ class Git(Source):
 
     def git_ls_remote(self, ref):
         """List remote repositories based on uri and ref received."""
-        LOGGER.debug("Invoking git to retrieve commit id for repo %s...", self.config['uri'])
+        LOGGER.debug(
+            "Invoking git to retrieve commit id for repo %s...",
+            self.config.get('uri', '')
+        )
         lsremote_output = subprocess.check_output(['git',
                                                    'ls-remote',
-                                                   self.config.get('uri'),
+                                                   self.config.get('uri', ''),
                                                    ref])
+        # pylint: disable=unsupported-membership-test
         if b"\t" in lsremote_output:
             commit_id = lsremote_output.split(b"\t")[0]
             LOGGER.debug("Matching commit id found: %s", commit_id)
             return commit_id
-        else:
-            raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.config['uri']))
+        raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.config['uri']))
 
     def determine_git_ls_remote_ref(self):
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
