@@ -14,17 +14,17 @@ class Source(object):
     (Git, S3, ect.)
     """
 
-    def __init__(self, config, cache_dir=None):
+    def __init__(self, config: dict, cache_dir: str = None):
         """Initialize."""
         self.config = config
         self.cache_dir = cache_dir
 
-    def fetch(self):
+    def fetch(self) -> None:
         """Retrieve remote source. To be implemented in each subclass."""
         raise NotImplementedError
 
     @staticmethod
-    def sanitize_directory_path(uri):
+    def sanitize_directory_path(uri: str) -> str:
         """Sanitize a Source directory path string."""
         for i in ['@', '/', ':']:
             uri = uri.replace(i, '_')
