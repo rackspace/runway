@@ -16,17 +16,12 @@ LOGGER = logging.getLogger('runway')
 class Git(Source):
     """ Git type Path Source """
 
-    def __init__(self, config, cache_dir=None):
-        """ Initialize """
-        self.config = config
-        self.cache_dir = cache_dir
-
     def fetch(self):
         """ Retrieve the git repository from it's remote location. """
         from git import Repo
 
         ref = self.determine_git_ref()
-        dir_name = '_'.join([self.sanitize_git_path(self.config.get('uri')), ref])
+        dir_name = '_'.join([self.sanitize_git_path(self.config.get('uri', '')), ref])
         cached_dir_path = os.path.join(self.cache_dir, dir_name)
         cached_path = ''
 
