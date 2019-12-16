@@ -7,6 +7,7 @@ from .sources.git import Git
 
 LOGGER = logging.getLogger('runway')
 
+
 class Path(object):
     """ Runway configuration 'path' settings object """
 
@@ -15,21 +16,19 @@ class Path(object):
         if not cache_dir:
             cache_dir = os.path.expanduser("~/.runway_cache")
 
-        self.module = module
         self.env_root = env_root
         self.cache_dir = cache_dir
-        self.source, self.uri, self.location, self.options = self.__parse()
-        self.module_root = self.__get_module_root_dir()
+        self.source, self.uri, self.location, self.options = self.parse(module)
+        self.module_root = self.__get_module_root_dir(module)
 
-    def __parse(self):
-        """ Retrieve the source and location of the path variable """
-
+    def parse(self, module):
+        """ Retrieve the source and location of the path variable. """
         source = 'local'
         uri = ''
         location = ''
         options = ''
 
-        split_source_location = self.module['path'].split('::')
+        split_source_location = module.get('path').split('::')
 
         # Local path
         if len(split_source_location) != 2:
@@ -44,11 +43,22 @@ class Path(object):
 
         return [source, uri, location, options]
 
+    def configuration(self):
+        """ Transform object into configuration settings for remote sources. """
+        conf = {
+            'source': self.source,
+            'location': self.location,
+            'uri': self.uri,
+            'options': self.options
+        }
+        return conf
+
     def __parse_uri_and_location(self, uri_loc_str):
+        """ Given a location string extract the uri and remaining location values. """
         split_uri_location = uri_loc_str.split('//')
         location_string = '/'
 
-        if(len(split_uri_location) == 3):
+        if len(split_uri_location) == 3:
             location_string = split_uri_location[2]
 
         return [
@@ -57,6 +67,10 @@ class Path(object):
         ]
 
     def __parse_location_and_options(self, loc_opt_str):
+        """
+            Given a location string extract the location
+            variable and the remote module options.
+        """
         split_location_options = loc_opt_str.split('?')
         location = split_location_options[0]
 
@@ -71,11 +85,11 @@ class Path(object):
         opts = options_str.split('&')
         return {key: value for key, value in [opt.split('=') for opt in opts[1:]]}
 
-    def __get_module_root_dir(self):
+    def __get_module_root_dir(self, module):
         """ Retrieve the root directory location of the module being parsed """
 
-        if isinstance(self.module, six.string_types):
-            self.module = {'path': self.module}
+        if isinstance(module, six.string_types):
+            module = {'path': module}
 
         if self.location in ['.', '.' + os.sep]:
             return self.env_root
@@ -83,14 +97,6 @@ class Path(object):
             self.__create_cache_directory()
             return self.__fetch_remote_source()
         return os.path.join(self.env_root, self.location)
-
-    def __get_path_configuration(self):
-        conf = {}
-        conf['source'] = self.source
-        conf['location'] = self.location
-        conf['uri'] = self.uri
-        conf['options'] = self.options
-        return conf
 
     def __create_cache_directory(self):
         """ If no cache directory exists for the remote runway modules, create one """
@@ -105,4 +111,4 @@ class Path(object):
         """
 
         if self.source == 'git':
-            return Git(self.__get_path_configuration(), self.cache_dir).fetch()
+            return Git(self.configuration(), self.cache_dir).fetch()
