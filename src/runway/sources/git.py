@@ -1,4 +1,4 @@
-""" 'Git' type Path Source """
+"""'Git' type Path Source."""
 
 import tempfile
 import shutil
@@ -14,10 +14,10 @@ LOGGER = logging.getLogger('runway')
 
 
 class Git(Source):
-    """ Git type Path Source """
+    """Git type Path Source."""
 
     def fetch(self):
-        """ Retrieve the git repository from it's remote location. """
+        """Retrieve the git repository from it's remote location."""
         from git import Repo
 
         ref = self.determine_git_ref()
@@ -42,7 +42,7 @@ class Git(Source):
         return os.path.join(cached_path, self.config['location'])
 
     def git_ls_remote(self, ref):
-        """ List remote repositories based on uri and ref received """
+        """List remote repositories based on uri and ref received."""
         LOGGER.debug("Invoking git to retrieve commit id for repo %s...", self.config['uri'])
         lsremote_output = subprocess.check_output(['git',
                                                    'ls-remote',
@@ -56,7 +56,7 @@ class Git(Source):
             raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.config['uri']))
 
     def determine_git_ls_remote_ref(self):
-        """ Default to HEAD remote ref unless a branch is found """
+        """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
 
         if self.config.get('branch'):
@@ -65,7 +65,7 @@ class Git(Source):
         return ref
 
     def determine_git_ref(self):
-        """ Determine the git reference code """
+        """Determine the git reference code."""
         ref_config_keys = 0
         options = self.config.get('options')
 
@@ -88,7 +88,7 @@ class Git(Source):
         return ref
 
     def sanitize_git_path(self, path):
-        """ Sanitize the git path for folder/file assignment """
+        """Sanitize the git path for folder/file assignment."""
         dir_name = path
         split = path.split('//')
         domain = split[len(split)-1]
