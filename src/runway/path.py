@@ -46,7 +46,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         Determine which remote Source type to fetch.
         """
         if self.source == 'git':
-            return self.git_source_class(self.configuration, self.cache_dir).fetch()
+            return self.git_source_class(self.configuration).fetch()
         return None
 
     @property
@@ -57,7 +57,8 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
             'source': self.source,
             'location': self.location,
             'uri': self.uri,
-            'options': self.options
+            'options': self.options,
+            'cache_dir': self.cache_dir
         }
 
     @classmethod

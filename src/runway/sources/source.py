@@ -18,15 +18,16 @@ class Source(object):
     (Git, S3, ect.)
     """
 
-    def __init__(self, config, cache_dir=None):
+    def __init__(self, config):
         # type(Dict[str, Union[str, Dict[str, str]]], Optional[str]) -> Source
         """Initialize."""
 
-        if not cache_dir:
-            cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
+        self.cache_dir = config.get('cache_dir', None)
+
+        if not self.cache_dir:
+            self.cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
 
         self.config = config  # type: Dict[str, Union[str, Dict[str, str]]]
-        self.cache_dir = cache_dir  # type: str
         self.__create_cache_directory()
 
     def fetch(self):

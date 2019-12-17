@@ -111,5 +111,6 @@ class PathTester(unittest.TestCase):
             'source': 'git',
             'location': 'src/foo/bar',
             'uri': 'git://github.com/onicagroup/foo/bar.git',
-            'options': {'branch': 'foo'}
+            'options': {'branch': 'foo'},
+            'cache_dir': None
         })
