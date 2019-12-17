@@ -19,7 +19,7 @@ class Source(object):
     def __init__(self, config, cache_dir=None):
         # type(Dict[str, Union[str, Dict[str, str]]], Optional[str]) -> Source
         """Initialize."""
-        self.config = config  # type: Dict[str, Union[str, Dict[str, str]]
+        self.config = config  # type: Dict[str, Union[str, Dict[str, str]]]
         self.cache_dir = cache_dir  # type: str
 
     def fetch(self):
