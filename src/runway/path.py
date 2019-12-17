@@ -11,7 +11,7 @@ from .sources.git import Git
 LOGGER = logging.getLogger('runway')
 
 
-class Path(object):
+class Path(object):  # pylint: disable=too-many-instance-attributes
     """Runway configuration 'path' settings object."""
 
     def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
