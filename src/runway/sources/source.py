@@ -19,8 +19,8 @@ class Source(object):
     def __init__(self, config, cache_dir=None):
         # type(Dict[str, Union[str, Dict[str, str]]], Optional[str]) -> Source
         """Initialize."""
-        self.config = config
-        self.cache_dir = cache_dir
+        self.config = config  # type: Dict[str, Union[str, Dict[str, str]]
+        self.cache_dir = cache_dir  # type: str
 
     def fetch(self):
         # type: () -> None
@@ -32,5 +32,5 @@ class Source(object):
         # type: (str) -> str
         """Sanitize a Source directory path string."""
         for i in ['@', '/', ':']:
-            uri = uri.replace(i, '_')
+            uri = uri.replace(i, '_')  # type: str
         return uri
