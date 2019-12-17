@@ -17,7 +17,8 @@ LOGGER = logging.getLogger('runway')
 class Git(Source):
     """Git type Path Source."""
 
-    def fetch(self) -> str:
+    def fetch(self):
+        # type: () -> str
         """Retrieve the git repository from it's remote location."""
         from git import Repo
 
@@ -42,7 +43,8 @@ class Git(Source):
 
         return os.path.join(cached_path, self.config['location'])
 
-    def git_ls_remote(self, ref: str) -> str:
+    def git_ls_remote(self, ref):
+        # type: (str) -> str
         """List remote repositories based on uri and ref received."""
         LOGGER.debug(
             "Invoking git to retrieve commit id for repo %s...",
@@ -59,7 +61,8 @@ class Git(Source):
             return commit_id
         raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.config['uri']))
 
-    def determine_git_ls_remote_ref(self) -> str:
+    def determine_git_ls_remote_ref(self):
+        # type: () -> str
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
 
@@ -68,7 +71,8 @@ class Git(Source):
 
         return ref
 
-    def determine_git_ref(self) -> str:
+    def determine_git_ref(self):
+        # type: () -> str
         """Determine the git reference code."""
         ref_config_keys = 0
         options = self.config.get('options')
@@ -91,7 +95,8 @@ class Git(Source):
             return ref.decode()
         return ref
 
-    def sanitize_git_path(self, path: str) -> str:
+    def sanitize_git_path(self, path):
+        # type(str) -> str
         """Sanitize the git path for folder/file assignment."""
         dir_name = path
         split = path.split('//')
