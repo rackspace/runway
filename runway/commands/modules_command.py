@@ -518,14 +518,16 @@ class ModulesCommand(RunwayCommand):
 
     def _deploy_module(self, module, deployment, context):
         module_opts = {}
+        deployment.resolve(context)
+        module.resolve(context)
         if deployment.get('environments'):
-            module_opts['environments'] = deployment['environments'].copy()  # noqa
+            module_opts['environments'] = deployment.environments.copy()
         if deployment.get('module_options'):
             module_opts['options'] = deployment['module_options'].copy()  # noqa
 
         path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))
 
-        module_opts = merge_dicts(module_opts, module.__dict__)
+        module_opts = merge_dicts(module_opts, module.contents)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
         LOGGER.info("")

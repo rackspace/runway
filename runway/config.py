@@ -1,9 +1,15 @@
 """Runway config file module."""
+from typing import Any, Dict, List, Optional, Union, Iterator, TYPE_CHECKING
+
 import logging
 import os
 import sys
-from typing import Any, Dict, List, Optional, Union, Iterator  # pylint: disable=unused-import
 import yaml
+
+from .variables import Variable
+
+if TYPE_CHECKING:
+    from .context import Context  # noqa
 
 LOGGER = logging.getLogger('runway')
 
@@ -11,10 +17,46 @@ LOGGER = logging.getLogger('runway')
 class ConfigComponent(object):
     """Base class for Runway config components."""
 
+    GLOBAL_SUPPORTS_VARIABLES = ['environments']
+    SUPPORTS_VARIABLES = []  # subclass support list
+
+    @property
+    def contents(self):
+        # type: () -> Dict[str, Any]
+        """Sanitized output of __dict__ with properties added."""
+        contents = {}
+
+        for key, val in self.__dict__.items():
+            if not key.startswith('_'):
+                contents[key] = val
+
+        for attr in self.supports_variables:
+            contents[attr] = getattr(self, attr, None)
+
+        return contents
+
+    @property
+    def environments(self):
+        # type: () -> Any
+        """Access the value of an attribute that supports variables."""
+        return self._environments.value  # pylint: disable=no-member
+
+    @property
+    def supports_variables(self):
+        # type: () -> List[str]
+        """Return a complete list of attributes that support variables."""
+        return self.GLOBAL_SUPPORTS_VARIABLES + self.SUPPORTS_VARIABLES
+
     def get(self, key, default=None):
         # type: (str, Any) -> Any
         """Implement evaluation of get."""
         return getattr(self, key, getattr(self, key.replace('-', '_'), default))
+
+    def resolve(self, context):
+        # type: ('Context') -> None
+        """Resolve all attributes that support variables."""
+        for attr in self.supports_variables:
+            getattr(self, '_' + attr).resolve(context)
 
     def __getitem__(self, key):
         # type: (str) -> Any
@@ -198,7 +240,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         self.name = name
         self.path = path
         self.class_path = class_path
-        self.environments = environments or {}
+        self._environments = Variable(name + '.environments', environments or {})
         self.env_vars = env_vars or {}
         self.options = options or {}
         self.tags = tags or {}
@@ -349,6 +391,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             - :ref:`command-plan`
 
         """
+        self.name = deployment.pop('name')  # type: str
         self.account_alias = deployment.pop(
             'account_alias', deployment.pop('account-alias', {})
         )  # type: Optional[Dict[str, str]]
@@ -358,9 +401,9 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self.assume_role = deployment.pop(
             'assume_role', deployment.pop('assume-role', {})
         )  # type: Optional[Dict[str, Union[str, Dict[str, str]]]]
-        self.environments = deployment.pop(
-            'environments', {}
-        )  # type: Optional[Dict[str, Dict[str, Any]]]
+        self._environments = Variable(
+            self.name + '.environments', deployment.pop('environments', {})
+        )  # type: Variable
         self.env_vars = deployment.pop(
             'env_vars', deployment.pop('env-vars', {})
         )  # type: Optional[Dict[str, Dict[str, Any]]]
@@ -382,7 +425,6 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self.module_options = deployment.pop(
             'module_options', deployment.pop('module-options', {})
         )  # type: Optional(Dict[str, Any])
-        self.name = deployment.pop('name')  # type: str
         self.regions = deployment.pop(
             'regions', []
         )  # type: Union[List[str], Dict[str, List[str]]]
