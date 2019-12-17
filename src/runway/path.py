@@ -71,7 +71,7 @@ class Path(object):
 
     @classmethod
     def parse(cls, module):
-        # type: (str) -> Tuple[str]
+        # type: (Dict[str, str]) -> Tuple[str]
         """Retrieve the source and location of the path variable."""
         source = 'local'  # type: str
         uri = ''  # type: str
@@ -83,13 +83,14 @@ class Path(object):
         # Local path
         if len(split_source_location) != 2:
             location = split_source_location[0]  # type: str
+            options = {}  # type: Dict
             return source, uri, location, options
 
         source = split_source_location[0]  # type: str
         temp_location = split_source_location[1]  # type: str
 
-        uri, location = cls.__parse_uri_and_location(temp_location)  # type: List[str]
-        location, options = cls.__parse_location_and_options(location)  # type: List[str]
+        location, options = cls.__parse_location_and_options(temp_location)  # type: List[str]
+        uri, location = cls.__parse_uri_and_location(location)  # type: List[str]
 
         return source, uri, location, options
 
