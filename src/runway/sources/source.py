@@ -21,7 +21,6 @@ class Source(object):
     def __init__(self, config):
         # type(Dict[str, Union[str, Dict[str, str]]], Optional[str]) -> Source
         """Initialize."""
-
         self.cache_dir = config.get('cache_dir', None)
 
         if not self.cache_dir:
@@ -48,4 +47,3 @@ class Source(object):
         """If no cache directory exists for the remote runway modules, create one."""
         if not os.path.isdir(self.cache_dir):
             os.mkdir(self.cache_dir)
-
