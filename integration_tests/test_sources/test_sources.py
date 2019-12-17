@@ -5,11 +5,11 @@ import glob
 from send2trash import send2trash
 
 from integration_test import IntegrationTest
-from util import (copy_file, copy_dir, import_tests, execute_tests)
+from util import (copy_file, import_tests, execute_tests)
 
 
 class TestSources(IntegrationTest):
-    """Test sources"""
+    """Test sources."""
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
     fixtures_dir = os.path.join(base_dir, 'fixtures')
