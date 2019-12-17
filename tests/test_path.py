@@ -2,9 +2,18 @@
 import logging
 import unittest
 
+from runway.sources.source import Source
 from runway.path import Path
 
 LOGGER = logging.getLogger('runway')
+
+
+class MockGitSource(Source):
+    """Mock a Git Source Object"""
+
+    def fetch(self):
+        """ Fetch """
+        return 'mock/git/folder'
 
 
 class PathTester(unittest.TestCase):
@@ -86,10 +95,21 @@ class PathTester(unittest.TestCase):
 
         Verify tuple is parsed as anticipated.
         """
-        (source, uri, location, options) = Path.parse(
-            {'path': 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz'} # noqa E501
-        )
+        path = 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz'
+        (source, uri, location, options) = Path.parse({'path': path})
         self.assertEqual(source, 'git')
         self.assertEqual(location, 'src/foo/bar')
         self.assertEqual(uri, 'git://github.com/onicagroup/foo/bar.git')
         self.assertEqual(options, {'branch': 'foo', 'bar': 'baz'})
+
+
+    def test_configuration_property(self):
+        """Verify the Configuration property is set to the unpacked parse tuple."""
+        path = 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo'
+        instance = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
+        self.assertEqual(instance.configuration, {
+            'source': 'git',
+            'location': 'src/foo/bar',
+            'uri': 'git://github.com/onicagroup/foo/bar.git',
+            'options': {'branch': 'foo'}
+        })
