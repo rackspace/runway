@@ -34,6 +34,12 @@ class Source(object):
         """Retrieve remote source. To be implemented in each subclass."""
         raise NotImplementedError
 
+    def __create_cache_directory(self):
+        # type: () -> None
+        """If no cache directory exists for the remote runway modules, create one."""
+        if not os.path.isdir(self.cache_dir):
+            os.mkdir(self.cache_dir)
+
     @staticmethod
     def sanitize_directory_path(uri):
         # type: (str) -> str
@@ -41,9 +47,3 @@ class Source(object):
         for i in ['@', '/', ':']:
             uri = uri.replace(i, '_')  # type: str
         return uri
-
-    def __create_cache_directory(self):
-        # type: () -> None
-        """If no cache directory exists for the remote runway modules, create one."""
-        if not os.path.isdir(self.cache_dir):
-            os.mkdir(self.cache_dir)
