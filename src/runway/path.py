@@ -17,9 +17,6 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
         # type: (str, str, Optional[str])-> Path
         """Initialize."""
-        if not cache_dir:
-            cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
-
         self.git_source_class = git_source_class  # type: Git
         self.env_root = env_root  # type: str
         self.cache_dir = cache_dir  # type: str
@@ -38,15 +35,8 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         if self.location in ['.', '.' + os.sep]:
             return self.env_root
         if self.source != 'local':
-            self.__create_cache_directory()
             return self.__fetch_remote_source()
         return os.path.join(self.env_root, self.location)
-
-    def __create_cache_directory(self):
-        # type: () -> None
-        """If no cache directory exists for the remote runway modules, create one."""
-        if not os.path.isdir(self.cache_dir):
-            os.mkdir(self.cache_dir)
 
     def __fetch_remote_source(self):
         # type: () -> Git or None
