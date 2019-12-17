@@ -18,3 +18,8 @@ class GitTester(unittest.TestCase):
             'location': '/'
         }).fetch()
         self.assertEqual(fetched, '/')
+
+    def test_sanitize_git_path(self):
+        """Ensure git path is property sanitized"""
+        path = Git({}).sanitize_git_path('git://github.com/onicagroup/runway.git')
+        self.assertEqual(path, 'github.com_onicagroup_runway')

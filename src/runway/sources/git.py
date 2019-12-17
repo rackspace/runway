@@ -49,18 +49,6 @@ class Git(Source):
 
         return os.path.join(cached_path, self.config['location'])
 
-    def sanitize_git_path(self, path):
-        # type(str) -> str
-        """Sanitize the git path for folder/file assignment."""
-        dir_name = path  # type: str
-        split = path.split('//')  # type: List[str]
-        domain = split[len(split)-1]  # type: str
-
-        if domain.endswith('.git'):
-            dir_name = domain[:-4]
-
-        return self.sanitize_directory_path(dir_name)
-
     def __git_ls_remote(self, ref):
         # type: (str) -> str
         """List remote repositories based on uri and ref received."""
@@ -112,3 +100,16 @@ class Git(Source):
         if sys.version_info[0] > 2 and isinstance(ref, bytes):
             return ref.decode()
         return ref
+
+    @classmethod
+    def sanitize_git_path(cls, path):
+        # type(str) -> str
+        """Sanitize the git path for folder/file assignment."""
+        dir_name = path  # type: str
+        split = path.split('//')  # type: List[str]
+        domain = split[len(split)-1]  # type: str
+
+        if domain.endswith('.git'):
+            dir_name = domain[:-4]
+
+        return cls.sanitize_directory_path(dir_name)
