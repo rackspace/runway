@@ -24,7 +24,7 @@ class Git(Source):
         """Retrieve the git repository from it's remote location."""
         from git import Repo
 
-        ref = self.determine_git_ref()  # type: str
+        ref = self.__determine_git_ref()  # type: str
         dir_name = '_'.join([
             self.sanitize_git_path(self.config.get('uri', '')),
             ref
@@ -48,7 +48,7 @@ class Git(Source):
 
         return os.path.join(cached_path, self.config['location'])
 
-    def git_ls_remote(self, ref):
+    def __git_ls_remote(self, ref):
         # type: (str) -> str
         """List remote repositories based on uri and ref received."""
         LOGGER.debug(
@@ -66,7 +66,7 @@ class Git(Source):
             return commit_id
         raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.config['uri']))
 
-    def determine_git_ls_remote_ref(self):
+    def __determine_git_ls_remote_ref(self):
         # type: () -> str
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
@@ -76,7 +76,7 @@ class Git(Source):
 
         return ref
 
-    def determine_git_ref(self):
+    def __determine_git_ref(self):
         # type: () -> str
         """Determine the git reference code."""
         ref_config_keys = 0   # type: int
@@ -95,12 +95,13 @@ class Git(Source):
         elif options.get('tag'):
             ref = options.get('tag')  # type: str
         else:
-            ref = self.git_ls_remote(self.determine_git_ls_remote_ref())  # ty pe: str
+            ref = self.__git_ls_remote(self.__determine_git_ls_remote_ref())  # ty pe: str
         if sys.version_info[0] > 2 and isinstance(ref, bytes):
             return ref.decode()
         return ref
 
-    def sanitize_git_path(self, path):
+    @classmethod
+    def sanitize_git_path(cls, path):
         # type(str) -> str
         """Sanitize the git path for folder/file assignment."""
         dir_name = path  # type: str
@@ -110,4 +111,4 @@ class Git(Source):
         if domain.endswith('.git'):
             dir_name = domain[:-4]
 
-        return self.sanitize_directory_path(dir_name)
+        return cls.sanitize_directory_path(dir_name)

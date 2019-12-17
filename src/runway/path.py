@@ -11,15 +11,13 @@ from .sources.git import Git
 LOGGER = logging.getLogger('runway')
 
 
-class Path(object):
+class Path(object):  # pylint: disable=too-many-instance-attributes
     """Runway configuration 'path' settings object."""
 
-    def __init__(self, module, env_root, cache_dir=None):
+    def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
         # type: (str, str, Optional[str])-> Path
         """Initialize."""
-        if not cache_dir:
-            cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
-
+        self.git_source_class = git_source_class  # type: Git
         self.env_root = env_root  # type: str
         self.cache_dir = cache_dir  # type: str
         (self.source,
@@ -37,15 +35,8 @@ class Path(object):
         if self.location in ['.', '.' + os.sep]:
             return self.env_root
         if self.source != 'local':
-            self.__create_cache_directory()
             return self.__fetch_remote_source()
         return os.path.join(self.env_root, self.location)
-
-    def __create_cache_directory(self):
-        # type: () -> None
-        """If no cache directory exists for the remote runway modules, create one."""
-        if not os.path.isdir(self.cache_dir):
-            os.mkdir(self.cache_dir)
 
     def __fetch_remote_source(self):
         # type: () -> Git or None
@@ -55,7 +46,7 @@ class Path(object):
         Determine which remote Source type to fetch.
         """
         if self.source == 'git':
-            return Git(self.configuration, self.cache_dir).fetch()
+            return self.git_source_class(self.configuration).fetch()
         return None
 
     @property
@@ -66,12 +57,13 @@ class Path(object):
             'source': self.source,
             'location': self.location,
             'uri': self.uri,
-            'options': self.options
+            'options': self.options,
+            'cache_dir': self.cache_dir
         }
 
     @classmethod
     def parse(cls, module):
-        # type: (str) -> Tuple[str]
+        # type: (Dict[str, str]) -> Tuple[str]
         """Retrieve the source and location of the path variable."""
         source = 'local'  # type: str
         uri = ''  # type: str
@@ -83,13 +75,14 @@ class Path(object):
         # Local path
         if len(split_source_location) != 2:
             location = split_source_location[0]  # type: str
+            options = {}  # type: Dict
             return source, uri, location, options
 
         source = split_source_location[0]  # type: str
         temp_location = split_source_location[1]  # type: str
 
-        uri, location = cls.__parse_uri_and_location(temp_location)  # type: List[str]
-        location, options = cls.__parse_location_and_options(location)  # type: List[str]
+        location, options = cls.__parse_location_and_options(temp_location)  # type: List[str]
+        uri, location = cls.__parse_uri_and_location(location)  # type: List[str]
 
         return source, uri, location, options
 
