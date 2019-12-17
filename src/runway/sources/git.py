@@ -22,7 +22,7 @@ class Git(Source):
     def fetch(self):
         # type: () -> str
         """Retrieve the git repository from it's remote location."""
-        from git import Repo  # pylint: disable=import-outside-toplevel
+        from git import Repo
 
         ref = self.__determine_git_ref()  # type: str
         dir_name = '_'.join([
