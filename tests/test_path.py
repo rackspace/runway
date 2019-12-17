@@ -102,9 +102,8 @@ class PathTester(unittest.TestCase):
         self.assertEqual(uri, 'git://github.com/onicagroup/foo/bar.git')
         self.assertEqual(options, {'branch': 'foo', 'bar': 'baz'})
 
-
     def test_configuration_property(self):
-        """Verify the Configuration property is set to the unpacked parse tuple."""
+        """Verify the Configuration property is set to appropriate values."""
         path = 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo'
         instance = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
         self.assertEqual(instance.configuration, {
@@ -114,3 +113,19 @@ class PathTester(unittest.TestCase):
             'options': {'branch': 'foo'},
             'cache_dir': None
         })
+
+    def test_module_root_set_to_env_root(self):
+        """When the path location == a root directory set to the env_root passed."""
+        path = '.'
+        instance = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
+        self.assertEqual(instance.module_root, 'fake/env/root')
+
+        path = './'
+        instance2 = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
+        self.assertEqual(instance2.module_root, 'fake/env/root')
+
+    def test_module_root_set_to_fetched_source_value(self):
+        """When the path location is a remote resource fetch the directory."""
+        path = 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo'
+        instance = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
+        self.assertEqual(instance.module_root, 'mock/git/folder')
