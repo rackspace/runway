@@ -14,12 +14,13 @@ LOGGER = logging.getLogger('runway')
 class Path(object):
     """Runway configuration 'path' settings object."""
 
-    def __init__(self, module, env_root, cache_dir=None):
+    def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
         # type: (str, str, Optional[str])-> Path
         """Initialize."""
         if not cache_dir:
             cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
 
+        self.git_source_class = git_source_class  # type: Git
         self.env_root = env_root  # type: str
         self.cache_dir = cache_dir  # type: str
         (self.source,
@@ -55,7 +56,7 @@ class Path(object):
         Determine which remote Source type to fetch.
         """
         if self.source == 'git':
-            return Git(self.configuration, self.cache_dir).fetch()
+            return self.git_source_class(self.configuration, self.cache_dir).fetch()
         return None
 
     @property
