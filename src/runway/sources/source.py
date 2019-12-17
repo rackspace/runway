@@ -5,7 +5,7 @@ Allows us to specify specific remote sourced resources for out application
 (Git, S3, ect.)
 """
 # pylint: disable=unused-import
-from typing import Dict, Optional  # noqa: F401
+from typing import Dict, Optional, Union  # noqa: F401
 
 
 class Source(object):
@@ -17,7 +17,7 @@ class Source(object):
     """
 
     def __init__(self, config, cache_dir=None):
-        # type(Dict[str, str or Dict[str, str]], Optional(str)) -> Source
+        # type(Dict[str, Union[str, Dict[str, str]]], Optional[str]) -> Source
         """Initialize."""
         self.config = config
         self.cache_dir = cache_dir
