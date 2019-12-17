@@ -30,3 +30,8 @@ class SourceTester(unittest.TestCase):
         """Ensure a cache directory is created"""
         source = Source({})
         self.assertTrue(os.path.isdir(source.cache_dir))
+
+    def test_directory_path_is_properly_sanitized(self):
+        """Ensure that path values are sanitized for folder creation."""
+        dir_path = Source.sanitize_directory_path('foo@bar/baz:bop')
+        self.assertEqual(dir_path, 'foo_bar_baz_bop')
