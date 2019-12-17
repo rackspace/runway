@@ -124,6 +124,17 @@ class PathTester(unittest.TestCase):
         instance2 = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
         self.assertEqual(instance2.module_root, 'fake/env/root')
 
+    def test_module_root_set_to_contcatenated_path(self):
+        """
+            Test module root set to concatednated path.
+
+            When the path location is local and not the
+            root combine the location with the env_root.
+        """
+        path = 'foo/bar'
+        instance = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
+        self.assertEqual(instance.module_root, 'fake/env/root/foo/bar')
+
     def test_module_root_set_to_fetched_source_value(self):
         """When the path location is a remote resource fetch the directory."""
         path = 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo'
