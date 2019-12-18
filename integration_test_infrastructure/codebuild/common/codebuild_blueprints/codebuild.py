@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Module with CodeBuild project."""
 from __future__ import print_function
+from os.path import dirname, realpath
+import sys
 
 from troposphere import (
     AccountId, Join, Partition, Region, iam, codebuild, Sub
@@ -18,6 +20,11 @@ from awacs.helpers.trust import make_simple_assume_policy
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import CFNString
+
+root_dir = dirname(dirname(dirname(dirname(dirname(realpath(__file__))))))
+sys.path.insert(0, root_dir)
+
+from integration_tests.runner import Runner  # noqa pylint: disable=wrong-import-position
 
 # The github accounts that are allowed to trigger the
 # build tests
@@ -50,8 +57,7 @@ class CodeBuild(Blueprint):
         template.set_description('Runway CodeBuild Project')
 
         # Resources
-        deploy_name_list = ['runway-integration-tests-',
-                            variables['EnvironmentName'].ref]
+        deploy_name_list = ['runway-int-test-']
 
         # This must match what is in the the Terraform
         # integration tests. This corresponds to the template listed in
@@ -158,30 +164,31 @@ class CodeBuild(Blueprint):
             )
         )
 
-        template.add_resource(
-            codebuild.Project(
-                'RunwayIntegrationTests',
+        def generate_codebuild_resource(name):
+            return codebuild.Project(
+                f'RunwayIntegrationTest{name}',
                 Artifacts=codebuild.Artifacts(
                     Type='NO_ARTIFACTS'
                 ),
+                Description=f'{name} runway integration tests',
                 Environment=codebuild.Environment(
                     ComputeType='BUILD_GENERAL1_SMALL',
                     EnvironmentVariables=[
                         codebuild.EnvironmentVariable(
-                            Name='CI',
-                            Type='PLAINTEXT',
-                            Value='1'
-                        ),
-                        codebuild.EnvironmentVariable(
                             Name='DEPLOY_ENVIRONMENT',
                             Type='PLAINTEXT',
                             Value=variables['EnvironmentName'].ref
+                        ),
+                        codebuild.EnvironmentVariable(
+                            Name='TEST_TO_RUN',
+                            Type='PLAINTEXT',
+                            Value=name.lower()
                         )
                     ],
                     Image='aws/codebuild/standard:2.0',
                     Type='LINUX_CONTAINER'
                 ),
-                Name=Join('', deploy_name_list),
+                Name=f'runway-int-test-{name}',
                 ServiceRole=codebuild_role.get_att('Arn'),
                 Source=codebuild.Source(
                     Type='GITHUB',
@@ -197,7 +204,9 @@ class CodeBuild(Blueprint):
                             ),
                             codebuild.WebhookFilter(
                                 Type='EVENT',
-                                Pattern='PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED,PULL_REQUEST_REOPENED' # noqa
+                                Pattern='PULL_REQUEST_CREATED,'
+                                        'PULL_REQUEST_UPDATED,'
+                                        'PULL_REQUEST_REOPENED'
                             ),
                             codebuild.WebhookFilter(
                                 Type='BASE_REF',
@@ -211,7 +220,11 @@ class CodeBuild(Blueprint):
                     ]
                 )
             )
-        )
+
+        runner = Runner(use_abs=True)
+
+        for test in runner.available_tests:
+            template.add_resource(generate_codebuild_resource(test.__name__))
 
 
 if __name__ == "__main__":

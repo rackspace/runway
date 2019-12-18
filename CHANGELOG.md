@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - `DEPLOY_ENVIRONMENT` is available to all module deployments as an environment variable
   - if it does not exist in the current environment, value is derived from branch or directory name
+- Updated static site CFN template to use node v10 for path rewrite lambda
 
 ## [1.3.3] - 2019-11-26
 ### Changed

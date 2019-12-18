@@ -3,11 +3,12 @@
 deployments:
   - modules:
     - ./
-    regions: 
+    regions:
       - us-east-1
     environments:
       common:
         namespace: common
+        repo_url: https://github.com/onicagroup/runway
     account-id:
       common: "523485371024"
 

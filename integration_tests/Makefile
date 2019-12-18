@@ -1,3 +1,3 @@
 test:
 	pipenv sync
-	pipenv run python runner.py
+	pipenv run python run_test.py
