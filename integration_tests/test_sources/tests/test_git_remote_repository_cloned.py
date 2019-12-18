@@ -2,7 +2,7 @@
 
 import os
 
-from test_sources.test_sources import TestSources
+from integration_tests.test_sources.test_sources import TestSources
 from runway.util import change_dir
 from util import run_command
 
