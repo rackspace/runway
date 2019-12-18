@@ -228,7 +228,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     ZipFile=Join(
                         '',
                         ["'use strict';\n",
-                         "exports.handler = (event, context, callback) => {\n",
+                         "exports.handler = async function(event, context) {\n",
                          "\n",
                          "    // Extract the request from the CloudFront event that is sent to Lambda@Edge\n",  # noqa pylint: disable=line-too-long
                          "    var request = event.Records[0].cf.request;\n",
@@ -244,7 +244,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                          "    // Replace the received URI with the URI that includes the index page\n",  # noqa pylint: disable=line-too-long
                          "    request.uri = newuri;\n",
                          "    // Return to CloudFront\n",
-                         "    return callback(null, request);\n",
+                         "    return request;\n",
                          "\n",
                          "};\n"]
                     )
@@ -252,7 +252,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 Description='Rewrites CF directory HTTP requests to default page',  # noqa
                 Handler='index.handler',
                 Role=cfdirectoryindexrewriterole.get_att('Arn'),
-                Runtime='nodejs8.10'
+                Runtime='nodejs10.x'
             )
         )
 

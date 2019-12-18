@@ -1,5 +1,5 @@
 """Test destroying stacks using tags."""
-from test_module_tags.test_module_tags import ModuleTags
+from integration_tests.test_moduletags.test_moduletags import ModuleTags
 
 
 class TestDestroy(ModuleTags):
@@ -14,6 +14,7 @@ class TestDestroy(ModuleTags):
 
     def run(self):
         """Run tests."""
+        self.init()
         self.runway_cmd('deploy', [])
         assert self.runway_cmd('destroy', ['app1']) == 0
         self.check_stacks([str(num) for num in range(2, 7)])

@@ -1,0 +1,9 @@
+deployments:
+  - modules:
+      - sampleapp.cfn
+    regions:
+      parallel:
+        - us-east-1
+        - us-east-2
+    environments:
+      dev: true

@@ -5,10 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fixed multi-stack CDK apps
+
 ### Added
 - Allow single-binary use of bundled yamllint
 
 ### Changed
+- `DEPLOY_ENVIRONMENT` is available to all module deployments as an environment variable
+  - if it does not exist in the current environment, value is derived from branch or directory name
+- Updated static site CFN template to use node v10 for path rewrite lambda
 - embedded stacker will not resolve dependancies for `locked` stacks when they rely on other stacks
   - accepted upstream in https://github.com/cloudtools/stacker/pull/746
 

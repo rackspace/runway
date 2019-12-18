@@ -1,6 +1,10 @@
 const path = require('path');
 const slsw = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
+
+// If dependencies can't be properly included in-line, then switch to
+// excluding them via webpack-node-externals
+// (`npm i -D webpack-node-externals`, require it here, and use nodeExternals() below)
+// const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
     mode: 'production',
@@ -16,7 +20,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /^(?!.*\.spec\.ts$).*\.ts$/,
+                test: /^(?!.*\.test\.ts$).*\.ts$/,
                 loader: 'ts-loader',
                 exclude: /node_modules/
             }
@@ -27,6 +31,9 @@ module.exports = {
         path: path.join(__dirname, '.webpack'),
         filename: '[name].js',
     },
-    externals: [nodeExternals()],
+    // Can externalize dependencies if needed (see comment on webpack-node-externals above):
+    // externals: [nodeExternals()],
+    // or alternatively the aws sdk can be ommitted from the package without webpack-node-externals:
+    // externals: ['aws-sdk'],
     devtool: 'source-map'
 };

@@ -66,15 +66,13 @@ HTTPS Download (e.g cURL)
 Use one of the endpoints below to download a single-binary executable
 version of Runway based on your operating system.
 
-+------------------+------------------------------------+
-| Operating System | Endpoint                           |
-+==================+====================================+
-| Linux            | https://oni.ca/runway/latest/linux |
-+------------------+------------------------------------+
-| macOS            | https://oni.ca/runway/latest/osx   |
-+------------------+------------------------------------+
-| Windows          | https://oni.ca/runway/latest/win   |
-+------------------+------------------------------------+
+================ ==================================
+Operating System Endpoint
+================ ==================================
+Linux            https://oni.ca/runway/latest/linux
+macOS            https://oni.ca/runway/latest/osx
+Windows          https://oni.ca/runway/latest/win
+================ ==================================
 
 ::
 
