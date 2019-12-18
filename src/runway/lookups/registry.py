@@ -5,7 +5,7 @@ from six import string_types
 
 from runway.embedded.stacker.util import load_object_from_string
 
-from .handlers import env
+from .handlers import env, var
 
 
 LOOKUP_HANDLERS = {}
@@ -41,3 +41,4 @@ def unregister_lookup_handler(lookup_type):
 
 
 register_lookup_handler(env.TYPE_NAME, env.EnvLookup)
+register_lookup_handler(var.TYPE_NAME, var.VarLookup)

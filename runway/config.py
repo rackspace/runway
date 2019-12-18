@@ -6,6 +6,7 @@ import os
 import sys
 import yaml
 
+from .util import MutableMap
 from .variables import Variable
 
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger('runway')
 
 
-class ConfigComponent(object):
+class ConfigComponent(MutableMap):
     """Base class for Runway config components."""
 
     GLOBAL_SUPPORTS_VARIABLES = ['environments']
@@ -52,31 +53,26 @@ class ConfigComponent(object):
         """Implement evaluation of get."""
         return getattr(self, key, getattr(self, key.replace('-', '_'), default))
 
-    def resolve(self, context):
-        # type: ('Context') -> None
+    def resolve(self, context, variables=None):
+        # type: ('Context', Optional[VariablesDefinition]) -> None
         """Resolve all attributes that support variables."""
         for attr in self.supports_variables:
-            getattr(self, '_' + attr).resolve(context)
+            getattr(self, '_' + attr).resolve(context, variables=variables)
 
     def __getitem__(self, key):
         # type: (str) -> Any
         """Implement evaluation of self[key]."""
         return getattr(self, key, getattr(self, key.replace('-', '_')))
 
-    def __setitem__(self, key, value):
-        # type: (str, Any) -> None
-        """Implement evaluation of self[key] for assignment."""
-        setattr(self, key, value)
-
     def __len__(self):
         # type: () -> int
         """Implement the built-in function len()."""
-        return len(self.__dict__)
+        return len(self.contents)
 
     def __iter__(self):
         # type: () -> Iterator[Any]
         """Return iterator object that can iterate over all attributes."""
-        return iter(self.__dict__)
+        return iter(self.contents)
 
 
 class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
@@ -533,6 +529,76 @@ class TestDefinition(ConfigComponent):
         return results
 
 
+class VariablesDefinition(MutableMap):
+    """A file containing variable definitions for the Runway config file."""
+
+    default_names = ['variables.runway.yml', 'variables.runway.yaml']
+
+    @classmethod
+    def find_file(cls, file_path=None, sys_path=None):
+        # type: (str, str) -> Optional[str]
+        """Find a Runway variables file.
+
+        Args:
+            file_path: Explicit path to a variables file. If it cannot be found
+                Runway will exit.
+            sys_path: Directory to base relative paths off of.
+
+        Returns:
+            Verified path to a file.
+
+        """
+        if not sys_path:
+            sys_path = os.getcwd()
+
+        if file_path:
+            result = os.path.join(sys_path, file_path)
+            if os.path.isfile(result):
+                return result
+            else:
+                LOGGER.error('The provided variables "%s" file could not '
+                             'be found.', result)
+                sys.exit(1)
+
+        for name in cls.default_names:
+            result = os.path.join(sys_path, name)
+            if os.path.isfile(result):
+                return result
+
+        LOGGER.info('Could not find "%s" in the current directory. '
+                    'Continuing without a variables file.')
+        return None
+
+    @classmethod
+    def load(cls, **kwargs):
+        # type: (Dict[str, Any]) -> VariablesDefinition
+        """Load variables."""
+        file_path = cls.find_file(file_path=kwargs.pop('file_path', None),
+                                  sys_path=kwargs.pop('sys_path', None))
+
+        if file_path:
+            variables = cls.load_from_file(file_path)
+
+            for key, val in kwargs.items():
+                variables[key] = val
+
+            return variables
+
+        return cls(**kwargs)
+
+    @classmethod
+    def load_from_file(cls, file_path):
+        # type: (str) -> VariablesDefinition
+        """Load the variables file into an object."""
+        if not os.path.isfile(file_path):
+            LOGGER.error('The provided variables "%s" file could not '
+                         'be found.', file_path)
+            sys.exit(1)
+
+        with open(file_path) as data_file:
+            return cls(**yaml.safe_load(data_file))
+
+
 class Config(ConfigComponent):
     """The Runway config file is where all options are defined.
 
@@ -568,7 +634,8 @@ class Config(ConfigComponent):
     def __init__(self,
                  deployments,  # type: List[Dict[str, Any]]
                  tests=None,  # type: List[Dict[str, Any]]
-                 ignore_git_branch=False  # type: bool
+                 ignore_git_branch=False,  # type: bool
+                 variables=None  # Optional[Dict[str, Any]]
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None
@@ -586,6 +653,9 @@ class Config(ConfigComponent):
                 ``DEPLOY_ENVIRONMENT`` environment variable before
                 execution. Note that defining ``DEPLOY_ENVIRONMENT``
                 will automatically ignore the git branch.
+            variables (Optional[Dict[str, Any]]): A map that defines the
+                location of a variables file and/or the variables
+                themselves.
 
         References:
             - :class:`deployment<runway.config.DeploymentDefinition>`
@@ -595,6 +665,9 @@ class Config(ConfigComponent):
         self.deployments = DeploymentDefinition.from_list(deployments)
         self.tests = TestDefinition.from_list(tests)
         self.ignore_git_branch = ignore_git_branch
+
+        variables = variables or {}
+        self.variables = VariablesDefinition.load(**variables)
 
     @classmethod
     def load_from_file(cls, config_path):

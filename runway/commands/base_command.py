@@ -3,7 +3,7 @@ from typing import List, Optional, Union  # pylint: disable=unused-import
 import os
 import logging
 
-from ..config import Config
+from ..config import Config, VariablesDefinition
 
 
 class BaseCommand(object):
@@ -54,6 +54,12 @@ class BaseCommand(object):
                 self.runway_config_path
             )
         return self._runway_config
+
+    @property
+    def runway_vars(self):
+        # type: () -> VariablesDefinition
+        """Return parsed Runway variables."""
+        return self.runway_config.variables
 
     def execute(self):
         # type: () -> None

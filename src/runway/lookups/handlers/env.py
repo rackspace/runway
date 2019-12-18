@@ -1,12 +1,10 @@
 """Environment variable lookup."""
 from typing import Any, TYPE_CHECKING  # noqa
 
-from stacker.util import read_value_from_path
-
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...context import Context  # noqa
+    from ...context import Context  # noqa: F401
 
 TYPE_NAME = "env"
 
@@ -29,12 +27,16 @@ class EnvLookup(LookupHandler):
             value: The value passed to the lookup.
             context: The current context object.
 
-        """
-        value = read_value_from_path(value)
+        Raises:
+            ValueError: Unable to find a value for the provided query and
+                a default value was not provided.
 
-        try:
-            return context.env_vars[value]
-        except KeyError:
-            raise ValueError(
-                '"{}" does not exist in the environment.'.format(value)
-            )
+        """
+        query, args = cls.parse(value)
+
+        result = context.env_vars.get(value, args.pop('default', None))
+
+        if result:
+            return cls.transform(result, to_type=args.pop('transform', None),
+                                 **args)
+        raise ValueError('"{}" does not exist in the environment'.format(value))

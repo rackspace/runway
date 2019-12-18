@@ -518,8 +518,8 @@ class ModulesCommand(RunwayCommand):
 
     def _deploy_module(self, module, deployment, context):
         module_opts = {}
-        deployment.resolve(context)
-        module.resolve(context)
+        deployment.resolve(context, self.runway_vars)
+        module.resolve(context, self.runway_vars)
         if deployment.get('environments'):
             module_opts['environments'] = deployment.environments.copy()
         if deployment.get('module_options'):

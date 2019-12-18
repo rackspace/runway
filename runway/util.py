@@ -1,6 +1,6 @@
 """Utility functions."""
 from __future__ import print_function
-from typing import Dict, List, Optional, Union  # noqa pylint: disable=unused-import
+from typing import Any, Dict, Iterator, List, Optional, Union  # noqa pylint: disable=unused-import
 
 from contextlib import contextmanager
 import hashlib
@@ -17,6 +17,187 @@ EMBEDDED_LIB_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'embedded'
 )
+
+
+class MutableMap(six.moves.collections_abc.MutableMapping):
+    """Base class for mutable map objects."""
+
+    def __init__(self, **kwargs):
+        # typing: (Dict[str, Any]) -> None
+        """Initialize class.
+
+        Provided ``kwargs`` are added to the object as attributes.
+
+        Example:
+            .. codeblock: python
+
+                obj = MutableMap(**{'key': 'value'})
+                print(obj.__dict__)
+                # {'key': 'value'}
+
+        """
+        for key, value in kwargs.items():
+            if isinstance(value, dict):
+                setattr(self, key, MutableMap(**value))
+            else:
+                setattr(self, key, value)
+        if kwargs:
+            self._found_queries = MutableMap()
+
+    def clear_found_cache(self):
+        # type: () -> None
+        """Clears _found_cache."""
+        for _, val in self.__dict__.items():
+            if isinstance(val, MutableMap):
+                val.clear_found_cache()
+        if hasattr(self, '_found_queries'):
+            self._found_queries.clear()
+
+    def find(self, query, default=None, ignore_cache=False):
+        # type: (str, Any, bool) -> Any
+        """Find a value in the map.
+
+        Previously found queries are cached to increase search speed. The
+        cached value should only be used if values are not expected to change.
+
+        Args:
+            query: A period delimited string that is split to search for
+                nested values
+            default: The value to return if the query was unsuccessful.
+            ignore_cache: Ignore cached value.
+
+        """
+        if not ignore_cache:
+            cached_result = self._found_queries.get(query, None)
+            if cached_result:
+                return cached_result
+
+        split_query = query.split('.')
+
+        if len(split_query) == 1:
+            result = self.get(split_query[0], default)
+            if result != default:
+                self._found_queries[split_query[0]] = result
+            return result
+
+        nested_value = self.get(split_query[0])
+
+        if not nested_value:
+            return default
+
+        nested_value = nested_value.find(split_query[1])
+
+        try:
+            nested_value = self[split_query[0]].find('.'.join(split_query[1:]),
+                                                     default, ignore_cache)
+            if nested_value != default:
+                self._found_queries[query] = nested_value
+            return nested_value
+        except (AttributeError, KeyError):
+            return default
+
+    def get(self, key, default=None):
+        # type: (str, Any) -> Any
+        """Implement evaluation of self.get.
+
+        Args:
+            key: Attribute name to return the value for.
+            default: Value to return if attribute is not found.
+
+        """
+        return getattr(self, key, default)
+
+    def __getitem__(self, key):
+        # type: (str) -> Any
+        """Implement evaluation of self[key].
+
+        Args:
+            key: Attribute name to return the value for.
+
+        Returns:
+            The value associated with the provided key/attribute name.
+
+        Raises:
+            Attribute: If attribute does not exist on this object.
+
+        Example:
+            .. codeblock: python
+
+                obj = MutableMap(**{'key': 'value'})
+                print(obj['key'])
+                # value
+
+        """
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        # type: (str, Any) -> None
+        """Implement assignment to self[key].
+
+        Args:
+            key: Attribute name to associate with a value.
+            value: Value of a key/attribute.
+
+        Example:
+            .. codeblock: python
+
+                obj = MutableMap()
+                obj['key'] = 'value'
+                print(obj['key'])
+                # value
+
+        """
+        if isinstance(value, dict):
+            setattr(self, key, MutableMap(**value))
+        else:
+            setattr(self, key, value)
+
+    def __delitem__(self, key):
+        # type: (str) -> None
+        """Implement deletion of self[key].
+
+        Args:
+            key: Attribute name to remove from the object.
+
+        Example:
+            .. codeblock: python
+
+                obj = MutableMap(**{'key': 'value'})
+                del obj['key']
+                print(obj.__dict__)
+                # {}
+
+        """
+        delattr(self, key)
+
+    def __len__(self) -> int:
+        # type: () -> int
+        """Implement the built-in function len().
+
+        Example:
+            .. codeblock: python
+
+                obj = MutableMap(**{'key': 'value'})
+                print(len(obj))
+                # 1
+
+        """
+        return len(self.__dict__)
+
+    def __iter__(self):
+        # type: () -> Iterator[Any]
+        """Return iterator object that can iterate over all attributes.
+
+        Example:
+            .. codeblock: python
+
+                obj = MutableMap(**{'key': 'value'})
+                for k, v in obj.items():
+                    print(f'{key}: {value}')
+                # key: value
+
+        """
+        return iter(self.__dict__)
 
 
 @contextmanager

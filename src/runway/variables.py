@@ -1,7 +1,6 @@
 """Runway variables."""
-from typing import Any, Callable, Dict, Iterable, List, Set
+from typing import Any, Callable, Dict, Iterable, List, Set, TYPE_CHECKING
 
-from copy import deepcopy
 import logging
 import re
 from six import string_types
@@ -12,6 +11,9 @@ from stacker.exceptions import (InvalidLookupCombination, UnresolvedVariable,  #
                                 InvalidLookupConcatenation)
 
 from .lookups.registry import LOOKUP_HANDLERS
+
+if TYPE_CHECKING:
+    from .config import VariablesDefinition  # noqa: F401
 
 
 LOGGER = logging.getLogger('runway')
@@ -58,27 +60,37 @@ class Variable(object):
             return self._value.value
         except UnresolvedVariableValue:
             raise UnresolvedVariable("<unknown>", self)
-        except InvalidLookupConcatenation as e:
-            raise InvalidLookupCombination(e.lookup, e.lookups, self)
+        except InvalidLookupConcatenation as err:
+            raise InvalidLookupCombination(err.lookup, err.lookups, self)
 
-    def copy(self):
-        return deepcopy(self)
-
-    def resolve(self, context):
-        # type: (Any) -> None
+    def resolve(self, context, variables=None, **kwargs):
+        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
         """Recursively resolve any lookups with the Variable.
 
         Args:
             context: The current context object.
+            variables: Object containing variables passed to Runway.
 
         """
         try:
-            self._value.resolve(context)
-        except FailedLookup as e:
-            raise FailedVariableLookup(self.name, e.lookup, e.error)
+            self._value.resolve(context, variables=variables, **kwargs)
+        except FailedLookup as err:
+            raise FailedVariableLookup(self.name, err.lookup, err.error)
 
     def get(self, key, default=None):
+        """Implement evaluation of self.get.
+
+        Args:
+            key: Attribute name to return the value for.
+            default: Value to return if attribute is not found.
+
+        """
         return getattr(self.value, key, default)
+
+    def __repr__(self):
+        # type: () -> str
+        """Return object representation."""
+        return 'Variable<{}={}>'.format(self.name, self._raw_value)
 
 
 class VariableValue(object):
@@ -116,21 +128,22 @@ class VariableValue(object):
     @property
     def value(self):
         # type: () -> None
-        """The value of the variable. Can be resolved or unresolved.
+        """Value of the variable. Can be resolved or unresolved.
 
         Should be implimented in subclasses.
 
         """
         raise NotImplementedError
 
-    def resolve(self, context):
-        # type: (Any) -> None
+    def resolve(self, context, variables=None, **kwargs):
+        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Should be implimented in subclasses.
 
         Args:
             context: The current context object.
+            variables: Object containing variables passed to Runway.
 
         """
 
@@ -161,16 +174,16 @@ class VariableValue(object):
         while True:
             last_open = None
             next_close = None
-            for i, t in enumerate(tokens):
-                if not isinstance(t, VariableValueLiteral):
+            for i, tok in enumerate(tokens):
+                if not isinstance(tok, VariableValueLiteral):
                     continue
 
-                if t.value == opener:
+                if tok.value == opener:
                     last_open = i
                     next_close = None
                 if (
                         last_open is not None and
-                        t.value == closer and
+                        tok.value == closer and
                         next_close is None
                 ):
                     next_close = i
@@ -199,9 +212,18 @@ class VariableValue(object):
         """
         raise NotImplementedError
 
+    def __repr__(self):
+        # type: () -> str
+        """Return object representation.
+
+        Should be implimented in subclasses.
+
+        """
+        raise NotImplementedError
+
 
 class VariableValueLiteral(VariableValue):
-    """placeholder."""
+    """The literal value of a variable as provided."""
 
     def __init__(self, value):
         # type: (Any) -> None
@@ -222,7 +244,7 @@ class VariableValueLiteral(VariableValue):
     @property
     def value(self):
         # type: () -> Any
-        """The value of the variable."""
+        """Value of the variable."""
         return self._value
 
     def __iter__(self):
@@ -233,7 +255,7 @@ class VariableValueLiteral(VariableValue):
     def __repr__(self):
         # type: () -> str
         """Return object representation."""
-        return 'VariableValueLiteral<{}>'.format(repr(self._value))
+        return 'Literal<{}>'.format(repr(self._value))
 
 
 class VariableValueList(VariableValue, list):
@@ -274,22 +296,23 @@ class VariableValueList(VariableValue, list):
     @property
     def value(self):
         # type: () -> List[Any]
-        """The value of the variable. Can be resolved or unresolved."""
+        """Value of the variable. Can be resolved or unresolved."""
         return [
             item.value
             for item in self
         ]
 
-    def resolve(self, context):
-        # type: (Any) -> None
+    def resolve(self, context, variables=None, **kwargs):
+        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            variables: Object containing variables passed to Runway.
 
         """
         for item in self:
-            item.resolve(context)
+            item.resolve(context, variables=variables, **kwargs)
 
     @classmethod
     def parse(cls, input_object):
@@ -313,8 +336,8 @@ class VariableValueList(VariableValue, list):
     def __repr__(self):
         # type: () -> str
         """Return object representation."""
-        return 'VariableValueList[{}]'.format(', '.join([repr(value)
-                                                         for value in self]))
+        return 'List[{}]'.format(', '.join([repr(value)
+                                            for value in self]))
 
 
 class VariableValueDict(VariableValue, dict):
@@ -355,22 +378,23 @@ class VariableValueDict(VariableValue, dict):
     @property
     def value(self):
         # type: () -> Dict[str, Any]
-        """The value of the variable. Can be resolved or unresolved."""
+        """Value of the variable. Can be resolved or unresolved."""
         return {
             k: v.value
             for k, v in self.items()
         }
 
-    def resolve(self, context):
-        # type: (Any) -> None
+    def resolve(self, context, variables=None, **kwargs):
+        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            variables: Object containing variables passed to Runway.
 
         """
         for item in self.values():
-            item.resolve(context)
+            item.resolve(context, variables=variables, **kwargs)
 
     @classmethod
     def parse(cls, input_object):
@@ -394,7 +418,7 @@ class VariableValueDict(VariableValue, dict):
     def __repr__(self):
         # type: () -> str
         """Return object representation."""
-        return 'VariableValueDict[{}]'.format(', '.join([
+        return 'Dict[{}]'.format(', '.join([
             "{}={}".format(k, repr(v)) for k, v in self.items()
         ]))
 
@@ -438,8 +462,7 @@ class VariableValueConcatenation(VariableValue, list):
                 pass
 
             elif (
-                    isinstance(item, VariableValueLiteral) and
-                    len(concat) > 0 and
+                    isinstance(item, VariableValueLiteral) and concat and
                     isinstance(concat[-1], VariableValueLiteral)
             ):
                 # join the literals together
@@ -454,7 +477,7 @@ class VariableValueConcatenation(VariableValue, list):
             else:
                 concat.append(item.simplified)
 
-        if len(concat) == 0:
+        if not concat:
             return VariableValueLiteral('')
         elif len(concat) == 1:
             return concat[0]
@@ -464,7 +487,7 @@ class VariableValueConcatenation(VariableValue, list):
     @property
     def value(self):
         # type: () -> Any
-        """The value of the variable. Can be resolved or unresolved."""
+        """Value of the variable. Can be resolved or unresolved."""
         if len(self) == 1:
             return self[0].value
 
@@ -476,16 +499,17 @@ class VariableValueConcatenation(VariableValue, list):
             values.append(resolved_value)
         return ''.join(values)
 
-    def resolve(self, context):
-        # type: (Any) -> None
+    def resolve(self, context, variables=None, **kwargs):
+        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            variables: Object containing variables passed to Runway.
 
         """
         for value in self:
-            value.resolve(context)
+            value.resolve(context, variables=variables, **kwargs)
 
     def __iter__(self):
         """How the object is iterated."""
@@ -494,7 +518,7 @@ class VariableValueConcatenation(VariableValue, list):
     def __repr__(self):
         # type: () -> str
         """Return object representation."""
-        return 'VariableValueConcatenation[{}]'.format(
+        return 'Concatenation[{}]'.format(
             ', '.join([repr(value)for value in self])
         )
 
@@ -532,7 +556,7 @@ class VariableValueLookup(VariableValue):
     def dependencies(self):
         # type: () -> Set[str]
         """Variables whose value this depends on."""
-        if type(self.handler) == type:
+        if isinstance(self.handler, type):
             return self.handler.dependencies(self.lookup_data)
         else:
             return set()
@@ -560,36 +584,32 @@ class VariableValueLookup(VariableValue):
     @property
     def value(self):
         # type: () -> Any
-        """The value of the variable. Can be resolved or unresolved."""
+        """Value of the variable. Can be resolved or unresolved."""
         if self._resolved:
             return self._value
         else:
             raise UnresolvedVariableValue(self)
 
-    def resolve(self, context):
-        # type: (Any) -> None
+    def resolve(self, context, variables=None, **kwargs):
+        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            variables: Object containing variables passed to Runway.
 
         """
-        self.lookup_data.resolve(context)
+        self.lookup_data.resolve(context, variables=variables, **kwargs)
         try:
-            if type(self.handler) == type:
-                # Hander is a new-style handler
-                result = self.handler.handle(
-                    value=self.lookup_data.value,
-                    context=context
-                )
-            else:
-                result = self.handler(
-                    value=self.lookup_data.value,
-                    context=context
-                )
+            result = self.handler.handle(
+                value=self.lookup_data.value,
+                context=context,
+                variables=variables,
+                **kwargs
+            )
             self._resolve(result)
-        except Exception as e:
-            raise FailedLookup(self, e)
+        except Exception as err:
+            raise FailedLookup(self, err)
 
     def _resolve(self, value):
         # type: (Any) -> None
@@ -605,20 +625,20 @@ class VariableValueLookup(VariableValue):
         # type: () -> str
         """Return object representation."""
         if self._resolved:
-            return 'VariableValueLookup<{r} ({t} {d})>'.format(
+            return 'Lookup<{r} ({t} {d})>'.format(
                 r=self._value,
                 t=self.lookup_name,
                 d=repr(self.lookup_data),
             )
         else:
-            return 'VariableValueLookup<{t} {d}>'.format(
+            return 'Lookup<{t} {d}>'.format(
                 t=self.lookup_name,
                 d=repr(self.lookup_data),
             )
 
     def __str__(self):
         # type: () -> str
-        """The string representation of this object."""
+        """Object displayed as a string."""
         return '${{{type} {data}}}'.format(
             type=self.lookup_name.value(),
             data=self.lookup_data.value(),
