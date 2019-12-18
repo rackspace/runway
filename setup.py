@@ -40,6 +40,7 @@ INSTALL_REQUIRES = [
     # and the following patches applied
     # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
     # https://github.com/cloudtools/stacker/pull/744 (diffs via CFN changesets)
+    # https://github.com/cloudtools/stacker/pull/746 (locked stack dependencies)
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
