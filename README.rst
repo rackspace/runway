@@ -66,13 +66,15 @@ HTTPS Download (e.g cURL)
 Use one of the endpoints below to download a single-binary executable
 version of Runway based on your operating system.
 
-================ ==================================
-Operating System Endpoint
-================ ==================================
-Linux            https://oni.ca/runway/latest/linux
-macOS            https://oni.ca/runway/latest/osx
-Windows          https://oni.ca/runway/latest/win
-================ ==================================
++------------------+------------------------------------+
+| Operating System | Endpoint                           |
++==================+====================================+
+| Linux            | https://oni.ca/runway/latest/linux |
++------------------+------------------------------------+
+| macOS            | https://oni.ca/runway/latest/osx   |
++------------------+------------------------------------+
+| Windows          | https://oni.ca/runway/latest/win   |
++------------------+------------------------------------+
 
 ::
 
@@ -114,3 +116,10 @@ documentation.
 Quickstart documentation, including CloudFormation templates and
 walkthrough can be found
 `here <https://docs.onica.com/projects/runway/en/latest/quickstart.html>`__
+
+Community Chat
+--------------
+
+Drop into the `#runway
+channel <https://kiwiirc.com/client/irc.freenode.net/?nick=RunwayHelp?#runway>`__
+for discussion/questions.
