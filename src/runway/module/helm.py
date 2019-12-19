@@ -15,12 +15,12 @@ LOGGER = logging.getLogger('runway')
 class Helm(RunwayModule):
     """Helm Runway Module."""
 
-    def run(self, command='plan'):
+    def run_helm(self, command='plan'):
         """Run Helm Runway Module."""
         LOGGER.info('Running helm: %s', command)
 
         # Install Helm
-        binary_file = HelmEnvManager(self.path).install('3.0.0')
+        binary_file = HelmEnvManager(self.path).install()
 
         # Create Helm application name
         module_name = os.path.basename(self.path)
@@ -54,6 +54,7 @@ class Helm(RunwayModule):
         response = subprocess.check_output(cmd, env=self.context.env_vars)
         if isinstance(response, bytes):  # python3 returns encoded bytes
             response = response.decode()
+        LOGGER.info(response)
 
         # check deploy response
         if command == 'deploy':
@@ -73,12 +74,12 @@ class Helm(RunwayModule):
 
     def plan(self):
         """Run plan."""
-        self.run(command='plan')
+        self.run_helm(command='plan')
 
     def deploy(self):
         """Run deploy."""
-        self.run(command='deploy')
+        self.run_helm(command='deploy')
 
     def destroy(self):
         """Run destroy."""
-        self.run(command='destroy')
+        self.run_helm(command='destroy')

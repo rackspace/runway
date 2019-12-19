@@ -85,6 +85,8 @@ def determine_module_class(path, class_path):  # pylint: disable=too-many-branch
         # Fallback to autodetection
         if os.path.isfile(os.path.join(path, 'serverless.yml')):
             class_path = 'runway.module.serverless.Serverless'
+        if os.path.isfile(os.path.join(path, 'Chart.yaml')):
+            class_path = 'runway.module.helm.Helm'
         elif glob.glob(os.path.join(path, '*.tf')):
             class_path = 'runway.module.terraform.Terraform'
         elif os.path.isfile(os.path.join(path, 'cdk.json')) \

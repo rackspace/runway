@@ -14,29 +14,21 @@ from ..util import sha256sum
 from ..embedded.stacker.util import TarGzipExtractor, ZipExtractor
 
 LOGGER = logging.getLogger('runway')
+HELM_VERSION_FILENAME = '.helm-version'
 
 
-def get_arch(env_key):
-    """Get the os architecture."""
-    arch = (
-        os.environ.get(env_key) if os.environ.get(env_key)
-        else 'amd64')
-    return arch
-
-
-def get_platform(name):
+def get_platform(os_platform):
     """Get the os platform."""
-    os_platform = None
-    if name.startswith('Darwin'):
-        os_platform = 'darwin'
-    elif name.startswith('Windows') or (
-            name.startswith('MINGW64') or (
-                name.startswith('MSYS_NT') or (
-                    name.startswith('CYGWIN_NT')))):
-        os_platform = 'windows'
-    else:
-        os_platform = 'linux'
-    return os_platform
+
+    if os_platform in ['Darwin', 'Linux', 'Windows']:
+        return os_platform.lower()
+
+    for prefix in ['Windows', 'WINGW64', 'MSYS_NT', 'CYGWIN_NT']:
+        if os_platform.startswith(prefix):
+            return 'windows'
+
+    raise ValueError('Could not determine appropriate '
+                     'OS platform for the download URL')
 
 
 def decompress(source, target):
@@ -113,6 +105,21 @@ def download(version_dir, version_requested, os_platform, os_arch):
         shutil.rmtree(download_dir)
 
 
+def get_version_requested(path):
+    """Return string listing requested version."""
+    helm_version_path = os.path.join(path,
+                                     HELM_VERSION_FILENAME)
+    if not os.path.isfile(helm_version_path):
+        LOGGER.error("helm install attempted and no %s file present to "
+                     "dictate the version. Please create it (e.g.  write "
+                     "\"3.0.0\" (without quotes) to the file and try again",
+                     HELM_VERSION_FILENAME)
+        sys.exit(1)
+    with open(helm_version_path, 'r') as stream:
+        ver = stream.read().rstrip()
+    return ver
+
+
 class HelmEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Helm environment manager."""
 
@@ -126,10 +133,12 @@ class HelmEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         LOGGER.info("Checking Helm %s is available at %s", version_requested, versions_dir)
 
         # identify os platform and architecture
-        os_arch = get_arch('KBENV_ARCH')
+        os_arch = os.getenv('KBENV_ARCH', 'amd64')
         os_platform = get_platform(platform.system())
 
         # get binary path
+        if not version_requested:
+            version_requested = get_version_requested(self.path)
         version_dir = os.path.join(versions_dir, version_requested)
         binary_file = get_binary_path(version_dir, os_platform, os_arch)
 
