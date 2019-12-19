@@ -8,6 +8,9 @@ Allows us to specify specific remote sourced resources for out application
 from typing import Dict, Optional, Union  # noqa: F401
 
 import os
+import logging
+
+LOGGER = logging.getLogger('runway')
 
 
 class Source(object):
@@ -24,21 +27,20 @@ class Source(object):
     will return the folder path at where the module requested resides.
     """
 
-    def __init__(self, config):
+    def __init__(self, cache_dir='', **_):
         # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
-        """
-            Keyword Arguments:
-                config (Dict[str, Union[str, Dict[str, str]]]): The configuration
-                    dictionary for the Source. Each Source object may expect
-                    it's own specific type of parameters.
+        """Source.
+
+        Keyword Arguments:
+            cache_dir (str): The directory where the given remote resource
+                should be cached
 
         """
-        self.cache_dir = config.get('cache_dir', None)
+        self.cache_dir = cache_dir
 
         if not self.cache_dir:
             self.cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
 
-        self.config = config  # type: Dict[str, Union[str, Dict[str, str]]]
         self.__create_cache_directory()
 
     def fetch(self):

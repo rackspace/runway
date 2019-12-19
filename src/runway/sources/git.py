@@ -25,25 +25,30 @@ class Git(Source):
     """
 
     # Added for documentation purposes
-    def __init__(self, config):
+    def __init__(self, uri='', location='', options=None, **kwargs):
         # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
         """Git Path Source.
 
         Keyword Args:
-            config (Dict[str, Union[str, Dict[str, str]]]): The configuration
-                dictionary. **uri (string)**: The uniform resource identifier for the git
-                repository.
+            uri (str): The uniform resource identifier that targets the remote git
+                repository
             location (string): The relative location to the root of the
                 repository where the module resides. Leaving this as an empty
                 string, ``/``, or ``./`` will have runway look in the root folder.
-            cache_dir (Optional[str]): The cache directory path that should
-            options (Dict[str, str]): A reference can be passed along via the
+            options (Union(None, Dict[str, str])): A reference can be passed along via the
                 options so that a specific version of the repository is cloned.
                 **commit**, **tag**, **branch**  are all valid keys with
                 respective output
 
         """
-        super(Git, self).__init__(config)
+        self.uri = uri
+        self.location = location
+        self.options = options
+
+        if not self.options:
+            self.options = {}
+
+        super(Git, self).__init__(**kwargs)
 
     def fetch(self):
         # type: () -> str
@@ -51,10 +56,7 @@ class Git(Source):
         from git import Repo
 
         ref = self.__determine_git_ref()  # type: str
-        dir_name = '_'.join([
-            self.sanitize_git_path(self.config.get('uri', '')),
-            ref
-        ])  # type: str
+        dir_name = '_'.join([self.sanitize_git_path(self.uri), ref])  # type: str
         cached_dir_path = os.path.join(self.cache_dir, dir_name)  # type: str
         cached_path = ''  # type: str
 
@@ -62,7 +64,7 @@ class Git(Source):
             tmp_dir = tempfile.mkdtemp()
             try:
                 tmp_repo_path = os.path.join(tmp_dir, dir_name)  # type: str
-                with Repo.clone_from(self.config.get('uri'), tmp_repo_path) as repo:
+                with Repo.clone_from(self.uri, tmp_repo_path) as repo:
                     repo.head.reference = ref  # type: str
                     repo.head.reset(index=True, working_tree=True)
                 shutil.move(tmp_repo_path, self.cache_dir)
@@ -72,7 +74,7 @@ class Git(Source):
         else:
             cached_path = cached_dir_path  # type: str
 
-        return os.path.join(cached_path, self.config['location'])
+        return os.path.join(cached_path, self.location)
 
     def __git_ls_remote(self, ref):
         # type: (str) -> str
@@ -82,28 +84,22 @@ class Git(Source):
             ref (str): The git reference value
 
         """
-        LOGGER.debug(
-            "Invoking git to retrieve commit id for repo %s...",
-            self.config.get('uri', '')
-        )
-        lsremote_output = subprocess.check_output(['git',
-                                                   'ls-remote',
-                                                   self.config.get('uri', ''),
-                                                   ref])
+        LOGGER.debug("Invoking git to retrieve commit id for repo %s...", self.uri)
+        lsremote_output = subprocess.check_output(['git', 'ls-remote', self.uri, ref])
         # pylint: disable=unsupported-membership-test
         if b"\t" in lsremote_output:
             commit_id = lsremote_output.split(b"\t")[0]  # type List[str]
             LOGGER.debug("Matching commit id found: %s", commit_id)
             return commit_id
-        raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.config['uri']))
+        raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.uri))
 
     def __determine_git_ls_remote_ref(self):
         # type: () -> str
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
 
-        if self.config.get('branch'):
-            ref = "refs/heads/%s" % self.config.get('branch')  # type: str
+        if self.options.get('branch'):
+            ref = "refs/heads/%s" % self.options.get('branch')  # type: str
 
         return ref
 
@@ -111,20 +107,19 @@ class Git(Source):
         # type: () -> str
         """Determine the git reference code."""
         ref_config_keys = 0   # type: int
-        options = self.config.get('options')  # type: Dict[str, Union(str, Dict[str, str])]
 
         for i in ['commit', 'tag', 'branch']:
-            if options.get(i):
+            if self.options.get(i):
                 ref_config_keys += 1
         if ref_config_keys > 1:
             raise ImportError("Fetching remote git sources failed: "
                               "conflicting revisions (e.g. 'commit', 'tag', "
                               "'branch') specified for a package source")
 
-        if options.get('commit'):
-            ref = options.get('commit')  # type: str
-        elif options.get('tag'):
-            ref = options.get('tag')  # type: str
+        if self.options.get('commit'):
+            ref = self.options.get('commit')  # type: str
+        elif self.options.get('tag'):
+            ref = self.options.get('tag')  # type: str
         else:
             ref = self.__git_ls_remote(self.__determine_git_ls_remote_ref())  # ty pe: str
         if sys.version_info[0] > 2 and isinstance(ref, bytes):

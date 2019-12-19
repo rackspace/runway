@@ -105,7 +105,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
         # type: (Union(str, Dict[str, str]), str, Optional[str], Optional[Git])-> Path
-        """Path Configuration:
+        """Path Configuration.
 
         Keyword Args:
             module (Union(str, Dict[str, str])): The module manifest or a string
@@ -156,7 +156,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         specified in the path variable.
         """
         if self.source == 'git':
-            return self.git_source_class(self.configuration).fetch()
+            return self.git_source_class(**self.configuration).fetch()
         return None
 
     @property
@@ -175,6 +175,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
     def parse(cls, module):
         # type: (Dict[str, str]) -> Tuple[str]
         """Retrieve the relevant elements of the path variable passed.
+
         Keyword Args:
             module (Dict[str, str]): The module manifest or a string
                 representation of a local path to a module.
