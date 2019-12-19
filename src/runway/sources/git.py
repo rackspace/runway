@@ -39,12 +39,8 @@ class Git(Source):
             cache_dir (Optional[str]): The cache directory path that should
             options (Dict[str, str]): A reference can be passed along via the
                 options so that a specific version of the repository is cloned.
-                If multiple keys are found then runway will process only one
-                in the order:
-                    **commit**, **tag**, **branch** Accepted key attributes:
-                        **branch (str)**: The branch to clone
-                        **tag (str)**: The tag to clone
-                        **commit (str)**: The commit to clone
+                **commit**, **tag**, **branch**  are all valid keys with
+                respective output
 
         """
         super(Git, self).__init__(config)
@@ -80,7 +76,12 @@ class Git(Source):
 
     def __git_ls_remote(self, ref):
         # type: (str) -> str
-        """List remote repositories based on uri and ref received."""
+        """List remote repositories based on uri and ref received.
+
+        Keyword Args:
+            ref (str): The git reference value
+
+        """
         LOGGER.debug(
             "Invoking git to retrieve commit id for repo %s...",
             self.config.get('uri', '')
@@ -133,7 +134,12 @@ class Git(Source):
     @classmethod
     def sanitize_git_path(cls, path):
         # type(str) -> str
-        """Sanitize the git path for folder/file assignment."""
+        """Sanitize the git path for folder/file assignment.
+
+        Keyword Args:
+            path (str): The path string to be sanitized
+
+        """
         dir_name = path  # type: str
         split = path.split('//')  # type: List[str]
         domain = split[len(split)-1]  # type: str

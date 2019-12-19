@@ -105,7 +105,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
         # type: (Union(str, Dict[str, str]), str, Optional[str], Optional[Git])-> Path
-        """
+        """Path Configuration:
 
         Keyword Args:
             module (Union(str, Dict[str, str])): The module manifest or a string
