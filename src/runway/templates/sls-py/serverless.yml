@@ -13,12 +13,11 @@ provider:
 
 functions:
   helloWorld:
-    handler: src.hello_world.handler
+    handler: hello_world.handler
 
 package:
-  include:
-    - Pipfile
   exclude:
-    # Broad exclusion here will ensure only function code & deps
-    # (from Pipfile.lock) & included files ^ are shipped in the package
-    - "**"
+    - node_modules/**
+    - package.json
+    - package-lock.json
+
