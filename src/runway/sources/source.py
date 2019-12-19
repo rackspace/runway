@@ -30,9 +30,7 @@ class Source(object):
             Keyword Arguments:
                 config (Dict[str, Union[str, Dict[str, str]]]): The configuration
                     dictionary for the Source. Each Source object may expect
-                    it's own specific type of parameters. Attributes:
-                        cache_dir (Optional[str]): The cache directory path that should
-                        be used as the root folder to store downloaded remote items.
+                    it's own specific type of parameters.
 
         """
         self.cache_dir = config.get('cache_dir', None)

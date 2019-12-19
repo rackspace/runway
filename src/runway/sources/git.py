@@ -47,7 +47,7 @@ class Git(Source):
                         **commit (str)**: The commit to clone
 
         """
-        Source.__init__(config)
+        super(Git, self).__init__(config)
 
     def fetch(self):
         # type: () -> str

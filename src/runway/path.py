@@ -14,10 +14,10 @@ LOGGER = logging.getLogger('runway')
 class Path(object):  # pylint: disable=too-many-instance-attributes
     """Runway configuration ``path`` settings object.
 
-    The Path object is responsible for parsing the ``path`` property
-    of a Runway configuration. It then can determine if the path
-    specified is locally sourced or remotely sourced through a service such
-    as :class:`Git<runway.sources.source.git>` or S3.
+    Path is responsible for parsing the ``path`` property of a Runway
+    configuration. It then can determine if the path specified is
+    locally sourced or remotely sourced through a service such
+    as `Git`_ or S3.
 
     Local ``path`` variables are defined relative to the root project folder.
     The value for this cannot be higher than the Runway config file, it must
@@ -32,11 +32,10 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
                 - my/local/module.cfn # same as above
                 - ./ # module is in the root
 
-    When the ``path`` is remote, a :class:`Source` type object is responsible
-    for fetching  the resource and returning the location of it's
-    cached path. The information for retrieving those sources can
-    be controlled via runway rather than manually retrieving each
-    one.
+    When the ``path`` is remote, Runway is responsible for fetching
+    the resource and returning the location of it's cached path.
+    The information for retrieving those sources can be controlled via
+    runway rather than manually retrieving each one.
 
     Example:
         .. code-block:: yaml
@@ -118,6 +117,9 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
                 This allows for an override of that default directory.
             git_source_class (Optional[Git]): Dependency injection for the `Git`
                 type Source.
+
+        References:
+            `Git`_
 
         """
         if isinstance(module, six.string_types):
