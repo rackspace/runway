@@ -19,7 +19,6 @@ HELM_VERSION_FILENAME = '.helm-version'
 
 def get_platform(os_platform):
     """Get the os platform."""
-
     if os_platform in ['Darwin', 'Linux', 'Windows']:
         return os_platform.lower()
 
