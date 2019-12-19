@@ -16,11 +16,6 @@ class SourceTester(unittest.TestCase):
         source = Source({})
         self.assertRaises(NotImplementedError, source.fetch)
 
-    def test_sets_the_config_to_that_passed(self):
-        """Ensure passed in config is set."""
-        source = Source({'foo': 'bar'})
-        self.assertEqual(source.config, {'foo': 'bar'})
-
     def test_when_no_cache_dir_parameter_in_config(self):
         """The default when no cache_dir is passed in the config"""
         source = Source({})
