@@ -17,7 +17,37 @@ LOGGER = logging.getLogger('runway')
 
 
 class Git(Source):
-    """Git type Path Source."""
+    """Git Path Source.
+
+    The Git path source can be tasked with cloning a remote repository
+    and pointing to a specific module folder (or the root).
+
+    """
+
+    # Added for documentation purposes
+    def __init__(self, config):
+        # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
+        """Git Path Source.
+
+        Keyword Args:
+            config (Dict[str, Union[str, Dict[str, str]]]): The configuration
+                dictionary. **uri (string)**: The uniform resource identifier for the git
+                repository.
+            location (string): The relative location to the root of the
+                repository where the module resides. Leaving this as an empty
+                string, ``/``, or ``./`` will have runway look in the root folder.
+            cache_dir (Optional[str]): The cache directory path that should
+            options (Dict[str, str]): A reference can be passed along via the
+                options so that a specific version of the repository is cloned.
+                If multiple keys are found then runway will process only one
+                in the order:
+                    **commit**, **tag**, **branch** Accepted key attributes:
+                        **branch (str)**: The branch to clone
+                        **tag (str)**: The tag to clone
+                        **commit (str)**: The commit to clone
+
+        """
+        Source.__init__(config)
 
     def fetch(self):
         # type: () -> str

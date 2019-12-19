@@ -30,6 +30,13 @@ Module
 
 .. autoclass:: runway.config.ModuleDefinition
 
+Path
+^^^^
+
+.. autoclass:: runway.path.Path
+
+.. autoclass:: runway.sources.git.Git
+
 .. _runway-test:
 
 Test
