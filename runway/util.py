@@ -24,7 +24,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
     """Base class for mutable map objects."""
 
     def __init__(self, **kwargs):
-        # typing: (Dict[str, Any]) -> None
+        # type: (Dict[str, Any]) -> None
         """Initialize class.
 
         Provided ``kwargs`` are added to the object as attributes.
@@ -120,6 +120,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         return getattr(self, key, default)
 
     def __bool__(self):
+        # type: () -> bool
         """Implement evaluation of instances as a bool."""
         if self.data:
             return True

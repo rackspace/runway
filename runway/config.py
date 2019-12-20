@@ -330,11 +330,13 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
     @classmethod
     def from_list(cls, modules):
+        # type: (List[Union[Dict[str, Any], str]]) -> List[ModuleDefinition]
         """Instantiate ModuleDefinition from a list."""
         results = []
+
         for mod in modules:
             if isinstance(mod, str):
-                results.append(cls(mod, mod, {}))
+                results.append(cls(name=mod, path=mod))
                 continue
             if mod.get('parallel'):
                 name = 'parallel_parent'
@@ -519,6 +521,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             )
         )  # type: Variable
 
+        # should add variable resolve here to support parallel region
+        # dict in the resolved variable
         regions = deployment.pop(
             'regions', []
         )
@@ -528,19 +532,19 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                          'deployment "%s"; only one can be defined',
                          self.name)
             sys.exit(1)
-        if isinstance(regions, dict) and self.regions.get('parallel'):
+        if isinstance(regions, dict) and regions.get('parallel'):
             self._parallel_regions = Variable(
-                self.name + '.parallel_regions', self.regions.pop('parallel')
+                self.name + '.parallel_regions', regions.pop('parallel')
             )  # type: Variable
             self._regions = Variable(self.name + '.regions',
                                      [])  # type: Variable
         else:
             self._regions = Variable(self.name + '.regions',
-                                     regions)  # type: Variable
+                                     regions)
             self._parallel_regions = Variable(
                 self.name + '.parallel_regions',
                 deployment.pop('parallel_regions', [])
-            )  # type: Variable
+            )
 
         if deployment:
             LOGGER.warning(
@@ -610,8 +614,13 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
     @classmethod
     def from_list(cls, deployments):
+        # type: (Optional[List[Dict[str, Any]]]) -> List[DeploymentDefinition]
         """Instantiate DeploymentDefinitions from a list."""
         results = []
+
+        if not deployments:
+            return []
+
         for i, deployment in enumerate(deployments):
             if not deployment.get('name'):
                 deployment['name'] = 'deployment_{}'.format(str(i + 1))
@@ -704,9 +713,12 @@ class TestDefinition(ConfigComponent):
 
     @classmethod
     def from_list(cls, tests):
-        # type: (List[Dict[str, Any]]) -> List[TestDefinition]
+        # type: (Optional[List[Dict[str, Any]]]) -> List[TestDefinition]
         """Instantiate TestDefinitions from a list."""
         results = []
+
+        if not tests:
+            return []
 
         for index, test in enumerate(tests):
             name = test.pop('name', 'test_{}'.format(index + 1))
@@ -729,7 +741,7 @@ class VariablesDefinition(MutableMap):
 
     @classmethod
     def find_file(cls, file_path=None, sys_path=None):
-        # type: (str, str) -> Optional[str]
+        # type: (Any, Any) -> Optional[str]
         """Find a Runway variables file.
 
         Args:
@@ -740,7 +752,15 @@ class VariablesDefinition(MutableMap):
         Returns:
             Verified path to a file.
 
+        Raises:
+            TypeError: file_path or sys_path is not a string.
+
         """
+        if not (isinstance(file_path, str) and isinstance(file_path, str)):
+            raise TypeError('file_path and sys_path of VariablesDefinition '
+                            'must of be type str but got types {} and {}'.format(
+                                type(file_path), type(sys_path))
+                            )
         if not sys_path:
             sys_path = os.getcwd()
 
@@ -827,7 +847,7 @@ class Config(ConfigComponent):
                  deployments,  # type: List[Dict[str, Any]]
                  tests=None,  # type: List[Dict[str, Any]]
                  ignore_git_branch=False,  # type: bool
-                 variables=None  # Optional[Dict[str, Any]]
+                 variables=None  # type: Optional[Dict[str, Any]]
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
         # type: (...) -> None

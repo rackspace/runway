@@ -21,8 +21,8 @@ class VarLookup(LookupHandler):
     """Variable definition lookup."""
 
     @classmethod
-    def handle(cls, value, variables, **_):
-        # type: (str, 'Context', 'VariablesDefinition', Any) -> Any
+    def handle(cls, value, context, **kwargs):
+        # type: (str, 'Context', Any) -> Any
         """Retrieve a variable from the variable definition.
 
         The value is retrieved from the variables passed to Runway using
@@ -39,11 +39,12 @@ class VarLookup(LookupHandler):
 
         """
         query, args = cls.parse(value)
+        variables = kwargs['variables']
 
-        result = variables.find(query, default=args.pop('default', None))
+        result = variables.find(query, default=args.pop('default', ''))
 
         if result:
-            return cls.transform(result, to_type=args.pop('transform', None),
+            return cls.transform(result, to_type=args.pop('transform', ''),
                                  **args)
 
         raise ValueError('"{}" does not exist in the variable definition')

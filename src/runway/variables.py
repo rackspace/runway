@@ -1,6 +1,6 @@
 """Runway variables."""
 from typing import (Any, Callable,  # noqa: F401 pylint: disable=unused-import
-                    Dict, Iterable, List, Set, TYPE_CHECKING)
+                    Dict, Iterable, Iterator, List, Optional, Type, Union, TYPE_CHECKING)
 
 import logging
 import re
@@ -12,6 +12,7 @@ from stacker.exceptions import (InvalidLookupCombination, UnresolvedVariable,  #
                                 InvalidLookupConcatenation)
 
 from .lookups.registry import LOOKUP_HANDLERS
+from .lookups.handlers.base import LookupHandler
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
@@ -38,12 +39,6 @@ class Variable(object):
         self.name = name
         self._raw_value = value
         self._value = VariableValue.parse(value)
-
-    @property
-    def dependencies(self):
-        # type: [str]
-        """Variables whose value this depends on."""
-        return self._value.dependencies
 
     @property
     def resolved(self):
@@ -81,6 +76,7 @@ class Variable(object):
             raise FailedVariableLookup(self.name, err.lookup, err.error)
 
     def get(self, key, default=None):
+        # type: (Any, Any) -> Any
         """Implement evaluation of self.get.
 
         Args:
@@ -98,12 +94,6 @@ class Variable(object):
 
 class VariableValue(object):
     """Syntax tree base class to parse variable values."""
-
-    @property
-    def dependencies(self):
-        # type: () -> Set[str]
-        """Variables whose value this depends on."""
-        return set()
 
     @property
     def resolved(self):
@@ -130,7 +120,7 @@ class VariableValue(object):
 
     @property
     def value(self):
-        # type: () -> None
+        # type: () -> Any
         """Value of the variable. Can be resolved or unresolved.
 
         Should be implimented in subclasses.
@@ -193,10 +183,10 @@ class VariableValue(object):
 
             if next_close is not None:
                 lookup_data = VariableValueConcatenation(
-                    tokens[(last_open + len(opener) + 1):next_close]
+                    tokens[(last_open or 0 + len(opener) + 1):next_close]
                 )
                 lookup = VariableValueLookup(
-                    lookup_name=tokens[last_open + 1],
+                    lookup_name=tokens[last_open or 0 + 1],
                     lookup_data=lookup_data,
                 )
                 tokens[last_open:(next_close + 1)] = [lookup]
@@ -208,6 +198,7 @@ class VariableValue(object):
         return tokens
 
     def __iter__(self):
+        # type: () -> Iterable
         """How the object is iterated.
 
         Should be implimented in subclasses.
@@ -265,15 +256,6 @@ class VariableValueList(VariableValue, list):
     """A list variable value."""
 
     @property
-    def dependencies(self):
-        # type: () -> Set[str]
-        """Variables whose value this depends on."""
-        deps = set()
-        for item in self:
-            deps.update(item.dependencies)
-        return deps
-
-    @property
     def resolved(self):
         # type: () -> bool
         """Use to check if the variable value has been resolved."""
@@ -284,7 +266,7 @@ class VariableValueList(VariableValue, list):
 
     @property
     def simplified(self):
-        # type: () -> List[Any]
+        # type: () -> List[VariableValue]
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -333,6 +315,7 @@ class VariableValueList(VariableValue, list):
         return cls(acc)
 
     def __iter__(self):
+        # type: () -> Iterator[Any]
         """How the object is iterated."""
         return list.__iter__(self)
 
@@ -347,15 +330,6 @@ class VariableValueDict(VariableValue, dict):
     """A dict variable value."""
 
     @property
-    def dependencies(self):
-        # type: () -> Set[str]
-        """Variables whose value this depends on."""
-        deps = set()
-        for item in self.values():
-            deps.update(item.dependencies)
-        return deps
-
-    @property
     def resolved(self):
         # type: () -> bool
         """Use to check if the variable value has been resolved."""
@@ -366,7 +340,7 @@ class VariableValueDict(VariableValue, dict):
 
     @property
     def simplified(self):
-        # type: () -> Dict[str, Any]
+        # type: () -> Dict[str, VariableValue]
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -415,6 +389,7 @@ class VariableValueDict(VariableValue, dict):
         return cls(acc)
 
     def __iter__(self):
+        # type: () -> Iterator[Any]
         """How the object is iterated."""
         return dict.__iter__(self)
 
@@ -430,33 +405,24 @@ class VariableValueConcatenation(VariableValue, list):
     """A concatinated variable value."""
 
     @property
-    def dependencies(self):
-        # type: () -> Set[str]
-        """Variables whose value this depends on."""
-        deps = set()
-        for item in self:
-            deps.update(item.dependencies)
-        return deps
-
-    @property
     def resolved(self):
         # type: () -> bool
         """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self:
-            accumulator = accumulator and item.resolved()
+            accumulator = accumulator and item.resolved
         return accumulator
 
     @property
     def simplified(self):
-        # type: () -> Any
+        # type: () -> Union[Type[VariableValue], VariableValueConcatenation, VariableValueLiteral]
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
         flatten nested concatenations.
 
         """
-        concat = []
+        concat = []  # type: List[Type[VariableValue]]
         for item in self:
             if (
                     isinstance(item, VariableValueLiteral) and
@@ -493,7 +459,7 @@ class VariableValueConcatenation(VariableValue, list):
         if len(self) == 1:
             return self[0].value
 
-        values = []
+        values = []  # type: List[str]
         for value in self:
             resolved_value = value.value
             if not isinstance(resolved_value, string_types):
@@ -514,6 +480,7 @@ class VariableValueConcatenation(VariableValue, list):
             value.resolve(context, variables=variables, **kwargs)
 
     def __iter__(self):
+        # type: () -> Iterator[Type[VariableValue]]
         """How the object is iterated."""
         return list.__iter__(self)
 
@@ -521,7 +488,7 @@ class VariableValueConcatenation(VariableValue, list):
         # type: () -> str
         """Return object representation."""
         return 'Concatenation[{}]'.format(
-            ', '.join([repr(value)for value in self])
+            ', '.join([repr(value) for value in self])
         )
 
 
@@ -529,7 +496,7 @@ class VariableValueLookup(VariableValue):
     """A lookup variable value."""
 
     def __init__(self, lookup_name, lookup_data, handler=None):
-        # type: (str, VariableValue, Callable) -> None
+        # type: (VariableValueLiteral, VariableValue, Type[LookupHandler]) -> None
         """Initialize class.
 
         Args:
@@ -553,14 +520,6 @@ class VariableValueLookup(VariableValue):
             except KeyError:
                 raise UnknownLookupType(lookup_name_resolved)
         self.handler = handler
-
-    @property
-    def dependencies(self):
-        # type: () -> Set[str]
-        """Variables whose value this depends on."""
-        if isinstance(self.handler, type):
-            return self.handler.dependencies(self.lookup_data)
-        return set()
 
     @property
     def resolved(self):
@@ -618,6 +577,7 @@ class VariableValueLookup(VariableValue):
         self._resolved = True
 
     def __iter__(self):
+        # type: () -> Iterable
         """How the object is iterated."""
         yield self
 
@@ -639,6 +599,6 @@ class VariableValueLookup(VariableValue):
         # type: () -> str
         """Object displayed as a string."""
         return '${{{type} {data}}}'.format(
-            type=self.lookup_name.value(),
-            data=self.lookup_data.value(),
+            type=self.lookup_name.value,
+            data=self.lookup_data.value,
         )

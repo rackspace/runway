@@ -37,8 +37,8 @@ Common Arguments
 +---------------+-------------------------------------------------------------+
 
 """
-from typing import (Any, Dict, Optional,  # pylint: disable=unused-import
-                    Set, Tuple, Union, TYPE_CHECKING)
+from typing import (Any, Dict, Set,  # pylint: disable=unused-import
+                    Tuple, Union, TYPE_CHECKING)
 
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=no-name-in-module,import-error
@@ -70,8 +70,8 @@ class LookupHandler(object):
         return set()
 
     @classmethod
-    def handle(cls, value, context, provider=None):
-        # type: (str, 'Context', Optional[Any])
+    def handle(cls, value, context, **kwargs):
+        # type: (str, 'Context', Any) -> Any
         """Perform the lookup.
 
         Args:
@@ -87,7 +87,7 @@ class LookupHandler(object):
 
     @classmethod
     def parse(cls, value):
-        # type: (str) -> Tuple[str, Optional[str], Dict[str, str]]
+        # type: (str) -> Tuple[str, Dict[str, str]]
         """Parse the value passed to a lookup in a standardized way.
 
         Args:
@@ -122,9 +122,9 @@ class LookupHandler(object):
             Dict of parsed args.
 
         """
-        args = args.split(',')
+        split_args = args.split(',')
         return {key.strip(): value.strip() for key, value in
-                [arg.split('=') for arg in args]}
+                [arg.split('=') for arg in split_args]}
 
     @classmethod
     def transform(cls, value, to_type='str', **kwargs):
@@ -147,7 +147,7 @@ class LookupHandler(object):
         if not to_type:
             return value
 
-        return mapping[to_type](value, **kwargs)
+        return mapping[to_type](value, **kwargs)  # type: ignore
 
     @classmethod
     def _transform_to_bool(cls, value, **_):
