@@ -46,12 +46,12 @@ def sync(context, provider, **kwargs):
                  "s3://%s/" % bucket_name,
                  '--delete'])
 
-        distribution = get_distribution_data(context=context, provider=provider, **kwargs)
-        invalidate_distribution(session=session, **distribution)
+        distribution = get_distribution_data(context, provider, **kwargs)
+        invalidate_distribution(session, **distribution)
 
         LOGGER.info("staticsite: sync " "complete")
 
-        update_ssm_hash(context=context, session=session)
+        update_ssm_hash(context, session)
 
     prune_archives(
         context=context,
@@ -59,7 +59,7 @@ def sync(context, provider, **kwargs):
     )
     return True
 
-def update_ssm_hash(context=None, session=None):
+def update_ssm_hash(context, session):
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
         LOGGER.info("staticsite: updating environment SSM parameter %s "
                     "with hash %s",
@@ -75,7 +75,7 @@ def update_ssm_hash(context=None, session=None):
         )
     return True
 
-def get_distribution_data(context=None, provider=None, **kwargs):
+def get_distribution_data(context, provider, **kwargs):
     LOGGER.info("Retrieved distribution data")
     return {
         'identifier': OutputLookup.handle(
@@ -91,7 +91,7 @@ def get_distribution_data(context=None, provider=None, **kwargs):
         'path': kwargs.get('distribution_path', '/*')
     }
 
-def invalidate_distribution(session=None, identifier='', path='', domain='', **_):
+def invalidate_distribution(session, identifier='', path='', domain='', **_):
     LOGGER.info("staticsite: Invalidating CF distribution")
     cf_client = session.client('cloudfront')
     cf_client.create_invalidation(
