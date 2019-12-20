@@ -1,1 +1,1 @@
-"""Empty file for python import traversal."""
+"""Empty file for python import traversal."""  # pylint: disable=all

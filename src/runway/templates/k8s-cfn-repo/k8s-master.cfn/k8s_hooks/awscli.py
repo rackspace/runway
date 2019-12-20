@@ -22,11 +22,14 @@ def aws_eks_update_kubeconfig(provider, context, **kwargs):  # noqa pylint: disa
     Returns: boolean for whether or not the hook succeeded.
 
     """
-    eks_cluster_name = OutputLookup.handle(
-        "%s::EksClusterName" % kwargs['stack'],
-        provider=provider,
-        context=context
-    )
+    if kwargs.get('cluster-name'):
+        eks_cluster_name = kwargs['cluster-name']
+    else:
+        eks_cluster_name = OutputLookup.handle(
+            "%s::EksClusterName" % kwargs['stack'],
+            provider=provider,
+            context=context
+        )
     LOGGER.info('writing kubeconfig...')
     subprocess.check_output(['runway', 'run-aws', '--', 'eks',
                              'update-kubeconfig', '--name', eks_cluster_name])
