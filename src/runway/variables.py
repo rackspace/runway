@@ -183,10 +183,10 @@ class VariableValue(object):
 
             if next_close is not None:
                 lookup_data = VariableValueConcatenation(
-                    tokens[(last_open or 0 + len(opener) + 1):next_close]
+                    tokens[(last_open + len(opener) + 1):next_close]
                 )
                 lookup = VariableValueLookup(
-                    lookup_name=tokens[last_open or 0 + 1],
+                    lookup_name=tokens[last_open + 1],
                     lookup_data=lookup_data,
                 )
                 tokens[last_open:(next_close + 1)] = [lookup]
