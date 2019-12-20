@@ -19,7 +19,8 @@ EMBEDDED_LIB_PATH = os.path.join(
 )
 
 
-class MutableMap(six.moves.collections_abc.MutableMapping):
+# python2 supported pylint is unable to load six.moves correctly
+class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
     """Base class for mutable map objects."""
 
     def __init__(self, **kwargs):
@@ -189,7 +190,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):
         """
         delattr(self, key)
 
-    def __len__(self) -> int:
+    def __len__(self):
         # type: () -> int
         """Implement the built-in function len().
 

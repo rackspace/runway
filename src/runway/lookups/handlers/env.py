@@ -1,10 +1,13 @@
 """Environment variable lookup."""
-from typing import Any, TYPE_CHECKING  # noqa
+# pylint: disable=arguments-differ
+from typing import Any, TYPE_CHECKING  # pylint: disable=unused-import
 
 from .base import LookupHandler
 
+# python2 supported pylint sees this is cyclic even though its only for type checking
+# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from ...context import Context  # noqa: F401
+    from ...context import Context  # noqa: F401 pylint: disable=unused-import
 
 TYPE_NAME = "env"
 
@@ -34,7 +37,7 @@ class EnvLookup(LookupHandler):
         """
         query, args = cls.parse(value)
 
-        result = context.env_vars.get(value, args.pop('default', None))
+        result = context.env_vars.get(query, args.pop('default', None))
 
         if result:
             return cls.transform(result, to_type=args.pop('transform', None),

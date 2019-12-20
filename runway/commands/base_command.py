@@ -3,7 +3,7 @@ from typing import List, Optional, Union  # pylint: disable=unused-import
 import os
 import logging
 
-from ..config import Config, VariablesDefinition
+from ..config import Config, VariablesDefinition  # noqa: F401 pylint: disable=unused-import
 
 
 class BaseCommand(object):

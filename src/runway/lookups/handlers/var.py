@@ -1,13 +1,16 @@
 """Variable definition lookup."""
-from typing import Any, TYPE_CHECKING
+# pylint: disable=arguments-differ
+from typing import Any, TYPE_CHECKING  # pylint: disable=unused-import
 
 import logging
 
 from .base import LookupHandler
 
+# python2 supported pylint sees this is cyclic even though its only for type checking
+# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from ...config import VariablesDefinition  # noqa: F401
-    from ...context import Context  # noqa: F401
+    from ...config import VariablesDefinition  # noqa: F401 pylint: disable=unused-import
+    from ...context import Context  # noqa: F401 pylint: disable=unused-import
 
 
 LOGGER = logging.getLogger('runway')
@@ -44,4 +47,3 @@ class VarLookup(LookupHandler):
                                  **args)
 
         raise ValueError('"{}" does not exist in the variable definition')
-

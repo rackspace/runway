@@ -1,6 +1,6 @@
 """Register test handlers."""
 # modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
-from typing import Callable, Union
+from typing import Callable, Union  # pylint: disable=unused-import
 from six import string_types
 
 from runway.embedded.stacker.util import load_object_from_string

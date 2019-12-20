@@ -37,15 +37,19 @@ Common Arguments
 +---------------+-------------------------------------------------------------+
 
 """
-from typing import Any, Dict, Optional, Set, Tuple, Union, TYPE_CHECKING  # noqa
+from typing import (Any, Dict, Optional,  # pylint: disable=unused-import
+                    Set, Tuple, Union, TYPE_CHECKING)
 
-from distutils.util import strtobool
+# python2 supported pylint is unable to load this when in a venv
+from distutils.util import strtobool  # pylint: disable=no-name-in-module,import-error
 from six import string_types
 
 from stacker.util import read_value_from_path
 
+# python2 supported pylint sees this is cyclic even though its only for type checking
+# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from ...context import Context  # noqa
+    from ...context import Context  # noqa: F401 pylint: disable=unused-import
 
 
 class LookupHandler(object):
@@ -146,7 +150,7 @@ class LookupHandler(object):
         return mapping[to_type](value, **kwargs)
 
     @classmethod
-    def _transform_to_bool(cls, value, **kwargs):
+    def _transform_to_bool(cls, value, **_):
         # type: (Union[bool, str], Any) -> bool
         """Transform a string into a bool.
 
@@ -156,6 +160,7 @@ class LookupHandler(object):
         Raises:
             ValueError: The value provided was not a bool or string or
                 the string could not be converted to a bool.
+
         """
         if isinstance(value, bool):
             return value
@@ -164,7 +169,7 @@ class LookupHandler(object):
         raise ValueError('value must be a string to use transform=bool')
 
     @classmethod
-    def _transform_to_string(cls, value, delimiter=None, **kwargs):
+    def _transform_to_string(cls, value, delimiter=None, **_):
         # type: (Any, str, Any) -> str
         """Transform anything into a string.
 
@@ -177,10 +182,6 @@ class LookupHandler(object):
                 to join each element together.
 
         """
-        if (
-                isinstance(value, list) or
-                isinstance(value, set) or
-                isinstance(value, tuple)
-        ):
+        if isinstance(value, (list, set, tuple)):
             return '{}'.format(delimiter or ',').join(value)
         return str(value)

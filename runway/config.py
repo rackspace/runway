@@ -1,7 +1,10 @@
 """Runway config file module."""
-from typing import Any, Dict, List, Optional, Union, Iterator, TYPE_CHECKING
+# pylint: disable=super-init-not-called
+from typing import (Any, Dict, List, Optional,  # pylint: disable=unused-import
+                    Union, Iterator, TYPE_CHECKING)
 
-from distutils.util import strtobool
+# python2 supported pylint is unable to load this when in a venv
+from distutils.util import strtobool  # pylint: disable=no-name-in-module,import-error
 import logging
 import os
 import sys
@@ -12,8 +15,10 @@ import yaml
 from .util import MutableMap
 from .variables import Variable
 
+# python2 supported pylint sees this is cyclic even though its only for type checking
+# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from .context import Context  # noqa
+    from .context import Context  # noqa: F401 pylint: disable=unused-import
 
 LOGGER = logging.getLogger('runway')
 
@@ -297,7 +302,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         """Access the value of an attribute that supports variables."""
         value = self._class_path.value
         if not value:
-            return
+            return None
         if isinstance(value, str):
             return value
         raise ValueError('{}.class_path = {} is of type {}; expected type '
@@ -743,10 +748,9 @@ class VariablesDefinition(MutableMap):
             result = os.path.join(sys_path, file_path)
             if os.path.isfile(result):
                 return result
-            else:
-                LOGGER.error('The provided variables "%s" file could not '
-                             'be found.', result)
-                sys.exit(1)
+            LOGGER.error('The provided variables "%s" file could not '
+                         'be found.', result)
+            sys.exit(1)
 
         for name in cls.default_names:
             result = os.path.join(sys_path, name)

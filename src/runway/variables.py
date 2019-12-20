@@ -1,5 +1,6 @@
 """Runway variables."""
-from typing import Any, Callable, Dict, Iterable, List, Set, TYPE_CHECKING
+from typing import (Any, Callable,  # noqa: F401 pylint: disable=unused-import
+                    Dict, Iterable, List, Set, TYPE_CHECKING)
 
 import logging
 import re
@@ -12,8 +13,10 @@ from stacker.exceptions import (InvalidLookupCombination, UnresolvedVariable,  #
 
 from .lookups.registry import LOOKUP_HANDLERS
 
+# python2 supported pylint sees this is cyclic even though its only for type checking
+# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from .config import VariablesDefinition  # noqa: F401
+    from .config import VariablesDefinition  # noqa: F401 pylint: disable=unused-import
 
 
 LOGGER = logging.getLogger('runway')
@@ -38,7 +41,7 @@ class Variable(object):
 
     @property
     def dependencies(self):
-        # type: Set[str]
+        # type: [str]
         """Variables whose value this depends on."""
         return self._value.dependencies
 
@@ -158,9 +161,9 @@ class VariableValue(object):
         """
         if isinstance(input_object, list):
             return VariableValueList.parse(input_object)
-        elif isinstance(input_object, dict):
+        if isinstance(input_object, dict):
             return VariableValueDict.parse(input_object)
-        elif not isinstance(input_object, string_types):
+        if not isinstance(input_object, string_types):
             return VariableValueLiteral(input_object)
 
         tokens = VariableValueConcatenation([
@@ -479,10 +482,9 @@ class VariableValueConcatenation(VariableValue, list):
 
         if not concat:
             return VariableValueLiteral('')
-        elif len(concat) == 1:
+        if len(concat) == 1:
             return concat[0]
-        else:
-            return VariableValueConcatenation(concat)
+        return VariableValueConcatenation(concat)
 
     @property
     def value(self):
@@ -558,8 +560,7 @@ class VariableValueLookup(VariableValue):
         """Variables whose value this depends on."""
         if isinstance(self.handler, type):
             return self.handler.dependencies(self.lookup_data)
-        else:
-            return set()
+        return set()
 
     @property
     def resolved(self):
@@ -587,8 +588,7 @@ class VariableValueLookup(VariableValue):
         """Value of the variable. Can be resolved or unresolved."""
         if self._resolved:
             return self._value
-        else:
-            raise UnresolvedVariableValue(self)
+        raise UnresolvedVariableValue(self)
 
     def resolve(self, context, variables=None, **kwargs):
         # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
@@ -630,11 +630,10 @@ class VariableValueLookup(VariableValue):
                 t=self.lookup_name,
                 d=repr(self.lookup_data),
             )
-        else:
-            return 'Lookup<{t} {d}>'.format(
-                t=self.lookup_name,
-                d=repr(self.lookup_data),
-            )
+        return 'Lookup<{t} {d}>'.format(
+            t=self.lookup_name,
+            d=repr(self.lookup_data),
+        )
 
     def __str__(self):
         # type: () -> str

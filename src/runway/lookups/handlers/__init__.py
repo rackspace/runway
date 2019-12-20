@@ -1,4 +1,4 @@
 """Import classes."""
 
-from .env import EnvLookup, TYPE_NAME  # noqa
-from .var import VarLookup, TYPE_NAME  # noqa
+from . import env  # noqa: F401
+from . import var  # noqa: F401
