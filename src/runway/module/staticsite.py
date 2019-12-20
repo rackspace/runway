@@ -27,12 +27,16 @@ class StaticSite(RunwayModule):
 
     def setup_website_module(self, command):
         """Create stacker configuration for website module."""
-        name = self.options.get('name') if self.options.get('name') else self.options.get('path')  # noqa pylint: disable=line-too-long
+
+        name = self.options.get('path')
+        if self.options.get('name'):
+            name = self.options.get('name')
+
         ensure_valid_environment_config(
             name,
-            self.options.get('environments',
-                             {}).get(self.context.env_name,
-                                     {}))
+            self.options.get('environments', {}).get(self.context.env_name, {})
+        )
+
         module_dir = tempfile.mkdtemp()
         LOGGER.info("staticsite: Generating CloudFormation configuration for "
                     "module %s in %s",
@@ -40,8 +44,13 @@ class StaticSite(RunwayModule):
                     module_dir)
 
         # Default parameter name matches build_staticsite hook
-        hash_param = self.options.get('options', {}).get('source_hashing', {}).get('parameter') if self.options.get('options', {}).get('source_hashing', {}).get('parameter') else "${namespace}-%s-hash" % name # noqa pylint: disable=line-too-long
+        hash_param = "${namespace}-%s-hash" % name
+        if self.options.get('options', {}).get('source_hashing', {}).get('parameter'):
+            hash_param = self.options.get('options', {}).get('source_hashing', {}).get(
+                'parameter'
+            )
         build_staticsite_args = self.options.copy()
+
         if not build_staticsite_args.get('options'):
             build_staticsite_args['options'] = {}
         build_staticsite_args['artifact_bucket_rxref_lookup'] = "%s-dependencies::ArtifactsBucketName" % name  # noqa pylint: disable=line-too-long
@@ -74,29 +83,21 @@ class StaticSite(RunwayModule):
             'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
-        if self.options.get('environments',
-                            {}).get(self.context.env_name,
-                                    {}).get('staticsite_enable_cf_logging',
-                                            True):
-            site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
-        if self.options.get('environments',
-                            {}).get(self.context.env_name,
-                                    {}).get('staticsite_acmcert_ssm_param'):
+
+        env = self.options.get('environments', ()).get(self.context.env_name, {})
+        site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'
+
+        if env.get('staticsite_acmcert_ssm_param'):
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
-        else:
-            site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'  # noqa pylint: disable=line-too-long
+
+        if env.get('staticsite_enable_cf_logging', True):
+            site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
         for i in ['custom_error_responses', 'lambda_function_associations']:
-            if self.options.get('environments',
-                                {}).get(self.context.env_name,
-                                        {}).get("staticsite_%s" % i):
-                site_stack_variables[i] = self.options.get(
-                    'environments',
-                    {}
-                ).get(self.context.env_name,
-                      {}).get("staticsite_%s" % i)
+            if env.get("staticsite_%s" % i):
+                site_stack_variables[i] = env.get("staticsite_%s" % i)
                 self.options.get('environments',
                                  {}).get(self.context.env_name,
                                          {}).pop("staticsite_%s" % i)
