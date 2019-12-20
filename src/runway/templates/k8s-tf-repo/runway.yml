@@ -3,6 +3,7 @@ deployments:
   - modules:
       - tfstate.cfn
       - eks-base.tf
+      - gen-kubeconfig.cfn  # just generating the local kubeconfig file
       - job-s3-echo.tf
       - service-hello-world.k8s
     env_vars:

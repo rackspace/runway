@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Updated `sls-py` sample to work properly w/ python plugin static caching
+- Updated `k8s-tf ` sample:
+    - Python 2 compatibility for cert certificate script
+    - kubeconfig file is now updated/recreated automatically
+
+### Changed
+- Updated `k8s-tf ` sample:
+    - Moved worker nodes to EKS node group
 
 ## [1.3.4] - 2019-12-18
 ### Fixed
