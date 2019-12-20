@@ -13,7 +13,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 def get_archives_to_prune(archives, hook_data):
-    """Return list of keys to delete."""
+    """Return list of keys to delete.
+
+    Keyword Args:
+        archives (Dict): The full list of file archives
+        hook_data (Dict): Stacker hook data
+
+    """
     files_to_skip = []
 
     for i in ['current_archive_filename', 'old_archive_filename']:
@@ -27,7 +33,13 @@ def get_archives_to_prune(archives, hook_data):
 
 
 def sync(context, provider, **kwargs):
-    """Sync static website to S3 bucket."""
+    """Sync static website to S3 bucket.
+
+    Keyword Args:
+
+        context (Dict):
+        provider (Dict):
+    """
     session = get_session(provider.region)
     bucket_name = OutputLookup.handle(kwargs.get('bucket_output_lookup'),
                                       provider=provider,
@@ -53,13 +65,17 @@ def sync(context, provider, **kwargs):
 
         update_ssm_hash(context, session)
 
-    prune_archives(
-        context=context,
-        session=session
-    )
+    prune_archives(context, session)
     return True
 
+
 def update_ssm_hash(context, session):
+    """Update the SSM hash with the new tracking data.
+
+    Keyword Args:
+        context (Dict):
+        session (Session): The Stacker Session
+    """
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
         LOGGER.info("staticsite: updating environment SSM parameter %s "
                     "with hash %s",
@@ -75,7 +91,13 @@ def update_ssm_hash(context, session):
         )
     return True
 
+
 def get_distribution_data(context, provider, **kwargs):
+    """Retrive information about the distribution
+
+        context (Dict):
+        provider (Dict):
+    """
     LOGGER.info("Retrieved distribution data")
     return {
         'identifier': OutputLookup.handle(
@@ -91,7 +113,14 @@ def get_distribution_data(context, provider, **kwargs):
         'path': kwargs.get('distribution_path', '/*')
     }
 
+
 def invalidate_distribution(session, identifier='', path='', domain='', **_):
+    """Invalidate the current distribution
+        session (Session): The current Stacker session
+        identifier (string): The distribution id
+        path (string): The distribution path
+        domain (string): The distribution domain
+    """
     LOGGER.info("staticsite: Invalidating CF distribution")
     cf_client = session.client('cloudfront')
     cf_client.create_invalidation(
@@ -106,7 +135,13 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
     LOGGER.info("staticsite: CF invalidation of %s (domain %s) " "complete", identifier, domain)
     return True
 
-def prune_archives(context=None, session=None):
+
+def prune_archives(context, session):
+    """Prune the archives from the bucket.
+
+        context (Dict):
+        session (Session): The Stacker session
+    """
     LOGGER.info("staticsite: cleaning up old site archives...")
     archives = []
     s3_client = session.client('s3')
