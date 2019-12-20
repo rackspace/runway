@@ -384,6 +384,8 @@ class ModulesCommand(RunwayCommand):
     def _process_deployments(self, deployments, context):
         """Process deployments."""
         for _, deployment in enumerate(deployments):
+            LOGGER.debug('Resolving deployment for preprocessing...')
+            deployment.resolve(context, self.runway_vars, pre_process=True)
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Processing deployment '%s' ===========================",
@@ -517,25 +519,25 @@ class ModulesCommand(RunwayCommand):
                 self._deploy_module(module, deployment, context)
 
     def _deploy_module(self, module, deployment, context):
-        module_opts = {}
         deployment.resolve(context, self.runway_vars)
         module.resolve(context, self.runway_vars)
-        if deployment.get('environments'):
-            module_opts['environments'] = deployment.environments.copy()
-        if deployment.get('module_options'):
-            module_opts['options'] = deployment['module_options'].copy()  # noqa
+        module_opts = {
+            'environments': deployment.environments.copy(),
+            'options': deployment['module_options'].copy()
+        }
 
         path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))
 
-        module_opts = merge_dicts(module_opts, module.contents)
+        module_opts = merge_dicts(module_opts, module.data)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
-                    module['path'],
+                    module.path,
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
+        module_opts['_using_vars'] = True if self.runway_vars else False
         if module_opts.get('env_vars'):
             module_env_vars = merge_nested_environment_dicts(
                 module_opts.get('env_vars'), env_name=context.env_name,
@@ -544,7 +546,7 @@ class ModulesCommand(RunwayCommand):
             if module_env_vars:
                 context = copy.deepcopy(context)  # changes for this mod only
                 LOGGER.info("OS environment variable overrides being "
-                            "applied this module: %s",
+                            "applied to this module: %s",
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
         with change_dir(path.module_root):

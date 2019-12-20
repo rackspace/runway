@@ -44,9 +44,20 @@ class MutableMap(six.moves.collections_abc.MutableMapping):
         if kwargs:
             self._found_queries = MutableMap()
 
+    @property
+    def data(self):
+        # type: () -> Dict[str, Any]
+        """Sanitized output of __dict__.
+
+        Removes anything that starts with ``_``.
+
+        """
+        return {key: value for key, value in self.__dict__.items()
+                if not key.startswith('_')}
+
     def clear_found_cache(self):
         # type: () -> None
-        """Clears _found_cache."""
+        """Clear _found_cache."""
         for _, val in self.__dict__.items():
             if isinstance(val, MutableMap):
                 val.clear_found_cache()
@@ -106,6 +117,14 @@ class MutableMap(six.moves.collections_abc.MutableMapping):
 
         """
         return getattr(self, key, default)
+
+    def __bool__(self):
+        """Implement evaluation of instances as a bool."""
+        if self.data:
+            return True
+        return False
+
+    __nonzero__ = __bool__  # python2 compatability
 
     def __getitem__(self, key):
         # type: (str) -> Any

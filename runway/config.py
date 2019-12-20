@@ -1,9 +1,12 @@
 """Runway config file module."""
 from typing import Any, Dict, List, Optional, Union, Iterator, TYPE_CHECKING
 
+from distutils.util import strtobool
 import logging
 import os
 import sys
+
+from six import string_types
 import yaml
 
 from .util import MutableMap
@@ -16,31 +19,61 @@ LOGGER = logging.getLogger('runway')
 
 
 class ConfigComponent(MutableMap):
-    """Base class for Runway config components."""
+    """Base class for Runway config components.
 
-    GLOBAL_SUPPORTS_VARIABLES = ['environments']
-    SUPPORTS_VARIABLES = []  # subclass support list
+    Attributes:
+        GLOBAL_SUPPORTS_VARIABLES: A list of directives that support the use
+            of variables across all components that contain the directive.
+        SUPPORTS_VARIABLES: A list of directives that support the use of
+            variable in the given subclass.
+        PRE_PROCESS_VARIABLES: A list of directives that support the use of
+            variables and needs to be resolved before the component is
+            processed.
+
+    """
+
+    GLOBAL_SUPPORTS_VARIABLES = ['env_vars', 'environments']  # type: List[str]
+    SUPPORTS_VARIABLES = []  # type: List[str]
+    PRE_PROCESS_VARIABLES = []  # type: List[str]
 
     @property
-    def contents(self):
+    def data(self):
         # type: () -> Dict[str, Any]
-        """Sanitized output of __dict__ with properties added."""
-        contents = {}
+        """Sanitized output of __dict__ with properties added.
+
+        Removes anything that starts with ``_``.
+
+        """
+        data = {}
 
         for key, val in self.__dict__.items():
             if not key.startswith('_'):
-                contents[key] = val
+                data[key] = val
 
         for attr in self.supports_variables:
-            contents[attr] = getattr(self, attr, None)
+            data[attr] = getattr(self, attr, None)
 
-        return contents
+        return data
+
+    @property
+    def env_vars(self):
+        # type: () -> Any
+        """Access the value of an attribute that supports variables."""
+        value = self._env_vars.value  # pylint: disable=no-member
+        if isinstance(value, dict):
+            return value
+        raise ValueError('{}.env_vars is of type {}; expected type '
+                         'of dict'.format(self.name, type(value)))
 
     @property
     def environments(self):
-        # type: () -> Any
+        # type: () -> Dict[Any, Any]
         """Access the value of an attribute that supports variables."""
-        return self._environments.value  # pylint: disable=no-member
+        value = self._environments.value  # pylint: disable=no-member
+        if isinstance(value, dict):
+            return value
+        raise ValueError('{}.environments is of type {}; expected type '
+                         'of dict'.format(self.name, type(value)))
 
     @property
     def supports_variables(self):
@@ -53,10 +86,23 @@ class ConfigComponent(MutableMap):
         """Implement evaluation of get."""
         return getattr(self, key, getattr(self, key.replace('-', '_'), default))
 
-    def resolve(self, context, variables=None):
-        # type: ('Context', Optional[VariablesDefinition]) -> None
-        """Resolve all attributes that support variables."""
-        for attr in self.supports_variables:
+    def resolve(self, context, variables=None, pre_process=False):
+        # type: ('Context', Optional[VariablesDefinition], bool) -> None
+        """Resolve attributes that support variables.
+
+        Args:
+            context: The current context object.
+            variables: Object containing variables passed to Runway.
+            pre_process: Only resolve the variables that are required before
+                the component is processed. If this is ``False``, all variables
+                will be resolved. This is useful to prevent errors when
+                variables cannot be resolved because the values are not
+                populated until processing has begun.
+
+        """
+        for attr in (self.PRE_PROCESS_VARIABLES if pre_process
+                     else self.supports_variables):
+            LOGGER.info('Resolving %s.%s', self.name, attr)
             getattr(self, '_' + attr).resolve(context, variables=variables)
 
     def __getitem__(self, key):
@@ -67,12 +113,12 @@ class ConfigComponent(MutableMap):
     def __len__(self):
         # type: () -> int
         """Implement the built-in function len()."""
-        return len(self.contents)
+        return len(self.data)
 
     def __iter__(self):
         # type: () -> Iterator[Any]
         """Return iterator object that can iterate over all attributes."""
-        return iter(self.contents)
+        return iter(self.data)
 
 
 class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
@@ -171,6 +217,8 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
     """
 
+    SUPPORTS_VARIABLES = ['class_path', 'options', 'path']
+
     def __init__(self,  # pylint: disable=too-many-arguments
                  name,  # type: str
                  path,  # type: str
@@ -234,13 +282,46 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
         """
         self.name = name
-        self.path = path
-        self.class_path = class_path
-        self._environments = Variable(name + '.environments', environments or {})
-        self.env_vars = env_vars or {}
-        self.options = options or {}
+        self._path = Variable(name + '.path', path)
+        self._class_path = Variable(name + '.class_path', class_path)
+        self._environments = Variable(name + '.environments',
+                                      environments or {})
+        self._env_vars = Variable(name + '.env_vars', env_vars or {})
+        self._options = Variable(name + '.options', options or {})
         self.tags = tags or {}
         self.child_modules = child_modules
+
+    @property
+    def class_path(self):
+        # type: () -> Optional[str]
+        """Access the value of an attribute that supports variables."""
+        value = self._class_path.value
+        if not value:
+            return
+        if isinstance(value, str):
+            return value
+        raise ValueError('{}.class_path = {} is of type {}; expected type '
+                         'of str'.format(self.name, value, type(value)))
+
+    @property
+    def options(self):
+        # type: () -> Dict[Any, Any]
+        """Access the value of an attribute that supports variables."""
+        value = self._options.value
+        if isinstance(value, dict):
+            return value
+        raise ValueError('{}.options is of type {}; expected type '
+                         'of dict'.format(self.name, type(value)))
+
+    @property
+    def path(self):
+        # type: () -> str
+        """Access the value of an attribute that supports variables."""
+        value = self._path.value  # pylint: disable=no-member
+        if isinstance(value, str):
+            return value
+        raise ValueError('{}.path is of type {}; expected type '
+                         'of str'.format(self.name, type(value)))
 
     @classmethod
     def from_list(cls, modules):
@@ -332,6 +413,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
     """
 
+    SUPPORTS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
+                          'module_options', 'regions', 'parallel_regions']
+    PRE_PROCESS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
+                             'env_vars', 'regions']
+
     def __init__(self, deployment):
         # type: (Dict[str, Any]) -> None
         """.. Runway deployment definition.
@@ -388,21 +474,25 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
         """
         self.name = deployment.pop('name')  # type: str
-        self.account_alias = deployment.pop(
-            'account_alias', deployment.pop('account-alias', {})
-        )  # type: Optional[Dict[str, str]]
-        self.account_id = deployment.pop(
+        self._account_alias = Variable(
+            self.name + '.account_alias', deployment.pop(
+                'account_alias', deployment.pop('account-alias', {})
+            )
+        )  # type: Variable
+        self._account_id = Variable(self.name + '.account_id', deployment.pop(
             'account_id', deployment.pop('account-id', {})
-        )  # type: Optional[Dict[str, Union[str, int]]]
-        self.assume_role = deployment.pop(
-            'assume_role', deployment.pop('assume-role', {})
-        )  # type: Optional[Dict[str, Union[str, Dict[str, str]]]]
+        ))  # type: Variable
+        self._assume_role = Variable(
+            self.name + '.assume_role', deployment.pop(
+                'assume_role', deployment.pop('assume-role', {})
+            )
+        )  # type: Variable
         self._environments = Variable(
             self.name + '.environments', deployment.pop('environments', {})
         )  # type: Variable
-        self.env_vars = deployment.pop(
+        self._env_vars = Variable(self.name + '.env_vars', deployment.pop(
             'env_vars', deployment.pop('env-vars', {})
-        )  # type: Optional[Dict[str, Dict[str, Any]]]
+        ))  # type: Variable
         if deployment.pop('current_dir', False):
             # Deprecated in 1.0 (late 2019). Retain for at least a major version.
             LOGGER.warning('DEPRECATION WARNING: The "current_dir" option has '
@@ -418,29 +508,100 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self.modules = ModuleDefinition.from_list(
             modules
         )  # type: List[ModuleDefinition]
-        self.module_options = deployment.pop(
-            'module_options', deployment.pop('module-options', {})
-        )  # type: Optional(Dict[str, Any])
-        self.regions = deployment.pop(
-            'regions', []
-        )  # type: Union[List[str], Dict[str, List[str]]]
+        self._module_options = Variable(
+            self.name + '.module_options', deployment.pop(
+                'module_options', deployment.pop('module-options', {})
+            )
+        )  # type: Variable
 
-        if self.regions and deployment.get('parallel_regions'):
+        regions = deployment.pop(
+            'regions', []
+        )
+
+        if regions and deployment.get('parallel_regions'):
             LOGGER.error('Found "regions" and "parallel_regions" in '
                          'deployment "%s"; only one can be defined',
                          self.name)
             sys.exit(1)
-        if isinstance(self.regions, dict) and self.regions.get('parallel'):
-            self.parallel_regions = self.regions.pop('parallel')
-            self.regions = []
+        if isinstance(regions, dict) and self.regions.get('parallel'):
+            self._parallel_regions = Variable(
+                self.name + '.parallel_regions', self.regions.pop('parallel')
+            )  # type: Variable
+            self._regions = Variable(self.name + '.regions',
+                                     [])  # type: Variable
         else:
-            self.parallel_regions = deployment.pop('parallel_regions', [])
+            self._regions = Variable(self.name + '.regions',
+                                     regions)  # type: Variable
+            self._parallel_regions = Variable(
+                self.name + '.parallel_regions',
+                deployment.pop('parallel_regions', [])
+            )  # type: Variable
 
         if deployment:
             LOGGER.warning(
                 'Invalid keys found in deployment %s have been ignored: %s',
                 self.name, ', '.join(deployment.keys())
             )
+
+    @property
+    def account_alias(self):
+        # type: () -> Union[Dict[Any, Any], str]
+        """Access the value of an attribute that supports variables."""
+        value = self._account_alias.value
+        if isinstance(value, (dict, string_types)):
+            return value
+        raise ValueError('{}.account_alias is of type {}; expected type '
+                         'of dict or str'.format(self.name, type(value)))
+
+    @property
+    def account_id(self):
+        # type: () -> Union[Dict[Any, Any], str]
+        """Access the value of an attribute that supports variables."""
+        value = self._account_id.value
+        if isinstance(value, (dict, string_types)):
+            return value
+        raise ValueError('{}.account_id is of type {}; expected type '
+                         'of dict or str'.format(self.name, type(value)))
+
+    @property
+    def assume_role(self):
+        # type: () -> Union[Dict[Any, Any], str]
+        """Access the value of an attribute that supports variables."""
+        value = self._assume_role.value
+        if isinstance(value, (dict, string_types)):
+            return value
+        raise ValueError('{}.assume_role is of type {}; expected type '
+                         'of dict or str'.format(self.name, type(value)))
+
+    @property
+    def module_options(self):
+        # type: () -> Dict[Any, Any]
+        """Access the value of an attribute that supports variables."""
+        value = self._module_options.value
+        if isinstance(value, dict):
+            return value
+        raise ValueError('{}.module_options is of type {}; expected type '
+                         'of dict'.format(self.name, type(value)))
+
+    @property
+    def regions(self):
+        # type: () -> List[str]
+        """Access the value of an attribute that supports variables."""
+        value = self._regions.value
+        if isinstance(value, list):
+            return value
+        raise ValueError('{}.regions is of type {}; expected type '
+                         'of list'.format(self.name, type(value)))
+
+    @property
+    def parallel_regions(self):
+        # type: () -> List[str]
+        """Access the value of an attribute that supports variables."""
+        value = self._parallel_regions.value
+        if isinstance(value, list):
+            return value
+        raise ValueError('{}.parallel_regions is of type {}; expected type '
+                         'of list'.format(self.name, type(value)))
 
     @classmethod
     def from_list(cls, deployments):
@@ -474,6 +635,8 @@ class TestDefinition(ConfigComponent):
 
     """
 
+    GLOBAL_SUPPORTS_VARIABLES = ['args', 'required']  # does not support other globals
+
     def __init__(self,
                  name,  # type: str
                  test_type,  # type: str
@@ -506,8 +669,33 @@ class TestDefinition(ConfigComponent):
         """
         self.name = name
         self.type = test_type
-        self.args = args or {}
-        self.required = required
+        self._args = Variable(self.name + '.args', args or {})
+        self._required = Variable(self.name + '.required', required)
+
+    @property
+    def args(self):
+        # type: () -> Dict[str, Any]
+        """Access the value of an attribute that supports variables."""
+        value = self._args.value
+        if isinstance(value, dict):
+            return value
+        raise ValueError('{}.args is of type {}; expected type '
+                         'of dict'.format(self.name, type(value)))
+
+    @property
+    def required(self):
+        # type: () -> bool
+        """Access the value of an attribute that supports variables."""
+        value = self._required.value
+        if isinstance(value, bool):
+            return value
+        try:
+            value = strtobool(value)
+            return value
+        except ValueError:
+            pass
+        raise ValueError('{}.required is of type {}; expected type '
+                         'of bool'.format(self.name, type(value)))
 
     @classmethod
     def from_list(cls, tests):

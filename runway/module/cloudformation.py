@@ -117,20 +117,27 @@ class CloudFormation(RunwayModule):
         stacker_env_file = get_stacker_env_file(self.path,
                                                 self.context.env_name,
                                                 self.context.env_region)
+        stacker_env_dict = self.options.get('environments',
+                                            {}).get(self.context.env_name)
         stacker_env_file_present = os.path.isfile(
             os.path.join(self.path, stacker_env_file)
         )
-        if isinstance(self.options.get('environments',
-                                       {}).get(self.context.env_name),
-                      dict):
-            for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
+
+        def add_stacker_e(envs):
+            """Add variable values to CLI command invocation."""
+            for key, val in envs.items():
                 stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
+
+        if self.options['_using_vars']:
+            add_stacker_e(self.options['environments'])
+        elif stacker_env_dict:
+            add_stacker_e(stacker_env_dict)
+
         if stacker_env_file_present:
             stacker_cmd.append(stacker_env_file)
 
-        if not (stacker_env_file_present or self.options.get(
-                'environments',
-                {}).get(self.context.env_name)):
+        if not (stacker_env_file_present or stacker_env_dict or
+                (self.options['_using_vars'] and self.options['environments'])):
             response['skipped_configs'] = True
             LOGGER.info(
                 "Skipping stacker %s; no environment "
