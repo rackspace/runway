@@ -1,5 +1,5 @@
 """Runway config file module."""
-# pylint: disable=super-init-not-called
+# pylint: disable=super-init-not-called,too-many-lines
 from typing import (Any, Dict, List, Optional,  # pylint: disable=unused-import
                     Union, Iterator, TYPE_CHECKING)
 
@@ -28,18 +28,15 @@ class ConfigComponent(MutableMap):
     """Base class for Runway config components.
 
     Attributes:
-        GLOBAL_SUPPORTS_VARIABLES: A list of directives that support the use
-            of variables across all components that contain the directive.
         SUPPORTS_VARIABLES: A list of directives that support the use of
-            variable in the given subclass.
+            variable.
         PRE_PROCESS_VARIABLES: A list of directives that support the use of
             variables and needs to be resolved before the component is
             processed.
 
     """
 
-    GLOBAL_SUPPORTS_VARIABLES = ['env_vars', 'environments']  # type: List[str]
-    SUPPORTS_VARIABLES = []  # type: List[str]
+    SUPPORTS_VARIABLES = ['env_vars', 'environments']  # type: List[str]
     PRE_PROCESS_VARIABLES = []  # type: List[str]
 
     @property
@@ -56,7 +53,7 @@ class ConfigComponent(MutableMap):
             if not key.startswith('_'):
                 data[key] = val
 
-        for attr in self.supports_variables:
+        for attr in self.SUPPORTS_VARIABLES:
             data[attr] = getattr(self, attr, None)
 
         return data
@@ -81,12 +78,6 @@ class ConfigComponent(MutableMap):
         raise ValueError('{}.environments is of type {}; expected type '
                          'of dict'.format(self.name, type(value)))
 
-    @property
-    def supports_variables(self):
-        # type: () -> List[str]
-        """Return a complete list of attributes that support variables."""
-        return self.GLOBAL_SUPPORTS_VARIABLES + self.SUPPORTS_VARIABLES
-
     def get(self, key, default=None):
         # type: (str, Any) -> Any
         """Implement evaluation of get."""
@@ -107,14 +98,18 @@ class ConfigComponent(MutableMap):
 
         """
         for attr in (self.PRE_PROCESS_VARIABLES if pre_process
-                     else self.supports_variables):
-            LOGGER.info('Resolving %s.%s', self.name, attr)
+                     else self.SUPPORTS_VARIABLES):
+            LOGGER.debug('Resolving %s.%s', self.name, attr)
             getattr(self, '_' + attr).resolve(context, variables=variables)
 
     def __getitem__(self, key):
         # type: (str) -> Any
         """Implement evaluation of self[key]."""
-        return getattr(self, key, getattr(self, key.replace('-', '_')))
+        result = getattr(self, key, getattr(self, key.replace('-', '_')))
+
+        if isinstance(result, Variable):
+            return result.value
+        return result
 
     def __len__(self):
         # type: () -> int
@@ -185,8 +180,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
               - name: my-module
                 path: my-module.tf
                 environments:
-                  dev:
-                    image_id: ami-1234
+                  image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
                 tags:
                   - app:example
                   - my-tag
@@ -202,6 +196,10 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     ``CI`` :ref:`environment variable is set<non-interactive-mode>`.
 
     Example:
+      In this example, ``backend.tf`` will be deployed followed by the services
+      that will be utilizing it. The services will be deployed in parallel.
+      After the services have completed, ``frontend.tf`` will be deployed.
+
       .. code-block:: yaml
 
         deployments:
@@ -212,18 +210,13 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
               - path: serviceb.cfn
               - path: servicec.cfn
                 environments:
-                  dev:
-                    count: 1
-                  prod:
-                    count: 3
+                  count: ${var:count.${env:DEPLOY_ENVIRONMENT}}
             - frontend.tf
-
-    (in that ^ example, backend.tf will be deployed, the services will be all
-    be deployed simultaneously, followed by frontend.tf)
 
     """
 
-    SUPPORTS_VARIABLES = ['class_path', 'options', 'path']
+    SUPPORTS_VARIABLES = ['class_path', 'env_vars', 'environments', 'options',
+                          'path']
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  name,  # type: str
@@ -250,25 +243,47 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 :ref:`Module Configurations<module-configurations>` for
                 detailed usage.
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
-                variables to environment names. When run, the variables
-                defined here are merged with those in the
+                module level variables to environment names or omit the
+                environment name to apply to all environments. When run, the
+                module variables defined here are merged with those in the
                 ``.env``/``.tfenv``/environment config file. If this is
-                defined, ``.env`` files can be omitted and the module
-                will still be processed.
+                defined, ``.env`` files can be omitted and the module will
+                still be processed. Takes precedence over values set at the
+                deployment-level.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
-                or for all environments using ``"*"`` as the environment
-                name. Takes precedence over values set at the deployment-
-                level.
+                or for all environments by omiting the environment name.
+                Takes precedence over values set at the deployment-level.
             options (Optional[Dict[str, Any]]): Module-specific options.
                 See :ref:`Module Configurations<module-configurations>`
-                for detailed usage.
+                for detailed usage. Takes precedence over values set at the
+                deployment-level.
             tags (Optional[Dict[str, str]]): Module tags used to select
                 which modules to process using CLI arguments.
                 (``--tag <tag>...``)
             child_modules (Optional[List[Union[str, Dict[str, Any]]]]):
                 Child modules that can be executed in parallel
+
+        .. rubric:: Lookup Resolution
+
+        +---------------------+-----------------------------------------------+
+        | Keyword / Directive | Support                                       |
+        +=====================+===============================================+
+        |  ``name``           | None                                          |
+        +---------------------+-----------------------------------------------+
+        |  ``path``           | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``class_path``     | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``environments``   | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``env_vars``       | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``options``        | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``tags``           | None                                          |
+        +---------------------+-----------------------------------------------+
 
         References:
             - `AWS CDK`_
@@ -395,34 +410,20 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               - path: my-other-modules.cfn
             regions:
               - us-east-1
-            account_id:  # optional
-              dev: 0000
-              prod: 1111
-            assume_role:  # optional
-              dev: arn:aws:iam::0000:role/role-name
-              prod: arn:aws:iam::1111:role/role-name
+            account_id: ${var:account_ids}  # optional
+            assume_role: ${var:assume_role}  # optional
             environments:  # optional
-              dev:
-                region: us-east-1
-                image_id: ami-abc123
+                region: ${env:AWS_REGION}
+                image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
             env_vars:  # optional environment variable overrides
-              dev:
-                AWS_PROFILE: foo
-                APP_PATH:  # a list will be treated as components of a path on disk
-                  - myapp.tf
-                  - foo
-              prod:
-                AWS_PROFILE: bar
-                APP_PATH:
-                  - myapp.tf
-                  - foo
-              "*":  # applied to all environments
-                ANOTHER_VAR: foo
+                AWS_PROFILE: ${var:aws_profile.${env:DEPLOY_ENVIRONMENT}::default=default}
+                APP_PATH: ${var:app_path.${env:DEPLOY_ENVIRONMENT}}
 
     """
 
     SUPPORTS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
-                          'module_options', 'regions', 'parallel_regions']
+                          'env_vars', 'environments', 'module_options',
+                          'regions', 'parallel_regions']
     PRE_PROCESS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
                              'env_vars', 'regions']
 
@@ -445,15 +446,16 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
-                variables to environment names. When run, the variables
-                defined here are merged with those in the
-                ``.env``/``.tfenv``/environment config file and
-                environments section of each module.
+                module level variables to environment names or omit the
+                environment name to apply to all environments. When run, the
+                module variables defined here are merged with those in the
+                ``.env``/``.tfenv``/environment config file. If this is
+                defined, ``.env`` files can be omitted and the module will
+                still be processed.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
-                or for all environments using ``"*"`` as the environment
-                name.
+                or for all environments by omiting the environment name.
             modules (Optional[List[Dict[str, Any]]]): A list of modules
                 to be processed in the order they are defined.
             module_options (Optional[Dict[str, Any]]): Options that are
@@ -473,6 +475,60 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 processed one at a time. This can be used in tandom with
                 **parallel modules**. ``assume_role.post_deploy_env_revert``
                 will always be ``true`` when run in parallel.
+
+        .. rubric:: Lookup Resolution
+
+        .. important:: Due to how a deployment is processed, values are
+                       resolved twice. Once before processing and once during
+                       processing. Because of this, the keywords/directives
+                       that are resolved before processing will not have
+                       access to values set during process like ``AWS_REGION``,
+                       ``AWS_DEFAULT_REGION``, and ``DEPLOY_ENVIRONMENT`` for
+                       the pre-processing resolution but, if they are resolved
+                       again during processing, these will be available. To
+                       avoide errors during the first resolution due to the
+                       value not existing, provide a default value for the
+                       :ref:`Lookup <Lookups>`.
+
+        +---------------------+-----------------------------------------------+
+        | Keyword / Directive | Support                                       |
+        +=====================+===============================================+
+        | ``account_alias``   | `env lookup`_ (``AWS_REGION`` and             |
+        |                     | ``AWS_DEFAULT_REGION`` will not have been set |
+        |                     | by Runway yet), `var lookup`_                 |
+        +---------------------+-----------------------------------------------+
+        | ``account_id``      | `env lookup`_ (``AWS_REGION`` and             |
+        |                     | ``AWS_DEFAULT_REGION`` will not have been set |
+        |                     | by Runway yet), `var lookup`_                 |
+        +---------------------+-----------------------------------------------+
+        |  ``assume_role``    | `env lookup`_ (``AWS_REGION`` and             |
+        |                     | ``AWS_DEFAULT_REGION`` will not have been set |
+        |                     | by Runway yet), `var lookup`_                 |
+        +---------------------+-----------------------------------------------+
+        |  ``environments``   | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``env_vars``       | `env lookup`_ (``AWS_REGION``,                |
+        |                     | ``DEPLOY_ENVIRONMENT``, and                   |
+        |                     | ``AWS_DEFAULT_REGION`` will not have been set |
+        |                     | by Runway during pre-process resolution.      |
+        |                     | provide a default value to avoide errors.),   |
+        |                     | `var lookup`_                                 |
+        +---------------------+-----------------------------------------------+
+        |  ``modules``        | No direct support. See `module`_ for details  |
+        |                     | on support within a module definition.        |
+        +---------------------+-----------------------------------------------+
+        |  ``module_options`` | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``name``           | None                                          |
+        +---------------------+-----------------------------------------------+
+        |  ``regions``        | `env lookup`_ (``AWS_REGION`` and             |
+        |                     | ``AWS_DEFAULT_REGION`` will not have been set |
+        |                     | by Runway yet), `var lookup`_                 |
+        +---------------------+-----------------------------------------------+
+        | ``parallel_regions``| `env lookup`_ (``AWS_REGION`` and             |
+        |                     | ``AWS_DEFAULT_REGION`` will not have been set |
+        |                     | by Runway yet), `var lookup`_                 |
+        +---------------------+-----------------------------------------------+
 
         References:
             - :class:`module<runway.config.ModuleDefinition>`
@@ -650,7 +706,7 @@ class TestDefinition(ConfigComponent):
 
     """
 
-    GLOBAL_SUPPORTS_VARIABLES = ['args', 'required']  # does not support other globals
+    SUPPORTS_VARIABLES = ['args', 'required']
 
     def __init__(self,
                  name,  # type: str
@@ -674,6 +730,22 @@ class TestDefinition(ConfigComponent):
                 list of arguments supported by each test type.
             required (bool):  If false, testing will continue if the test
                 fails. *(default: true)*
+
+        .. rubric:: Lookup Resolution
+
+        .. note:: Runway does not set ``AWS_REGION`` or ``AWS_DEFAULT_REGION``
+                  environment variables. If the ``DEPLOY_ENVIRONMENT``
+                  environment variable is not manually set, it will always
+                  be ``test`` and is not determined from the branch or
+                  directory.
+
+        +---------------------+-----------------------------------------------+
+        | Keyword / Directive | Support                                       |
+        +=====================+===============================================+
+        | ``args``            | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        | ``required``        | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
 
         References:
             - :ref:`Build-in Test Types<built-in-test-types>` - Supported
@@ -736,9 +808,60 @@ class TestDefinition(ConfigComponent):
 
 
 class VariablesDefinition(MutableMap):
-    """A file containing variable definitions for the Runway config file."""
+    """A variable definitions for the Runway config file.
+
+    Runway variables are used to fill values that could change based on any
+    number of circumstances. They can also be used to simplify the Runway config
+    file by pulling lengthy definitions into another file. Variables can be used
+    in the config file by providing the `var lookup`_ to any keyword/directive
+    that supports :ref:`Lookups <Lookups>`.
+
+    By default, Runway will look for and load a ``variables.runway.yml`` or
+    ``variables.runway.yaml`` file that is in the same directory as the
+    Runway config file. The file path and name of the file can optionally be
+    defined in the config file. If the file path is explicitly provided and
+    the file can't be found, an error will be raised.
+
+    Variables can also be defined in the Runway config file directly. This can
+    either be in place of a dedicated variables file, extend an existing file,
+    or override values from the file.
+
+    .. rubric:: Lookup Resolution
+
+    Runway lookup resolution is not supported within the variables definition
+    block or variables file. Attempts to use Runway :ref:`Lookups <Lookups>`
+    within the variables definition block or variables file will result in
+    the literal value being processed.
+
+    Example:
+      .. code-block:: yaml
+
+        variables:
+          sys_path: ./  # defaults to the current directory
+          file_path: secrets.yaml
+          # define additional variables or override those in the variables file
+          another_var: some_value
+        deployments:
+          - modules:
+              - ${var:sampleapp.definition}
+            regions: ${var:sampleapp.regions}
+
+    """
 
     default_names = ['variables.runway.yml', 'variables.runway.yaml']
+
+    def __init__(self, file_path=None, sys_path=None, **kwargs):
+        """.. Not really needed but cleans up the docs.
+
+        Keyword Args:
+            file_path: Explicit path to a variables file. If it cannot be found
+                Runway will exit.
+            sys_path: Directory to base relative paths off of.
+
+        """
+        self._file_path = file_path
+        self._sys_path = sys_path
+        super(VariablesDefinition, self).__init__(**kwargs)
 
     @classmethod
     def find_file(cls, file_path=None, sys_path=None):
@@ -790,7 +913,7 @@ class VariablesDefinition(MutableMap):
                                   sys_path=kwargs.pop('sys_path', None))
 
         if file_path:
-            variables = cls.load_from_file(file_path)
+            variables = cls._load_from_file(file_path)
 
             for key, val in kwargs.items():
                 variables[key] = val
@@ -800,7 +923,7 @@ class VariablesDefinition(MutableMap):
         return cls(**kwargs)
 
     @classmethod
-    def load_from_file(cls, file_path):
+    def _load_from_file(cls, file_path):
         # type: (str) -> VariablesDefinition
         """Load the variables file into an object."""
         if not os.path.isfile(file_path):
@@ -869,6 +992,23 @@ class Config(ConfigComponent):
             variables (Optional[Dict[str, Any]]): A map that defines the
                 location of a variables file and/or the variables
                 themselves.
+
+        .. rubric:: Lookup Resolution
+
+        +---------------------+-----------------------------------------------+
+        | Keyword / Directive | Support                                       |
+        +=====================+===============================================+
+        | ``deployments``     | No direct support. See `Deployment`_ for      |
+        |                     | details on support within a deploymet         |
+        |                     | definition.                                   |
+        +---------------------+-----------------------------------------------+
+        | ``tests``           | No direct support. See `Test`_ for details on |
+        |                     | support within a test definition.             |
+        +---------------------+-----------------------------------------------+
+        |``ignore_git_branch``| None                                          |
+        +---------------------+-----------------------------------------------+
+        | ``variables``       | None                                          |
+        +---------------------+-----------------------------------------------+
 
         References:
             - :class:`deployment<runway.config.DeploymentDefinition>`

@@ -519,11 +519,30 @@ class ModulesCommand(RunwayCommand):
                 self._deploy_module(module, deployment, context)
 
     def _deploy_module(self, module, deployment, context):
+        """Executes module deployment.
+
+        1. Resolves variables in :class:`runway.config.DeploymentDefinition`
+           and :class:`runway.config.ModuleDefinition`.
+        2. Constructs a ``Dict`` of options to be passed to the ``module_class``.
+        3. Determine the class to use to execute the
+           :class:`runway.config.ModuleDefinition`, ``cd`` to the module
+           directory, and instanteate the class.
+        4. Find and execute the command method of the instanteated class.
+
+        Args:
+            module (:class:`runway.config.ModuleDefinition`): The module
+                to be deployed.
+            deployment (:class:`runway.config.DeploymentDefinition`): The
+                deployment the module belongs to. Used to get options,
+                environments, and env_vars from the deployment level.
+            context: (:class:`runway.context.Context`): Current context instance.
+
+        """
         deployment.resolve(context, self.runway_vars)
         module.resolve(context, self.runway_vars)
         module_opts = {
             'environments': deployment.environments.copy(),
-            'options': deployment['module_options'].copy()
+            'options': deployment.module_options.copy()
         }
 
         path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))

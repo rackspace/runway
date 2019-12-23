@@ -1,7 +1,9 @@
 """.. Base class for lookup handlers.
 
-Arguments
-~~~~~~~~~
+Lookup Arguments
+^^^^^^^^^^^^^^^^
+
+.. _lookup arguments:
 
 Arguments can be passed to Lookups to effect how they function.
 
@@ -12,7 +14,7 @@ The arguments can have an optional space after the comma and before the next
 key to make them easier to read but this is not required. The value of all
 arguments are read as strings.
 
-.. rubric:: Example Using Arguments
+.. rubric:: Example
 .. code-block:: yaml
 
     ${var:my_query::default=true, transform=bool}
@@ -23,7 +25,9 @@ functionality or the value it returns. There is also a common set of arguments
 that all Lookups accept.
 
 Common Arguments
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
+
+.. _common lookup arguments:
 
 +---------------+-------------------------------------------------------------+
 | Argument      | Description                                                 |
@@ -35,6 +39,14 @@ Common Arguments
 | ``transform`` | Transform the data returned by a Lookup into a different    |
 |               | datatype. Supports ``str`` and ``bool``.                    |
 +---------------+-------------------------------------------------------------+
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  deployments:
+    - environments:
+        some_variable: ${var:some_value::default=my_value}
+        comma_list: ${var:my_list::default=undefined, transform=str}
 
 """
 from typing import (Any, Dict, Set,  # pylint: disable=unused-import

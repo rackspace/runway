@@ -1,4 +1,28 @@
-"""Variable definition lookup."""
+"""Retrieve a variable from the variables file or definition.
+
+If the lookup is unable to find an defined variable matching the
+provided query, the default value is returned or a ``ValueError`` is raised
+if a default value was not provided.
+
+Nested values can be used by providing the full path to the value but, it
+will not select a list element.
+
+The returned value can contain any YAML support data type
+(dictionaries/mappings/hashes, lists/arrays/sequences, strings, numbers,
+and booleon).
+
+.. Example
+.. code-block:: yaml
+
+  deployment:
+    - modules:
+        - path: sampleapp.cfn
+          environment:
+            ami_id: ${var:ami_id.${env:AWS_REGION}}
+      env_vars:
+        SOME_VARIABLE: ${var:some_variable::default=default}
+
+"""
 # pylint: disable=arguments-differ
 from typing import Any, TYPE_CHECKING  # pylint: disable=unused-import
 
