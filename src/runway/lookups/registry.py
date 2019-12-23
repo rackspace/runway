@@ -1,18 +1,19 @@
 """Register test handlers."""
 # modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
-from typing import Callable, Union  # pylint: disable=unused-import
+from typing import Type, Union  # pylint: disable=unused-import
 from six import string_types
 
 from runway.embedded.stacker.util import load_object_from_string
 
 from .handlers import env, var
+from .handlers.base import LookupHandler  # noqa: F401 pylint: disable=unused-import
 
 
 LOOKUP_HANDLERS = {}
 
 
 def register_lookup_handler(lookup_type, handler_or_path):
-    # type: (str, Union[Callable, str]) -> None
+    # type: (str, Union[Type[LookupHandler], str]) -> None
     """Register a lookup handler.
 
     Args:

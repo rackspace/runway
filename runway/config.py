@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from .context import Context  # noqa: F401 pylint: disable=unused-import
 
 LOGGER = logging.getLogger('runway')
-NONE_TYPE = type(None)
+NoneType = type(None)
 
 
 class ConfigComponent(MutableMap):
@@ -757,12 +757,11 @@ class VariablesDefinition(MutableMap):
             TypeError: file_path or sys_path is not a string.
 
         """
-        if not (isinstance(file_path, (str, NONE_TYPE)) and
-                isinstance(file_path, (str, NONE_TYPE))):
+        if not (isinstance(file_path, (str, NoneType)) and
+                isinstance(file_path, (str, NoneType))):
             raise TypeError('file_path and sys_path of VariablesDefinition '
                             'must of be of type str but got types {} and {}'.format(
-                                type(file_path), type(sys_path))
-                            )
+                                type(file_path), type(sys_path)))
         if not sys_path:
             sys_path = os.getcwd()
 

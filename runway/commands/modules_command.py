@@ -537,8 +537,7 @@ class ModulesCommand(RunwayCommand):
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
-        # this does not always work as expected when using bool()
-        module_opts['_using_vars'] = True if self.runway_vars else False  # noqa pylint: disable=simplifiable-if-expression
+        module_opts['_using_vars'] = bool(self.runway_vars)
         if module_opts.get('env_vars'):
             module_env_vars = merge_nested_environment_dicts(
                 module_opts.get('env_vars'), env_name=context.env_name,

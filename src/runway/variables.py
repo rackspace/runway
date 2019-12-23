@@ -1,6 +1,7 @@
 """Runway variables."""
 from typing import (Any, Callable,  # noqa: F401 pylint: disable=unused-import
-                    Dict, Iterable, Iterator, List, Optional, Type, Union, TYPE_CHECKING)
+                    Dict, Iterable, Iterator, List, Optional, Type, Union,
+                    TYPE_CHECKING, cast)
 
 import logging
 import re
@@ -12,7 +13,7 @@ from stacker.exceptions import (InvalidLookupCombination, UnresolvedVariable,  #
                                 InvalidLookupConcatenation)
 
 from .lookups.registry import LOOKUP_HANDLERS
-from .lookups.handlers.base import LookupHandler
+from .lookups.handlers.base import LookupHandler  # noqa: F401 pylint: disable=unused-import
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
@@ -35,7 +36,7 @@ class Variable(object):
             value: The variable itself.
 
         """
-        LOGGER.info('Initalized variable "%s".', name)
+        LOGGER.debug('Initalized variable "%s".', name)
         self.name = name
         self._raw_value = value
         self._value = VariableValue.parse(value)
@@ -183,19 +184,17 @@ class VariableValue(object):
 
             if next_close is not None:
                 lookup_data = VariableValueConcatenation(
-                    tokens[(last_open + len(opener) + 1):next_close]
+                    tokens[(cast(int, last_open) + len(opener) + 1):next_close]
                 )
                 lookup = VariableValueLookup(
-                    lookup_name=tokens[last_open + 1],
+                    lookup_name=tokens[cast(int, last_open) + 1],
                     lookup_data=lookup_data,
                 )
                 tokens[last_open:(next_close + 1)] = [lookup]
             else:
                 break
 
-        tokens = tokens.simplified
-
-        return tokens
+        return tokens.simplified
 
     def __iter__(self):
         # type: () -> Iterable
@@ -410,7 +409,7 @@ class VariableValueConcatenation(VariableValue, list):
         """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self:
-            accumulator = accumulator and item.resolved
+            accumulator = bool(accumulator and item.resolved)
         return accumulator
 
     @property
@@ -444,7 +443,7 @@ class VariableValueConcatenation(VariableValue, list):
                 concat.extend(item.simplified)
 
             else:
-                concat.append(item.simplified)
+                concat.append(cast(Type[VariableValue], item.simplified))
 
         if not concat:
             return VariableValueLiteral('')
@@ -516,7 +515,7 @@ class VariableValueLookup(VariableValue):
         if handler is None:
             lookup_name_resolved = lookup_name.value
             try:
-                handler = LOOKUP_HANDLERS[lookup_name_resolved]
+                handler = cast(Type[LookupHandler], LOOKUP_HANDLERS[lookup_name_resolved])
             except KeyError:
                 raise UnknownLookupType(lookup_name_resolved)
         self.handler = handler
