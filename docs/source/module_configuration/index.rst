@@ -14,3 +14,4 @@ Module Configurations
     serverless
     staticsite
     terraform
+    helm
