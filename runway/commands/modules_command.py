@@ -519,7 +519,7 @@ class ModulesCommand(RunwayCommand):
                 self._deploy_module(module, deployment, context)
 
     def _deploy_module(self, module, deployment, context):
-        """Executes module deployment.
+        """Execute module deployment.
 
         1. Resolves variables in :class:`runway.config.DeploymentDefinition`
            and :class:`runway.config.ModuleDefinition`.
