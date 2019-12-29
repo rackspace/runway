@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.6] - 2019-12-28
+### Fixed
+- Correct detection of Serverless Framework projects with a JS config file
+
 ## [1.3.5] - 2019-12-19
 ### Fixed
 - Updated `sls-py` sample to work properly w/ python plugin static caching
@@ -646,7 +650,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.5...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.6...HEAD
+[1.3.6]: https://github.com/onicagroup/runway/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/onicagroup/runway/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/onicagroup/runway/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/onicagroup/runway/compare/v1.3.2...v1.3.3
