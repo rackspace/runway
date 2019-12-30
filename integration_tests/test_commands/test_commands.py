@@ -13,7 +13,9 @@ class TestRunwayCommands(IntegrationTest):
 
     def run(self):
         """Find all tests and run them."""
-        import_tests(self.logger, self.tests_dir, 'test_*')
+        suffix = os.getenv('COMMAND_SUFFIX', '*')
+        pattern = 'test_{0}'.format(suffix)
+        import_tests(self.logger, self.tests_dir, pattern)
         tests = [test(self.logger) for test in TestRunwayCommands.__subclasses__()]
         self.logger.debug('FOUND TESTS: %s', tests)
         err_count = execute_tests(tests, self.logger)
