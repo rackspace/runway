@@ -49,7 +49,7 @@ class Variable(object):
         Variables only need to be resolved if they contain lookups.
 
         """
-        return self._value.resolved()
+        return self._value.resolved
 
     @property
     def value(self):

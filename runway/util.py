@@ -53,8 +53,15 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         Removes anything that starts with ``_``.
 
         """
-        return {key: value for key, value in self.__dict__.items()
-                if not key.startswith('_')}
+        result = {}
+        for key, val in self.__dict__.items():
+            if key.startswith('_'):
+                continue
+            if isinstance(val, MutableMap):
+                result[key] = val.data
+            else:
+                result[key] = val
+        return result
 
     def clear_found_cache(self):
         # type: () -> None

@@ -49,8 +49,8 @@ Common Arguments
         comma_list: ${var:my_list::default=undefined, transform=str}
 
 """
-from typing import (Any, Dict, Set,  # pylint: disable=unused-import
-                    Tuple, Union, TYPE_CHECKING)
+from typing import (Any, Dict, Tuple,  # pylint: disable=unused-import
+                    Union, TYPE_CHECKING)
 
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=no-name-in-module,import-error
@@ -66,20 +66,6 @@ if TYPE_CHECKING:
 
 class LookupHandler(object):
     """Base class for lookup handlers."""
-
-    @classmethod
-    def dependencies(cls, lookup_data):
-        # type: (Any) -> Set
-        """Calculate any dependencies required to perform this lookup.
-
-        Note that lookup_data may not be (completely) resolved at this time.
-
-        Args:
-            lookup_data: The lookup data.
-
-        """
-        del lookup_data  # unused in this implementation
-        return set()
 
     @classmethod
     def handle(cls, value, context, **kwargs):
@@ -178,7 +164,8 @@ class LookupHandler(object):
             return value
         if isinstance(value, string_types):
             return bool(strtobool(value))
-        raise ValueError('value must be a string to use transform=bool')
+        raise TypeError('Value must be a string or bool to use transform=bool. '
+                        'Got type {}.'.format(type(value)))
 
     @classmethod
     def _transform_to_string(cls, value, delimiter=None, **_):

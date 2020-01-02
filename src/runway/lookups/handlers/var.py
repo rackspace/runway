@@ -67,7 +67,7 @@ class VarLookup(LookupHandler):
 
         result = variables.find(query, default=args.pop('default', ''))
 
-        if result:
+        if result != '':  # allows for False bool and NoneType results
             return cls.transform(result, to_type=args.pop('transform', ''),
                                  **args)
 
