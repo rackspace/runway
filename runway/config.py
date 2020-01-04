@@ -310,7 +310,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         self._env_vars = Variable(name + '.env_vars', env_vars or {})
         self._options = Variable(name + '.options', options or {})
         self.tags = tags or {}
-        self.child_modules = child_modules
+        self.child_modules = child_modules or []
 
     @property
     def class_path(self):
@@ -626,8 +626,10 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         value = self._account_id.value
         if isinstance(value, (dict, string_types)):
             return value
+        if isinstance(value, int):
+            return str(value)
         raise ValueError('{}.account_id is of type {}; expected type '
-                         'of dict or str'.format(self.name, type(value)))
+                         'of dict, int, or str'.format(self.name, type(value)))
 
     @property
     def assume_role(self):
@@ -901,8 +903,9 @@ class VariablesDefinition(MutableMap):
             if os.path.isfile(result):
                 return result
 
-        LOGGER.info('Could not find "%s" in the current directory. '
-                    'Continuing without a variables file.')
+        LOGGER.info('Could not find %s in the current directory. '
+                    'Continuing without a variables file.',
+                    ' or '.join(cls.default_names))
         return None
 
     @classmethod
