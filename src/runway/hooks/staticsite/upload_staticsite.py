@@ -74,7 +74,7 @@ def update_ssm_hash(context, session):
 
     Keyword Args:
         context (Dict):
-        session (Session): The Stacker Session
+        session (:class:`stacker.context.Context`): context instance
     """
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
         LOGGER.info("staticsite: updating environment SSM parameter %s "
@@ -95,8 +95,9 @@ def update_ssm_hash(context, session):
 def get_distribution_data(context, provider, **kwargs):
     """Retrive information about the distribution
 
-        context (Dict):
-        provider (Dict):
+        context (:class:`stacker.context.Context`): The context instance
+        provider (:class:`stacker.providers.base.BaseProvider`): The provider
+            instance:
     """
     LOGGER.info("Retrieved distribution data")
     return {
@@ -139,7 +140,7 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
 def prune_archives(context, session):
     """Prune the archives from the bucket.
 
-        context (Dict):
+        context (:class:`stacker.context.Context`): The context instance
         session (Session): The Stacker session
     """
     LOGGER.info("staticsite: cleaning up old site archives...")
