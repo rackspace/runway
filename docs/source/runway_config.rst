@@ -33,7 +33,7 @@ Module
 Path
 ^^^^
 
-.. autoclass:: runway.path.Path
+.. automodule:: runway.path.Path
 
 Git
 ---
