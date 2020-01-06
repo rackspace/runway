@@ -51,7 +51,9 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
 
     The values parsed from the string are as follows:
 
-    **source**: Determine if the source is local or remote. The initial
+    .. rubric:: source
+
+    Determine if the source is local or remote. The initial
     prefix is used to determine this separated by `::` in the string.
     A path is considered local if it contains no source type value.
 
@@ -63,7 +65,9 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
                     # source is `git`
                     - path: git::git://github.com/foo/bar.git
 
-    **uri**: The uniform resource identifier when targetting a remote resource.
+    .. rubric:: uri
+
+    The uniform resource identifier when targetting a remote resource.
     This instructs runway on where to retrieve your module.
 
     Example:
@@ -74,7 +78,9 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
                     # uri is `git://github.com/foo/bar.git`
                     - path: git::git://github.com/foo/bar.git
 
-    **location**: The relative location of the module files from the root
+    .. rubric:: location
+
+    The relative location of the module files from the root
     directory. This value is specified as a path after the uri separated
     by `//`
 
@@ -86,7 +92,9 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
                     # location is `my/path`
                     - path: git::git://github.com/foo/bar.git//my/path
 
-    **options**: The remaining options that are passed along to the
+    .. rubric:: options
+
+    The remaining options that are passed along to the
     Source. This is specified in the path following the `?` separator.
     Multiple option keys and values can be specified with the `&` as
     the separator. Each remote source can have different options for
