@@ -82,7 +82,7 @@ class StaticSite(RunwayModule):
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
 
-        env = self.options.get('environments', ()).get(self.context.env_name, {})
+        env = self.options.get('environments', {}).get(self.context.env_name, {})
         site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'
 
         if env.get('staticsite_acmcert_ssm_param'):
