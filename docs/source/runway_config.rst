@@ -63,7 +63,7 @@ string
 ``my/path`` **(optional)**: The relative path from the root of the repo
 where the module is housed
 
-``?`` (optional): Logical separator of the path from the options
+``?`` **(optional)**: Logical separator of the path from the options
 
 ``branch=develop`` **(optional)**:  The options to be passed. The Git module
 accepts three different types of options: `commit`, `tag`, or `branch`. These
