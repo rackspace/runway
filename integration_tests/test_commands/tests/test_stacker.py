@@ -21,7 +21,6 @@ class TestRunStacker(Commands):
              'run-stacker',
              '--',
              '--version']).decode().strip()
-        print(response)
         assert response == 'stacker 1.7.0'
 
     def teardown(self):
