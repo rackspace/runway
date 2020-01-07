@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+
+- pinned `pyhcl` to `<0.3.14`
+    - `0.3.14` vendored ply instead of having it as a dependency which breaks our embedded, patched copy
 
 ## [1.3.6] - 2019-12-28
 ### Fixed
