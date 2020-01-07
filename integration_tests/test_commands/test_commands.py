@@ -13,7 +13,9 @@ class Commands(IntegrationTest):
 
     def run(self):
         """Find all tests and run them."""
-        import_tests(self.logger, self.tests_dir, 'test_*')
+        suffix = os.getenv('COMMAND_SUFFIX', '*')
+        pattern = 'test_{0}'.format(suffix)
+        import_tests(self.logger, self.tests_dir, pattern)
         tests = [test(self.logger) for test in Commands.__subclasses__()]
         if not tests:
             raise Exception('No tests were found.')
