@@ -77,13 +77,13 @@ class StaticSite(RunwayModule):
                 default_flow_style=False
             )
         site_stack_variables = {
+            'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',
             'Aliases': '${default staticsite_aliases::undefined}',
             'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
 
         env = self.options.get('environments', {}).get(self.context.env_name, {})
-        site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'
 
         if env.get('staticsite_acmcert_ssm_param'):
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
