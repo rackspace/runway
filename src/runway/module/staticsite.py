@@ -79,6 +79,7 @@ class StaticSite(RunwayModule):
         site_stack_variables = {
             'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',
             'Aliases': '${default staticsite_aliases::undefined}',
+            'CFDisabled': '${default staticsite_cf_disable::undefined}',
             'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
@@ -90,6 +91,9 @@ class StaticSite(RunwayModule):
 
         if env.get('staticsite_enable_cf_logging', True):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
+
+        if env.get('staticsite_cf_disable', False):
+            site_stack_variables['CFDisabled'] = "true"
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
@@ -119,6 +123,7 @@ class StaticSite(RunwayModule):
                       'required': True,
                       'args': {
                           'bucket_output_lookup': '%s::BucketName' % name,
+                          'cf_disabled': '%s' % site_stack_variables['CFDisabled'],
                           'distributionid_output_lookup': '%s::CFDistributionId' % name,  # noqa
                           'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % name}}  # noqa pylint: disable=line-too-long
                  ],
