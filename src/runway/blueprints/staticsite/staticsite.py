@@ -103,9 +103,54 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                                         'associations.'},
     }
 
+    def create_template(self):
+        """Create template (main function called by Stacker).
+
+        Returns:
+            Template: Stacker template
+        """
+        template = self.template
+        template.set_version('2010-09-09')
+        template.set_description('Static Website - Bucket and Distribution')
+
+        # Conditions
+        template = self.add_conditions(template)
+
+        # Resources
+        bucket = self.add_bucket(template)
+        oai = self.add_origin_access_identity(template)
+        allow_access = self.allow_cloudfront_access_on_bucket(template, bucket, oai)
+        rewrite_role = self.add_index_rewrite_role(template)
+        index_rewrite = self.add_cloudfront_directory_index_rewrite(
+            template,
+            rewrite_role
+        )
+        index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
+            template,
+            index_rewrite
+        )
+        lambda_function_associations = self.get_lambda_associations(index_rewrite_version)
+        distribution_options = self.get_cloudfront_distribution_options(
+            bucket,
+            oai,
+            lambda_function_associations
+        )
+        cfdistribution = self.add_cloudfront_distribution( # noqa pylint: disable=unused-variable
+            template,
+            allow_access,
+            distribution_options
+        )
+
+        return template
+
     def add_conditions(self, template):
         """Add Template Conditions
 
+        Keyword Args:
+            template (Template): Stacker template
+
+        Returns:
+            Template: Stacker template
         """
         variables = self.get_variables()
 
@@ -136,147 +181,16 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
         return template
 
-    def add_origin_access_identity(self, template):
-        return template.add_resource(
-            cloudfront.CloudFrontOriginAccessIdentity(
-                'OAI',
-                CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa pylint: disable=line-too-long
-                    Comment='CF access to website'
-                )
-            )
-        )
-
-    def add_bucket(self, template):
-        bucket = template.add_resource(
-            s3.Bucket(
-                'Bucket',
-                AccessControl=s3.Private,
-                LifecycleConfiguration=s3.LifecycleConfiguration(
-                    Rules=[
-                        s3.LifecycleRule(
-                            NoncurrentVersionExpirationInDays=90,
-                            Status='Enabled'
-                        )
-                    ]
-                ),
-                VersioningConfiguration=s3.VersioningConfiguration(
-                    Status='Enabled'
-                ),
-                WebsiteConfiguration=s3.WebsiteConfiguration(
-                    IndexDocument='index.html',
-                    ErrorDocument='error.html'
-                )
-            )
-        )
-        template.add_output(Output(
-            'BucketName',
-            Description='Name of website bucket',
-            Value=bucket.ref()
-        ))
-        return bucket
-
-    def allow_cloudfront_access_on_bucket(self, template, bucket, oai):
-        return template.add_resource(
-            s3.BucketPolicy(
-                'AllowCFAccess',
-                Bucket=bucket.ref(),
-                PolicyDocument=PolicyDocument(
-                    Version='2012-10-17',
-                    Statement=[
-                        Statement(
-                            Action=[awacs.s3.GetObject],
-                            Effect=Allow,
-                            Principal=Principal(
-                                'CanonicalUser',
-                                oai.get_att('S3CanonicalUserId')
-                            ),
-                            Resource=[
-                                Join('', [bucket.get_att('Arn'),
-                                          '/*'])
-                            ]
-                        )
-                    ]
-                )
-            )
-        )
-
-    def add_index_rewrite_role(self, template):
-        return template.add_resource(
-            iam.Role(
-                'CFDirectoryIndexRewriteRole',
-                Condition='DirectoryIndexSpecified',
-                AssumeRolePolicyDocument=PolicyDocument(
-                    Version='2012-10-17',
-                    Statement=[
-                        Statement(
-                            Effect=Allow,
-                            Action=[awacs.sts.AssumeRole],
-                            Principal=Principal('Service',
-                                                ['lambda.amazonaws.com',
-                                                 'edgelambda.amazonaws.com'])
-                        )
-                    ]
-                ),
-                ManagedPolicyArns=[
-                    IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
-                ]
-            )
-        )
-
-    def add_cloudfront_directory_index_rewrite(self, template, role):
-        variables = self.get_variables()
-        return template.add_resource(
-            awslambda.Function(
-                'CFDirectoryIndexRewrite',
-                Condition='DirectoryIndexSpecified',
-                Code=awslambda.Code(
-                    ZipFile=Join(
-                        '',
-                        ["'use strict';\n",
-                         "exports.handler = async function(event, context) {\n",
-                         "\n",
-                         "    // Extract the request from the CloudFront event that is sent to Lambda@Edge\n",  # noqa pylint: disable=line-too-long
-                         "    var request = event.Records[0].cf.request;\n",
-                         "    // Extract the URI from the request\n",
-                         "    var olduri = request.uri;\n",
-                         "    // Match any '/' that occurs at the end of a URI. Replace it with a default index\n",  # noqa pylint: disable=line-too-long
-                         "    var newuri = olduri.replace(/\\/$/, '\\/",
-                         variables['RewriteDirectoryIndex'].ref,
-                         "');\n",  # noqa
-                         "    // Log the URI as received by CloudFront and the new URI to be used to fetch from origin\n",  # noqa pylint: disable=line-too-long
-                         "    console.log(\"Old URI: \" + olduri);\n",
-                         "    console.log(\"New URI: \" + newuri);\n",
-                         "    // Replace the received URI with the URI that includes the index page\n",  # noqa pylint: disable=line-too-long
-                         "    request.uri = newuri;\n",
-                         "    // Return to CloudFront\n",
-                         "    return request;\n",
-                         "\n",
-                         "};\n"]
-                    )
-                ),
-                Description='Rewrites CF directory HTTP requests to default page',  # noqa
-                Handler='index.handler',
-                Role=role.get_att('Arn'),
-                Runtime='nodejs10.x'
-            )
-        )
-
-    def add_cloudfront_directory_index_rewrite_version(self, template, directory_index_rewrite):
-        # Generating a unique resource name here for the Lambda version, so it
-        # updates automatically if the lambda code changes
-        code_hash = hashlib.md5(
-            str(directory_index_rewrite.properties['Code'].properties['ZipFile'].to_dict()).encode()  # noqa pylint: disable=line-too-long
-        ).hexdigest()
-
-        return template.add_resource(
-            awslambda.Version(
-                'CFDirectoryIndexRewriteVer' + code_hash,
-                Condition='DirectoryIndexSpecified',
-                FunctionName=directory_index_rewrite.ref()
-            )
-        )
-
     def get_lambda_associations(self, directory_index_rewrite_version):
+        """Retrieve any lambda associations from the instance variables
+
+        Keyword Args:
+            directory_index_rewrite_version (dict): The directory index rewrite lambda version
+                resource
+
+        Return:
+            array: Array of lambda function association variables
+        """
         variables = self.get_variables()
 
         # If custom associations defined, use them
@@ -299,6 +213,16 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def get_cloudfront_distribution_options(self, bucket, oai, lambda_function_associations):
+        """Retrieve the options for our CloudFront distribution
+
+        Keyword Args:
+            bucket (dict): The bucket resource
+            oai (dict): The origin access identity resource
+            lambda_function_associations (array): The lambda function association array
+
+        Return:
+            dict: The CloudFront Distribution Options
+        """
         variables = self.get_variables()
         cf_dist_opts = {
             'Aliases': If(
@@ -360,23 +284,219 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         }
 
-        # If custom error responses defined, use them
-        if variables['custom_error_responses']:
-            cf_dist_opts['CustomErrorResponses'] = [
-                cloudfront.CustomErrorResponse(
-                    **x
-                ) for x in variables['custom_error_responses']
-            ]
+    @staticmethod
+    def add_origin_access_identity(template):
+        """Add the origin access identity resource to the template
 
-        return cf_dist_opts
+        Returns:
+            dict: The OAI resource
+        """
+        return template.add_resource(
+            cloudfront.CloudFrontOriginAccessIdentity(
+                'OAI',
+                CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa pylint: disable=line-too-long
+                    Comment='CF access to website'
+                )
+            )
+        )
 
+    @staticmethod
+    def add_bucket(template):
+        """Add the bucket resource along with an output of it's name
+
+        Keyword Args:
+            template (Template): Stacker template
+
+        Returns:
+            dict: The bucket resource
+        """
+        bucket = template.add_resource(
+            s3.Bucket(
+                'Bucket',
+                AccessControl=s3.Private,
+                LifecycleConfiguration=s3.LifecycleConfiguration(
+                    Rules=[
+                        s3.LifecycleRule(
+                            NoncurrentVersionExpirationInDays=90,
+                            Status='Enabled'
+                        )
+                    ]
+                ),
+                VersioningConfiguration=s3.VersioningConfiguration(
+                    Status='Enabled'
+                ),
+                WebsiteConfiguration=s3.WebsiteConfiguration(
+                    IndexDocument='index.html',
+                    ErrorDocument='error.html'
+                )
+            )
+        )
+        template.add_output(Output(
+            'BucketName',
+            Description='Name of website bucket',
+            Value=bucket.ref()
+        ))
+        return bucket
+
+    @staticmethod
+    def allow_cloudfront_access_on_bucket(template, bucket, oai):
+        """Given a bucket and oai resource add cloudfront access to the bucket.
+
+        Keyword Args:
+            template (Template): Stacker template
+            bucket (dict): A bucket resource
+            oai (dict): An Origin Access Identity resource
+
+        Return:
+            dict: The CloudFront Bucket access resource
+        """
+        return template.add_resource(
+            s3.BucketPolicy(
+                'AllowCFAccess',
+                Bucket=bucket.ref(),
+                PolicyDocument=PolicyDocument(
+                    Version='2012-10-17',
+                    Statement=[
+                        Statement(
+                            Action=[awacs.s3.GetObject],
+                            Effect=Allow,
+                            Principal=Principal(
+                                'CanonicalUser',
+                                oai.get_att('S3CanonicalUserId')
+                            ),
+                            Resource=[
+                                Join('', [bucket.get_att('Arn'),
+                                          '/*'])
+                            ]
+                        )
+                    ]
+                )
+            )
+        )
+
+    @staticmethod
+    def add_index_rewrite_role(template):
+        """Add an index rewrite role to the template
+
+        Keyword Args:
+            template (Template): Stacker template
+
+        Return:
+            dict: The index rewrite role
+        """
+
+        return template.add_resource(
+            iam.Role(
+                'CFDirectoryIndexRewriteRole',
+                Condition='DirectoryIndexSpecified',
+                AssumeRolePolicyDocument=PolicyDocument(
+                    Version='2012-10-17',
+                    Statement=[
+                        Statement(
+                            Effect=Allow,
+                            Action=[awacs.sts.AssumeRole],
+                            Principal=Principal('Service',
+                                                ['lambda.amazonaws.com',
+                                                 'edgelambda.amazonaws.com'])
+                        )
+                    ]
+                ),
+                ManagedPolicyArns=[
+                    IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
+                ]
+            )
+        )
+
+    def add_cloudfront_directory_index_rewrite(self, template, role):
+        """Add an index CloudFront directory index rewrite lambda function to the template
+
+        Keyword Args:
+            template (Template): Stacker template
+            role (dict): The index rewrite role resource
+
+        Return:
+            dict: The CloudFront directory index rewrite lambda function resource
+        """
+        variables = self.get_variables()
+        return template.add_resource(
+            awslambda.Function(
+                'CFDirectoryIndexRewrite',
+                Condition='DirectoryIndexSpecified',
+                Code=awslambda.Code(
+                    ZipFile=Join(
+                        '',
+                        ["'use strict';\n",
+                         "exports.handler = async function(event, context) {\n",
+                         "\n",
+                         "    // Extract the request from the CloudFront event that is sent to Lambda@Edge\n",  # noqa pylint: disable=line-too-long
+                         "    var request = event.Records[0].cf.request;\n",
+                         "    // Extract the URI from the request\n",
+                         "    var olduri = request.uri;\n",
+                         "    // Match any '/' that occurs at the end of a URI. Replace it with a default index\n",  # noqa pylint: disable=line-too-long
+                         "    var newuri = olduri.replace(/\\/$/, '\\/",
+                         variables['RewriteDirectoryIndex'].ref,
+                         "');\n",  # noqa
+                         "    // Log the URI as received by CloudFront and the new URI to be used to fetch from origin\n",  # noqa pylint: disable=line-too-long
+                         "    console.log(\"Old URI: \" + olduri);\n",
+                         "    console.log(\"New URI: \" + newuri);\n",
+                         "    // Replace the received URI with the URI that includes the index page\n",  # noqa pylint: disable=line-too-long
+                         "    request.uri = newuri;\n",
+                         "    // Return to CloudFront\n",
+                         "    return request;\n",
+                         "\n",
+                         "};\n"]
+                    )
+                ),
+                Description='Rewrites CF directory HTTP requests to default page',  # noqa
+                Handler='index.handler',
+                Role=role.get_att('Arn'),
+                Runtime='nodejs10.x'
+            )
+        )
+
+    @staticmethod
+    def add_cloudfront_directory_index_rewrite_version(template, directory_index_rewrite):
+        """Add a specific version to the directory index rewrite lambda
+
+        Keyword Args:
+            template (Template): Stacker template
+            directory_index_rewrite (dict): The directory index rewrite lambda resource
+
+        Return:
+            dict: The CloudFront directory index rewrite version
+        """
+        # Generating a unique resource name here for the Lambda version, so it
+        # updates automatically if the lambda code changes
+        code_hash = hashlib.md5(
+            str(directory_index_rewrite.properties['Code'].properties['ZipFile'].to_dict()).encode()  # noqa pylint: disable=line-too-long
+        ).hexdigest()
+
+        return template.add_resource(
+            awslambda.Version(
+                'CFDirectoryIndexRewriteVer' + code_hash,
+                Condition='DirectoryIndexSpecified',
+                FunctionName=directory_index_rewrite.ref()
+            )
+        )
+
+    @staticmethod
     def add_cloudfront_distribution(
-            self,
             template,
             allow_cloudfront_access,
             cloudfront_distribution_options
     ):
-        cfdistribution = template.add_resource(
+        """Add the CloudFront distribution to the template and output the id
+        and domain name.
+
+        Keyword Args:
+            template (Template): Stacker template
+            allow_cloudfront_access (dict): Allow bucket access resource
+            cloudfront_distribution_options (dict): The distribution options
+
+        Return:
+            dict: The CloudFront Distribution resource
+        """
+        distribution = template.add_resource(
             get_cf_distribution_class()(
                 'CFDistribution',
                 DependsOn=allow_cloudfront_access.title,
@@ -388,52 +508,16 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         template.add_output(Output(
             'CFDistributionId',
             Description='CloudFront distribution ID',
-            Value=cfdistribution.ref()
+            Value=distribution.ref()
         ))
         template.add_output(
             Output(
                 'CFDistributionDomainName',
                 Description='CloudFront distribution domain name',
-                Value=cfdistribution.get_att('DomainName')
+                Value=distribution.get_att('DomainName')
             )
         )
-        return cfdistribution
-
-    def create_template(self):
-        """Create template (main function called by Stacker)."""
-        template = self.template
-        template.set_version('2010-09-09')
-        template.set_description('Static Website - Bucket and Distribution')
-
-        # Conditions
-        template = self.add_conditions(template)
-
-        # Resources
-        bucket = self.add_bucket(template)
-        oai = self.add_origin_access_identity(template)
-        allow_access = self.allow_cloudfront_access_on_bucket(template, bucket, oai)
-        rewrite_role = self.add_index_rewrite_role(template)
-        index_rewrite = self.add_cloudfront_directory_index_rewrite(
-            template,
-            rewrite_role
-        )
-        index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
-            template,
-            index_rewrite
-        )
-        lambda_function_associations = self.get_lambda_associations(index_rewrite_version)
-        distribution_options = self.get_cloudfront_distribution_options(
-            bucket,
-            oai,
-            lambda_function_associations
-        )
-        cfdistribution = self.add_cloudfront_distribution( # noqa pylint: disable=unused-variable
-            template,
-            allow_access,
-            distribution_options
-        )
-
-        return template
+        return distribution
 
 
 def get_cf_distribution_class():
