@@ -37,8 +37,9 @@ def sync(context, provider, **kwargs):
 
     Keyword Args:
 
-        context (Dict):
-        provider (Dict):
+        context (:class:`stacker.context.Context`): The context instance
+        provider (:class:`stacker.providers.base.BaseProvider`): The provider
+            instance
     """
     session = get_session(provider.region)
     bucket_name = OutputLookup.handle(kwargs.get('bucket_output_lookup'),
@@ -73,8 +74,9 @@ def update_ssm_hash(context, session):
     """Update the SSM hash with the new tracking data.
 
     Keyword Args:
-        context (Dict):
-        session (:class:`stacker.context.Context`): context instance
+        context (:class:`stacker.context.Context`): context instance
+Dict):
+        session (:class:`stacker.session.Session`): Stacker session
     """
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
         LOGGER.info("staticsite: updating environment SSM parameter %s "
@@ -97,7 +99,7 @@ def get_distribution_data(context, provider, **kwargs):
 
         context (:class:`stacker.context.Context`): The context instance
         provider (:class:`stacker.providers.base.BaseProvider`): The provider
-            instance:
+            instance
     """
     LOGGER.info("Retrieved distribution data")
     return {
@@ -141,7 +143,7 @@ def prune_archives(context, session):
     """Prune the archives from the bucket.
 
         context (:class:`stacker.context.Context`): The context instance
-        session (Session): The Stacker session
+        session (:class:`stacker.session.Session`): The Stacker session
     """
     LOGGER.info("staticsite: cleaning up old site archives...")
     archives = []
