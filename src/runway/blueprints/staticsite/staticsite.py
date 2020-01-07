@@ -77,6 +77,9 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     'default': '',
                     'description': '(Optional) Domain aliases the '
                                    'distribution'},
+        'CFDisabled': {'type': CFNString,
+                       'default': '',
+                       'description': 'Whether to disable CF'},
         'LogBucketName': {'type': CFNString,
                           'default': '',
                           'description': 'S3 bucket for CF logs'},
@@ -145,6 +148,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 Not(Equals(Select(0, variables['Aliases'].ref), 'undefined')))
         )
         self.template.add_condition(
+            'CFEnabled',
+            Not(Equals(variables['CFDisabled'].ref, 'true'))
+        )
+        self.template.add_condition(
             'CFLoggingEnabled',
             And(Not(Equals(variables['LogBucketName'].ref, '')),
                 Not(Equals(variables['LogBucketName'].ref, 'undefined')))
@@ -153,6 +160,12 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             'DirectoryIndexSpecified',
             And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
                 Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')))  # noqa
+        )
+        self.template.add_condition(
+            'CFEnabledAndDirectoryIndexSpecified',
+            And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
+                Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')), # noqa
+                Not(Equals(variables['CFDisabled'].ref, 'true')))
         )
         self.template.add_condition(
             'WAFNameSpecified',
@@ -272,6 +285,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             cloudfront.CloudFrontOriginAccessIdentity(
                 'OAI',
+                Condition='CFEnabled',
                 CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa pylint: disable=line-too-long
                     Comment='CF access to website'
                 )
@@ -326,6 +340,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             s3.BucketPolicy(
                 'AllowCFAccess',
                 Bucket=bucket.ref(),
+                Condition='CFEnabled',
                 PolicyDocument=PolicyDocument(
                     Version='2012-10-17',
                     Statement=[
@@ -388,7 +403,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             awslambda.Function(
                 'CFDirectoryIndexRewrite',
-                Condition='DirectoryIndexSpecified',
+                Condition='CFEnabledAndDirectoryIndexSpecified',
                 Code=awslambda.Code(
                     ZipFile=Join(
                         '',
@@ -439,7 +454,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             awslambda.Version(
                 'CFDirectoryIndexRewriteVer' + code_hash,
-                Condition='DirectoryIndexSpecified',
+                Condition='CFEnabledAndDirectoryIndexSpecified',
                 FunctionName=directory_index_rewrite.ref()
             )
         )
@@ -462,6 +477,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         distribution = self.template.add_resource(
             get_cf_distribution_class()(
                 'CFDistribution',
+                Condition='CFEnabled',
                 DependsOn=allow_cloudfront_access.title,
                 DistributionConfig=get_cf_distro_conf_class()(
                     **cloudfront_distribution_options
@@ -470,12 +486,14 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
         self.template.add_output(Output(
             'CFDistributionId',
+            Condition='CFEnabled',
             Description='CloudFront distribution ID',
             Value=distribution.ref()
         ))
         self.template.add_output(
             Output(
                 'CFDistributionDomainName',
+                Condition='CFEnabled',
                 Description='CloudFront distribution domain name',
                 Value=distribution.get_att('DomainName')
             )
