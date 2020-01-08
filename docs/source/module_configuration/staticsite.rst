@@ -4,8 +4,8 @@ Static Site
 ===========
 
 This module type performs idempotent deployments of static websites. It
-combines CloudFormation stacks (for S3 buckets & CloudFront Distribution) with
-additional logic to build & sync the sites.
+combines CloudFormation stacks (for S3 buckets & CloudFront Distribution)
+with additional logic to build & sync the sites.
 
 It can be used with a configuration like the following::
 
@@ -37,6 +37,11 @@ be displayed on stack creation/updates.
 
 A start-to-finish example walkthrough is available
 in the :ref:`Conduit quickstart<qs-conduit>`.
+
+Please note that the CloudFront distribution will take a significant amount
+of time to spin up on initial deploy (10 to 25 minutes is not abnormal). If
+you are working on a development project it may benefit you to add the
+`staticsite_cf_disable` environment parameter to `true`.
 
 
 .. _staticsite-config-options:
@@ -82,6 +87,9 @@ Most of these options are not required, but are listed here for reference::
                   - ErrorCode: 404
                     ResponseCode: 200
                     ResponsePagePath: /index.html
+
+                # Exclude the CloudFront distribution from overall deployment
+                statisite_cf_disable: true
             options:
               pre_build_steps:  # commands to run before generating hash of files
                 - command: npm ci
