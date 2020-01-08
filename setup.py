@@ -29,7 +29,7 @@ INSTALL_REQUIRES = [
     # with the LICENSE file added to its root folder
     # and the following patches applied
     # https://github.com/virtuald/pyhcl/pull/57
-    'pyhcl~=0.3',
+    'pyhcl<0.3.14',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'six',
     'typing;python_version<"3.5"',

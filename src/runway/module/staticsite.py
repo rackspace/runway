@@ -28,9 +28,7 @@ class StaticSite(RunwayModule):
     def setup_website_module(self, command):
         """Create stacker configuration for website module."""
 
-        name = self.options.get('path')
-        if self.options.get('name'):
-            name = self.options.get('name')
+        name = self.options.get('name', self.options.get('path'))
 
         ensure_valid_environment_config(
             name,
@@ -84,7 +82,7 @@ class StaticSite(RunwayModule):
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
 
-        env = self.options.get('environments', ()).get(self.context.env_name, {})
+        env = self.options.get('environments', {}).get(self.context.env_name, {})
         site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'
 
         if env.get('staticsite_acmcert_ssm_param'):
