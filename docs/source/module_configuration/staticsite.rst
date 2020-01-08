@@ -39,7 +39,8 @@ A start-to-finish example walkthrough is available
 in the :ref:`Conduit quickstart<qs-conduit>`.
 
 Please note that the CloudFront distribution will take a significant amount
-of time to spin up on initial deploy (10 to 25 minutes is not abnormal). If
+of time to spin up on initial deploy (10 to 25 minutes is not abnormal). Incorporating
+CloudFront with a static site is a common best practice, however, if
 you are working on a development project it may benefit you to add the
 `staticsite_cf_disable` environment parameter to `true`.
 
