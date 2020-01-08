@@ -59,8 +59,9 @@ def sync(context, provider, **kwargs):
                  "s3://%s/" % bucket_name,
                  '--delete'])
 
-        distribution = get_distribution_data(context, provider, **kwargs)
-        invalidate_distribution(session, **distribution)
+        if kwargs.get('cf_disabled', '') != 'true':
+            distribution = get_distribution_data(context, provider, **kwargs)
+            invalidate_distribution(session, **distribution)
 
         LOGGER.info("staticsite: sync " "complete")
 
