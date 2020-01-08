@@ -104,29 +104,19 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
     }
 
     def create_template(self):
-        """Create template (main function called by Stacker).
+        """Create template (main function called by Stacker)."""
+        self.template.set_version('2010-09-09')
+        self.template.set_description('Static Website - Bucket and Distribution')
 
-        Returns:
-            Template: Stacker template
-        """
-        template = self.template
-        template.set_version('2010-09-09')
-        template.set_description('Static Website - Bucket and Distribution')
-
-        # Conditions
-        template = self.add_conditions(template)
+        self.add_template_conditions()
 
         # Resources
-        bucket = self.add_bucket(template)
-        oai = self.add_origin_access_identity(template)
-        allow_access = self.allow_cloudfront_access_on_bucket(template, bucket, oai)
-        rewrite_role = self.add_index_rewrite_role(template)
-        index_rewrite = self.add_cloudfront_directory_index_rewrite(
-            template,
-            rewrite_role
-        )
+        bucket = self.add_bucket()
+        oai = self.add_origin_access_identity()
+        allow_access = self.allow_cloudfront_access_on_bucket(bucket, oai)
+        rewrite_role = self.add_index_rewrite_role()
+        index_rewrite = self.add_cloudfront_directory_index_rewrite(rewrite_role)
         index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
-            template,
             index_rewrite
         )
         lambda_function_associations = self.get_lambda_associations(index_rewrite_version)
@@ -135,51 +125,40 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             oai,
             lambda_function_associations
         )
-        cfdistribution = self.add_cloudfront_distribution( # noqa pylint: disable=unused-variable
-            template,
+        distribution = self.add_cloudfront_distribution( # noqa pylint: disable=unused-variable
             allow_access,
             distribution_options
         )
 
-        return template
-
-    def add_conditions(self, template):
-        """Add Template Conditions
-
-        Keyword Args:
-            template (Template): Stacker template
-
-        Returns:
-            Template: Stacker template
-        """
+    def add_template_conditions(self):
+        """Add Template Conditions"""
         variables = self.get_variables()
 
-        template.add_condition(
+        self.template.add_condition(
             'AcmCertSpecified',
             And(Not(Equals(variables['AcmCertificateArn'].ref, '')),
                 Not(Equals(variables['AcmCertificateArn'].ref, 'undefined')))
         )
-        template.add_condition(
+        self.template.add_condition(
             'AliasesSpecified',
             And(Not(Equals(Select(0, variables['Aliases'].ref), '')),
                 Not(Equals(Select(0, variables['Aliases'].ref), 'undefined')))
         )
-        template.add_condition(
+        self.template.add_condition(
             'CFLoggingEnabled',
             And(Not(Equals(variables['LogBucketName'].ref, '')),
                 Not(Equals(variables['LogBucketName'].ref, 'undefined')))
         )
-        template.add_condition(
+        self.template.add_condition(
             'DirectoryIndexSpecified',
             And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
                 Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')))  # noqa
         )
-        template.add_condition(
+        self.template.add_condition(
             'WAFNameSpecified',
             And(Not(Equals(variables['WAFWebACL'].ref, '')),
                 Not(Equals(variables['WAFWebACL'].ref, 'undefined')))
         )
-        return template
 
     def get_lambda_associations(self, directory_index_rewrite_version):
         """Retrieve any lambda associations from the instance variables
@@ -224,7 +203,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             dict: The CloudFront Distribution Options
         """
         variables = self.get_variables()
-        cf_dist_opts = {
+        return {
             'Aliases': If(
                 'AliasesSpecified',
                 variables['Aliases'].ref,
@@ -284,14 +263,13 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         }
 
-    @staticmethod
-    def add_origin_access_identity(template):
+    def add_origin_access_identity(self):
         """Add the origin access identity resource to the template
 
         Returns:
             dict: The OAI resource
         """
-        return template.add_resource(
+        return self.template.add_resource(
             cloudfront.CloudFrontOriginAccessIdentity(
                 'OAI',
                 CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa pylint: disable=line-too-long
@@ -300,17 +278,13 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
-    @staticmethod
-    def add_bucket(template):
+    def add_bucket(self):
         """Add the bucket resource along with an output of it's name
-
-        Keyword Args:
-            template (Template): Stacker template
 
         Returns:
             dict: The bucket resource
         """
-        bucket = template.add_resource(
+        bucket = self.template.add_resource(
             s3.Bucket(
                 'Bucket',
                 AccessControl=s3.Private,
@@ -331,26 +305,24 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 )
             )
         )
-        template.add_output(Output(
+        self.template.add_output(Output(
             'BucketName',
             Description='Name of website bucket',
             Value=bucket.ref()
         ))
         return bucket
 
-    @staticmethod
-    def allow_cloudfront_access_on_bucket(template, bucket, oai):
+    def allow_cloudfront_access_on_bucket(self, bucket, oai):
         """Given a bucket and oai resource add cloudfront access to the bucket.
 
         Keyword Args:
-            template (Template): Stacker template
             bucket (dict): A bucket resource
             oai (dict): An Origin Access Identity resource
 
         Return:
             dict: The CloudFront Bucket access resource
         """
-        return template.add_resource(
+        return self.template.add_resource(
             s3.BucketPolicy(
                 'AllowCFAccess',
                 Bucket=bucket.ref(),
@@ -374,18 +346,14 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
-    @staticmethod
-    def add_index_rewrite_role(template):
+    def add_index_rewrite_role(self):
         """Add an index rewrite role to the template
-
-        Keyword Args:
-            template (Template): Stacker template
 
         Return:
             dict: The index rewrite role
         """
 
-        return template.add_resource(
+        return self.template.add_resource(
             iam.Role(
                 'CFDirectoryIndexRewriteRole',
                 Condition='DirectoryIndexSpecified',
@@ -407,18 +375,17 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
-    def add_cloudfront_directory_index_rewrite(self, template, role):
+    def add_cloudfront_directory_index_rewrite(self, role):
         """Add an index CloudFront directory index rewrite lambda function to the template
 
         Keyword Args:
-            template (Template): Stacker template
-            role (dict): The index rewrite role resource
+            role (dict): The index rewrite role resourcevoodooGQ/runway/pull/3
 
         Return:
             dict: The CloudFront directory index rewrite lambda function resource
         """
         variables = self.get_variables()
-        return template.add_resource(
+        return self.template.add_resource(
             awslambda.Function(
                 'CFDirectoryIndexRewrite',
                 Condition='DirectoryIndexSpecified',
@@ -454,12 +421,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
-    @staticmethod
-    def add_cloudfront_directory_index_rewrite_version(template, directory_index_rewrite):
+    def add_cloudfront_directory_index_rewrite_version(self, directory_index_rewrite):
         """Add a specific version to the directory index rewrite lambda
 
         Keyword Args:
-            template (Template): Stacker template
             directory_index_rewrite (dict): The directory index rewrite lambda resource
 
         Return:
@@ -471,7 +436,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             str(directory_index_rewrite.properties['Code'].properties['ZipFile'].to_dict()).encode()  # noqa pylint: disable=line-too-long
         ).hexdigest()
 
-        return template.add_resource(
+        return self.template.add_resource(
             awslambda.Version(
                 'CFDirectoryIndexRewriteVer' + code_hash,
                 Condition='DirectoryIndexSpecified',
@@ -479,9 +444,8 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
-    @staticmethod
     def add_cloudfront_distribution(
-            template,
+            self,
             allow_cloudfront_access,
             cloudfront_distribution_options
     ):
@@ -489,14 +453,13 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         and domain name.
 
         Keyword Args:
-            template (Template): Stacker template
             allow_cloudfront_access (dict): Allow bucket access resource
             cloudfront_distribution_options (dict): The distribution options
 
         Return:
             dict: The CloudFront Distribution resource
         """
-        distribution = template.add_resource(
+        distribution = self.template.add_resource(
             get_cf_distribution_class()(
                 'CFDistribution',
                 DependsOn=allow_cloudfront_access.title,
@@ -505,12 +468,12 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 )
             )
         )
-        template.add_output(Output(
+        self.template.add_output(Output(
             'CFDistributionId',
             Description='CloudFront distribution ID',
             Value=distribution.ref()
         ))
-        template.add_output(
+        self.template.add_output(
             Output(
                 'CFDistributionDomainName',
                 Description='CloudFront distribution domain name',
