@@ -5,8 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Fixed
 
+## [1.3.7] - 2020-01-07
+### Fixed
 - pinned `pyhcl` to `<0.3.14`
     - `0.3.14` vendored ply instead of having it as a dependency which breaks our embedded, patched copy
 
@@ -654,7 +655,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.6...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.7...HEAD
+[1.3.7]: https://github.com/onicagroup/runway/compare/v1.3.6...v1.3.7
 [1.3.6]: https://github.com/onicagroup/runway/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/onicagroup/runway/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/onicagroup/runway/compare/v1.3.3...v1.3.4
