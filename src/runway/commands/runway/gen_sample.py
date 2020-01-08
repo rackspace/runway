@@ -39,6 +39,10 @@ sample directory.
 |                  | :ref:`module<runway-module>` identical the ``cfn``|
 |                  | sample but with the template written in python    |
 +------------------+---------------------------------------------------+
+| ``static-react`` | `StaticSite`_                                     |
+|                  | :ref:`module<runway-module>` of a StaticSite and  |
+|                  | the React framework                               |
++------------------+---------------------------------------------------+
 | ``tf``           | `Terraform`_ :ref:`module<runway-module>`         |
 +------------------+---------------------------------------------------+
 
@@ -90,6 +94,32 @@ def generate_sample_module(module_dir):
                      module_dir)
         sys.exit(1)
     os.mkdir(module_dir)
+
+
+def generate_sample_static_react(env_root):
+    """Generate a sample static React application.
+
+    Keyword Args:
+        env_root (string): The environment root directory path
+    """
+    repo_dir = os.path.join(env_root, 'static-react')
+
+    if os.path.isdir(repo_dir):
+        LOGGER.error("Error generating sample repo -- directory %s "
+                     "already exists!",
+                     repo_dir)
+        sys.exit(1)
+
+    shutil.copytree(
+        os.path.join(ROOT, 'templates', 'static-react'),
+        repo_dir
+    )
+    os.rename(os.path.join(repo_dir, 'sample-app/_gitignore'),
+              os.path.join(repo_dir, 'sample-app/.gitignore'))
+
+    LOGGER.info("Sample static React site repo created at %s",
+                repo_dir)
+    LOGGER.info('(see its README for setup and deployment instructions)')
 
 
 def generate_sample_k8s_cfn_repo(env_root):
@@ -409,6 +439,8 @@ class GenSample(RunwayCommand):
         """Run selected module generator."""
         if self._cli_arguments.get('<samplename>') == 'cfn':
             generate_sample_cfn_module(self.env_root)
+        elif self._cli_arguments.get('<samplename>') == 'static-react':
+            generate_sample_static_react(self.env_root)
         elif self._cli_arguments.get('<samplename>') == 'sls-py':
             generate_sample_sls_module(self.env_root, 'sls-py')
         elif self._cli_arguments.get('<samplename>') == 'sls-tsc':
@@ -429,7 +461,7 @@ class GenSample(RunwayCommand):
             generate_sample_cdk_cs_module(self.env_root)
         else:
             LOGGER.info("Available samples to generate:")
-            for i in ['cfn', 'sls-tsc', 'sls-py', 'tf', 'k8s-cfn-repo',
+            for i in ['cfn', 'static-react', 'sls-tsc', 'sls-py', 'tf', 'k8s-cfn-repo',
                       'k8s-tf-repo', 'stacker', 'cdk-tsc', 'cdk-py',
                       'cdk-csharp']:
                 print(i)
