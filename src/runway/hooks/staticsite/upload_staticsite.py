@@ -95,11 +95,11 @@ def update_ssm_hash(context, session):
 
 
 def get_distribution_data(context, provider, **kwargs):
-    """Retrive information about the distribution.
+    """Retrieve information about the distribution.
 
+    Keyword Args:
         context (:class:`stacker.context.Context`): The context instance
-        provider (:class:`stacker.providers.base.BaseProvider`): The provider
-            instance
+        provider (:class:`stacker.providers.base.BaseProvider`): The provider instance
     """
     LOGGER.info("Retrieved distribution data")
     return {
@@ -118,8 +118,9 @@ def get_distribution_data(context, provider, **kwargs):
 
 
 def invalidate_distribution(session, identifier='', path='', domain='', **_):
-    """Invalidate the current distribution
+    """Invalidate the current distribution.
 
+    Keyword Args:
         session (Session): The current Stacker session
         identifier (string): The distribution id
         path (string): The distribution path
@@ -143,6 +144,7 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
 def prune_archives(context, session):
     """Prune the archives from the bucket.
 
+    Keyword Args:
         context (:class:`stacker.context.Context`): The context instance
         session (:class:`stacker.session.Session`): The Stacker session
     """
