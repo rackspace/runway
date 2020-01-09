@@ -134,7 +134,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_template_conditions(self):
-        """Add Template Conditions"""
+        """Add Template Conditions."""
         variables = self.get_variables()
 
         self.template.add_condition(
@@ -174,7 +174,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def get_lambda_associations(self, directory_index_rewrite_version):
-        """Retrieve any lambda associations from the instance variables
+        """Retrieve any lambda associations from the instance variables.
 
         Keyword Args:
             directory_index_rewrite_version (dict): The directory index rewrite lambda version
@@ -205,7 +205,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def get_cloudfront_distribution_options(self, bucket, oai, lambda_function_associations):
-        """Retrieve the options for our CloudFront distribution
+        """Retrieve the options for our CloudFront distribution.
 
         Keyword Args:
             bucket (dict): The bucket resource
@@ -214,6 +214,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         Return:
             dict: The CloudFront Distribution Options
+
         """
         variables = self.get_variables()
         return {
@@ -277,10 +278,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         }
 
     def add_origin_access_identity(self):
-        """Add the origin access identity resource to the template
+        """Add the origin access identity resource to the template.
 
         Returns:
             dict: The OAI resource
+
         """
         return self.template.add_resource(
             cloudfront.CloudFrontOriginAccessIdentity(
@@ -293,10 +295,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket(self):
-        """Add the bucket resource along with an output of it's name
+        """Add the bucket resource along with an output of it's name.
 
         Returns:
             dict: The bucket resource
+
         """
         bucket = self.template.add_resource(
             s3.Bucket(
@@ -362,12 +365,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_index_rewrite_role(self):
-        """Add an index rewrite role to the template
+        """Add an index rewrite role to the template.
 
         Return:
             dict: The index rewrite role
         """
-
         return self.template.add_resource(
             iam.Role(
                 'CFDirectoryIndexRewriteRole',
@@ -391,10 +393,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_cloudfront_directory_index_rewrite(self, role):
-        """Add an index CloudFront directory index rewrite lambda function to the template
+        """Add an index CloudFront directory index rewrite lambda function to the template.
 
         Keyword Args:
-            role (dict): The index rewrite role resourcevoodooGQ/runway/pull/3
+            role (dict): The index rewrite role resource
 
         Return:
             dict: The CloudFront directory index rewrite lambda function resource
@@ -437,13 +439,14 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_cloudfront_directory_index_rewrite_version(self, directory_index_rewrite):
-        """Add a specific version to the directory index rewrite lambda
+        """Add a specific version to the directory index rewrite lambda.
 
         Keyword Args:
             directory_index_rewrite (dict): The directory index rewrite lambda resource
 
         Return:
             dict: The CloudFront directory index rewrite version
+
         """
         # Generating a unique resource name here for the Lambda version, so it
         # updates automatically if the lambda code changes
@@ -464,8 +467,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             allow_cloudfront_access,
             cloudfront_distribution_options
     ):
-        """Add the CloudFront distribution to the template and output the id
-        and domain name.
+        """Add the CloudFront distribution to the template / output the id and domain name.
 
         Keyword Args:
             allow_cloudfront_access (dict): Allow bucket access resource
@@ -473,6 +475,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         Return:
             dict: The CloudFront Distribution resource
+
         """
         distribution = self.template.add_resource(
             get_cf_distribution_class()(
