@@ -88,7 +88,7 @@ class IAMPolicyBuilder():
 
 
     def build(self, test_name):
-        """Creates a roles for the given test."""
+        """Create policies for the given test."""
         policies = []
         policies.append(create_base_policy())
         for policy in self.policy_finder.find(test_name):

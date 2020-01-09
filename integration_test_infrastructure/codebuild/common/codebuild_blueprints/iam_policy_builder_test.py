@@ -32,12 +32,5 @@ class IAMPolicyBuilderTest(unittest.TestCase):
         self.assertEqual(len(policies), 1)
         self.assertEqual(policies[0].PolicyName, 'base-policy')
 
-    # def test_terraform(self):
-    #     """Tests the terraform policy is found."""
-    #     builder = IAMPolicyBuilder()
-    #     policies = builder.build('my_test')
-    #     self.assertEqual(len(policies), 1)
-    #     self.assertEqual(policies[0].PolicyName, 'base-policy')
-
 if __name__ == '__main__':
     unittest.main()
