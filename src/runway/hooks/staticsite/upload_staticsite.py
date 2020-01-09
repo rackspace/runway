@@ -76,7 +76,6 @@ def update_ssm_hash(context, session):
 
     Keyword Args:
         context (:class:`stacker.context.Context`): context instance
-Dict):
         session (:class:`stacker.session.Session`): Stacker session
     """
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
@@ -96,7 +95,7 @@ Dict):
 
 
 def get_distribution_data(context, provider, **kwargs):
-    """Retrive information about the distribution
+    """Retrive information about the distribution.
 
         context (:class:`stacker.context.Context`): The context instance
         provider (:class:`stacker.providers.base.BaseProvider`): The provider
@@ -120,6 +119,7 @@ def get_distribution_data(context, provider, **kwargs):
 
 def invalidate_distribution(session, identifier='', path='', domain='', **_):
     """Invalidate the current distribution
+
         session (Session): The current Stacker session
         identifier (string): The distribution id
         path (string): The distribution path
