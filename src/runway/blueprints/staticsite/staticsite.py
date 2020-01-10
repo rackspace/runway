@@ -300,7 +300,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket_policy(self, bucket):
-        """Add a policy to the bucket if CloudFront is disabled. Ensure PublicRead
+        """Add a policy to the bucket if CloudFront is disabled. Ensure PublicRead.
 
         Keyword Args:
             bucket (dict): The bucket resource to place the policy
