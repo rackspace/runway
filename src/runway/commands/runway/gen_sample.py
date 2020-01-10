@@ -90,6 +90,16 @@ def generate_tfstate_cfn_template():
                            None).to_json())
 
 
+def convert_gitignore(directory=''):
+    """Given a directory convert the _gitignore file within to a dotfile.
+
+    Keyword Args:
+        directory (str)
+    """
+    os.rename(os.path.join(directory, '_gitignore'),
+              os.path.join(directory, '.gitignore'))
+
+
 def generate_sample_module(module_dir):
     """Generate skeleton sample module."""
     if os.path.isdir(module_dir):
@@ -118,8 +128,7 @@ def generate_sample_static_angular(env_root):
         os.path.join(ROOT, 'templates', 'static-angular'),
         repo_dir
     )
-    os.rename(os.path.join(repo_dir, 'sample-app/_gitignore'),
-              os.path.join(repo_dir, 'sample-app/.gitignore'))
+    convert_gitignore(os.path.join(repo_dir, 'sample-app'))
 
     LOGGER.info("Sample static Angular site repo created at %s",
                 repo_dir)
@@ -144,8 +153,7 @@ def generate_sample_static_react(env_root):
         os.path.join(ROOT, 'templates', 'static-react'),
         repo_dir
     )
-    os.rename(os.path.join(repo_dir, 'sample-app/_gitignore'),
-              os.path.join(repo_dir, 'sample-app/.gitignore'))
+    convert_gitignore(os.path.join(repo_dir, 'sample-app'))
 
     LOGGER.info("Sample static React site repo created at %s",
                 repo_dir)
@@ -171,8 +179,7 @@ def generate_sample_k8s_cfn_repo(env_root):
                      'k8s-cfn-repo'),
         repo_dir
     )
-    os.rename(os.path.join(repo_dir, '_gitignore'),
-              os.path.join(repo_dir, '.gitignore'))
+    convert_gitignore(repo_dir)
 
     # Generate masters CFN templates from blueprints
     master_template_dir = os.path.join(repo_dir, 'k8s-master.cfn', 'templates')
@@ -232,8 +239,7 @@ def generate_sample_k8s_tf_repo(env_root):
                      'awscli.py'),
     )
 
-    os.rename(os.path.join(repo_dir, '_gitignore'),
-              os.path.join(repo_dir, '.gitignore'))
+    convert_gitignore(repo_dir)
 
     # Generate tfstate CFN template from blueprints
     tfstate_template_dir = os.path.join(repo_dir, 'tfstate.cfn', 'templates')
@@ -263,8 +269,7 @@ def generate_sample_sls_module(env_root, template_dir, module_dir=None):
                      template_dir),
         module_dir
     )
-    os.rename(os.path.join(module_dir, '_gitignore'),
-              os.path.join(module_dir, '.gitignore'))
+    convert_gitignore(module_dir)
     LOGGER.info("Sample Serverless module created at %s",
                 module_dir)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
