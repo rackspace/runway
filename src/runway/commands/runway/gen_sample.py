@@ -470,6 +470,7 @@ class GenSample(RunwayCommand):
 
     SKIP_FIND_CONFIG = True
 
+    # noqa pylint: disable=too-many-branches
     def execute(self):
         """Run selected module generator."""
         if self._cli_arguments.get('<samplename>') == 'cfn':
