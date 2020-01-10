@@ -9,7 +9,7 @@ from past.builtins import basestring
 
 import awacs.s3
 import awacs.sts
-from awacs.aws import Allow, PolicyDocument, Principal, Statement
+from awacs.aws import Action, Allow, Policy, PolicyDocument, Principal, Statement
 
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import CFNCommaDelimitedList, CFNString
@@ -115,6 +115,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         # Resources
         bucket = self.add_bucket()
+        bucket_policy = self.add_bucket_policy(bucket)
         oai = self.add_origin_access_identity()
         allow_access = self.allow_cloudfront_access_on_bucket(bucket, oai)
         rewrite_role = self.add_index_rewrite_role()
@@ -150,6 +151,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         self.template.add_condition(
             'CFEnabled',
             Not(Equals(variables['CFDisabled'].ref, 'true'))
+        )
+        self.template.add_condition(
+            'CFDisabled',
+            Equals(variables['CFDisabled'].ref, 'true')
         )
         self.template.add_condition(
             'CFLoggingEnabled',
@@ -294,6 +299,30 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
+    def add_bucket_policy(self, bucket):
+        return self.template.add_resource(
+            s3.BucketPolicy(
+                'BucketPolicy',
+                Bucket=bucket.ref(),
+                Condition='CFDisabled',
+                PolicyDocument=Policy(
+                    Version="2012-10-17",
+                    Statement=[
+                        Statement(
+                            Effect=Allow,
+                            Principal=Principal('*'),
+                            Action=[Action('s3', 'getObject')],
+                            Resource=[
+                                Join('', ['arn:aws:s3:::',
+                                          bucket.ref(),
+                                          '/*'])
+                            ],
+                        )
+                    ]
+                )
+            )
+        )
+
     def add_bucket(self):
         """Add the bucket resource along with an output of it's name.
 
@@ -301,10 +330,12 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             dict: The bucket resource
 
         """
+        variables = self.get_variables();
+        access = s3.PublicRead if (variables['CFDisabled'] == 'true') else s3.Private
         bucket = self.template.add_resource(
             s3.Bucket(
                 'Bucket',
-                AccessControl=s3.Private,
+                AccessControl=access,
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
                         s3.LifecycleRule(
