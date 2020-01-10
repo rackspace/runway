@@ -115,7 +115,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         # Resources
         bucket = self.add_bucket()
-        bucket_policy = self.add_bucket_policy(bucket)
+        bucket_policy = self.add_bucket_policy(bucket) # noqa pylint: disable=unused-variable
         oai = self.add_origin_access_identity()
         allow_access = self.allow_cloudfront_access_on_bucket(bucket, oai)
         rewrite_role = self.add_index_rewrite_role()
@@ -300,6 +300,15 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket_policy(self, bucket):
+        """Add a policy to the bucket if CloudFront is disabled. Ensure PublicRead
+
+        Keyword Args:
+            bucket (dict): The bucket resource to place the policy
+
+        Returns:
+            dict: The Bucket Policy Resource
+
+        """
         return self.template.add_resource(
             s3.BucketPolicy(
                 'BucketPolicy',
@@ -330,7 +339,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             dict: The bucket resource
 
         """
-        variables = self.get_variables();
+        variables = self.get_variables()
         access = s3.PublicRead if (variables['CFDisabled'] == 'true') else s3.Private
         bucket = self.template.add_resource(
             s3.Bucket(
