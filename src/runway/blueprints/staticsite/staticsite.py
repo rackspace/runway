@@ -78,8 +78,8 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     'description': '(Optional) Domain aliases the '
                                    'distribution'},
         'DisableCloudFront': {'type': CFNString,
-                       'default': '',
-                       'description': 'Whether to disable CF'},
+                              'default': '',
+                              'description': 'Whether to disable CF'},
         'LogBucketName': {'type': CFNString,
                           'default': '',
                           'description': 'S3 bucket for CF logs'},
@@ -339,12 +339,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             dict: The bucket resource
 
         """
-        variables = self.get_variables()
-        access = s3.PublicRead if (variables['DisableCloudFront'] == 'true') else s3.Private
         bucket = self.template.add_resource(
             s3.Bucket(
                 'Bucket',
-                AccessControl=access,
+                AccessControl=If('CFEnabled', s3.Private, s3.PublicRead),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
                         s3.LifecycleRule(
