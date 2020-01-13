@@ -17,7 +17,7 @@ from stacker.context import Context
 
 import troposphere
 from troposphere import (
-    AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
+    AWSProperty, And, Equals, If, GetAtt, Join, Not, NoValue, Output, Select,
     awslambda, cloudfront, iam, s3
 )
 
@@ -366,6 +366,12 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             'BucketName',
             Description='Name of website bucket',
             Value=bucket.ref()
+        ))
+        self.template.add_output(Output(
+            'BucketWebsiteUrl',
+            Condition="CFDisabled",
+            Description='URL of the bucket website',
+            Value=GetAtt(bucket, 'WebsiteURL')
         ))
         return bucket
 
