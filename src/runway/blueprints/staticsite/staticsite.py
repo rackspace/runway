@@ -333,7 +333,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket(self):
-        """Add the bucket resource along with an output of it's name.
+        """Add the bucket resource along with an output of it's name / website url.
 
         Returns:
             dict: The bucket resource
@@ -368,7 +368,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             Value=bucket.ref()
         ))
         self.template.add_output(Output(
-            'BucketWebsiteUrl',
+            'BucketWebsiteURL',
             Condition="CFDisabled",
             Description='URL of the bucket website',
             Value=GetAtt(bucket, 'WebsiteURL')

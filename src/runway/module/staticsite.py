@@ -122,6 +122,7 @@ class StaticSite(RunwayModule):
                       'required': True,
                       'args': {
                           'bucket_output_lookup': '%s::BucketName' % name,
+                          'website_url': '%s::BucketWebsiteURL' % name,
                           'cf_disabled': '%s' % site_stack_variables['CFDisabled'],
                           'distributionid_output_lookup': '%s::CFDistributionId' % name,  # noqa
                           'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % name}}  # noqa pylint: disable=line-too-long
