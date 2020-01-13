@@ -92,7 +92,7 @@ class StaticSite(RunwayModule):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
 
         if env.get('staticsite_cf_disable', False):
-            site_stack_variables['CFDisabled'] = "true"
+            site_stack_variables['DisableCloudFront'] = "true"
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
@@ -123,7 +123,7 @@ class StaticSite(RunwayModule):
                       'args': {
                           'bucket_output_lookup': '%s::BucketName' % name,
                           'website_url': '%s::BucketWebsiteURL' % name,
-                          'cf_disabled': '%s' % site_stack_variables['CFDisabled'],
+                          'cf_disabled': '%s' % site_stack_variables['DisableCloudFront'],
                           'distributionid_output_lookup': '%s::CFDistributionId' % name,  # noqa
                           'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % name}}  # noqa pylint: disable=line-too-long
                  ],

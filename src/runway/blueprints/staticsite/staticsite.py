@@ -77,7 +77,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     'default': '',
                     'description': '(Optional) Domain aliases the '
                                    'distribution'},
-        'CFDisabled': {'type': CFNString,
+        'DisableCloudFront': {'type': CFNString,
                        'default': '',
                        'description': 'Whether to disable CF'},
         'LogBucketName': {'type': CFNString,
@@ -150,11 +150,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
         self.template.add_condition(
             'CFEnabled',
-            Not(Equals(variables['CFDisabled'].ref, 'true'))
+            Not(Equals(variables['DisableCloudFront'].ref, 'true'))
         )
         self.template.add_condition(
             'CFDisabled',
-            Equals(variables['CFDisabled'].ref, 'true')
+            Equals(variables['DisableCloudFront'].ref, 'true')
         )
         self.template.add_condition(
             'CFLoggingEnabled',
@@ -170,7 +170,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             'CFEnabledAndDirectoryIndexSpecified',
             And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
                 Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')), # noqa
-                Not(Equals(variables['CFDisabled'].ref, 'true')))
+                Not(Equals(variables['DisableCloudFront'].ref, 'true')))
         )
         self.template.add_condition(
             'WAFNameSpecified',
@@ -340,7 +340,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         """
         variables = self.get_variables()
-        access = s3.PublicRead if (variables['CFDisabled'] == 'true') else s3.Private
+        access = s3.PublicRead if (variables['DisableCloudFront'] == 'true') else s3.Private
         bucket = self.template.add_resource(
             s3.Bucket(
                 'Bucket',

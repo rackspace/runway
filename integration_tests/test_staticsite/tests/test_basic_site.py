@@ -1,4 +1,4 @@
-"""Test that multiple CDK stacks does not prompt a failure"""
+"""Test deploying a base line static site."""
 from runway.util import change_dir
 
 from integration_tests.test_staticsite.test_staticsite import StaticSite
@@ -6,7 +6,7 @@ from integration_tests.util import run_command
 
 
 class TestBasicSite(StaticSite):
-    """Test deploying multiple stacks and ensure all are deployed"""
+    """Test deploying a base line static site."""
 
     TEST_NAME = __name__
     module_dir = 'basic-site'

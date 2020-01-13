@@ -39,15 +39,10 @@ A start-to-finish example walkthrough is available
 in the :ref:`Conduit quickstart<qs-conduit>`.
 
 **Please note:** The CloudFront distribution will take a significant amount
-of time to spin up on initial deploy (10 to 25 minutes is not abnormal).
+of time to spin up on initial deploy (10 to 60 minutes is not abnormal).
 Incorporating CloudFront with a static site is a common best practice, however,
 if you are working on a development project it may benefit you to add the
-`staticsite_cf_disable` environment parameter to `true`. To ensure visibility of
-the files that are uploaded, the bucket's policy will be set to a PublicRead
-canned ACL https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl.
-This means that every file uploaded will be **publically viewable**. Make sure
-to utilize best practices when uploading sensitive information.
-
+`staticsite_cf_disable` environment parameter set to `true`.
 
 .. _staticsite-config-options:
 
@@ -93,7 +88,8 @@ Most of these options are not required, but are listed here for reference::
                     ResponseCode: 200
                     ResponsePagePath: /index.html
 
-                # Exclude the CloudFront distribution from overall deployment
+                # Don't use CloudFront with the site
+                # i.e. for a development site accessible only via its S3-url
                 statisite_cf_disable: true
             options:
               pre_build_steps:  # commands to run before generating hash of files
