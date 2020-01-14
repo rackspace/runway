@@ -78,7 +78,7 @@ class StaticSite(RunwayModule):
         site_stack_variables = {
             'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',
             'Aliases': '${default staticsite_aliases::undefined}',
-            'CFDisabled': '${default staticsite_cf_disable::undefined}',
+            'DisableCloudFront': '${default staticsite_cf_disable::undefined}',
             'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
