@@ -163,6 +163,12 @@ class StaticSite(RunwayModule):
     def deploy(self):
         """Create website CFN module and run stacker build."""
         if self.options.get('environments', {}).get(self.context.env_name):
+            if self.options.get('staticsite_cf_disable', False) is False:
+                msg = ("PLEASE NOTE: Initial creation or updates to distribution settings "
+                       "(e.g. url rewrites) will take quite a while (up to an hour). "
+                       "Unless you receive an error your deployment is still running.")
+                LOGGER.info(msg)
+
             self.setup_website_module(command='deploy')
         else:
             LOGGER.info("Skipping staticsite deploy of %s; no environment "
