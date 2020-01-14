@@ -17,7 +17,7 @@ from stacker.context import Context
 
 import troposphere
 from troposphere import (
-    AWSProperty, And, Equals, If, GetAtt, Join, Not, NoValue, Output, Select,
+    AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
     awslambda, cloudfront, iam, s3
 )
 
