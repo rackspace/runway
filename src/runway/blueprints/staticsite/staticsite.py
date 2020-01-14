@@ -322,9 +322,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                             Principal=Principal('*'),
                             Action=[Action('s3', 'getObject')],
                             Resource=[
-                                Join('', ['arn:aws:s3:::',
-                                          bucket.ref(),
-                                          '/*'])
+                                Join('', [bucket.get_att('Arn'), '/*'])
                             ],
                         )
                     ]
