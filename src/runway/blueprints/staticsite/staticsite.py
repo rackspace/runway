@@ -367,7 +367,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             'BucketWebsiteURL',
             Condition="CFDisabled",
             Description='URL of the bucket website',
-            Value=GetAtt(bucket, 'WebsiteURL')
+            Value=bucket.get_att('WebsiteURL')
         ))
         return bucket
 
