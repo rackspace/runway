@@ -417,7 +417,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             iam.Role(
                 'CFDirectoryIndexRewriteRole',
-                Condition='DirectoryIndexSpecified',
+                Condition='CFEnabledAndDirectoryIndexSpecified',
                 AssumeRolePolicyDocument=PolicyDocument(
                     Version='2012-10-17',
                     Statement=[
