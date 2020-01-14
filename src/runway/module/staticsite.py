@@ -27,12 +27,13 @@ class StaticSite(RunwayModule):
 
     def setup_website_module(self, command):
         """Create stacker configuration for website module."""
-        name = self.options.get('name') if self.options.get('name') else self.options.get('path')  # noqa pylint: disable=line-too-long
+        name = self.options.get('name', self.options.get('path'))
+
         ensure_valid_environment_config(
             name,
-            self.options.get('environments',
-                             {}).get(self.context.env_name,
-                                     {}))
+            self.options.get('environments', {}).get(self.context.env_name, {})
+        )
+
         module_dir = tempfile.mkdtemp()
         LOGGER.info("staticsite: Generating CloudFormation configuration for "
                     "module %s in %s",
@@ -40,8 +41,13 @@ class StaticSite(RunwayModule):
                     module_dir)
 
         # Default parameter name matches build_staticsite hook
-        hash_param = self.options.get('options', {}).get('source_hashing', {}).get('parameter') if self.options.get('options', {}).get('source_hashing', {}).get('parameter') else "${namespace}-%s-hash" % name # noqa pylint: disable=line-too-long
+        hash_param = "${namespace}-%s-hash" % name
+        if self.options.get('options', {}).get('source_hashing', {}).get('parameter'):
+            hash_param = self.options.get('options', {}).get('source_hashing', {}).get(
+                'parameter'
+            )
         build_staticsite_args = self.options.copy()
+
         if not build_staticsite_args.get('options'):
             build_staticsite_args['options'] = {}
         build_staticsite_args['artifact_bucket_rxref_lookup'] = "%s-dependencies::ArtifactsBucketName" % name  # noqa pylint: disable=line-too-long
@@ -70,33 +76,29 @@ class StaticSite(RunwayModule):
                 default_flow_style=False
             )
         site_stack_variables = {
+            'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',
             'Aliases': '${default staticsite_aliases::undefined}',
+            'DisableCloudFront': '${default staticsite_cf_disable::undefined}',
             'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
-        if self.options.get('environments',
-                            {}).get(self.context.env_name,
-                                    {}).get('staticsite_enable_cf_logging',
-                                            True):
-            site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
-        if self.options.get('environments',
-                            {}).get(self.context.env_name,
-                                    {}).get('staticsite_acmcert_ssm_param'):
+
+        env = self.options.get('environments', {}).get(self.context.env_name, {})
+
+        if env.get('staticsite_acmcert_ssm_param'):
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
-        else:
-            site_stack_variables['AcmCertificateArn'] = '${default staticsite_acmcert_arn::undefined}'  # noqa pylint: disable=line-too-long
+
+        if env.get('staticsite_enable_cf_logging', True):
+            site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
+
+        if env.get('staticsite_cf_disable', False):
+            site_stack_variables['DisableCloudFront'] = "true"
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
         for i in ['custom_error_responses', 'lambda_function_associations']:
-            if self.options.get('environments',
-                                {}).get(self.context.env_name,
-                                        {}).get("staticsite_%s" % i):
-                site_stack_variables[i] = self.options.get(
-                    'environments',
-                    {}
-                ).get(self.context.env_name,
-                      {}).get("staticsite_%s" % i)
+            if env.get("staticsite_%s" % i):
+                site_stack_variables[i] = env.get("staticsite_%s" % i)
                 self.options.get('environments',
                                  {}).get(self.context.env_name,
                                          {}).pop("staticsite_%s" % i)
@@ -120,6 +122,8 @@ class StaticSite(RunwayModule):
                       'required': True,
                       'args': {
                           'bucket_output_lookup': '%s::BucketName' % name,
+                          'website_url': '%s::BucketWebsiteURL' % name,
+                          'cf_disabled': '%s' % site_stack_variables['DisableCloudFront'],
                           'distributionid_output_lookup': '%s::CFDistributionId' % name,  # noqa
                           'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % name}}  # noqa pylint: disable=line-too-long
                  ],
@@ -158,7 +162,14 @@ class StaticSite(RunwayModule):
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
-        if self.options.get('environments', {}).get(self.context.env_name):
+        env = self.options.get('environments', {}).get(self.context.env_name)
+        if env:
+            if env.get('staticsite_cf_disable', False) is False:
+                msg = ("Please Note: Initial creation or updates to distribution settings "
+                       "(e.g. url rewrites) will take quite a while (up to an hour). "
+                       "Unless you receive an error your deployment is still running.")
+                LOGGER.info(msg.upper())
+
             self.setup_website_module(command='deploy')
         else:
             LOGGER.info("Skipping staticsite deploy of %s; no environment "
