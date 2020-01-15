@@ -23,21 +23,21 @@ CloudFormation Quickstart
 
    .. code-block:: shell
 
-       $ curl -L https://oni.ca/latest/osx/runway -o runway
+       $ curl -L https://oni.ca/runway/latest/osx -o runway
        $ chmod +x runway
 
    .. rubric:: Ubuntu
 
    .. code-block:: shell
 
-       $ curl -L https://oni.ca/latest/ubnt/runway -o runway
+       $ curl -L https://oni.ca/runway/latest/linux -o runway
        $ chmod +x runway
 
    .. rubric:: Windows
 
    .. code-block:: shell
 
-       $ curl -L https://oni.ca/latest/win/runway -o runway
+       > iwr -Uri oni.ca/runway/latest/windows -OutFile runway.exe
 
 #. Use Runway to :ref:`generate a sample<command-gen-sample>` `CloudFormation`_
    :ref:`module<runway-module>`, edit the values in the environment file, and

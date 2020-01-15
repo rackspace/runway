@@ -23,7 +23,7 @@ on your operating system.
 +------------------+---------------------------------------------------+
 | macOS            | https://oni.ca/runway/latest/osx                  |
 +------------------+---------------------------------------------------+
-| Windows          | https://oni.ca/runway/latest/win                  |
+| Windows          | https://oni.ca/runway/latest/windows              |
 +------------------+---------------------------------------------------+
 
 .. code-block:: shell

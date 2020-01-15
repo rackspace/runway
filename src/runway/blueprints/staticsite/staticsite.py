@@ -77,9 +77,9 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     'default': '',
                     'description': '(Optional) Domain aliases the '
                                    'distribution'},
-        'CFDisabled': {'type': CFNString,
-                       'default': '',
-                       'description': 'Whether to disable CF'},
+        'DisableCloudFront': {'type': CFNString,
+                              'default': '',
+                              'description': 'Whether to disable CF'},
         'LogBucketName': {'type': CFNString,
                           'default': '',
                           'description': 'S3 bucket for CF logs'},
@@ -150,11 +150,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
         self.template.add_condition(
             'CFEnabled',
-            Not(Equals(variables['CFDisabled'].ref, 'true'))
+            Not(Equals(variables['DisableCloudFront'].ref, 'true'))
         )
         self.template.add_condition(
             'CFDisabled',
-            Equals(variables['CFDisabled'].ref, 'true')
+            Equals(variables['DisableCloudFront'].ref, 'true')
         )
         self.template.add_condition(
             'CFLoggingEnabled',
@@ -170,7 +170,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             'CFEnabledAndDirectoryIndexSpecified',
             And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
                 Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')), # noqa
-                Not(Equals(variables['CFDisabled'].ref, 'true')))
+                Not(Equals(variables['DisableCloudFront'].ref, 'true')))
         )
         self.template.add_condition(
             'WAFNameSpecified',
@@ -322,9 +322,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                             Principal=Principal('*'),
                             Action=[Action('s3', 'getObject')],
                             Resource=[
-                                Join('', ['arn:aws:s3:::',
-                                          bucket.ref(),
-                                          '/*'])
+                                Join('', [bucket.get_att('Arn'), '/*'])
                             ],
                         )
                     ]
@@ -333,18 +331,16 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket(self):
-        """Add the bucket resource along with an output of it's name.
+        """Add the bucket resource along with an output of it's name / website url.
 
         Returns:
             dict: The bucket resource
 
         """
-        variables = self.get_variables()
-        access = s3.PublicRead if (variables['CFDisabled'] == 'true') else s3.Private
         bucket = self.template.add_resource(
             s3.Bucket(
                 'Bucket',
-                AccessControl=access,
+                AccessControl=If('CFEnabled', s3.Private, s3.PublicRead),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
                         s3.LifecycleRule(
@@ -367,11 +363,16 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             Description='Name of website bucket',
             Value=bucket.ref()
         ))
+        self.template.add_output(Output(
+            'BucketWebsiteURL',
+            Condition="CFDisabled",
+            Description='URL of the bucket website',
+            Value=bucket.get_att('WebsiteURL')
+        ))
         return bucket
 
     def allow_cloudfront_access_on_bucket(self, bucket, oai):
         """Given a bucket and oai resource add cloudfront access to the bucket.
-
         Keyword Args:
             bucket (dict): A bucket resource
             oai (dict): An Origin Access Identity resource
@@ -413,7 +414,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             iam.Role(
                 'CFDirectoryIndexRewriteRole',
-                Condition='DirectoryIndexSpecified',
+                Condition='CFEnabledAndDirectoryIndexSpecified',
                 AssumeRolePolicyDocument=PolicyDocument(
                     Version='2012-10-17',
                     Statement=[

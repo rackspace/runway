@@ -1,4 +1,4 @@
-"""Tests for the CDK module."""
+"""Tests for the StaticSite module."""
 import os
 import glob
 
@@ -10,7 +10,7 @@ from integration_tests.util import (copy_file, copy_dir, import_tests,
 
 
 class StaticSite(IntegrationTest):
-    """Test CDK based module scenarios"""
+    """Test StaticSite based module scenarios"""
     base_dir = os.path.abspath(os.path.dirname(__file__))
     fixtures_dir = os.path.join(base_dir, 'fixtures')
     tests_dir = os.path.join(base_dir, 'tests')

@@ -49,6 +49,8 @@ def sync(context, provider, **kwargs):
     if context.hook_data['staticsite']['deploy_is_current']:
         LOGGER.info('staticsite: skipping upload; latest version already '
                     'deployed')
+        if kwargs.get('cf_disabled', '') == 'true':
+            display_static_website_url(kwargs.get('website_url'), provider, context)
     else:
         # Using the awscli for s3 syncing is incredibly suboptimal, but on
         # balance it's probably the most stable/efficient option for syncing
@@ -59,7 +61,9 @@ def sync(context, provider, **kwargs):
                  "s3://%s/" % bucket_name,
                  '--delete'])
 
-        if kwargs.get('cf_disabled', '') != 'true':
+        if kwargs.get('cf_disabled', '') == 'true':
+            display_static_website_url(kwargs.get('website_url'), provider, context)
+        else:
             distribution = get_distribution_data(context, provider, **kwargs)
             invalidate_distribution(session, **distribution)
 
@@ -69,6 +73,21 @@ def sync(context, provider, **kwargs):
 
     prune_archives(context, session)
     return True
+
+
+def display_static_website_url(website_url_handle, provider, context):
+    """Based on the url handle display the static website url.
+
+    Keyword Args:
+        website_url_handle (str): the Output handle for the website url
+        provider (:class:`stacker.providers.base.BaseProvider`): The provider instance
+        context (:class:`stacker.context.Context`): context instance
+
+    """
+    bucket_url = OutputLookup.handle(website_url_handle,
+                                     provider=provider,
+                                     context=context)
+    LOGGER.info("STATIC WEBSITE URL: %s", bucket_url)
 
 
 def update_ssm_hash(context, session):

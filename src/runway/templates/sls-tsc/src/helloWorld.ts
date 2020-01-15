@@ -1,8 +1,9 @@
 /**
  * hello-world API
+ *
+ * @packageDocumentation
  */
 
-/** imports (delete comment after https://github.com/TypeStrong/typedoc/issues/603 resolution) */
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyHandler,

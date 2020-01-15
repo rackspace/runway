@@ -78,7 +78,7 @@ class StaticSite(RunwayModule):
         site_stack_variables = {
             'AcmCertificateArn': '${default staticsite_acmcert_arn::undefined}',
             'Aliases': '${default staticsite_aliases::undefined}',
-            'CFDisabled': '${default staticsite_cf_disable::undefined}',
+            'DisableCloudFront': '${default staticsite_cf_disable::undefined}',
             'RewriteDirectoryIndex': '${default staticsite_rewrite_directory_index::undefined}',  # noqa pylint: disable=line-too-long
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
@@ -92,7 +92,7 @@ class StaticSite(RunwayModule):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
 
         if env.get('staticsite_cf_disable', False):
-            site_stack_variables['CFDisabled'] = "true"
+            site_stack_variables['DisableCloudFront'] = "true"
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
@@ -122,7 +122,8 @@ class StaticSite(RunwayModule):
                       'required': True,
                       'args': {
                           'bucket_output_lookup': '%s::BucketName' % name,
-                          'cf_disabled': '%s' % site_stack_variables['CFDisabled'],
+                          'website_url': '%s::BucketWebsiteURL' % name,
+                          'cf_disabled': '%s' % site_stack_variables['DisableCloudFront'],
                           'distributionid_output_lookup': '%s::CFDistributionId' % name,  # noqa
                           'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % name}}  # noqa pylint: disable=line-too-long
                  ],
@@ -161,7 +162,14 @@ class StaticSite(RunwayModule):
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
-        if self.options.get('environments', {}).get(self.context.env_name):
+        env = self.options.get('environments', {}).get(self.context.env_name)
+        if env:
+            if env.get('staticsite_cf_disable', False) is False:
+                msg = ("Please Note: Initial creation or updates to distribution settings "
+                       "(e.g. url rewrites) will take quite a while (up to an hour). "
+                       "Unless you receive an error your deployment is still running.")
+                LOGGER.info(msg.upper())
+
             self.setup_website_module(command='deploy')
         else:
             LOGGER.info("Skipping staticsite deploy of %s; no environment "
