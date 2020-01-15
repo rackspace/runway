@@ -137,6 +137,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                  name,  # type: str
                  path,  # type: str
                  class_path=None,  # type: Optional[str]
+                 type_str=None, # type: Optional[str]
                  environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  env_vars=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  options=None,  # type: Optional[Dict[str, Any]]
@@ -155,6 +156,9 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 `Path`_ for detailed usage.
             class_path (Optional[str]): Path to custom Runway module class.
                 Also used for static site deployments. See
+                :ref:`Module Configurations<module-configurations>` for
+                detailed usage.
+            type_str (Optional[str]): Alias for type of module to use
                 :ref:`Module Configurations<module-configurations>` for
                 detailed usage.
             environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
@@ -198,6 +202,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         self.name = name
         self.path = path
         self.class_path = class_path
+        self.type = type_str
         self.environments = environments or {}
         self.env_vars = env_vars or {}
         self.options = options or {}
@@ -228,6 +233,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
             results.append(cls(name,
                                path,
                                class_path=mod.pop('class_path', None),
+                               type_str=mod.pop('type', None),
                                environments=mod.pop('environments', {}),
                                env_vars=mod.pop('env_vars', {}),
                                options=mod.pop('options', {}),

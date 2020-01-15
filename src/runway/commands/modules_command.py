@@ -503,7 +503,7 @@ class ModulesCommand(RunwayCommand):
 
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method
-            module_instance = module_type.class_path(
+            module_instance = module_type.module_class(
                 context=context,
                 path=path.module_root,
                 options=module_opts

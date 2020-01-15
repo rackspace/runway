@@ -19,11 +19,11 @@ class ModuleType(object):
         'static': 'runway.module.staticsite.StaticSite'
     }
 
-    def __init__(self, path, class_path=None, type_str=None):
+    def __init__(self, path, class_path=None, type=None):
         self.path = path
         self.class_path = class_path
-        self.type_str = type_str
-        self.class_path = self.determine_module_class()
+        self.type = type
+        self.module_class = self.determine_module_class()
 
     def determine_module_class(self):  # pylint: disable=too-many-branches
         """Determine type of module and return deployment module class."""
@@ -33,6 +33,10 @@ class ModuleType(object):
             basename_split = basename.split('.')
             extension = basename_split[len(basename_split) - 1]
             self.class_path = self.EXTENSION_MAP.get(extension, None)
+
+        if not self.class_path and self.type:
+            if self.type == 'static':
+                self.class_path = self.EXTENSION_MAP.get('static', None)
 
         if not self.class_path:
             # Fallback to autodetection
@@ -54,7 +58,6 @@ class ModuleType(object):
             LOGGER.error('No module class found for %s', os.path.basename(self.path))
             sys.exit(1)
 
-        LOGGER.info(self.path)
         return load_object_from_string(self.class_path)
 
     def is_file(self, file_name):
