@@ -20,7 +20,7 @@ import yaml
 from .runway_command import RunwayCommand, get_env
 from ..context import Context
 from ..path import Path
-from ..type import Type
+from ..module_type import ModuleType
 from ..util import (
     change_dir, load_object_from_string, merge_dicts,
     merge_nested_environment_dicts
@@ -497,14 +497,13 @@ class ModulesCommand(RunwayCommand):
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
         with change_dir(path.module_root):
 
-            module_type = Type(path.module_root,
-                               module_opts.get('class_path'),
-                               module_opts.get('type'))
+            module_type = ModuleType(path.module_root,
+                                     module_opts.get('class_path'),
+                                     module_opts.get('type'))
+
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method
-            module_class = module_type.determine_module_class()
-
-            module_instance = module_class(
+            module_instance = module_type.class_path(
                 context=context,
                 path=path.module_root,
                 options=module_opts

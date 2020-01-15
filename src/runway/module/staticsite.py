@@ -27,7 +27,9 @@ class StaticSite(RunwayModule):
 
     def setup_website_module(self, command):
         """Create stacker configuration for website module."""
-        name = self.options.get('name', self.options.get('path'))
+        original_name = self.options.get('name', self.options.get('path'))
+        # Make sure we remove any `.static` extension
+        name = original_name.split('.')[0]
 
         ensure_valid_environment_config(
             name,
