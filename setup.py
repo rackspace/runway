@@ -25,12 +25,7 @@ INSTALL_REQUIRES = [
     'docopt',
     'requests',
     'future',
-    'gitpython',
-    # embedded pyhcl is 0.3.12
-    # with the LICENSE file added to its root folder
-    # and the following patches applied
-    # https://github.com/virtuald/pyhcl/pull/57
-    'pyhcl~=0.3',
+    'pyhcl~=0.4',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'six',
     'typing;python_version<"3.5"',
@@ -41,6 +36,7 @@ INSTALL_REQUIRES = [
     # and the following patches applied
     # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
     # https://github.com/cloudtools/stacker/pull/744 (diffs via CFN changesets)
+    # https://github.com/cloudtools/stacker/pull/746 (locked stack dependencies)
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py

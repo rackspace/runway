@@ -10,7 +10,7 @@ variable "region" {}
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 2.28"
+  version = "~> 2.43"
   region = "${var.region}"
 }
 
@@ -36,7 +36,7 @@ provider "kubernetes" {
   cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
   token = "${data.aws_eks_cluster_auth.cluster_auth.token}"
   load_config_file = false
-  version = "~> 1.9"
+  version = "~> 1.10"
 }
 
 data "aws_ssm_parameter" "oidc_iam_provider_cluster_url" {

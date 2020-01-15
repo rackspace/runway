@@ -157,6 +157,21 @@ def generate_sample_k8s_tf_repo(env_root):
                      'k8s-tf-repo'),
         repo_dir
     )
+
+    # Use kubeconfig-generating hook from k8s_cfn_repo
+    shutil.copyfile(
+        os.path.join(ROOT,
+                     'templates',
+                     'k8s-cfn-repo',
+                     'k8s-master.cfn',
+                     'k8s_hooks',
+                     'awscli.py'),
+        os.path.join(repo_dir,
+                     'gen-kubeconfig.cfn',
+                     'k8s_hooks',
+                     'awscli.py'),
+    )
+
     os.rename(os.path.join(repo_dir, '_gitignore'),
               os.path.join(repo_dir, '.gitignore'))
 

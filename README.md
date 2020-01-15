@@ -62,7 +62,7 @@ Use one of the endpoints below to download a single-binary executable version of
 |------------------|--------------------------------------|
 | Linux            | https://oni.ca/runway/latest/linux   |
 | macOS            | https://oni.ca/runway/latest/osx     |
-| Windows          | https://oni.ca/runway/latest/win     |
+| Windows          | https://oni.ca/runway/latest/windows |
 
 ```shell
 $ curl -L oni.ca/runway/latest/osx -o runway

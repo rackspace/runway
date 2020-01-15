@@ -2,7 +2,7 @@ service: serverless-test-pzmsmz
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
 
 package:
   individually: true

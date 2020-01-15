@@ -5,6 +5,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
+
+### Removed
+- embedded `hcl`
+
+## [1.3.7] - 2020-01-07
+### Fixed
+- pinned `pyhcl` to `<0.3.14`
+    - `0.3.14` vendored ply instead of having it as a dependency which breaks our embedded, patched copy
+
+## [1.3.6] - 2019-12-28
+### Fixed
+- Correct detection of Serverless Framework projects with a JS config file
+
+## [1.3.5] - 2019-12-19
+### Fixed
+- Updated `sls-py` sample to work properly w/ python plugin static caching
+- Updated `k8s-tf ` sample:
+    - Python 2 compatibility for cert certificate script
+    - kubeconfig file is now updated/recreated automatically
+
+### Changed
+- Updated `k8s-tf ` sample:
+    - Moved worker nodes to EKS node group
+
+## [1.3.4] - 2019-12-18
 ### Fixed
 - Fixed multi-stack CDK apps
 
@@ -15,6 +42,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `DEPLOY_ENVIRONMENT` is available to all module deployments as an environment variable
   - if it does not exist in the current environment, value is derived from branch or directory name
 - Updated static site CFN template to use node v10 for path rewrite lambda
+- embedded stacker will not resolve dependancies for `locked` stacks when they rely on other stacks
+  - accepted upstream in https://github.com/cloudtools/stacker/pull/746
 
 ## [1.3.3] - 2019-11-26
 ### Changed
@@ -631,7 +660,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.7...HEAD
+[1.3.7]: https://github.com/onicagroup/runway/compare/v1.3.6...v1.3.7
+[1.3.6]: https://github.com/onicagroup/runway/compare/v1.3.5...v1.3.6
+[1.3.5]: https://github.com/onicagroup/runway/compare/v1.3.4...v1.3.5
+[1.3.4]: https://github.com/onicagroup/runway/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/onicagroup/runway/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/onicagroup/runway/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/onicagroup/runway/compare/v1.3.0...v1.3.1

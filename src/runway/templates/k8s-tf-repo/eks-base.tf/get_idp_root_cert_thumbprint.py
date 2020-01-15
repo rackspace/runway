@@ -21,10 +21,15 @@ DST = (URL, PORT if PORT else 443)
 CTX = SSL.Context(SSL.SSLv23_METHOD)
 CON = SSL.Connection(CTX, socket.create_connection(DST))
 CON.set_connect_state()
-HOSTNAME = bytes(DST[0], 'utf-8')
+if sys.version_info[0] < 3:
+    HOSTNAME = bytes(DST[0])
+    DATA_TO_SEND = bytes('HEAD / HTTP/1.0\n\n')
+else:
+    HOSTNAME = bytes(DST[0], 'utf-8')
+    DATA_TO_SEND = bytes('HEAD / HTTP/1.0\n\n', 'utf-8')
 CON.set_tlsext_host_name(HOSTNAME)
 
-CON.sendall(bytes('HEAD / HTTP/1.0\n\n', 'utf-8'))
+CON.sendall(DATA_TO_SEND)
 CON.recv(16)
 
 CERTS = CON.get_peer_cert_chain()
@@ -32,6 +37,11 @@ CACERT = load_certificate(
     FILETYPE_PEM,
     CERTS[-1].to_cryptography().public_bytes(serialization.Encoding.PEM)
 )
-THUMBPRINT = str(CACERT.digest('sha1'), 'utf-8').replace(':', '').lower()
+if sys.version_info[0] < 3:
+    THUMBPRINT = str(CACERT.digest('sha1')).encode('utf-8').replace(':',
+                                                                    '').lower()
+else:
+    THUMBPRINT = str(CACERT.digest('sha1'), 'utf-8').replace(':',
+                                                             '').lower()
 
 print(json.dumps({'thumbprint': THUMBPRINT}))

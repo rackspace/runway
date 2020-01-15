@@ -13,8 +13,11 @@ variable "az-count" { default = 3 }
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 2.28"
+  version = "~> 2.43"
   region = "${var.region}"
+}
+provider "external" {
+  version = "~> 1.2"
 }
 
 # Data and resources
@@ -22,6 +25,8 @@ data "aws_region" "current" {}
 data "aws_availability_zones" "available" {}
 
 locals {
+  # This cluster name is also used in the next runway module to create the local
+  # kubeconfig; if updated here make sure to update that module as well
   cluster_name = "k8s-${terraform.workspace}"
 }
 
@@ -167,13 +172,13 @@ resource "aws_security_group_rule" "node-ingress-cluster" {
   type = "ingress"
 }
 resource "aws_security_group_rule" "cluster-ingress-node-https" {
-  description              = "Allow pods to communicate with the cluster API Server"
-  from_port                = 443
-  protocol                 = "tcp"
-  security_group_id        = "${aws_security_group.cluster.id}"
+  description = "Allow pods to communicate with the cluster API Server"
+  from_port = 443
+  protocol = "tcp"
+  security_group_id = "${aws_security_group.cluster.id}"
   source_security_group_id = "${aws_security_group.node.id}"
-  to_port                  = 443
-  type                     = "ingress"
+  to_port = 443
+  type = "ingress"
 }
 
 resource "aws_eks_cluster" "cluster" {
@@ -194,22 +199,12 @@ resource "aws_eks_cluster" "cluster" {
     "module.vpc.natgw_ids",  # would be better to just depend on the entire module, if it were possible
   ]
 
-  # Generate local kubeconfig file
-  provisioner "local-exec" {
-    command = "aws eks update-kubeconfig --name ${local.cluster_name}"
-    # The dependency on awscli can be removed by using runway's embedded awscli here:
-    # command = "runway run-aws -- eks update-kubeconfig --name ${local.cluster_name}"
-    # (and changing the auth command in the generated kubeconfig to
-    #  "runway" and adding "run-aws" & "--" as the first two command arguments)
-  }
-
   # API will timeout on initial connection attempts (i.e. when using the config_map 
   # resource below). Wait here for 2 minutes to ensure it is available.
   provisioner "local-exec" {
     command = "runway run-python sleep.py"
   }
 }
-
 
 data "aws_eks_cluster_auth" "cluster_auth" {
   name = "${aws_eks_cluster.cluster.id}"
@@ -220,7 +215,7 @@ provider "kubernetes" {
   cluster_ca_certificate = "${base64decode(aws_eks_cluster.cluster.certificate_authority.0.data)}"
   token = "${data.aws_eks_cluster_auth.cluster_auth.token}"
   load_config_file = false
-  version = "~> 1.9"
+  version = "~> 1.10"
 }
 
 resource "kubernetes_config_map" "aws_auth_configmap" {
@@ -243,57 +238,25 @@ YAML
   }
 }
 
-data "aws_ami" "eks-worker" {
-  filter {
-    name   = "name"
-    values = ["amazon-eks-node-${aws_eks_cluster.cluster.version}-v*"]
+resource "aws_eks_node_group" "node" {
+  cluster_name = aws_eks_cluster.cluster.name
+  node_group_name = "base"
+  node_role_arn = aws_iam_role.node.arn
+  subnet_ids = module.vpc.private_subnets[*]
+
+  scaling_config {
+    desired_size = 1
+    max_size = 1
+    min_size = 1
   }
 
-  most_recent = true
-  owners      = ["602401143452"] # Amazon EKS AMI Account ID
-}
-locals {
-  node-userdata = <<USERDATA
-#!/bin/bash
-set -o xtrace
-/etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.cluster.endpoint}' --b64-cluster-ca '${aws_eks_cluster.cluster.certificate_authority.0.data}' '${local.cluster_name}'
-USERDATA
-}
-resource "aws_launch_configuration" "node" {
-  name_prefix = "${local.cluster_name}-"
-  associate_public_ip_address = true
-  iam_instance_profile = "${aws_iam_instance_profile.node.name}"
-  image_id = "${data.aws_ami.eks-worker.id}"
-  instance_type = "m4.large"
-  security_groups = ["${aws_security_group.node.id}"]
-  user_data_base64 = "${base64encode(local.node-userdata)}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_autoscaling_group" "node" {
-  name_prefix = "${local.cluster_name}-"
-  launch_configuration = "${aws_launch_configuration.node.id}"
-  max_size = 6
-  min_size = 3
-  vpc_zone_identifier = "${module.vpc.private_subnets[*]}"
-
-  tag {
-    key = "Name"
-    value = "${local.cluster_name}"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key = "kubernetes.io/cluster/${local.cluster_name}"
-    value = "owned"
-    propagate_at_launch = true
-  }
-
+  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
-    "kubernetes_config_map.aws_auth_configmap",
+    aws_iam_role_policy_attachment.node-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.node-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.node-AmazonEC2ContainerRegistryReadOnly,
+    kubernetes_config_map.aws_auth_configmap,
   ]
 }
 
