@@ -41,9 +41,9 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     """A module defines the directory to be processed and applicable options.
 
     It can consist of `CloudFormation`_ (using `Stacker`_),
-    `Terraform`_, `Serverless Framework`_, `AWS CDK`_, or `Kubernetes`_.
-    It is recommended to place the appropriate extension on each directory
-    for identification (but it is not required). See
+    `Terraform`_, `Serverless Framework`_, `AWS CDK`_, `Kubernetes`_, or
+    a `StaticSite`_. It is recommended to place the appropriate extension
+    on each directory for identification (but it is not required). See
     :ref:`Repo Structure<repo-structure>` for examples of a module
     directory structure.
 
@@ -59,6 +59,8 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     | ``.tf``          | `Terraform`_                                  |
     +------------------+-----------------------------------------------+
     | ``.k8s``         | `Kubernetes`_                                 |
+    +------------------+-----------------------------------------------+
+    | ``.static``      | `StaticSite`_                                 |
     +------------------+-----------------------------------------------+
 
     A module is only deployed if there is a corresponding env/config
