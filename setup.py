@@ -26,6 +26,7 @@ INSTALL_REQUIRES = [
     'requests',
     'future',
     'pyhcl~=0.4',
+    'gitpython',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'six',
     'typing;python_version<"3.5"',
