@@ -19,6 +19,7 @@ import yaml
 
 from .runway_command import RunwayCommand, get_env
 from ..context import Context
+from ..path import Path
 from ..util import (
     change_dir, load_object_from_string, merge_dicts,
     merge_nested_environment_dicts
@@ -105,15 +106,9 @@ def determine_module_class(path, class_path):  # pylint: disable=too-many-branch
     return load_object_from_string(class_path)
 
 
-def path_is_current_dir(path):
-    """Determine if defined path is reference to current directory."""
-    if path in ['.', '.' + os.sep]:
-        return True
-    return False
-
-
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
+    LOGGER.info(path)
     module_options_file = os.path.join(path,
                                        'runway.module.yml')
     if os.path.isfile(module_options_file):
@@ -527,14 +522,11 @@ class ModulesCommand(RunwayCommand):
             module_opts['environments'] = deployment['environments'].copy()  # noqa
         if deployment.get('module_options'):
             module_opts['options'] = deployment['module_options'].copy()  # noqa
-        if isinstance(module, six.string_types):
-            module = {'path': module}
-        if path_is_current_dir(module['path']):
-            module_root = self.env_root
-        else:
-            module_root = os.path.join(self.env_root, module['path'])
+
+        path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))
+
         module_opts = merge_dicts(module_opts, module.__dict__)
-        module_opts = load_module_opts_from_file(module_root, module_opts)
+        module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
@@ -553,14 +545,14 @@ class ModulesCommand(RunwayCommand):
                             "applied this module: %s",
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
-        with change_dir(module_root):
+        with change_dir(path.module_root):
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method
-            module_class = determine_module_class(module_root,
+            module_class = determine_module_class(path.module_root,
                                                   module_opts.get('class_path'))
             module_instance = module_class(
                 context=context,
-                path=module_root,
+                path=path.module_root,
                 options=module_opts
             )
             if hasattr(module_instance, context.command):

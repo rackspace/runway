@@ -30,6 +30,45 @@ Module
 
 .. autoclass:: runway.config.ModuleDefinition
 
+Path
+^^^^
+
+.. automodule:: runway.path.Path
+
+Git
+---
+
+Git remote resources can be used as modules for your Runway project. Below is
+an example of git remote path.
+
+Example:
+    .. code-block:: yaml
+
+        deployments:
+            - modules:
+                - git::git://github.com/foo/bar.git//my/path?branch=develop
+
+The path is broken down into the following attributes:
+
+``git``: The type of remote resource being retrieved, in this case **git**
+
+``::``: Logical separator of the type from the rest of the path string
+
+``git://github.com/foo/bar.git``: The protocol and URI address of the git
+repository
+
+``//`` **(optional)**: Logical separator of the URI from the remaining path
+string
+
+``my/path`` **(optional)**: The relative path from the root of the repo
+where the module is housed
+
+``?`` **(optional)**: Logical separator of the path from the options
+
+``branch=develop`` **(optional)**:  The options to be passed. The Git module
+accepts three different types of options: `commit`, `tag`, or `branch`. These
+respectively point the repository at the reference id specified.
+
 .. _runway-test:
 
 Test

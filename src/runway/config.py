@@ -151,7 +151,8 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
             name (str): Name of the module. Used to more easily identify
                 where different modules begin/end in the logs.
             path (str): Path to the module relative to the Runway config
-                file. This cannot be higher than the Runway config file.
+                file. This cannot be higher than the Runway config file. See
+                `Path`_ for detailed usage.
             class_path (Optional[str]): Path to custom Runway module class.
                 Also used for static site deployments. See
                 :ref:`Module Configurations<module-configurations>` for
@@ -166,7 +167,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
                 or for all environments using ``"*"`` as the environment
-                name. Takes precendence over values set at the deployment-
+                name. Takes precedence over values set at the deployment-
                 level.
             options (Optional[Dict[str, Any]]): Module-specific options.
                 See :ref:`Module Configurations<module-configurations>`
