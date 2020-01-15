@@ -373,6 +373,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
     def allow_cloudfront_access_on_bucket(self, bucket, oai):
         """Given a bucket and oai resource add cloudfront access to the bucket.
+
         Keyword Args:
             bucket (dict): A bucket resource
             oai (dict): An Origin Access Identity resource
