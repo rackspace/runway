@@ -19,17 +19,9 @@ import yaml
 
 from .runway_command import RunwayCommand, get_env
 from ..context import Context
-<<<<<<< HEAD
 from ..path import Path
 from ..module_type import ModuleType
-||||||| merged common ancestors
-=======
-from ..path import Path
->>>>>>> master
-from ..util import (
-    change_dir, load_object_from_string, merge_dicts,
-    merge_nested_environment_dicts
-)
+from ..util import change_dir, merge_dicts, merge_nested_environment_dicts
 
 if sys.version_info[0] > 2:
     import concurrent.futures
@@ -61,101 +53,6 @@ def assume_role(role_arn, session_name=None, duration_seconds=None,
             'AWS_SESSION_TOKEN': response['Credentials']['SessionToken']}
 
 
-<<<<<<< HEAD
-||||||| merged common ancestors
-def determine_module_class(path, class_path):  # pylint: disable=too-many-branches
-    """Determine type of module and return deployment module class."""
-    if not class_path:
-        # First check directory name for type-indicating suffix
-        basename = os.path.basename(path)
-        if basename.endswith('.sls'):
-            class_path = 'runway.module.serverless.Serverless'
-        elif basename.endswith('.tf'):
-            class_path = 'runway.module.terraform.Terraform'
-        elif basename.endswith('.cdk'):
-            class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif basename.endswith('.k8s'):
-            class_path = 'runway.module.k8s.K8s'
-        elif basename.endswith('.cfn'):
-            class_path = 'runway.module.cloudformation.CloudFormation'
-
-    if not class_path:
-        # Fallback to autodetection
-        if (os.path.isfile(os.path.join(path, 'serverless.yml'))
-                or os.path.isfile(os.path.join(path, 'serverless.js'))) \
-                and os.path.isfile(os.path.join(path, 'package.json')):
-            class_path = 'runway.module.serverless.Serverless'
-        elif glob.glob(os.path.join(path, '*.tf')):
-            class_path = 'runway.module.terraform.Terraform'
-        elif os.path.isfile(os.path.join(path, 'cdk.json')) \
-                and os.path.isfile(os.path.join(path, 'package.json')):
-            class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif os.path.isdir(os.path.join(path, 'overlays')) \
-                and find_kustomize_files(path):
-            class_path = 'runway.module.k8s.K8s'
-        elif glob.glob(os.path.join(path, '*.env')) or (
-                glob.glob(os.path.join(path, '*.yaml'))) or (
-                    glob.glob(os.path.join(path, '*.yml'))):
-            class_path = 'runway.module.cloudformation.CloudFormation'
-
-    if not class_path:
-        LOGGER.error('No module class found for %s', os.path.basename(path))
-        sys.exit(1)
-
-    return load_object_from_string(class_path)
-
-
-def path_is_current_dir(path):
-    """Determine if defined path is reference to current directory."""
-    if path in ['.', '.' + os.sep]:
-        return True
-    return False
-
-
-=======
-def determine_module_class(path, class_path):  # pylint: disable=too-many-branches
-    """Determine type of module and return deployment module class."""
-    if not class_path:
-        # First check directory name for type-indicating suffix
-        basename = os.path.basename(path)
-        if basename.endswith('.sls'):
-            class_path = 'runway.module.serverless.Serverless'
-        elif basename.endswith('.tf'):
-            class_path = 'runway.module.terraform.Terraform'
-        elif basename.endswith('.cdk'):
-            class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif basename.endswith('.k8s'):
-            class_path = 'runway.module.k8s.K8s'
-        elif basename.endswith('.cfn'):
-            class_path = 'runway.module.cloudformation.CloudFormation'
-
-    if not class_path:
-        # Fallback to autodetection
-        if (os.path.isfile(os.path.join(path, 'serverless.yml'))
-                or os.path.isfile(os.path.join(path, 'serverless.js'))) \
-                and os.path.isfile(os.path.join(path, 'package.json')):
-            class_path = 'runway.module.serverless.Serverless'
-        elif glob.glob(os.path.join(path, '*.tf')):
-            class_path = 'runway.module.terraform.Terraform'
-        elif os.path.isfile(os.path.join(path, 'cdk.json')) \
-                and os.path.isfile(os.path.join(path, 'package.json')):
-            class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif os.path.isdir(os.path.join(path, 'overlays')) \
-                and find_kustomize_files(path):
-            class_path = 'runway.module.k8s.K8s'
-        elif glob.glob(os.path.join(path, '*.env')) or (
-                glob.glob(os.path.join(path, '*.yaml'))) or (
-                    glob.glob(os.path.join(path, '*.yml'))):
-            class_path = 'runway.module.cloudformation.CloudFormation'
-
-    if not class_path:
-        LOGGER.error('No module class found for %s', os.path.basename(path))
-        sys.exit(1)
-
-    return load_object_from_string(class_path)
-
-
->>>>>>> master
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
     LOGGER.info(path)
