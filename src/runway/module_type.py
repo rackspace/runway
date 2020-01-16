@@ -143,7 +143,6 @@ class ModuleType(object):
             boolean: Whether the file_name passed in is a file
 
         """
-
         return os.path.isfile(os.path.join(self.path, file_name))
 
     def _is_dir(self, dir_name):
