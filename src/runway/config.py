@@ -43,8 +43,9 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     It can consist of `CloudFormation`_ (using `Stacker`_),
     `Terraform`_, `Serverless Framework`_, `AWS CDK`_, `Kubernetes`_, or
     a :ref:`Static Site<mod-staticsite>`. It is recommended to place the
-    appropriate extension on each directory for identification (but it is not required). See :ref:`Repo Structure<repo-structure>` for examples of a
-    module directory structure.
+    appropriate extension on each directory for identification (but it
+    is not required). See :ref:`Repo Structure<repo-structure>` for
+    examples of a module directory structure.
 
     +------------------+-----------------------------------------------+
     | Suffix/Extension | IaC Tool/Framework                            |
@@ -138,7 +139,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                  name,  # type: str
                  path,  # type: str
                  class_path=None,  # type: Optional[str]
-                 type_str=None, # type: Optional[str]
+                 type_str=None,  # type: Optional[str]
                  environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  env_vars=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  options=None,  # type: Optional[Dict[str, Any]]
