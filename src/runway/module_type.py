@@ -1,3 +1,4 @@
+"""Abstraction for the module 'type' value in a a Runway configuration."""
 import glob
 import logging
 import os
@@ -9,6 +10,42 @@ LOGGER = logging.getLogger('runway')
 
 
 class ModuleType(object):
+    """Runway configuration ``type`` settings object.
+
+    The ``type`` property of a Runway configuration can be
+    used to explicitly specify what module type you are
+    intending to deploy.
+
+    Runway determines the type of module you are trying to
+    deploy in 3 different ways. First, it will check for the
+    ``type`` property as described here, next it will look
+    for a suffix as described in :ref:`Module Definition<mod-definition>`,
+    and finally it will attempt to autodetect your module
+    type by scanning the files of the project. If none of
+    those settings produces a valid result an error will
+    occur. The following are valid explicit types:
+
+    +--------------------+-----------------------------------------------+
+    | Type               | IaC Tool/Framework                            |
+    +====================+===============================================+
+    | ``cdk``            | `AWS CDK`_                                    |
+    +--------------------+-----------------------------------------------+
+    | ``cloudformation`` | `CloudFormation`_                             |
+    +--------------------+-----------------------------------------------+
+    | ``serverless``     | `Serverless Framework`_                       |
+    +--------------------+-----------------------------------------------+
+    | ``terraform``      | `Terraform`_                                  |
+    +--------------------+-----------------------------------------------+
+    | ``kubernetes``     | `Kubernetes`_                                 |
+    +--------------------+-----------------------------------------------+
+    | ``static``         | :ref:`Static Site<mod-staticsite>`            |
+    +--------------------+-----------------------------------------------+
+
+    Even when specifying a module ``type`` the module structure
+    needs to be conducive with that type of project. If the files contained
+    within don't match the type then an error will occur.
+
+    """
 
     EXTENSION_MAP = {
         'sls': 'runway.module.serverless.Serverless',

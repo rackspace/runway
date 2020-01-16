@@ -42,10 +42,9 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
     It can consist of `CloudFormation`_ (using `Stacker`_),
     `Terraform`_, `Serverless Framework`_, `AWS CDK`_, `Kubernetes`_, or
-    a `StaticSite`_. It is recommended to place the appropriate extension
-    on each directory for identification (but it is not required). See
-    :ref:`Repo Structure<repo-structure>` for examples of a module
-    directory structure.
+    a :ref:`Static Site<mod-staticsite>`. It is recommended to place the
+    appropriate extension on each directory for identification (but it is not required). See :ref:`Repo Structure<repo-structure>` for examples of a
+    module directory structure.
 
     +------------------+-----------------------------------------------+
     | Suffix/Extension | IaC Tool/Framework                            |
@@ -60,7 +59,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     +------------------+-----------------------------------------------+
     | ``.k8s``         | `Kubernetes`_                                 |
     +------------------+-----------------------------------------------+
-    | ``.static``      | `StaticSite`_                                 |
+    | ``.static``      | :ref:`Static Site<mod-staticsite>`            |
     +------------------+-----------------------------------------------+
 
     A module is only deployed if there is a corresponding env/config
@@ -192,6 +191,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
             - `Troposphere`_
             - `Terraform`_
             - `Kubernetes`_
+            - :ref:`Static Site<mod-staticsite>`
             - :ref:`Module Configurations<module-configurations>` -
               detailed module ``options``
             - :ref:`Repo Structure<repo-structure>` - examples of
@@ -274,6 +274,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
           - name: detailed-deployment  # optional
             modules:
               - path: my-other-modules.cfn
+                type: cloudformation
             regions:
               - us-east-1
             account_id:  # optional
@@ -336,6 +337,13 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 shared among all modules in the deployment.
             name (str): Name of the deployment. Used to more easily
                 identify where different deployments begin/end in the logs.
+            type (str): The type of module we are deploying. By default
+                Runway will first check to see if you explicitly specify
+                the module type, after that it will check to see if a
+                valid module extension exists on the directory, and
+                finally it will attempt to autodetect the type of module.
+                Valid values are: ``serverless``, ``terraform``, ``cdk``,
+                ``kubernetes``, ``cloudformation``, ``static``.
             regions (List[str]): AWS region names where modules will be
                 deployed/destroyed. Can optionally define as a map with
                 ``parallel`` as the key and a list of regions as the value.
@@ -517,7 +525,7 @@ class Config(ConfigComponent):
             ignore_git_branch: true
             tests:
               - name: example
-                type: script
+                type: static
                 args:
                   commands:
                     - echo "Hello world"

@@ -6,7 +6,6 @@ from __future__ import print_function
 from distutils.util import strtobool  # noqa pylint: disable=no-name-in-module,import-error
 
 import copy
-import glob
 import logging
 import os
 import sys
