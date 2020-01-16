@@ -1,0 +1,6 @@
+deployments:
+  - modules:
+    - path: type_cdk
+      type: cdk
+    regions:
+      - us-east-1
