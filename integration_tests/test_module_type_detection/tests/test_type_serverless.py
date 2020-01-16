@@ -1,4 +1,4 @@
-"""Test to verify behavior on declining deployment"""
+"""Test to verify behavior of explicit type declarations."""
 import subprocess
 
 from runway.util import change_dir

@@ -1,0 +1,5 @@
+deployments:
+  - modules:
+    - path: sampleapp.static
+    regions:
+      - us-east-1
