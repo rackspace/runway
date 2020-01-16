@@ -1,0 +1,6 @@
+deployments:
+  - modules:
+    - path: type_cloudformation
+      type: cloudformation
+    regions:
+      - us-east-1
