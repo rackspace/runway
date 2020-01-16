@@ -55,7 +55,6 @@ def assume_role(role_arn, session_name=None, duration_seconds=None,
 
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
-    LOGGER.info(path)
     module_options_file = os.path.join(path,
                                        'runway.module.yml')
     if os.path.isfile(module_options_file):
