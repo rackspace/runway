@@ -71,7 +71,7 @@ class ModuleType(object):
 
     def __init__(self, path, class_path=None, type_str=None):
         # type: (str, Optional[str], Optional[str]) -> ModuleType
-        """Module Type Configuration.
+        """Initialization of the Module Type Configuration.  # noqa
 
         Keyword Args:
             path (str): The required path to the module
@@ -90,6 +90,7 @@ class ModuleType(object):
 
         Returns:
             object: The specified module class
+
         """
         if not self.class_path:
             self._set_class_path_based_on_extension()
@@ -133,32 +134,33 @@ class ModuleType(object):
 
     def _is_file(self, file_name):
         # type(str) -> boolean
-        """Verify if specified filename is a file
+        """Verify if specified filename is a file.
 
         Keyword Args:
             file_name (str): The filename relative to the initialized path
 
         Returns:
             boolean: Whether the file_name passed in is a file
-        """
 
+        """
 
         return os.path.isfile(os.path.join(self.path, file_name))
 
     def _is_dir(self, dir_name):
-        # type: (str) -> boolean
-        """Verify if specified dir_name is a directory
+        # type: (str) -> bool
+        """Verify if specified dir_name is a directory.
 
         Keyword Args:
             dir_name (str): The directory relative to the initialized path
 
         Returns:
             boolean: Whether the passed in dir_name is a directory
+
         """
         return os.path.isdir(os.path.join(self.path, dir_name))
 
     def _has_glob(self, glb):
-        # type: (str)-> boolean
+        # type: (str)-> bool
         """Verify if a glob of files exist.
 
         Keyword Args:
@@ -166,15 +168,17 @@ class ModuleType(object):
 
         Returns:
             boolean: Whether the passed in glob of files exist
+
         """
         return glob.glob(os.path.join(self.path, glb))
 
     def _find_kustomize_files(self):
-        # type: ()-> boolean
+        # type: ()-> bool
         """Return true if kustomize yaml file found.
 
         Returns:
             boolean: Whether the kustomize yaml exist
+
         """
         for _root, _dirnames, filenames in os.walk(self.path):
             for filename in filenames:
