@@ -69,6 +69,12 @@ where the module is housed
 accepts three different types of options: `commit`, `tag`, or `branch`. These
 respectively point the repository at the reference id specified.
 
+Type
+^^^^
+
+.. automodule:: runway.module_type.ModuleType
+
+
 .. _runway-test:
 
 Test

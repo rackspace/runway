@@ -9,6 +9,7 @@ from .util import (load_object_from_string)
 LOGGER = logging.getLogger('runway')
 
 
+# noqa pylint: disable=too-few-public-methods
 class ModuleType(object):
     """Runway configuration ``type`` settings object.
 
