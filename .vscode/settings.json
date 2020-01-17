@@ -4,5 +4,8 @@
     "python.linting.mypyEnabled": false,
     "restructuredtext.confPath": "${workspaceFolder}\\docs\\source",
     "python.linting.pylintEnabled": true,
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python"
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "cSpell.words": [
+        "cfngin"
+    ]
 }
