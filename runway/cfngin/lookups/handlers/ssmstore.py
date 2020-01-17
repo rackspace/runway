@@ -3,10 +3,9 @@ from __future__ import division
 from __future__ import absolute_import
 from builtins import str
 
-from stacker.session_cache import get_session
-
 from . import LookupHandler
 from ...util import read_value_from_path
+from ...session_cache import get_session
 
 TYPE_NAME = "ssmstore"
 

@@ -12,8 +12,8 @@ from .base import BaseCommand
 from ...config import render_parse_load as load_config
 from ...context import Context
 from ...providers.aws import default
-from ... import __version__
 from ... import session_cache
+from .... import __version__
 
 logger = logging.getLogger(__name__)
 

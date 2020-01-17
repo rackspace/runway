@@ -2,9 +2,9 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 import codecs
-from stacker.session_cache import get_session
 
 from . import LookupHandler
+from ...session_cache import get_session
 from ...util import read_value_from_path
 
 TYPE_NAME = "kms"

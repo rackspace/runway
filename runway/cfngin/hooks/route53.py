@@ -3,9 +3,9 @@ from __future__ import division
 from __future__ import absolute_import
 import logging
 
-from stacker.session_cache import get_session
+from ..session_cache import get_session
 
-from stacker.util import create_route53_zone
+from ..util import create_route53_zone
 
 logger = logging.getLogger(__name__)
 

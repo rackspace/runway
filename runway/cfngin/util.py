@@ -27,7 +27,7 @@ from yaml.constructor import ConstructorError
 from yaml.nodes import MappingNode
 
 from .awscli_yamlhelper import yaml_parse
-from stacker.session_cache import get_session
+from .session_cache import get_session
 
 logger = logging.getLogger(__name__)
 

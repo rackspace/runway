@@ -11,14 +11,14 @@ from ..dag import walk, ThreadedWalker, UnlimitedSemaphore
 from ..plan import Step, build_plan, build_graph
 
 import botocore.exceptions
-from stacker.session_cache import get_session
-from stacker.exceptions import PlanFailed
+from ..session_cache import get_session
+from ..exceptions import PlanFailed
 
 from ..status import (
     COMPLETE
 )
 
-from stacker.util import (
+from ..util import (
     ensure_s3_bucket,
     get_s3_endpoint,
 )

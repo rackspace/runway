@@ -5,7 +5,7 @@ from builtins import object
 import collections
 import logging
 
-from stacker.config import Config
+from .config import Config
 from .stack import Stack
 from .target import Target
 
