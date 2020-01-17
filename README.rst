@@ -33,7 +33,7 @@ Supported Deployment Tools
 Example
 -------
 
-A typical Runway configuration is unobtrusive – it just lists the
+A typical Runway configuration is unobtrusive - it just lists the
 deployment order and locations (regions).
 
 ::
@@ -66,13 +66,15 @@ HTTPS Download (e.g cURL)
 Use one of the endpoints below to download a single-binary executable
 version of Runway based on your operating system.
 
-================ ====================================
-Operating System Endpoint
-================ ====================================
-Linux            https://oni.ca/runway/latest/linux
-macOS            https://oni.ca/runway/latest/osx
-Windows          https://oni.ca/runway/latest/windows
-================ ====================================
++------------------+--------------------------------------+
+| Operating System | Endpoint                             |
++==================+======================================+
+| Linux            | https://oni.ca/runway/latest/linux   |
++------------------+--------------------------------------+
+| macOS            | https://oni.ca/runway/latest/osx     |
++------------------+--------------------------------------+
+| Windows          | https://oni.ca/runway/latest/windows |
++------------------+--------------------------------------+
 
 ::
 

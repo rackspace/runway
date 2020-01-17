@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - explicitly define the path/name to a variables file instead of using the default path/names
     - define variables directly in the runway config file
         - if this is used with a variables file, what is defined in the runway config takes precedence
+- `parameters` directive for modules and deployments
+    - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
 
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
@@ -26,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - imports of stacker by anything run/deployed by runway will be redirected to `runway.cfngin`
     - e.g. `from stacker.blueprints.base import Blueprint` will act as `from runway.cfngin.blueprints.base import Blueprint`
 - `.cfn` modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use a `$DEPLOY_ENVIRONMENT-$AWS_REGION.env` file if variables/lookups are used
+- modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use an environment specific variables file (.e.g `$DEPLOY_ENVIRONMENT-$AWS_REGION.env`) if `parameters` are used.
+- `environments` key now acts as an explict toggle (with a booleon value per environment name) for deploying modules to an environment
+    - support old functionallity retained for the time being by merging into `parameters`
 
 ### Removed
 - embedded `hcl`
