@@ -17,5 +17,5 @@ fi
 ${PIPENV}${PYTHON} setup.py test
 
 ${PIPENV}flake8 --exclude=runway/cfngin,runway/embedded,runway/templates runway
-find runway -name '*.py' -not -path 'runway/cnfgin*' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs ${PIPENV}pylint --rcfile=.pylintrc
+find runway -name '*.py' -not -path 'runway/cfngin*' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run ${PIPENV}pylint --rcfile=.pylintrc
 find runway/blueprints -name '*.py' | xargs ${PIPENV}pylint --disable=duplicate-code
