@@ -1,12 +1,12 @@
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
-from stacker.session_cache import get_session
 import re
 import operator
 
 from . import LookupHandler
 from ...util import read_value_from_path
+from ...session_cache import get_session
 
 TYPE_NAME = "ami"
 
@@ -24,29 +24,29 @@ class AmiLookup(LookupHandler):
     @classmethod
     def handle(cls, value, provider, **kwargs):
         """Fetch the most recent AMI Id using a filter
-    
+
         For example:
-    
+
             ${ami [<region>@]owners:self,account,amazon name_regex:serverX-[0-9]+ architecture:x64,i386}
-    
+
             The above fetches the most recent AMI where owner is self
             account or amazon and the ami name matches the regex described,
             the architecture will be either x64 or i386
-    
+
             You can also optionally specify the region in which to perform the
             AMI lookup.
-    
+
             Valid arguments:
-    
+
             owners (comma delimited) REQUIRED ONCE:
                 aws_account_id | amazon | self
-    
+
             name_regex (a regex) REQUIRED ONCE:
                 e.g. my-ubuntu-server-[0-9]+
-    
+
             executable_users (comma delimited) OPTIONAL ONCE:
                 aws_account_id | amazon | self
-    
+
             Any other arguments specified are sent as filters to the aws api
             For example, "architecture:x86_64" will add a filter
         """  # noqa

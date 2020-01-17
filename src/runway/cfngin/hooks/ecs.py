@@ -7,7 +7,7 @@ from __future__ import absolute_import
 from past.builtins import basestring
 import logging
 
-from stacker.session_cache import get_session
+from ..session_cache import get_session
 
 logger = logging.getLogger(__name__)
 

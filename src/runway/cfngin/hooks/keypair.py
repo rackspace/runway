@@ -8,9 +8,9 @@ import sys
 
 from botocore.exceptions import ClientError
 
-from stacker.session_cache import get_session
-from stacker.hooks import utils
-from stacker.ui import get_raw_input
+from ..session_cache import get_session
+from ..hooks import utils
+from ..ui import get_raw_input
 
 
 logger = logging.getLogger(__name__)

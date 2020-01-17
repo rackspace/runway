@@ -8,8 +8,7 @@ import copy
 import hashlib
 import logging
 import string
-from stacker.util import read_value_from_path
-from stacker.variables import Variable
+
 
 from troposphere import (
     Output,
@@ -18,6 +17,8 @@ from troposphere import (
     Template,
 )
 
+from ..util import read_value_from_path
+from ..variables import Variable
 from ..exceptions import (
     MissingVariable,
     UnresolvedVariable,

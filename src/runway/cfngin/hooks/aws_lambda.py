@@ -14,9 +14,9 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import botocore
 import formic
 from troposphere.awslambda import Code
-from stacker.session_cache import get_session
+from ..session_cache import get_session
 
-from stacker.util import (
+from ..util import (
     get_config_directory,
     ensure_s3_bucket,
 )

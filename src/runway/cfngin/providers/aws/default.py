@@ -22,7 +22,7 @@ from ..base import BaseProvider
 from ... import exceptions
 from ...ui import ui
 from ...util import parse_cloudformation_template
-from stacker.session_cache import get_session
+from ...session_cache import get_session
 
 from ...actions.diff import (
     DictValue,

@@ -5,7 +5,6 @@ from builtins import input
 import copy
 import logging
 
-from stacker.session_cache import get_session
 from botocore.exceptions import ClientError
 
 from awacs.aws import Statement, Allow, Policy
@@ -13,6 +12,7 @@ from awacs import ecs
 from awacs.helpers.trust import get_ecs_assumerole_policy
 
 from . import utils
+from ..session_cache import get_session
 
 logger = logging.getLogger(__name__)
 

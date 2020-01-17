@@ -6,7 +6,7 @@ import logging
 import os
 from subprocess import PIPE, Popen
 
-from stacker.exceptions import ImproperlyConfigured
+from ..exceptions import ImproperlyConfigured
 
 logger = logging.getLogger(__name__)
 
