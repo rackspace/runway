@@ -526,7 +526,7 @@ class Config(ConfigComponent):
             ignore_git_branch: true
             tests:
               - name: example
-                type: static
+                type: script
                 args:
                   commands:
                     - echo "Hello world"
