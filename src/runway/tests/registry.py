@@ -2,7 +2,7 @@
 # modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
 from past.builtins import basestring
 
-from runway.embedded.stacker.util import load_object_from_string
+from ..cfngin.util import load_object_from_string
 
 from .handlers import script
 from .handlers import cfn_lint

@@ -31,7 +31,7 @@ INSTALL_REQUIRES = [
     'typing;python_version<"3.5"',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # embedded stacker is v1.7.0
+    # cfngin is stacker v1.7.0
     # with the LICENSE file added to its root folder
     # and the following patches applied
     # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
@@ -40,7 +40,6 @@ INSTALL_REQUIRES = [
     # and the following files/folders deleted:
     #   * tests
     #   * blueprints/testutil.py
-    # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
     'stacker~=1.7',
     # stacker's troposphere dep is more loose, but we need to ensure we use a
     # sufficiently recent version for compatibility embedded blueprints
