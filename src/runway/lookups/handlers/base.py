@@ -17,8 +17,8 @@ arguments are read as strings.
 .. rubric:: Example
 .. code-block:: yaml
 
-    ${var:my_query::default=true, transform=bool}
-    ${env:MY_QUERY::default=1,transform=bool}
+    ${var my_query::default=true, transform=bool}
+    ${env MY_QUERY::default=1,transform=bool}
 
 Each Lookup may have their own, specific arguments that it uses to modify its
 functionality or the value it returns. There is also a common set of arguments
@@ -45,8 +45,8 @@ Common Arguments
 
   deployments:
     - environments:
-        some_variable: ${var:some_value::default=my_value}
-        comma_list: ${var:my_list::default=undefined, transform=str}
+        some_variable: ${var some_value::default=my_value}
+        comma_list: ${var my_list::default=undefined, transform=str}
 
 """
 from typing import (Any, Dict, Tuple,  # pylint: disable=unused-import

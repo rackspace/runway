@@ -466,12 +466,13 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 be used to apply the same role to all environment.
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
-            environments (Optional[Dict[str, Dict[str, Any]]]): **[DEPRECATED:
-                in favor of parameters]** Mapping for module level variables
-                to environment names. When run, the module variables defined
-                here are merged with those in the ``.env``/``.tfenv``/
-                environment config file. If this is defined, ``.env`` files can
-                be omitted and the module will still be processed.
+            environments (Optional[Dict[str, Dict[str, Any]]]): Optional
+                mapping of environment names to a booleon value used to
+                explicitly deploy or not deploy in an environment. This
+                can be used when an environment specific variables file
+                and parameters are not needed to force a module to deploy
+                anyway or, explicitly skip a module even if a file or
+                parameters are found.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment

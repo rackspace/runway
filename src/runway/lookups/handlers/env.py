@@ -21,9 +21,9 @@ if a default value was not provided.
     - modules:
         - path: sampleapp.cfn
           environment:
-            creator: ${env:USER}
+            creator: ${env USER}
       env_vars:
-        ENVIRONMENT: ${env:DEPLOY_ENVIRONMENT::default=default}
+        ENVIRONMENT: ${env DEPLOY_ENVIRONMENT::default=default}
 
 """
 # pylint: disable=arguments-differ

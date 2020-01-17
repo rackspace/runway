@@ -138,23 +138,23 @@ Sample
           # to revert the AWS credentials in the environment to their previous
           # values
           # post_deploy_env_revert: true
-          arn: ${var:assume_role.${env:DEPLOY_ENVIRONMENT}}
+          arn: ${var assume_role.${env DEPLOY_ENVIRONMENT}}
           # duration: 7200
 
         # Parameters (e.g. values for CFN .env file, TF .tfvars) can
         # be provided at the deployment level -- the options will be applied to
         # every module
         parameters:
-          region: ${env:AWS_REGION}
-          image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
+          region: ${env AWS_REGION}
+          image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
 
         # AWS account alias can be provided to have Runway verify the current
         # assumed role / credentials match the necessary account
-        account_alias: ${var:account_alias.${env:DEPLOY_ENVIRONMENT}}  # optional
+        account_alias: ${var account_alias.${env DEPLOY_ENVIRONMENT}}  # optional
 
         # AWS account id can be provided to have Runway verify the current
         # assumed role / credentials match the necessary account
-        account_id: ${var:account_id.${env:DEPLOY_ENVIRONMENT}}  # optional
+        account_id: ${var account_id.${env DEPLOY_ENVIRONMENT}}  # optional
 
         # env_vars set OS environment variables for the module (not logical
         # environment values like those in a CFN .env or TF .tfvars file).
@@ -162,8 +162,8 @@ Sample
         # tools that absolutely require it, like Terraform's
         # TF_PLUGIN_CACHE_DIR option)
         env_vars:  # optional environment variable overrides
-          AWS_PROFILE: ${var:envvars.profile.${env:DEPLOY_ENVIRONMENT}}
-          APP_PATH: ${var:envvars.app_path}
+          AWS_PROFILE: ${var envvars.profile.${env DEPLOY_ENVIRONMENT}}
+          APP_PATH: ${var envvars.app_path}
           ANOTHER_VAR: foo
 
       # Start of another deployment
@@ -173,8 +173,8 @@ Sample
             # be provided for a single module (replacing or supplementing the
             # use of environment/tfvars/etc files in the module)
             parameters:
-              region: ${env:AWS_REGION}
-              image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
+              region: ${env AWS_REGION}
+              image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
             tags:  # Modules can optionally have tags.
               # This is a list of strings that can be "targeted"
               # by passing arguments to the deploy/destroy command.

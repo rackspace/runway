@@ -123,7 +123,7 @@ class TestModuleDefinition(object):
         assert not module.class_path
         assert module.env_vars == {'MY_USERNAME_MODULE': 'test'}
         assert module.environments == {'module_test_param': 'test'}
-        assert module.name == '${var:test_path}app.cfn'
+        assert module.name == '${var test_path}app.cfn'
         assert module.options == {'sample_module_option': 'test.module.options'}
         assert module.path == 'sampleapp.cfn'
         assert module.tags == {}

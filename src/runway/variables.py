@@ -159,7 +159,7 @@ class VariableValue(object):
 
         tokens = VariableValueConcatenation([
             VariableValueLiteral(t)
-            for t in re.split(r'(\$\{|\}|:)', input_object)  # ${ or : or }
+            for t in re.split(r'(\$\{|\}|\s+)', input_object)  # ${ or space or }
         ])
 
         opener = '${'

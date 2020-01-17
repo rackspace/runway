@@ -88,7 +88,7 @@ and/or
       - parameters:
           namespace: contoso-${env DEPLOY_ENVIRONMENT}
           foo: bar
-          some_value: ${var:some_map.${env DEPLOY_ENVIRONMENT}}
+          some_value: ${var some_map.${env DEPLOY_ENVIRONMENT}}
         modules:
           - mycfnstacks
 
