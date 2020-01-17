@@ -1,4 +1,5 @@
 .. _CFNgin: ../cfngin/index.html
+.. _Lookups: lookups.html
 
 .. _mod-cfn:
 
@@ -54,7 +55,12 @@ The config yaml supports many more features; see the full CFNgin_ documentation 
 Environment Values Via Runway Deployment/Module Options
 ---------------------------------------------------------
 
-In addition or in place of the environment file(s), environment values can be provided via deployment and module arguments.
+In addition or in place of the environment file(s), deploy environment specific
+values can be provided via deployment and module options as ``parameters``. It
+is recommended to use `Lookups`_ in the ``parameters`` section to
+assist in selecting the appropriate values for the deploy environment and/or
+region being deployed to but, this is not a requirement if the value will
+remain the same.
 
 
 Top-level Runway Config
@@ -67,10 +73,10 @@ Top-level Runway Config
     deployments:
       - modules:
           - path: mycfnstacks
-            environments:
-              dev:
-                namespace: contoso-dev
-                foo: bar
+            parameters:
+              namespace: contoso-${env DEPLOY_ENVIRONMENT}
+              foo: bar
+              some_value: ${var some_map.${env DEPLOY_ENVIRONMENT}}
 
 and/or
 
@@ -79,10 +85,10 @@ and/or
     ---
 
     deployments:
-      - environments:
-          dev:
-            namespace: contoso-dev
-            foo: bar
+      - parameters:
+          namespace: contoso-${env DEPLOY_ENVIRONMENT}
+          foo: bar
+          some_value: ${var:some_map.${env DEPLOY_ENVIRONMENT}}
         modules:
           - mycfnstacks
 
@@ -90,12 +96,13 @@ and/or
 In Module Directory
 ~~~~~~~~~~~~~~~~~~~
 
+.. important: `Lookups`_ are not supported in this file.
+
 ::
 
     ---
-    environments:
-      dev:
-        namespace: contoso-dev
-        foo: bar
+    parameters:
+      namespace: contoso-dev
+      foo: bar
 
 (in ``runway.module.yml``)

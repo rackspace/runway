@@ -36,7 +36,7 @@ class ConfigComponent(MutableMap):
 
     """
 
-    SUPPORTS_VARIABLES = ['env_vars', 'environments']  # type: List[str]
+    SUPPORTS_VARIABLES = ['env_vars', 'environments', 'parameters']  # type: List[str]
     PRE_PROCESS_VARIABLES = []  # type: List[str]
 
     @property
@@ -76,6 +76,16 @@ class ConfigComponent(MutableMap):
         if isinstance(value, dict):
             return value
         raise ValueError('{}.environments is of type {}; expected type '
+                         'of dict'.format(self.name, type(value)))
+
+    @property
+    def parameters(self):
+        # type: () -> Dict[str, Any]
+        """Access the value of an attribute that supports variables."""
+        value = self._parameters.value  # pylint: disable=no-member
+        if isinstance(value, dict):
+            return value
+        raise ValueError('{}.parameters is of type {}; expected type '
                          'of dict'.format(self.name, type(value)))
 
     def get(self, key, default=None):
@@ -146,12 +156,12 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     | ``.k8s``         | `Kubernetes`_                                 |
     +------------------+-----------------------------------------------+
 
-    A module is only deployed if there is a corresponding env/config
-    present. This can take the form of either a file in the module folder
-    or the ``environments`` option being defined. The naming format
-    varies per-module type. See
-    :ref:`Module Configurations<module-configurations>` for acceptable
-    env/config file name formats.
+    A module is only deployed if there is a corresponding environment file
+    present or parameters are provided. This can take the form of either a file
+    in the module folder or the ``parameters`` option being defined. The naming
+    format varies per-module type.
+    See :ref:`Module Configurations<module-configurations>` for acceptable
+    environment file name formats.
 
     Modules can be defined as a string or a mapping. The minimum
     requirement for a module is a string that is equal to the name of
@@ -167,10 +177,11 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
               - path: my-module.cfn  # is the same as this
 
     Using a map to define a module provides the ability to specify
-    per-module ``options``, environment values, tags, and even a custom
-    class for processing the module. The options that can be used with
-    each module vary. For detailed information about module-specific
-    options, see :ref:`Module Configurations<module-configurations>`.
+    per-module ``options``, parameters, environment variables,tags,
+    and even a custom class for processing the module. The options that
+    can be used with each module vary. For detailed information about
+    module-specific options, see
+    :ref:`Module Configurations<module-configurations>`.
 
     Example:
       .. code-block:: yaml
@@ -179,7 +190,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
           - modules:
               - name: my-module
                 path: my-module.tf
-                environments:
+                parameters:
                   image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
                 tags:
                   - app:example
@@ -209,20 +220,21 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
               - servicea.cfn  # any normal module option can be used here
               - path: serviceb.cfn
               - path: servicec.cfn
-                environments:
+                parameters:
                   count: ${var:count.${env:DEPLOY_ENVIRONMENT}}
             - frontend.tf
 
     """
 
-    SUPPORTS_VARIABLES = ['class_path', 'env_vars', 'environments', 'options',
-                          'path']
+    SUPPORTS_VARIABLES = ['class_path', 'env_vars', 'environments',
+                          'options', 'parameters', 'path']
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  name,  # type: str
                  path,  # type: str
                  class_path=None,  # type: Optional[str]
                  environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
+                 parameters=None,  # type: Optional[Dict[str, Any]]
                  env_vars=None,  # type: Optional[Dict[str, Dict[str, Any]]]
                  options=None,  # type: Optional[Dict[str, Any]]
                  tags=None,  # type: Optional[Dict[str, str]]
@@ -242,14 +254,13 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 Also used for static site deployments. See
                 :ref:`Module Configurations<module-configurations>` for
                 detailed usage.
-            environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
-                module level variables to environment names or omit the
-                environment name to apply to all environments. When run, the
-                module variables defined here are merged with those in the
-                ``.env``/``.tfenv``/environment config file. If this is
-                defined, ``.env`` files can be omitted and the module will
-                still be processed. Takes precedence over values set at the
-                deployment-level.
+            environments (Optional[Dict[str, Dict[str, Any]]]): Optional
+                mapping of environment names to a booleon value used to
+                explicitly deploy or not deploy in an environment. This
+                can be used when an environment specific variables file
+                and parameters are not needed to force a module to deploy
+                anyway or, explicitly skip a module even if a file or
+                parameters are found.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
@@ -259,6 +270,12 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 See :ref:`Module Configurations<module-configurations>`
                 for detailed usage. Takes precedence over values set at the
                 deployment-level.
+            parameters (Optional(Dict[str, Any])): Module level parameters that
+                are akin to a `CloudFormation`_ parameter in functionality.
+                These can be used to pass variable values to your modules in
+                place of a ``.env``/``.tfenv``/environment config file.
+                Through the use of `Lookups`_, the value can differ per
+                deploy environment, region, etc.
             tags (Optional[Dict[str, str]]): Module tags used to select
                 which modules to process using CLI arguments.
                 (``--tag <tag>...``)
@@ -281,6 +298,8 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         |  ``env_vars``       | `env lookup`_, `var lookup`_                  |
         +---------------------+-----------------------------------------------+
         |  ``options``        | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
+        |  ``parameters``     | `env lookup`_, `var lookup`_                  |
         +---------------------+-----------------------------------------------+
         |  ``tags``           | None                                          |
         +---------------------+-----------------------------------------------+
@@ -307,6 +326,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         self._class_path = Variable(name + '.class_path', class_path)
         self._environments = Variable(name + '.environments',
                                       environments or {})
+        self._parameters = Variable(name + '.parameters', parameters or {})
         self._env_vars = Variable(name + '.env_vars', env_vars or {})
         self._options = Variable(name + '.options', options or {})
         self.tags = tags or {}
@@ -373,6 +393,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                                environments=mod.pop('environments', {}),
                                env_vars=mod.pop('env_vars', {}),
                                options=mod.pop('options', {}),
+                               parameters=mod.pop('parameters', {}),
                                tags=mod.pop('tags', {}),
                                child_modules=child_modules))
             if mod:
@@ -412,7 +433,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               - us-east-1
             account_id: ${var:account_ids}  # optional
             assume_role: ${var:assume_role}  # optional
-            environments:  # optional
+            parameters:  # optional
                 region: ${env:AWS_REGION}
                 image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
             env_vars:  # optional environment variable overrides
@@ -423,7 +444,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
     SUPPORTS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
                           'env_vars', 'environments', 'module_options',
-                          'regions', 'parallel_regions']
+                          'regions', 'parallel_regions', 'parameters']
     PRE_PROCESS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
                              'env_vars', 'regions']
 
@@ -445,13 +466,12 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 be used to apply the same role to all environment.
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
-            environments (Optional[Dict[str, Dict[str, Any]]]): Mapping for
-                module level variables to environment names or omit the
-                environment name to apply to all environments. When run, the
-                module variables defined here are merged with those in the
-                ``.env``/``.tfenv``/environment config file. If this is
-                defined, ``.env`` files can be omitted and the module will
-                still be processed.
+            environments (Optional[Dict[str, Dict[str, Any]]]): **[DEPRECATED:
+                in favor of parameters]** Mapping for module level variables
+                to environment names. When run, the module variables defined
+                here are merged with those in the ``.env``/``.tfenv``/
+                environment config file. If this is defined, ``.env`` files can
+                be omitted and the module will still be processed.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
@@ -475,6 +495,12 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 processed one at a time. This can be used in tandom with
                 **parallel modules**. ``assume_role.post_deploy_env_revert``
                 will always be ``true`` when run in parallel.
+            parameters (Optional(Dict[str, Any])): Module level parameters that
+                are akin to a `CloudFormation`_ parameter in functionality.
+                These can be used to pass variable values to your modules in
+                place of a ``.env``/``.tfenv``/environment config file.
+                Through the use of `Lookups`_, the value can differ per
+                deploy environment, region, etc.
 
         .. rubric:: Lookup Resolution
 
@@ -529,6 +555,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         |                     | ``AWS_DEFAULT_REGION`` will not have been set |
         |                     | by Runway yet), `var lookup`_                 |
         +---------------------+-----------------------------------------------+
+        |  ``parameters``     | `env lookup`_, `var lookup`_                  |
+        +---------------------+-----------------------------------------------+
 
         References:
             - :class:`module<runway.config.ModuleDefinition>`
@@ -553,6 +581,9 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         )  # type: Variable
         self._environments = Variable(
             self.name + '.environments', deployment.pop('environments', {})
+        )  # type: Variable
+        self._parameters = Variable(
+            self.name + '.parameters', deployment.pop('parameters', {})
         )  # type: Variable
         self._env_vars = Variable(self.name + '.env_vars', deployment.pop(
             'env_vars', deployment.pop('env-vars', {})

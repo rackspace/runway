@@ -534,7 +534,7 @@ class ModulesCommand(RunwayCommand):
                 to be deployed.
             deployment (:class:`runway.config.DeploymentDefinition`): The
                 deployment the module belongs to. Used to get options,
-                environments, and env_vars from the deployment level.
+                environments, parameters, and env_vars from the deployment level.
             context: (:class:`runway.context.Context`): Current context instance.
 
         """
@@ -542,7 +542,8 @@ class ModulesCommand(RunwayCommand):
         module.resolve(context, self.runway_vars)
         module_opts = {
             'environments': deployment.environments.copy(),
-            'options': deployment.module_options.copy()
+            'options': deployment.module_options.copy(),
+            'parameters': deployment.parameters.copy()
         }
 
         path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))
@@ -550,13 +551,24 @@ class ModulesCommand(RunwayCommand):
         module_opts = merge_dicts(module_opts, module.data)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
+        env_environ = module_opts['environments'].get(context.env_name, {})
+        if isinstance(env_environ, bool) and not env_environ:
+            LOGGER.info("")
+            LOGGER.info(
+                "---- Skipping module '%s'; explicitly disabled ----------"
+            )
+            return
+        if isinstance(env_environ, dict):  # legacy support
+            module_opts['parameters'].update(env_environ)
+        else:
+            module_opts['parameters'].update({'_' + context.env_name: env_environ})
+
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
                     module.path,
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
-        module_opts['_using_vars'] = bool(self.runway_vars)
         if module_opts.get('env_vars'):
             module_env_vars = merge_nested_environment_dicts(
                 module_opts.get('env_vars'), env_name=context.env_name,

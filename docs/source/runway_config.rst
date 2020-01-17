@@ -6,6 +6,7 @@
 .. _Troposphere: https://github.com/cloudtools/troposphere
 .. _Kubernetes: https://kubernetes.io/
 
+.. _Lookups: lookups.html
 .. _env lookup: lookups.html#env
 .. _var lookup: lookups.html#var
 
@@ -34,12 +35,12 @@ Module
 .. autoclass:: runway.config.ModuleDefinition
 
 Path
-^^^^
+----
 
 .. automodule:: runway.path.Path
 
 Git
----
+~~~
 
 Git remote resources can be used as modules for your Runway project. Below is
 an example of git remote path.
@@ -112,14 +113,12 @@ Sample
       - type: yamllint  # not all tests accept arguments
 
     # Order that modules will be deployed. A module will be skipped if a
-    # corresponding env/config is not present (either in a file in its folder
-    # or via an environments option specified here on the deployment or
-    # module)
+    # corresponding environment file is not present or "enabled" is false.
     # E.g., for cfn modules, if
     # 1) a dev-us-west-2.env file is not in the 'app.cfn' folder when running
     #    a dev deployment of 'app' to us-west-2,
     # and
-    # 2) dev is not specified under the deployment or module's environments
+    # 2) "enabled" is false under the deployment or module
     #
     # then it will be skipped.
 
@@ -142,10 +141,10 @@ Sample
           arn: ${var:assume_role.${env:DEPLOY_ENVIRONMENT}}
           # duration: 7200
 
-        # Environment options (e.g. values for CFN .env file, TF .tfvars) can
+        # Parameters (e.g. values for CFN .env file, TF .tfvars) can
         # be provided at the deployment level -- the options will be applied to
         # every module
-        environments:
+        parameters:
           region: ${env:AWS_REGION}
           image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
 
@@ -170,10 +169,10 @@ Sample
       # Start of another deployment
       - modules:
           - path: myapp.cfn
-            # Environment options (e.g. values for CFN .env file, TF .tfvars) can
+            # Parameters (e.g. values for CFN .env file, TF .tfvars) can
             # be provided for a single module (replacing or supplementing the
             # use of environment/tfvars/etc files in the module)
-            environments:
+            parameters:
               region: ${env:AWS_REGION}
               image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
             tags:  # Modules can optionally have tags.

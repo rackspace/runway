@@ -31,7 +31,7 @@ class StaticSite(RunwayModule):
 
         ensure_valid_environment_config(
             name,
-            self.options.get('environments', {}).get(self.context.env_name, {})
+            self.options['parameters']
         )
 
         module_dir = tempfile.mkdtemp()
@@ -83,25 +83,22 @@ class StaticSite(RunwayModule):
             'WAFWebACL': '${default staticsite_web_acl::undefined}'
         }
 
-        env = self.options.get('environments', {}).get(self.context.env_name, {})
+        parameters = self.options['parameters']
 
-        if env.get('staticsite_acmcert_ssm_param'):
+        if parameters.get('staticsite_acmcert_ssm_param'):
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
 
-        if env.get('staticsite_enable_cf_logging', True):
+        if parameters.get('staticsite_enable_cf_logging', True):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % name  # noqa pylint: disable=line-too-long
 
-        if env.get('staticsite_cf_disable', False):
+        if parameters.get('staticsite_cf_disable', False):
             site_stack_variables['DisableCloudFront'] = "true"
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
         for i in ['custom_error_responses', 'lambda_function_associations']:
-            if env.get("staticsite_%s" % i):
-                site_stack_variables[i] = env.get("staticsite_%s" % i)
-                self.options.get('environments',
-                                 {}).get(self.context.env_name,
-                                         {}).pop("staticsite_%s" % i)
+            if parameters.get("staticsite_%s" % i):
+                site_stack_variables[i] = parameters.pop("staticsite_%s" % i)
 
         with open(os.path.join(module_dir, '02-staticsite.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
@@ -153,7 +150,7 @@ class StaticSite(RunwayModule):
 
     def plan(self):
         """Create website CFN module and run stacker diff."""
-        if self.options.get('environments', {}).get(self.context.env_name):
+        if self.options['parameters']:
             self.setup_website_module(command='plan')
         else:
             LOGGER.info("Skipping staticsite plan of %s; no environment "
@@ -162,9 +159,9 @@ class StaticSite(RunwayModule):
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
-        env = self.options.get('environments', {}).get(self.context.env_name)
-        if env:
-            if env.get('staticsite_cf_disable', False) is False:
+        parameters = self.options['parameters']
+        if parameters:
+            if parameters.get('staticsite_cf_disable', False) is False:
                 msg = ("Please Note: Initial creation or updates to distribution settings "
                        "(e.g. url rewrites) will take quite a while (up to an hour). "
                        "Unless you receive an error your deployment is still running.")
@@ -178,7 +175,7 @@ class StaticSite(RunwayModule):
 
     def destroy(self):
         """Create website CFN module and run stacker destroy."""
-        if self.options.get('environments', {}).get(self.context.env_name):
+        if self.options['parameters']:
             self.setup_website_module(command='destroy')
         else:
             LOGGER.info("Skipping staticsite destroy of %s; no environment "
