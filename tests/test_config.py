@@ -14,7 +14,7 @@ from runway.config import TestDefinition as ConfigTestDefinition
 from runway.util import MutableMap
 
 
-YAML_FIXTURES = ['config.runway.yml', 'config.variables.runway.yml']
+YAML_FIXTURES = ['config.runway.yml', 'config.runway.variables.yml']
 ENV_VARS = {
     'AWS_REGION': 'us-east-1',
     'DEPLOY_ENVIRONMENT': 'test',
@@ -43,7 +43,7 @@ class TestDeploymentDefinition(object):
     def test_pre_process_resolve(self, yaml_fixtures):
         """Test that pre-process resolution only resolves specific vars."""
         raw_config = deepcopy(yaml_fixtures['config.runway.yml']['deployments'])
-        raw_vars = deepcopy(yaml_fixtures['config.variables.runway.yml'])
+        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
         deployment = DeploymentDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -67,7 +67,7 @@ class TestDeploymentDefinition(object):
     def test_resolve(self, yaml_fixtures):
         """Test full resolution of variable attributes."""
         raw_config = deepcopy(yaml_fixtures['config.runway.yml']['deployments'])
-        raw_vars = deepcopy(yaml_fixtures['config.variables.runway.yml'])
+        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
         deployment = DeploymentDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -111,7 +111,7 @@ class TestModuleDefinition(object):
         raw_config = deepcopy(
             yaml_fixtures['config.runway.yml']['deployments'][0]['modules']
         )
-        raw_vars = deepcopy(yaml_fixtures['config.variables.runway.yml'])
+        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
         module = ModuleDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -145,7 +145,7 @@ class TestTestDefinition(object):
     def test_resolve(self, yaml_fixtures):
         """Test full resolution of variable attributes."""
         raw_config = deepcopy(yaml_fixtures['config.runway.yml']['tests'])
-        raw_vars = deepcopy(yaml_fixtures['config.variables.runway.yml'])
+        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
         test = ConfigTestDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -170,7 +170,7 @@ class TestVariablesDefinition(object):
         """
         with NamedTemporaryFile(mode='w+', suffix='.yml') as var_file:
             var_file.write(
-                yaml.safe_dump(yaml_fixtures['config.variables.runway.yml'])
+                yaml.safe_dump(yaml_fixtures['config.runway.variables.yml'])
             )
             var_file.seek(0)  # return curser to the top of the file
             result = VariablesDefinition.load(

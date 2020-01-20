@@ -868,8 +868,8 @@ class VariablesDefinition(MutableMap):
     in the config file by providing the `var lookup`_ to any keyword/directive
     that supports :ref:`Lookups <Lookups>`.
 
-    By default, Runway will look for and load a ``variables.runway.yml`` or
-    ``variables.runway.yaml`` file that is in the same directory as the
+    By default, Runway will look for and load a ``runway.variables.yml`` or
+    ``runway.variables.yaml`` file that is in the same directory as the
     Runway config file. The file path and name of the file can optionally be
     defined in the config file. If the file path is explicitly provided and
     the file can't be found, an error will be raised.
@@ -900,7 +900,7 @@ class VariablesDefinition(MutableMap):
 
     """
 
-    default_names = ['variables.runway.yml', 'variables.runway.yaml']
+    default_names = ['runway.variables.yml', 'runway.variables.yaml']
 
     def __init__(self, file_path=None, sys_path=None, **kwargs):
         """.. Not really needed but cleans up the docs.
