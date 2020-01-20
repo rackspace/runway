@@ -22,7 +22,7 @@ from ..context import Context
 from ..path import Path
 from ..util import (
     change_dir, load_object_from_string, merge_dicts,
-    merge_nested_environment_dicts
+    merge_nested_environment_dicts, extract_boto_args_from_env
 )
 
 if sys.version_info[0] > 2:
@@ -320,6 +320,54 @@ def validate_account_credentials(deployment, context):
                                account_alias)
 
 
+def validate_environment(module_name, env_def, env_vars):
+    """Check if an environment should be deployed to.
+
+    Args:
+        module_name (str): Name of the module being validated.
+        env_def (Union[bool, str, List[str]]): Environment definition from
+            the config file. Can be bool, string of "$ACCOUNT_ID/$REGION",
+            or a list of strings.
+        env_vars (Dict[str, str]): Environment variables.
+
+    Returns:
+        Booleon value of wether to deploy or not.
+
+    """
+    if isinstance(env_def, bool):  # explicit enable or disable
+        if env_def:
+            LOGGER.debug('Module \'%s\' explicitly enabled', module_name)
+            return True
+
+        LOGGER.info('')
+        LOGGER.info(
+            '---- Skipping module \'%s\'; explicitly disabled ----------',
+            module_name
+        )
+        return False
+
+    if isinstance(env_def, (list, six.string_types)):
+        boto_args = extract_boto_args_from_env(env_vars)
+        sts_client = boto3.client('sts', **boto_args)
+        current_env = '{}/{}'.format(
+            sts_client.get_caller_identity()['Account'],
+            env_vars['AWS_DEFAULT_REGION']
+        )
+
+        if current_env in env_def:
+            LOGGER.debug('Current environment \'%s\' found in %s for module \'%s\'',
+                         current_env, str(env_def), module_name)
+            return True
+        LOGGER.info('')
+        LOGGER.info(
+            '---- Skipping module \'%s\'; account_id/region mismatch ---',
+            module_name
+        )
+        return False
+    raise TypeError('env_def of type "%s" provided to validate_environment; '
+                    'expected type of bool, list, or str' % type(env_def))
+
+
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
@@ -551,17 +599,19 @@ class ModulesCommand(RunwayCommand):
         module_opts = merge_dicts(module_opts, module.data)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
-        env_environ = module_opts['environments'].get(context.env_name, {})
-        if isinstance(env_environ, bool) and not env_environ:
-            LOGGER.info("")
-            LOGGER.info(
-                "---- Skipping module '%s'; explicitly disabled ----------"
-            )
-            return
-        if isinstance(env_environ, dict):  # legacy support
-            module_opts['parameters'].update(env_environ)
+        module_opts['environment'] = module_opts['environments'].get(
+            context.env_name, {}
+        )
+        if isinstance(module_opts['environment'], dict):  # legacy support
+            module_opts['parameters'].update(module_opts['environment'])
+            if module_opts['parameters']:
+                # deploy if env is empty but params are provided
+                module_opts['environment'] = True
         else:
-            module_opts['parameters'].update({'_' + context.env_name: env_environ})
+            if not validate_environment(module.name,
+                                        module_opts['environment'],
+                                        context.env_vars):
+                return  # skip if env validation fails
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",

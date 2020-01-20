@@ -5,8 +5,10 @@ from copy import deepcopy
 from mock import patch
 import yaml
 
+from moto import mock_sts
+
 from runway.commands.modules_command import (
-    ModulesCommand, select_modules_to_run
+    select_modules_to_run, validate_environment
 )
 
 
@@ -20,14 +22,14 @@ def module_tag_config():
         return yaml.safe_load(stream)
 
 
-class ModulesCommandTestCase(unittest.TestCase):
     """Test runway/commands/modules_command.py."""
+class ModulesCommandTestCase(unittest.TestCase):
 
     tag_yml = module_tag_config()
 
     def test_select_modules_to_run_tag_test_app(self):
         """tag=[app:test-app] should return 2 modules."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
+        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
         tags = ['app:test-app']
 
         result = [
@@ -42,7 +44,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_tag_iac(self):
         """tag=[tier:iac] should return 2 modules."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
+        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
         tags = ['tier:iac']
 
         result = [
@@ -57,7 +59,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_two_tags(self):
         """tag=[tier:iac, app:test-app] should return 1 module."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
+        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
         tags = ['tier:iac', 'app:test-app']
         result = [
             select_modules_to_run(deployment, tags)
@@ -70,7 +72,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_no_tags(self):
         """tag=[] should request input."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
+        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
         user_input = ['1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
@@ -82,7 +84,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_no_tags_ci(self):
         """tag=[], ci=true should not request input and return everything."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
+        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
         result = [
             select_modules_to_run(deployment, [], ci='true')
             for deployment in config['deployments']
@@ -91,7 +93,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_destroy(self):
         """command=destroy should only prompt with no tag of ci if one module."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
+        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
         user_input = ['y', '1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
@@ -117,3 +119,46 @@ class ModulesCommandTestCase(unittest.TestCase):
         )
         self.assertEqual(result_tag_ci['modules'],
                          config['deployments'][0]['modules'])
+
+
+class TestValidateEnvironment(object):
+    """Tests for validate_environment."""
+
+    MOCK_ACCOUNT_ID = '123456789012'
+
+    def test_bool_match(self):
+        """True bool should match."""
+        assert validate_environment('test_module', True, os.environ)
+
+    def test_bool_not_match(self):
+        """False bool should not match."""
+        assert not validate_environment('test_module', False, os.environ)
+
+    @mock_sts
+    def test_list_match(self):
+        """Env in list should match."""
+        assert validate_environment('test_module',
+                                    [self.MOCK_ACCOUNT_ID + '/us-east-1'],
+                                    os.environ)
+
+    @mock_sts
+    def test_list_not_match(self):
+        """Env not in list should not match."""
+        assert not validate_environment('test_module',
+                                        [self.MOCK_ACCOUNT_ID + '/us-east-2'],
+                                        os.environ)
+
+    @mock_sts
+    def test_str_match(self):
+        """Env in string should match."""
+        assert validate_environment('test_module',
+                                    self.MOCK_ACCOUNT_ID + '/us-east-1',
+                                    os.environ)
+
+    @mock_sts
+    def test_str_not_match(self):
+        """Env not in string should not match."""
+        assert not validate_environment('test_module',
+                                        self.MOCK_ACCOUNT_ID + '/us-east-2',
+                                        os.environ)
+

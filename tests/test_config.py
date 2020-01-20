@@ -20,7 +20,6 @@ ENV_VARS = {
     'DEPLOY_ENVIRONMENT': 'test',
     'USER': 'test'
 }
-# pytestmark = pytest.mark.usefixtures('deploy_env_test_module')
 
 
 class TestDeploymentDefinition(object):

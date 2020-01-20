@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - e.g. `from stacker.blueprints.base import Blueprint` will act as `from runway.cfngin.blueprints.base import Blueprint`
 - `.cfn` modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use a `$DEPLOY_ENVIRONMENT-$AWS_REGION.env` file if variables/lookups are used
 - modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use an environment specific variables file (.e.g `$DEPLOY_ENVIRONMENT-$AWS_REGION.env`) if `parameters` are used.
-- `environments` key now acts as an explict toggle (with a booleon value per environment name) for deploying modules to an environment
+- `environments` key now acts as an explict toggle (with a booleon value per environment name, string of `$ACCOUNT_ID/$REGION`, or list of strings) for deploying modules to an environment
     - support old functionallity retained for the time being by merging into `parameters`
 
 ### Removed

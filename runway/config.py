@@ -190,6 +190,12 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
           - modules:
               - name: my-module
                 path: my-module.tf
+                environments:
+                  prod: 111111111111/us-east-1
+                  dev:
+                    - 222222222222/us-east-1
+                    - 333333333333/us-east-1
+                  lab: true
                 parameters:
                   image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
                 tags:
@@ -260,7 +266,10 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 can be used when an environment specific variables file
                 and parameters are not needed to force a module to deploy
                 anyway or, explicitly skip a module even if a file or
-                parameters are found.
+                parameters are found. The mapping can also have a string
+                (or list of strings) value of $ACCOUNT_ID/$REGION to lock
+                an environment to specific regions in a specific accounts.
+                If it matches, it will act as an explicit deploy.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
@@ -431,6 +440,12 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               - path: my-other-modules.cfn
             regions:
               - us-east-1
+            environments:
+              prod: 111111111111/us-east-1
+              dev:
+                - 222222222222/us-east-1
+                - 333333333333/us-east-1
+              lab: true
             account_id: ${var:account_ids}  # optional
             assume_role: ${var:assume_role}  # optional
             parameters:  # optional
@@ -472,7 +487,10 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 can be used when an environment specific variables file
                 and parameters are not needed to force a module to deploy
                 anyway or, explicitly skip a module even if a file or
-                parameters are found.
+                parameters are found. The mapping can also have a string
+                (or list of strings) value of $ACCOUNT_ID/$REGION to lock
+                an environment to specific regions in a specific accounts.
+                If it matches, it will act as an explicit deploy.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment

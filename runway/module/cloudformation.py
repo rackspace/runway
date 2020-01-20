@@ -122,13 +122,12 @@ class CloudFormation(RunwayModule):
         )
 
         for key, val in self.options['parameters'].items():
-            if key != '_' + self.context.env_name:
-                stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
+            stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
 
         if stacker_env_file_present:
             stacker_cmd.append(stacker_env_file)
 
-        if not (stacker_env_file_present or self.options['parameters']):
+        if not (stacker_env_file_present or self.options['environment']):
             response['skipped_configs'] = True
             LOGGER.info(
                 "Skipping stacker %s; no environment "

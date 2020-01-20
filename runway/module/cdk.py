@@ -5,37 +5,15 @@ import os
 import subprocess
 import sys
 
-import boto3
-import six
-
 from . import (
     RunwayModule, format_npm_command_for_logging, generate_node_command,
     run_module_command, run_npm_install, warn_on_boto_env_vars
 )
 from ..util import (
-    change_dir, extract_boto_args_from_env, run_commands, which
+    change_dir, run_commands, which
 )
 
 LOGGER = logging.getLogger('runway')
-
-
-def cdk_module_matches_env(env_name, env_vars, parameters):
-    """Return bool on whether cdk command should continue in current env."""
-    if isinstance(parameters.get('_' + env_name), six.string_types):
-        env_str = parameters['_' + env_name]
-        (account_id, region) = env_str.split('/')
-        if region == env_vars['AWS_DEFAULT_REGION']:
-            boto_args = extract_boto_args_from_env(env_vars)
-            sts_client = boto3.client(
-                'sts',
-                region_name=env_vars['AWS_DEFAULT_REGION'],
-                **boto_args
-            )
-            if sts_client.get_caller_identity()['Account'] == account_id:
-                return True
-    if parameters:
-        return True
-    return False
 
 
 def get_cdk_stacks(module_path, env_vars, context_opts):
@@ -72,9 +50,7 @@ class CloudDevelopmentKit(RunwayModule):
 
         warn_on_boto_env_vars(self.context.env_vars)
 
-        if cdk_module_matches_env(self.context.env_name,
-                                  self.context.env_vars,
-                                  self.options['parameters']):
+        if self.options['environment']:
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
@@ -91,8 +67,7 @@ class CloudDevelopmentKit(RunwayModule):
                         )
                     cdk_context_opts = []
                     for (key, val) in self.options['parameters'].items():
-                        if key != '_' + self.context.env_name:
-                            cdk_context_opts.extend(['-c', "%s=%s" % (key, val)])
+                        cdk_context_opts.extend(['-c', "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)
                     if command == 'diff':
                         LOGGER.info("Running cdk %s on each stack in %s",
