@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - embedded `hcl`
 
+### Fixed
+- pinned `zipp` sub dependency to `~=1.0.0` to retain support for python 3.5
+
 ## [1.3.7] - 2020-01-07
 ### Fixed
 - pinned `pyhcl` to `<0.3.14`
