@@ -16,10 +16,9 @@ INSTALL_REQUIRES = [
     'Send2Trash',
     'awacs',  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
-    # version set to match stacker requirement and include awscli fix #4182
     'awscli>=1.16.308<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
-    'boto3>=1.9.111<2.0',  # matching stacker requirement
+    'boto3>=1.9.111<2.0',
     'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
@@ -32,25 +31,19 @@ INSTALL_REQUIRES = [
     'typing;python_version<"3.5"',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # cfngin is stacker v1.7.0
-    # with the LICENSE file added to its root folder
-    # and the following patches applied
-    # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
-    # https://github.com/cloudtools/stacker/pull/744 (diffs via CFN changesets)
-    # https://github.com/cloudtools/stacker/pull/746 (locked stack dependencies)
-    # and the following files/folders deleted:
-    #   * tests
-    #   * blueprints/testutil.py
-    'stacker~=1.7',
-    # stacker's troposphere dep is more loose, but we need to ensure we use a
-    # sufficiently recent version for compatibility embedded blueprints
     'troposphere>=2.4.2',
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
     'urllib3>=1.20,<1.25',
     # dependency of importlib-metadata, dependency of pytest, cfn-lint, & others
     # 2.0.0 drops support for python 3.5
-    'zipp~=1.0.0'
+    'zipp~=1.0.0',
+    # inherited from stacker 1.7.0 requirements
+    'gitpython>=2.0,<3.0',
+    'jinja2>=2.7,<3.0',
+    'schematics>=2.0.1,<2.1.0',
+    'formic2',
+    'python-dateutil>=2.0,<3.0'
 ]
 
 

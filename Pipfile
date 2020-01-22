@@ -23,7 +23,9 @@ flake8 = "*"
 pylint = "<2.3.1"
 astroid = "<2.2.5"
 pyinstaller = "~=3.5"
+pytest = ">4.6"  # last version that supports 2.7 - allows install with 2/3
 mock = "~=3.0.5"
 pywin32 = {version = "*", os_name = "== 'nt'"}  # windows only
 pywin32-ctypes = {version = "*", os_name = "== 'nt'"}  # windows only
 pefile = {version = "*", os_name = "== 'nt'"}  # windows only
+moto = "~=1.3"
