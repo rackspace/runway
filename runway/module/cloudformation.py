@@ -1,15 +1,13 @@
 """Cloudformation module."""
-
 import logging
 import os
-import platform
 import re
 import sys
 
 import yaml
 
 from . import RunwayModule, run_module_command
-from ..util import change_dir, get_embedded_lib_path
+from ..util import change_dir
 
 LOGGER = logging.getLogger('runway')
 
@@ -50,28 +48,22 @@ def get_stacker_env_file(path, environment, region):
     return "%s-%s.env" % (environment, region)  # fallback to env & region
 
 
-def make_stacker_cmd_string(args, lib_path):
+def make_stacker_cmd_string(args):
     """Generate stacker invocation script from command line arg list.
 
     This is the standard stacker invocation script, with the following changes:
     * Adding our explicit arguments to parse_args (instead of leaving it empty)
     * Overriding sys.argv
-    * Adding embedded Runway lib directory to sys.path
+
     """
-    if platform.system().lower() == 'windows':
-        # Because this will be run via subprocess, the backslashes on Windows
-        # will cause command errors
-        lib_path = lib_path.replace('\\', '/')
     # This same code is duplicated in the base Runway command `run-stacker`
     return ("import sys;"
             "from runway.cfngin.logger import setup_logging;"
-            "from runway.cfngin.commands import Stacker"
+            "from runway.cfngin.commands import Stacker;"
             "sys.argv = ['stacker'] + {args};"
-            "sys.path.insert(1, '{lib_path}');"
             "stacker = Stacker(setup_logging=setup_logging);"
             "args = stacker.parse_args({args});"
-            "stacker.configure(args);args.run(args)".format(args=str(args),
-                                                            lib_path=lib_path))
+            "stacker.configure(args);args.run(args)".format(args=str(args)))
 
 
 class CloudFormation(RunwayModule):
@@ -94,10 +86,7 @@ class CloudFormation(RunwayModule):
             )
         else:
             # traditional python execution
-            stacker_cmd_str = make_stacker_cmd_string(
-                cmd_list,
-                get_embedded_lib_path()
-            )
+            stacker_cmd_str = make_stacker_cmd_string(cmd_list)
             executable_cmd_list = [sys.executable, '-c']
             LOGGER.debug(
                 "Stacker command being executed: %s \"%s\"",

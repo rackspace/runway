@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
+- `runway.embedded.stacker` is now `runway.cfngin`
+- imports of stacker by anything run/deployed by runway will be redirected to `runway.cfngin`
+    - e.g. `from stacker.blueprints.base import Blueprint` will act as `from runway.cfngin.blueprints.base import Blueprint`
 
 ### Removed
 - embedded `hcl`
