@@ -11,18 +11,19 @@ import awacs.s3
 import awacs.sts
 from awacs.aws import Action, Allow, Policy, PolicyDocument, Principal, Statement
 
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNCommaDelimitedList, CFNString
-from stacker.context import Context
-
 import troposphere
 from troposphere import (
     AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
     awslambda, cloudfront, iam, s3
 )
 
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNCommaDelimitedList, CFNString
+from runway.cfngin.context import Context
+
 IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
 if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
+    # pylint: disable=ungrouped-imports
     from troposphere.validators import boolean, priceclass_type
 
     class S3OriginConfig(AWSProperty):

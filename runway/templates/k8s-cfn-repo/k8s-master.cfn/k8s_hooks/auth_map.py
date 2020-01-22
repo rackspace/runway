@@ -2,8 +2,8 @@
 import os
 import logging
 
-from stacker.lookups.handlers.output import OutputLookup
-from stacker.session_cache import get_session
+from runway.cfngin.lookups.handlers.output import OutputLookup
+from runway.cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 

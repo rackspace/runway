@@ -7,8 +7,8 @@ from troposphere import AccountId, Join, Output, s3
 import awacs.s3
 from awacs.aws import AWSPrincipal, Allow, Policy, Statement
 
-from stacker.blueprints.base import Blueprint
-# from stacker.blueprints.variables.types import CFNString
+from runway.cfngin.blueprints.base import Blueprint
+# from runway.cfngin.blueprints.variables.types import CFNString
 
 
 class Dependencies(Blueprint):
@@ -90,5 +90,5 @@ class Dependencies(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
     print(Dependencies('test', Context({"namespace": "test"}), None).to_json())

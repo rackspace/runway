@@ -5,9 +5,9 @@ import time
 
 from operator import itemgetter
 
-from stacker.lookups.handlers.output import OutputLookup
-from stacker.session_cache import get_session
-from runway.commands.runway.run_aws import aws_cli
+from ...cfngin.lookups.handlers.output import OutputLookup
+from ...cfngin.session_cache import get_session
+from ...commands.runway.run_aws import aws_cli
 
 LOGGER = logging.getLogger(__name__)
 

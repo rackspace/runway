@@ -4,10 +4,10 @@ import logging
 
 from botocore.exceptions import ClientError
 
-from stacker.lookups.handlers.output import OutputLookup
-from stacker.lookups.handlers.rxref import RxrefLookup
-from stacker.lookups.handlers.xref import XrefLookup
-from stacker.session_cache import get_session
+from ..cfngin.lookups.handlers.output import OutputLookup
+from ..cfngin.lookups.handlers.rxref import RxrefLookup
+from ..cfngin.lookups.handlers.xref import XrefLookup
+from ..cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 

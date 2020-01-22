@@ -2,7 +2,7 @@
 
 import logging
 
-from stacker.session_cache import get_session
+from ..cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 
