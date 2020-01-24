@@ -9,14 +9,14 @@ from integration_tests.util import (copy_file, copy_dir, import_tests,
                                     execute_tests)
 
 
-class ModuleTypeDetection(IntegrationTest):
+class RunwayModuleTypeDetection(IntegrationTest):
     """Test that module type detection is handled."""
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
     fixtures_dir = os.path.join(base_dir, 'fixtures')
     tests_dir = os.path.join(base_dir, 'tests')
 
-    mtd_test_dir = os.path.join(base_dir, 'module_type_detection_test_dir')
+    mtd_test_dir = os.path.join(base_dir, 'runway_module_type_detection_test_dir')
 
     def copy_fixture(self, name='two-regions-app.cfn'):
         """Copy fixture files for test."""
@@ -34,7 +34,7 @@ class ModuleTypeDetection(IntegrationTest):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
         tests = [
-            test(self.logger) for test in ModuleTypeDetection.__subclasses__()
+            test(self.logger) for test in RunwayModuleTypeDetection.__subclasses__()
         ]
         if not tests:
             raise Exception('No tests were found.')

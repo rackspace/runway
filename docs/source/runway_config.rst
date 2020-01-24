@@ -72,7 +72,7 @@ respectively point the repository at the reference id specified.
 Type
 ^^^^
 
-.. automodule:: runway.module_type.ModuleType
+.. automodule:: runway.runway_module_type.RunwayModuleType
 
 
 .. _runway-test:

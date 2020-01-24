@@ -3,28 +3,28 @@ import subprocess
 
 from runway.util import change_dir
 
-from integration_tests.test_module_type_detection.test_module_type_detection import (
-    ModuleTypeDetection
+from integration_tests.test_runway_module_type_detection.test_runway_module_type_detection import (
+    RunwayModuleTypeDetection
 )
 
 
-class TestSuffixTypeTF(ModuleTypeDetection):
-    """Test to verify a 'type' directory suffix 'tf' is respected."""
+class TestSuffixTypeCFN(RunwayModuleTypeDetection):
+    """Test to verify a 'type' directory suffix 'cfn' is respected."""
 
     TEST_NAME = __name__
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_fixture('sampleapp.tf')
-        self.copy_runway('suffix-tf')
+        self.copy_fixture('sampleapp.cfn')
+        self.copy_runway('suffix-cfn')
         with change_dir(self.mtd_test_dir):
             out = subprocess.check_output(['runway', 'deploy'], stderr=subprocess.STDOUT)
-            return 0 if "Skipping Terraform apply of sampleapp.tf" in out.decode() else -1
+            return 0 if "Skipping stacker build" in out.decode() else -1
 
     def run(self):
         """Run tests."""
         self.clean()
-        assert self.deploy() == 0, '{}:Directory Suffix Type TF Failed'.format(__name__)
+        assert self.deploy() == 0, '{}:Directory Suffix Type CFN Failed'.format(__name__)
 
     def teardown(self):
         """Teardown."""

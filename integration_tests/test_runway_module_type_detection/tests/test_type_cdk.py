@@ -3,12 +3,12 @@ import subprocess
 
 from runway.util import change_dir
 
-from integration_tests.test_module_type_detection.test_module_type_detection import (
-    ModuleTypeDetection
+from integration_tests.test_runway_module_type_detection.test_runway_module_type_detection import (
+    RunwayModuleTypeDetection
 )
 
 
-class TestTypeCDK(ModuleTypeDetection):
+class TestTypeCDK(RunwayModuleTypeDetection):
     """Test to verify a 'type' definition of 'cdk' is respected."""
 
     TEST_NAME = __name__

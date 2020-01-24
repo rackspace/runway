@@ -3,12 +3,12 @@ import subprocess
 
 from runway.util import change_dir
 
-from integration_tests.test_module_type_detection.test_module_type_detection import (
-    ModuleTypeDetection
+from integration_tests.test_runway_module_type_detection.test_runway_module_type_detection import (
+    RunwayModuleTypeDetection
 )
 
 
-class TestSuffixTypeK8S(ModuleTypeDetection):
+class TestSuffixTypeK8S(RunwayModuleTypeDetection):
     """Test to verify a 'type' directory suffix 'k8s' is respected."""
 
     TEST_NAME = __name__

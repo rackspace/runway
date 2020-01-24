@@ -13,7 +13,7 @@ LOGGER = logging.getLogger('runway')
 
 
 # noqa pylint: disable=too-few-public-methods
-class ModuleType(object):
+class RunwayModuleType(object):
     """Runway configuration ``type`` settings object.
 
     The ``type`` property of a Runway configuration can be
@@ -70,7 +70,7 @@ class ModuleType(object):
     }
 
     def __init__(self, path, class_path=None, type_str=None):
-        # type: (str, Optional[str], Optional[str]) -> ModuleType
+        # type: (str, Optional[str], Optional[str]) -> RunwayRunwayModuleType
         """Initialization of the Module Type Configuration.  # noqa
 
         Keyword Args:
@@ -78,7 +78,7 @@ class ModuleType(object):
             class_path (Optional[str]): A supplied class_path to override
                 the autodetected one.
             type_str (Optional[str]): An explicit type to assign to
-                the ModuleType
+                the RunwayRunwayModuleType
         """
         self.path = path
         self.class_path = class_path
