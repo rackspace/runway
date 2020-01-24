@@ -3,7 +3,7 @@ import unittest
 
 from runway.cfngin.config import Config, load
 from runway.cfngin.context import Context, get_fqn
-from runway.cfngin.util import handle_hooks
+from runway.cfngin.hooks.utils import handle_hooks
 
 
 class TestContext(unittest.TestCase):

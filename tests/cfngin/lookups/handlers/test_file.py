@@ -133,7 +133,7 @@ class TestFileTranslator(unittest.TestCase):
     def test_handler_b64(self, content_mock):
         """Test handler b64."""
         plain = u'Hello, world'
-        encoded = base64.b64encode(plain.encode('utf8'))
+        encoded = base64.b64encode(plain.encode('utf8')).decode('utf-8')
 
         content_mock.return_value = plain
         out = FileLookup.handle(u'base64:file://tmp/test')
