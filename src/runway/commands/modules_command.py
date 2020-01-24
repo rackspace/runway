@@ -494,8 +494,8 @@ class ModulesCommand(RunwayCommand):
         with change_dir(path.module_root):
 
             runway_module_type = RunwayModuleType(path.module_root,
-                                     module_opts.get('class_path'),
-                                     module_opts.get('type'))
+                                                  module_opts.get('class_path'),
+                                                  module_opts.get('type'))
 
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method
