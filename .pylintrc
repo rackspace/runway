@@ -134,7 +134,11 @@ disable=useless-object-inheritance,
         xreadlines-attribute,
         deprecated-sys-function,
         exception-escape,
-        comprehension-escape
+        comprehension-escape,
+        # There is a bug for correctly detecting this but to upgrade before this
+        # pr will causes issues as described in Pipfile
+        # https://github.com/PyCQA/pylint/issues/3134
+        unsubscriptable-object
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -259,9 +263,12 @@ function-naming-style=snake_case
 good-names=i,
            j,
            k,
+           v,
            ex,
            Run,
-           _
+           _,
+           fn,
+           db
 
 # Include a hint for the correct naming format with invalid-name
 include-naming-hint=no
@@ -411,8 +418,7 @@ min-similarity-lines=4
 
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,
-      XXX,
-      TODO
+      XXX
 
 
 [FORMAT]

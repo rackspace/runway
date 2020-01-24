@@ -8,8 +8,8 @@ import sys
 
 from botocore.exceptions import ClientError
 
+from . import utils
 from ..session_cache import get_session
-from ..hooks import utils
 from ..ui import get_raw_input
 
 

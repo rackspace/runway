@@ -27,3 +27,5 @@ preuninstall.js
 !runway/templates/**/package.json
 !runway/templates/**/.npmignore
 !integration_tests/**/package.json
+
+tests/fixtures/blueprints/*-result

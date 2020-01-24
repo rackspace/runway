@@ -280,10 +280,10 @@ def parse_user_data(variables, raw_user_data, blueprint_name):
 
     try:
         res = template.substitute(variable_values)
-    except ValueError as exp:
-        raise InvalidUserdataPlaceholder(blueprint_name, exp.args[0])
-    except KeyError as key:
-        raise MissingVariable(blueprint_name, key)
+    except ValueError as err:
+        raise InvalidUserdataPlaceholder(blueprint_name, err.args[0])
+    except KeyError as err:
+        raise MissingVariable(blueprint_name, err)
 
     return res
 
