@@ -130,7 +130,7 @@ class TestPlan(unittest.TestCase):
             description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEquals(calls, ['namespace-vpc.1', 'namespace-bastion.1'])
+        self.assertEqual(calls, ['namespace-vpc.1', 'namespace-bastion.1'])
 
     def test_execute_plan_filtered(self):
         """Test execute plan filtered."""
