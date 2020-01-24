@@ -7,15 +7,18 @@ import os
 import pytest
 import yaml
 
-logger = logging.getLogger(__name__)
+
+LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope='session', autouse=True)
 def aws_credentials():
     # type: () -> Dict[str, str]
     """Handle change in https://github.com/spulec/moto/issues/1924.
+
     Ensure AWS SDK finds some (bogus) credentials in the environment and
     doesn't try to use other providers.
+
     """
     overrides = {
         'AWS_ACCESS_KEY_ID': 'testing',
@@ -24,14 +27,14 @@ def aws_credentials():
     }
     saved_env = {}
     for key, value in overrides.items():
-        logger.info('Overriding env var: {}={}'.format(key, value))
+        LOG.info('Overriding env var: %s=%s', key, value)
         saved_env[key] = os.environ.get(key, None)
         os.environ[key] = value
 
     yield
 
     for key, value in saved_env.items():
-        logger.info('Restoring saved env var: {}={}'.format(key, value))
+        LOG.info('Restoring saved env var: %s=%s', key, value)
         if value is None:
             del os.environ[key]
         else:
@@ -52,13 +55,15 @@ def fixture_dir():
 @pytest.fixture(scope='module')
 def yaml_fixtures(request, fixture_dir):  # pylint: disable=redefined-outer-name
     """Load test fixture yaml files.
+
     Uses a list of file paths within the fixture directory loaded from the
     `YAML_FIXTURES` variable of the module.
+
     """
     file_paths = getattr(request.module, 'YAML_FIXTURES', [])
     result = {}
     for file_path in file_paths:
-        with open(os.path.join(fixture_dir, file_path)) as f:
-            data = f.read()
+        with open(os.path.join(fixture_dir, file_path)) as _file:
+            data = _file.read()
             result[file_path] = yaml.safe_load(data)
     return result

@@ -15,7 +15,10 @@ REGION = "us-east-1"
 class TestAMILookup(unittest.TestCase):
     """Tests for runway.cfngin.lookups.handlers.ami.ImageNotFound."""
 
-    client = boto3.client("ec2", region_name=REGION)
+    client = boto3.client("ec2", region_name=REGION,
+                          # bypass the need to have these in the env
+                          aws_access_key_id='testing',
+                          aws_secret_access_key='testing')
 
     def setUp(self):
         """Run before tests."""

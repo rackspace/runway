@@ -13,7 +13,10 @@ from ...factories import SessionStub
 class TestDynamoDBHandler(unittest.TestCase):
     """Tests for runway.cfngin.lookups.handlers.dynamodb.DynamodbLookup."""
 
-    client = boto3.client('dynamodb', region_name='us-east-1')
+    client = boto3.client('dynamodb', region_name='us-east-1',
+                          # bypass the need to have these in the env
+                          aws_access_key_id='testing',
+                          aws_secret_access_key='testing')
 
     def setUp(self):
         """Run before tests."""
