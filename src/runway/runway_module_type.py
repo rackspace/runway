@@ -57,7 +57,7 @@ class RunwayModuleType(object):
         'cdk': 'runway.module.cdk.CloudDevelopmentKit',
         'k8s': 'runway.module.k8s.K8s',
         'cfn': 'runway.module.cloudformation.CloudFormation',
-        'static': 'runway.module.staticsite.StaticSite'
+        'web': 'runway.module.staticsite.StaticSite'
     }
 
     TYPE_MAP = {
@@ -66,7 +66,7 @@ class RunwayModuleType(object):
         'cdk': EXTENSION_MAP.get('cdk'),
         'kubernetes': EXTENSION_MAP.get('k8s'),
         'cloudformation': EXTENSION_MAP.get('cfn'),
-        'static': EXTENSION_MAP.get('static'),
+        'static': EXTENSION_MAP.get('web'),
     }
 
     def __init__(self, path, class_path=None, type_str=None):

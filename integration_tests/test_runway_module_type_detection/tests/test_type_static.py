@@ -20,6 +20,7 @@ class TestTypeStatic(RunwayModuleTypeDetection):
         with change_dir(self.mtd_test_dir):
             out = subprocess.check_output(['runway', 'deploy'], stderr=subprocess.STDOUT)
             return 0 if "Skipping staticsite deploy of type_static" in out.decode() else -1
+
     def run(self):
         """Run tests."""
         self.clean()

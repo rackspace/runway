@@ -8,18 +8,18 @@ from integration_tests.test_runway_module_type_detection.test_runway_module_type
 )
 
 
-class TestSuffixTypeStatic(RunwayModuleTypeDetection):
-    """Test to verify a 'type' directory suffix 'static' is respected."""
+class TestSuffixTypeWeb(RunwayModuleTypeDetection):
+    """Test to verify a 'type' directory suffix 'web' is respected."""
 
     TEST_NAME = __name__
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_fixture('sampleapp.static')
-        self.copy_runway('suffix-static')
+        self.copy_fixture('sampleapp.web')
+        self.copy_runway('suffix-web')
         with change_dir(self.mtd_test_dir):
             out = subprocess.check_output(['runway', 'deploy'], stderr=subprocess.STDOUT)
-            return 0 if "Skipping staticsite deploy of sampleapp.static" in out.decode() else -1
+            return 0 if "Skipping staticsite deploy of sampleapp.web" in out.decode() else -1
 
     def run(self):
         """Run tests."""
