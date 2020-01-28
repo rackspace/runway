@@ -45,8 +45,8 @@ class TestLambdaHooks(unittest.TestCase):
     def temp_directory_with_files(cls, files=ALL_FILES):
         """Create a temp directory with files."""
         temp_dict = TempDirectory()
-        for _file in files:
-            temp_dict.write(_file, b'')
+        for file_ in files:
+            temp_dict.write(file_, b'')
         return temp_dict
 
     @property
