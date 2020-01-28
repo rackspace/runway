@@ -70,7 +70,7 @@ class RunwayModuleType(object):
     }
 
     def __init__(self, path, class_path=None, type_str=None):
-        # type: (str, Optional[str], Optional[str]) -> RunwayRunwayModuleType
+        # type: (str, Optional[str], Optional[str]) -> RunwayModuleType
         """Initialization of the Module Type Configuration.  # noqa
 
         Keyword Args:
@@ -78,7 +78,7 @@ class RunwayModuleType(object):
             class_path (Optional[str]): A supplied class_path to override
                 the autodetected one.
             type_str (Optional[str]): An explicit type to assign to
-                the RunwayRunwayModuleType
+                the RunwayModuleType
         """
         self.path = path
         self.class_path = class_path
