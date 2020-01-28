@@ -2,7 +2,6 @@
 # TODO move to runway.cfngin.hooks on next major release
 import logging
 import time
-
 from operator import itemgetter
 
 from ...cfngin.lookups.handlers.output import OutputLookup
@@ -63,7 +62,7 @@ def sync(context, provider, **kwargs):
                  "s3://%s/" % bucket_name,
                  '--delete'])
 
-        if kwargs.get('cf_disabled', '') == 'true':
+        if kwargs.get('cf_disabled', False):
             display_static_website_url(kwargs.get('website_url'), provider, context)
         else:
             distribution = get_distribution_data(context, provider, **kwargs)

@@ -3,96 +3,50 @@
 from __future__ import print_function
 
 import hashlib
-# https://github.com/PyCQA/pylint/issues/73
-from distutils.version import LooseVersion  # noqa pylint: disable=no-name-in-module,import-error
-from past.builtins import basestring
+import logging
+import os
+from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 
 import awacs.s3
 import awacs.sts
-from awacs.aws import Action, Allow, Policy, PolicyDocument, Principal, Statement
-
-import troposphere
-from troposphere import (
-    AWSProperty, And, Equals, If, Join, Not, NoValue, Output, Select,
-    awslambda, cloudfront, iam, s3
-)
+from awacs.aws import (Action, Allow, Policy, PolicyDocument, Principal,
+                       Statement)
+from troposphere import (Join, NoValue, Output, awslambda, cloudfront, iam, s3)
 
 from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.blueprints.variables.types import CFNCommaDelimitedList, CFNString
 from runway.cfngin.context import Context
 
+LOGGER = logging.getLogger('runway')
+
 IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
-if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
-    # pylint: disable=ungrouped-imports
-    from troposphere.validators import boolean, priceclass_type
-
-    class S3OriginConfig(AWSProperty):
-        """Backported s3 origin config class for broken troposphere release."""
-
-        props = {
-            'OriginAccessIdentity': (basestring, False),
-        }
-
-    class Origin(AWSProperty):
-        """Backported origin config class for broken troposphere release."""
-
-        props = {
-            'CustomOriginConfig': (cloudfront.CustomOriginConfig, False),
-            'DomainName': (basestring, True),
-            'Id': (basestring, True),
-            'OriginCustomHeaders': ([cloudfront.OriginCustomHeader], False),
-            'OriginPath': (basestring, False),
-            'S3OriginConfig': (S3OriginConfig, False),
-        }
-
-    class DistributionConfig(AWSProperty):
-        """Backported cf config class for broken troposphere release."""
-
-        props = {
-            'Aliases': (list, False),
-            'CacheBehaviors': ([cloudfront.CacheBehavior], False),
-            'Comment': (basestring, False),
-            'CustomErrorResponses': ([cloudfront.CustomErrorResponse], False),
-            'DefaultCacheBehavior': (cloudfront.DefaultCacheBehavior, True),
-            'DefaultRootObject': (basestring, False),
-            'Enabled': (boolean, True),
-            'HttpVersion': (basestring, False),
-            'IPV6Enabled': (boolean, False),
-            'Logging': (cloudfront.Logging, False),
-            'Origins': ([Origin], True),
-            'PriceClass': (priceclass_type, False),
-            'Restrictions': (cloudfront.Restrictions, False),
-            'ViewerCertificate': (cloudfront.ViewerCertificate, False),
-            'WebACLId': (basestring, False),
-        }
 
 
 class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
     """Stacker blueprint for creating S3 bucket and CloudFront distribution."""
 
     VARIABLES = {
-        'AcmCertificateArn': {'type': CFNString,
+        'AcmCertificateArn': {'type': str,
                               'default': '',
                               'description': '(Optional) Cert ARN for site'},
-        'Aliases': {'type': CFNCommaDelimitedList,
-                    'default': '',
+        'Aliases': {'type': list,
+                    'default': [],
                     'description': '(Optional) Domain aliases the '
                                    'distribution'},
-        'DisableCloudFront': {'type': CFNString,
-                              'default': '',
+        'DisableCloudFront': {'type': bool,
+                              'default': False,
                               'description': 'Whether to disable CF'},
-        'LogBucketName': {'type': CFNString,
+        'LogBucketName': {'type': str,
                           'default': '',
                           'description': 'S3 bucket for CF logs'},
-        'PriceClass': {'type': CFNString,
+        'PriceClass': {'type': str,
                        'default': 'PriceClass_100',  # US/Europe
                        'description': 'CF price class for the distribution.'},
-        'RewriteDirectoryIndex': {'type': CFNString,
+        'RewriteDirectoryIndex': {'type': str,
                                   'default': '',
                                   'description': '(Optional) File name to '
                                                  'append to directory '
                                                  'requests.'},
-        'WAFWebACL': {'type': CFNString,
+        'WAFWebACL': {'type': str,
                       'default': '',
                       'description': '(Optional) WAF id to associate with the '
                                      'distribution.'},
@@ -107,79 +61,81 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                                         'associations.'},
     }
 
+    @property
+    def aliases_specified(self):
+        # type: () -> bool
+        """Aliases are specified conditional."""
+        return self.get_variables()['Aliases'] != ['']
+
+    @property
+    def cf_enabled(self):
+        # type: () -> bool
+        """CloudFront enabled conditional."""
+        return not self.get_variables().get('DisableCloudFront', False)
+
+    @property
+    def acm_certificate_specified(self):
+        # type: () -> bool
+        """ACM Certification specified conditional."""
+        return self.get_variables()['AcmCertificateArn'] != ''
+
+    @property
+    def cf_logging_enabled(self):
+        # type: () -> bool
+        """CloudFront Logging specified conditional."""
+        return self.get_variables()['LogBucketName'] != ''
+
+    @property
+    def directory_index_specified(self):
+        # type: () -> bool
+        """Directory Index specified conditional."""
+        return self.get_variables()['RewriteDirectoryIndex'] != ''
+
+    @property
+    def waf_name_specified(self):
+        # type: () -> bool
+        """WAF name specified conditional."""
+        return self.get_variables()['WAFWebACL'] != ''
+
     def create_template(self):
+        # type: () -> None
         """Create template (main function called by Stacker)."""
         self.template.set_version('2010-09-09')
         self.template.set_description('Static Website - Bucket and Distribution')
 
-        self.add_template_conditions()
-
         # Resources
         bucket = self.add_bucket()
-        bucket_policy = self.add_bucket_policy(bucket) # noqa pylint: disable=unused-variable
-        oai = self.add_origin_access_identity()
-        allow_access = self.allow_cloudfront_access_on_bucket(bucket, oai)
-        rewrite_role = self.add_index_rewrite_role()
-        index_rewrite = self.add_cloudfront_directory_index_rewrite(rewrite_role)
-        index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
-            index_rewrite
-        )
-        lambda_function_associations = self.get_lambda_associations(index_rewrite_version)
-        distribution_options = self.get_cloudfront_distribution_options(
-            bucket,
-            oai,
-            lambda_function_associations
-        )
-        distribution = self.add_cloudfront_distribution( # noqa pylint: disable=unused-variable
-            allow_access,
-            distribution_options
-        )
 
-    def add_template_conditions(self):
-        """Add Template Conditions."""
-        variables = self.get_variables()
+        if self.cf_enabled:
+            oai = self.add_origin_access_identity()
+            bucket_policy = self.add_cloudfront_bucket_policy(bucket, oai)
+            lambda_function_associations = self.get_lambda_associations()
 
-        self.template.add_condition(
-            'AcmCertSpecified',
-            And(Not(Equals(variables['AcmCertificateArn'].ref, '')),
-                Not(Equals(variables['AcmCertificateArn'].ref, 'undefined')))
-        )
-        self.template.add_condition(
-            'AliasesSpecified',
-            And(Not(Equals(Select(0, variables['Aliases'].ref), '')),
-                Not(Equals(Select(0, variables['Aliases'].ref), 'undefined')))
-        )
-        self.template.add_condition(
-            'CFEnabled',
-            Not(Equals(variables['DisableCloudFront'].ref, 'true'))
-        )
-        self.template.add_condition(
-            'CFDisabled',
-            Equals(variables['DisableCloudFront'].ref, 'true')
-        )
-        self.template.add_condition(
-            'CFLoggingEnabled',
-            And(Not(Equals(variables['LogBucketName'].ref, '')),
-                Not(Equals(variables['LogBucketName'].ref, 'undefined')))
-        )
-        self.template.add_condition(
-            'DirectoryIndexSpecified',
-            And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
-                Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')))  # noqa
-        )
-        self.template.add_condition(
-            'CFEnabledAndDirectoryIndexSpecified',
-            And(Not(Equals(variables['RewriteDirectoryIndex'].ref, '')),
-                Not(Equals(variables['RewriteDirectoryIndex'].ref, 'undefined')), # noqa
-                Not(Equals(variables['DisableCloudFront'].ref, 'true')))
-        )
-        self.template.add_condition(
-            'WAFNameSpecified',
-            And(Not(Equals(variables['WAFWebACL'].ref, '')),
-                Not(Equals(variables['WAFWebACL'].ref, 'undefined')))
-        )
+            if self.directory_index_specified:
+                rewrite_role = self.add_index_rewrite_role()
+                index_rewrite = self.add_cloudfront_directory_index_rewrite(rewrite_role)
+                index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
+                    index_rewrite
+                )
+                lambda_function_associations = self.get_directory_index_lambda_association(
+                    lambda_function_associations,
+                    index_rewrite_version
+                )
 
-    def get_lambda_associations(self, directory_index_rewrite_version):
+            distribution_options = self.get_cloudfront_distribution_options(
+                bucket,
+                oai,
+                lambda_function_associations
+            )
+            distribution = self.add_cloudfront_distribution( # noqa pylint: disable=unused-variable
+                bucket_policy,
+                distribution_options
+            )
+        else:
+            self.add_bucket_policy(bucket)
+
+    def get_lambda_associations(self):
+        # type: () -> List[cloudfront.LambdaFunctionAssociation]
         """Retrieve any lambda associations from the instance variables.
 
         Keyword Args:
@@ -199,18 +155,33 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     LambdaFunctionARN=x['arn']
                 ) for x in variables['lambda_function_associations']
             ]
+        return []
 
-        # otherwise fallback to pure CFN condition
-        return If(
-            'DirectoryIndexSpecified',
-            [cloudfront.LambdaFunctionAssociation(
+    def get_directory_index_lambda_association(  # pylint: disable=no-self-use
+            self,
+            lambda_associations,  # List[cloudfront.LambdaFunctionAssociation]
+            directory_index_rewrite_version):  # awslambda.Version
+        # type: (...) ->  List[cloudfront.LambdaFunctionAssociation]
+        """Retrieve the directory index lambda associations with the added rewriter.
+
+        Args:
+            lambda_associations [List(Any)]: The lambda associations
+            directory_index_rewrite_version [Any]: The directory index rewrite version
+        """
+        lambda_associations.append(
+            cloudfront.LambdaFunctionAssociation(
                 EventType='origin-request',
                 LambdaFunctionARN=directory_index_rewrite_version.ref()
-            )],
-            NoValue
+            )
         )
+        return lambda_associations
 
-    def get_cloudfront_distribution_options(self, bucket, oai, lambda_function_associations):
+    def get_cloudfront_distribution_options(
+            self,
+            bucket,  # type: s3.Bucket
+            oai,  # type: cloudfront.CloudFrontOriginAccessIdentity
+            lambda_function_associations):  # List[cloudfront.LambdaFunctionAssociation]
+        # type: (...) -> Dict[str, Any]
         """Retrieve the options for our CloudFront distribution.
 
         Keyword Args:
@@ -224,18 +195,14 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """
         variables = self.get_variables()
         return {
-            'Aliases': If(
-                'AliasesSpecified',
-                variables['Aliases'].ref,
-                NoValue
-            ),
+            'Aliases': self.add_aliases(),
             'Origins': [
-                get_cf_origin_class()(
+                cloudfront.Origin(
                     DomainName=Join(
                         '.',
                         [bucket.ref(),
                          's3.amazonaws.com']),
-                    S3OriginConfig=get_s3_origin_conf_class()(
+                    S3OriginConfig=cloudfront.S3OriginConfig(
                         OriginAccessIdentity=Join(
                             '',
                             ['origin-access-identity/cloudfront/',
@@ -257,33 +224,57 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 ViewerProtocolPolicy='redirect-to-https'
             ),
             'DefaultRootObject': 'index.html',
-            'Logging': If(
-                'CFLoggingEnabled',
-                cloudfront.Logging(
-                    Bucket=Join('.',
-                                [variables['LogBucketName'].ref,
-                                 's3.amazonaws.com'])
-                ),
-                NoValue
-            ),
-            'PriceClass': variables['PriceClass'].ref,
+            'Logging': self.add_logging_bucket(),
+            'PriceClass': variables['PriceClass'],
+            'CustomErrorResponses': [
+                cloudfront.CustomErrorResponse(
+                    ErrorCode=response['ErrorCode'],
+                    ResponseCode=response['ResponseCode'],
+                    ResponsePagePath=response['ResponsePagePath']
+                ) for response in variables['custom_error_responses']
+            ],
             'Enabled': True,
-            'WebACLId': If(
-                'WAFNameSpecified',
-                variables['WAFWebACL'].ref,
-                NoValue
-            ),
-            'ViewerCertificate': If(
-                'AcmCertSpecified',
-                cloudfront.ViewerCertificate(
-                    AcmCertificateArn=variables['AcmCertificateArn'].ref,
-                    SslSupportMethod='sni-only'
-                ),
-                NoValue
-            )
+            'WebACLId': self.add_web_acl(),
+            'ViewerCertificate': self.add_acm_cert()
         }
 
+    def add_aliases(self):
+        # type: () -> Union[List[str], NoValue]
+        """Add aliases."""
+        if self.aliases_specified:
+            return self.get_variables()['Aliases']
+        return NoValue
+
+    def add_web_acl(self):
+        # type: () -> Union[str, NoValue]
+        """Add Web ACL."""
+        if self.waf_name_specified:
+            return self.get_variables()['WAFWebACL']
+        return NoValue
+
+    def add_logging_bucket(self):
+        # type: () -> Union[cloudfront.Logging, NoValue]
+        """Add Logging Bucket."""
+        if self.cf_logging_enabled:
+            return cloudfront.Logging(
+                Bucket=Join('.',
+                            [self.get_variables()['LogBucketName'],
+                             's3.amazonaws.com'])
+            )
+        return NoValue
+
+    def add_acm_cert(self):
+        # type: () -> Union[cloudfront.ViewerCertificate, NoValue]
+        """Add ACM cert."""
+        if self.acm_certificate_specified:
+            return cloudfront.ViewerCertificate(
+                AcmCertificateArn=self.get_variables()['AcmCertificateArn'],
+                SslSupportMethod='sni-only'
+            )
+        return NoValue
+
     def add_origin_access_identity(self):
+        # type: () -> cloudfront.CloudFrontOriginAccessIdentity
         """Add the origin access identity resource to the template.
 
         Returns:
@@ -293,7 +284,6 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             cloudfront.CloudFrontOriginAccessIdentity(
                 'OAI',
-                Condition='CFEnabled',
                 CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa pylint: disable=line-too-long
                     Comment='CF access to website'
                 )
@@ -301,6 +291,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket_policy(self, bucket):
+        # type: (s3.Bucket) -> s3.BucketPolicy
         """Add a policy to the bucket if CloudFront is disabled. Ensure PublicRead.
 
         Keyword Args:
@@ -314,7 +305,6 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             s3.BucketPolicy(
                 'BucketPolicy',
                 Bucket=bucket.ref(),
-                Condition='CFDisabled',
                 PolicyDocument=Policy(
                     Version="2012-10-17",
                     Statement=[
@@ -332,6 +322,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_bucket(self):
+        # type: () -> s3.Bucket
         """Add the bucket resource along with an output of it's name / website url.
 
         Returns:
@@ -341,7 +332,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         bucket = self.template.add_resource(
             s3.Bucket(
                 'Bucket',
-                AccessControl=If('CFEnabled', s3.Private, s3.PublicRead),
+                AccessControl=(s3.Private if self.cf_enabled else s3.PublicRead),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
                         s3.LifecycleRule(
@@ -364,15 +355,18 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             Description='Name of website bucket',
             Value=bucket.ref()
         ))
-        self.template.add_output(Output(
-            'BucketWebsiteURL',
-            Condition="CFDisabled",
-            Description='URL of the bucket website',
-            Value=bucket.get_att('WebsiteURL')
-        ))
+
+        if not self.cf_enabled:
+            self.template.add_output(Output(
+                'BucketWebsiteURL',
+                Description='URL of the bucket website',
+                Value=bucket.get_att('WebsiteURL')
+            ))
+
         return bucket
 
-    def allow_cloudfront_access_on_bucket(self, bucket, oai):
+    def add_cloudfront_bucket_policy(self, bucket, oai):
+        # type (s3.Bucket, cloudfront.CloudFrontOriginAccessIdentity) -> s3.BucketPolicy
         """Given a bucket and oai resource add cloudfront access to the bucket.
 
         Keyword Args:
@@ -386,28 +380,18 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             s3.BucketPolicy(
                 'AllowCFAccess',
                 Bucket=bucket.ref(),
-                Condition='CFEnabled',
                 PolicyDocument=PolicyDocument(
                     Version='2012-10-17',
-                    Statement=[
-                        Statement(
-                            Action=[awacs.s3.GetObject],
-                            Effect=Allow,
-                            Principal=Principal(
-                                'CanonicalUser',
-                                oai.get_att('S3CanonicalUserId')
-                            ),
-                            Resource=[
-                                Join('', [bucket.get_att('Arn'),
-                                          '/*'])
-                            ]
-                        )
-                    ]
+                    Statement=self._get_cloudfront_bucket_policy_statements(
+                        bucket,
+                        oai
+                    )
                 )
             )
         )
 
     def add_index_rewrite_role(self):
+        # type: () -> iam.Role
         """Add an index rewrite role to the template.
 
         Return:
@@ -416,7 +400,6 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             iam.Role(
                 'CFDirectoryIndexRewriteRole',
-                Condition='CFEnabledAndDirectoryIndexSpecified',
                 AssumeRolePolicyDocument=PolicyDocument(
                     Version='2012-10-17',
                     Statement=[
@@ -436,6 +419,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_cloudfront_directory_index_rewrite(self, role):
+        # type: (iam.Role) -> awslambda.Function
         """Add an index CloudFront directory index rewrite lambda function to the template.
 
         Keyword Args:
@@ -445,34 +429,22 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             dict: The CloudFront directory index rewrite lambda function resource
         """
         variables = self.get_variables()
+        code_str = ''
+        path = os.path.join(
+            os.path.dirname(__file__),
+            'templates/cf_directory_index_rewrite.template.js'
+        )
+        with open(path) as file_:
+            code_str = file_.read().replace(
+                '{{RewriteDirectoryIndex}}',
+                variables["RewriteDirectoryIndex"]
+            )
+
         return self.template.add_resource(
             awslambda.Function(
                 'CFDirectoryIndexRewrite',
-                Condition='CFEnabledAndDirectoryIndexSpecified',
                 Code=awslambda.Code(
-                    ZipFile=Join(
-                        '',
-                        ["'use strict';\n",
-                         "exports.handler = async function(event, context) {\n",
-                         "\n",
-                         "    // Extract the request from the CloudFront event that is sent to Lambda@Edge\n",  # noqa pylint: disable=line-too-long
-                         "    var request = event.Records[0].cf.request;\n",
-                         "    // Extract the URI from the request\n",
-                         "    var olduri = request.uri;\n",
-                         "    // Match any '/' that occurs at the end of a URI. Replace it with a default index\n",  # noqa pylint: disable=line-too-long
-                         "    var newuri = olduri.replace(/\\/$/, '\\/",
-                         variables['RewriteDirectoryIndex'].ref,
-                         "');\n",  # noqa
-                         "    // Log the URI as received by CloudFront and the new URI to be used to fetch from origin\n",  # noqa pylint: disable=line-too-long
-                         "    console.log(\"Old URI: \" + olduri);\n",
-                         "    console.log(\"New URI: \" + newuri);\n",
-                         "    // Replace the received URI with the URI that includes the index page\n",  # noqa pylint: disable=line-too-long
-                         "    request.uri = newuri;\n",
-                         "    // Return to CloudFront\n",
-                         "    return request;\n",
-                         "\n",
-                         "};\n"]
-                    )
+                    ZipFile=code_str
                 ),
                 Description='Rewrites CF directory HTTP requests to default page',  # noqa
                 Handler='index.handler',
@@ -482,6 +454,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
     def add_cloudfront_directory_index_rewrite_version(self, directory_index_rewrite):
+        # type: (awslambda.Function) -> awslambda.Version
         """Add a specific version to the directory index rewrite lambda.
 
         Keyword Args:
@@ -491,29 +464,27 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             dict: The CloudFront directory index rewrite version
 
         """
-        # Generating a unique resource name here for the Lambda version, so it
-        # updates automatically if the lambda code changes
         code_hash = hashlib.md5(
-            str(directory_index_rewrite.properties['Code'].properties['ZipFile'].to_dict()).encode()  # noqa pylint: disable=line-too-long
+            str(directory_index_rewrite.properties['Code'].properties['ZipFile']).encode()  # noqa pylint: disable=line-too-long
         ).hexdigest()
 
         return self.template.add_resource(
             awslambda.Version(
                 'CFDirectoryIndexRewriteVer' + code_hash,
-                Condition='CFEnabledAndDirectoryIndexSpecified',
                 FunctionName=directory_index_rewrite.ref()
             )
         )
 
     def add_cloudfront_distribution(
             self,
-            allow_cloudfront_access,
+            bucket_policy,
             cloudfront_distribution_options
     ):
+        # type: (s3.BucketPolicy, Dict[str, Any]) -> cloudfront.Distribution
         """Add the CloudFront distribution to the template / output the id and domain name.
 
         Keyword Args:
-            allow_cloudfront_access (dict): Allow bucket access resource
+            bucket_policy (dict): Bucket policy to allow CloudFront access
             cloudfront_distribution_options (dict): The distribution options
 
         Return:
@@ -521,62 +492,42 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         """
         distribution = self.template.add_resource(
-            get_cf_distribution_class()(
+            cloudfront.Distribution(
                 'CFDistribution',
-                Condition='CFEnabled',
-                DependsOn=allow_cloudfront_access.title,
-                DistributionConfig=get_cf_distro_conf_class()(
+                DependsOn=bucket_policy.title,
+                DistributionConfig=cloudfront.DistributionConfig(
                     **cloudfront_distribution_options
                 )
             )
         )
         self.template.add_output(Output(
             'CFDistributionId',
-            Condition='CFEnabled',
             Description='CloudFront distribution ID',
             Value=distribution.ref()
         ))
         self.template.add_output(
             Output(
                 'CFDistributionDomainName',
-                Condition='CFEnabled',
                 Description='CloudFront distribution domain name',
                 Value=distribution.get_att('DomainName')
             )
         )
         return distribution
 
-
-def get_cf_distribution_class():
-    """Return the correct troposphere CF distribution class."""
-    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
-        cf_dist = cloudfront.Distribution
-        cf_dist.props['DistributionConfig'] = (DistributionConfig, True)
-        return cf_dist
-    return cloudfront.Distribution
-
-
-def get_cf_distro_conf_class():
-    """Return the correct troposphere CF distribution class."""
-    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
-        return DistributionConfig
-    return cloudfront.DistributionConfig
-
-
-def get_cf_origin_class():
-    """Return the correct Origin class for troposphere."""
-    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
-        return Origin
-    return cloudfront.Origin
-
-
-def get_s3_origin_conf_class():
-    """Return the correct S3 Origin Config class for troposphere."""
-    if LooseVersion(troposphere.__version__) > LooseVersion('2.4.0'):
-        return cloudfront.S3OriginConfig
-    if LooseVersion(troposphere.__version__) == LooseVersion('2.4.0'):
-        return S3OriginConfig
-    return cloudfront.S3Origin
+    def _get_cloudfront_bucket_policy_statements(self, bucket, oai):  # noqa pylint: disable=no-self-use
+        return [
+            Statement(
+                Action=[awacs.s3.GetObject],
+                Effect=Allow,
+                Principal=Principal(
+                    'CanonicalUser',
+                    oai.get_att('S3CanonicalUserId')
+                ),
+                Resource=[
+                    Join('', [bucket.get_att('Arn'), '/*'])
+                ]
+            )
+        ]
 
 
 # Helper section to enable easy blueprint -> template generation
