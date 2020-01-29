@@ -9,6 +9,11 @@ endif
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 
+pipenv_lock:
+	pipenv lock --dev
+	pushd integration_tests && pipenv lock --dev && popd
+	pushd integration_test_infrastructure && pipenv lock --dev && popd
+
 clean:
 	rm -rf build/
 	rm -rf dist/
