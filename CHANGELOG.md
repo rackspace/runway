@@ -10,9 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - embedded `hcl`
+- python 2.6 support for `PyYAML` and `cfn_flip` dependencies
 
 ### Fixed
 - pinned `zipp` sub dependency to `~=1.0.0` to retain support for python 3.5
+- `PyYAML` dependency is now `>=4.1,<5.3` to match the top-end of newer versions of `awscli`
 
 ## [1.3.7] - 2020-01-07
 ### Fixed

@@ -1,5 +1,4 @@
 """Packaging settings."""
-import sys
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
 
@@ -18,15 +17,17 @@ INSTALL_REQUIRES = [
     'awacs',  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
     # version set to match stacker requirement and include awscli fix #4182
-    'awscli>=1.16.191<2.0',
+    'awscli>=1.16.308<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
     'boto3>=1.9.111<2.0',  # matching stacker requirement
+    'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
     'requests',
     'future',
     'pyhcl~=0.4',
     'pyOpenSSL',  # For embedded hook & associated script usage
+    'PyYAML>=4.1,<5.3',  # match awscli top-end
     'six',
     'typing;python_version<"3.5"',
     'yamllint',
@@ -52,14 +53,6 @@ INSTALL_REQUIRES = [
     # 2.0.0 drops support for python 3.5
     'zipp~=1.0.0'
 ]
-
-# ensuring pyyaml dep matches awscli
-if sys.version_info[:2] == (2, 6):
-    INSTALL_REQUIRES.append('PyYAML>=3.10,<=3.13')
-    INSTALL_REQUIRES.append('cfn_flip<=1.2.0')  # 1.2.1+ require PyYAML 4.1+
-else:
-    INSTALL_REQUIRES.append('PyYAML>=4.1,<=5.1')
-    INSTALL_REQUIRES.append('cfn_flip>=1.2.1')
 
 
 setup(
