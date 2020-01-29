@@ -22,6 +22,7 @@ six = "*"
 cfn-lint = "*"
 pyOpenSSL = "*"
 requests = "*"
+zipp = '~=1.0.0'
 
 [dev-packages]
 # python3 flake8-docstrings fails with pydocstyle 4:
