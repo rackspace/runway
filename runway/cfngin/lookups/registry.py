@@ -1,27 +1,14 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
+"""CFNgin lookup registry."""
 import logging
 import warnings
 
-from past.builtins import basestring
+from six import string_types
 
-from ..exceptions import UnknownLookupType, FailedVariableLookup
-from ..util import load_object_from_string
-
-from .handlers import output
-from .handlers import kms
-from .handlers import xref
-from .handlers import ssmstore
-from .handlers import dynamodb
-from .handlers import envvar
-from .handlers import rxref
-from .handlers import ami
+from ...util import load_object_from_string
+from ..exceptions import FailedVariableLookup, UnknownLookupType
+from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler
-from .handlers import split
-from .handlers import default
-from .handlers import hook_data
+from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref
 
 LOOKUP_HANDLERS = {}
 
@@ -30,19 +17,20 @@ def register_lookup_handler(lookup_type, handler_or_path):
     """Register a lookup handler.
 
     Args:
-        lookup_type (str): Name to register the handler under
-        handler_or_path (OneOf[func, str]): a function or a path to a handler
+        lookup_type (str): Name to register the handler under.
+        handler_or_path (Union[Callable, str]): A function or a path to a
+            handler.
 
     """
     handler = handler_or_path
-    if isinstance(handler_or_path, basestring):
+    if isinstance(handler_or_path, string_types):
         handler = load_object_from_string(handler_or_path)
     LOOKUP_HANDLERS[lookup_type] = handler
-    if type(handler) != type:
+    if not isinstance(handler, type):
         # Hander is a not a new-style handler
         logger = logging.getLogger(__name__)
         logger.warning("Registering lookup `%s`: Please upgrade to use the "
-                       "new style of Lookups." % lookup_type)
+                       "new style of Lookups.", lookup_type)
         warnings.warn(
             # For some reason, this does not show up...
             # Leaving it in anyway
@@ -60,7 +48,7 @@ def unregister_lookup_handler(lookup_type):
     the lookup type after the test runs.
 
     Args:
-        lookup_type (str): Name of the lookup type to unregister
+        lookup_type (str): Name of the lookup type to unregister.
 
     """
     LOOKUP_HANDLERS.pop(lookup_type, None)
@@ -70,14 +58,14 @@ def resolve_lookups(variable, context, provider):
     """Resolve a set of lookups.
 
     Args:
-        variable (:class:`stacker.variables.Variable`): The variable resolving
-            it's lookups.
-        context (:class:`stacker.context.Context`): stacker context
-        provider (:class:`stacker.provider.base.BaseProvider`): subclass of the
-            base provider
+        variable (:class:`runway.cfngin.variables.Variable`): The variable
+            resolving it's lookups.
+        context (:class:`runway.cfngin.context.Context`): Context instance.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance.
 
     Returns:
-        dict: dict of Lookup -> resolved value
+        Dict[str, Any]: Lookup -> resolved value
 
     """
     resolved_lookups = {}
@@ -92,8 +80,8 @@ def resolve_lookups(variable, context, provider):
                 context=context,
                 provider=provider,
             )
-        except Exception as e:
-            raise FailedVariableLookup(variable.name, lookup, e)
+        except Exception as err:
+            raise FailedVariableLookup(variable.name, lookup, err)
     return resolved_lookups
 
 

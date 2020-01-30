@@ -1,24 +1,25 @@
 """Destroys CloudFormation stacks based on the given config.
 
-Stacker will determine the order in which stacks should be destroyed based on
+CFNgin will determine the order in which stacks should be destroyed based on
 any manual requirements they specify or output values they rely on from other
 stacks.
 
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from .base import BaseCommand, cancel
 from ...actions import destroy
+from .base import BaseCommand, cancel
 
 
 class Destroy(BaseCommand):
+    """Destroy subcommand."""
 
     name = "destroy"
     description = __doc__
 
     def add_arguments(self, parser):
+        """Add arguments."""
         super(Destroy, self).add_arguments(parser)
+        self._add_argument_max_parallel(parser)
+        self._add_argument_tail(parser)
         parser.add_argument("-f", "--force", action="store_true",
                             help="Whether or not you want to go through "
                                  " with destroying the stacks")
@@ -26,20 +27,12 @@ class Destroy(BaseCommand):
                             metavar="STACKNAME", type=str,
                             help="Only work on the stacks given. Can be "
                                  "specified more than once. If not specified "
-                                 "then stacker will work on all stacks in the "
+                                 "then CFNgin will work on all stacks in the "
                                  "config file.")
-        parser.add_argument("-j", "--max-parallel", action="store", type=int,
-                            default=0,
-                            help="The maximum number of stacks to execute in "
-                                 "parallel. If not provided, the value will "
-                                 "be constrained based on the underlying "
-                                 "graph.")
-        parser.add_argument("-t", "--tail", action="store_true",
-                            help="Tail the CloudFormation logs while working "
-                                 "with stacks")
 
-    def run(self, options, **kwargs):
-        super(Destroy, self).run(options, **kwargs)
+    def run(self, options):
+        """Run the command."""
+        super(Destroy, self).run(options)
         action = destroy.Action(options.context,
                                 provider_builder=options.provider_builder,
                                 cancel=cancel())
@@ -47,5 +40,19 @@ class Destroy(BaseCommand):
                        force=options.force,
                        tail=options.tail)
 
-    def get_context_kwargs(self, options, **kwargs):
+    def get_context_kwargs(self, options):
+        """Return a dictionary of kwargs that will be used with the Context.
+
+        This allows commands to pass in any specific arguments they define to
+        the context.
+
+        Args:
+            options (:class:`argparse.Namespace`): arguments that have been
+                passed via the command line
+
+        Returns:
+            Dict[str, Any]: Dictionary that will be passed to Context
+                initializer as kwargs.
+
+        """
         return {"stack_names": options.targets}

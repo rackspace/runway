@@ -1,26 +1,23 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""Resources to tokenize userdata."""
 import re
 
-from troposphere import Ref, GetAtt
-
+from troposphere import GetAtt, Ref
 
 HELPERS = {
     "Ref": Ref,
     "Fn::GetAtt": GetAtt
 }
 
-split_string = "(" + "|".join([r"%s\([^)]+\)" % h for h in HELPERS]) + ")"
-replace_string = \
+SPLIT_STRING = "(" + "|".join([r"%s\([^)]+\)" % h for h in HELPERS]) + ")"
+REPLACE_STRING = \
     r"(?P<helper>%s)\((?P<args>['\"]?[^)]+['\"]?)+\)" % '|'.join(HELPERS)
 
-split_re = re.compile(split_string)
-replace_re = re.compile(replace_string)
+SPLIT_RE = re.compile(SPLIT_STRING)
+REPLACE_RE = re.compile(REPLACE_STRING)
 
 
-def cf_tokenize(s):
-    """ Parses UserData for Cloudformation helper functions.
+def cf_tokenize(raw_userdata):
+    """Parse UserData for Cloudformation helper functions.
 
     http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
     http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
@@ -29,18 +26,27 @@ def cf_tokenize(s):
     It breaks apart the given string at each recognized function (see HELPERS)
     and instantiates the helper function objects in place of those.
 
-    Returns a list of parts as a result. Useful when used with Join() and
-    Base64() CloudFormation functions to produce user data.
+    Args:
+        raw_userdata (str): Unparsed userdata data string.
 
-    ie: Base64(Join('', cf_tokenize(userdata_string)))
+    Returns:
+        List[str]: A list of string parts that is useful when used with
+            ``troposphere.Join()`` and ``troposphere.Base64()`` to produce
+            userdata.
+
+    Example:
+        .. code-block: python
+
+            Base64(Join('', cf_tokenize(userdata_string)))
+
     """
-    t = []
-    parts = split_re.split(s)
+    result = []
+    parts = SPLIT_RE.split(raw_userdata)
     for part in parts:
-        cf_func = replace_re.search(part)
+        cf_func = REPLACE_RE.search(part)
         if cf_func:
             args = [a.strip("'\" ") for a in cf_func.group("args").split(",")]
-            t.append(HELPERS[cf_func.group("helper")](*args).data)
+            result.append(HELPERS[cf_func.group("helper")](*args).data)
         else:
-            t.append(part)
-    return t
+            result.append(part)
+    return result

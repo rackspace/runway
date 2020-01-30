@@ -1,11 +1,5 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import str
-from builtins import object
+"""CFNgin utilities."""
 import copy
-import uuid
-import importlib
 import logging
 import os
 import re
@@ -14,8 +8,8 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import uuid
 import zipfile
-
 from collections import OrderedDict
 
 import botocore.client
@@ -28,36 +22,38 @@ from yaml.nodes import MappingNode
 from .awscli_yamlhelper import yaml_parse
 from .session_cache import get_session
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def camel_to_snake(name):
-    """Converts CamelCase to snake_case.
+    """Convert CamelCase to snake_case.
 
     Args:
-        name (string): The name to convert from CamelCase to snake_case.
+        name (str): The name to convert from CamelCase to snake_case.
 
     Returns:
         string: Converted string.
+
     """
-    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+    sub_str_1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", sub_str_1).lower()
 
 
 def convert_class_name(kls):
-    """Gets a string that represents a given class.
+    """Get a string that represents a given class.
 
     Args:
         kls (class): The class being analyzed for its name.
 
     Returns:
         string: The name of the given kls.
+
     """
     return camel_to_snake(kls.__name__)
 
 
 def parse_zone_id(full_zone_id):
-    """Parses the returned hosted zone id and returns only the ID itself."""
+    """Parse the returned hosted zone id and returns only the ID itself."""
     return full_zone_id.split("/")[2]
 
 
@@ -71,11 +67,12 @@ def get_hosted_zone_by_name(client, zone_name):
 
     Returns:
         string: The Id of the Hosted Zone.
-    """
-    p = client.get_paginator("list_hosted_zones")
 
-    for i in p.paginate():
-        for zone in i["HostedZones"]:
+    """
+    paginator = client.get_paginator("list_hosted_zones")
+
+    for page in paginator.paginate():
+        for zone in page["HostedZones"]:
             if zone["Name"] == zone_name:
                 return parse_zone_id(zone["Id"])
     return None
@@ -91,12 +88,13 @@ def get_or_create_hosted_zone(client, zone_name):
 
     Returns:
         string: The Id of the Hosted Zone.
+
     """
     zone_id = get_hosted_zone_by_name(client, zone_name)
     if zone_id:
         return zone_id
 
-    logger.debug("Zone %s does not exist, creating.", zone_name)
+    LOGGER.debug("Zone %s does not exist, creating.", zone_name)
 
     reference = uuid.uuid4().hex
 
@@ -106,29 +104,34 @@ def get_or_create_hosted_zone(client, zone_name):
     return parse_zone_id(response["HostedZone"]["Id"])
 
 
-class SOARecordText(object):
-    """Represents the actual body of an SOARecord. """
+class SOARecordText(object):  # pylint: disable=too-few-public-methods
+    """Represents the actual body of an SOARecord."""
+
     def __init__(self, record_text):
+        """Instantiate class."""
         (self.nameserver, self.contact, self.serial, self.refresh,
-            self.retry, self.expire, self.min_ttl) = record_text.split()
+         self.retry, self.expire, self.min_ttl) = record_text.split()
 
     def __str__(self):
+        """Contert an instance of this class to a string."""
         return "%s %s %s %s %s %s %s" % (
             self.nameserver, self.contact, self.serial, self.refresh,
             self.retry, self.expire, self.min_ttl
         )
 
 
-class SOARecord(object):
-    """Represents an SOA record. """
+class SOARecord(object):  # pylint: disable=too-few-public-methods
+    """Represents an SOA record."""
+
     def __init__(self, record):
+        """Instantiate class."""
         self.name = record["Name"]
         self.text = SOARecordText(record["ResourceRecords"][0]["Value"])
         self.ttl = record["TTL"]
 
 
 def get_soa_record(client, zone_id, zone_name):
-    """Gets the SOA record for zone_name from zone_id.
+    """Get the SOA record for zone_name from zone_id.
 
     Args:
         client (:class:`botocore.client.Route53`): The connection used to
@@ -139,8 +142,8 @@ def get_soa_record(client, zone_id, zone_name):
     Returns:
         :class:`stacker.util.SOARecord`: An object representing the parsed SOA
             record returned from AWS Route53.
-    """
 
+    """
     response = client.list_resource_record_sets(HostedZoneId=zone_id,
                                                 StartRecordName=zone_name,
                                                 StartRecordType="SOA",
@@ -149,7 +152,7 @@ def get_soa_record(client, zone_id, zone_name):
 
 
 def create_route53_zone(client, zone_name):
-    """Creates the given zone_name if it doesn't already exists.
+    """Create the given zone_name if it doesn't already exists.
 
     Also sets the SOA negative caching TTL to something short (300 seconds).
 
@@ -161,6 +164,7 @@ def create_route53_zone(client, zone_name):
     Returns:
         string: The zone id returned from AWS for the existing, or newly
             created zone.
+
     """
     if not zone_name.endswith("."):
         zone_name += "."
@@ -172,7 +176,7 @@ def create_route53_zone(client, zone_name):
         return zone_id
 
     new_soa = copy.deepcopy(old_soa)
-    logger.debug("Updating negative caching value on zone %s to 300.",
+    LOGGER.debug("Updating negative caching value on zone %s to 300.",
                  zone_name)
     new_soa.text.min_ttl = "300"
     client.change_resource_record_sets(
@@ -199,29 +203,12 @@ def create_route53_zone(client, zone_name):
     return zone_id
 
 
-def load_object_from_string(fqcn):
-    """Converts "." delimited strings to a python object.
-
-    Given a "." delimited string representing the full path to an object
-    (function, class, variable) inside a module, return that object.  Example:
-
-    load_object_from_string("os.path.basename")
-    load_object_from_string("logging.Logger")
-    load_object_from_string("LocalClassName")
-    """
-    module_path = "__main__"
-    object_name = fqcn
-    if "." in fqcn:
-        module_path, object_name = fqcn.rsplit(".", 1)
-        importlib.import_module(module_path)
-    return getattr(sys.modules[module_path], object_name)
-
-
 def merge_map(a, b):
     """Recursively merge elements of argument b into argument a.
 
-    Primarly used for merging two dictionaries together, where dict b takes
+    Primarily used for merging two dictionaries together, where dict b takes
     precedence over dict a. If 2 lists are provided, they are concatenated.
+
     """
     if isinstance(a, list) and isinstance(b, list):
         return a + b
@@ -235,7 +222,7 @@ def merge_map(a, b):
 
 
 def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
-    """Provides yaml.load alternative with preserved dictionary order.
+    """yaml.load alternative with preserved dictionary order.
 
     Args:
         stream (string): YAML string to load.
@@ -244,14 +231,16 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
 
     Returns:
         OrderedDict: Parsed YAML.
+
     """
     class OrderedUniqueLoader(loader):
-        """
-        Subclasses the given pyYAML `loader` class.
+        """Subclasses the given pyYAML `loader` class.
 
         Validates all sibling keys to insure no duplicates.
 
-        Returns an OrderedDict instead of a Dict.
+        Returns:
+            OrderedDict: instead of a Dict.
+
         """
 
         # keys which require no duplicate siblings.
@@ -259,12 +248,13 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
         # keys which require no duplicate children keys.
         NO_DUPE_CHILDREN = ["stacks"]
 
-        def _error_mapping_on_dupe(self, node, node_name):
-            """check mapping node for dupe children keys."""
+        @staticmethod
+        def _error_mapping_on_dupe(node, node_name):
+            """Check mapping node for dupe children keys."""
             if isinstance(node, MappingNode):
                 mapping = {}
-                for n in node.value:
-                    a = n[0]
+                for val in node.value:
+                    a = val[0]
                     b = mapping.get(a.value, None)
                     if b:
                         msg = "{} mapping cannot have duplicate keys {} {}"
@@ -320,16 +310,17 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
     return yaml.load(stream, OrderedUniqueLoader)
 
 
-def uppercase_first_letter(s):
-    """Return string "s" with first character upper case."""
-    return s[0].upper() + s[1:]
+def uppercase_first_letter(string_):
+    """Return string "string_" with first character upper case."""
+    return string_[0].upper() + string_[1:]
 
 
 def cf_safe_name(name):
-    """Converts a name to a safe string for a Cloudformation resource.
+    """Convert a name to a safe string for a Cloudformation resource.
 
     Given a string, returns a name that is safe for use as a CloudFormation
     Resource. (ie: Only alphanumeric characters)
+
     """
     alphanumeric = r"[a-zA-Z0-9]+"
     parts = re.findall(alphanumeric, name)
@@ -350,11 +341,14 @@ def get_config_directory():
 
 
 def read_value_from_path(value):
-    """Enables translators to read values from files.
+    """Enable translators to read values from files.
 
-    The value can be referred to with the `file://` prefix. ie:
+    The value can be referred to with the `file://` prefix.
 
-        conf_key: ${kms file://kms_value.txt}
+    Example:
+        .. code-block: yaml
+
+            conf_key: ${kms file://kms_value.txt}
 
     """
     if value.startswith('file://'):
@@ -367,35 +361,35 @@ def read_value_from_path(value):
 
 
 def get_client_region(client):
-    """Gets the region from a :class:`boto3.client.Client` object.
+    """Get the region from a :class:`boto3.client.Client` object.
 
     Args:
         client (:class:`boto3.client.Client`): The client to get the region
             from.
 
     Returns:
-        string: AWS region string.
-    """
+        str: AWS region string.
 
+    """
     return client._client_config.region_name
 
 
 def get_s3_endpoint(client):
-    """Gets the s3 endpoint for the given :class:`boto3.client.Client` object.
+    """Get the s3 endpoint for the given :class:`boto3.client.Client` object.
 
     Args:
         client (:class:`boto3.client.Client`): The client to get the endpoint
             from.
 
     Returns:
-        string: The AWS endpoint for the client.
-    """
+        str: The AWS endpoint for the client.
 
+    """
     return client._endpoint.host
 
 
 def s3_bucket_location_constraint(region):
-    """Returns the appropriate LocationConstraint info for a new S3 bucket.
+    """Return the appropriate LocationConstraint info for a new S3 bucket.
 
     When creating a bucket in a region OTHER than us-east-1, you need to
     specify a LocationConstraint inside the CreateBucketConfiguration argument.
@@ -405,7 +399,8 @@ def s3_bucket_location_constraint(region):
         region (str): The region where the bucket will be created in.
 
     Returns:
-        string: The string to use with the given client for creating a bucket.
+        str: The string to use with the given client for creating a bucket.
+
     """
     if region == "us-east-1":
         return ""
@@ -419,14 +414,15 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region):
         s3_client (:class:`botocore.client.Client`): An s3 client used to
             verify and create the bucket.
         bucket_name (str): The bucket being checked/created.
-        bucket_region (str, optional): The region to create the bucket in. If
+        bucket_region (Optional[str]): The region to create the bucket in. If
             not provided, will be determined by s3_client's region.
+
     """
     try:
         s3_client.head_bucket(Bucket=bucket_name)
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Message'] == "Not Found":
-            logger.debug("Creating bucket %s.", bucket_name)
+    except botocore.exceptions.ClientError as err:
+        if err.response['Error']['Message'] == "Not Found":
+            LOGGER.debug("Creating bucket %s.", bucket_name)
             create_args = {"Bucket": bucket_name}
             location_constraint = s3_bucket_location_constraint(
                 bucket_region
@@ -436,14 +432,14 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region):
                     "LocationConstraint": location_constraint
                 }
             s3_client.create_bucket(**create_args)
-        elif e.response['Error']['Message'] == "Forbidden":
-            logger.exception("Access denied for bucket %s.  Did " +
+        elif err.response['Error']['Message'] == "Forbidden":
+            LOGGER.exception("Access denied for bucket %s.  Did "
                              "you remember to use a globally unique name?",
                              bucket_name)
             raise
         else:
-            logger.exception("Error creating bucket %s. Error %s",
-                             bucket_name, e.response)
+            LOGGER.exception("Error creating bucket %s. Error %s",
+                             bucket_name, err.response)
             raise
 
 
@@ -454,6 +450,7 @@ def parse_cloudformation_template(template):
 
     Args:
         template (str): The template body.
+
     """
     return yaml_parse(template)
 
@@ -462,20 +459,20 @@ class Extractor(object):
     """Base class for extractors."""
 
     def __init__(self, archive=None):
-        """
-        Create extractor object with the archive path.
+        """Instantiate class.
 
         Args:
-            archive (string): Archive path
+            archive (str): Archive path.
+
         """
         self.archive = archive
 
     def set_archive(self, dir_name):
-        """
-        Update archive filename to match directory name & extension.
+        """Update archive filename to match directory name & extension.
 
         Args:
-            dir_name (string): Archive directory name
+            dir_name (str): Archive directory name
+
         """
         self.archive = dir_name + self.extension()
 
@@ -533,13 +530,14 @@ class SourceProcessor(object):
     ISO8601_FORMAT = '%Y%m%dT%H%M%SZ'
 
     def __init__(self, sources, stacker_cache_dir=None):
-        """
-        Process a config's defined package sources.
+        """Process a config's defined package sources.
 
         Args:
-            sources (dict): Package sources from Stacker config dictionary
-            stacker_cache_dir (string): Path where remote sources will be
+            sources (Dict[str, Any]): Package sources from Stacker config
+                dictionary.
+            stacker_cache_dir (str): Path where remote sources will be
                 cached.
+
         """
         if not stacker_cache_dir:
             stacker_cache_dir = os.path.expanduser("~/.stacker")
@@ -570,10 +568,10 @@ class SourceProcessor(object):
             self.fetch_git_package(config=config)
 
     def fetch_local_package(self, config):
-        """Make a local path available to current stacker config.
+        """Make a local path available to current CFNgin config.
 
         Args:
-            config (dict): 'local' path config dictionary
+            config (Dict[str, Any]): 'local' path config dictionary.
 
         """
         # Update sys.path & merge in remote configs (if necessary)
@@ -585,19 +583,19 @@ class SourceProcessor(object):
         """Make a remote S3 archive available for local use.
 
         Args:
-            config (dict): git config dictionary
+            config (Dict[str, Any]): git config dictionary.
 
         """
         extractor_map = {'.tar.gz': TarGzipExtractor,
                          '.tar': TarExtractor,
                          '.zip': ZipExtractor}
         extractor = None
-        for suffix, klass in extractor_map.items():
+        for suffix, class_ in extractor_map.items():
             if config['key'].endswith(suffix):
-                extractor = klass()
-                logger.debug("Using extractor %s for S3 object \"%s\" in "
+                extractor = class_()
+                LOGGER.debug("Using extractor %s for S3 object \"%s\" in "
                              "bucket %s.",
-                             klass.__name__,
+                             class_.__name__,
                              config['key'],
                              config['bucket'])
                 dir_name = self.sanitize_uri_path(
@@ -628,7 +626,7 @@ class SourceProcessor(object):
                     **extra_s3_args
                 )['LastModified'].astimezone(dateutil.tz.tzutc())
             except botocore.exceptions.ClientError as client_error:
-                logger.error("Error checking modified date of "
+                LOGGER.error("Error checking modified date of "
                              "s3://%s/%s : %s",
                              config['bucket'],
                              config['key'],
@@ -637,7 +635,7 @@ class SourceProcessor(object):
             dir_name += "-%s" % modified_date.strftime(self.ISO8601_FORMAT)
         cached_dir_path = os.path.join(self.package_cache_dir, dir_name)
         if not os.path.isdir(cached_dir_path):
-            logger.debug("Remote package s3://%s/%s does not appear to have "
+            LOGGER.debug("Remote package s3://%s/%s does not appear to have "
                          "been previously downloaded - starting download and "
                          "extraction to %s",
                          config['bucket'],
@@ -647,7 +645,7 @@ class SourceProcessor(object):
             tmp_package_path = os.path.join(tmp_dir, dir_name)
             try:
                 extractor.set_archive(os.path.join(tmp_dir, dir_name))
-                logger.debug("Starting remote package download from S3 to %s "
+                LOGGER.debug("Starting remote package download from S3 to %s "
                              "with extra S3 options \"%s\"",
                              extractor.archive,
                              str(extra_s3_args))
@@ -656,11 +654,11 @@ class SourceProcessor(object):
                     extractor.archive,
                     ExtraArgs=extra_s3_args
                 )
-                logger.debug("Download complete; extracting downloaded "
+                LOGGER.debug("Download complete; extracting downloaded "
                              "package to %s",
                              tmp_package_path)
                 extractor.extract(tmp_package_path)
-                logger.debug("Moving extracted package directory %s to the "
+                LOGGER.debug("Moving extracted package directory %s to the "
                              "Stacker cache at %s",
                              dir_name,
                              self.package_cache_dir)
@@ -668,7 +666,7 @@ class SourceProcessor(object):
             finally:
                 shutil.rmtree(tmp_dir)
         else:
-            logger.debug("Remote package s3://%s/%s appears to have "
+            LOGGER.debug("Remote package s3://%s/%s appears to have "
                          "been previously downloaded to %s -- bypassing "
                          "download",
                          config['bucket'],
@@ -683,7 +681,7 @@ class SourceProcessor(object):
         """Make a remote git repository available for local use.
 
         Args:
-            config (dict): git config dictionary
+            config (Dict[str, Any]): git config dictionary.
 
         """
         # only loading git here when needed to avoid load errors on systems
@@ -696,7 +694,7 @@ class SourceProcessor(object):
 
         # We can skip cloning the repo if it's already been cached
         if not os.path.isdir(cached_dir_path):
-            logger.debug("Remote repo %s does not appear to have been "
+            LOGGER.debug("Remote repo %s does not appear to have been "
                          "previously downloaded - starting clone to %s",
                          config['uri'],
                          cached_dir_path)
@@ -710,7 +708,7 @@ class SourceProcessor(object):
             finally:
                 shutil.rmtree(tmp_dir)
         else:
-            logger.debug("Remote repo %s appears to have been previously "
+            LOGGER.debug("Remote repo %s appears to have been previously "
                          "cloned to %s -- bypassing download",
                          config['uri'],
                          cached_dir_path)
@@ -724,10 +722,10 @@ class SourceProcessor(object):
         """Handle remote source defined sys.paths & configs.
 
         Args:
-            config (dict): git config dictionary
-            pkg_dir_name (string): directory name of the stacker archive
-            pkg_cache_dir (string): fully qualified path to stacker cache
-                                    cache directory
+            config (Dict[str, Any]): Git config dictionary.
+            pkg_dir_name (str): directory Name of the CFNgin archive.
+            pkg_cache_dir (Optional[str]): Fully qualified path to CFNgin
+                cache cache directory.
 
         """
         if pkg_cache_dir is None:
@@ -739,51 +737,51 @@ class SourceProcessor(object):
             for path in config['paths']:
                 path_to_append = os.path.join(cached_dir_path,
                                               path)
-                logger.debug("Appending \"%s\" to python sys.path",
+                LOGGER.debug("Appending \"%s\" to python sys.path",
                              path_to_append)
                 sys.path.append(path_to_append)
         else:
             sys.path.append(cached_dir_path)
 
-        # If the configuration defines a set of remote config yamls to
+        # If the configuration defines a set of remote config yaml files to
         # include, add them to the list for merging
         if config.get('configs'):
             for config_filename in config['configs']:
                 self.configs_to_merge.append(os.path.join(cached_dir_path,
                                                           config_filename))
 
-    def git_ls_remote(self, uri, ref):
+    @staticmethod
+    def git_ls_remote(uri, ref):
         """Determine the latest commit id for a given ref.
 
         Args:
-            uri (string): git URI
-            ref (string): git ref
+            uri (str): Git URI.
+            ref (str): Git ref.
 
         Returns:
             str: A commit id
 
         """
-        logger.debug("Invoking git to retrieve commit id for repo %s...", uri)
-        lsremote_output = subprocess.check_output(['git',
-                                                   'ls-remote',
-                                                   uri,
-                                                   ref])
-        if b"\t" in lsremote_output:
-            commit_id = lsremote_output.split(b"\t")[0]
-            logger.debug("Matching commit id found: %s", commit_id)
+        LOGGER.debug("Invoking git to retrieve commit id for repo %s...", uri)
+        ls_remote_output = subprocess.check_output(['git', 'ls-remote', uri,
+                                                    ref])
+        # incorrectly detected - https://github.com/PyCQA/pylint/issues/3045
+        if b"\t" in ls_remote_output:  # pylint: disable=unsupported-membership-test
+            commit_id = ls_remote_output.split(b"\t")[0]
+            LOGGER.debug("Matching commit id found: %s", commit_id)
             return commit_id
-        else:
-            raise ValueError("Ref \"%s\" not found for repo %s." % (ref, uri))
+        raise ValueError("Ref \"%s\" not found for repo %s." % (ref, uri))
 
-    def determine_git_ls_remote_ref(self, config):
+    @staticmethod
+    def determine_git_ls_remote_ref(config):
         """Determine the ref to be used with the "git ls-remote" command.
 
         Args:
-            config (:class:`stacker.config.GitPackageSource`): git config
-                dictionary; 'branch' key is optional
+            config (:class:`runway.cfngin.config.GitPackageSource`): Git
+                config dictionary; 'branch' key is optional.
 
         Returns:
-            str: A branch reference or "HEAD"
+            str: A branch reference or "HEAD".
 
         """
         if config.get('branch'):
@@ -794,13 +792,13 @@ class SourceProcessor(object):
         return ref
 
     def determine_git_ref(self, config):
-        """Determine the ref to be used for 'git checkout'.
+        """Determine the ref to be used for ``git checkout``.
 
         Args:
-            config (dict): git config dictionary
+            config (Dict[str, Any]): Git config dictionary.
 
         Returns:
-            str: A commit id or tag name
+            str: A commit id or tag name.
 
         """
         # First ensure redundant config keys aren't specified (which could
@@ -831,14 +829,15 @@ class SourceProcessor(object):
             return ref.decode()
         return ref
 
-    def sanitize_uri_path(self, uri):
+    @staticmethod
+    def sanitize_uri_path(uri):
         """Take a URI and converts it to a directory safe path.
 
         Args:
-            uri (string): URI (e.g. http://example.com/cats)
+            uri (str): URI (e.g. http://example.com/cats).
 
         Returns:
-            str: Directory name for the supplied uri
+            str: Directory name for the supplied uri.
 
         """
         for i in ['@', '/', ':']:
@@ -849,9 +848,8 @@ class SourceProcessor(object):
         """Take a git URI and ref and converts it to a directory safe path.
 
         Args:
-            uri (string): git URI
-                          (e.g. git@github.com:foo/bar.git)
-            ref (string): optional git ref to be appended to the path
+            uri (str): Git URI. (e.g. git@github.com:foo/bar.git)
+            ref (Optional[str]): Git ref to be appended to the path.
 
         Returns:
             str: Directory name for the supplied uri
@@ -871,11 +869,12 @@ def stack_template_key_name(blueprint):
     """Given a blueprint, produce an appropriate key name.
 
     Args:
-        blueprint (:class:`stacker.blueprints.base.Blueprint`): The blueprint
-            object to create the key from.
+        blueprint (:class:`runway.cfngin.blueprints.base.Blueprint`): The
+            blueprint object to create the key from.
 
     Returns:
-        string: Key name resulting from blueprint.
+        str: Key name resulting from blueprint.
+
     """
     name = blueprint.name
     return "stack_templates/%s/%s-%s.json" % (blueprint.context.get_fqn(name),

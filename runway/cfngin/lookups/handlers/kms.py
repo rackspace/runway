@@ -1,28 +1,35 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""AWS KMS lookup."""
+# pylint: disable=unused-argument
 import codecs
 
-from . import LookupHandler
 from ...session_cache import get_session
 from ...util import read_value_from_path
+from . import LookupHandler
 
 TYPE_NAME = "kms"
 
 
 class KmsLookup(LookupHandler):
-    @classmethod
-    def handle(cls, value, **kwargs):
-        """Decrypt the specified value with a master key in KMS.
+    """AWS KMS lookup."""
 
-        kmssimple field types should be in the following format:
+    @classmethod
+    def handle(cls, value, context=None, provider=None):
+        r"""Decrypt the specified value with a master key in KMS.
+
+        Args:
+            value (str): Parameter(s) given to this lookup.
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
+
+        ``value`` should be in the following format:
 
             [<region>@]<base64 encrypted value>
 
-        Note: The region is optional, and defaults to the environment's
-        `AWS_DEFAULT_REGION` if not specified.
+        .. note: The region is optional, and defaults to the environment's
+                 ``AWS_DEFAULT_REGION`` if not specified.
 
-        For example:
+        Example::
 
             # We use the aws cli to get the encrypted value for the string
             # "PASSWORD" using the master key called "myStackerKey" in
@@ -32,16 +39,16 @@ class KmsLookup(LookupHandler):
 
             CiD6bC8t2Y<...encrypted blob...>
 
-            # In stacker we would reference the encrypted value like:
+            # With CFNgin we would reference the encrypted value like:
             conf_key: ${kms us-east-1@CiD6bC8t2Y<...encrypted blob...>}
 
-            You can optionally store the encrypted value in a file, ie:
+        You can optionally store the encrypted value in a file, ie::
 
             kms_value.txt
             us-east-1@CiD6bC8t2Y<...encrypted blob...>
 
-            and reference it within stacker (NOTE: the path should be relative
-            to the stacker config file):
+        and reference it within CFNgin (NOTE: the path should be relative
+        to the CFNgin config file):
 
             conf_key: ${kms file://kms_value.txt}
 

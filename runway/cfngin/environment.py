@@ -1,9 +1,16 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""CFNgin environment file parsing."""
 
 
 def parse_environment(raw_environment):
+    """Parse environment file contents.
+
+    Args:
+        raw_environment (str): Environment file read into a string.
+
+    Returns:
+        Dict[str, Any]
+
+    """
     environment = {}
     for line in raw_environment.split('\n'):
         line = line.strip()

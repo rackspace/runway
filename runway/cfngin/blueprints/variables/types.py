@@ -1,31 +1,32 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import object
+"""CFNgin blueprint variable types."""
+# pylint: disable=invalid-name,len-as-condition
 
 
 class TroposphereType(object):
+    """Represents a Troposphere type.
+
+    :class:`Troposphere` will convert the value provided to the variable to
+    the specified Troposphere type.
+
+    Both resource and parameter classes (which are just used to configure
+    other resources) are acceptable as configuration values.
+
+    Complete resource definitions must be dictionaries, with the keys
+    identifying the resource titles, and the values being used as the
+    constructor parameters.
+
+    Parameter classes can be defined as dictionary or a list of
+    dictionaries. In either case, the keys and values will be used directly
+    as constructor parameters.
+
+    """
 
     def __init__(self, defined_type, many=False, optional=False,
                  validate=True):
-        """Represents a Troposphere type.
-
-        :class:`Troposphere` will convert the value provided to the variable to
-        the specified Troposphere type.
-
-        Both resource and parameter classes (which are just used to configure
-        other resources) are acceptable as configuration values.
-
-        Complete resource definitions must be dictionaries, with the keys
-        identifying the resource titles, and the values being used as the
-        constructor parameters.
-
-        Parameter classes can be defined as dictionariy or a list of
-        dictionaries. In either case, the keys and values will be used directly
-        as constructor parameters.
+        """Instantiate class.
 
         Args:
-            defined_type (type): Troposphere type
+            defined_type (Any): Troposphere type
             many (bool): Whether or not multiple resources can be constructed.
                 If the defined type is a resource, multiple resources can be
                 passed as a dictionary of dictionaries.
@@ -40,7 +41,6 @@ class TroposphereType(object):
                 that it must be validated at a later point.
 
         """
-
         self._validate_type(defined_type)
 
         self._type = defined_type
@@ -48,12 +48,14 @@ class TroposphereType(object):
         self._optional = optional
         self._validate = validate
 
-    def _validate_type(self, defined_type):
+    @staticmethod
+    def _validate_type(defined_type):
         if not hasattr(defined_type, "from_dict"):
             raise ValueError("Type must have `from_dict` attribute")
 
     @property
     def resource_name(self):
+        """Name of the type or resource."""
         return (
             getattr(self._type, 'resource_name', None) or self._type.__name__
         )
@@ -62,18 +64,16 @@ class TroposphereType(object):
         """Create the troposphere type from the value.
 
         Args:
-            value (Union[dict, list]): A dictionary or list of dictionaries
-                (see class documentation for details) to use as parameters to
-                create the Troposphere type instance.
+            value (Union[Dict[str, Any], List[Dict[str, Any]]]): A dictionary
+                or list of dictionaries (see class documentation for details)
+                to use as parameters to create the Troposphere type instance.
                 Each dictionary will be passed to the `from_dict` method of the
                 type.
 
         Returns:
-            Union[list, type]: Returns the value converted to the troposphere
-                type
+            Any: Returns the value converted to the troposphere type.
 
         """
-
         # Explicitly check with len such that non-sequence types throw.
         if self._optional and (value is None or len(value) == 0):
             return None
@@ -110,14 +110,17 @@ class TroposphereType(object):
         return result[0] if not self._many else result
 
 
-class CFNType(object):
+class CFNType(object):  # pylint: disable=too-few-public-methods
+    """Represents a CloudFormation Parameter Type.
+
+    :class:`CFNType`` can be used as the `type` for a Blueprint variable.
+    Unlike other variables, a variable with `type` :class:`CFNType`, will
+    be submitted to CloudFormation as a Parameter.
+
+    """
 
     def __init__(self, parameter_type):
-        """Represents a CloudFormation Parameter Type.
-
-        :class:`CFNType`` can be used as the `type` for a Blueprint variable.
-        Unlike other variables, a variable with `type` :class:`CFNType`, will
-        be submitted to CloudFormation as a Parameter.
+        """Instantiate class.
 
         Args:
             parameter_type (str): An AWS specific parameter type

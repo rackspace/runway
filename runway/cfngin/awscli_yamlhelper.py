@@ -1,6 +1,4 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""Copy of awscli.customizations.cloudformation.yamlhelper.py."""
 # Copyright 2012-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You
@@ -14,18 +12,18 @@ from __future__ import absolute_import
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
+
 import yaml
+from botocore.compat import six
 from yaml.resolver import ScalarNode, SequenceNode
 
-from botocore.compat import six
 
+def intrinsics_multi_constructor(loader, tag_prefix, node):  # pylint: disable=unused-argument
+    """YAML constructor to parse CloudFormation intrinsics.
 
-def intrinsics_multi_constructor(loader, tag_prefix, node):
+    This will return a dictionary with key being the intrinsic name
+
     """
-    YAML constructor to parse CloudFormation intrinsics.
-    This will return a dictionary with key being the instrinsic name
-    """
-
     # Get the actual tag name excluding the first exclamation
     tag = node.tag[1:]
 
@@ -58,16 +56,12 @@ def intrinsics_multi_constructor(loader, tag_prefix, node):
 
 
 def yaml_dump(dict_to_dump):
-    """
-    Dumps the dictionary as a YAML document
-    :param dict_to_dump:
-    :return:
-    """
+    """Dump the dictionary as a YAML document."""
     return yaml.safe_dump(dict_to_dump, default_flow_style=False)
 
 
 def yaml_parse(yamlstr):
-    """Parse a yaml string"""
+    """Parse a yaml string."""
     try:
         # PyYAML doesn't support json as well as it should, so if the input
         # is actually just json it is better to parse it with the standard

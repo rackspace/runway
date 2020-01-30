@@ -1,12 +1,10 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""CFNgin info action."""
 import logging
 
-from .base import BaseAction
 from .. import exceptions
+from .base import BaseAction
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Action(BaseAction):
@@ -16,23 +14,24 @@ class Action(BaseAction):
 
     """
 
-    def run(self, *args, **kwargs):
-        logger.info('Outputs for stacks: %s', self.context.get_fqn())
+    def run(self, **kwargs):
+        """Get information on CloudFormation stacks."""
+        LOGGER.info('Outputs for stacks: %s', self.context.get_fqn())
         if not self.context.get_stacks():
-            logger.warn('WARNING: No stacks detected (error in config?)')
+            LOGGER.warning('WARNING: No stacks detected (error in config?)')
         for stack in self.context.get_stacks():
             provider = self.build_provider(stack)
 
             try:
                 provider_stack = provider.get_stack(stack.fqn)
             except exceptions.StackDoesNotExist:
-                logger.info('Stack "%s" does not exist.' % (stack.fqn,))
+                LOGGER.info('Stack "%s" does not exist.', stack.fqn,)
                 continue
 
-            logger.info('%s:', stack.fqn)
+            LOGGER.info('%s:', stack.fqn)
             if 'Outputs' in provider_stack:
                 for output in provider_stack['Outputs']:
-                    logger.info(
+                    LOGGER.info(
                         '\t%s: %s',
                         output['OutputKey'],
                         output['OutputValue']

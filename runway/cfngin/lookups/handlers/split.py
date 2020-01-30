@@ -1,24 +1,35 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""Split lookup."""
+# pylint: disable=unused-argument
 from . import LookupHandler
+
 TYPE_NAME = "split"
 
 
 class SplitLookup(LookupHandler):
+    """Split lookup."""
+
     @classmethod
-    def handle(cls, value, **kwargs):
+    def handle(cls, value, context=None, provider=None):
         """Split the supplied string on the given delimiter, providing a list.
 
-        Format of value:
+        Args:
+            value (str): Parameter(s) given to this lookup.
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
+
+        Returns:
+            str: Looked up value.
+
+        Format of value::
 
             <delimiter>::<value>
 
-        For example:
+        Example::
 
             Subnets: ${split ,::subnet-1,subnet-2,subnet-3}
 
-        Would result in the variable `Subnets` getting a list consisting of:
+        Would result in the variable `Subnets` getting a list consisting of::
 
             ["subnet-1", "subnet-2", "subnet-3"]
 
@@ -26,11 +37,11 @@ class SplitLookup(LookupHandler):
         that contains a list. For example, the standard vpc blueprint outputs
         the list of Subnets it creates as a pair of Outputs (PublicSubnets,
         PrivateSubnets) that are comma separated, so you could use this in your
-        config:
+        config::
 
             Subnets: ${split ,::${output vpc::PrivateSubnets}}
-        """
 
+        """
         try:
             delimiter, text = value.split("::", 1)
         except ValueError:

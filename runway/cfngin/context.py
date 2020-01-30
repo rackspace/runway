@@ -1,7 +1,4 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import object
+"""CFNgin context."""
 import collections
 import logging
 
@@ -9,7 +6,7 @@ from .config import Config
 from .stack import Stack
 from .target import Target
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 DEFAULT_NAMESPACE_DELIMITER = "-"
@@ -32,18 +29,8 @@ def get_fqn(base_fqn, delimiter, name=None):
 class Context(object):
     """The context under which the current stacks are being executed.
 
-    The stacker Context is responsible for translating the values passed in via
-    the command line and specified in the config to `Stack` objects.
-
-    Args:
-        environment (dict): A dictionary used to pass in information about
-            the environment. Useful for templating.
-        stack_names (list): A list of stack_names to operate on. If not passed,
-            usually all stacks defined in the config will be operated on.
-        config (:class:`stacker.config.Config`): The stacker configuration
-            being operated on.
-        force_stacks (list): A list of stacks to force work on. Used to work
-            on locked stacks.
+    The CFNgin Context is responsible for translating the values passed in
+    via the command line and specified in the config to `Stack` objects.
 
     """
 
@@ -51,18 +38,36 @@ class Context(object):
                  stack_names=None,
                  config=None,
                  force_stacks=None):
+        """Instantiate class.
+
+        Args:
+            environment (dict): A dictionary used to pass in information about
+                the environment. Useful for templating.
+            stack_names (list): A list of stack_names to operate on. If not
+                passed, usually all stacks defined in the config will be
+                operated on.
+            config (:class:`runway.cfngin.config.Config`): The CFNgin
+                configuration being operated on.
+            force_stacks (list): A list of stacks to force work on. Used to
+                work on locked stacks.
+
+        """
         self.environment = environment
         self.stack_names = stack_names or []
         self.config = config or Config()
         self.force_stacks = force_stacks or []
         self.hook_data = {}
+        self._stacks = []
+        self._targets = []
 
     @property
     def namespace(self):
+        """Return ``namespace`` from config."""
         return self.config.namespace
 
     @property
     def namespace_delimiter(self):
+        """Return ``namespace_delimiter`` from config or default."""
         delimiter = self.config.namespace_delimiter
         if delimiter is not None:
             return delimiter
@@ -70,6 +75,7 @@ class Context(object):
 
     @property
     def template_indent(self):
+        """Return ``template_indent`` from config or default."""
         indent = self.config.template_indent
         if indent is not None:
             return int(indent)
@@ -77,6 +83,7 @@ class Context(object):
 
     @property
     def bucket_name(self):
+        """Return ``stacker_bucket`` from config, calculated name, or None."""
         if not self.upload_templates_to_s3:
             return None
 
@@ -85,11 +92,17 @@ class Context(object):
 
     @property
     def upload_templates_to_s3(self):
+        """Condition result determining if templates will be uploaded to s3.
+
+        False if ``stacker_bucket`` provided in config is explicitly an empty
+        string or if ``stacker_bucket`` and ``namespace`` are not provided.
+
+        """
         # Don't upload stack templates to S3 if `stacker_bucket` is explicitly
         # set to an empty string.
         if self.config.stacker_bucket == '':
-            logger.debug("Not uploading templates to s3 because "
-                         "`stacker_bucket` is explicity set to an "
+            LOGGER.debug("Not uploading templates to s3 because "
+                         "`stacker_bucket` is explicitly set to an "
                          "empty string")
             return False
 
@@ -97,7 +110,7 @@ class Context(object):
         # bucket specified, don't upload to s3. This makes sense because we
         # can't realistically auto generate a stacker bucket name in this case.
         if not self.namespace and not self.config.stacker_bucket:
-            logger.debug("Not uploading templates to s3 because "
+            LOGGER.debug("Not uploading templates to s3 because "
                          "there is no namespace set, and no "
                          "stacker_bucket set")
             return False
@@ -106,6 +119,7 @@ class Context(object):
 
     @property
     def tags(self):
+        """Return ``tags`` from config."""
         tags = self.config.tags
         if tags is not None:
             return tags
@@ -115,23 +129,26 @@ class Context(object):
 
     @property
     def _base_fqn(self):
+        """Return ``namespace`` sanitized for use as an S3 Bucket name."""
         return self.namespace.replace(".", "-").lower()
 
     @property
     def mappings(self):
+        """Return ``mappings`` from config."""
         return self.config.mappings or {}
 
     def _get_stack_definitions(self):
+        """Return ``stacks`` from config."""
         return self.config.stacks
 
     def get_targets(self):
-        """Returns the named targets that are specified in the config.
+        """Return the named targets that are specified in the config.
 
         Returns:
-            list: a list of :class:`stacker.target.Target` objects
+            list: a list of :class:`runway.cfngin.target.Target` objects
 
         """
-        if not hasattr(self, "_targets"):
+        if not self._targets:
             targets = []
             for target_def in self.config.targets or []:
                 target = Target(target_def)
@@ -142,14 +159,14 @@ class Context(object):
     def get_stacks(self):
         """Get the stacks for the current action.
 
-        Handles configuring the :class:`stacker.stack.Stack` objects that will
-        be used in the current action.
+        Handles configuring the :class:`runway.cfngin.stack.Stack` objects
+        that will be used in the current action.
 
         Returns:
-            list: a list of :class:`stacker.stack.Stack` objects
+            list: a list of :class:`runway.cfngin.stack.Stack` objects
 
         """
-        if not hasattr(self, "_stacks"):
+        if not self._stacks:
             stacks = []
             definitions = self._get_stack_definitions()
             for stack_def in definitions:
@@ -167,11 +184,19 @@ class Context(object):
         return self._stacks
 
     def get_stack(self, name):
+        """Get a stack by name.
+
+        Args:
+            name (str): Name of a stack to retrieve.
+
+        """
         for stack in self.get_stacks():
             if stack.name == name:
                 return stack
+        return None
 
     def get_stacks_dict(self):
+        """Construct a dict of {stack.fqn: stack} for easy access to stacks."""
         return dict((stack.fqn, stack) for stack in self.get_stacks())
 
     def get_fqn(self, name=None):
@@ -190,8 +215,8 @@ class Context(object):
             key(str): The key to store the hook data in.
             data(:class:`collections.Mapping`): A dictionary of data to store,
                 as returned from a hook.
-        """
 
+        """
         if not isinstance(data, collections.Mapping):
             raise ValueError("Hook (key: %s) data must be an instance of "
                              "collections.Mapping (a dictionary for "
@@ -199,6 +224,6 @@ class Context(object):
 
         if key in self.hook_data:
             raise KeyError("Hook data for key %s already exists, each hook "
-                           "must have a unique data_key.", key)
+                           "must have a unique data_key." % key)
 
         self.hook_data[key] = data

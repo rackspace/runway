@@ -1,59 +1,40 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
+"""CFNgin config."""
 import copy
-import sys
 import logging
-
-from string import Template
+import sys
 from io import StringIO
-
-from schematics import Model
-from schematics.exceptions import ValidationError
-from schematics.exceptions import (
-    BaseError as SchematicsError,
-    UndefinedValueError
-)
-
-from schematics.types import (
-    ModelType,
-    ListType,
-    StringType,
-    BooleanType,
-    DictType,
-    BaseType
-)
+from string import Template
 
 import yaml
+from schematics import Model
+from schematics.exceptions import BaseError as SchematicsError
+from schematics.exceptions import UndefinedValueError, ValidationError
+from schematics.types import (BaseType, BooleanType, DictType, ListType,
+                              ModelType, StringType)
+from six import text_type
 
-from ..lookups import register_lookup_handler
-from ..util import merge_map, yaml_to_ordered_dict, SourceProcessor
 from .. import exceptions
+from ..lookups import register_lookup_handler
+from ..util import SourceProcessor, merge_map, yaml_to_ordered_dict
+from .translators import *  # noqa
 
-# register translators (yaml constructors)
-from .translators import *  # NOQA
-
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def render_parse_load(raw_config, environment=None, validate=True):
-    """Encapsulates the render -> parse -> validate -> load process.
+    """Encapsulate the render -> parse -> validate -> load process.
 
     Args:
-        raw_config (str): the raw stacker configuration string.
-        environment (dict, optional): any environment values that should be
-            passed to the config
-        validate (bool): if provided, the config is validated before being
+        raw_config (str): The raw CFNgin configuration string.
+        environment (Optional[Dict[str, Any]]): Any environment values that
+            should be passed to the config.
+        validate (bool): If provided, the config is validated before being
             loaded.
 
     Returns:
-        :class:`Config`: the parsed stacker config.
+        :class:`Config`: The parsed CFNgin config.
 
     """
-
     pre_rendered = render(raw_config, environment)
 
     rendered = process_remote_sources(pre_rendered, environment)
@@ -65,11 +46,11 @@ def render_parse_load(raw_config, environment=None, validate=True):
     if config.namespace is None:
         namespace = environment.get("namespace")
         if namespace:
-            logger.warn("DEPRECATION WARNING: specifying namespace in the "
-                        "environment is deprecated. See "
-                        "https://stacker.readthedocs.io/en/latest/config.html"
-                        "#namespace "
-                        "for more info.")
+            LOGGER.warning("DEPRECATION WARNING: specifying namespace in the "
+                           "environment is deprecated. See "
+                           "https://stacker.readthedocs.io/en/latest/config.html"
+                           "#namespace "
+                           "for more info.")
             config.namespace = namespace
 
     if validate:
@@ -79,32 +60,31 @@ def render_parse_load(raw_config, environment=None, validate=True):
 
 
 def render(raw_config, environment=None):
-    """Renders a config, using it as a template with the environment.
+    """Render a config, using it as a template with the environment.
 
     Args:
-        raw_config (str): the raw stacker configuration string.
-        environment (dict, optional): any environment values that should be
-            passed to the config
+        raw_config (str): The raw CFNgin configuration string.
+        environment (Optional[Dict[str, Any]]): Any environment values that
+            should be passed to the config.
 
     Returns:
-        str: the stacker configuration populated with any values passed from
-            the environment
+        str: The CFNgin configuration populated with any values passed from
+            the environment.
 
     """
-
-    t = Template(raw_config)
+    template = Template(raw_config)
     buff = StringIO()
     if not environment:
         environment = {}
     try:
-        substituted = t.substitute(environment)
-    except KeyError as e:
-        raise exceptions.MissingEnvironment(e.args[0])
+        substituted = template.substitute(environment)
+    except KeyError as err:
+        raise exceptions.MissingEnvironment(err.args[0])
     except ValueError:
         # Support "invalid" placeholders for lookup placeholders.
-        substituted = t.safe_substitute(environment)
+        substituted = template.safe_substitute(environment)
 
-    if not isinstance(substituted, str):
+    if not isinstance(substituted, text_type):
         substituted = substituted.decode('utf-8')
 
     buff.write(substituted)
@@ -113,16 +93,15 @@ def render(raw_config, environment=None):
 
 
 def parse(raw_config):
-    """Parse a raw yaml formatted stacker config.
+    """Parse a raw yaml formatted CFNgin config.
 
     Args:
-        raw_config (str): the raw stacker configuration string in yaml format.
+        raw_config (str): The raw CFNgin configuration string in yaml format.
 
     Returns:
-        :class:`Config`: the parsed stacker config.
+        :class:`Config`: The parsed CFNgin config.
 
     """
-
     # Convert any applicable dictionaries back into lists
     # This is necessary due to the move from lists for these top level config
     # values to either lists or OrderedDicts.
@@ -145,26 +124,24 @@ def parse(raw_config):
     # mode is fine here.
     try:
         return Config(config_dict, strict=True)
-    except SchematicsError as e:
-        raise exceptions.InvalidConfig(e.errors)
+    except SchematicsError as err:
+        raise exceptions.InvalidConfig(err.errors)
 
 
 def load(config):
-    """Loads a stacker configuration by modifying sys paths, loading lookups,
-    etc.
+    """Load a CFNgin configuration by modifying syspath, loading lookups, etc.
 
     Args:
-        config (:class:`Config`): the stacker config to load.
+        config (:class:`Config`): The CFNgin config to load.
 
     Returns:
-        :class:`Config`: the stacker config provided above.
+        :class:`Config`: The CFNgin config provided above.
 
     """
-
     if config.sys_path:
-        logger.debug("Appending %s to sys.path.", config.sys_path)
+        LOGGER.debug("Appending %s to sys.path.", config.sys_path)
         sys.path.append(config.sys_path)
-        logger.debug("sys.path is now %s", sys.path)
+        LOGGER.debug("sys.path is now %s", sys.path)
     if config.lookups:
         for key, handler in config.lookups.items():
             register_lookup_handler(key, handler)
@@ -173,17 +150,15 @@ def load(config):
 
 
 def dump(config):
-    """Dumps a stacker Config object as yaml.
+    """Dump a CFNgin Config object as yaml.
 
     Args:
-        config (:class:`Config`): the stacker Config object.
-        stream (stream): an optional stream object to write to.
+        config (:class:`Config`): The CFNgin Config object.
 
     Returns:
-        str: the yaml formatted stacker Config.
+        str: The yaml formatted CFNgin Config.
 
     """
-
     return yaml.safe_dump(
         config.to_primitive(),
         default_flow_style=False,
@@ -195,15 +170,14 @@ def process_remote_sources(raw_config, environment=None):
     """Stage remote package sources and merge in remote configs.
 
     Args:
-        raw_config (str): the raw stacker configuration string.
-        environment (dict, optional): any environment values that should be
-            passed to the config
+        raw_config (str): The raw CFNgin configuration string.
+        environment (Optional[Dict, Any]): Any environment values that should
+            be passed to the config.
 
     Returns:
-        str: the raw stacker configuration string
+        str: The raw CFNgin configuration string.
 
     """
-
     config = yaml.safe_load(raw_config)
     if config and config.get('package_sources'):
         processor = SourceProcessor(
@@ -213,7 +187,7 @@ def process_remote_sources(raw_config, environment=None):
         processor.get_package_sources()
         if processor.configs_to_merge:
             for i in processor.configs_to_merge:
-                logger.debug("Merging in remote config \"%s\"", i)
+                LOGGER.debug("Merging in remote config \"%s\"", i)
                 remote_config = yaml.safe_load(open(i))
                 config = merge_map(remote_config, config)
             # Call the render again as the package_sources may have merged in
@@ -225,116 +199,166 @@ def process_remote_sources(raw_config, environment=None):
     return raw_config
 
 
-def not_empty_list(value):
-    if not value or len(value) < 1:
-        raise ValidationError("Should have more than one element.")
-    return value
-
-
 class AnyType(BaseType):
-    pass
+    """Any type."""
 
 
 class LocalPackageSource(Model):
-    source = StringType(required=True)
+    """Local package source model.
 
-    paths = ListType(StringType, serialize_when_none=False)
+    Package source located on a local disk.
+
+    Attributes:
+        configs (ListType): List of CFNgin config paths to execute.
+        paths (ListType): List of paths to append to ``sys.path``.
+        source (StringType): Source.
+
+    """
 
     configs = ListType(StringType, serialize_when_none=False)
+    paths = ListType(StringType, serialize_when_none=False)
+    source = StringType(required=True)
 
 
 class GitPackageSource(Model):
-    uri = StringType(required=True)
+    """Git package source model.
 
-    tag = StringType(serialize_when_none=False)
+    Package source located in a git repo.
+
+    Attributes:
+        branch (StringType): Branch name.
+        commit (StringType): Commit hash.
+        configs (ListType): List of CFNgin config paths to execute.
+        paths (ListType): List of paths to append to ``sys.path``.
+        tag (StringType): Git tag.
+        uri (StringType): Remote git repo URI.
+
+    """
 
     branch = StringType(serialize_when_none=False)
-
     commit = StringType(serialize_when_none=False)
-
-    paths = ListType(StringType, serialize_when_none=False)
-
     configs = ListType(StringType, serialize_when_none=False)
+    paths = ListType(StringType, serialize_when_none=False)
+    tag = StringType(serialize_when_none=False)
+    uri = StringType(required=True)
 
 
 class S3PackageSource(Model):
+    """S3 package source model.
+
+    Package source located in AWS S3.
+
+    Attributes:
+        bucket (StringType): AWS S3 bucket name.
+        configs (ListType): List of CFNgin config paths to execute.
+        key (StringType): Object key. The object should be a zip file.
+        paths (ListType): List of paths to append to ``sys.path``.
+        requester_pays (BooleanType): AWS S3 requester pays option.
+        use_latest (BooleanType): Use the latest version of the object.
+
+    """
+
     bucket = StringType(required=True)
-
-    key = StringType(required=True)
-
-    use_latest = BooleanType(serialize_when_none=False)
-
-    requester_pays = BooleanType(serialize_when_none=False)
-
-    paths = ListType(StringType, serialize_when_none=False)
-
     configs = ListType(StringType, serialize_when_none=False)
+    key = StringType(required=True)
+    paths = ListType(StringType, serialize_when_none=False)
+    requester_pays = BooleanType(serialize_when_none=False)
+    use_latest = BooleanType(serialize_when_none=False)
 
 
 class PackageSources(Model):
-    local = ListType(ModelType(LocalPackageSource))
+    """Package sources model.
+
+    Attributes:
+        git (GitPackageSource): Package source located in a git repo.
+        local (LocalPackageSource): Package source located on a local disk.
+        s3 (S3PackageSource): Package source located in AWS S3.
+
+    """
 
     git = ListType(ModelType(GitPackageSource))
-
+    local = ListType(ModelType(LocalPackageSource))
     s3 = ListType(ModelType(S3PackageSource))
 
 
 class Hook(Model):
-    path = StringType(required=True)
+    """Hook module.
 
-    required = BooleanType(default=True)
+    Attributes:
+        args (DictType)
+        data_key (StringType)
+        enabled (BooleanType)
+        path (StringType)
+        required (BooleanType)
 
-    enabled = BooleanType(default=True)
-
-    data_key = StringType(serialize_when_none=False)
+    """
 
     args = DictType(AnyType)
+    data_key = StringType(serialize_when_none=False)
+    enabled = BooleanType(default=True)
+    path = StringType(required=True)
+    required = BooleanType(default=True)
 
 
 class Target(Model):
+    """Target model.
+
+    Attributes:
+        name (StringType)
+        required_by (ListType)
+        requires (ListType)
+
+    """
+
     name = StringType(required=True)
-
-    requires = ListType(StringType, serialize_when_none=False)
-
     required_by = ListType(StringType, serialize_when_none=False)
+    requires = ListType(StringType, serialize_when_none=False)
 
 
 class Stack(Model):
-    name = StringType(required=True)
+    """Stack model.
 
-    stack_name = StringType(serialize_when_none=False)
+    Attributes:
+        class_path (StringType)
+        description (StringType)
+        enabled (BooleanType)
+        in_progress_behavior (StringType)
+        locked (BooleanType)
+        name (StringType)
+        parameters (DictType)
+        profile (StringType)
+        protected (BooleanType)
+        region (StringType)
+        required_by (ListType)
+        requires (ListType)
+        stack_name (StringType)
+        stack_policy_path (StringType)
+        tags (DictType)
+        template_path (StringType)
+        variables (DictType)
 
-    region = StringType(serialize_when_none=False)
-
-    profile = StringType(serialize_when_none=False)
+    """
 
     class_path = StringType(serialize_when_none=False)
-
-    template_path = StringType(serialize_when_none=False)
-
     description = StringType(serialize_when_none=False)
-
-    requires = ListType(StringType, serialize_when_none=False)
-
-    required_by = ListType(StringType, serialize_when_none=False)
-
-    locked = BooleanType(default=False)
-
     enabled = BooleanType(default=True)
-
+    in_progress_behavior = StringType(serialize_when_none=False)
+    locked = BooleanType(default=False)
+    name = StringType(required=True)
+    parameters = DictType(AnyType, serialize_when_none=False)
+    profile = StringType(serialize_when_none=False)
     protected = BooleanType(default=False)
-
+    region = StringType(serialize_when_none=False)
+    required_by = ListType(StringType, serialize_when_none=False)
+    requires = ListType(StringType, serialize_when_none=False)
+    stack_name = StringType(serialize_when_none=False)
+    stack_policy_path = StringType(serialize_when_none=False)
+    tags = DictType(StringType, serialize_when_none=False)
+    template_path = StringType(serialize_when_none=False)
     variables = DictType(AnyType, serialize_when_none=False)
 
-    parameters = DictType(AnyType, serialize_when_none=False)
-
-    tags = DictType(StringType, serialize_when_none=False)
-
-    stack_policy_path = StringType(serialize_when_none=False)
-
-    in_progress_behavior = StringType(serialize_when_none=False)
-
     def validate_class_path(self, data, value):
+        """Validate class pass."""
         if value and data["template_path"]:
             raise ValidationError(
                 "template_path cannot be present when "
@@ -342,13 +366,16 @@ class Stack(Model):
         self.validate_stack_source(data)
 
     def validate_template_path(self, data, value):
+        """Validate template path."""
         if value and data["class_path"]:
             raise ValidationError(
                 "class_path cannot be present when "
                 "template_path is provided.")
         self.validate_stack_source(data)
 
-    def validate_stack_source(self, data):
+    @staticmethod
+    def validate_stack_source(data):
+        """Validate stack source."""
         # Locked stacks don't actually need a template, since they're
         # read-only.
         if data["locked"]:
@@ -358,29 +385,30 @@ class Stack(Model):
             raise ValidationError(
                 "class_path or template_path is required.")
 
-    def validate_parameters(self, data, value):
+    def validate_parameters(self, data, value):  # pylint: disable=no-self-use
+        """Validate parameters."""
         if value:
             stack_name = data['name']
             raise ValidationError(
                 "DEPRECATION: Stack definition %s contains "
                 "deprecated 'parameters', rather than 'variables'. You are"
-                " required to update your config. See https://stacker.rea"
-                "dthedocs.io/en/latest/config.html#variables for "
-                "additional information."
+                " required to update your config. See "
+                "https://stacker.readthedocs.io/en/latest/config.html#variables"
+                " for additional information."
                 % stack_name)
         return value
 
 
 class Config(Model):
-    """This is the Python representation of a stacker config file.
+    """This is the Python representation of a CFNgin config file.
 
-    This is used internally by stacker to parse and validate a yaml formatted
-    stacker configuration file, but can also be used in scripts to generate a
-    stacker config file before handing it off to stacker to build/destroy.
+    This is used internally by CFNgin to parse and validate a yaml formatted
+    CFNgin configuration file, but can also be used in scripts to generate a
+    CFNgin config file before handing it off to CFNgin to build/destroy.
 
     Example::
 
-        from stacker.config import dump, Config, Stack
+        from runway.cfngin.config import dump, Config, Stack
 
         vpc = Stack({
             "name": "vpc",
@@ -392,56 +420,60 @@ class Config(Model):
 
         print dump(config)
 
+    Attributes:
+        log_formats (DictType)
+        lookups (DictType)
+        mappings (DictType)
+        namespace (StringType)
+        namespace_delimiter (StringType)
+        package_sources (ModelType)
+        post_build (ListType)
+        post_destroy (ListType)
+        pre_build (ListType)
+        pre_destroy (ListType)
+        service_role (StringType)
+        stacker_bucket (StringType)
+        stacker_bucket_region (StringType)
+        stacker_cache_dir (StringType)
+        stacks (ListType)
+        sys_path (StringType)
+        tags (DictType)
+        targets (ListType)
+        template_indent (StringType)
+
     """
 
-    namespace = StringType(required=True)
-
-    namespace_delimiter = StringType(serialize_when_none=False)
-
-    stacker_bucket = StringType(serialize_when_none=False)
-
-    stacker_bucket_region = StringType(serialize_when_none=False)
-
-    stacker_cache_dir = StringType(serialize_when_none=False)
-
-    sys_path = StringType(serialize_when_none=False)
-
-    package_sources = ModelType(PackageSources, serialize_when_none=False)
-
-    service_role = StringType(serialize_when_none=False)
-
-    pre_build = ListType(ModelType(Hook), serialize_when_none=False)
-
-    post_build = ListType(ModelType(Hook), serialize_when_none=False)
-
-    pre_destroy = ListType(ModelType(Hook), serialize_when_none=False)
-
-    post_destroy = ListType(ModelType(Hook), serialize_when_none=False)
-
-    tags = DictType(StringType, serialize_when_none=False)
-
-    template_indent = StringType(serialize_when_none=False)
-
+    log_formats = DictType(StringType, serialize_when_none=False)
+    lookups = DictType(StringType, serialize_when_none=False)
     mappings = DictType(
         DictType(DictType(StringType)), serialize_when_none=False)
-
-    lookups = DictType(StringType, serialize_when_none=False)
-
-    targets = ListType(
-        ModelType(Target), serialize_when_none=False)
-
+    namespace = StringType(required=True)
+    namespace_delimiter = StringType(serialize_when_none=False)
+    package_sources = ModelType(PackageSources, serialize_when_none=False)
+    post_build = ListType(ModelType(Hook), serialize_when_none=False)
+    post_destroy = ListType(ModelType(Hook), serialize_when_none=False)
+    pre_build = ListType(ModelType(Hook), serialize_when_none=False)
+    pre_destroy = ListType(ModelType(Hook), serialize_when_none=False)
+    service_role = StringType(serialize_when_none=False)
+    stacker_bucket = StringType(serialize_when_none=False)
+    stacker_bucket_region = StringType(serialize_when_none=False)
+    stacker_cache_dir = StringType(serialize_when_none=False)
     stacks = ListType(
         ModelType(Stack), default=[])
-
-    log_formats = DictType(StringType, serialize_when_none=False)
+    sys_path = StringType(serialize_when_none=False)
+    tags = DictType(StringType, serialize_when_none=False)
+    targets = ListType(
+        ModelType(Target), serialize_when_none=False)
+    template_indent = StringType(serialize_when_none=False)
 
     def _remove_excess_keys(self, data):
         excess_keys = set(data.keys())
-        excess_keys -= self._schema.valid_input_keys
+        # attribute is defined in __new__ of base class
+        excess_keys -= self._schema.valid_input_keys  # pylint: disable=no-member
         if not excess_keys:
             return data
 
-        logger.debug('Removing excess keys from config input: %s',
+        LOGGER.debug('Removing excess keys from config input: %s',
                      excess_keys)
         clean_data = data.copy()
         for key in excess_keys:
@@ -460,15 +492,35 @@ class Config(Model):
         return super(Config, self)._convert(raw_data=raw_data, context=context,
                                             **kwargs)
 
-    def validate(self, *args, **kwargs):
-        try:
-            return super(Config, self).validate(*args, **kwargs)
-        except UndefinedValueError as e:
-            raise exceptions.InvalidConfig([e.message])
-        except SchematicsError as e:
-            raise exceptions.InvalidConfig(e.errors)
+    def validate(self, partial=False, convert=True, app_data=None, **kwargs):
+        """Validate the state of the model.
 
-    def validate_stacks(self, data, value):
+        If the data is invalid, raises a ``DataError`` with error messages.
+
+        Args:
+            partial (bool): Allow partial data to validate. Essentially drops
+                the ``required=True`` settings from field definitions.
+            convert (bool): Controls whether to perform import conversion
+                before validating. Can be turned off to skip an unnecessary
+                conversion step if all values are known to have the right
+                datatypes (e.g., when validating immediately after the initial
+                import).
+
+        Raises
+            UndefinedValueError
+            SchematicsError
+
+        """
+        try:
+            return super(Config, self).validate(partial, convert, app_data,
+                                                **kwargs)
+        except UndefinedValueError as err:
+            raise exceptions.InvalidConfig([str(err)])
+        except SchematicsError as err:
+            raise exceptions.InvalidConfig(err.errors)
+
+    def validate_stacks(self, _data, value):  # pylint: disable=no-self-use
+        """Validate stacks."""
         if value:
             stack_names = [stack.name for stack in value]
             if len(set(stack_names)) != len(stack_names):

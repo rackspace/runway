@@ -1,8 +1,4 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import str
-
+"""AWS SSM Parameter Store lookup."""
 from . import LookupHandler
 from ...util import read_value_from_path
 from ...session_cache import get_session
@@ -11,29 +7,39 @@ TYPE_NAME = "ssmstore"
 
 
 class SsmstoreLookup(LookupHandler):
-    @classmethod
-    def handle(cls, value, **kwargs):
-        """Retrieve (and decrypt if applicable) a parameter from
-        AWS SSM Parameter Store.
+    """AWS SSM Parameter Store lookup."""
 
-        ssmstore field types should be in the following format:
+    @classmethod
+    def handle(cls, value, context=None, provider=None):
+        """Retrieve (and decrypt) a parameter from AWS SSM Parameter Store.
+
+        Args:
+            value (str): Parameter(s) given to this lookup.
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
+
+        Returns:
+            str: Looked up value.
+
+        ``value`` should be in the following format::
 
             [<region>@]ssmkey
 
-        Note: The region is optional, and defaults to us-east-1 if not given.
+        .. note: The region is optional, and defaults to us-east-1 if not given.
 
-        For example:
+        Example::
 
-            # In stacker we would reference the encrypted value like:
+            # In CFNgin we would reference the encrypted value like:
             conf_key: ${ssmstore us-east-1@ssmkey}
 
-            You can optionally store the value in a file, ie:
+        You can optionally store the value in a file, ie::
 
             ssmstore_value.txt
             us-east-1@ssmkey
 
-            and reference it within stacker (NOTE: the path should be relative
-            to the stacker config file):
+        and reference it within CFNgin (NOTE: the path should be relative
+        to the CFNgin config file)::
 
             conf_key: ${ssmstore file://ssmstore_value.txt}
 

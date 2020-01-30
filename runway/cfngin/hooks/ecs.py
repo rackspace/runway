@@ -1,29 +1,33 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# A lot of this code exists to deal w/ the broken ECS connect_to_region
-# function, and will be removed once this pull request is accepted:
-#   https://github.com/boto/boto/pull/3143
-from past.builtins import basestring
+"""AWS ECS hook.
+
+A lot of this code exists to deal w/ the broken ECS connect_to_region
+function, and will be removed once this pull request is accepted:
+https://github.com/boto/boto/pull/3143
+
+"""
+# pylint: disable=unused-argument
 import logging
+
+from six import string_types
 
 from ..session_cache import get_session
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def create_clusters(provider, context, **kwargs):
-    """Creates ECS clusters.
+    """Create ECS clusters.
 
     Expects a "clusters" argument, which should contain a list of cluster
     names to create.
 
     Args:
-        provider (:class:`stacker.providers.base.BaseProvider`): provider
-            instance
-        context (:class:`stacker.context.Context`): context instance
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance.
+        context (:class:`runway.cfngin.context.Context`): Context instance.
 
-    Returns: boolean for whether or not the hook succeeded.
+    Returns:
+        bool: Whether or not the hook succeeded.
 
     """
     conn = get_session(provider.region).client('ecs')
@@ -31,15 +35,15 @@ def create_clusters(provider, context, **kwargs):
     try:
         clusters = kwargs["clusters"]
     except KeyError:
-        logger.error("setup_clusters hook missing \"clusters\" argument")
+        LOGGER.error("setup_clusters hook missing \"clusters\" argument")
         return False
 
-    if isinstance(clusters, basestring):
+    if isinstance(clusters, string_types):
         clusters = [clusters]
 
     cluster_info = {}
     for cluster in clusters:
-        logger.debug("Creating ECS cluster: %s", cluster)
-        r = conn.create_cluster(clusterName=cluster)
-        cluster_info[r["cluster"]["clusterName"]] = r
+        LOGGER.debug("Creating ECS cluster: %s", cluster)
+        response = conn.create_cluster(clusterName=cluster)
+        cluster_info[response["cluster"]["clusterName"]] = response
     return {"clusters": cluster_info}

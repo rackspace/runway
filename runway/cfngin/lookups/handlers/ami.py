@@ -1,6 +1,5 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""AMI lookup."""
+# pylint: disable=unused-argument,line-too-long
 import re
 import operator
 
@@ -12,7 +11,10 @@ TYPE_NAME = "ami"
 
 
 class ImageNotFound(Exception):
+    """Image not found."""
+
     def __init__(self, search_string):
+        """Instantiate class."""
         self.search_string = search_string
         message = ("Unable to find ec2 image with search string: {}").format(
             search_string
@@ -21,13 +23,25 @@ class ImageNotFound(Exception):
 
 
 class AmiLookup(LookupHandler):
+    """AMI lookup."""
+
     @classmethod
-    def handle(cls, value, provider, **kwargs):
-        """Fetch the most recent AMI Id using a filter
+    def handle(cls, value, context=None, provider=None):
+        """Fetch the most recent AMI Id using a filter.
 
-        For example:
+        Args:
+            value (str): Parameter(s) given to this lookup.
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
 
-            ${ami [<region>@]owners:self,account,amazon name_regex:serverX-[0-9]+ architecture:x64,i386}
+        Returns:
+            str: Looked up value.
+
+        Example:
+            .. code-block:
+
+                ${ami [<region>@]owners:self,account,amazon name_regex:serverX-[0-9]+ architecture:x64,i386}
 
             The above fetches the most recent AMI where owner is self
             account or amazon and the ami name matches the regex described,
@@ -49,6 +63,7 @@ class AmiLookup(LookupHandler):
 
             Any other arguments specified are sent as filters to the aws api
             For example, "architecture:x86_64" will add a filter
+
         """  # noqa
         value = read_value_from_path(value)
 
@@ -63,7 +78,7 @@ class AmiLookup(LookupHandler):
         describe_args = {}
 
         # now find any other arguments that can be filters
-        matches = re.findall('([0-9a-zA-z_-]+:[^\s$]+)', value)
+        matches = re.findall(r'([0-9a-zA-z_-]+:[^\s$]+)', value)
         for match in matches:
             k, v = match.split(':', 1)
             values[k] = v

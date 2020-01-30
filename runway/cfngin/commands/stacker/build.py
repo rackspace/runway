@@ -1,25 +1,25 @@
 """Launches or updates CloudFormation stacks based on the given config.
 
-Stacker is smart enough to figure out if anything (the template or parameters)
-have changed for a given stack. If nothing has changed, stacker will correctly
+CFNgin is smart enough to figure out if anything (the template or parameters)
+have changed for a given stack. If nothing has changed, CFNgin will correctly
 skip executing anything against the stack.
 
 """
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
-from .base import BaseCommand, cancel
 from ...actions import build
+from .base import BaseCommand, cancel
 
 
 class Build(BaseCommand):
+    """Build subcommand."""
 
     name = "build"
     description = __doc__
 
     def add_arguments(self, parser):
+        """Add arguments."""
         super(Build, self).add_arguments(parser)
+        self._add_argument_max_parallel(parser)
+        self._add_argument_tail(parser)
         parser.add_argument("-o", "--outline", action="store_true",
                             help="Print an outline of what steps will be "
                                  "taken to build the stacks")
@@ -32,23 +32,15 @@ class Build(BaseCommand):
                             metavar="STACKNAME", type=str,
                             help="Only work on the stacks given, and their "
                                  "dependencies. Can be specified more than "
-                                 "once. If not specified then stacker will "
+                                 "once. If not specified then CFNgin will "
                                  "work on all stacks in the config file.")
-        parser.add_argument("-j", "--max-parallel", action="store", type=int,
-                            default=0,
-                            help="The maximum number of stacks to execute in "
-                                 "parallel. If not provided, the value will "
-                                 "be constrained based on the underlying "
-                                 "graph.")
-        parser.add_argument("-t", "--tail", action="store_true",
-                            help="Tail the CloudFormation logs while working "
-                                 "with stacks")
         parser.add_argument("-d", "--dump", action="store", type=str,
                             help="Dump the rendered Cloudformation templates "
                                  "to a directory")
 
-    def run(self, options, **kwargs):
-        super(Build, self).run(options, **kwargs)
+    def run(self, options):
+        """Run the command."""
+        super(Build, self).run(options)
         action = build.Action(options.context,
                               provider_builder=options.provider_builder,
                               cancel=cancel())
@@ -57,5 +49,19 @@ class Build(BaseCommand):
                        tail=options.tail,
                        dump=options.dump)
 
-    def get_context_kwargs(self, options, **kwargs):
+    def get_context_kwargs(self, options):
+        """Return a dictionary of kwargs that will be used with the Context.
+
+        This allows commands to pass in any specific arguments they define to
+        the context.
+
+        Args:
+            options (:class:`argparse.Namespace`): arguments that have been
+                passed via the command line
+
+        Returns:
+            Dict[str, Any]: Dictionary that will be passed to Context
+                initializer as kwargs.
+
+        """
         return {"stack_names": options.targets, "force_stacks": options.force}

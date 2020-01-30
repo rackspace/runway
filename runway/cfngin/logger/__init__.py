@@ -1,8 +1,6 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-import sys
+"""CFNgin logger."""
 import logging
+import sys
 
 DEBUG_FORMAT = ("[%(asctime)s] %(levelname)s %(threadName)s "
                 "%(name)s:%(lineno)d(%(funcName)s): %(message)s")
@@ -13,8 +11,10 @@ ISO_8601 = "%Y-%m-%dT%H:%M:%S"
 
 
 class ColorFormatter(logging.Formatter):
-    """ Handles colorizing formatted log messages if color provided. """
+    """Handles colorizing formatted log messages if color provided."""
+
     def format(self, record):
+        """Format log message."""
         if 'color' not in record.__dict__:
             record.__dict__['color'] = 37
         msg = super(ColorFormatter, self).format(record)
@@ -22,13 +22,13 @@ class ColorFormatter(logging.Formatter):
 
 
 def setup_logging(verbosity, formats=None):
-    """
-    Configure a proper logger based on verbosity and optional log formats.
+    """Configure a proper logger based on verbosity and optional log formats.
 
     Args:
         verbosity (int): 0, 1, 2
-        formats (dict): Optional, looks for `info`, `color`, and `debug` keys
-                        which may override the associated default log formats.
+        formats (Optional[Dict[str, Any]]): Keys (``info``, ``color``, ``debug``)
+            which may override the associated default log formats.
+
     """
     if formats is None:
         formats = {}

@@ -1,10 +1,10 @@
 """Tests for runway.cfngin.lookups.handlers.ssmstore."""
 import unittest
-from builtins import str
 
 import boto3
 import mock
 from botocore.stub import Stubber
+from six import string_types
 
 from runway.cfngin.lookups.handlers.ssmstore import SsmstoreLookup
 
@@ -56,7 +56,7 @@ class TestSSMStoreHandler(unittest.TestCase):
         with self.stubber:
             value = SsmstoreLookup.handle(self.ssmkey)
             self.assertEqual(value, self.ssmvalue)
-            self.assertIsInstance(value, str)
+            self.assertIsInstance(value, string_types)
 
     @mock.patch('runway.cfngin.lookups.handlers.ssmstore.get_session',
                 return_value=SessionStub(client))

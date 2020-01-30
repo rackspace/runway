@@ -1,28 +1,32 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import str
-from botocore.exceptions import ClientError
+"""DynamoDB lookup."""
 import re
 
-from . import LookupHandler
-from ...util import read_value_from_path
+from botocore.exceptions import ClientError
+
 from ...session_cache import get_session
+from ...util import read_value_from_path
+from . import LookupHandler
 
 TYPE_NAME = 'dynamodb'
 
 
 class DynamodbLookup(LookupHandler):
+    """DynamoDB lookup."""
+
     @classmethod
-    def handle(cls, value, **kwargs):
-        """Get a value from a dynamodb table
+    def handle(cls, value, context=None, provider=None):
+        """Get a value from a DynamoDB table.
 
-        dynamodb field types should be in the following format:
+        Args:
+            value (str): Parameter(s) given to this lookup.
+                ``[<region>:]<tablename>@<primarypartionkey>:<keyvalue>.<keyvalue>...``
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
 
-            [<region>:]<tablename>@<primarypartionkey>:<keyvalue>.<keyvalue>...
+        .. note: The region is optional, and defaults to the environment's
+        ``AWS_DEFAULT_REGION`` if not specified.
 
-        Note: The region is optional, and defaults to the environment's
-        `AWS_DEFAULT_REGION` if not specified.
         """
         value = read_value_from_path(value)
         table_info = None
@@ -39,7 +43,7 @@ class DynamodbLookup(LookupHandler):
             raise ValueError('Please make sure to include a tablename')
 
         if not table_name:
-            raise ValueError('Please make sure to include a dynamodb table '
+            raise ValueError('Please make sure to include a DynamoDB table '
                              'name')
 
         table_lookup, table_keys = table_keys.split(':', 1)
@@ -52,7 +56,7 @@ class DynamodbLookup(LookupHandler):
 
         projection_expression = _build_projection_expression(clean_table_keys)
 
-        # lookup the data from dynamodb
+        # lookup the data from DynamoDB
         dynamodb = get_session(region).client('dynamodb')
         try:
             response = dynamodb.get_item(
@@ -62,24 +66,22 @@ class DynamodbLookup(LookupHandler):
                 },
                 ProjectionExpression=projection_expression
             )
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'ResourceNotFoundException':
+        except ClientError as err:
+            if err.response['Error']['Code'] == 'ResourceNotFoundException':
                 raise ValueError(
-                    'Cannot find the dynamodb table: {}'.format(table_name))
-            elif e.response['Error']['Code'] == 'ValidationException':
+                    'Cannot find the DynamoDB table: {}'.format(table_name))
+            if err.response['Error']['Code'] == 'ValidationException':
                 raise ValueError(
-                    'No dynamodb record matched the partition key: '
+                    'No DynamoDB record matched the partition key: '
                     '{}'.format(table_lookup))
-            else:
-                raise ValueError('The dynamodb lookup {} had an error: '
-                                 '{}'.format(value, e))
+            raise ValueError('The DynamoDB lookup {} had an error: '
+                             '{}'.format(value, err))
         # find and return the key from the dynamo data returned
         if 'Item' in response:
-            return (_get_val_from_ddb_data(response['Item'], new_keys[1:]))
-        else:
-            raise ValueError(
-                'The dynamodb record could not be found using the following '
-                'key: {}'.format(new_keys[0]))
+            return _get_val_from_ddb_data(response['Item'], new_keys[1:])
+        raise ValueError(
+            'The DynamoDB record could not be found using the following '
+            'key: {}'.format(new_keys[0]))
 
 
 def _lookup_key_parse(table_keys):
@@ -98,7 +100,7 @@ def _lookup_key_parse(table_keys):
 
     """
     # we need to parse the key lookup passed in
-    regex_matcher = '\[([^\]]+)]'
+    regex_matcher = r'\[([^\]]+)]'
     valid_dynamodb_datatypes = ['M', 'S', 'N', 'L']
     clean_table_keys = []
     new_keys = []
@@ -127,14 +129,14 @@ def _lookup_key_parse(table_keys):
 
 
 def _build_projection_expression(clean_table_keys):
-    """Given cleaned up keys, this will return a projection expression for
-    the dynamodb lookup.
+    """Return a projection expression for the DynamoDB lookup.
 
     Args:
-        clean_table_keys (dict): keys without the data types attached
+        clean_table_keys (Dict[str, Any]): Keys without the data types attached.
 
     Returns:
-        str: A projection expression for the dynamodb lookup.
+        str: A projection expression for the DynamoDB lookup.
+
     """
     projection_expression = ''
     for key in clean_table_keys[:-1]:
@@ -144,28 +146,28 @@ def _build_projection_expression(clean_table_keys):
 
 
 def _get_val_from_ddb_data(data, keylist):
-    """Given a dictionary of dynamodb data (including the datatypes) and a
-    properly structured keylist, it will return the value of the lookup
+    """Return the value of the lookup.
 
     Args:
-        data (dict): the raw dynamodb data
-            keylist(list): a list of keys to lookup. This must include the
-                datatype
+        data (Dict[str, Any]): The raw DynamoDB data.
+        keylist(List[Dict[str, str]]): A list of keys to lookup. This must
+            include the datatype.
 
     Returns:
-        various: It returns the value from the dynamodb record, and casts it
-            to a matching python datatype
+        Any: It returns the value from the DynamoDB record, and casts it
+            to a matching python datatype.
+
     """
     next_type = None
     # iterate through the keylist to find the matching key/datatype
-    for k in keylist:
-        for k1 in k:
+    for key in keylist:
+        for k in key:
             if next_type is None:
-                data = data[k[k1]]
+                data = data[key[k]]
             else:
                 temp_dict = data[next_type]
-                data = temp_dict[k[k1]]
-            next_type = k1
+                data = temp_dict[key[k]]
+            next_type = k
     if next_type == 'L':
         # if type is list, convert it to a list and return
         return _convert_ddb_list_to_list(data[next_type])
@@ -178,18 +180,18 @@ def _get_val_from_ddb_data(data, keylist):
 
 
 def _convert_ddb_list_to_list(conversion_list):
-    """Given a dynamodb list, it will return a python list without the dynamodb
-        datatypes
+    """Return a python list without the DynamoDB datatypes.
 
     Args:
-        conversion_list (dict): a dynamodb list which includes the
-            datatypes
+        conversion_list (Dict[str, Any]): A DynamoDB list which includes the
+            datatypes.
 
     Returns:
-        list: Returns a sanitized list without the dynamodb datatypes
+        List[Any]: Returns A sanitized list without the datatypes.
+
     """
     ret_list = []
-    for v in conversion_list:
-        for v1 in v:
-            ret_list.append(v[v1])
+    for val in conversion_list:
+        for v in val:
+            ret_list.append(val[v])
     return ret_list

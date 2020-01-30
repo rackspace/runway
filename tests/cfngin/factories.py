@@ -1,12 +1,13 @@
 """Factories for tests."""
 # pylint: disable=unused-argument
-from builtins import object
+from collections import namedtuple
 
 from mock import MagicMock
 
 from runway.cfngin.config import Config, Stack
 from runway.cfngin.context import Context
-from runway.cfngin.lookups import Lookup
+
+Lookup = namedtuple("Lookup", ("type", "input", "raw"))
 
 
 class MockThreadingEvent(object):

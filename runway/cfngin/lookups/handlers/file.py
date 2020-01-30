@@ -1,23 +1,16 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import bytes, str
-
+"""File lookup."""
+# pylint: disable=unused-argument
 import base64
 import json
 import re
-try:
-    from collections.abc import Mapping, Sequence
-except ImportError:
-    from collections import Mapping, Sequence
 
 import yaml
+from six import string_types
+from six.moves.collections_abc import Mapping, Sequence  # pylint: disable=E
+from troposphere import Base64, GenericHelperFn
 
-from troposphere import GenericHelperFn, Base64
-
-from . import LookupHandler
 from ...util import read_value_from_path
-
+from . import LookupHandler
 
 TYPE_NAME = "file"
 
@@ -25,20 +18,28 @@ _PARAMETER_PATTERN = re.compile(r'{{([::|\w]+)}}')
 
 
 class FileLookup(LookupHandler):
+    """File lookup."""
+
     @classmethod
-    def handle(cls, value, **kwargs):
-        """Translate a filename into the file contents.
+    def handle(cls, value, context=None, provider=None):
+        r"""Translate a filename into the file contents.
+
+        Args:
+            value (str): Parameter(s) given to this lookup.
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
 
         Fields should use the following format::
 
             <codec>:<path>
 
-        For example::
+        Example::
 
             # We've written a file to /some/path:
             $ echo "hello there" > /some/path
 
-            # In stacker we would reference the contents of this file with the
+            # With CFNgin we would reference the contents of this file with the
             # following
             conf_key: ${file plain:file://some/path}
 
@@ -55,10 +56,10 @@ class FileLookup(LookupHandler):
 
             - plain
 
-            - base64 - encode the plain text file at the given path with base64
-              prior to returning it
+            - base64 - Encode the plain text file at the given path with base64
+              prior to returning it.
 
-            - parameterized - the same as plain, but additionally supports
+            - parameterized - The same as plain, but additionally supports
               referencing template parameters to create userdata that's
               supplemented with information from the template, as is commonly
               needed in EC2 UserData. For example, given a template parameter
@@ -67,12 +68,12 @@ class FileLookup(LookupHandler):
                 #!/bin/sh
                 aws s3 sync s3://{{BucketName}}/somepath /somepath
 
-              and then you could use something like this in the YAML config
+              Then you could use something like this in the YAML config
               file::
 
                 UserData: ${file parameterized:/path/to/file}
 
-              resulting in the UserData parameter being defined as::
+              Resulting in the UserData parameter being defined as::
 
                   { "Fn::Join" : ["", [
                       "#!/bin/sh\\naws s3 sync s3://",
@@ -80,9 +81,9 @@ class FileLookup(LookupHandler):
                       "/somepath /somepath"
                   ]] }
 
-            - parameterized-b64 - the same as parameterized, with the results
+            - parameterized-b64 - The same as parameterized, with the results
               additionally wrapped in *{ "Fn::Base64": ... }* , which is what
-              you actually need for EC2 UserData
+              you actually need for EC2 UserData.
 
         When using parameterized-b64 for UserData, you should use a variable
         defined as such:
@@ -97,12 +98,12 @@ class FileLookup(LookupHandler):
                   "default": Ref("AWS::NoValue")
               }
 
-        and then assign UserData in a LaunchConfiguration or Instance to
+        Then assign UserData in a LaunchConfiguration or Instance to
         *self.get_variables()["UserData"]*. Note that we use AWSHelperFn as the
         type because the parameterized-b64 codec returns either a Base64 or a
-        GenericHelperFn troposphere object
-        """
+        GenericHelperFn troposphere object.
 
+        """
         try:
             codec, path = value.split(":", 1)
         except ValueError:
@@ -117,20 +118,20 @@ class FileLookup(LookupHandler):
 
 
 def _parameterize_string(raw):
-    """Substitute placeholders in a string using CloudFormation references
+    """Substitute placeholders in a string using CloudFormation references.
 
     Args:
-        raw (`str`): String to be processed. Byte strings are not
-        supported; decode them before passing them to this function.
+        raw (str): String to be processed. Byte strings are not
+            supported; decode them before passing them to this function.
 
     Returns:
-        `str` | :class:`troposphere.GenericHelperFn`: An expression with
+        str | :class:`troposphere.GenericHelperFn`: An expression with
             placeholders from the input replaced, suitable to be passed to
             Troposphere to be included in CloudFormation template. This will
             be the input string without modification if no substitutions are
             found, and a composition of CloudFormation calls otherwise.
-    """
 
+    """
     parts = []
     s_index = 0
 
@@ -147,19 +148,19 @@ def _parameterize_string(raw):
 
 
 def parameterized_codec(raw, b64):
-    """Parameterize a string, possibly encoding it as Base64 afterwards
+    """Parameterize a string, possibly encoding it as Base64 afterwards.
 
     Args:
-        raw (`str` | `bytes`): String to be processed. Byte strings will be
+        raw (Union[bytes, str]): String to be processed. Byte strings will be
             interpreted as UTF-8.
-        b64 (`bool`): Whether to wrap the output in a Base64 CloudFormation
-            call
+        b64 (bool): Whether to wrap the output in a Base64 CloudFormation
+            call.
 
     Returns:
-        :class:`troposphere.AWSHelperFn`: output to be included in a
+        :class:`troposphere.AWSHelperFn`: Output to be included in a
         CloudFormation template.
-    """
 
+    """
     if isinstance(raw, bytes):
         raw = raw.decode('utf-8')
 
@@ -174,44 +175,48 @@ def parameterized_codec(raw, b64):
 def _parameterize_obj(obj):
     """Recursively parameterize all strings contained in an object.
 
-    Parameterizes all values of a Mapping, all items of a Sequence, an
+    Parametrizes all values of a Mapping, all items of a Sequence, an
     unicode string, or pass other objects through unmodified.
 
     Byte strings will be interpreted as UTF-8.
 
     Args:
-        obj: data to parameterize
+        obj (Any): Data to parameterize.
 
     Return:
         A parameterized object to be included in a CloudFormation template.
         Mappings are converted to `dict`, Sequences are converted to  `list`,
         and strings possibly replaced by compositions of function calls.
-    """
 
+    """
     if isinstance(obj, Mapping):
         return dict((key, _parameterize_obj(value))
                     for key, value in obj.items())
-    elif isinstance(obj, bytes):
+    if isinstance(obj, bytes):
         return _parameterize_string(obj.decode('utf8'))
-    elif isinstance(obj, str):
+    if isinstance(obj, string_types):
         return _parameterize_string(obj)
-    elif isinstance(obj, Sequence):
+    if isinstance(obj, Sequence):
         return list(_parameterize_obj(item) for item in obj)
-    else:
-        return obj
+    return obj
 
 
 class SafeUnicodeLoader(yaml.SafeLoader):
+    """Safe unicode loader."""
+
     def construct_yaml_str(self, node):
+        """Construct yaml str."""
         return self.construct_scalar(node)
 
 
 def yaml_codec(raw, parameterized=False):
+    """YAML codec."""
     data = yaml.load(raw, Loader=SafeUnicodeLoader)
     return _parameterize_obj(data) if parameterized else data
 
 
 def json_codec(raw, parameterized=False):
+    """JSON codec."""
     data = json.loads(raw)
     return _parameterize_obj(data) if parameterized else data
 

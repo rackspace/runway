@@ -1,30 +1,29 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""CFNgin commands."""
 import logging
 
-from .build import Build
-from .destroy import Destroy
-from .info import Info
-from .diff import Diff
-from .graph import Graph
-from .base import BaseCommand
+from .... import __version__
+from ... import session_cache
 from ...config import render_parse_load as load_config
 from ...context import Context
 from ...providers.aws import default
-from ... import session_cache
-from .... import __version__
+from .base import BaseCommand
+from .build import Build
+from .destroy import Destroy
+from .diff import Diff
+from .graph import Graph
+from .info import Info
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Stacker(BaseCommand):
+    """Stacker command."""
 
     name = "stacker"
     subcommands = (Build, Destroy, Info, Diff, Graph)
 
-    def configure(self, options, **kwargs):
-
+    def configure(self, options):
+        """Configure CLI command."""
         session_cache.default_profile = options.profile
 
         self.config = load_config(
@@ -49,12 +48,13 @@ class Stacker(BaseCommand):
             **options.get_context_kwargs(options)
         )
 
-        super(Stacker, self).configure(options, **kwargs)
+        super(Stacker, self).configure(options)
         if options.interactive:
-            logger.info("Using interactive AWS provider mode.")
+            LOGGER.info("Using interactive AWS provider mode.")
         else:
-            logger.info("Using default AWS provider mode")
+            LOGGER.info("Using default AWS provider mode")
 
     def add_arguments(self, parser):
+        """Add CLI arguments."""
         parser.add_argument("--version", action="version",
                             version="%%(prog)s %s" % (__version__,))

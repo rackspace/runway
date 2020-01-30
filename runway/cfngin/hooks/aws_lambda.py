@@ -1,56 +1,48 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from past.builtins import basestring
+"""AWS Lambda hook."""
+import hashlib
+import logging
 import os
 import os.path
 import stat
-import logging
-import hashlib
 from io import BytesIO as StringIO
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZIP_DEFLATED, ZipFile
+
 import botocore
 import formic
+from six import string_types
 from troposphere.awslambda import Code
+
 from ..session_cache import get_session
+from ..util import ensure_s3_bucket, get_config_directory
 
-from ..util import (
-    get_config_directory,
-    ensure_s3_bucket,
-)
-
-
-"""Mask to retrieve only UNIX file permissions from the external attributes
-field of a ZIP entry.
-"""
+# mask to retrieve only UNIX file permissions from the external attributes
+# field of a ZIP entry.
 ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def _zip_files(files, root):
-    """Generates a ZIP file in-memory from a list of files.
+    """Generate a ZIP file in-memory from a list of files.
 
     Files will be stored in the archive with relative names, and have their
     UNIX permissions forced to 755 or 644 (depending on whether they are
     user-executable in the source filesystem).
 
     Args:
-        files (list[str]): file names to add to the archive, relative to
+        files (List[str]): file names to add to the archive, relative to
             ``root``.
         root (str): base directory to retrieve files from.
 
     Returns:
-        str: content of the ZIP file as a byte string.
-        str: A calculated hash of all the files.
+        Tuple[str, str]: Content of the ZIP file as a byte string and
+            calculated hash of all the files
 
     """
     zip_data = StringIO()
     with ZipFile(zip_data, 'w', ZIP_DEFLATED) as zip_file:
-        for fname in files:
-            zip_file.write(os.path.join(root, fname), fname)
+        for file_name in files:
+            zip_file.write(os.path.join(root, file_name), file_name)
 
         # Fix file permissions to avoid any issues - only care whether a file
         # is executable or not, choosing between modes 755 and 644 accordingly.
@@ -62,10 +54,11 @@ def _zip_files(files, root):
                 new_perms = 0o644
 
             if new_perms != perms:
-                logger.debug("lambda: fixing perms: %s: %o => %o",
+                LOGGER.debug("lambda: fixing perms: %s: %o => %o",
                              zip_entry.filename, perms, new_perms)
-                new_attr = ((zip_entry.external_attr & ~ZIP_PERMS_MASK) |
-                            (new_perms << 16))
+                new_attr = (
+                    (zip_entry.external_attr & ~ZIP_PERMS_MASK) | (new_perms << 16)
+                )
                 zip_entry.external_attr = new_attr
 
     contents = zip_data.getvalue()
@@ -76,7 +69,7 @@ def _zip_files(files, root):
 
 
 def _calculate_hash(files, root):
-    """ Returns a hash of all of the given files at the given root.
+    """Return a hash of all of the given files at the given root.
 
     Args:
         files (list[str]): file names to include in the hash calculation,
@@ -85,13 +78,14 @@ def _calculate_hash(files, root):
 
     Returns:
         str: A hash of the hashes of the given files.
+
     """
     file_hash = hashlib.md5()
-    for fname in sorted(files):
-        f = os.path.join(root, fname)
-        file_hash.update((fname + "\0").encode())
-        with open(f, "rb") as fd:
-            for chunk in iter(lambda: fd.read(4096), ""):
+    for file_name in sorted(files):
+        file_path = os.path.join(root, file_name)
+        file_hash.update((file_name + "\0").encode())
+        with open(file_path, "rb") as file_:
+            for chunk in iter(lambda: file_.read(4096), ""):  # pylint: disable=W
                 if not chunk:
                     break
                 file_hash.update(chunk)
@@ -108,9 +102,9 @@ def _find_files(root, includes, excludes, follow_symlinks):
 
     Args:
         root (str): base directory to list files from.
-        includes (list[str]): inclusion patterns. Only files matching those
+        includes (List[str]): inclusion patterns. Only files matching those
             patterns will be included in the result.
-        excludes (list[str]): exclusion patterns. Files matching those
+        excludes (List[str]): exclusion patterns. Files matching those
             patterns will be excluded from the result. Exclusions take
             precedence over inclusions.
         follow_symlinks (bool): If true, symlinks will be included in the
@@ -122,8 +116,8 @@ def _find_files(root, includes, excludes, follow_symlinks):
     Note:
         Documentation for the patterns can be found at
         http://www.aviser.asia/formic/doc/index.html
-    """
 
+    """
     root = os.path.abspath(root)
     file_set = formic.FileSet(
         directory=root, include=includes,
@@ -135,13 +129,13 @@ def _find_files(root, includes, excludes, follow_symlinks):
 
 
 def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
-    """Generates a ZIP file in-memory from file search patterns.
+    """Generate a ZIP file in-memory from file search patterns.
 
     Args:
-        root (str): base directory to list files from.
-        includes (list[str]): inclusion patterns. Only files  matching those
+        root (str): Base directory to list files from.
+        includes (List[str]): Inclusion patterns. Only files  matching those
             patterns will be included in the result.
-        excludes (list[str]): exclusion patterns. Files matching those
+        excludes (List[str]): Exclusion patterns. Files matching those
             patterns will be excluded from the result. Exclusions take
             precedence over inclusions.
         follow_symlinks (bool): If true, symlinks will be included in the
@@ -154,17 +148,17 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
         RuntimeError: when the generated archive would be empty.
 
     """
-    logger.info('lambda: base directory: %s', root)
+    LOGGER.info('lambda: base directory: %s', root)
 
     files = list(_find_files(root, includes, excludes, follow_symlinks))
     if not files:
         raise RuntimeError('Empty list of files for Lambda payload. Check '
                            'your include/exclude options for errors.')
 
-    logger.info('lambda: adding %d files:', len(files))
+    LOGGER.info('lambda: adding %d files:', len(files))
 
-    for fname in files:
-        logger.debug('lambda: + %s', fname)
+    for file_name in files:
+        LOGGER.debug('lambda: + %s', file_name)
 
     return _zip_files(files, root)
 
@@ -184,14 +178,14 @@ def _head_object(s3_conn, bucket, key):
     Raises:
         botocore.exceptions.ClientError: any error from boto3 other than key
             not found is passed through.
+
     """
     try:
         return s3_conn.head_object(Bucket=bucket, Key=key)
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == '404':
+    except botocore.exceptions.ClientError as err:
+        if err.response['Error']['Code'] == '404':
             return None
-        else:
-            raise
+        raise
 
 
 def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash,
@@ -221,15 +215,15 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash,
     Raises:
         botocore.exceptions.ClientError: any error from boto3 is passed
             through.
-    """
 
-    logger.debug('lambda: ZIP hash: %s', content_hash)
+    """
+    LOGGER.debug('lambda: ZIP hash: %s', content_hash)
     key = '{}lambda-{}-{}.zip'.format(prefix, name, content_hash)
 
     if _head_object(s3_conn, bucket, key):
-        logger.info('lambda: object %s already exists, not uploading', key)
+        LOGGER.info('lambda: object %s already exists, not uploading', key)
     else:
-        logger.info('lambda: uploading object %s', key)
+        LOGGER.info('lambda: uploading object %s', key)
         s3_conn.put_object(Bucket=bucket, Key=key, Body=contents,
                            ContentType='application/zip',
                            ACL=payload_acl)
@@ -238,34 +232,35 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash,
 
 
 def _check_pattern_list(patterns, key, default=None):
-    """Validates file search patterns from user configuration.
+    """Validate file search patterns from user configuration.
 
     Acceptable input is a string (which will be converted to a singleton list),
     a list of strings, or anything falsy (such as None or an empty dictionary).
     Empty or unset input will be converted to a default.
 
     Args:
-        patterns: input from user configuration (YAML).
-        key (str): name of the configuration key the input came from,
+        patterns: Input from user configuration (YAML).
+        key (str): Name of the configuration key the input came from,
             used for error display purposes.
 
     Keyword Args:
-        default: value to return in case the input is empty or unset.
+        default: Value to return in case the input is empty or unset.
 
     Returns:
-        list[str]: validated list of patterns
+        List[str]: Validated list of patterns.
 
     Raises:
-        ValueError: if the input is unacceptable.
+        ValueError: If the input is unacceptable.
+
     """
     if not patterns:
         return default
 
-    if isinstance(patterns, basestring):
+    if isinstance(patterns, string_types):
         return [patterns]
 
     if isinstance(patterns, list):
-        if all(isinstance(p, basestring) for p in patterns):
+        if all(isinstance(p, string_types) for p in patterns):
             return patterns
 
     raise ValueError("Invalid file patterns in key '{}': must be a string or "
@@ -274,26 +269,26 @@ def _check_pattern_list(patterns, key, default=None):
 
 def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
                      payload_acl):
-    """Builds a Lambda payload from user configuration and uploads it to S3.
+    """Build a Lambda payload from user configuration and uploads it to S3.
 
     Args:
         s3_conn (botocore.client.S3): S3 connection to use for operations.
         bucket (str): name of the bucket to upload to.
         prefix (str): S3 prefix to prepend to the constructed key name for
             the uploaded file
-        name (str): desired name of the Lambda function. Will be used to
+        name (str): Desired name of the Lambda function. Will be used to
             construct a key name for the uploaded file.
-        options (dict): configuration for how to build the payload.
+        options (Dict[str, Any]): Configuration for how to build the payload.
             Consists of the following keys:
                 * path:
-                    base path to retrieve files from (mandatory). If not
-                    absolute, it will be interpreted as relative to the stacker
+                    Base path to retrieve files from (mandatory). If not
+                    absolute, it will be interpreted as relative to the CFNgin
                     configuration file directory, then converted to an absolute
-                    path. See :func:`stacker.util.get_config_directory`.
+                    path. See :func:`runway.cfngin.util.get_config_directory`.
                 * include:
-                    file patterns to include in the payload (optional).
+                    File patterns to include in the payload (optional).
                 * exclude:
-                    file patterns to exclude from the payload (optional).
+                    File patterns to exclude from the payload (optional).
         follow_symlinks  (bool): If true, symlinks will be included in the
             resulting zip file
         payload_acl (str): The canned S3 object ACL to be applied to the
@@ -301,26 +296,27 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
 
     Returns:
         troposphere.awslambda.Code: CloudFormation AWS Lambda Code object,
-        pointing to the uploaded object in S3.
+            pointing to the uploaded object in S3.
 
     Raises:
-        ValueError: if any configuration is invalid.
-        botocore.exceptions.ClientError: any error from boto3 is passed
+        ValueError: If any configuration is invalid.
+        botocore.exceptions.ClientError: Any error from boto3 is passed
             through.
+
     """
     try:
         root = os.path.expanduser(options['path'])
-    except KeyError as e:
+    except KeyError as err:
         raise ValueError(
             "missing required property '{}' in function '{}'".format(
-                e.args[0], name))
+                err.args[0], name))
 
     includes = _check_pattern_list(options.get('include'), 'include',
                                    default=['**'])
     excludes = _check_pattern_list(options.get('exclude'), 'exclude',
                                    default=[])
 
-    logger.debug('lambda: processing function %s', name)
+    LOGGER.debug('lambda: processing function %s', name)
 
     # os.path.join will ignore other parameters if the right-most one is an
     # absolute path, which is exactly what we want.
@@ -337,12 +333,12 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
 
 def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
                          provider_region):
-    """Returns the appropriate region to use when uploading functions.
+    """Return the appropriate region to use when uploading functions.
 
     Select the appropriate region for the bucket where lambdas are uploaded in.
 
     Args:
-        custom_bucket (str, None): The custom bucket name provided by the
+        custom_bucket (Optional[str]): The custom bucket name provided by the
             `bucket` kwarg of the aws_lambda hook, if provided.
         hook_region (str): The contents of the `bucket_region` argument to
             the hook.
@@ -352,6 +348,7 @@ def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
 
     Returns:
         str: The appropriate region string.
+
     """
     region = None
     if custom_bucket:
@@ -362,7 +359,7 @@ def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
 
 
 def upload_lambda_functions(context, provider, **kwargs):
-    """Builds Lambda payloads from user configuration and uploads them to S3.
+    """Build Lambda payloads from user configuration and uploads them to S3.
 
     Constructs ZIP archives containing files matching specified patterns for
     each function, uploads the result to Amazon S3, then stores objects (of
@@ -374,35 +371,35 @@ def upload_lambda_functions(context, provider, **kwargs):
     function (used for generating names for artifacts), and the value
     determines what files to include in the ZIP (see more details below).
 
-    Payloads are uploaded to either a custom bucket or stackers default bucket,
-    with the key containing it's checksum, to allow repeated uploads to be
-    skipped in subsequent runs.
+    Payloads are uploaded to either a custom bucket or the CFNgin default
+    bucket, with the key containing it's checksum, to allow repeated uploads
+    to be skipped in subsequent runs.
 
     The configuration settings are documented as keyword arguments below.
 
     Keyword Arguments:
-        bucket (str, optional): Custom bucket to upload functions to.
-            Omitting it will cause the default stacker bucket to be used.
-        bucket_region (str, optional): The region in which the bucket should
+        bucket (Optional[str]): Custom bucket to upload functions to.
+            Omitting it will cause the default CFNgin bucket to be used.
+        bucket_region (Optional[str]): The region in which the bucket should
             exist. If not given, the region will be either be that of the
             global `stacker_bucket_region` setting, or else the region in
             use by the provider.
-        prefix (str, optional): S3 key prefix to prepend to the uploaded
+        prefix (Optional[str]): S3 key prefix to prepend to the uploaded
             zip name.
-        follow_symlinks (bool, optional): Will determine if symlinks should
+        follow_symlinks (Optional[bool]): Will determine if symlinks should
             be followed and included with the zip artifact. Default: False
-        payload_acl (str, optional): The canned S3 object ACL to be applied to
+        payload_acl (Optional[str]): The canned S3 object ACL to be applied to
             the uploaded payload. Default: private
-        functions (dict):
-            Configurations of desired payloads to build. Keys correspond to
-            function names, used to derive key names for the payload. Each
-            value should itself be a dictionary, with the following data:
+        functions (Dict[str, Any]): Configurations of desired payloads to
+            build. Keys correspond to function names, used to derive key names
+            for the payload. Each value should itself be a dictionary, with
+            the following data:
 
                 * path (str):
 
                     Base directory of the Lambda function payload content.
                     If it not an absolute path, it will be considered relative
-                    to the directory containing the stacker configuration file
+                    to the directory containing the CFNgin configuration file
                     in use.
 
                     Files in this directory will be added to the payload ZIP,
@@ -415,7 +412,7 @@ def upload_lambda_functions(context, provider, **kwargs):
                     directly under this directory will be added to the root of
                     the ZIP file.
 
-                * include(str or list[str], optional):
+                * include(Union[str, List[str], None]):
 
                     Pattern or list of patterns of files to include in the
                     payload. If provided, only files that match these
@@ -424,7 +421,7 @@ def upload_lambda_functions(context, provider, **kwargs):
                     Omitting it is equivalent to accepting all files that are
                     not otherwise excluded.
 
-                * exclude(str or list[str], optional):
+                * exclude(Union[str, List[str], None]):
                     Pattern or list of patterns of files to exclude from the
                     payload. If provided, any files that match will be ignored,
                     regardless of whether they match an inclusion pattern.
@@ -438,7 +435,7 @@ def upload_lambda_functions(context, provider, **kwargs):
         .. code-block:: yaml
 
             pre_build:
-              - path: stacker.hooks.aws_lambda.upload_lambda_functions
+              - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
                 required: true
                 enabled: true
                 data_key: lambda
@@ -461,7 +458,7 @@ def upload_lambda_functions(context, provider, **kwargs):
         .. code-block:: python
 
             from troposphere.awslambda import Function
-            from stacker.blueprints.base import Blueprint
+            from runway.cfngin.blueprints.base import Blueprint
 
             class LambdaBlueprint(Blueprint):
                 def create_template(self):
@@ -476,15 +473,16 @@ def upload_lambda_functions(context, provider, **kwargs):
                             Runtime='python2.7'
                         )
                     )
+
     """
     custom_bucket = kwargs.get('bucket')
     if not custom_bucket:
         bucket_name = context.bucket_name
-        logger.info("lambda: using default bucket from stacker: %s",
+        LOGGER.info("lambda: using default bucket from CFNgin: %s",
                     bucket_name)
     else:
         bucket_name = custom_bucket
-        logger.info("lambda: using custom bucket: %s", bucket_name)
+        LOGGER.info("lambda: using custom bucket: %s", bucket_name)
 
     custom_bucket_region = kwargs.get("bucket_region")
     if not custom_bucket and custom_bucket_region:

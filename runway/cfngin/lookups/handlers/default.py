@@ -1,7 +1,4 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
+"""Lookup to provide a default value."""
 from . import LookupHandler
 
 
@@ -9,33 +6,39 @@ TYPE_NAME = "default"
 
 
 class DefaultLookup(LookupHandler):
+    """Lookup to provide a default value."""
+
     @classmethod
-    def handle(cls, value, **kwargs):
-        """Use a value from the environment or fall back to a default if the
-           environment doesn't contain the variable.
+    def handle(cls, value, context=None, provider=None):
+        """Use a value from the environment or fall back to a default value.
 
-        Format of value:
+        Allows defaults to be set at the config file level.
 
-            <env_var>::<default value>
+        Args:
+            value (str): Parameter(s) given to this lookup.
+                ``<env_var>::<default value>``
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
 
-        For example:
+        Returns:
+            str: Looked up value
 
-            Groups: ${default app_security_groups::sg-12345,sg-67890}
+        Example::
 
-        If `app_security_groups` is defined in the environment, its defined
-        value will be returned. Otherwise, `sg-12345,sg-67890` will be the
-        returned value.
+                Groups: ${default app_security_groups::sg-12345,sg-67890}
 
-        This allows defaults to be set at the config file level.
+            If ``app_security_groups`` is defined in the environment, its
+            defined value will be returned. Otherwise, ``sg-12345,sg-67890``
+            will be thereturned value.
+
         """
-
         try:
             env_var_name, default_val = value.split("::", 1)
         except ValueError:
             raise ValueError("Invalid value for default: %s. Must be in "
                              "<env_var>::<default value> format." % value)
 
-        if env_var_name in kwargs['context'].environment:
-            return kwargs['context'].environment[env_var_name]
-        else:
-            return default_val
+        if env_var_name in context.environment:
+            return context.environment[env_var_name]
+        return default_val

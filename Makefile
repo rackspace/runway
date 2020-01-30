@@ -32,8 +32,8 @@ clean:
 	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
 lint:
-	pipenv run flake8 --exclude=runway/cfngin,runway/embedded,runway/templates runway
-	find runway -name '*.py' -not -path 'runway/cfngin*' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
+	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
 	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 test:

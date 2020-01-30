@@ -1,7 +1,5 @@
 """Tests for runway.cfngin.util."""
 # pylint: disable=unused-argument,invalid-name
-import os
-import string
 import unittest
 
 import boto3
@@ -11,8 +9,8 @@ from runway.cfngin.config import GitPackageSource
 from runway.cfngin.util import (Extractor, SourceProcessor, TarExtractor,
                                 TarGzipExtractor, ZipExtractor, camel_to_snake,
                                 cf_safe_name, get_client_region,
-                                get_s3_endpoint, load_object_from_string,
-                                merge_map, parse_cloudformation_template,
+                                get_s3_endpoint, merge_map,
+                                parse_cloudformation_template,
                                 s3_bucket_location_constraint,
                                 yaml_to_ordered_dict)
 
@@ -42,16 +40,6 @@ class TestUtil(unittest.TestCase):
         )
         for test in tests:
             self.assertEqual(cf_safe_name(test[0]), test[1])
-
-    def test_load_object_from_string(self):
-        """Test load object from string."""
-        tests = (
-            ("string.Template", string.Template),
-            ("os.path.basename", os.path.basename),
-            ("string.ascii_letters", string.ascii_letters)
-        )
-        for test in tests:
-            self.assertIs(load_object_from_string(test[0]), test[1])
 
     def test_camel_to_snake(self):
         """Test camel to snake."""

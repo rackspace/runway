@@ -1,31 +1,30 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""AWS Route 53 hook."""
+# pylint: disable=unused-argument
 import logging
 
 from ..session_cache import get_session
-
 from ..util import create_route53_zone
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def create_domain(provider, context, **kwargs):
     """Create a domain within route53.
 
     Args:
-        provider (:class:`stacker.providers.base.BaseProvider`): provider
-            instance
-        context (:class:`stacker.context.Context`): context instance
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance.
+        context (:class:`runway.cfngin.context.Context`): Context instance.
 
-    Returns: boolean for whether or not the hook succeeded.
+    Returns:
+        Dict[str, str]
 
     """
     session = get_session(provider.region)
     client = session.client("route53")
     domain = kwargs.get("domain")
     if not domain:
-        logger.error("domain argument or BaseDomain variable not provided.")
+        LOGGER.error("domain argument or BaseDomain variable not provided.")
         return False
     zone_id = create_route53_zone(client, domain)
     return {"domain": domain, "zone_id": zone_id}

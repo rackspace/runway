@@ -1,13 +1,13 @@
 """Provides a sublass of unittest.TestCase for testing blueprints."""
 import difflib
 import json
-import unittest
 import os.path
+import unittest
 from glob import glob
 
+from ...util import load_object_from_string
 from ..config import parse as parse_config
 from ..context import Context
-from ..util import load_object_from_string
 from ..variables import Variable
 
 
@@ -54,23 +54,24 @@ class BlueprintTestCase(unittest.TestCase):
 class YamlDirTestGenerator(object):
     """Generate blueprint tests from yaml config files.
 
-    This class creates blueprint tests from yaml files with a syntax similar to
-    stackers' configuration syntax. For example,
+    This class creates blueprint tests from yaml files with a syntax similar
+    to CFNgin configuration syntax. For example,
 
-       ---
-       namespace: test
-       stacks:
-         - name: test_sample
-           class_path: stacker_blueprints.test.Sample
-           variables:
-             var1: value1
+    Example:
+        .. code-block: yaml
 
-    will create a test for the specified blueprint, passing that variable as
+            namespace: test
+            stacks:
+              - name: test_sample
+                class_path: blueprints.test.Sample
+                variables:
+                    var1: value1
+
+    Will create a test for the specified blueprint, passing that variable as
     part of the test.
 
     The test will generate a .json file for this blueprint, and compare it with
     the stored result.
-
 
     By default, the generator looks for files named 'test_*.yaml' in its same
     directory. In order to use it, subclass it in a directory containing such
@@ -79,21 +80,18 @@ class YamlDirTestGenerator(object):
 
     The subclass may override some properties:
 
-    @property base_class: by default, the generated tests are subclasses of
-    stacker.blueprints.testutil.BlueprintTestCase. In order to change this,
-    set this property to the desired base class.
+    ``@property base_class``: By default, the generated tests are subclasses
+    or runway.cfngin.blueprints.testutil.BlueprintTestCase. In order to change
+    this, set this property to the desired base class.
 
-    @property yaml_dirs: by default, the directory where the generator is
+    ``@property yaml_dirs``: By default, the directory where the generator is
     subclassed is searched for test files. Override this array for specifying
     more directories. These must be relative to the directory in which the
     subclass lives in. Globs may be used.
         Default: [ '.' ]. Example override: [ '.', 'tests/*/' ]
 
-    @property yaml_filename: by default, the generator looks for files named
-    'test_*.yaml'. Use this to change this pattern. Globs may be used.
-
-
-    There's an example of this use in the tests/ subdir of stacker_blueprints.
+    ``@property yaml_filename``: By default, the generator looks for files
+    named 'test_*.yaml'. Use this to change this pattern. Globs may be used.
 
     """
 
@@ -120,7 +118,8 @@ class YamlDirTestGenerator(object):
         """Yaml filename."""
         return 'test_*.yaml'
 
-    def test_generator(self):
+    # pylint incorrectly detects this
+    def test_generator(self):  # pylint: disable=no-self-use
         """Test generator."""
         # Search for tests in given paths
         configs = []

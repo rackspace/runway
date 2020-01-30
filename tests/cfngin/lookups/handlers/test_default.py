@@ -39,4 +39,6 @@ class TestDefaultLookup(unittest.TestCase):
         """Test invalid value."""
         value = "env_var:fallback"
         with self.assertRaises(ValueError):
-            DefaultLookup.handle(value)
+            DefaultLookup.handle(value,
+                                 provider=self.provider,
+                                 context=self.context)

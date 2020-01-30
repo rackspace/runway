@@ -1,20 +1,16 @@
-"""Prints the the relationships between steps as a graph.
-
-"""
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
-from .base import BaseCommand
+"""Print the the relationships between steps as a graph."""
 from ...actions import graph
+from .base import BaseCommand
 
 
 class Graph(BaseCommand):
+    """Graph subcommands."""
 
     name = "graph"
     description = __doc__
 
     def add_arguments(self, parser):
+        """Add arguments."""
         super(Graph, self).add_arguments(parser)
         parser.add_argument("-f", "--format", default="dot",
                             choices=graph.FORMATTERS,
@@ -26,8 +22,9 @@ class Graph(BaseCommand):
                                  "graph. While this will produce a less "
                                  "noisy graph, it is slower.")
 
-    def run(self, options, **kwargs):
-        super(Graph, self).run(options, **kwargs)
+    def run(self, options):
+        """Run the command."""
+        super(Graph, self).run(options)
         action = graph.Action(options.context,
                               provider_builder=options.provider_builder)
         action.execute(

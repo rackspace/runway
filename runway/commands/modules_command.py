@@ -82,9 +82,9 @@ def determine_module_class(path, class_path):  # pylint: disable=too-many-branch
 
     if not class_path:
         # Fallback to autodetection
-        if (os.path.isfile(os.path.join(path, 'serverless.yml'))
-                or os.path.isfile(os.path.join(path, 'serverless.js'))) \
-                and os.path.isfile(os.path.join(path, 'package.json')):
+        if (os.path.isfile(os.path.join(path, 'serverless.yml')) or
+                os.path.isfile(os.path.join(path, 'serverless.js'))) and \
+                os.path.isfile(os.path.join(path, 'package.json')):
             class_path = 'runway.module.serverless.Serverless'
         elif glob.glob(os.path.join(path, '*.tf')):
             class_path = 'runway.module.terraform.Terraform'
@@ -206,7 +206,7 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         print('')
         print('Configured modules in deployment \'%s\':' % deployment.get('name'))
         for i, module in enumerate(modules):
-            print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
+            print(" %s: %s" % (i + 1, _module_menu_entry(module, env_name)))
         print('')
         print('')
         if command == 'destroy':
@@ -338,7 +338,7 @@ class ModulesCommand(RunwayCommand):
         # set default names if needed
         for i, deployment in enumerate(deployments):
             if not deployment.get('name'):
-                deployment['name'] = 'deployment_' + str(i+1)
+                deployment['name'] = 'deployment_' + str(i + 1)
 
         if command == 'destroy':
             LOGGER.info('WARNING!')
@@ -592,7 +592,7 @@ class ModulesCommand(RunwayCommand):
             print('')
             print('Configured deployments:')
             for i, deployment in enumerate(deployments):
-                print(" %d: %s" % (i+1, _deployment_menu_entry(deployment)))
+                print(" %d: %s" % (i + 1, _deployment_menu_entry(deployment)))
             print('')
             print('')
             if command == 'destroy':

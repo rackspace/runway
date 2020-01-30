@@ -1,48 +1,28 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""CFNgin build action."""
 import logging
 
-from .base import BaseAction, plan, build_walker
-from .base import STACK_POLL_TIME
-
-from ..providers.base import Template
+from ..exceptions import (CancelExecution, MissingParameterException,
+                          StackDidNotChange, StackDoesNotExist)
 from ..hooks import utils
-from ..exceptions import (
-    MissingParameterException,
-    StackDidNotChange,
-    StackDoesNotExist,
-    CancelExecution,
-)
+from ..providers.base import Template
+from ..status import (INTERRUPTED, PENDING, SUBMITTED, WAITING, CompleteStatus,
+                      DidNotChangeStatus, FailedStatus, NotSubmittedStatus,
+                      NotUpdatedStatus, SkippedStatus, SubmittedStatus)
+from .base import STACK_POLL_TIME, BaseAction, build_walker, plan
 
-from ..status import (
-    NotSubmittedStatus,
-    NotUpdatedStatus,
-    DidNotChangeStatus,
-    SubmittedStatus,
-    CompleteStatus,
-    FailedStatus,
-    SkippedStatus,
-    PENDING,
-    WAITING,
-    SUBMITTED,
-    INTERRUPTED
-)
-
-
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def build_stack_tags(stack):
-    """Builds a common set of tags to attach to a stack"""
+    """Build a common set of tags to attach to a stack."""
     return [{'Key': t[0], 'Value': t[1]} for t in stack.tags.items()]
 
 
 def should_update(stack):
-    """Tests whether a stack should be submitted for updates to CF.
+    """Test whether a stack should be submitted for updates to CloudFormation.
 
     Args:
-        stack (:class:`stacker.stack.Stack`): The stack object to check.
+        stack (:class:`runway.CFNgin.stack.Stack`): The stack object to check.
 
     Returns:
         bool: If the stack should be updated, return True.
@@ -50,20 +30,19 @@ def should_update(stack):
     """
     if stack.locked:
         if not stack.force:
-            logger.debug("Stack %s locked and not in --force list. "
+            LOGGER.debug("Stack %s locked and not in --force list. "
                          "Refusing to update.", stack.name)
             return False
-        else:
-            logger.debug("Stack %s locked, but is in --force "
-                         "list.", stack.name)
+        LOGGER.debug("Stack %s locked, but is in --force "
+                     "list.", stack.name)
     return True
 
 
 def should_submit(stack):
-    """Tests whether a stack should be submitted to CF for update/create
+    """Test whether a stack should be submitted to CF for update/create.
 
     Args:
-        stack (:class:`stacker.stack.Stack`): The stack object to check.
+        stack (:class:`runway.CFNgin.stack.Stack`): The stack object to check.
 
     Returns:
         bool: If the stack should be submitted, return True.
@@ -72,12 +51,12 @@ def should_submit(stack):
     if stack.enabled:
         return True
 
-    logger.debug("Stack %s is not enabled.  Skipping.", stack.name)
+    LOGGER.debug("Stack %s is not enabled.  Skipping.", stack.name)
     return False
 
 
 def should_ensure_cfn_bucket(outline, dump):
-    """Test whether access to the cloudformation template bucket is required
+    """Test whether access to the cloudformation template bucket is required.
 
     Args:
         outline (bool): The outline action.
@@ -91,7 +70,7 @@ def should_ensure_cfn_bucket(outline, dump):
 
 
 def _resolve_parameters(parameters, blueprint):
-    """Resolves CloudFormation Parameters for a given blueprint.
+    """Resolve CloudFormation Parameters for a given blueprint.
 
     Given a list of parameters, handles:
         - discard any parameters that the blueprint does not use
@@ -101,8 +80,8 @@ def _resolve_parameters(parameters, blueprint):
     Args:
         parameters (dict): A dictionary of parameters provided by the
             stack definition
-        blueprint (:class:`stacker.blueprint.base.Blueprint`): A Blueprint
-            object that is having the parameters applied to it.
+        blueprint (:class:`runway.CFNgin.blueprint.base.Blueprint`):
+            A Blueprint object that is having the parameters applied to it.
 
     Returns:
         dict: The resolved parameters.
@@ -113,32 +92,29 @@ def _resolve_parameters(parameters, blueprint):
 
     for key, value in parameters.items():
         if key not in param_defs:
-            logger.debug("Blueprint %s does not use parameter %s.",
+            LOGGER.debug("Blueprint %s does not use parameter %s.",
                          blueprint.name, key)
             continue
         if value is None:
-            logger.debug("Got None value for parameter %s, not submitting it "
+            LOGGER.debug("Got None value for parameter %s, not submitting it "
                          "to cloudformation, default value should be used.",
                          key)
             continue
         if isinstance(value, bool):
-            logger.debug("Converting parameter %s boolean \"%s\" to string.",
+            LOGGER.debug("Converting parameter %s boolean \"%s\" to string.",
                          key, value)
             value = str(value).lower()
         params[key] = value
     return params
 
 
-class UsePreviousParameterValue(object):
-    """ A simple class used to indicate a Parameter should use it's existng
-    value.
-    """
-    pass
+class UsePreviousParameterValue(object):  # pylint: disable=too-few-public-methods
+    """Class used to indicate a Parameter should use it's existing value."""
 
 
 def _handle_missing_parameters(parameter_values, all_params, required_params,
                                existing_stack=None):
-    """Handles any missing parameters.
+    """Handle any missing parameters.
 
     If an existing_stack is provided, look up missing parameters there.
 
@@ -164,16 +140,16 @@ def _handle_missing_parameters(parameter_values, all_params, required_params,
     missing_params = list(set(all_params) - set(parameter_values.keys()))
     if existing_stack and 'Parameters' in existing_stack:
         stack_parameters = [
-            p["ParameterKey"] for p in existing_stack["Parameters"]
+            param["ParameterKey"] for param in existing_stack["Parameters"]
         ]
-        for p in missing_params:
-            if p in stack_parameters:
-                logger.debug(
+        for param in missing_params:
+            if param in stack_parameters:
+                LOGGER.debug(
                     "Using previous value for parameter %s from existing "
                     "stack",
-                    p
+                    param
                 )
-                parameter_values[p] = UsePreviousParameterValue
+                parameter_values[param] = UsePreviousParameterValue
     final_missing = list(set(required_params) - set(parameter_values.keys()))
     if final_missing:
         raise MissingParameterException(final_missing)
@@ -187,9 +163,9 @@ def handle_hooks(stage, hooks, provider, context, dump, outline):
     Args:
         stage (str): The name of the hook stage - pre_build/post_build.
         hooks (list): A list of dictionaries containing the hooks to execute.
-        provider (:class:`stacker.provider.base.BaseProvider`): The provider
+        provider (:class:`runway.cfngin.provider.base.BaseProvider`): The provider
             the current stack is using.
-        context (:class:`stacker.context.Context`): The current stacker
+        context (:class:`runway.cfngin.context.Context`): The current CFNgin
             context.
         dump (bool): Whether running with dump set or not.
         outline (bool): Whether running with outline set or not.
@@ -215,19 +191,20 @@ class Action(BaseAction):
 
         - Pushing the generated CloudFormation template to S3 if it has changed
         - Submitting either a build or update of the given stack to the
-            :class:`stacker.provider.base.Provider`.
+            :class:`runway.cfngin.provider.base.Provider`.
 
     """
 
-    def build_parameters(self, stack, provider_stack=None):
-        """Builds the CloudFormation Parameters for our stack.
+    @staticmethod
+    def build_parameters(stack, provider_stack=None):
+        """Build the CloudFormation Parameters for our stack.
 
         Args:
-            stack (:class:`stacker.stack.Stack`): A stacker stack
-            provider_stack (dict): An optional Stacker provider object
+            stack (:class:`runway.cfngin.stack.Stack`): A CFNgin stack.
+            provider_stack (Dict[str, Any]): An optional Stacker provider object.
 
         Returns:
-            dict: The parameters for the given stack
+            Dict[str, Any]: The parameters for the given stack
 
         """
         resolved = _resolve_parameters(stack.parameter_values, stack.blueprint)
@@ -250,8 +227,9 @@ class Action(BaseAction):
 
         return param_list
 
-    def _launch_stack(self, stack, **kwargs):
-        """Handles the creating or updating of a stack in CloudFormation.
+    # TODO refactor long if, elif, else block
+    def _launch_stack(self, stack, **kwargs):  # pylint: disable=R
+        """Handle the creating or updating of a stack in CloudFormation.
 
         Also makes sure that we don't try to create or update a stack while
         it is already updating or creating.
@@ -279,17 +257,17 @@ class Action(BaseAction):
 
         recreate = False
         if provider_stack and old_status == SUBMITTED:
-            logger.debug(
+            LOGGER.debug(
                 "Stack %s provider status: %s",
                 stack.fqn,
                 provider.get_stack_status(provider_stack),
             )
 
-            if provider.is_stack_rolling_back(provider_stack):
+            if provider.is_stack_rolling_back(provider_stack):  # pylint: disable=no-else-return
                 if 'rolling back' in old_status.reason:
                     return old_status
 
-                logger.debug("Stack %s entered a roll back", stack.fqn)
+                LOGGER.debug("Stack %s entered a roll back", stack.fqn)
                 if 'updating' in old_status.reason:
                     reason = 'rolling back update'
                 else:
@@ -297,10 +275,10 @@ class Action(BaseAction):
 
                 return SubmittedStatus(reason)
             elif provider.is_stack_in_progress(provider_stack):
-                logger.debug("Stack %s in progress.", stack.fqn)
+                LOGGER.debug("Stack %s in progress.", stack.fqn)
                 return old_status
             elif provider.is_stack_destroyed(provider_stack):
-                logger.debug("Stack %s finished deleting", stack.fqn)
+                LOGGER.debug("Stack %s finished deleting", stack.fqn)
                 recreate = True
                 # Continue with creation afterwards
             # Failure must be checked *before* completion, as both will be true
@@ -311,8 +289,8 @@ class Action(BaseAction):
                 if 'rolling' in reason:
                     reason = reason.replace('rolling', 'rolled')
                 status_reason = provider.get_rollback_status_reason(stack.fqn)
-                logger.info(
-                    "%s Stack Roll Back Reason: " + status_reason, stack.fqn)
+                LOGGER.info(
+                    "%s Stack Roll Back Reason: %s", stack.fqn, status_reason)
                 return FailedStatus(reason)
 
             elif provider.is_stack_completed(provider_stack):
@@ -322,10 +300,10 @@ class Action(BaseAction):
             else:
                 return old_status
 
-        logger.debug("Resolving stack %s", stack.fqn)
+        LOGGER.debug("Resolving stack %s", stack.fqn)
         stack.resolve(self.context, self.provider)
 
-        logger.debug("Launching stack %s now.", stack.fqn)
+        LOGGER.debug("Launching stack %s now.", stack.fqn)
         template = self._template(stack.blueprint)
         stack_policy = self._stack_policy(stack)
         tags = build_stack_tags(stack)
@@ -333,12 +311,12 @@ class Action(BaseAction):
         force_change_set = stack.blueprint.requires_change_set
 
         if recreate:
-            logger.debug("Re-creating stack: %s", stack.fqn)
+            LOGGER.debug("Re-creating stack: %s", stack.fqn)
             provider.create_stack(stack.fqn, template, parameters,
                                   tags, stack_policy=stack_policy)
             return SubmittedStatus("re-creating stack")
-        elif not provider_stack:
-            logger.debug("Creating new stack: %s", stack.fqn)
+        if not provider_stack:
+            LOGGER.debug("Creating new stack: %s", stack.fqn)
             provider.create_stack(stack.fqn, template, parameters, tags,
                                   force_change_set,
                                   stack_policy=stack_policy)
@@ -361,10 +339,9 @@ class Action(BaseAction):
                     stack_policy=stack_policy,
                 )
 
-                logger.debug("Updating existing stack: %s", stack.fqn)
+                LOGGER.debug("Updating existing stack: %s", stack.fqn)
                 return SubmittedStatus("updating existing stack")
-            else:
-                return SubmittedStatus("destroying stack for re-creation")
+            return SubmittedStatus("destroying stack for re-creation")
         except CancelExecution:
             stack.set_outputs(provider.get_output_dict(provider_stack))
             return SkippedStatus(reason="canceled execution")
@@ -373,23 +350,29 @@ class Action(BaseAction):
             return DidNotChangeStatus()
 
     def _template(self, blueprint):
-        """Generates a suitable template based on whether or not an S3 bucket
-        is set.
+        """Generate a template based on whether or not an S3 bucket is set.
 
         If an S3 bucket is set, then the template will be uploaded to S3 first,
         and CreateStack/UpdateStack operations will use the uploaded template.
         If not bucket is set, then the template will be inlined.
+
         """
         if self.bucket_name:
             return Template(url=self.s3_stack_push(blueprint))
-        else:
-            return Template(body=blueprint.rendered)
+        return Template(body=blueprint.rendered)
 
-    def _stack_policy(self, stack):
-        """Returns a Template object for the stacks stack policy, or None if
-        the stack doesn't have a stack policy."""
+    @staticmethod
+    def _stack_policy(stack):
+        """Return a Template object for the stacks stack policy.
+
+        Returns:
+            Template: If stack has a template policy
+            None: If the stack doesn't have a stack policy.
+
+        """
         if stack.stack_policy:
             return Template(body=stack.stack_policy)
+        return None
 
     def _generate_plan(self, tail=False):
         return plan(
@@ -398,8 +381,10 @@ class Action(BaseAction):
             tail=self._tail_stack if tail else None,
             context=self.context)
 
-    def pre_run(self, outline=False, dump=False, *args, **kwargs):
+    def pre_run(self, **kwargs):
         """Any steps that need to be taken prior to running the action."""
+        dump = kwargs.get('dump', False)
+        outline = kwargs.get('outline', False)
         if should_ensure_cfn_bucket(outline, dump):
             self.ensure_cfn_bucket()
         hooks = self.context.config.pre_build
@@ -412,30 +397,33 @@ class Action(BaseAction):
             outline
         )
 
-    def run(self, concurrency=0, outline=False,
-            tail=False, dump=False, *args, **kwargs):
+    def run(self, **kwargs):
         """Kicks off the build/update of the stacks in the stack_definitions.
 
         This is the main entry point for the Builder.
 
         """
-        plan = self._generate_plan(tail=tail)
-        if not plan.keys():
-            logger.warn('WARNING: No stacks detected (error in config?)')
+        dump = kwargs.get('dump', False)
+        outline = kwargs.get('outline', False)
+        action_plan = self._generate_plan(tail=kwargs.get('tail'))
+        if not action_plan.keys():
+            LOGGER.warning('WARNING: No stacks detected (error in config?)')
         if not outline and not dump:
-            plan.outline(logging.DEBUG)
-            logger.debug("Launching stacks: %s", ", ".join(plan.keys()))
-            walker = build_walker(concurrency)
-            plan.execute(walker)
+            action_plan.outline(logging.DEBUG)
+            LOGGER.debug("Launching stacks: %s", ", ".join(action_plan.keys()))
+            walker = build_walker(kwargs.get('concurrency', 0))
+            action_plan.execute(walker)
         else:
             if outline:
-                plan.outline()
+                action_plan.outline()
             if dump:
-                plan.dump(directory=dump, context=self.context,
-                          provider=self.provider)
+                action_plan.dump(directory=dump, context=self.context,
+                                 provider=self.provider)
 
-    def post_run(self, outline=False, dump=False, *args, **kwargs):
+    def post_run(self, **kwargs):
         """Any steps that need to be taken after running the action."""
+        dump = kwargs.get('dump', False)
+        outline = kwargs.get('outline', False)
         hooks = self.context.config.post_build
         handle_hooks(
             "post_build",

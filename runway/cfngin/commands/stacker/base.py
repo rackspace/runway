@@ -1,16 +1,15 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import object
+"""CFNgin command base class."""
 import argparse
-import threading
-import signal
-from collections import Mapping
 import logging
+import signal
+import threading
+
+# pylint false positive
+from six.moves.collections_abc import Mapping  # pylint: disable=E
 
 from ...environment import parse_environment
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 SIGNAL_NAMES = {
     signal.SIGINT: "SIGINT",
@@ -19,25 +18,31 @@ SIGNAL_NAMES = {
 
 
 def cancel():
-    """Returns a threading.Event() that will get set when SIGTERM, or
-    SIGINT are triggered. This can be used to cancel execution of threads.
-    """
-    cancel = threading.Event()
+    """Cancel execution of threads.
 
-    def cancel_execution(signum, frame):
+    Returns:
+         threading.Event(): Set when SIGTERM, or SIGINT are triggered.
+
+    """
+    cancel_event = threading.Event()
+
+    def cancel_execution(signum, _frame):
         signame = SIGNAL_NAMES.get(signum, signum)
-        logger.info("Signal %s received, quitting "
+        LOGGER.info("Signal %s received, quitting "
                     "(this can take some time)...", signame)
-        cancel.set()
+        cancel_event.set()
 
     signal.signal(signal.SIGINT, cancel_execution)
     signal.signal(signal.SIGTERM, cancel_execution)
-    return cancel
+    return cancel_event
 
 
-class KeyValueAction(argparse.Action):
+class KeyValueAction(argparse.Action):  # pylint: disable=too-few-public-methods
+    """Key=value argument class for an argparse option."""
+
     def __init__(self, option_strings, dest, default=None, nargs=None,
                  **kwargs):
+        """Instantiate class."""
         if nargs:
             raise ValueError("nargs not allowed")
         default = default or {}
@@ -45,6 +50,7 @@ class KeyValueAction(argparse.Action):
                                              default=default, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
+        """Call class directly."""
         if not isinstance(values, Mapping):
             raise ValueError("type must be \"key_value\"")
         if not getattr(namespace, self.dest):
@@ -53,6 +59,7 @@ class KeyValueAction(argparse.Action):
 
 
 def key_value_arg(string):
+    """Key=value argument type for an argparse option."""
     try:
         k, v = string.split("=", 1)
     except ValueError:
@@ -62,13 +69,13 @@ def key_value_arg(string):
 
 
 def environment_file(input_file):
-    """Reads a stacker environment file and returns the resulting data."""
-    with open(input_file) as fd:
-        return parse_environment(fd.read())
+    """Read a CFNgin environment file and returns the resulting data."""
+    with open(input_file) as file_:
+        return parse_environment(file_.read())
 
 
 class BaseCommand(object):
-    """Base class for all stacker subcommands.
+    """Base class for all CFNgin subcommands.
 
     The way argparse handles common arguments that should be passed to the
     subparser is confusing. You can add arguments to the parent parser that
@@ -76,7 +83,7 @@ class BaseCommand(object):
     command line before specifying the subparser. Furthermore, when viewing the
     help for a subcommand, you can't view these parameters.
 
-    By including shared parameters for stacker commands within this subclass,
+    By including shared parameters for CFNgin commands within this subclass,
     we don't have to redundantly add the parameters we want on all subclasses
     within each subparser and these shared parameters are treated as normal
     arguments to the subcommand.
@@ -88,12 +95,15 @@ class BaseCommand(object):
     subcommands = tuple()
     subcommands_help = None
 
-    def __init__(self, setup_logging=None, *args, **kwargs):
+    def __init__(self, setup_logging=None):
+        """Instantiate class."""
+        self.config = None
         self.setup_logging = setup_logging
         if not self.name:
             raise ValueError("Subcommands must set \"name\": %s" % (self,))
 
     def add_subcommands(self, parser):
+        """Add subcommands."""
         if self.subcommands:
             subparsers = parser.add_subparsers(help=self.subcommands_help)
             for subcommand_class in self.subcommands:
@@ -108,6 +118,7 @@ class BaseCommand(object):
                     get_context_kwargs=subcommand.get_context_kwargs)
 
     def parse_args(self, *vargs):
+        """Parse arguments."""
         parser = argparse.ArgumentParser(description=self.description)
         self.add_subcommands(parser)
         self.add_arguments(parser)
@@ -115,14 +126,15 @@ class BaseCommand(object):
         args.environment.update(args.cli_envs)
         return args
 
-    def run(self, options, **kwargs):
-        pass
+    def run(self, options):
+        """Run the command."""
 
-    def configure(self, options, **kwargs):
+    def configure(self, options):
+        """Configure command class."""
         if self.setup_logging:
             self.setup_logging(options.verbose, self.config.log_formats)
 
-    def get_context_kwargs(self, options, **kwargs):
+    def get_context_kwargs(self, options):  # pylint: disable=no-self-use,unused-argument
         """Return a dictionary of kwargs that will be used with the Context.
 
         This allows commands to pass in any specific arguments they define to
@@ -133,13 +145,15 @@ class BaseCommand(object):
                 passed via the command line
 
         Returns:
-            dict: Dictionary that will be passed to Context initializer as
-                kwargs.
+            Dict[str, Any]: Dictionary that will be passed to Context
+                initializer as kwargs.
 
         """
         return {}
 
-    def add_arguments(self, parser):
+    @staticmethod
+    def add_arguments(parser):
+        """Add arguments."""
         parser.add_argument(
             "-e", "--env", dest="cli_envs", metavar="ENV=VALUE",
             type=key_value_arg, action=KeyValueAction, default={},
@@ -179,9 +193,36 @@ class BaseCommand(object):
                  "replacements, run with \"--replacements-only\" as well.")
         parser.add_argument(
             "--replacements-only", action="store_true",
-            help="If interactive mode is enabled, stacker will only prompt to "
+            help="If interactive mode is enabled, CFNgin will only prompt to "
                  "authorize replacements.")
         parser.add_argument(
             "--recreate-failed", action="store_true",
             help="Destroy and re-create stacks that are stuck in a failed "
                  "state from an initial deployment when updating.")
+
+    @staticmethod
+    def _add_argument_max_parallel(parser):
+        """Add ``-j``, ``--max-parallel`` argument to an arg parser."""
+        parser.add_argument("-j", "--max-parallel", action="store", type=int,
+                            default=0,
+                            help="The maximum number of stacks to execute in "
+                                 "parallel. If not provided, the value will "
+                                 "be constrained based on the underlying "
+                                 "graph.")
+
+    @staticmethod
+    def _add_argument_stacks(parser):
+        """Add ``--stacks`` argument to an arg parser."""
+        parser.add_argument("--stacks", action="append",
+                            metavar="STACKNAME", type=str,
+                            help="Only work on the stacks given. Can be "
+                                 "specified more than once. If not specified "
+                                 "then CFNgin will work on all stacks in the "
+                                 "config file.")
+
+    @staticmethod
+    def _add_argument_tail(parser):
+        """Add ``-t``, ``--tail`` argument to an arg parser."""
+        parser.add_argument("-t", "--tail", action="store_true",
+                            help="Tail the CloudFormation logs while working "
+                                 "with stacks")

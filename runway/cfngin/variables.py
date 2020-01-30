@@ -1,34 +1,23 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import division
-
+"""CFNgin variables."""
 import re
 
-from past.builtins import basestring
-from builtins import object
-from string import Template
+from six import string_types
 
-from .exceptions import InvalidLookupCombination, UnresolvedVariable, \
-    UnknownLookupType, FailedVariableLookup, FailedLookup, \
-    UnresolvedVariableValue, InvalidLookupConcatenation
+from .exceptions import (FailedLookup, FailedVariableLookup,
+                         InvalidLookupCombination, InvalidLookupConcatenation,
+                         UnknownLookupType, UnresolvedVariable,
+                         UnresolvedVariableValue)
 from .lookups.registry import LOOKUP_HANDLERS
-
-
-class LookupTemplate(Template):
-
-    """A custom string template we use to replace lookup values"""
-    idpattern = r'[_a-z][^\$\{\}]*'
 
 
 def resolve_variables(variables, context, provider):
     """Given a list of variables, resolve all of them.
 
     Args:
-        variables (list of :class:`stacker.variables.Variable`): list of
-            variables
-        context (:class:`stacker.context.Context`): stacker context
-        provider (:class:`stacker.provider.base.BaseProvider`): subclass of the
-            base provider
+        variables (List[:class:`Variable`]): List of variables.
+        context (:class:`runway.cfngin.context.Context`): CFNgin context.
+        provider (:class:`runway.cfngin.provider.base.BaseProvider`): Subclass
+            of the base provider.
 
     """
     for variable in variables:
@@ -36,35 +25,37 @@ def resolve_variables(variables, context, provider):
 
 
 class Variable(object):
-    """Represents a variable passed to a stack.
-
-    Args:
-        name (str): Name of the variable
-        value (any): Initial value of the variable from the config (str, list,
-                     dict)
-    """
+    """Represents a variable passed to a stack."""
 
     def __init__(self, name, value):
+        """Instantiate class.
+
+        Args:
+            name (str): Name of the variable
+            value (Any): Initial value of the variable from the config.
+                (str, list, dict)
+
+        """
         self.name = name
         self._raw_value = value
         self._value = VariableValue.parse(value)
 
     @property
     def value(self):
-        """Return the current value of the Variable.
-        """
+        """Return the current value of the Variable."""
         try:
             return self._value.value()
         except UnresolvedVariableValue:
             raise UnresolvedVariable("<unknown>", self)
-        except InvalidLookupConcatenation as e:
-            raise InvalidLookupCombination(e.lookup, e.lookups, self)
+        except InvalidLookupConcatenation as err:
+            raise InvalidLookupCombination(err.lookup, err.lookups, self)
 
     @property
     def resolved(self):
         """Boolean for whether the Variable has been resolved.
 
         Variables only need to be resolved if they contain lookups.
+
         """
         return self._value.resolved()
 
@@ -72,66 +63,81 @@ class Variable(object):
         """Recursively resolve any lookups with the Variable.
 
         Args:
-            context (:class:`stacker.context.Context`): Current context for
-                building the stack
-            provider (:class:`stacker.provider.base.BaseProvider`): subclass of
-                the base provider
+            context (:class:`runway.cfngin.context.Context`): Current context
+                for building the stack
+            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+                subclass of the base provider
 
         """
         try:
             self._value.resolve(context, provider)
-        except FailedLookup as e:
-            raise FailedVariableLookup(self.name, e.lookup, e.error)
+        except FailedLookup as err:
+            raise FailedVariableLookup(self.name, err.lookup, err.error)
 
     def dependencies(self):
-        """
+        """Stack names that this variable depends on.
+
         Returns:
-            Set[str]: Stack names that this variable depends on
+            Set[str]: Stack names that this variable depends on.
+
         """
         return self._value.dependencies()
 
 
 class VariableValue(object):
-    """
-    Abstract Syntax Tree base object to parse the value for a variable
-    """
+    """Abstract Syntax Tree base object to parse the value for a variable."""
+
     def value(self):
-        return NotImplementedError()
+        """Abstract method for a variable value's value."""
+        raise NotImplementedError
 
     def __iter__(self):
-        return NotImplementedError()
+        """Abstract method for iterating over an instance of this class."""
+        raise NotImplementedError
 
     def resolved(self):
-        """
+        """Abstract method for variable is resolved.
+
         Returns:
-            bool: Whether value() will not raise an error
+            bool: Whether value() will not raise an error.
+
         """
-        return NotImplementedError()
+        raise NotImplementedError
 
     def resolve(self, context, provider):
-        pass
+        """Resolve the value of the variable."""
 
-    def dependencies(self):
+    @staticmethod
+    def dependencies():
+        """Stack names that this variable depends on."""
         return set()
 
     def simplified(self):
-        """
-        Return a simplified version of the Value.
+        """Return a simplified version of the value.
+
         This can be used to e.g. concatenate two literals in to one literal, or
         to flatten nested Concatenations
 
         Returns:
             VariableValue
+
         """
         return self
 
     @classmethod
     def parse(cls, input_object):
+        """Parse complex variable structures using type appropriate subclasses.
+
+        Args:
+            input_object (Any): The objected defined as the value of a
+                variable.
+
+        """
         if isinstance(input_object, list):
             return VariableValueList.parse(input_object)
-        elif isinstance(input_object, dict):
+        if isinstance(input_object, dict):
             return VariableValueDict.parse(input_object)
-        elif not isinstance(input_object, basestring):
+        if not isinstance(input_object, string_types):
             return VariableValueLiteral(input_object)
         # else:  # str
 
@@ -146,15 +152,15 @@ class VariableValue(object):
         while True:
             last_open = None
             next_close = None
-            for i, t in enumerate(tokens):
-                if not isinstance(t, VariableValueLiteral):
+            for i, tok in enumerate(tokens):
+                if not isinstance(tok, VariableValueLiteral):
                     continue
 
-                if t.value() == opener:
+                if tok.value() == opener:
                     last_open = i
                     next_close = None
                 if last_open is not None and \
-                        t.value() == closer and \
+                        tok.value() == closer and \
                         next_close is None:
                     next_close = i
 
@@ -176,25 +182,46 @@ class VariableValue(object):
 
 
 class VariableValueLiteral(VariableValue):
+    """The literal value of a variable as provided."""
+
     def __init__(self, value):
+        """Instantiate class."""
         self._value = value
 
     def value(self):
+        """Value of the variable. Can be resolved or unresolved."""
         return self._value
 
-    def __iter__(self):
-        yield self
-
     def resolved(self):
+        """Use to check if the variable value has been resolved.
+
+        The ValueLiteral will always appear as resolved because it does
+        not "resolve" since it is the literal definition of the value.
+
+        """
         return True
 
+    def __iter__(self):
+        """How the object is iterated."""
+        yield self
+
     def __repr__(self):
+        """Object represented as a string."""
         return "Literal<{}>".format(repr(self._value))
 
 
 class VariableValueList(VariableValue, list):
+    """A list variable value."""
+
     @classmethod
     def parse(cls, input_object):
+        """Parse list variable structure.
+
+        Args:
+            input_object (List[Any]): The objected defined as the value of a
+                variable.
+
+        """
         acc = [
             VariableValue.parse(obj)
             for obj in input_object
@@ -202,43 +229,72 @@ class VariableValueList(VariableValue, list):
         return cls(acc)
 
     def value(self):
+        """Value of the variable. Can be resolved or unresolved."""
         return [
             item.value()
             for item in self
         ]
 
     def resolved(self):
+        """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self:
             accumulator = accumulator and item.resolved()
         return accumulator
 
-    def __repr__(self):
-        return "List[{}]".format(', '.join([repr(value) for value in self]))
-
-    def __iter__(self):
-        return list.__iter__(self)
-
     def resolve(self, context, provider):
+        """Resolve the variable value.
+
+        Args:
+            context (:class:`runway.cfngin.context.Context`): Current context
+                for building the stack
+            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+                subclass of the base provider
+
+        """
         for item in self:
             item.resolve(context, provider)
 
     def dependencies(self):
+        """Stack names that this variable depends on."""
         deps = set()
         for item in self:
             deps.update(item.dependencies())
         return deps
 
     def simplified(self):
+        """Return a simplified version of the value.
+
+        This can be used to concatenate two literals into one literal or
+        flatten nested concatenations.
+
+        """
         return [
             item.simplified()
             for item in self
         ]
 
+    def __iter__(self):
+        """How the object is iterated."""
+        return list.__iter__(self)
+
+    def __repr__(self):
+        """Object represented as a string."""
+        return "List[{}]".format(', '.join([repr(value) for value in self]))
+
 
 class VariableValueDict(VariableValue, dict):
+    """A dict variable value."""
+
     @classmethod
     def parse(cls, input_object):
+        """Parse dict variable structure.
+
+        Args:
+            input_object (Dict[str, Any]): The objected defined as the value
+                of a variable.
+
+        """
         acc = {
             k: VariableValue.parse(v)
             for k, v in input_object.items()
@@ -246,87 +302,109 @@ class VariableValueDict(VariableValue, dict):
         return cls(acc)
 
     def value(self):
+        """Value of the variable. Can be resolved or unresolved."""
         return {
             k: v.value()
             for k, v in self.items()
         }
 
     def resolved(self):
+        """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self.values():
             accumulator = accumulator and item.resolved()
         return accumulator
 
-    def __repr__(self):
-        return "Dict[{}]".format(', '.join([
-            "{}={}".format(k, repr(v)) for k, v in self.items()
-        ]))
-
-    def __iter__(self):
-        return dict.__iter__(self)
-
     def resolve(self, context, provider):
+        """Resolve the variable value.
+
+        Args:
+            context (:class:`runway.cfngin.context.Context`): Current context
+                for building the stack
+            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+                subclass of the base provider
+
+        """
         for item in self.values():
             item.resolve(context, provider)
 
     def dependencies(self):
+        """Stack names that this variable depends on."""
         deps = set()
         for item in self.values():
             deps.update(item.dependencies())
         return deps
 
     def simplified(self):
+        """Return a simplified version of the value."""
         return {
             k: v.simplified()
             for k, v in self.items()
         }
 
+    def __iter__(self):
+        """How the object is iterated."""
+        return dict.__iter__(self)
+
+    def __repr__(self):
+        """Object represented as a string."""
+        return "Dict[{}]".format(', '.join([
+            "{}={}".format(k, repr(v)) for k, v in self.items()
+        ]))
+
 
 class VariableValueConcatenation(VariableValue, list):
+    """A concatinated variable value."""
+
     def value(self):
+        """Value of the variable. Can be resolved or unresolved."""
         if len(self) == 1:
             return self[0].value()
 
         values = []
         for value in self:
             resolved_value = value.value()
-            if not isinstance(resolved_value, basestring):
+            if not isinstance(resolved_value, string_types):
                 raise InvalidLookupConcatenation(value, self)
             values.append(resolved_value)
         return ''.join(values)
 
-    def __iter__(self):
-        return list.__iter__(self)
-
     def resolved(self):
+        """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self:
             accumulator = accumulator and item.resolved()
         return accumulator
 
-    def __repr__(self):
-        return "Concat[{}]".format(', '.join([repr(value) for value in self]))
-
     def resolve(self, context, provider):
+        """Resolve the variable value.
+
+        Args:
+            context (:class:`runway.cfngin.context.Context`): Current context
+                for building the stack
+            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+                subclass of the base provider
+
+        """
         for value in self:
             value.resolve(context, provider)
 
     def dependencies(self):
+        """Stack names that this variable depends on."""
         deps = set()
         for item in self:
             deps.update(item.dependencies())
         return deps
 
     def simplified(self):
+        """Return a simplified version of the value."""
         concat = []
         for item in self:
-            if isinstance(item, VariableValueLiteral) and \
-                    item.value() == '':
-                pass
+            if isinstance(item, VariableValueLiteral) and item.value() == '':
+                continue
 
-            elif isinstance(item, VariableValueLiteral) and \
-                    len(concat) > 0 and \
-                    isinstance(concat[-1], VariableValueLiteral):
+            if (isinstance(item, VariableValueLiteral) and concat and
+                    isinstance(concat[-1], VariableValueLiteral)):
                 # Join the literals together
                 concat[-1] = VariableValueLiteral(
                     concat[-1].value() + item.value()
@@ -339,27 +417,38 @@ class VariableValueConcatenation(VariableValue, list):
             else:
                 concat.append(item.simplified())
 
-        if len(concat) == 0:
+        if not concat:
             return VariableValueLiteral('')
-        elif len(concat) == 1:
+        if len(concat) == 1:
             return concat[0]
-        else:
-            return VariableValueConcatenation(concat)
+        return VariableValueConcatenation(concat)
+
+    def __iter__(self):
+        """How the object is iterated."""
+        return list.__iter__(self)
+
+    def __repr__(self):
+        """Object represented as a string."""
+        return "Concat[{}]".format(', '.join([repr(value) for value in self]))
 
 
 class VariableValueLookup(VariableValue):
+    """A lookup variable value."""
+
     def __init__(self, lookup_name, lookup_data, handler=None):
-        """
+        """Instantiate class.
+
         Args:
-            lookup_name (basestring): Name of the invoked lookup
+            lookup_name (str): Name of the invoked lookup
             lookup_data (VariableValue): Data portion of the lookup
+
         """
         self._resolved = False
         self._value = None
 
         self.lookup_name = lookup_name
 
-        if isinstance(lookup_data, basestring):
+        if isinstance(lookup_data, string_types):
             lookup_data = VariableValueLiteral(lookup_data)
         self.lookup_data = lookup_data
 
@@ -372,9 +461,18 @@ class VariableValueLookup(VariableValue):
         self.handler = handler
 
     def resolve(self, context, provider):
+        """Resolve the variable value.
+
+        Args:
+            context (:class:`runway.cfngin.context.Context`): Current context
+                for building the stack
+            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+                subclass of the base provider
+
+        """
         self.lookup_data.resolve(context, provider)
         try:
-            if type(self.handler) == type:
+            if isinstance(self.handler, type):
                 # Hander is a new-style handler
                 result = self.handler.handle(
                     value=self.lookup_data.value(),
@@ -388,52 +486,56 @@ class VariableValueLookup(VariableValue):
                     provider=provider
                 )
             self._resolve(result)
-        except Exception as e:
-            raise FailedLookup(self, e)
+        except Exception as err:
+            raise FailedLookup(self, err)
 
     def _resolve(self, value):
         self._value = value
         self._resolved = True
 
     def dependencies(self):
-        if type(self.handler) == type:
+        """Stack names that this variable depends on."""
+        if isinstance(self.handler, type):
             return self.handler.dependencies(self.lookup_data)
-        else:
-            return set()
+        return set()
 
     def value(self):
+        """Value of the variable. Can be resolved or unresolved."""
         if self._resolved:
             return self._value
-        else:
-            raise UnresolvedVariableValue(self)
-
-    def __iter__(self):
-        yield self
+        raise UnresolvedVariableValue(self)
 
     def resolved(self):
+        """Use to check if the variable value has been resolved."""
         return self._resolved
 
+    def simplified(self):
+        """Return a simplified version of the value."""
+        return VariableValueLookup(
+            lookup_name=self.lookup_name,
+            lookup_data=self.lookup_data.simplified(),
+        )
+
+    def __iter__(self):
+        """How the object is iterated."""
+        yield self
+
     def __repr__(self):
+        """Object represented as a string."""
         if self._resolved:
             return "Lookup<{r} ({t} {d})>".format(
                 r=self._value,
                 t=self.lookup_name,
                 d=repr(self.lookup_data),
             )
-        else:
-            return "Lookup<{t} {d}>".format(
-                t=self.lookup_name,
-                d=repr(self.lookup_data),
-            )
+        return "Lookup<{t} {d}>".format(
+            t=self.lookup_name,
+            d=repr(self.lookup_data),
+        )
 
     def __str__(self):
+        """Object displayed as a string."""
         return "${{{type} {data}}}".format(
             type=self.lookup_name.value(),
             data=self.lookup_data.value(),
-        )
-
-    def simplified(self):
-        return VariableValueLookup(
-            lookup_name=self.lookup_name,
-            lookup_data=self.lookup_data.simplified(),
         )

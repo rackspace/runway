@@ -1,36 +1,44 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""Environment variable lookup."""
+# pylint: disable=unused-argument
 import os
 
-from . import LookupHandler
 from ...util import read_value_from_path
+from . import LookupHandler
 
 TYPE_NAME = "envvar"
 
 
 class EnvvarLookup(LookupHandler):
+    """Environment variable lookup."""
+
     @classmethod
-    def handle(cls, value, **kwargs):
+    def handle(cls, value, context=None, provider=None):
         """Retrieve an environment variable.
 
-        For example:
+        Args:
+            value (str): Parameter(s) given to this lookup.
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
 
-            # In stacker we would reference the environment variable like this:
+        Example::
+
+            # With CFNgin we would reference the environment variable like this:
             conf_key: ${envvar ENV_VAR_NAME}
 
-            You can optionally store the value in a file, ie:
+        You can optionally store the value in a file, ie::
 
             $ cat envvar_value.txt
             ENV_VAR_NAME
 
-            and reference it within stacker (NOTE: the path should be relative
-            to the stacker config file):
+        and reference it within CFNgin (NOTE: the path should be relative
+        to the CFNgin config file)::
 
             conf_key: ${envvar file://envvar_value.txt}
 
             # Both of the above would resolve to
             conf_key: ENV_VALUE
+
         """
         value = read_value_from_path(value)
 

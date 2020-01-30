@@ -1,34 +1,33 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import input
+"""AWS IAM hook."""
+# pylint: disable=unused-argument
 import copy
 import logging
 
-from botocore.exceptions import ClientError
-
-from awacs.aws import Statement, Allow, Policy
 from awacs import ecs
+from awacs.aws import Allow, Policy, Statement
 from awacs.helpers.trust import get_ecs_assumerole_policy
+from botocore.exceptions import ClientError
+from six.moves import input
 
-from . import utils
 from ..session_cache import get_session
+from . import utils
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def create_ecs_service_role(provider, context, **kwargs):
-    """Used to create the ecsServieRole, which has to be named exactly that
-    currently, so cannot be created via CloudFormation. See:
+    """Create ecsServieRole, which has to be named exactly that currently.
 
-    http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
+    See: http://docs.aws.amazon.com/AmazonECS/latest/developerguide/
+    IAM_policies.html#service_IAM_role
 
     Args:
-        provider (:class:`stacker.providers.base.BaseProvider`): provider
-            instance
-        context (:class:`stacker.context.Context`): context instance
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance.
+        context (:class:`runway.cfngin.context.Context`): Context instance.
 
-    Returns: boolean for whether or not the hook succeeded.
+    Returns:
+        bool: Whether or not the hook succeeded.
 
     """
     role_name = kwargs.get("role_name", "ecsServiceRole")
@@ -39,8 +38,8 @@ def create_ecs_service_role(provider, context, **kwargs):
             RoleName=role_name,
             AssumeRolePolicyDocument=get_ecs_assumerole_policy().to_json()
         )
-    except ClientError as e:
-        if "already exists" in str(e):
+    except ClientError as err:
+        if "already exists" in str(err):
             pass
         else:
             raise
@@ -73,16 +72,18 @@ def _get_cert_arn_from_response(response):
 
 
 def get_cert_contents(kwargs):
-    """Builds parameters with server cert file contents.
+    """Build parameters with server cert file contents.
 
     Args:
-        kwargs(dict): The keyword args passed to ensure_server_cert_exists,
-            optionally containing the paths to the cert, key and chain files.
+        kwargs (Dict[str, Any]): The keyword args passed to
+            ensure_server_cert_exists, optionally containing the paths to the
+            cert, key and chain files.
 
     Returns:
-        dict: A dictionary containing the appropriate parameters to supply to
-            upload_server_certificate. An empty dictionary if there is a
-            problem.
+        Dict[str, Any]: A dictionary containing the appropriate parameters
+            to supply to upload_server_certificate. An empty dictionary if
+            there is a problem.
+
     """
     paths = {
         "certificate": kwargs.get("path_to_certificate"),
@@ -125,7 +126,8 @@ def get_cert_contents(kwargs):
     return parameters
 
 
-def ensure_server_cert_exists(provider, context, **kwargs):
+def ensure_server_cert_exists(provider, _context, **kwargs):
+    """Ensure server cert exists."""
     client = get_session(provider.region).client('iam')
     cert_name = kwargs["cert_name"]
     status = "unknown"
@@ -135,7 +137,7 @@ def ensure_server_cert_exists(provider, context, **kwargs):
         )
         cert_arn = _get_cert_arn_from_response(response)
         status = "exists"
-        logger.info("certificate exists: %s (%s)", cert_name, cert_arn)
+        LOGGER.info("certificate exists: %s (%s)", cert_name, cert_arn)
     except ClientError:
         if kwargs.get("prompt", True):
             upload = input(
@@ -152,7 +154,7 @@ def ensure_server_cert_exists(provider, context, **kwargs):
         response = client.upload_server_certificate(**parameters)
         cert_arn = _get_cert_arn_from_response(response)
         status = "uploaded"
-        logger.info(
+        LOGGER.info(
             "uploaded certificate: %s (%s)",
             cert_name,
             cert_arn,

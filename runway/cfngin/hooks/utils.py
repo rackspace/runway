@@ -4,9 +4,9 @@ import logging
 import os
 import sys
 
-from ..util import load_object_from_string
+from ...util import load_object_from_string
 
-LOG = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def full_path(path):
@@ -15,68 +15,67 @@ def full_path(path):
 
 
 def handle_hooks(stage, hooks, provider, context):
-    """ Used to handle pre/post_build hooks.
+    """Handle pre/post_build hooks.
 
     These are pieces of code that we want to run before/after the builder
     builds the stacks.
 
     Args:
-        stage (string): The current stage (pre_run, post_run, etc).
-        hooks (list): A list of :class:`stacker.config.Hook` containing the
-            hooks to execute.
-        provider (:class:`stacker.provider.base.BaseProvider`): The provider
-            the current stack is using.
-        context (:class:`stacker.context.Context`): The current stacker
-            context.
+        stage (str): The current stage (pre_run, post_run, etc).
+        hooks (List[:class:`runway.cfngin.config.Hook`]): Hooks to execute.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance.
+        context (:class:`runway.cfngin.context.Context`): Context instance.
+
     """
     if not hooks:
-        LOG.debug("No %s hooks defined.", stage)
+        LOGGER.debug("No %s hooks defined.", stage)
         return
 
     hook_paths = []
-    for i, h in enumerate(hooks):
+    for i, hook in enumerate(hooks):
         try:
-            hook_paths.append(h.path)
+            hook_paths.append(hook.path)
         except KeyError:
             raise ValueError("%s hook #%d missing path." % (stage, i))
 
-    LOG.info("Executing %s hooks: %s", stage, ", ".join(hook_paths))
+    LOGGER.info("Executing %s hooks: %s", stage, ", ".join(hook_paths))
     for hook in hooks:
         data_key = hook.data_key
         required = hook.required
         kwargs = hook.args or {}
         enabled = hook.enabled
         if not enabled:
-            LOG.debug("hook with method %s is disabled, skipping",
+            LOGGER.debug("hook with method %s is disabled, skipping",
                          hook.path)
             continue
         try:
             method = load_object_from_string(hook.path)
         except (AttributeError, ImportError):
-            LOG.exception("Unable to load method at %s:", hook.path)
+            LOGGER.exception("Unable to load method at %s:", hook.path)
             if required:
                 raise
             continue
         try:
             result = method(context=context, provider=provider, **kwargs)
-        except Exception:
-            LOG.exception("Method %s threw an exception:", hook.path)
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.exception("Method %s threw an exception:", hook.path)
             if required:
                 raise
             continue
         if not result:
             if required:
-                LOG.error("Required hook %s failed. Return value: %s",
+                LOGGER.error("Required hook %s failed. Return value: %s",
                              hook.path, result)
                 sys.exit(1)
-            LOG.warning("Non-required hook %s failed. Return value: %s",
+            LOGGER.warning("Non-required hook %s failed. Return value: %s",
                            hook.path, result)
         else:
             if isinstance(result, collections.Mapping):
                 if data_key:
-                    LOG.debug("Adding result for hook %s to context in "
+                    LOGGER.debug("Adding result for hook %s to context in "
                                  "data_key %s.", hook.path, data_key)
                     context.set_hook_data(data_key, result)
                 else:
-                    LOG.debug("Hook %s returned result data, but no data "
+                    LOGGER.debug("Hook %s returned result data, but no data "
                                  "key set, so ignoring.", hook.path)

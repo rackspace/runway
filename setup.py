@@ -27,7 +27,7 @@ INSTALL_REQUIRES = [
     'pyhcl~=0.4',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'PyYAML>=4.1,<5.3',  # match awscli top-end
-    'six',
+    'six>=1.13.0',
     'typing;python_version<"3.5"',
     'yamllint',
     'zgitignore',  # for embedded hooks

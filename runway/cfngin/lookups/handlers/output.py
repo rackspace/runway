@@ -1,7 +1,5 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
+"""AWS CloudFormation Output lookup."""
+# pylint: disable=unused-argument
 import re
 from collections import namedtuple
 
@@ -13,29 +11,43 @@ Output = namedtuple("Output", ("stack_name", "output_name"))
 
 
 class OutputLookup(LookupHandler):
+    """AWS CloudFormation Output lookup."""
+
     @classmethod
-    def handle(cls, value, context=None, **kwargs):
+    def handle(cls, value, context=None, provider=None):
         """Fetch an output from the designated stack.
 
         Args:
-            value (str): string with the following format:
-                <stack_name>::<output_name>, ie. some-stack::SomeOutput
-            context (:class:`stacker.context.Context`): stacker context
+            value (str): Parameter(s) given to this lookup.
+                ``<stack_name>::<output_name>``
+            context (:class:`runway.cfngin.context.Context`): Context instance.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                Provider instance.
 
         Returns:
-            str: output from the specified stack
+            str: Output from the specified stack.
 
         """
-
         if context is None:
             raise ValueError('Context is required')
 
-        d = deconstruct(value)
-        stack = context.get_stack(d.stack_name)
-        return stack.outputs[d.output_name]
+        decon = deconstruct(value)
+        stack = context.get_stack(decon.stack_name)
+        return stack.outputs[decon.output_name]
 
     @classmethod
     def dependencies(cls, lookup_data):
+        """Calculate any dependencies required to perform this lookup.
+
+        Note that lookup_data may not be (completely) resolved at this time.
+
+        Args:
+            lookup_data (VariableValue): Parameter(s) given to this lookup.
+
+        Returns:
+            Set[str]: Stack names this lookup depends on.
+
+        """
         # try to get the stack name
         stack_name = ''
         for data_item in lookup_data:
@@ -58,7 +70,7 @@ class OutputLookup(LookupHandler):
 
 
 def deconstruct(value):
-
+    """Deconstruct the value."""
     try:
         stack_name, output_name = value.split("::")
     except ValueError:

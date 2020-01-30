@@ -1,8 +1,4 @@
-"""Blueprint representing raw template module."""
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
+"""CFNgin blueprint representing raw template module."""
 import hashlib
 import json
 import os
@@ -10,8 +6,8 @@ import sys
 
 from jinja2 import Template
 
-from ..util import parse_cloudformation_template
 from ..exceptions import InvalidConfig, UnresolvedVariable
+from ..util import parse_cloudformation_template
 from .base import Blueprint
 
 
@@ -62,8 +58,8 @@ def resolve_variable(provided_variable, blueprint_name):
     out everything that doesn't apply to CFN parameters.
 
     Args:
-        provided_variable (:class:`stacker.variables.Variable`): The variable
-            value provided to the blueprint.
+        provided_variable (:class:`runway.cfngin.variables.Variable`):
+            The variable value provided to the blueprint.
         blueprint_name (str): The name of the blueprint that the variable is
             being applied to.
 
@@ -85,12 +81,12 @@ def resolve_variable(provided_variable, blueprint_name):
     return value
 
 
-class RawTemplateBlueprint(Blueprint):
+class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
     """Blueprint class for blueprints auto-generated from raw templates."""
 
-    def __init__(self, name, context, raw_template_path, mappings=None, # noqa pylint: disable=too-many-arguments
-                 description=None):  # pylint: disable=unused-argument
-        """Initialize RawTemplateBlueprint object."""
+    def __init__(self, name, context,  # pylint: disable=super-init-not-called
+                 raw_template_path, mappings=None, description=None):
+        """Instantiate class."""
         self.name = name
         self.context = context
         self.mappings = mappings
@@ -99,7 +95,7 @@ class RawTemplateBlueprint(Blueprint):
         self._rendered = None
         self._version = None
 
-    def to_json(self, variables=None):  # pylint: disable=unused-argument
+    def to_json(self, variables=None):
         """Return the template in JSON.
 
         Args:
@@ -138,7 +134,7 @@ class RawTemplateBlueprint(Blueprint):
         return get_template_params(self.to_dict())
 
     def get_output_definitions(self):
-        """Gets the output definitions.
+        """Get the output definitions.
 
         Returns:
             dict: output definitions. Keys are output names, the values
@@ -157,8 +153,8 @@ class RawTemplateBlueprint(Blueprint):
         and requires provided variables to render.
 
         Args:
-            provided_variables (list of :class:`stacker.variables.Variable`):
-                list of provided variables
+            provided_variables (List[:class:`runway.cfngin.variables.Variable`]):
+                List of provided variables.
 
         """
         # Pass 1 to set resolved_variables to provided variables

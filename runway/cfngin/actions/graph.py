@@ -1,32 +1,40 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
+"""CFNgin graph action."""
+import json
 import logging
 import sys
-import json
 
 from .base import BaseAction, plan
 
-
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def each_step(graph):
-    """Returns an iterator that yields each step and it's direct
-    dependencies.
-    """
+    """Yield each step and it's direct dependencies.
 
+    Args:
+        graph (Graph): Graph to iterate over.
+
+    Yields:
+        Tuple[Step, Set(str)]
+
+    """
     steps = graph.topological_sort()
     steps.reverse()
 
     for step in steps:
         deps = graph.downstream(step.name)
-        yield (step, deps)
+        yield step, deps
 
 
 def dot_format(out, graph, name="digraph"):
-    """Outputs the graph using the graphviz "dot" format."""
+    """Output a graph using the graphviz "dot" format.
 
+    Args:
+        out (TextIo): Where output will be written.
+        graph (Graph): Graph to be output.
+        name (str): Name of the graph.
+
+    """
     out.write("digraph %s {\n" % name)
     for step, deps in each_step(graph):
         for dep in deps:
@@ -36,7 +44,13 @@ def dot_format(out, graph, name="digraph"):
 
 
 def json_format(out, graph):
-    """Outputs the graph in a machine readable JSON format."""
+    """Output the graph in a machine readable JSON format.
+
+    Args:
+        out (TextIo): Where output will be written.
+        graph (Graph): Graph to be output.
+
+    """
     steps = {}
     for step, deps in each_step(graph):
         steps[step.name] = {}
@@ -53,6 +67,7 @@ FORMATTERS = {
 
 
 class Action(BaseAction):
+    """Responsible for outputing a graph for the current CFNgin config."""
 
     def _generate_plan(self):
         return plan(
@@ -60,18 +75,16 @@ class Action(BaseAction):
             stack_action=None,
             context=self.context)
 
-    def run(self, format=None, reduce=False, *args, **kwargs):
-        """Generates the underlying graph and prints it.
-
-        """
-        plan = self._generate_plan()
-        if reduce:
+    def run(self, **kwargs):
+        """Generate the underlying graph and prints it."""
+        action_plan = self._generate_plan()
+        if kwargs.get('reduce'):
             # This will performa a transitive reduction on the underlying
             # graph, producing less edges. Mostly useful for the "dot" format,
             # when converting to PNG, so it creates a prettier/cleaner
             # dependency graph.
-            plan.graph.transitive_reduction()
+            action_plan.graph.transitive_reduction()
 
-        fn = FORMATTERS[format]
-        fn(sys.stdout, plan.graph)
+        fn = FORMATTERS[kwargs.get('format')]
+        fn(sys.stdout, action_plan.graph)
         sys.stdout.flush()

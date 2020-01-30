@@ -31,7 +31,7 @@ class TestDynamoDBHandler(unittest.TestCase):
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_handler(self, _mock_client):
-        """Test dynamodb handler."""
+        """Test DynamoDB handler."""
         expected_params = {
             'TableName': 'TestTable',
             'Key': {
@@ -51,7 +51,7 @@ class TestDynamoDBHandler(unittest.TestCase):
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_number_handler(self, _mock_client):
-        """Test dynamodb number handler."""
+        """Test DynamoDB number handler."""
         expected_params = {
             'TableName': 'TestTable',
             'Key': {
@@ -72,7 +72,7 @@ class TestDynamoDBHandler(unittest.TestCase):
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_list_handler(self, _mock_client):
-        """Test dynamodb list handler."""
+        """Test DynamoDB list handler."""
         expected_params = {
             'TableName': 'TestTable',
             'Key': {
@@ -93,7 +93,7 @@ class TestDynamoDBHandler(unittest.TestCase):
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_empty_table_handler(self, _mock_client):
-        """Test dynamodb empty table handler."""
+        """Test DynamoDB empty table handler."""
         expected_params = {
             'TableName': '',
             'Key': {
@@ -110,13 +110,13 @@ class TestDynamoDBHandler(unittest.TestCase):
                 DynamodbLookup.handle(base_lookup_key)
             except ValueError as err:
                 self.assertEqual(
-                    'Please make sure to include a dynamodb table name',
+                    'Please make sure to include a DynamoDB table name',
                     str(err))
 
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_missing_table_handler(self, _mock_client):
-        """Test dynamodb missing table handler."""
+        """Test DynamoDB missing table handler."""
         expected_params = {
             'Key': {
                 'TestKey': {'S': 'TestVal'}
@@ -138,7 +138,7 @@ class TestDynamoDBHandler(unittest.TestCase):
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_invalid_table_handler(self, _mock_client):
-        """Test dynamodb invalid table handler."""
+        """Test DynamoDB invalid table handler."""
         expected_params = {
             'TableName': 'FakeTable',
             'Key': {
@@ -156,13 +156,13 @@ class TestDynamoDBHandler(unittest.TestCase):
                 DynamodbLookup.handle(base_lookup_key)
             except ValueError as err:
                 self.assertEqual(
-                    'Cannot find the dynamodb table: FakeTable',
+                    'Cannot find the DynamoDB table: FakeTable',
                     str(err))
 
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_invalid_partition_key_handler(self, _mock_client):
-        """Test dynamodb invalid partition key handler."""
+        """Test DynamoDB invalid partition key handler."""
         expected_params = {
             'TableName': 'TestTable',
             'Key': {
@@ -181,13 +181,13 @@ class TestDynamoDBHandler(unittest.TestCase):
                 DynamodbLookup.handle(base_lookup_key)
             except ValueError as err:
                 self.assertEqual(
-                    'No dynamodb record matched the partition key: FakeKey',
+                    'No DynamoDB record matched the partition key: FakeKey',
                     str(err))
 
     @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_invalid_partition_val_handler(self, _mock_client):
-        """Test dynamodb invalid partition val handler."""
+        """Test DynamoDB invalid partition val handler."""
         expected_params = {
             'TableName': 'TestTable',
             'Key': {
@@ -205,6 +205,6 @@ class TestDynamoDBHandler(unittest.TestCase):
                 DynamodbLookup.handle(base_lookup_key)
             except ValueError as err:
                 self.assertEqual(
-                    'The dynamodb record could not be found using '
+                    'The DynamoDB record could not be found using '
                     'the following key: {\'S\': \'FakeVal\'}',
                     str(err))
