@@ -1,7 +1,8 @@
 """CFNgin stack."""
 from copy import deepcopy
 
-from ..util import load_object_from_string
+from runway.util import load_object_from_string
+
 from .blueprints.raw import RawTemplateBlueprint
 from .variables import Variable, resolve_variables
 

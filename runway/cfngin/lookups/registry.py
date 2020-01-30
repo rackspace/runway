@@ -4,7 +4,8 @@ import warnings
 
 from six import string_types
 
-from ...util import load_object_from_string
+from runway.util import load_object_from_string
+
 from ..exceptions import FailedVariableLookup, UnknownLookupType
 from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler

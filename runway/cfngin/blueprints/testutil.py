@@ -5,7 +5,8 @@ import os.path
 import unittest
 from glob import glob
 
-from ...util import load_object_from_string
+from runway.util import load_object_from_string
+
 from ..config import parse as parse_config
 from ..context import Context
 from ..variables import Variable

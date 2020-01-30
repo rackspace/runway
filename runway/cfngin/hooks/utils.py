@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-from ...util import load_object_from_string
+from runway.util import load_object_from_string
 
 LOGGER = logging.getLogger(__name__)
 
