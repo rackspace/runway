@@ -4,7 +4,7 @@ from os.path import abspath, dirname, join
 
 from setuptools import find_packages, setup
 
-from src.runway import __version__
+from runway import __version__
 
 
 THIS_DIR = abspath(dirname(__file__))
@@ -78,9 +78,7 @@ setup(
     ],
     python_requires='>=2.6',
     keywords='cli',
-    # exclude=['docs', 'tests*'],
-    packages=find_packages(where='src'),
-    package_dir={"": "src"},
+    packages=find_packages(exclude=('tests', 'integration_tests')),
     install_requires=INSTALL_REQUIRES,
     extras_require={
         'test': ['flake8', 'pep8-naming', 'flake8-docstrings',
