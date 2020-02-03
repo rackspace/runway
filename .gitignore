@@ -14,9 +14,7 @@ node_modules
 .serverless
 .venv
 # paths usind during build
-src/osx
-src/linux
-src/windows
+src/*
 tmp/*
 artifacts/*
 # npm files copied and modified at runtime

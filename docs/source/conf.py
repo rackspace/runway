@@ -14,10 +14,9 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 from os.path import dirname, realpath
-import os.path
 import sys
 root_dir = dirname(dirname(dirname(realpath(__file__))))
-sys.path.insert(0, os.path.join(root_dir, 'src'))
+sys.path.insert(0, root_dir)
 
 from runway import __version__  # noqa
 
