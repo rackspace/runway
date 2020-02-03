@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Add static site examples for React & Angular
+
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
 
