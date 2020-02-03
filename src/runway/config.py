@@ -60,7 +60,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
     +------------------+-----------------------------------------------+
     | ``.k8s``         | `Kubernetes`_                                 |
     +------------------+-----------------------------------------------+
-    | ``.static``      | :ref:`Static Site<mod-staticsite>`            |
+    | ``.web``         | :ref:`Static Site<mod-staticsite>`            |
     +------------------+-----------------------------------------------+
 
     A module is only deployed if there is a corresponding env/config
