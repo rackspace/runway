@@ -168,7 +168,7 @@ class Stack(object):
         or overrides.
 
         Returns:
-            Dict[str, str]: dictionary of tags
+            Dict[str, str]: Dictionary of tags.
 
         """
         tags = self.definition.tags or {}
@@ -183,7 +183,8 @@ class Stack(object):
         ``type``.
 
         Returns:
-            Dict[str, Any]: dictionary of <parameter name>: <parameter value>.
+            Dict[str, Any]: dictionary of
+            ``<parameter name>: <parameter value>``.
 
         """
         return self.blueprint.get_parameter_values()
@@ -193,8 +194,8 @@ class Stack(object):
         """Return a list of all parameters in the blueprint/template.
 
         Dict[str, Dict[str, str]]: parameter definitions. Keys are
-                parameter names, the values are dicts containing key/values
-                for various parameter properties.
+        parameter names, the values are dicts containing key/values
+        for various parameter properties.
 
         """
         return self.blueprint.get_parameter_definitions()
@@ -205,8 +206,8 @@ class Stack(object):
 
         Returns:
             Dict[str, Dict[str, str]]: dict of required CloudFormation
-                Parameters for the blueprint. Will be a dictionary of
-                <parameter name>: <parameter attributes>.
+            Parameters for the blueprint. Will be a dictionary of
+            ``<parameter name>: <parameter attributes>``.
 
         """
         return self.blueprint.get_required_parameter_definitions()
@@ -219,7 +220,7 @@ class Stack(object):
 
         Args:
             context (:class:`runway.cfngin.context.Context`): CFNgin context.
-            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 Subclass of the base provider.
 
         """

@@ -146,7 +146,7 @@ class BaseCommand(object):
 
         Returns:
             Dict[str, Any]: Dictionary that will be passed to Context
-                initializer as kwargs.
+            initializer as kwargs.
 
         """
         return {}

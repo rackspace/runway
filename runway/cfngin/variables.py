@@ -16,7 +16,7 @@ def resolve_variables(variables, context, provider):
     Args:
         variables (List[:class:`Variable`]): List of variables.
         context (:class:`runway.cfngin.context.Context`): CFNgin context.
-        provider (:class:`runway.cfngin.provider.base.BaseProvider`): Subclass
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Subclass
             of the base provider.
 
     """
@@ -65,7 +65,7 @@ class Variable(object):
         Args:
             context (:class:`runway.cfngin.context.Context`): Current context
                 for building the stack
-            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 subclass of the base provider
 
         """
@@ -248,7 +248,7 @@ class VariableValueList(VariableValue, list):
         Args:
             context (:class:`runway.cfngin.context.Context`): Current context
                 for building the stack
-            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 subclass of the base provider
 
         """
@@ -321,7 +321,7 @@ class VariableValueDict(VariableValue, dict):
         Args:
             context (:class:`runway.cfngin.context.Context`): Current context
                 for building the stack
-            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 subclass of the base provider
 
         """
@@ -382,7 +382,7 @@ class VariableValueConcatenation(VariableValue, list):
         Args:
             context (:class:`runway.cfngin.context.Context`): Current context
                 for building the stack
-            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 subclass of the base provider
 
         """
@@ -439,8 +439,8 @@ class VariableValueLookup(VariableValue):
         """Instantiate class.
 
         Args:
-            lookup_name (str): Name of the invoked lookup
-            lookup_data (VariableValue): Data portion of the lookup
+            lookup_name (str): Name of the invoked lookup.
+            lookup_data (:class:`VariableValue`): Data portion of the lookup.
 
         """
         self._resolved = False
@@ -466,7 +466,7 @@ class VariableValueLookup(VariableValue):
         Args:
             context (:class:`runway.cfngin.context.Context`): Current context
                 for building the stack
-            provider (:class:`runway.cfngin.provider.base.BaseProvider`):
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 subclass of the base provider
 
         """

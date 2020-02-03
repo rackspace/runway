@@ -67,8 +67,8 @@ class TroposphereType(object):
             value (Union[Dict[str, Any], List[Dict[str, Any]]]): A dictionary
                 or list of dictionaries (see class documentation for details)
                 to use as parameters to create the Troposphere type instance.
-                Each dictionary will be passed to the `from_dict` method of the
-                type.
+                Each dictionary will be passed to the ``from_dict`` method of
+                the type.
 
         Returns:
             Any: Returns the value converted to the troposphere type.
@@ -113,8 +113,8 @@ class TroposphereType(object):
 class CFNType(object):  # pylint: disable=too-few-public-methods
     """Represents a CloudFormation Parameter Type.
 
-    :class:`CFNType`` can be used as the `type` for a Blueprint variable.
-    Unlike other variables, a variable with `type` :class:`CFNType`, will
+    :class:`CFNType` can be used as the ``type`` for a Blueprint variable.
+    Unlike other variables, a variable with ``type: CFNType``, will
     be submitted to CloudFormation as a Parameter.
 
     """

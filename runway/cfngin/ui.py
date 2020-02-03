@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def get_raw_input(message):
-    """Just a wrapper for raw_input for testing purposes."""
+    """Just a wrapper for :func:`input` for testing purposes."""
     return input(message)
 
 

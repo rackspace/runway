@@ -185,7 +185,7 @@ stacks: []
         assert error.__str__() == (
             "DEPRECATION: Stack definition vpc contains deprecated 'parameters'"
             ", rather than 'variables'. You are required to update your config. "
-            "See https://stacker.readthedocs.io/en/latest/config.html#variables "
+            "See https://docs.onica.com/projects/runway/en/release/cfngin/config.html#variables "
             "for additional information."
         )
 

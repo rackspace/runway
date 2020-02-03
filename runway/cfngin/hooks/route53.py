@@ -13,11 +13,16 @@ def create_domain(provider, context, **kwargs):
 
     Args:
         provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance.
+            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
+            (passed in by CFNgin)
+
+    Keyword Args:
+        domain (str): Domain name for the Route 53 hosted zone to be
+            created.
 
     Returns:
-        Dict[str, str]
+        Dict[str, str]: Dict containing ``domain`` and ``zone_id``.
 
     """
     session = get_session(provider.region)

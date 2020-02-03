@@ -24,8 +24,8 @@ class DynamodbLookup(LookupHandler):
             provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 Provider instance.
 
-        .. note: The region is optional, and defaults to the environment's
-        ``AWS_DEFAULT_REGION`` if not specified.
+        .. note:: The region is optional, and defaults to the environment's
+                  ``AWS_DEFAULT_REGION`` if not specified.
 
         """
         value = read_value_from_path(value)
@@ -116,7 +116,7 @@ def _lookup_key_parse(table_keys):
                 clean_table_keys.append(key)
             else:
                 raise ValueError(
-                    ('Stacker does not support looking up the datatype: {}')
+                    ('CFNgin does not support looking up the datatype: {}')
                     .format(str(match.group(1))))
         else:
             new_keys.append({'S': key})

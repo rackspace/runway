@@ -98,32 +98,6 @@ class Status(object):
         return self._comparison(operator.ge, other)
 
 
-class PendingStatus(Status):  # pylint: disable=too-few-public-methods
-    """Status name of 'pending' with code of '0'."""
-
-    def __init__(self, reason=None):
-        """Instantiate class.
-
-        Args:
-            reason (Optional[str]): Reason for the status.
-
-        """
-        super(PendingStatus, self).__init__("pending", 0, reason)
-
-
-class SubmittedStatus(Status):  # pylint: disable=too-few-public-methods
-    """Status name of 'submitted' with code of '1'."""
-
-    def __init__(self, reason=None):
-        """Instantiate class.
-
-        Args:
-            reason (Optional[str]): Reason for the status.
-
-        """
-        super(SubmittedStatus, self).__init__("submitted", 1, reason)
-
-
 class CompleteStatus(Status):  # pylint: disable=too-few-public-methods
     """Status name of 'complete' with code of '2'."""
 
@@ -135,19 +109,6 @@ class CompleteStatus(Status):  # pylint: disable=too-few-public-methods
 
         """
         super(CompleteStatus, self).__init__("complete", 2, reason)
-
-
-class SkippedStatus(Status):  # pylint: disable=too-few-public-methods
-    """Status name of 'skipped' with code of '3'."""
-
-    def __init__(self, reason=None):
-        """Instantiate class.
-
-        Args:
-            reason (Optional[str]): Reason for the status.
-
-        """
-        super(SkippedStatus, self).__init__("skipped", 3, reason)
 
 
 class FailedStatus(Status):  # pylint: disable=too-few-public-methods
@@ -163,6 +124,51 @@ class FailedStatus(Status):  # pylint: disable=too-few-public-methods
         super(FailedStatus, self).__init__("failed", 4, reason)
 
 
+class PendingStatus(Status):  # pylint: disable=too-few-public-methods
+    """Status name of 'pending' with code of '0'."""
+
+    def __init__(self, reason=None):
+        """Instantiate class.
+
+        Args:
+            reason (Optional[str]): Reason for the status.
+
+        """
+        super(PendingStatus, self).__init__("pending", 0, reason)
+
+
+class SkippedStatus(Status):  # pylint: disable=too-few-public-methods
+    """Status name of 'skipped' with code of '3'."""
+
+    def __init__(self, reason=None):
+        """Instantiate class.
+
+        Args:
+            reason (Optional[str]): Reason for the status.
+
+        """
+        super(SkippedStatus, self).__init__("skipped", 3, reason)
+
+
+class SubmittedStatus(Status):  # pylint: disable=too-few-public-methods
+    """Status name of 'submitted' with code of '1'."""
+
+    def __init__(self, reason=None):
+        """Instantiate class.
+
+        Args:
+            reason (Optional[str]): Reason for the status.
+
+        """
+        super(SubmittedStatus, self).__init__("submitted", 1, reason)
+
+
+class DidNotChangeStatus(SkippedStatus):  # pylint: disable=too-few-public-methods
+    """Skipped status with a reason of 'nochange'."""
+
+    reason = "nochange"
+
+
 class NotSubmittedStatus(SkippedStatus):  # pylint: disable=too-few-public-methods
     """Skipped status with a reason of 'disabled'."""
 
@@ -173,12 +179,6 @@ class NotUpdatedStatus(SkippedStatus):  # pylint: disable=too-few-public-methods
     """Skipped status with a reason of 'locked'."""
 
     reason = "locked"
-
-
-class DidNotChangeStatus(SkippedStatus):  # pylint: disable=too-few-public-methods
-    """Skipped status with a reason of 'nochange'."""
-
-    reason = "nochange"
 
 
 class StackDoesNotExist(SkippedStatus):  # pylint: disable=too-few-public-methods

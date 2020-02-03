@@ -18,13 +18,15 @@ LOGGER = logging.getLogger(__name__)
 def create_clusters(provider, context, **kwargs):
     """Create ECS clusters.
 
-    Expects a "clusters" argument, which should contain a list of cluster
-    names to create.
-
     Args:
         provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance.
+            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
+            (passed in by CFNgin)
+
+    Keyword Args:
+        clusters (List[str]): Names of clusters to create.
+
 
     Returns:
         bool: Whether or not the hook succeeded.

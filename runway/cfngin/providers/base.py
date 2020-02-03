@@ -52,8 +52,8 @@ class Template(object):
     """CloudFormation stack template, which could be optionally uploaded to s3.
 
     Presence of the url attribute indicates that the template was uploaded to
-    S3, and the uploaded template should be used for CreateStack/UpdateStack
-    calls.
+    S3, and the uploaded template should be used for
+    ``CreateStack``/``UpdateStack`` calls.
 
     """
 

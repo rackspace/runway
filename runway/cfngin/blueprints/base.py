@@ -116,8 +116,8 @@ def validate_variable_type(var_name, var_type, value):
             variable
 
     Returns:
-        Any: Returns the appropriate value object. If the original value
-            was of CFNType, the returned value will be wrapped in CFNParameter.
+        Any: The appropriate value object. If the original value
+        was of CFNType, the returned value will be wrapped in CFNParameter.
 
     Raises:
         ValueError: If the `value` isn't of `var_type` and can't be cast as
@@ -235,10 +235,10 @@ def parse_user_data(variables, raw_user_data, blueprint_name):
     that's supplemented with information from the stack, as commonly
     required when creating EC2 userdata files.
 
-    For example:
-        Given a raw_user_data string: 'open file ${file}'
-        And a variables dictionary with: {'file': 'test.txt'}
-        parse_user_data would output: open file test.txt
+    Example:
+        Given a raw_user_data string: ``'open file ${file}'``
+        And a variables dictionary with: ``{'file': 'test.txt'}``
+        parse_user_data would output: ``open file test.txt``
 
     Args:
         variables (Dict[str, Any]): Variables available to the template.
@@ -247,11 +247,11 @@ def parse_user_data(variables, raw_user_data, blueprint_name):
 
     Returns:
         str: The parsed user data, with all the variables values and
-             refs replaced with their resolved values.
+        refs replaced with their resolved values.
 
     Raises:
         InvalidUserdataPlaceholder: Raised when a placeholder name in
-            raw_user_data is not valid. E.g ${100} would raise this.
+            raw_user_data is not valid. E.g ``${100}`` would raise this.
         MissingVariable: Raised when a variable is in the raw_user_data that
             is not given in the blueprint
 
@@ -306,8 +306,9 @@ class Blueprint(object):
             raise AttributeError("DEPRECATION WARNING: Blueprint %s uses "
                                  "deprecated PARAMETERS or "
                                  "LOCAL_PARAMETERS, rather than VARIABLES. "
-                                 "Please update your blueprints. See https://"
-                                 "stacker.readthedocs.io/en/latest/blueprints."
+                                 "Please update your blueprints. See "
+                                 "https://docs.onica.com/projects/runway"
+                                 "/en/release/cfngin/blueprints."
                                  "html#variables for additional information."
                                  % name)
 
@@ -319,8 +320,8 @@ class Blueprint(object):
 
         Returns:
             Dict[str, Dict[str, str]]: Parameter definitions. Keys are
-                parameter names, the values are dicts containing key/values
-                for various parameter properties.
+            parameter names, the values are dicts containing key/values
+            for various parameter properties.
 
         """
         output = {}
@@ -337,8 +338,8 @@ class Blueprint(object):
 
         Returns:
             Dict[str, Dict[str, str]]: Output definitions. Keys are output
-                names, the values are dicts containing key/values for various
-                output properties.
+            names, the values are dicts containing key/values for various
+            output properties.
 
         """
         return {k: output.to_dict() for k, output in
@@ -349,8 +350,8 @@ class Blueprint(object):
 
         Returns:
             Dict[str, Dict[str, str]]: Dict of required CloudFormation
-                Parameters for the blueprint. Will be a dictionary of
-                <parameter name>: <parameter attributes>.
+            Parameters for the blueprint. Will be a dictionary of
+            ``<parameter name>: <parameter attributes>``.
 
         """
         required = {}
@@ -364,8 +365,8 @@ class Blueprint(object):
 
         Returns:
             Dict[str, str]: Variables that need to be submitted as
-                CloudFormation Parameters. Will be a dictionary of
-                <parameter name>: <parameter value>.
+            CloudFormation Parameters. Will be a dictionary of
+            <parameter name>: <parameter value>.
 
         """
         variables = self.get_variables()
@@ -426,7 +427,7 @@ class Blueprint(object):
 
         Returns:
             Dict[str, Any]: variables that need to be submitted as
-                CloudFormation Parameters.
+            CloudFormation Parameters.
 
         """
         variables = self.get_variables()

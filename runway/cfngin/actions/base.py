@@ -43,8 +43,7 @@ def build_walker(concurrency):
         concurrency (int): Number of threads to use while walking.
 
     Returns:
-        Callable[..., Any]: Function to
-            walk a :class:`runway.cfngin.dag.DAG`.
+        Callable[..., Any]: Function to walk a :class:`runway.cfngin.dag.DAG`.
 
     """
     if concurrency == 1:
@@ -114,7 +113,7 @@ def stack_template_url(bucket_name, blueprint, endpoint):
 class BaseAction(object):
     """Actions perform the actual work of each Command.
 
-    Each action is tied to a :class:`runway.cfngin.commands.base.BaseCommand`,
+    Each action is tied to a :class:`runway.cfngin.commands.stacker.base.BaseCommand`,
     and is responsible for building the :class:`runway.cfngin.plan.Plan` that
     will be executed to perform that command.
 
@@ -137,7 +136,7 @@ class BaseAction(object):
         Args:
             context (:class:`runway.cfngin.context.Context`): The context
                 for the current run.
-            provider_builder (Optional[BaseProviderBuilder]):
+            provider_builder (Optional[:class:`BaseProviderBuilder`]):
                 An object that will build a provider that will be interacted
                 with in order to perform the necessary actions.
             cancel (threading.Event): Cancel handler.
@@ -225,15 +224,15 @@ class BaseAction(object):
         """Perform steps after running the action."""
 
     def build_provider(self, stack):
-        """Build a :class:`runway.cfngin.providers.base.Provider`.
+        """Build a :class:`runway.cfngin.providers.base.BaseProvider`.
 
         Args:
             stack (:class:`runway.cfngin.stack.Stack`): Stack the action will
                 be executed on.
 
         Returns:
-            :class:`runway.cfngin.providers.base.Provider`: Suitable for
-                operating on the given :class:`runway.cfngin.stack.Stack`.
+            :class:`runway.cfngin.providers.base.BaseProvider`: Suitable for
+            operating on the given :class:`runway.cfngin.stack.Stack`.
 
         """
         return self.provider_builder.build(region=stack.region,
@@ -246,7 +245,7 @@ class BaseAction(object):
         Used for running things like hooks.
 
         Returns:
-            :class:`runway.cfngin.providers.base.Provider`
+            :class:`runway.cfngin.providers.base.BaseProvider`
 
         """
         return self.provider_builder.build()

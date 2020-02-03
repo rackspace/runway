@@ -126,9 +126,9 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         """Get the parameter definitions to submit to CloudFormation.
 
         Returns:
-            dict: parameter definitions. Keys are parameter names, the values
-                are dicts containing key/values for various parameter
-                properties.
+            Dict[str, Any]: parameter definitions. Keys are parameter names,
+            the values are dicts containing key/values for various parameter
+            properties.
 
         """
         return get_template_params(self.to_dict())
@@ -137,9 +137,9 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         """Get the output definitions.
 
         Returns:
-            dict: output definitions. Keys are output names, the values
-                are dicts containing key/values for various output
-                properties.
+            Dict[str, Any]: output definitions. Keys are output names, the
+            values are dicts containing key/values for various output
+            properties.
 
         """
         return self.to_dict().get('Outputs', {})
@@ -185,9 +185,9 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         """Return a dictionary of variables with `type` :class:`CFNType`.
 
         Returns:
-            dict: variables that need to be submitted as CloudFormation
-                Parameters. Will be a dictionary of <parameter name>:
-                <parameter value>.
+            Dict[str, Any]: variables that need to be submitted as
+            CloudFormation Parameters. Will be a dictionary of
+            ``<parameter name>: <parameter value>``.
 
         """
         return self.resolved_variables

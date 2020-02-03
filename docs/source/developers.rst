@@ -1,5 +1,5 @@
 .. _developers:
-.. highlight:: json
+.. highlight:: shell
 
 Developers
 ==========
@@ -60,7 +60,7 @@ Travis CI Environment Variables
 
 **Travis CI User Permissions Example**
 
-::
+.. code-block:: json
 
     {
         "Version": "2012-10-17",

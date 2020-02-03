@@ -27,7 +27,8 @@ class LookupHandler(object):
         Note that lookup_data may not be (completely) resolved at this time.
 
         Args:
-            lookup_data (VariableValue): Parameter(s) given to this lookup.
+            lookup_data (:class`runway.cfngin.variables.VariableValue`):
+                Parameter(s) given to this lookup.
 
         Returns:
             Set[str]: Stack names this lookup depends on.

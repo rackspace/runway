@@ -20,19 +20,22 @@ def cf_tokenize(raw_userdata):
     """Parse UserData for Cloudformation helper functions.
 
     http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
+
     http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
+
     http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-cloudformation.html#scenario-userdata-base64
 
-    It breaks apart the given string at each recognized function (see HELPERS)
-    and instantiates the helper function objects in place of those.
+    It breaks apart the given string at each recognized function (see
+    ``HELPERS`` global variable) and instantiates the helper function objects
+    in place of those.
 
     Args:
         raw_userdata (str): Unparsed userdata data string.
 
     Returns:
         List[str]: A list of string parts that is useful when used with
-            ``troposphere.Join()`` and ``troposphere.Base64()`` to produce
-            userdata.
+        :func:`troposphere.Join` and :func:`troposphere.Base64` to produce
+        userdata.
 
     Example:
         .. code-block: python

@@ -35,8 +35,8 @@ class DictValue(object):
         """Return changes to represent the diff between old and new value.
 
         Returns:
-            list: [string] representation of the change (if any)
-                between old and new value
+            List[str]: Representation of the change (if any) between old and
+            new value.
 
         """
         output = []
@@ -70,8 +70,8 @@ def diff_dictionaries(old_dict, new_dict):
         new_dict(Dict[Any, Any]): New dictionary.
 
     Returns:
-        Tuple[int, List[DictValue]]: Number of changed records and the
-            DictValue object containing the changes.
+        Tuple[int, List[:class:`DictValue`]]: Number of changed records and
+        the :class:`DictValue` object containing the changes.
 
     """
     old_set = set(old_dict)
@@ -104,9 +104,9 @@ def format_params_diff(parameter_diff):
     """Handle the formatting of differences in parameters.
 
     Args:
-        parameter_diff (List[DictValues]): A list of DictValues detailing the
-            differences between two dicts returned by
-            :func:`diff_dictionaries`.
+        parameter_diff (List[:class:`DictValue`]): A list of
+            :class:`DictValue` detailing the differences between two dicts
+            returned by :func:`diff_dictionaries`.
 
     Returns:
         str: A formatted string that represents a parameter diff
@@ -130,7 +130,7 @@ def diff_parameters(old_params, new_params):
         new_params(Dict[Any, Any]): new parameters
 
     Returns:
-        List[DictValue]: A list of differences.
+        List[:class:`DictValue`]: A list of differences.
 
     """
     changes, diff = diff_dictionaries(old_params, new_params)

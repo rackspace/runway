@@ -7,7 +7,13 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-from runway import __version__  # noqa
+import os.path
+from os.path import dirname, realpath
+
+from runway import __version__
+
+ROOT_DIR = dirname(dirname(dirname(realpath(__file__))))
+DOC_SRC = os.path.join(ROOT_DIR, 'docs/source')
 
 
 # -- Project information -----------------------------------------------------
@@ -34,7 +40,8 @@ release = __version__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'sphinxcontrib.apidoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -175,3 +182,14 @@ autoclass_content = 'both'
 # -- Options for napoleon  ----------------------------------------------------
 napoleon_google_docstring = True
 napoleon_include_init_with_doc = False
+
+# -- Options for sphinxcontrib.apidoc  ----------------------------------------
+apidoc_excluded_paths = ['cfngin/commands', 'templates']
+apidoc_extra_args = [
+    f"--templatedir={os.path.join(DOC_SRC, '_templates/apidocs')}"
+]
+apidoc_module_dir = '../../src/runway'
+apidoc_module_first = True
+apidoc_output_dir = 'apidocs'
+apidoc_separate_modules = True
+apidoc_toc_file = 'index'

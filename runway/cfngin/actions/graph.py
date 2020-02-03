@@ -12,7 +12,7 @@ def each_step(graph):
     """Yield each step and it's direct dependencies.
 
     Args:
-        graph (Graph): Graph to iterate over.
+        graph (:class:`runway.cfngin.plan.Graph`): Graph to iterate over.
 
     Yields:
         Tuple[Step, Set(str)]
@@ -31,7 +31,7 @@ def dot_format(out, graph, name="digraph"):
 
     Args:
         out (TextIo): Where output will be written.
-        graph (Graph): Graph to be output.
+        graph (:class:`runway.cfngin.plan.Graph`): Graph to be output.
         name (str): Name of the graph.
 
     """
@@ -48,7 +48,7 @@ def json_format(out, graph):
 
     Args:
         out (TextIo): Where output will be written.
-        graph (Graph): Graph to be output.
+        graph (:class:`runway.cfngin.plan.Graph`): Graph to be output.
 
     """
     steps = {}

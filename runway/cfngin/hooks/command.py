@@ -18,18 +18,24 @@ def run_command(provider, context, command, capture=False, interactive=False,
                 **kwargs):
     """Run a custom command as a hook.
 
-    Keyword Arguments:
-        command (Union[str, List[str]]): Command to run.
+    Args:
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance. (passed in by CFNgin)
+        context (:class:`runway.cfngin.context.Context`): Context instance.
+            (passed in by CFNgin)
+
+    Keyword Args:
+        command (Union[str, List[str]]): Command(s) to run.
         capture (bool): If enabled, capture the command's stdout and stderr,
-            and return them in the hook result. Default: ``False``
+            and return them in the hook result. (*default:* ``False``)
         interactive (bool): If enabled, allow the command to interact with
             stdin. Otherwise, stdin will be set to the null device.
-            Default: ``False``
+            (*default:* ``False``)
         ignore_status (bool): Don't fail the hook if the command returns a
-            non-zero status. Default: ``False``
+            non-zero status. (*default:* ``False``)
         quiet (bool): Redirect the command's stdout and stderr to the null
-            device, silencing all output. Should not be enabled if ``capture``
-            is also enabled. Default: ``False``
+            device, silencing all output. Should not be enabled if
+            ``capture`` is also enabled. (*default:* ``False``)
         stdin (Optional[str]): String to send to the stdin of the command.
             Implicitly disables ``interactive``.
         env (Optional[Dict[str, str]]): Dictionary of environment variable
@@ -43,13 +49,15 @@ def run_command(provider, context, command, capture=False, interactive=False,
         .. code-block:: yaml
 
             pre_build:
-              - path: runway.cfngin.hooks.command.run_command
+              command_copy_environment:
+                path: runway.cfngin.hooks.command.run_command
                 required: true
                 enabled: true
                 data_key: copy_env
                 args:
                   command: ['cp', 'environment.template', 'environment']
-              - path: runway.cfngin.hooks.command.run_command
+              command_git_rev_parse:
+                path: runway.cfngin.hooks.command.run_command
                 required: true
                 enabled: true
                 data_key: get_git_commit
@@ -57,12 +65,13 @@ def run_command(provider, context, command, capture=False, interactive=False,
                   command: ['git', 'rev-parse', 'HEAD']
                   cwd: ./my-git-repo
                   capture: true
-              - path: runway.cfngin.hooks.command.run_command
+              command_npm_install:
+                path: runway.cfngin.hooks.command.run_command
                 args:
-                  command: `cd $PROJECT_DIR/project; npm install'
+                  command: '`cd $PROJECT_DIR/project; npm install`'
                   env:
                     PROJECT_DIR: ./my-project
-                  shell: true
+                    shell: true
 
     """
     if quiet and capture:

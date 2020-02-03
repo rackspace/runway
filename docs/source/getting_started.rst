@@ -193,6 +193,8 @@ From the root of the project directory we created in
     $ ./runway destroy
 
 
+.. _non-interactive-mode:
+
 Execution Without A TTY (non-interactive)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Runway allows you to set an environment variable to allow execution without a

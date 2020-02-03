@@ -21,23 +21,24 @@ class EnvvarLookup(LookupHandler):
             provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 Provider instance.
 
-        Example::
+        Example:
+            ::
 
-            # With CFNgin we would reference the environment variable like this:
-            conf_key: ${envvar ENV_VAR_NAME}
+                # With CFNgin we would reference the environment variable like this:
+                conf_key: ${envvar ENV_VAR_NAME}
 
-        You can optionally store the value in a file, ie::
+            You can optionally store the value in a file, ie::
 
-            $ cat envvar_value.txt
-            ENV_VAR_NAME
+                $ cat envvar_value.txt
+                ENV_VAR_NAME
 
-        and reference it within CFNgin (NOTE: the path should be relative
-        to the CFNgin config file)::
+            and reference it within CFNgin (NOTE: the path should be relative
+            to the CFNgin config file)::
 
-            conf_key: ${envvar file://envvar_value.txt}
+                conf_key: ${envvar file://envvar_value.txt}
 
-            # Both of the above would resolve to
-            conf_key: ENV_VALUE
+                # Both of the above would resolve to
+                conf_key: ENV_VALUE
 
         """
         value = read_value_from_path(value)

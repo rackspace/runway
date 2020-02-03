@@ -56,13 +56,13 @@ class AmiLookup(LookupHandler):
                 aws_account_id | amazon | self
 
             name_regex (a regex) REQUIRED ONCE:
-                e.g. my-ubuntu-server-[0-9]+
+                e.g. ``my-ubuntu-server-[0-9]+``
 
             executable_users (comma delimited) OPTIONAL ONCE:
                 aws_account_id | amazon | self
 
             Any other arguments specified are sent as filters to the aws api
-            For example, "architecture:x86_64" will add a filter
+            For example, ``architecture:x86_64`` will add a filter
 
         """  # noqa
         value = read_value_from_path(value)

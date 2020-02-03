@@ -33,7 +33,7 @@ class BlueprintTestCase(unittest.TestCase):
         """Test that the rendered blueprint json matches the expected result.
 
         Result files are to be stored in the repo as
-        ``test/fixtures/blueprints/${blueprint.name}.json``
+        ``test/fixtures/blueprints/${blueprint.name}.json``.
 
         """
         expected_output = "%s/%s.json" % (self.OUTPUT_PATH, blueprint.name)
@@ -56,48 +56,48 @@ class YamlDirTestGenerator(object):
     """Generate blueprint tests from yaml config files.
 
     This class creates blueprint tests from yaml files with a syntax similar
-    to CFNgin configuration syntax. For example,
+    to CFNgin configuration syntax. For example::
 
-    Example:
-        .. code-block: yaml
-
-            namespace: test
-            stacks:
-              - name: test_sample
-                class_path: blueprints.test.Sample
-                variables:
-                    var1: value1
+        namespace: test
+        stacks:
+            - name: test_sample
+            class_path: blueprints.test.Sample
+            variables:
+                var1: value1
 
     Will create a test for the specified blueprint, passing that variable as
     part of the test.
 
-    The test will generate a .json file for this blueprint, and compare it with
-    the stored result.
+    The test will generate a ``.json`` file for this blueprint, and compare it
+    with the stored result.
 
-    By default, the generator looks for files named 'test_*.yaml' in its same
+    By default, the generator looks for files named ``test_*.yaml`` in its same
     directory. In order to use it, subclass it in a directory containing such
     tests, and name the class with a pattern that will include it in nosetests'
     tests (for example, TestGenerator).
 
-    The subclass may override some properties:
+    The subclass may override some ``@property`` definitions:
 
-    ``@property base_class``: By default, the generated tests are subclasses
-    or runway.cfngin.blueprints.testutil.BlueprintTestCase. In order to change
-    this, set this property to the desired base class.
+    **base_class**
+      By default, the generated tests are subclasses or
+      :class:`runway.cfngin.blueprints.testutil.BlueprintTestCase`. In order
+      to change this, set this property to the desired base class.
 
-    ``@property yaml_dirs``: By default, the directory where the generator is
-    subclassed is searched for test files. Override this array for specifying
-    more directories. These must be relative to the directory in which the
-    subclass lives in. Globs may be used.
-        Default: [ '.' ]. Example override: [ '.', 'tests/*/' ]
+    **yaml_dirs:**
+      By default, the directory where the generator is subclassed is searched
+      for test files. Override this array for specifying more directories.
+      These must be relative to the directory in which the subclass lives in.
+      Globs may be used. Default: ``['.']``.
+      Example override: ``['.', 'tests/*/']``
 
-    ``@property yaml_filename``: By default, the generator looks for files
-    named 'test_*.yaml'. Use this to change this pattern. Globs may be used.
+    **yaml_filename:**
+      By default, the generator looks for files named ``test_*.yaml``.
+      Use this to change this pattern. Globs may be used.
 
     """
 
     def __init__(self):
-        """.. Instantiate class."""
+        """Instantiate class."""
         self.classdir = os.path.relpath(
             self.__class__.__module__.replace('.', '/'))
         if not os.path.isdir(self.classdir):

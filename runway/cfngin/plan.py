@@ -24,7 +24,7 @@ def log_step(step):
     """Construct a log message for a set and log it to the UI.
 
     Args:
-        step (runway.cfngin.plan.Step): The step to be logged.
+        step (:class:`Step`): The step to be logged.
 
     """
     msg = "%s: %s" % (step, step.status.name)
@@ -205,7 +205,7 @@ class Step(object):
         """Set the current step's status.
 
         Args:
-            status (:class:`Status <Status>` object): The status to set the
+            status (:class:`runway.cfngin.status.Status`): The status to set the
                 step to.
 
         """
@@ -218,15 +218,15 @@ class Step(object):
                 log_step(self)
 
     def complete(self):
-        """Shortcut for set_status(COMPLETE)."""
+        """Shortcut for ``set_status(COMPLETE)``."""
         self.set_status(COMPLETE)
 
     def skip(self):
-        """Shortcut for set_status(SKIPPED)."""
+        """Shortcut for ``set_status(SKIPPED)``."""
         self.set_status(SKIPPED)
 
     def submit(self):
-        """Shortcut for set_status(SUBMITTED)."""
+        """Shortcut for ``set_status(SUBMITTED)``."""
         self.set_status(SUBMITTED)
 
     def __repr__(self):
@@ -254,7 +254,7 @@ def build_plan(description, graph,
             (dependencies last).
 
     Returns:
-        Plan
+        :class:`Plan`
 
     """
     # If we want to execute the plan in reverse (e.g. Destroy), transpose the
@@ -278,10 +278,11 @@ def build_graph(steps):
     """Build a graph of steps.
 
     Args:
-        steps (list): a list of :class:`Step` objects to execute.
+        steps (List[:class:`Step`]): A list of :class:`Step` objects to
+            execute.
 
     Returns:
-        Graph
+        :class:`Graph`
 
     """
     graph = Graph()
@@ -329,9 +330,12 @@ class Graph(object):
         """Instantiate class.
 
         Args:
-            steps (Dict[str, :class:`Step`]): an optional list of :class:`Step`
-                objects to execute.
-            dag (:class:`runway.cfngin.dag.DAG`): an optional
+            steps (Optional[Dict[str, :class:`Step`]]): Dict with key of step
+                name and value of :class:`Step` for steps to initialize the
+                Graph with. Note that if this is provided, a pre-configured
+                :class:`runway.cfngin.dag.DAG` that already includes these
+                steps should also be provided..
+            dag (Optional[:class:`runway.cfngin.dag.DAG`]): An optional
                 :class:`runway.cfngin.dag.DAG` object. If one is not provided,
                 a new one will be initialized.
 
@@ -343,7 +347,7 @@ class Graph(object):
         """Add a step to the graph.
 
         Args:
-            step (Step): Step to be added to the graph.
+            step (:class:`Step`): Step to be added to the graph.
 
         """
         self.steps[step.name] = step
@@ -379,8 +383,9 @@ class Graph(object):
         """Walk the steps of the graph.
 
         Args:
-            walker (Callable[[DAG], Any]): Function used to walk the steps.
-            walk_func (Callable[[Step], Any]): Function called with a
+            walker (Callable[[:class:`runway.cfngin.dag.DAG`], Any]): Function
+                used to walk the steps.
+            walk_func (Callable[[:class:`Step`], Any]): Function called with a
                 :class:`Step` as the only argument for each step of the plan.
 
         """
@@ -460,9 +465,9 @@ class Plan(object):
         taken.
 
         Args:
-            level (int, optional): a valid log level that should be used to log
+            level (Optional[int]): a valid log level that should be used to log
                 the outline
-            message (str, optional): a message that will be logged to
+            message (Optional[str]): a message that will be logged to
                 the user after the outline has been logged.
 
         """
@@ -486,9 +491,10 @@ class Plan(object):
 
         Args:
             directory (str): Directory where files will be created.
-            context (runway.cfngin.context.Contest): Current CFNgin context.
-            provider (runway.cfngin.providers.aws.default.Provider): Provider
-                to use when resolving the blueprints.
+            context (:class:`runway.cfngin.context.Contest`): Current CFNgin
+                context.
+            provider (:class:`runway.cfngin.providers.aws.default.Provider`):
+                Provider to use when resolving the blueprints.
 
         """
         LOGGER.info("Dumping \"%s\"...", self.description)
@@ -556,7 +562,7 @@ class Plan(object):
         """Return a list of all steps in the plan.
 
         Returns:
-            List[Step]
+            List[:class:`Step`]
 
         """
         steps = self.graph.topological_sort()

@@ -26,25 +26,26 @@ class SsmstoreLookup(LookupHandler):
 
             [<region>@]ssmkey
 
-        .. note: The region is optional, and defaults to us-east-1 if not given.
+        .. note:: The region is optional, and defaults to us-east-1 if not given.
 
-        Example::
+        Example:
+            ::
 
-            # In CFNgin we would reference the encrypted value like:
-            conf_key: ${ssmstore us-east-1@ssmkey}
+                # In CFNgin we would reference the encrypted value like:
+                conf_key: ${ssmstore us-east-1@ssmkey}
 
-        You can optionally store the value in a file, ie::
+            You can optionally store the value in a file, ie::
 
-            ssmstore_value.txt
-            us-east-1@ssmkey
+                ssmstore_value.txt
+                us-east-1@ssmkey
 
-        and reference it within CFNgin (NOTE: the path should be relative
-        to the CFNgin config file)::
+            and reference it within CFNgin (NOTE: the path should be relative
+            to the CFNgin config file)::
 
-            conf_key: ${ssmstore file://ssmstore_value.txt}
+                conf_key: ${ssmstore file://ssmstore_value.txt}
 
-            # Both of the above would resolve to
-            conf_key: PASSWORD
+                # Both of the above would resolve to
+                conf_key: PASSWORD
 
         """
         value = read_value_from_path(value)

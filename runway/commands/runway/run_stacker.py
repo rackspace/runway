@@ -1,7 +1,6 @@
 """Execute the "shimmed" `Stacker`_ aka Runway CFNgin.
 
-This command allows direct access to Runway's CloudFormation management
-tool, Stacker.
+This command allows direct access to Runway's CloudFormation management tool.
 
 Example:
   .. code-block:: shell

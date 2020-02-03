@@ -18,13 +18,17 @@ LOGGER = logging.getLogger(__name__)
 def create_ecs_service_role(provider, context, **kwargs):
     """Create ecsServieRole, which has to be named exactly that currently.
 
-    See: http://docs.aws.amazon.com/AmazonECS/latest/developerguide/
-    IAM_policies.html#service_IAM_role
+    http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
 
     Args:
         provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance.
+            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
+            (passed in by CFNgin)
+
+    Keyword Args:
+        role_name (str): Name of the role to create.
+            (*default: ecsServiceRole*)
 
     Returns:
         bool: Whether or not the hook succeeded.
@@ -71,7 +75,7 @@ def _get_cert_arn_from_response(response):
     return result["ServerCertificateMetadata"]["Arn"]
 
 
-def get_cert_contents(kwargs):
+def _get_cert_contents(kwargs):
     """Build parameters with server cert file contents.
 
     Args:
@@ -126,8 +130,25 @@ def get_cert_contents(kwargs):
     return parameters
 
 
-def ensure_server_cert_exists(provider, _context, **kwargs):
-    """Ensure server cert exists."""
+def ensure_server_cert_exists(provider, context, **kwargs):
+    """Ensure server cert exists.
+
+    Args:
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance. (passed in by CFNgin)
+        context (:class:`runway.cfngin.context.Context`): Context instance.
+            (passed in by CFNgin)
+
+    Keyword Args:
+        cert_name (str): Name of the certificate that should exist.
+        prompt (bool): Whether to prompt to upload a certificate if one does
+            not exist. (*default:* ``True``)
+
+    Returns:
+        Dict[str, str]: Dict containing ``status``, ``cert_name``, and
+            ``cert_arn``.
+
+    """
     client = get_session(provider.region).client('iam')
     cert_name = kwargs["cert_name"]
     status = "unknown"
@@ -148,7 +169,7 @@ def ensure_server_cert_exists(provider, _context, **kwargs):
             if upload != "yes":
                 return False
 
-        parameters = get_cert_contents(kwargs)
+        parameters = _get_cert_contents(kwargs)
         if not parameters:
             return False
         response = client.upload_server_certificate(**parameters)

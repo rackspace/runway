@@ -22,7 +22,7 @@ def should_update(stack):
     """Test whether a stack should be submitted for updates to CloudFormation.
 
     Args:
-        stack (:class:`runway.CFNgin.stack.Stack`): The stack object to check.
+        stack (:class:`runway.cfngin.stack.Stack`): The stack object to check.
 
     Returns:
         bool: If the stack should be updated, return True.
@@ -42,7 +42,7 @@ def should_submit(stack):
     """Test whether a stack should be submitted to CF for update/create.
 
     Args:
-        stack (:class:`runway.CFNgin.stack.Stack`): The stack object to check.
+        stack (:class:`runway.cfngin.stack.Stack`): The stack object to check.
 
     Returns:
         bool: If the stack should be submitted, return True.
@@ -80,7 +80,7 @@ def _resolve_parameters(parameters, blueprint):
     Args:
         parameters (dict): A dictionary of parameters provided by the
             stack definition
-        blueprint (:class:`runway.CFNgin.blueprint.base.Blueprint`):
+        blueprint (:class:`runway.cfngin.blueprint.base.Blueprint`):
             A Blueprint object that is having the parameters applied to it.
 
     Returns:
@@ -163,7 +163,7 @@ def handle_hooks(stage, hooks, provider, context, dump, outline):
     Args:
         stage (str): The name of the hook stage - pre_build/post_build.
         hooks (list): A list of dictionaries containing the hooks to execute.
-        provider (:class:`runway.cfngin.provider.base.BaseProvider`): The provider
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): The provider
             the current stack is using.
         context (:class:`runway.cfngin.context.Context`): The current CFNgin
             context.
@@ -189,9 +189,9 @@ class Action(BaseAction):
     The plan can then either be printed out as an outline or executed. If
     executed, each stack will get launched in order which entails:
 
-        - Pushing the generated CloudFormation template to S3 if it has changed
-        - Submitting either a build or update of the given stack to the
-            :class:`runway.cfngin.provider.base.Provider`.
+    - Pushing the generated CloudFormation template to S3 if it has changed
+    - Submitting either a build or update of the given stack to the
+      :class:`runway.cfngin.providers.base.BaseProvider`.
 
     """
 

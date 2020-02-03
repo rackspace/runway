@@ -132,7 +132,7 @@ class DAG(object):
         """Build a new graph with the edges reversed.
 
         Returns:
-            :class:`stacker.dag.DAG`: The transposed graph.
+            :class:`runway.cfngin.dag.DAG`: The transposed graph.
 
         """
         graph = self.graph
@@ -235,7 +235,7 @@ class DAG(object):
 
         Returns:
             List[str]: A list of nodes that are immediately downstream from the
-                node.
+            node.
 
         """
         graph = self.graph
@@ -274,7 +274,7 @@ class DAG(object):
             nodes (list): The nodes you are interested in.
 
         Returns:
-            :class:`stacker.dag.DAG`: The filtered graph.
+            :class:`DAG`: The filtered graph.
 
         """
         filtered_dag = DAG()

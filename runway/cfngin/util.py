@@ -32,7 +32,7 @@ def camel_to_snake(name):
         name (str): The name to convert from CamelCase to snake_case.
 
     Returns:
-        string: Converted string.
+        str: Converted string.
 
     """
     sub_str_1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
@@ -46,7 +46,7 @@ def convert_class_name(kls):
         kls (class): The class being analyzed for its name.
 
     Returns:
-        string: The name of the given kls.
+        str: The name of the given kls.
 
     """
     return camel_to_snake(kls.__name__)
@@ -63,10 +63,10 @@ def get_hosted_zone_by_name(client, zone_name):
     Args:
         client (:class:`botocore.client.Route53`): The connection used to
             interact with Route53's API.
-        zone_name (string): The name of the DNS hosted zone to create.
+        zone_name (str): The name of the DNS hosted zone to create.
 
     Returns:
-        string: The Id of the Hosted Zone.
+        str: The Id of the Hosted Zone.
 
     """
     paginator = client.get_paginator("list_hosted_zones")
@@ -84,10 +84,10 @@ def get_or_create_hosted_zone(client, zone_name):
     Args:
         client (:class:`botocore.client.Route53`): The connection used to
             interact with Route53's API.
-        zone_name (string): The name of the DNS hosted zone to create.
+        zone_name (str): The name of the DNS hosted zone to create.
 
     Returns:
-        string: The Id of the Hosted Zone.
+        str: The Id of the Hosted Zone.
 
     """
     zone_id = get_hosted_zone_by_name(client, zone_name)
@@ -134,14 +134,14 @@ def get_soa_record(client, zone_id, zone_name):
     """Get the SOA record for zone_name from zone_id.
 
     Args:
-        client (:class:`botocore.client.Route53`): The connection used to
+        client (:class:`boto3.client.Client`): The connection used to
             interact with Route53's API.
-        zone_id (string): The AWS Route53 zone id of the hosted zone to query.
-        zone_name (string): The name of the DNS hosted zone to create.
+        zone_id (str): The AWS Route53 zone id of the hosted zone to query.
+        zone_name (str): The name of the DNS hosted zone to create.
 
     Returns:
-        :class:`stacker.util.SOARecord`: An object representing the parsed SOA
-            record returned from AWS Route53.
+        :class:`runway.cfngin.util.SOARecord`: An object representing the
+        parsed SOA record returned from AWS Route53.
 
     """
     response = client.list_resource_record_sets(HostedZoneId=zone_id,
@@ -157,13 +157,13 @@ def create_route53_zone(client, zone_name):
     Also sets the SOA negative caching TTL to something short (300 seconds).
 
     Args:
-        client (:class:`botocore.client.Route53`): The connection used to
+        client (:class:`boto3.client.Client`): The connection used to
             interact with Route53's API.
-        zone_name (string): The name of the DNS hosted zone to create.
+        zone_name (str): The name of the DNS hosted zone to create.
 
     Returns:
-        string: The zone id returned from AWS for the existing, or newly
-            created zone.
+        str: The zone id returned from AWS for the existing, or newly
+        created zone.
 
     """
     if not zone_name.endswith("."):
@@ -225,7 +225,7 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
     """yaml.load alternative with preserved dictionary order.
 
     Args:
-        stream (string): YAML string to load.
+        stream (str): YAML string to load.
         loader (:class:`yaml.loader`): PyYAML loader class. Defaults to safe
             load.
 
@@ -311,12 +311,12 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
 
 
 def uppercase_first_letter(string_):
-    """Return string "string_" with first character upper case."""
+    """Return string with first character upper case."""
     return string_[0].upper() + string_[1:]
 
 
 def cf_safe_name(name):
-    """Convert a name to a safe string for a Cloudformation resource.
+    """Convert a name to a safe string for a CloudFormation resource.
 
     Given a string, returns a name that is safe for use as a CloudFormation
     Resource. (ie: Only alphanumeric characters)
@@ -346,7 +346,7 @@ def read_value_from_path(value):
     The value can be referred to with the `file://` prefix.
 
     Example:
-        .. code-block: yaml
+        ::
 
             conf_key: ${kms file://kms_value.txt}
 
@@ -533,14 +533,14 @@ class SourceProcessor(object):
         """Process a config's defined package sources.
 
         Args:
-            sources (Dict[str, Any]): Package sources from Stacker config
+            sources (Dict[str, Any]): Package sources from CFNgin config
                 dictionary.
             stacker_cache_dir (str): Path where remote sources will be
                 cached.
 
         """
         if not stacker_cache_dir:
-            stacker_cache_dir = os.path.expanduser("~/.stacker")
+            stacker_cache_dir = os.path.expanduser("~/.runway_cache")
         package_cache_dir = os.path.join(stacker_cache_dir, 'packages')
         self.stacker_cache_dir = stacker_cache_dir
         self.package_cache_dir = package_cache_dir
@@ -641,7 +641,7 @@ class SourceProcessor(object):
                          config['bucket'],
                          config['key'],
                          cached_dir_path)
-            tmp_dir = tempfile.mkdtemp(prefix='stacker')
+            tmp_dir = tempfile.mkdtemp(prefix='cfngin')
             tmp_package_path = os.path.join(tmp_dir, dir_name)
             try:
                 extractor.set_archive(os.path.join(tmp_dir, dir_name))
@@ -659,7 +659,7 @@ class SourceProcessor(object):
                              tmp_package_path)
                 extractor.extract(tmp_package_path)
                 LOGGER.debug("Moving extracted package directory %s to the "
-                             "Stacker cache at %s",
+                             "CFNgin cache at %s",
                              dir_name,
                              self.package_cache_dir)
                 shutil.move(tmp_package_path, self.package_cache_dir)
@@ -698,7 +698,7 @@ class SourceProcessor(object):
                          "previously downloaded - starting clone to %s",
                          config['uri'],
                          cached_dir_path)
-            tmp_dir = tempfile.mkdtemp(prefix='stacker')
+            tmp_dir = tempfile.mkdtemp(prefix='cfngin')
             try:
                 tmp_repo_path = os.path.join(tmp_dir, dir_name)
                 with Repo.clone_from(config['uri'], tmp_repo_path) as repo:
@@ -848,7 +848,7 @@ class SourceProcessor(object):
         """Take a git URI and ref and converts it to a directory safe path.
 
         Args:
-            uri (str): Git URI. (e.g. git@github.com:foo/bar.git)
+            uri (str): Git URI. (e.g. ``git@github.com:foo/bar.git``)
             ref (Optional[str]): Git ref to be appended to the path.
 
         Returns:

@@ -48,8 +48,8 @@ def render_parse_load(raw_config, environment=None, validate=True):
         if namespace:
             LOGGER.warning("DEPRECATION WARNING: specifying namespace in the "
                            "environment is deprecated. See "
-                           "https://stacker.readthedocs.io/en/latest/config.html"
-                           "#namespace "
+                           "https://docs.onica.com/projects/runway/en/"
+                           "release/cfngin/config.html#namespace "
                            "for more info.")
             config.namespace = namespace
 
@@ -393,8 +393,8 @@ class Stack(Model):
                 "DEPRECATION: Stack definition %s contains "
                 "deprecated 'parameters', rather than 'variables'. You are"
                 " required to update your config. See "
-                "https://stacker.readthedocs.io/en/latest/config.html#variables"
-                " for additional information."
+                "https://docs.onica.com/projects/runway/en/release/cfngin/"
+                "config.html#variables for additional information."
                 % stack_name)
         return value
 
@@ -506,7 +506,7 @@ class Config(Model):
                 datatypes (e.g., when validating immediately after the initial
                 import).
 
-        Raises
+        Raises:
             UndefinedValueError
             SchematicsError
 

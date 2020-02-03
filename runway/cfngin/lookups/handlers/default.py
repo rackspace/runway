@@ -24,7 +24,8 @@ class DefaultLookup(LookupHandler):
         Returns:
             str: Looked up value
 
-        Example::
+        Example:
+            ::
 
                 Groups: ${default app_security_groups::sg-12345,sg-67890}
 

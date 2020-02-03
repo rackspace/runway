@@ -36,7 +36,7 @@ def _zip_files(files, root):
 
     Returns:
         Tuple[str, str]: Content of the ZIP file as a byte string and
-            calculated hash of all the files
+        calculated hash of all the files
 
     """
     zip_data = StringIO()
@@ -172,8 +172,8 @@ def _head_object(s3_conn, bucket, key):
         key (str): name of the key to lookup.
 
     Returns:
-        dict: S3 object information, or None if the object does not exist.
-            See the AWS documentation for explanation of the contents.
+        Dict[str, Any]: S3 object information, or None if the object does not
+        exist. See the AWS documentation for explanation of the contents.
 
     Raises:
         botocore.exceptions.ClientError: any error from boto3 other than key
@@ -280,23 +280,23 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
             construct a key name for the uploaded file.
         options (Dict[str, Any]): Configuration for how to build the payload.
             Consists of the following keys:
-                * path:
+                **path**:
                     Base path to retrieve files from (mandatory). If not
                     absolute, it will be interpreted as relative to the CFNgin
                     configuration file directory, then converted to an absolute
                     path. See :func:`runway.cfngin.util.get_config_directory`.
-                * include:
+                **include**:
                     File patterns to include in the payload (optional).
-                * exclude:
+                **exclude**:
                     File patterns to exclude from the payload (optional).
-        follow_symlinks  (bool): If true, symlinks will be included in the
+        follow_symlinks (bool): If true, symlinks will be included in the
             resulting zip file
         payload_acl (str): The canned S3 object ACL to be applied to the
             uploaded payload
 
     Returns:
         troposphere.awslambda.Code: CloudFormation AWS Lambda Code object,
-            pointing to the uploaded object in S3.
+        pointing to the uploaded object in S3.
 
     Raises:
         ValueError: If any configuration is invalid.
@@ -359,7 +359,7 @@ def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
 
 
 def upload_lambda_functions(context, provider, **kwargs):
-    """Build Lambda payloads from user configuration and uploads them to S3.
+    """Build Lambda payloads from user configuration and upload them to S3.
 
     Constructs ZIP archives containing files matching specified patterns for
     each function, uploads the result to Amazon S3, then stores objects (of
@@ -377,65 +377,71 @@ def upload_lambda_functions(context, provider, **kwargs):
 
     The configuration settings are documented as keyword arguments below.
 
-    Keyword Arguments:
+    Args:
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
+            instance. (passed in by CFNgin)
+        context (:class:`runway.cfngin.context.Context`): Context instance.
+            (passed in by CFNgin)
+
+    Keyword Args:
         bucket (Optional[str]): Custom bucket to upload functions to.
             Omitting it will cause the default CFNgin bucket to be used.
         bucket_region (Optional[str]): The region in which the bucket should
             exist. If not given, the region will be either be that of the
-            global `stacker_bucket_region` setting, or else the region in
+            global ``stacker_bucket_region`` setting, or else the region in
             use by the provider.
         prefix (Optional[str]): S3 key prefix to prepend to the uploaded
             zip name.
         follow_symlinks (Optional[bool]): Will determine if symlinks should
-            be followed and included with the zip artifact. Default: False
-        payload_acl (Optional[str]): The canned S3 object ACL to be applied to
-            the uploaded payload. Default: private
+            be followed and included with the zip artifact. (*default:*
+            ``False``)
+        payload_acl (Optional[str]): The canned S3 object ACL to be applied
+            to the uploaded payload. (*default: private*)
         functions (Dict[str, Any]): Configurations of desired payloads to
-            build. Keys correspond to function names, used to derive key names
-            for the payload. Each value should itself be a dictionary, with
-            the following data:
+            build. Keys correspond to function names, used to derive key
+            names for the payload. Each value should itself be a dictionary,
+            with the following data:
 
-                * path (str):
+            **path (str)**
+                Base directory of the Lambda function payload content.
+                If it not an absolute path, it will be considered relative
+                to the directory containing the CFNgin configuration file
+                in use.
 
-                    Base directory of the Lambda function payload content.
-                    If it not an absolute path, it will be considered relative
-                    to the directory containing the CFNgin configuration file
-                    in use.
+                Files in this directory will be added to the payload ZIP,
+                according to the include and exclude patterns. If not
+                patterns are provided, all files in this directory
+                (respecting default exclusions) will be used.
 
-                    Files in this directory will be added to the payload ZIP,
-                    according to the include and exclude patterns. If not
-                    patterns are provided, all files in this directory
-                    (respecting default exclusions) will be used.
+                Files are stored in the archive with path names relative to
+                this directory. So, for example, all the files contained
+                directly under this directory will be added to the root of
+                the ZIP file.
 
-                    Files are stored in the archive with path names relative to
-                    this directory. So, for example, all the files contained
-                    directly under this directory will be added to the root of
-                    the ZIP file.
+            **include (Optional[Union[str, List[str]]])**
+                Pattern or list of patterns of files to include in the
+                payload. If provided, only files that match these
+                patterns will be included in the payload.
 
-                * include(Union[str, List[str], None]):
+                Omitting it is equivalent to accepting all files that are
+                not otherwise excluded.
 
-                    Pattern or list of patterns of files to include in the
-                    payload. If provided, only files that match these
-                    patterns will be included in the payload.
+            **exclude (Optional[Union[str, List[str]]])**
+                Pattern or list of patterns of files to exclude from the
+                payload. If provided, any files that match will be ignored,
+                regardless of whether they match an inclusion pattern.
 
-                    Omitting it is equivalent to accepting all files that are
-                    not otherwise excluded.
-
-                * exclude(Union[str, List[str], None]):
-                    Pattern or list of patterns of files to exclude from the
-                    payload. If provided, any files that match will be ignored,
-                    regardless of whether they match an inclusion pattern.
-
-                    Commonly ignored files are already excluded by default,
-                    such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``,
-                    ``.gitignore``, etc.
+                Commonly ignored files are already excluded by default,
+                such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``,
+                ``.gitignore``, etc.
 
     Examples:
         .. Hook configuration.
         .. code-block:: yaml
 
             pre_build:
-              - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+              upload_functions:
+                path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
                 required: true
                 enabled: true
                 data_key: lambda

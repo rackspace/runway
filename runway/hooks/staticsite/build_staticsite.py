@@ -1,5 +1,5 @@
-"""Stacker hook for building static website."""
-
+"""CFNgin hook for building static website."""
+# TODO move to runway.cfngin.hooks on next major release
 import logging
 import os
 import tempfile

@@ -65,11 +65,12 @@ def get_output_dict(stack):
     """Return a dict of key/values for the outputs for a given CF stack.
 
     Args:
-        stack (dict): The stack object to get
+        stack (Dict[str, Any]): The stack object to get
             outputs from.
 
     Returns:
-        dict: A dictionary with key/values for each output on the stack.
+        Dict[str, Any]: A dictionary with key/values for each output on the
+        stack.
 
     """
     outputs = {}
@@ -88,7 +89,8 @@ def s3_fallback(fqn, template, parameters, tags, method,
     """Falling back to legacy stacker S3 bucket region for templates."""
     LOGGER.warning("DEPRECATION WARNING: Falling back to legacy "
                    "stacker S3 bucket region for templates. See "
-                   "http://stacker.readthedocs.io/en/latest/config.html#s3-bucket"
+                   "https://docs.onica.com/projects/runway/en/release/"
+                   "cfngin/config.html#s3-bucket"
                    " for more information.")
     # extra line break on purpose to avoid status updates removing URL
     # from view
@@ -114,7 +116,8 @@ def s3_fallback(fqn, template, parameters, tags, method,
 def get_change_set_name():
     """Return a valid Change Set Name.
 
-    The name has to satisfy the following regex:
+    The name has to satisfy the following regex::
+
         [a-zA-Z][-a-zA-Z0-9]*
 
     And must be unique across all change sets.
@@ -142,14 +145,15 @@ def output_full_changeset(full_changeset=None, params_diff=None,
     """Optionally output full changeset.
 
     Args:
-        full_changeset (list, optional): A list of the full changeset that will
-            be output if the user specifies verbose.
-        params_diff (list, optional): A list of DictValue detailing the
-            differences between two parameters returned by
-            :func:`runway.cfngin.actions.diff.diff_dictionaries`
-        answer (str, optional): predetermined answer to the prompt if it has
+        full_changeset (Optional[List[Dict[str, Any]]]): A list of the full
+            changeset that will be output if the user specifies verbose.
+        params_diff (Optional[List[:class:`runway.cfngin.actions.diff.DictValue`):
+            A list of DictValue detailing the differences between two
+            parameters returned by
+            :func:`runway.cfngin.actions.diff.diff_dictionaries`.
+        answer (Optional[str]): predetermined answer to the prompt if it has
             already been answered or inferred.
-        fqn (str, optional): fully qualified name of the stack.
+        fqn (Optional[str]): fully qualified name of the stack.
 
     """
     if not answer:
@@ -183,14 +187,18 @@ def ask_for_approval(full_changeset=None, params_diff=None,
     """Prompt the user for approval to execute a change set.
 
     Args:
-        full_changeset (list, optional): A list of the full changeset that will
-            be output if the user specifies verbose.
-        params_diff (list, optional): A list of DictValue detailing the
-            differences between two parameters returned by
+        full_changeset (Optional[List[Dict[str, Any]]]): A list of the full
+            changeset that will be output if the user specifies verbose.
+        params_diff (Optional[List[:class:`runway.cfngin.actions.diff`]]):
+            A list of DictValue detailing the differences between two
+            parameters returned by
             :func:`runway.cfngin.actions.diff.diff_dictionaries`
-        include_verbose (bool, optional): Boolean for whether or not to include
+        include_verbose (bool): Boolean for whether or not to include
             the verbose option.
         fqn (str): fully qualified name of the stack.
+
+    Raises:
+        CancelExecution: If approval no given.
 
     """
     approval_options = ['y', 'n']
@@ -254,7 +262,7 @@ def output_summary(fqn, action, changeset, params_diff,
 
 
 def format_params_diff(params_diff):
-    """Wrap runway.cfngin.actions.diff.format_params_diff for testing."""
+    """Wrap :func:`runway.cfngin.actions.diff.format_params_diff` for testing."""
     return format_diff(params_diff)
 
 
@@ -286,22 +294,23 @@ def wait_till_change_set_complete(cfn_client, change_set_id, try_count=25,
 
     Since changesets can take a little bit of time to get into a complete
     state, we need to poll it until it does so. This will try to get the
-    state `try_count` times, waiting `sleep_time` * 2 seconds between each try
-    up to the `max_sleep` number of seconds. If, after that time, the changeset
-    is not in a complete state it fails. These default settings will wait a
-    little over one minute.
+    state ``try_count`` times, waiting ``sleep_time`` * 2 seconds between each
+    try up to the ``max_sleep`` number of seconds. If, after that time, the
+    changeset is not in a complete state it fails. These default settings will
+    wait a little over one minute.
 
     Args:
-        cfn_client (:class:`botocore.client.CloudFormation`): Used to query
-            cloudformation.
+        cfn_client (:class:`botocore.client.Client`): Used to query
+            CloudFormation.
         change_set_id (str): The unique changeset id to wait for.
         try_count (int): Number of times to try the call.
         sleep_time (int): Time to sleep between attempts.
         max_sleep (int): Max time to sleep during backoff
 
     Return:
-        dict: The response from cloudformation for the describe_change_set
-            call.
+        Dict[str, Any]: The response from CloudFormation for the
+        ``describe_change_set`` call.
+
     """
     complete = False
     response = None
@@ -389,15 +398,16 @@ def create_change_set(cfn_client, fqn, template, parameters, tags,
 def check_tags_contain(actual, expected):
     """Check if a set of AWS resource tags is contained in another.
 
-    Every tag key in `expected` must be present in `actual`, and have the same
-    value. Extra keys in `actual` but not in `expected` are ignored.
+    Every tag key in ``expected`` must be present in ``actual``, and have the
+    same value. Extra keys in `actual` but not in ``expected`` are ignored.
 
     Args:
-        actual (list): Set of tags to be verified, usually from the description
-            of a resource. Each item must be a `dict` containing `Key` and
-            `Value` items.
-        expected (list): Set of tags that must be present in `actual` (in the
-            same format).
+        actual (List[Dict[str, str]]): Set of tags to be verified, usually
+            from the description of a resource. Each item must be a
+            ``dict`` containing ``Key`` and ``Value`` items.
+        expected (List[Dict[str, str]]): Set of tags that must be present in
+            ``actual`` (in the same format).
+
     """
     actual_set = set((item["Key"], item["Value"]) for item in actual)
     expected_set = set((item["Key"], item["Value"]) for item in expected)
@@ -411,33 +421,33 @@ def generate_cloudformation_args(stack_name, parameters, tags, template,
                                  service_role=None,
                                  stack_policy=None,
                                  change_set_name=None):
-    """Generate the args for common cloudformation API interactions.
+    """Generate the args for common CloudFormation API interactions.
 
-    This is used for create_stack/update_stack/create_change_set calls in
-    cloudformation.
+    This is used for ``create_stack``/``update_stack``/``create_change_set``
+    calls in CloudFormation.
 
     Args:
         stack_name (str): The fully qualified stack name in Cloudformation.
-        parameters (list): A list of dictionaries that defines the
-            parameter list to be applied to the Cloudformation stack.
-        tags (list): A list of dictionaries that defines the tags
-            that should be applied to the Cloudformation stack.
+        parameters (List[Dict[str, Any]]): A list of dictionaries that defines
+            the parameter list to be applied to the Cloudformation stack.
+        tags (List[Dict[str, str]]): A list of dictionaries that defines the
+            tags that should be applied to the Cloudformation stack.
         template (:class:`runway.cfngin.provider.base.Template`): The template
             object.
-        capabilities (list, optional): A list of capabilities to use when
+        capabilities (Optional[List[str]]): A list of capabilities to use when
             updating Cloudformation.
-        change_set_type (str, optional): An optional change set type to use
+        change_set_type (Optional[str]): An optional change set type to use
             with create_change_set.
-        service_role (str, optional): An optional service role to use when
+        service_role (Optional[str]): An optional service role to use when
             interacting with Cloudformation.
         stack_policy (:class:`runway.cfngin.providers.base.Template`):
             A template object representing a stack policy.
-        change_set_name (str, optional): An optional change set name to use
+        change_set_name (Optional[str]): An optional change set name to use
             with create_change_set.
 
     Returns:
-        dict: A dictionary of arguments to be used in the Cloudformation API
-            call.
+        Dict[str, Any]: A dictionary of arguments to be used in the
+        Cloudformation API call.
 
     """
     args = {
@@ -813,10 +823,11 @@ class Provider(BaseProvider):
 
         It may involve deleting the stack if is has failed it's initial
         creation. The deletion is only allowed if:
-          - The stack contains all the tags configured in the current context;
-          - The stack is in one of the statuses considered safe to re-create
-          - ``recreate_failed`` is enabled, due to either being explicitly
-            enabled by the user, or because interactive mode is on.
+
+        - The stack contains all the tags configured in the current context;
+        - The stack is in one of the statuses considered safe to re-create
+        - ``recreate_failed`` is enabled, due to either being explicitly
+          enabled by the user, or because interactive mode is on.
 
         Args:
             stack (dict): a stack object returned from get_stack
@@ -825,7 +836,7 @@ class Provider(BaseProvider):
 
         Returns:
             bool: True if the stack can be updated, False if it must be
-                re-created
+            re-created
 
         """
         if self.is_stack_destroyed(stack):
@@ -884,12 +895,14 @@ class Provider(BaseProvider):
             fqn (str): The fully qualified name of the Cloudformation stack.
             template (:class:`runway.cfngin.providers.base.Template`):
                 A Template object to use when updating the stack.
-            old_parameters (list): A list of dictionaries that defines the
-                parameter list on the existing Cloudformation stack.
-            parameters (list): A list of dictionaries that defines the
-                parameter list to be applied to the Cloudformation stack.
-            tags (list): A list of dictionaries that defines the tags
-                that should be applied to the Cloudformation stack.
+            old_parameters (List[Dict[str, Any]]): A list of dictionaries that
+                defines the parameter list on the existing Cloudformation
+                stack.
+            parameters (List[Dict[str, Any]]): A list of dictionaries that
+                defines the parameter list to be applied to the Cloudformation
+                stack.
+            tags (List[Dict[str, str]]): A list of dictionaries that defines
+                the tags that should be applied to the Cloudformation stack.
             force_interactive (bool): A flag that indicates whether the update
                 should be interactive. If set to True, interactive mode will
                 be used no matter if the provider is in interactive mode or
@@ -939,14 +952,15 @@ class Provider(BaseProvider):
             fqn (str): The fully qualified name of the Cloudformation stack.
             template (:class:`runway.cfngin.providers.base.Template`):
                 A Template object to use when updating the stack.
-            old_parameters (list): A list of dictionaries that defines the
-                parameter list on the existing Cloudformation stack.
-            parameters (list): A list of dictionaries that defines the
-                parameter list to be applied to the Cloudformation stack.
+            old_parameters (List[Dict[str, Any]]): A list of dictionaries that
+                defines the parameter list on the existing Cloudformation stack.
+            parameters (List[Dict[str, Any]]): A list of dictionaries that
+                defines the parameter list to be applied to the Cloudformation
+                stack.
             stack_policy (:class:`runway.cfngin.providers.base.Template`):
                 A template object representing a stack policy.
-            tags (list): A list of dictionaries that defines the tags
-                that should be applied to the Cloudformation stack.
+            tags (List[Dict[str, str]]): A list of dictionaries that defines
+                the tags that should be applied to the Cloudformation stack.
 
         """
         LOGGER.debug("Using interactive provider mode for %s.", fqn)
@@ -997,7 +1011,7 @@ class Provider(BaseProvider):
         """Update a Cloudformation stack using a change set.
 
         This is required for stacks with a defined Transform (i.e. SAM), as the
-        default update_stack API cannot be used with them.
+        default ``update_stack`` API cannot be used with them.
 
         Args:
             fqn (str): The fully qualified name of the Cloudformation stack.
@@ -1124,13 +1138,14 @@ class Provider(BaseProvider):
                 changes.
             template (:class:`runway.cfngin.providers.base.Template`):
                 A Template object to compaired to.
-            parameters (list): A list of dictionaries that defines the
-                parameter list to be applied to the Cloudformation stack.
-            tags (list): A list of dictionaries that defines the tags
-                that should be applied to the Cloudformation stack.
+            parameters (List[Dict[str, Any]]): A list of dictionaries that
+                defines the parameter list to be applied to the Cloudformation
+                stack.
+            tags (List[Dict[str, Any]]): A list of dictionaries that defines
+                the tags that should be applied to the Cloudformation stack.
 
         Returns:
-            dict: Stack outputs with inferred changes.
+            Dict[str, Any]: Stack outputs with inferred changes.
 
         """
         try:

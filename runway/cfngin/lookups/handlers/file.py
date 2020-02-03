@@ -54,54 +54,94 @@ class FileLookup(LookupHandler):
 
         Supported codecs:
 
-            - plain
+        **plain**
+            Plain Text
 
-            - base64 - Encode the plain text file at the given path with base64
-              prior to returning it.
+        **base64**
+            Encode the plain text file at the given path with base64 prior to
+            returning it.
 
-            - parameterized - The same as plain, but additionally supports
-              referencing template parameters to create userdata that's
-              supplemented with information from the template, as is commonly
-              needed in EC2 UserData. For example, given a template parameter
-              of BucketName, the file could contain the following text::
+        **parameterized**
+            The same as plain, but additionally supports referencing template
+            parameters to create userdata that's supplemented with information
+            from the template, as is commonly needed in EC2 UserData.
+            For example, given a template parameter of BucketName, the file
+            could contain the following text::
 
                 #!/bin/sh
                 aws s3 sync s3://{{BucketName}}/somepath /somepath
 
-              Then you could use something like this in the YAML config
-              file::
+            Then you could use something like this in the YAML config
+            file::
 
                 UserData: ${file parameterized:/path/to/file}
 
-              Resulting in the UserData parameter being defined as::
+            Resulting in the UserData parameter being defined as::
 
-                  { "Fn::Join" : ["", [
-                      "#!/bin/sh\\naws s3 sync s3://",
-                      {"Ref" : "BucketName"},
-                      "/somepath /somepath"
-                  ]] }
+                { "Fn::Join" : ["", [
+                    "#!/bin/sh\\naws s3 sync s3://",
+                    {"Ref" : "BucketName"},
+                    "/somepath /somepath"
+                ]] }
 
-            - parameterized-b64 - The same as parameterized, with the results
-              additionally wrapped in *{ "Fn::Base64": ... }* , which is what
-              you actually need for EC2 UserData.
+        **parameterized-b64**
+            The same as parameterized, with the results additionally wrapped
+            in ``{ "Fn::Base64": ... }`` , which is what you actually need
+            for EC2 UserData.
 
-        When using parameterized-b64 for UserData, you should use a variable
-        defined as such:
+            When using parameterized-b64 for UserData, you should use a
+            variable defined as such:
 
-        .. code-block:: python
+            .. code-block:: python
 
-            from troposphere import AWSHelperFn
+                from troposphere import AWSHelperFn
 
-              "UserData": {
-                  "type": AWSHelperFn,
-                  "description": "Instance user data",
-                  "default": Ref("AWS::NoValue")
-              }
+                "UserData": {
+                    "type": AWSHelperFn,
+                    "description": "Instance user data",
+                    "default": Ref("AWS::NoValue")
+                }
 
-        Then assign UserData in a LaunchConfiguration or Instance to
-        *self.get_variables()["UserData"]*. Note that we use AWSHelperFn as the
-        type because the parameterized-b64 codec returns either a Base64 or a
-        GenericHelperFn troposphere object.
+            Then assign UserData in a LaunchConfiguration or Instance to
+            ``self.get_variables()["UserData"]``. Note that we use AWSHelperFn
+            as the type because the parameterized-b64 codec returns either a
+            Base64 or a GenericHelperFn troposphere object.
+
+        **json**
+            Decode the file as JSON and return the resulting object
+
+        **json-parameterized**
+            Same as ``json``, but applying templating rules from
+            ``parameterized`` to every object *value*. Note that
+            object *keys* are not modified. Example (an external
+            PolicyDocument)::
+
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "some:Action"
+                                ],
+                                "Resource": "{{MyResource}}"
+                            }
+                        ]
+                    }
+
+        **yaml**
+            Decode the file as YAML and return the resulting object.
+            All strings are returned as ``unicode`` even in Python 2.
+
+        **yaml-parameterized**
+            Same as ``json-parameterized``, but using YAML. Example::
+
+                Version: 2012-10-17
+                Statement:
+                  - Effect: Allow
+                    Action:
+                      - "some:Action"
+                    Resource: "{{MyResource}}"
 
         """
         try:
