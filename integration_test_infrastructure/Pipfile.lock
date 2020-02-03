@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bf3997a28c27794173c1d149a6a5828cbd638eceac4250d30ebf17948375f6dc"
+            "sha256": "336160271f92aae97107d977d2dcdb69a28fd9fd60da20832afeb179b2d8c212"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -108,10 +108,10 @@
         },
         "cfn-lint": {
             "hashes": [
-                "sha256:4d7fe0c53219890ab8656be468dc985632890902271ad8536107c5ed200e08ff",
-                "sha256:ee027f955a42da596e0f1068e05d40253ff7c76cd64ada8fdd4d72bae1e25ba2"
+                "sha256:07aa493be259f90a77f590213d26df9e834d003843c4dafc026d730055ba54a9",
+                "sha256:085ded355f11278c14a1c45335e27f81b2a31e6c3eb9ec288a2b39ec813829b4"
             ],
-            "version": "==0.27.3"
+            "version": "==0.27.4"
         },
         "chardet": {
             "hashes": [
@@ -220,10 +220,10 @@
         },
         "jinja2": {
             "hashes": [
-                "sha256:6e7a3c2934694d59ad334c93dd1b6c96699cf24c53fdb8ec848ac6b23e685734",
-                "sha256:d6609ae5ec3d56212ca7d802eda654eaf2310000816ce815361041465b108be4"
+                "sha256:93187ffbc7808079673ef52771baa950426fd664d3aad1d0fa3e95644360e250",
+                "sha256:b0eaf100007721b5c16c1fc1eecb87409464edc10469ddc9a22a27a99123be49"
             ],
-            "version": "==2.11.0"
+            "version": "==2.11.1"
         },
         "jmespath": {
             "hashes": [
@@ -237,6 +237,7 @@
                 "sha256:cc3a7241010a1fd3f50145a3b33be2c03c1e679faa19934b628bb07d0f64819e",
                 "sha256:ddc0f7628b8bfdd62e3cbfbc24ca6671b0b6265b50d186c2cf3659dc0f78fd6a"
             ],
+            "markers": "python_version != '3.4'",
             "version": "==1.25"
         },
         "jsonpointer": {
@@ -386,7 +387,7 @@
         },
         "runway": {
             "editable": true,
-            "path": "./../../runway"
+            "path": "./.."
         },
         "s3transfer": {
             "hashes": [

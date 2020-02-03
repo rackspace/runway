@@ -4,25 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-send2trash = "*"
-awacs = "*"
-awscli = ">=1.16.308<2.0"
-docopt = "*"
-future = "*"
-pyhcl = "~=0.4"
-typing = {version = "~= 3.7",markers = "python_version < '3.5'"}
-yamllint = "*"
-zgitignore = "*"
-stacker = "~=1.7"
-botocore = ">=1.12.111"
-boto3 = ">=1.9.111<2.0"
-pyyaml = ">=4.1,<5.3"
-cfn_flip = ">=1.2.1"
-six = "*"
-cfn-lint = "*"
-pyOpenSSL = "*"
-requests = "*"
-zipp = '~=1.0.0'
+runway = {editable = true, path = "."}
+# these don't get pulled into the lock correctly when using ^ with >=3.7
+pathlib2 = {version = ">=2.3.0", python_version = '<="3.4"'}
+importlib-resources = {version = "~=1.0.2", python_version = '<"3.7"'}
 
 [dev-packages]
 # python3 flake8-docstrings fails with pydocstyle 4:
