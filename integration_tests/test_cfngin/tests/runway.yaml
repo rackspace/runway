@@ -1,0 +1,7 @@
+deployments:
+  - modules:
+      - path: ./
+        environments:
+          dev: true
+    regions:
+      - us-east-1
