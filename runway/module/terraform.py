@@ -273,7 +273,7 @@ class Terraform(RunwayModule):
                     env_name=self.context.env_name,
                     env_region=self.context.env_region,
                     env_vars=env_vars
-                    )
+                )
 
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(

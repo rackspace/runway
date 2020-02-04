@@ -60,7 +60,6 @@ def Entrypoint(dist, group, name, **kwargs):  # noqa
 data_files = [
     (os.path.join(CLI_PATH, 'templates'), './runway/templates'),
     (os.path.join(CLI_PATH, 'blueprints'), './runway/blueprints'),
-    (os.path.join(CLI_PATH, 'embedded'), './runway/embedded'),
     (os.path.join(CLI_PATH, 'hooks'), './runway/hooks')
 ]
 data_files.append(('{}/yamllint/conf'.format(get_distribution('yamllint').location),

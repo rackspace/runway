@@ -45,12 +45,14 @@ def load_object_from_string(fqcn):
     """Convert "." delimited strings to a python object.
 
     Given a "." delimited string representing the full path to an object
-    (function, class, variable) inside a module, return that object.  Example:
-    load_object_from_string("os.path.basename")
-    load_object_from_string("logging.Logger")
-    load_object_from_string("LocalClassName")
+    (function, class, variable) inside a module, return that object.
 
-    Adapted from stacker.utils
+    Example::
+
+        load_object_from_string("os.path.basename")
+        load_object_from_string("logging.Logger")
+        load_object_from_string("LocalClassName")
+
     """
     module_path = "__main__"
     object_name = fqcn
@@ -232,7 +234,7 @@ def md5sum(filename):
 def sha256sum(filename):
     """Return SHA256 hash of file."""
     sha256 = hashlib.sha256()
-    mem_view = memoryview(bytearray(128*1024))
+    mem_view = memoryview(bytearray(128 * 1024))
     with open(filename, 'rb', buffering=0) as stream:
         for i in iter(lambda: stream.readinto(mem_view), 0):
             sha256.update(mem_view[:i])

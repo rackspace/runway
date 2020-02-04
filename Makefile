@@ -31,11 +31,13 @@ clean:
 	rm -rf src/
 	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
-test: sync create_readme
-	pipenv run python setup.py test
+lint:
 	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
 	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
 	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
+
+test:
+	pipenv run pytest
 
 travistest: create_readme
 	./.travis/test.sh

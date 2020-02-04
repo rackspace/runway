@@ -1,9 +1,0 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Test stack
-
-Resources:
-  FakeResource:
-    # a quick resource to create/delete
-    # when the contents of a stack doesn't matter
-    Type: AWS::CloudFormation::WaitConditionHandle
-    Properties: {}

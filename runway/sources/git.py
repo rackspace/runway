@@ -137,7 +137,7 @@ class Git(Source):
         """
         dir_name = path  # type: str
         split = path.split('//')  # type: List[str]
-        domain = split[len(split)-1]  # type: str
+        domain = split[len(split) - 1]  # type: str
 
         if domain.endswith('.git'):
             dir_name = domain[:-4]

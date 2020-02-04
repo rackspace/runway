@@ -2,7 +2,17 @@
     "files.insertFinalNewline": true,
     "python.linting.flake8Enabled": true,
     "python.linting.mypyEnabled": false,
-    "restructuredtext.confPath": "${workspaceFolder}\\docs\\source",
+    "restructuredtext.builtDocumentationPath": "${workspaceRoot}/docs/build/html",
+    "restructuredtext.confPath": "${workspaceFolder}/docs/source",
+    "restructuredtext.updateOnTextChanged": "true",
+    "restructuredtext.linter.extraArgs": [
+        "--ignore D001"
+    ],
+    "restructuredtext.preview.scrollEditorWithPreview": false,
+    "restructuredtext.preview.scrollPreviewWithEditor": false,
     "python.linting.pylintEnabled": true,
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python"
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "cSpell.words": [
+        "cfngin"
+    ]
 }

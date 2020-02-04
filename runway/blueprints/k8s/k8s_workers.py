@@ -13,8 +13,8 @@ from troposphere.policies import AutoScalingRollingUpdate, UpdatePolicy
 
 import botocore
 
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import (
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import (
     CFNNumber, CFNString, EC2ImageId, EC2SecurityGroupId, EC2SubnetIdList,
     EC2VPCId
 )
@@ -327,5 +327,5 @@ class NodeGroup(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
     print(NodeGroup('test', Context({"namespace": "test"}), None).to_json())
