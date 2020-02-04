@@ -5,11 +5,13 @@
 CFNgin
 ======
 
-CFNgin is a library used to create & update multiple CloudFormation stacks.
-It originates from the open source library `Stacker`_ and has been adapted to better fit Runway.
-Since we originally cloned the `Stacker`_ repo, we have continued development to improve what they started.
+CFNgin is a library (originating from the open source library `Stacker`_) used to create & update CloudFormation stacks.
 
-CFNgin Blueprints_ are written in troposphere_, though the purpose of most templates is to keep them as generic as possible and then use configuration to modify them.
+It provides a simple way to manage stacks with features like:
+
+- Automatic stack ordering (e.g. deploy stack "A" before stacks "B" & "C")
+- Per-environment values for stack parameters
+- Actions before & after stack creation/deletion
 
 
 Contents:
