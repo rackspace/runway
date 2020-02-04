@@ -87,6 +87,7 @@ jobs:
         - |
           if [ ! -z "${AWS_ACCESS_KEY_ID}" ]; then
             pip install awscli
+            mkdir -p src
             make npm_prep
             aws s3 sync s3://${AWS_BUCKET}/${AWS_BUCKET_PREFIX}/$(cat tmp/version.txt)/npm ./src/
           else
@@ -139,6 +140,6 @@ deploy:
       # artifacts.
       # Forks are welcome to set these environment variables in their own travis-ci
       # environment to use their own AWS account during development. Forks that
-      # wish to use this must create and environment variable "FORKED=true".
+      # wish to use this must create an environment variable "FORKED=true".
       all_branches: true
       condition: $PUBLISH = true && ${AWS_ACCESS_KEY_ID:?} && ${AWS_SECRET_ACCESS_KEY:?} && ${NPM_API_KEY:?}

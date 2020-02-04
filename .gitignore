@@ -8,15 +8,13 @@ build
 dist
 docs/source/_build
 # This is dynamically built at build-time via make
-src/runway/templates/terraform/.terraform-version
+runway/templates/terraform/.terraform-version
 .idea
 node_modules
 .serverless
 .venv
 # paths usind during build
-src/osx
-src/linux
-src/windows
+src/*
 tmp/*
 artifacts/*
 # npm files copied and modified at runtime
@@ -26,6 +24,6 @@ postinstall.js
 preuninstall.js
 
 # templates may include normally excluded files
-!src/runway/templates/**/package.json
-
+!runway/templates/**/package.json
+!runway/templates/**/.npmignore
 !integration_tests/**/package.json

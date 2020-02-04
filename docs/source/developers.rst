@@ -4,31 +4,22 @@
 Developers
 ==========
 
-Want to work on the Runway code itself?
+Getting Started
+---------------
 
-The simplest way to get started is to modify the source code in place while working on an existing project.
+Before getting started, [fork this repo](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) and [clone your fork](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository).
 
-To do this, first ensure you can deploy the project successfully using the ``pipenv`` method of executing Runway.
+Development Environment
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Then, running the following command from your Runway project folder will check out out the latest source code
-from Git and then will configure ``pipenv`` to use that code::
+This project uses ``pipenv`` to create Python virtual environment. This must be installed on your system before setting up your dev environment.
 
-    $ pipenv install -e git+https://github.com/onicagroup/runway#egg=runway
 
-(If you have your own fork, replace ``onicagroup`` appropriately.)
+With pipenv installed, run ``make sync_all`` to setup your development environment. This will create all the requred virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
 
-Where was the source code downloaded to? This command will tell you::
-
-    $ pipenv --venv
-    /Users/myname/.local/share/virtualenvs/my-project-name-d7VNcTay
-
-From that folder, look in ``src/runway/runway``.
-
-You can now edit the files there as you like, and whatever changes you make will be reflected when you
-next execute Runway (using ``pipenv``) in the project folder.
 
 Travis CI
-^^^^^^^^^
+---------
 
 If you would like to simulate a fully build/deploy of runway on your fork,
 you can do so by first signing up and `Travis CI <https://travis-ci.org/>`_
