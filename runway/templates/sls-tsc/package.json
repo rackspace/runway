@@ -1,0 +1,40 @@
+{
+  "name": "replaceme-myslsservice",
+  "version": "1.0.0",
+  "description": "Replace Me - My Serverless Service",
+  "main": "index.js",
+  "scripts": {
+    "docs": "typedoc",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "lintfix": "npm run lint -- --fix",
+    "test": "jest",
+    "coverage": "npm test -- --coverage"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.556.0",
+    "source-map-support": "^0.5.10"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.20",
+    "@types/jest": "^24.0.20",
+    "@types/node": "^11.10.4",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "serverless": "^1.38.0",
+    "serverless-webpack": "^5.2.0",
+    "ts-jest": "^24.1.0",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.2",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "typedoc": "^0.15.6",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6"
+  },
+  "prettier": {
+    "trailingComma": "all"
+  }
+}
