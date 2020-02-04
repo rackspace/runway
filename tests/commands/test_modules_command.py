@@ -1,4 +1,4 @@
-"""Tests src/runway/commands/modules_command.py."""
+"""Tests runway/commands/modules_command.py."""
 from os import path
 import unittest
 from copy import deepcopy
@@ -21,7 +21,7 @@ def module_tag_config():
 
 
 class ModulesCommandTestCase(unittest.TestCase):
-    """Test src/runway/commands/modules_command.py."""
+    """Test runway/commands/modules_command.py."""
 
     tag_yml = module_tag_config()
 

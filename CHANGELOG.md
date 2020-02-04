@@ -5,11 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Add static site examples for React & Angular
+
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
 
 ### Removed
 - embedded `hcl`
+- python 2.6 support for `PyYAML` and `cfn_flip` dependencies
+
+### Fixed
+- pinned `zipp` sub dependency to `~=1.0.0` to retain support for python 3.5
+- `PyYAML` dependency is now `>=4.1,<5.3` to match the top-end of newer versions of `awscli`
 
 ## [1.3.7] - 2020-01-07
 ### Fixed

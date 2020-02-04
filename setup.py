@@ -1,11 +1,10 @@
 """Packaging settings."""
-import sys
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
 
 from setuptools import find_packages, setup
 
-from src.runway import __version__
+from runway import __version__
 
 
 THIS_DIR = abspath(dirname(__file__))
@@ -18,9 +17,10 @@ INSTALL_REQUIRES = [
     'awacs',  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
     # version set to match stacker requirement and include awscli fix #4182
-    'awscli>=1.16.191<2.0',
+    'awscli>=1.16.308<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
     'boto3>=1.9.111<2.0',  # matching stacker requirement
+    'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
     'requests',
@@ -28,6 +28,7 @@ INSTALL_REQUIRES = [
     'pyhcl~=0.4',
     'gitpython',
     'pyOpenSSL',  # For embedded hook & associated script usage
+    'PyYAML>=4.1,<5.3',  # match awscli top-end
     'six',
     'typing;python_version<"3.5"',
     'yamllint',
@@ -49,15 +50,10 @@ INSTALL_REQUIRES = [
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
     'urllib3>=1.20,<1.25',
+    # dependency of importlib-metadata, dependency of pytest, cfn-lint, & others
+    # 2.0.0 drops support for python 3.5
+    'zipp~=1.0.0'
 ]
-
-# ensuring pyyaml dep matches awscli
-if sys.version_info[:2] == (2, 6):
-    INSTALL_REQUIRES.append('PyYAML>=3.10,<=3.13')
-    INSTALL_REQUIRES.append('cfn_flip<=1.2.0')  # 1.2.1+ require PyYAML 4.1+
-else:
-    INSTALL_REQUIRES.append('PyYAML>=4.1,<=5.1')
-    INSTALL_REQUIRES.append('cfn_flip>=1.2.1')
 
 
 setup(
@@ -83,9 +79,7 @@ setup(
     ],
     python_requires='>=2.6',
     keywords='cli',
-    # exclude=['docs', 'tests*'],
-    packages=find_packages(where='src'),
-    package_dir={"": "src"},
+    packages=find_packages(exclude=('tests', 'integration_tests')),
     install_requires=INSTALL_REQUIRES,
     extras_require={
         'test': ['flake8', 'pep8-naming', 'flake8-docstrings',

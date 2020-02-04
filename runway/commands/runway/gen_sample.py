@@ -6,41 +6,49 @@ sample directory.
 
 .. rubric:: Available Samples
 
-+------------------+---------------------------------------------------+
-|      Name        |  Description                                      |
-+==================+===================================================+
-| ``cdk-csharp``   | `AWS CDK`_ :ref:`module<runway-module>` using C#  |
-+------------------+---------------------------------------------------+
-| ``cdk-py``       | `AWS CDK`_ :ref:`module<runway-module>` using     |
-|                  | Python                                            |
-+------------------+---------------------------------------------------+
-| ``cdk-tsc``      | `AWS CDK`_ :ref:`module<runway-module>` using     |
-|                  | TypeScript                                        |
-+------------------+---------------------------------------------------+
-| ``cfn``          | `CloudFormation`_ :ref:`module<runway-module>`    |
-|                  | stack with S3 bucket & DDB table (perfect for     |
-|                  | storing Terraform backend state)                  |
-+------------------+---------------------------------------------------+
-| ``k8s-cfn-repo`` | `Kubernetes`_                                     |
-|                  | :ref:`module<runway-module>` EKS cluster & sample |
-|                  | app using CloudFormation                          |
-+------------------+---------------------------------------------------+
-| ``k8s-tf-repo``  | `Kubernetes`_                                     |
-|                  | :ref:`module<runway-module>` EKS cluster & sample |
-|                  | app using Terraform                               |
-+------------------+---------------------------------------------------+
-| ``sls-py``       | `Serverless Framework`_                           |
-|                  | :ref:`module<runway-module>` using Python         |
-+------------------+---------------------------------------------------+
-| ``sls-tsc``      | `Serverless Framework`_                           |
-|                  | :ref:`module<runway-module>` using TypeScript     |
-+------------------+---------------------------------------------------+
-| ``stacker``      | `Troposphere`_/`Stacker`_                         |
-|                  | :ref:`module<runway-module>` identical the ``cfn``|
-|                  | sample but with the template written in python    |
-+------------------+---------------------------------------------------+
-| ``tf``           | `Terraform`_ :ref:`module<runway-module>`         |
-+------------------+---------------------------------------------------+
++--------------------+---------------------------------------------------+
+|       Name         |  Description                                      |
++====================+===================================================+
+| ``cdk-csharp``     | `AWS CDK`_ :ref:`module<runway-module>` using C#  |
++--------------------+---------------------------------------------------+
+| ``cdk-py``         | `AWS CDK`_ :ref:`module<runway-module>` using     |
+|                    | Python                                            |
++--------------------+---------------------------------------------------+
+| ``cdk-tsc``        | `AWS CDK`_ :ref:`module<runway-module>` using     |
+|                    | TypeScript                                        |
++--------------------+---------------------------------------------------+
+| ``cfn``            | `CloudFormation`_ :ref:`module<runway-module>`    |
+|                    | stack with S3 bucket & DDB table (perfect for     |
+|                    | storing Terraform backend state)                  |
++--------------------+---------------------------------------------------+
+| ``k8s-cfn-repo``   | `Kubernetes`_                                     |
+|                    | :ref:`module<runway-module>` EKS cluster & sample |
+|                    | app using CloudFormation                          |
++--------------------+---------------------------------------------------+
+| ``k8s-tf-repo``    | `Kubernetes`_                                     |
+|                    | :ref:`module<runway-module>` EKS cluster & sample |
+|                    | app using Terraform                               |
++--------------------+---------------------------------------------------+
+| ``sls-py``         | `Serverless Framework`_                           |
+|                    | :ref:`module<runway-module>` using Python         |
++--------------------+---------------------------------------------------+
+| ``sls-tsc``        | `Serverless Framework`_                           |
+|                    | :ref:`module<runway-module>` using TypeScript     |
++--------------------+---------------------------------------------------+
+| ``stacker``        | `Troposphere`_/`Stacker`_                         |
+|                    | :ref:`module<runway-module>` identical the ``cfn``|
+|                    | sample but with the template written in python    |
++--------------------+---------------------------------------------------+
+| ``static-angular`` | `StaticSite`_                                     |
+|                    | :ref:`module<runway-module>` of a StaticSite and  |
+|                    | the Angular framework                             |
++--------------------+---------------------------------------------------+
+| ``static-react``   | `StaticSite`_                                     |
+|                    | :ref:`module<runway-module>` of a StaticSite and  |
+|                    | the React framework                               |
++--------------------+---------------------------------------------------+
+| ``tf``             | `Terraform`_ :ref:`module<runway-module>`         |
++--------------------+---------------------------------------------------+
 
 .. rubric:: Example
 
@@ -82,6 +90,16 @@ def generate_tfstate_cfn_template():
                            None).to_json())
 
 
+def convert_gitignore(directory=''):
+    """Given a directory convert the _gitignore file within to a dotfile.
+
+    Keyword Args:
+        directory (str)
+    """
+    os.rename(os.path.join(directory, '_gitignore'),
+              os.path.join(directory, '.gitignore'))
+
+
 def generate_sample_module(module_dir):
     """Generate skeleton sample module."""
     if os.path.isdir(module_dir):
@@ -90,6 +108,56 @@ def generate_sample_module(module_dir):
                      module_dir)
         sys.exit(1)
     os.mkdir(module_dir)
+
+
+def generate_sample_static_angular(env_root):
+    """Generate a sample static Angular application.
+
+    Keyword Args:
+        env_root (string): The environment root directory path
+    """
+    repo_dir = os.path.join(env_root, 'static-angular')
+
+    if os.path.isdir(repo_dir):
+        LOGGER.error("Error generating sample repo -- directory %s "
+                     "already exists!",
+                     repo_dir)
+        sys.exit(1)
+
+    shutil.copytree(
+        os.path.join(ROOT, 'templates', 'static-angular'),
+        repo_dir
+    )
+    convert_gitignore(os.path.join(repo_dir, 'sample-app'))
+
+    LOGGER.info("Sample static Angular site repo created at %s",
+                repo_dir)
+    LOGGER.info('(see its README for setup and deployment instructions)')
+
+
+def generate_sample_static_react(env_root):
+    """Generate a sample static React application.
+
+    Keyword Args:
+        env_root (string): The environment root directory path
+    """
+    repo_dir = os.path.join(env_root, 'static-react')
+
+    if os.path.isdir(repo_dir):
+        LOGGER.error("Error generating sample repo -- directory %s "
+                     "already exists!",
+                     repo_dir)
+        sys.exit(1)
+
+    shutil.copytree(
+        os.path.join(ROOT, 'templates', 'static-react'),
+        repo_dir
+    )
+    convert_gitignore(os.path.join(repo_dir, 'sample-app'))
+
+    LOGGER.info("Sample static React site repo created at %s",
+                repo_dir)
+    LOGGER.info('(see its README for setup and deployment instructions)')
 
 
 def generate_sample_k8s_cfn_repo(env_root):
@@ -111,8 +179,7 @@ def generate_sample_k8s_cfn_repo(env_root):
                      'k8s-cfn-repo'),
         repo_dir
     )
-    os.rename(os.path.join(repo_dir, '_gitignore'),
-              os.path.join(repo_dir, '.gitignore'))
+    convert_gitignore(repo_dir)
 
     # Generate masters CFN templates from blueprints
     master_template_dir = os.path.join(repo_dir, 'k8s-master.cfn', 'templates')
@@ -172,8 +239,7 @@ def generate_sample_k8s_tf_repo(env_root):
                      'awscli.py'),
     )
 
-    os.rename(os.path.join(repo_dir, '_gitignore'),
-              os.path.join(repo_dir, '.gitignore'))
+    convert_gitignore(repo_dir)
 
     # Generate tfstate CFN template from blueprints
     tfstate_template_dir = os.path.join(repo_dir, 'tfstate.cfn', 'templates')
@@ -203,8 +269,7 @@ def generate_sample_sls_module(env_root, template_dir, module_dir=None):
                      template_dir),
         module_dir
     )
-    os.rename(os.path.join(module_dir, '_gitignore'),
-              os.path.join(module_dir, '.gitignore'))
+    convert_gitignore(module_dir)
     LOGGER.info("Sample Serverless module created at %s",
                 module_dir)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
@@ -405,10 +470,15 @@ class GenSample(RunwayCommand):
 
     SKIP_FIND_CONFIG = True
 
+    # noqa pylint: disable=too-many-branches
     def execute(self):
         """Run selected module generator."""
         if self._cli_arguments.get('<samplename>') == 'cfn':
             generate_sample_cfn_module(self.env_root)
+        elif self._cli_arguments.get('<samplename>') == 'static-angular':
+            generate_sample_static_angular(self.env_root)
+        elif self._cli_arguments.get('<samplename>') == 'static-react':
+            generate_sample_static_react(self.env_root)
         elif self._cli_arguments.get('<samplename>') == 'sls-py':
             generate_sample_sls_module(self.env_root, 'sls-py')
         elif self._cli_arguments.get('<samplename>') == 'sls-tsc':
@@ -429,7 +499,7 @@ class GenSample(RunwayCommand):
             generate_sample_cdk_cs_module(self.env_root)
         else:
             LOGGER.info("Available samples to generate:")
-            for i in ['cfn', 'sls-tsc', 'sls-py', 'tf', 'k8s-cfn-repo',
-                      'k8s-tf-repo', 'stacker', 'cdk-tsc', 'cdk-py',
-                      'cdk-csharp']:
+            for i in ['cfn', 'static-angular', 'static-react', 'sls-tsc',
+                      'sls-py', 'tf', 'k8s-cfn-repo', 'k8s-tf-repo',
+                      'stacker', 'cdk-tsc', 'cdk-py', 'cdk-csharp']:
                 print(i)

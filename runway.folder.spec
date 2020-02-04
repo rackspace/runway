@@ -17,7 +17,7 @@ if distutils.distutils_path.endswith('__init__.py'):
     distutils.distutils_path = os.path.dirname(distutils.distutils_path)
 
 CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)),  # noqa
-                        'src/runway')
+                        'runway')
 
 
 def get_submodules(package):
