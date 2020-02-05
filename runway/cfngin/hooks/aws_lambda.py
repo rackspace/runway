@@ -2,18 +2,28 @@
 import hashlib
 import logging
 import os
-import os.path
 import stat
+import subprocess
+import sys
 from io import BytesIO as StringIO
+from shutil import copyfile
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import botocore
+import docker as Docker  # noqa: N812
 import formic
 from six import string_types
 from troposphere.awslambda import Code
 
+from ..exceptions import (InvalidDockerizePipConfiguration, PipenvError,
+                          PipError)
 from ..session_cache import get_session
 from ..util import ensure_s3_bucket, get_config_directory
+
+if sys.version_info[0] < 3:
+    from backports import tempfile  # pylint: disable=E
+else:
+    import tempfile
 
 # mask to retrieve only UNIX file permissions from the external attributes
 # field of a ZIP entry.
@@ -161,6 +171,171 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
         LOGGER.debug('lambda: + %s', file_name)
 
     return _zip_files(files, root)
+
+
+def _handle_use_pipenv(package_root, dest_path, timeout=300):
+    """Create requirements file from Pipfile.
+
+    Args:
+        package_root (str): Base directory to generate requirements from.
+        dest_path (str): Where to output the requirements file.
+        timeout (int): Seconds to wait for process to complete.
+
+    Raises:
+        PipenvError: Non-zero exit code returned by pipenv process.
+
+    """
+    # TODO stream process output to stdout/stderr
+    LOGGER.info('Creating requirements.txt from Pipfile...')
+    req_path = os.path.join(dest_path, 'requirements.txt')
+    cmd = ['pipenv', 'lock', '--requirements', '--keep-outdated']
+    with open(req_path, 'w') as requirements:
+        pipenv_process = subprocess.Popen(cmd, cwd=package_root,
+                                          stdout=requirements,
+                                          stderr=subprocess.PIPE)
+        _stdout, stderr = pipenv_process.communicate(timeout=timeout)
+        if pipenv_process.returncode == 0:
+            return req_path
+        if int(sys.version[0]) > 2:
+            stderr = stderr.decode('UTF-8')
+        LOGGER.error('"%s" failed with the following output:\n%s',
+                     ' '.join(cmd), stderr)
+        raise PipenvError
+
+
+def dockerized_pip(work_dir, runtime=None, docker_file=None,
+                   docker_image=None, **_kwargs):
+    """Run pip with docker.
+
+    Args:
+        work_dir (str): Work directory for docker.
+        runtime (Optional[str]): Lambda runtime. Must provide one of
+            ``runtime``, ``docker_file``, or ``docker_image``.
+        docker_file (Optional[str]): Path to a Dockerfile to build an image.
+            Must provide one of ``runtime``, ``docker_file``, or
+            ``docker_image``.
+        docker_image (Optional[str]): Local or remote docker image to use.
+            Must provide one of ``runtime``, ``docker_file``, or
+            ``docker_image``.
+        kwargs (Any): Advanced options for docker. See source code to
+            determine what is supported.
+
+    Returns:
+        Tuple[str, str]: Content of the ZIP file as a byte string and
+        calculated hash of all the files
+
+    """
+    # TODO use kwargs to pass args to docker for advanced config
+    # TODO stream docker logs to stdout/stderr
+    if docker_file and docker_file and runtime:
+        raise InvalidDockerizePipConfiguration(
+            'only one of [docker_file, docker_file, runtime] can be specified'
+        )
+    docker = Docker.from_env()
+
+    if docker_file:
+        if not os.path.isfile(docker_file):
+            raise ValueError('could not find docker_file "%s"' % docker_file)
+        tmp_image, _build_logs = docker.images.build(
+            path=os.path.dirname(docker_file),
+            dockerfile=os.path.basename(docker_file)
+        )
+        docker_image = tmp_image.id
+
+    if runtime:
+        docker_image = 'lambci/lambda:build-%s' % runtime
+
+    if not docker_image:
+        raise InvalidDockerizePipConfiguration(
+            'one of [docker_file, docker_file, runtime] must be specified'
+        )
+
+    if sys.platform.lower() == 'win32':
+        work_dir = work_dir.replace('\\', '/')
+
+    work_dir_mount = Docker.types.Mount(target='/var/task',
+                                        source=work_dir,
+                                        type='bind')
+    pip_cmd = (
+        'python -m pip install -t /var/task -r /var/task/requirements.txt'
+    )
+
+    _ = docker.containers.run(image=docker_image,
+                              command=['/bin/sh', '-c', pip_cmd],
+                              auto_remove=True,
+                              mounts=[work_dir_mount])
+
+
+def _zip_package(package_root, includes, excludes, dockerize_pip=False,
+                 follow_symlinks=False, use_pipenv=False, **kwargs):
+    """Create zip file in memory with restored packages.
+
+    Args:
+        package_root (str): Base directory to copy files from.
+        includes (List[str]): Inclusion patterns. Only files  matching those
+            patterns will be included in the result.
+        excludes (List[str]): Exclusion patterns. Files matching those
+            patterns will be excluded from the result. Exclusions take
+            precedence over inclusions.
+        dockerize_pip (Union[bool, str]): Whether to use docker or under what
+            conditions docker will be used to run ``pip``.
+        follow_symlinks (bool): If true, symlinks will be included in the
+            resulting zip file.
+        use_pipenv (bool): Wether to use pipenv to export a Pipfile as
+            requirements.txt.
+        kwargs (Any): Advanced options for subprocess and docker. See source
+            code to determine what is supported.
+
+    Returns:
+        Tuple[str, str]: Content of the ZIP file as a byte string and
+        calculated hash of all the files
+
+    """
+    with tempfile.TemporaryDirectory(  # TODO add handling for cache not existing
+            prefix='cfngin', dir=os.path.expanduser('~/.runway_cache')
+    ) as tmpdir:
+        tmp_req = os.path.join(tmpdir, 'requirements.txt')
+        if use_pipenv:
+            _handle_use_pipenv(package_root, tmpdir,
+                               kwargs.get('pipenv_lock_timeout', 300))
+        for file_name in _find_files(package_root, includes, excludes,
+                                     follow_symlinks):
+            copyfile(os.path.join(package_root, file_name),
+                     os.path.join(tmpdir, file_name))
+
+        if not os.path.isfile(tmp_req):
+            LOGGER.error('Unable to find "requirements.txt". Ensure this file '
+                         'exists in the package directory and is not excluded '
+                         'or use the "use_pipenv" option to generate one from '
+                         'a Pipfile.')
+            raise ValueError('no such file "requirements.txt"')
+
+        if dockerize_pip:
+            if (
+                    isinstance(dockerize_pip, bool) or
+                    (dockerize_pip == 'non-linux' and
+                     sys.platform.lower() != 'linux')
+            ):
+                dockerized_pip(tmpdir, **kwargs)
+        else:
+            pip_cmd = ['python', '-m', 'pip', 'install',
+                       '-t', tmpdir,
+                       '-r', tmp_req]
+            pip_proc = subprocess.Popen(pip_cmd,
+                                        cwd=tmpdir, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+            _stdout, stderr = pip_proc.communicate(timeout=kwargs.get(
+                'pipenv_timeout', 900
+            ))
+            if pip_proc.returncode != 0:
+                if int(sys.version[0]) > 2:
+                    stderr = stderr.decode('UTF-8')
+                LOGGER.error('"%s" failed with the following output:\n%s',
+                             ' '.join(pip_cmd), stderr)
+                raise PipError
+
+        req_files = _find_files(tmpdir, '**', [], False)
+        return _zip_files(req_files, tmpdir)
 
 
 def _head_object(s3_conn, bucket, key):
@@ -322,10 +497,19 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
     # absolute path, which is exactly what we want.
     if not os.path.isabs(root):
         root = os.path.abspath(os.path.join(get_config_directory(), root))
-    zip_contents, content_hash = _zip_from_file_patterns(root,
-                                                         includes,
-                                                         excludes,
-                                                         follow_symlinks)
+    if options.get('dockerize_pip'):
+        zip_contents, content_hash = _zip_package(
+            root,
+            includes=includes,
+            excludes=excludes,
+            follow_symlinks=follow_symlinks,
+            **options
+        )
+    else:
+        zip_contents, content_hash = _zip_from_file_patterns(root,
+                                                             includes,
+                                                             excludes,
+                                                             follow_symlinks)
 
     return _upload_code(s3_conn, bucket, prefix, name, zip_contents,
                         content_hash, payload_acl)
@@ -481,6 +665,9 @@ def upload_lambda_functions(context, provider, **kwargs):
                     )
 
     """
+    # TODO document new options and include examples here and in docs/
+    # TODO add better handling for misconfiguration (e.g. forgetting function names)
+    # TODO support defining dockerize_pip options at the top level of args
     custom_bucket = kwargs.get('bucket')
     if not custom_bucket:
         bucket_name = context.bucket_name
