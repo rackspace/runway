@@ -1,0 +1,23 @@
+sys_path: ./
+namespace: testlambda
+stacker_bucket: "runwaylambdahooktestbucket"
+
+pre_build:
+  upload_lambda:
+    path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+    required: true
+    data_key: lambda
+    args:
+      functions:
+        testlambda:
+          path: ./nondockerize_src
+          include:
+            - '*.py'
+          exclude:
+            - '*.pyc'
+stacks:
+  - name: test-nondockerize
+    class_path: blueprints.lambda.BlueprintClass
+    variables:
+      Code: ${hook_data lambda::testlambda}
+      AppName: nondockerizepip

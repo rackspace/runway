@@ -1,0 +1,7 @@
+---
+deployments:
+  - name: test
+    regions:
+      - us-east-1
+    modules:
+      - ./
