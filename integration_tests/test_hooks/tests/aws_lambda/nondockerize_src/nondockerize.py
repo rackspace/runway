@@ -7,7 +7,10 @@ def handler(event, context):
     with urlopen(req) as url:
         f = url.read().decode('utf8')
         print(f)
+<<<<<<< HEAD
         return {
             'statusCode': 200,
             'body': 'success'
         }
+=======
+>>>>>>> added in lambda hook tests
