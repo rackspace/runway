@@ -292,8 +292,12 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
         calculated hash of all the files
 
     """
-    with tempfile.TemporaryDirectory(  # TODO add handling for cache not existing
-            prefix='cfngin', dir=os.path.expanduser('~/.runway_cache')
+    temp_root = os.path.join(os.path.expanduser('~'), '.runway_cache')
+    if not os.path.isdir(temp_root):
+        os.makedirs(temp_root)
+
+    with tempfile.TemporaryDirectory(
+            prefix='cfngin', dir=temp_root
     ) as tmpdir:
         tmp_req = os.path.join(tmpdir, 'requirements.txt')
         if use_pipenv:
