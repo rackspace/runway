@@ -1,7 +1,51 @@
 ---
-- Version: "2012-10-17"
+- Version: '2012-10-17'
   Statement:
     - Effect: Allow
       Action:
-        - '*'
-      Resource: '*'    
+        - 'cloudformation:CreateStack'
+        - 'cloudformation:DeleteStack'
+        - 'cloudformation:DescribeStacks'
+        - 'cloudformation:CreateChangeSet'
+        - 'cloudformation:DescribeChangeSet'
+        - 'cloudformation:DeleteChangeSet'
+      Resource: 'arn:aws:cloudformation:*:*:stack/testsuite-tf-state*'
+    - Effect: Allow
+      Action:
+        - 's3:HeadBucket'
+        - 's3:ListBucket'
+        - 's3:ListBucketVersions'
+        - 's3:GetBucketVersioning'
+        - 's3:GetObject'
+        - 's3:GetObjectVersion'
+        - 's3:CreateBucket'
+        - 's3:PutLifecycleConfiguration'
+        - 's3:PutBucketVersioning'
+        - 's3:PutObject'
+        - 's3:DeleteBucket'
+        - 's3:DeleteObjectVersion'
+        - 's3:DeleteObject'
+      Resource: 
+        - 'arn:aws:s3:::testsuite-tf-state'
+        - 'arn:aws:s3:::testsuite-tf-state/*'
+    - Effect: Allow
+      Action:
+        - 'dynamodb:CreateTable'
+        - 'dynamodb:DescribeTable'
+        - 'dynamodb:GetItem'
+        - 'dynamodb:DeleteTable'
+        - 'dynamodb:PutItem'
+        - 'dynamodb:DeleteItem'
+      Resource: 'arn:aws:dynamodb:*:*:table/testsuite-tf-state-TerraformLockTable*'
+    - Effect: Allow
+      Action:
+        - 'sqs:CreateQueue'
+        - 'sqs:DeleteQueue'
+        - 'sqs:SetQueueAttributes'
+        - 'sqs:ListQueues'
+        - 'sqs:GetQueueAttributes'
+        - 'sqs:GetQueueUrl'
+        - 'sqs:ListQueueTags'
+        - 'sqs:TagQueue'
+      Resource: 
+        - 'arn:aws:sqs:*:*:terraform*'

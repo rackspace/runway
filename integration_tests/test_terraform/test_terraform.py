@@ -33,7 +33,7 @@ class Terraform(IntegrationTest):
 
     def clean(self):
         """Clean up Terraform module directory."""
-        file_types = ('*.tf', '.terraform-version', '*.yaml', '*.yml', 'local_backend')
+        file_types = ('*.tf', '.terraform-version', '*.yml', 'local_backend')
         templates = []
         for file_type in file_types:
             templates.extend(glob.glob(os.path.join(self.tf_test_dir, file_type)))
