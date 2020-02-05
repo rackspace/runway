@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: TestTemplate
+
+
+Parameters:
+  Param1:
+    Type: String
+  Parm2:
+    Type: CommaDelimitedList
+    Default: default
+  WaitConditionCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 2
+
+
+Conditions:
+  DeployOne:
+    !Or [ !Equals [ !Ref WaitConditionCount, 1 ], !Equals [ !Ref WaitConditionCount, 2 ] ]
+  DeployTwo:
+    !Equals [ !Ref WaitConditionCount, 2 ]
+
+
+Resources:
+  Dummy1:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: DeployOne
+  Dummy2:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: DeployTwo
+
+
+Outputs:
+  DummyId:
+    Value: dummy-1234

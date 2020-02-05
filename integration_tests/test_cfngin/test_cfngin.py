@@ -10,9 +10,11 @@ class Cfngin(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, '[0-9][0-9]_**')
+        # import_tests(self.logger, self.tests_dir, '10_**')
         self.set_environment('dev')
         self.set_env_var('CI', '1')
-        tests = [test(self.logger) for test in Cfngin.__subclasses__()]
+        tests = [test(self.logger, self.environment)
+                 for test in Cfngin.__subclasses__()]
         if not tests:
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)

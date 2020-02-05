@@ -1,0 +1,11 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  vpc:
+    locked: true
+  bastion:
+    class_path: fixtures.mock_blueprints.Dummy
+    variables:
+      StringVariable: ${output vpc::DummyId}

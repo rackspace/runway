@@ -1,9 +1,10 @@
 """Integration test module."""
+import errno
 import os
 import shutil
 import subprocess
-from copy import deepcopy
 import sys
+from copy import deepcopy
 
 import yaml
 from send2trash import send2trash
@@ -28,10 +29,10 @@ class IntegrationTest(object):
 
     REQUIRED_FIXTURE_FILES = []
 
-    def __init__(self, logger):
+    def __init__(self, logger, env_vars=None):
         """Initialize base class."""
         self.logger = logger
-        self.environment = deepcopy(os.environ)
+        self.environment = deepcopy(env_vars or os.environ)
         self.runway_config_path = None
         # roundabout way to get the file path of a subclass
         self.working_dir = os.path.abspath(os.path.dirname(
@@ -42,6 +43,8 @@ class IntegrationTest(object):
 
     def copy_fixtures(self):
         """Copy fixtures to the root of the tests dir."""
+        self.logger.info('Fixtures defined for tests: %s',
+                         str(self.REQUIRED_FIXTURE_FILES))
         for fixture in self.REQUIRED_FIXTURE_FILES:
             src = os.path.join(self.fixture_dir, fixture)
             dest = os.path.join(self.working_dir, fixture)
@@ -54,7 +57,12 @@ class IntegrationTest(object):
         for fixture in self.REQUIRED_FIXTURE_FILES:
             fixture_path = os.path.join(self.working_dir, fixture)
             self.logger.info('Deleting "%s"...', fixture_path)
-            send2trash(fixture_path)
+            try:
+                send2trash(fixture_path)
+            except OSError as err:
+                if err.errno == errno.ENOENT or 'not found' in str(err):
+                    continue
+                raise
 
     def parse_config(self, path):
         """Read and parse yml."""
@@ -82,14 +90,13 @@ class IntegrationTest(object):
 
         """
         cmd = ['runway', action]
-        self.logger.info(os.getcwd())
         if tags:
             for tag in tags:
                 cmd.extend(['--tag', tag])
         cmd.extend(args)
         self.logger.info('Running command: %s', str(cmd))
         with change_dir(self.working_dir):
-            cmd_process = subprocess.Popen(cmd, env=env_vars,
+            cmd_process = subprocess.Popen(cmd, env=env_vars or self.environment,
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE)
             stdout, stderr = cmd_process.communicate(timeout=timeout)
