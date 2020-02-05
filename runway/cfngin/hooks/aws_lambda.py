@@ -260,6 +260,7 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
         'python -m pip install -t /var/task -r /var/task/requirements.txt'
     )
 
+    # TODO figure out what to do with the logs returned here or drop the var
     _ = docker.containers.run(image=docker_image,
                               command=['/bin/sh', '-c', pip_cmd],
                               auto_remove=True,
