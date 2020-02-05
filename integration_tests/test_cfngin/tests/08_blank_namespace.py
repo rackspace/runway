@@ -5,6 +5,8 @@ from os.path import basename
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
 
+FILE_BASENAME = '.'.join(basename(__file__).split('.')[:-1])
+
 
 class TestBlankNamespace(Cfngin):
     """Test CFNgin namespace as an empty string.
@@ -14,7 +16,7 @@ class TestBlankNamespace(Cfngin):
     """
 
     REQUIRED_FIXTURE_FILES = [
-        '.'.join(basename(__file__).split('.')[:-1]) + '.yaml'
+        FILE_BASENAME + '.yaml'
     ]
     TEST_NAME = __name__
 

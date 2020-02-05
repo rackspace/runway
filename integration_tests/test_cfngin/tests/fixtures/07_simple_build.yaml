@@ -3,7 +3,7 @@ stacker_bucket: ''
 sys_path: ./
 
 stacks:
-  vpc:
+  simple-build-vpc:
     class_path: fixtures.mock_blueprints.VPC
     stack_policy_path: fixtures/stack_policies/default.json
     variables:

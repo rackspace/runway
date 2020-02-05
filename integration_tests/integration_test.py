@@ -105,9 +105,8 @@ class IntegrationTest(object):
     def set_environment(self, env):
         """Set deploy environment."""
         self.logger.info('Setting "DEPLOY_ENVIRONMENT" to "%s"', env)
-        if not isinstance(env, dict):
-            env = {'DEPLOY_ENVIRONMENT': env}
-        self.environment.update(env)
+        if isinstance(env, str):
+            self.environment['DEPLOY_ENVIRONMENT'] = env
 
     def set_env_var(self, var_name, var):
         """Set an environment variable"""

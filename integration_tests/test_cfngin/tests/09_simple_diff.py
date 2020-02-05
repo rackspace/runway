@@ -5,6 +5,8 @@ from os.path import basename
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
 
+FILE_BASENAME = '.'.join(basename(__file__).split('.')[:-1])
+
 
 class TestSimpleDiff(Cfngin):
     """Test CFNgin diff.
@@ -14,12 +16,13 @@ class TestSimpleDiff(Cfngin):
     """
 
     REQUIRED_FIXTURE_FILES = [
-        '.'.join(basename(__file__).split('.')[:-1]) + '.yaml'
+        FILE_BASENAME + '.yaml'
     ]
     TEST_NAME = __name__
 
     def _build(self):
         """Execute and assert initial build."""
+        self.set_environment('dev')
         code, _stdout, _stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
 
@@ -47,5 +50,5 @@ class TestSimpleDiff(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')  # cleanup incase of failure
+        self.runway_cmd('destroy')
         self.cleanup_fixtures()

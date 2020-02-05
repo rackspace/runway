@@ -20,6 +20,7 @@ class TestRawTemplateDiff(Cfngin):
 
     def _build(self):
         """Execute and assert initial build."""
+        self.set_environment('dev')
         code, _stdout, _stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
 
@@ -47,5 +48,5 @@ class TestRawTemplateDiff(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')  # cleanup incase of failure
+        self.runway_cmd('destroy')
         self.cleanup_fixtures()

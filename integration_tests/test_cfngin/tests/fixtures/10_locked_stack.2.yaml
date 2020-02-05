@@ -3,9 +3,9 @@ stacker_bucket: ''
 sys_path: ./
 
 stacks:
-  vpc:
+  locked-stack-vpc:
     locked: true
-  bastion:
+  locked-stack-bastion:
     class_path: fixtures.mock_blueprints.Dummy
     variables:
-      StringVariable: ${output vpc::DummyId}
+      StringVariable: ${output locked-stack-vpc::DummyId}

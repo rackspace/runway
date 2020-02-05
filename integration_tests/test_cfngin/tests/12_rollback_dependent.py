@@ -28,7 +28,7 @@ class TestRollbackWithDependent(Cfngin):
         assert code != 0, 'exit code should be non-zero'
         expected_lines = [
             'dependent-rollback-parent: submitted (creating new stack)',
-            'dependent-rollback-parent: failed (rolled back new stack)',
+            'dependent-rollback-parent: failed (creating new stack)',
             'dependent-rollback-child: failed (dependency has failed)',
             'The following steps failed: dependent-rollback-parent, dependent-rollback-child'
         ]

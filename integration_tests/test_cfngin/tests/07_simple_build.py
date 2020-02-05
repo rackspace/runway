@@ -5,6 +5,8 @@ from os.path import basename
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
 
+FILE_BASENAME = '.'.join(basename(__file__).split('.')[:-1])
+
 
 class TestSimpleBuild(Cfngin):
     """Test CFNgin simple build.
@@ -14,7 +16,7 @@ class TestSimpleBuild(Cfngin):
     """
 
     REQUIRED_FIXTURE_FILES = [
-        '.'.join(basename(__file__).split('.')[:-1]) + '.yaml'
+        FILE_BASENAME + '.yaml'
     ]
     TEST_NAME = __name__
 
@@ -24,11 +26,11 @@ class TestSimpleBuild(Cfngin):
         assert code == 0, 'exit code should be zero'
         expected_lines = [
             'Using default AWS provider mode',
-            'vpc: submitted (creating new stack)',
-            'vpc: complete (creating new stack)'
+            'simple-build-vpc: submitted (creating new stack)',
+            'simple-build-vpc: complete (creating new stack)'
         ]
         for line in expected_lines:
-            assert line in stderr, '"{line}" missing from output'
+            assert line in stderr, f'"{line}" missing from output'
 
     def _update_no_change(self):
         """Execute and assert second build with no changes."""
@@ -36,18 +38,18 @@ class TestSimpleBuild(Cfngin):
         assert code == 0, 'exit code should be zero'
         expected_lines = [
             'Using default AWS provider mode',
-            'vpc: skipped (nochange)'
+            'simple-build-vpc: skipped (nochange)'
         ]
         for line in expected_lines:
-            assert line in stderr, '"{line}" missing from output'
+            assert line in stderr, f'"{line}" missing from output'
 
     def _destroy(self):
         """Execute and assert destroy."""
         code, _stdout, stderr = self.runway_cmd('destroy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'vpc: submitted (submitted for destruction)',
-            'vpc: complete (stack destroyed)'
+            'simple-build-vpc: submitted (submitted for destruction)',
+            'simple-build-vpc: complete (stack destroyed)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'

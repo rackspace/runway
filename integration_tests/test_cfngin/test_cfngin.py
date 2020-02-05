@@ -1,5 +1,4 @@
 """Integration tests for runway.cfngin."""
-
 from integration_tests.integration_test import IntegrationTest
 from integration_tests.util import execute_tests, import_tests
 
@@ -10,7 +9,6 @@ class Cfngin(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, '[0-9][0-9]_**')
-        # import_tests(self.logger, self.tests_dir, '10_**')
         self.set_environment('dev')
         self.set_env_var('CI', '1')
         tests = [test(self.logger, self.environment)

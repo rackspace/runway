@@ -10,7 +10,7 @@ deployments:
       - path: ./  # used to pass different vars to a stack. just change the env.
         environments:
           dev2:
-            CFNGIN_NAMESPACE: runway-tests
+            CFNGIN_NAMESPACE: runway-tests-cfngin
             diff_inst_type: m5.xlarge
             diff_wait_condition: 2
     regions:
