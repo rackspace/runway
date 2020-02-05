@@ -1,18 +1,17 @@
 """Test Runway config classes."""
+import os
 from copy import deepcopy
 from tempfile import NamedTemporaryFile
-import os
 
 import pytest
-from stacker.exceptions import UnresolvedVariable
 import yaml
 
-from runway.config import (DeploymentDefinition, ModuleDefinition,
-                           VariablesDefinition)
+from runway.cfngin.exceptions import UnresolvedVariable
+from runway.config import DeploymentDefinition, ModuleDefinition
 # tries to test the imported class unless using "as"
 from runway.config import TestDefinition as ConfigTestDefinition
+from runway.config import VariablesDefinition
 from runway.util import MutableMap
-
 
 YAML_FIXTURES = ['config.runway.yml', 'config.runway.variables.yml']
 ENV_VARS = {
@@ -199,4 +198,3 @@ class TestVariablesDefinition(object):
         assert caplog.records[0].msg == ('Could not find %s in the current '
                                          'directory. Continuing without a '
                                          'variables file.')
-

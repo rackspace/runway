@@ -49,14 +49,13 @@ Common Arguments
         comma_list: ${var my_list::default=undefined, transform=str}
 
 """
-from typing import (Any, Dict, Tuple,  # pylint: disable=unused-import
-                    Union, TYPE_CHECKING)
-
 # python2 supported pylint is unable to load this when in a venv
-from distutils.util import strtobool  # pylint: disable=no-name-in-module,import-error
+from distutils.util import strtobool  # pylint: disable=E
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
+
 from six import string_types
 
-from stacker.util import read_value_from_path
+from ...cfngin.util import read_value_from_path
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import

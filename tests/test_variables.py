@@ -1,7 +1,7 @@
 """Tests for variables."""
 from unittest import TestCase
 
-from stacker.exceptions import UnresolvedVariable
+from runway.cfngin.exceptions import UnresolvedVariable
 
 from runway.variables import Variable
 from runway.util import MutableMap

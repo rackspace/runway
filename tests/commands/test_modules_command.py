@@ -1,15 +1,15 @@
 """Tests runway/commands/modules_command.py."""
-from os import path
+import os
 import unittest
 from copy import deepcopy
-from mock import patch
-import yaml
+from os import path
 
+import yaml
+from mock import patch
 from moto import mock_sts
 
-from runway.commands.modules_command import (
-    select_modules_to_run, validate_environment
-)
+from runway.commands.modules_command import (select_modules_to_run,
+                                             validate_environment)
 
 
 def module_tag_config():
@@ -22,14 +22,14 @@ def module_tag_config():
         return yaml.safe_load(stream)
 
 
-    """Test runway/commands/modules_command.py."""
 class ModulesCommandTestCase(unittest.TestCase):
+    """Test runway/commands/modules_command.py."""
 
     tag_yml = module_tag_config()
 
     def test_select_modules_to_run_tag_test_app(self):
         """tag=[app:test-app] should return 2 modules."""
-        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
+        config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['app:test-app']
 
         result = [
@@ -44,7 +44,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_tag_iac(self):
         """tag=[tier:iac] should return 2 modules."""
-        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
+        config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['tier:iac']
 
         result = [
@@ -59,7 +59,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_two_tags(self):
         """tag=[tier:iac, app:test-app] should return 1 module."""
-        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
+        config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['tier:iac', 'app:test-app']
         result = [
             select_modules_to_run(deployment, tags)
@@ -72,7 +72,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_no_tags(self):
         """tag=[] should request input."""
-        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
+        config = deepcopy(ModulesCommandTestCase.tag_yml)
         user_input = ['1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
@@ -84,7 +84,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_no_tags_ci(self):
         """tag=[], ci=true should not request input and return everything."""
-        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
+        config = deepcopy(ModulesCommandTestCase.tag_yml)
         result = [
             select_modules_to_run(deployment, [], ci='true')
             for deployment in config['deployments']
@@ -93,7 +93,7 @@ class ModulesCommandTestCase(unittest.TestCase):
 
     def test_select_modules_to_run_destroy(self):
         """command=destroy should only prompt with no tag of ci if one module."""
-        config = deepcopy(SelectModulesToRunTestCase.tag_yml)
+        config = deepcopy(ModulesCommandTestCase.tag_yml)
         user_input = ['y', '1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
@@ -161,4 +161,3 @@ class TestValidateEnvironment(object):
         assert not validate_environment('test_module',
                                         self.MOCK_ACCOUNT_ID + '/us-east-2',
                                         os.environ)
-
