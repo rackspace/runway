@@ -1,7 +1,7 @@
 """Runway variables."""
 import logging
 import re
-from typing import (TYPE_CHECKING,  # noqa: F401 pylint: disable=unused-import
+from typing import (TYPE_CHECKING,  # noqa: F401 pylint: disable=W
                     Any, Dict, Iterable, Iterator, List, Optional, Set, Type,
                     Union, cast)
 
@@ -557,12 +557,14 @@ class VariableValueConcatenation(VariableValue, list):
 class VariableValueLookup(VariableValue):
     """A lookup variable value."""
 
+    # flake8/pylint fight over the indent here on python2
+    # TODO remove "disable=bad-continuation" when dropping python2
     def __init__(self,
                  lookup_name,  # type: VariableValueLiteral
                  lookup_data,  # type: VariableValue
                  handler=None,  # type: Optional[Type[LookupHandler]]
                  variable_type='cfngin'  # type: str
-                 ):
+                 ):  # pylint: disable=bad-continuation
         # type: (...) -> None
         """Initialize class.
 

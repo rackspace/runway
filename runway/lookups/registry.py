@@ -6,8 +6,7 @@ from six import string_types
 from runway.util import load_object_from_string
 
 from .handlers import env, var
-from .handlers.base import \
-    LookupHandler  # noqa: F401 pylint: disable=unused-import
+from .handlers.base import LookupHandler  # noqa: F401 pylint: disable=W
 
 RUNWAY_LOOKUP_HANDLERS = {}
 
