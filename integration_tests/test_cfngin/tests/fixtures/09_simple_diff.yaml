@@ -1,0 +1,10 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  simple-diff-vpc:
+    class_path: fixtures.mock_blueprints.DiffTester
+    variables:
+      InstanceType: ${diff_inst_type}
+      WaitConditionCount: ${diff_wait_condition}

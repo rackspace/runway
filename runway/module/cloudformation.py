@@ -150,7 +150,7 @@ class CloudFormation(RunwayModule):
                     if command == 'destroy':
                         sorted_files = reversed(sorted_files)
                     for name in sorted_files:
-                        if re.match(r"runway(\..*)?\.yml", name) or (
+                        if re.match(r"runway(\..*)?\.(yml|yaml)", name) or (
                                 name.startswith('.') or
                                 name == 'docker-compose.yml'):
                             # Hidden files (e.g. .gitlab-ci.yml), Runway configs,
