@@ -454,6 +454,7 @@ class ThreadedWalker(object):  # pylint: disable=too-few-public-methods
         # Blocks until all of the given nodes have completed execution (whether
         # successfully, or errored). Returns True if all nodes returned True.
         def wait_for(nodes):
+            """Wait for nodes."""
             for node in nodes:
                 thread = threads[node]
                 while thread.is_alive():
@@ -464,6 +465,7 @@ class ThreadedWalker(object):  # pylint: disable=too-few-public-methods
         # nodes dependencies have executed.
         for node in nodes:
             def fn(node_, deps):
+                """Function."""
                 if deps:
                     LOGGER.debug("%s waiting for %s to complete", node_,
                                  ", ".join(deps))

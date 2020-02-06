@@ -1,5 +1,5 @@
 """AWS SSM Parameter Store lookup."""
-# pylint: disable=arguments-differ
+# pylint: disable=arguments-differ,unused-argument
 from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 from ...session_cache import get_session

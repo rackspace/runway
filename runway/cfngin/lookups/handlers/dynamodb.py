@@ -1,5 +1,5 @@
 """DynamoDB lookup."""
-# pylint: disable=arguments-differ
+# pylint: disable=arguments-differ,unused-argument
 import re
 
 from botocore.exceptions import ClientError

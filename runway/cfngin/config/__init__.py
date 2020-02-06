@@ -16,7 +16,7 @@ from six import text_type
 from .. import exceptions
 from ..lookups import register_lookup_handler
 from ..util import SourceProcessor, merge_map, yaml_to_ordered_dict
-from .translators import *  # noqa
+from .translators import *  # noqa pylint: disable=wildcard-import
 
 LOGGER = logging.getLogger(__name__)
 

@@ -74,6 +74,7 @@ def plan(description, stack_action, context, tail=None, reverse=False):
 
     """
     def target_fn(*_args, **_kwargs):
+        """Target function."""
         return COMPLETE
 
     steps = [
