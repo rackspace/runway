@@ -7,3 +7,7 @@ def handler(event, context):
     with urlopen(req) as url:
         f = url.read().decode('utf8')
         print(f)
+        return {
+            'statusCode': 200,
+            'body': 'success'
+        }
