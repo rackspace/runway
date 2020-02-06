@@ -1,5 +1,4 @@
 """Register test handlers."""
-# modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
 from typing import Type, Union  # pylint: disable=unused-import
 
 from six import string_types
@@ -10,7 +9,7 @@ from .handlers import env, var
 from .handlers.base import \
     LookupHandler  # noqa: F401 pylint: disable=unused-import
 
-LOOKUP_HANDLERS = {}
+RUNWAY_LOOKUP_HANDLERS = {}
 
 
 def register_lookup_handler(lookup_type, handler_or_path):
@@ -25,7 +24,7 @@ def register_lookup_handler(lookup_type, handler_or_path):
     handler = handler_or_path
     if isinstance(handler_or_path, string_types):
         handler = load_object_from_string(handler_or_path)
-    LOOKUP_HANDLERS[lookup_type] = handler
+    RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
 
 
 def unregister_lookup_handler(lookup_type):
@@ -39,7 +38,7 @@ def unregister_lookup_handler(lookup_type):
         lookup_type: Name of the lookup type to unregister
 
     """
-    LOOKUP_HANDLERS.pop(lookup_type, None)
+    RUNWAY_LOOKUP_HANDLERS.pop(lookup_type, None)
 
 
 register_lookup_handler(env.TYPE_NAME, env.EnvLookup)

@@ -1,5 +1,6 @@
 """Lookup to provide a default value."""
-from . import LookupHandler
+# pylint: disable=arguments-differ,unused-argument
+from ....lookups.handlers.base import LookupHandler
 
 
 TYPE_NAME = "default"
@@ -9,7 +10,7 @@ class DefaultLookup(LookupHandler):
     """Lookup to provide a default value."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Use a value from the environment or fall back to a default value.
 
         Allows defaults to be set at the config file level.

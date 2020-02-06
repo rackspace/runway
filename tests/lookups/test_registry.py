@@ -1,7 +1,7 @@
 """Tests for lookup registry and common lookup functionality."""
 from unittest import TestCase
 
-from runway.lookups.registry import LOOKUP_HANDLERS
+from runway.lookups.registry import RUNWAY_LOOKUP_HANDLERS
 from runway.util import MutableMap
 
 VALUES = {
@@ -24,7 +24,7 @@ class TestCommonLookupFunctionality(TestCase):
 
     def test_handle_default(self):
         """Verify default value is handled by lookups."""
-        for name, lookup in LOOKUP_HANDLERS.items():
+        for name, lookup in RUNWAY_LOOKUP_HANDLERS.items():
             query = 'NOT_VALID::default=default value'
             result = lookup.handle(query, context=CONTEXT,
                                    variables=VARIABLES)
@@ -35,7 +35,7 @@ class TestCommonLookupFunctionality(TestCase):
 
     def test_handle_transform(self):
         """Verify transform is handled by lookup."""
-        for name, lookup in LOOKUP_HANDLERS.items():
+        for name, lookup in RUNWAY_LOOKUP_HANDLERS.items():
             query = 'NOT_VALID::default=false, transform=bool'
             result = lookup.handle(query, context=CONTEXT,
                                    variables=VARIABLES)

@@ -1,9 +1,9 @@
 """AWS CloudFormation Output lookup."""
-# pylint: disable=unused-argument
-import re
+# pylint: disable=arguments-differ,unused-argument
 from collections import namedtuple
+import re
 
-from . import LookupHandler
+from ....lookups.handlers.base import LookupHandler
 
 TYPE_NAME = "output"
 
@@ -14,7 +14,7 @@ class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Fetch an output from the designated stack.
 
         Args:

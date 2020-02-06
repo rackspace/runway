@@ -331,13 +331,14 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
         """
         self.name = name
-        self._path = Variable(name + '.path', path)
-        self._class_path = Variable(name + '.class_path', class_path)
+        self._path = Variable(name + '.path', path, 'runway')
+        self._class_path = Variable(name + '.class_path', class_path, 'runway')
         self._environments = Variable(name + '.environments',
-                                      environments or {})
-        self._parameters = Variable(name + '.parameters', parameters or {})
-        self._env_vars = Variable(name + '.env_vars', env_vars or {})
-        self._options = Variable(name + '.options', options or {})
+                                      environments or {}, 'runway')
+        self._parameters = Variable(name + '.parameters', parameters or {},
+                                    'runway')
+        self._env_vars = Variable(name + '.env_vars', env_vars or {}, 'runway')
+        self._options = Variable(name + '.options', options or {}, 'runway')
         self.tags = tags or {}
         self.child_modules = child_modules or []
 
@@ -588,25 +589,27 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self._account_alias = Variable(
             self.name + '.account_alias', deployment.pop(
                 'account_alias', deployment.pop('account-alias', {})
-            )
+            ), 'runway'
         )  # type: Variable
         self._account_id = Variable(self.name + '.account_id', deployment.pop(
             'account_id', deployment.pop('account-id', {})
-        ))  # type: Variable
+        ), 'runway')  # type: Variable
         self._assume_role = Variable(
             self.name + '.assume_role', deployment.pop(
                 'assume_role', deployment.pop('assume-role', {})
-            )
+            ), 'runway'
         )  # type: Variable
         self._environments = Variable(
-            self.name + '.environments', deployment.pop('environments', {})
+            self.name + '.environments', deployment.pop('environments', {}),
+            'runway'
         )  # type: Variable
         self._parameters = Variable(
-            self.name + '.parameters', deployment.pop('parameters', {})
+            self.name + '.parameters', deployment.pop('parameters', {}),
+            'runway'
         )  # type: Variable
         self._env_vars = Variable(self.name + '.env_vars', deployment.pop(
             'env_vars', deployment.pop('env-vars', {})
-        ))  # type: Variable
+        ), 'runway')  # type: Variable
         if deployment.pop('current_dir', False):
             # Deprecated in 1.0 (late 2019). Retain for at least a major version.
             LOGGER.warning('DEPRECATION WARNING: The "current_dir" option has '
@@ -625,7 +628,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self._module_options = Variable(
             self.name + '.module_options', deployment.pop(
                 'module_options', deployment.pop('module-options', {})
-            )
+            ), 'runway'
         )  # type: Variable
 
         # should add variable resolve here to support parallel region
@@ -641,16 +644,18 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             sys.exit(1)
         if isinstance(regions, dict) and regions.get('parallel'):
             self._parallel_regions = Variable(
-                self.name + '.parallel_regions', regions.pop('parallel')
+                self.name + '.parallel_regions', regions.pop('parallel'),
+                'runway'
             )  # type: Variable
             self._regions = Variable(self.name + '.regions',
-                                     [])  # type: Variable
+                                     [], 'runway')  # type: Variable
         else:
             self._regions = Variable(self.name + '.regions',
-                                     regions)
+                                     regions, 'runway')
             self._parallel_regions = Variable(
                 self.name + '.parallel_regions',
-                deployment.pop('parallel_regions', [])
+                deployment.pop('parallel_regions', []),
+                'runway'
             )
 
         if deployment:
@@ -808,8 +813,8 @@ class TestDefinition(ConfigComponent):
         """
         self.name = name
         self.type = test_type
-        self._args = Variable(self.name + '.args', args or {})
-        self._required = Variable(self.name + '.required', required)
+        self._args = Variable(self.name + '.args', args or {}, 'runway')
+        self._required = Variable(self.name + '.required', required, 'runway')
 
     @property
     def args(self):

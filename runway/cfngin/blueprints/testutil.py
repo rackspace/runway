@@ -7,9 +7,9 @@ from glob import glob
 
 from runway.util import load_object_from_string
 
+from ...variables import Variable
 from ..config import parse as parse_config
 from ..context import Context
-from ..variables import Variable
 
 
 def diff(first, second):
@@ -149,7 +149,8 @@ class YamlDirTestGenerator(object):
                                   environment={'environment': 'test'})
 
                 configvars = self.stack.variables or {}
-                variables = [Variable(k, v) for k, v in configvars.iteritems()]
+                variables = [Variable(k, v, 'cfngin')
+                             for k, v in configvars.iteritems()]
 
                 blueprint_class = load_object_from_string(
                     self.stack.class_path)

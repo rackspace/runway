@@ -2,8 +2,8 @@
 import logging
 import re
 from typing import (TYPE_CHECKING,  # noqa: F401 pylint: disable=unused-import
-                    Any, Dict, Iterable, Iterator, List, Optional, Type, Union,
-                    cast)
+                    Any, Dict, Iterable, Iterator, List, Optional, Set, Type,
+                    Union, cast)
 
 from six import string_types
 
@@ -11,9 +11,10 @@ from .cfngin.exceptions import (FailedLookup, FailedVariableLookup,
                                 InvalidLookupCombination,
                                 InvalidLookupConcatenation, UnknownLookupType,
                                 UnresolvedVariable, UnresolvedVariableValue)
+from .cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
 from .lookups.handlers.base import \
     LookupHandler  # noqa: F401 pylint: disable=unused-import
-from .lookups.registry import LOOKUP_HANDLERS
+from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
@@ -24,11 +25,25 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger('runway')
 
 
+def resolve_variables(variables, context, provider):
+    """Given a list of variables, resolve all of them.
+
+    Args:
+        variables (List[:class:`Variable`]): List of variables.
+        context (:class:`runway.cfngin.context.Context`): CFNgin context.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Subclass
+            of the base provider.
+
+    """
+    for variable in variables:
+        variable.resolve(context, provider)
+
+
 class Variable(object):
     """Represents a variable provided to a Runway directive."""
 
-    def __init__(self, name, value):
-        # type: (str, Any) -> None
+    def __init__(self, name, value, variable_type='cfngin'):
+        # type: (str, Any, str) -> None
         """Initialize class.
 
         Args:
@@ -39,7 +54,18 @@ class Variable(object):
         LOGGER.debug('Initalized variable "%s".', name)
         self.name = name
         self._raw_value = value
-        self._value = VariableValue.parse(value)
+        self._value = VariableValue.parse(value, variable_type)
+
+    @property
+    def dependencies(self):
+        # () -> Set[str]
+        """Stack names that this variable depends on.
+
+        Returns:
+            Set[str]: Stack names that this variable depends on.
+
+        """
+        return self._value.dependencies
 
     @property
     def resolved(self):
@@ -62,17 +88,19 @@ class Variable(object):
         except InvalidLookupConcatenation as err:
             raise InvalidLookupCombination(err.lookup, err.lookups, self)
 
-    def resolve(self, context, variables=None, **kwargs):
-        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
-        """Recursively resolve any lookups with the Variable.
+    def resolve(self, context, provider=None, variables=None, **kwargs):
+        # type: (Any, Any, 'Optional[VariablesDefinition]', Any) -> None
+        """Resolve the variable value.
 
         Args:
             context: The current context object.
+            provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
         """
         try:
-            self._value.resolve(context, variables=variables, **kwargs)
+            self._value.resolve(context, provider=provider,
+                                variables=variables, **kwargs)
         except FailedLookup as err:
             raise FailedVariableLookup(self.name, err.lookup, err.error)
 
@@ -95,6 +123,12 @@ class Variable(object):
 
 class VariableValue(object):
     """Syntax tree base class to parse variable values."""
+
+    @property
+    def dependencies(self):
+        # () -> Set[]
+        """Stack names that this variable depends on."""
+        return set()
 
     @property
     def resolved(self):
@@ -129,21 +163,20 @@ class VariableValue(object):
         """
         raise NotImplementedError
 
-    def resolve(self, context, variables=None, **kwargs):
-        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
+    def resolve(self, context, provider=None, variables=None, **kwargs):
+        # type: (Any, Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
-
-        Should be implimented in subclasses.
 
         Args:
             context: The current context object.
+            provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
         """
 
     @classmethod
-    def parse(cls, input_object):
-        # type: (Any) -> Any
+    def parse(cls, input_object, variable_type='cfngin'):
+        # type: (Any, str) -> Any
         """Parse complex variable structures using type appropriate subclasses.
 
         Args:
@@ -151,9 +184,9 @@ class VariableValue(object):
 
         """
         if isinstance(input_object, list):
-            return VariableValueList.parse(input_object)
+            return VariableValueList.parse(input_object, variable_type)
         if isinstance(input_object, dict):
-            return VariableValueDict.parse(input_object)
+            return VariableValueDict.parse(input_object, variable_type)
         if not isinstance(input_object, string_types):
             return VariableValueLiteral(input_object)
 
@@ -189,6 +222,7 @@ class VariableValue(object):
                 lookup = VariableValueLookup(
                     lookup_name=tokens[cast(int, last_open) + 1],
                     lookup_data=lookup_data,
+                    variable_type=variable_type
                 )
                 tokens[last_open:(next_close + 1)] = [lookup]
             else:
@@ -255,6 +289,15 @@ class VariableValueList(VariableValue, list):
     """A list variable value."""
 
     @property
+    def dependencies(self):
+        # () -> Set[str]
+        """Stack names that this variable depends on."""
+        deps = set()
+        for item in self:
+            deps.update(item.dependencies)
+        return deps
+
+    @property
     def resolved(self):
         # type: () -> bool
         """Use to check if the variable value has been resolved."""
@@ -286,12 +329,13 @@ class VariableValueList(VariableValue, list):
             for item in self
         ]
 
-    def resolve(self, context, variables=None, **kwargs):
-        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
+    def resolve(self, context, provider=None, variables=None, **kwargs):
+        # type: (Any, Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
         """
@@ -299,8 +343,8 @@ class VariableValueList(VariableValue, list):
             item.resolve(context, variables=variables, **kwargs)
 
     @classmethod
-    def parse(cls, input_object):
-        # type: (Any) -> VariableValueList
+    def parse(cls, input_object, variable_type='cfngin'):
+        # type: (Any, str) -> VariableValueList
         """Parse list variable structure.
 
         Args:
@@ -308,7 +352,7 @@ class VariableValueList(VariableValue, list):
 
         """
         acc = [
-            VariableValue.parse(obj)
+            VariableValue.parse(obj, variable_type)
             for obj in input_object
         ]
         return cls(acc)
@@ -327,6 +371,15 @@ class VariableValueList(VariableValue, list):
 
 class VariableValueDict(VariableValue, dict):
     """A dict variable value."""
+
+    @property
+    def dependencies(self):
+        # () -> Set[str]
+        """Stack names that this variable depends on."""
+        deps = set()
+        for item in self:
+            deps.update(item.dependencies)
+        return deps
 
     @property
     def resolved(self):
@@ -360,12 +413,13 @@ class VariableValueDict(VariableValue, dict):
             for k, v in self.items()
         }
 
-    def resolve(self, context, variables=None, **kwargs):
-        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
+    def resolve(self, context, provider=None, variables=None, **kwargs):
+        # type: (Any, Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
         """
@@ -373,8 +427,8 @@ class VariableValueDict(VariableValue, dict):
             item.resolve(context, variables=variables, **kwargs)
 
     @classmethod
-    def parse(cls, input_object):
-        # type: (Any) -> VariableValueDict
+    def parse(cls, input_object, variable_type='cfngin'):
+        # type: (Any, str) -> VariableValueDict
         """Parse list variable structure.
 
         Args:
@@ -382,7 +436,7 @@ class VariableValueDict(VariableValue, dict):
 
         """
         acc = {
-            k: VariableValue.parse(v)
+            k: VariableValue.parse(v, variable_type)
             for k, v in input_object.items()
         }
         return cls(acc)
@@ -402,6 +456,14 @@ class VariableValueDict(VariableValue, dict):
 
 class VariableValueConcatenation(VariableValue, list):
     """A concatinated variable value."""
+
+    @property
+    def dependencies(self):
+        """Stack names that this variable depends on."""
+        deps = set()
+        for item in self:
+            deps.update(item.dependencies)
+        return deps
 
     @property
     def resolved(self):
@@ -466,12 +528,13 @@ class VariableValueConcatenation(VariableValue, list):
             values.append(resolved_value)
         return ''.join(values)
 
-    def resolve(self, context, variables=None, **kwargs):
-        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
+    def resolve(self, context, provider=None, variables=None, **kwargs):
+        # type: (Any, Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
         """
@@ -494,8 +557,13 @@ class VariableValueConcatenation(VariableValue, list):
 class VariableValueLookup(VariableValue):
     """A lookup variable value."""
 
-    def __init__(self, lookup_name, lookup_data, handler=None):
-        # type: (VariableValueLiteral, VariableValue, Type[LookupHandler]) -> None
+    def __init__(self,
+                 lookup_name,  # type: VariableValueLiteral
+                 lookup_data,  # type: VariableValue
+                 handler=None,  # type: Optional[Type[LookupHandler]]
+                 variable_type='cfngin'  # type: str
+                 ):
+        # type: (...) -> None
         """Initialize class.
 
         Args:
@@ -515,10 +583,31 @@ class VariableValueLookup(VariableValue):
         if handler is None:
             lookup_name_resolved = lookup_name.value
             try:
-                handler = cast(Type[LookupHandler], LOOKUP_HANDLERS[lookup_name_resolved])
+                if variable_type == 'cfngin':
+                    handler = cast(
+                        Type[LookupHandler],
+                        CFNGIN_LOOKUP_HANDLERS[lookup_name_resolved]
+                    )
+                elif variable_type == 'runway':
+                    handler = cast(
+                        Type[LookupHandler],
+                        RUNWAY_LOOKUP_HANDLERS[lookup_name_resolved]
+                    )
+                else:
+                    raise ValueError(
+                        'Variable type must be one of "cfngin" or "runway"'
+                    )
             except KeyError:
                 raise UnknownLookupType(lookup_name_resolved)
         self.handler = handler
+
+    @property
+    def dependencies(self):
+        # () -> Set[str]
+        """Stack names that this variable depends on."""
+        if isinstance(self.handler, type):
+            return self.handler.dependencies(self.lookup_data)
+        return set()
 
     @property
     def resolved(self):
@@ -535,10 +624,7 @@ class VariableValueLookup(VariableValue):
         flatten nested concatenations.
 
         """
-        return VariableValueLookup(
-            lookup_name=self.lookup_name,
-            lookup_data=self.lookup_data.simplified,
-        )
+        return self
 
     @property
     def value(self):
@@ -548,23 +634,34 @@ class VariableValueLookup(VariableValue):
             return self._value
         raise UnresolvedVariableValue(self)
 
-    def resolve(self, context, variables=None, **kwargs):
-        # type: (Any, 'Optional[VariablesDefinition]', Any) -> None
+    def resolve(self, context, provider=None, variables=None, **kwargs):
+        # type: (Any, Any, 'Optional[VariablesDefinition]', Any) -> None
         """Resolve the variable value.
 
         Args:
             context: The current context object.
+            provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
         """
         self.lookup_data.resolve(context, variables=variables, **kwargs)
         try:
-            result = self.handler.handle(
-                value=self.lookup_data.value,
-                context=context,
-                variables=variables,
-                **kwargs
-            )
+            if isinstance(self.handler, type):
+                result = self.handler.handle(
+                    value=self.lookup_data.value,
+                    context=context,
+                    provider=provider,
+                    variables=variables,
+                    **kwargs
+                )
+            else:
+                # TODO remove this during the next major release
+                # handle legacy lookup style
+                result = self.handler(
+                    value=self.lookup_data.value,
+                    context=context,
+                    provider=provider
+                )
             self._resolve(result)
         except Exception as err:
             raise FailedLookup(self, err)

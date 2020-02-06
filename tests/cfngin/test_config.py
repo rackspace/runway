@@ -10,7 +10,7 @@ from runway.cfngin.config import (Config, Stack, dump, load, parse,
                                   process_remote_sources, render,
                                   render_parse_load)
 from runway.cfngin.environment import parse_environment
-from runway.cfngin.lookups.registry import LOOKUP_HANDLERS
+from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
 
 CONFIG = """a: $a
 b: $b
@@ -434,7 +434,7 @@ stacks:
             "lookups": {
                 "custom": "importlib.import_module"}})
         load(config)
-        self.assertTrue(callable(LOOKUP_HANDLERS["custom"]))
+        self.assertTrue(callable(CFNGIN_LOOKUP_HANDLERS["custom"]))
 
     def test_load_adds_sys_path(self):
         """Test load adds sys path."""
@@ -459,7 +459,7 @@ stacks:
             "lookups": {
                 "custom": "fixtures.mock_lookups.handler"}})
         load(config)
-        self.assertTrue(callable(LOOKUP_HANDLERS["custom"]))
+        self.assertTrue(callable(CFNGIN_LOOKUP_HANDLERS["custom"]))
 
     def test_render_parse_load_namespace_fallback(self):
         """Test render parse load namespace fallback."""

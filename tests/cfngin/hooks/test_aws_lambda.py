@@ -317,7 +317,7 @@ class TestLambdaHooks(unittest.TestCase):
 
             results = self.run_hook(functions={
                 'MyFunction': {
-                    'path':  temp_dir.path + '/f1',
+                    'path': temp_dir.path + '/f1',
                     'exclude': ['**']
                 }
             })
@@ -332,7 +332,7 @@ class TestLambdaHooks(unittest.TestCase):
         with self.temp_directory_with_files() as temp_dir:
             functions = {
                 'MyFunction': {
-                    'path':  temp_dir.path + '/f1'
+                    'path': temp_dir.path + '/f1'
                 }
             }
 

@@ -3,8 +3,8 @@ from copy import deepcopy
 
 from runway.util import load_object_from_string
 
+from ..variables import Variable, resolve_variables
 from .blueprints.raw import RawTemplateBlueprint
-from .variables import Variable, resolve_variables
 
 
 def _initialize_variables(stack_def, variables=None):
@@ -25,7 +25,7 @@ def _initialize_variables(stack_def, variables=None):
     """
     variables = variables or stack_def.variables or {}
     variable_values = deepcopy(variables)
-    return [Variable(k, v) for k, v in variable_values.items()]
+    return [Variable(k, v, 'cfngin') for k, v in variable_values.items()]
 
 
 class Stack(object):

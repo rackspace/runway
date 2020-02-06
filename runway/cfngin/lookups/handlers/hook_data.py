@@ -1,6 +1,6 @@
 """Hook data lookup."""
-# pylint: disable=unused-argument
-from . import LookupHandler
+# pylint: disable=arguments-differ,unused-argument
+from ....lookups.handlers.base import LookupHandler
 
 TYPE_NAME = "hook_data"
 
@@ -9,7 +9,7 @@ class HookDataLookup(LookupHandler):
     """Hook data lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Return the value of a key for a given hook in hook_data.
 
         Args:
