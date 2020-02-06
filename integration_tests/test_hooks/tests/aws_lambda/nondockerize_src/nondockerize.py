@@ -8,9 +8,15 @@ def handler(event, context):
         f = url.read().decode('utf8')
         print(f)
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> return proper status code in lambda test
         return {
             'statusCode': 200,
             'body': 'success'
         }
+<<<<<<< HEAD
 =======
 >>>>>>> added in lambda hook tests
+=======
+>>>>>>> return proper status code in lambda test
