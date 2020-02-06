@@ -645,27 +645,32 @@ class VariableValueLookup(VariableValue):
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
 
+        Raises:
+            FailedLookup: A lookup failed for any reason.
+
         """
         self.lookup_data.resolve(context, variables=variables, **kwargs)
         try:
             if isinstance(self.handler, type):
-                result = self.handler.handle(
-                    value=self.lookup_data.value,
-                    context=context,
-                    provider=provider,
-                    variables=variables,
-                    **kwargs
-                )
+                result = self.handler.handle(value=self.lookup_data.value,
+                                             context=context,
+                                             provider=provider,
+                                             variables=variables,
+                                             **kwargs)
             else:
-                # TODO remove this during the next major release
-                # handle legacy lookup style
-                result = self.handler(
-                    value=self.lookup_data.value,
-                    context=context,
-                    provider=provider
-                )
-            self._resolve(result)
+                result = self._resolve_legacy(context, provider)
+            return self._resolve(result)
         except Exception as err:
+            if isinstance(err, TypeError):
+                # handle lookups that don't accept all the args we want
+                # to pass to it
+                LOGGER.debug('Encountered %s: %s - trying legacy resolver',
+                             type(err), err)
+                try:
+                    return self._resolve(self._resolve_legacy(context,
+                                                              provider))
+                except Exception as err2:
+                    raise FailedLookup(self, err2)
             raise FailedLookup(self, err)
 
     def _resolve(self, value):
@@ -673,6 +678,35 @@ class VariableValueLookup(VariableValue):
         """Set _value and _resolved from the result of resolve()."""
         self._value = value
         self._resolved = True
+
+    def _resolve_legacy(self, context, provider):
+        """Resolve legacy lookups.
+
+        Stacker style custom lookups only take 3 args (value, provider,
+        context). In combining CFNgin and Runway Variable/LookupHandler classes
+        we need to be able to pass more arguments. The built-in lookups have
+        been updated but, any custom lookups designed for Stacker would fail
+        when trying to pass the arguments that now get passed. That is where
+        this method comes it. It can handle legacy Stacker function lookups
+        and those that don't support accept more then 3 args.
+
+        TODO:
+            Remove during the next major release.
+
+        """
+        if isinstance(self.handler, type):
+            import warnings
+            warn_msg = ('Old style lookup in use. Please upgrade to use '
+                        'the new style of Lookups that accepts '
+                        '"**kwargs".')
+            LOGGER.warning(warn_msg)
+            warnings.warn(warn_msg, DeprecationWarning, stacklevel=2)
+            return self.handler.handle(value=self.lookup_data.value,
+                                       context=context,
+                                       provider=provider)
+        return self.handler(value=self.lookup_data.value,
+                            context=context,
+                            provider=provider)
 
     def __iter__(self):
         # type: () -> Iterable
