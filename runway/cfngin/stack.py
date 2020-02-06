@@ -111,7 +111,7 @@ class Stack(object):
 
         # Add any dependencies based on output lookups
         for variable in self.variables:
-            deps = variable.dependencies()
+            deps = variable.dependencies
             if self.name in deps:
                 message = (
                     "Variable %s in stack %s has a circular reference"

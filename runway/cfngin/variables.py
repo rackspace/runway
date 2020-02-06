@@ -44,7 +44,7 @@ class Variable(object):
     def value(self):
         """Return the current value of the Variable."""
         try:
-            return self._value.value()
+            return self._value.value
         except UnresolvedVariableValue:
             raise UnresolvedVariable("<unknown>", self)
         except InvalidLookupConcatenation as err:
@@ -57,7 +57,7 @@ class Variable(object):
         Variables only need to be resolved if they contain lookups.
 
         """
-        return self._value.resolved()
+        return self._value.resolved
 
     def resolve(self, context, provider):
         """Recursively resolve any lookups with the Variable.
@@ -74,6 +74,7 @@ class Variable(object):
         except FailedLookup as err:
             raise FailedVariableLookup(self.name, err.lookup, err.error)
 
+    @property
     def dependencies(self):
         """Stack names that this variable depends on.
 
@@ -81,12 +82,13 @@ class Variable(object):
             Set[str]: Stack names that this variable depends on.
 
         """
-        return self._value.dependencies()
+        return self._value.dependencies
 
 
 class VariableValue(object):
     """Abstract Syntax Tree base object to parse the value for a variable."""
 
+    @property
     def value(self):
         """Abstract method for a variable value's value."""
         raise NotImplementedError
@@ -95,6 +97,7 @@ class VariableValue(object):
         """Abstract method for iterating over an instance of this class."""
         raise NotImplementedError
 
+    @property
     def resolved(self):
         """Abstract method for variable is resolved.
 
@@ -107,11 +110,12 @@ class VariableValue(object):
     def resolve(self, context, provider):
         """Resolve the value of the variable."""
 
-    @staticmethod
-    def dependencies():
+    @property
+    def dependencies(self):
         """Stack names that this variable depends on."""
         return set()
 
+    @property
     def simplified(self):
         """Return a simplified version of the value.
 
@@ -156,11 +160,11 @@ class VariableValue(object):
                 if not isinstance(tok, VariableValueLiteral):
                     continue
 
-                if tok.value() == opener:
+                if tok.value == opener:
                     last_open = i
                     next_close = None
                 if last_open is not None and \
-                        tok.value() == closer and \
+                        tok.value == closer and \
                         next_close is None:
                     next_close = i
 
@@ -176,7 +180,7 @@ class VariableValue(object):
             else:
                 break
 
-        tokens = tokens.simplified()
+        tokens = tokens.simplified
 
         return tokens
 
@@ -188,10 +192,12 @@ class VariableValueLiteral(VariableValue):
         """Instantiate class."""
         self._value = value
 
+    @property
     def value(self):
         """Value of the variable. Can be resolved or unresolved."""
         return self._value
 
+    @property
     def resolved(self):
         """Use to check if the variable value has been resolved.
 
@@ -228,18 +234,20 @@ class VariableValueList(VariableValue, list):
         ]
         return cls(acc)
 
+    @property
     def value(self):
         """Value of the variable. Can be resolved or unresolved."""
         return [
-            item.value()
+            item.value
             for item in self
         ]
 
+    @property
     def resolved(self):
         """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self:
-            accumulator = accumulator and item.resolved()
+            accumulator = accumulator and item.resolved
         return accumulator
 
     def resolve(self, context, provider):
@@ -255,13 +263,15 @@ class VariableValueList(VariableValue, list):
         for item in self:
             item.resolve(context, provider)
 
+    @property
     def dependencies(self):
         """Stack names that this variable depends on."""
         deps = set()
         for item in self:
-            deps.update(item.dependencies())
+            deps.update(item.dependencies)
         return deps
 
+    @property
     def simplified(self):
         """Return a simplified version of the value.
 
@@ -270,7 +280,7 @@ class VariableValueList(VariableValue, list):
 
         """
         return [
-            item.simplified()
+            item.simplified
             for item in self
         ]
 
@@ -301,18 +311,20 @@ class VariableValueDict(VariableValue, dict):
         }
         return cls(acc)
 
+    @property
     def value(self):
         """Value of the variable. Can be resolved or unresolved."""
         return {
-            k: v.value()
+            k: v.value
             for k, v in self.items()
         }
 
+    @property
     def resolved(self):
         """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self.values():
-            accumulator = accumulator and item.resolved()
+            accumulator = accumulator and item.resolved
         return accumulator
 
     def resolve(self, context, provider):
@@ -328,17 +340,19 @@ class VariableValueDict(VariableValue, dict):
         for item in self.values():
             item.resolve(context, provider)
 
+    @property
     def dependencies(self):
         """Stack names that this variable depends on."""
         deps = set()
         for item in self.values():
-            deps.update(item.dependencies())
+            deps.update(item.dependencies)
         return deps
 
+    @property
     def simplified(self):
         """Return a simplified version of the value."""
         return {
-            k: v.simplified()
+            k: v.simplified
             for k, v in self.items()
         }
 
@@ -356,24 +370,26 @@ class VariableValueDict(VariableValue, dict):
 class VariableValueConcatenation(VariableValue, list):
     """A concatinated variable value."""
 
+    @property
     def value(self):
         """Value of the variable. Can be resolved or unresolved."""
         if len(self) == 1:
-            return self[0].value()
+            return self[0].value
 
         values = []
         for value in self:
-            resolved_value = value.value()
+            resolved_value = value.value
             if not isinstance(resolved_value, string_types):
                 raise InvalidLookupConcatenation(value, self)
             values.append(resolved_value)
         return ''.join(values)
 
+    @property
     def resolved(self):
         """Use to check if the variable value has been resolved."""
         accumulator = True
         for item in self:
-            accumulator = accumulator and item.resolved()
+            accumulator = accumulator and item.resolved
         return accumulator
 
     def resolve(self, context, provider):
@@ -389,33 +405,35 @@ class VariableValueConcatenation(VariableValue, list):
         for value in self:
             value.resolve(context, provider)
 
+    @property
     def dependencies(self):
         """Stack names that this variable depends on."""
         deps = set()
         for item in self:
-            deps.update(item.dependencies())
+            deps.update(item.dependencies)
         return deps
 
+    @property
     def simplified(self):
         """Return a simplified version of the value."""
         concat = []
         for item in self:
-            if isinstance(item, VariableValueLiteral) and item.value() == '':
+            if isinstance(item, VariableValueLiteral) and item.value == '':
                 continue
 
             if (isinstance(item, VariableValueLiteral) and concat and
                     isinstance(concat[-1], VariableValueLiteral)):
                 # Join the literals together
                 concat[-1] = VariableValueLiteral(
-                    concat[-1].value() + item.value()
+                    concat[-1].value + item.value
                 )
 
             elif isinstance(item, VariableValueConcatenation):
                 # Flatten concatenations
-                concat.extend(item.simplified())
+                concat.extend(item.simplified)
 
             else:
-                concat.append(item.simplified())
+                concat.append(item.simplified)
 
         if not concat:
             return VariableValueLiteral('')
@@ -453,7 +471,7 @@ class VariableValueLookup(VariableValue):
         self.lookup_data = lookup_data
 
         if handler is None:
-            lookup_name_resolved = lookup_name.value()
+            lookup_name_resolved = lookup_name.value
             try:
                 handler = LOOKUP_HANDLERS[lookup_name_resolved]
             except KeyError:
@@ -475,13 +493,13 @@ class VariableValueLookup(VariableValue):
             if isinstance(self.handler, type):
                 # Hander is a new-style handler
                 result = self.handler.handle(
-                    value=self.lookup_data.value(),
+                    value=self.lookup_data.value,
                     context=context,
                     provider=provider
                 )
             else:
                 result = self.handler(
-                    value=self.lookup_data.value(),
+                    value=self.lookup_data.value,
                     context=context,
                     provider=provider
                 )
@@ -493,12 +511,14 @@ class VariableValueLookup(VariableValue):
         self._value = value
         self._resolved = True
 
+    @property
     def dependencies(self):
         """Stack names that this variable depends on."""
         if isinstance(self.handler, type):
             return self.handler.dependencies(self.lookup_data)
         return set()
 
+    @property
     def value(self):
         """Value of the variable. Can be resolved or unresolved."""
         if self._resolved:
@@ -509,11 +529,12 @@ class VariableValueLookup(VariableValue):
         """Use to check if the variable value has been resolved."""
         return self._resolved
 
+    @property
     def simplified(self):
         """Return a simplified version of the value."""
         return VariableValueLookup(
             lookup_name=self.lookup_name,
-            lookup_data=self.lookup_data.simplified(),
+            lookup_data=self.lookup_data.simplified,
         )
 
     def __iter__(self):
@@ -536,6 +557,6 @@ class VariableValueLookup(VariableValue):
     def __str__(self):
         """Object displayed as a string."""
         return "${{{type} {data}}}".format(
-            type=self.lookup_name.value(),
-            data=self.lookup_data.value(),
+            type=self.lookup_name.value,
+            data=self.lookup_data.value,
         )
