@@ -52,7 +52,7 @@ to be skipped in subsequent runs.
 
 **bucket_region (Optional[str])**
     The region in which the bucket should exist.
-    If not given, the region will be either be that of the global ``stacker_bucket_region`` setting, or else the region in use by the provider.
+    If not given, the region will be either be that of the global ``cfngin_bucket_region`` setting, or else the region in use by the provider.
 
 **prefix (Optional[str])**
     S3 key prefix to prepend to the uploaded zip name.

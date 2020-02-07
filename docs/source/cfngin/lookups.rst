@@ -8,6 +8,11 @@
 Lookups
 =======
 
+.. note:: Runway lookups and CFNgin lookups are not interchangeable. While they
+          do share a similar base class and syntax, they exist in two different
+          registries. Runway config files can't use CFNgin lookups just as the
+          CFNgin config cannot use Runway lookups.
+
 CFNgin provides the ability to dynamically replace values in the config via a
 concept called lookups. A lookup is meant to take a value and convert
 it by calling out to another service or system.
