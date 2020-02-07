@@ -499,10 +499,13 @@ class Config(Model):
             for field_suffix in ['bucket', 'bucket_region', 'cache_dir']:
                 cfngin_field = 'cfngin_' + field_suffix
                 stacker_field = 'stacker_' + field_suffix
-                # explicitly check for an empty string since it has specific logic
+                # explicitly check for an empty string since it has specific logic.
+                # cfngin fields with a value take precedence.
                 if (
-                        raw_data.get(stacker_field) or
-                        raw_data.get(stacker_field) == ''
+                        not (raw_data.get(cfngin_field) or
+                             raw_data.get(cfngin_field) == '') and
+                        (raw_data.get(stacker_field) or
+                         raw_data.get(stacker_field) == '')
                 ):
                     raw_data[cfngin_field] = raw_data[stacker_field]
         super(Config, self).__init__(raw_data=raw_data,
@@ -580,36 +583,3 @@ class Config(Model):
                         raise ValidationError(
                             "Duplicate stack %s found at index %d."
                             % (stack_name, i))
-
-    def validate_cfngin_bucket(self, _data, _value):
-        """Validate legacy field has been promoted to new field."""
-        if self.stacker_bucket:
-            if self.stacker_bucket == self.cfngin_bucket:
-                return
-            raise ValidationError(
-                'stacker_bucket ({}) provided and does not match '
-                'cfngin_bucket ({})'.format(self.stacker_bucket,
-                                            self.cfngin_bucket)
-            )
-
-    def validate_cfngin_bucket_region(self, _data, _value):
-        """Validate legacy field has been promoted to new field."""
-        if self.stacker_bucket_region:
-            if self.stacker_bucket_region == self.cfngin_bucket_region:
-                return
-            raise ValidationError(
-                'stacker_bucket ({}) provided and does not match '
-                'cfngin_bucket ({})'.format(self.stacker_bucket_region,
-                                            self.cfngin_bucket_region)
-            )
-
-    def validate_cfngin_cache_dir(self, _data, _value):
-        """Validate legacy field has been promoted to new field."""
-        if self.stacker_cache_dir:
-            if self.stacker_cache_dir == self.cfngin_cache_dir:
-                return
-            raise ValidationError(
-                'stacker_bucket ({}) provided and does not match '
-                'cfngin_bucket ({})'.format(self.stacker_cache_dir,
-                                            self.cfngin_cache_dir)
-            )

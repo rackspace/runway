@@ -555,6 +555,22 @@ stacks:
         with self.assertRaises(exceptions.InvalidConfig):
             parse(yaml_config)
 
+    def test_stacker_to_runway_field_conversion(self):
+        """Ensure the correct value is being presented by the config."""
+        yaml_config = """
+        namespace: test
+        cfngin_bucket: ''
+        stacker_bucket: test-bucket
+        cfngin_bucket_region: us-east-1
+        stacker_cache_dir: ./test/path
+        """
+        config = parse(yaml_config)
+        # config.validate()
+
+        assert config.cfngin_bucket == ''
+        assert config.cfngin_bucket_region == 'us-east-1'
+        assert config.cfngin_cache_dir == './test/path'
+
 
 if __name__ == '__main__':
     unittest.main()
