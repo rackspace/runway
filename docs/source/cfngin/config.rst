@@ -4,6 +4,7 @@
 .. _Blueprints: ../terminology.html#blueprint
 .. _hook: ../terminology.html#hook
 .. _hooks: ../terminology.html#hook
+.. _lookups: lookups.html
 .. _Mappings: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
 .. _Outputs: ../terminology.html#output
 
@@ -251,7 +252,10 @@ The keyword is a dictionary with the following keys:
   with a variable pulled from an environment file.
 
 **args:**
-  A dictionary of arguments to pass to the hook_.
+  A dictionary of arguments to pass to the hook_ with support for lookups_.
+  Note that lookups_ that change the order of execution, like ``output``, can
+  only be used in a `post` hook but hooks like ``rxref`` are able to be used
+  with either `pre` or `post` hooks.
 
 An example using the ``create_domain`` hook_ for creating a route53 domain before
 the build action:
@@ -280,6 +284,33 @@ should run in the environment CFNgin is running against:
       enabled: ${create_domain_bool}
       args:
         domain: mydomain.com
+
+An example of a custom hooks using various lookups in it's arguments:
+
+.. code-block:: yaml
+
+  pre_build:
+    custom_hook1:
+      path: path.to.hook1.entry_point
+      args:
+        ami: ${ami [<region>@]owners:self,888888888888,amazon name_regex:server[0-9]+ architecture:i386}
+        user_data: ${file parameterized-64:file://some/path}
+        db_endpoint: ${rxref some-stack::Endpoint}
+        subnet: ${xref some-stack::Subnet}
+        db_creds: ${ssmstore us-east-1@MyDBUser}
+    custom_hook2:
+      path: path.to.hook.entry_point
+      args:
+        bucket: ${dynamodb us-east-1:TestTable@TestKey:TestVal.BucketName}
+        bucket_region: ${envvar AWS_REGION}  # this variable is set by Runway
+        files:
+          - ${file plain:file://some/path}
+
+  post_build:
+    custom_hook3:
+      path: path.to.hook3.entry_point
+      args:
+        nlb: ${output nlb-stack::Nlb}  # output can only be used as a post hook
 
 
 Tags
