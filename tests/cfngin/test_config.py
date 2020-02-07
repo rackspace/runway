@@ -485,6 +485,7 @@ stacks:
               CIDR: 192.168.2.0/24
         """
         doc = parse(yaml_config)
+        print(doc.to_primitive())
         self.assertEqual(
             doc["stacks"][0]["variables"]["CIDR"], "192.168.2.0/24"
         )
