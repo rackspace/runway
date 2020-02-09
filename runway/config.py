@@ -197,7 +197,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                     - 333333333333/us-east-1
                   lab: true
                 parameters:
-                  image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
+                  image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
                 tags:
                   - app:example
                   - my-tag
@@ -227,7 +227,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
               - path: serviceb.cfn
               - path: servicec.cfn
                 parameters:
-                  count: ${var:count.${env:DEPLOY_ENVIRONMENT}}
+                  count: ${var count.${env DEPLOY_ENVIRONMENT}}
             - frontend.tf
 
     """
@@ -447,14 +447,14 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 - 222222222222/us-east-1
                 - 333333333333/us-east-1
               lab: true
-            account_id: ${var:account_ids}  # optional
-            assume_role: ${var:assume_role}  # optional
+            account_id: ${var account_ids}  # optional
+            assume_role: ${var assume_role}  # optional
             parameters:  # optional
-                region: ${env:AWS_REGION}
-                image_id: ${var:image_id.${env:DEPLOY_ENVIRONMENT}}
+                region: ${env AWS_REGION}
+                image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
             env_vars:  # optional environment variable overrides
-                AWS_PROFILE: ${var:aws_profile.${env:DEPLOY_ENVIRONMENT}::default=default}
-                APP_PATH: ${var:app_path.${env:DEPLOY_ENVIRONMENT}}
+                AWS_PROFILE: ${var aws_profile.${env DEPLOY_ENVIRONMENT}::default=default}
+                APP_PATH: ${var app_path.${env DEPLOY_ENVIRONMENT}}
 
     """
 
@@ -484,14 +484,14 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 revert credentials after processing.
             environments (Optional[Dict[str, Dict[str, Any]]]): Optional
                 mapping of environment names to a booleon value used to
-                explicitly deploy or not deploy in an environment. This
+                explicitly enable or disable in an environment. This
                 can be used when an environment specific variables file
-                and parameters are not needed to force a module to deploy
+                and parameters are not needed to force a module to enable
                 anyway or, explicitly skip a module even if a file or
                 parameters are found. The mapping can also have a string
                 (or list of strings) value of $ACCOUNT_ID/$REGION to lock
                 an environment to specific regions in a specific accounts.
-                If it matches, it will act as an explicit deploy.
+                If it matches, it will act as an explicit enable.
             env_vars (Optional[Dict[str, Dict[str, Any]]]): A mapping of
                 OS environment variable overrides to apply when processing
                 modules in the deployment. Can be defined per environment
@@ -900,8 +900,8 @@ class VariablesDefinition(MutableMap):
           another_var: some_value
         deployments:
           - modules:
-              - ${var:sampleapp.definition}
-            regions: ${var:sampleapp.regions}
+              - ${var sampleapp.definition}
+            regions: ${var sampleapp.regions}
 
     """
 

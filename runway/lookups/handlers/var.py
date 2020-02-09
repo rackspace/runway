@@ -18,7 +18,7 @@ and booleon).
     - modules:
         - path: sampleapp.cfn
           environment:
-            ami_id: ${var ami_id.${env:AWS_REGION}}
+            ami_id: ${var ami_id.${env AWS_REGION}}
       env_vars:
         SOME_VARIABLE: ${var some_variable::default=default}
 
