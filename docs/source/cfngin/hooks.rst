@@ -518,7 +518,8 @@ Example Hook Class
 
         SUCCESS_MESSAGE = 'You are not a failure {name}.'
 
-        def do_something(context, provider, is_failure=True, **kwargs):
+        @classmethod
+        def do_something(cls, context, provider, is_failure=True, **kwargs):
             """Do something."""
             if is_failure:
                 return False

@@ -503,6 +503,7 @@ class Plan(object):
             os.makedirs(directory)
 
         def walk_func(step):
+            """Walk function."""
             step.stack.resolve(
                 context=context,
                 provider=provider,
@@ -545,6 +546,7 @@ class Plan(object):
 
         """
         def walk_func(step):
+            """Walk function."""
             # Before we execute the step, we need to ensure that it's
             # transitive dependencies are all in an "ok" state. If not, we
             # won't execute this step.

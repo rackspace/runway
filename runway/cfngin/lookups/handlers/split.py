@@ -1,6 +1,6 @@
 """Split lookup."""
-# pylint: disable=unused-argument
-from . import LookupHandler
+# pylint: disable=arguments-differ,unused-argument
+from ....lookups.handlers.base import LookupHandler
 
 TYPE_NAME = "split"
 
@@ -9,7 +9,7 @@ class SplitLookup(LookupHandler):
     """Split lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Split the supplied string on the given delimiter, providing a list.
 
         Args:

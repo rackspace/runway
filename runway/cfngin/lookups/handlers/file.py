@@ -1,5 +1,5 @@
 """File lookup."""
-# pylint: disable=unused-argument
+# pylint: disable=arguments-differ,unused-argument
 import base64
 import json
 import re
@@ -9,8 +9,8 @@ from six import string_types
 from six.moves.collections_abc import Mapping, Sequence  # pylint: disable=E
 from troposphere import Base64, GenericHelperFn
 
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
-from . import LookupHandler
 
 TYPE_NAME = "file"
 
@@ -21,7 +21,7 @@ class FileLookup(LookupHandler):
     """File lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         r"""Translate a filename into the file contents.
 
         Args:

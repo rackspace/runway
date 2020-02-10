@@ -1,6 +1,6 @@
 """Handler for fetching outputs from a stack in the current namespace."""
-# pylint: disable=unused-argument
-from . import LookupHandler
+# pylint: disable=arguments-differ,unused-argument
+from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 TYPE_NAME = "rxref"
@@ -10,7 +10,7 @@ class RxrefLookup(LookupHandler):
     """Rxref lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Fetch an output from the designated stack in the current namespace.
 
         The ``output`` lookup supports fetching outputs from stacks created

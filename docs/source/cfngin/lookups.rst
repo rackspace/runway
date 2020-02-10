@@ -534,7 +534,7 @@ A custom lookup must be in an executable, importable python package or standalon
 The lookup must be importable using your current ``sys.path``.
 This takes into account the sys_path_ defined in the config file as well as any ``paths`` of package_sources_.
 
-The lookup must be a class, preferable with a base class of :class:`runway.cfngin.hooks.handlers.LookupHandler` with a ``@classmethod`` of handle that accepts three arguments - ``value``, ``context`` and ``provider``.
+The lookup must be a class, preferable with a base class of :class:`runway.cfngin.lookups.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
 There must be only one lookup per file.
 The file containing the lookup class must have a ``TYPE_NAME`` global variable with a value of the name that will be used to register the lookup.
 
@@ -548,8 +548,8 @@ If using boto3 in a lookup, use the ``session_cache`` instead of creating a new 
 .. code-block:: python
 
     """Example lookup."""
+    from runway.lookups.base import LookupHandler
     from runway.cfngin.context import Context
-    from runway.cfngin.hooks.handlers import LookupHandler
     from runway.cfngin.providers.base import BaseProvider
     from runway.cfngin.session_cache import get_session
     from runway.cfngin.util import read_value_from_path
@@ -559,12 +559,15 @@ If using boto3 in a lookup, use the ``session_cache`` instead of creating a new 
     class MylookupLookup(LookupHandler):
         """My lookup."""
 
-        def handle(value: str,
+        @classmethod
+        def handle(cls,
+                   value: str,
                    context: Context,
-                   provider: BaseProvider
+                   provider: BaseProvider,
+                   **kwargs: Any
                    ) -> str:
             """Do something."""
-            value = read_value_from_path(value)
+            query, args = cls.parse(read_value_from_path(value))
 
             # example of using get_session for a boto3 session
             session = get_session(provider.region)

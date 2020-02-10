@@ -177,8 +177,10 @@ class Serverless(RunwayModule):
                                         command_opts=sls_opts,
                                         path=self.path)
 
-        if (not self.options.get('environments') and os.path.isfile(os.path.join(self.path, sls_env_file))) or (  # noqa pylint: disable=line-too-long
-                self.options.get('environments', {}).get(self.context.env_name)):  # noqa
+        if (
+                self.options['parameters'] or
+                os.path.isfile(os.path.join(self.path, sls_env_file))
+        ):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)

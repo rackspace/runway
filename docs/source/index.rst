@@ -31,6 +31,7 @@ Very simple configuration to:
    runway_config
    module_configuration/index
    cfngin/index
+   lookups
    defining_tests
    repo_structure
    terminology

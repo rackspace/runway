@@ -1,11 +1,12 @@
 """DynamoDB lookup."""
+# pylint: disable=arguments-differ,unused-argument
 import re
 
 from botocore.exceptions import ClientError
 
+from ....lookups.handlers.base import LookupHandler
 from ...session_cache import get_session
 from ...util import read_value_from_path
-from . import LookupHandler
 
 TYPE_NAME = 'dynamodb'
 
@@ -14,7 +15,7 @@ class DynamodbLookup(LookupHandler):
     """DynamoDB lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Get a value from a DynamoDB table.
 
         Args:

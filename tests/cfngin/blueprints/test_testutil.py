@@ -6,7 +6,7 @@ from troposphere import ecr
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.testutil import BlueprintTestCase
 from runway.cfngin.context import Context
-from runway.cfngin.variables import Variable
+from runway.variables import Variable
 
 
 class Repositories(Blueprint):
@@ -41,7 +41,7 @@ class TestRepositories(BlueprintTestCase):
         ctx = Context({'namespace': 'test'})
         blueprint = Repositories('test_repo', ctx)
         blueprint.resolve_variables([
-            Variable('Repositories', ["repo1", "repo2"])
+            Variable('Repositories', ["repo1", "repo2"], 'cfngin')
         ])
         blueprint.create_template()
         self.assertRenderedBlueprint(blueprint)
@@ -51,7 +51,7 @@ class TestRepositories(BlueprintTestCase):
         ctx = Context({'namespace': 'test'})
         blueprint = Repositories('test_repo', ctx)
         blueprint.resolve_variables([
-            Variable('Repositories', ["repo1", "repo2", "repo3"])
+            Variable('Repositories', ["repo1", "repo2", "repo3"], 'cfngin')
         ])
         blueprint.create_template()
         with self.assertRaises(AssertionError):

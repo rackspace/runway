@@ -699,9 +699,11 @@ class Provider(BaseProvider):
 
     def get_rollback_status_reason(self, stack_name):
         """Process events and returns latest roll back reason."""
+        # flake8/pylint fight over the indent here on python2
+        # TODO remove "disable=bad-continuation" when dropping python2
         event = next((item for item in self.get_events(stack_name, False)
                       if item["ResourceStatus"] == "UPDATE_ROLLBACK_IN_PROGRESS"
-                      ), None)
+                      ), None)  # pylint: disable=bad-continuation
         if event:
             reason = event["ResourceStatusReason"]
             return reason

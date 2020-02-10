@@ -1,6 +1,6 @@
 """Handler for fetching outputs from fully qualified stacks."""
-# pylint: disable=unused-argument
-from . import LookupHandler
+# pylint: disable=arguments-differ,unused-argument
+from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 TYPE_NAME = "xref"
@@ -10,7 +10,7 @@ class XrefLookup(LookupHandler):
     """Xref lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Fetch an output from the designated, fully qualified stack.
 
         The `output` handler supports fetching outputs from stacks created

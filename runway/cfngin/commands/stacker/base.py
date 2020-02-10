@@ -27,6 +27,7 @@ def cancel():
     cancel_event = threading.Event()
 
     def cancel_execution(signum, _frame):
+        """Cancel execution."""
         signame = SIGNAL_NAMES.get(signum, signum)
         LOGGER.info("Signal %s received, quitting "
                     "(this can take some time)...", signame)

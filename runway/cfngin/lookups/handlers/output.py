@@ -1,9 +1,9 @@
 """AWS CloudFormation Output lookup."""
-# pylint: disable=unused-argument
-import re
+# pylint: disable=arguments-differ,unused-argument
 from collections import namedtuple
+import re
 
-from . import LookupHandler
+from ....lookups.handlers.base import LookupHandler
 
 TYPE_NAME = "output"
 
@@ -14,7 +14,7 @@ class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Fetch an output from the designated stack.
 
         Args:
@@ -51,13 +51,13 @@ class OutputLookup(LookupHandler):
         # try to get the stack name
         stack_name = ''
         for data_item in lookup_data:
-            if not data_item.resolved():
+            if not data_item.resolved:
                 # We encountered an unresolved substitution.
                 # StackName is calculated dynamically based on context:
                 #  e.g. ${output ${default var::source}::name}
                 # Stop here
                 return set()
-            stack_name = stack_name + data_item.value()
+            stack_name = stack_name + data_item.value
             match = re.search(r'::', stack_name)
             if match:
                 stack_name = stack_name[0:match.start()]

@@ -9,6 +9,10 @@ endif
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 
+# not actually a sync since we need to skip-lock but maintains naming
+sync_two:
+	PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --two --skip-lock
+
 # sync all virtual environments used by this project with their Pipfile.lock
 sync_all:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three

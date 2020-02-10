@@ -1,10 +1,10 @@
 """AWS KMS lookup."""
-# pylint: disable=unused-argument
+# pylint: disable=arguments-differ,unused-argument
 import codecs
 
+from ....lookups.handlers.base import LookupHandler
 from ...session_cache import get_session
 from ...util import read_value_from_path
-from . import LookupHandler
 
 TYPE_NAME = "kms"
 
@@ -13,7 +13,7 @@ class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         r"""Decrypt the specified value with a master key in KMS.
 
         Args:
