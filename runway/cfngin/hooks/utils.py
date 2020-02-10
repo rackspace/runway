@@ -5,11 +5,9 @@ import os
 import sys
 
 from runway.util import load_object_from_string
-# from runway.variables import Variable, resolve_variables
+from runway.variables import Variable, resolve_variables
 
 from ..exceptions import FailedVariableLookup
-# TODO replace after https://github.com/onicagroup/runway/pull/116
-from ..variables import Variable, resolve_variables
 
 LOGGER = logging.getLogger(__name__)
 
