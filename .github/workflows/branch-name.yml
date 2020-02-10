@@ -17,7 +17,7 @@ jobs:
           # All branches should start with the given prefix
           allowed_prefixes: 'bugfix,chore,docs,enhancement,feat,feature,fix,hotfix,maint,maintain,maintenance,release'
           # Ignore exactly matching branch names from convention
-          ignore: master,develop,v0_47_fixes
+          ignore: master,release,develop,v0_47_fixes
           # Min length of the branch name
           min_length: 5
           # Max length of the branch name
