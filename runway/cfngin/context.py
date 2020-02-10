@@ -83,36 +83,36 @@ class Context(object):
 
     @property
     def bucket_name(self):
-        """Return ``stacker_bucket`` from config, calculated name, or None."""
+        """Return ``cfngin_bucket`` from config, calculated name, or None."""
         if not self.upload_templates_to_s3:
             return None
 
-        return self.config.stacker_bucket \
+        return self.config.cfngin_bucket \
             or "stacker-%s" % (self.get_fqn(),)
 
     @property
     def upload_templates_to_s3(self):
         """Condition result determining if templates will be uploaded to s3.
 
-        False if ``stacker_bucket`` provided in config is explicitly an empty
-        string or if ``stacker_bucket`` and ``namespace`` are not provided.
+        False if ``cfngin_bucket`` provided in config is explicitly an empty
+        string or if ``cfngin_bucket`` and ``namespace`` are not provided.
 
         """
-        # Don't upload stack templates to S3 if `stacker_bucket` is explicitly
+        # Don't upload stack templates to S3 if `cfngin_bucket` is explicitly
         # set to an empty string.
-        if self.config.stacker_bucket == '':
+        if self.config.cfngin_bucket == '':
             LOGGER.debug("Not uploading templates to s3 because "
-                         "`stacker_bucket` is explicitly set to an "
+                         "`cfngin_bucket` is explicitly set to an "
                          "empty string")
             return False
 
-        # If no namespace is specificied, and there's no explicit stacker
+        # If no namespace is specificied, and there's no explicit cfngin
         # bucket specified, don't upload to s3. This makes sense because we
-        # can't realistically auto generate a stacker bucket name in this case.
-        if not self.namespace and not self.config.stacker_bucket:
+        # can't realistically auto generate a cfngin bucket name in this case.
+        if not self.namespace and not self.config.cfngin_bucket:
             LOGGER.debug("Not uploading templates to s3 because "
                          "there is no namespace set, and no "
-                         "stacker_bucket set")
+                         "cfngin_bucket set")
             return False
 
         return True
@@ -124,7 +124,7 @@ class Context(object):
         if tags is not None:
             return tags
         if self.namespace:
-            return {"stacker_namespace": self.namespace}
+            return {"cfngin_namespace": self.namespace}
         return {}
 
     @property

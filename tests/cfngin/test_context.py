@@ -125,7 +125,7 @@ class TestContext(unittest.TestCase):
         """Test context no tags specified."""
         config = Config({"namespace": "test"})
         context = Context(config=config)
-        self.assertEqual(context.tags, {"stacker_namespace": "test"})
+        self.assertEqual(context.tags, {"cfngin_namespace": "test"})
 
     def test_hook_with_sys_path(self):
         """Test hook with sys path."""

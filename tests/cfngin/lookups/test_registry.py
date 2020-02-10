@@ -4,8 +4,8 @@ import unittest
 from mock import MagicMock
 
 from runway.cfngin.exceptions import FailedVariableLookup, UnknownLookupType
-from runway.cfngin.lookups.registry import LOOKUP_HANDLERS
-from runway.cfngin.variables import Variable, VariableValueLookup
+from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
+from runway.variables import Variable, VariableValueLookup
 
 from ..factories import mock_context, mock_provider
 
@@ -26,7 +26,7 @@ class TestRegistry(unittest.TestCase):
         ]
         for handler in handlers:
             try:
-                LOOKUP_HANDLERS[handler]
+                CFNGIN_LOOKUP_HANDLERS[handler]
             except KeyError:
                 assert False, 'Lookup handler: "{}" was not registered'.format(
                     handler

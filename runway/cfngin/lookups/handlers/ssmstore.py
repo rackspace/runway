@@ -1,5 +1,6 @@
 """AWS SSM Parameter Store lookup."""
-from . import LookupHandler
+# pylint: disable=arguments-differ,unused-argument
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 from ...session_cache import get_session
 
@@ -10,7 +11,7 @@ class SsmstoreLookup(LookupHandler):
     """AWS SSM Parameter Store lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Retrieve (and decrypt) a parameter from AWS SSM Parameter Store.
 
         Args:

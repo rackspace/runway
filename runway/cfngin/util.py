@@ -529,20 +529,20 @@ class SourceProcessor(object):
 
     ISO8601_FORMAT = '%Y%m%dT%H%M%SZ'
 
-    def __init__(self, sources, stacker_cache_dir=None):
+    def __init__(self, sources, cfngin_cache_dir=None):
         """Process a config's defined package sources.
 
         Args:
             sources (Dict[str, Any]): Package sources from CFNgin config
                 dictionary.
-            stacker_cache_dir (str): Path where remote sources will be
+            cfngin_cache_dir (str): Path where remote sources will be
                 cached.
 
         """
-        if not stacker_cache_dir:
-            stacker_cache_dir = os.path.expanduser("~/.runway_cache")
-        package_cache_dir = os.path.join(stacker_cache_dir, 'packages')
-        self.stacker_cache_dir = stacker_cache_dir
+        if not cfngin_cache_dir:
+            cfngin_cache_dir = os.path.expanduser("~/.runway_cache")
+        package_cache_dir = os.path.join(cfngin_cache_dir, 'packages')
+        self.cfngin_cache_dir = cfngin_cache_dir
         self.package_cache_dir = package_cache_dir
         self.sources = sources
         self.configs_to_merge = []
@@ -551,8 +551,8 @@ class SourceProcessor(object):
     def create_cache_directories(self):
         """Ensure that SourceProcessor cache directories exist."""
         if not os.path.isdir(self.package_cache_dir):
-            if not os.path.isdir(self.stacker_cache_dir):
-                os.mkdir(self.stacker_cache_dir)
+            if not os.path.isdir(self.cfngin_cache_dir):
+                os.mkdir(self.cfngin_cache_dir)
             os.mkdir(self.package_cache_dir)
 
     def get_package_sources(self):

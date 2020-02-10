@@ -1,0 +1,6 @@
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  fake_stack:
+    template_path: no-template.yaml

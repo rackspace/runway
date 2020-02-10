@@ -1,0 +1,11 @@
+# bad config
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  recreate-failed:
+    class_path: fixtures.mock_blueprints.LongRunningDummy
+    variables:
+      Count: 10
+      BreakLast: true

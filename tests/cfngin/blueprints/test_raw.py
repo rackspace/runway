@@ -7,7 +7,7 @@ from mock import MagicMock
 from runway.cfngin.blueprints.raw import (RawTemplateBlueprint,
                                           get_template_params,
                                           get_template_path)
-from runway.cfngin.variables import Variable
+from runway.variables import Variable
 
 from ..factories import mock_context
 
@@ -155,8 +155,8 @@ class TestBlueprintRendering(unittest.TestCase):
                 environment={'foo': 'bar'}),
             raw_template_path=RAW_J2_TEMPLATE_PATH
         )
-        blueprint.resolve_variables([Variable("Param1", "param1val"),
-                                     Variable("bar", "foo")])
+        blueprint.resolve_variables([Variable("Param1", "param1val", 'cfngin'),
+                                     Variable("bar", "foo", 'cfngin')])
         self.assertEqual(
             expected_json,
             blueprint.to_json()

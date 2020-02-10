@@ -1,10 +1,14 @@
 .. _AWS CDK: https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _Serverless Framework: https://serverless.com/
-.. _Stacker: https://stacker.readthedocs.io/en/stable/
+.. _CFNgin: cfngin/index.html
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
 .. _Kubernetes: https://kubernetes.io/
+
+.. _Lookups: lookups.html
+.. _env lookup: lookups.html#env
+.. _var lookup: lookups.html#var
 
 .. _runway-config:
 
@@ -31,12 +35,12 @@ Module
 .. autoclass:: runway.config.ModuleDefinition
 
 Path
-^^^^
+----
 
 .. automodule:: runway.path.Path
 
 Git
----
+~~~
 
 Git remote resources can be used as modules for your Runway project. Below is
 an example of git remote path.
@@ -76,9 +80,17 @@ Test
 
 .. autoclass:: runway.config.TestDefinition
 
+.. _runway-variables:
+
+Variables
+^^^^^^^^^
+
+.. autoclass:: runway.config.VariablesDefinition
+
 Sample
 ^^^^^^
 
+.. rubric:: runway.yml
 .. code-block:: yaml
 
     ---
@@ -101,14 +113,12 @@ Sample
       - type: yamllint  # not all tests accept arguments
 
     # Order that modules will be deployed. A module will be skipped if a
-    # corresponding env/config is not present (either in a file in its folder
-    # or via an environments option specified here on the deployment or
-    # module)
+    # corresponding environment file is not present or "enabled" is false.
     # E.g., for cfn modules, if
     # 1) a dev-us-west-2.env file is not in the 'app.cfn' folder when running
     #    a dev deployment of 'app' to us-west-2,
     # and
-    # 2) dev is not specified under the deployment or module's environments
+    # 2) "enabled" is false under the deployment or module
     #
     # then it will be skipped.
 
@@ -128,36 +138,23 @@ Sample
           # to revert the AWS credentials in the environment to their previous
           # values
           # post_deploy_env_revert: true
-          dev: arn:aws:iam::account-id1:role/role-name
-          prod: arn:aws:iam::account-id2:role/role-name
-          # A single ARN can be specified instead, to apply to all environments
-          # arn: arn:aws:iam::account-id:role/role-name
-          # Role duration can be set at the top level, or in a specific environment
+          arn: ${var assume_role.${env DEPLOY_ENVIRONMENT}}
           # duration: 7200
-          # dev:
-          #   arn: arn:aws:iam::account-id1:role/role-name
-          #   duration: 7200
 
-        # Environment options (e.g. values for CFN .env file, TF .tfvars) can
+        # Parameters (e.g. values for CFN .env file, TF .tfvars) can
         # be provided at the deployment level -- the options will be applied to
-        # every module in the environment
-        environments:
-          dev:
-            region: us-east-1
-            image_id: ami-abc123
+        # every module
+        parameters:
+          region: ${env AWS_REGION}
+          image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
 
-        account_alias:  # optional
-          # A mapping of environment -> alias mappings can be provided to have
-          # Runway verify the current assumed role / credentials match the
-          # necessary account
-          dev: my_dev_account
-          prod: my_dev_account
-        account_id:  # optional
-          # A mapping of environment -> id mappings can be provided to have Runway
-          # verify the current assumed role / credentials match the necessary
-          # account
-          dev: 123456789012
-          prod: 345678901234
+        # AWS account alias can be provided to have Runway verify the current
+        # assumed role / credentials match the necessary account
+        account_alias: ${var account_alias.${env DEPLOY_ENVIRONMENT}}  # optional
+
+        # AWS account id can be provided to have Runway verify the current
+        # assumed role / credentials match the necessary account
+        account_id: ${var account_id.${env DEPLOY_ENVIRONMENT}}  # optional
 
         # env_vars set OS environment variables for the module (not logical
         # environment values like those in a CFN .env or TF .tfvars file).
@@ -165,29 +162,19 @@ Sample
         # tools that absolutely require it, like Terraform's
         # TF_PLUGIN_CACHE_DIR option)
         env_vars:  # optional environment variable overrides
-          dev:
-            AWS_PROFILE: foo
-            APP_PATH:  # When specified as list, will be treated as components of a path on disk
-              - myapp.tf
-              - foo
-          prod:
-            AWS_PROFILE: bar
-            APP_PATH:
-              - myapp.tf
-              - foo
-          "*":  # Applied to all environments
-            ANOTHER_VAR: foo
+          AWS_PROFILE: ${var envvars.profile.${env DEPLOY_ENVIRONMENT}}
+          APP_PATH: ${var envvars.app_path}
+          ANOTHER_VAR: foo
 
       # Start of another deployment
       - modules:
           - path: myapp.cfn
-            # Environment options (e.g. values for CFN .env file, TF .tfvars) can
+            # Parameters (e.g. values for CFN .env file, TF .tfvars) can
             # be provided for a single module (replacing or supplementing the
             # use of environment/tfvars/etc files in the module)
-            environments:
-              dev:
-                region: us-east-1
-                image_id: ami-abc123
+            parameters:
+              region: ${env AWS_REGION}
+              image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
             tags:  # Modules can optionally have tags.
               # This is a list of strings that can be "targeted"
               # by passing arguments to the deploy/destroy command.
@@ -203,3 +190,25 @@ Sample
     # If using environment folders instead of git branches, git branch lookup can
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
+
+.. rubric:: variables.runway.yml
+.. code-block:: yaml
+
+  account_alias:
+    dev: my_dev_account
+    prod: my_dev_account
+  account_id:
+    dev: 123456789012
+    prod: 345678901234
+  assume_role:
+    dev: arn:aws:iam::account-id1:role/role-name
+    prod: arn:aws:iam::account-id2:role/role-name
+  image_id:
+    dev: ami-abc123
+  envvars:
+    profile:
+      dev: foo
+      prod: bar
+    app_path:
+      - myapp.tf
+      - foo

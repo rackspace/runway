@@ -20,7 +20,7 @@ from runway.cfngin.exceptions import (InvalidLookupCombination,
                                       UnresolvedVariables, ValidatorError,
                                       VariableTypeRequired)
 from runway.cfngin.lookups import register_lookup_handler
-from runway.cfngin.variables import Variable
+from runway.variables import Variable
 
 from ..factories import mock_context
 
@@ -268,7 +268,7 @@ class TestVariables(unittest.TestCase):
         """Test resolve variable provided not resolved."""
         var_name = "testVar"
         var_def = {"type": str}
-        provided_variable = Variable(var_name, "${mock abc}")
+        provided_variable = Variable(var_name, "${mock abc}", 'cfngin')
         blueprint_name = "testBlueprint"
 
         with self.assertRaises(UnresolvedVariable):
@@ -279,7 +279,7 @@ class TestVariables(unittest.TestCase):
         """Resolve troposphere var."""
         var_name = "testVar"
         var_def = {"type": TroposphereType(tpe, **kwargs)}
-        provided_variable = Variable(var_name, value)
+        provided_variable = Variable(var_name, value, 'cfngin')
         blueprint_name = "testBlueprint"
 
         return resolve_variable(var_name, var_def, provided_variable,
@@ -387,7 +387,7 @@ class TestVariables(unittest.TestCase):
         """Test resolve variable provided resolved."""
         var_name = "testVar"
         var_def = {"type": str}
-        provided_variable = Variable(var_name, "${mock 1}")
+        provided_variable = Variable(var_name, "${mock 1}", 'cfngin')
         provided_variable.resolve(context=MagicMock(), provider=MagicMock())
         blueprint_name = "testBlueprint"
 
@@ -399,13 +399,13 @@ class TestVariables(unittest.TestCase):
         """Test resolve variable allowed values."""
         var_name = "testVar"
         var_def = {"type": str, "allowed_values": ["allowed"]}
-        provided_variable = Variable(var_name, "not_allowed")
+        provided_variable = Variable(var_name, "not_allowed", 'cfngin')
         blueprint_name = "testBlueprint"
         with self.assertRaises(ValueError):
             resolve_variable(var_name, var_def, provided_variable,
                              blueprint_name)
 
-        provided_variable = Variable(var_name, "allowed")
+        provided_variable = Variable(var_name, "allowed", 'cfngin')
         value = resolve_variable(var_name, var_def, provided_variable,
                                  blueprint_name)
         self.assertEqual(value, "allowed")
@@ -420,7 +420,7 @@ class TestVariables(unittest.TestCase):
         var_name = "testVar"
         var_def = {"type": list, "validator": triple_validator}
         var_value = [1, 2, 3]
-        provided_variable = Variable(var_name, var_value)
+        provided_variable = Variable(var_name, var_value, 'cfngin')
         blueprint_name = "testBlueprint"
 
         value = resolve_variable(var_name, var_def, provided_variable,
@@ -437,7 +437,7 @@ class TestVariables(unittest.TestCase):
         var_name = "testVar"
         var_def = {"type": list, "validator": triple_validator}
         var_value = [1, 2]
-        provided_variable = Variable(var_name, var_value)
+        provided_variable = Variable(var_name, var_value, 'cfngin')
         blueprint_name = "testBlueprint"
 
         with self.assertRaises(ValidatorError) as result:
@@ -459,9 +459,9 @@ class TestVariables(unittest.TestCase):
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
         variables = [
-            Variable("Param1", 1),
-            Variable("Param2", "${output other-stack::Output}"),
-            Variable("Param3", 3),
+            Variable("Param1", 1, 'cfngin'),
+            Variable("Param2", "${output other-stack::Output}", 'cfngin'),
+            Variable("Param3", 3, 'cfngin'),
         ]
 
         variables[1]._value._resolve("Test Output")
@@ -486,7 +486,8 @@ class TestVariables(unittest.TestCase):
 
         register_lookup_handler("custom", return_list_something)
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "${custom non-string-return-val}")]
+        variables = [Variable("Param1", "${custom non-string-return-val}",
+                              'cfngin')]
         for var in variables:
             var._value.resolve({}, {})
 
@@ -508,7 +509,8 @@ class TestVariables(unittest.TestCase):
 
         register_lookup_handler("custom", return_obj)
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "${custom non-string-return-val}")]
+        variables = [Variable("Param1", "${custom non-string-return-val}",
+                              'cfngin')]
         for var in variables:
             var._value.resolve({}, {})
 
@@ -526,6 +528,7 @@ class TestVariables(unittest.TestCase):
         variable = Variable(
             "Param1",
             "${custom non-string-return-val},${output some-stack::Output}",
+            'cfngin'
         )
         variable._value[0].resolve({}, {})
         with self.assertRaises(InvalidLookupCombination):
@@ -542,7 +545,8 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1), Variable("Param2", "Test Output")]
+        variables = [Variable("Param1", 1, 'cfngin'),
+                     Variable("Param2", "Test Output", 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertEqual(variables["Param1"], 1)
@@ -559,7 +563,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1)]
+        variables = [Variable("Param1", 1, 'cfngin')]
         with self.assertRaises(MissingVariable):
             blueprint.resolve_variables(variables)
 
@@ -573,7 +577,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "Something")]
+        variables = [Variable("Param1", "Something", 'cfngin')]
         with self.assertRaises(ValueError):
             blueprint.resolve_variables(variables)
 
@@ -588,7 +592,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param2", "Test Output")]
+        variables = [Variable("Param2", "Test Output", 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertEqual(variables["Param1"], 1)
@@ -604,7 +608,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1)]
+        variables = [Variable("Param1", 1, 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], int))
@@ -619,7 +623,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "Value")]
+        variables = [Variable("Param1", "Value", 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], CFNParameter))
@@ -634,7 +638,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1)]
+        variables = [Variable("Param1", 1, 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], CFNParameter))
@@ -650,7 +654,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", ["us-east-1", "us-west-2"])]
+        variables = [Variable("Param1", ["us-east-1", "us-west-2"], 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], CFNParameter))
@@ -669,7 +673,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", {"main": "us-east-1"})]
+        variables = [Variable("Param1", {"main": "us-east-1"}, 'cfngin')]
         with self.assertRaises(ValueError):
             blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
@@ -730,7 +734,8 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1), Variable("Param2", "Value")]
+        variables = [Variable("Param1", 1, 'cfngin'),
+                     Variable("Param2", "Value", 'cfngin')]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertEqual(len(variables), 2)
@@ -773,7 +778,7 @@ class TestVariables(unittest.TestCase):
         var_name = "testVar"
         var_def = {"type": str}
         var_value = None
-        provided_variable = Variable(var_name, var_value)
+        provided_variable = Variable(var_name, var_value, 'cfngin')
         blueprint_name = "testBlueprint"
 
         with self.assertRaises(ValueError):

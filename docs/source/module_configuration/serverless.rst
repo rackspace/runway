@@ -78,6 +78,8 @@ and/or
 In Module Directory
 ~~~~~~~~~~~~~~~~~~~
 
+.. important: `Lookups`_ are not supported in this file.
+
 ::
 
     ---

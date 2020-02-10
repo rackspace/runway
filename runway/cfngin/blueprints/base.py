@@ -7,11 +7,11 @@ import string
 from six import string_types
 from troposphere import Output, Parameter, Ref, Template
 
+from ...variables import Variable
 from ..exceptions import (InvalidUserdataPlaceholder, MissingVariable,
                           UnresolvedVariable, UnresolvedVariables,
                           ValidatorError, VariableTypeRequired)
 from ..util import read_value_from_path
-from ..variables import Variable
 from .variables.types import CFNType, TroposphereType
 
 LOGGER = logging.getLogger(__name__)
@@ -500,13 +500,14 @@ class Blueprint(object):
         variables_to_resolve = []
         if variables:
             for key, value in variables.items():
-                variables_to_resolve.append(Variable(key, value))
+                variables_to_resolve.append(Variable(key, value, 'cfngin'))
         for k in self.get_parameter_definitions():
             if not variables or k not in variables:
                 # The provided value for a CFN parameter has no effect in this
                 # context (generating the CFN template), so any string can be
                 # provided for its value - just needs to be something
-                variables_to_resolve.append(Variable(k, 'unused_value'))
+                variables_to_resolve.append(Variable(k, 'unused_value',
+                                                     'cfngin'))
         self.resolve_variables(variables_to_resolve)
 
         return self.render_template()[1]

@@ -1,0 +1,11 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  dependent-rollback-parent:
+    class_path: fixtures.mock_blueprints.Broken
+  dependent-rollback-child:
+    class_path: fixtures.mock_blueprints.Dummy
+    requires:
+      - dependent-rollback-parent

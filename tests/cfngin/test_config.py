@@ -10,7 +10,7 @@ from runway.cfngin.config import (Config, Stack, dump, load, parse,
                                   process_remote_sources, render,
                                   render_parse_load)
 from runway.cfngin.environment import parse_environment
-from runway.cfngin.lookups.registry import LOOKUP_HANDLERS
+from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
 
 CONFIG = """a: $a
 b: $b
@@ -434,7 +434,7 @@ stacks:
             "lookups": {
                 "custom": "importlib.import_module"}})
         load(config)
-        self.assertTrue(callable(LOOKUP_HANDLERS["custom"]))
+        self.assertTrue(callable(CFNGIN_LOOKUP_HANDLERS["custom"]))
 
     def test_load_adds_sys_path(self):
         """Test load adds sys path."""
@@ -459,7 +459,7 @@ stacks:
             "lookups": {
                 "custom": "fixtures.mock_lookups.handler"}})
         load(config)
-        self.assertTrue(callable(LOOKUP_HANDLERS["custom"]))
+        self.assertTrue(callable(CFNGIN_LOOKUP_HANDLERS["custom"]))
 
     def test_render_parse_load_namespace_fallback(self):
         """Test render parse load namespace fallback."""
@@ -485,6 +485,7 @@ stacks:
               CIDR: 192.168.2.0/24
         """
         doc = parse(yaml_config)
+        print(doc.to_primitive())
         self.assertEqual(
             doc["stacks"][0]["variables"]["CIDR"], "192.168.2.0/24"
         )
@@ -553,6 +554,22 @@ stacks:
 
         with self.assertRaises(exceptions.InvalidConfig):
             parse(yaml_config)
+
+    def test_stacker_to_runway_field_conversion(self):
+        """Ensure the correct value is being presented by the config."""
+        yaml_config = """
+        namespace: test
+        cfngin_bucket: ''
+        stacker_bucket: test-bucket
+        cfngin_bucket_region: us-east-1
+        stacker_cache_dir: ./test/path
+        """
+        config = parse(yaml_config)
+        # config.validate()
+
+        assert config.cfngin_bucket == ''
+        assert config.cfngin_bucket_region == 'us-east-1'
+        assert config.cfngin_cache_dir == './test/path'
 
 
 if __name__ == '__main__':

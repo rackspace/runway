@@ -1,0 +1,10 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  vpc:
+    class_path: fixtures.mock_blueprints.VPC
+    variables:
+      PublicSubnets: ${vpc_public_subnets}
+      PrivateSubnets: ${vpc_private_subnets}

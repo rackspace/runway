@@ -1,0 +1,27 @@
+tests:
+  - name: hello_world
+    type: script
+    required: ${var require_test}
+    args:
+      commands:
+        - echo "My name is ${env USER}"
+
+deployments:
+  - modules:
+      - path: ${var test_path}app.cfn
+        env_vars:
+          MY_USERNAME_MODULE: ${env USER}
+        options:
+          sample_module_option: ${env USER}.module.options
+        environments:
+          module_test_param: ${env USER}
+    regions: ${var test_regions}
+    environments:
+      test_param: ${var test_region_map.${env AWS_REGION}.${env DEPLOY_ENVIRONMENT}}
+    env_vars:
+      MY_USERNAME: ${env USER}
+    module_options:
+      deployment_option: ${env USER}.deployment.module_options
+    assume_role:
+      arn: ${var accounts.${env DEPLOY_ENVIRONMENT}.assume_role}
+    account_id: ${var accounts.${env DEPLOY_ENVIRONMENT}.account_id}

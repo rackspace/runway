@@ -1,9 +1,9 @@
 """Environment variable lookup."""
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,arguments-differ
 import os
 
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
-from . import LookupHandler
 
 TYPE_NAME = "envvar"
 
@@ -12,7 +12,7 @@ class EnvvarLookup(LookupHandler):
     """Environment variable lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Retrieve an environment variable.
 
         Args:

@@ -120,17 +120,14 @@ class CloudFormation(RunwayModule):
         stacker_env_file_present = os.path.isfile(
             os.path.join(self.path, stacker_env_file)
         )
-        if isinstance(self.options.get('environments',
-                                       {}).get(self.context.env_name),
-                      dict):
-            for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
-                stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
+
+        for key, val in self.options['parameters'].items():
+            stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
+
         if stacker_env_file_present:
             stacker_cmd.append(stacker_env_file)
 
-        if not (stacker_env_file_present or self.options.get(
-                'environments',
-                {}).get(self.context.env_name)):
+        if not (stacker_env_file_present or self.options['environment']):
             response['skipped_configs'] = True
             LOGGER.info(
                 "Skipping stacker %s; no environment "
@@ -150,7 +147,7 @@ class CloudFormation(RunwayModule):
                     if command == 'destroy':
                         sorted_files = reversed(sorted_files)
                     for name in sorted_files:
-                        if re.match(r"runway(\..*)?\.yml", name) or (
+                        if re.match(r"runway(\..*)?\.(yml|yaml)", name) or (
                                 name.startswith('.') or
                                 name == 'docker-compose.yml'):
                             # Hidden files (e.g. .gitlab-ci.yml), Runway configs,

@@ -1,11 +1,11 @@
 """AMI lookup."""
-# pylint: disable=unused-argument,line-too-long
-import re
+# pylint: disable=unused-argument,line-too-long,arguments-differ
 import operator
+import re
 
-from . import LookupHandler
-from ...util import read_value_from_path
+from ....lookups.handlers.base import LookupHandler
 from ...session_cache import get_session
+from ...util import read_value_from_path
 
 TYPE_NAME = "ami"
 
@@ -26,7 +26,7 @@ class AmiLookup(LookupHandler):
     """AMI lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None):
+    def handle(cls, value, context=None, provider=None, **kwargs):
         """Fetch the most recent AMI Id using a filter.
 
         Args:

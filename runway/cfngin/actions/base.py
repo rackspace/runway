@@ -74,6 +74,7 @@ def plan(description, stack_action, context, tail=None, reverse=False):
 
     """
     def target_fn(*_args, **_kwargs):
+        """Target function."""
         return COMPLETE
 
     steps = [
@@ -146,7 +147,7 @@ class BaseAction(object):
         self.provider_builder = provider_builder
         self.bucket_name = context.bucket_name
         self.cancel = cancel or threading.Event()
-        self.bucket_region = context.config.stacker_bucket_region
+        self.bucket_region = context.config.cfngin_bucket_region
         if not self.bucket_region and provider_builder:
             self.bucket_region = provider_builder.region
         self.s3_conn = get_session(self.bucket_region).client('s3')

@@ -11,7 +11,7 @@ from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler
 from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref
 
-LOOKUP_HANDLERS = {}
+CFNGIN_LOOKUP_HANDLERS = {}
 
 
 def register_lookup_handler(lookup_type, handler_or_path):
@@ -26,7 +26,7 @@ def register_lookup_handler(lookup_type, handler_or_path):
     handler = handler_or_path
     if isinstance(handler_or_path, string_types):
         handler = load_object_from_string(handler_or_path)
-    LOOKUP_HANDLERS[lookup_type] = handler
+    CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
     if not isinstance(handler, type):
         # Hander is a not a new-style handler
         logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def unregister_lookup_handler(lookup_type):
         lookup_type (str): Name of the lookup type to unregister.
 
     """
-    LOOKUP_HANDLERS.pop(lookup_type, None)
+    CFNGIN_LOOKUP_HANDLERS.pop(lookup_type, None)
 
 
 def resolve_lookups(variable, context, provider):
@@ -72,7 +72,7 @@ def resolve_lookups(variable, context, provider):
     resolved_lookups = {}
     for lookup in variable.lookups:
         try:
-            handler = LOOKUP_HANDLERS[lookup.type]
+            handler = CFNGIN_LOOKUP_HANDLERS[lookup.type]
         except KeyError:
             raise UnknownLookupType(lookup)
         try:
@@ -86,15 +86,15 @@ def resolve_lookups(variable, context, provider):
     return resolved_lookups
 
 
-register_lookup_handler(output.TYPE_NAME, output.OutputLookup)
-register_lookup_handler(kms.TYPE_NAME, kms.KmsLookup)
-register_lookup_handler(ssmstore.TYPE_NAME, ssmstore.SsmstoreLookup)
-register_lookup_handler(envvar.TYPE_NAME, envvar.EnvvarLookup)
-register_lookup_handler(xref.TYPE_NAME, xref.XrefLookup)
-register_lookup_handler(rxref.TYPE_NAME, rxref.RxrefLookup)
 register_lookup_handler(ami.TYPE_NAME, ami.AmiLookup)
-register_lookup_handler(file_handler.TYPE_NAME, file_handler.FileLookup)
-register_lookup_handler(split.TYPE_NAME, split.SplitLookup)
 register_lookup_handler(default.TYPE_NAME, default.DefaultLookup)
-register_lookup_handler(hook_data.TYPE_NAME, hook_data.HookDataLookup)
 register_lookup_handler(dynamodb.TYPE_NAME, dynamodb.DynamodbLookup)
+register_lookup_handler(envvar.TYPE_NAME, envvar.EnvvarLookup)
+register_lookup_handler(file_handler.TYPE_NAME, file_handler.FileLookup)
+register_lookup_handler(hook_data.TYPE_NAME, hook_data.HookDataLookup)
+register_lookup_handler(kms.TYPE_NAME, kms.KmsLookup)
+register_lookup_handler(output.TYPE_NAME, output.OutputLookup)
+register_lookup_handler(rxref.TYPE_NAME, rxref.RxrefLookup)
+register_lookup_handler(split.TYPE_NAME, split.SplitLookup)
+register_lookup_handler(ssmstore.TYPE_NAME, ssmstore.SsmstoreLookup)
+register_lookup_handler(xref.TYPE_NAME, xref.XrefLookup)

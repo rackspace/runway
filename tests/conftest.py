@@ -1,12 +1,11 @@
 """Pytest fixtures and plugins."""
-from typing import Dict
+from typing import Dict, Optional
 
 import logging
 import os
 
 import pytest
 import yaml
-
 
 LOG = logging.getLogger(__name__)
 
@@ -67,3 +66,44 @@ def yaml_fixtures(request, fixture_dir):  # pylint: disable=redefined-outer-name
             data = _file.read()
             result[file_path] = yaml.safe_load(data)
     return result
+
+
+
+def _override_env_vars(overrides):
+    # type: (Dict[str, Optional[str]]) -> Dict[str, str]
+    """Use a dict to override os.environ values.
+
+    Ensure AWS SDK finds some (bogus) credentials in the environment and
+    doesn't try to use other providers.
+
+    """
+    overrides = {
+        'AWS_ACCESS_KEY_ID': 'testing',
+        'AWS_SECRET_ACCESS_KEY': 'testing',
+        'AWS_DEFAULT_REGION': 'us-east-1'
+    }
+    saved_env = {}
+    for key, value in overrides.items():
+        LOG.info('Overriding env var: {}={}'.format(key, value))
+        saved_env[key] = os.environ.get(key, None)
+        os.environ[key] = value
+
+    yield
+
+    for key, value in saved_env.items():
+        LOG.info('Restoring saved env var: {}={}'.format(key, value))
+        if value is None:
+            del os.environ[key]
+        else:
+            os.environ[key] = value
+
+    saved_env.clear()
+
+
+@pytest.fixture(scope='package')
+def fixture_dir():
+    # type: () -> str
+    """Path to the fixture directory."""
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        'fixtures')
+    return path
