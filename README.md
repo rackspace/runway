@@ -58,11 +58,11 @@ Runway is available via any of the following installation methods. Use whatever 
 
 Use one of the endpoints below to download a single-binary executable version of Runway based on your operating system.
 
-| Operating System | Endpoint                             |
-|------------------|--------------------------------------|
-| Linux            | https://oni.ca/runway/latest/linux   |
-| macOS            | https://oni.ca/runway/latest/osx     |
-| Windows          | https://oni.ca/runway/latest/windows |
+| Operating System | Endpoint                               |
+|------------------|----------------------------------------|
+| Linux            | <https://oni.ca/runway/latest/linux>   |
+| macOS            | <https://oni.ca/runway/latest/osx>     |
+| Windows          | <https://oni.ca/runway/latest/windows> |
 
 ```shell
 $ curl -L oni.ca/runway/latest/osx -o runway
