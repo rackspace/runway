@@ -70,16 +70,16 @@ updating your stacks. By default it uses a bucket named
 ``stacker-${namespace}``, where the namespace_ is the namespace_ provided the
 config.
 
-If you want to change this, provide the ``stacker_bucket`` top-level keyword
+If you want to change this, provide the ``cfngin_bucket`` top-level keyword
 in the config.
 
 The bucket will be created in the same region that the stacks will be launched
 in.  If you want to change this, or if you already have an existing bucket
-in a different region, you can set the ``stacker_bucket_region`` to
+in a different region, you can set the ``cfngin_bucket_region`` to
 the region where you want to create the bucket.
 
 If you want CFNgin to upload templates directly to CloudFormation, instead of
-first uploading to S3, you can set ``stacker_bucket`` to an empty string.
+first uploading to S3, you can set ``cfngin_bucket`` to an empty string.
 However, note that template size is greatly limited when uploading directly.
 See the `CloudFormation Limits Reference`_.
 
@@ -171,7 +171,7 @@ Use the ``paths`` option when subdirectories of the repo/archive/directory
 should be added to CFNgins's ``sys.path``.
 
 Cloned repos/archives will be cached between builds; the cache location defaults
-to ``~/.runway_cache`` but can be manually specified via the ``stacker_cache_dir``
+to ``~/.runway_cache`` but can be manually specified via the ``cfngin_cache_dir``
 top-level keyword.
 
 
@@ -287,7 +287,7 @@ Tags
 
 CloudFormation supports arbitrary key-value pair tags. All stack-level, including automatically created tags, are
 propagated to resources that AWS CloudFormation supports. See `AWS CloudFormation Resource Tags Type`_ for more details.
-If no tags are specified, the ``stacker_namespace`` tag is applied to your stack with the value of ``namespace`` as the
+If no tags are specified, the ``cfngin_namespace`` tag is applied to your stack with the value of ``namespace`` as the
 tag value.
 
 If you prefer to apply a custom set of tags, specify the top-level keyword ``tags`` as a map.

@@ -331,7 +331,7 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
                         content_hash, payload_acl)
 
 
-def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
+def select_bucket_region(custom_bucket, hook_region, cfngin_bucket_region,
                          provider_region):
     """Return the appropriate region to use when uploading functions.
 
@@ -342,8 +342,8 @@ def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
             `bucket` kwarg of the aws_lambda hook, if provided.
         hook_region (str): The contents of the `bucket_region` argument to
             the hook.
-        stacker_bucket_region (str): The contents of the
-            `stacker_bucket_region` global setting.
+        cfngin_bucket_region (str): The contents of the
+            ``cfngin_bucket_region`` global setting.
         provider_region (str): The region being used by the provider.
 
     Returns:
@@ -354,7 +354,7 @@ def select_bucket_region(custom_bucket, hook_region, stacker_bucket_region,
     if custom_bucket:
         region = hook_region
     else:
-        region = stacker_bucket_region
+        region = cfngin_bucket_region
     return region or provider_region
 
 
@@ -388,7 +388,7 @@ def upload_lambda_functions(context, provider, **kwargs):
             Omitting it will cause the default CFNgin bucket to be used.
         bucket_region (Optional[str]): The region in which the bucket should
             exist. If not given, the region will be either be that of the
-            global ``stacker_bucket_region`` setting, or else the region in
+            global ``cfngin_bucket_region`` setting, or else the region in
             use by the provider.
         prefix (Optional[str]): S3 key prefix to prepend to the uploaded
             zip name.
@@ -498,7 +498,7 @@ def upload_lambda_functions(context, provider, **kwargs):
     bucket_region = select_bucket_region(
         custom_bucket,
         custom_bucket_region,
-        context.config.stacker_bucket_region,
+        context.config.cfngin_bucket_region,
         provider.region
     )
 

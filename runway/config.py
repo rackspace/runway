@@ -40,7 +40,7 @@ class ConfigComponent(object):
 class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
     """A module defines the directory to be processed and applicable options.
 
-    It can consist of `CloudFormation`_ (using `Stacker`_),
+    It can consist of `CloudFormation`_ (using `CFNgin`_),
     `Terraform`_, `Serverless Framework`_, `AWS CDK`_, or `Kubernetes`_.
     It is recommended to place the appropriate extension on each directory
     for identification (but it is not required). See
@@ -182,7 +182,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
             - `AWS CDK`_
             - `CloudFormation`_
             - `Serverless Framework`_
-            - `Stacker`_
+            - `CFNgin`_
             - `Troposphere`_
             - `Terraform`_
             - `Kubernetes`_

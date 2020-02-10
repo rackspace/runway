@@ -182,7 +182,8 @@ def process_remote_sources(raw_config, environment=None):
     if config and config.get('package_sources'):
         processor = SourceProcessor(
             sources=config['package_sources'],
-            stacker_cache_dir=config.get('stacker_cache_dir')
+            cfngin_cache_dir=config.get('cfngin_cache_dir',
+                                        config.get('stacker_cache_dir'))
         )
         processor.get_package_sources()
         if processor.configs_to_merge:
@@ -421,28 +422,45 @@ class Config(Model):
         print dump(config)
 
     Attributes:
-        log_formats (DictType)
-        lookups (DictType)
-        mappings (DictType)
-        namespace (StringType)
-        namespace_delimiter (StringType)
-        package_sources (ModelType)
-        post_build (ListType)
-        post_destroy (ListType)
-        pre_build (ListType)
-        pre_destroy (ListType)
-        service_role (StringType)
-        stacker_bucket (StringType)
-        stacker_bucket_region (StringType)
-        stacker_cache_dir (StringType)
-        stacks (ListType)
-        sys_path (StringType)
-        tags (DictType)
-        targets (ListType)
-        template_indent (StringType)
+        cfngin_bucket (StringType): Bucket to use for CFNgin resources (e.g.
+            CloudFormation templates). May be an empty string.
+        cfngin_bucket_region (StringType): Explicit region to use for
+            ``cfngin_bucket``.
+        cfngin_cache_dir (StringType): Local directory to use for caching.
+        log_formats (DictType): Custom formatting for log messages.
+        lookups (DictType): Register custom lookups.
+        mappings (DictType): Mappings that will be added to all stacks.
+        namespace (StringType): Namespace to prepend to everything.
+        namespace_delimiter (StringType): Character used to separate
+            ``namespace`` and anything it prepends.
+        package_sources (ModelType): Remote source locations.
+        post_build (ListType): Hooks to run after a build action.
+        post_destroy (ListType): Hooks to run after a destroy action.
+        pre_build (ListType): Hooks to run before a build action.
+        pre_destroy (ListType): Hooks to run before a destroy action.
+        service_role (StringType): IAM role for CloudFormation to use.
+        stacker_bucket (StringType): [DEPRECATED] Replaced by
+            ``cfngin_bucket``, support will be retained until the release
+            of version 2.0.0 at the earliest.
+        stacker_bucket_region (StringType): [DEPRECATED] Replaced by
+            ``cfngin_bucket_region``, support will be retained until the
+            release of version 2.0.0 at the earliest.
+        stacker_cache_dir (StringType): [DEPRECATED] Replaced by
+            ``cfngin_cache_dir``, support will be retained until the release
+            of version 2.0.0 at the earliest.
+        stacks (ListType): Stacks to be processed.
+        sys_path (StringType): Relative or absolute path to use as the work
+            directory.
+        tags (DictType): Tags to apply to all resources.
+        targets (ListType): Stag grouping.
+        template_indent (StringType): Spaces to use per-indent level when
+            outputing a template to json.
 
     """
 
+    cfngin_bucket = StringType(serialize_when_none=False)
+    cfngin_bucket_region = StringType(serialize_when_none=False)
+    cfngin_cache_dir = StringType(serialize_when_none=False)
     log_formats = DictType(StringType, serialize_when_none=False)
     lookups = DictType(StringType, serialize_when_none=False)
     mappings = DictType(
@@ -465,6 +483,41 @@ class Config(Model):
     targets = ListType(
         ModelType(Target), serialize_when_none=False)
     template_indent = StringType(serialize_when_none=False)
+
+    def __init__(self, raw_data=None, trusted_data=None,
+                 deserialize_mapping=None, init=True, partial=True,
+                 strict=True, validate=False, app_data=None, lazy=False,
+                 **kwargs):
+        """Extend functionality of the parent class.
+
+        Manipulation here allows us to _clone_ the values of legacy stacker
+        field into their new names. Doing so we can retain support for Stacker
+        configs and CFNgin configs.
+
+        """
+        if raw_data:  # this can be empty when running unittests
+            for field_suffix in ['bucket', 'bucket_region', 'cache_dir']:
+                cfngin_field = 'cfngin_' + field_suffix
+                stacker_field = 'stacker_' + field_suffix
+                # explicitly check for an empty string since it has specific logic.
+                # cfngin fields with a value take precedence.
+                if (
+                        not (raw_data.get(cfngin_field) or
+                             raw_data.get(cfngin_field) == '') and
+                        (raw_data.get(stacker_field) or
+                         raw_data.get(stacker_field) == '')
+                ):
+                    raw_data[cfngin_field] = raw_data[stacker_field]
+        super(Config, self).__init__(raw_data=raw_data,
+                                     trusted_data=trusted_data,
+                                     deserialize_mapping=deserialize_mapping,
+                                     init=init,
+                                     partial=partial,
+                                     strict=strict,
+                                     validate=validate,
+                                     app_data=app_data,
+                                     lazy=lazy,
+                                     **kwargs)
 
     def _remove_excess_keys(self, data):
         excess_keys = set(data.keys())

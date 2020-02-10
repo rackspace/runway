@@ -1,7 +1,7 @@
 .. _AWS CDK: https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _Serverless Framework: https://serverless.com/
-.. _Stacker: https://stacker.readthedocs.io/en/stable/
+.. _CFNgin: cfngin/index.html
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
 .. _Kubernetes: https://kubernetes.io/
