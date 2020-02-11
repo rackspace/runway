@@ -260,7 +260,6 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
         'python -m pip install -t /var/task -r /var/task/requirements.txt'
     )
 
-    # TODO figure out what to do with the logs returned here or drop the var
     logs = docker.containers.run(image=docker_image,
                                  command=['/bin/sh', '-c', pip_cmd],
                                  auto_remove=True,
@@ -593,7 +592,19 @@ def upload_lambda_functions(context, provider, **kwargs):
             build. Keys correspond to function names, used to derive key
             names for the payload. Each value should itself be a dictionary,
             with the following data:
-
+            **use_pipenv (Optional[bool])**:
+                Will determine if pipenv will be used to generate requirements.txt
+                from an existing Pipfile.
+            **pipenv_timeout (Optional[int])**
+                Time in milliseconds to wait while running pipenv.
+                (*default:* `900`)
+            **pipenv_lock_timeout (Optional[int])**
+                Time in milliseconds to wait while creating lock file with pipenv.
+                (*default:* `300`)
+            **dockerize_pip (Optional[Union[str, bool]])**
+                Whether to use Docker when restoring packages with pip.
+                Can be set to True/False or the special string 'non-linux'
+                which will only run on non Linux systems.
             **path (str)**
                 Base directory of the Lambda function payload content.
                 If it not an absolute path, it will be considered relative
