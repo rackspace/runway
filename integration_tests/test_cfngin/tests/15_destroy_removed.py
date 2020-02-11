@@ -8,8 +8,8 @@ from integration_tests.test_cfngin.test_cfngin import Cfngin
 FILE_BASENAME = '.'.join(basename(__file__).split('.')[:-1])
 
 
-class TestSimpleBuild(Cfngin):
-    """Test CFNgin simple build.
+class DestroyRemoved(Cfngin):
+    """Test CFNgin persistent graph destroying removed stacks.
 
     Requires valid AWS credentials.
 
