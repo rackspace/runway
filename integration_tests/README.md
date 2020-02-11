@@ -38,9 +38,9 @@ that also start with `test_` and execute the `run()` and `teardown()` methods in
 ## Helper Functions
 
 In `util.py` there are a couple of helper functions:
-* `import_tests`
-    * This will import tests from a given path and pattern, so your tests can import more tests.
-    * See `test_terraform.py` for an example of this.
-* `execute_tests`
-    * Given a list of classes, it will iterate through them and run  `run()` and `teardown()`.
-    * This will also give a report of the results of each test.
+- `import_tests`
+  - This will import tests from a given path and pattern, so your tests can import more tests.
+  - See `test_terraform.py` for an example of this.
+- `execute_tests`
+  - Given a list of classes, it will iterate through them and run  `run()` and `teardown()`.
+  - This will also give a report of the results of each test.

@@ -33,7 +33,7 @@ Supported Deployment Tools
 Example
 -------
 
-A typical Runway configuration is unobtrusive – it just lists the
+A typical Runway configuration is unobtrusive - it just lists the
 deployment order and locations (regions).
 
 ::

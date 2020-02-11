@@ -1,5 +1,5 @@
-"""Stacker hook for building static website."""
-
+"""CFNgin hook for building static website."""
+# TODO move to runway.cfngin.hooks on next major release
 import logging
 import os
 import tempfile
@@ -8,8 +8,8 @@ import zipfile
 from boto3.s3.transfer import S3Transfer
 import boto3
 
-from stacker.lookups.handlers.rxref import RxrefLookup
-from stacker.session_cache import get_session
+from ...cfngin.lookups.handlers.rxref import RxrefLookup
+from ...cfngin.session_cache import get_session
 
 from .util import get_hash_of_files
 from ...util import change_dir, run_commands

@@ -73,8 +73,7 @@ def use_npm_ci(path):
                 subprocess.call(
                     [NPM_BIN, 'ci', '-h'],
                     stdout=fnull,
-                    stderr=subprocess.STDOUT
-                ) == 0):
+                    stderr=subprocess.STDOUT) == 0):
             return True
     return False
 

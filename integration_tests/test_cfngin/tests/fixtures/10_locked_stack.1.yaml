@@ -1,0 +1,7 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  locked-stack-vpc:
+    class_path: fixtures.mock_blueprints.Dummy

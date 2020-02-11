@@ -29,7 +29,7 @@ class ModuleTags(IntegrationTest):
         'stacks': {}
     }
     stack_definition = {
-        'template_path': 'templates/test_stack.yaml'
+        'class_path': 'blueprints.fake_stack.BlueprintClass'
     }
 
     def check_stacks(self, should_exist):

@@ -1,8 +1,8 @@
-"""Stacker hook for cleaning up resources prior to CFN stack deletion."""
-
+"""CFNgin hook for cleaning up resources prior to CFN stack deletion."""
+# TODO move to runway.cfngin.hooks on next major release
 import logging
 
-from stacker.session_cache import get_session
+from ..cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 

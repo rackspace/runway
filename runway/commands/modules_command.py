@@ -20,7 +20,8 @@ from .runway_command import RunwayCommand, get_env
 from ..context import Context
 from ..path import Path
 from ..runway_module_type import RunwayModuleType
-from ..util import change_dir, merge_dicts, merge_nested_environment_dicts
+from ..util import (change_dir, extract_boto_args_from_env, merge_dicts,
+                    merge_nested_environment_dicts)
 
 if sys.version_info[0] > 2:
     import concurrent.futures
@@ -151,7 +152,7 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         print('')
         print('Configured modules in deployment \'%s\':' % deployment.get('name'))
         for i, module in enumerate(modules):
-            print(" %s: %s" % (i+1, _module_menu_entry(module, env_name)))
+            print(" %s: %s" % (i + 1, _module_menu_entry(module, env_name)))
         print('')
         print('')
         if command == 'destroy':
@@ -265,6 +266,54 @@ def validate_account_credentials(deployment, context):
                                account_alias)
 
 
+def validate_environment(module_name, env_def, env_vars):
+    """Check if an environment should be deployed to.
+
+    Args:
+        module_name (str): Name of the module being validated.
+        env_def (Union[bool, str, List[str]]): Environment definition from
+            the config file. Can be bool, string of "$ACCOUNT_ID/$REGION",
+            or a list of strings.
+        env_vars (Dict[str, str]): Environment variables.
+
+    Returns:
+        Booleon value of wether to deploy or not.
+
+    """
+    if isinstance(env_def, bool):  # explicit enable or disable
+        if env_def:
+            LOGGER.debug('Module \'%s\' explicitly enabled', module_name)
+            return True
+
+        LOGGER.info('')
+        LOGGER.info(
+            '---- Skipping module \'%s\'; explicitly disabled ----------',
+            module_name
+        )
+        return False
+
+    if isinstance(env_def, (list, six.string_types)):
+        boto_args = extract_boto_args_from_env(env_vars)
+        sts_client = boto3.client('sts', **boto_args)
+        current_env = '{}/{}'.format(
+            sts_client.get_caller_identity()['Account'],
+            env_vars['AWS_DEFAULT_REGION']
+        )
+
+        if current_env in env_def:
+            LOGGER.debug('Current environment \'%s\' found in %s for module \'%s\'',
+                         current_env, str(env_def), module_name)
+            return True
+        LOGGER.info('')
+        LOGGER.info(
+            '---- Skipping module \'%s\'; account_id/region mismatch ---',
+            module_name
+        )
+        return False
+    raise TypeError('env_def of type "%s" provided to validate_environment; '
+                    'expected type of bool, list, or str' % type(env_def))
+
+
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
@@ -283,7 +332,7 @@ class ModulesCommand(RunwayCommand):
         # set default names if needed
         for i, deployment in enumerate(deployments):
             if not deployment.get('name'):
-                deployment['name'] = 'deployment_' + str(i+1)
+                deployment['name'] = 'deployment_' + str(i + 1)
 
         if command == 'destroy':
             LOGGER.info('WARNING!')
@@ -329,6 +378,8 @@ class ModulesCommand(RunwayCommand):
     def _process_deployments(self, deployments, context):
         """Process deployments."""
         for _, deployment in enumerate(deployments):
+            LOGGER.debug('Resolving deployment for preprocessing...')
+            deployment.resolve(context, self.runway_vars, pre_process=True)
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Processing deployment '%s' ===========================",
@@ -462,20 +513,55 @@ class ModulesCommand(RunwayCommand):
                 self._deploy_module(module, deployment, context)
 
     def _deploy_module(self, module, deployment, context):
-        module_opts = {}
-        if deployment.get('environments'):
-            module_opts['environments'] = deployment['environments'].copy()  # noqa
-        if deployment.get('module_options'):
-            module_opts['options'] = deployment['module_options'].copy()  # noqa
+        """Execute module deployment.
+
+        1. Resolves variables in :class:`runway.config.DeploymentDefinition`
+           and :class:`runway.config.ModuleDefinition`.
+        2. Constructs a ``Dict`` of options to be passed to the ``module_class``.
+        3. Determine the class to use to execute the
+           :class:`runway.config.ModuleDefinition`, ``cd`` to the module
+           directory, and instanteate the class.
+        4. Find and execute the command method of the instanteated class.
+
+        Args:
+            module (:class:`runway.config.ModuleDefinition`): The module
+                to be deployed.
+            deployment (:class:`runway.config.DeploymentDefinition`): The
+                deployment the module belongs to. Used to get options,
+                environments, parameters, and env_vars from the deployment level.
+            context: (:class:`runway.context.Context`): Current context instance.
+
+        """
+        deployment.resolve(context, self.runway_vars)
+        module.resolve(context, self.runway_vars)
+        module_opts = {
+            'environments': deployment.environments.copy(),
+            'options': deployment.module_options.copy(),
+            'parameters': deployment.parameters.copy()
+        }
 
         path = Path(module, self.env_root, os.path.join(self.env_root, '.runway_cache'))
 
-        module_opts = merge_dicts(module_opts, module.__dict__)
+        module_opts = merge_dicts(module_opts, module.data)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
+
+        module_opts['environment'] = module_opts['environments'].get(
+            context.env_name, {}
+        )
+        if isinstance(module_opts['environment'], dict):  # legacy support
+            module_opts['parameters'].update(module_opts['environment'])
+            if module_opts['parameters']:
+                # deploy if env is empty but params are provided
+                module_opts['environment'] = True
+        else:
+            if not validate_environment(module.name,
+                                        module_opts['environment'],
+                                        context.env_vars):
+                return  # skip if env validation fails
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
-                    module['path'],
+                    module.path,
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
@@ -487,7 +573,7 @@ class ModulesCommand(RunwayCommand):
             if module_env_vars:
                 context = copy.deepcopy(context)  # changes for this mod only
                 LOGGER.info("OS environment variable overrides being "
-                            "applied this module: %s",
+                            "applied to this module: %s",
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
 
@@ -518,14 +604,11 @@ class ModulesCommand(RunwayCommand):
         if deployments is None:
             deployments = []
 
-        reversed_deployments = []
-        for i in deployments[::-1]:
-            deployment = copy.deepcopy(i)
-            for config in ['modules', 'regions']:
-                if deployment.get(config):
-                    deployment[config] = deployment[config][::-1]
-            reversed_deployments.append(deployment)
-        return reversed_deployments
+        for deployment in deployments:
+            deployment.reverse()
+
+        deployments.reverse()
+        return deployments
 
     @staticmethod
     def select_deployment_to_run(deployments=None, command='build'):
@@ -541,7 +624,7 @@ class ModulesCommand(RunwayCommand):
             print('')
             print('Configured deployments:')
             for i, deployment in enumerate(deployments):
-                print(" %d: %s" % (i+1, _deployment_menu_entry(deployment)))
+                print(" %d: %s" % (i + 1, _deployment_menu_entry(deployment)))
             print('')
             print('')
             if command == 'destroy':

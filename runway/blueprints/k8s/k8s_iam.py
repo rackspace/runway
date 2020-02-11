@@ -9,8 +9,8 @@ import awacs.sts
 from awacs.aws import Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
 
-from stacker.blueprints.base import Blueprint
-# from stacker.blueprints.variables.types import CFNString
+from runway.cfngin.blueprints.base import Blueprint
+# from runway.cfngin.blueprints.variables.types import CFNString
 
 IAM_POLICY_ARN_PREFIX = 'arn:aws:iam::aws:policy/'
 
@@ -119,5 +119,5 @@ class Iam(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
     print(Iam('test', Context({"namespace": "test"}), None).to_json())

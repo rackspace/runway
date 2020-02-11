@@ -424,12 +424,6 @@
             ],
             "version": "==2.0.5"
         },
-        "stacker": {
-            "hashes": [
-                "sha256:fb8d519a88758eae6c236b859fc2aff658c8cfa2df2666c68eece9b09cd36339"
-            ],
-            "version": "==1.7.0"
-        },
         "troposphere": {
             "hashes": [
                 "sha256:fbf3592fb0559102e2abf15aa26cadbeced3390565ee294e6df0fb2d421bf759"

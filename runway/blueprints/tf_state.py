@@ -10,8 +10,8 @@ import awacs.dynamodb
 import awacs.s3
 from awacs.aws import Allow, PolicyDocument, Statement
 
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNString
 
 
 class TfState(Blueprint):
@@ -154,7 +154,7 @@ class TfState(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
     print(TfState('test',
                   Context({'namespace': 'test'}),
                   None).to_json())

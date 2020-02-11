@@ -27,3 +27,10 @@ preuninstall.js
 !runway/templates/**/package.json
 !runway/templates/**/.npmignore
 !integration_tests/**/package.json
+
+# Test artifacts & copied fixtures
+tests/fixtures/blueprints/*-result
+integration_tests/test_cfngin/tests/[0-9][0-9]_*.yaml
+
+# Programatically generated doc pages
+docs/source/apidocs

@@ -1,15 +1,13 @@
 """Cloudformation module."""
-
 import logging
 import os
-import platform
 import re
 import sys
 
 import yaml
 
 from . import RunwayModule, run_module_command
-from ..util import change_dir, get_embedded_lib_path
+from ..util import change_dir
 
 LOGGER = logging.getLogger('runway')
 
@@ -50,28 +48,22 @@ def get_stacker_env_file(path, environment, region):
     return "%s-%s.env" % (environment, region)  # fallback to env & region
 
 
-def make_stacker_cmd_string(args, lib_path):
+def make_stacker_cmd_string(args):
     """Generate stacker invocation script from command line arg list.
 
     This is the standard stacker invocation script, with the following changes:
     * Adding our explicit arguments to parse_args (instead of leaving it empty)
     * Overriding sys.argv
-    * Adding embedded Runway lib directory to sys.path
+
     """
-    if platform.system().lower() == 'windows':
-        # Because this will be run via subprocess, the backslashes on Windows
-        # will cause command errors
-        lib_path = lib_path.replace('\\', '/')
     # This same code is duplicated in the base Runway command `run-stacker`
     return ("import sys;"
+            "from runway.cfngin.logger import setup_logging;"
+            "from runway.cfngin.commands import Stacker;"
             "sys.argv = ['stacker'] + {args};"
-            "sys.path.insert(1, '{lib_path}');"
-            "from stacker.logger import setup_logging;"
-            "from stacker.commands import Stacker;"
             "stacker = Stacker(setup_logging=setup_logging);"
             "args = stacker.parse_args({args});"
-            "stacker.configure(args);args.run(args)".format(args=str(args),
-                                                            lib_path=lib_path))
+            "stacker.configure(args);args.run(args)".format(args=str(args)))
 
 
 class CloudFormation(RunwayModule):
@@ -94,10 +86,7 @@ class CloudFormation(RunwayModule):
             )
         else:
             # traditional python execution
-            stacker_cmd_str = make_stacker_cmd_string(
-                cmd_list,
-                get_embedded_lib_path()
-            )
+            stacker_cmd_str = make_stacker_cmd_string(cmd_list)
             executable_cmd_list = [sys.executable, '-c']
             LOGGER.debug(
                 "Stacker command being executed: %s \"%s\"",
@@ -131,17 +120,14 @@ class CloudFormation(RunwayModule):
         stacker_env_file_present = os.path.isfile(
             os.path.join(self.path, stacker_env_file)
         )
-        if isinstance(self.options.get('environments',
-                                       {}).get(self.context.env_name),
-                      dict):
-            for (key, val) in self.options['environments'][self.context.env_name].items():  # noqa
-                stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
+
+        for key, val in self.options['parameters'].items():
+            stacker_cmd.extend(['-e', "%s=%s" % (key, val)])
+
         if stacker_env_file_present:
             stacker_cmd.append(stacker_env_file)
 
-        if not (stacker_env_file_present or self.options.get(
-                'environments',
-                {}).get(self.context.env_name)):
+        if not (stacker_env_file_present or self.options['environment']):
             response['skipped_configs'] = True
             LOGGER.info(
                 "Skipping stacker %s; no environment "
@@ -161,7 +147,7 @@ class CloudFormation(RunwayModule):
                     if command == 'destroy':
                         sorted_files = reversed(sorted_files)
                     for name in sorted_files:
-                        if re.match(r"runway(\..*)?\.yml", name) or (
+                        if re.match(r"runway(\..*)?\.(yml|yaml)", name) or (
                                 name.startswith('.') or
                                 name == 'docker-compose.yml'):
                             # Hidden files (e.g. .gitlab-ci.yml), Runway configs,
