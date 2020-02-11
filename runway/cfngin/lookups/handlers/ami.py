@@ -3,7 +3,8 @@
 import operator
 import re
 
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
+
 from ...session_cache import get_session
 from ...util import read_value_from_path
 
