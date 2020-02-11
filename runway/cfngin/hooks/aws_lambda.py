@@ -261,10 +261,13 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
     )
 
     # TODO figure out what to do with the logs returned here or drop the var
-    _ = docker.containers.run(image=docker_image,
-                              command=['/bin/sh', '-c', pip_cmd],
-                              auto_remove=True,
-                              mounts=[work_dir_mount])
+    logs = docker.containers.run(image=docker_image,
+                                 command=['/bin/sh', '-c', pip_cmd],
+                                 auto_remove=True,
+                                 mounts=[work_dir_mount],
+                                 stream=True)
+    for line in logs:
+        LOGGER.info(line.decode('UTF-8').strip())
 
 
 def _zip_package(package_root, includes, excludes, dockerize_pip=False,
