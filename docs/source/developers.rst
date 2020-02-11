@@ -1,3 +1,5 @@
+.. _Pyinstaller: https://pypi.org/project/PyInstaller/
+
 .. _developers:
 .. highlight:: shell
 
@@ -16,6 +18,30 @@ This project uses ``pipenv`` to create Python virtual environment. This must be 
 
 
 With pipenv installed, run ``make sync_all`` to setup your development environment. This will create all the requred virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
+
+
+Building Pyinstaller Packages Locally
+-------------------------------------
+
+We use Pyinstaller_ to build executables that do not require Python to be installed on a system.
+These are built by Travis CI for distribution to ensure a consistent environment but they can also be build locally for testing.
+
+Prerequisites
+~~~~~~~~~~~~~
+
+These need to be installed globally so they are not included in the Pipfile.
+
+* ``setuptools==45.2.0``
+* ``virtualenv==20.0.1``
+* ``pipenv==2018.11.26``
+
+Process
+~~~~~~~
+
+1. Export ``TRAVIS_OS_NAME`` environment variable for your system (``linux``, ``osx``, or ``windows``).
+2. Execute ``make travisbuild_file`` or ``make travisbuild_folder`` from the root of the repo.
+
+The output of these commands can be found in ``../artifacts``
 
 
 Travis CI
