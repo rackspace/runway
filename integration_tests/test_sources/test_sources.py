@@ -5,7 +5,7 @@ import glob
 from send2trash import send2trash
 
 from integration_tests.integration_test import IntegrationTest
-from util import (copy_file, import_tests, execute_tests)
+from integration_tests.util import copy_file, import_tests, execute_tests
 
 
 class TestSources(IntegrationTest):
