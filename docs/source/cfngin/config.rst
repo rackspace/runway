@@ -130,7 +130,7 @@ like the below.
 When executing an action that will be modifying the persistent graph
 (build or destroy), the S3 object is *"locked"*. The lock is a tag applied to
 the object at the start of one of these actions. The tag-key is
-**stacker_lock_code** and the tag-value is UUID generated each time a command
+**cfngin_lock_code** and the tag-value is UUID generated each time a command
 is run. In order for CFNgin to lock a persistent graph object, the tag must
 not be present on the object. For CFNgin to act on the graph_ (modify or
 unlock) the value of the tag must match the UUID of the current CFNgin
@@ -141,7 +141,7 @@ condition.
 
 .. note::
   A persistent graph object can be unlocked manually by removing the
-  **stacker_lock_code** tag from it. This should be done with caution as it
+  **cfngin_lock_code** tag from it. This should be done with caution as it
   will cause any active sessions to raise an error.
 
 Persistent Graph Example
