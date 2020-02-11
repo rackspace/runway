@@ -24,7 +24,7 @@ class BlueprintClass(Blueprint):
         },
         "AppName": {
             "type": CFNString,
-            "description": "Name of role"
+            "description": "Name of app"
         }
     }
 
