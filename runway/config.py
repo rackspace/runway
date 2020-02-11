@@ -585,6 +585,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             - :ref:`command-plan`
 
         """
+        self._reverse = False
         self.name = deployment.pop('name')  # type: str
         self._account_alias = Variable(
             self.name + '.account_alias', deployment.pop(
@@ -712,6 +713,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         """Access the value of an attribute that supports variables."""
         value = self._regions.value
         if isinstance(value, list):
+            if self._reverse:
+                return value[::-1]
             return value
         raise ValueError('{}.regions is of type {}; expected type '
                          'of list'.format(self.name, type(value)))
@@ -725,6 +728,14 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             return value
         raise ValueError('{}.parallel_regions is of type {}; expected type '
                          'of list'.format(self.name, type(value)))
+
+    def reverse(self):
+        """Reverse the order of modules and regions."""
+        if self._reverse:
+            self._reverse = False
+        else:
+            self._reverse = True
+        self.modules.reverse()
 
     @classmethod
     def from_list(cls, deployments):
