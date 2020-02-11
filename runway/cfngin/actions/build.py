@@ -209,7 +209,7 @@ class Action(BaseAction):
 
         Args:
             stack (:class:`runway.cfngin.stack.Stack`): A CFNgin stack.
-            provider_stack (Dict[str, Any]): An optional Stacker provider object.
+            provider_stack (Dict[str, Any]): An optional CFNgin provider object.
 
         Returns:
             Dict[str, Any]: The parameters for the given stack

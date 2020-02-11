@@ -589,7 +589,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             with self.stubber:
                 self.provider.prepare_stack_for_update(
                     stack,
-                    tags=[{'Key': 'stacker_namespace', 'Value': 'test'}])
+                    tags=[{'Key': 'cfngin_namespace', 'Value': 'test'}])
 
         self.assertIn('tags differ', str(raised.exception).lower())
 

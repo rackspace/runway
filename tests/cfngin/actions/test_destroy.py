@@ -14,7 +14,7 @@ from ..factories import MockProviderBuilder, MockThreadingEvent
 
 
 class MockStack(object):  # pylint: disable=too-few-public-methods
-    """Mock our local Stacker stack and an AWS provider stack."""
+    """Mock our local CFNgin stack and an AWS provider stack."""
 
     def __init__(self, name, tags=None, **kwargs):
         """Instantiate class."""

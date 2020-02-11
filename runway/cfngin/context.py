@@ -223,9 +223,9 @@ class Context(object):
 
     @property
     def s3_bucket_verified(self):
-        """Check Stacker bucket exists and you have access.
+        """Check CFNgin bucket exists and you have access.
 
-        If the Stacker bucket does not exist, will try to create one.
+        If the CFNgin bucket does not exist, will try to create one.
 
         Returns:
             bool
