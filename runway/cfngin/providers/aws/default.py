@@ -754,9 +754,9 @@ class Provider(BaseProvider):
             force_interactive (bool): Always ask for approval.
 
         """
-        action = kwargs.get('action', 'destroy')
-        approval = kwargs.get('approval')
-        force_interactive = kwargs.get('force_interactive', False)
+        action = kwargs.pop('action', 'destroy')
+        approval = kwargs.pop('approval', None)
+        force_interactive = kwargs.pop('force_interactive', False)
         fqn = self.get_stack_name(stack)
         LOGGER.debug("Attempting to delete stack %s", fqn)
 

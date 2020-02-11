@@ -460,7 +460,7 @@ class Context(object):
 
         """
         if not self.persistent_graph:
-            return False
+            return True
 
         if not self.persistent_graph.to_dict():
             try:
@@ -471,7 +471,7 @@ class Context(object):
             except self.s3_conn.exceptions.NoSuchKey:
                 LOGGER.info('Persistent graph was deleted and does not '
                             'need to be unlocked.')
-                return False
+                return True
 
         LOGGER.debug('Unlocking persistent graph "%s".',
                      self.persistent_graph_location)
