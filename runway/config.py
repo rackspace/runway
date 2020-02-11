@@ -714,7 +714,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         value = self._regions.value
         if isinstance(value, list):
             if self._reverse:
-                value.reverse()
+                return value[::-1]
             return value
         raise ValueError('{}.regions is of type {}; expected type '
                          'of list'.format(self.name, type(value)))
