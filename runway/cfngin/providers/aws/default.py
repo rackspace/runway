@@ -1,5 +1,5 @@
 """Default AWS Provider."""
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,too-many-public-methods
 import json
 import logging
 import sys
@@ -542,6 +542,8 @@ class ProviderBuilder(object):  # pylint: disable=too-few-public-methods
 class Provider(BaseProvider):
     """AWS CloudFormation Provider."""
 
+    DELETEING_STATUS = "DELETE_IN_PROGRESS"
+
     DELETED_STATUS = "DELETE_COMPLETE"
 
     IN_PROGRESS_STATUSES = (
@@ -609,6 +611,10 @@ class Provider(BaseProvider):
     def get_stack_status(self, stack, *args, **kwargs):  # pylint: disable=unused-argument
         """Get stack status."""
         return stack['StackStatus']
+
+    def is_stack_being_destroyed(self, stack, **kwargs):  # pylint: disable=unused-argument
+        """Whether the status of the stack indicates it is 'being destroyed'."""
+        return self.get_stack_status(stack) == self.DELETEING_STATUS
 
     def is_stack_completed(self, stack):
         """Whether the status of the stack indicates it is 'complete'."""
@@ -736,14 +742,31 @@ class Provider(BaseProvider):
                 return
 
     def destroy_stack(self, stack, *args, **kwargs):  # pylint: disable=unused-argument
-        """Destroy stack."""
-        LOGGER.debug("Destroying stack: %s", self.get_stack_name(stack))
-        args = {"StackName": self.get_stack_name(stack)}
-        if self.service_role:
-            args["RoleARN"] = self.service_role
+        """Destroy a CloudFormation Stack.
 
-        self.cloudformation.delete_stack(**args)
-        return True
+        Args:
+            stack (:class:`stacker.stack.Stack`): Stack to be destroyed.
+
+        Keyword Args:
+            action (str): Name of the action being executed. This impacts
+                the log message used.
+            approval (Optional[str]): Response to approval prompt.
+            force_interactive (bool): Always ask for approval.
+
+        """
+        action = kwargs.get('action', 'destroy')
+        approval = kwargs.get('approval')
+        force_interactive = kwargs.get('force_interactive', False)
+        fqn = self.get_stack_name(stack)
+        LOGGER.debug("Attempting to delete stack %s", fqn)
+
+        if action == 'build':
+            LOGGER.info('%s was removed from the Stacker config file '
+                        'so it is being destroyed.', fqn)
+
+        destroy_method = self.select_destroy_method(force_interactive)
+        return destroy_method(fqn=fqn, action=action,
+                              approval=approval, **kwargs)
 
     def create_stack(self, fqn,  # pylint: disable=arguments-differ
                      template, parameters, tags, force_change_set=False,
@@ -884,7 +907,7 @@ class Provider(BaseProvider):
             ask_for_approval(include_verbose=False, fqn=stack_name)
 
         LOGGER.warning('Destroying stack \"%s\" for re-creation', stack_name)
-        self.destroy_stack(stack)
+        self.destroy_stack(stack, approval='y')
 
         return False
 
@@ -945,6 +968,30 @@ class Provider(BaseProvider):
             kwargs["StackName"] = fqn
             LOGGER.debug("Setting stack policy on %s.", fqn)
             self.cloudformation.set_stack_policy(**kwargs)
+
+    def interactive_destroy_stack(self, fqn, approval=None, **kwargs):
+        """Delete a CloudFormation stack in interactive mode.
+
+        Args:
+            fqn (str): A fully qualified stack name.
+            approval (Optional[str]): Response to approval prompt.
+
+        """
+        LOGGER.debug("Using interactive provider mode for %s.", fqn)
+
+        approval_options = ['y', 'n']
+        try:
+            ui.lock()
+            approval = approval or ui.ask("Destroy stack '{}'? [{}] ".format(
+                fqn, '/'.join(approval_options)
+            )).lower()
+        finally:
+            ui.unlock()
+
+        if approval != 'y':
+            raise exceptions.CancelExecution
+
+        return self.noninteractive_destroy_stack(fqn, **kwargs)
 
     def interactive_update_stack(self, fqn, template, old_parameters,
                                  parameters, stack_policy, tags):
@@ -1007,6 +1054,20 @@ class Provider(BaseProvider):
             ChangeSetName=change_set_id,
         )
 
+    def noninteractive_destroy_stack(self, fqn, **kwargs):  # pylint: disable=unused-argument
+        """Delete a CloudFormation stack without interaction.
+
+        Args:
+            fqn (str): A fully qualified stack name.
+
+        """
+        LOGGER.debug("Destroying stack: %s", fqn)
+        args = {"StackName": fqn}
+        if self.service_role:
+            args["RoleARN"] = self.service_role
+
+        self.cloudformation.delete_stack(**args)
+
     def noninteractive_changeset_update(self, fqn, template,
                                         old_parameters,  # pylint: disable=unused-argument
                                         parameters, stack_policy, tags):
@@ -1041,6 +1102,20 @@ class Provider(BaseProvider):
         self.cloudformation.execute_change_set(
             ChangeSetName=change_set_id,
         )
+
+    def select_destroy_method(self, force_interactive):
+        """Select the correct destroy method for destroying a stack.
+
+        Args:
+            force_interactive (bool): Always ask for approval.
+
+        Returns:
+            Interactive or non-interactive method to be invoked.
+
+        """
+        if self.interactive or force_interactive:
+            return self.interactive_destroy_stack
+        return self.noninteractive_destroy_stack
 
     def default_update_stack(self, fqn, template,
                              old_parameters,  # pylint: disable=unused-argument

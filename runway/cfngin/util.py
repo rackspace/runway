@@ -407,40 +407,61 @@ def s3_bucket_location_constraint(region):
     return region
 
 
-def ensure_s3_bucket(s3_client, bucket_name, bucket_region):
+def ensure_s3_bucket(s3_client, bucket_name, bucket_region,
+                     persist_graph=False):
     """Ensure an s3 bucket exists, if it does not then create it.
 
     Args:
         s3_client (:class:`botocore.client.Client`): An s3 client used to
             verify and create the bucket.
         bucket_name (str): The bucket being checked/created.
-        bucket_region (Optional[str]): The region to create the bucket in. If
+        bucket_region (str, optional): The region to create the bucket in. If
             not provided, will be determined by s3_client's region.
+        persist_graph (bool): Check bucket for recommended settings.
+            If creating a new bucket, it will be created with recommended
+            settings.
 
     """
     try:
         s3_client.head_bucket(Bucket=bucket_name)
+        if persist_graph:
+            response = s3_client.get_bucket_versioning(Bucket=bucket_name)
+            state = response.get('Status', 'disabled').lower()
+            if state != 'enabled':
+                LOGGER.warning('WARNING: Versioning is %s on bucket "%s". '
+                               'It is recommended to enable versioning '
+                               'when using persistent graphs.', state,
+                               bucket_name)
+            if response.get('MFADelete', 'Disabled') != 'Disabled':
+                LOGGER.warning('WARNING: MFADelete must be disabled on '
+                               'bucket "%s" when using persistent graphs'
+                               ' to allow for propper management of the '
+                               'graphs.', bucket_name)
     except botocore.exceptions.ClientError as err:
         if err.response['Error']['Message'] == "Not Found":
+            # can't use s3_client.exceptions.NoSuchBucket here.
+            # it does not work if the bucket was recently deleted.
             LOGGER.debug("Creating bucket %s.", bucket_name)
             create_args = {"Bucket": bucket_name}
-            location_constraint = s3_bucket_location_constraint(
-                bucket_region
-            )
+            location_constraint = s3_bucket_location_constraint(bucket_region)
             if location_constraint:
                 create_args["CreateBucketConfiguration"] = {
                     "LocationConstraint": location_constraint
                 }
             s3_client.create_bucket(**create_args)
-        elif err.response['Error']['Message'] == "Forbidden":
-            LOGGER.exception("Access denied for bucket %s.  Did "
-                             "you remember to use a globally unique name?",
-                             bucket_name)
-            raise
+            if persist_graph:
+                s3_client.put_bucket_versioning(Bucket=bucket_name,
+                                                VersioningConfiguration={
+                                                    'Status': 'Enabled'
+                                                })
+            return
+        if err.response['Error']['Message'] == "Forbidden":
+            LOGGER.exception("Access denied for bucket %s.  Did you remember "
+                             "to use a globally unique name?", bucket_name)
         else:
             LOGGER.exception("Error creating bucket %s. Error %s",
                              bucket_name, err.response)
-            raise
+        raise
 
 
 def parse_cloudformation_template(template):

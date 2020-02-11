@@ -4,13 +4,19 @@ import logging
 from ..exceptions import (CancelExecution, MissingParameterException,
                           StackDidNotChange, StackDoesNotExist)
 from ..hooks import utils
+from ..plan import Graph, Plan, Step
 from ..providers.base import Template
-from ..status import (INTERRUPTED, PENDING, SUBMITTED, WAITING, CompleteStatus,
-                      DidNotChangeStatus, FailedStatus, NotSubmittedStatus,
-                      NotUpdatedStatus, SkippedStatus, SubmittedStatus)
-from .base import STACK_POLL_TIME, BaseAction, build_walker, plan
+from ..status import (COMPLETE, INTERRUPTED, PENDING, SUBMITTED, WAITING,
+                      CompleteStatus, DidNotChangeStatus, FailedStatus,
+                      NotSubmittedStatus, NotUpdatedStatus, SkippedStatus)
+from ..status import StackDoesNotExist as StackDoesNotExistStatus
+from ..status import SubmittedStatus
+from .base import STACK_POLL_TIME, BaseAction, build_walker
 
 LOGGER = logging.getLogger(__name__)
+
+DESTROYED_STATUS = CompleteStatus("stack destroyed")
+DESTROYING_STATUS = SubmittedStatus("submitted for destruction")
 
 
 def build_stack_tags(stack):
@@ -195,6 +201,8 @@ class Action(BaseAction):
 
     """
 
+    DESCRIPTION = 'Create/Update stacks'
+
     @staticmethod
     def build_parameters(stack, provider_stack=None):
         """Build the CloudFormation Parameters for our stack.
@@ -227,12 +235,59 @@ class Action(BaseAction):
 
         return param_list
 
+    def _destroy_stack(self, stack, **kwargs):  # pylint: disable=too-many-return-statements
+        """Delete a CloudFormation stack.
+
+        Used to remove stacks that exist in the persistent graph but not
+        have been removed from the "local" graph.
+
+        Args:
+            stack (:class:`runway.cfngin.stack.Stack`): Stack to be deleted.
+
+        """
+        old_status = kwargs.get("status")
+        wait_time = 0 if old_status is PENDING else STACK_POLL_TIME
+        if self.cancel.wait(wait_time):
+            return INTERRUPTED
+
+        provider = self.build_provider(stack)
+
+        try:
+            provider_stack = provider.get_stack(stack.fqn)
+        except StackDoesNotExist:
+            LOGGER.debug("Stack %s does not exist.", stack.fqn)
+            if kwargs.get("status", None) == SUBMITTED:
+                return DESTROYED_STATUS
+            return StackDoesNotExistStatus()
+
+        LOGGER.debug(
+            "Stack %s provider status: %s",
+            provider.get_stack_name(provider_stack),
+            provider.get_stack_status(provider_stack),
+        )
+        try:
+            if provider.is_stack_being_destroyed(provider_stack):
+                return DESTROYING_STATUS
+            if provider.is_stack_destroyed(provider_stack):
+                return DESTROYED_STATUS
+            wait = stack.in_progress_behavior == "wait"
+            if wait and provider.is_stack_in_progress(provider_stack):
+                return WAITING
+            LOGGER.debug("Destroying stack: %s", stack.fqn)
+            provider.destroy_stack(provider_stack, action='build')
+            return DESTROYING_STATUS
+        except CancelExecution:
+            return SkippedStatus(reason="canceled execution")
+
     # TODO refactor long if, elif, else block
     def _launch_stack(self, stack, **kwargs):  # pylint: disable=R
         """Handle the creating or updating of a stack in CloudFormation.
 
         Also makes sure that we don't try to create or update a stack while
         it is already updating or creating.
+
+        Args:
+            stack (:class:`runway.cfngin.stack.Stack`): Stack to be launched.
 
         """
         old_status = kwargs.get("status")
@@ -349,6 +404,11 @@ class Action(BaseAction):
             stack.set_outputs(provider.get_output_dict(provider_stack))
             return DidNotChangeStatus()
 
+    @property
+    def _stack_action(self):
+        """Run against a step."""
+        return self._launch_stack
+
     def _template(self, blueprint):
         """Generate a template based on whether or not an S3 bucket is set.
 
@@ -374,12 +434,63 @@ class Action(BaseAction):
             return Template(body=stack.stack_policy)
         return None
 
-    def _generate_plan(self, tail=False):
-        return plan(
-            description="Create/Update stacks",
-            stack_action=self._launch_stack,
-            tail=self._tail_stack if tail else None,
-            context=self.context)
+    def __generate_plan(self, tail=False):
+        """Plan creation that is specific to the build action.
+
+        If a persistent graph is used, stacks that exist in the persistent
+        graph but are no longer in the "local" graph will be deleted.
+        If not using a persistent graph. the default method for creating
+        a plan is used.
+
+        Args:
+            tail (Union[bool, Callable]): An optional function to call
+                to tail the stack progress.
+
+        Returns:
+            :class:`runway.cfngin.plan.Plan`: The resulting plan object.
+
+        """
+        if not self.context.persistent_graph:
+            return self._generate_plan(tail)
+
+        graph = Graph()
+        config_stack_names = [stack.name for stack in
+                              self.context.get_stacks()]
+        inverse_steps = []
+        persist_graph = self.context.persistent_graph.transposed()
+
+        def target_fn(*_args, **_kwargs):
+            return COMPLETE
+
+        for ind_node, dep_nodes in persist_graph.dag.graph.items():
+            if ind_node not in config_stack_names:
+                inverse_steps.append(
+                    Step.from_stack_name(ind_node, self.context,
+                                         requires=list(dep_nodes),
+                                         fn=self._destroy_stack,
+                                         watch_func=(self._tail_stack if
+                                                     tail else None))
+                )
+
+        graph.add_steps(inverse_steps)
+
+        # invert what is going to be destroyed to retain dependencies
+        graph = graph.transposed()
+
+        steps = [Step(stack, fn=self._launch_stack,
+                      watch_func=(self._tail_stack if tail else None))
+                 for stack in self.context.get_stacks()]
+
+        steps += [Step(target, fn=target_fn)
+                  for target in self.context.get_targets()]
+
+        graph.add_steps(steps)
+
+        return Plan(
+            context=self.context,
+            description=self.DESCRIPTION,
+            graph=graph
+        )
 
     def pre_run(self, **kwargs):
         """Any steps that need to be taken prior to running the action."""
@@ -405,20 +516,25 @@ class Action(BaseAction):
         """
         dump = kwargs.get('dump', False)
         outline = kwargs.get('outline', False)
-        action_plan = self._generate_plan(tail=kwargs.get('tail'))
-        if not action_plan.keys():
+        plan = self.__generate_plan(tail=kwargs.get('tail'))
+        if not plan.keys():
             LOGGER.warning('WARNING: No stacks detected (error in config?)')
         if not outline and not dump:
-            action_plan.outline(logging.DEBUG)
-            LOGGER.debug("Launching stacks: %s", ", ".join(action_plan.keys()))
+            plan.outline(logging.DEBUG)
+            self.context.lock_persistent_graph(plan.lock_code)
+            LOGGER.debug("Launching stacks: %s", ", ".join(plan.keys()))
             walker = build_walker(kwargs.get('concurrency', 0))
-            action_plan.execute(walker)
+            try:
+                plan.execute(walker)
+            finally:
+                # always unlock the graph at the end
+                self.context.unlock_persistent_graph(plan.lock_code)
         else:
             if outline:
-                action_plan.outline()
+                plan.outline()
             if dump:
-                action_plan.dump(directory=dump, context=self.context,
-                                 provider=self.provider)
+                plan.dump(directory=dump, context=self.context,
+                          provider=self.provider)
 
     def post_run(self, **kwargs):
         """Any steps that need to be taken after running the action."""
