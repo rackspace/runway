@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 """Module responsible of creating IAM roles."""
-from __future__ import print_function
+import logging
 from os import path
-from awacs.aws import Allow, PolicyDocument, Statement
-from troposphere import AccountId, Join, Partition, Region, iam
+
 import awacs.logs
 import yaml
+from awacs.aws import Allow, PolicyDocument, Statement
+from troposphere import AccountId, Join, Partition, Region, iam
 
 BASE_PATH = path.dirname(__file__)
+LOGGER = logging.getLogger(__name__)
+
 
 def create_base_policy():
     """Creates the base policy."""
@@ -63,8 +66,8 @@ class IAMPolicyFinder:
     def find(self, test_name):
         """Gets the policies for the given integration test."""
         file_path = path.abspath(self.file_path(test_name))
-        try:
-            policies = []
+        policies = []
+        if path.isfile(file_path):
             with open(file_path, 'r') as stream:
                 entries = yaml.safe_load(stream)
                 for entry in entries:
@@ -73,10 +76,10 @@ class IAMPolicyFinder:
                         PolicyDocument=entry
                     )
                     policies.append(policy)
-            return policies
-        except IOError:
-            print("policies.yaml not found for {0} at {1}".format(test_name, file_path))
-            return []
+        else:
+            LOGGER.warning('policies.yaml not found for %s at %s', test_name,
+                           file_path)
+        return policies
 
 
 class IAMPolicyBuilder():
@@ -85,7 +88,6 @@ class IAMPolicyBuilder():
     def __init__(self, policy_finder=None):
         """Sets the policy finder."""
         self.policy_finder = policy_finder or IAMPolicyFinder("")
-
 
     def build(self, test_name):
         """Create policies for the given test."""

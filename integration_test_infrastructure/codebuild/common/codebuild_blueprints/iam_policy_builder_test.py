@@ -8,6 +8,7 @@ from iam_policy_builder import (
     IAMPolicyBuilder, IAMPolicyFinder
 )
 
+
 class IAMPolicyFinderTest(unittest.TestCase):
     """Finder tests."""
 
@@ -31,6 +32,7 @@ class IAMPolicyBuilderTest(unittest.TestCase):
         policies = builder.build('my_test')
         self.assertEqual(len(policies), 1)
         self.assertEqual(policies[0].PolicyName, 'base-policy')
+
 
 if __name__ == '__main__':
     unittest.main()
