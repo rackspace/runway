@@ -654,14 +654,11 @@ class ModulesCommand(RunwayCommand):
         if deployments is None:
             deployments = []
 
-        reversed_deployments = []
-        for i in deployments[::-1]:
-            deployment = copy.deepcopy(i)
-            for config in ['modules', 'regions']:
-                if deployment.get(config):
-                    deployment[config] = deployment[config][::-1]
-            reversed_deployments.append(deployment)
-        return reversed_deployments
+        for deployment in deployments:
+            deployment.reverse()
+
+        deployments.reverse()
+        return deployments
 
     @staticmethod
     def select_deployment_to_run(deployments=None, command='build'):
