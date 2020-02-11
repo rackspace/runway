@@ -245,36 +245,34 @@ class Action(BaseAction):
             stack (:class:`runway.cfngin.stack.Stack`): Stack to be deleted.
 
         """
-        old_status = kwargs.get("status")
-        wait_time = 0 if old_status is PENDING else STACK_POLL_TIME
+        stack_status = kwargs.get("status")
+        wait_time = 0 if stack_status is PENDING else STACK_POLL_TIME
         if self.cancel.wait(wait_time):
             return INTERRUPTED
 
         provider = self.build_provider(stack)
 
         try:
-            provider_stack = provider.get_stack(stack.fqn)
+            stack_data = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
             LOGGER.debug("Stack %s does not exist.", stack.fqn)
             if kwargs.get("status", None) == SUBMITTED:
                 return DESTROYED_STATUS
             return StackDoesNotExistStatus()
 
-        LOGGER.debug(
-            "Stack %s provider status: %s",
-            provider.get_stack_name(provider_stack),
-            provider.get_stack_status(provider_stack),
-        )
+        LOGGER.debug("Stack %s provider status: %s",
+                     provider.get_stack_name(stack_data),
+                     provider.get_stack_status(stack_data))
         try:
-            if provider.is_stack_being_destroyed(provider_stack):
+            if provider.is_stack_being_destroyed(stack_data):
                 return DESTROYING_STATUS
-            if provider.is_stack_destroyed(provider_stack):
+            if provider.is_stack_destroyed(stack_data):
                 return DESTROYED_STATUS
             wait = stack.in_progress_behavior == "wait"
-            if wait and provider.is_stack_in_progress(provider_stack):
+            if wait and provider.is_stack_in_progress(stack_data):
                 return WAITING
             LOGGER.debug("Destroying stack: %s", stack.fqn)
-            provider.destroy_stack(provider_stack, action='build')
+            provider.destroy_stack(stack_data, action='build')
             return DESTROYING_STATUS
         except CancelExecution:
             return SkippedStatus(reason="canceled execution")
