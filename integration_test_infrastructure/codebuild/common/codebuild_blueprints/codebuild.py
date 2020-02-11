@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 """Module with CodeBuild project."""
-from __future__ import print_function
-from os.path import dirname, realpath
 import sys
-
-from troposphere import iam, codebuild
+from os.path import dirname, realpath
 
 from awacs.helpers.trust import make_simple_assume_policy
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
+from troposphere import codebuild, iam
+
+from integration_tests.runner import Runner
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNString
+
 from .iam_policy_builder import IAMPolicyBuilder
 
 ROOT_DIR = dirname(dirname(dirname(dirname(dirname(realpath(__file__))))))
 sys.path.insert(0, ROOT_DIR)
 
-from integration_tests.runner import Runner  # noqa pylint: disable=wrong-import-position
 
 # The github accounts that are allowed to trigger the
 # build tests
@@ -29,6 +29,7 @@ GITHUB_ACCOUNT_IDS = [
 
 ALT_TESTING_ACCOUNT_ID = '395611358874'
 IAM_POLICY_BUILDER = IAMPolicyBuilder()
+
 
 class CodeBuild(Blueprint):
     """Stacker blueprint for CodeBuild project."""
@@ -47,10 +48,8 @@ class CodeBuild(Blueprint):
         template.set_version('2010-09-09')
         template.set_description('Runway CodeBuild Project')
 
-
         def add_test_resources(test_name):
-            """Add the resources for the given test"""
-
+            """Add the resources for the given test."""
             codebuild_role = template.add_resource(
                 iam.Role(
                     'CodeBuildRole{}'.format(test_name),
@@ -119,11 +118,11 @@ class CodeBuild(Blueprint):
 
         runner = Runner(use_abs=True)
 
-        # create the necessary resources for each test 
+        # create the necessary resources for each test
         for test in runner.available_tests:
             add_test_resources(test.__name__)
 
 
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
     print(CodeBuild('test', Context({"namespace": "test"}), None).to_json())
