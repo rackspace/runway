@@ -43,5 +43,5 @@ class DestroyRemoved(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        _code, _stdout, stderr = self.runway_cmd('destroy')
+        self.runway_cmd('destroy')
         self.cleanup_fixtures()
