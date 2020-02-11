@@ -1,3 +1,4 @@
+.. _Pyinstaller: https://pypi.org/project/PyInstaller/
 .. _fork this repo: https://help.github.com/en/github/getting-started-with-github/fork-a-repo
 .. _clone your fork: https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository
 
@@ -102,6 +103,30 @@ Release Management
 ~~~~~~~~~~~~~~~~~~
 
 When a commit is pushed to master (tag is pushed, PR is merged) a release draft is created (if one does not exist) and PRs since the last tag are added following the included template. Changes are categorized based on PR labels.
+
+
+Building Pyinstaller Packages Locally
+-------------------------------------
+
+We use Pyinstaller_ to build executables that do not require Python to be installed on a system.
+These are built by Travis CI for distribution to ensure a consistent environment but they can also be build locally for testing.
+
+Prerequisites
+~~~~~~~~~~~~~
+
+These need to be installed globally so they are not included in the Pipfile.
+
+* ``setuptools==45.2.0``
+* ``virtualenv==20.0.1``
+* ``pipenv==2018.11.26``
+
+Process
+~~~~~~~
+
+1. Export ``TRAVIS_OS_NAME`` environment variable for your system (``linux``, ``osx``, or ``windows``).
+2. Execute ``make travisbuild_file`` or ``make travisbuild_folder`` from the root of the repo.
+
+The output of these commands can be found in ``../artifacts``
 
 
 Travis CI
