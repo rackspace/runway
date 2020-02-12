@@ -68,6 +68,21 @@ class LookupHandler(object):
     """Base class for lookup handlers."""
 
     @classmethod
+    def dependencies(cls, _lookup_data):
+        """Calculate any dependencies required to perform this lookup.
+
+        Note that lookup_data may not be (completely) resolved at this time.
+
+        Args:
+            lookup_data (VariableValue): Parameter(s) given to this lookup.
+
+        Returns:
+            Set
+
+        """
+        return set()
+
+    @classmethod
     def handle(cls, value, context, **kwargs):
         # type: (str, 'Context', Any) -> Any
         """Perform the lookup.
