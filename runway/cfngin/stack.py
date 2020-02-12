@@ -2,8 +2,8 @@
 from copy import deepcopy
 
 from runway.util import load_object_from_string
+from runway.variables import Variable, resolve_variables
 
-from ..variables import Variable, resolve_variables
 from .blueprints.raw import RawTemplateBlueprint
 
 

@@ -9,7 +9,8 @@ from six import string_types
 from six.moves.collections_abc import Mapping, Sequence  # pylint: disable=E
 from troposphere import Base64, GenericHelperFn
 
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
+
 from ...util import read_value_from_path
 
 TYPE_NAME = "file"
