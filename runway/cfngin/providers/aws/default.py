@@ -542,7 +542,7 @@ class ProviderBuilder(object):  # pylint: disable=too-few-public-methods
 class Provider(BaseProvider):
     """AWS CloudFormation Provider."""
 
-    DELETEING_STATUS = "DELETE_IN_PROGRESS"
+    DELETING_STATUS = "DELETE_IN_PROGRESS"
 
     DELETED_STATUS = "DELETE_COMPLETE"
 
@@ -614,7 +614,7 @@ class Provider(BaseProvider):
 
     def is_stack_being_destroyed(self, stack, **kwargs):  # pylint: disable=unused-argument
         """Whether the status of the stack indicates it is 'being destroyed'."""
-        return self.get_stack_status(stack) == self.DELETEING_STATUS
+        return self.get_stack_status(stack) == self.DELETING_STATUS
 
     def is_stack_completed(self, stack):
         """Whether the status of the stack indicates it is 'complete'."""
