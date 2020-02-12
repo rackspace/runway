@@ -5,6 +5,9 @@ import os
 import sys
 
 from runway.util import load_object_from_string
+from runway.variables import Variable, resolve_variables
+
+from ..exceptions import FailedVariableLookup
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,12 +46,12 @@ def handle_hooks(stage, hooks, provider, context):
     for hook in hooks:
         data_key = hook.data_key
         required = hook.required
-        kwargs = hook.args or {}
-        enabled = hook.enabled
-        if not enabled:
+
+        if not hook.enabled:
             LOGGER.debug("hook with method %s is disabled, skipping",
                          hook.path)
             continue
+
         try:
             method = load_object_from_string(hook.path)
         except (AttributeError, ImportError):
@@ -56,6 +59,24 @@ def handle_hooks(stage, hooks, provider, context):
             if required:
                 raise
             continue
+
+        if isinstance(hook.args, dict):
+            args = [Variable(k, v) for k, v in hook.args.items()]
+            try:  # handling for output or similar being used in pre_build
+                resolve_variables(args, context, provider)
+            except FailedVariableLookup:
+                if 'pre' in stage:
+                    LOGGER.error('Lookups that change the order of '
+                                 'execution, like "output", can only be '
+                                 'used in "post_*" hooks. Please '
+                                 'ensure that the hook being used does '
+                                 'not rely on a stack, hook_data, or '
+                                 'context that does not exist yet.')
+                raise
+            kwargs = {v.name: v.value for v in args}
+        else:
+            kwargs = hook.args or {}
+
         try:
             result = method(context=context, provider=provider, **kwargs)
         except Exception:  # pylint: disable=broad-except
@@ -63,6 +84,7 @@ def handle_hooks(stage, hooks, provider, context):
             if required:
                 raise
             continue
+
         if not result:
             if required:
                 LOGGER.error("Required hook %s failed. Return value: %s",
