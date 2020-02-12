@@ -78,6 +78,24 @@ class CodeBuild(Blueprint):
                             Name='TEST_TO_RUN',
                             Type='PLAINTEXT',
                             Value=test_name.lower()
+                        ),
+                        codebuild.EnvironmentVariable(
+                            # Disable emojis in output.
+                            Name='PIPENV_HIDE_EMOJIS',
+                            Type='PLAINTEXT',
+                            Value='1'
+                        ),
+                        codebuild.EnvironmentVariable(
+                            # disable terminal spinner.
+                            Name='PIPENV_NOSPIN',
+                            Type='PLAINTEXT',
+                            Value='1'
+                        ),
+                        codebuild.EnvironmentVariable(
+                            # Pipenv automatically assumes “yes” at all prompts.
+                            Name='PIPENV_YES',
+                            Type='PLAINTEXT',
+                            Value='1'
                         )
                     ],
                     Image='aws/codebuild/standard:2.0',
