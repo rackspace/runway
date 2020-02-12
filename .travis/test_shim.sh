@@ -24,5 +24,6 @@ stacks:
 HERE
 }
 
-${PIPENV}runway run-stacker -- build <(cfngin_config) --dump .travis
+# AWS_SECRET_ACCESS_KEY required to pass in forked travis runs
+AWS_SECRET_ACCESS_KEY=1 ${PIPENV}runway run-stacker -- build <(cfngin_config) --dump .travis
 rm -rf .travis/stack_templates
