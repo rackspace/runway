@@ -3,7 +3,8 @@ import json
 import logging
 import sys
 
-from .base import BaseAction, plan
+from ..plan import merge_graphs
+from .base import BaseAction
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,22 +70,26 @@ FORMATTERS = {
 class Action(BaseAction):
     """Responsible for outputing a graph for the current CFNgin config."""
 
-    def _generate_plan(self):
-        return plan(
-            description="Print graph",
-            stack_action=None,
-            context=self.context)
+    DESCRIPTION = 'Print graph'
+
+    @property
+    def _stack_action(self):
+        """Run against a step."""
+        return None
 
     def run(self, **kwargs):
         """Generate the underlying graph and prints it."""
-        action_plan = self._generate_plan()
+        graph = self._generate_plan(require_unlocked=False,
+                                    include_persistent_graph=True).graph
+        if self.context.persistent_graph:
+            graph = merge_graphs(self.context.persistent_graph, graph)
         if kwargs.get('reduce'):
             # This will performa a transitive reduction on the underlying
             # graph, producing less edges. Mostly useful for the "dot" format,
             # when converting to PNG, so it creates a prettier/cleaner
             # dependency graph.
-            action_plan.graph.transitive_reduction()
+            graph.transitive_reduction()
 
         fn = FORMATTERS[kwargs.get('format')]
-        fn(sys.stdout, action_plan.graph)
+        fn(sys.stdout, graph)
         sys.stdout.flush()

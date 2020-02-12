@@ -4,9 +4,10 @@ from operator import attrgetter
 
 from .. import exceptions
 from ..status import (COMPLETE, INTERRUPTED, NotSubmittedStatus,
-                      NotUpdatedStatus)
+                      NotUpdatedStatus, SkippedStatus)
+from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from . import build
-from .base import build_walker, plan
+from .base import build_walker
 
 LOGGER = logging.getLogger(__name__)
 
@@ -151,7 +152,14 @@ class Action(build.Action):
 
     """
 
-    def _diff_stack(self, stack, **_kwargs):
+    DESCRIPTION = 'Diff stacks'
+
+    @property
+    def _stack_action(self):
+        """Run against a step."""
+        return self._diff_stack
+
+    def _diff_stack(self, stack, **_kwargs):  # pylint: disable=too-many-return-statements
         """Handle diffing a stack in CloudFormation vs our config."""
         if self.cancel.wait(0):
             return INTERRUPTED
@@ -175,26 +183,29 @@ class Action(build.Action):
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
             LOGGER.info('No changes: %s', stack.fqn)
-
+        except exceptions.StackDoesNotExist:  # TODO make sure this is correct post chageset
+            if self.context.persistent_graph:
+                return SkippedStatus('persistent graph: stack does not '
+                                     'exist, will be removed')
+            return StackDoesNotExistStatus()
+        except AttributeError as err:  # TODO make sure this is correct post chageset
+            if (self.context.persistent_graph and
+                    'defined class or template path' in str(err)):
+                return SkippedStatus('persistent graph: will be destroyed')
+            raise
         return COMPLETE
-
-    def _generate_plan(self, tail=False):
-        return plan(
-            description="Diff stacks",
-            stack_action=self._diff_stack,
-            tail=self._tail_stack if tail else None,
-            context=self.context)
 
     def run(self, **kwargs):
         """Kicks off the diffing of the stacks in the stack_definitions."""
-        action_plan = self._generate_plan()
-        action_plan.outline(logging.DEBUG)
-        if action_plan.keys():
-            LOGGER.info("Diffing stacks: %s", ", ".join(action_plan.keys()))
+        plan = self._generate_plan(require_unlocked=False,
+                                   include_persistent_graph=True)
+        plan.outline(logging.DEBUG)
+        if plan.keys():
+            LOGGER.info("Diffing stacks: %s", ", ".join(plan.keys()))
         else:
             LOGGER.warning('WARNING: No stacks detected (error in config?)')
         walker = build_walker(kwargs.get('concurrency', 0))
-        action_plan.execute(walker)
+        plan.execute(walker)
 
     def pre_run(self, **kwargs):
         """Do nothing."""
