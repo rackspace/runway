@@ -1,5 +1,5 @@
 """Test handler."""
-from urllib.reuqest import urlopen, Request
+from urllib.request import urlopen, Request
 
 def handler(event, context):
     """Handle lambda."""

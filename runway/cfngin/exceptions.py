@@ -280,7 +280,6 @@ class PipError(Exception):
 
     def __init__(self):
         """Instantiate class."""
-        # TODO refine message
         self.message = ('A non-zero exit code was returned when invoking '
                         'pip. More information can be found in the error '
                         'above.')
@@ -292,7 +291,6 @@ class PipenvError(Exception):
 
     def __init__(self):
         """Instantiate class."""
-        # TODO refine message
         self.message = ('A non-zero exit code was returned when invoking '
                         'pipenv. Please ensure pipenv in installed and the '
                         'Pipfile being used is valid. More information can be '

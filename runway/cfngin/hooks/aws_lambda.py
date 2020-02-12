@@ -10,7 +10,7 @@ from shutil import copyfile
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import botocore
-import docker as Docker  # noqa: N812
+import docker
 import formic
 from six import string_types
 from troposphere.awslambda import Code
@@ -231,12 +231,12 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
         raise InvalidDockerizePipConfiguration(
             'only one of [docker_file, docker_file, runtime] can be specified'
         )
-    docker = Docker.from_env()
+    docker_client = docker.from_env()
 
     if docker_file:
         if not os.path.isfile(docker_file):
             raise ValueError('could not find docker_file "%s"' % docker_file)
-        tmp_image, _build_logs = docker.images.build(
+        tmp_image, _build_logs = docker_client.images.build(
             path=os.path.dirname(docker_file),
             dockerfile=os.path.basename(docker_file)
         )
@@ -253,14 +253,14 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
     if sys.platform.lower() == 'win32':
         work_dir = work_dir.replace('\\', '/')
 
-    work_dir_mount = Docker.types.Mount(target='/var/task',
+    work_dir_mount = docker.types.Mount(target='/var/task',
                                         source=work_dir,
                                         type='bind')
     pip_cmd = (
         'python -m pip install -t /var/task -r /var/task/requirements.txt'
     )
 
-    logs = docker.containers.run(image=docker_image,
+    logs = docker_client.containers.run(image=docker_image,
                                  command=['/bin/sh', '-c', pip_cmd],
                                  auto_remove=True,
                                  mounts=[work_dir_mount],
@@ -596,10 +596,10 @@ def upload_lambda_functions(context, provider, **kwargs):
                 Will determine if pipenv will be used to generate requirements.txt
                 from an existing Pipfile.
             **pipenv_timeout (Optional[int])**
-                Time in milliseconds to wait while running pipenv.
+                Time in seconds to wait while running pipenv.
                 (*default:* `900`)
             **pipenv_lock_timeout (Optional[int])**
-                Time in milliseconds to wait while creating lock file with pipenv.
+                Time in seconds to wait while creating lock file with pipenv.
                 (*default:* `300`)
             **dockerize_pip (Optional[Union[str, bool]])**
                 Whether to use Docker when restoring packages with pip.
