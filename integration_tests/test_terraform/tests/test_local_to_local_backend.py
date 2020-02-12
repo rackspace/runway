@@ -1,7 +1,5 @@
 """Test changing backends between local and local."""
-from runway.util import change_dir
 from integration_tests.test_terraform.test_terraform import Terraform
-from integration_tests.util import run_command
 
 
 class LocalToLocalBackend(Terraform):
@@ -13,15 +11,13 @@ class LocalToLocalBackend(Terraform):
         """Deploy provider."""
         self.copy_template('{}-backend.tf'.format(backend))
         self.copy_runway('nos3')
-
-        with change_dir(self.base_dir):
-            return run_command(['runway', 'deploy'])
+        code, _stdout, _stderr = self.runway_cmd('deploy')
+        return code
 
     def run(self):
         """Run tests."""
         self.clean()
         self.set_tf_version(11)
-        self.set_env_var('CI', '1')
 
         assert self.deploy_backend('no') == 0,\
             '{}: "No local backend" failed'.format(self.TEST_NAME)
@@ -32,7 +28,6 @@ class LocalToLocalBackend(Terraform):
     def teardown(self):
         """Teardown any created resources."""
         self.logger.info('Tearing down: %s', self.TEST_NAME)
-        with change_dir(self.base_dir):
-            run_command(['runway', 'destroy'])
-        self.unset_env_var('CI')
+        code, _stdout, _stderr = self.runway_cmd('destroy')
+        assert code == 0, 'exit code should be zero'
         self.clean()
