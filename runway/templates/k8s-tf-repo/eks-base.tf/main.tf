@@ -215,7 +215,7 @@ provider "kubernetes" {
   cluster_ca_certificate = "${base64decode(aws_eks_cluster.cluster.certificate_authority.0.data)}"
   token = "${data.aws_eks_cluster_auth.cluster_auth.token}"
   load_config_file = false
-  version = "~> 1.10"
+  version = "~> 1.10.0"
 }
 
 resource "kubernetes_config_map" "aws_auth_configmap" {
