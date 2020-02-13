@@ -20,7 +20,6 @@ class TestTwoRegions(Parallelism):
     def run(self):
         """Run tests."""
         self.clean()
-        self.set_environment('dev')
         self.set_env_var('CI', '1')
         assert self.deploy() == 0, '{}: Two regions deployed in parallel failed'.format(__name__)
 
@@ -30,4 +29,3 @@ class TestTwoRegions(Parallelism):
         with change_dir(self.parallelism_test_dir):
             run_command(['runway', 'destroy'])
         self.clean()
-        self.unset_env_var('CI')

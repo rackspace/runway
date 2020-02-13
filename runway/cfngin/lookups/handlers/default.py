@@ -1,6 +1,6 @@
 """Lookup to provide a default value."""
 # pylint: disable=arguments-differ,unused-argument
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
 
 
 TYPE_NAME = "default"

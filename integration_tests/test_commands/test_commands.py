@@ -13,8 +13,12 @@ class Commands(IntegrationTest):
 
     def run(self):
         """Find all tests and run them."""
-        import_tests(self.logger, self.tests_dir, 'test_*')
-        tests = [test(self.logger) for test in Commands.__subclasses__()]
+        suffix = os.getenv('COMMAND_SUFFIX', '*')
+        pattern = 'test_{0}'.format(suffix)
+        self.set_env_var('AWS_DEFAULT_REGION', 'us-east-1')
+        import_tests(self.logger, self.tests_dir, pattern)
+        tests = [test(self.logger, self.environment)
+                 for test in Commands.__subclasses__()]
         if not tests:
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)

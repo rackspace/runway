@@ -1,6 +1,7 @@
 """Handler for fetching outputs from a stack in the current namespace."""
 # pylint: disable=arguments-differ,unused-argument
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
+
 from .output import deconstruct
 
 TYPE_NAME = "rxref"

@@ -2,7 +2,8 @@
 # pylint: disable=unused-argument,arguments-differ
 import os
 
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
+
 from ...util import read_value_from_path
 
 TYPE_NAME = "envvar"

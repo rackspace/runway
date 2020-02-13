@@ -6,7 +6,7 @@ from ..hooks.utils import handle_hooks
 from ..status import INTERRUPTED, PENDING, SUBMITTED, CompleteStatus
 from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from ..status import SubmittedStatus
-from .base import STACK_POLL_TIME, BaseAction, build_walker, plan
+from .base import STACK_POLL_TIME, BaseAction, build_walker
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,13 +27,12 @@ class Action(BaseAction):
 
     """
 
-    def _generate_plan(self, tail=False):
-        return plan(
-            description="Destroy stacks",
-            stack_action=self._destroy_stack,
-            tail=self._tail_stack if tail else None,
-            context=self.context,
-            reverse=True)
+    DESCRIPTION = 'Destroy stacks'
+
+    @property
+    def _stack_action(self):
+        """Run against a step."""
+        return self._destroy_stack
 
     def _destroy_stack(self, stack, **kwargs):
         old_status = kwargs.get("status")
@@ -79,18 +78,23 @@ class Action(BaseAction):
 
     def run(self, **kwargs):
         """Kicks off the destruction of the stacks in the stack_definitions."""
-        action_plan = self._generate_plan(tail=kwargs.get('tail'))
-        if not action_plan.keys():
+        plan = self._generate_plan(tail=kwargs.get('tail'), reverse=True,
+                                   include_persistent_graph=True)
+        if not plan.keys():
             LOGGER.warning('WARNING: No stacks detected (error in config?)')
         if kwargs.get('force', False):
             # need to generate a new plan to log since the outline sets the
             # steps to COMPLETE in order to log them
-            action_plan.outline(logging.DEBUG)
+            plan.outline(logging.DEBUG)
+            self.context.lock_persistent_graph(plan.lock_code)
             walker = build_walker(kwargs.get('concurrency', 0))
-            action_plan.execute(walker)
+            try:
+                plan.execute(walker)
+            finally:
+                self.context.unlock_persistent_graph(plan.lock_code)
         else:
-            action_plan.outline(message="To execute this plan, run with "
-                                        "\"--force\" flag.")
+            plan.outline(message="To execute this plan, run with "
+                                 "\"--force\" flag.")
 
     def post_run(self, **kwargs):
         """Any steps that need to be taken after running the action."""

@@ -43,6 +43,9 @@ lint:
 test:
 	pipenv run pytest
 
+test_shim:
+	./.travis/test_shim.sh
+
 travistest: create_readme
 	./.travis/test.sh
 

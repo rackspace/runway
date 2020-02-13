@@ -142,6 +142,22 @@ class TestHooks(unittest.TestCase):
         with self.assertRaises(KeyError):
             handle_hooks("result", hooks, "us-east-1", self.context)
 
+    def test_resolve_lookups_in_args(self):
+        """Test the resolution of lookups in hook args."""
+        hooks = [Hook({
+            "path": "tests.cfngin.hooks.test_utils.kwargs_hook",
+            "data_key": "my_hook_results",
+            "args": {
+                "default_lookup": "${default env_var::default_value}"
+            }
+        })]
+        handle_hooks("lookups", hooks, "us-east-1", self.context)
+
+        self.assertEqual(
+            self.context.hook_data["my_hook_results"]["default_lookup"],
+            "default_value"
+        )
+
 
 def mock_hook(*args, **kwargs):
     """Mock hook."""
@@ -167,3 +183,8 @@ def context_hook(*args, **kwargs):
 def result_hook(*args, **kwargs):
     """Results hook."""
     return {"foo": "bar"}
+
+
+def kwargs_hook(*args, **kwargs):
+    """Kwargs hook."""
+    return kwargs

@@ -3,7 +3,8 @@
 import operator
 import re
 
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
+
 from ...session_cache import get_session
 from ...util import read_value_from_path
 
@@ -92,7 +93,6 @@ class AmiLookup(LookupHandler):
             raise Exception("'name_regex' value required when using ami")
         name_regex = values.pop('name_regex')
 
-        executable_users = None
         if values.get('executable_users'):
             executable_users = values.pop('executable_users').split(',')
             describe_args["ExecutableUsers"] = executable_users
@@ -108,7 +108,8 @@ class AmiLookup(LookupHandler):
                         key=operator.itemgetter('CreationDate'),
                         reverse=True)
         for image in images:
-            if re.match("^%s$" % name_regex, image['Name']):
+            # sometimes we get ARI/AKI in response - these don't have a 'Name'
+            if re.match("^%s$" % name_regex, image.get('Name', '')):
                 return image['ImageId']
 
         raise ImageNotFound(value)

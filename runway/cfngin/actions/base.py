@@ -8,8 +8,7 @@ import botocore.exceptions
 
 from ..dag import ThreadedWalker, UnlimitedSemaphore, walk
 from ..exceptions import PlanFailed
-from ..plan import Step, build_graph, build_plan
-from ..session_cache import get_session
+from ..plan import Graph, Plan, Step, merge_graphs
 from ..status import COMPLETE
 from ..util import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
 
@@ -22,7 +21,7 @@ LOGGER = logging.getLogger(__name__)
 # https://github.com/boto/botocore/blob/1.6.1/botocore/data/cloudformation/2010-05-15/waiters-2.json#L22
 #
 # This can be controlled via an environment variable, mostly for testing.
-STACK_POLL_TIME = int(os.environ.get("STACKER_STACK_POLL_TIME", 30))
+STACK_POLL_TIME = int(os.environ.get("CFNGIN_STACK_POLL_TIME", 30))
 
 
 def build_walker(concurrency):
@@ -56,43 +55,6 @@ def build_walker(concurrency):
     return ThreadedWalker(semaphore).walk
 
 
-def plan(description, stack_action, context, tail=None, reverse=False):
-    """Build a graph based plan from a set of stacks.
-
-    Args:
-        description (str): A description of the plan.
-        stack_action (Callable[..., Any]): A function to call for each stack.
-        context (:class:`runway.cfngin.context.Context`): a
-            :class:`runway.cfngin.context.Context` to build the plan from.
-        tail (Optional[Callable[..., Any]]): an optional function to call to
-            tail the stack progress.
-        reverse (bool): if True, execute the graph in reverse (useful for
-            destroy actions).
-
-    Returns:
-        :class:`plan.Plan`: The resulting plan object
-
-    """
-    def target_fn(*_args, **_kwargs):
-        """Target function."""
-        return COMPLETE
-
-    steps = [
-        Step(stack, fn=stack_action, watch_func=tail)
-        for stack in context.get_stacks()]
-
-    steps += [
-        Step(target, fn=target_fn) for target in context.get_targets()]
-
-    graph = build_graph(steps)
-
-    return build_plan(
-        description=description,
-        graph=graph,
-        targets=context.stack_names,
-        reverse=reverse)
-
-
 def stack_template_url(bucket_name, blueprint, endpoint):
     """Produce an s3 url for a given blueprint.
 
@@ -119,6 +81,7 @@ class BaseAction(object):
     will be executed to perform that command.
 
     Attributes:
+        DESCRIPTION (str): Description used when creating a plan for an action.
         bucket_name (str): S3 bucket used by the action.
         bucket_region (str): AWS region where S3 bucket is located.
         cancel (threading.Event): Cancel handler.
@@ -130,6 +93,8 @@ class BaseAction(object):
         s3_conn (boto3.client.Client): Boto3 S3 client.
 
     """
+
+    DESCRIPTION = 'Base action'
 
     def __init__(self, context, provider_builder=None, cancel=None):
         """Instantiate class.
@@ -150,7 +115,39 @@ class BaseAction(object):
         self.bucket_region = context.config.cfngin_bucket_region
         if not self.bucket_region and provider_builder:
             self.bucket_region = provider_builder.region
-        self.s3_conn = get_session(self.bucket_region).client('s3')
+        self.s3_conn = self.context.s3_conn
+
+    @property
+    def _stack_action(self):
+        """Run against a step."""
+        raise NotImplementedError
+
+    @property
+    def provider(self):
+        """Return a generic provider using the default region.
+
+        Used for running things like hooks.
+
+        Returns:
+            :class:`runway.cfngin.providers.base.BaseProvider`
+
+        """
+        return self.provider_builder.build()
+
+    def build_provider(self, stack):
+        """Build a :class:`runway.cfngin.providers.base.BaseProvider`.
+
+        Args:
+            stack (:class:`runway.cfngin.stack.Stack`): Stack the action will
+                be executed on.
+
+        Returns:
+            :class:`runway.cfngin.providers.base.BaseProvider`: Suitable for
+            operating on the given :class:`runway.cfngin.stack.Stack`.
+
+        """
+        return self.provider_builder.build(region=stack.region,
+                                           profile=stack.profile)
 
     def ensure_cfn_bucket(self):
         """CloudFormation bucket where templates will be stored."""
@@ -159,16 +156,25 @@ class BaseAction(object):
                              self.bucket_name,
                              self.bucket_region)
 
-    def stack_template_url(self, blueprint):
-        """S3 URL for CloudFormation template object.
+    def execute(self, **kwargs):
+        """Run the action with pre and post steps."""
+        try:
+            self.pre_run(**kwargs)
+            self.run(**kwargs)
+            self.post_run(**kwargs)
+        except PlanFailed as err:
+            LOGGER.error(str(err))
+            sys.exit(1)
 
-        Returns:
-            str
+    def pre_run(self, **kwargs):
+        """Perform steps before running the action."""
 
-        """
-        return stack_template_url(
-            self.bucket_name, blueprint, get_s3_endpoint(self.s3_conn)
-        )
+    def post_run(self, **kwargs):
+        """Perform steps after running the action."""
+
+    def run(self, **kwargs):
+        """Abstract method for running the action."""
+        raise NotImplementedError("Subclass must implement \"run\" method")
 
     def s3_stack_push(self, blueprint, force=False):
         """Push the rendered blueprint's template to S3.
@@ -204,52 +210,69 @@ class BaseAction(object):
                      template_url)
         return template_url
 
-    def execute(self, **kwargs):
-        """Run the action with pre and post steps."""
-        try:
-            self.pre_run(**kwargs)
-            self.run(**kwargs)
-            self.post_run(**kwargs)
-        except PlanFailed as err:
-            LOGGER.error(str(err))
-            sys.exit(1)
+    def stack_template_url(self, blueprint):
+        """S3 URL for CloudFormation template object.
 
-    def pre_run(self, **kwargs):
-        """Perform steps before running the action."""
+        Returns:
+            str
 
-    def run(self, **kwargs):
-        """Abstract method for running the action."""
-        raise NotImplementedError("Subclass must implement \"run\" method")
+        """
+        return stack_template_url(
+            self.bucket_name, blueprint, get_s3_endpoint(self.s3_conn)
+        )
 
-    def post_run(self, **kwargs):
-        """Perform steps after running the action."""
-
-    def build_provider(self, stack):
-        """Build a :class:`runway.cfngin.providers.base.BaseProvider`.
+    def _generate_plan(self, tail=False, reverse=False,
+                       require_unlocked=True,
+                       include_persistent_graph=False):
+        """Create a plan for this action.
 
         Args:
-            stack (:class:`runway.cfngin.stack.Stack`): Stack the action will
-                be executed on.
+            tail (Union[bool, Callable]): An optional function to call
+                to tail the stack progress.
+            reverse (bool): If True, execute the graph in reverse (useful for
+                destroy actions).
+            require_unlocked (bool): If the persistent graph is locked, an
+                error is raised.
+            include_persistent_graph (bool): Include the persistent graph
+                in the :class:`runway.cfngin.plan.Plan` (if there is one).
+                This will handle basic merging of the local and persistent
+                graphs if an action does not require more complex logic.
 
         Returns:
-            :class:`runway.cfngin.providers.base.BaseProvider`: Suitable for
-            operating on the given :class:`runway.cfngin.stack.Stack`.
+            :class:`runway.cfngin.plan.Plan`: The resulting plan object
 
         """
-        return self.provider_builder.build(region=stack.region,
-                                           profile=stack.profile)
+        tail = self._tail_stack if tail else None
 
-    @property
-    def provider(self):
-        """Return a generic provider using the default region.
+        def target_fn(*_args, **_kwargs):
+            return COMPLETE
 
-        Used for running things like hooks.
+        steps = [
+            Step(stack, fn=self._stack_action, watch_func=tail)
+            for stack in self.context.get_stacks()]
 
-        Returns:
-            :class:`runway.cfngin.providers.base.BaseProvider`
+        steps += [
+            Step(target, fn=target_fn)
+            for target in self.context.get_targets()]
 
-        """
-        return self.provider_builder.build()
+        graph = Graph.from_steps(steps)
+
+        if include_persistent_graph and self.context.persistent_graph:
+            persist_steps = Step.from_persistent_graph(
+                self.context.persistent_graph.to_dict(),
+                self.context,
+                fn=self._stack_action,
+                watch_func=tail
+            )
+            persist_graph = Graph.from_steps(persist_steps)
+            graph = merge_graphs(graph, persist_graph)
+
+        return Plan(
+            context=self.context,
+            description=self.DESCRIPTION,
+            graph=graph,
+            reverse=reverse,
+            require_unlocked=require_unlocked)
 
     def _tail_stack(self, stack, cancel, retries=0, **kwargs):
         """Tail a stack's event stream."""

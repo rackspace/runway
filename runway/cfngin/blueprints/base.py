@@ -7,7 +7,8 @@ import string
 from six import string_types
 from troposphere import Output, Parameter, Ref, Template
 
-from ...variables import Variable
+from runway.variables import Variable
+
 from ..exceptions import (InvalidUserdataPlaceholder, MissingVariable,
                           UnresolvedVariable, UnresolvedVariables,
                           ValidatorError, VariableTypeRequired)

@@ -1,0 +1,25 @@
+# https://github.com/release-drafter/release-drafter
+name-template: 'v$NEXT_MINOR_VERSION'
+tag-template: 'v$NEXT_MINOR_VERSION'
+sort-direction: ascending
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+  - title: '📖 Doc Updates'
+    labels:
+      - documentation
+  - title: '🧰 Maintenance'
+    label: 'maintenance'
+exclude-labels:
+  - 'skip-changelog'
+  - 'release'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+template: |
+  ## What Changed
+
+  $CHANGES

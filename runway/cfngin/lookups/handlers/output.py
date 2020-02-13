@@ -1,9 +1,9 @@
 """AWS CloudFormation Output lookup."""
 # pylint: disable=arguments-differ,unused-argument
-from collections import namedtuple
 import re
+from collections import namedtuple
 
-from ....lookups.handlers.base import LookupHandler
+from runway.lookups.handlers.base import LookupHandler
 
 TYPE_NAME = "output"
 

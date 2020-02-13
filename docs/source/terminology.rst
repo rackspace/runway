@@ -40,6 +40,28 @@ A set of variables that can be used inside the config, allowing you to
 slightly adjust configs based on which environment you are launching.
 
 
+graph
+-----
+
+A mapping of **object name** to **set/list of dependencies**.
+
+A graph is constructed for each execution of CFNgin from the contents of the
+config_ file.
+
+.. rubric:: Example
+
+.. code-block:: json
+    {
+        "stack1": [],
+        "stack2": [
+            "stack1"
+        ]
+    }
+
+- **stack1** depends on nothing.
+- **stack2** depends on **stack1**
+
+
 hook
 ----
 
@@ -69,6 +91,13 @@ A CloudFormation Template concept. Stacks can output values, allowing easy
 access to those values. Often used to export the unique ID's of resources that
 templates create. CFNgin makes it simple to pull outputs from one stack and
 then use them as a variable_ in another stack.
+
+
+persistent graph
+----------------
+
+A graph_ that is persisted between CFNgin executions. It is stored in in the
+Stack `S3 bucket <cfngin/config.html#s3-bucket>`_.
 
 
 provider
