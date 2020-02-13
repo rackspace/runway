@@ -185,8 +185,7 @@ def _handle_use_pipenv(package_root, dest_path, timeout=300):
         PipenvError: Non-zero exit code returned by pipenv process.
 
     """
-    # TODO stream process output to stdout/stderr
-    LOGGER.info('Creating requirements.txt from Pipfile...')
+    LOGGER.info('lambda.pipenv: Creating requirements.txt from Pipfile...')
     req_path = os.path.join(dest_path, 'requirements.txt')
     cmd = ['pipenv', 'lock', '--requirements', '--keep-outdated']
     with open(req_path, 'w') as requirements:
@@ -198,8 +197,8 @@ def _handle_use_pipenv(package_root, dest_path, timeout=300):
             return req_path
         if int(sys.version[0]) > 2:
             stderr = stderr.decode('UTF-8')
-        LOGGER.error('"%s" failed with the following output:\n%s',
-                     ' '.join(cmd), stderr)
+        LOGGER.error('lambda.pipenv: "%s" failed with the following '
+                     'output:\n%s', ' '.join(cmd), stderr)
         raise PipenvError
 
 
@@ -236,14 +235,19 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
     if docker_file:
         if not os.path.isfile(docker_file):
             raise ValueError('could not find docker_file "%s"' % docker_file)
+        LOGGER.info('lambda.docker: Building docker image from "%s".',
+                    docker_file)
         tmp_image, _build_logs = docker_client.images.build(
             path=os.path.dirname(docker_file),
             dockerfile=os.path.basename(docker_file)
         )
         docker_image = tmp_image.id
+        LOGGER.info('lambda.docker: Docker image "%s" created.', docker_image)
 
     if runtime:
         docker_image = 'lambci/lambda:build-%s' % runtime
+        LOGGER.debug('lambda.docker: Selected docker image "%s" based on '
+                     'provided runtime', docker_image)
 
     if not docker_image:
         raise InvalidDockerizePipConfiguration(
@@ -251,6 +255,7 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
         )
 
     if sys.platform.lower() == 'win32':
+        LOGGER.debug('lambda.docker: Formatted docker mount path for Windows')
         work_dir = work_dir.replace('\\', '/')
 
     work_dir_mount = docker.types.Mount(target='/var/task',
@@ -260,13 +265,23 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
         'python -m pip install -t /var/task -r /var/task/requirements.txt'
     )
 
-    logs = docker_client.containers.run(image=docker_image,
-                                 command=['/bin/sh', '-c', pip_cmd],
-                                 auto_remove=True,
-                                 mounts=[work_dir_mount],
-                                 stream=True)
-    for line in logs:
-        LOGGER.info(line.decode('UTF-8').strip())
+    LOGGER.info('lambda.docker: Using docker image "%s" to build deployment '
+                'package...', docker_image)
+
+    service = docker_client.containers.run(image=docker_image,
+                                           command=['/bin/sh', '-c', pip_cmd],
+                                           auto_remove=True,
+                                           detach=True,
+                                           mounts=[work_dir_mount])
+
+    # 'stream' creates a blocking generator that allows for real-time logs.
+    # this loop ends when the container 'auto_remove's itself.
+    for log in service.logs(stdout=True,
+                            stderr=True,
+                            stream=True,
+                            tail=0):
+        # without strip there are a bunch blank lines in the output
+        LOGGER.info('lambda.docker: %s', log.decode().strip())
 
 
 def _zip_package(package_root, includes, excludes, dockerize_pip=False,
@@ -305,6 +320,8 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
         if use_pipenv:
             _handle_use_pipenv(package_root, tmpdir,
                                kwargs.get('pipenv_lock_timeout', 300))
+            # dir created when creating a lock file
+            excludes.append('.venv/')
         for file_name in _find_files(package_root, includes, excludes,
                                      follow_symlinks):
             copyfile(os.path.join(package_root, file_name),
