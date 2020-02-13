@@ -6,7 +6,6 @@ from __future__ import print_function
 from distutils.util import strtobool  # noqa pylint: disable=no-name-in-module,import-error
 
 import copy
-import glob
 import logging
 import os
 import sys
@@ -20,24 +19,14 @@ import yaml
 from .runway_command import RunwayCommand, get_env
 from ..context import Context
 from ..path import Path
-from ..util import (
-    change_dir, load_object_from_string, merge_dicts,
-    merge_nested_environment_dicts, extract_boto_args_from_env
-)
+from ..runway_module_type import RunwayModuleType
+from ..util import (change_dir, extract_boto_args_from_env, merge_dicts,
+                    merge_nested_environment_dicts)
 
 if sys.version_info[0] > 2:
     import concurrent.futures
 
 LOGGER = logging.getLogger('runway')
-
-
-def find_kustomize_files(path):
-    """Return true if kustomize yaml file found."""
-    for _root, _dirnames, filenames in os.walk(path):
-        for filename in filenames:
-            if filename == 'kustomization.yaml':
-                return True
-    return False
 
 
 def assume_role(role_arn, session_name=None, duration_seconds=None,
@@ -64,51 +53,8 @@ def assume_role(role_arn, session_name=None, duration_seconds=None,
             'AWS_SESSION_TOKEN': response['Credentials']['SessionToken']}
 
 
-def determine_module_class(path, class_path):  # pylint: disable=too-many-branches
-    """Determine type of module and return deployment module class."""
-    if not class_path:
-        # First check directory name for type-indicating suffix
-        basename = os.path.basename(path)
-        if basename.endswith('.sls'):
-            class_path = 'runway.module.serverless.Serverless'
-        elif basename.endswith('.tf'):
-            class_path = 'runway.module.terraform.Terraform'
-        elif basename.endswith('.cdk'):
-            class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif basename.endswith('.k8s'):
-            class_path = 'runway.module.k8s.K8s'
-        elif basename.endswith('.cfn'):
-            class_path = 'runway.module.cloudformation.CloudFormation'
-
-    if not class_path:
-        # Fallback to autodetection
-        if (os.path.isfile(os.path.join(path, 'serverless.yml')) or
-                os.path.isfile(os.path.join(path, 'serverless.js'))) and \
-                os.path.isfile(os.path.join(path, 'package.json')):
-            class_path = 'runway.module.serverless.Serverless'
-        elif glob.glob(os.path.join(path, '*.tf')):
-            class_path = 'runway.module.terraform.Terraform'
-        elif os.path.isfile(os.path.join(path, 'cdk.json')) \
-                and os.path.isfile(os.path.join(path, 'package.json')):
-            class_path = 'runway.module.cdk.CloudDevelopmentKit'
-        elif os.path.isdir(os.path.join(path, 'overlays')) \
-                and find_kustomize_files(path):
-            class_path = 'runway.module.k8s.K8s'
-        elif glob.glob(os.path.join(path, '*.env')) or (
-                glob.glob(os.path.join(path, '*.yaml'))) or (
-                    glob.glob(os.path.join(path, '*.yml'))):
-            class_path = 'runway.module.cloudformation.CloudFormation'
-
-    if not class_path:
-        LOGGER.error('No module class found for %s', os.path.basename(path))
-        sys.exit(1)
-
-    return load_object_from_string(class_path)
-
-
 def load_module_opts_from_file(path, module_options):
     """Update module_options with any options defined in module path."""
-    LOGGER.info(path)
     module_options_file = os.path.join(path,
                                        'runway.module.yml')
     if os.path.isfile(module_options_file):
@@ -632,12 +578,16 @@ class ModulesCommand(RunwayCommand):
                             "applied to this module: %s",
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
+
         with change_dir(path.module_root):
+
+            runway_module_type = RunwayModuleType(path.module_root,
+                                                  module_opts.get('class_path'),
+                                                  module_opts.get('type'))
+
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method
-            module_class = determine_module_class(path.module_root,
-                                                  module_opts.get('class_path'))
-            module_instance = module_class(
+            module_instance = runway_module_type.module_class(
                 context=context,
                 path=path.module_root,
                 options=module_opts

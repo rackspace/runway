@@ -1,0 +1,6 @@
+deployments:
+  - modules:
+    - path: type_terraform
+      type: terraform
+    regions:
+      - us-east-1

@@ -25,6 +25,7 @@ INSTALL_REQUIRES = [
     'requests',
     'future',
     'pyhcl~=0.4',
+    'gitpython',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'PyYAML>=4.1,<5.3',  # match awscli top-end
     'six>=1.13.0',
