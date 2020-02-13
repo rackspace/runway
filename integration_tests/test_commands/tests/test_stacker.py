@@ -5,7 +5,6 @@ import boto3
 
 from integration_tests.test_commands.test_commands import Commands
 
-CLIENT = boto3.client('ssm')
 KEY = "/runway/integration-test/stacker"
 VALUE = "foo"
 
@@ -36,7 +35,9 @@ class TestRunStacker(Commands):
              'build',
              'stack.yaml'],
             cwd=path).decode()
-        parameter = CLIENT.get_parameter(Name=KEY)
+        client = boto3.client('ssm',
+                              region_name=self.environment['AWS_DEFAULT_REGION'])
+        parameter = client.get_parameter(Name=KEY)
         assert parameter['Parameter']['Value'] == VALUE
 
     def teardown(self):

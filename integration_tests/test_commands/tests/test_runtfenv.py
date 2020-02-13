@@ -6,7 +6,6 @@ import boto3
 
 from integration_tests.test_commands.test_commands import Commands
 
-CLIENT = boto3.client('ssm')
 
 class TestRunTFEnv(Commands):
     """Tests run-tfenv subcommand."""
@@ -26,56 +25,46 @@ class TestRunTFEnv(Commands):
 
     def run(self):
         """Run tests."""
+        self.set_env_var('AWS_DEFAULT_REGION', 'us-east-1')
         # init
-        check_output(
-            ['runway',
-             'tfenv',
-             'run',
-             'init',
-             self.get_path()]
-        ).decode()
+        check_output(['runway',
+                      'tfenv',
+                      'run',
+                      'init',
+                      self.get_path()]).decode()
 
         # apply
-        check_output(
-            ['runway',
-             'tfenv',
-             'run',
-             '--',
-             'apply',
-             '-auto-approve',
-             self.get_path()
-            ]
-        ).decode()
+        check_output(['runway',
+                      'tfenv',
+                      'run',
+                      '--',
+                      'apply',
+                      '-auto-approve',
+                      self.get_path()]).decode()
 
         # output
-        key = check_output(
-            ['runway',
-             'tfenv',
-             'run',
-             '--',
-             'output',
-             'key'
-            ]
-        ).decode()
+        key = check_output(['runway',
+                            'tfenv',
+                            'run',
+                            '--',
+                            'output',
+                            'key']).decode()
+        self.logger.info('Key: %s', key)
 
         # ssm parameter
-        parameter = CLIENT.get_parameter(Name=key)
+        client = boto3.client('ssm',
+                              region_name=self.environment['AWS_DEFAULT_REGION'])
+        parameter = client.get_parameter(Name=key)
         value = parameter['Parameter']['Value']
 
-        # assert
         assert value == 'bar'
 
     def teardown(self):
         """Teardown any created resources."""
-        check_output(
-            ['runway',
-             'tfenv',
-             'run',
-             '--',
-             'destroy',
-             '-auto-approve',
-             self.get_path()
-            ]
-        ).decode()
-
-        pass  # pylint: disable=unnecessary-pass
+        check_output(['runway',
+                      'tfenv',
+                      'run',
+                      '--',
+                      'destroy',
+                      '-auto-approve',
+                      self.get_path()]).decode()
