@@ -13,11 +13,10 @@ It can be used with a configuration like the following::
       - modules:
           - path: web
             class_path: runway.module.staticsite.StaticSite
-            environments:
-              dev:
-                namespace: contoso-dev
-                staticsite_aliases: web.example.com,foo.web.example.com
-                staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
+            parameters:
+              namespace: contoso-dev
+              staticsite_aliases: web.example.com,foo.web.example.com
+              staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
             options:
               build_steps:
                 - npm ci
@@ -56,41 +55,40 @@ Most of these options are not required, but are listed here for reference::
           - name: conduitsite  # defaults to path; used in stack names & ssm parameter
             path: web
             class_path: runway.module.staticsite.StaticSite
-            environments:
-              # The only required environment value is namespace
-              dev:
-                namespace: contoso-dev
-                staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
+            parameters:
+              # The only required parameter value is namespace
+              namespace: contoso-${env DEPLOY_ENVIRONMENT}
+              staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
 
-                # A cert ARN can also be looked up dynamically via SSM
-                staticsite_acmcert_ssm_param: us-west-2@MySSMParamName...
+              # A cert ARN can also be looked up dynamically via SSM
+              staticsite_acmcert_ssm_param: us-west-2@MySSMParamName...
 
-                staticsite_aliases: example.com,foo.example.com
-                staticsite_web_acl: arn:aws:waf::123456789012:webacl/...
+              staticsite_aliases: example.com,foo.example.com
+              staticsite_web_acl: arn:aws:waf::123456789012:webacl/...
 
-                # staticsite_enable_cf_logging defaults to true
-                staticsite_enable_cf_logging: true
+              # staticsite_enable_cf_logging defaults to true
+              staticsite_enable_cf_logging: true
 
-                # Deploy Lambda@Edge to rewrite directory indexes
-                # e.g. support accessing example.org/foo/
-                staticsite_rewrite_directory_index: index.html
+              # Deploy Lambda@Edge to rewrite directory indexes
+              # e.g. support accessing example.org/foo/
+              staticsite_rewrite_directory_index: index.html
 
-                # You can also deploy custom Lambda@Edge associations with your
-                # pre-built function versions
-                # (this takes precedence over staticsite_rewrite_directory_index)
-                staticsite_lambda_function_associations:
-                  - type: origin-request
-                    arn: arn:aws:lambda:us-east-1:123456789012:function:foo:1
+              # You can also deploy custom Lambda@Edge associations with your
+              # pre-built function versions
+              # (this takes precedence over staticsite_rewrite_directory_index)
+              staticsite_lambda_function_associations:
+                - type: origin-request
+                  arn: arn:aws:lambda:us-east-1:123456789012:function:foo:1
 
-                # Custom error response options can be defined
-                staticsite_custom_error_responses:
-                  - ErrorCode: 404
-                    ResponseCode: 200
-                    ResponsePagePath: /index.html
+              # Custom error response options can be defined
+              staticsite_custom_error_responses:
+                - ErrorCode: 404
+                  ResponseCode: 200
+                  ResponsePagePath: /index.html
 
-                # Don't use CloudFront with the site
-                # i.e. for a development site accessible only via its S3-url
-                statisite_cf_disable: true
+              # Don't use CloudFront with the site
+              # i.e. for a development site accessible only via its S3-url
+              statisite_cf_disable: true
             options:
               pre_build_steps:  # commands to run before generating hash of files
                 - command: npm ci

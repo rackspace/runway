@@ -5,7 +5,7 @@ import subprocess
 import logging
 import sys
 
-from stacker.lookups.handlers.output import OutputLookup
+from runway.cfngin.lookups.handlers.output import OutputLookup
 from runway.util import which
 
 LOGGER = logging.getLogger(__name__)

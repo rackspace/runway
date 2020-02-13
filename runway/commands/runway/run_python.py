@@ -37,6 +37,8 @@ class RunPython(RunwayCommand):
         execglobals.update({'__name__': '__main__',
                             '__file__': filename})
 
+        # we don't have anything embedded anymore but probably worth keeping
+        # the logic around.
         sys.path.insert(1, get_embedded_lib_path())
         with open(filename, 'r') as stream:
             exec(stream.read(), execglobals, execglobals)  # pylint: disable=exec-used

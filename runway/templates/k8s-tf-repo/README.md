@@ -1,14 +1,16 @@
+# Kubernetes Terraform Sample
+
 ## Overview
 
 This repo represents a sample Terraform infrastructure deployment of EKS, featuring:
 
 * Consolidated configuration for each environment in runway.yml
-    * Environments in this context correlate with separate k8s clusters (e.g. a dev & prod cluster)
+  * Environments in this context correlate with separate k8s clusters (e.g. a dev & prod cluster)
 * Per-environment kubectl version management
-    * Because each k8s environment has a `.kubectl-version` file, kubectl does not need to be installed (Runway will handle downloading and executing the appropriate version for the environment)
+  * Because each k8s environment has a `.kubectl-version` file, kubectl does not need to be installed (Runway will handle downloading and executing the appropriate version for the environment)
 * IAM Role enabled Service Account (IRSA) usage
 * kustomize-templated k8s configurations
-    * Runway uses the kustomize base/overlays directory structure to apply per-environment k8s configurations
+  * Runway uses the kustomize base/overlays directory structure to apply per-environment k8s configurations
 
 ## Pre-reqs
 
@@ -20,9 +22,11 @@ This repo represents a sample Terraform infrastructure deployment of EKS, featur
 ### Deployment
 
 Update the kubectl-access-role-arn to specify the IAM role to which cluster admin access should be granted. E.g., if you assume an IAM role for operating in your account `aws sts get-caller-identity --query 'Arn' --output text` will show you the assumed role principal like:
+
 ```
 arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
 ```
+
 You can use that arn to determine the IAM role arn for runway.yml:
 
 ```
@@ -32,12 +36,14 @@ You can use that arn to determine the IAM role arn for runway.yml:
 After updating the role ARN, deploy to the dev environment via:
 
 macOS/Linux:
+
 ```
 export DEPLOY_ENVIRONMENT=dev
 runway deploy
 ```
 
 Windows:
+
 ```
 $env:DEPLOY_ENVIRONMENT = dev
 runway deploy
@@ -58,6 +64,7 @@ runway deploy
 After deployment, the sample hello-world app will be available at port 8666 on the address shown via:
 
 macOS/Linux:
+
 ```
 eval $(runway envvars)
 RUNWAY_ENV=$(runway whichenv)
@@ -66,6 +73,7 @@ echo "http://$(runway kbenv run -- get svc $RUNWAY_ENV-the-service -o jsonpath="
 ```
 
 Windows:
+
 ```
 runway envvars | iex
 $RUNWAY_ENV = $(runway whichenv)

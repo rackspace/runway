@@ -1,0 +1,9 @@
+{%- if show_headings %}
+{{- [basename, "module"] | join(' ') | e | heading }}
+
+{% endif -%}
+.. automodule:: {{ qualname }}
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :member-order: bysource

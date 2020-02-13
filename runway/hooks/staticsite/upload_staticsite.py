@@ -1,13 +1,13 @@
-"""Stacker hook for syncing static website to S3 bucket."""
-
+"""CFNgin hook for syncing static website to S3 bucket."""
+# TODO move to runway.cfngin.hooks on next major release
 import logging
 import time
 
 from operator import itemgetter
 
-from stacker.lookups.handlers.output import OutputLookup
-from stacker.session_cache import get_session
-from runway.commands.runway.run_aws import aws_cli
+from ...cfngin.lookups.handlers.output import OutputLookup
+from ...cfngin.session_cache import get_session
+from ...commands.runway.run_aws import aws_cli
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ def get_archives_to_prune(archives, hook_data):
 
     Keyword Args:
         archives (Dict): The full list of file archives
-        hook_data (Dict): Stacker hook data
+        hook_data (Dict): CFNgin hook data
 
     """
     files_to_skip = []
@@ -37,9 +37,11 @@ def sync(context, provider, **kwargs):
 
     Keyword Args:
 
-        context (:class:`stacker.context.Context`): The context instance
-        provider (:class:`stacker.providers.base.BaseProvider`): The provider
-            instance
+        context (:class:`runway.cfngin.context.Context`): The context
+            instance.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+            The provider instance.
+
     """
     session = get_session(provider.region)
     bucket_name = OutputLookup.handle(kwargs.get('bucket_output_lookup'),
@@ -80,8 +82,9 @@ def display_static_website_url(website_url_handle, provider, context):
 
     Keyword Args:
         website_url_handle (str): the Output handle for the website url
-        provider (:class:`stacker.providers.base.BaseProvider`): The provider instance
-        context (:class:`stacker.context.Context`): context instance
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+            The provider instance.
+        context (:class:`runway.cfngin.context.Context`): context instance
 
     """
     bucket_url = OutputLookup.handle(website_url_handle,
@@ -94,8 +97,9 @@ def update_ssm_hash(context, session):
     """Update the SSM hash with the new tracking data.
 
     Keyword Args:
-        context (:class:`stacker.context.Context`): context instance
-        session (:class:`stacker.session.Session`): Stacker session
+        context (:class:`runway.cfngin.context.Context`): context instance
+        session (:class:`runway.cfngin.session.Session`): CFNgin session
+
     """
     if not context.hook_data['staticsite'].get('hash_tracking_disabled'):
         LOGGER.info("staticsite: updating environment SSM parameter %s "
@@ -117,8 +121,11 @@ def get_distribution_data(context, provider, **kwargs):
     """Retrieve information about the distribution.
 
     Keyword Args:
-        context (:class:`stacker.context.Context`): The context instance
-        provider (:class:`stacker.providers.base.BaseProvider`): The provider instance
+        context (:class:`runway.cfngin.context.Context`): The context
+            instance.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+            The provider instance
+
     """
     LOGGER.info("Retrieved distribution data")
     return {
@@ -140,10 +147,11 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
     """Invalidate the current distribution.
 
     Keyword Args:
-        session (Session): The current Stacker session
+        session (Session): The current CFNgin session
         identifier (string): The distribution id
         path (string): The distribution path
         domain (string): The distribution domain
+
     """
     LOGGER.info("staticsite: Invalidating CF distribution")
     cf_client = session.client('cloudfront')
@@ -164,8 +172,11 @@ def prune_archives(context, session):
     """Prune the archives from the bucket.
 
     Keyword Args:
-        context (:class:`stacker.context.Context`): The context instance
-        session (:class:`stacker.session.Session`): The Stacker session
+        context (:class:`runway.cfngin.context.Context`): The context
+            instance.
+        session (:class:`runway.cfngin.session.Session`): The CFNgin
+            session.
+
     """
     LOGGER.info("staticsite: cleaning up old site archives...")
     archives = []

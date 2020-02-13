@@ -223,16 +223,12 @@ class Terraform(RunwayModule):
         if workspace_tfvar_present:
             tf_cmd.append("-var-file=%s" % workspace_tfvars_file)
         env_vars = copy.deepcopy(self.context.env_vars)
-        if isinstance(self.options.get('environments',
-                                       {}).get(self.context.env_name),
-                      dict):
-            env_vars = update_env_vars_with_tf_var_values(
-                env_vars,
-                self.options['environments'][self.context.env_name]
-            )
+        env_vars = update_env_vars_with_tf_var_values(
+            env_vars,
+            self.options['parameters']
+        )
 
-        if self.options.get('environments', {}).get(self.context.env_name) or (
-                workspace_tfvar_present):
+        if self.options['parameters'] or workspace_tfvar_present:
             LOGGER.info("Preparing to run terraform %s on %s...",
                         command,
                         os.path.basename(self.path))
@@ -273,7 +269,7 @@ class Terraform(RunwayModule):
                     env_name=self.context.env_name,
                     env_region=self.context.env_region,
                     env_vars=env_vars
-                    )
+                )
 
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(

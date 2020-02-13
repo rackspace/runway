@@ -71,9 +71,9 @@ import shutil
 import sys
 
 from cfn_flip import to_yaml
-from stacker.context import Context
 
 from ..runway_command import RunwayCommand
+from ...cfngin.context import Context
 from ...env_mgr.tfenv import get_latest_tf_version
 
 LOGGER = logging.getLogger('runway')

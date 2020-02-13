@@ -1,13 +1,15 @@
 """Tests runway/commands/modules_command.py."""
-from os import path
+import os
 import unittest
 from copy import deepcopy
-from mock import patch
-import yaml
+from os import path
 
-from runway.commands.modules_command import (
-    ModulesCommand, select_modules_to_run
-)
+import yaml
+from mock import patch
+from moto import mock_sts
+
+from runway.commands.modules_command import (select_modules_to_run,
+                                             validate_environment)
 
 
 def module_tag_config():
@@ -117,3 +119,45 @@ class ModulesCommandTestCase(unittest.TestCase):
         )
         self.assertEqual(result_tag_ci['modules'],
                          config['deployments'][0]['modules'])
+
+
+class TestValidateEnvironment(object):
+    """Tests for validate_environment."""
+
+    MOCK_ACCOUNT_ID = '123456789012'
+
+    def test_bool_match(self):
+        """True bool should match."""
+        assert validate_environment('test_module', True, os.environ)
+
+    def test_bool_not_match(self):
+        """False bool should not match."""
+        assert not validate_environment('test_module', False, os.environ)
+
+    @mock_sts
+    def test_list_match(self):
+        """Env in list should match."""
+        assert validate_environment('test_module',
+                                    [self.MOCK_ACCOUNT_ID + '/us-east-1'],
+                                    os.environ)
+
+    @mock_sts
+    def test_list_not_match(self):
+        """Env not in list should not match."""
+        assert not validate_environment('test_module',
+                                        [self.MOCK_ACCOUNT_ID + '/us-east-2'],
+                                        os.environ)
+
+    @mock_sts
+    def test_str_match(self):
+        """Env in string should match."""
+        assert validate_environment('test_module',
+                                    self.MOCK_ACCOUNT_ID + '/us-east-1',
+                                    os.environ)
+
+    @mock_sts
+    def test_str_not_match(self):
+        """Env not in string should not match."""
+        assert not validate_environment('test_module',
+                                        self.MOCK_ACCOUNT_ID + '/us-east-2',
+                                        os.environ)

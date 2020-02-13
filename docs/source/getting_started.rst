@@ -100,7 +100,7 @@ Deploying Your First Module
    ``sampleapp.cfn/``. Here is where we will define values for our stacks that
    will be deployed as part of the **dev** environment in the **us-east-1**
    region. Replace the place holder values in this file with your own
-   information. It is important that the ``stacker_bucket_name`` value is
+   information. It is important that the ``cfngin_bucket_name`` value is
    globally unique for this example as it will be used to create a new S3
    bucket.
 
@@ -110,8 +110,8 @@ Deploying Your First Module
        customer: onica
        environment: dev
        region: us-east-1
-       # The stacker bucket is used for CFN template uploads to AWS
-       stacker_bucket_name: stacker-onica-us-east-1
+       # The CFNgin bucket is used for CFN template uploads to AWS
+       cfngin_bucket_name: cfngin-onica-us-east-1
 
 #. With the :ref:`module<runway-module>` ready to deploy, now we need to create
    our :ref:`Runway config file<runway-config>`. Do to this, use the
@@ -192,6 +192,8 @@ From the root of the project directory we created in
 
     $ ./runway destroy
 
+
+.. _non-interactive-mode:
 
 Execution Without A TTY (non-interactive)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

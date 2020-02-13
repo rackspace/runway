@@ -11,10 +11,12 @@ References:
 """
 from __future__ import print_function
 import logging
+import os
 import sys
 import traceback
 
 from ..base_command import BaseCommand
+from ...context import Context
 from ...tests.registry import TEST_HANDLERS
 
 LOGGER = logging.getLogger('runway')
@@ -44,8 +46,15 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
                 print(i, file=sys.stderr)
             sys.exit(1)
 
+        context = Context(env_name=os.getenv('DEPLOY_ENVIRONMENT', 'test'),
+                          env_region=None,
+                          env_root=self.env_root,
+                          env_vars=os.environ.copy(),
+                          command='test')
+
         LOGGER.info('Found %i test(s)', len(test_definitions))
         for test in test_definitions:
+            test.resolve(context, self.runway_vars)
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Running test '%s' ===========================",
