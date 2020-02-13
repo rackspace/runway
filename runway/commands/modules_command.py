@@ -487,19 +487,21 @@ class ModulesCommand(RunwayCommand):
                         job.result()  # Raise exceptions / exit as needed
                     return
 
+                # single var to reduce comparisons
+                regions = deployment.parallel_regions or deployment.regions
+
                 if deployment.parallel_regions:
                     LOGGER.info(
                         '%s - processing the regions sequentially...',
                         ('Not running in CI mode' if sys.version_info[0] > 2
                          else 'Parallel execution requires Python 3+')
                     )
-                    deployment.regions += deployment.parallel_regions
 
                 LOGGER.info("Attempting to deploy '%s' to region(s): %s",
                             context.env_name,
-                            ", ".join(deployment.regions))
+                            ", ".join(regions))
 
-                for region in deployment.regions:
+                for region in regions:
                     LOGGER.info("")
                     LOGGER.info("======= Processing region %s ================"
                                 "===========", region)
