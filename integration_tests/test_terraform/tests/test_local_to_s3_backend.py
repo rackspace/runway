@@ -22,6 +22,11 @@ class LocalToS3Backend(Terraform):
         self.clean()
         self.set_tf_version(11)
 
+        # deploy tf state bucket
+        self.copy_runway('state')
+        code, _stdout, _stderr = self.runway_cmd('deploy')
+        assert code == 0, 'exit code should be zero'
+
         assert self.deploy_backend('local') == 0, '{}: Local backend failed'.format(__name__)
         assert self.deploy_backend('s3') == 0, '{}: S3 backend failed'.format(__name__)
 
@@ -30,4 +35,10 @@ class LocalToS3Backend(Terraform):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         code, _stdout, _stderr = self.runway_cmd('destroy')
         assert code == 0, 'exit code should be zero'
+
+        # destroy tf state bucket
+        self.copy_runway('state')
+        code, _stdout, _stderr = self.runway_cmd('destroy')
+        assert code == 0, 'exit code should be zero'
+
         self.clean()

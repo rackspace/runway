@@ -72,7 +72,7 @@ class IntegrationTest(object):
         with open(path) as data_file:
             return yaml.safe_load(data_file)
 
-    def runway_cmd(self, action, env_vars=None, tags=None, timeout=300, *args):
+    def runway_cmd(self, action, env_vars=None, tags=None, timeout=900, *args):
         """Run a deploy command based on tags.
 
         Args:

@@ -61,19 +61,10 @@ class Terraform(IntegrationTest):
         if not tests:
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
-
-        # deploy tf state bucket
-        self.copy_runway('state')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
-        assert code == 0, 'exit code should be zero'
-
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0  # assert that all subtests were successful
         return err_count
 
     def teardown(self):
         """Teardown resources create during init."""
-        self.copy_runway('state')
-        code, _stdout, _stderr = self.runway_cmd('destroy')
-        assert code == 0, 'exit code should be zero'
         self.clean()

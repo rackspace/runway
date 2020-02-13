@@ -19,6 +19,11 @@ class VersionTest(Terraform):
         """Run tests."""
         self.clean()
 
+        # deploy tf state bucket
+        self.copy_runway('state')
+        code, _stdout, _stderr = self.runway_cmd('deploy')
+        assert code == 0, 'exit code should be zero'
+
         assert self.deploy_version(11) == 0, '{}: Terraform version 11 failed'.format(__name__)
         assert self.deploy_version(12) == 0, '{}: Terraform version 12 failed'.format(__name__)
 
@@ -27,4 +32,10 @@ class VersionTest(Terraform):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         code, _stdout, _stderr = self.runway_cmd('destroy')
         assert code == 0, 'exit code should be zero'
+
+        # destroy tf state bucket
+        self.copy_runway('state')
+        code, _stdout, _stderr = self.runway_cmd('destroy')
+        assert code == 0, 'exit code should be zero'
+
         self.clean()

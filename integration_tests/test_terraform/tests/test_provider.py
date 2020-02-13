@@ -19,6 +19,11 @@ class ProviderTest(Terraform):
         self.clean()
         self.set_tf_version(11)
 
+        # deploy tf state bucket
+        self.copy_runway('state')
+        code, _stdout, _stderr = self.runway_cmd('deploy')
+        assert code == 0, 'exit code should be zero'
+
         assert self.deploy_provider(1) == 0, '{}: Provider version 1 failed'.format(__name__)
         assert self.deploy_provider(2) == 0, '{}: Provider version 2 failed'.format(__name__)
 
@@ -27,4 +32,10 @@ class ProviderTest(Terraform):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         code, _stdout, _stderr = self.runway_cmd('destroy')
         assert code == 0, 'exit code should be zero'
+
+        # destroy tf state bucket
+        self.copy_runway('state')
+        code, _stdout, _stderr = self.runway_cmd('destroy')
+        assert code == 0, 'exit code should be zero'
+
         self.clean()
