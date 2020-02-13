@@ -42,7 +42,6 @@ INSTALL_REQUIRES = [
     # 2.0.0 drops support for python 3.5
     'zipp~=1.0.0',
     # inherited from stacker 1.7.0 requirements
-    'gitpython>=2.0,<3.0',
     'jinja2>=2.7,<3.0',
     'schematics>=2.0.1,<2.1.0',
     'formic2'
