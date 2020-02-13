@@ -1,6 +1,13 @@
 ---
 - Version: '2012-10-17'
   Statement:
+    - Sid: DoesNotSupportResourceLevelPermissions
+      Effect: Allow
+      Action:
+        - s3:HeadBucket
+        - sqs:ListQueues
+      Resource:
+        - '*'
     - Effect: Allow
       Action:
         - 'cloudformation:CreateStack'
@@ -10,24 +17,28 @@
         - 'cloudformation:DescribeChangeSet'
         - 'cloudformation:DeleteChangeSet'
       Resource: 'arn:aws:cloudformation:*:*:stack/testsuite-tf-state*'
-    - Effect: Allow
+    - Sid: S3BucketPermissions
+      Effect: Allow
       Action:
-        - 's3:HeadBucket'
-        - 's3:ListBucket'
-        - 's3:ListBucketVersions'
-        - 's3:GetBucketVersioning'
+        - s3:ListBucket
+        - s3:ListBucketVersions
+        - s3:GetBucketVersioning
+        - s3:CreateBucket
+        - s3:PutLifecycleConfiguration
+        - s3:PutBucketVersioning
+        - s3:DeleteBucket
+      Resource:
+        - arn:aws:s3:::testsuite-tf-state*
+    - Sid: S3ObjectPermissions
+      Effect: Allow
+      Action:
         - 's3:GetObject'
         - 's3:GetObjectVersion'
-        - 's3:CreateBucket'
-        - 's3:PutLifecycleConfiguration'
-        - 's3:PutBucketVersioning'
         - 's3:PutObject'
-        - 's3:DeleteBucket'
         - 's3:DeleteObjectVersion'
         - 's3:DeleteObject'
-      Resource: 
-        - 'arn:aws:s3:::testsuite-tf-state'
-        - 'arn:aws:s3:::testsuite-tf-state/*'
+      Resource:
+        - 'arn:aws:s3:::testsuite-tf-state*/*'
     - Effect: Allow
       Action:
         - 'dynamodb:CreateTable'
@@ -36,16 +47,17 @@
         - 'dynamodb:DeleteTable'
         - 'dynamodb:PutItem'
         - 'dynamodb:DeleteItem'
+        - dynamodb:TagResource
+        - dynamodb:UntagResource
       Resource: 'arn:aws:dynamodb:*:*:table/testsuite-tf-state-TerraformLockTable*'
     - Effect: Allow
       Action:
         - 'sqs:CreateQueue'
         - 'sqs:DeleteQueue'
         - 'sqs:SetQueueAttributes'
-        - 'sqs:ListQueues'
         - 'sqs:GetQueueAttributes'
         - 'sqs:GetQueueUrl'
         - 'sqs:ListQueueTags'
         - 'sqs:TagQueue'
-      Resource: 
+      Resource:
         - 'arn:aws:sqs:*:*:terraform*'
