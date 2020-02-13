@@ -2,10 +2,14 @@
 .. _`AWS profiles`: https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html
 .. _Blueprint: ../terminology.html#blueprint
 .. _Blueprints: ../terminology.html#blueprint
+.. _config file: ../terminology.html#config
+.. _graph: ../terminology.html#graph
 .. _hook: ../terminology.html#hook
 .. _hooks: ../terminology.html#hook
+.. _lookups: lookups.html
 .. _Mappings: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
 .. _Outputs: ../terminology.html#output
+.. _stack: ../terminology.html#stack
 
 
 ==================
@@ -84,6 +88,105 @@ However, note that template size is greatly limited when uploading directly.
 See the `CloudFormation Limits Reference`_.
 
 .. _`CloudFormation Limits Reference`: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html
+
+
+Persistent Graph
+----------------
+
+Each time CFNgin is run, it creates a dependency graph_ of Stacks_. This is
+used to determine the order in which to execute them. This graph_ can be
+persisted between runs to track the removal of Stacks_ the `config file`_.
+
+When a stack_ is present in the persistent graph but not in the graph_
+constructed from the `config file`_, CFNgin will delete the stack_ from
+CloudFormation. This takes effect during both build and destroy actions.
+
+The persistent graph is also used with the `graph command <commands.html#graph>`_
+where it is merged with the graph_ constructed from the `config file`_.
+
+To enable persistent graph, set **persistent_graph_key** to a unique value
+that will be used to construct the path to the persistent graph object in S3.
+This object is stored in the CFNgin `S3 Bucket`_ which is also used for
+CloudFormation templates. The fully qualified path to the object will look
+like the below.
+
+.. code-block::
+
+  s3://${cfngin_bucket}/${namespace}/persistent_graphs/${namespace}/${persistent_graph_key}.json
+
+.. note::
+  It is recommended to enable versioning on the CFNgin `S3 Bucket`_ when
+  using persistent graph to have a backup version in the event something
+  unintended happens. A warning will be logged if this is not enabled.
+
+  If CFNgin creates an `S3 Bucket`_ for you when persistent graph is enabled,
+  it will be created with versioning enabled.
+
+.. important::
+  When choosing a value for **persistent_graph_key**, it is vital to ensure
+  the value is unique for the **namespace** being used. If the key is a
+  duplicate, `stacks <../terminology.html#stack>`_ that are not intended to be
+  destroyed will be destroyed.
+
+When executing an action that will be modifying the persistent graph
+(build or destroy), the S3 object is *"locked"*. The lock is a tag applied to
+the object at the start of one of these actions. The tag-key is
+**cfngin_lock_code** and the tag-value is UUID generated each time a command
+is run. In order for CFNgin to lock a persistent graph object, the tag must
+not be present on the object. For CFNgin to act on the graph_ (modify or
+unlock) the value of the tag must match the UUID of the current CFNgin
+session. If the object is locked or the code does not match, an error will be
+raised and no action will be taken. This prevents two parties from acting on
+the same persistent graph object concurrently which would create a race
+condition.
+
+.. note::
+  A persistent graph object can be unlocked manually by removing the
+  **cfngin_lock_code** tag from it. This should be done with caution as it
+  will cause any active sessions to raise an error.
+
+Persistent Graph Example
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: config.yml
+.. code-block:: yaml
+
+  namespace: example
+  cfngin_bucket: cfngin-bucket
+  persistent_graph_key: my_graph  # .json - will be appended if not provided
+  stacks:
+    first_stack:
+      ...
+    new_stack:
+      ...
+
+.. rubric:: s3://cfngin-bucket/persistent_graphs/example/my_graph.json
+.. code-block:: json
+
+  {
+    "first_stack": [],
+    "removed_stack": [
+      "first_stack"
+    ]
+  }
+
+.. rubric:: Result
+
+Given the above `config file`_ and persistent graph,
+when running ``runway deploy``, the following will occur.
+
+#. The ``{"Key": "cfngin_lock_code", "Value": "123456"}`` tag is applied to
+   **s3://cfngin-bucket/persistent_graphs/example/my_graph.json** to lock it
+   to the current session.
+#. **removed_stack** is deleted from CloudFormation and deleted from the
+   persistent graph object in S3.
+#. **first_stack** is updated in CloudFormation and updated in the persistent
+   graph object in S3 (incase dependencies change).
+#. **new_stack** is created in CloudFormation and added to the persistent graph
+   object in S3.
+#. The ``{"Key": "cfngin_lock_code", "Value": "123456"}`` tag is removed from
+   **s3://cfngin-bucket/persistent_graphs/example/my_graph.json** to unlock it
+   for use in other sessions.
 
 
 Module Paths
@@ -251,7 +354,10 @@ The keyword is a dictionary with the following keys:
   with a variable pulled from an environment file.
 
 **args:**
-  A dictionary of arguments to pass to the hook_.
+  A dictionary of arguments to pass to the hook_ with support for lookups_.
+  Note that lookups_ that change the order of execution, like ``output``, can
+  only be used in a `post` hook but hooks like ``rxref`` are able to be used
+  with either `pre` or `post` hooks.
 
 An example using the ``create_domain`` hook_ for creating a route53 domain before
 the build action:
@@ -280,6 +386,33 @@ should run in the environment CFNgin is running against:
       enabled: ${create_domain_bool}
       args:
         domain: mydomain.com
+
+An example of a custom hooks using various lookups in it's arguments:
+
+.. code-block:: yaml
+
+  pre_build:
+    custom_hook1:
+      path: path.to.hook1.entry_point
+      args:
+        ami: ${ami [<region>@]owners:self,888888888888,amazon name_regex:server[0-9]+ architecture:i386}
+        user_data: ${file parameterized-64:file://some/path}
+        db_endpoint: ${rxref some-stack::Endpoint}
+        subnet: ${xref some-stack::Subnet}
+        db_creds: ${ssmstore us-east-1@MyDBUser}
+    custom_hook2:
+      path: path.to.hook.entry_point
+      args:
+        bucket: ${dynamodb us-east-1:TestTable@TestKey:TestVal.BucketName}
+        bucket_region: ${envvar AWS_REGION}  # this variable is set by Runway
+        files:
+          - ${file plain:file://some/path}
+
+  post_build:
+    custom_hook3:
+      path: path.to.hook3.entry_point
+      args:
+        nlb: ${output nlb-stack::Nlb}  # output can only be used as a post hook
 
 
 Tags

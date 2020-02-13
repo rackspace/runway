@@ -20,7 +20,6 @@ class TestDefaultToSeries(Parallelism):
     def run(self):
         """Run tests."""
         self.clean()
-        self.set_environment('dev')
         assert self.deploy() == 0, '{}: Default to series failed'.format(__name__)
 
     def teardown(self):
@@ -30,4 +29,3 @@ class TestDefaultToSeries(Parallelism):
         with change_dir(self.parallelism_test_dir):
             run_command(['runway', 'destroy'])
         self.clean()
-        self.unset_env_var('CI')

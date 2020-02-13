@@ -1,0 +1,49 @@
+name: Issue Management
+
+on:
+  issues:
+    types:  # scoped to 'opened' since it is the only action being used for now
+      - opened
+
+jobs:
+  issue-opened:
+    name: Issue Opened
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: assign first responders
+        # https://github.com/Naturalclar/issue-action
+        uses: Naturalclar/issue-action@v1.0.0
+        with:
+          keywords: '[" "]'  # space should match any issue with two words or more
+          assignees: '["ITProKyle", "troyready"]'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: apply initial labels
+        # https://github.com/Naturalclar/issue-action
+        uses: Naturalclar/issue-action@v1.0.0
+        with:
+          keywords: '[" "]'  # space should match any issue with two words or more
+          labels: '["status:review_needed", "priority:low"]'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: identify bug
+        # https://github.com/Naturalclar/issue-action
+        uses: Naturalclar/issue-action@v1.0.0
+        with:
+          keywords: '["bug"]'
+          labels: '["bug"]'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: identify feature
+        # https://github.com/Naturalclar/issue-action
+        uses: Naturalclar/issue-action@v1.0.0
+        with:
+          keywords: '["feature", "request"]'
+          labels: '["feature"]'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: identify question
+        # https://github.com/Naturalclar/issue-action
+        uses: Naturalclar/issue-action@v1.0.0
+        with:
+          keywords: '["question"]'
+          labels: '["question"]'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+

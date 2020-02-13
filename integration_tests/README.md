@@ -44,3 +44,9 @@ In `util.py` there are a couple of helper functions:
 - `execute_tests`
   - Given a list of classes, it will iterate through them and run  `run()` and `teardown()`.
   - This will also give a report of the results of each test.
+
+## Permissions
+Put a file called policies.yaml in the integration test folder in order to define permissions. e.g. /integration_tests/test_cdk/policies.yaml
+
+Whenever permissions are updated, the permissions stack must be redeployed with the following command from the folder '/integration_test_infrastructure/codebuild/common': pipenv run runway deploy
+

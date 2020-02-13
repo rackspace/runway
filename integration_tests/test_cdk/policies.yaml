@@ -1,0 +1,14 @@
+---
+- Version: "2012-10-17"
+  Statement:
+    - Effect: Allow
+      Action: 'cloudformation:*'
+      Resource: 
+        - 'arn:aws:cloudformation:*:*:stack/runway-cdk-py-sample*'
+        - 'arn:aws:cloudformation:*:*:stack/CDKToolkit*'
+    - Effect: Allow
+      Action: 's3:*'
+      Resource: 'arn:aws:s3:::cdktoolkit*'
+    - Effect: Allow
+      Action: 'sns:*'
+      Resource: 'arn:aws:sns:*:*:runway-cdk-py-sample*'

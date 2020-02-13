@@ -1,9 +1,9 @@
 """Tests for runway.cfngin.actions.build."""
-# pylint: disable=protected-access,unused-argument
+# pylint: disable=no-self-use,protected-access,unused-argument
 import unittest
 from collections import namedtuple
 
-import mock
+from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin import exceptions
 from runway.cfngin.actions import build
@@ -13,6 +13,7 @@ from runway.cfngin.actions.build import (UsePreviousParameterValue,
 from runway.cfngin.blueprints.variables.types import CFNString
 from runway.cfngin.context import Config, Context
 from runway.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
+from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.providers.base import BaseProvider
 from runway.cfngin.session_cache import get_session
@@ -66,23 +67,67 @@ class TestBuildAction(unittest.TestCase):
             self.context,
             provider_builder=MockProviderBuilder(self.provider))
 
-    def _get_context(self, **kwargs):
+    def _get_context(self, extra_config_args=None, **kwargs):
         """Get context."""
-        config = Config({
+        config = {
             "namespace": "namespace",
             "stacks": [
                 {"name": "vpc"},
-                {"name": "bastion",
-                 "variables": {
-                     "test": "${output vpc::something}"}},
-                {"name": "db",
-                 "variables": {
-                     "test": "${output vpc::something}",
-                     "else": "${output bastion::something}"}},
+                {
+                    "name": "bastion",
+                    "variables": {
+                        "test": "${output vpc::something}"
+                    }
+                },
+                {
+                    "name": "db",
+                    "variables": {
+                        "test": "${output vpc::something}",
+                        "else": "${output bastion::something}"
+                    }
+                },
                 {"name": "other", "variables": {}}
             ],
-        })
-        return Context(config=config, **kwargs)
+        }
+        if extra_config_args:
+            config.update(extra_config_args)
+        return Context(config=Config(config), **kwargs)
+
+    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+           new_callable=PropertyMock)
+    def test_generate_plan_persist_destroy(self, mock_graph_tags):
+        """Test generate plan persist destroy."""
+        mock_graph_tags.return_value = {}
+        context = self._get_context(
+            extra_config_args={'persistent_graph_key': 'test.json'}
+        )
+        context._persistent_graph = Graph.from_steps(
+            [Step.from_stack_name('removed', context)]
+        )
+        build_action = build.Action(context=context)
+        plan = build_action._Action__generate_plan()
+
+        self.assertIsInstance(plan, Plan)
+        self.assertEqual(build.Action.DESCRIPTION, plan.description)
+        mock_graph_tags.assert_called_once()
+        # order is different between python2/3 so can't compare dicts
+        result_graph_dict = plan.graph.to_dict()
+        self.assertEqual(5, len(result_graph_dict))
+        self.assertEqual(set(), result_graph_dict['other'])
+        self.assertEqual(set(), result_graph_dict['removed'])
+        self.assertEqual(set(), result_graph_dict['vpc'])
+        self.assertEqual(set(['vpc']), result_graph_dict['bastion'])
+        self.assertEqual(set(['bastion', 'vpc']), result_graph_dict['db'])
+        self.assertEqual(build_action._destroy_stack,
+                         plan.graph.steps['removed'].fn)
+        self.assertEqual(build_action._launch_stack,
+                         plan.graph.steps['vpc'].fn)
+        self.assertEqual(build_action._launch_stack,
+                         plan.graph.steps['bastion'].fn)
+        self.assertEqual(build_action._launch_stack,
+                         plan.graph.steps['db'].fn)
+        self.assertEqual(build_action._launch_stack,
+                         plan.graph.steps['other'].fn)
 
     def test_handle_missing_params(self):
         """Test handle missing params."""
@@ -135,7 +180,7 @@ class TestBuildAction(unittest.TestCase):
         """Test generate plan."""
         context = self._get_context()
         build_action = build.Action(context, cancel=MockThreadingEvent())
-        plan = build_action._generate_plan()
+        plan = build_action._Action__generate_plan()
         self.assertEqual(
             {
                 'db': set(['bastion', 'vpc']),
@@ -149,7 +194,7 @@ class TestBuildAction(unittest.TestCase):
         """Test does not execute plan when outline specified."""
         context = self._get_context()
         build_action = build.Action(context, cancel=MockThreadingEvent())
-        with mock.patch.object(build_action, "_generate_plan") as \
+        with patch.object(build_action, "_generate_plan") as \
                 mock_generate_plan:
             build_action.run(outline=True)
             self.assertEqual(mock_generate_plan().execute.call_count, 0)
@@ -158,10 +203,35 @@ class TestBuildAction(unittest.TestCase):
         """Test execute plan when outline not specified."""
         context = self._get_context()
         build_action = build.Action(context, cancel=MockThreadingEvent())
-        with mock.patch.object(build_action, "_generate_plan") as \
+        with patch.object(build_action, "_generate_plan") as \
                 mock_generate_plan:
             build_action.run(outline=False)
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
+
+    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+           new_callable=PropertyMock)
+    @patch('runway.cfngin.context.Context.lock_persistent_graph',
+           new_callable=MagicMock)
+    @patch('runway.cfngin.context.Context.unlock_persistent_graph',
+           new_callable=MagicMock)
+    @patch('runway.cfngin.plan.Plan.execute', new_callable=MagicMock)
+    def test_run_persist(self, mock_execute, mock_unlock, mock_lock,
+                         mock_graph_tags):
+        """Test run persist."""
+        mock_graph_tags.return_value = {}
+        context = self._get_context(
+            extra_config_args={'persistent_graph_key': 'test.json'}
+        )
+        context._persistent_graph = Graph.from_steps(
+            [Step.from_stack_name('removed', context)]
+        )
+        build_action = build.Action(context=context)
+        build_action.run()
+
+        mock_graph_tags.assert_called_once()
+        mock_lock.assert_called_once()
+        mock_execute.assert_called_once()
+        mock_unlock.assert_called_once()
 
     def test_should_update(self):
         """Test should update."""
@@ -173,7 +243,7 @@ class TestBuildAction(unittest.TestCase):
             test_scenario(locked=True, force=False, result=False),
             test_scenario(locked=True, force=True, result=True)
         )
-        mock_stack = mock.MagicMock(["locked", "force", "name"])
+        mock_stack = MagicMock(["locked", "force", "name"])
         mock_stack.name = "test-stack"
         for test in test_scenarios:
             mock_stack.locked = test.locked
@@ -210,7 +280,7 @@ class TestBuildAction(unittest.TestCase):
             test_scenario(enabled=True, result=True),
         )
 
-        mock_stack = mock.MagicMock(["enabled", "name"])
+        mock_stack = MagicMock(["enabled", "name"])
         mock_stack.name = "test-stack"
         for test in test_scenarios:
             mock_stack.enabled = test.enabled
@@ -231,7 +301,7 @@ class TestLaunchStack(TestBuildAction):
                                          provider_builder=provider_builder,
                                          cancel=MockThreadingEvent())
 
-        self.stack = mock.MagicMock()
+        self.stack = MagicMock()
         self.stack.region = None
         self.stack.name = 'vpc'
         self.stack.fqn = 'vpc'
@@ -239,12 +309,12 @@ class TestLaunchStack(TestBuildAction):
         self.stack.locked = False
         self.stack_status = None
 
-        plan = self.build_action._generate_plan()
+        plan = self.build_action._Action__generate_plan()
         self.step = plan.steps[0]
         self.step.stack = self.stack
 
         def patch_object(*args, **kwargs):
-            mock_object = mock.patch.object(*args, **kwargs)
+            mock_object = patch.object(*args, **kwargs)
             self.addCleanup(mock_object.stop)
             mock_object.start()
 
@@ -403,8 +473,8 @@ class TestFunctions(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.ctx = Context({"namespace": "test"})
-        self.prov = mock.MagicMock()
-        self.blueprint = mock.MagicMock()
+        self.prov = MagicMock()
+        self.blueprint = MagicMock()
 
     def test_resolve_parameters_unused_parameter(self):
         """Test resolve parameters unused parameter."""

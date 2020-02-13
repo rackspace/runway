@@ -460,6 +460,16 @@ class TestProviderDefaultMode(unittest.TestCase):
             self.session, region=region, recreate_failed=False)
         self.stubber = Stubber(self.provider.cloudformation)
 
+    def test_destroy_stack(self):
+        """Test destroy stack."""
+        stack = {'StackName': 'MockStack'}
+
+        self.stubber.add_response('delete_stack', {}, stack)
+
+        with self.stubber:
+            self.assertIsNone(self.provider.destroy_stack(stack))
+            self.stubber.assert_no_pending_responses()
+
     def test_get_stack_stack_does_not_exist(self):
         """Test get stack stack does not exist."""
         stack_name = "MockStack"
@@ -490,6 +500,15 @@ class TestProviderDefaultMode(unittest.TestCase):
             response = self.provider.get_stack(stack_name)
 
         self.assertEqual(response["StackName"], stack_name)
+
+    def test_select_destroy_method(self):
+        """Test select destroy method."""
+        for i in [[{'force_interactive': False},
+                   self.provider.noninteractive_destroy_stack],
+                  [{'force_interactive': True},
+                   self.provider.interactive_destroy_stack]]:
+            self.assertEqual(self.provider.select_destroy_method(**i[0]),
+                             i[1])
 
     def test_select_update_method(self):
         """Test select update method."""
@@ -570,7 +589,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             with self.stubber:
                 self.provider.prepare_stack_for_update(
                     stack,
-                    tags=[{'Key': 'stacker_namespace', 'Value': 'test'}])
+                    tags=[{'Key': 'cfngin_namespace', 'Value': 'test'}])
 
         self.assertIn('tags differ', str(raised.exception).lower())
 
@@ -857,6 +876,27 @@ class TestProviderInteractiveMode(unittest.TestCase):
             self.session, interactive=True, recreate_failed=True)
         self.stubber = Stubber(self.provider.cloudformation)
 
+    @patch('runway.cfngin.ui.get_raw_input')
+    def test_destroy_stack(self, patched_input):
+        """Test destroy stack."""
+        stack = {'StackName': 'MockStack'}
+        patched_input.return_value = 'y'
+
+        self.stubber.add_response('delete_stack', {}, stack)
+
+        with self.stubber:
+            self.assertIsNone(self.provider.destroy_stack(stack))
+            self.stubber.assert_no_pending_responses()
+
+    @patch('runway.cfngin.ui.get_raw_input')
+    def test_destroy_stack_canceled(self, patched_input):
+        """Test destroy stack canceled."""
+        stack = {'StackName': 'MockStack'}
+        patched_input.return_value = 'n'
+
+        with self.assertRaises(exceptions.CancelExecution):
+            self.provider.destroy_stack(stack)
+
     def test_successful_init(self):
         """Test successful init."""
         replacements = True
@@ -943,8 +983,17 @@ class TestProviderInteractiveMode(unittest.TestCase):
 
         self.assertEqual(patched_approval.call_count, 1)
 
+    def test_select_destroy_method(self):
+        """Test select destroy method."""
+        for i in [[{'force_interactive': False},
+                   self.provider.interactive_destroy_stack],
+                  [{'force_interactive': True},
+                   self.provider.interactive_destroy_stack]]:
+            self.assertEqual(self.provider.select_destroy_method(**i[0]),
+                             i[1])
+
     def test_select_update_method(self):
-        """."""
+        """Test select update method."""
         for i in [[{'force_interactive': False,
                     'force_change_set': False},
                    self.provider.interactive_update_stack],

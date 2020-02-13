@@ -1,0 +1,6 @@
+deployments:
+  - modules:
+    - path: type_static
+      type: static
+    regions:
+      - us-east-1

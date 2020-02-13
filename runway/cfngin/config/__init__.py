@@ -434,6 +434,8 @@ class Config(Model):
         namespace_delimiter (StringType): Character used to separate
             ``namespace`` and anything it prepends.
         package_sources (ModelType): Remote source locations.
+        persistent_graph_key (str): S3 object key were the persistent graph
+            is stored.
         post_build (ListType): Hooks to run after a build action.
         post_destroy (ListType): Hooks to run after a destroy action.
         pre_build (ListType): Hooks to run before a build action.
@@ -468,6 +470,7 @@ class Config(Model):
     namespace = StringType(required=True)
     namespace_delimiter = StringType(serialize_when_none=False)
     package_sources = ModelType(PackageSources, serialize_when_none=False)
+    persistent_graph_key = StringType(serialize_when_none=False)
     post_build = ListType(ModelType(Hook), serialize_when_none=False)
     post_destroy = ListType(ModelType(Hook), serialize_when_none=False)
     pre_build = ListType(ModelType(Hook), serialize_when_none=False)

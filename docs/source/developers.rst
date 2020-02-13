@@ -1,15 +1,17 @@
 .. _Pyinstaller: https://pypi.org/project/PyInstaller/
+.. _fork this repo: https://help.github.com/en/github/getting-started-with-github/fork-a-repo
+.. _clone your fork: https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository
 
 .. _developers:
 .. highlight:: shell
 
-Developers
-==========
+Developer Guide
+===============
 
 Getting Started
 ---------------
 
-Before getting started, [fork this repo](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) and [clone your fork](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository).
+Before getting started, `fork this repo`_ and `clone your fork`_.
 
 Development Environment
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,6 +20,89 @@ This project uses ``pipenv`` to create Python virtual environment. This must be 
 
 
 With pipenv installed, run ``make sync_all`` to setup your development environment. This will create all the requred virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
+
+Branch Requirements
+~~~~~~~~~~~~~~~~~~~
+
+Branches must start with one of the following prefixes (e.g. ``<prefix>/<your-branch-name>``).
+This is due to how labels are applied to PRs.
+If the branch does not meet the requirement, any PRs from it will be blocked from being merged.
+
+**bugfix | fix | hotfix**
+    The branch contains a fix for a big.
+
+**feature | feat**
+    The branch contains a new feature or enhancement to an existing feature.
+
+**docs | documentation**
+    The branch only contains updates to documentation.
+
+**maintain | maint | maintenance**
+    The branch does not contain changes to the project itself to is aimed at maintaining the repo, CI/CD, or testing infrastructure. (e.g. README, GitHub action, integration test infrastructure)
+
+**release**
+    Reserved for maintainers to prepare for the release of a new version.
+
+PR Requirements
+~~~~~~~~~~~~~~~
+
+In order for a PR to be merged it must be passing all checks and be approved by at least one maintainer.
+Some of the checks can be run locally using ``make lint`` and ``make test``.
+
+To be considered for approval, the PR must meet the following requirements.
+
+- Title must be a brief explanation of what was done in the PR (think commit message).
+- A summary of was done.
+- Explain why this change is needed.
+- Detail the changes that were made (think CHANGELOG).
+- Screenshot if applicable.
+- Include tests for any new features or changes to existing features. (unit tests and integration tests depending on the nature of the change)
+- Documentation was updated for any new feature or changes to existing features.
+
+
+GitHub Actions
+--------------
+
+GitHub Actions are used to manage issues, pull requests, and releases.
+
+Branch Name
+~~~~~~~~~~~
+
+Runs on PR open/reopen to check that the incoming branch is using one of the correct prefixes for labels to be applied.
+
+### Accepted Prefixes
+
+- ``bugfix/``
+- ``chore/``
+- ``docs/``
+- ``enhancement/``
+- ``feat/``
+- ``feature/``
+- ``fix/``
+- ``hotfix/``
+- ``maint/``
+- ``maintain/``
+- ``maintenance/``
+- ``release/``
+
+Issue Management
+~~~~~~~~~~~~~~~~
+
+Assigns first responders to a newly opened issue and applies initial labels of `status:review_required` and `priority:low` to denote that one of the first responders has not reviewed the issue yet and set initial triage level.
+
+This will also try to identify if the issue is a feature request, bug report, or question based by looking for keywords and apply the appropriate label. The issue templates will result in the corresponding label being applied.
+
+PR Management
+~~~~~~~~~~~~~
+
+When a PR is opened, it will receive a label based on the source branch's prefix. These labels are used to categorize the PRs for the release message.
+
+When a PR is ready for review (regular PR is opened or draft PR is marked ready for review) maintainers are added as reviewers of the PR and the PR author is assigned to the PR.
+
+Release Management
+~~~~~~~~~~~~~~~~~~
+
+When a commit is pushed to master (tag is pushed, PR is merged) a release draft is created (if one does not exist) and PRs since the last tag are added following the included template. Changes are categorized based on PR labels.
 
 
 Building Pyinstaller Packages Locally

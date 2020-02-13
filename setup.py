@@ -27,6 +27,7 @@ INSTALL_REQUIRES = [
     'requests',
     'future',
     'pyhcl~=0.4',
+    'gitpython',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'PyYAML>=4.1,<5.3',  # match awscli top-end
     'six>=1.13.0',
@@ -44,8 +45,7 @@ INSTALL_REQUIRES = [
     'gitpython>=2.0,<3.0',
     'jinja2>=2.7,<3.0',
     'schematics>=2.0.1,<2.1.0',
-    'formic2',
-    'python-dateutil>=2.0,<3.0'
+    'formic2'
 ]
 
 

@@ -7,7 +7,7 @@ from .base import BaseAction
 LOGGER = logging.getLogger(__name__)
 
 
-class Action(BaseAction):
+class Action(BaseAction):  # pylint: disable=abstract-method
     """Get information on CloudFormation stacks.
 
     Displays the outputs for the set of CloudFormation stacks.

@@ -72,7 +72,7 @@ class IntegrationTest(object):
         with open(path) as data_file:
             return yaml.safe_load(data_file)
 
-    def runway_cmd(self, action, env_vars=None, tags=None, timeout=300, *args):
+    def runway_cmd(self, action, env_vars=None, tags=None, timeout=900, *args):
         """Run a deploy command based on tags.
 
         Args:
@@ -98,9 +98,11 @@ class IntegrationTest(object):
         with change_dir(self.working_dir):
             cmd_process = subprocess.Popen(cmd, env=env_vars or self.environment,
                                            stdout=subprocess.PIPE,
-                                           stderr=subprocess.PIPE)
+                                           stderr=subprocess.PIPE,
+                                           universal_newlines=True)
             stdout, stderr = cmd_process.communicate(timeout=timeout)
-        return cmd_process.returncode, stdout.decode(), stderr.decode()
+            print(stderr)
+        return cmd_process.returncode, stdout, stderr
 
     def set_environment(self, env):
         """Set deploy environment."""

@@ -110,6 +110,16 @@ class TestAMILookup(unittest.TestCase):
                         "Name": "Fake Image 2",
                         "VirtualizationType": "hvm",
                     },
+                    # include an ARI in the response to ensure it can be handled
+                    # (these don't include a 'Name')
+                    {
+                        'OwnerId': '897883143566',
+                        'Architecture': 'x86_64',
+                        'CreationDate': '2011-06-24T20:34:25.000Z',
+                        'State': 'available',
+                        'ImageId': 'ari-e6bc478f',
+                        'VirtualizationType': 'paravirtual'
+                    }
                 ]
             }
         )

@@ -1,0 +1,6 @@
+namespace: dev
+stacker_bucket: ''
+
+stacks:
+  stackerintegrationtest:
+    template_path: ssm.yaml
