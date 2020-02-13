@@ -1,4 +1,6 @@
 """Test deploying a base line static site."""
+import os
+
 from runway.util import change_dir
 
 from integration_tests.test_staticsite.test_staticsite import StaticSite
@@ -13,7 +15,9 @@ class TestBasicSite(StaticSite):
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_fixture(self.module_dir)
+        os.mkdir(self.staticsite_test_dir)
+        os.mkdir(os.path.join(self.staticsite_test_dir, self.module_dir))
+        os.mkdir(os.path.join(self.staticsite_test_dir, self.module_dir, 'build'))
         self.copy_runway('basic-site')
         with change_dir(self.staticsite_test_dir):
             return run_command(['runway', 'deploy'])
@@ -30,4 +34,3 @@ class TestBasicSite(StaticSite):
         with change_dir(self.staticsite_test_dir):
             run_command(['runway', 'destroy'])
         self.clean()
-        self.unset_env_var('CI')
