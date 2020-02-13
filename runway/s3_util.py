@@ -80,6 +80,11 @@ def ensure_bucket_exists(bucket_name, region='us-east-1', session=None):
             }
         s3_client.create_bucket(Bucket=bucket_name, **create_bucket_opts)
 
+        # sometimes when creating the bucket it can take a few moments before
+        # it is ready to add the encryption settings.
+        bucket_waiter = s3_client.get_waiter('bucket_exists')
+        bucket_waiter.wait(Bucket=bucket_name)
+
         # enable default encryption
         s3_client.put_bucket_encryption(Bucket=bucket_name,
                                         ServerSideEncryptionConfiguration={
