@@ -32,12 +32,13 @@ class StaticSite(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
-        tests = [test(self.logger) for test in StaticSite.__subclasses__()]
+        self.set_environment('dev')
+        self.set_env_var('PIPENV_VENV_IN_PROJECT', '1')
+        tests = [test(self.logger, self.environment)
+                 for test in StaticSite.__subclasses__()]
         if not tests:
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
-        self.set_environment('dev')
-        self.set_env_var('PIPENV_VENV_IN_PROJECT', '1')
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0  # assert that all subtests were successful
         return err_count
@@ -58,6 +59,9 @@ class StaticSite(IntegrationTest):
             if os.path.isdir(folder_path):
                 self.logger.debug('send2trash: "%s"', folder_path)
                 send2trash(folder_path)
+        if os.path.isdir(folder_path):
+            self.logger.debug('send2trash: "%s"', self.staticsite_test_dir)
+            send2trash(self.staticsite_test_dir)
 
     def delete_venv(self, module_directory):
         """Delete pipenv venv before running destroy."""
@@ -69,5 +73,4 @@ class StaticSite(IntegrationTest):
 
     def teardown(self):
         """Teardown resources create during init."""
-        self.unset_env_var('PIPENV_VENV_IN_PROJECT')
         self.clean()
