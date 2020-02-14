@@ -1,6 +1,4 @@
-""" Load dependencies """
-from __future__ import print_function
-
+"""Load dependencies."""
 from troposphere import Ref, Join, Sub, Output, awslambda, iam, Export, GetAtt
 
 import awacs.awslambda
@@ -9,8 +7,8 @@ import awacs.sts
 import awacs.dynamodb
 from awacs.aws import Allow, Statement, Policy, Principal
 
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNString
 
 
 class BlueprintClass(Blueprint):
@@ -25,6 +23,11 @@ class BlueprintClass(Blueprint):
         "AppName": {
             "type": CFNString,
             "description": "Name of app"
+        },
+        "Entrypoint": {
+            "type": CFNString,
+            "description": "Lambda function entrypoint.",
+            "default": "index.handler"
         }
     }
 
@@ -81,14 +84,13 @@ class BlueprintClass(Blueprint):
             awslambda.Function(
                 'LambdaFunction',
                 Code=variables['Code'],
-                Handler='index.handler',
+                Handler=variables['Entrypoint'].ref,
                 Role=GetAtt(lambda_iam_role, 'Arn'),
                 Runtime='python3.6',
                 Timeout=30,
                 MemorySize=128,
-                FunctionName=Join('-',
-                                   [app_name,
-                                   'integrationtest'])
+                FunctionName=Join('-', [app_name,
+                                        'integrationtest'])
             )
         )
 
@@ -96,7 +98,9 @@ class BlueprintClass(Blueprint):
             Output(
                 lambda_iam_role.title,
                 Description='Lambda Role',
-                Export=Export(Sub('${AWS::StackName}-%s' % lambda_iam_role.title)),  # nopep8 pylint: disable=C0301
+                Export=Export(Sub(
+                    '${AWS::StackName}-%s' % lambda_iam_role.title
+                )),
                 Value=Ref(lambda_iam_role)
             )
         )
@@ -104,7 +108,9 @@ class BlueprintClass(Blueprint):
             Output(
                 lambda_function.title,
                 Description='Lambda Function',
-                Export=Export(Sub('${AWS::StackName}-%s' % lambda_function.title)),  # nopep8 pylint: disable=C0301
+                Export=Export(Sub(
+                    '${AWS::StackName}-%s' % lambda_function.title
+                )),
                 Value=GetAtt(lambda_function, 'Arn')
             )
         )
@@ -112,7 +118,9 @@ class BlueprintClass(Blueprint):
             Output(
                 lambda_function.title + 'Name',
                 Description='Lambda Function Name',
-                Export=Export(Sub('${AWS::StackName}-%sName' % lambda_function.title)),  # nopep8 pylint: disable=C0301
+                Export=Export(Sub(
+                    '${AWS::StackName}-%sName' % lambda_function.title
+                )),
                 Value=Ref(lambda_function)
             )
         )

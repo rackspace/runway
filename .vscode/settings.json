@@ -19,6 +19,8 @@
     "python.linting.pylintEnabled": true,
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "cSpell.words": [
-        "cfngin"
+        "cfngin",
+        "dockerizepip",
+        "nondockerizepip"
     ]
 }

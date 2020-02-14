@@ -41,6 +41,30 @@ class IntegrationTest(object):
         self.fixture_dir = os.path.join(self.working_dir, 'fixtures')
         self.tests_dir = os.path.join(self.working_dir, 'tests')
 
+    @property
+    def deploy_env(self):
+        """Return DEPLOY_ENVIRONMENT for the test."""
+        return self.environment.get('DEPLOY_ENVIRONMENT')
+
+    @deploy_env.setter
+    def deploy_env(self, value):
+        """Set the DEPLOY_ENVIRONMENT value."""
+        self.logger.info('Setting "DEPLOY_ENVIRONMENT" to "%s"', value)
+        self.environment['DEPLOY_ENVIRONMENT'] = value
+
+    @property
+    def region(self):
+        """Return the region set for the test environment."""
+        return self.environment.get('AWS_DEFAULT_REGION',
+                                    self.environment.get('AWS_REGION',
+                                                         'us-east-1'))
+
+    @region.setter
+    def region(self, value):
+        """Set the value of region."""
+        self.environment['AWS_DEFAULT_REGION'] = value
+        self.environment['AWS_REGION'] = value
+
     def copy_fixtures(self):
         """Copy fixtures to the root of the tests dir."""
         self.logger.info('Fixtures defined for tests: %s',
@@ -72,7 +96,7 @@ class IntegrationTest(object):
         with open(path) as data_file:
             return yaml.safe_load(data_file)
 
-    def runway_cmd(self, action, env_vars=None, tags=None, timeout=900, *args):
+    def runway_cmd(self, action, *args, env_vars=None, tags=None, timeout=900):
         """Run a deploy command based on tags.
 
         Args:
@@ -106,9 +130,8 @@ class IntegrationTest(object):
 
     def set_environment(self, env):
         """Set deploy environment."""
-        self.logger.info('Setting "DEPLOY_ENVIRONMENT" to "%s"', env)
         if isinstance(env, str):
-            self.environment['DEPLOY_ENVIRONMENT'] = env
+            self.deploy_env = env
 
     def set_env_var(self, var_name, var):
         """Set an environment variable"""

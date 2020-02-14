@@ -1,0 +1,40 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ${bucket_name}
+sys_path: ./
+
+pre_build:
+  upload_lambdas:
+    path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+    required: true
+    data_key: lambda
+    args:
+      functions:
+        dockerize:
+          dockerize_pip: non-linux
+          use_pipenv: true
+          runtime: python3.7
+          path: ./fixtures/lambda_src/dockerize_src
+          include:
+            - '*.py'
+          exclude:
+            - '*.pyc'
+        nondockerize:
+            path: ./fixtures/lambda_src/nondockerize_src
+            include:
+              - '*.py'
+            exclude:
+              - '*.pyc'
+
+stacks:
+  test-dockerize:
+    class_path: fixtures.lambda_function.BlueprintClass
+    variables:
+      Code: ${hook_data lambda::dockerize}
+      Entrypoint: dockerize.handler
+      AppName: dockerizepip
+  test-nondockerize:
+    class_path: fixtures.lambda_function.BlueprintClass
+    variables:
+      Code: ${hook_data lambda::nondockerize}
+      Entrypoint: nondockerize.handler
+      AppName: nondockerizepip
