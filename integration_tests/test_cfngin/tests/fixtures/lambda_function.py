@@ -1,11 +1,11 @@
 """Load dependencies."""
-from troposphere import Ref, Join, Sub, Output, awslambda, iam, Export, GetAtt
-
 import awacs.awslambda
+import awacs.dynamodb
 import awacs.logs
 import awacs.sts
-import awacs.dynamodb
-from awacs.aws import Allow, Statement, Policy, Principal
+from awacs.aws import Allow, Policy, Principal, Statement
+from troposphere import (AccountId, Export, GetAtt, Join, Output, Partition,
+                         Ref, Region, Sub, awslambda, iam)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNString
@@ -35,7 +35,7 @@ class BlueprintClass(Blueprint):
         """Create the resources."""
         template = self.template
         variables = self.get_variables()
-        app_name = variables.get('AppName').ref
+        app_name = variables['AppName'].ref
 
         lambda_iam_role = template.add_resource(
             iam.Role(
@@ -70,7 +70,18 @@ class BlueprintClass(Blueprint):
                                         awacs.logs.PutLogEvents
                                     ],
                                     Effect=Allow,
-                                    Resource=['arn:aws:logs:*:*:*'],
+                                    Resource=[
+                                        Join('', [
+                                            'arn:',
+                                            Partition,
+                                            ':logs:',
+                                            Region,
+                                            ':',
+                                            AccountId,
+                                            ':log-group:/aws/lambda/',
+                                            app_name,
+                                            '-*'])
+                                    ],
                                     Sid='WriteLogs'
                                 )
                             ]
