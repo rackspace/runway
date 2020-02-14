@@ -3,7 +3,7 @@ name: Release Management
 on:
   push:
     branches:
-      - master
+      - release  # this is the branch we tag for releases
 
 jobs:
   update_draft_release:
