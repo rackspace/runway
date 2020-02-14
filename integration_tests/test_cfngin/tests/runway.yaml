@@ -6,7 +6,6 @@ deployments:
           dev2: false
         parameters:
           CFNGIN_NAMESPACE: runway-tests-cfngin
-          bucket_name: runway-integration-testing-${env AWS_REGION}
           region: ${env AWS_REGION}
           vpc_private_subnets: 10.128.8.0/22,10.128.12.0/22,10.128.16.0/22,10.128.20.0/22
           diff_inst_type: m5.large
@@ -17,7 +16,6 @@ deployments:
           dev2: true
         parameters:
           CFNGIN_NAMESPACE: runway-tests-cfngin
-          bucket_name: runway-integration-testing-${env AWS_REGION}
           region: ${env AWS_REGION}
           diff_inst_type: m5.xlarge
           diff_wait_condition: 2

@@ -1,5 +1,6 @@
 namespace: ${CFNGIN_NAMESPACE}
-stacker_bucket: ${bucket_name}
+cfngin_bucket: ${CFNGIN_NAMESPACE}-${region}
+
 sys_path: ./
 
 pre_build:
@@ -10,6 +11,10 @@ pre_build:
     args:
       functions:
         dockerize:
+          # this won't actually use docker at the moment.
+          # it will take additional work to get docker running in codebuild for this.
+          # but, for the time being we are at least testing the use of pipenv.
+          # note: leaving it set to `non-linux` will allow local testing to use docker even though codebuild testing does not.
           dockerize_pip: non-linux
           use_pipenv: true
           runtime: python3.7
@@ -38,3 +43,10 @@ stacks:
       Code: ${hook_data lambda::nondockerize}
       Entrypoint: nondockerize.handler
       AppName: nondockerizepip
+
+post_destroy:
+  purge_bucket:
+    path: runway.hooks.cleanup_s3.purge_bucket
+    required: True
+    args:
+      bucket_name: ${CFNGIN_NAMESPACE}-${region}

@@ -93,7 +93,6 @@ def _zip_files(files, root):
         # rewound.
         LOGGER.debug('lambda: Converting file generater to list for reuse...')
         files = list(files)
-    LOGGER.info('_zip_files for files: %s', [file_name for file_name in files])
     with ZipFile(zip_data, 'w', ZIP_DEFLATED) as zip_file:
         for file_name in files:
             zip_file.write(os.path.join(root, file_name), file_name)
