@@ -32,6 +32,12 @@ specifications. In the specifications, each key indicating the name of the
 function (used for generating names for artifacts), and the value
 determines what files to include in the ZIP (see more details below).
 
+Docker can be used to collect python dependencies to include in the ZIP archive.
+This can be done by including the ``dockerize_pip`` configuration option which can have a value of ``true`` or ``non-linux`` to use this feature.
+Docker can use a **requirements.txt** or **Pipfile/Pipfile.lock** to install dependencies.
+If using **Pipfile**, the ``use_pipenv: true`` option must be provided.
+While recommended when using pipenv, if a **Pipfile.lock** is not found, one will be created.
+
 Payloads are uploaded to either a custom bucket or the CFNgin default
 bucket, with the key containing it's checksum, to allow repeated uploads
 to be skipped in subsequent runs.
@@ -64,13 +70,32 @@ to be skipped in subsequent runs.
     Configurations of desired payloads to build.
     Keys correspond to function names, used to derive key names for the payload.
     Each value should itself be a dictionary, with the following data:
+
     **use_pipenv (Optional[bool])**:
         Will determine if pipenv will be used to generate requirements.txt
-        from an existing Pipfile.
+        from an existing Pipfile. Requires ``dockerize_pip``.
+
     **dockerize_pip (Optional[Union[str, bool]])**
-        Whether to use Docker when restoring packages with pip.
-        Can be set to True/False or the special string 'non-linux'
+        Whether to use Docker when restoring dependencies with pip.
+        Can be set to ``true``/``false`` or the special string ``non-linux``
         which will only run on non Linux systems.
+
+    **docker_file (Optional[str])**
+        Path to a local DockerFile that will be built and used for
+        ``dockerize_pip``. Must provide exactly one of ``docker_file``,
+        ``docker_image``, or ``runtime``.
+
+    **docker_image (Optional[str])**
+        Custom Docker image to use  with ``dockerize_pip``. Must
+        provide exactly one of ``docker_file``, ``docker_image``, or
+        ``runtime``.
+
+    **runtime (Optional[str])**
+        Runtime of the AWS Lambda Function being uploaded. Used with
+        ``dockerize_pip`` to automatically select the appropriate
+        Docker image to use. Must provide exactly one of
+        ``docker_file``, ``docker_image``, or ``runtime``.
+
     **path (str)**
         Base directory of the Lambda function payload content.
         If it not an absolute path, it will be considered relative
@@ -125,6 +150,9 @@ to be skipped in subsequent runs.
           functions:
             MyFunction:
               path: ./lambda_functions
+              dockerize_pip: non-linux
+              use_pipenv: true
+              runtime: python3.8
               include:
                 - '*.py'
                 - '*.txt'

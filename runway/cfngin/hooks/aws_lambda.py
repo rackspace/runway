@@ -649,19 +649,40 @@ def upload_lambda_functions(context, provider, **kwargs):
             build. Keys correspond to function names, used to derive key
             names for the payload. Each value should itself be a dictionary,
             with the following data:
-            **use_pipenv (Optional[bool])**:
+
+            **use_pipenv (Optional[bool])**
                 Will determine if pipenv will be used to generate requirements.txt
-                from an existing Pipfile.
+                from an existing Pipfile. Requires ``dockerize_pip``.
+
             **pipenv_timeout (Optional[int])**
-                Time in seconds to wait while running pipenv.
-                (*default:* `900`)
+                Time in seconds to wait while running pipenv. Requires
+                ``dockerize_pip``. (*default:* `900`)
+
             **pipenv_lock_timeout (Optional[int])**
                 Time in seconds to wait while creating lock file with pipenv.
-                (*default:* `300`)
+                Requires ``dockerize_pip``. (*default:* `300`)
+
             **dockerize_pip (Optional[Union[str, bool]])**
                 Whether to use Docker when restoring packages with pip.
                 Can be set to True/False or the special string 'non-linux'
                 which will only run on non Linux systems.
+
+            **docker_file (Optional[str])**
+                Path to a local DockerFile that will be built and used for
+                ``dockerize_pip``. Must provide exactly one of ``docker_file``,
+                ``docker_image``, or ``runtime``.
+
+            **docker_image (Optional[str])**
+                Custom Docker image to use  with ``dockerize_pip``. Must
+                provide exactly one of ``docker_file``, ``docker_image``, or
+                ``runtime``.
+
+            **runtime (Optional[str])**
+                Runtime of the AWS Lambda Function being uploaded. Used with
+                ``dockerize_pip`` to automatically select the appropriate
+                Docker image to use. Must provide exactly one of
+                ``docker_file``, ``docker_image``, or ``runtime``.
+
             **path (str)**
                 Base directory of the Lambda function payload content.
                 If it not an absolute path, it will be considered relative
@@ -713,6 +734,9 @@ def upload_lambda_functions(context, provider, **kwargs):
                   functions:
                     MyFunction:
                       path: ./lambda_functions
+                      dockerize_pip: non-linux
+                      use_pipenv: true
+                      runtime: python3.8
                       include:
                         - '*.py'
                         - '*.txt'
@@ -741,7 +765,6 @@ def upload_lambda_functions(context, provider, **kwargs):
                     )
 
     """
-    # TODO document new options and include examples here and in docs/
     # TODO add better handling for misconfiguration (e.g. forgetting function names)
     # TODO support defining dockerize_pip options at the top level of args
     custom_bucket = kwargs.get('bucket')
