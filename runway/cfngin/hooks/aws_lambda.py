@@ -65,7 +65,8 @@ def copydir(source, destination, includes, excludes=None,
             LOGGER.debug('lambda.copydir: Copying file "%s" to "%s"',
                          src, dest)
             copyfile(src, dest)
-        except OSError:
+        # python2 raises an IOError here
+        except (IOError, OSError):
             _mkdir(os.path.dirname(dest))
             copyfile(src, dest)
 
