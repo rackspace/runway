@@ -1,4 +1,6 @@
 # https://github.com/release-drafter/release-drafter
+branches:
+  - release  # this is the branch we tag for releases
 name-template: 'v$NEXT_MINOR_VERSION'
 tag-template: 'v$NEXT_MINOR_VERSION'
 sort-direction: ascending
