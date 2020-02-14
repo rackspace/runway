@@ -74,11 +74,13 @@ to be skipped in subsequent runs.
     **use_pipenv (Optional[bool])**:
         Will determine if pipenv will be used to generate requirements.txt
         from an existing Pipfile. Requires ``dockerize_pip``.
+        To use this option pipenv must be installed.
 
     **dockerize_pip (Optional[Union[str, bool]])**
         Whether to use Docker when restoring dependencies with pip.
         Can be set to ``true``/``false`` or the special string ``non-linux``
         which will only run on non Linux systems.
+        To use this option Docker must be installed.
 
     **docker_file (Optional[str])**
         Path to a local DockerFile that will be built and used for

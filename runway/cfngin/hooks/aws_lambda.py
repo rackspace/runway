@@ -236,7 +236,10 @@ def handle_use_pipenv(package_root, dest_path, timeout=300):
         pipenv_process = subprocess.Popen(cmd, cwd=package_root,
                                           stdout=requirements,
                                           stderr=subprocess.PIPE)
-        _stdout, stderr = pipenv_process.communicate(timeout=timeout)
+        if int(sys.version[0]) > 2:
+            _stdout, stderr = pipenv_process.communicate(timeout=timeout)
+        else:
+            _stdout, stderr = pipenv_process.communicate()
         if pipenv_process.returncode == 0:
             return req_path
         if int(sys.version[0]) > 2:
@@ -388,9 +391,12 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
             pip_proc = subprocess.Popen(pip_cmd,
                                         cwd=tmpdir, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
-            _stdout, stderr = pip_proc.communicate(timeout=kwargs.get(
-                'pipenv_timeout', 900
-            ))
+            if int(sys.version[0]) > 2:
+                _stdout, stderr = pip_proc.communicate(timeout=kwargs.get(
+                    'pipenv_timeout', 900
+                ))
+            else:
+                _stdout, stderr = pip_proc.communicate()
             if pip_proc.returncode != 0:
                 if int(sys.version[0]) > 2:
                     stderr = stderr.decode('UTF-8')
@@ -652,20 +658,22 @@ def upload_lambda_functions(context, provider, **kwargs):
 
             **use_pipenv (Optional[bool])**
                 Will determine if pipenv will be used to generate requirements.txt
-                from an existing Pipfile. Requires ``dockerize_pip``.
+                from an existing Pipfile. Requires ``dockerize_pip``. To use
+                this option pipenv must be installed.
 
             **pipenv_timeout (Optional[int])**
                 Time in seconds to wait while running pipenv. Requires
-                ``dockerize_pip``. (*default:* `900`)
+                ``dockerize_pip``. Require Python3.(*default:* `900`)
 
             **pipenv_lock_timeout (Optional[int])**
                 Time in seconds to wait while creating lock file with pipenv.
-                Requires ``dockerize_pip``. (*default:* `300`)
+                Requires ``dockerize_pip``. Require Python3. (*default:* `300`)
 
             **dockerize_pip (Optional[Union[str, bool]])**
                 Whether to use Docker when restoring packages with pip.
                 Can be set to True/False or the special string 'non-linux'
-                which will only run on non Linux systems.
+                which will only run on non Linux systems. To use this option
+                Docker must be installed.
 
             **docker_file (Optional[str])**
                 Path to a local DockerFile that will be built and used for
