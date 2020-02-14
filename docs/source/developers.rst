@@ -92,17 +92,10 @@ Assigns first responders to a newly opened issue and applies initial labels of `
 
 This will also try to identify if the issue is a feature request, bug report, or question based by looking for keywords and apply the appropriate label. The issue templates will result in the corresponding label being applied.
 
-PR Management
-~~~~~~~~~~~~~
-
-When a PR is opened, it will receive a label based on the source branch's prefix. These labels are used to categorize the PRs for the release message.
-
-When a PR is ready for review (regular PR is opened or draft PR is marked ready for review) maintainers are added as reviewers of the PR and the PR author is assigned to the PR.
-
 Release Management
 ~~~~~~~~~~~~~~~~~~
 
-When a commit is pushed to master (tag is pushed, PR is merged) a release draft is created (if one does not exist) and PRs since the last tag are added following the included template. Changes are categorized based on PR labels.
+When a commit is pushed to **release** (tag is pushed, PR is merged) a release draft is created (if one does not exist) and PRs since the last tag are added following the included template. Changes are categorized based on PR labels.
 
 
 Building Pyinstaller Packages Locally
