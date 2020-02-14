@@ -7,6 +7,7 @@ import subprocess
 import sys
 from io import BytesIO as StringIO
 from shutil import copyfile
+from types import GeneratorType
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import botocore
@@ -32,6 +33,42 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 LOGGER = logging.getLogger(__name__)
 
 
+def copydir(source, destination, includes, excludes, follow_symlinks=False):
+    """Extend the functionality of shutil.
+
+    Correctly copies files and directories in a source directory.
+
+    Args:
+        source (str): Source directory.
+        destination (str): Destination directory.
+        includes (List[str]): Glob patterns for files to include.
+        includes (List[str]): Glob patterns for files to exclude.
+        follow_symlinks (bool): If true, symlinks will be included in the
+            resulting zip file.
+
+    """
+    files = _find_files(source, includes, excludes, follow_symlinks)
+
+    def _mkdir(dir_name):
+        """Recursively create directories."""
+        parent = os.path.dirname(dir_name)
+        if not os.path.isdir(parent):
+            _mkdir(parent)
+        LOGGER.debug('lambda.copydir: Creating directory: %s', dir_name)
+        os.mkdir(dir_name)
+
+    for file_name in files:
+        src = os.path.join(source, file_name)
+        dest = os.path.join(destination, file_name)
+        try:
+            LOGGER.debug('lambda.copydir: Copying file "%s" to "%s"',
+                         src, dest)
+            copyfile(src, dest)
+        except OSError:
+            _mkdir(os.path.dirname(dest))
+            copyfile(src, dest)
+
+
 def _zip_files(files, root):
     """Generate a ZIP file in-memory from a list of files.
 
@@ -50,6 +87,13 @@ def _zip_files(files, root):
 
     """
     zip_data = StringIO()
+    if isinstance(files, GeneratorType):
+        # if file list is a generator, save the contents so it can be reused
+        # since generators are empty after the first iteration and cannot be
+        # rewound.
+        LOGGER.debug('lambda: Converting file generater to list for reuse...')
+        files = list(files)
+    LOGGER.info('_zip_files for files: %s', [file_name for file_name in files])
     with ZipFile(zip_data, 'w', ZIP_DEFLATED) as zip_file:
         for file_name in files:
             zip_file.write(os.path.join(root, file_name), file_name)
@@ -104,7 +148,7 @@ def _calculate_hash(files, root):
     return file_hash.hexdigest()
 
 
-def _find_files(root, includes, excludes, follow_symlinks):
+def _find_files(root, includes, excludes=None, follow_symlinks=False):
     """List files inside a directory based on include and exclude rules.
 
     This is a more advanced version of `glob.glob`, that accepts multiple
@@ -322,10 +366,7 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
                                kwargs.get('pipenv_lock_timeout', 300))
             # dir created when creating a lock file
             excludes.append('.venv/')
-        for file_name in _find_files(package_root, includes, excludes,
-                                     follow_symlinks):
-            copyfile(os.path.join(package_root, file_name),
-                     os.path.join(tmpdir, file_name))
+        copydir(package_root, tmpdir, includes, excludes, follow_symlinks)
 
         if not os.path.isfile(tmp_req):
             LOGGER.error('Unable to find "requirements.txt". Ensure this file '
@@ -358,7 +399,7 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
                              ' '.join(pip_cmd), stderr)
                 raise PipError
 
-        req_files = _find_files(tmpdir, '**', [], False)
+        req_files = _find_files(tmpdir, includes='**', follow_symlinks=False)
         return _zip_files(req_files, tmpdir)
 
 
