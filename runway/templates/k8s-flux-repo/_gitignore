@@ -1,0 +1,4 @@
+.terraform
+terraform.tfstate.d
+.kubeconfig
+__pycache__

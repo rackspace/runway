@@ -294,6 +294,10 @@ If a directory already exists with the name Runway tries to use, the sample will
 | ``k8s-tf-repo``    | :ref:`mod-k8s` EKS cluster & sample app using     |
 |                    | Terraform_                                        |
 +--------------------+---------------------------------------------------+
+| ``k8s-flux-repo``  | `Kubernetes + Flux`_                              |
+|                    | :ref:`module<runway-module>` EKS cluster & Flux   |
+|                    | app using Terraform                               |
++--------------------+---------------------------------------------------+
 | ``sls-py``         | `Serverless Framework`_                           |
 |                    | :ref:`module<runway-module>` using Python         |
 +--------------------+---------------------------------------------------+

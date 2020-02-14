@@ -10,6 +10,7 @@ from ._cfn import cfn
 from ._cfngin import cfngin
 from ._k8s_cfn_repo import k8s_cfn_repo
 from ._k8s_tf_repo import k8s_tf_repo
+from ._k8s_flux_repo import k8s_flux_repo
 from ._sls_py import sls_py
 from ._sls_tsc import sls_tsc
 from ._stacker import stacker
@@ -25,6 +26,7 @@ __all__ = [
     "cfngin",
     "k8s_cfn_repo",
     "k8s_tf_repo",
+    "k8s_flux_repo",
     "sls_py",
     "sls_tsc",
     "stacker",
@@ -41,6 +43,7 @@ COMMANDS = [
     cfngin,
     k8s_cfn_repo,
     k8s_tf_repo,
+    k8s_flux_repo,
     sls_py,
     sls_tsc,
     stacker,

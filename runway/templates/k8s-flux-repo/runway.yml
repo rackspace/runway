@@ -1,0 +1,21 @@
+---
+deployments:
+  - modules:
+      - tfstate.cfn
+      - eks-base.tf
+      - flux.tf
+    environments:
+      dev:
+        namespace: dev
+        region: us-east-1
+        kubectl-access-role-arn: YOURROLEARNHERE  
+    module_options:
+      terraform_backend_config:
+        dev:
+          region: us-east-1
+      terraform_backend_cfn_outputs:
+        dev:
+          bucket: dev-tf-state::TerraformStateBucketName
+          dynamodb_table: dev-tf-state::TerraformStateTableName
+    regions:
+      - us-east-1
