@@ -16,6 +16,7 @@ from troposphere.awslambda import Code
 from runway.cfngin.config import Config
 from runway.cfngin.context import Context
 from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
+                                            copydir, handle_use_pipenv,
                                             select_bucket_region,
                                             upload_lambda_functions)
 
@@ -513,3 +514,44 @@ class TestLambdaHooks(unittest.TestCase):
                 'f1/test2/test.txt',
                 'f2/f2.js',
             ])
+
+
+def test_handle_use_pipenv():
+    """Test handling pipenv."""
+    pipfile = '\n'.join([
+        '[[source]]',
+        'url = "https://pypi.org/simple"',
+        'verify_ssl = true',
+        'name = "pypi"',
+        '[packages]',
+        '[dev-packages]'
+    ])
+    with TempDirectory() as tmp_dir:
+        tmp_dir.write('Pipfile', pipfile.encode('utf-8'))
+        req_path = handle_use_pipenv(tmp_dir.path, tmp_dir.path)
+        print('Pipfile.lock: %s' % str(tmp_dir.read('Pipfile.lock')))
+        print('requirements.txt: %s' % str(
+            tmp_dir.read('requirements.txt')
+        ))
+        assert os.path.basename(req_path) == 'requirements.txt'
+        assert tmp_dir.read('Pipfile.lock')
+        assert tmp_dir.read('requirements.txt') == \
+            b'-i https://pypi.org/simple\n\n'
+
+
+def test_copydir():
+    """Test copydir."""
+    example_file = b'example file content'
+    with TempDirectory() as tmp_dir:
+        dest_path = tmp_dir.makedir('dest')
+        src_path = tmp_dir.makedir('src')
+        tmp_dir.makedir(('src', 'lib'))
+        tmp_dir.write(('src', 'example_file'), example_file)
+        tmp_dir.write(('src', 'lib', 'example_file'), example_file)
+
+        copydir(src_path, dest_path, '**')
+
+        assert tmp_dir.read(('src', 'example_file')) == example_file
+        assert tmp_dir.read(('src', 'lib', 'example_file')) == example_file
+        assert tmp_dir.read(('dest', 'example_file')) == example_file
+        assert tmp_dir.read(('dest', 'lib', 'example_file')) == example_file

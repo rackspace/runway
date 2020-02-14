@@ -33,7 +33,8 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 LOGGER = logging.getLogger(__name__)
 
 
-def copydir(source, destination, includes, excludes, follow_symlinks=False):
+def copydir(source, destination, includes, excludes=None,
+            follow_symlinks=False):
     """Extend the functionality of shutil.
 
     Correctly copies files and directories in a source directory.
@@ -216,7 +217,7 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
     return _zip_files(files, root)
 
 
-def _handle_use_pipenv(package_root, dest_path, timeout=300):
+def handle_use_pipenv(package_root, dest_path, timeout=300):
     """Create requirements file from Pipfile.
 
     Args:
@@ -268,7 +269,6 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
 
     """
     # TODO use kwargs to pass args to docker for advanced config
-    # TODO stream docker logs to stdout/stderr
     if docker_file and docker_file and runtime:
         raise InvalidDockerizePipConfiguration(
             'only one of [docker_file, docker_file, runtime] can be specified'
@@ -361,8 +361,8 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
     ) as tmpdir:
         tmp_req = os.path.join(tmpdir, 'requirements.txt')
         if use_pipenv:
-            _handle_use_pipenv(package_root, tmpdir,
-                               kwargs.get('pipenv_lock_timeout', 300))
+            handle_use_pipenv(package_root, tmpdir,
+                              kwargs.get('pipenv_lock_timeout', 300))
             # dir created when creating a lock file
             excludes.append('.venv/')
         copydir(package_root, tmpdir, includes, excludes, follow_symlinks)
