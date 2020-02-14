@@ -11,9 +11,6 @@ Hooks
 A hook is a python function or class method that is executed before or after the action is taken.
 To see how to define hooks in a config file see the `Pre & Post Hooks`_ documentation.
 
-.. important:: Lookups cannot be used with hooks. You can use values from the environment files
-               like ``${some_value}``. But, lookups like ``${envvar SOME_VALUE}`` will not work.
-
 
 Built-in Hooks
 ==============
