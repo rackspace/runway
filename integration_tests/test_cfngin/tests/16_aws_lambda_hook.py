@@ -54,8 +54,8 @@ class TestAwsLambda(Cfngin):
     def teardown(self):
         """Teardown test."""
         self.runway_cmd('destroy')
-        try:
-            send2trash(path.join(self.fixture_dir,
-                                 'lambda_src/dockerize_src/.venv'))
-        finally:
-            self.cleanup_fixtures()
+        venv_dir = path.join(self.fixture_dir,
+                             'lambda_src/dockerize_src/.venv')
+        if path.isdir(venv_dir):
+            send2trash(venv_dir)
+        self.cleanup_fixtures()
