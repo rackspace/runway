@@ -32,6 +32,18 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 
 LOGGER = logging.getLogger(__name__)
 
+# list from python tags of https://hub.docker.com/r/lambci/lambda/tags
+SUPPORTED_RUNTIMES = [
+    # Python 2.7 reached end-of-life on January 1st, 2020.
+    # However, the Python 2.7 runtime is still supported and is not scheduled
+    # to be deprecated at this time.
+    # https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html
+    'python2.7',
+    'python3.6',
+    'python3.7',
+    'python3.8'
+]
+
 
 def copydir(source, destination, includes, excludes=None,
             follow_symlinks=False):
@@ -250,7 +262,7 @@ def handle_use_pipenv(package_root, dest_path, timeout=300):
         raise PipenvError
 
 
-def dockerized_pip(work_dir, runtime=None, docker_file=None,
+def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
                    docker_image=None, **_kwargs):
     """Run pip with docker.
 
@@ -273,33 +285,45 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
 
     """
     # TODO use kwargs to pass args to docker for advanced config
-    if docker_file and docker_file and runtime:
+    if bool(docker_file) + bool(docker_image) + bool(runtime) != 1:
+        # exactly one of these is needed. converting to bool will give us a
+        # 'False' (0) for 'None' and 'True' (1) for anything else.
         raise InvalidDockerizePipConfiguration(
-            'only one of [docker_file, docker_file, runtime] can be specified'
+            'exactly only one of [docker_file, docker_file, runtime] must be '
+            'provided'
         )
-    docker_client = docker.from_env()
+
+    if not client:
+        client = docker.from_env()
 
     if docker_file:
         if not os.path.isfile(docker_file):
             raise ValueError('could not find docker_file "%s"' % docker_file)
         LOGGER.info('lambda.docker: Building docker image from "%s".',
                     docker_file)
-        tmp_image, _build_logs = docker_client.images.build(
+        response = client.images.build(
             path=os.path.dirname(docker_file),
-            dockerfile=os.path.basename(docker_file)
+            dockerfile=os.path.basename(docker_file),
+            forcerm=True
         )
-        docker_image = tmp_image.id
+        # the response can be either a tuple of (Image, Generator[Dict[str, str]])
+        # or just Image depending on API version.
+        if isinstance(response, tuple):
+            docker_image = response[0].id
+            for log_msg in response[1]:
+                if log_msg.get('stream'):
+                    LOGGER.info(log_msg['stream'].strip('\n'))
+        else:
+            docker_image = response.id
         LOGGER.info('lambda.docker: Docker image "%s" created.', docker_image)
-
     if runtime:
+        if runtime not in SUPPORTED_RUNTIMES:
+            raise ValueError('invalid runtime "{}" must be one of {}'.format(
+                runtime, str(SUPPORTED_RUNTIMES)
+            ))
         docker_image = 'lambci/lambda:build-%s' % runtime
         LOGGER.debug('lambda.docker: Selected docker image "%s" based on '
                      'provided runtime', docker_image)
-
-    if not docker_image:
-        raise InvalidDockerizePipConfiguration(
-            'one of [docker_file, docker_file, runtime] must be specified'
-        )
 
     if sys.platform.lower() == 'win32':
         LOGGER.debug('lambda.docker: Formatted docker mount path for Windows')
@@ -315,18 +339,18 @@ def dockerized_pip(work_dir, runtime=None, docker_file=None,
     LOGGER.info('lambda.docker: Using docker image "%s" to build deployment '
                 'package...', docker_image)
 
-    service = docker_client.containers.run(image=docker_image,
-                                           command=['/bin/sh', '-c', pip_cmd],
-                                           auto_remove=True,
-                                           detach=True,
-                                           mounts=[work_dir_mount])
+    container = client.containers.run(image=docker_image,
+                                      command=['/bin/sh', '-c', pip_cmd],
+                                      auto_remove=True,
+                                      detach=True,
+                                      mounts=[work_dir_mount])
 
     # 'stream' creates a blocking generator that allows for real-time logs.
     # this loop ends when the container 'auto_remove's itself.
-    for log in service.logs(stdout=True,
-                            stderr=True,
-                            stream=True,
-                            tail=0):
+    for log in container.logs(stdout=True,
+                              stderr=True,
+                              stream=True,
+                              tail=0):
         # without strip there are a bunch blank lines in the output
         LOGGER.info('lambda.docker: %s', log.decode().strip())
 

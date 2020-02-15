@@ -4,7 +4,8 @@
     "python.linting.mypyEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
-        "tests"
+        "tests",
+        "--no-cov"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
@@ -21,6 +22,9 @@
     "cSpell.words": [
         "cfngin",
         "dockerizepip",
+        "forcerm",
+        "lambci",
         "nondockerizepip"
-    ]
+    ],
+    "pythonTestExplorer.testFramework": "pytest"
 }
