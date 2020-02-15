@@ -134,3 +134,15 @@ directory is pre-compiled) via the ``skip_npm_ci`` module option:
           - path: myslsproject.sls
             options:
               skip_npm_ci: true
+
+Specifying serverless config file
+---------------------------------
+Name of your configuration file, if other than serverless.yml|.yaml|.js|.json.
+::
+
+    ---
+    deployments:
+        - modules:
+            - path: sampleapp.sls
+              options:
+                config: sampleapp.yml
