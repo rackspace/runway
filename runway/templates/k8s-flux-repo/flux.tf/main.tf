@@ -107,7 +107,12 @@ resource "null_resource" "flux_image" {
   ]
 
   provisioner "local-exec" {
-    command = "${path.module}/build_image.sh ${aws_ecr_repository.flux_with_awscli.repository_url}"
+    command = <<EOD
+    docker build --tag ${aws_ecr_repository.flux_with_awscli.repository_url}:${local.flux_version} ${path.module};
+    $(aws ecr get-login --no-include-email --region us-east-1);
+    docker push ${aws_ecr_repository.flux_with_awscli.repository_url}:${local.flux_version};
+    EOD
+    
   }  
 
 }
