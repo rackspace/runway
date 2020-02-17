@@ -1,0 +1,5 @@
+deployments:
+  - modules:
+    - path: sampleapp.cfn
+    regions:
+      - us-east-1

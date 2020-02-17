@@ -33,11 +33,12 @@ class Parallelism(IntegrationTest):
     def run(self):
         """Find all tests and run them."""
         import_tests(self.logger, self.tests_dir, 'test_*')
-        tests = [test(self.logger) for test in Parallelism.__subclasses__()]
+        self.set_environment('dev')
+        tests = [test(self.logger, self.environment)
+                 for test in Parallelism.__subclasses__()]
         if not tests:
             raise Exception('No tests were found.')
         self.logger.debug('FOUND TESTS: %s', tests)
-        self.set_environment('dev')
         err_count = execute_tests(tests, self.logger)
         assert err_count == 0
         return err_count

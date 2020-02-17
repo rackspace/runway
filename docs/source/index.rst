@@ -30,8 +30,12 @@ Very simple configuration to:
    commands
    runway_config
    module_configuration/index
+   cfngin/index
+   lookups
    defining_tests
    repo_structure
+   terminology
+   apidocs/index
    developers
    license
 

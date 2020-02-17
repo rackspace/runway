@@ -14,8 +14,9 @@ if [ "$TRAVIS_OS_NAME" = "osx" ] || [ "$TRAVIS_OS_NAME" = "windows" ]; then
     PIPENV="pipenv run "
 fi
 
-${PIPENV}${PYTHON} setup.py test
+${PIPENV}pytest
 
-${PIPENV}flake8 --exclude=src/runway/embedded,src/runway/templates src/runway
-find src/runway -name '*.py' -not -path 'src/runway/embedded*' -not -path 'src/runway/templates/stacker/*' -not -path 'src/runway/templates/cdk-py/*' -not -path 'src/runway/blueprints/*' | PYTHONPATH=src xargs ${PIPENV}pylint --rcfile=.pylintrc
-find src/runway/blueprints -name '*.py' | xargs ${PIPENV}pylint --disable=duplicate-code
+${PIPENV}flake8 --exclude=runway/cfngin,runway/embedded,runway/templates runway
+find runway -name '*.py' -not -path 'runway/cfngin*' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run ${PIPENV}pylint --rcfile=.pylintrc
+find runway/blueprints -name '*.py' | xargs ${PIPENV}pylint --disable=duplicate-code
+bash .travis/test_shim.sh

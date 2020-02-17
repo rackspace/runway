@@ -1,5 +1,6 @@
 namespace: ${namespace}
-stacker_bucket: ""
+# this needs to go to a bucket now b/c the template is too large
+cfngin_bucket: ${bucket_name}
 
 sys_path: ./
 

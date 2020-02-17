@@ -1,0 +1,12 @@
+deployments:
+  - modules:
+    - path: basic-site
+      class_path: runway.module.staticsite.StaticSite
+      environments:
+        dev:
+          namespace: basic-site-dev
+          staticsite_cf_disable: true
+      options:
+        build_output: build
+    regions:
+      - us-east-1

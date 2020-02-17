@@ -5,6 +5,46 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Add static site examples for React & Angular
+- variable resolution in the runway config file
+    - uses lookups to resolve value
+        - resolves from environment variables, variables file, or variables definition
+        - lookups can take arguments in addition to a query
+            - parsing is part of the base class to standardize syntax
+            - used to provide default values if the query fails and/or transform the data
+    - only resolvable in specific areas of the config file (see docs for details)
+    - some environment variables can only be used during processing of a module since they are set during processing
+- `variables` top-level directive to the runway config file
+    - explicitly define the path/name to a variables file instead of using the default path/names
+    - define variables directly in the runway config file
+        - if this is used with a variables file, what is defined in the runway config takes precedence
+- `parameters` directive for modules and deployments
+    - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
+
+### Changed
+- install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
+- `runway.embedded.stacker` is now `runway.cfngin`
+- imports of stacker by anything run/deployed by runway will be redirected to `runway.cfngin`
+- e.g. `from stacker.blueprints.base import Blueprint` will act as `from runway.cfngin.blueprints.base import Blueprint`
+- `.cfn` modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use a `$DEPLOY_ENVIRONMENT-$AWS_REGION.env` file if variables/lookups are used
+- modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use an environment specific variables file (.e.g `$DEPLOY_ENVIRONMENT-$AWS_REGION.env`) if `parameters` are used.
+- `environments` key now acts as an explict toggle (with a booleon value per environment name, string of `$ACCOUNT_ID/$REGION`, or list of strings) for deploying modules to an environment
+    - support old functionallity retained for the time being by merging into `parameters`
+
+### Removed
+- embedded `hcl`
+- python 2.6 support for `PyYAML` and `cfn_flip` dependencies
+
+### Fixed
+- pinned `zipp` sub dependency to `~=1.0.0` to retain support for python 3.5
+- `PyYAML` dependency is now `>=4.1,<5.3` to match the top-end of newer versions of `awscli`
+- `NoSuchBucket` during `PutBucketEncryption` when sls tries to create a `promotezip` bucket
+
+## [1.3.7] - 2020-01-07
+### Fixed
+- pinned `pyhcl` to `<0.3.14`
+  - `0.3.14` vendored ply instead of having it as a dependency which breaks our embedded, patched copy
 
 ## [1.3.6] - 2019-12-28
 ### Fixed
@@ -13,13 +53,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.3.5] - 2019-12-19
 ### Fixed
 - Updated `sls-py` sample to work properly w/ python plugin static caching
-- Updated `k8s-tf ` sample:
-    - Python 2 compatibility for cert certificate script
-    - kubeconfig file is now updated/recreated automatically
+- Updated `k8s-tf` sample:
+  - Python 2 compatibility for cert certificate script
+  - kubeconfig file is now updated/recreated automatically
 
 ### Changed
-- Updated `k8s-tf ` sample:
-    - Moved worker nodes to EKS node group
+- Updated `k8s-tf` sample:
+  - Moved worker nodes to EKS node group
 
 ## [1.3.4] - 2019-12-18
 ### Fixed
@@ -32,8 +72,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `DEPLOY_ENVIRONMENT` is available to all module deployments as an environment variable
   - if it does not exist in the current environment, value is derived from branch or directory name
 - Updated static site CFN template to use node v10 for path rewrite lambda
-- embedded stacker will not resolve dependancies for `locked` stacks when they rely on other stacks
-  - accepted upstream in https://github.com/cloudtools/stacker/pull/746
+- embedded stacker will not resolve dependencies for `locked` stacks when they rely on other stacks
+  - accepted upstream in <https://github.com/cloudtools/stacker/pull/746>
 
 ## [1.3.3] - 2019-11-26
 ### Changed
@@ -97,8 +137,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - run-python & run-stacker commands (for single-binary compatibility)
 - Custom error responses support for static sites
 - `--tag <tag>...` option for deploy/destroy
-    - select modules based on a list of tags applied in the runway file (ex. `deployments[].modules[].tags[]`)
-    - can be used to construct a list of tags a module must have to be selected
+  - select modules based on a list of tags applied in the runway file (ex. `deployments[].modules[].tags[]`)
+  - can be used to construct a list of tags a module must have to be selected
 - Terraform backend lookup via SSM params
 - class for handling the runway config file that warns on invalid keys
 - new top level `tests` to the runway config for user defined tests (cfn-lint, script, and yamllint)
@@ -120,7 +160,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Terraform initialization should be considerably faster via use of `init --reconfigure`
 - Updated CDK typescript sample generator to v1 syntax
-- Terraform variables from runway.yml passed as environment variables (fixes https://github.com/hashicorp/terraform/issues/19424#issuecomment-472186386)
+- Terraform variables from runway.yml passed as environment variables (fixes <https://github.com/hashicorp/terraform/issues/19424#issuecomment-472186386>)
 - CDK/Serverless `npm ci` skip option (formerly `skip-npm-ci`) moved to module options
 - Top-level & deployment options now consistently documented with underscores (e.g. `account_id:` vs `account-id:`).
 
@@ -149,7 +189,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Stop troposphere deprecation warnings on 2.4.2+
 - Re-add `terraform init` execution after workspace switches
-    * This appears to be required to ensure all plugins are downloaded
+  - This appears to be required to ensure all plugins are downloaded
 
 ## [0.46.2] - 2019-05-13
 ### Fixed
@@ -212,7 +252,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.44.2] - 2019-03-21
 ### Fixed
 - Fixed module config options completely overriding deployment options
-    * Options will now be deeply merged, allowing selective overrides per-module
+  - Options will now be deeply merged, allowing selective overrides per-module
 
 ## [0.44.1] - 2019-03-16
 ### Fixed
@@ -259,7 +299,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Removed check for python blueprint execute status
-    * This doesn't really fit with current recommendation to execute environments under pipenv
+  - This doesn't really fit with current recommendation to execute environments under pipenv
 
 ## [0.39.1] - 2018-12-28
 ### Fixed
@@ -312,7 +352,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.35.2] - 2018-11-05
 ### Fixed
-- Improve approval resilency on CFN stack updates (Stacker #674)
+- Improve approval resiliency on CFN stack updates (Stacker #674)
 
 ## [0.35.1] - 2018-11-01
 ### Fixed
@@ -378,7 +418,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.29.1] - 2018-09-04
 ### Fixed
-- Update embedded stacker to fix interative CFN stack updates with empty string parameters
+- Update embedded stacker to fix interactive CFN stack updates with empty string parameters
 
 ## [0.29.0] - 2018-08-28
 ### Added
@@ -418,7 +458,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Static website deployment module
 - Module options in runway.yaml (or runway.module.yaml in a module)
-    * These can be used to make Terraform, Serverless, and CloudFormation (Stacker) variable/environment files optional.
+  - These can be used to make Terraform, Serverless, and CloudFormation (Stacker) variable/environment files optional.
 
 ### Changed
 - Only use `npm ci` when `CI` environment variable is set
@@ -456,7 +496,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - It is now possible to disable pylint error checks in a custom .pylintrc
 - Pylint is now only instantiated one for all file checks
-    * This fixes duplicate code checking and should greatly speed up tests
+  - This fixes duplicate code checking and should greatly speed up tests
 
 ### Added
 - Added reference .pylintrc to templates
@@ -477,7 +517,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.20.4] - 2018-06-25
 ### Fixed
 - Suppress stacktrace when stacker/terraform/serverless fail
-    * They provide their own error messages/stacktrace; runway errors just obfuscate them
+  - They provide their own error messages/stacktrace; runway errors just obfuscate them
 - Fix 0.20.1 regression of global stacker install use (instead of embedded version)
 
 ## [0.20.3] - 2018-06-13
@@ -487,7 +527,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.20.1] - 2018-06-13
 ### Fixed
 - Multiple CFN modules can now use the same remote Stacker package at different versions
-    * Previously, the first module to load a remote package (e.g. stacker_blueprints at tag v1.0.3) would have that tagged version stuck for the rest of the runway deployment. Now, subsequent modules can specify other tags/commits/etc of the same remote package.
+  - Previously, the first module to load a remote package (e.g. stacker_blueprints at tag v1.0.3) would have that tagged version stuck for the rest of the runway deployment. Now, subsequent modules can specify other tags/commits/etc of the same remote package.
 
 ## [0.20.0] - 2018-06-11
 ### Added
@@ -501,7 +541,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Update embedded stacker to v1.3
 - Add stacker as a requirement of runway
-    * This should provide a better experience for user IDEs when editing stacker blueprints
+  - This should provide a better experience for user IDEs when editing stacker blueprints
 
 ## [0.18.0] - 2018-06-05
 ### Added
@@ -571,7 +611,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.12.0] - 2018-04-02
 ### Changed
 - Drop support for generic `backend.tfvars` terraform backend config
-    * Any previous `backend.tfvars` values should be moved into the primary (e.g. main.tf) backend config
+  - Any previous `backend.tfvars` values should be moved into the primary (e.g. main.tf) backend config
 - On destroy/dismantle, reverse order of deployments and their contained modules
 - Add `account_id` and `account_alias` deployment config options for account verification
 - Add support for [tfenv](https://github.com/kamatama41/tfenv)
@@ -611,7 +651,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [0.8.0] - 2018-03-12
 ### Changed
 - Change Serverless `sls deploy` run-script to just `sls`
-    * This is necessary for the upcoming `destroy`/`dismantle` (e.g. `sls remove`) support
+  - This is necessary for the upcoming `destroy`/`dismantle` (e.g. `sls remove`) support
 - Automatically use `npm ci` if available
 
 ### Fixed
@@ -650,7 +690,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.6...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.7...HEAD
+[1.3.7]: https://github.com/onicagroup/runway/compare/v1.3.6...v1.3.7
 [1.3.6]: https://github.com/onicagroup/runway/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/onicagroup/runway/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/onicagroup/runway/compare/v1.3.3...v1.3.4

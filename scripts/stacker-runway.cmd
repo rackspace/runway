@@ -36,31 +36,19 @@ goto :EOF
 
 #!/usr/bin/env python
 from __future__ import print_function
-import inspect
 import sys
 
 from os import path
 
-from runway.embedded.stacker.logger import setup_logging
+from runway.cfngin.commands import Stacker
+from runway.cfngin.logger import setup_logging
 
-EMBEDDED_LIB_PATH = path.dirname(
-    # .../site-packages/runway/embedded/stacker/logger/__init__.py
-    # ->
-    # .../site-packages/runway/embedded
-    path.dirname(path.dirname(inspect.getfile(setup_logging)))
-)
 
 if __name__ == "__main__":
     # No immediate plans to remove. Not to be done prior to 2.0
     print('DEPRECATION NOTICE: the "stacker-runway" command has been '
           'deprecated in favor of "runway run-stacker"', file=sys.stderr)
 
-    # Ensure any blueprints/hooks use the embedded version of stacker
-    sys.path.insert(
-        1,  # https://stackoverflow.com/a/10097543
-        EMBEDDED_LIB_PATH
-    )
-    from runway.embedded.stacker.commands import Stacker
     stacker = Stacker(setup_logging=setup_logging)
     args = stacker.parse_args()
     stacker.configure(args)

@@ -1,0 +1,8 @@
+deployments:
+  - modules:
+    - git::git://github.com/onicagroup/runway.git//integration_tests/test_parallelism/fixtures/sampleapp.cfn
+    regions:
+      - us-east-1
+    environments:
+      dev:
+        region: us-east-1

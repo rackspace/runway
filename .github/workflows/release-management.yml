@@ -1,0 +1,22 @@
+name: Release Management
+
+on:
+  push:
+    branches:
+      - release  # this is the branch we tag for releases
+
+jobs:
+  update_draft_release:
+    name: Draft release
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/release-drafter/release-drafter
+      - uses: release-drafter/release-drafter@v5.6.1
+        env:
+          # Using a PAT here will allow releases to trigger a build/release but
+          # we're just using the actions token for the time being since we
+          # don't have anything triggered on tag.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Using the action token, we would need to push a tag to the repo
+          # (instead of creating one from the release interface) then connect
+          # the release draft to the tag.

@@ -9,15 +9,8 @@ import os
 import pkgutil
 from pkg_resources import get_distribution, get_entry_info
 
-# distutils not included with latest virtualenv so we have to import it here
-# https://github.com/pyinstaller/pyinstaller/issues/4064
-import distutils
-
-if distutils.distutils_path.endswith('__init__.py'):
-    distutils.distutils_path = os.path.dirname(distutils.distutils_path)
-
 CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)),  # noqa
-                        'src/runway')
+                        'runway')
 
 
 def get_submodules(package):
@@ -60,7 +53,6 @@ def Entrypoint(dist, group, name, **kwargs):  # noqa
 data_files = [
     (os.path.join(CLI_PATH, 'templates'), './runway/templates'),
     (os.path.join(CLI_PATH, 'blueprints'), './runway/blueprints'),
-    (os.path.join(CLI_PATH, 'embedded'), './runway/embedded'),
     (os.path.join(CLI_PATH, 'hooks'), './runway/hooks')
 ]
 data_files.append(('{}/yamllint/conf'.format(get_distribution('yamllint').location),
@@ -88,6 +80,10 @@ hiddenimports.extend(get_submodules(troposphere))
 hiddenimports.extend(get_submodules(awacs))
 hiddenimports.extend(get_submodules(awscli))
 hiddenimports.extend(get_submodules(botocore))
+# needed due to pkg_resources dropping python2 support
+# can be removed on the next pyinstaller release
+# https://github.com/pypa/setuptools/issues/1963#issuecomment-582084099
+hiddenimports.append('pkg_resources.py2_warn')
 
 a = Entrypoint('runway',
                'console_scripts',

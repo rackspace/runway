@@ -1,3 +1,5 @@
+.. _Lookups: lookups.html
+
 .. _mod-tf:
 
 Terraform
@@ -261,25 +263,28 @@ E.g. ``common-us-east-1.tfvars``::
 Values in runway.yml
 ~~~~~~~~~~~~~~~~~~~~
 
-Variable values can also be specified as environment values (no relation to
-OS environment variables, just values for the Runway logical environment) in
-runway.yml::
+Variable values can also be specified as parameter values in runway.yml. It
+is recommended to use `Lookups`_ in the ``parameters`` section to
+assist in selecting the appropriate values for the deploy environment and/or
+region being deployed to but, this is not a requirement if the value will
+remain the same.
+
+::
 
     ---
 
     deployments:
       - modules:
           - path: mytfmodule
-            environments:
-              dev:
-                region: us-east-1
-                image_id: ami-abc123
-                mylist:
-                  - item1
-                  - item2
-                mymap:
-                  key1: value1
-                  key2: value1
+            parameters:
+              region: ${env AWS_REGION}
+              image_id: ${var image_id.${env AWS_REGION}}
+              mylist:
+                - item1
+                - item2
+              mymap:
+                key1: value1
+                key2: value1
 
 and/or
 ::
@@ -287,15 +292,14 @@ and/or
     ---
 
     deployments:
-      - environments:
-          dev:
-            region: us-east-1
-            image_id: ami-abc123
-            mylist:
-              - item1
-              - item2
-            mymap:
-              key1: value1
-              key2: value1
+      - parameters:
+          region: ${env AWS_REGION}
+          image_id: ${var image_id.${env AWS_REGION}}
+          mylist:
+            - item1
+            - item2
+          mymap:
+            key1: value1
+            key2: value1
         modules:
           - mytfmodule

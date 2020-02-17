@@ -1,0 +1,8 @@
+default: true
+MD012: false  # no-multiple-blanks: Multiple consecutive blank lines
+MD013: false  # line-length
+MD014: false  # commands-show-output: Dollar signs used before commands without showing output
+MD022: false  # blanks-around-headers
+MD024: false  # no-duplicate-heading/no-duplicate-header
+MD032: false  # blanks-around-lists
+MD040: false  # fenced-code-language: Fenced code blocks should have a language specified

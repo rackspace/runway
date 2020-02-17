@@ -1,0 +1,26 @@
+test_value: basic value
+
+require_test: True
+
+test_list:
+  - list value 1
+  - list value 2
+
+test_dict:
+  lab: my lab value
+
+test_region_map:
+  us-east-1:
+    test: lab value for ${envvar AWS_REGION}
+
+bool_test: true
+
+test_path: sample
+
+test_regions:
+  - us-east-1
+
+accounts:
+  test:
+    assume_role: arn:aws:iam::role/some-role
+    account_id: 123456789101

@@ -1,11 +1,10 @@
 """Packaging settings."""
-import sys
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
 
 from setuptools import find_packages, setup
 
-from src.runway import __version__
+from runway import __version__
 
 
 THIS_DIR = abspath(dirname(__file__))
@@ -17,50 +16,35 @@ INSTALL_REQUIRES = [
     'Send2Trash',
     'awacs',  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
-    # version set to match stacker requirement and include awscli fix #4182
-    'awscli>=1.16.191<2.0',
+    'awscli>=1.16.308<2.0',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
-    'boto3>=1.9.111<2.0',  # matching stacker requirement
+    'boto3>=1.9.111<2.0',
+    'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'docopt',
     'requests',
     'future',
-    # embedded pyhcl is 0.3.12
-    # with the LICENSE file added to its root folder
-    # and the following patches applied
-    # https://github.com/virtuald/pyhcl/pull/57
-    'pyhcl~=0.3',
+    'pyhcl~=0.4',
+    'gitpython',
     'pyOpenSSL',  # For embedded hook & associated script usage
-    'six',
+    'PyYAML>=4.1,<5.3',  # match awscli top-end
+    'six>=1.13.0',
     'typing;python_version<"3.5"',
     'yamllint',
     'zgitignore',  # for embedded hooks
-    # embedded stacker is v1.7.0
-    # with the LICENSE file added to its root folder
-    # and the following patches applied
-    # https://github.com/cloudtools/stacker/pull/731 (CAPABILITY_AUTO_EXPAND)
-    # https://github.com/cloudtools/stacker/pull/744 (diffs via CFN changesets)
-    # https://github.com/cloudtools/stacker/pull/746 (locked stack dependencies)
-    # and the following files/folders deleted:
-    #   * tests
-    #   * blueprints/testutil.py
-    # and the stacker & stacker.cmd scripts adapted with EMBEDDED_LIB_PATH
-    'stacker~=1.7',
-    # stacker's troposphere dep is more loose, but we need to ensure we use a
-    # sufficiently recent version for compatibility embedded blueprints
     'troposphere>=2.4.2',
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
     'urllib3>=1.20,<1.25',
+    # dependency of importlib-metadata, dependency of pytest, cfn-lint, & others
+    # 2.0.0 drops support for python 3.5
+    'zipp~=1.0.0',
+    # inherited from stacker 1.7.0 requirements
+    'gitpython>=2.0,<3.0',
+    'jinja2>=2.7,<3.0',
+    'schematics>=2.0.1,<2.1.0',
+    'formic2'
 ]
-
-# ensuring pyyaml dep matches awscli
-if sys.version_info[:2] == (2, 6):
-    INSTALL_REQUIRES.append('PyYAML>=3.10,<=3.13')
-    INSTALL_REQUIRES.append('cfn_flip<=1.2.0')  # 1.2.1+ require PyYAML 4.1+
-else:
-    INSTALL_REQUIRES.append('PyYAML>=4.1,<=5.1')
-    INSTALL_REQUIRES.append('cfn_flip>=1.2.1')
 
 
 setup(
@@ -86,19 +70,8 @@ setup(
     ],
     python_requires='>=2.6',
     keywords='cli',
-    # exclude=['docs', 'tests*'],
-    packages=find_packages(where='src'),
-    package_dir={"": "src"},
+    packages=find_packages(exclude=('tests', 'integration_tests')),
     install_requires=INSTALL_REQUIRES,
-    extras_require={
-        'test': ['flake8', 'pep8-naming', 'flake8-docstrings',
-                 'mock~=3.0.5', 'pylint',
-                 # python3 flake8-docstrings fails with pydocstyle 4:
-                 # https://github.com/PyCQA/pydocstyle/issues/375
-                 # newer versions do not support python2:
-                 # https://github.com/PyCQA/pydocstyle/pull/374
-                 'pydocstyle<4.0.0'],
-    },
     entry_points={
         'console_scripts': [
             'runway=runway.cli:main',
@@ -107,6 +80,5 @@ setup(
     scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd',
              'scripts/tf-runway', 'scripts/tf-runway.cmd',
              'scripts/tfenv-runway', 'scripts/tfenv-runway.cmd'],
-    include_package_data=True,  # needed for templates,blueprints,hooks
-    test_suite='tests'
+    include_package_data=True  # needed for templates,blueprints,hooks
 )

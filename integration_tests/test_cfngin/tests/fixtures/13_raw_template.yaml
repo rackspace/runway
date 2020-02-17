@@ -1,0 +1,9 @@
+namespace: ${CFNGIN_NAMESPACE}
+stacker_bucket: ''
+sys_path: ./
+
+stacks:
+  raw-template-vpc:
+    template_path: fixtures/cfn_template.yaml
+    variables:
+      Param1: foobar

@@ -9,17 +9,42 @@ endif
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 
+# not actually a sync since we need to skip-lock but maintains naming
+sync_two:
+	PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --two --skip-lock
+
+# sync all virtual environments used by this project with their Pipfile.lock
+sync_all:
+	PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three
+	pushd docs && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
+	pushd integration_tests && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
+	pushd integration_test_infrastructure && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
+
+# update all Pipfile.lock's used by this project
+pipenv_lock:
+	pipenv lock --dev
+	pushd docs && pipenv lock --dev && popd
+	pushd integration_tests && pipenv lock --dev && popd
+	pushd integration_test_infrastructure && pipenv lock --dev && popd
+
 clean:
 	rm -rf build/
 	rm -rf dist/
 	rm -rf runway.egg-info/
 	rm -rf tmp/
+	rm -rf src/
+	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
-test: sync create_readme
-	pipenv run python setup.py test
-	pipenv run flake8 --exclude=src/runway/embedded,src/runway/templates src/runway
-	find src/runway -name '*.py' -not -path 'src/runway/embedded*' -not -path 'src/runway/templates/stacker/*' -not -path 'src/runway/templates/cdk-py/*' -not -path 'src/runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
-	find src/runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
+lint:
+	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
+	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
+
+test:
+	pipenv run pytest
+
+test_shim:
+	./.travis/test_shim.sh
 
 travistest: create_readme
 	./.travis/test.sh
@@ -28,7 +53,7 @@ create_readme:
 	sed '/^\[!\[Build Status\]/d' README.md | sed '/^\[!\[PyPi\]/d' | sed '/^\[!\[npm\]/d' | sed '/^\![\[runway\-example\.gif\]/d' | sed 's/^```yml$$/```/g' | sed 's/^```shell$$/```/g' |pandoc --from=markdown --to=rst --output=README.rst
 
 create_tfenv_ver_file:
-	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > src/runway/templates/terraform/.terraform-version
+	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
 
 build: clean create_readme create_tfenv_ver_file
 	python setup.py sdist
