@@ -268,6 +268,7 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
 
     Args:
         work_dir (str): Work directory for docker.
+        client (Optional[docker.DockerClient]): Custom docker client.
         runtime (Optional[str]): Lambda runtime. Must provide one of
             ``runtime``, ``docker_file``, or ``docker_image``.
         docker_file (Optional[str]): Path to a Dockerfile to build an image.
