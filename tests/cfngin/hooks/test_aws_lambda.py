@@ -23,6 +23,7 @@ from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
                                             copydir, dockerized_pip,
                                             handle_use_pipenv,
                                             select_bucket_region,
+                                            should_use_docker,
                                             upload_lambda_functions)
 
 from ..factories import mock_provider
@@ -644,6 +645,39 @@ class TestDockerizePip(object):
             dockerized_pip(os.getcwd(), client=client,
                            runtime='node')
         assert 'node' in str(excinfo.value)
+
+
+class TestShouldUseDocker(object):
+    """Test should_use_docker."""
+
+    def test_bool_true(self):
+        """Test value bool(True)."""
+        assert should_use_docker(True)
+
+    def test_bool_false(self):
+        """Test value bool(True)."""
+        assert not should_use_docker(False)
+
+    def test_str_true(self):
+        """Test value 'false'."""
+        assert should_use_docker('True')
+        assert should_use_docker('true')
+
+    def test_str_false(self):
+        """Test value 'false'."""
+        assert not should_use_docker('False')
+        assert not should_use_docker('false')
+
+    def test_non_linux(self):
+        """Test value 'non-linux' with all possible platforms."""
+        non_linux_os = ['aix', 'cygwin', 'darwin', 'win32']
+        for non_linux in non_linux_os:
+            with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
+                mock_sys.configure_mock(platform=non_linux)
+                assert should_use_docker('non-linux')
+        with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
+            mock_sys.configure_mock(platform='linux')
+            assert not should_use_docker('non-linux')
 
 
 def test_handle_use_pipenv():

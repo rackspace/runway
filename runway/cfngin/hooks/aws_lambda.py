@@ -5,6 +5,8 @@ import os
 import stat
 import subprocess
 import sys
+# https://github.com/PyCQA/pylint/issues/2955
+from distutils.util import strtobool  # pylint: disable=E
 from io import BytesIO as StringIO
 from shutil import copyfile
 from types import GeneratorType
@@ -81,6 +83,31 @@ def copydir(source, destination, includes, excludes=None,
         except (IOError, OSError):
             _mkdir(os.path.dirname(dest))
             copyfile(src, dest)
+
+
+def should_use_docker(dockerize_pip=None):
+    """Assess if Docker should be used based on the value of args.
+
+    Args:
+        dockerize_pip (Union[bool, None, str]): Value to assess if Docker
+            should be used for pip.
+
+    Returns:
+        bool
+
+    """
+    if isinstance(dockerize_pip, bool):
+        return dockerize_pip
+
+    if isinstance(dockerize_pip, str):
+        if dockerize_pip == 'non-linux' and \
+                not sys.platform.startswith('linux'):
+            return True
+        try:
+            return strtobool(dockerize_pip)
+        except ValueError:
+            pass
+    return False
 
 
 def _zip_files(files, root):
@@ -403,13 +430,8 @@ def _zip_package(package_root, includes, excludes, dockerize_pip=False,
                          'a Pipfile.')
             raise ValueError('no such file "requirements.txt"')
 
-        if dockerize_pip:
-            if (
-                    isinstance(dockerize_pip, bool) or
-                    (dockerize_pip == 'non-linux' and
-                     sys.platform.lower() != 'linux')
-            ):
-                dockerized_pip(tmpdir, **kwargs)
+        if should_use_docker(dockerize_pip):
+            dockerized_pip(tmpdir, **kwargs)
         else:
             pip_cmd = ['python', '-m', 'pip', 'install',
                        '-t', tmpdir,

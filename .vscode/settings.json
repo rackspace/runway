@@ -18,6 +18,7 @@
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "cSpell.words": [
         "cfngin",
+        "cygwin",
         "dockerizepip",
         "forcerm",
         "lambci",
