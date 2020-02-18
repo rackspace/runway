@@ -145,4 +145,4 @@ Name of your configuration file, if other than serverless.yml|.yaml|.js|.json.
         - modules:
             - path: sampleapp.sls
               options:
-                config: sampleapp.yml
+                sls_configfile: sampleapp.yml
