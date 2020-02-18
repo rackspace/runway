@@ -10,19 +10,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add static site examples for React & Angular
 - variable resolution in the runway config file
-    - uses lookups to resolve value
-        - resolves from environment variables, variables file, or variables definition
-        - lookups can take arguments in addition to a query
-            - parsing is part of the base class to standardize syntax
-            - used to provide default values if the query fails and/or transform the data
-    - only resolvable in specific areas of the config file (see docs for details)
-    - some environment variables can only be used during processing of a module since they are set during processing
+  - uses lookups to resolve value
+    - resolves from environment variables, variables file, or variables definition
+    - lookups can take arguments in addition to a query
+      - parsing is part of the base class to standardize syntax
+      - used to provide default values if the query fails and/or transform the data
+  - only resolvable in specific areas of the config file (see docs for details)
+  - some environment variables can only be used during processing of a module since they are set during processing
 - `variables` top-level directive to the runway config file
-    - explicitly define the path/name to a variables file instead of using the default path/names
-    - define variables directly in the runway config file
-        - if this is used with a variables file, what is defined in the runway config takes precedence
+  - explicitly define the path/name to a variables file instead of using the default path/names
+  - define variables directly in the runway config file
+    - if this is used with a variables file, what is defined in the runway config takes precedence
 - `parameters` directive for modules and deployments
-    - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
+  - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
 
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `.cfn` modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use a `$DEPLOY_ENVIRONMENT-$AWS_REGION.env` file if variables/lookups are used
 - modules no longer require `deployments[].environments.$DEPLOY_ENVIRONMENT` to be deployed when opting to not use an environment specific variables file (.e.g `$DEPLOY_ENVIRONMENT-$AWS_REGION.env`) if `parameters` are used.
 - `environments` key now acts as an explict toggle (with a booleon value per environment name, string of `$ACCOUNT_ID/$REGION`, or list of strings) for deploying modules to an environment
-    - support old functionallity retained for the time being by merging into `parameters`
+  - support old functionallity retained for the time being by merging into `parameters`
 
 ### Removed
 - embedded `hcl`
