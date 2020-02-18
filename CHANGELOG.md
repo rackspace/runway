@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
         - if this is used with a variables file, what is defined in the runway config takes precedence
 - `parameters` directive for modules and deployments
     - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
+- Add `sls_configfile` option in sls modules to support sls `--config` option
 
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
