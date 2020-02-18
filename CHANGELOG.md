@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - pinned `zipp` sub dependency to `~=1.0.0` to retain support for python 3.5
 - `PyYAML` dependency is now `>=4.1,<5.3` to match the top-end of newer versions of `awscli`
 - `NoSuchBucket` during `PutBucketEncryption` when sls tries to create a `promotezip` bucket
+- `parallel_regions` causing subsequent deployments to be skipped
 
 ## [1.3.7] - 2020-01-07
 ### Fixed
