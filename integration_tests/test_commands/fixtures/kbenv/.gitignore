@@ -1,5 +1,0 @@
-.terraform
-.terraform.tfstate.lock.info
-.kubeconfig
-terraform.tfstate
-terraform.tfstate.backup

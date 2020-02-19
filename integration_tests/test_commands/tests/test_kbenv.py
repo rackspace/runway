@@ -1,8 +1,9 @@
 """Test running kbenv commands."""
 import os
+import tempfile
 from subprocess import check_output
-
 from integration_tests.test_commands.test_commands import Commands
+
 
 
 class TestKBEnv(Commands):
@@ -10,12 +11,11 @@ class TestKBEnv(Commands):
 
     TEST_NAME = __name__
 
-    def get_stack_path(self):
-        """Gets the stack path."""
-        return os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            'fixtures',
-            'kbenv')
+    tmp_stack = None
+
+    stack_path = None
+
+    env = None
 
     def init(self):
         """Initialize eks."""
@@ -23,37 +23,54 @@ class TestKBEnv(Commands):
 
     def run(self):
         """Run tests."""
-        path = self.get_stack_path()
-        env = dict(os.environ, KUBECONFIG='{0}/.kubeconfig'.format(path))
-        # init
+
+        # setup context
+        tmp_root = tempfile.gettempdir()
+        self.tmp_stack = tempfile.TemporaryDirectory(dir=tmp_root)
+        self.stack_path = self.tmp_stack.name + '/k8s-tf-infrastructure'
+        self.env = dict(
+            os.environ,
+            CI='1',
+            DEPLOY_ENVIRONMENT='dev',
+            KUBECONFIG='{0}/.kubeconfig'.format(self.stack_path))
+
+        # create project from k8s-tf-repo sample
         check_output(
-            ['runway', 'tfenv', 'run', 'init'],
-            cwd=path
+            ['runway', 'gen-sample', 'k8s-tf-repo'],
+            cwd=self.tmp_stack.name
         ).decode()
-        # apply
+
+        # deploy stack
         check_output(
-            ['runway', 'tfenv', 'run', '--', 'apply', '-auto-approve'],
-            cwd=path
+            ['runway', 'deploy', '--tag', 'eks'],
+            cwd=self.stack_path,
+            env=self.env
         ).decode()
-        # get cluster name
-        cluster = check_output(
-            ['runway', 'tfenv', 'run', '--', 'output', 'cluster_arn'],
-            cwd=path
-        ).decode().strip()
+
+        # create kubeconfig
+        response = check_output(
+            ['aws', 'eks', 'update-kubeconfig', '--name', 'k8s-dev',
+             '--kubeconfig', './.kubeconfig', '--region', 'us-west-2'],
+            cwd=self.stack_path,
+            env=self.env
+        ).decode()
+
         # run kubectl command
         response = check_output(
-            ['runway', 'kbenv', 'run', '--', 
-             'get', 'namespace', 'default', "--cluster={0}".format(cluster)],
-            cwd=path,
-            env=env
+            ['runway', 'kbenv', 'run', '--',
+             'get', 'namespace', 'default', "--kubeconfig=./.kubeconfig"],
+            cwd=self.stack_path,
+            env=self.env
         ).decode()
+
         # check that default namespace is Active
         assert 'Active' in response
 
     def teardown(self):
         """Teardown any created resources."""
-        # apply
         check_output(
-            ['runway', 'tfenv', 'run', '--', 'destroy', '-auto-approve'],
-            cwd=self.get_stack_path()
+            ['runway', 'destroy', '--tag', 'eks'],
+            cwd=self.stack_path,
+            env=self.env
         ).decode()
+        self.tmp_stack.cleanup()

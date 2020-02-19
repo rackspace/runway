@@ -1,8 +1,14 @@
 ---
 deployments:
   - modules:
-      - tfstate.cfn
-      - eks-base.tf
+      - name: tfstate.cfn
+        path: tfstate.cfn
+        tags:
+          - eks
+      - name: eks-base.tf
+        path: eks-base.tf
+        tags:
+          - eks
       - gen-kubeconfig.cfn  # just generating the local kubeconfig file
       - job-s3-echo.tf
       - service-hello-world.k8s
