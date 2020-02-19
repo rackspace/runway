@@ -21,7 +21,8 @@ from runway.cfngin.context import Context
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
 from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
                                             copydir, dockerized_pip,
-                                            handle_use_pipenv,
+                                            find_requirements,
+                                            handle_requirements,
                                             select_bucket_region,
                                             should_use_docker,
                                             upload_lambda_functions)
@@ -647,6 +648,76 @@ class TestDockerizePip(object):
         assert 'node' in str(excinfo.value)
 
 
+class TestHandleRequirements(object):
+    """Test handle_requirements."""
+
+    PIPFILE = '\n'.join([
+        '[[source]]',
+        'url = "https://pypi.org/simple"',
+        'verify_ssl = true',
+        'name = "pypi"',
+        '[packages]',
+        '[dev-packages]'
+    ])
+    REQUIREMENTS = '-i https://pypi.org/simple\n\n'
+
+    def test_default(self):
+        """Test default action."""
+        expected = b'This is correct.'
+        with TempDirectory() as tmp_dir:
+            tmp_dir.write('Pipfile', self.PIPFILE.encode('utf-8'))
+            tmp_dir.write('requirements.txt', expected)
+            req_path = handle_requirements(package_root=tmp_dir.path,
+                                           dest_path=tmp_dir.path,
+                                           requirements=find_requirements(tmp_dir.path))
+
+            assert req_path == os.path.join(tmp_dir.path, 'requirements.txt')
+            assert not os.path.isfile(os.path.join(tmp_dir.path, 'Pipfile.lock'))
+            assert tmp_dir.read('requirements.txt') == expected
+
+    def test_explicit_pipenv(self):
+        """Test with 'use_pipenv=True'."""
+        with TempDirectory() as tmp_dir:
+            tmp_dir.write('Pipfile', self.PIPFILE.encode('utf-8'))
+            tmp_dir.write('requirements.txt', b'This is not correct!')
+            req_path = handle_requirements(package_root=tmp_dir.path,
+                                           dest_path=tmp_dir.path,
+                                           requirements=find_requirements(tmp_dir.path),
+                                           use_pipenv=True)
+
+            assert req_path == os.path.join(tmp_dir.path, 'requirements.txt')
+            assert tmp_dir.read('Pipfile.lock')
+            assert tmp_dir.read('requirements.txt') == \
+                b'-i https://pypi.org/simple\n\n'
+
+    def test_implicit_pipenv(self):
+        """Test implicit use of pipenv."""
+        with TempDirectory() as tmp_dir:
+            tmp_dir.write('Pipfile', self.PIPFILE.encode('utf-8'))
+            req_path = handle_requirements(package_root=tmp_dir.path,
+                                           dest_path=tmp_dir.path,
+                                           requirements=find_requirements(tmp_dir.path))
+
+            assert req_path == os.path.join(tmp_dir.path, 'requirements.txt')
+            assert tmp_dir.read('Pipfile.lock')
+            assert tmp_dir.read('requirements.txt') == \
+                b'-i https://pypi.org/simple\n\n'
+
+    def test_raise_not_implimented(self):
+        """Test NotImplimentedError is raised when no requirements file."""
+        with TempDirectory() as tmp_dir:
+            with pytest.raises(NotImplementedError):
+                handle_requirements(
+                    package_root=tmp_dir.path,
+                    dest_path=tmp_dir.path,
+                    requirements={
+                        'requirements.txt': False,
+                        'Pipfile': False,
+                        'Pipfile.lock': False
+                    }
+                )
+
+
 class TestShouldUseDocker(object):
     """Test should_use_docker."""
 
@@ -678,29 +749,6 @@ class TestShouldUseDocker(object):
         with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
             mock_sys.configure_mock(platform='linux')
             assert not should_use_docker('non-linux')
-
-
-def test_handle_use_pipenv():
-    """Test handling pipenv."""
-    pipfile = '\n'.join([
-        '[[source]]',
-        'url = "https://pypi.org/simple"',
-        'verify_ssl = true',
-        'name = "pypi"',
-        '[packages]',
-        '[dev-packages]'
-    ])
-    with TempDirectory() as tmp_dir:
-        tmp_dir.write('Pipfile', pipfile.encode('utf-8'))
-        req_path = handle_use_pipenv(tmp_dir.path, tmp_dir.path)
-        print('Pipfile.lock: %s' % str(tmp_dir.read('Pipfile.lock')))
-        print('requirements.txt: %s' % str(
-            tmp_dir.read('requirements.txt')
-        ))
-        assert os.path.basename(req_path) == 'requirements.txt'
-        assert tmp_dir.read('Pipfile.lock')
-        assert tmp_dir.read('requirements.txt') == \
-            b'-i https://pypi.org/simple\n\n'
 
 
 def test_copydir():

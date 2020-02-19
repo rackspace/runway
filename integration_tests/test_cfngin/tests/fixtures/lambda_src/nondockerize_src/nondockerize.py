@@ -1,13 +1,18 @@
 """Test handler."""
-from urllib.request import urlopen, Request
+import lib
+
 
 def handler(event, context):
     """Handle lambda."""
-    req = Request('https://api.github.com')
-    with urlopen(req) as url:
-        f = url.read().decode('utf8')
-        print(f)
+    try:
+        if lib.RESPONSE_OBJ.shape == (3, 5):
+            return {
+                'statusCode': 200,
+                'body': str(lib.RESPONSE_OBJ.shape)
+            }
+        raise ValueError
+    except:
         return {
-            'statusCode': 200,
-            'body': 'success'
+            'statusCode': 500,
+            'body': 'fail'
         }

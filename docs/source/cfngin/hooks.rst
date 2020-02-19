@@ -32,11 +32,10 @@ specifications. In the specifications, each key indicating the name of the
 function (used for generating names for artifacts), and the value
 determines what files to include in the ZIP (see more details below).
 
-Docker can be used to collect python dependencies to include in the ZIP archive.
-This can be done by including the ``dockerize_pip`` configuration option which can have a value of ``true`` or ``non-linux`` to use this feature.
-Docker can use a **requirements.txt** or **Pipfile/Pipfile.lock** to install dependencies.
-If using **Pipfile**, the ``use_pipenv: true`` option must be provided.
-While recommended when using pipenv, if a **Pipfile.lock** is not found, one will be created.
+If a ``requirements.txt``, ``Pipenv``, or ``Pipenv.lock`` file are found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically. If you want to explicitly use ``pipenv`` over ``pip``, provide ``use_pipenv: true`` for the function.
+
+Docker can be used to collect python dependencies instead of using system python to build appropriate binaries for Lambda.
+This can be done by including the ``dockerize_pip`` configuration option which can have a value of ``true`` or ``non-linux``.
 
 Payloads are uploaded to either a custom bucket or the CFNgin default
 bucket, with the key containing it's checksum, to allow repeated uploads
@@ -71,17 +70,6 @@ to be skipped in subsequent runs.
     Keys correspond to function names, used to derive key names for the payload.
     Each value should itself be a dictionary, with the following data:
 
-    **use_pipenv (Optional[bool])**:
-        Will determine if pipenv will be used to generate requirements.txt
-        from an existing Pipfile. Requires ``dockerize_pip``.
-        To use this option pipenv must be installed.
-
-    **dockerize_pip (Optional[Union[str, bool]])**
-        Whether to use Docker when restoring dependencies with pip.
-        Can be set to ``true``/``false`` or the special string ``non-linux``
-        which will only run on non Linux systems.
-        To use this option Docker must be installed.
-
     **docker_file (Optional[str])**
         Path to a local DockerFile that will be built and used for
         ``dockerize_pip``. Must provide exactly one of ``docker_file``,
@@ -92,11 +80,28 @@ to be skipped in subsequent runs.
         provide exactly one of ``docker_file``, ``docker_image``, or
         ``runtime``.
 
-    **runtime (Optional[str])**
-        Runtime of the AWS Lambda Function being uploaded. Used with
-        ``dockerize_pip`` to automatically select the appropriate
-        Docker image to use. Must provide exactly one of
-        ``docker_file``, ``docker_image``, or ``runtime``.
+    **dockerize_pip (Optional[Union[str, bool]])**
+        Whether to use Docker when restoring dependencies with pip.
+        Can be set to ``true``/``false`` or the special string ``non-linux``
+        which will only run on non Linux systems.
+        To use this option Docker must be installed.
+
+    **exclude (Optional[Union[str, List[str]]])**
+        Pattern or list of patterns of files to exclude from the
+        payload. If provided, any files that match will be ignored,
+        regardless of whether they match an inclusion pattern.
+
+        Commonly ignored files are already excluded by default,
+        such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``,
+        ``.gitignore``, etc.
+
+    **include (Optional[Union[str, List[str]]])**
+        Pattern or list of patterns of files to include in the
+        payload. If provided, only files that match these
+        patterns will be included in the payload.
+
+        Omitting it is equivalent to accepting all files that are
+        not otherwise excluded.
 
     **path (str)**
         Base directory of the Lambda function payload content.
@@ -114,22 +119,20 @@ to be skipped in subsequent runs.
         directly under this directory will be added to the root of
         the ZIP file.
 
-    **include (Optional[Union[str, List[str]]])**
-        Pattern or list of patterns of files to include in the
-        payload. If provided, only files that match these
-        patterns will be included in the payload.
+    **python_path (Optional[str])**
+        Absolute path to a python interpreter to use for ``pip``/``pipenv``
+        actions. If not provided, the current python interpreter will be used
+        for ``pip`` and ``pipenv`` will be used from the current ``$PATH``.
 
-        Omitting it is equivalent to accepting all files that are
-        not otherwise excluded.
+    **runtime (Optional[str])**
+        Runtime of the AWS Lambda Function being uploaded. Used with
+        ``dockerize_pip`` to automatically select the appropriate
+        Docker image to use. Must provide exactly one of
+        ``docker_file``, ``docker_image``, or ``runtime``.
 
-    **exclude (Optional[Union[str, List[str]]])**
-        Pattern or list of patterns of files to exclude from the
-        payload. If provided, any files that match will be ignored,
-        regardless of whether they match an inclusion pattern.
-
-        Commonly ignored files are already excluded by default,
-        such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``,
-        ``.gitignore``, etc.
+    **use_pipenv (Optional[bool])**:
+        Will determine if pipenv will be used to generate requirements.txt
+        from an existing Pipfile. To use this option pipenv must be installed.
 
 
 .. rubric:: Example
@@ -352,7 +355,7 @@ iam.create_ecs_service_role
 
 .. rubric:: Description
 
-Create ecsServieRole, which has to be named exactly that currently.
+Create ecsServiceRole, which has to be named exactly that currently.
 
 http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
 
@@ -493,7 +496,7 @@ The values for these additional arguments come from the ``args`` key of the `hoo
 
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
-This signifies to CFNging whether or not to halt execution if the hook is ``required``.
+This signifies to CFNgin whether or not to halt execution if the hook is ``required``.
 If data is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where ``data_key`` is the value set in the `hook definition`_.
 
