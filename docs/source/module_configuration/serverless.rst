@@ -134,3 +134,35 @@ directory is pre-compiled) via the ``skip_npm_ci`` module option:
           - path: myslsproject.sls
             options:
               skip_npm_ci: true
+
+Specifying Serverless CLI Arguments/Options
+-------------------------------------------
+
+Runway can pass custom arguments/options to the Serverless CLI by using the ``args`` option. These will always be placed after the default arguments/options
+
+The value of ``args`` must be a list of arguments/options to pass to the CLI.
+Each element of the argument/option should be it's own list item (e.b. ``--config sls.yml`` would be ``['--config', 'sls.yml']``.
+
+.. important:: Do not provide ``--region <region>`` or ``--stage <stage>`` here. These will be provided by Runway.
+
+
+.. rubric:: Runway Example
+.. code-block:: yaml
+
+  ---
+  deployments:
+    - modules:
+        - path: sampleapp.sls
+          options:
+            args:
+              - '--config'
+              - sls.yml
+      regions
+        - us-east-2
+      environments:
+        example: true
+
+.. rubric:: Command Equivalent
+.. code-block::
+
+  serverless deploy -r us-east-1 --stage example --config sls.yml

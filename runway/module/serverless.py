@@ -172,6 +172,7 @@ class Serverless(RunwayModule):
         sls_env_file = get_sls_config_file(self.path,
                                            self.context.env_name,
                                            self.context.env_region)
+        sls_opts.extend(self.options.get('options', {}).get('args', []))
 
         sls_cmd = generate_node_command(command='sls',
                                         command_opts=sls_opts,

@@ -1,25 +1,35 @@
 """Tests for runway.cfngin.hooks.aws_lambda."""
+# pylint: disable=invalid-name,no-self-use
 import os
 import os.path
-import random
+# python2 supported pylint incorrectly detects this for python3.8
+import random  # pylint: disable=syntax-error
 import unittest
 from io import BytesIO as StringIO
 from zipfile import ZipFile
 
 import boto3
 import botocore
-import mock
+import pytest
+from mock import patch
 from moto import mock_s3
 from testfixtures import ShouldRaise, TempDirectory, compare
 from troposphere.awslambda import Code
 
 from runway.cfngin.config import Config
 from runway.cfngin.context import Context
+from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
 from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
+                                            copydir, dockerized_pip,
+                                            find_requirements,
+                                            handle_requirements,
                                             select_bucket_region,
+                                            should_use_docker,
                                             upload_lambda_functions)
 
 from ..factories import mock_provider
+from ..fixtures.mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
+from ..fixtures.mock_docker.fake_api_client import make_fake_client
 
 REGION = "us-east-1"
 ALL_FILES = (
@@ -166,7 +176,7 @@ class TestLambdaHooks(unittest.TestCase):
         """Test path relative."""
         get_config_directory = 'runway.cfngin.hooks.aws_lambda.get_config_directory'
         with self.temp_directory_with_files(['test/test.py']) as temp_dir, \
-                mock.patch(get_config_directory) as mock1:
+                patch(get_config_directory) as mock1:
             mock1.return_value = temp_dir.path
 
             results = self.run_hook(functions={
@@ -188,7 +198,7 @@ class TestLambdaHooks(unittest.TestCase):
 
         orig_expanduser = os.path.expanduser
         with self.temp_directory_with_files(['test.py']) as temp_dir, \
-                mock.patch('os.path.expanduser') as mock1:
+                patch('os.path.expanduser') as mock1:
             mock1.side_effect = lambda p: (temp_dir.path if p == test_path
                                            else orig_expanduser(p))
 
@@ -513,3 +523,247 @@ class TestLambdaHooks(unittest.TestCase):
                 'f1/test2/test.txt',
                 'f2/f2.js',
             ])
+
+
+class TestDockerizePip(object):
+    """Test dockerize_pip."""
+
+    command = ['/bin/sh', '-c', 'python -m pip install -t /var/task -r '
+               '/var/task/requirements.txt']
+    host_config = {
+        'NetworkMode': 'default',
+        'AutoRemove': True,
+        'Mounts': [
+            {
+                'Target': '/var/task',
+                'Source': os.getcwd(),
+                'Type': 'bind',
+                'ReadOnly': False
+            }
+        ]
+    }
+
+    def test_with_docker_file(self):
+        """Test with docker_file provided."""
+        client = make_fake_client()
+        with TempDirectory() as tmp_dir:
+            docker_file = tmp_dir.write('Dockerfile', b'')
+            dockerized_pip(os.getcwd(), client=client,
+                           docker_file=docker_file)
+
+            client.api.build.assert_called_with(
+                path=tmp_dir.path,
+                dockerfile='Dockerfile',
+                forcerm=True
+            )
+            client.api.create_container.assert_called_with(
+                detach=True,
+                image=FAKE_IMAGE_ID,
+                command=self.command,
+                host_config=self.host_config
+            )
+            client.api.inspect_container.assert_called_with(FAKE_CONTAINER_ID)
+            client.api.start.assert_called_with(FAKE_CONTAINER_ID)
+            client.api.logs.assert_called_with(FAKE_CONTAINER_ID,
+                                               stderr=True,
+                                               stdout=True,
+                                               stream=True,
+                                               tail=0)
+
+    def test_with_docker_image(self):
+        """Test with docker_image provided."""
+        client = make_fake_client()
+        image = 'alpine'
+        dockerized_pip(os.getcwd(), client=client, docker_image=image)
+
+        client.api.create_container.assert_called_with(
+            detach=True,
+            image=image,
+            command=self.command,
+            host_config=self.host_config
+        )
+        client.api.inspect_container.assert_called_with(FAKE_CONTAINER_ID)
+        client.api.start.assert_called_with(FAKE_CONTAINER_ID)
+        client.api.logs.assert_called_with(FAKE_CONTAINER_ID,
+                                           stderr=True,
+                                           stdout=True,
+                                           stream=True,
+                                           tail=0)
+
+    def test_with_runtime(self):
+        """Test with runtime provided."""
+        client = make_fake_client()
+        runtime = 'python3.8'
+        dockerized_pip(os.getcwd(), client=client, runtime=runtime)
+
+        client.api.create_container.assert_called_with(
+            detach=True,
+            image='lambci/lambda:build-' + runtime,
+            command=self.command,
+            host_config=self.host_config
+        )
+        client.api.inspect_container.assert_called_with(FAKE_CONTAINER_ID)
+        client.api.start.assert_called_with(FAKE_CONTAINER_ID)
+        client.api.logs.assert_called_with(FAKE_CONTAINER_ID,
+                                           stderr=True,
+                                           stdout=True,
+                                           stream=True,
+                                           tail=0)
+
+    def test_raises_invalid_config(self):
+        """Test that InvalidDockerizePipConfiguration is raised."""
+        client = make_fake_client()
+        with pytest.raises(InvalidDockerizePipConfiguration):
+            dockerized_pip(os.getcwd(), client=client,
+                           docker_file='docker_file',
+                           docker_image='docker_image',
+                           runtime='runtime')
+        with pytest.raises(InvalidDockerizePipConfiguration):
+            dockerized_pip(os.getcwd(), client=client,
+                           docker_file='docker_file',
+                           docker_image='docker_image')
+        with pytest.raises(InvalidDockerizePipConfiguration):
+            dockerized_pip(os.getcwd(), client=client,
+                           docker_file='docker_file', runtime='runtime')
+        with pytest.raises(InvalidDockerizePipConfiguration):
+            dockerized_pip(os.getcwd(), client=client,
+                           docker_image='docker_image', runtime='runtime')
+        with pytest.raises(InvalidDockerizePipConfiguration):
+            dockerized_pip(os.getcwd(), client=client)
+
+    def test_raises_value_error_missing_dockerfile(self):
+        """ValueError raised when provided Dockerfile is not found."""
+        client = make_fake_client()
+        with pytest.raises(ValueError) as excinfo:
+            dockerized_pip(os.getcwd(), client=client,
+                           docker_file='not-a-Dockerfile')
+        assert 'docker_file' in str(excinfo.value)
+
+    def test_raises_value_error_runtime(self):
+        """ValueError raised if runtime provided is not supported."""
+        client = make_fake_client()
+        with pytest.raises(ValueError) as excinfo:
+            dockerized_pip(os.getcwd(), client=client,
+                           runtime='node')
+        assert 'node' in str(excinfo.value)
+
+
+class TestHandleRequirements(object):
+    """Test handle_requirements."""
+
+    PIPFILE = '\n'.join([
+        '[[source]]',
+        'url = "https://pypi.org/simple"',
+        'verify_ssl = true',
+        'name = "pypi"',
+        '[packages]',
+        '[dev-packages]'
+    ])
+    REQUIREMENTS = '-i https://pypi.org/simple\n\n'
+
+    def test_default(self):
+        """Test default action."""
+        expected = b'This is correct.'
+        with TempDirectory() as tmp_dir:
+            tmp_dir.write('Pipfile', self.PIPFILE.encode('utf-8'))
+            tmp_dir.write('requirements.txt', expected)
+            req_path = handle_requirements(package_root=tmp_dir.path,
+                                           dest_path=tmp_dir.path,
+                                           requirements=find_requirements(tmp_dir.path))
+
+            assert req_path == os.path.join(tmp_dir.path, 'requirements.txt')
+            assert not os.path.isfile(os.path.join(tmp_dir.path, 'Pipfile.lock'))
+            assert tmp_dir.read('requirements.txt') == expected
+
+    def test_explicit_pipenv(self):
+        """Test with 'use_pipenv=True'."""
+        with TempDirectory() as tmp_dir:
+            tmp_dir.write('Pipfile', self.PIPFILE.encode('utf-8'))
+            tmp_dir.write('requirements.txt', b'This is not correct!')
+            req_path = handle_requirements(package_root=tmp_dir.path,
+                                           dest_path=tmp_dir.path,
+                                           requirements=find_requirements(tmp_dir.path),
+                                           use_pipenv=True)
+
+            assert req_path == os.path.join(tmp_dir.path, 'requirements.txt')
+            assert tmp_dir.read('Pipfile.lock')
+            assert tmp_dir.read('requirements.txt') == \
+                b'-i https://pypi.org/simple\n\n'
+
+    def test_implicit_pipenv(self):
+        """Test implicit use of pipenv."""
+        with TempDirectory() as tmp_dir:
+            tmp_dir.write('Pipfile', self.PIPFILE.encode('utf-8'))
+            req_path = handle_requirements(package_root=tmp_dir.path,
+                                           dest_path=tmp_dir.path,
+                                           requirements=find_requirements(tmp_dir.path))
+
+            assert req_path == os.path.join(tmp_dir.path, 'requirements.txt')
+            assert tmp_dir.read('Pipfile.lock')
+            assert tmp_dir.read('requirements.txt') == \
+                b'-i https://pypi.org/simple\n\n'
+
+    def test_raise_not_implimented(self):
+        """Test NotImplimentedError is raised when no requirements file."""
+        with TempDirectory() as tmp_dir:
+            with pytest.raises(NotImplementedError):
+                handle_requirements(
+                    package_root=tmp_dir.path,
+                    dest_path=tmp_dir.path,
+                    requirements={
+                        'requirements.txt': False,
+                        'Pipfile': False,
+                        'Pipfile.lock': False
+                    }
+                )
+
+
+class TestShouldUseDocker(object):
+    """Test should_use_docker."""
+
+    def test_bool_true(self):
+        """Test value bool(True)."""
+        assert should_use_docker(True)
+
+    def test_bool_false(self):
+        """Test value bool(True)."""
+        assert not should_use_docker(False)
+
+    def test_str_true(self):
+        """Test value 'false'."""
+        assert should_use_docker('True')
+        assert should_use_docker('true')
+
+    def test_str_false(self):
+        """Test value 'false'."""
+        assert not should_use_docker('False')
+        assert not should_use_docker('false')
+
+    def test_non_linux(self):
+        """Test value 'non-linux' with all possible platforms."""
+        non_linux_os = ['aix', 'cygwin', 'darwin', 'win32']
+        for non_linux in non_linux_os:
+            with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
+                mock_sys.configure_mock(platform=non_linux)
+                assert should_use_docker('non-linux')
+        with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
+            mock_sys.configure_mock(platform='linux')
+            assert not should_use_docker('non-linux')
+
+
+def test_copydir():
+    """Test copydir."""
+    example_file = b'example file content'
+    with TempDirectory() as tmp_dir:
+        dest_path = tmp_dir.makedir('dest')
+        src_path = tmp_dir.makedir('src')
+        tmp_dir.makedir(('src', 'lib'))
+        tmp_dir.write(('src', 'example_file'), example_file)
+        tmp_dir.write(('src', 'lib', 'example_file'), example_file)
+
+        copydir(src_path, dest_path, '**')
+
+        assert tmp_dir.read(('src', 'example_file')) == example_file
+        assert tmp_dir.read(('src', 'lib', 'example_file')) == example_file
+        assert tmp_dir.read(('dest', 'example_file')) == example_file
+        assert tmp_dir.read(('dest', 'lib', 'example_file')) == example_file

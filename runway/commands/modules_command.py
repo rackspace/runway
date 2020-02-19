@@ -431,7 +431,7 @@ class ModulesCommand(RunwayCommand):
                     concurrent.futures.wait(futures)
                     for job in futures:
                         job.result()  # Raise exceptions / exit as needed
-                    return
+                    continue
 
                 # single var to reduce comparisons
                 regions = deployment.parallel_regions or deployment.regions

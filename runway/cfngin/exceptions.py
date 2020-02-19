@@ -128,6 +128,20 @@ class InvalidConfig(Exception):
         self.errors = errors
 
 
+class InvalidDockerizePipConfiguration(Exception):
+    """Raised when the provided configuration for dockerized pip is invalid."""
+
+    def __init__(self, msg):
+        """Instantiate class.
+
+        Args:
+            msg (str): The reason for the error being raised.
+
+        """
+        self.message = msg
+        super(InvalidDockerizePipConfiguration, self).__init__(self.message)
+
+
 class InvalidLookupCombination(Exception):
     """Improper use of lookups to result in a non-string return value."""
 
@@ -259,6 +273,29 @@ class OutputDoesNotExist(Exception):
         message = "Output %s does not exist on stack %s" % (output,
                                                             stack_name)
         super(OutputDoesNotExist, self).__init__(message, *args, **kwargs)
+
+
+class PipError(Exception):
+    """Raised when pip returns a non-zero exit code."""
+
+    def __init__(self):
+        """Instantiate class."""
+        self.message = ('A non-zero exit code was returned when invoking '
+                        'pip. More information can be found in the error '
+                        'above.')
+        super(PipError, self).__init__(self.message)
+
+
+class PipenvError(Exception):
+    """Raised when pipenv returns a non-zero exit code."""
+
+    def __init__(self):
+        """Instantiate class."""
+        self.message = ('A non-zero exit code was returned when invoking '
+                        'pipenv. Please ensure pipenv in installed and the '
+                        'Pipfile being used is valid. More information can be '
+                        'found in the error above.')
+        super(PipenvError, self).__init__(self.message)
 
 
 class PersistentGraphCannotLock(Exception):

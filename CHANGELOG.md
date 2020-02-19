@@ -22,7 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - define variables directly in the runway config file
     - if this is used with a variables file, what is defined in the runway config takes precedence
 - `parameters` directive for modules and deployments
-  - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
+    - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
+- Add `args` option for serverless module to pass additional arguments/option to the serverless command
 
 ### Changed
 - install now requires `pyhcl~=0.4` which is being used in place of the embedded copy
@@ -42,6 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - pinned `zipp` sub dependency to `~=1.0.0` to retain support for python 3.5
 - `PyYAML` dependency is now `>=4.1,<5.3` to match the top-end of newer versions of `awscli`
 - `NoSuchBucket` during `PutBucketEncryption` when sls tries to create a `promotezip` bucket
+- `parallel_regions` causing subsequent deployments to be skipped
 
 ## [1.3.7] - 2020-01-07
 ### Fixed
@@ -692,7 +694,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.3.7...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/onicagroup/runway/compare/v1.3.7...v1.4.0
 [1.3.7]: https://github.com/onicagroup/runway/compare/v1.3.6...v1.3.7
 [1.3.6]: https://github.com/onicagroup/runway/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/onicagroup/runway/compare/v1.3.4...v1.3.5
