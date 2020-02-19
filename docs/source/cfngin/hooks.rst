@@ -32,7 +32,7 @@ specifications. In the specifications, each key indicating the name of the
 function (used for generating names for artifacts), and the value
 determines what files to include in the ZIP (see more details below).
 
-If a ``requirements.txt``, ``Pipenv``, or ``Pipenv.lock`` file are found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically. If you want to explicitly use ``pipenv`` over ``pip``, provide ``use_pipenv: true`` for the function.
+If a ``requirements.txt`` or ``Pipfile/Pipfile.lock`` files are found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically. If you want to explicitly use ``pipenv`` over ``pip``, provide ``use_pipenv: true`` for the function.
 
 Docker can be used to collect python dependencies instead of using system python to build appropriate binaries for Lambda.
 This can be done by including the ``dockerize_pip`` configuration option which can have a value of ``true`` or ``non-linux``.
