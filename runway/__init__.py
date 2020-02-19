@@ -4,4 +4,4 @@ from . import cfngin
 
 sys.modules['stacker'] = cfngin  # shim to remove stacker dependency
 
-__version__ = '1.3.7'
+__version__ = '1.4.0'
