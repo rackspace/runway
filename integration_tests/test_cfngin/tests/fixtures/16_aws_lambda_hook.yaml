@@ -1,0 +1,52 @@
+namespace: ${CFNGIN_NAMESPACE}
+cfngin_bucket: ${CFNGIN_NAMESPACE}-${region}
+
+sys_path: ./
+
+pre_build:
+  upload_lambdas:
+    path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+    required: true
+    data_key: lambda
+    args:
+      functions:
+        dockerize:
+          # this won't actually use docker at the moment.
+          # it will take additional work to get docker running in codebuild for this.
+          # but, for the time being we are at least testing the use of pipenv.
+          # note: leaving it set to `non-linux` will allow local testing to use docker even though codebuild testing does not.
+          dockerize_pip: non-linux
+          use_pipenv: true
+          runtime: python3.7
+          path: ./fixtures/lambda_src/dockerize_src
+          include:
+            - '*.py'
+          exclude:
+            - '*.pyc'
+        nondockerize:
+            path: ./fixtures/lambda_src/nondockerize_src
+            include:
+              - '*.py'
+            exclude:
+              - '*.pyc'
+
+stacks:
+  test-dockerize:
+    class_path: fixtures.lambda_function.BlueprintClass
+    variables:
+      Code: ${hook_data lambda::dockerize}
+      Entrypoint: dockerize.handler
+      AppName: dockerizepip
+  test-nondockerize:
+    class_path: fixtures.lambda_function.BlueprintClass
+    variables:
+      Code: ${hook_data lambda::nondockerize}
+      Entrypoint: nondockerize.handler
+      AppName: nondockerizepip
+
+post_destroy:
+  purge_bucket:
+    path: runway.hooks.cleanup_s3.purge_bucket
+    required: True
+    args:
+      bucket_name: ${CFNGIN_NAMESPACE}-${region}

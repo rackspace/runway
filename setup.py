@@ -17,10 +17,12 @@ INSTALL_REQUIRES = [
     'awacs',  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
     'awscli>=1.16.308<2.0',
+    'backports.tempfile; python_version < "3.2"',
     'botocore>=1.12.111',  # matching awscli/boto3 requirement
     'boto3>=1.9.111<2.0',
     'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
+    'docker',
     'docopt',
     'requests',
     'future',
@@ -40,7 +42,6 @@ INSTALL_REQUIRES = [
     # 2.0.0 drops support for python 3.5
     'zipp~=1.0.0',
     # inherited from stacker 1.7.0 requirements
-    'gitpython>=2.0,<3.0',
     'jinja2>=2.7,<3.0',
     'schematics>=2.0.1,<2.1.0',
     'formic2'
