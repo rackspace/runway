@@ -46,19 +46,17 @@ test:
 test_shim:
 	./.travis/test_shim.sh
 
-travistest: create_readme
+travistest:
 	./.travis/test.sh
 
-create_readme:
-	sed '/^\[!\[Build Status\]/d' README.md | sed '/^\[!\[PyPi\]/d' | sed '/^\[!\[npm\]/d' | sed '/^\![\[runway\-example\.gif\]/d' | sed 's/^```yml$$/```/g' | sed 's/^```shell$$/```/g' |pandoc --from=markdown --to=rst --output=README.rst
 
 create_tfenv_ver_file:
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
 
-build: clean create_readme create_tfenv_ver_file
+build: clean create_tfenv_ver_file
 	python setup.py sdist
 
-travisbuild_file: clean sync create_readme create_tfenv_ver_file
+travisbuild_file: clean sync create_tfenv_ver_file
 	pipenv run $(PYTHON) setup.py sdist
 	mkdir -p tmp
 	pipenv run pip install .
@@ -69,7 +67,7 @@ travisbuild_file: clean sync create_readme create_tfenv_ver_file
 	pipenv run pyinstaller --noconfirm --clean runway.file.spec
 	mv dist/* artifacts/$$(cat tmp/version.txt)/$(TRAVIS_OS_NAME)
 
-travisbuild_folder: clean sync create_readme create_tfenv_ver_file
+travisbuild_folder: clean sync create_tfenv_ver_file
 	mkdir -p tmp
 	pipenv run pip install .
 	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
@@ -81,10 +79,10 @@ travisbuild_folder: clean sync create_readme create_tfenv_ver_file
 		tar -C dist/runway/ -czvf ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/runway.tar.gz .; \
 	fi;
 
-build_whl: clean create_readme create_tfenv_ver_file
+build_whl: clean create_tfenv_ver_file
 	$(PYTHON) setup.py bdist_wheel --universal
 
-release: clean create_readme create_tfenv_ver_file build
+release: clean create_tfenv_ver_file build
 	twine upload dist/*
 	curl -D - -X PURGE https://pypi.org/simple/runway
 
