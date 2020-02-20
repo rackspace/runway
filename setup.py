@@ -8,7 +8,7 @@ from runway import __version__
 
 
 THIS_DIR = abspath(dirname(__file__))
-with codecs_open(join(THIS_DIR, 'README.rst'), encoding='utf-8') as readfile:
+with codecs_open(join(THIS_DIR, 'README.md'), encoding='utf-8') as readfile:
     LONG_DESCRIPTION = readfile.read()
 
 
@@ -53,6 +53,7 @@ setup(
     version=__version__,
     description='Simplify infrastructure/app testing/deployment',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     url='https://github.com/onicagroup/runway',
     author='Onica Group LLC',
     author_email='opensource@onica.com',
