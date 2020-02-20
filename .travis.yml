@@ -44,7 +44,7 @@ jobs:
     - name: "Python 3.7 macOS Single Binary Build"
       stage: build
       os: osx
-      osx_image: xcode11  # Python 3.7.4 running on macOS 10.14.4
+      osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
       script: make travisbuild_file
@@ -65,7 +65,7 @@ jobs:
     - name: "Python 3.7 macOS npm Build"
       stage: build
       os: osx
-      osx_image: xcode11  # Python 3.7.4 running on macOS 10.14.4
+      osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14.4
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
       script: make travisbuild_folder
