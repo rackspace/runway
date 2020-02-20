@@ -62,7 +62,17 @@ fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
       if (process.env.npm_config_global) {
         binPath = `${process.env.NVM_BIN || '/usr/local/bin'}/runway`;
       } else {
-        fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
+        try {
+          fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
+        } catch (err) {
+          // shouldn't need to catch an EEXIST error with the recursive option
+          // set on mkdirSync, but it still can occur (e.g. on older
+          // versions of nodejs without the recursive option)
+          // https://github.com/nodejs/node/issues/27293
+          if (err && err.code !== 'EEXIST') {
+            throw err;
+          }
+        }
         binPath = `${basepath}/.bin/runway`;
       }
       // create symlink in bin to the appropriate runway binary
