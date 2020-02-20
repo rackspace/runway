@@ -131,6 +131,7 @@ deploy:
       condition: $DEPLOY = true && ${AWS_ACCESS_KEY_ID:?} && ${AWS_SECRET_ACCESS_KEY:?} && ("${TRAVIS_TAG:-undefined}" != "undefined" || ${FORKED} = true)
 
   - provider: npm
+    edge: true
     email: $NPM_EMAIL
     api_key: $NPM_API_KEY
     skip_cleanup: true
