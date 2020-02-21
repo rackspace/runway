@@ -339,11 +339,11 @@ class ModulesCommand(RunwayCommand):
             LOGGER.info('Runway is running in DESTROY mode.')
             LOGGER.info('Any/all deployment(s) selected will be '
                         'irrecoverably DESTROYED.')
-            if not context.env_vars.get('CI', None):
+            if context.is_interactive:
                 if not strtobool(input('Proceed?: ')):
                     sys.exit(0)
 
-        if context.env_vars.get('CI', None) or self._cli_arguments.get('--tag'):
+        if context.is_noninteractive or self._cli_arguments.get('--tag'):
             selected_deployments = deployments
         else:
             selected_deployments = self.select_deployment_to_run(
@@ -354,7 +354,7 @@ class ModulesCommand(RunwayCommand):
             select_modules_to_run(deployment,
                                   self._cli_arguments.get('--tag'),
                                   command,
-                                  context.env_vars.get('CI', None),
+                                  context.is_noninteractive,
                                   context.env_name)
             for deployment in selected_deployments
         ]
@@ -413,17 +413,13 @@ class ModulesCommand(RunwayCommand):
 
                 LOGGER.info("")
 
-                if (deployment.parallel_regions and
-                        context.env_vars.get('CI') and
-                        sys.version_info[0] > 2):
-                    # CI is required for concurrent execution to prevent weird
-                    # user-input behavior
-                    # py3+ is required because backported futures has issues with
-                    # ProcessPoolExecutor
+                if deployment.parallel_regions and context.use_concurrent:
                     LOGGER.info("Processing parallel regions %s",
                                 deployment.parallel_regions)
                     LOGGER.info('(output will be interwoven)')
-                    executor = concurrent.futures.ProcessPoolExecutor()
+                    executor = concurrent.futures.ProcessPoolExecutor(
+                        context.max_concurrent_regions
+                    )
                     futures = [executor.submit(self._execute_deployment,
                                                *[deployment, context,
                                                  region, True])
@@ -439,7 +435,7 @@ class ModulesCommand(RunwayCommand):
                 if deployment.parallel_regions:
                     LOGGER.info(
                         '%s - processing the regions sequentially...',
-                        ('Not running in CI mode' if sys.version_info[0] > 2
+                        ('Not running in CI mode' if context.is_python3
                          else 'Parallel execution requires Python 3+')
                     )
 
@@ -483,17 +479,16 @@ class ModulesCommand(RunwayCommand):
         """Process the modules of a deployment."""
         for module in deployment.modules:
             if module.child_modules:
-                # CI is required for concurrent execution to prevent weird
-                # user-input behavior
-                # py3+ is required because backported futures has issues with
-                # ProcessPoolExecutor, and alternatives (like ThreadPoolExecuter)
-                # won't work properly (e.g. working directory changes aren't
-                # thread-safe)
-                if context.env_vars.get('CI') and sys.version_info[0] > 2:
+                if context.use_concurrent:
                     LOGGER.info("Processing parallel modules %s",
                                 [x.path for x in module.child_modules])
                     LOGGER.info('(output will be interwoven)')
-                    executor = concurrent.futures.ProcessPoolExecutor()
+                    # Can't use threading or ThreadPoolExecutor here because
+                    # we need to be able to do things like `cd` which is not
+                    # thread safe.
+                    executor = concurrent.futures.ProcessPoolExecutor(
+                        context.max_concurrent_modules
+                    )
                     futures = [executor.submit(self._deploy_module,
                                                *[x, deployment, context])
                                for x in module.child_modules]
@@ -504,7 +499,7 @@ class ModulesCommand(RunwayCommand):
                     LOGGER.info(
                         '%s - processing the following '
                         'parallel modules sequentially...',
-                        ('Not running in CI mode' if sys.version_info[0] > 2
+                        ('Not running in CI mode' if context.is_python3
                          else 'Parallel execution requires Python 3+')
                     )
                     for child_module in module.child_modules:

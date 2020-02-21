@@ -1,7 +1,9 @@
 """Runway context module."""
 import logging
+# needed for python2 cpu_count, can be replace with python3 os.cpu_count()
+import multiprocessing
 import os
-
+import sys
 
 LOGGER = logging.getLogger('runway')
 
@@ -47,6 +49,113 @@ class Context(object):
 
         if not self._env_name_from_env:
             self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
+
+    @property
+    def is_interactive(self):
+        """Wether the user should be prompted or not.
+
+        Determined by the existed of ``CI`` in the environment.
+
+        Returns:
+            bool
+
+        """
+        return not bool(self.env_vars.get('CI'))
+
+    @property
+    def is_noninteractive(self):
+        """Wether the user should be prompted or not.
+
+        Determined by the existed of ``CI`` in the environment.
+        Inverse of ``is_interactive`` property.
+
+        Returns:
+            bool
+
+        """
+        return bool(self.env_vars.get('CI'))
+
+    @property
+    def is_python3(self):
+        """Wether running in Python 3 or not.
+
+        Used for Python compatability decisions.
+
+        Returns:
+            bool
+
+        """
+        return sys.version_info[0] > 2
+
+    @property
+    def max_concurrent_modules(self):
+        """Max number of modules that can be deployed to concurrently.
+
+        This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_MODULES``.
+        If no value is specified, the systems core count is used.
+
+        On Windows, max_workers must be equal or lower than ``61``.
+
+        .. important:: When using ``parallel_regions`` and ``child_modules``
+                       together, please consider the exponential nature of
+                       their relationship when manually setting this value.
+                       (``parallel_regions``^``child_modules``)
+
+        Returns:
+            int: Value from environment variable or
+            ``min(61, os.cpu_count())``
+
+        """
+        value = os.getenv('RUNWAY_MAX_CONCURRENT_MODULES')
+
+        if value:
+            return int(value)
+        # TODO update to `os.cpu_count()` when dropping python2
+        return min(61, multiprocessing.cpu_count())
+
+    @property
+    def max_concurrent_regions(self):
+        """Max number of regions that can be deployed to concurrently.
+
+        This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_REGIONS``.
+        If no value is specified, the systems core count is used.
+
+        On Windows, max_workers must be equal or lower than ``61``.
+
+        .. important:: When using ``parallel_regions`` and ``child_modules``
+                       together, please consider the exponential nature of
+                       their relationship when manually setting this value.
+                       (``parallel_regions``^``child_modules``)
+
+        Returns:
+            int: Value from environment variable or
+            ``min(61, os.cpu_count())``
+
+        """
+        value = os.getenv('RUNWAY_MAX_CONCURRENT_REGIONS')
+
+        if value:
+            return int(value)
+        # TODO update to `os.cpu_count()` when dropping python2
+        return min(61, multiprocessing.cpu_count())
+
+    @property
+    def use_concurrent(self):
+        """Wether to use concurrent.futures or not.
+
+        Noninteractive is required for concurrent execution to prevent weird
+        user-input behavior.
+
+        Python 3 is required because backported futures has issues with
+        ProcessPoolExecutor.
+
+        Returns:
+            bool
+
+        """
+        if self.is_noninteractive and self.is_python3:
+            return True
+        return False
 
     def echo_detected_environment(self):
         """Print a helper note about how the environment was determined."""
