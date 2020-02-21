@@ -417,8 +417,9 @@ class ModulesCommand(RunwayCommand):
                     LOGGER.info("Processing parallel regions %s",
                                 deployment.parallel_regions)
                     LOGGER.info('(output will be interwoven)')
-                    executor = concurrent.futures.ProcessPoolExecutor(
-                        context.max_concurrent_regions
+                    executor = concurrent.futures.ThreadPoolExecutor(
+                        max_workers=context.max_concurrent_regions,
+                        thread_name_prefix='runway.parallel_regions'
                     )
                     futures = [executor.submit(self._execute_deployment,
                                                *[deployment, context,
@@ -487,7 +488,7 @@ class ModulesCommand(RunwayCommand):
                     # we need to be able to do things like `cd` which is not
                     # thread safe.
                     executor = concurrent.futures.ProcessPoolExecutor(
-                        context.max_concurrent_modules
+                        max_workers=context.max_concurrent_modules
                     )
                     futures = [executor.submit(self._deploy_module,
                                                *[x, deployment, context])
