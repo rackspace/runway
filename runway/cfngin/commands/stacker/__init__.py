@@ -1,7 +1,8 @@
 """CFNgin commands."""
 import logging
 
-from .... import __version__
+from runway.cfngin import __version__
+
 from ... import session_cache
 from ...config import render_parse_load as load_config
 from ...context import Context
