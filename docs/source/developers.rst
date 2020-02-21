@@ -110,7 +110,7 @@ Prerequisites
 These need to be installed globally so they are not included in the Pipfile.
 
 * ``setuptools==45.2.0``
-* ``virtualenv==20.0.1``
+* ``virtualenv==16.7.9``
 * ``pipenv==2018.11.26``
 
 Process
