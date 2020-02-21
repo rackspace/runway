@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- `stacker.variables` import error by adding a shim to `runway.variables`
+- `runway.cfngin.commands.__init__` import of `__version__` through the stacker shim
+-  `stacker.variables` import error by adding a shim to `runway.variables`
 
 ## [1.4.1] - 2020-02-20
 ### Fixed
