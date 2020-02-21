@@ -47,7 +47,7 @@ jobs:
       osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
-      script: brew install jq && make travisbuild_file
+      script: make travisbuild_file
     - name: "Python 3.7 Windows Single Binary Build"
       stage: build
       os: windows  # Windows 10.0.17134 N/A Build 17134
@@ -68,7 +68,7 @@ jobs:
       osx_image: xcode11.3  # Python 3.7.4 running on macOS 10.14.4
       language: shell  # 'language: python' is an error on Travis CI macOS
       env: PIP=pip3 PYTHON_VERSION=3.7 DEPLOY=true
-      script: brew install jq && make travisbuild_folder
+      script: make travisbuild_folder
     - name: "Python 3.7 Windows npm Build"
       stage: build
       os: windows  # Windows 10.0.17134 N/A Build 17134
@@ -99,11 +99,10 @@ addons:
   apt:
     packages:
       - sed
-  # homebrew addon is currently broken so we are installing "manually"
-  # https://travis-ci.community/t/macos-build-fails-because-of-homebrew-bundle-unknown-command/7296/3
-  # homebrew:
-  #   packages:
-  #     - jq
+  homebrew:
+    update: true
+    packages:
+      - jq
 
 install:
   - ./.travis/install.sh
