@@ -188,7 +188,7 @@ apidoc_excluded_paths = ['cfngin/commands', 'templates']
 apidoc_extra_args = [
     f"--templatedir={os.path.join(DOC_SRC, '_templates/apidocs')}"
 ]
-apidoc_module_dir = '../../src/runway'
+apidoc_module_dir = '../../runway'
 apidoc_module_first = True
 apidoc_output_dir = 'apidocs'
 apidoc_separate_modules = True

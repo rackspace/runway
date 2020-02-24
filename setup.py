@@ -1,13 +1,53 @@
 """Packaging settings."""
+import re
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
 
 from setuptools import find_packages, setup
 
-from runway import __version__
-
-
 THIS_DIR = abspath(dirname(__file__))
+
+
+def read(rel_path):
+    """Read a file.
+
+    Intentionally *not* adding an encoding option to open, See:
+    https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
+
+    Args:
+        rel_path (str): Relative path to a file from this file.
+
+    Returns:
+        str: Contents of the file.
+
+    """
+    with codecs_open(join(THIS_DIR, rel_path), 'r') as file_:
+        return file_.read()
+
+
+def get_version(rel_path):
+    """Get version string without needing to import the module.
+
+    Args:
+        rel_path (str): Relative path to a file from this file.
+
+    Returns:
+        str: Version string.
+
+    Raises:
+        RuntimeError: If a version string can't be found in the provided file.
+
+    """
+    version_file = read(rel_path)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+
+    if version_match:
+        return version_match.group(1)
+
+    raise RuntimeError("Unable to find version string.")
+
+
 with codecs_open(join(THIS_DIR, 'README.md'), encoding='utf-8') as readfile:
     LONG_DESCRIPTION = readfile.read()
 
@@ -50,7 +90,7 @@ INSTALL_REQUIRES = [
 
 setup(
     name='runway',
-    version=__version__,
+    version=get_version('./runway/__init__.py'),
     description='Simplify infrastructure/app testing/deployment',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",

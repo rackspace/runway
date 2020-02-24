@@ -9,6 +9,13 @@ import os
 import pkgutil
 from pkg_resources import get_distribution, get_entry_info
 
+# distutils not included with virtualenv < 20 so we have to import it here
+# can be removed once we can upgrade virtualenv and pyinstaller
+import distutils
+
+if distutils.distutils_path.endswith('__init__.py'):
+    distutils.distutils_path = os.path.dirname(distutils.distutils_path)
+
 CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)),  # noqa
                         'runway')
 

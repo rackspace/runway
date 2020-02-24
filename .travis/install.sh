@@ -22,7 +22,7 @@ fi
 # virtualenv 20 was a complete rewrite and includes some breaking changes
 # with how we were handling things like distutils. These version are now pinned
 # to ensure compatability.
-pip install "virtualenv==20.0.1" "pipenv==2018.11.26"
+pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
 
 # anything running python3 can use the provided Pipfile.lock
 if [ "$PYTHON_VERSION" != "2.7" ]; then

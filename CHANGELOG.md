@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.2] - 2020-02-21
+### Fixed
+- `runway.cfngin.commands.__init__` import of `__version__` through the stacker shim
+- `stacker.variables` import error by adding a shim to `runway.variables`
+
 ## [1.4.1] - 2020-02-20
 ### Fixed
 - `stacker.__version__` check when shimmed to CFNgin
@@ -699,7 +704,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.2...HEAD
+[1.4.2]: https://github.com/onicagroup/runway/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/onicagroup/runway/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/onicagroup/runway/compare/v1.3.7...v1.4.0
 [1.3.7]: https://github.com/onicagroup/runway/compare/v1.3.6...v1.3.7
