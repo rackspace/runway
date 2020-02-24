@@ -117,7 +117,7 @@ class Context(object):
         """Max number of regions that can be deployed to concurrently.
 
         This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_REGIONS``.
-        If no value is specified, ``min(32, os.cpu_count() + 4)`` is used.
+        If no value is specified, ``min(61, os.cpu_count())`` is used.
 
         IMPORTANT: When using ``parallel_regions`` and ``child_modules``
         together, please consider the nature of their relationship when
@@ -125,7 +125,7 @@ class Context(object):
 
         Returns:
             int: Value from environment variable or
-            ``min(32, os.cpu_count() + 4)``
+            ``min(61, os.cpu_count())``
 
         """
         value = os.getenv('RUNWAY_MAX_CONCURRENT_REGIONS')
@@ -133,7 +133,7 @@ class Context(object):
         if value:
             return int(value)
         # TODO update to `os.cpu_count()` when dropping python2
-        return min(32, multiprocessing.cpu_count() + 4)
+        return min(61, multiprocessing.cpu_count())
 
     @property
     def use_concurrent(self):

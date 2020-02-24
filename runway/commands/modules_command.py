@@ -417,9 +417,8 @@ class ModulesCommand(RunwayCommand):
                     LOGGER.info("Processing parallel regions %s",
                                 deployment.parallel_regions)
                     LOGGER.info('(output will be interwoven)')
-                    executor = concurrent.futures.ThreadPoolExecutor(
-                        max_workers=context.max_concurrent_regions,
-                        thread_name_prefix='runway.parallel_regions'
+                    executor = concurrent.futures.ProcessPoolExecutor(
+                        max_workers=context.max_concurrent_regions
                     )
                     futures = [executor.submit(self._execute_deployment,
                                                *[deployment, context,
