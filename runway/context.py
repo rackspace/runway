@@ -94,15 +94,14 @@ class Context(object):
         This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_MODULES``.
         If no value is specified, ``min(61, os.cpu_count())`` is used.
 
-        On Windows, max_workers must be equal or lower than ``61``.
+        On Windows, this must be equal to or lower than ``61``.
 
-        IMPORTANT: When using ``parallel_regions`` and ``child_modules``
+        **IMPORTANT:** When using ``parallel_regions`` and ``child_modules``
         together, please consider the nature of their relationship when
         manually setting this value. (``parallel_regions * child_modules``)
 
         Returns:
-            int: Value from environment variable or
-            ``min(61, os.cpu_count())``
+            int: Value from environment variable or ``min(61, os.cpu_count())``
 
         """
         value = os.getenv('RUNWAY_MAX_CONCURRENT_MODULES')
@@ -119,13 +118,14 @@ class Context(object):
         This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_REGIONS``.
         If no value is specified, ``min(61, os.cpu_count())`` is used.
 
-        IMPORTANT: When using ``parallel_regions`` and ``child_modules``
+        On Windows, this must be equal to or lower than ``61``.
+
+        **IMPORTANT:** When using ``parallel_regions`` and ``child_modules``
         together, please consider the nature of their relationship when
         manually setting this value. (``parallel_regions * child_modules``)
 
         Returns:
-            int: Value from environment variable or
-            ``min(61, os.cpu_count())``
+            int: Value from environment variable or ``min(61, os.cpu_count())``
 
         """
         value = os.getenv('RUNWAY_MAX_CONCURRENT_REGIONS')
