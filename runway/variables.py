@@ -377,7 +377,7 @@ class VariableValueDict(VariableValue, dict):
         # () -> Set[str]
         """Stack names that this variable depends on."""
         deps = set()
-        for item in self:
+        for item in self.values():
             deps.update(item.dependencies)
         return deps
 
