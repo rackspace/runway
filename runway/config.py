@@ -1124,7 +1124,8 @@ class Config(ConfigComponent):
                             config_file.pop('ignore_git_branch',
                                             config_file.pop(
                                                 'ignore-git-branch',
-                                                False)))
+                                                False)),
+                            config_file.pop('variables', {}))
 
             if config_file:
                 LOGGER.warning(

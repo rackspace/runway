@@ -21,6 +21,7 @@
         "cygwin",
         "dockerizepip",
         "forcerm",
+        "kwarg",
         "lambci",
         "nondockerizepip"
     ],

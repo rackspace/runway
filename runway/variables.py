@@ -36,7 +36,7 @@ def resolve_variables(variables, context, provider):
 
     """
     for variable in variables:
-        variable.resolve(context, provider)
+        variable.resolve(context=context, provider=provider)
 
 
 class Variable(object):
@@ -340,7 +340,8 @@ class VariableValueList(VariableValue, list):
 
         """
         for item in self:
-            item.resolve(context, variables=variables, **kwargs)
+            item.resolve(context, provider=provider, variables=variables,
+                         **kwargs)
 
     @classmethod
     def parse(cls, input_object, variable_type='cfngin'):
@@ -424,7 +425,8 @@ class VariableValueDict(VariableValue, dict):
 
         """
         for item in self.values():
-            item.resolve(context, variables=variables, **kwargs)
+            item.resolve(context, provider=provider, variables=variables,
+                         **kwargs)
 
     @classmethod
     def parse(cls, input_object, variable_type='cfngin'):
@@ -539,7 +541,8 @@ class VariableValueConcatenation(VariableValue, list):
 
         """
         for value in self:
-            value.resolve(context, variables=variables, **kwargs)
+            value.resolve(context, provider=provider, variables=variables,
+                          **kwargs)
 
     def __iter__(self):
         # type: () -> Iterator[Type[VariableValue]]
@@ -649,7 +652,8 @@ class VariableValueLookup(VariableValue):
             FailedLookup: A lookup failed for any reason.
 
         """
-        self.lookup_data.resolve(context, variables=variables, **kwargs)
+        self.lookup_data.resolve(context, provider=provider,
+                                 variables=variables, **kwargs)
         try:
             if isinstance(self.handler, type):
                 result = self.handler.handle(value=self.lookup_data.value,
@@ -667,8 +671,8 @@ class VariableValueLookup(VariableValue):
                 LOGGER.debug('Encountered %s: %s - trying legacy resolver',
                              type(err), err)
                 try:
-                    return self._resolve(self._resolve_legacy(context,
-                                                              provider))
+                    return self._resolve(self._resolve_legacy(context=context,
+                                                              provider=provider))
                 except Exception as err2:
                     raise FailedLookup(self, err2)
             raise FailedLookup(self, err)
