@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.4.4] - 2020-02-28
 ### Fixed
 - explicitly pass `provider` as a kwarg for resolving complex variable types
 - error message raised when `var` lookup query is not in variables now includes the query
@@ -716,7 +718,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.4...HEAD
+[1.4.4]: https://github.com/onicagroup/runway/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/onicagroup/runway/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/onicagroup/runway/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/onicagroup/runway/compare/v1.4.0...v1.4.1
