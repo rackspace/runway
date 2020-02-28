@@ -71,4 +71,6 @@ class VarLookup(LookupHandler):
             return cls.transform(result, to_type=args.pop('transform', ''),
                                  **args)
 
-        raise ValueError('"{}" does not exist in the variable definition')
+        raise ValueError(
+            '"{}" does not exist in the variable definition'.format(query)
+        )
