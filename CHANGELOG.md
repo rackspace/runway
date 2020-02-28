@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- `provider` missing from variable resolution args
+- explicitly pass `provider` as a kwarg for resolving complex variable types
+- error message raised when `var` lookup query is not in variables now includes the query
+- `variables` is now passed from the config file to the `VariablesDefinition` as intended
 
 ## [1.4.3] - 2020-02-25
 ### Fixed
