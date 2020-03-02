@@ -113,7 +113,7 @@ class Context(object):
             int: Value from environment variable or ``0``.
 
         """
-        return int(os.getenv('RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS'), 0)
+        return int(os.getenv('RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS', '0'))
 
     @property
     def max_concurrent_modules(self):
