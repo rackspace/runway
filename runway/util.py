@@ -13,10 +13,47 @@ from subprocess import check_call
 import sys
 import six
 
+AWS_ENV_VARS = ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
+                'AWS_SESSION_TOKEN')
 EMBEDDED_LIB_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'embedded'
 )
+
+
+class cached_property(object):  # pylint: disable=invalid-name,R # noqa
+    """Decerator for creating cached properties.
+
+    A property that is only computed once per instance and then replaces itself
+    with an ordinary attribute. Deleting the attribute resets the property.
+    Source: https://github.com/bottlepy/bottle/commit/fa7733e075da0d790d809aa3d2f53071897e6f76
+
+    """
+
+    def __init__(self, func):
+        """Initialize class.
+
+        Args:
+            func (Callable): Method being decorated.
+
+        """
+        self.func = func
+
+    def __get__(self, obj, _):
+        """Attempt to get a cached value.
+
+        Args:
+            obj (Any): Instance of a class.
+
+        Returns:
+            Any
+
+        """
+        if obj is None:
+            return self
+
+        value = obj.__dict__[self.func.__name__] = self.func(obj)
+        return value
 
 
 # python2 supported pylint is unable to load six.moves correctly

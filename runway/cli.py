@@ -42,17 +42,23 @@ Help:
 
 """
 
-
 import logging
 import os
+import sys
 
 from docopt import docopt
 
 from . import __version__ as version
-
+from .cfngin.logger import ColorFormatter
 from .commands.command_loader import find_command_class
 
+# replicate stacker's colorized logs until we implement something better
+COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger('runway')
+HDLR = logging.StreamHandler()
+HDLR.setFormatter(ColorFormatter(
+    COLOR_FORMAT if sys.stdout.isatty() else logging.BASIC_FORMAT
+))
 
 
 def fix_hyphen_commands(raw_cli_arguments):
@@ -68,7 +74,8 @@ def main():
     if os.environ.get('DEBUG'):
         logging.basicConfig(level=logging.DEBUG)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+                            handlers=[HDLR])
         # botocore info is spammy
         logging.getLogger('botocore').setLevel(logging.ERROR)
 
