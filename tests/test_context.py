@@ -32,7 +32,7 @@ class TestContext(object):
         context = Context(env_name='test',
                           env_region='us-east-1',
                           env_root='./',
-                          env_vars={})
+                          env_vars={'NON_EMPTY': '1'})
         assert context.is_interactive
 
         context.env_vars['CI'] = '1'
@@ -43,7 +43,7 @@ class TestContext(object):
         context = Context(env_name='test',
                           env_region='us-east-1',
                           env_root='./',
-                          env_vars={})
+                          env_vars={'NON_EMPTY': '1'})
         assert not context.is_noninteractive
 
         context.env_vars['CI'] = '1'
