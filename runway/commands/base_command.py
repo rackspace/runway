@@ -9,6 +9,8 @@ from ..config import Config, VariablesDefinition  # noqa: F401 pylint: disable=u
 class BaseCommand(object):
     """Base class for commands."""
 
+    DEPRECATION_MSG = ('This command as been deprecated and will be removed '
+                       'in the next major release.')
     SKIP_FIND_CONFIG = False  # set to true for commands that don't need config
 
     def __init__(self,

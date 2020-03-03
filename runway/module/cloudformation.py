@@ -1,8 +1,8 @@
 """Cloudformation module."""
 import logging
 
-from . import RunwayModule
 from ..cfngin import CFNgin
+from . import RunwayModule
 
 LOGGER = logging.getLogger('runway')
 

@@ -1,6 +1,7 @@
 """Test runway.module.cloudformation."""
 # pylint: disable=protected-access,no-self-use
 import os
+
 from mock import patch
 
 from runway.context import Context
