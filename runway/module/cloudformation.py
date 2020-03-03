@@ -31,17 +31,23 @@ def ensure_stacker_compat_config(config_filename):
 class CloudFormation(RunwayModule):
     """CloudFormation (Stacker) Runway Module."""
 
-    def plan(self):
-        """Run stacker diff."""
-        cfngin = CFNgin(self.context, self.options['parameters'])
-        cfngin.plan(sys_path=self.path)
-
     def deploy(self):
         """Run stacker build."""
-        cfngin = CFNgin(self.context, self.options['parameters'])
-        cfngin.deploy(sys_path=self.path)
+        cfngin = CFNgin(self.context,
+                        parameters=self.options['parameters'],
+                        sys_path=self.path)
+        cfngin.deploy()
 
     def destroy(self):
         """Run stacker destroy."""
-        cfngin = CFNgin(self.context, self.options['parameters'])
-        cfngin.destroy(sys_path=self.path)
+        cfngin = CFNgin(self.context,
+                        parameters=self.options['parameters'],
+                        sys_path=self.path)
+        cfngin.destroy()
+
+    def plan(self):
+        """Run stacker diff."""
+        cfngin = CFNgin(self.context,
+                        parameters=self.options['parameters'],
+                        sys_path=self.path)
+        cfngin.plan()

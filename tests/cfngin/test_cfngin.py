@@ -49,20 +49,24 @@ class TestCFNgin(object):
     def test_env_file(self, tmp_path):
         """Test that the correct env file is selected."""
         test_env = tmp_path / 'test.env'
-        test_env.write_text('test_value: test')
+        # python2 Path.write_text requires unicode
+        test_env.write_text(u'test_value: test')
 
         # support python < 3.6
         result = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         assert result.env_file.test_value == 'test'
 
         test_us_east_1 = tmp_path / 'test-us-east-1.env'
-        test_us_east_1.write_text('test_value: test-us-east-1')
+        # python2 Path.write_text requires unicode
+        test_us_east_1.write_text(u'test_value: test-us-east-1')
 
         test_us_west_2 = tmp_path / 'test-us-west-2.env'
-        test_us_west_2.write_text('test_value: test-us-west-2')
+        # python2 Path.write_text requires unicode
+        test_us_west_2.write_text(u'test_value: test-us-west-2')
 
         lab_ca_central_1 = tmp_path / 'lab-ca-central-1.env'
-        lab_ca_central_1.write_text('test_value: lab-ca-central-1')
+        # python2 Path.write_text requires unicode
+        lab_ca_central_1.write_text(u'test_value: lab-ca-central-1')
 
         # support python < 3.6
         result = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
@@ -182,7 +186,8 @@ class TestCFNgin(object):
         ]
 
         for config_path in good_config_paths + bad_config_paths:
-            config_path.write_text('')
+            # python2 Path.write_text requires unicode
+            config_path.write_text(u'')
 
         # support python < 3.6
         result = CFNgin.find_config_files(sys_path=str(tmp_path))
