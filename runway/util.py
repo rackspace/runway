@@ -21,7 +21,7 @@ EMBEDDED_LIB_PATH = os.path.join(
 )
 
 
-class cached_property(object):  # pylint: disable=invalid-name,R # noqa
+class cached_property(object):  # pylint: disable=invalid-name,too-few-public-methods # noqa
     """Decerator for creating cached properties.
 
     A property that is only computed once per instance and then replaces itself
