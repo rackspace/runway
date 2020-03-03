@@ -3,7 +3,6 @@ import logging
 import os
 import re
 
-from runway.context import Context as RunwayContext
 from runway.util import AWS_ENV_VARS, MutableMap, cached_property
 
 from .actions import build, destroy, diff
