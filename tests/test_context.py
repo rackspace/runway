@@ -18,6 +18,17 @@ TEST_CREDENTIALS = {
 class TestContext(object):
     """Test Context class."""
 
+    def test_boto3_credentials(self):
+        """Test boto3_credentials."""
+        context = Context(env_name='test',
+                          env_region='us-east-1',
+                          env_root='./',
+                          env_vars=TEST_CREDENTIALS.copy())
+
+        assert context.boto3_credentials == {key.lower(): value
+                                             for key, value in
+                                             TEST_CREDENTIALS.items()}
+
     def test_current_aws_creds(self):
         """Test current_aws_creds."""
         context = Context(env_name='test',

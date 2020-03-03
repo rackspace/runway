@@ -228,6 +228,7 @@ class CFNgin(object):
 
         """
         return CFNginContext(
+            boto3_credentials=self.__ctx.boto3_credentials,
             config=config,
             environment=self.parameters,
             force_stacks=[],  # placeholder

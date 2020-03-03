@@ -28,8 +28,7 @@ class RunStacker(RunwayCommand):
     def execute(self):
         """Execute stacker."""
         warnings.warn(self.DEPRECATION_MSG,
-                      DeprecationWarning,
-                      stacklevel=2)
+                      DeprecationWarning)
         LOGGER.warning(self.DEPRECATION_MSG)
         cmd_line_args = strip_leading_option_delim(
             self._cli_arguments.get('<stacker-args>', [])

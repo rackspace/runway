@@ -54,6 +54,12 @@ class Context(object):
             self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
 
     @property
+    def boto3_credentials(self):
+        """Return a dict of boto3 credentials."""
+        return {key.lower(): value
+                for key, value in self.current_aws_creds.items()}
+
+    @property
     def current_aws_creds(self):
         """AWS credentials from self.env_vars.
 

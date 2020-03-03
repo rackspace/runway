@@ -42,7 +42,9 @@ class Context(object):
 
     """
 
-    def __init__(self, environment=None,
+    def __init__(self,
+                 environment=None,
+                 boto3_credentials=None,
                  stack_names=None,
                  config=None,
                  region=None,
@@ -50,6 +52,8 @@ class Context(object):
         """Instantiate class.
 
         Args:
+            boto3_credentials (Optional[Dict[str, str]]): Credentials to use
+                when creating a boto3 session from context.
             environment (dict): A dictionary used to pass in information about
                 the environment. Useful for templating.
             stack_names (list): A list of stack_names to operate on. If not
@@ -62,6 +66,7 @@ class Context(object):
                 work on locked stacks.
 
         """
+        self.__boto3_credentials = boto3_credentials
         self._bucket_name = None
         self._persistent_graph = None
         self._persistent_graph_lock_code = None
@@ -75,7 +80,8 @@ class Context(object):
         self.environment = environment
         self.force_stacks = force_stacks or []
         self.hook_data = {}
-        self.s3_conn = get_session(self.bucket_region).client('s3')
+        self.region = region
+        self.s3_conn = self.get_session(region=self.bucket_region).client('s3')
         self.stack_names = stack_names or []
 
     @property
@@ -302,6 +308,28 @@ class Context(object):
                 targets.append(target)
             self._targets = targets
         return self._targets
+
+    def get_session(self, profile=None, region=None):
+        """Create a thread-safe boto3 session.
+
+        Args:
+            profile (Optional[str]): The profile for the session.
+            region (Optional[str]): The region for the session.
+
+        Returns:
+            :class:`boto3.session.Session`: A thread-safe boto3 session.
+
+        """
+        kwargs = {}
+        if profile:
+            kwargs['profile'] = profile
+        elif self.__boto3_credentials:
+            kwargs.update({
+                'access_key': self.__boto3_credentials['aws_access_key_id'],
+                'secret_key': self.__boto3_credentials['aws_secret_access_key'],
+                'session_token': self.__boto3_credentials['aws_session_token']
+            })
+        return get_session(region=region or self.region, **kwargs)
 
     def get_stack(self, name):
         """Get a stack by name.

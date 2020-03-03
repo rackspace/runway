@@ -19,6 +19,17 @@ from runway.cfngin.exceptions import (PersistentGraphCannotLock,
 from runway.cfngin.hooks.utils import handle_hooks
 from runway.cfngin.plan import Graph, json_serial
 
+BOTO3_CREDENTIALS = {
+    'aws_access_key_id': 'foo',
+    'aws_secret_access_key': 'bar',
+    'aws_session_token': 'foobar'
+}
+GET_SESSION_CALL = {
+    'access_key': BOTO3_CREDENTIALS['aws_access_key_id'],
+    'secret_key': BOTO3_CREDENTIALS['aws_secret_access_key'],
+    'session_token': BOTO3_CREDENTIALS['aws_session_token']
+}
+
 
 def gen_tagset(tags):
     """Create TagSet value from a dict."""
@@ -172,6 +183,25 @@ class TestContext(unittest.TestCase):
         config = Config({"namespace": "test"})
         context = Context(config=config)
         self.assertEqual(context.tags, {"cfngin_namespace": "test"})
+
+    @patch('runway.cfngin.context.get_session')
+    def test_get_session(self, mock_get_session):
+        """Test get_session."""
+        creds = BOTO3_CREDENTIALS.copy()
+        context = Context(boto3_credentials=creds,
+                          region='us-east-1')
+
+        context.get_session()
+        mock_get_session.assert_called_with(region='us-east-1',
+                                            **GET_SESSION_CALL)
+
+        context.get_session(region='us-west-2')
+        mock_get_session.assert_called_with(region='us-west-2',
+                                            **GET_SESSION_CALL)
+
+        context.get_session(profile='user')
+        mock_get_session.assert_called_with(region='us-east-1',
+                                            profile='user')
 
     def test_hook_with_sys_path(self):
         """Test hook with sys path."""
