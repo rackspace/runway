@@ -6,7 +6,6 @@ from mock import patch
 
 from runway.context import Context
 
-
 LOGGER = logging.getLogger('runway')
 
 TEST_CREDENTIALS = {
