@@ -3,6 +3,7 @@
 import os
 import shutil
 
+import pytest
 from mock import MagicMock, patch
 
 from runway.cfngin import CFNgin
@@ -146,6 +147,19 @@ class TestCFNgin(object):
         assert result.namespace == 'test-namespace'
         assert len(result.get_stacks()) == 1
         assert result.get_stacks()[0].name == 'test-stack'
+
+    def test_load_cfn_template(self, caplog, tmp_path):
+        """Test load a CFN template."""
+        cfn_template = tmp_path / 'template.yml'
+        cfn_template.write_text(u'test_key: !Ref something')
+        cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
+
+        caplog.set_level('ERROR', logger='runway.cfngin')
+
+        with pytest.raises(SystemExit):
+            cfngin.load(str(cfn_template))  # support python < 3.6
+
+        assert 'appears to be a CloudFormation template' in caplog.text
 
     @patch('runway.cfngin.actions.diff.Action')
     def test_plan(self, mock_action, cfngin_fixtures, tmp_path):

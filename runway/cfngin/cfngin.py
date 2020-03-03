@@ -2,6 +2,9 @@
 import logging
 import os
 import re
+import sys
+
+from yaml.constructor import ConstructorError
 
 from runway.util import AWS_ENV_VARS, MutableMap, cached_property
 
@@ -158,9 +161,21 @@ class CFNgin(object):
 
         """
         LOGGER.debug('%s: loading...', os.path.basename(config_path))
-        config = self._get_config(config_path)
-        context = self._get_context(config)
-        return context
+        try:
+            config = self._get_config(config_path)
+            context = self._get_context(config)
+            return context
+        except ConstructorError as err:
+            if err.problem.startswith('could not determine a constructor '
+                                      'for the tag \'!'):
+                LOGGER.error('"%s" appears to be a CloudFormation template, '
+                             'but is located in the top level of a module '
+                             'alongside the CloudFormation config files (i.e. '
+                             'the file or files indicating the stack names & '
+                             'parameters). Please move the template to a '
+                             'subdirectory.', config_path)
+                sys.exit(1)
+            raise
 
     def plan(self, sys_path=None):
         """Run the CFNgin plan action.
