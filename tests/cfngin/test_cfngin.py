@@ -103,7 +103,7 @@ class TestCFNgin(object):
         assert cfngin.parameters.test_param == 'test-param-value'
         assert cfngin.recreate_failed
         assert cfngin.region == 'us-east-1'
-        assert cfngin.sys_path == tmp_path
+        assert cfngin.sys_path == str(tmp_path)
         assert not cfngin.tail
 
         assert mock_action.call_count == 2
@@ -184,10 +184,11 @@ class TestCFNgin(object):
                            for config_path in good_config_paths])
         assert result == expected
 
+        config_01 = tmp_path / '01-config.yml'
         result = CFNgin.find_config_files(
-            sys_path=str(tmp_path / '01-config.yml')
+            sys_path=str(config_01)
         )
-        assert result == [tmp_path / '01-config.yml']
+        assert result == [str(config_01)]
 
         result = CFNgin.find_config_files()
         assert not result
