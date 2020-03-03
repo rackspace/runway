@@ -107,7 +107,8 @@ class TestContext(object):
         from runway.context import sys
         context = Context(env_name='test',
                           env_region='us-east-1',
-                          env_root='./')
+                          env_root='./',
+                          env_vars={'NON_EMPTY': '1'})
         context_ci = Context(env_name='test',
                              env_region='us-east-1',
                              env_root='./',

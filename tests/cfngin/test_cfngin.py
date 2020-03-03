@@ -51,6 +51,7 @@ class TestCFNgin(object):
         test_env = tmp_path / 'test.env'
         test_env.write_text('test_value: test')
 
+        # support python < 3.6
         result = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         assert result.env_file.test_value == 'test'
 
@@ -63,16 +64,17 @@ class TestCFNgin(object):
         lab_ca_central_1 = tmp_path / 'lab-ca-central-1.env'
         lab_ca_central_1.write_text('test_value: lab-ca-central-1')
 
+        # support python < 3.6
         result = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         assert result.env_file.test_value == 'test-us-east-1'
 
         result = CFNgin(ctx=self.get_context(region='us-west-2'),
-                        sys_path=str(tmp_path))
+                        sys_path=str(tmp_path))  # support python < 3.6
         assert result.env_file.test_value == 'test-us-west-2'
 
         result = CFNgin(ctx=self.get_context(name='lab',
                                              region='ca-central-1'),
-                        sys_path=str(tmp_path))
+                        sys_path=str(tmp_path))  # support python < 3.6
         assert result.env_file.test_value == 'lab-ca-central-1'
 
     @patch('runway.cfngin.actions.build.Action')
@@ -88,7 +90,7 @@ class TestCFNgin(object):
 
         cfngin = CFNgin(ctx=context,
                         parameters={'test_param': 'test-param-value'},
-                        sys_path=str(tmp_path))
+                        sys_path=str(tmp_path))  # support python < 3.6
         cfngin.deploy()
 
         assert get_env_creds() == cfngin._aws_credential_backup, \
@@ -118,6 +120,7 @@ class TestCFNgin(object):
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
 
+        # support python < 3.6
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         cfngin.destroy()
 
@@ -131,8 +134,9 @@ class TestCFNgin(object):
     def test_load(self, cfngin_fixtures, tmp_path):
         """Test load."""
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
+        # support python < 3.6
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
-        result = cfngin.load(tmp_path / 'basic.yml')
+        result = cfngin.load(str(tmp_path / 'basic.yml'))  # support python < 3.6
 
         assert not result.bucket_name
         assert result.namespace == 'test-namespace'
@@ -145,6 +149,7 @@ class TestCFNgin(object):
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
 
+        # support python < 3.6
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         cfngin.plan()
 
@@ -179,6 +184,7 @@ class TestCFNgin(object):
         for config_path in good_config_paths + bad_config_paths:
             config_path.write_text('')
 
+        # support python < 3.6
         result = CFNgin.find_config_files(sys_path=str(tmp_path))
         expected = sorted([str(config_path)
                            for config_path in good_config_paths])
@@ -186,9 +192,9 @@ class TestCFNgin(object):
 
         config_01 = tmp_path / '01-config.yml'
         result = CFNgin.find_config_files(
-            sys_path=str(config_01)
+            sys_path=str(config_01)  # support python < 3.6
         )
-        assert result == [str(config_01)]
+        assert result == [str(config_01)]  # support python < 3.6
 
         result = CFNgin.find_config_files()
         assert not result
