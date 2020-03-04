@@ -2,6 +2,8 @@
 
 This command allows direct access to Runway's CloudFormation management tool.
 
+.. deprecated:: 1.5.0
+
 Example:
   .. code-block:: shell
 
