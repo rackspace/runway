@@ -80,6 +80,10 @@ def render(raw_config, environment=None):
         substituted = template.substitute(environment)
     except KeyError as err:
         raise exceptions.MissingEnvironment(err.args[0])
+    except AttributeError as err:
+        # gets the missing attr from the error message to result in the same
+        # message as a KeyError
+        raise exceptions.MissingEnvironment(err.args[0].split("'")[3])
     except ValueError:
         # Support "invalid" placeholders for lookup placeholders.
         substituted = template.safe_substitute(environment)
