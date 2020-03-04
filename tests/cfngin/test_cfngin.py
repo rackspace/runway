@@ -176,6 +176,29 @@ class TestCFNgin(object):
         mock_action.assert_called_once()
         mock_instance.execute.assert_called_once_with()
 
+    def test_should_skip(self, cfngin_fixtures, tmp_path):
+        """Test should_skip."""
+        # support python < 3.6
+        cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
+        del cfngin.env_file  # clear cached value and force load
+
+        assert cfngin.should_skip()
+        del cfngin.env_file  # clear cached value and force load
+        assert not cfngin.should_skip(force=True)  # does not repopulate env_file
+
+        copy_basic_fixtures(cfngin_fixtures, tmp_path)
+        assert not cfngin.should_skip()
+        del cfngin.env_file  # clear cached value and force load
+        assert not cfngin.should_skip(force=True)  # does not repopulate env_file
+
+        env_region_file = tmp_path / 'test-us-east-1.env'
+        env_file = tmp_path / 'test.env'
+        copy_fixture(env_region_file, env_file)
+        env_region_file.unlink()
+        assert not cfngin.should_skip()
+        del cfngin.env_file  # clear cached value and force load
+        assert not cfngin.should_skip(force=True)  # does not repopulate env_file
+
     def test_find_config_files(self, tmp_path):
         """Test find_config_files."""
         bad_path = tmp_path / 'bad_path'

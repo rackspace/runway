@@ -555,6 +555,7 @@ class ModulesCommand(RunwayCommand):
                                         module_opts['environment'],
                                         context.env_vars):
                 return  # skip if env validation fails
+            module_opts['environment'] = True
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",

@@ -95,14 +95,18 @@ class CFNgin(object):
                     result.update(parse_environment(file_.read()))
         return MutableMap(**result)
 
-    def deploy(self, sys_path=None):
+    def deploy(self, force=False, sys_path=None):
         """Run the CFNgin deploy action.
 
         Args:
+            force (bool): Explicitly enable the action even if an environment
+                file is not found.
             syspath (Optional[str]): Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
+        if self.should_skip(force):
+            return
         self._inject_aws_credentials()
         if not sys_path:
             sys_path = self.sys_path
@@ -121,14 +125,18 @@ class CFNgin(object):
                            tail=self.tail)
         self._restore_aws_credentials()
 
-    def destroy(self, sys_path=None):
+    def destroy(self, force=False, sys_path=None):
         """Run the CFNgin destroy action.
 
         Args:
+            force (bool): Explicitly enable the action even if an environment
+                file is not found.
             syspath (Optional[str]): Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
+        if self.should_skip(force):
+            return
         self._inject_aws_credentials()
         if not sys_path:
             sys_path = self.sys_path
@@ -177,14 +185,18 @@ class CFNgin(object):
                 sys.exit(1)
             raise
 
-    def plan(self, sys_path=None):
+    def plan(self, force=False, sys_path=None):
         """Run the CFNgin plan action.
 
         Args:
+            force (bool): Explicitly enable the action even if an environment
+                file is not found.
             syspath (Optional[str]): Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
+        if self.should_skip(force):
+            return
         self._inject_aws_credentials()
         if not sys_path:
             sys_path = self.sys_path
@@ -201,6 +213,23 @@ class CFNgin(object):
             )
             action.execute()
         self._restore_aws_credentials()
+
+    def should_skip(self, force=False):
+        """Determine if action should be taken or not.
+
+        Args:
+            force (bool): If ``True``, will always return ``False`` meaning
+                the action should not be skipped.
+
+        Returns:
+            bool: Skip action or not.
+
+        """
+        if force or self.env_file:
+            return False
+        LOGGER.info('Skipping module; environment not explicitly enabled '
+                    'and no environment file found')
+        return True
 
     def _get_config(self, file_path, validate=True):
         """Initialize a CFNgin config object from a file.
