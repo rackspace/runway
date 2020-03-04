@@ -16,6 +16,7 @@ class TestCloudFormation(object):
     def generic_options(self):
         """Return generic module options."""
         return {
+            'environment': True,
             'parameters': MutableMap(**{
                 'test_key': 'test-value'
             })
