@@ -21,7 +21,7 @@ from troposphere.awslambda import Code
 from ..exceptions import (InvalidDockerizePipConfiguration, PipenvError,
                           PipError)
 from ..session_cache import get_session
-from ..util import ensure_s3_bucket, get_config_directory
+from ..util import ensure_s3_bucket
 
 if sys.version_info[0] < 3:
     from backports import tempfile  # pylint: disable=E
@@ -639,7 +639,7 @@ def _check_pattern_list(patterns, key, default=None):
 
 
 def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
-                     payload_acl):
+                     payload_acl, sys_path):
     """Build a Lambda payload from user configuration and uploads it to S3.
 
     Args:
@@ -664,6 +664,7 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
             resulting zip file
         payload_acl (str): The canned S3 object ACL to be applied to the
             uploaded payload
+        sys_path (str): Path that all actions are relative to.
 
     Returns:
         troposphere.awslambda.Code: CloudFormation AWS Lambda Code object,
@@ -692,7 +693,7 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
     # os.path.join will ignore other parameters if the right-most one is an
     # absolute path, which is exactly what we want.
     if not os.path.isabs(root):
-        root = os.path.abspath(os.path.join(get_config_directory(), root))
+        root = os.path.abspath(os.path.join(sys_path, root))
     requirements_files = find_requirements(root)
     if requirements_files:
         zip_contents, content_hash = _zip_package(
@@ -946,7 +947,11 @@ def upload_lambda_functions(context, provider, **kwargs):
 
     results = {}
     for name, options in kwargs['functions'].items():
+        sys_path = (os.path.dirname(context.config_path)
+                    if os.path.isfile(context.config_path)
+                    else context.config_path)
         results[name] = _upload_function(s3_client, bucket_name, prefix, name,
-                                         options, follow_symlinks, payload_acl)
+                                         options, follow_symlinks, payload_acl,
+                                         sys_path)
 
     return results

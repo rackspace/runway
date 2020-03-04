@@ -9,6 +9,7 @@ import sys
 import tarfile
 import tempfile
 import uuid
+import warnings
 import zipfile
 from collections import OrderedDict
 
@@ -335,6 +336,10 @@ def get_config_directory():
     """
     # avoid circular import
     from .commands.stacker import Stacker
+    deprecation_msg = ('get_config_directory has been deprecated and will be '
+                       'removed in the next major release')
+    warnings.warn(deprecation_msg, DeprecationWarning)
+    LOGGER.warning(deprecation_msg)
     command = Stacker()
     namespace = command.parse_args()
     return os.path.dirname(namespace.config.name)

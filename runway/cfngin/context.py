@@ -47,6 +47,7 @@ class Context(object):
                  boto3_credentials=None,
                  stack_names=None,
                  config=None,
+                 config_path=None,
                  region=None,
                  force_stacks=None):
         """Instantiate class.
@@ -61,6 +62,7 @@ class Context(object):
                 operated on.
             config (:class:`runway.cfngin.config.Config`): The CFNgin
                 configuration being operated on.
+            config_path (str): Path to the config file that was provided.
             region (str): Name of an AWS region if provided as a CLI argument.
             force_stacks (list): A list of stacks to force work on. Used to
                 work on locked stacks.
@@ -75,7 +77,13 @@ class Context(object):
         self._stacks = None
         self._targets = None
         self._upload_to_s3 = None
+        # TODO load the config from context instead of taking it as an arg
         self.config = config or Config()
+        # TODO set this value when provisioning a Config object in context
+        # set to a fake location for the time being but this should be set
+        # by all runtime entry points. the only time the fake value should be
+        # used is during tests.
+        self.config_path = config_path or './'
         self.bucket_region = self.config.cfngin_bucket_region or region
         self.environment = environment
         self.force_stacks = force_stacks or []

@@ -171,7 +171,7 @@ class CFNgin(object):
         LOGGER.debug('%s: loading...', os.path.basename(config_path))
         try:
             config = self._get_config(config_path)
-            context = self._get_context(config)
+            context = self._get_context(config, config_path)
             return context
         except ConstructorError as err:
             if err.problem.startswith('could not determine a constructor '
@@ -246,11 +246,12 @@ class CFNgin(object):
             raw_config = file_.read()
         return load_config(raw_config, self.parameters, validate)
 
-    def _get_context(self, config):
+    def _get_context(self, config, config_path):
         """Initialize a CFNgin context object.
 
         Args:
             config (:class:`runway.cfngin.config.Config): CFNgin config object.
+            config_path (str): Path to the config file that was provided.
 
         Returns:
             :class:`runway.cfngin.context.Context`
@@ -259,6 +260,7 @@ class CFNgin(object):
         return CFNginContext(
             boto3_credentials=self.__ctx.boto3_credentials,
             config=config,
+            config_path=config_path,
             environment=self.parameters,
             force_stacks=[],  # placeholder
             region=self.region,
