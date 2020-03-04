@@ -1,5 +1,6 @@
 """CFNgin commands."""
 import logging
+import warnings
 
 from runway.cfngin import __version__
 
@@ -23,8 +24,14 @@ class Stacker(BaseCommand):
     name = "stacker"
     subcommands = (Build, Destroy, Info, Diff, Graph)
 
+    DEPRECATION_MSG = ("Runway's Stacker CLI components have been deprecated "
+                       "and will be removed in the next major release of "
+                       "Runway.")
+
     def configure(self, options):
         """Configure CLI command."""
+        warnings.warn(self.DEPRECATION_MSG, DeprecationWarning),
+        LOGGER.warning(self.DEPRECATION_MSG)
         session_cache.default_profile = options.profile
 
         self.config = load_config(
