@@ -1,3 +1,5 @@
+.. _Lookups: ../lookups.html
+
 .. _mod-sls:
 
 Serverless
@@ -78,7 +80,7 @@ and/or
 In Module Directory
 ~~~~~~~~~~~~~~~~~~~
 
-.. important: `Lookups`_ are not supported in this file.
+.. important:: `Lookups`_ are not supported in this file.
 
 ::
 

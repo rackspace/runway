@@ -2,7 +2,7 @@
 .. _CFNgin Config File: ../cfngin/config.html
 .. _deploy environment: ../terminology.rst#deploy-environment
 .. _environment file: ../cfngin/environments.html
-.. _Lookups: lookups.html
+.. _Lookups: ../lookups.html
 .. _Parameters: ../terminology.html#parameters
 .. _Runway Config File: runway_config.html
 
@@ -130,7 +130,7 @@ and/or
 In Module Directory
 -------------------
 
-.. important: `Lookups`_ are not supported in this file.
+.. important:: `Lookups`_ are not supported in this file.
 
 .. code-block:: yaml
 
