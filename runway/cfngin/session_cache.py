@@ -44,7 +44,7 @@ def get_session(region=None,
     elif access_key:
         LOGGER.debug('Building session with Access Key "%s" in region "%s"',
                      access_key, region or 'default')
-    elif os.environ['AWS_ACCESS_KEY_ID']:
+    elif os.environ.get('AWS_ACCESS_KEY_ID'):
         # TODO raise an error so we don't need to modify os.environ for cfngin
         warnings.warn(DEPRECATION_MSG, DeprecationWarning)
         # TODO uncomment log message after we update all internal use
