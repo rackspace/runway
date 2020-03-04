@@ -325,9 +325,15 @@ class Context(object):
             kwargs['profile'] = profile
         elif self.__boto3_credentials:
             kwargs.update({
-                'access_key': self.__boto3_credentials['aws_access_key_id'],
-                'secret_key': self.__boto3_credentials['aws_secret_access_key'],
-                'session_token': self.__boto3_credentials['aws_session_token']
+                'access_key': self.__boto3_credentials.get(
+                    'aws_access_key_id'
+                ),
+                'secret_key': self.__boto3_credentials.get(
+                    'aws_secret_access_key'
+                ),
+                'session_token': self.__boto3_credentials.get(
+                    'aws_session_token'
+                )
             })
         return get_session(region=region or self.region, **kwargs)
 
