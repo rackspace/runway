@@ -1,5 +1,5 @@
 .. _CFNgin: ../cfngin/index.html
-.. _CFNgin Config File: ../cfngin/config.html
+.. _configuration file: ../cfngin/config.html
 .. _deploy environment: ../terminology.rst#deploy-environment
 .. _environment file: ../cfngin/environments.html
 .. _Lookups: ../lookups.html
@@ -11,11 +11,10 @@
 CloudFormation
 ==============
 
-CloudFormation modules are processed using CFNgin.
-There are two files that can be used for configuration:
+In addition to the `Runway Config File`_, there are two files that can be used for configuration:
 
-- a YAML `CFNgin Config File`_
-- an optional key/value `environment file`_
+- a YAML `configuration file`_ **[REQUIRED]**
+- a key/value `environment file`_
 
 
 .. rubric:: Environment
@@ -30,19 +29,19 @@ Name these files in the form of ``ENV-REGION.env`` (e.g. ``dev-us-east-1.env``) 
   environment: dev
   customer: contoso
   region: us-west-2
-  # The stacker bucket is the S3 bucket (automatically created) where templates
-  # are uploaded for deployment (a CloudFormation requirement for large templates)
-  stacker_bucket_name: stacker-contoso-us-west-2
+  # This S3 bucket (automatically created) is where templates are uploaded
+  # for deployment (a CloudFormation requirement for large templates)
+  cfngin_bucket_name: cfngin-contoso-us-west-2
 
 .. rubric:: Stack Config (yaml file)
 
-These files can have any name ending in .yaml (they will be evaluated in alphabetical order):
+These files can have any name ending in ``.yaml`` (they will be evaluated in alphabetical order):
 
 .. code-block:: yaml
 
-  # Note namespace/stacker_bucket_name being substituted from the environment
+  # Note namespace/cfngin_bucket_name being substituted from the environment
   namespace: ${namespace}
-  stacker_bucket: ${stacker_bucket_name}
+  cfngin_bucket: ${cfngin_bucket_name}
 
   stacks:
     myvpcstack:  # will be deployed as contoso-dev-myvpcstack
@@ -59,8 +58,12 @@ These files can have any name ending in .yaml (they will be evaluated in alphabe
       variables:
         VpcId: ${output myvpcstack::VpcId}
 
-The config yaml supports many more features; see the full CFNgin_ documentation for more detail
+The YAML `configuration file`_ supports many more features; see the full CFNgin_ documentation for more detail
 (e.g. stack configuration options, additional lookups in addition to output (e.g. SSM, DynamoDB))
+
+.. important:: CloudFormation templates ending in ``.yaml`` or ``.yml``
+               should be placed in a subdirectory so they are not mistaken
+               as a `configuration file`_.
 
 
 Parameters
