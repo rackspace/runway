@@ -170,6 +170,11 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
             return True
         return False
 
+    def __contains__(self, value):
+        # type: () -> bool
+        """Implement evaluation of 'in' conditional."""
+        return value in self.data
+
     __nonzero__ = __bool__  # python2 compatability
 
     def __getitem__(self, key):
