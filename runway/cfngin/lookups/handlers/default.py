@@ -41,6 +41,6 @@ class DefaultLookup(LookupHandler):
             raise ValueError("Invalid value for default: %s. Must be in "
                              "<env_var>::<default value> format." % value)
 
-        if env_var_name in context.environment:
+        if context.environment.get(env_var_name):
             return context.environment[env_var_name]
         return default_val
