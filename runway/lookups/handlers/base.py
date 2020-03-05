@@ -49,19 +49,25 @@ Common Arguments
         comma_list: ${var my_list::default=undefined, transform=str}
 
 """
+import json
+import logging
+import yaml
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=E
 from typing import (TYPE_CHECKING, Any, Dict,  # noqa: F401 pylint: disable=W
-                    Tuple, Union)
+                    Optional, Tuple, Union)
 
 from six import string_types
 
-from ...cfngin.util import read_value_from_path
+from runway.cfngin.util import read_value_from_path
+from runway.util import MutableMap
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
 if TYPE_CHECKING:
     from ...context import Context  # noqa: F401 pylint: disable=unused-import
+
+LOGGER = logging.getLogger(__name__)
 
 
 class LookupHandler(object):
@@ -81,6 +87,32 @@ class LookupHandler(object):
 
         """
         return set()
+
+    @classmethod
+    def format_results(cls,
+                       value,  # type: Any
+                       get=None,  # type: Optional[str]
+                       load=None,  # type: Optional[str]
+                       transform=None,  # type: Optional[str]
+                       **kwargs  # type: Any
+                       ):
+        # type: (...) -> Any
+        """Format results to be returned by a lookup."""
+        if isinstance(value, str) and load:
+            value = cls.load(value, parser=load, **kwargs)
+        if get:
+            if isinstance(value, MutableMap):
+                value = value.find(get)
+            elif isinstance(value, dict):
+                value = value.get(get)
+            else:
+                raise TypeError()  # TODO fill out message
+        if transform:
+            return cls.transform(value, to_type=transform, **kwargs)
+        if isinstance(value, MutableMap):
+            LOGGER.warning('Returning data from MutableMap')
+            return value.data
+        return value
 
     @classmethod
     def handle(cls, value, context, **kwargs):
@@ -140,6 +172,63 @@ class LookupHandler(object):
                 [arg.split('=') for arg in split_args]}
 
     @classmethod
+    def load(cls, value, parser=None, **kwargs):
+        # type: (str, str, Any) -> Any
+        """Load a formatted string into a python datatype.
+
+        Args:
+            value: What is being loaded.
+            parser: Name of the parser to use.
+
+        Returns:
+            The loaded value.
+
+        """
+        mapping = {
+            'json': cls._load_json,
+            'yaml': cls._load_yaml
+        }
+
+        if not parser:
+            return value
+
+        return mapping[parser](value, **kwargs)
+
+    @classmethod
+    def _load_json(cls, value, **_):
+        # type: (str, Any) -> MutableMap
+        """Load a JSON string into a MutableMap.
+
+        Args:
+            value: JSON formatted string.
+
+        Returns:
+            MutableMap
+
+        """
+        result = json.loads(value)
+        if isinstance(result, dict):
+            return MutableMap(**result)
+        return result
+
+    @classmethod
+    def _load_yaml(cls, value, **_):
+        # type: (str, Any) -> MutableMap
+        """Load a YAML string into a MutableMap.
+
+        Args:
+            value: YAML formatted string.
+
+        Returns:
+            MutableMap
+
+        """
+        result = yaml.safe_load(value)
+        if isinstance(result, dict):
+            return MutableMap(**result)
+        return result
+
+    @classmethod
     def transform(cls, value, to_type='str', **kwargs):
         # type: (str, str, Any) -> Any
         """Transform the result of a lookup into another datatype.
@@ -183,7 +272,7 @@ class LookupHandler(object):
                         'Got type {}.'.format(type(value)))
 
     @classmethod
-    def _transform_to_string(cls, value, delimiter=None, **_):
+    def _transform_to_string(cls, value, delimiter=None, **kwargs):
         # type: (Any, str, Any) -> str
         """Transform anything into a string.
 
@@ -198,4 +287,10 @@ class LookupHandler(object):
         """
         if isinstance(value, (list, set, tuple)):
             return '{}'.format(delimiter or ',').join(value)
-        return str(value)
+        if isinstance(value, MutableMap):
+            # convert into a dict with protected attrs removed
+            value = value.data
+        if isinstance(value, dict):
+            # dumped twice for an escaped json dict
+            value = json.dumps(value, indent=kwargs.get('indent'))
+        return json.dumps(str(value))
