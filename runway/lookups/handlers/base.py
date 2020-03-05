@@ -51,12 +51,12 @@ Common Arguments
 """
 import json
 import logging
-import yaml
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=E
 from typing import (TYPE_CHECKING, Any, Dict,  # noqa: F401 pylint: disable=W
                     Optional, Tuple, Union)
 
+import yaml
 from six import string_types
 
 from runway.cfngin.util import read_value_from_path
