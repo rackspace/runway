@@ -174,16 +174,12 @@ class TestLambdaHooks(unittest.TestCase):
     @mock_s3
     def test_path_relative(self):
         """Test path relative."""
-        get_config_directory = 'runway.cfngin.hooks.aws_lambda.get_config_directory'
-        with self.temp_directory_with_files(['test/test.py']) as temp_dir, \
-                patch(get_config_directory) as mock1:
-            mock1.return_value = temp_dir.path
-
-            results = self.run_hook(functions={
-                'MyFunction': {
-                    'path': 'test'
-                }
-            })
+        with self.temp_directory_with_files(['test/test.py']) as temp_dir:
+            results = self.run_hook(
+                functions={'MyFunction': {'path': 'test'}},
+                context=Context(config=Config({'namespace': 'test',
+                                               'stacker_bucket': 'test'}),
+                                config_path=temp_dir.path))
 
         self.assertIsNotNone(results)
 

@@ -540,7 +540,7 @@ The file containing the lookup class must have a ``TYPE_NAME`` global variable w
 
 The lookup must return a string if being used for a CloudFormation parameter.
 
-If using boto3 in a lookup, use the ``session_cache`` instead of creating a new session to ensure the correct credentials are used.
+If using boto3 in a lookup, use ``context.get_session()`` instead of creating a new session to ensure the correct credentials are used.
 
 
 .. Example
@@ -551,7 +551,6 @@ If using boto3 in a lookup, use the ``session_cache`` instead of creating a new 
     from runway.lookups.base import LookupHandler
     from runway.cfngin.context import Context
     from runway.cfngin.providers.base import BaseProvider
-    from runway.cfngin.session_cache import get_session
     from runway.cfngin.util import read_value_from_path
 
     TYPE_NAME = 'mylookup'
@@ -570,7 +569,7 @@ If using boto3 in a lookup, use the ``session_cache`` instead of creating a new 
             query, args = cls.parse(read_value_from_path(value))
 
             # example of using get_session for a boto3 session
-            session = get_session(provider.region)
+            session = context.get_session()
             s3_client = session.client('s3')
 
             return 'something'

@@ -1,0 +1,8 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+
+sys_path: ./
+
+stacks:
+  test-stack:
+    template_path: template.yml

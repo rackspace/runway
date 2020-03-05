@@ -1,5 +1,8 @@
 .. _blueprints: terminology.html#blueprint
+.. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _CloudFormation Parameters: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+.. _module type: runway_config.html#type
+.. _Runway Config File: runway_config.html
 .. _stacks: terminology.html#stack
 .. _stack definitions: terminology.html#stack-definition
 .. _troposphere: https://github.com/cloudtools/troposphere
@@ -8,6 +11,52 @@
 ===========
 Terminology
 ===========
+
+Runway
+======
+
+
+Deploy Environment
+------------------
+
+Deploy environments are used for selecting the options/variables/parameters to be used with each Module_.
+They can be defined by the name of a directory (if its not a git repo), git branch, or environment variable (``DEPLOY_ENVIRONMENT``).
+Standard deploy environments would be something like prod, dev, and test.
+
+
+Deployment
+----------
+
+A :ref:`deployment<runway-deployment>` contains a list of `modules <#module>`_ and options for
+all the modules_ in the deployment_.
+A `Runway config file`_ can contain multiple deployments_ and a deployment_ can contain multiple modules_.
+
+
+Lookup (Runway)
+---------------
+
+A method for expanding values in the `Runway Config File`_ file when processing a deployment/module.
+These are only supported in select areas of the `Runway Config File`_ (see the config docs for more details).
+
+
+Module
+------
+
+A :ref:`module<runway-module>` is a directory containing a single infrastructure-as-code tool configuration of an application, a component, or some infrastructure (eg. a set of `CloudFormation`_ templates).
+It is defined in a `deployment`_ by path.
+Modules can also contain granular options that only pertain to it based on its `module type`_.
+
+
+Parameters
+----------
+
+A mapping of ``key: value`` that is passed to a module.
+Through the use of a `Lookup (Runway)`_, the value can be changed per region or deploy environment.
+The ``value`` can be any data type but, support for complex data types depends on the `module type`_.
+
+
+-------------------------------------------------------------------------------
+
 
 CFngin
 ======

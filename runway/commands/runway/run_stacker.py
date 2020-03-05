@@ -2,6 +2,8 @@
 
 This command allows direct access to Runway's CloudFormation management tool.
 
+.. deprecated:: 1.5.0
+
 Example:
   .. code-block:: shell
 
@@ -10,6 +12,7 @@ Example:
 """
 import logging
 import sys
+import warnings
 
 from ..runway_command import RunwayCommand
 from ...cfngin.logger import setup_logging
@@ -26,6 +29,9 @@ class RunStacker(RunwayCommand):
 
     def execute(self):
         """Execute stacker."""
+        warnings.warn(self.DEPRECATION_MSG,
+                      DeprecationWarning)
+        LOGGER.warning(self.DEPRECATION_MSG)
         cmd_line_args = strip_leading_option_delim(
             self._cli_arguments.get('<stacker-args>', [])
         )

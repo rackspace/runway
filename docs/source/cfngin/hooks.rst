@@ -500,16 +500,15 @@ This signifies to CFNgin whether or not to halt execution if the hook is ``requi
 If data is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where ``data_key`` is the value set in the `hook definition`_.
 
-If using boto3 in a hook, use the ``session_cache`` instead of creating a new session to ensure the correct credentials are used.
+If using boto3 in a hook, use ``context.get_session()`` instead of creating a new session to ensure the correct credentials are used.
 
 .. code-block::
 
-    """session_cache example."""
-    from runway.cfngin.session_cache import get_session
+    """context.get_session() example."""
 
     def do_something(context, provider, **kwargs):
         """Do something."""
-        session = get_session(provider.region)
+        session = context.get_session()
         s3_client = session.client('s3')
 
 

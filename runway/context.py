@@ -5,6 +5,8 @@ import multiprocessing
 import os
 import sys
 
+from .util import AWS_ENV_VARS
+
 LOGGER = logging.getLogger('runway')
 
 
@@ -44,11 +46,29 @@ class Context(object):
         self.command = command
         self.env_vars = env_vars or os.environ.copy()
         self._env_name_from_env = bool(self.env_vars.get(self.env_override_name))
+        self.debug = bool(self.env_vars.get('DEBUG'))
 
         self.echo_detected_environment()
 
         if not self._env_name_from_env:
             self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
+
+    @property
+    def boto3_credentials(self):
+        """Return a dict of boto3 credentials."""
+        return {key.lower(): value
+                for key, value in self.current_aws_creds.items()}
+
+    @property
+    def current_aws_creds(self):
+        """AWS credentials from self.env_vars.
+
+        Returns:
+            Dict[str, str]
+
+        """
+        return {name: self.env_vars.get(name)
+                for name in AWS_ENV_VARS if self.env_vars.get(name)}
 
     @property
     def is_interactive(self):
@@ -85,7 +105,23 @@ class Context(object):
             bool
 
         """
-        return sys.version_info[0] > 2
+        return sys.version_info.major > 2
+
+    @property
+    def max_concurrent_cfngin_stacks(self):
+        """Max number of CFNgin stacks that can be deployed concurrently.
+
+        This property can be set by exporting
+        ``RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS``. If no value is specified, the
+        value will be constrained based on the underlying graph.
+
+        Returns:
+            int: Value from environment variable or ``0``.
+
+        """
+        return int(
+            self.env_vars.get('RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS', '0')
+        )
 
     @property
     def max_concurrent_modules(self):
@@ -104,7 +140,7 @@ class Context(object):
             int: Value from environment variable or ``min(61, os.cpu_count())``
 
         """
-        value = os.getenv('RUNWAY_MAX_CONCURRENT_MODULES')
+        value = self.env_vars.get('RUNWAY_MAX_CONCURRENT_MODULES')
 
         if value:
             return int(value)
@@ -128,7 +164,7 @@ class Context(object):
             int: Value from environment variable or ``min(61, os.cpu_count())``
 
         """
-        value = os.getenv('RUNWAY_MAX_CONCURRENT_REGIONS')
+        value = self.env_vars.get('RUNWAY_MAX_CONCURRENT_REGIONS')
 
         if value:
             return int(value)
@@ -174,15 +210,13 @@ class Context(object):
 
     def save_existing_iam_env_vars(self):
         """Backup IAM environment variables for later restoration."""
-        for i in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
-                  'AWS_SESSION_TOKEN']:
+        for i in AWS_ENV_VARS:
             if i in self.env_vars:
                 self.env_vars['OLD_' + i] = self.env_vars[i]
 
     def restore_existing_iam_env_vars(self):
         """Restore backed up IAM environment variables."""
-        for i in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
-                  'AWS_SESSION_TOKEN']:
+        for i in AWS_ENV_VARS:
             if 'OLD_' + i in self.env_vars:
                 self.env_vars[i] = self.env_vars['OLD_' + i]
             elif i in self.env_vars:

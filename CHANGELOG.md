@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `runway.cfngin.cfngin.CFNgin` class (can also be imported as `runway.cfngin.CFNgin`)
+- `runway.cfngin.context.Context.get_session()` method for creating a boto3 session using the correct AWS credentials
+- `environment` and `region` as _common parameters_ for cloudformation modules so they do not need to be defined
+  - pulled from the Runway context object
+
+### Changed
+- `get_session` can now accept AWS credentials when creating a thread-safe session
+- Runway environment variable options to pull from `self.env_var` instead of `os.environ`
+- deprecated the `run-stacker` command
+- deprecated the use `get_session` directly when credentials are in environment variables
+- deprecated `runway.cfngin.util.get_config_directory()` which was only used for the aws_lambda hook.
+- deprecated Stacker CLI components
 
 ## [1.4.4] - 2020-02-28
 ### Fixed
