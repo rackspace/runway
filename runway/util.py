@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterator, List, Optional, Union  # noqa pylint: di
 from contextlib import contextmanager
 import hashlib
 import importlib
+import json
 import os
 import platform
 import re
@@ -263,6 +264,11 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
 
         """
         return iter(self.__dict__)
+
+    def __str__(self):
+        # type: () -> str
+        """Return string representation of the object."""
+        return json.dumps(self.data)
 
 
 @contextmanager
