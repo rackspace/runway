@@ -1,4 +1,29 @@
-"""Retrieve a value from SSM Parameter Store."""
+"""Retrieve a value from SSM Parameter Store.
+
+If the Lookup is unable to find an SSM Parameter matching the provided query,
+the default value is returned or ``ParameterNotFound`` is raised if a default
+value is not provided.
+
+.. rubric:: Arguments
+
+This Lookup supports all `Common Arguments`_.
+
+
+.. Example
+.. code-block:: yaml
+
+  deployment:
+    - modules:
+        - path: sampleapp.cfn
+          parameters:
+            secret_value: ${ssm /example/secret}
+            conf_file: ${ssm /example/config/json::load=json, get=value}
+            toggle: ${ssm toggle::load=yaml, get=val, transform=bool}
+      env_vars:
+        SOME_VARIABLE: ${ssm /example/param::region=us-east-1}
+        DEFAULT_VARIABLE: ${ssm /example/default::default=default}
+
+"""
 # pylint: disable=arguments-differ
 import logging
 from typing import TYPE_CHECKING, Any, Union  # pylint: disable=unused-import
@@ -17,12 +42,22 @@ TYPE_NAME = 'ssm'
 
 
 class SsmLookup(LookupHandler):
-    """SSM Parameter Store lookup."""
+    """SSM Parameter Store Lookup."""
 
     @classmethod
     def handle(cls, value, context, **_):
         # type: (str, Union['CFNginContext', 'RunwayContext'], Any) -> Any
-        """Retrieve a value from SSM Parameter Store."""
+        """Retrieve a value from SSM Parameter Store.
+
+        Args:
+            value: The value passed to the Lookup.
+            context: The current context object.
+
+        Raises:
+            ParameterNotFound: Parameter not found in SSM and a default value
+                was not provided.
+
+        """
         query, args = cls.parse(value)
 
         session = context.get_session(region=args.get('region'))

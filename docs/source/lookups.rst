@@ -1,3 +1,5 @@
+.. _Common Arguments: #common-arguments
+
 Lookups
 =======
 
@@ -14,8 +16,9 @@ The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``
 +===========================+=================================================+
 | ``${``                    | Signifies the opening of the lookup.            |
 +---------------------------+-------------------------------------------------+
-| ``<lookup-name>``         | The name of the lookup you wish to use. (e.g.   |
-|                           | ``env``)                                        |
+| ``<lookup-name>``         | The name of the lookup you wish to use (e.g.    |
+|                           | ``env``). This signifies the *source* of the    |
+|                           | data to be retrieved by the lookup.             |
 +---------------------------+-------------------------------------------------+
 | `` ``                     | The separator between lookup name a query.      |
 +---------------------------+-------------------------------------------------+
@@ -57,6 +60,11 @@ env
 .. _env-lookup:
 
 .. automodule:: runway.lookups.handlers.env
+
+ssm
+~~~
+
+.. automodule:: runway.lookups.handlers.ssm
 
 var
 ~~~

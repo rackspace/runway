@@ -27,18 +27,47 @@ that all Lookups accept.
 Common Arguments
 ~~~~~~~~~~~~~~~~
 
-.. _common lookup arguments:
+**default (Any)**
+    If the Lookup is unable to find a value for the provided query, this
+    value will be returned instead of raising an exception.
 
-+---------------+-------------------------------------------------------------+
-| Argument      | Description                                                 |
-+===============+=============================================================+
-| ``default``   | If the Lookup is unable to find a value for the provided    |
-|               | query, this value will be returned instead of raising a     |
-|               | ``ValueError``.                                             |
-+---------------+-------------------------------------------------------------+
-| ``transform`` | Transform the data returned by a Lookup into a different    |
-|               | datatype. Supports ``str`` and ``bool``.                    |
-+---------------+-------------------------------------------------------------+
+**get (Optional[str])**
+    Can be used on a dictionary type object to retrieve a specific piece of
+    data. This is executed after the optional ``load`` step.
+
+**indent (Optional[int])**
+    Number of spaces to use per indent level when transforming a dictionary
+    type object to a string.
+
+**load (Optional[str])**
+    Load the data to be processed by a Lookup using a specific parser. This is
+    the first action taking on the data after it has been retrieved from its
+    source. The data must be in a format that is supported by the parser
+    in order for it to be used.
+    **json**
+        Loads a JSON seralizable string into a dictionary like object.
+    **yaml**
+        Loads a YAML seralizable string into a dictionary like object.
+
+**region (Optional[str])**
+    AWS region used when creating a ``boto3.Session`` to retrieve data.
+    If not provided, the region currently being processed will be used.
+    This can be specified to always get data from one region regardless of
+    region is being deployed to.
+
+**transform (Optional[str])**
+    Transform the data that will be returned by a Lookup into a different
+    data type. This is the last action taking on the data before it is
+    returned. Supports the following:
+    **str**
+        Converts any value to a string. The original data type determines the
+        end result.
+
+        ``list``, ``set``, and ``tuple`` will become a comma delimited list
+
+        ``dict`` and anything else will become an escaped JSON string.
+    **bool**
+        Converts a string or boolean value into a boolean.
 
 .. rubric:: Example
 .. code-block:: yaml
@@ -292,5 +321,5 @@ class LookupHandler(object):
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            value = json.dumps(value, indent=kwargs.get('indent'))
+            value = json.dumps(value, indent=int(kwargs.get('indent', 0)))
         return json.dumps(str(value))

@@ -1,6 +1,6 @@
 """Retrieve a variable from the variables file or definition.
 
-If the lookup is unable to find an defined variable matching the
+If the Lookup is unable to find an defined variable matching the
 provided query, the default value is returned or a ``ValueError`` is raised
 if a default value was not provided.
 
@@ -11,13 +11,22 @@ The returned value can contain any YAML support data type
 (dictionaries/mappings/hashes, lists/arrays/sequences, strings, numbers,
 and booleon).
 
+
+.. rubric:: Arguments
+
+This Lookup supports all `Common Arguments`_ but, the folling have limited or
+no effect:
+
+- region
+
+
 .. Example
 .. code-block:: yaml
 
   deployment:
     - modules:
         - path: sampleapp.cfn
-          environment:
+          parameters:
             ami_id: ${var ami_id.${env AWS_REGION}}
       env_vars:
         SOME_VARIABLE: ${var some_variable::default=default}
@@ -42,7 +51,7 @@ TYPE_NAME = 'var'
 
 
 class VarLookup(LookupHandler):
-    """Variable definition lookup."""
+    """Variable definition Lookup."""
 
     @classmethod
     def handle(cls, value, context, **kwargs):
@@ -54,7 +63,7 @@ class VarLookup(LookupHandler):
         config file.
 
         Args:
-            value: The value passed to the lookup.
+            value: The value passed to the Lookup.
             variables: The resolved variables pass to Runway.
 
         Raises:
@@ -68,8 +77,7 @@ class VarLookup(LookupHandler):
         result = variables.find(query, default=args.pop('default', ''))
 
         if result != '':  # allows for False bool and NoneType results
-            return cls.transform(result, to_type=args.pop('transform', ''),
-                                 **args)
+            return cls.format_results(result, **args)
 
         raise ValueError(
             '"{}" does not exist in the variable definition'.format(query)

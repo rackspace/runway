@@ -1,3 +1,4 @@
+.. _Common Arguments: #common-arguments
 .. _`hook_data`: config.html#pre-post-hooks
 .. _`aws_lambda hook`: ../apidocs/runway.cfngin.hooks.aws_lambda.html#runway.cfngin.hooks.aws_lambda.upload_lambda_functions
 .. _`aws_lambda blueprint`: https://github.com/cloudtools/stacker_blueprints/blob/master/stacker_blueprints/aws_lambda.py
@@ -363,6 +364,12 @@ Basic examples::
         Action:
           - "some:Action"
         Resource: "{{MyResource}}"
+
+
+SSM
+---
+
+.. automodule:: runway.lookups.handlers.ssm
 
 
 .. _`ssmstore lookup`:

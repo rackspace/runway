@@ -10,9 +10,17 @@ manipulated at runtime by Runway to fill in additional values such as
           when trying to resolve one of these in a :ref:`Deployment
           <runway-deployment>` definition, provide a default value.
 
-If the lookup is unable to find an environment variable matching the
+If the Lookup is unable to find an environment variable matching the
 provided query, the default value is returned or a ``ValueError`` is raised
 if a default value was not provided.
+
+.. rubric:: Arguments
+
+This Lookup supports all `Common Arguments`_ but, the folling have limited or
+no effect:
+
+- region
+
 
 .. rubric:: Example
 .. code-block:: yaml
@@ -20,7 +28,7 @@ if a default value was not provided.
   deployment:
     - modules:
         - path: sampleapp.cfn
-          environment:
+          parameters:
             creator: ${env USER}
       env_vars:
         ENVIRONMENT: ${env DEPLOY_ENVIRONMENT::default=default}
@@ -40,7 +48,7 @@ TYPE_NAME = "env"
 
 
 class EnvLookup(LookupHandler):
-    """Environment variable lookup."""
+    """Environment variable Lookup."""
 
     @classmethod
     def handle(cls, value, context, **_):
@@ -54,7 +62,7 @@ class EnvLookup(LookupHandler):
         current execution.
 
         Args:
-            value: The value passed to the lookup.
+            value: The value passed to the Lookup.
             context: The current context object.
 
         Raises:
@@ -67,7 +75,6 @@ class EnvLookup(LookupHandler):
         result = context.env_vars.get(query, args.pop('default', ''))
 
         if result != '':  # allows for False bool and NoneType results
-            return cls.transform(result, to_type=args.pop('transform', ''),
-                                 **args)
+            return cls.format_results(result, **args)
 
         raise ValueError('"{}" does not exist in the environment'.format(value))
