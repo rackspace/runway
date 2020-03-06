@@ -1,11 +1,12 @@
 """Pytest fixtures and plugins."""
-from typing import Dict, Optional
-
 import logging
 import os
+from typing import Dict, Optional
 
 import pytest
 import yaml
+
+from .factories import MockCFNginContext, MockRunwayContext
 
 LOG = logging.getLogger(__name__)
 
@@ -68,7 +69,6 @@ def yaml_fixtures(request, fixture_dir):  # pylint: disable=redefined-outer-name
     return result
 
 
-
 def _override_env_vars(overrides):
     # type: (Dict[str, Optional[str]]) -> Dict[str, str]
     """Use a dict to override os.environ values.
@@ -100,10 +100,31 @@ def _override_env_vars(overrides):
     saved_env.clear()
 
 
-@pytest.fixture(scope='package')
-def fixture_dir():
-    # type: () -> str
-    """Path to the fixture directory."""
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        'fixtures')
-    return path
+@pytest.fixture(scope='function')
+def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
+    """Create a mock CFNgin context object."""
+    return MockCFNginContext(environment={},
+                             boto3_credentials=runway_context.boto3_credentials,
+                             region=runway_context.env_region)
+
+
+@pytest.fixture(scope='function')
+def runway_context(request):
+    """Create a mock Runway context object."""
+    env_vars = {
+        'AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),
+        'DEFAULT_AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),
+        'DEPLOY_ENVIRONMET': getattr(request.module, 'DEPLOY_ENVIRONMET', 'test')
+    }
+    creds = {
+        'AWS_ACCESS_KEY_ID': 'test_access_key',
+        'AWS_SECRET_ACCESS_KEY': 'test_secret_key',
+        'AWS_SESSION_TOKEN': 'test_session_token'
+    }
+    env_vars.update(getattr(request.module, 'AWS_CREDENTIALS', creds))
+    env_vars.update(getattr(request.module, 'ENV_VARS', {}))
+    return MockRunwayContext(env_name='test',
+                             env_region='us-east-1',
+                             env_root=os.getcwd(),
+                             env_vars=env_vars,
+                             command='test')
