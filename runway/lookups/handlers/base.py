@@ -135,11 +135,14 @@ class LookupHandler(object):
             elif isinstance(value, dict):
                 value = value.get(get)
             else:
-                raise TypeError()  # TODO fill out message
+                raise TypeError(
+                    'value must be dict type to use "get"; got type "%s"',
+                    type(value)
+                )
         if transform:
             return cls.transform(value, to_type=transform, **kwargs)
         if isinstance(value, MutableMap):
-            LOGGER.warning('Returning data from MutableMap')
+            LOGGER.debug('Returning data from MutableMap')
             return value.data
         return value
 
