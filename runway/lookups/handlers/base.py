@@ -321,5 +321,8 @@ class LookupHandler(object):
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            value = json.dumps(value, indent=int(kwargs.get('indent', 0)))
-        return json.dumps(str(value))
+            return json.dumps(json.dumps(value,
+                                         indent=int(kwargs.get('indent', 0))))
+        if isinstance(value, bool):
+            return json.dumps(str(value))
+        return str(value)

@@ -1,4 +1,5 @@
 """Tests for lookup handler base class."""
+import json
 from unittest import TestCase
 
 from runway.lookups.handlers.base import LookupHandler
@@ -73,8 +74,8 @@ class TestLookupHandler(TestCase):
         """Test types that are directly transformed to strings."""
         self.assertEqual(LookupHandler.transform('test', 'str'), 'test')
         self.assertEqual(LookupHandler.transform({'key1': 'val1'}, 'str'),
-                         "{'key1': 'val1'}")
-        self.assertEqual(LookupHandler.transform(True, 'str'), 'True')
+                         json.dumps(json.dumps({'key1': 'val1'}, indent=0)))
+        self.assertEqual(LookupHandler.transform(True, 'str'), '"True"')
 
     def test_transform_str_list(self):
         """Test list type joined to create string."""

@@ -274,8 +274,7 @@ class TestRunwayVariables(TestCase):
         var = Variable('test', '${env dict_val}', 'runway')
         var.resolve(CONTEXT)
 
-        # need to use data prop to compare the MutableMap contents
-        self.assertEqual(var.value.data, VALUE['dict_val'])
+        self.assertEqual(var.value, VALUE['dict_val'])
 
     def test_value_lookup_to_list(self):
         """Variable lookups should be resolvable to a list value."""
