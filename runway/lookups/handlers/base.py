@@ -161,10 +161,8 @@ class LookupHandler(object):
             elif isinstance(value, dict):
                 value = value.get(get)
             else:
-                raise TypeError(
-                    'value must be dict type to use "get"; got type "%s"',
-                    type(value)
-                )
+                raise TypeError('value must be dict type to use "get"; got '
+                                'type "{}"'.format(type(value)))
         if transform:
             return cls.transform(value, to_type=transform, **kwargs)
         if isinstance(value, MutableMap):
