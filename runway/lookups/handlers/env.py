@@ -16,8 +16,8 @@ if a default value was not provided.
 
 .. rubric:: Arguments
 
-This Lookup supports all `Common Arguments`_ but, the folling have limited or
-no effect:
+This Lookup supports all :ref:`Common Lookup Arguments` but, the folling have
+limited or no effect:
 
 - region
 

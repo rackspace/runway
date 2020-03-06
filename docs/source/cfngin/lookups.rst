@@ -1,4 +1,3 @@
-.. _Common Arguments: #common-arguments
 .. _`hook_data`: config.html#pre-post-hooks
 .. _`aws_lambda hook`: ../apidocs/runway.cfngin.hooks.aws_lambda.html#runway.cfngin.hooks.aws_lambda.upload_lambda_functions
 .. _`aws_lambda blueprint`: https://github.com/cloudtools/stacker_blueprints/blob/master/stacker_blueprints/aws_lambda.py
@@ -83,7 +82,7 @@ CFNgin includes the following lookup types:
 - `hook_data lookup`_
 - `kms lookup`_
 - `rxref lookup`_
-- `ssmstore lookup`_
+- ssm_ lookup
 - `xref lookup`_
 
 .. _`output lookup`:
@@ -366,7 +365,7 @@ Basic examples::
         Resource: "{{MyResource}}"
 
 
-SSM
+ssm
 ---
 
 .. automodule:: runway.lookups.handlers.ssm
@@ -376,6 +375,9 @@ SSM
 
 SSM Parameter Store Lookup
 --------------------------
+
+.. deprecated:: 1.5.0
+  Replaced by ssm_
 
 The ``ssmstore`` lookup type retrieves a value from the Simple Systems
 Manager Parameter Store.

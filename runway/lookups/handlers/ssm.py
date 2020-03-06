@@ -4,9 +4,14 @@ If the Lookup is unable to find an SSM Parameter matching the provided query,
 the default value is returned or ``ParameterNotFound`` is raised if a default
 value is not provided.
 
+Parameters of type ``SecureString`` are automatically decrypted.
+
+Parameters of type ``StringList`` are returned as a list.
+
+
 .. rubric:: Arguments
 
-This Lookup supports all `Common Arguments`_.
+This Lookup supports all :ref:`Common Lookup Arguments`.
 
 
 .. Example

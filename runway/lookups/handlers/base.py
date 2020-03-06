@@ -1,9 +1,9 @@
 """.. Base class for lookup handlers.
 
+.. _lookup arguments:
+
 Lookup Arguments
 ^^^^^^^^^^^^^^^^
-
-.. _lookup arguments:
 
 Arguments can be passed to Lookups to effect how they function.
 
@@ -24,8 +24,10 @@ Each Lookup may have their own, specific arguments that it uses to modify its
 functionality or the value it returns. There is also a common set of arguments
 that all Lookups accept.
 
-Common Arguments
-~~~~~~~~~~~~~~~~
+.. _Common Lookup Arguments:
+
+Common Lookup Arguments
+~~~~~~~~~~~~~~~~~~~~~~~
 
 **default (Any)**
     If the Lookup is unable to find a value for the provided query, this
@@ -44,6 +46,7 @@ Common Arguments
     the first action taking on the data after it has been retrieved from its
     source. The data must be in a format that is supported by the parser
     in order for it to be used.
+
     **json**
         Loads a JSON seralizable string into a dictionary like object.
     **yaml**
@@ -59,6 +62,7 @@ Common Arguments
     Transform the data that will be returned by a Lookup into a different
     data type. This is the last action taking on the data before it is
     returned. Supports the following:
+
     **str**
         Converts any value to a string. The original data type determines the
         end result.
@@ -126,7 +130,29 @@ class LookupHandler(object):
                        **kwargs  # type: Any
                        ):
         # type: (...) -> Any
-        """Format results to be returned by a lookup."""
+        """Format results to be returned by a lookup.
+
+        Args:
+            value (Any): Data collected by the Lookup.
+            get (Optional[str]): Nested value to get from a dictionary like
+                object.
+            load (Optional[str]): Parser to use to parse a formatted string
+                before the ``get`` and ``transform`` method.
+            transform (Optional[str]): Convert the final value to a different
+                data type before returning it.
+
+        Raises:
+            TypeError: If ``get`` is provided but the value value is not a
+                dictionary like object.
+
+        Runs the following actions in order:
+
+        1. :meth:`~LookupHandler.load` if ``load`` is provided.
+        2. :meth:`runway.util.MutableMap.find` or :meth:`dict.get` depending
+           on the data type if ``get`` is provided.
+        3. :meth:`~LookupHandler.transform` if ``transform`` is provided.
+
+        """
         if isinstance(value, str) and load:
             value = cls.load(value, parser=load, **kwargs)
         if get:
@@ -208,6 +234,11 @@ class LookupHandler(object):
         # type: (str, str, Any) -> Any
         """Load a formatted string into a python datatype.
 
+        First action taken in :meth:`~LookupHandler.format_results`.
+        If a lookup needs to handling loading data to process it before it
+        enters :meth:`~LookupHandler.format_results`, is should use
+        ``args.pop('load')`` to prevent the data from being loaded twice.
+
         Args:
             value: What is being loaded.
             parser: Name of the parser to use.
@@ -264,6 +295,11 @@ class LookupHandler(object):
     def transform(cls, value, to_type='str', **kwargs):
         # type: (str, str, Any) -> Any
         """Transform the result of a lookup into another datatype.
+
+        Last action taken in :meth:`~LookupHandler.format_results`.
+        If a lookup needs to handling transforming the data in a way that
+        the base class can't support it should overwrite this method of the
+        base class to register different transform methods.
 
         Args:
             value: What is to be transformed.
