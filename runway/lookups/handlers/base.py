@@ -128,7 +128,7 @@ class LookupHandler(object):
                        load=None,  # type: Optional[str]
                        transform=None,  # type: Optional[str]
                        **kwargs  # type: Any
-                       ):
+                       ):  # python2 only # pylint: disable=bad-continuation
         # type: (...) -> Any
         """Format results to be returned by a lookup.
 
