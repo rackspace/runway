@@ -30,7 +30,7 @@ arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
 You can use that arn to determine the IAM role arn for runway.yml:
 
 ```
-        kubectl-access-role-arn: arn:aws:iam::123456789012:assumed-role/myIamRole
+        kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
 ```
 
 After updating the role ARN, deploy to the dev environment via:
