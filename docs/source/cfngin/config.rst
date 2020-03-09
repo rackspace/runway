@@ -399,7 +399,7 @@ An example of a custom hooks using various lookups in it's arguments:
         user_data: ${file parameterized-64:file://some/path}
         db_endpoint: ${rxref some-stack::Endpoint}
         subnet: ${xref some-stack::Subnet}
-        db_creds: ${ssmstore us-east-1@MyDBUser}
+        db_creds: ${ssm MyDBUser::region=us-east-1}
     custom_hook2:
       path: path.to.hook.entry_point
       args:
