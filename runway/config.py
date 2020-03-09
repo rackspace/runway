@@ -459,6 +459,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
               lab: true
             account_id: ${var account_ids}  # optional
             assume_role: ${var assume_role}  # optional
+            config_dir: .. # optional used for CFNgin configs directory
             parameters:  # optional
                 region: ${env AWS_REGION}
                 image_id: ${var image_id.${env DEPLOY_ENVIRONMENT}}
@@ -492,6 +493,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 be used to apply the same role to all environment.
                 ``post_deploy_env_revert: true`` can also be provided to
                 revert credentials after processing.
+            config_dir (Optional[str]): Options directory for CFNgin env files
+                relitive to relitive to the module directory level. default is .
             environments (Optional[Dict[str, Dict[str, Any]]]): Optional
                 mapping of environment names to a booleon value used to
                 explicitly enable or disable in an environment. This
