@@ -47,14 +47,12 @@ class Context(object):
         self.env_vars = env_vars or os.environ.copy()
         self._env_name_from_env = bool(self.env_vars.get(self.env_override_name))
         self.debug = bool(self.env_vars.get('DEBUG'))
-        self.echo_detected_environment()
         self.config_dir = None
+
+        self.echo_detected_environment()
+
         if not self._env_name_from_env:
             self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
-
-    def set_config_dir(self, config_dir):
-        """ this sets the class attribute for the config dir """
-        self.config_dir = config_dir
 
     @property
     def boto3_credentials(self):
@@ -224,3 +222,7 @@ class Context(object):
                 self.env_vars[i] = self.env_vars['OLD_' + i]
             elif i in self.env_vars:
                 self.env_vars.pop(i)
+
+    def set_config_dir(self, config_dir):
+        """ this sets the class attribute for the config dir """
+        self.config_dir = config_dir
