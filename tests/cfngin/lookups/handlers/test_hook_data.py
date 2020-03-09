@@ -1,10 +1,10 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
 # pylint: disable=no-self-use
 import pytest
-
-from runway.variables import Variable
-from runway.cfngin.exceptions import FailedVariableLookup
 from troposphere.awslambda import Code
+
+from runway.cfngin.exceptions import FailedVariableLookup
+from runway.variables import Variable
 
 
 class TestHookDataLookup(object):

@@ -4,6 +4,7 @@ import logging
 import warnings
 
 from troposphere import BaseAWSObject
+
 from runway.lookups.handlers.base import LookupHandler
 
 LOGGER = logging.getLogger(__name__)

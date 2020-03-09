@@ -90,8 +90,8 @@ from typing import (TYPE_CHECKING, Any, Dict,  # noqa: F401 pylint: disable=W
                     Optional, Tuple, Union)
 
 import yaml
-from troposphere import BaseAWSObject
 from six import string_types
+from troposphere import BaseAWSObject
 
 from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
