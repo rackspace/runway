@@ -563,6 +563,11 @@ class ModulesCommand(RunwayCommand):
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
+
+        if deployment.config_dir:
+            context.set_config_dir(deployment.config_dir)
+            LOGGER.debug("Setting config dir %s in context", context.config_dir)
+
         if module_opts.get('env_vars'):
             module_env_vars = merge_nested_environment_dicts(
                 module_opts.get('env_vars'), env_name=context.env_name,
@@ -574,6 +579,7 @@ class ModulesCommand(RunwayCommand):
                             "applied to this module: %s",
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
+
 
         with change_dir(path.module_root):
 
@@ -590,7 +596,10 @@ class ModulesCommand(RunwayCommand):
             )
             if hasattr(module_instance, context.command):
                 command_method = getattr(module_instance, context.command)
+                LOGGER.info("before call")
                 command_method()
+                LOGGER.info("after call")
+
             else:
                 LOGGER.error("'%s' is missing method '%s'",
                              module_instance, context.command)

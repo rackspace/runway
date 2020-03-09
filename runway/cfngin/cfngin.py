@@ -64,6 +64,7 @@ class CFNgin(object):
         self.region = ctx.env_region
         self.sys_path = sys_path or os.getcwd()
         self.tail = ctx.debug
+        self.config_dir = ctx.config_dir
 
         self.parameters.update(self.env_file)
 
@@ -86,6 +87,11 @@ class CFNgin(object):
         supported_names = ['{}.env'.format(self.__ctx.env_name),
                            '{}-{}.env'.format(self.__ctx.env_name,
                                               self.region)]
+        if self.config_dir:
+            LOGGER.info('appening config_dir: %s', self.config_dir)
+            for index, name in enumerate(supported_names):
+                supported_names[index] = "{}/{}".format(self.config_dir, name)
+
         for _, file_name in enumerate(supported_names):
             file_path = os.path.join(self.sys_path, file_name)
             if os.path.isfile(file_path):

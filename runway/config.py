@@ -470,7 +470,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
     SUPPORTS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
                           'env_vars', 'environments', 'module_options',
-                          'regions', 'parallel_regions', 'parameters']
+                          'regions', 'parallel_regions', 'parameters', 'config_dir']
     PRE_PROCESS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
                              'env_vars', 'regions']
 
@@ -628,6 +628,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         self._env_vars = Variable(self.name + '.env_vars', deployment.pop(
             'env_vars', deployment.pop('env-vars', {})
         ), 'runway')  # type: Variable
+        self._config_dir = Variable(
+            self.name + '.config_dir', deployment.pop(
+                'config_dir', deployment.pop('config-dir', '.')
+            ), 'runway'
+        )
         if deployment.pop('current_dir', False):
             # Deprecated in 1.0 (late 2019). Retain for at least a major version.
             LOGGER.warning('DEPRECATION WARNING: The "current_dir" option has '
@@ -681,6 +686,18 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
                 'Invalid keys found in deployment %s have been ignored: %s',
                 self.name, ', '.join(deployment.keys())
             )
+
+    @property
+    def config_dir(self):
+        # type: () -> str
+        """Access the value of an attribute that supports variables."""
+        value = self._config_dir.value
+        if isinstance(value, (str, string_types)):
+            return value
+        if isinstance(value, int):
+            return str(value)
+        raise ValueError('{}.config_dir is of type {}; expected type '
+                         'of int, or str'.format(self.name, type(value)))
 
     @property
     def account_alias(self):

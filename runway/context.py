@@ -47,11 +47,14 @@ class Context(object):
         self.env_vars = env_vars or os.environ.copy()
         self._env_name_from_env = bool(self.env_vars.get(self.env_override_name))
         self.debug = bool(self.env_vars.get('DEBUG'))
-
         self.echo_detected_environment()
-
+        self.config_dir = None
         if not self._env_name_from_env:
             self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
+
+    def set_config_dir(self, config_dir):
+        """ this sets the class attribute for the config dir """
+        self.config_dir = config_dir
 
     @property
     def boto3_credentials(self):
@@ -206,7 +209,6 @@ class Context(object):
             LOGGER.info("If this is not the environment name, update the "
                         "branch/folder name or set an override value via "
                         "the %s environment variable", self.env_override_name)
-        LOGGER.info("")
 
     def save_existing_iam_env_vars(self):
         """Backup IAM environment variables for later restoration."""
