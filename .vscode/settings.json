@@ -24,7 +24,8 @@
         "forcerm",
         "kwarg",
         "lambci",
-        "nondockerizepip"
+        "nondockerizepip",
+        "stubbers"
     ],
     "pythonTestExplorer.testFramework": "pytest"
 }

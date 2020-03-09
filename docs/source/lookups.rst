@@ -14,10 +14,11 @@ The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``
 +===========================+=================================================+
 | ``${``                    | Signifies the opening of the lookup.            |
 +---------------------------+-------------------------------------------------+
-| ``<lookup-name>``         | The name of the lookup you wish to use. (e.g.   |
-|                           | ``env``)                                        |
+| ``<lookup-name>``         | The name of the lookup you wish to use (e.g.    |
+|                           | ``env``). This signifies the *source* of the    |
+|                           | data to be retrieved by the lookup.             |
 +---------------------------+-------------------------------------------------+
-| `` ``                     | The separator between lookup name a query.      |
+|                           | The separator between lookup name a query.      |
 +---------------------------+-------------------------------------------------+
 | ``<query>``               | The value the lookup will be looking for. (e.g. |
 |                           | ``AWS_REGION``)                                 |
@@ -46,21 +47,35 @@ expect.
 
 .. automodule:: runway.lookups.handlers.base
 
+
+.. _build-in-lookups:
+
 Build-in Lookups
 ^^^^^^^^^^^^^^^^
 
-.. _build-in-lookups:
+
+.. _env lookup:
+.. _env-lookup:
 
 env
 ~~~
 
-.. _env-lookup:
-
 .. automodule:: runway.lookups.handlers.env
+
+
+.. _ssm lookup:
+.. _ssm-lookup:
+
+ssm
+~~~
+
+.. automodule:: runway.lookups.handlers.ssm
+
+
+.. _var lookup:
+.. _var-lookup:
 
 var
 ~~~
-
-.. _var-lookup:
 
 .. automodule:: runway.lookups.handlers.var

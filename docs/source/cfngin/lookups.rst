@@ -82,7 +82,7 @@ CFNgin includes the following lookup types:
 - `hook_data lookup`_
 - `kms lookup`_
 - `rxref lookup`_
-- `ssmstore lookup`_
+- ssm_ lookup
 - `xref lookup`_
 
 .. _`output lookup`:
@@ -365,10 +365,19 @@ Basic examples::
         Resource: "{{MyResource}}"
 
 
+ssm
+---
+
+.. automodule:: runway.lookups.handlers.ssm
+
+
 .. _`ssmstore lookup`:
 
 SSM Parameter Store Lookup
 --------------------------
+
+.. deprecated:: 1.5.0
+  Replaced by ssm_
 
 The ``ssmstore`` lookup type retrieves a value from the Simple Systems
 Manager Parameter Store.

@@ -30,7 +30,7 @@ class Stacker(BaseCommand):
 
     def configure(self, options):
         """Configure CLI command."""
-        warnings.warn(self.DEPRECATION_MSG, DeprecationWarning),
+        warnings.warn(self.DEPRECATION_MSG, DeprecationWarning)
         LOGGER.warning(self.DEPRECATION_MSG)
         session_cache.default_profile = options.profile
 

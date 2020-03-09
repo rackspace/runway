@@ -6,6 +6,7 @@ import os
 import sys
 
 from .util import AWS_ENV_VARS
+from .cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger('runway')
 
@@ -207,6 +208,31 @@ class Context(object):
                         "branch/folder name or set an override value via "
                         "the %s environment variable", self.env_override_name)
         LOGGER.info("")
+
+    def get_session(self, profile=None, region=None):
+        """Create a thread-safe boto3 session.
+
+        Args:
+            profile (Optional[str]): The profile for the session.
+            region (Optional[str]): The region for the session.
+
+        Returns:
+            :class:`boto3.session.Session`: A thread-safe boto3 session.
+
+        """
+        kwargs = {}
+        # save to var so its not calculated multiple times
+        creds = self.boto3_credentials
+        if profile:
+            kwargs['profile'] = profile
+        elif creds:
+            kwargs.update({
+                'access_key': creds.get('aws_access_key_id'),
+                'secret_key': creds.get('aws_secret_access_key'),
+                'session_token': creds.get('aws_session_token')
+            })
+            LOGGER.warning('Current env_region: %s', self.env_region)
+        return get_session(region=region or self.env_region, **kwargs)
 
     def save_existing_iam_env_vars(self):
         """Backup IAM environment variables for later restoration."""

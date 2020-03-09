@@ -4,6 +4,7 @@ import warnings
 
 from six import string_types
 
+from runway.lookups.handlers import ssm
 from runway.util import load_object_from_string
 
 from ..exceptions import FailedVariableLookup, UnknownLookupType
@@ -96,5 +97,6 @@ register_lookup_handler(kms.TYPE_NAME, kms.KmsLookup)
 register_lookup_handler(output.TYPE_NAME, output.OutputLookup)
 register_lookup_handler(rxref.TYPE_NAME, rxref.RxrefLookup)
 register_lookup_handler(split.TYPE_NAME, split.SplitLookup)
+register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
 register_lookup_handler(ssmstore.TYPE_NAME, ssmstore.SsmstoreLookup)
 register_lookup_handler(xref.TYPE_NAME, xref.XrefLookup)

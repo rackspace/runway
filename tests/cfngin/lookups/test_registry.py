@@ -21,8 +21,8 @@ class TestRegistry(unittest.TestCase):
     def test_autoloaded_lookup_handlers(self):
         """Test autoloaded lookup handlers."""
         handlers = [
-            "output", "xref", "kms", "ssmstore", "envvar", "rxref", "ami",
-            "file", "split", "default", "hook_data", "dynamodb",
+            "output", "xref", "kms", "ssm", "ssmstore", "envvar", "rxref",
+            "ami", "file", "split", "default", "hook_data", "dynamodb"
         ]
         for handler in handlers:
             try:
