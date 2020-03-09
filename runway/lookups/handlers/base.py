@@ -49,6 +49,9 @@ Common Lookup Arguments
 
     **json**
         Loads a JSON seralizable string into a dictionary like object.
+    **troposphere**
+        Loads the ``properties`` of a subclass of ``troposphere.BaseAWSObject``
+        into a dictinary.
     **yaml**
         Loads a YAML seralizable string into a dictionary like object.
 

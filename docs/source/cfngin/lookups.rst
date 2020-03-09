@@ -518,6 +518,13 @@ is when you use the `aws_lambda hook`_ to upload AWS Lambda code, then need to
 pass that code object as the **Code** variable in the `aws_lambda blueprint`_
 dictionary.
 
+.. rubric:: Arguments
+
+This Lookup supports all :ref:`Common Lookup Arguments` but, the folling have
+limited or no effect:
+
+- region
+
 .. rubric:: Example
 .. code-block:: yaml
 
@@ -525,7 +532,17 @@ dictionary.
   # and you name the function package "TheCode" you can get the troposphere
   # awslambda.Code object with:
 
-  Code: ${hook_data myfunction::TheCode}
+  Code: ${hook_data myfunction.TheCode}
+
+  # If you need to pass the code location as individual strings for use in a
+  # CloudFormation template instead of a Blueprint, you can do so like this:
+
+  Bucket: ${hook_data myfunction.TheCode::load=troposphere, get=S3Bucket}
+  Key: ${hook_data myfunction.TheCode::load=troposphere, get=S3Key}
+
+.. versionchanged:: 1.5.0
+  The ``<hook_name>::<key>`` syntax was deprecated with support being added for the``key.nested_key`` syntax for access data within a dictionary.
+
 
 .. _`custom lookup`:
 
