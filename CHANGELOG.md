@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - pulled from the Runway context object
 - `ssm` lookup usable in Runway and CFNgin config files
 - `staticsite_acmcert_arn` option
+- `troposphere` transform option for lookups
 
 ### Changed
 - `get_session` can now accept AWS credentials when creating a thread-safe session
@@ -23,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - deprecate `ssmstore` lookup
 - deprecate `staticsite_acmcert_ssm_param` option
 - deprecate `terraform_backend_ssm_params` option
+- `hook_data` lookup now supports the standardized lookup query syntax
+  - supports `load`, `transform`, `get`, and `default` arguments
+  - dot notation to get nested data from the dictionary
 
 ## [1.4.4] - 2020-02-28
 ### Fixed
