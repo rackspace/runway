@@ -27,11 +27,7 @@ class HookDataLookup(LookupHandler):
             <hook_name>::<key>
 
         """
-        try:
-            hook_name, key = value.split("::")
-        except ValueError:
-            raise ValueError("Invalid value for hook_data: %s. Must be in "
-                             "<hook_name>::<key> format." % value)
+        hook_name, key = value.split("::")
         warnings.warn(cls.DEPRECATION_MSG, DeprecationWarning)
         LOGGER.warning(cls.DEPRECATION_MSG)
         return '{}.{}'.format(hook_name, key), {}
