@@ -209,6 +209,7 @@ class Context(object):
             LOGGER.info("If this is not the environment name, update the "
                         "branch/folder name or set an override value via "
                         "the %s environment variable", self.env_override_name)
+        LOGGER.info("")
 
     def save_existing_iam_env_vars(self):
         """Backup IAM environment variables for later restoration."""
