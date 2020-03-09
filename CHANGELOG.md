@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `runway.cfngin.context.Context.get_session()` method for creating a boto3 session using the correct AWS credentials
 - `environment` and `region` as _common parameters_ for cloudformation modules so they do not need to be defined
   - pulled from the Runway context object
+- `ssm` lookup usable in Runway and CFNgin config files
+- `staticsite_acmcert_arn` option
 
 ### Changed
 - `get_session` can now accept AWS credentials when creating a thread-safe session
@@ -18,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - deprecated the use `get_session` directly when credentials are in environment variables
 - deprecated `runway.cfngin.util.get_config_directory()` which was only used for the aws_lambda hook.
 - deprecated Stacker CLI components
+- deprecate `ssmstore` lookup
+- deprecate `staticsite_acmcert_ssm_param` option
+- deprecate `terraform_backend_ssm_params` option
 
 ## [1.4.4] - 2020-02-28
 ### Fixed
