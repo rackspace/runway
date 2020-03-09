@@ -1,15 +1,22 @@
 """AWS SSM Parameter Store lookup."""
 # pylint: disable=arguments-differ,unused-argument
+import logging
+import warnings
+
 from runway.lookups.handlers.base import LookupHandler
 
 from ...session_cache import get_session
 from ...util import read_value_from_path
 
+LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "ssmstore"
 
 
 class SsmstoreLookup(LookupHandler):
     """AWS SSM Parameter Store lookup."""
+
+    DEPRECATION_MSG = ('The "ssmstore" lookup has been deprecated. '
+                       'The "ssm" lookup should be used instead.')
 
     @classmethod
     def handle(cls, value, context=None, provider=None, **kwargs):
@@ -50,6 +57,9 @@ class SsmstoreLookup(LookupHandler):
                 conf_key: PASSWORD
 
         """
+        warnings.warn(cls.DEPRECATION_MSG, DeprecationWarning)
+        LOGGER.warning(cls.DEPRECATION_MSG)
+
         value = read_value_from_path(value)
 
         region = "us-east-1"
