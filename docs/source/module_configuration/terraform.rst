@@ -219,9 +219,8 @@ Either for a single module::
             options:
               terraform_backend_config:
                 region: us-east-1
-              terraform_backend_ssm_params:
-                bucket: ParamNameHere
-                dynamodb_table: ParamNameHere
+                bucket: ${ssm ParamNameHere::region=us-east-1}
+                dynamodb_table: ${ssm ParamNameHere::region=us-east-1}
 
 
 and/or for a group of modules:
@@ -235,9 +234,8 @@ and/or for a group of modules:
         module_options:  # shared between all modules in deployment
           terraform_backend_config:
             region: us-east-1
-          terraform_backend_ssm_params:
-            bucket: ParamNameHere
-            dynamodb_table: ParamNameHere
+            bucket: ${ssm ParamNameHere::region=us-east-1}
+            dynamodb_table: ${ssm ParamNameHere::region=us-east-1}
 
 
 Part 4: Variable Values

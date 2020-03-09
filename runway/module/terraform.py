@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import sys
+import warnings
 
 import boto3
 from send2trash import send2trash
@@ -51,6 +52,11 @@ def create_config_backend_options(module_opts, env_name, env_vars):
                 )['Stacks'][0]['Outputs']
             )
     if module_opts.get('terraform_backend_ssm_params'):
+        dep_msg = ('Use of the "terraform_backend_ssm_params" option has been '
+                   'deprecated. The "terraform_backend_config" option with '
+                   '"ssm" lookup should be used instead.')
+        warnings.warn(dep_msg, DeprecationWarning)
+        LOGGER.warning(dep_msg)
         if not backend_opts.get('config'):
             backend_opts['config'] = {}
         if not backend_opts['config'].get('region'):
