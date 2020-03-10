@@ -260,3 +260,81 @@ jobs:
         with:
           name: pyinstaller-onefolder-${{ matrix.os }}
           path: artifacts
+
+  build-pypi:
+    name: Build PyPi 📦
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
+    needs:
+      - test-python
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7]
+    runs-on: ${{ matrix.os }}
+    steps:
+      # - *checkout
+      - name: Checkout Repo
+        uses: actions/checkout@v2.0.0
+      # - *install_python
+      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      # - *dependencies_ubuntu
+      - name: Install Dependencies (ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install sed -y
+      # - *cache_pip_ubuntu
+      - name: Pip Cache (ubuntu)
+        uses: actions/cache@v1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          path:  ~/.cache/pip
+          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ matrix.os }}-pip-${{ matrix.python-version }}
+      - name: Install Global Python Packages
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
+      # - *cache_pipenv
+      - name: Pipenv Cache
+        uses: actions/cache@v1
+        with:
+          path: ./.venv
+          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+      # - *pipenv_sync
+      - name: Setup Python Virtual Environment (3.x)
+        run: pipenv sync --dev
+      - name: Run Build
+        run: make build
+      - name: Upload Distribution Artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: pypi-dist
+          path: dist
+
+  publish-pypi:
+    name: Publish 📦 To PyPI
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
+    needs:
+      - build-pypi
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Distribution Artifact
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pypi-dist
+      - name: Publish Distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@v1.1.0
+        with:
+          password: ${{ secrets.test_pypi_password }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: Publish Distribution 📦 to PyPI
+        if: success() && startsWith(github.event.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@v1.1.0
+        with:
+          password: ${{ secrets.pypi_password }}
