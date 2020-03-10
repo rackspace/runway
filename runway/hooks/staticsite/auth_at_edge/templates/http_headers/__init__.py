@@ -1,9 +1,4 @@
-
-"""Add all configured headers (CloudFront compatable) to origin response.
-
-NOTE: pylint: skip-file has been added to this file to avoid an issue with a false
-positive about duplicated code. Please remove during iteration.
-"""
+"""Add all configured headers (CloudFront compatable) to origin response."""
 from shared import as_cloud_front_headers, get_config  # pylint: disable=import-error
 
 CONFIG = get_config()
