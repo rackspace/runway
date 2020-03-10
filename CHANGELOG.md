@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `environment` and `region` as _common parameters_ for cloudformation modules so they do not need to be defined
   - pulled from the Runway context object
 - `ssm` lookup usable in Runway and CFNgin config files
+- `troposphere` transform option for lookups
 - Private (authorized AKA Auth@Edge) static sites
 
 ### Changed
@@ -23,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - deprecate `ssmstore` lookup
 - deprecate `staticsite_acmcert_ssm_param` option
 - deprecate `terraform_backend_ssm_params` option
+- `hook_data` lookup now supports the standardized lookup query syntax
+  - supports `load`, `transform`, `get`, and `default` arguments
+  - dot notation to get nested data from the dictionary
 
 ## [1.4.4] - 2020-02-28
 ### Fixed

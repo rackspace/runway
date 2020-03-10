@@ -49,6 +49,9 @@ Common Lookup Arguments
 
     **json**
         Loads a JSON seralizable string into a dictionary like object.
+    **troposphere**
+        Loads the ``properties`` of a subclass of ``troposphere.BaseAWSObject``
+        into a dictinary.
     **yaml**
         Loads a YAML seralizable string into a dictionary like object.
 
@@ -91,6 +94,7 @@ from typing import (TYPE_CHECKING, Any, Dict,  # noqa: F401 pylint: disable=W
 
 import yaml
 from six import string_types
+from troposphere import BaseAWSObject
 
 from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
@@ -153,7 +157,7 @@ class LookupHandler(object):
         3. :meth:`~LookupHandler.transform` if ``transform`` is provided.
 
         """
-        if isinstance(value, str) and load:
+        if load:
             value = cls.load(value, parser=load, **kwargs)
         if get:
             if isinstance(value, MutableMap):
@@ -230,7 +234,7 @@ class LookupHandler(object):
     @classmethod
     def load(cls, value, parser=None, **kwargs):
         # type: (str, str, Any) -> Any
-        """Load a formatted string into a python datatype.
+        """Load a formatted string or object into a python data type.
 
         First action taken in :meth:`~LookupHandler.format_results`.
         If a lookup needs to handling loading data to process it before it
@@ -247,6 +251,7 @@ class LookupHandler(object):
         """
         mapping = {
             'json': cls._load_json,
+            'troposphere': cls._load_troposphere,
             'yaml': cls._load_yaml
         }
 
@@ -267,10 +272,36 @@ class LookupHandler(object):
             MutableMap
 
         """
+        if not isinstance(value, str):
+            raise TypeError('value of type "%s" must of type "str" to use '
+                            'the "load=json" argument.')
         result = json.loads(value)
         if isinstance(result, dict):
             return MutableMap(**result)
         return result
+
+    @classmethod
+    def _load_troposphere(cls, value, **_):
+        # type: (BaseAWSObject, Any) -> MutableMap
+        """Load a Troposphere resource into a MutableMap.
+
+        Args:
+            Value (troposphere.BaseAWSObject): Troposphere resource to
+                contvert to a MutableMap for parsing.
+
+        Returns:
+            MutableMap
+
+        """
+        if not isinstance(value, BaseAWSObject):
+            raise TypeError('value of type "%s" must of type "troposphere.'
+                            'BaseAWSObject" to use the "load=troposphere" '
+                            'option.')
+        if hasattr(value, 'properties'):
+            return MutableMap(**value.properties)
+        raise NotImplementedError('"load=troposphere" only supports '
+                                  'BaseAWSObject with a "properties" '
+                                  'object.')
 
     @classmethod
     def _load_yaml(cls, value, **_):
@@ -284,6 +315,9 @@ class LookupHandler(object):
             MutableMap
 
         """
+        if not isinstance(value, str):
+            raise TypeError('value of type "%s" must of type "str" to use '
+                            'the "load=yaml" argument.')
         result = yaml.safe_load(value)
         if isinstance(result, dict):
             return MutableMap(**result)
