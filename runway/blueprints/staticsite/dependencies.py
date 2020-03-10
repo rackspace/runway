@@ -2,24 +2,48 @@
 """Module with static website supporting infrastructure."""
 from __future__ import print_function
 
-from troposphere import AccountId, Join, Output, s3
+import logging
 
 import awacs.s3
-from awacs.aws import AWSPrincipal, Allow, Policy, Statement
+from awacs.aws import Allow, AWSPrincipal, Policy, Statement
+from troposphere import AccountId, Join, Output, cognito, s3
 
 from runway.cfngin.blueprints.base import Blueprint
-# from runway.cfngin.blueprints.variables.types import CFNString
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Dependencies(Blueprint):
     """Stacker blueprint for creating static website buckets."""
 
-    VARIABLES = {}
+    VARIABLES = {
+        'AuthAtEdge': {
+            'type': bool,
+            'default': False,
+            'description': 'Utilizing Authorization @ Edge'
+        },
+        'UserPoolId': {
+            'type': str,
+            'default': '',
+            'description': 'User Pool ID for Authorization @ Edge'
+        },
+        'OAuthScopes': {
+            'type': list,
+            'default': [
+                'phone',
+                'email',
+                'profile',
+                'openid',
+                'aws.cognito.signin.user.admin'
+            ],
+            'description': 'The allowed scopes for OAuth validation'
+        }
+    }
 
     def create_template(self):
         """Create template (main function called by Stacker)."""
         template = self.template
-        # variables = self.get_variables()
+        variables = self.get_variables()
         template.set_version('2010-09-09')
         template.set_description('Static Website - Dependencies')
 
@@ -85,6 +109,27 @@ class Dependencies(Blueprint):
             Description='Name of bucket storing artifacts',
             Value=artifacts.ref()
         ))
+
+        if variables['AuthAtEdge']:
+            client = template.add_resource(
+                cognito.UserPoolClient(
+                    "AuthAtEdgeClient",
+                    AllowedOAuthFlows=['code'],
+                    # Temporary CallbackURLs as they are required to
+                    # create the resource. These are changed during
+                    # the client_updater hook to the correct
+                    # values.
+                    CallbackURLs=['https://example.temp'],
+                    UserPoolId=variables['UserPoolId'],
+                    AllowedOAuthScopes=variables['OAuthScopes']
+                )
+            )
+
+            template.add_output(Output(
+                'AuthAtEdgeClient',
+                Description='Cognito User Pool App Client for Auth @ Edge',
+                Value=client.ref()
+            ))
 
 
 # Helper section to enable easy blueprint -> template generation

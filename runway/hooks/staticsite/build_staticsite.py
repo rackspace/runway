@@ -5,15 +5,14 @@ import os
 import tempfile
 import zipfile
 
-from boto3.s3.transfer import S3Transfer
 import boto3
+from boto3.s3.transfer import S3Transfer
 
 from ...cfngin.lookups.handlers.rxref import RxrefLookup
 from ...cfngin.session_cache import get_session
-
-from .util import get_hash_of_files
+from ...s3_util import does_s3_object_exist, download_and_extract_to_mkdtemp
 from ...util import change_dir, run_commands
-from ...s3_util import download_and_extract_to_mkdtemp, does_s3_object_exist
+from .util import get_hash_of_files
 
 LOGGER = logging.getLogger(__name__)
 
