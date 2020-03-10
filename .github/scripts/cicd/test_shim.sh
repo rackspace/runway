@@ -2,11 +2,6 @@
 
 # A simple script for testing the stacker => runway.cfngin shim
 
-if [ "$TRAVIS_OS_NAME" = "osx" ] || [ "$TRAVIS_OS_NAME" = "windows" ] || [ -z "$TRAVIS_OS_NAME"]; then
-    # these do not nativly run in a venv
-    PIPENV="pipenv run "
-fi
-
 set -ev
 
 cfngin_config() {
@@ -24,6 +19,5 @@ stacks:
 HERE
 }
 
-# AWS_SECRET_ACCESS_KEY required to pass in forked travis runs
-AWS_SECRET_ACCESS_KEY=1 ${PIPENV}runway run-stacker -- build <(cfngin_config) --dump .travis
-rm -rf .travis/stack_templates
+pipenv run runway run-stacker -- build <(cfngin_config) --dump .github/temp
+rm -rf .github/temp/stack_templates
