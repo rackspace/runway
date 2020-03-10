@@ -9,7 +9,7 @@ from runway.cfngin.session_cache import get_session
 LOGGER = logging.getLogger(__name__)
 
 
-def update(context,  # type: Context # pylint: disable=unused-import
+def update(context,  # type: Context
            provider,  # type: BaseProvider
            **kwargs  # type: Optional[Dict[str, Any]]
           ):  # noqa: E124

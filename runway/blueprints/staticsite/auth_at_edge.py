@@ -5,14 +5,16 @@ https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-h
 """
 
 import logging
-from typing import Any, Dict, List  # pylint: disable=unused-import
+from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 
-import awacs.s3
 import awacs.logs
+import awacs.s3
 from awacs.aws import Allow, Principal, Statement
-from troposphere import (AccountId, Join, NoValue, StackName,  # noqa pylint: disable=unused-import
-                         awslambda, cloudfront, iam, s3)
+from troposphere import (AccountId, Join,  # noqa pylint: disable=unused-import
+                         NoValue, Output, StackName, awslambda, cloudfront,
+                         iam, s3)
 
+from runway.cfngin.context import Context  # pylint: disable=unused-import
 from .staticsite import StaticSite
 
 LOGGER = logging.getLogger('runway')
@@ -23,23 +25,10 @@ class AuthAtEdge(StaticSite):
 
     IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
 
-    VARIABLES = {
-        'AcmCertificateArn': {'type': str,
-                              'default': '',
-                              'description': '(Optional) Cert ARN for site'},
-        'Aliases': {'type': list,
-                    'default': [],
-                    'description': '(Optional) Domain aliases the '
-                                   'distribution'},
-        'LogBucketName': {'type': str,
-                          'default': '',
-                          'description': 'S3 bucket for CF logs'},
+    AUTH_VARIABLES = {
         'OAuthScopes': {'type': list,
                         'default': [],
                         'description': 'OAuth2 Scopes'},
-        'DisableCloudFront': {'type': bool,
-                              'default': False,
-                              'description': 'Whether to disable CF'},
         'PriceClass': {'type': str,
                        'default': 'PriceClass_100',  # US/Europe
                        'description': 'CF price class for the distribution.'},
@@ -52,28 +41,36 @@ class AuthAtEdge(StaticSite):
                                     'default': '/refreshauth',
                                     'description': 'The URL path that should '
                                                    'handle the JWT refresh request.'},
-        'RewriteDirectoryIndex': {'type': str,
-                                  'default': '',
-                                  'description': 'The path for rewriting the directory index'},
-        'RoleBoundaryArn': {'type': str,
-                            'default': '',
-                            'description': '(Optional) IAM Role Boundary to '
-                                           'apply to any created IAM Roles.'},
         'NonSPAMode': {'type': bool,
                        'default': False,
                        'description': 'Whether Auth@Edge should omit SPA specific settings'},
         'SignOutUrl': {'type': str,
                        'default': '/signout',
                        'description': 'The URL path that you can visit to sign-out.'},
-        'WAFWebACL': {'type': str,
-                      'default': '',
-                      'description': '(Optional) WAF id to associate with the '
-                                     'distribution.'},
-        'custom_error_responses': {'type': list,
-                                   'default': [],
-                                   'description': '(Optional) Custom error '
-                                                  'responses.'},
     }
+
+    VARIABLES = {}  # type: Dict[str, Dict[str, Union[str, Any]]]
+
+    def __init__(self,
+                 name,  # type: str
+                 context,  # type: Context
+                 mappings=None,  # type: Union[None, Dict]
+                 description=None  # type: Union[None, str]
+                ):  # noqa: E124
+        # type(...) -> Cleanup
+        """Initialize the Blueprint.
+
+        Args:
+            name (str): The name of the stack
+            context (Context): The CFNgin Context object
+
+        KeywordArgs:
+            mappings (Union(None, Dict)): Blueprint mappings
+            description (Union(None, str)): The description of the stack
+        """
+        super(AuthAtEdge, self).__init__(name, context, mappings, description)
+        self.VARIABLES.update(StaticSite.VARIABLES)
+        self.VARIABLES.update(self.AUTH_VARIABLES)
 
     def create_template(self):
         # type: () -> None
@@ -89,7 +86,7 @@ class AuthAtEdge(StaticSite):
         oai = self.add_origin_access_identity()
         bucket_policy = self.add_cloudfront_bucket_policy(bucket, oai)
         # @TODO: Make this available in Auth@Edge
-        lambda_function_associations = []
+        lambda_function_associations = []  # type: List[str]
 
         if self.directory_index_specified:
             index_rewrite = self._get_index_rewrite_role_function_and_version()
@@ -166,11 +163,11 @@ class AuthAtEdge(StaticSite):
             distribution_options
         )
 
-    def get_auth_at_edge_lambda_and_ver(self,
+    def get_auth_at_edge_lambda_and_ver(self,  # type: AuthAtEdge
                                         title,  # type: str
                                         description,  # type: str
                                         handle,  # type: str
-                                        role  # iam.Role
+                                        role  # type: iam.Role
                                        ):  # noqa: E124
         # type: (...) -> Dict[str, Any]
         """Create a lambda function and its version.
@@ -216,9 +213,10 @@ class AuthAtEdge(StaticSite):
                 identify the correct Code hook_data information.
             role (IAM.Role): The Lambda Execution Role
         """
-        return self.template.add_resource(
+        lamb = self.template.add_resource(
             awslambda.Function(
                 title,
+                DeletionPolicy="Retain",
                 Code=self.context.hook_data['aae_lambda_config'][handler],
                 Description=description,
                 Handler='__init__.handler',
@@ -226,6 +224,14 @@ class AuthAtEdge(StaticSite):
                 Runtime='python3.7'
             )
         )
+
+        self.template.add_output(Output(
+            'Lambda%sArn' % title,
+            Description='Arn For the %s Lambda Function' % title,
+            Value=lamb.get_att('Arn')
+        ))
+
+        return lamb
 
     def add_version(self,
                     title,  # type: str
