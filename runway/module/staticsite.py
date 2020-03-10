@@ -232,7 +232,7 @@ class StaticSite(RunwayModule):
         if self.parameters.get('staticsite_acmcert_ssm_param'):
             dep_msg = ('Use of the "staticsite_acmcert_ssm_param" option has '
                        'been deprecated. The "staticsite_acmcert_arn" option '
-                       'with an "ssm" lookup sould be used instead.')
+                       'with an "ssm" lookup should be used instead.')
             warnings.warn(dep_msg, DeprecationWarning)
             LOGGER.warning(dep_msg)
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long

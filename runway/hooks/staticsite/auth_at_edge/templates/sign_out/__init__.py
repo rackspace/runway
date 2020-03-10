@@ -1,8 +1,7 @@
-
 """Sign the user out of Cognito and remove all Cookie Headers."""
 
 import logging
-from urllib.parse import urlencode
+from urllib.parse import urlencode  # pylint: disable=no-name-in-module,import-error
 
 from shared import extract_and_parse_cookies, get_config, get_cookie_headers  # noqa pylint: disable=import-error
 
