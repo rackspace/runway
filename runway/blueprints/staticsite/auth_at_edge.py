@@ -8,9 +8,9 @@ import logging
 from typing import Any, Dict, List  # pylint: disable=unused-import
 
 import awacs.s3
+import awacs.logs
 from awacs.aws import Allow, Principal, Statement
-from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (Join, NoValue,  # noqa pylint: disable=unused-import
+from troposphere import (AccountId, Join, NoValue, StackName,  # noqa pylint: disable=unused-import
                          awslambda, cloudfront, iam, s3)
 
 from .staticsite import StaticSite
@@ -92,47 +92,62 @@ class AuthAtEdge(StaticSite):
         lambda_function_associations = []
 
         if self.directory_index_specified:
-            rewrite_role = self.add_index_rewrite_role()
-            index_rewrite = self.add_cloudfront_directory_index_rewrite(rewrite_role)
-            index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
-                index_rewrite
-            )
+            index_rewrite = self._get_index_rewrite_role_function_and_version()
             lambda_function_associations = self.get_directory_index_lambda_association(
                 lambda_function_associations,
-                index_rewrite_version
+                index_rewrite['version']
             )
 
         # Auth@Edge Lambdas
-        lambda_execution_role = self.add_lambda_execution_role()
+        check_auth_name = 'CheckAuth'
         check_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
-            'CheckAuth',
+            check_auth_name,
             'Check Authorization information for request',
             'check_auth',
-            lambda_execution_role
+            self.add_lambda_execution_role(
+                'CheckAuthLambdaExecutionRole',
+                check_auth_name
+            )
         )
+        http_headers_name = 'HttpHeaders'
         http_headers_lambda = self.get_auth_at_edge_lambda_and_ver(
-            'HttpHeaders',
+            http_headers_name,
             'Additional Headers added to every response',
             'http_headers',
-            lambda_execution_role
+            self.add_lambda_execution_role(
+                'HttpHeadersLambdaExecutionRole',
+                http_headers_name
+            )
         )
+        parse_auth_name = 'ParseAuth'
         parse_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
-            'ParseAuth',
+            parse_auth_name,
             'Parse the Authorization Headers/Cookies for the request',
             'parse_auth',
-            lambda_execution_role
+            self.add_lambda_execution_role(
+                'ParseAuthLambdaExecutionRole',
+                parse_auth_name
+            )
         )
+        refresh_auth_name = 'RefreshAuth'
         refresh_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
-            'RefreshAuth',
+            refresh_auth_name,
             'Refresh the Authorization information when expired',
             'refresh_auth',
-            lambda_execution_role
+            self.add_lambda_execution_role(
+                'RefreshAuthLambdaExecutionRole',
+                refresh_auth_name
+            )
         )
+        sign_out_name = 'SignOut'
         sign_out_lambda = self.get_auth_at_edge_lambda_and_ver(
-            'SignOut',
+            sign_out_name,
             'Sign the User out of the application',
             'sign_out',
-            lambda_execution_role
+            self.add_lambda_execution_role(
+                'SignOutLambdaExecutionRole',
+                sign_out_name
+            )
         )
 
         # CloudFront Distribution
@@ -234,26 +249,6 @@ class AuthAtEdge(StaticSite):
             awslambda.Version(
                 title + 'Ver' + code_hash,
                 FunctionName=lambda_function.ref()
-            )
-        )
-
-    def add_lambda_execution_role(self):
-        # type: () -> iam.Role
-        """Create the Lambda@Edge execution role."""
-        variables = self.get_variables()
-        return self.template.add_resource(
-            iam.Role(
-                'LambdaExecutionRole',
-                AssumeRolePolicyDocument=make_simple_assume_policy(
-                    'lambda.amazonaws.com', 'edgelambda.amazonaws.com'
-                ),
-                ManagedPolicyArns=[
-                    self.IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
-                ],
-                PermissionsBoundary=(
-                    variables['RoleBoundaryArn'] if self.role_boundary_specified
-                    else NoValue
-                )
             )
         )
 
