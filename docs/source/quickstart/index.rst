@@ -9,3 +9,4 @@ Quickstart Guides
     cloudformation
     conduit
     other_ways_to_use
+    private_static_site
