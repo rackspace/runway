@@ -67,7 +67,7 @@ def write(context,  # type: context.Context
         'redirect_path_auth_refresh': kwargs['redirect_path_refresh'],
         'redirect_path_sign_in': kwargs['redirect_path_sign_in'],
         'redirect_path_sign_out': kwargs['redirect_path_sign_out'],
-        'user_pool_id': kwargs['user_pool_id'],
+        'user_pool_id': context.hook_data['aae_user_pool_id_retriever']['id']
     }
 
     # Shared file that contains the method called for configuration data

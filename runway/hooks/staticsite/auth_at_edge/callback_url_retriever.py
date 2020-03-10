@@ -52,11 +52,19 @@ def get(context,  # pylint: disable=unused-argument
         )
         # Get the client_id from the outputs
         outputs = stack_desc['Stacks'][0]['Outputs']
+
+        if kwargs['user_pool_arn']:
+            user_pool_id = kwargs['user_pool_arn'].split('/')[-1:][0]
+        else:
+            user_pool_id = [
+                o['OutputValue'] for o in outputs if o['OutputKey'] == 'AuthAtEdgeUserPoolId'
+            ][0]
+
         client_id = [o['OutputValue'] for o in outputs if o['OutputKey'] == 'AuthAtEdgeClient'][0]
 
         # Poll the user pool client information
         resp = cognito_client.describe_user_pool_client(
-            UserPoolId=kwargs['user_pool_id'],
+            UserPoolId=user_pool_id,
             ClientId=client_id
         )
 
