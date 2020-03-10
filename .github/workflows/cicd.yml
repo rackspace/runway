@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: [2.7, 3.5, 3.6, 3.7]
     runs-on: ${{ matrix.os }}
     env:
@@ -41,15 +41,6 @@ jobs:
         name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - # &cache_pip_mac
-        name: Pip Cache (macOS)
-        uses: actions/cache@v1
-        if: matrix.os == 'macos-latest'
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
       - # &cache_pip_ubuntu
         name: Pip Cache (ubuntu)
         uses: actions/cache@v1
@@ -111,9 +102,6 @@ jobs:
         if: matrix.os != 'windows-latest'
         # assertions assume linux so some fail when run on windows
         run: make test
-      - name: Run Shim Test (macOS, ubuntu)
-        if: "!startsWith(matrix.os, 'windows')"
-        run: make test_shim
 
   build-pyinstaller-onefile:
     name: Pyinstaller "One File" Build
@@ -142,7 +130,7 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      # - *cache_pip_mac
+      # - &cache_pip_mac
       - name: Pip Cache (macOS)
         uses: actions/cache@v1
         if: matrix.os == 'macos-latest'
