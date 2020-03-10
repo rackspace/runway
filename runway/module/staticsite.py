@@ -226,7 +226,8 @@ class StaticSite(RunwayModule):
         }
 
         if self.parameters.get('staticsite_acmcert_arn'):
-            site_stack_variables['AcmCertificateArn'] = self.parameters.get('staticsite_acmcert_arn')
+            site_stack_variables['AcmCertificateArn'] = \
+                self.parameters['staticsite_acmcert_arn']
 
         if self.parameters.get('staticsite_acmcert_ssm_param'):
             dep_msg = ('Use of the "staticsite_acmcert_ssm_param" option has '
@@ -235,11 +236,6 @@ class StaticSite(RunwayModule):
             warnings.warn(dep_msg, DeprecationWarning)
             LOGGER.warning(dep_msg)
             site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
-
-        if self.parameters.get('staticsite_acmcert_arn') and \
-                not self.parameters.get('staticsite_acmcert_ssm_param'):
-            site_stack_variables['AcmCertificateArn'] = \
-                self.parameters['staticsite_acmcert_arn']
 
         if self.parameters.get('staticsite_enable_cf_logging', True):
             site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % self.name  # noqa pylint: disable=line-too-long
