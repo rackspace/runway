@@ -110,16 +110,14 @@ class Dependencies(Blueprint):
             Value=artifacts.ref()
         ))
 
+        callbacks = self.context.hook_data['aae_callback_url_retriever']['callback_urls']
+
         if variables['AuthAtEdge']:
             client = template.add_resource(
                 cognito.UserPoolClient(
                     "AuthAtEdgeClient",
                     AllowedOAuthFlows=['code'],
-                    # Temporary CallbackURLs as they are required to
-                    # create the resource. These are changed during
-                    # the client_updater hook to the correct
-                    # values.
-                    CallbackURLs=['https://example.temp'],
+                    CallbackURLs=callbacks,
                     UserPoolId=variables['UserPoolId'],
                     AllowedOAuthScopes=variables['OAuthScopes']
                 )
