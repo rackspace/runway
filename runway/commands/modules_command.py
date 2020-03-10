@@ -580,7 +580,6 @@ class ModulesCommand(RunwayCommand):
                             str(module_env_vars))
                 context.env_vars = merge_dicts(context.env_vars, module_env_vars)
 
-
         with change_dir(path.module_root):
 
             runway_module_type = RunwayModuleType(path.module_root,

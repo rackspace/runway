@@ -224,5 +224,5 @@ class Context(object):
                 self.env_vars.pop(i)
 
     def set_config_dir(self, config_dir):
-        """ this sets the class attribute for the config dir """
+        """Set the class attribute for the config dir."""
         self.config_dir = config_dir
