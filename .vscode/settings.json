@@ -18,6 +18,10 @@
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "cSpell.words": [
         "Ngin",
+        "CFNgin",
+        "JWKS",
+        "PKCE",
+        "boto",
         "cfngin",
         "cygwin",
         "dockerizepip",
@@ -25,7 +29,8 @@
         "kwarg",
         "lambci",
         "nondockerizepip",
-        "stubbers"
+        "stubbers",
+        "rxref"
     ],
     "pythonTestExplorer.testFramework": "pytest"
 }
