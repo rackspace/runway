@@ -197,3 +197,10 @@ class TestContext(object):
         assert context.env_vars['OLD_AWS_ACCESS_KEY_ID'] == 'foo'
         assert context.env_vars['OLD_AWS_SECRET_ACCESS_KEY'] == 'bar'
         assert context.env_vars['OLD_AWS_SESSION_TOKEN'] == 'foobar'
+
+    def test_set_config_dir(self):
+        context = Context(env_name='dev', env_region='us-east-1',
+                          env_root='./', env_vars=TEST_CREDENTIALS.copy())
+        expected = "foobar"
+        context.set_config_dir(expected)
+        assert expected == context.config_dir

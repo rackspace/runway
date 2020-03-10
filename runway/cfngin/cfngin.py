@@ -88,7 +88,7 @@ class CFNgin(object):
                            '{}-{}.env'.format(self.__ctx.env_name,
                                               self.region)]
         if self.config_dir:
-            LOGGER.info('appening config_dir: %s', self.config_dir)
+            LOGGER.info('Appening config_dir: %s', self.config_dir)
             for index, name in enumerate(supported_names):
                 supported_names[index] = "{}/{}".format(self.config_dir, name)
 

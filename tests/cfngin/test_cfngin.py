@@ -140,7 +140,9 @@ class TestCFNgin(object):
         """Test load."""
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
         # support python < 3.6
-        cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
+        ctx=self.get_context()
+        ctx.set_config_dir(".")
+        cfngin = CFNgin(ctx=ctx, sys_path=str(tmp_path))
         result = cfngin.load(str(tmp_path / 'basic.yml'))  # support python < 3.6
 
         assert not result.bucket_name
