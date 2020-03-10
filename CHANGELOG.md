@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `environment` and `region` as _common parameters_ for cloudformation modules so they do not need to be defined
   - pulled from the Runway context object
 - `ssm` lookup usable in Runway and CFNgin config files
-- `staticsite_acmcert_arn` option
+- Private (authorized AKA Auth@Edge) static sites
 
 ### Changed
 - `get_session` can now accept AWS credentials when creating a thread-safe session
@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - define variables directly in the runway config file
     - if this is used with a variables file, what is defined in the runway config takes precedence
 - `parameters` directive for modules and deployments
-    - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
+  - predecessor to `environments.$DEPLOY_ENVIRONMENT` map
 - Add `args` option for serverless module to pass additional arguments/option to the serverless command
 
 ### Changed
