@@ -1,5 +1,4 @@
 """Packaging settings."""
-import re
 from codecs import open as codecs_open
 from os.path import abspath, dirname, join
 
@@ -8,44 +7,9 @@ from setuptools import find_packages, setup
 THIS_DIR = abspath(dirname(__file__))
 
 
-def read(rel_path):
-    """Read a file.
-
-    Intentionally *not* adding an encoding option to open, See:
-    https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-
-    Args:
-        rel_path (str): Relative path to a file from this file.
-
-    Returns:
-        str: Contents of the file.
-
-    """
-    with codecs_open(join(THIS_DIR, rel_path), 'r') as file_:
-        return file_.read()
-
-
-def get_version(rel_path):
-    """Get version string without needing to import the module.
-
-    Args:
-        rel_path (str): Relative path to a file from this file.
-
-    Returns:
-        str: Version string.
-
-    Raises:
-        RuntimeError: If a version string can't be found in the provided file.
-
-    """
-    version_file = read(rel_path)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-
-    if version_match:
-        return version_match.group(1)
-
-    raise RuntimeError("Unable to find version string.")
+def local_scheme(version: str) -> str:  # pylint: disable=unused-argument
+    """Skip the local version (eg. +xyz) to upload to Test PyPI."""
+    return ""
 
 
 with codecs_open(join(THIS_DIR, 'README.md'), encoding='utf-8') as readfile:
@@ -68,6 +32,7 @@ INSTALL_REQUIRES = [
     'future',
     'pyhcl~=0.4',
     'gitpython',
+    'importlib-metadata; python_version < "3.8"',
     'pyOpenSSL',  # For embedded hook & associated script usage
     'PyYAML>=4.1,<5.3',  # match awscli top-end
     'six>=1.13.0',
@@ -90,7 +55,6 @@ INSTALL_REQUIRES = [
 
 setup(
     name='runway',
-    version=get_version('./runway/__init__.py'),
     description='Simplify infrastructure/app testing/deployment',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -114,6 +78,8 @@ setup(
     keywords='cli',
     packages=find_packages(exclude=('tests', 'integration_tests')),
     install_requires=INSTALL_REQUIRES,
+    setup_requires=['setuptools_scm'],
+    use_scm_version={"local_scheme": local_scheme},
     entry_points={
         'console_scripts': [
             'runway=runway.cli:main',

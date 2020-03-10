@@ -44,10 +44,10 @@ create_tfenv_ver_file:
 build: clean create_tfenv_ver_file
 	python setup.py sdist
 
-build_pyinstaller_file: clean create_tfenv_ver_file version_file
+build_pyinstaller_file: clean create_tfenv_ver_file
 	bash ./.github/scripts/cicd/build_pyinstaller.sh file
 
-build_pyinstaller_folder: clean create_tfenv_ver_file version_file
+build_pyinstaller_folder: clean create_tfenv_ver_file
 	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
 
 build_whl: clean create_tfenv_ver_file
@@ -57,12 +57,9 @@ release: clean create_tfenv_ver_file build
 	twine upload dist/*
 	curl -D - -X PURGE https://pypi.org/simple/runway
 
-npm_prep: version_file
+npm_prep:
+	mkdir -p tmp
 	cp npm/* . && cp npm/.[^.]* .
-	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(cat tmp/version.txt)}\"" package.json > tmp/package.json
+	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(pipenv run python ./setup.py --version)}\"" package.json > tmp/package.json
 	jq ".name = \"$${NPM_PACKAGE_NAME-$${TRAVIS_BRANCH-undefined}}\"" tmp/package.json > package.json
 	rm -rf tmp/package.json
-
-version_file:
-	mkdir -p tmp
-	pipenv run python -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt

@@ -20,9 +20,11 @@ if [ "$1" != "file" ] && [ "$1" != "folder" ]; then
     exit 1
 fi
 
+RUNWAY_VERSION=`pipenv run python ./setup.py --version`
+
 pipenv run python setup.py sdist
 pipenv run pip install .
-mkdir -p artifacts/$(cat tmp/version.txt)/$LOCAL_OS_NAME
-rm -rf dist/runway-$(cat tmp/version.txt).tar.gz
+mkdir -p artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
+rm -rf dist/runway-$RUNWAY_VERSION.tar.gz
 pipenv run pyinstaller --noconfirm --clean runway.$1.spec
-mv dist/* artifacts/$(cat tmp/version.txt)/$LOCAL_OS_NAME
+mv dist/* artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
