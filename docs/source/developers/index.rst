@@ -8,6 +8,7 @@ Developers Guide
    :maxdepth: 2
 
    getting_started
+   contributing
    github_actions
    advanced_configuration
    pyinstaller
