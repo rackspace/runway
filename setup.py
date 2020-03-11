@@ -7,7 +7,8 @@ from setuptools import find_packages, setup
 THIS_DIR = abspath(dirname(__file__))
 
 
-def local_scheme(version: str) -> str:  # pylint: disable=unused-argument
+def local_scheme(version):  # pylint: disable=unused-argument
+    # type: (str) -> str
     """Skip the local version (eg. +xyz) to upload to Test PyPI."""
     return ""
 
