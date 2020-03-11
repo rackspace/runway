@@ -313,17 +313,17 @@ jobs:
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefile-macos-latest
+          name: pyinstaller-onefolder-macos-latest
           path: artifacts
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefile-ubuntu-latest
+          name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefile-windows-latest
+          name: pyinstaller-onefolder-windows-latest
           path: artifacts
       - name: List Artifacts
         run: tree artifacts/
