@@ -267,6 +267,7 @@ jobs:
 
   build-npm:
     name: Build npm 📦
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
     needs:
       - test-python
       - build-pyinstaller-onefolder
