@@ -456,3 +456,41 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.1.0
         with:
           password: ${{ secrets.pypi_password }}
+
+  publish-s3:
+    name: Publish 📦 To S3
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
+    needs:
+      - test-python
+      - build-pyinstaller-onefile
+    env:
+      AWS_DEFAULT_REGION: us-west-2
+      AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
+      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Download Artifacts (macOS)
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pyinstaller-onefile-macos-latest
+          path: artifacts
+      - name: Download Artifacts (ubuntu)
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pyinstaller-onefile-ubuntu-latest
+          path: artifacts
+      - name: Download Artifacts (windows)
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pyinstaller-onefile-windows-latest
+          path: artifacts
+      # TODO add step to update url shortener to change 'latest' to point here if tagged release
+      - name: Install AWS CLI & Upload 📦
+        run: |
+          pip install "awscli~=1.18.19"
+          aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read

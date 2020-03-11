@@ -45,7 +45,7 @@ Based on the execution environment, this workflow will run different steps.
 - Lint & test
 - build & upload Pyinstaller_ artifacts
 - build & upload PyPi_ & npm_ artifacts
-- publish a development version to `Test PyPi`_
+- publish a development version to `Test PyPi`_ and npm_
 
 .. rubric:: Tag
 
@@ -53,7 +53,7 @@ Based on the execution environment, this workflow will run different steps.
 - build & upload Pyinstaller_ artifacts
 - build & upload PyPi_ & npm_ artifacts
 - publish a development version to `Test PyPi`_
-- publish a release to PyPi_ & npm_
+- publish a release to AWS S3, PyPi_, & npm_
 
 .. _npm: https://www.npmjs.com/package/@onica/runway
 .. _Pyinstaller: https://pypi.org/project/PyInstaller/
@@ -73,13 +73,16 @@ Linting and tests are run on Ubuntu and Windows for the following python version
 All version and OS combinations are run in parallel. If any of them fail, all the other tests will fail immediately.
 
 We are not currently running linting & tests on macOS due to the limited concurrent runner count of macOS runners.
-There are also enough similarites between macOS and Ubuntu in regards to the functionallity of Runway that it is not deemed to be a necessity at this time.
+There are also enough similarities between macOS and Ubuntu in regards to the functionality of Runway that it is not deemed to be a necessity at this time.
 
 Secrets
 =======
 
 These are the secrets_ used by this workflow that have been added to the repo and how to generate them.
-They can be added to any any fork to enable *similar* results but, you will need change the name of the application for publishing to succeed.
+They can be added to any any fork to enable *similar* results but, you will need to change the name of the application for publishing to succeed.
+
+**aws_access_key & aws_secret_key**
+  AWS access key ID and secret access key for an IAM user that has the permissions required to publish to AWS S3.
 
 **npm_api_token**
   An npm authentication token.
