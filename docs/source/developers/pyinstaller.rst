@@ -23,7 +23,7 @@ These need to be installed globally so they are not included in the Pipfile.
 Process
 *******
 
-1. Export ``TRAVIS_OS_NAME`` environment variable for your system (``linux``, ``osx``, or ``windows``).
-2. Execute ``make travisbuild_file`` or ``make travisbuild_folder`` from the root of the repo.
+1. Export ``OS_NAME`` environment variable for your system (``ubuntu-latest``, ``macos-latest``, or ``windows-latest``).
+2. Execute ``make build_pyinstaller_file`` or ``make build_pyinstaller_folder`` from the root of the repo.
 
-The output of these commands can be found in ``../artifacts``
+The output of these commands can be found in ``./artifacts``

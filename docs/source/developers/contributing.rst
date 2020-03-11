@@ -34,7 +34,7 @@ Documentation Requirements
 Docstrings
 ==========
 
-In generall, we losely follow the `Google Python Style Guide for Comments and Docstrings`.
+In general, we loosely follow the `Google Python Style Guide for Comments and Docstrings`.
 
 We use the ``napoleon`` extension for Sphinx to parse docstrings.
 Napoleon provides an `Example Google Style Python Docstring`_ that can be referenced.
@@ -46,7 +46,7 @@ Napoleon provides an `Example Google Style Python Docstring`_ that can be refere
 reStructuredText Formatting
 ===========================
 
-In general, we losely follow the `Python Style Guide for documentation`_.
+In general, we loosely follow the `Python Style Guide for documentation`_.
 
 .. note:: Not all documentation pages follow this yet. If the page you are updating deviates from this format, adapt to the format of the page.
 
@@ -64,7 +64,7 @@ Section headers are created by underlining (and optionally overlining) the secti
 5. ``^``, for **h5**
 6. ``"``, for **h6**
 
-**h1** and **h2** should have two blank lines seperating them from sections with headings of the same level or higher.
+**h1** and **h2** should have two blank lines separating them from sections with headings of the same level or higher.
 
 A ''rubric'' directive can be used to create a non-indexed heading.
 
