@@ -114,10 +114,9 @@ jobs:
     env:
       OS_NAME: ${{ matrix.os }}
     steps:
-      - name: Checkout Repo (all history)
+      # - *checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2.0.0
-        with:
-          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -194,10 +193,9 @@ jobs:
     env:
       OS_NAME: ${{ matrix.os }}
     steps:
-      - name: Checkout Repo (all history)
+      # - *checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2.0.0
-        with:
-          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -265,7 +263,6 @@ jobs:
 
   build-npm:
     name: Build npm 📦
-    # if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
     needs:
       - test-python
       - build-pyinstaller-onefolder
@@ -279,10 +276,9 @@ jobs:
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Repo (all history)
+      # - *checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2.0.0
-        with:
-          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -350,7 +346,7 @@ jobs:
 
   build-pypi:
     name: Build PyPi 📦
-    # if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
     needs:
       - test-python
     strategy:
@@ -360,10 +356,9 @@ jobs:
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Repo (all history)
+      # - *checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2.0.0
-        with:
-          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
