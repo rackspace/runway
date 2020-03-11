@@ -261,6 +261,89 @@ jobs:
           name: pyinstaller-onefolder-${{ matrix.os }}
           path: artifacts
 
+  build-npm:
+    name: Build npm 📦
+    needs:
+      - test-python
+      - build-pyinstaller-onefolder
+    env:
+      NODE_VERSION: 12
+      NPM_PACKAGE_NAME: '@onica/runway'
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7]
+    runs-on: ${{ matrix.os }}
+    steps:
+      # - *checkout
+      - name: Checkout Repo
+        uses: actions/checkout@v2.0.0
+      # - *install_python
+      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
+        uses: actions/setup-node@v1.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org/
+      - name: Install Dependencies (ubuntu)
+        run: sudo apt-get update && sudo apt-get install sed tree -y
+      # - *cache_pip_ubuntu
+      - name: Pip Cache (ubuntu)
+        uses: actions/cache@v1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          path:  ~/.cache/pip
+          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ matrix.os }}-pip-${{ matrix.python-version }}
+      - name: Install Global Python Packages
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
+      # - *cache_pipenv
+      - name: Pipenv Cache
+        uses: actions/cache@v1
+        with:
+          path: ./.venv
+          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+      # - *pipenv_sync
+      - name: Setup Python Virtual Environment (3.x)
+        run: pipenv sync --dev
+      - name: Download Artifacts (macOS)
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pyinstaller-onefile-macos-latest
+          path: artifacts
+      - name: Download Artifacts (ubuntu)
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pyinstaller-onefile-ubuntu-latest
+          path: artifacts
+      - name: Download Artifacts (windows)
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: pyinstaller-onefile-windows-latest
+          path: artifacts
+      - name: List Artifacts
+        run: tree artifacts/
+      - name: npm Prep
+        run: make npm_prep
+      - name: npm pack
+        run: |
+          npm pack
+          find . -name 'onica-runway-*.*.*-*.tgz' -exec mv {} artifacts/ \;
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: npm-pack
+          path: artifacts
+
   build-pypi:
     name: Build PyPi 📦
     if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
