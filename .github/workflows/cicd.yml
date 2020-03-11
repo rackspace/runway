@@ -343,12 +343,49 @@ jobs:
       - name: npm pack
         run: |
           npm pack
+          rm -rf artifacts && mkdir -p artifacts
           find . -name 'onica-runway-*.*.*-*.tgz' -exec mv {} artifacts/ \;
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1.0.0
         with:
           name: npm-pack
           path: artifacts
+
+  publish-npm:
+    name: Publish 📦 To npm
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
+    needs:
+      - build-npm
+    env:
+      NODE_VERSION: 12
+      NPM_PACKAGE_NAME: '@onica/runway'
+      NODE_AUTH_TOKEN: ${{secrets.npm_api_token}}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
+        uses: actions/setup-node@v1.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org/
+      - name: Download Artifact
+        uses: actions/download-artifact@v1.0.0
+        with:
+          name: npm-pack
+          path: artifacts
+      - name: Publish Distribution 📦 to npm (dev)
+        if: github.ref == 'refs/heads/master'
+        run: |
+          find ./artifacts -name 'runway-*.tgz' -exec npm publish {} --tag dev \;
+      - name: Publish Distribution 📦 to npm
+        if: startsWith(github.event.ref, 'refs/tags')
+        # TODO support alpha, beta, and rc tags
+        run: |
+          find ./artifacts -name 'runway-*.tgz' -exec npm publish {} \;
 
   build-pypi:
     name: Build PyPi 📦
