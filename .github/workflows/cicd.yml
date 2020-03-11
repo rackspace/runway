@@ -117,6 +117,8 @@ jobs:
       # - *checkout
       - name: Checkout Repo
         uses: actions/checkout@v2.0.0
+      - name: Fetch All Tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -196,6 +198,8 @@ jobs:
       # - *checkout
       - name: Checkout Repo
         uses: actions/checkout@v2.0.0
+      - name: Fetch All Tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -279,6 +283,8 @@ jobs:
       # - *checkout
       - name: Checkout Repo
         uses: actions/checkout@v2.0.0
+      - name: Fetch All Tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -359,6 +365,8 @@ jobs:
       # - *checkout
       - name: Checkout Repo
         uses: actions/checkout@v2.0.0
+      - name: Fetch All Tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
