@@ -319,7 +319,7 @@ class StaticSite(RunwayModule):
     def _get_supported_identity_providers(self):
         providers = self.parameters.get('staticsite_supported_identity_providers')
         if providers:
-            return [provider.upper().strip() for provider in providers.split(',')]
+            return [provider.strip() for provider in providers.split(',')]
         return ['COGNITO']
 
     def _get_dependencies_variables(self):
