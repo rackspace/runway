@@ -369,12 +369,12 @@ jobs:
       - name: Publish Distribution 📦 to npm (dev)
         if: github.ref == 'refs/heads/master'
         run: |
-          find ./artifacts -name 'runway-*.tgz' -exec npm publish {} --tag dev \;
+          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} --tag dev \;
       - name: Publish Distribution 📦 to npm
         if: startsWith(github.event.ref, 'refs/tags')
         # TODO support alpha, beta, and rc tags
         run: |
-          find ./artifacts -name 'runway-*.tgz' -exec npm publish {} \;
+          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} \;
 
   build-pypi:
     name: Build PyPi 📦
