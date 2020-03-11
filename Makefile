@@ -57,10 +57,12 @@ release: clean create_tfenv_ver_file build
 	twine upload dist/*
 	curl -D - -X PURGE https://pypi.org/simple/runway
 
-# copies npm package files to the root of the repo, updates package.json
-# with the name of the package and semver version from scm (formated for npm)
+# copies artifacts to src & npm package files to the root of the repo
+# updates package.json with the name of the package & semver version from scm (formated for npm)
 npm_prep:
 	mkdir -p tmp
+	mkdir -p src
+	cp -r artifacts/$$(pipenv run python ./setup.py --version)/* src/
 	cp npm/* . && cp npm/.[^.]* .
 	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(pipenv run python ./setup.py --version | sed -En "s/\.dev/-dev/p")}\"" package.json > tmp/package.json
 	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
