@@ -309,18 +309,7 @@ jobs:
       - name: Install Global Python Packages
         run: |
           python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
-      # - *cache_pipenv
-      - name: Pipenv Cache
-        uses: actions/cache@v1
-        with:
-          path: ./.venv
-          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
-      # - *pipenv_sync
-      - name: Setup Python Virtual Environment (3.x)
-        run: pipenv sync --dev
+          pip install "setuptools-scm~=3.5.0" wheel
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v1.0.0
         with:
