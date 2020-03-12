@@ -10,7 +10,7 @@ from typing import Any, Dict, List  # pylint: disable=unused-import
 import awacs.s3
 from awacs.aws import Allow, Principal, Statement
 from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (Join, Output,  # noqa pylint: disable=unused-import
+from troposphere import (Join, NoValue,  # noqa pylint: disable=unused-import
                          awslambda, cloudfront, iam, s3)
 
 from .staticsite import StaticSite
@@ -55,6 +55,10 @@ class AuthAtEdge(StaticSite):
         'RewriteDirectoryIndex': {'type': str,
                                   'default': '',
                                   'description': 'The path for rewriting the directory index'},
+        'RoleBoundaryArn': {'type': str,
+                            'default': '',
+                            'description': '(Optional) IAM Role Boundary to '
+                                           'apply to any created IAM Roles.'},
         'NonSPAMode': {'type': bool,
                        'default': False,
                        'description': 'Whether Auth@Edge should omit SPA specific settings'},
@@ -236,6 +240,7 @@ class AuthAtEdge(StaticSite):
     def add_lambda_execution_role(self):
         # type: () -> iam.Role
         """Create the Lambda@Edge execution role."""
+        variables = self.get_variables()
         return self.template.add_resource(
             iam.Role(
                 'LambdaExecutionRole',
@@ -244,7 +249,11 @@ class AuthAtEdge(StaticSite):
                 ),
                 ManagedPolicyArns=[
                     self.IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
-                ]
+                ],
+                PermissionsBoundary=(
+                    variables['RoleBoundaryArn'] if self.role_boundary_specified
+                    else NoValue
+                )
             )
         )
 

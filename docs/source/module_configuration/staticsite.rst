@@ -25,22 +25,13 @@ Parameters
     staticsite_aliases: example.com,foo.example.com
 
 **staticsite_acmcert_arn (Optional[str])**
-  The certificate arn used for any alias domains supplied. This is a requirement when supplying any custom domain unless ``staticsite_acmcert_ssm_param`` is specified.
+  The certificate arn used for any alias domains supplied. This is a requirement when supplying any custom domain.
 
   Example:
 
   .. code-block:: yaml
 
     staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
-
-**staticsite_acmcert_ssm_param (Optional[str])**
-  The certificate ARN can be looked up dynamically via SSM. This is a requirement when supplying any custom domain unless ``staticsite_acmcert_arn`` is specified.
-
-  Example:
-
-  .. code-block:: yaml
-
-    staticsite_acmcert_arn: us-west-2@MySSMParamName
 
 **staticsite_enable_cf_logging (Optional[bool])**
   Defaults to ``true``, allows the user to specify if they would like logging performed on their CloudFront distribution.
@@ -220,6 +211,17 @@ Parameters
   .. code-block:: yaml
 
     staticsite_non_spa: true
+
+**staticsite_role_boundary_arn (Optional[str])**
+  Defines an IAM Managed Policy that will be set as the permissions boundary
+  for any IAM Roles created to support the site (e.g. when using
+  ``staticsite_auth_at_edge`` or ``staticsite_rewrite_directory_index``).
+
+  Example:
+
+  .. code-block:: yaml
+
+    staticsite_role_boundary_arn: arn:aws:iam::444455556666:policy/MyCustomPolicy
 
 Options
 -------

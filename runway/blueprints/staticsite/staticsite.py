@@ -46,6 +46,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                   'description': '(Optional) File name to '
                                                  'append to directory '
                                                  'requests.'},
+        'RoleBoundaryArn': {'type': str,
+                            'default': '',
+                            'description': '(Optional) IAM Role permissions '
+                                           'boundary applied to any created '
+                                           'roles.'},
         'WAFWebACL': {'type': str,
                       'default': '',
                       'description': '(Optional) WAF id to associate with the '
@@ -90,6 +95,12 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         # type: () -> bool
         """Directory Index specified conditional."""
         return self.get_variables()['RewriteDirectoryIndex'] != ''
+
+    @property
+    def role_boundary_specified(self):
+        # type: () -> bool
+        """IAM Role Boundary specified conditional."""
+        return self.get_variables()['RoleBoundaryArn'] != ''
 
     @property
     def waf_name_specified(self):
@@ -397,6 +408,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         Return:
             dict: The index rewrite role
         """
+        variables = self.get_variables()
         return self.template.add_resource(
             iam.Role(
                 'CFDirectoryIndexRewriteRole',
@@ -414,7 +426,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 ),
                 ManagedPolicyArns=[
                     IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
-                ]
+                ],
+                PermissionsBoundary=(
+                    variables['RoleBoundaryArn'] if self.role_boundary_specified
+                    else NoValue
+                )
             )
         )
 
