@@ -9,6 +9,8 @@ import os
 import pkgutil
 from pkg_resources import get_distribution, get_entry_info
 
+from PyInstaller.utils.hooks import copy_metadata
+
 # distutils not included with virtualenv < 20 so we have to import it here
 # can be removed once we can upgrade virtualenv and pyinstaller
 import distutils
@@ -70,6 +72,7 @@ data_files.append(('{}/botocore/data'.format(get_distribution('botocore').locati
                    'botocore/data/'))
 data_files.append(('{}/awscli/data'.format(get_distribution('awscli').location),
                    'awscli/data/'))
+data_files.append(copy_metadata('runway')[0])  # support scm version
 
 # pyinstaller is not able to find dependencies of dependencies
 # unless a hook already exists for pyinstaller so we have to
