@@ -181,11 +181,15 @@ class StaticSite(RunwayModule):
                 'args': lambda_config_variables
             })
             post_build.insert(0, {
-                'path': 'runway.hooks.staticsite.auth_at_edge.client_updater.update', # noqa
+                'path': 'runway.hooks.staticsite.auth_at_edge.client_updater.update',
                 'required': True,
                 'data_key': 'client_updater',
                 'args': client_updater_variables
             })
+
+        if self.parameters.get('staticsite_role_boundary_arn', False):
+            site_stack_variables['RoleBoundaryArn'] = \
+                self.parameters.pop('staticsite_role_boundary_arn')
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
