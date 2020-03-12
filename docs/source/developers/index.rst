@@ -12,5 +12,6 @@ Developers Guide
    github_actions
    advanced_configuration
    pyinstaller
+   maintainers/index
 
 

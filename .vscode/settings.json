@@ -78,6 +78,7 @@
         "testfixtures",
         "unshallow",
         "urllib",
+        "wontfix",
         "xmltodict",
         "xray"
     ],
