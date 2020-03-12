@@ -548,6 +548,7 @@ class Provider(BaseProvider):
 
     IN_PROGRESS_STATUSES = (
         "CREATE_IN_PROGRESS",
+        "IMPORT_IN_PROGRESS",
         "UPDATE_IN_PROGRESS",
         "DELETE_IN_PROGRESS",
         "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
@@ -555,6 +556,7 @@ class Provider(BaseProvider):
 
     ROLLING_BACK_STATUSES = (
         "ROLLBACK_IN_PROGRESS",
+        "IMPORT_ROLLBACK_IN_PROGRESS",
         "UPDATE_ROLLBACK_IN_PROGRESS"
     )
 
@@ -563,6 +565,7 @@ class Provider(BaseProvider):
         "ROLLBACK_FAILED",
         "ROLLBACK_COMPLETE",
         "DELETE_FAILED",
+        "IMPORT_ROLLBACK_FAILED",
         "UPDATE_ROLLBACK_FAILED",
         # Note: UPDATE_ROLLBACK_COMPLETE is in both the FAILED and COMPLETE
         # sets, because we need to wait for it when a rollback is triggered,
@@ -573,7 +576,9 @@ class Provider(BaseProvider):
     COMPLETE_STATUSES = (
         "CREATE_COMPLETE",
         "DELETE_COMPLETE",
+        "IMPORT_COMPLETE",
         "UPDATE_COMPLETE",
+        "IMPORT_ROLLBACK_COMPLETE",
         "UPDATE_ROLLBACK_COMPLETE",
     )
 
