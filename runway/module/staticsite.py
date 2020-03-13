@@ -32,7 +32,6 @@ class StaticSite(RunwayModule):
     def __init__(self, context, path, options=None):
         """Initialize."""
         super(StaticSite, self).__init__(context, path, options)
-        LOGGER.info(self.context.env_region)
         self.name = self.options.get('name', self.options.get('path'))
         self.user_options = self.options.get('options', {})
         self.parameters = self.options.get('parameters')
@@ -60,6 +59,20 @@ class StaticSite(RunwayModule):
                        "(e.g. url rewrites) will take quite a while (up to an hour). "
                        "Unless you receive an error your deployment is still running.")
                 LOGGER.info(msg.upper())
+
+                # Auth@Edge warning about subsequent deploys
+                if self.parameters.get('staticsite_auth_at_edge', False) is True:
+                    msg = ("PLEASE NOTE: A hook that is part of the dependencies stack of "
+                           "the Auth@Edge static site deployment is designed to verify that "
+                           "the correct Callback URLs are being used when a User Pool Client "
+                           "already exists for the application. This ensures that there is no "
+                           "interruption of service while the deployment reaches the stage "
+                           "where the Callback URLs are updated to that of the Distribution. "
+                           "Because of this you will receive a change set request on your first "
+                           "subsequent deploy from the first, or any subsequent ones where the "
+                           "alias domains have changed.")
+                    LOGGER.info(msg)
+
             self._setup_website_module(command='deploy')
         else:
             LOGGER.info("Skipping staticsite deploy of %s; no environment "
@@ -97,6 +110,19 @@ class StaticSite(RunwayModule):
         return module_dir
 
     def _create_dependencies_yaml(self, module_dir):
+        pre_build = []
+
+        if self.parameters.get('staticsite_auth_at_edge', False):
+            pre_build = [{
+                'path': 'runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get',
+                'required': True,
+                'data_key': 'aae_callback_url_retriever',
+                'args': {
+                    'user_pool_id': self._extract_user_pool_id(),
+                    'stack_name': "${namespace}-%s-dependencies" % self.name
+                }
+            }]
+
         with open(os.path.join(module_dir, '01-dependencies.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
                 {'namespace': '${namespace}',
@@ -105,6 +131,7 @@ class StaticSite(RunwayModule):
                      "%s-dependencies" % self.name: {
                          'class_path': 'runway.blueprints.staticsite.dependencies.Dependencies',
                          'variables': self._get_dependencies_variables()}},
+                 'pre_build': pre_build,
                  'pre_destroy': [
                      {'path': 'runway.hooks.cleanup_s3.purge_bucket',
                       'required': True,
@@ -215,7 +242,7 @@ class StaticSite(RunwayModule):
 
     def _get_site_stack_variables(self):
         site_stack_variables = {
-            'Aliases': self.parameters.get('staticsite_aliases', '').split(','),
+            'Aliases': [],
             'DisableCloudFront': self.parameters.get('staticsite_cf_disable', False),
             'RewriteDirectoryIndex': self.parameters.get(
                 'staticsite_rewrite_directory_index',
@@ -228,6 +255,9 @@ class StaticSite(RunwayModule):
             'SignOutUrl': '${default staticsite_sign_out_url::/signout}',
             'WAFWebACL': self.parameters.get('staticsite_web_acl', '')
         }
+
+        if self.parameters.get('staticsite_aliases'):
+            site_stack_variables['Aliases'] = self.parameters.get('staticsite_aliases').split(',')
 
         if self.parameters.get('staticsite_acmcert_arn'):
             site_stack_variables['AcmCertificateArn'] = \
@@ -361,9 +391,9 @@ class StaticSite(RunwayModule):
         }
 
     def _get_client_updater_variables(self, name, site_stack_variables):
-        aliases = list(map(add_url_scheme, site_stack_variables['Aliases']))
+        aliases = [add_url_scheme(x) for x in site_stack_variables['Aliases']]
         return {
-            'alternate_domains': [] if aliases[0] == '' else aliases,
+            'alternate_domains': aliases,
             'client_id': "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
             'distribution_domain': '${rxref %s::CFDistributionDomainName}' % name,
             'oauth_scopes': site_stack_variables['OAuthScopes'],

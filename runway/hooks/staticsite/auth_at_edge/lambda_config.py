@@ -69,8 +69,6 @@ def write(context,  # type: context.Context
         'redirect_path_sign_out': kwargs['redirect_path_sign_out'],
         'user_pool_id': kwargs['user_pool_id'],
     }
-    LOGGER.info('LAMBDA_CONFIG')
-    LOGGER.info(config)
 
     # Shared file that contains the method called for configuration data
     path = os.path.join(
