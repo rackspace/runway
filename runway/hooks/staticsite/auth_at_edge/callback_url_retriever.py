@@ -36,24 +36,31 @@ def get(context,  # pylint: disable=unused-argument
 
     Keyword Args:
         user_pool_id (str): The ID of the User Pool to check for a client
+        stack_name (str) The name of the stack to check against
     """
     session = get_session(provider.region)
+    cloudformation_client = session.client('cloudformation')
     cognito_client = session.client('cognito-idp')
+
     context_dict = {}
     context_dict['callback_urls'] = ['https://example.tmp']
 
     try:
-        clients = cognito_client.list_user_pool_clients(
-            UserPoolId=kwargs['user_pool_id']
-        )['UserPoolClients']
+        # Return the current stack if one exists
+        stack_desc = cloudformation_client.describe_stacks(
+            StackName=kwargs['stack_name']
+        )
+        # Get the client_id from the outputs
+        outputs = stack_desc['Stacks'][0]['Outputs']
+        client_id = [o['OutputValue'] for o in outputs if o['OutputKey'] == 'AuthAtEdgeClient'][0]
 
-        client = next((c for c in clients if c['ClientName'].startswith('AuthAtEdge')), None)
-
+        # Poll the user pool client information
         resp = cognito_client.describe_user_pool_client(
             UserPoolId=kwargs['user_pool_id'],
-            ClientId=client['ClientId']
+            ClientId=client_id
         )
 
+        # Retrieve the callbacks
         callbacks = resp['UserPoolClient']['CallbackURLs']
 
         if callbacks:

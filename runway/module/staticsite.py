@@ -32,7 +32,6 @@ class StaticSite(RunwayModule):
     def __init__(self, context, path, options=None):
         """Initialize."""
         super(StaticSite, self).__init__(context, path, options)
-        LOGGER.info(self.context.env_region)
         self.name = self.options.get('name', self.options.get('path'))
         self.user_options = self.options.get('options', {})
         self.parameters = self.options.get('parameters')
@@ -119,7 +118,8 @@ class StaticSite(RunwayModule):
                 'required': True,
                 'data_key': 'aae_callback_url_retriever',
                 'args': {
-                    'user_pool_id': self._extract_user_pool_id()
+                    'user_pool_id': self._extract_user_pool_id(),
+                    'stack_name': "${namespace}-%s-dependencies" % self.name
                 }
             }]
 
