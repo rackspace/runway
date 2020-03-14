@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - supports `load`, `transform`, `get`, and `default` arguments
   - dot notation to get nested data from the dictionary
 
+### Fixed
+- git module path will now default to the root of the repo when no `location` is provided.
+
 ## [1.4.4] - 2020-02-28
 ### Fixed
 - explicitly pass `provider` as a kwarg for resolving complex variable types
