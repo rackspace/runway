@@ -2,9 +2,9 @@
 import copy
 import logging
 import sys
+import warnings
 from io import StringIO
 from string import Template
-import warnings
 
 import yaml
 from schematics import Model
@@ -580,19 +580,6 @@ class Config(Model):
         except SchematicsError as err:
             raise exceptions.InvalidConfig(err.errors)
 
-    def validate_stacker_cache_dir(self, _data, value):  # pylint: disable=no-self-use
-        """Validate stacker_cache_dir is not used.
-
-        If in use, show deprecation warning.
-
-        """
-        msg = ('Use of "stacker_cache_dir" has been deprecated and will '
-               'be removed after the next major release. Please use '
-               '"cfngin_cache_dir".')
-        if value:
-            warnings.warn(msg, DeprecationWarning)
-            LOGGER.warning(msg)
-
     def validate_stacker_bucket(self, _data, value):  # pylint: disable=no-self-use
         """Validate stack_bucket is not used.
 
@@ -615,6 +602,19 @@ class Config(Model):
         msg = ('Use of "stacker_bucket_region" has been deprecated and will '
                'be removed after the next major release. Please use '
                '"cfngin_bucket_region".')
+        if value:
+            warnings.warn(msg, DeprecationWarning)
+            LOGGER.warning(msg)
+
+    def validate_stacker_cache_dir(self, _data, value):  # pylint: disable=no-self-use
+        """Validate stacker_cache_dir is not used.
+
+        If in use, show deprecation warning.
+
+        """
+        msg = ('Use of "stacker_cache_dir" has been deprecated and will '
+               'be removed after the next major release. Please use '
+               '"cfngin_cache_dir".')
         if value:
             warnings.warn(msg, DeprecationWarning)
             LOGGER.warning(msg)
