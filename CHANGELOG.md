@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `hook_data` lookup now supports the standardized lookup query syntax
   - supports `load`, `transform`, `get`, and `default` arguments
   - dot notation to get nested data from the dictionary
+- deprecate `stacker_bucket` in CFNgin configs
+  - replaced by `cfngin_bucket`
+- deprecate `stacker_bucket_region` in CFNgin configs
+  - replaced by `cfngin_bucket_region`
 
 ## [1.4.4] - 2020-02-28
 ### Fixed
