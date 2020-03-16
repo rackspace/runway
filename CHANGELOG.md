@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `hook_data` lookup now supports the standardized lookup query syntax
   - supports `load`, `transform`, `get`, and `default` arguments
   - dot notation to get nested data from the dictionary
+- deprecate `stacker_bucket` in CFNgin configs
+  - replaced by `cfngin_bucket`
+- deprecate `stacker_bucket_region` in CFNgin configs
+  - replaced by `cfngin_bucket_region`
+- deprecate `stacker_cache_dir` in CFNgin configs
+  - replaced by `cfngin_cache_dir`
 
 ### Fixed
 - git module path will now default to the root of the repo when no `location` is provided.
