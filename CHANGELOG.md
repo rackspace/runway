@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - replaced by `cfngin_bucket`
 - deprecate `stacker_bucket_region` in CFNgin configs
   - replaced by `cfngin_bucket_region`
+- deprecate `stacker_cache_dir` in CFNgin configs
+  - replaced by `cfngin_cache_dir`
 
 ## [1.4.4] - 2020-02-28
 ### Fixed

@@ -580,6 +580,19 @@ class Config(Model):
         except SchematicsError as err:
             raise exceptions.InvalidConfig(err.errors)
 
+    def validate_stacker_cache_dir(self, _data, value):  # pylint: disable=no-self-use
+        """Validate stacker_cache_dir is not used.
+
+        If in use, show deprecation warning.
+
+        """
+        msg = ('Use of "stacker_cache_dir" has been deprecated and will '
+               'be removed after the next major release. Please use '
+               '"cfngin_cache_dir".')
+        if value:
+            warnings.warn(msg, DeprecationWarning)
+            LOGGER.warning(msg)
+
     def validate_stacker_bucket(self, _data, value):  # pylint: disable=no-self-use
         """Validate stack_bucket is not used.
 
@@ -594,7 +607,7 @@ class Config(Model):
             LOGGER.warning(msg)
 
     def validate_stacker_bucket_region(self, _data, value):  # pylint: disable=no-self-use
-        """Validate stack_bucket is not used.
+        """Validate stacker_bucket_regio is not used.
 
         If in use, show deprecation warning.
 
