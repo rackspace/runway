@@ -9,10 +9,10 @@ LOGGER = logging.getLogger('runway')
 
 
 class MockGitSource(Source):
-    """Mock a Git Source Object"""
+    """Mock a Git Source Object."""
 
     def fetch(self):
-        """ Fetch """
+        """Fetch."""
         return 'mock/git/folder'
 
 
@@ -28,12 +28,16 @@ class PathTester(unittest.TestCase):
         self.assertEqual(options, {})
 
     def test_parse_git_source_no_location_or_options(self):
-        """Parsing Git source with no location or options. Verify tuple is parsed as anticipated."""
+        """Parsing Git source with no location or options.
+
+        Verify tuple is parsed as anticipated.
+
+        """
         (source, uri, location, options) = Path.parse(
             {'path': 'git::git://github.com/onicagroup/foo/bar.git'}
         )
         self.assertEqual(source, 'git')
-        self.assertEqual(location, '/')
+        self.assertEqual(location, '')
         self.assertEqual(uri, 'git://github.com/onicagroup/foo/bar.git')
         self.assertEqual(options, {})
 
@@ -57,7 +61,7 @@ class PathTester(unittest.TestCase):
             {'path': 'git::git://github.com/onicagroup/foo/bar.git?branch=foo'}
         )
         self.assertEqual(source, 'git')
-        self.assertEqual(location, '/')
+        self.assertEqual(location, '')
         self.assertEqual(uri, 'git://github.com/onicagroup/foo/bar.git')
         self.assertEqual(options, {'branch': 'foo'})
 
@@ -71,15 +75,15 @@ class PathTester(unittest.TestCase):
             {'path': 'git::git://github.com/onicagroup/foo/bar.git?branch=foo&bar=baz'}
         )
         self.assertEqual(source, 'git')
-        self.assertEqual(location, '/')
+        self.assertEqual(location, '')
         self.assertEqual(uri, 'git://github.com/onicagroup/foo/bar.git')
         self.assertEqual(options, {'branch': 'foo', 'bar': 'baz'})
 
     def test_parse_git_source_with_options_and_location(self):
-        """
-        Parsing Git source with options and location
+        """Parsing Git source with options and location.
 
         Verify tuple is parsed as anticipated.
+
         """
         (source, uri, location, options) = Path.parse(
             {'path': 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo'}
@@ -90,10 +94,10 @@ class PathTester(unittest.TestCase):
         self.assertEqual(options, {'branch': 'foo'})
 
     def test_parse_git_source_with_multiple_options_and_location(self):
-        """
-        Parsing Git source with multiple options and location
+        """Parsing Git source with multiple options and location.
 
         Verify tuple is parsed as anticipated.
+
         """
         path = 'git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz'
         (source, uri, location, options) = Path.parse({'path': path})
@@ -125,11 +129,11 @@ class PathTester(unittest.TestCase):
         self.assertEqual(instance2.module_root, 'fake/env/root')
 
     def test_module_root_set_to_contcatenated_path(self):
-        """
-            Test module root set to concatednated path.
+        """Test module root set to concatednated path.
 
-            When the path location is local and not the
-            root combine the location with the env_root.
+        When the path location is local and not the root combine the location
+        with the env_root.
+
         """
         path = 'foo/bar'
         instance = Path({'path': path}, 'fake/env/root', git_source_class=MockGitSource)
