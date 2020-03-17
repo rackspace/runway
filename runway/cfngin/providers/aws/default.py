@@ -775,7 +775,7 @@ class Provider(BaseProvider):
 
     def create_stack(self, fqn,  # pylint: disable=arguments-differ
                      template, parameters, tags, force_change_set=False,
-                     stack_policy=None, **kwargs):
+                     stack_policy=None, termination_protection=False, **kwargs):
         """Create a new Cloudformation stack.
 
         Args:
@@ -789,6 +789,8 @@ class Provider(BaseProvider):
             force_change_set (bool): Whether or not to force change set use.
             stack_policy (:class:`runway.cfngin.providers.base.Template`):
                 A template object representing a stack policy.
+            termination_protection (bool): End state of the stack's termination
+                protection.
 
         """
         LOGGER.debug("Attempting to create stack %s:.", fqn)
@@ -816,6 +818,9 @@ class Provider(BaseProvider):
                 service_role=self.service_role,
                 stack_policy=stack_policy,
             )
+            # this arg is only valid for stack creation so its not part of
+            # generate_cloudformation_args.
+            args['EnableTerminationProtection'] = termination_protection
 
             try:
                 self.cloudformation.create_stack(**args)
@@ -918,7 +923,8 @@ class Provider(BaseProvider):
 
     def update_stack(self, fqn, template,  # pylint: disable=arguments-differ
                      old_parameters, parameters, tags, force_interactive=False,
-                     force_change_set=False, stack_policy=None, **kwargs):
+                     force_change_set=False, stack_policy=None,
+                     termination_protection=False, **kwargs):
         """Update a Cloudformation stack.
 
         Args:
@@ -941,6 +947,8 @@ class Provider(BaseProvider):
                 must be executed with a change set.
             stack_policy (:class:`runway.cfngin.providers.base.Template`):
                 A template object representing a stack policy.
+            termination_protection (bool): End state of the stack's termination
+                protection.
 
         """
         LOGGER.debug("Attempting to update stack %s:", fqn)
@@ -953,8 +961,33 @@ class Provider(BaseProvider):
         update_method = self.select_update_method(force_interactive,
                                                   force_change_set)
 
+        self.update_termination_protection(fqn, termination_protection)
         return update_method(fqn, template, old_parameters, parameters,
                              stack_policy=stack_policy, tags=tags, **kwargs)
+
+    def update_termination_protection(self, fqn, termination_protection):
+        """Update a Stack's termination protection if needed.
+
+        Runs before the normal stack update process.
+
+        Args:
+            fqn (str): The fully qualified name of the Cloudformation stack.
+            termination_protection (bool): End state of the stack's termination
+                protection.
+
+        """
+        stack = self.get_stack(fqn)
+
+        if stack['EnableTerminationProtection'] != termination_protection:
+            LOGGER.debug(
+                'Updating termination protection of stack "%s" to "%s"',
+                fqn,
+                termination_protection
+            )
+            self.cloudformation.update_termination_protection(
+                EnableTerminationProtection=termination_protection,
+                StackName=fqn
+            )
 
     def deal_with_changeset_stack_policy(self, fqn, stack_policy):
         """Set a stack policy when using changesets.
@@ -996,7 +1029,21 @@ class Provider(BaseProvider):
         if approval != 'y':
             raise exceptions.CancelExecution
 
-        return self.noninteractive_destroy_stack(fqn, **kwargs)
+        try:
+            return self.noninteractive_destroy_stack(fqn, **kwargs)
+        except botocore.exceptions.ClientError as err:
+            if 'TerminationProtection' in err.response['Error']['Message']:
+                approval = ui.ask('Termination protection is enabled for '
+                                  "stack '{}'.\nWould you like to disable it "
+                                  'and try deleting the stack again? '
+                                  '[{}] '.format(
+                                      fqn,
+                                      '/'.join(approval_options)
+                                  )).lower()
+                if approval == 'y':
+                    self.update_termination_protection(fqn, False)
+                    return self.noninteractive_destroy_stack(fqn, **kwargs)
+            raise
 
     def interactive_update_stack(self, fqn, template, old_parameters,
                                  parameters, stack_policy, tags):
