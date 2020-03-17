@@ -1035,7 +1035,7 @@ class Provider(BaseProvider):
             if 'TerminationProtection' in err.response['Error']['Message']:
                 approval = ui.ask('Termination protection is enabled for '
                                   "stack '{}'.\nWould you like to disable it "
-                                  'and try deleting the stack again? '
+                                  'and try destroying the stack again? '
                                   '[{}] '.format(
                                       fqn,
                                       '/'.join(approval_options)
