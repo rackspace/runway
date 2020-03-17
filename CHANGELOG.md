@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - git module path will now default to the root of the repo when no `location` is provided.
+- cfngin correctly notifies when a stack will be deleted during `runway plan` when using persistent graph
 
 ## [1.4.4] - 2020-02-28
 ### Fixed
