@@ -47,7 +47,8 @@ def random_string(length=12):
 def generate_describe_stacks_stack(stack_name,
                                    creation_time=None,
                                    stack_status="CREATE_COMPLETE",
-                                   tags=None):
+                                   tags=None,
+                                   termination_protection=False):
     """Generate describe stacks stack."""
     tags = tags or []
     return {
@@ -55,7 +56,8 @@ def generate_describe_stacks_stack(stack_name,
         "StackId": stack_name,
         "CreationTime": creation_time or datetime(2015, 1, 1),
         "StackStatus": stack_status,
-        "Tags": tags
+        "Tags": tags,
+        "EnableTerminationProtection": termination_protection
     }
 
 
@@ -911,11 +913,14 @@ class TestProviderInteractiveMode(unittest.TestCase):
         stack_name = "my-fake-stack"
 
         self.stubber.add_response(
+            'describe_stacks',
+            {'Stacks': [generate_describe_stacks_stack(stack_name)]}
+        )
+        self.stubber.add_response(
             "create_change_set",
             {'Id': 'CHANGESETID', 'StackId': 'STACKID'}
         )
-        changes = []
-        changes.append(generate_change())
+        changes = [generate_change()]
 
         self.stubber.add_response(
             "describe_change_set",
@@ -949,11 +954,14 @@ class TestProviderInteractiveMode(unittest.TestCase):
         stack_name = "my-fake-stack"
 
         self.stubber.add_response(
+            'describe_stacks',
+            {'Stacks': [generate_describe_stacks_stack(stack_name)]}
+        )
+        self.stubber.add_response(
             "create_change_set",
             {'Id': 'CHANGESETID', 'StackId': 'STACKID'}
         )
-        changes = []
-        changes.append(generate_change())
+        changes = [generate_change()]
 
         self.stubber.add_response(
             "describe_change_set",
