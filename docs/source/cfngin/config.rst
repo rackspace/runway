@@ -509,28 +509,28 @@ If no ``stack_name`` is provided, the value here will be used for the name of th
 
 A stack has the following keys:
 
-**class_path:**
+**class_path (str)**
   The python class path to the Blueprint_ to be used. Specify this or
   ``template_path`` for the stack.
 
-**description:**
+**description (str)**
   A short description to apply to the stack. This overwrites any description
   provided in the Blueprint_. See:
   http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
 
-**enabled:**
+**enabled (bool)**
   (optional) If set to false, the stack is disabled, and will not be
   built or updated. This can allow you to disable stacks in different
   environments.
 
-**in_progress_behavior**:
+**in_progress_behavior (str)**
   (optional): If provided, specifies the behavior for when a stack is in
   ``CREATE_IN_PROGRESS`` or ``UPDATE_IN_PROGRESS``. By default, CFNgin will raise
   an exception if the stack is in an ``IN_PROGRESS`` state. You can set this
   option to ``wait`` and CFNgin will wait for the previous update to complete
   before attempting to update the stack.
 
-**locked:**
+**locked (bool)**
   (optional) If set to true, the stack is locked and will not be
   updated unless the stack is passed to CFNgin via the ``--force`` flag.
   This is useful for **risky** stacks that you don't want to take the
@@ -538,45 +538,45 @@ A stack has the following keys:
   sure get launched when the environment is first created. When ``locked``,
   it's not necessary to specify a ``class_path`` or ``template_path``.
 
-**protected:**
+**protected (bool)**
   (optional) When running an update in non-interactive mode, if a stack has
   ``protected`` set to ``true`` and would get changed, CFNgin will switch to
   interactive mode for that stack, allowing you to approve/skip the change.
 
-**required_by:**
+**required_by (List[str])**
   (optional) a list of other stacks or targets that require this stack. It's an
   inverse to ``requires``.
 
-**requires:**
+**requires (List[str])**
   (optional) a list of other stacks this stack requires. This is for explicit
   dependencies - you do not need to set this if you refer to another stack in
   a Parameter, so this is rarely necessary.
 
-**stack_name:**
+**stack_name (str)**
   (optional) If provided, this will be used as the name of the CloudFormation
   stack. Unlike ``name``, the value doesn't need to be unique within the config,
   since you could have multiple stacks with the same name, but in different
   regions or accounts. (note: the namespace from the environment will be
   prepended to this)
 
-**stack_policy_path**:
+**stack_policy_path (str)**
   (optional): If provided, specifies the path to a JSON formatted stack policy
   that will be applied when the CloudFormation stack is created and updated.
   You can use stack policies to prevent CloudFormation from making updates to
   protected resources (e.g. databases). See: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/protect-stack-resources.html
 
-**tags:**
+**tags (Dict[str, str])**
   (optional) a dictionary of CloudFormation tags to apply to this stack. This
   will be combined with the global tags, but these tags will take precedence.
 
-**template_path:**
+**template_path (str)**
   Path to raw CloudFormation template (JSON or YAML). Specify this or
   ``class_path`` for the stack. Path can be specified relative to the current
   working directory (e.g. templates stored alongside the Config), or relative
   to a directory in the python ``sys.path`` (i.e. for loading templates
   retrieved via ``packages_sources``).
 
-**variables:**
+**variables (Dict[str, str])**
   A dictionary of Variables_ to pass into the Blueprint_ when rendering the
   CloudFormation template. Variables_ can be any valid YAML data
   structure.
