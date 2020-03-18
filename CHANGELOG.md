@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `ssm` lookup usable in Runway and CFNgin config files
 - `troposphere` transform option for lookups
 - Private (authorized AKA Auth@Edge) static sites
+- `termination_protection` CFNgin stack option
 
 ### Changed
 - `get_session` can now accept AWS credentials when creating a thread-safe session
