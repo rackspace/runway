@@ -519,9 +519,9 @@ A stack has the following keys:
   http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
 
 **enabled (Optional[bool])**
-  If set to false, the stack is disabled, and will not be
+  If set to ``false``, the stack is disabled, and will not be
   built or updated. This can allow you to disable stacks in different
-  environments.
+  environments. (*default:* ``true``)
 
 **in_progress_behavior (Optional[str])**
   If provided, specifies the behavior for when a stack is in
@@ -531,17 +531,19 @@ A stack has the following keys:
   before attempting to update the stack.
 
 **locked (Optional[bool])**
-  If set to true, the stack is locked and will not be
+  If set to ``true``, the stack is locked and will not be
   updated unless the stack is passed to CFNgin via the ``--force`` flag.
   This is useful for **risky** stacks that you don't want to take the
   risk of allowing CloudFormation to update, but still want to make
   sure get launched when the environment is first created. When ``locked``,
   it's not necessary to specify a ``class_path`` or ``template_path``.
+  (*default:* ``false``)
 
 **protected (Optional[bool])**
   When running an update in non-interactive mode, if a stack has
-  ``protected`` set to ``true`` and would get changed, CFNgin will switch to
+  ``protected: true`` and would get changed, CFNgin will switch to
   interactive mode for that stack, allowing you to approve/skip the change.
+  (*default:* ``false``)
 
 **required_by (Optional[List[str]])**
   A list of other stacks or targets that require this stack. It's an
@@ -575,6 +577,12 @@ A stack has the following keys:
   working directory (e.g. templates stored alongside the Config), or relative
   to a directory in the python ``sys.path`` (i.e. for loading templates
   retrieved via ``packages_sources``).
+
+**termination_protection (Optional[bool])**
+  If ``true``, the stack will be protected from termination by CloudFormation.
+  Any attempts to destroy the stack (using Runway, the AWS Console, AWS API, etc) will be prevented unless manually disabled.
+  When updating a stack and the value has been changed to ``false``, termination protection will be disabled.
+  (*default:* ``false``)
 
 **variables (Optional[Dict[str, str]])**
   A dictionary of Variables_ to pass into the Blueprint_ when rendering the
