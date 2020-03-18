@@ -812,6 +812,7 @@ class Provider(BaseProvider):
             self.cloudformation.execute_change_set(
                 ChangeSetName=change_set_id,
             )
+            self.update_termination_protection(fqn, termination_protection)
         else:
             args = generate_cloudformation_args(
                 fqn, parameters, tags, template,
