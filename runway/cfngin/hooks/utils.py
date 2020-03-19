@@ -7,9 +7,17 @@ import sys
 from runway.util import load_object_from_string
 from runway.variables import Variable, resolve_variables
 
+from ..blueprints.base import Blueprint
 from ..exceptions import FailedVariableLookup
 
 LOGGER = logging.getLogger(__name__)
+
+
+class BlankBlueprint(Blueprint):
+    """Blueprint that can be built programatically."""
+
+    def create_template(self):
+        """Create template without raising NotImplementedError."""
 
 
 def full_path(path):
@@ -78,7 +86,8 @@ def handle_hooks(stage, hooks, provider, context):
             kwargs = hook.args or {}
 
         try:
-            result = method(context=context, provider=provider, **kwargs)
+            result = method(context=context, provider=provider,
+                            stage=stage, **kwargs)
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Method %s threw an exception:", hook.path)
             if required:
