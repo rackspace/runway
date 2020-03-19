@@ -22,6 +22,11 @@ class Dependencies(Blueprint):
             'default': False,
             'description': 'Utilizing Authorization @ Edge'
         },
+        'CreateUserPool': {
+            'type': bool,
+            'default': False,
+            'description': 'Whether a User Pool should be created for the project'
+        },
         'UserPoolId': {
             'type': str,
             'default': '',
@@ -113,12 +118,27 @@ class Dependencies(Blueprint):
         if variables['AuthAtEdge']:
             callbacks = self.context.hook_data['aae_callback_url_retriever']['callback_urls']
 
+            user_pool_id = variables['UserPoolId']
+
+            if variables['CreateUserPool']:
+                user_pool = template.add_resource(
+                    cognito.UserPool("AuthAtEdgeUserPool")
+                )
+
+                user_pool_id = user_pool.ref()
+
+                template.add_output(Output(
+                    'AuthAtEdgeUserPoolId',
+                    Description='Cognito User Pool App Client for Auth @ Edge',
+                    Value=user_pool_id
+                ))
+
             client = template.add_resource(
                 cognito.UserPoolClient(
                     "AuthAtEdgeClient",
                     AllowedOAuthFlows=['code'],
                     CallbackURLs=callbacks,
-                    UserPoolId=variables['UserPoolId'],
+                    UserPoolId=user_pool_id,
                     AllowedOAuthScopes=variables['OAuthScopes']
                 )
             )
