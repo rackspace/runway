@@ -9,9 +9,12 @@ from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 
 import awacs.s3
 import awacs.sts
+import awacs.logs
 from awacs.aws import (Action, Allow, Policy, PolicyDocument, Principal,
                        Statement)
-from troposphere import (Join, NoValue, Output, awslambda, cloudfront, iam, s3)
+from awacs.helpers.trust import make_simple_assume_policy
+from troposphere import (AccountId, Join, NoValue, Output, Partition, Region, StackName, Sub, # noqa pylint: disable=unused-import
+                         awslambda, cloudfront, iam, s3)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.context import Context
@@ -123,14 +126,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             lambda_function_associations = self.get_lambda_associations()
 
             if self.directory_index_specified:
-                rewrite_role = self.add_index_rewrite_role()
-                index_rewrite = self.add_cloudfront_directory_index_rewrite(rewrite_role)
-                index_rewrite_version = self.add_cloudfront_directory_index_rewrite_version(
-                    index_rewrite
-                )
+                index_rewrite = self._get_index_rewrite_role_function_and_version()
                 lambda_function_associations = self.get_directory_index_lambda_association(
                     lambda_function_associations,
-                    index_rewrite_version
+                    index_rewrite['version']
                 )
 
             distribution_options = self.get_cloudfront_distribution_options(
@@ -401,36 +400,61 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             )
         )
 
-    def add_index_rewrite_role(self):
-        # type: () -> iam.Role
-        """Add an index rewrite role to the template.
-
-        Return:
-            dict: The index rewrite role
-        """
+    def add_lambda_execution_role(self,
+                                  name='LambdaExecutionRole',  # type: str
+                                  function_name=''
+                                 ):  # noqa: E124
+        # type: (...) -> iam.Role
+        """Create the Lambda@Edge execution role."""
         variables = self.get_variables()
+
+        lambda_resource = Join('', [
+            'arn:',
+            Partition,
+            ':logs:*:',
+            AccountId,
+            ':log-group:/aws/lambda/',
+            StackName,
+            '-%s-*' % function_name
+        ])
+
+        edge_resource = Join('', [
+            'arn:',
+            Partition,
+            ':logs:*:',
+            AccountId,
+            ':log-group:/aws/lambda/*.',
+            StackName,
+            '-%s-*' % function_name,
+        ])
+
         return self.template.add_resource(
             iam.Role(
-                'CFDirectoryIndexRewriteRole',
-                AssumeRolePolicyDocument=PolicyDocument(
-                    Version='2012-10-17',
-                    Statement=[
-                        Statement(
-                            Effect=Allow,
-                            Action=[awacs.sts.AssumeRole],
-                            Principal=Principal('Service',
-                                                ['lambda.amazonaws.com',
-                                                 'edgelambda.amazonaws.com'])
-                        )
-                    ]
+                name,
+                AssumeRolePolicyDocument=make_simple_assume_policy(
+                    'lambda.amazonaws.com', 'edgelambda.amazonaws.com'
                 ),
-                ManagedPolicyArns=[
-                    IAM_ARN_PREFIX + 'AWSLambdaBasicExecutionRole'
-                ],
                 PermissionsBoundary=(
                     variables['RoleBoundaryArn'] if self.role_boundary_specified
                     else NoValue
-                )
+                ),
+                Policies=[
+                    iam.Policy(
+                        PolicyName="LambdaLogCreation",
+                        PolicyDocument=PolicyDocument(
+                            Version='2012-10-17',
+                            Statement=[
+                                Statement(
+                                    Action=[awacs.logs.CreateLogGroup,
+                                            awacs.logs.CreateLogStream,
+                                            awacs.logs.PutLogEvents],
+                                    Effect=Allow,
+                                    Resource=[lambda_resource, edge_resource]
+                                )
+                            ]
+                        )
+                    ),
+                ],
             )
         )
 
@@ -544,6 +568,18 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 ]
             )
         ]
+
+    def _get_index_rewrite_role_function_and_version(self):
+        res = {}
+        res['role'] = self.add_lambda_execution_role(
+            'CFDirectoryIndexRewriteRole',
+            'CFDirectoryIndexRewrite'
+        )
+        res['function'] = self.add_cloudfront_directory_index_rewrite(res['role'])
+        res['version'] = self.add_cloudfront_directory_index_rewrite_version(
+            res['function']
+        )
+        return res
 
 
 # Helper section to enable easy blueprint -> template generation
