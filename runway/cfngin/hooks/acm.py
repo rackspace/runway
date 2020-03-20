@@ -4,11 +4,12 @@ import logging
 from time import sleep
 
 from troposphere.certificatemanager import Certificate as CertificateResource
+
 from runway.util import MutableMap
 
+from ..status import NO_CHANGE
 from .base import Hook
 from .utils import BlankBlueprint
-from ..status import SUBMITTED, NO_CHANGE
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class Certificate(Hook):
 
     """
 
-    def __init__(self, context, provider, stage, **kwargs) -> None:
+    def __init__(self, context, provider, **kwargs) -> None:
         """Instantiate class.
 
         Args:
@@ -53,10 +54,9 @@ class Certificate(Hook):
                 (passed in by CFNgin)
             provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 Provider instance. (passed in by CFNgin)
-            stage (str): CFNgin execution stage.
 
         """
-        super(Certificate, self).__init__(context, provider, stage, **kwargs)
+        super(Certificate, self).__init__(context, provider, **kwargs)
 
         self.template_description = self.get_template_description()
         self.stack_name = kwargs['domain'].replace('.', '-')
@@ -74,9 +74,6 @@ class Certificate(Hook):
         self.r53_client = session.client('route53')
         self.stack = self.generate_stack()
 
-        if 'build' in stage:
-            self.deploy()
-
     def _create_blueprint(self):
         """Create CFNgin Blueprint."""
         blueprint = BlankBlueprint(self.stack_name, self.context)
@@ -90,13 +87,13 @@ class Certificate(Hook):
         blueprint.add_output('%sArn' % cert.title, cert.ref())
         return blueprint
 
-    def get_certificate(self, stack_name=None, interval=5):
+    def get_certificate(self, interval=5, stack_name=None):
         """Get the certificate being created by a CloudFormation.
 
         Args:
+            interval (int): Number of seconds to wait between attempts.
             stack_name (str): Name of CloudFormation stack containing a pending
                 certificate.
-            interval (int): Number of seconds to wait between attempts.
 
         Returns:
             str: Certificate ARN
@@ -115,14 +112,14 @@ class Certificate(Hook):
         sleep(interval)
         return self.get_certificate(stack_name)
 
-    def get_validation_record(self, stack_name=None, cert_arn=None, interval=5):
+    def get_validation_record(self, cert_arn=None, interval=5, stack_name=None):
         """Get validation record from the certificate being created.
 
         Args:
-            stack_name (str): Name of CloudFormation stack containing a pending
-                certificate.
             cert_arn (str): ARN of the certificate to validate.
             interval (int): Number of seconds to wait between attempts.
+            stack_name (str): Name of CloudFormation stack containing a pending
+                certificate.
 
         Returns:
             Dict[str, str]: A record set to be added to Route 53.
@@ -201,16 +198,18 @@ class Certificate(Hook):
             }
         )
 
-    def deploy(self, **kwargs):
+    def _deploy(self):
         """Deploy an ACM Certificate."""
         status = self.deploy_stack()
+        cert_arn = self.get_certificate()
+        result = {'CertificateArn': cert_arn}
 
         if status == NO_CHANGE:
             LOGGER.debug('Stack did not change; no action required')
-            return
+            return result
 
         try:
-            record = self.get_validation_record()
+            record = self.get_validation_record(cert_arn)
             self.put_record_set(record)
         except ValueError as err:
             if 'No pending validations' in str(err) and \
@@ -220,3 +219,21 @@ class Certificate(Hook):
             else:
                 raise
         self.wait_for_stack()
+
+        return result
+
+    def post_deploy(self):
+        """Run during the **post_deploy** stage."""
+        return self._deploy()
+
+    def post_destroy(self):
+        """Run during the **post_destroy** stage."""
+        LOGGER.warning('%s does not support "destory" at this time')
+
+    def pre_deploy(self):
+        """Run during the **pre_deploy** stage."""
+        return self._deploy()
+
+    def pre_destroy(self):
+        """Run during the **pre_destroy** stage."""
+        LOGGER.warning('%s does not support "destory" at this time')

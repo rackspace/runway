@@ -38,7 +38,6 @@ class Hook(object):
     def __init__(self,
                  context: Context,
                  provider: Provider,
-                 stage: str = 'pre_build',
                  **kwargs: Any
                  ) -> None:
         """Instantiate class.
@@ -48,7 +47,6 @@ class Hook(object):
                 (passed in by CFNgin)
             provider (:class:`runway.cfngin.providers.base.BaseProvider`):
                 Provider instance. (passed in by CFNgin)
-            stage (str): CFNgin execution stage.
 
         """
         kwargs.setdefault('tags', {})
@@ -86,16 +84,6 @@ class Hook(object):
         stack._blueprint = self.blueprint  # pylint: disable=protected-access
         return stack
 
-    def deploy(self, **kwargs):
-        """Run by the hook during deploy stage."""
-        LOGGER.warning('Deploy action not implimented for %s',
-                       self.__class__.__name__)
-
-    def destroy(self, **kwargs):
-        """Run by the hook during destory stage."""
-        LOGGER.warning('Destroy action not implimented for %s',
-                       self.__class__.__name__)
-
     def get_template_description(self, suffix=None):
         """Generate a template description.
 
@@ -132,6 +120,22 @@ class Hook(object):
         if wait:
             status = self.wait_for_stack(stack=stack, status=status)
         return status
+
+    def post_deploy(self):
+        """Run during the **post_deploy** stage."""
+        raise NotImplementedError
+
+    def post_destroy(self):
+        """Run during the **post_destroy** stage."""
+        raise NotImplementedError
+
+    def pre_deploy(self):
+        """Run during the **pre_deploy** stage."""
+        raise NotImplementedError
+
+    def pre_destroy(self):
+        """Run during the **pre_destroy** stage."""
+        raise NotImplementedError
 
     def wait_for_stack(self, stack=None, status=None):
         """Wait for a CloudFormation stack to complete.

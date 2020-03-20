@@ -3,6 +3,7 @@ import collections
 import logging
 import os
 import sys
+from types import FunctionType
 
 from runway.util import load_object_from_string
 from runway.variables import Variable, resolve_variables
@@ -51,6 +52,7 @@ def handle_hooks(stage, hooks, provider, context):
             raise ValueError("%s hook #%d missing path." % (stage, i))
 
     LOGGER.info("Executing %s hooks: %s", stage, ", ".join(hook_paths))
+    stage = stage.replace('build', 'deploy')  # TODO remove after full rename
     for hook in hooks:
         data_key = hook.data_key
         required = hook.required
@@ -86,8 +88,14 @@ def handle_hooks(stage, hooks, provider, context):
             kwargs = hook.args or {}
 
         try:
-            result = method(context=context, provider=provider,
-                            stage=stage, **kwargs)
+            if isinstance(method, FunctionType):
+                result = method(context=context, provider=provider,
+                                **kwargs)
+            else:
+                result = getattr(
+                    method(context=context, provider=provider, **kwargs),
+                    stage
+                )()
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Method %s threw an exception:", hook.path)
             if required:
