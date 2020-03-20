@@ -26,7 +26,8 @@ def full_path(path):
     return os.path.abspath(os.path.expanduser(path))
 
 
-def handle_hooks(stage, hooks, provider, context):
+# TODO split up to reduce number of statements
+def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-statements
     """Handle pre/post_build hooks.
 
     These are pieces of code that we want to run before/after the builder

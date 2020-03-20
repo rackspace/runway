@@ -1,10 +1,10 @@
 """Base class for CFNgin hooks."""
-# pylint: disable=unused-argument
-from collections import UserDict
 import logging
+from collections import UserDict
 from typing import Any
 
 from troposphere import Tags
+
 from runway.util import MutableMap
 
 from ..actions import build
@@ -12,7 +12,7 @@ from ..context import Context
 from ..plan import COLOR_CODES
 from ..providers.aws.default import Provider
 from ..stack import Stack
-from ..status import COMPLETE, FAILED, PENDING, SUBMITTED
+from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ class Hook(object):
         self.stack = None
         self.stack_name = 'stack'
         self._deploy_action = HookBuildAction(self.context, self.provider)
+        self._destroy_action = HookDestroyAction(self.context, self.provider)
 
     @property
     def tags(self):
@@ -105,7 +106,7 @@ class Hook(object):
         """Deploy a stack.
 
         Args:
-            stack (Optional[Stack]): A stack to deploy.
+            stack (Optional[Stack]): A stack to act on.
             wait (bool): Wither to wait for the stack to complete before
                 returning.
 
@@ -113,13 +114,25 @@ class Hook(object):
             Status: Ending status of the stack.
 
         """
-        stack = stack or self.stack
-        status = self._deploy_action.run(stack=stack, status=PENDING)
-        self._log_stack(stack, status)
+        return self._run_stack_action(action=self._deploy_action,
+                                      stack=stack,
+                                      wait=wait)
 
-        if wait:
-            status = self.wait_for_stack(stack=stack, status=status)
-        return status
+    def destroy_stack(self, stack=None, wait=None):
+        """Destroy a stack.
+
+        Args:
+            stack (Optional[Stack]): A stack to act on.
+            wait (bool): Wither to wait for the stack to complete before
+                returning.
+
+        Returns:
+            Status: Ending status of the stack.
+
+        """
+        return self._run_stack_action(action=self._destroy_action,
+                                      stack=stack,
+                                      wait=wait)
 
     def post_deploy(self):
         """Run during the **post_deploy** stage."""
@@ -137,29 +150,6 @@ class Hook(object):
         """Run during the **pre_destroy** stage."""
         raise NotImplementedError
 
-    def wait_for_stack(self, stack=None, status=None):
-        """Wait for a CloudFormation stack to complete.
-
-        Args:
-            stack (Optional[Stack]): A stack that has been acted upon.
-            status (Optional[Status]): The last status of the stack.
-
-        Returns:
-            Status: Ending status of the stack.
-
-        """
-        status = status or SUBMITTED
-        stack = stack or self.stack
-
-        while True:
-            if status in (COMPLETE, FAILED):
-                break
-            LOGGER.warning('Waiting for stack to complete...')
-            status = self._deploy_action.run(stack=stack, status=status)
-
-        self._log_stack(stack, status)
-        return status
-
     @staticmethod
     def _log_stack(stack, status):
         """Log stack status. Mimics normal stack deployment.
@@ -175,6 +165,52 @@ class Hook(object):
             msg += " (%s)" % (status.reason)
         color_code = COLOR_CODES.get(status.code, 37)
         LOGGER.info(msg, extra={"color": color_code})
+
+    def _run_stack_action(self, action, stack=None, wait=None):
+        """Run a CFNgin hook modified for use in hooks.
+
+        Args:
+            action (BaseAction): Action to be taken against a stack.
+            stack (Optional[Stack]): A stack to act on.
+            wait (bool): Wither to wait for the stack to complete before
+                returning.
+
+        Returns:
+            Status: Ending status of the stack.
+
+        """
+        stack = stack or self.stack
+        status = action.run(stack=stack, status=PENDING)
+        self._log_stack(stack, status)
+
+        if wait and status != SKIPPED:
+            status = self._wait_for_stack(action=action, stack=stack,
+                                          status=status)
+        return status
+
+    def _wait_for_stack(self, action, stack=None, status=None):
+        """Wait for a CloudFormation stack to complete.
+
+        Args:
+            action (BaseAction): Action to be taken against a stack.
+            stack (Optional[Stack]): A stack that has been acted upon.
+            status (Optional[Status]): The last status of the stack.
+
+        Returns:
+            Status: Ending status of the stack.
+
+        """
+        status = status or SUBMITTED
+        stack = stack or self.stack
+
+        while True:
+            if status in (COMPLETE, FAILED):
+                break
+            LOGGER.info('Waiting for stack to complete...')
+            status = action.run(stack=stack, status=status)
+
+        self._log_stack(stack, status)
+        return status
 
 
 class HookBuildAction(build.Action):
@@ -203,6 +239,16 @@ class HookBuildAction(build.Action):
     def run(self, **kwargs):
         """Run the action for one stack."""
         return self._launch_stack(**kwargs)
+
+
+# the build action has logic to destroy stacks so we can just extend the
+# HookBuildAction and change `run` in use the `_destroy_stack` method instead
+class HookDestroyAction(HookBuildAction):
+    """Destroy action that can be used from hooks."""
+
+    def run(self, **kwargs):
+        """Run the action for one stack."""
+        return self._destroy_stack(**kwargs)
 
 
 class HookStackDefinition(UserDict):

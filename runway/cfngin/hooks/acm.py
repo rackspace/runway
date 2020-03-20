@@ -1,8 +1,8 @@
 """CFNgin hooks for AWS Certificate Manager."""
-# pylint: disable=unused-argument
 import logging
 from time import sleep
 
+from botocore.exceptions import ClientError
 from troposphere.certificatemanager import Certificate as CertificateResource
 
 from runway.util import MutableMap
@@ -86,6 +86,38 @@ class Certificate(Hook):
         ))
         blueprint.add_output('%sArn' % cert.title, cert.ref())
         return blueprint
+
+    def remove_validation_records(self):
+        """Remove all record set entries used to validate an ACM Certificate."""
+        cert_arn = self.get_certificate()
+        cert = self.acm_client.describe_certificate(
+            CertificateArn=cert_arn
+        )['Certificate']
+
+        records = [opt['ResourceRecord']
+                   for opt in cert.get('DomainValidationOptions', [])
+                   if opt['ValidationMethod'] == 'DNS']
+        LOGGER.info('Removing %i validation record(s) from "%s"...',
+                    len(records), self.args.hosted_zone_id)
+        self.r53_client.change_resource_record_sets(
+            HostedZoneId=self.args.hosted_zone_id,
+            ChangeBatch={
+                'Comment': self.get_template_description(),
+                'Changes': [
+                    {
+                        'Action': 'DELETE',
+                        'ResourceRecordSet': {
+                            'Name': record['Name'],
+                            'Type': record['Type'],
+                            'ResourceRecords': [
+                                {'Value': record['Value']}
+                            ],
+                            'TTL': 5
+                        }
+                    } for record in records
+                ]
+            }
+        )
 
     def get_certificate(self, interval=5, stack_name=None):
         """Get the certificate being created by a CloudFormation.
@@ -211,6 +243,8 @@ class Certificate(Hook):
         try:
             record = self.get_validation_record(cert_arn)
             self.put_record_set(record)
+            LOGGER.info('Waiting for certificate to validate; '
+                        'this can take upwards of 30 minutes to complete...')
         except ValueError as err:
             if 'No pending validations' in str(err) and \
                     'updating existing stack' in status.reason:
@@ -218,9 +252,21 @@ class Certificate(Hook):
                              'no action required')
             else:
                 raise
-        self.wait_for_stack()
+        self._wait_for_stack(self._deploy_action)
 
         return result
+
+    def _destroy(self):
+        """Destroy an ACM certificate."""
+        try:
+            self.remove_validation_records()
+        except ClientError as err:
+            if err.response['Error']['Message'] != ('Stack with id {} does not'
+                                                    ' exist'.format(
+                                                        self.stack.fqn)):
+                raise
+        self.destroy_stack(wait=True)
+        return True
 
     def post_deploy(self):
         """Run during the **post_deploy** stage."""
@@ -228,7 +274,7 @@ class Certificate(Hook):
 
     def post_destroy(self):
         """Run during the **post_destroy** stage."""
-        LOGGER.warning('%s does not support "destory" at this time')
+        return self._destroy()
 
     def pre_deploy(self):
         """Run during the **pre_deploy** stage."""
@@ -236,4 +282,4 @@ class Certificate(Hook):
 
     def pre_destroy(self):
         """Run during the **pre_destroy** stage."""
-        LOGGER.warning('%s does not support "destory" at this time')
+        return self._destroy()
