@@ -8,12 +8,13 @@ from runway.util import MutableMap
 
 from .base import Hook
 from .utils import BlankBlueprint
+from ..status import SUBMITTED, NO_CHANGE
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Certificate(Hook):
-    """AWS Certificate Manager Certificate object.
+    """Hook for managing a **AWS::CertificateManager::Certificate**.
 
     Keyword Args:
         alt_names (Optional[List[str]]): Additional FQDNs to be included in the
@@ -61,8 +62,9 @@ class Certificate(Hook):
         self.stack_name = kwargs['domain'].replace('.', '-')
 
         self.properties = MutableMap(**{
-            'DomainName': self.args.domaine,
+            'DomainName': self.args.domain,
             'SubjectAlternativeNames': self.args.get('alt_names', []),
+            'Tags': self.tags,
             'ValidationMethod': 'DNS'
         })
         self.blueprint = self._create_blueprint()
@@ -145,7 +147,8 @@ class Certificate(Hook):
             LOGGER.debug('Waiting for DomainValidationOptions to become '
                          'available for the certificate...')
             sleep(interval)
-            return self.get_validation_record(cert_arn, interval)
+            return self.get_validation_record(cert_arn=cert_arn,
+                                              interval=interval)
 
         if not domain_validation:
             raise ValueError('No pending validations found for "{}"'.format(
@@ -164,7 +167,8 @@ class Certificate(Hook):
             LOGGER.debug('Waiting for DomainValidationOptions.ResourceRecord '
                          'to become available for the certificate...')
             sleep(interval)
-            return self.get_validation_record(cert_arn, interval)
+            return self.get_validation_record(cert_arn=cert_arn,
+                                              interval=interval)
 
     def put_record_set(self, record_set):
         """Create/update a record set on a Route 53 Hosted Zone.
@@ -173,6 +177,9 @@ class Certificate(Hook):
             record_set (Dict[str, str]): Record set to be added to Route 53.
 
         """
+        LOGGER.info('Adding validation record to "%s"',
+                    self.args.hosted_zone_id)
+        LOGGER.debug('Validation Record: %s', record_set)
         return self.r53_client.change_resource_record_sets(
             HostedZoneId=self.args.hosted_zone_id,
             ChangeBatch={
@@ -196,7 +203,20 @@ class Certificate(Hook):
 
     def deploy(self, **kwargs):
         """Deploy an ACM Certificate."""
-        self.deploy_stack()
-        record = self.get_validation_record()
-        self.put_record_set(record)
+        status = self.deploy_stack()
+
+        if status == NO_CHANGE:
+            LOGGER.debug('Stack did not change; no action required')
+            return
+
+        try:
+            record = self.get_validation_record()
+            self.put_record_set(record)
+        except ValueError as err:
+            if 'No pending validations' in str(err) and \
+                    'updating existing stack' in status.reason:
+                LOGGER.debug('Stack update did not cause recreation; '
+                             'no action required')
+            else:
+                raise
         self.wait_for_stack()

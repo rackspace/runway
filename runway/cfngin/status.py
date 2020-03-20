@@ -187,10 +187,11 @@ class StackDoesNotExist(SkippedStatus):  # pylint: disable=too-few-public-method
     reason = "does not exist in cloudformation"
 
 
-PENDING = PendingStatus()
-WAITING = PendingStatus(reason="waiting")
-SUBMITTED = SubmittedStatus()
 COMPLETE = CompleteStatus()
-SKIPPED = SkippedStatus()
 FAILED = FailedStatus()
 INTERRUPTED = FailedStatus(reason="interrupted")
+NO_CHANGE = DidNotChangeStatus()
+PENDING = PendingStatus()
+SKIPPED = SkippedStatus()
+SUBMITTED = SubmittedStatus()
+WAITING = PendingStatus(reason="waiting")

@@ -1,8 +1,10 @@
 """Base class for CFNgin hooks."""
 # pylint: disable=unused-argument
+from collections import UserDict
 import logging
 from typing import Any
 
+from troposphere import Tags
 from runway.util import MutableMap
 
 from ..actions import build
@@ -49,13 +51,26 @@ class Hook(object):
             stage (str): CFNgin execution stage.
 
         """
+        kwargs.setdefault('tags', {})
+
         self.args = MutableMap(**kwargs)
+        self.args.tags.update(context.tags)
         self.blueprint = None
         self.context = context
         self.provider = provider
         self.stack = None
         self.stack_name = 'stack'
         self._deploy_action = HookBuildAction(self.context, self.provider)
+
+    @property
+    def tags(self):
+        """Return tags that should be applied to any resource being created.
+
+        Returns:
+            troposphere.Tags
+
+        """
+        return Tags(**dict(self.context.tags, **self.args.tags.data))
 
     def generate_stack(self, **kwargs):
         """Create a CFNgin Stack object.
@@ -64,7 +79,9 @@ class Hook(object):
             Stack
 
         """
-        definition = HookStackDefinition(name=self.stack_name, **kwargs)
+        definition = HookStackDefinition(name=self.stack_name,
+                                         tags=self.args.tags.data,
+                                         **kwargs)
         stack = Stack(definition, self.context)
         stack._blueprint = self.blueprint  # pylint: disable=protected-access
         return stack
@@ -184,7 +201,7 @@ class HookBuildAction(build.Action):
         return self._launch_stack(**kwargs)
 
 
-class HookStackDefinition(MutableMap):
+class HookStackDefinition(UserDict):
     """Stack definition for use in hooks to avoid cyclic imports."""
 
     def __init__(self, name, **kwargs):
@@ -208,3 +225,10 @@ class HookStackDefinition(MutableMap):
         }
         values.update(kwargs)
         super(HookStackDefinition, self).__init__(**values)
+
+    def __getattr__(self, key):
+        """Implement dot notation."""
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key)
