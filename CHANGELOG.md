@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.0] - 2020-03-24
 ### Added
 - `runway.cfngin.cfngin.CFNgin` class (can also be imported as `runway.cfngin.CFNgin`)
 - `runway.cfngin.context.Context.get_session()` method for creating a boto3 session using the correct AWS credentials
@@ -751,7 +753,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/onicagroup/runway/compare/v1.4.4...v1.5.0
 [1.4.4]: https://github.com/onicagroup/runway/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/onicagroup/runway/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/onicagroup/runway/compare/v1.4.1...v1.4.2
