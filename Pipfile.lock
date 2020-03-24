@@ -437,9 +437,9 @@
         },
         "troposphere": {
             "hashes": [
-                "sha256:fbf3592fb0559102e2abf15aa26cadbeced3390565ee294e6df0fb2d421bf759"
+                "sha256:3dbc8c438b9694a39035e29bbcb00fcd3890c9e24a6b938873d6e9afae6e4d9c"
             ],
-            "version": "==2.5.3"
+            "version": "==2.6.0"
         },
         "urllib3": {
             "hashes": [
