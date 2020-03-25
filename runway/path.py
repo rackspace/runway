@@ -228,7 +228,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         will be concatenated together.
         """
         split_uri_location = uri_loc_str.split('//')  # type: List[str, str]
-        location_string = '/'  # type: str
+        location_string = ''  # type: str
 
         if len(split_uri_location) == 3:
             location_string = split_uri_location[2]  # type: str

@@ -2,6 +2,7 @@
 import copy
 import logging
 import sys
+import warnings
 from io import StringIO
 from string import Template
 
@@ -340,6 +341,7 @@ class Stack(Model):
         stack_policy_path (StringType)
         tags (DictType)
         template_path (StringType)
+        termination_protection (BooleanType)
         variables (DictType)
 
     """
@@ -360,6 +362,7 @@ class Stack(Model):
     stack_policy_path = StringType(serialize_when_none=False)
     tags = DictType(StringType, serialize_when_none=False)
     template_path = StringType(serialize_when_none=False)
+    termination_protection = BooleanType(default=False)
     variables = DictType(AnyType, serialize_when_none=False)
 
     def validate_class_path(self, data, value):
@@ -578,6 +581,45 @@ class Config(Model):
             raise exceptions.InvalidConfig([str(err)])
         except SchematicsError as err:
             raise exceptions.InvalidConfig(err.errors)
+
+    def validate_stacker_bucket(self, _data, value):  # pylint: disable=no-self-use
+        """Validate stack_bucket is not used.
+
+        If in use, show deprecation warning.
+
+        """
+        msg = ('Use of "stacker_bucket" has been deprecated and will be '
+               'removed after the next major release. Please use '
+               '"cfngin_bucket".')
+        if value or value == '':
+            warnings.warn(msg, DeprecationWarning)
+            LOGGER.warning(msg)
+
+    def validate_stacker_bucket_region(self, _data, value):  # pylint: disable=no-self-use
+        """Validate stacker_bucket_regio is not used.
+
+        If in use, show deprecation warning.
+
+        """
+        msg = ('Use of "stacker_bucket_region" has been deprecated and will '
+               'be removed after the next major release. Please use '
+               '"cfngin_bucket_region".')
+        if value:
+            warnings.warn(msg, DeprecationWarning)
+            LOGGER.warning(msg)
+
+    def validate_stacker_cache_dir(self, _data, value):  # pylint: disable=no-self-use
+        """Validate stacker_cache_dir is not used.
+
+        If in use, show deprecation warning.
+
+        """
+        msg = ('Use of "stacker_cache_dir" has been deprecated and will '
+               'be removed after the next major release. Please use '
+               '"cfngin_cache_dir".')
+        if value:
+            warnings.warn(msg, DeprecationWarning)
+            LOGGER.warning(msg)
 
     def validate_stacks(self, _data, value):  # pylint: disable=no-self-use
         """Validate stacks."""

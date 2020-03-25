@@ -173,22 +173,21 @@ class Action(build.Action):
         provider = self.build_provider(stack)
         tags = build.build_stack_tags(stack)
 
-        stack.resolve(self.context, provider)
-        parameters = self.build_parameters(stack)
-
         try:
+            stack.resolve(self.context, provider)
+            parameters = self.build_parameters(stack)
             outputs = provider.get_stack_changes(
                 stack, self._template(stack.blueprint), parameters, tags
             )
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
             LOGGER.info('No changes: %s', stack.fqn)
-        except exceptions.StackDoesNotExist:  # TODO make sure this is correct post chageset
+        except exceptions.StackDoesNotExist:
             if self.context.persistent_graph:
                 return SkippedStatus('persistent graph: stack does not '
                                      'exist, will be removed')
             return StackDoesNotExistStatus()
-        except AttributeError as err:  # TODO make sure this is correct post chageset
+        except AttributeError as err:
             if (self.context.persistent_graph and
                     'defined class or template path' in str(err)):
                 return SkippedStatus('persistent graph: will be destroyed')

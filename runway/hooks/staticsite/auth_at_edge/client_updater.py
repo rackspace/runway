@@ -41,7 +41,6 @@ def update(context,  # pylint: disable=unused-argument
     session = get_session(provider.region)
     cognito_client = session.client('cognito-idp')
 
-    LOGGER.info(kwargs['distribution_domain'])
     # Combine alternate domains with main distribution
     redirect_domains = kwargs['alternate_domains'] + ['https://' + kwargs['distribution_domain']]
 
@@ -64,11 +63,10 @@ def update(context,  # pylint: disable=unused-argument
             ClientId=kwargs['client_id'],
             CallbackURLs=redirect_uris_sign_in,
             LogoutURLs=redirect_uris_sign_out,
-            UserPoolId=kwargs['user_pool_id'],
+            UserPoolId=context.hook_data['aae_user_pool_id_retriever']['id'],
         )
         return True
-    # pylint: disable=broad-except
-    except Exception as err:
+    except Exception as err:  # pylint: disable=broad-except
         LOGGER.error('Was not able to update the callback urls on '
                      'the user pool client')
         LOGGER.error(err)

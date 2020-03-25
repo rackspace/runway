@@ -5,13 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.0] - 2020-03-24
 ### Added
 - `runway.cfngin.cfngin.CFNgin` class (can also be imported as `runway.cfngin.CFNgin`)
 - `runway.cfngin.context.Context.get_session()` method for creating a boto3 session using the correct AWS credentials
 - `environment` and `region` as _common parameters_ for cloudformation modules so they do not need to be defined
   - pulled from the Runway context object
 - `ssm` lookup usable in Runway and CFNgin config files
+- `troposphere` transform option for lookups
 - Private (authorized AKA Auth@Edge) static sites
+- `termination_protection` CFNgin stack option
 
 ### Changed
 - `get_session` can now accept AWS credentials when creating a thread-safe session
@@ -23,6 +27,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - deprecate `ssmstore` lookup
 - deprecate `staticsite_acmcert_ssm_param` option
 - deprecate `terraform_backend_ssm_params` option
+- `hook_data` lookup now supports the standardized lookup query syntax
+  - supports `load`, `transform`, `get`, and `default` arguments
+  - dot notation to get nested data from the dictionary
+- deprecate `stacker_bucket` in CFNgin configs
+  - replaced by `cfngin_bucket`
+- deprecate `stacker_bucket_region` in CFNgin configs
+  - replaced by `cfngin_bucket_region`
+- deprecate `stacker_cache_dir` in CFNgin configs
+  - replaced by `cfngin_cache_dir`
+
+### Fixed
+- git module path will now default to the root of the repo when no `location` is provided.
+- cfngin correctly notifies when a stack will be deleted during `runway plan` when using persistent graph
 
 ## [1.4.4] - 2020-02-28
 ### Fixed
@@ -736,7 +753,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/onicagroup/runway/compare/v1.4.4...v1.5.0
 [1.4.4]: https://github.com/onicagroup/runway/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/onicagroup/runway/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/onicagroup/runway/compare/v1.4.1...v1.4.2

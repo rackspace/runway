@@ -49,6 +49,8 @@ class Stack(object):
         profile (str): Profile name from the stack definition.
         protected (bool): Whether this stack is protected.
         region (str): AWS region name.
+        termination_protection (bool): The state of termination protection
+            to apply to the stack.
         variables (Optional[Dict[str, Any]]): Variables for the stack.
 
     """
@@ -71,23 +73,25 @@ class Stack(object):
             protected (bool): Whether this stack is protected.
 
         """
-        self.logging = True
-        self.name = definition.name
-        self.fqn = context.get_fqn(definition.stack_name or self.name)
-        self.region = definition.region
-        self.profile = definition.profile
-        self.definition = definition
-        self.variables = _initialize_variables(definition, variables)
-        self.mappings = mappings
-        self.locked = locked
-        self.force = force
-        self.enabled = enabled
-        self.protected = protected
-        self.context = context
-        self.outputs = None
-        self.in_progress_behavior = definition.in_progress_behavior
         self._blueprint = None
         self._stack_policy = None
+
+        self.name = definition.name  # dependency of other attrs
+        self.context = context
+        self.definition = definition
+        self.enabled = enabled
+        self.force = force
+        self.fqn = context.get_fqn(definition.stack_name or self.name)
+        self.in_progress_behavior = definition.in_progress_behavior
+        self.locked = locked
+        self.logging = True
+        self.mappings = mappings
+        self.outputs = None
+        self.profile = definition.profile
+        self.protected = protected
+        self.region = definition.region
+        self.termination_protection = definition.termination_protection
+        self.variables = _initialize_variables(definition, variables)
 
     @property
     def required_by(self):

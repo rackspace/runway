@@ -25,22 +25,13 @@ Parameters
     staticsite_aliases: example.com,foo.example.com
 
 **staticsite_acmcert_arn (Optional[str])**
-  The certificate arn used for any alias domains supplied. This is a requirement when supplying any custom domain unless ``staticsite_acmcert_ssm_param`` is specified.
+  The certificate arn used for any alias domains supplied. This is a requirement when supplying any custom domain.
 
   Example:
 
   .. code-block:: yaml
 
     staticsite_acmcert_arn: arn:aws:acm:us-east-1:123456789012:certificate/...
-
-**staticsite_acmcert_ssm_param (Optional[str])**
-  The certificate ARN can be looked up dynamically via SSM. This is a requirement when supplying any custom domain unless ``staticsite_acmcert_arn`` is specified.
-
-  Example:
-
-  .. code-block:: yaml
-
-    staticsite_acmcert_arn: us-west-2@MySSMParamName
 
 **staticsite_enable_cf_logging (Optional[bool])**
   Defaults to ``true``, allows the user to specify if they would like logging performed on their CloudFront distribution.
@@ -87,8 +78,17 @@ Parameters
 
     staticsite_auth_at_edge: true
 
+**staticsite_create_user_pool (Optional[bool])**
+  Creates a User Pool for the Auth@Edge configuration. Either this or ``staticsite_user_pool_arn`` are required when ``staticsite_auth_at_edge`` is ``true``.
+
+  Example:
+
+  .. code-block:: yaml
+
+    staticsite_create_user_pool: true
+
 **staticsite_user_pool_arn (Optional[str])**
-  Required if ``staticsite_auth_at_edge`` is ``true``. A pre-existing Cognito User Pool is required for user authentication.
+  A pre-existing Cognito User Pool is required for user authentication. Either this or ``staticsite_create_user_pool`` are required when ``staticsite_auth_at_edge`` is ``true``.
 
   Example:
 
@@ -221,6 +221,17 @@ Parameters
 
     staticsite_non_spa: true
 
+**staticsite_role_boundary_arn (Optional[str])**
+  Defines an IAM Managed Policy that will be set as the permissions boundary
+  for any IAM Roles created to support the site (e.g. when using
+  ``staticsite_auth_at_edge`` or ``staticsite_rewrite_directory_index``).
+
+  Example:
+
+  .. code-block:: yaml
+
+    staticsite_role_boundary_arn: arn:aws:iam::444455556666:policy/MyCustomPolicy
+
 Options
 -------
 
@@ -341,7 +352,7 @@ Here is how the solution works:
 6. After passing all of the verification steps, `Lambda@Edge` strips out the Authorization header and allows the request to pass through to designated origin for CloudFront. In this case, the origin is the private content Amazon S3 bucket.
 7. After receiving response from the origin S3 bucket, CloudFront sends the response back to the browser. The browser displays the data from the returned response.
 
-An example of a `Auth@Edge`_ static site configuration is as follows. All listed options are required:
+An example of a `Auth@Edge`_ static site configuration is as follows:
 
 .. code-block:: yaml
 
@@ -360,5 +371,5 @@ An example of a `Auth@Edge`_ static site configuration is as follows. All listed
         - us-east-1
 
 The `Auth@Edge`_ functionality uses your existing Cognito User Pool (optionally configured
-with federated identity providers). A user pool app client will be automatically created
-within the pool for the application's use.
+with federated identity providers) or can create one for you with the ``staticsite_create_user_pool`` option.
+A user pool app client will be automatically created within the pool for the application's use.

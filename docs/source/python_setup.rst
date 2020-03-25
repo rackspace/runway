@@ -49,7 +49,7 @@ your user will be able to install additional Python packages via
         - Run ``source ~/.bash_profile`` to use the updated PATH.
         - Install Python 3 and dependencies::
 
-            sudo apt -y install python3-pip python3-tk python3-keyring curl
+            sudo apt -y install python3-pip
 
 2. Install `pipenv <https://pipenv.readthedocs.io/en/latest/>`_:
     - On macOS / Windows::

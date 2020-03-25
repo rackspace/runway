@@ -366,13 +366,15 @@ class Action(BaseAction):
         if recreate:
             LOGGER.debug("Re-creating stack: %s", stack.fqn)
             provider.create_stack(stack.fqn, template, parameters,
-                                  tags, stack_policy=stack_policy)
+                                  tags, stack_policy=stack_policy,
+                                  termination_protection=stack.termination_protection)
             return SubmittedStatus("re-creating stack")
         if not provider_stack:
             LOGGER.debug("Creating new stack: %s", stack.fqn)
             provider.create_stack(stack.fqn, template, parameters, tags,
                                   force_change_set,
-                                  stack_policy=stack_policy)
+                                  stack_policy=stack_policy,
+                                  termination_protection=stack.termination_protection)
             return SubmittedStatus("creating new stack")
 
         try:
@@ -390,6 +392,7 @@ class Action(BaseAction):
                     force_interactive=stack.protected,
                     force_change_set=force_change_set,
                     stack_policy=stack_policy,
+                    termination_protection=stack.termination_protection
                 )
 
                 LOGGER.debug("Updating existing stack: %s", stack.fqn)

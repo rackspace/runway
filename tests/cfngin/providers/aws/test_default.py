@@ -4,6 +4,7 @@ import copy
 import os.path
 import random
 import string
+import sys
 import threading
 import unittest
 from datetime import datetime
@@ -28,6 +29,12 @@ from runway.cfngin.providers.aws.default import (DEFAULT_CAPABILITIES,
 from runway.cfngin.providers.base import Template
 from runway.cfngin.session_cache import get_session
 from runway.cfngin.stack import Stack
+from runway.util import MutableMap
+
+if sys.version_info.major < 3:
+    from pathlib2 import Path  # pylint: disable=E
+else:
+    from pathlib import Path  # pylint: disable=E
 
 
 def random_string(length=12):
@@ -47,7 +54,8 @@ def random_string(length=12):
 def generate_describe_stacks_stack(stack_name,
                                    creation_time=None,
                                    stack_status="CREATE_COMPLETE",
-                                   tags=None):
+                                   tags=None,
+                                   termination_protection=False):
     """Generate describe stacks stack."""
     tags = tags or []
     return {
@@ -55,7 +63,8 @@ def generate_describe_stacks_stack(stack_name,
         "StackId": stack_name,
         "CreationTime": creation_time or datetime(2015, 1, 1),
         "StackStatus": stack_status,
-        "Tags": tags
+        "Tags": tags,
+        "EnableTerminationProtection": termination_protection
     }
 
 
@@ -460,6 +469,62 @@ class TestProviderDefaultMode(unittest.TestCase):
             self.session, region=region, recreate_failed=False)
         self.stubber = Stubber(self.provider.cloudformation)
 
+    def test_create_stack_no_changeset(self):
+        """Test create_stack, no changeset, template url."""
+        stack_name = 'fake_stack'
+        template = Template(url="http://fake.template.url.com/")
+        parameters = []
+        tags = []
+
+        expected_args = generate_cloudformation_args(stack_name,
+                                                     parameters,
+                                                     tags,
+                                                     template)
+        expected_args['EnableTerminationProtection'] = False
+
+        self.stubber.add_response(
+            'create_stack',
+            {'StackId': stack_name},
+            expected_args
+        )
+
+        with self.stubber:
+            self.provider.create_stack(stack_name, template, parameters, tags)
+        self.stubber.assert_no_pending_responses()
+
+    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
+    @patch('runway.cfngin.providers.aws.default.create_change_set')
+    def test_create_stack_with_changeset(self, patched_create_change_set,
+                                         patched_update_term):
+        """Test create_stack, force changeset, termination protection."""
+        stack_name = 'fake_stack'
+        template_path = Path('./tests/cfngin/fixtures/cfn_template.yaml')
+        template = Template(body=template_path.read_text())
+        parameters = []
+        tags = []
+
+        changeset_id = 'CHANGESETID'
+
+        patched_create_change_set.return_value = ([], changeset_id)
+
+        self.stubber.add_response(
+            'execute_change_set',
+            {},
+            {'ChangeSetName': changeset_id}
+        )
+
+        with self.stubber:
+            self.provider.create_stack(stack_name, template, parameters, tags,
+                                       force_change_set=True,
+                                       termination_protection=True)
+        self.stubber.assert_no_pending_responses()
+
+        patched_create_change_set.assert_called_once_with(
+            self.provider.cloudformation, stack_name, template, parameters,
+            tags, 'CREATE', service_role=self.provider.service_role
+        )
+        patched_update_term.assert_called_once_with(stack_name, True)
+
     def test_destroy_stack(self):
         """Test destroy stack."""
         stack = {'StackName': 'MockStack'}
@@ -671,6 +736,14 @@ class TestProviderDefaultMode(unittest.TestCase):
                 parameters=[], stack_policy=Template(body="{}"), tags=[],
             )
 
+    def test_noninteractive_destroy_stack_termination_protected(self):
+        """Test noninteractive_destroy_stack with termination protection."""
+        self.stubber.add_client_error('delete_stack')
+
+        with self.stubber, self.assertRaises(ClientError):
+            self.provider.noninteractive_destroy_stack('fake-stack')
+        self.stubber.assert_no_pending_responses()
+
     @patch('runway.cfngin.providers.aws.default.output_full_changeset')
     def test_get_stack_changes_update(self, mock_output_full_cs):
         """Test get stack changes update."""
@@ -864,6 +937,38 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.assertEqual(received_events[0]["EventId"], "Event1")
 
+    def test_update_termination_protection(self):
+        """Test update_termination_protection."""
+        stack_name = 'fake-stack'
+        test_cases = [
+            MutableMap(aws=False, defined=True, expected=True),
+            MutableMap(aws=True, defined=False, expected=False),
+            MutableMap(aws=True, defined=True, expected=None),
+            MutableMap(aws=False, defined=False, expected=None)
+        ]
+
+        for test in test_cases:
+            self.stubber.add_response(
+                'describe_stacks',
+                {'Stacks': [
+                    generate_describe_stacks_stack(
+                        stack_name, termination_protection=test.aws
+                    )
+                ]},
+                {'StackName': stack_name}
+            )
+            if isinstance(test.expected, bool):
+                self.stubber.add_response(
+                    'update_termination_protection',
+                    {'StackId': stack_name},
+                    {'EnableTerminationProtection': test.expected,
+                     'StackName': stack_name}
+                )
+            with self.stubber:
+                self.provider.update_termination_protection(stack_name,
+                                                            test.defined)
+            self.stubber.assert_no_pending_responses()
+
 
 class TestProviderInteractiveMode(unittest.TestCase):
     """Tests for runway.cfngin.providers.aws.default interactive mode."""
@@ -877,16 +982,37 @@ class TestProviderInteractiveMode(unittest.TestCase):
         self.stubber = Stubber(self.provider.cloudformation)
 
     @patch('runway.cfngin.ui.get_raw_input')
-    def test_destroy_stack(self, patched_input):
-        """Test destroy stack."""
-        stack = {'StackName': 'MockStack'}
+    def test_interactive_destroy_stack(self, patched_input):
+        """Test interactive_destroy_stack."""
+        stack_name = 'fake-stack'
+        stack = {'StackName': stack_name}
         patched_input.return_value = 'y'
 
         self.stubber.add_response('delete_stack', {}, stack)
 
         with self.stubber:
-            self.assertIsNone(self.provider.destroy_stack(stack))
+            self.assertIsNone(self.provider.interactive_destroy_stack(stack_name))
             self.stubber.assert_no_pending_responses()
+
+    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
+    @patch('runway.cfngin.ui.get_raw_input')
+    def test_interactive_destroy_stack_termination_protected(self,
+                                                             patched_input,
+                                                             patched_update_term):
+        """Test interactive_destroy_stack with termination protection."""
+        stack_name = 'fake-stack'
+        stack = {'StackName': stack_name}
+        patched_input.return_value = 'y'
+
+        self.stubber.add_client_error('delete_stack',
+                                      service_message='TerminationProtection')
+        self.stubber.add_response('delete_stack', {}, stack)
+
+        with self.stubber:
+            self.provider.interactive_destroy_stack(stack_name, approval='y')
+        self.stubber.assert_no_pending_responses()
+        patched_input.assert_called_once()
+        patched_update_term.assert_called_once_with(stack_name, False)
 
     @patch('runway.cfngin.ui.get_raw_input')
     def test_destroy_stack_canceled(self, patched_input):
@@ -904,9 +1030,11 @@ class TestProviderInteractiveMode(unittest.TestCase):
                             replacements_only=replacements)
         self.assertEqual(provider.replacements_only, replacements)
 
+    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
     @patch("runway.cfngin.providers.aws.default.ask_for_approval")
     def test_update_stack_execute_success_no_stack_policy(self,
-                                                          patched_approval):
+                                                          patched_approval,
+                                                          patched_update_term):
         """Test update stack execute success no stack policy."""
         stack_name = "my-fake-stack"
 
@@ -914,8 +1042,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
             "create_change_set",
             {'Id': 'CHANGESETID', 'StackId': 'STACKID'}
         )
-        changes = []
-        changes.append(generate_change())
+        changes = [generate_change()]
 
         self.stubber.add_response(
             "describe_change_set",
@@ -935,16 +1062,17 @@ class TestProviderInteractiveMode(unittest.TestCase):
                 parameters=[], tags=[]
             )
 
-        patched_approval.assert_called_with(full_changeset=changes,
-                                            params_diff=[],
-                                            include_verbose=True,
-                                            fqn=stack_name)
+        patched_approval.assert_called_once_with(full_changeset=changes,
+                                                 params_diff=[],
+                                                 include_verbose=True,
+                                                 fqn=stack_name)
+        patched_update_term.assert_called_once_with(stack_name, False)
 
-        self.assertEqual(patched_approval.call_count, 1)
-
+    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
     @patch("runway.cfngin.providers.aws.default.ask_for_approval")
     def test_update_stack_execute_success_with_stack_policy(self,
-                                                            patched_approval):
+                                                            patched_approval,
+                                                            patched_update_term):
         """Test update stack execute success with stack policy."""
         stack_name = "my-fake-stack"
 
@@ -952,8 +1080,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
             "create_change_set",
             {'Id': 'CHANGESETID', 'StackId': 'STACKID'}
         )
-        changes = []
-        changes.append(generate_change())
+        changes = [generate_change()]
 
         self.stubber.add_response(
             "describe_change_set",
@@ -976,12 +1103,11 @@ class TestProviderInteractiveMode(unittest.TestCase):
                 stack_policy=Template(body="{}"),
             )
 
-        patched_approval.assert_called_with(full_changeset=changes,
-                                            params_diff=[],
-                                            include_verbose=True,
-                                            fqn=stack_name)
-
-        self.assertEqual(patched_approval.call_count, 1)
+        patched_approval.assert_called_once_with(full_changeset=changes,
+                                                 params_diff=[],
+                                                 include_verbose=True,
+                                                 fqn=stack_name)
+        patched_update_term.assert_called_once_with(stack_name, False)
 
     def test_select_destroy_method(self):
         """Test select destroy method."""

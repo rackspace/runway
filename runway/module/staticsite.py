@@ -32,7 +32,6 @@ class StaticSite(RunwayModule):
     def __init__(self, context, path, options=None):
         """Initialize."""
         super(StaticSite, self).__init__(context, path, options)
-        LOGGER.info(self.context.env_region)
         self.name = self.options.get('name', self.options.get('path'))
         self.user_options = self.options.get('options', {})
         self.parameters = self.options.get('parameters')
@@ -60,6 +59,20 @@ class StaticSite(RunwayModule):
                        "(e.g. url rewrites) will take quite a while (up to an hour). "
                        "Unless you receive an error your deployment is still running.")
                 LOGGER.info(msg.upper())
+
+                # Auth@Edge warning about subsequent deploys
+                if self.parameters.get('staticsite_auth_at_edge', False) is True:
+                    msg = ("PLEASE NOTE: A hook that is part of the dependencies stack of "
+                           "the Auth@Edge static site deployment is designed to verify that "
+                           "the correct Callback URLs are being used when a User Pool Client "
+                           "already exists for the application. This ensures that there is no "
+                           "interruption of service while the deployment reaches the stage "
+                           "where the Callback URLs are updated to that of the Distribution. "
+                           "Because of this you will receive a change set request on your first "
+                           "subsequent deploy from the first, or any subsequent ones where the "
+                           "alias domains have changed.")
+                    LOGGER.info(msg)
+
             self._setup_website_module(command='deploy')
         else:
             LOGGER.info("Skipping staticsite deploy of %s; no environment "
@@ -97,6 +110,42 @@ class StaticSite(RunwayModule):
         return module_dir
 
     def _create_dependencies_yaml(self, module_dir):
+        pre_build = []
+
+        pre_destroy = [
+            {'path': 'runway.hooks.cleanup_s3.purge_bucket',
+             'required': True,
+             'args': {
+                 'bucket_rxref_lookup': "%s-dependencies::%s" % (self.name, i)  # noqa
+             }} for i in ['AWSLogBucketName', 'ArtifactsBucketName']
+        ]
+
+        if self.parameters.get('staticsite_auth_at_edge', False):
+            pre_build = [{
+                'path': 'runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get',
+                'required': True,
+                'data_key': 'aae_callback_url_retriever',
+                'args': {
+                    'user_pool_arn': self.parameters.get('staticsite_user_pool_arn', ''),
+                    'stack_name': "${namespace}-%s-dependencies" % self.name
+                }
+            }]
+
+            if self.parameters.get('staticsite_create_user_pool', False):
+                pre_destroy.append({
+                    'path': 'runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get',
+                    'required': True,
+                    'data_key': 'aae_user_pool_id_retriever',
+                    'args': self._get_user_pool_id_retriever_variables(),
+                })
+
+                pre_destroy.append({
+                    'path': 'runway.hooks.staticsite.auth_at_edge.domain_updater.delete',
+                    'required': True,
+                    'data_key': 'aae_domain_updater',
+                    'args': self._get_domain_updater_variables(),
+                })
+
         with open(os.path.join(module_dir, '01-dependencies.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
                 {'namespace': '${namespace}',
@@ -105,13 +154,8 @@ class StaticSite(RunwayModule):
                      "%s-dependencies" % self.name: {
                          'class_path': 'runway.blueprints.staticsite.dependencies.Dependencies',
                          'variables': self._get_dependencies_variables()}},
-                 'pre_destroy': [
-                     {'path': 'runway.hooks.cleanup_s3.purge_bucket',
-                      'required': True,
-                      'args': {
-                          'bucket_rxref_lookup': "%s-dependencies::%s" % (self.name, i)  # noqa
-                      }} for i in ['AWSLogBucketName', 'ArtifactsBucketName']
-                 ]},
+                 'pre_build': pre_build,
+                 'pre_destroy': pre_destroy},
                 output_stream,
                 default_flow_style=False
             )
@@ -159,33 +203,40 @@ class StaticSite(RunwayModule):
 
         if self.parameters.get('staticsite_auth_at_edge', False):
             class_path = 'auth_at_edge.AuthAtEdge'
-            domain_updater_variables = self._get_domain_updater_variables()
-            client_updater_variables = self._get_client_updater_variables(
-                self.name,
-                site_stack_variables
-            )
-            lambda_config_variables = self._get_lambda_config_variables(
-                site_stack_variables
-            )
 
+            pre_build.append({
+                'path': 'runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get',
+                'required': True,
+                'data_key': 'aae_user_pool_id_retriever',
+                'args': self._get_user_pool_id_retriever_variables()
+            })
             pre_build.append({
                 'path': 'runway.hooks.staticsite.auth_at_edge.domain_updater.update',
                 'required': True,
                 'data_key': 'aae_domain_updater',
-                'args': domain_updater_variables
+                'args': self._get_domain_updater_variables()
             })
             pre_build.append({
                 'path': 'runway.hooks.staticsite.auth_at_edge.lambda_config.write',
                 'required': True,
                 'data_key': 'aae_lambda_config',
-                'args': lambda_config_variables
+                'args': self._get_lambda_config_variables(
+                    site_stack_variables
+                )
             })
             post_build.insert(0, {
-                'path': 'runway.hooks.staticsite.auth_at_edge.client_updater.update', # noqa
+                'path': 'runway.hooks.staticsite.auth_at_edge.client_updater.update',
                 'required': True,
                 'data_key': 'client_updater',
-                'args': client_updater_variables
+                'args': self._get_client_updater_variables(
+                    self.name,
+                    site_stack_variables
+                )
             })
+
+        if self.parameters.get('staticsite_role_boundary_arn', False):
+            site_stack_variables['RoleBoundaryArn'] = \
+                self.parameters.pop('staticsite_role_boundary_arn')
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
@@ -211,7 +262,7 @@ class StaticSite(RunwayModule):
 
     def _get_site_stack_variables(self):
         site_stack_variables = {
-            'Aliases': self.parameters.get('staticsite_aliases', '').split(','),
+            'Aliases': [],
             'DisableCloudFront': self.parameters.get('staticsite_cf_disable', False),
             'RewriteDirectoryIndex': self.parameters.get(
                 'staticsite_rewrite_directory_index',
@@ -224,6 +275,9 @@ class StaticSite(RunwayModule):
             'SignOutUrl': '${default staticsite_sign_out_url::/signout}',
             'WAFWebACL': self.parameters.get('staticsite_web_acl', '')
         }
+
+        if self.parameters.get('staticsite_aliases'):
+            site_stack_variables['Aliases'] = self.parameters.get('staticsite_aliases').split(',')
 
         if self.parameters.get('staticsite_acmcert_arn'):
             site_stack_variables['AcmCertificateArn'] = \
@@ -249,7 +303,6 @@ class StaticSite(RunwayModule):
                 'staticsite_non_spa',
                 False
             )
-            site_stack_variables['UserPoolId'] = self._extract_user_pool_id()
             site_stack_variables['HttpHeaders'] = self._get_http_headers()
             site_stack_variables['CookieSettings'] = self._get_cookie_settings()
             site_stack_variables['OAuthScopes'] = self._get_oauth_scopes()
@@ -264,14 +317,6 @@ class StaticSite(RunwayModule):
                     self.parameters.pop("staticsite_%s" % i)
 
         return site_stack_variables
-
-    def _extract_user_pool_id(self):
-        """Memoized extraction of the user pool id from the arn in Auth@Edge."""
-        if self.user_pool_id:
-            return self.user_pool_id
-
-        self.user_pool_id = self.parameters.get('staticsite_user_pool_arn').split('/')[-1:][0]
-        return self.user_pool_id
 
     def _get_cookie_settings(self):
         """Retrieve the cookie settings from the variables or return the default."""
@@ -319,7 +364,7 @@ class StaticSite(RunwayModule):
     def _get_supported_identity_providers(self):
         providers = self.parameters.get('staticsite_supported_identity_providers')
         if providers:
-            return [provider.upper().strip() for provider in providers.split(',')]
+            return [provider.strip() for provider in providers.split(',')]
         return ['COGNITO']
 
     def _get_dependencies_variables(self):
@@ -331,16 +376,31 @@ class StaticSite(RunwayModule):
                 'AuthAtEdge': self.parameters.get(
                     'staticsite_auth_at_edge',
                     False
-                ),
-                'UserPoolId': self._extract_user_pool_id()
+                )
             })
+
+            if self.parameters.get('staticsite_create_user_pool', False):
+                variables.update({
+                    'CreateUserPool': self.parameters.get('staticsite_create_user_pool', False)
+                })
+
         return variables
+
+    def _get_user_pool_id_retriever_variables(self):
+        args = {
+            'user_pool_arn': self.parameters.get('staticsite_user_pool_arn', ''),
+        }
+
+        if self.parameters.get('staticsite_create_user_pool', False):
+            args['created_user_pool_id'] = \
+                '${rxref %s-dependencies::AuthAtEdgeUserPoolId}' % (self.name)
+
+        return args
 
     def _get_domain_updater_variables(self):
         return {
             'client_id_output_lookup': "%s-dependencies::AuthAtEdgeClient" % self.name,  # noqa pylint: disable=line-too-long
             'client_id': "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
-            'user_pool_id': self._extract_user_pool_id()
         }
 
     def _get_lambda_config_variables(self, site_stack_variables):
@@ -353,25 +413,25 @@ class StaticSite(RunwayModule):
             'redirect_path_refresh': site_stack_variables['RedirectPathAuthRefresh'],
             'redirect_path_sign_in': site_stack_variables['RedirectPathSignIn'],
             'redirect_path_sign_out': site_stack_variables['RedirectPathSignOut'],
-            'user_pool_id': self._extract_user_pool_id(),
         }
 
     def _get_client_updater_variables(self, name, site_stack_variables):
-        aliases = list(map(add_url_scheme, site_stack_variables['Aliases']))
+        aliases = [add_url_scheme(x) for x in site_stack_variables['Aliases']]
         return {
-            'alternate_domains': [] if aliases[0] == '' else aliases,
+            'alternate_domains': aliases,
             'client_id': "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
             'distribution_domain': '${rxref %s::CFDistributionDomainName}' % name,
             'oauth_scopes': site_stack_variables['OAuthScopes'],
             'redirect_path_sign_in': site_stack_variables['RedirectPathSignIn'],
             'redirect_path_sign_out': site_stack_variables['RedirectPathSignOut'],
             'supported_identity_providers': site_stack_variables['SupportedIdentityProviders'],
-            'user_pool_id': self._extract_user_pool_id(),
         }
 
     def _ensure_auth_at_edge_requirements(self):
-        if not self.parameters.get('staticsite_user_pool_arn'):
-            LOGGER.fatal("A Cognito UserPool ARN is required with Auth@Edge")
+        if not self.parameters.get('staticsite_user_pool_arn') and \
+           not self.parameters.get('staticsite_create_user_pool'):
+            LOGGER.fatal("A Cognito UserPool ARN is required with Auth@Edge. "
+                         "You can supply your own or have one created.")
             sys.exit(1)
 
     def _ensure_correct_region_with_auth_at_edge(self):

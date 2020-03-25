@@ -419,6 +419,7 @@ stacks:
   locked: false
   name: vpc
   protected: false
+  termination_protection: false
 - class_path: blueprints.Bastion
   enabled: true
   locked: false
@@ -426,6 +427,7 @@ stacks:
   protected: false
   requires:
   - vpc
+  termination_protection: false
 """)
 
     def test_load_register_custom_lookups(self):

@@ -124,6 +124,11 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
             ignore_cache: Ignore cached value.
 
         """
+        if not hasattr(self, '_found_queries'):
+            # if not created from kwargs, this attr won't exist yet
+            # this is done to prevent endless recursion
+            self._found_queries = MutableMap()
+
         if not ignore_cache:
             cached_result = self._found_queries.get(query, None)
             if cached_result:
