@@ -1,28 +1,94 @@
-.. _`anchors & references`: https://en.wikipedia.org/wiki/YAML#Repeated_nodes
-.. _`AWS profiles`: https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html
-.. _Blueprint: ../terminology.html#blueprint
-.. _Blueprints: ../terminology.html#blueprint
-.. _config file: ../terminology.html#config
-.. _graph: ../terminology.html#graph
-.. _hook: ../terminology.html#hook
-.. _hooks: ../terminology.html#hook
-.. _lookups: lookups.html
-.. _Mappings: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html
-.. _Outputs: ../terminology.html#output
-.. _stack: ../terminology.html#stack
+.. _Runway Config File: runway_config.html
+
+#############
+Configuration
+#############
+
+In addition to the `Runway Config File`_, there are two files that can be used for configuration:
+
+- a YAML :ref:`configuration file <cfngin-config>` **[REQUIRED]**
+- a key/value :ref:`environment file <cfngin-env>`
 
 
-==================
+
+**********
+runway.yml
+**********
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  deployments:
+    - modules:
+        - path: sampleapp.cfn
+          type: cloudformation  # not required; implied from ".cfn" directory extension
+          environments:
+            dev: true
+          parameters:
+            namespace: example-${env DEPLOY_ENVIRONMENT}
+            cfngin_bucket: example-${env DEPLOY_ENVIRONMENT}-${env AWS_REGION}
+      regions:
+        - us-east-1
+
+
+Options
+=======
+
+CloudFormation modules do not have any module-specific options.
+
+
+Parameters
+==========
+
+Runway can pass :ref:`Parameters <term-param>` to a CloudFormation module in place of or in addition to an :ref:`environment file <cfngin-env>`.
+When :ref:`Parameters <term-param>` are passed to the module, the data type is retained (e.g. ``array``, ``boolean``, ``mapping``).
+
+A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :ref:`Parameters <term-param>` to pass :ref:`deploy environment <term-deploy-env>` and/or region specific values to the module from the `Runway Config File`_.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  deployments:
+    - modules:
+        - sampleapp-01.cfn
+        - path: sampleapp-02.cfn
+          parameters:
+            instance_count: ${var instance_count.${env DEPLOY_ENVIRONMENT}}
+      parameters:
+        image_id: ${var image_id.%{env AWS_REGION}}
+
+Common Parameters
+-----------------
+
+Runway automatically makes the following commonly used :ref:`Parameters <term-param>`  available to CloudFormation modules.
+
+.. note::
+  If these parameter names are already being explicitly defined in the `Runway Config File`_ or :ref:`environment file <cfngin-env>`.
+  The value provided will be used over that which would be automatically added.
+
+**environment (str)**
+  Taken from the ``DEPLOY_ENVIRONMENT`` environment variable. This will the be current :ref:`deploy environment <term-deploy-env>`.
+
+**region (str)**
+  Taken from the ``AWS_REGION`` environment variable. This will be the current region being processed.
+
+
+
+----
+
+.. _cfngin-config:
+
+******************
 CFNgin Config File
-==================
+******************
 
-CFNgin makes use of a YAML formatted config file to define the different
+Runway's CFNgin makes use of a YAML formatted config file to define the different
 CloudFormation stacks that make up a given environment.
 
-The configuration file has a loose definition, with only a few top-level
-keywords. Other than those keywords, you can define your own top-level keys
-to make use of other YAML features like `anchors & references`_ to avoid
-duplicating config. (See `YAML anchors & references`_ for details)
+The configuration file has a loose definition, with only a few top-level keywords.
+Other than those keywords, you can define your own top-level keys to make use of other YAML features like
+`anchors & references <https://en.wikipedia.org/wiki/YAML#Repeated_nodes>`_ to avoid duplicating config.
+(See :ref:`YAML anchors & references <cfngin-yaml>` for details)
 
 
 Top Level Keywords
@@ -34,12 +100,12 @@ Namespace
 ---------
 
 You can provide a   ``namespace`` to create all stacks within. The namespace_ will
-be used as a prefix for the name of any stack that CFNgin creates.
+be used as a prefix for the name of any stack that Runway's CFNgin creates.
 
-In addition, this value will be used to create an S3 bucket that CFNgin will
+In addition, this value will be used to create an S3 bucket that Runway's CFNgin will
 use to upload and store all CloudFormation templates.
 
-In general, this is paired with the concept of Environments_ to create a namespace_ per environment.
+In general, this is paired with the concept of :ref:`Environments <term-cfngin-env>` to create a namespace_ per environment.
 
 .. code-block:: yaml
 
@@ -49,7 +115,7 @@ In general, this is paired with the concept of Environments_ to create a namespa
 Namespace Delimiter
 -------------------
 
-By default, CFNgin will use ``-`` as a delimiter between your namespace_ and the
+By default, Runway's CFNgin will use ``-`` as a delimiter between your namespace_ and the
 declared stack name to build the actual CloudFormation stack name that gets
 created. Since child resources of your stacks will, by default, use a portion
 of your stack name in the auto-generated resource names, the first characters
@@ -57,18 +123,16 @@ of your fully-qualified stack name potentially convey valuable information to
 someone glancing at resource names. If you prefer to not use a delimiter, you
 can pass the ``namespace_delimiter`` top-level keyword in the config as an empty string.
 
-See the `CloudFormation API Reference`_ for allowed stack name characters
-
-.. _`CloudFormation API Reference`: http://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html
+See the `CloudFormation API Reference <http://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html>`__ for allowed stack name characters
 
 
-.. _cfngin_bucket:
+.. _cfngin-bucket:
 .. _stacker_bucket:
 
 S3 Bucket
 ---------
 
-CFNgin, by default, pushes your CloudFormation templates into an S3 bucket
+Runway's CFNgin, by default, pushes your CloudFormation templates into an S3 bucket
 and points CloudFormation at the template in that bucket when launching or
 updating your stacks. By default it uses a bucket named
 ``stacker-${namespace}``, where the namespace_ is the namespace_ provided the
@@ -85,24 +149,19 @@ the region where you want to create the bucket.
 If you want CFNgin to upload templates directly to CloudFormation, instead of
 first uploading to S3, you can set ``cfngin_bucket`` to an empty string.
 However, note that template size is greatly limited when uploading directly.
-See the `CloudFormation Limits Reference`_.
-
-.. _`CloudFormation Limits Reference`: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html
+See the `CloudFormation Limits Reference <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html>`__.
 
 
 Persistent Graph
 ----------------
 
-Each time CFNgin is run, it creates a dependency graph_ of Stacks_. This is
-used to determine the order in which to execute them. This graph_ can be
-persisted between runs to track the removal of Stacks_ the `config file`_.
+Each time Runway's CFNgin is run, it creates a dependency :ref:`graph <term-graph>` of :ref:`Stacks <term-stack>`.
+This is used to determine the order in which to execute them. This :ref:`graph <term-graph>` can be
+persisted between runs to track the removal of :ref:`Stacks <term-stack>` the config file.
 
-When a stack_ is present in the persistent graph but not in the graph_
-constructed from the `config file`_, CFNgin will delete the stack_ from
+When a :ref:`stack <term-stack>` is present in the persistent graph but not in the :ref:`graph <term-graph>`
+constructed from the config file, CFNgin will delete the :ref:`stack <term-stack>` from
 CloudFormation. This takes effect during both build and destroy actions.
-
-The persistent graph is also used with the `graph command <commands.html#graph>`_
-where it is merged with the graph_ constructed from the `config file`_.
 
 To enable persistent graph, set **persistent_graph_key** to a unique value
 that will be used to construct the path to the persistent graph object in S3.
@@ -132,8 +191,8 @@ When executing an action that will be modifying the persistent graph
 (build or destroy), the S3 object is *"locked"*. The lock is a tag applied to
 the object at the start of one of these actions. The tag-key is
 **cfngin_lock_code** and the tag-value is UUID generated each time a command
-is run. In order for CFNgin to lock a persistent graph object, the tag must
-not be present on the object. For CFNgin to act on the graph_ (modify or
+is run. In order for Runway's CFNgin to lock a persistent graph object, the tag must
+not be present on the object. For Runway's CFNgin to act on the :ref:`graph <term-graph>` (modify or
 unlock) the value of the tag must match the UUID of the current CFNgin
 session. If the object is locked or the code does not match, an error will be
 raised and no action will be taken. This prevents two parties from acting on
@@ -144,6 +203,7 @@ condition.
   A persistent graph object can be unlocked manually by removing the
   **cfngin_lock_code** tag from it. This should be done with caution as it
   will cause any active sessions to raise an error.
+
 
 Persistent Graph Example
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -172,7 +232,7 @@ Persistent Graph Example
 
 .. rubric:: Result
 
-Given the above `config file`_ and persistent graph,
+Given the above config file and persistent graph,
 when running ``runway deploy``, the following will occur.
 
 #. The ``{"Key": "cfngin_lock_code", "Value": "123456"}`` tag is applied to
@@ -191,9 +251,10 @@ when running ``runway deploy``, the following will occur.
 
 Module Paths
 ------------
-When setting the ``classpath`` for Blueprints_/hooks_, it is sometimes desirable to
-load modules from outside the default ``sys.path`` (e.g., to include modules
-inside the same repo as config files).
+
+When setting the ``classpath`` for :ref:`Blueprints`/:ref:`hooks <term-cfngin-hook>`,
+it is sometimes desirable to load modules from outside the default ``sys.path``
+(e.g., to include modules inside the same repo as config files).
 
 Adding a path (e.g. ``./``) to the ``sys_path`` top-level keyword will allow
 modules from that path location to be used.
@@ -202,7 +263,7 @@ modules from that path location to be used.
 Service Role
 ------------
 
-By default CFNgin doesn't specify a service role when executing changes to
+By default Runway's CFNgin doesn't specify a service role when executing changes to
 CloudFormation stacks. If you would prefer that it do so, you can set
 ``service_role`` to be the ARN of the role that CFNgin should use when
 executing CloudFormation changes.
@@ -211,16 +272,14 @@ This is the equivalent of setting ``RoleARN`` on a call to the following
 CloudFormation api calls: ``CreateStack``, ``UpdateStack``,
 ``CreateChangeSet``.
 
-See the AWS documentation for `AWS CloudFormation Service Roles`_.
-
-.. _`AWS CloudFormation Service Roles`: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html?icmpid=docs_cfn_console
+See the AWS documentation for `AWS CloudFormation Service Roles <https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html?icmpid=docs_cfn_console>`__.
 
 
 Remote Packages
 ---------------
 
 The ``package_sources`` top-level keyword can be used to define remote
-sources for Blueprints_ (e.g., retrieving ``src/runway/blueprints`` on github at
+sources for :ref:`Blueprints` (e.g., retrieving ``src/runway/blueprints`` on github at
 tag ``v1.3.7``).
 
 The only required key for a git repository config is ``uri``, but ``branch``,
@@ -296,11 +355,10 @@ In this example, the configuration in ``vpc.yaml`` will be merged into the
 running current configuration, with the current configuration's values taking
 priority over the values in ``vpc.yaml``.
 
-
 Dictionary Stack Names & Hook Paths
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To allow remote configs to be selectively overridden, stack names & hook_ paths are defined as dictionaries.
+To allow remote configs to be selectively overridden, stack names & :ref:`hook <term-cfngin-hook>` paths are defined as dictionaries.
 
 .. code-block:: yaml
 
@@ -325,10 +383,10 @@ To allow remote configs to be selectively overridden, stack names & hook_ paths 
 Pre & Post Hooks
 ----------------
 
-Many actions allow for pre & post hooks_. These are python functions/methods that are
-executed before, and after the action is taken for the entire config. Hooks_
-can be enabled or disabled, per hook_. Only the following actions allow
-pre/post hooks_:
+Many actions allow for pre & post :ref:`hooks <term-cfngin-hook>`. These are python functions/methods that are
+executed before, and after the action is taken for the entire config. :ref:`Hooks <term-cfngin-hook>`
+can be enabled or disabled, per :ref:`hook <term-cfngin-hook>`. Only the following actions allow
+pre/post :ref:`hooks <term-cfngin-hook>`:
 
 * build (keywords: ``pre_build``, ``post_build``)
 * destroy (keywords: ``pre_destroy``, ``post_destroy``)
@@ -339,27 +397,27 @@ better control over the naming of a resource than what CloudFormation allows.
 The keyword is a dictionary with the following keys:
 
 **path:**
-  the python import path to the hook_.
+  the python import path to the :ref:`hook <term-cfngin-hook>`.
 
 **data_key:**
-  If set, and the hook_ returns data (a dictionary), the results will be stored
+  If set, and the :ref:`hook <term-cfngin-hook>` returns data (a dictionary), the results will be stored
   in the ``context.hook_data`` with the ``data_key`` as its key.
 
 **required:**
-  Whether to stop execution if the hook_ fails.
+  Whether to stop execution if the :ref:`hook <term-cfngin-hook>` fails.
 
 **enabled:**
-  Whether to execute the hook_ every CFNgin run. Default: True. This is a bool
-  that grants you the ability to execute a hook_ per environment when combined
+  Whether to execute the :ref:`hook <term-cfngin-hook>` every CFNgin run. Default: True. This is a bool
+  that grants you the ability to execute a :ref:`hook <term-cfngin-hook>` per environment when combined
   with a variable pulled from an environment file.
 
 **args:**
-  A dictionary of arguments to pass to the hook_ with support for lookups_.
-  Note that lookups_ that change the order of execution, like ``output``, can
+  A dictionary of arguments to pass to the :ref:`hook <term-cfngin-hook>` with support for :ref:`lookups <cfngin-lookups>`.
+  Note that :ref:`lookups <cfngin-lookups>` that change the order of execution, like ``output``, can
   only be used in a `post` hook but hooks like ``rxref`` are able to be used
   with either `pre` or `post` hooks.
 
-An example using the ``create_domain`` hook_ for creating a route53 domain before
+An example using the ``create_domain`` :ref:`hook <term-cfngin-hook>` for creating a route53 domain before
 the build action:
 
 .. code-block:: yaml
@@ -372,9 +430,9 @@ the build action:
       args:
         domain: mydomain.com
 
-An example of a hook_ using the ``create_domain_bool`` variable from the environment
-file to determine if the hook_ should run. Set ``create_domain_bool: true`` or
-``create_domain_bool: false`` in the environment file to determine if the hook_
+An example of a :ref:`hook <term-cfngin-hook>` using the ``create_domain_bool`` variable from the environment
+file to determine if the :ref:`hook <term-cfngin-hook>` should run. Set ``create_domain_bool: true`` or
+``create_domain_bool: false`` in the environment file to determine if the :ref:`hook <term-cfngin-hook>`
 should run in the environment CFNgin is running against:
 
 .. code-block:: yaml
@@ -446,8 +504,7 @@ map for the top-level keyword.
 Mappings
 --------
 
-Mappings are dictionaries that are provided as Mappings_ to each CloudFormation
-stack that CFNgin produces.
+Mappings are dictionaries that are provided as `Mappings <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html>`__ to each CloudFormation stack that CFNgin produces.
 
 These can be useful for providing things like different AMIs for different
 instance types in different regions.
@@ -465,17 +522,17 @@ instance types in different regions.
         ubuntu1404: ami-5189a661
         bastion: ami-5189a661
 
-These can be used in each Blueprint_/stack as usual.
+These can be used in each :ref:`Blueprint`/stack as usual.
 
 
 Lookups
 -------
 
 Lookups allow you to create custom methods which take a value and are
-resolved at build time. The resolved values are passed to the Blueprint_ before it is rendered.
-For more information, see the `Lookups <lookups.html>`_ documentation.
+resolved at build time. The resolved values are passed to the :ref:`Blueprint` before it is rendered.
+For more information, see the :ref:`Lookups <cfngin-lookups>` documentation.
 
-CFNgin provides some common `lookups <lookups.html>`_, but it is
+CFNgin provides some common :ref:`Lookups <cfngin-lookups>`, but it is
 sometimes useful to have your own custom lookup that doesn't get shipped
 with Runway. You can register your own lookups by defining a ``lookups``
 key.
@@ -510,12 +567,12 @@ If no ``stack_name`` is provided, the value here will be used for the name of th
 A stack has the following keys:
 
 **class_path (Optional[str])**
-  The python class path to the Blueprint_ to be used. Specify this or
+  The python class path to the :ref:`Blueprint` to be used. Specify this or
   ``template_path`` for the stack.
 
 **description (Optional[str])**
   A short description to apply to the stack. This overwrites any description
-  provided in the Blueprint_. See:
+  provided in the :ref:`Blueprint`. See:
   http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html
 
 **enabled (Optional[bool])**
@@ -585,7 +642,7 @@ A stack has the following keys:
   (*default:* ``false``)
 
 **variables (Optional[Dict[str, str]])**
-  A dictionary of Variables_ to pass into the Blueprint_ when rendering the
+  A dictionary of Variables_ to pass into the :ref:`Blueprint` when rendering the
   CloudFormation template. Variables_ can be any valid YAML data
   structure.
 
@@ -623,7 +680,7 @@ Here's an example used to create a VPC:
 Custom Log Formats
 ------------------
 
-By default, CFNgin uses the following ``log_formats``:
+By default, Runway's CFNgin uses the following ``log_formats``:
 
 .. code-block:: yaml
 
@@ -648,13 +705,14 @@ when building your `log_formats`.
 Variables
 ==========
 
-Variables are values that will be passed into a Blueprint_ before it is
+Variables are values that will be passed into a :ref:`Blueprint` before it is
 rendered. Variables can be any valid YAML data structure and can leverage
-Lookups_ to expand values at build time.
+:ref:`Lookups <cfngin-lookups>` to expand values at build time.
 
 The following concepts make working with variables within large templates
 easier:
 
+.. _cfngin-yaml:
 
 YAML anchors & references
 -------------------------
@@ -713,13 +771,13 @@ could use them, you can just do this instead.
 Using Outputs as Variables
 ---------------------------
 
-Since CFNgin encourages the breaking up of your CloudFormation stacks into
+Since Runway's CFNgin encourages the breaking up of your CloudFormation stacks into
 entirely separate stacks, sometimes you'll need to pass values from one stack
 to another. The way this is handled in CFNgin is by having one stack
-provide Outputs_ for all the values that another stack may need, and then
+provide :ref:`Outputs <term-outputs>` for all the values that another stack may need, and then
 using those as the inputs for another stack's Variables_. CFNgin makes
 this easier for you by providing a syntax for Variables_ that will cause
-CFNgin to automatically look up the values of Outputs_ from another stack
+CFNgin to automatically look up the values of :ref:`Outputs <term-outputs>` from another stack
 in its config. To do so, use the following format for the Variable on the
 target stack.
 
@@ -727,8 +785,8 @@ target stack.
 
   MyParameter: ${output OtherStack::OutputName}
 
-Since referencing Outputs_ from stacks is the most common use case, ``output`` is the default lookup type.
-For more information see Lookups_.
+Since referencing :ref:`Outputs <term-outputs>` from stacks is the most common use case, ``output`` is the default lookup type.
+For more information see :ref:`Lookups <cfngin-lookups>`.
 
 In this example config - when building things inside a VPC, you will need to pass the **VpcId** of the VPC that you want the resources to be located in.
 If the **vpc** stack provides an Output called **VpcId**, you can reference it easily.
@@ -753,14 +811,87 @@ to the **vpc** stack, which will cause CFNgin to submit the **vpc** stack, and
 then wait until it is complete until it submits the **webservers** stack.
 
 
-Environments
-============
+
+----
+
+.. _cfngin-env:
+
+****************
+Environment File
+****************
+
+When using Runway's CFNgin, you can optionally provide an "environment" file. The
+CFNgin config file will be interpolated as a `string.Template
+<https://docs.python.org/2/library/string.html#template-strings>`_ using the
+key/value pairs from the environment file. The format of the file is a single
+key/value per line, separated by a colon (**:**).
+
+
+File Naming
+===========
+
+Environment files must follow a specific naming format in order to be recognized by Runway.
+The files must also be stored at the root of the module's directory.
+
+**<DEPLOY_ENVIRONMENT>-<AWS_REGION>.env**
+  The typical naming format that will be used for these files specifies the name of the ``DEPLOY_ENVIRONMENT`` and ``AWS_REGION`` in which to use the file.
+
+**<DEPLOY_ENVIRONMENT>.env**
+  The region can optionally be omitted to apply a single file to all regions.
+
+Files following both naming schemes may be used. The file with the most specific name takes precedence.
+Values passed in as ``parameters`` from the `Runway Config File`_ take precedence over those provided in an environment file.
+
+
+Usage
+=====
 
 A pretty common use case is to have separate environments that you want to
 look mostly the same, though with some slight modifications. For example, you
 might want a **production** and a **staging** environment. The production
 environment likely needs more instances, and often those instances will be
-of a larger instance type. Environments_ allow you to use your existing
+of a larger instance type. :ref:`Environments <term-cfngin-env>` allow you to use your existing
 CFNgin config, but provide different values based on the environment file
-chosen on the command line. For more information, see the
-`Environments <environments.html>`_ documentation.
+chosen.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  vpcID: vpc-12345678
+
+Provided the key/value vpcID above, you will now be able to use this in
+your configs for the specific environment you are deploying into. They
+act as keys that can be used in your config file, providing a sort of
+templating ability. This allows you to change the values of your config
+based on the environment you are in. For example, if you have a **webserver**
+stack, and you need to provide it a variable for the instance size it
+should use, you would have something like this in your config file.
+
+.. code-block:: yaml
+
+  stacks:
+    - name: webservers
+      class_path: blueprints.asg.AutoscalingGroup
+      variables:
+        InstanceType: m3.medium
+
+But what if you needed more CPU in your production environment, but not in your
+staging? Without Environments, you'd need a separate config for each. With
+environments, you can simply define two different environment files with the
+appropriate **InstanceType** in each, and then use the key in the environment
+files in your config.
+
+.. code-block:: yaml
+
+  # in the file: stage.env
+  web_instance_type: m3.medium
+
+  # in the file: prod.env
+  web_instance_type: c4.xlarge
+
+  # in your config file:
+  stacks:
+    - name: webservers
+      class_path: blueprints.asg.AutoscalingGroup
+      variables:
+        InstanceType: ${web_instance_type}
