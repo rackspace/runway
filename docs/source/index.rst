@@ -1,14 +1,9 @@
-Runway documentation
-==================================
+####################
+Runway Documentation
+####################
 
-What is Runway?
-^^^^^^^^^^^^^^^
-Runway is a lightweight wrapper around infrastructure deployment (e.g.
-CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease
-management of per-environment configs & deployment.
+Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease management of per-environment configs & deployment.
 
-Why use Runway?
-^^^^^^^^^^^^^^^
 Very simple configuration to:
 
 - Perform automatic linting/verification
@@ -22,7 +17,7 @@ Very simple configuration to:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
    installation
    getting_started
@@ -30,7 +25,6 @@ Very simple configuration to:
    commands
    runway_config
    module_configuration/index
-   cfngin/index
    lookups
    defining_tests
    repo_structure
@@ -39,9 +33,32 @@ Very simple configuration to:
    developers
    license
 
+********************
+Module Configuration
+********************
 
+CloudFormation & Troposphere
+============================
+
+The CloudFormation module type is deployed using Runway's CloudFormation engine (CFNgin).
+It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_ templates that are written in the form of a :ref:`Blueprint`.
+
+.. toctree::
+   :caption: CloudFormation & Troposphere
+   :maxdepth: 2
+   :hidden:
+
+   cfngin/configuration
+   cfngin/directory_structure
+   cfngin/advanced_features
+   cfngin/migrating
+
+.. _Troposphere: https://github.com/cloudtools/troposphere
+
+
+******************
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -4,6 +4,8 @@
 .. _package_sources: config.html#remote-package
 .. _sys_path: config.html#module-paths
 
+.. _cfngin-lookups:
+
 =======
 Lookups
 =======
@@ -13,7 +15,7 @@ Lookups
           registries. Runway config files can't use CFNgin lookups just as the
           CFNgin config cannot use Runway lookups.
 
-CFNgin provides the ability to dynamically replace values in the config via a
+Runway's CFNgin provides the ability to dynamically replace values in the config via a
 concept called lookups. A lookup is meant to take a value and convert
 it by calling out to another service or system.
 
@@ -70,7 +72,7 @@ dictionary:
   }
 
 
-CFNgin includes the following lookup types:
+Runway's CFNgin includes the following lookup types:
 
 - `output lookup`_
 - `ami lookup`_
