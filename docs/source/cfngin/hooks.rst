@@ -1,8 +1,8 @@
-.. _hook definition: config.html#pre-post-hooks
-.. _package_sources: config.html#remote-package
-.. _`Pre & Post Hooks`: config.html#pre-post-hooks
+.. _hook definition: configuration.html#pre-post-hooks
+.. _package_sources: configuration.html#remote-package
+.. _`Pre & Post Hooks`: configuration.html#pre-post-hooks
 .. _staticsite: ../module_configuration/staticsite.html
-.. _sys_path: config.html#module-paths
+.. _sys_path: configuration.html#module-paths
 
 =====
 Hooks
