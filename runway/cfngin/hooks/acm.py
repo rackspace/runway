@@ -9,7 +9,7 @@ from troposphere.certificatemanager import Certificate as CertificateResource
 from runway.cfngin.blueprints.variables.types import CFNString
 from runway.util import MutableMap
 
-from ..status import NO_CHANGE
+from ..status import NO_CHANGE, SUBMITTED
 from .base import Hook
 from .utils import BlankBlueprint
 
@@ -200,7 +200,7 @@ class Certificate(Hook):
         """
         LOGGER.info('Adding validation record to "%s"',
                     self.args.hosted_zone_id)
-        self.__change_record_set('ADD', [record_set])
+        self.__change_record_set('CREATE', [record_set])
 
     def remove_validation_records(self):
         """Remove all record set entries used to validate an ACM Certificate."""
@@ -230,7 +230,7 @@ class Certificate(Hook):
         """Wrap boto3.client('acm').change_resource_record_sets.
 
         Args:
-            action (str): Change action. [ADD, DELETE, UPSERT]
+            action (str): Change action. [CREATE, DELETE, UPSERT]
             record_sets (List[Dict[str, str]]): Record sets to change.
 
         """
@@ -260,6 +260,15 @@ class Certificate(Hook):
             }
         )
 
+    def deploy(self):
+        """Wrap _deploy method with error handling to back track."""
+        try:
+            return self._deploy()
+        except self.r53_client.exceptions.InvalidChangeBatch as err:
+            LOGGER.error(err)
+            self._destroy()
+            return {}
+
     def _deploy(self):
         """Deploy an ACM Certificate."""
         status = self.deploy_stack()
@@ -270,26 +279,30 @@ class Certificate(Hook):
             LOGGER.debug('Stack did not change; no action required')
             return result
 
-        try:
-            record = self.get_validation_record(cert_arn)
-        except ValueError as err:
-            if 'No validations with status "PENDING' in str(err) and \
-                    'updating existing stack' in status.reason:
+        if status == SUBMITTED:
+            if status.reason == 'creating new stack':
+                record = self.get_validation_record(cert_arn)
+                self.put_record_set(record)
+                LOGGER.info('Waiting for certificate to validate; '
+                            'this can take upwards of 30 minutes to '
+                            'complete...')
+                self._wait_for_stack(self._deploy_action)
+                return result
+            if status.reason == 'updating existing stack':
+                # get the cert ARN again in case it changed during update
+                cert_arn = self.get_certificate()
                 record = self.get_validation_record(cert_arn, status='SUCCESS')
                 self.update_record_set(record)
                 return result
-            raise
-        self.put_record_set(record)
-        LOGGER.info('Waiting for certificate to validate; '
-                    'this can take upwards of 30 minutes to complete...')
-        self._wait_for_stack(self._deploy_action)
-
-        return result
+        return None
 
     def _destroy(self):
         """Destroy an ACM certificate."""
         try:
             self.remove_validation_records()
+        except self.r53_client.exceptions.InvalidChangeBatch:
+            # handle error that can be raised during create, its fine here
+            pass
         except ClientError as err:
             if err.response['Error']['Message'] != ('Stack with id {} does not'
                                                     ' exist'.format(
@@ -300,7 +313,7 @@ class Certificate(Hook):
 
     def post_deploy(self):
         """Run during the **post_deploy** stage."""
-        return self._deploy()
+        return self.deploy()
 
     def post_destroy(self):
         """Run during the **post_destroy** stage."""
@@ -308,7 +321,7 @@ class Certificate(Hook):
 
     def pre_deploy(self):
         """Run during the **pre_deploy** stage."""
-        return self._deploy()
+        return self.deploy()
 
     def pre_destroy(self):
         """Run during the **pre_destroy** stage."""
