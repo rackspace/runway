@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- `runway plan` for cfngin modules will now properly resolve output lookups when the original stack did not change
+- `runway plan` for cfngin modules will now properly resolve output lookups when the original stack did not change or the reference stack is `locked: true`
 
 ## [1.5.1] - 2020-03-25
 ### Changed
