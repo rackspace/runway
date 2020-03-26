@@ -15,14 +15,14 @@ if [ "$TRAVIS_OS_NAME" = "osx" ] || [ "$TRAVIS_OS_NAME" = "windows" ]; then
     # these setup steps are already taken care of for linux in travis's
     # images. but, since windows and osx don't 'support' the python language
     # option, we have to do this here.
-    ${PYTHON} --version && pip --version
+    ${PYTHON} --version && ${PIP} --version
     ${PYTHON} -m pip install --upgrade pip setuptools
 fi
 
 # virtualenv 20 was a complete rewrite and includes some breaking changes
 # with how we were handling things like distutils. These version are now pinned
 # to ensure compatability.
-pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
+${PIP} install "virtualenv==16.7.9" "pipenv==2018.11.26"
 
 # anything running python3 can use the provided Pipfile.lock
 if [ "$PYTHON_VERSION" != "2.7" ]; then
