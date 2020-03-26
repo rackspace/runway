@@ -23,9 +23,9 @@
         },
         "awacs": {
             "hashes": [
-                "sha256:640d30a738266ff2c4e79be17414220c0d8e0b3f52af8719108911c5208aa6bf"
+                "sha256:ede06cb407af50e3bb9681fa3142db95230a1f72c32c817785898681256e8be5"
             ],
-            "version": "==0.9.7"
+            "version": "==0.9.8"
         },
         "aws-sam-translator": {
             "hashes": [
