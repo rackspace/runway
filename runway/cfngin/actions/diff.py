@@ -182,6 +182,7 @@ class Action(build.Action):
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
             LOGGER.info('No changes: %s', stack.fqn)
+            stack.set_outputs(provider.get_outputs(stack.fqn))
         except exceptions.StackDoesNotExist:
             if self.context.persistent_graph:
                 return SkippedStatus('persistent graph: stack does not '
