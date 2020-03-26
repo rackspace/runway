@@ -32,7 +32,7 @@ Variables
 =========
 
 A Blueprint can define a ``VARIABLES`` property that defines the variables
-it accepts from the `Config Variables <config.html#variables>`_.
+it accepts from the `Config Variables <configuration.html#variables>`_.
 
 ``VARIABLES`` should be a dictionary of ``<variable name>: <variable
 definition>``. The variable definition should be a dictionary which

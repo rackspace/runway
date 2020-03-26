@@ -6,7 +6,7 @@ Templates
 
 CloudFormation templates can be provided via Blueprints_ or JSON/YAML.
 JSON/YAML templates are specified for stacks via the ``template_path`` config
-option (see `Stacks <config.html#stacks>`_).
+option (see `Stacks <configuration.html#stacks>`_).
 
 
 Jinja2 Templating
