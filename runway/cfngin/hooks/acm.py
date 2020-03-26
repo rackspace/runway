@@ -6,9 +6,10 @@ from botocore.exceptions import ClientError
 from troposphere import Ref
 from troposphere.certificatemanager import Certificate as CertificateResource
 
-from runway.cfngin.blueprints.variables.types import CFNString
 from runway.util import MutableMap
 
+from ..blueprints.variables.types import CFNString
+from ..exceptions import StackDoesNotExist
 from ..status import NO_CHANGE, SUBMITTED
 from .base import Hook
 from .utils import BlankBlueprint
@@ -34,7 +35,10 @@ class Certificate(Hook):
         hosted_zone_id (str): The ID of the Route 53 Hosted Zone that contains
             the resource record sets that you want to change. This must exist
             in the same account that the certificate will be created in.
-        ttl (int): The resource record cache time to live (TTL), in seconds.
+        stack_name (Optional[str]): Provide a name for the stack used to
+            create the certificate. If not provided, the domain is used.
+        ttl (Optional[int]): The resource record cache time to live (TTL),
+            in seconds.
 
     Example:
     .. code-block: yaml
@@ -63,7 +67,8 @@ class Certificate(Hook):
         super(Certificate, self).__init__(context, provider, **kwargs)
 
         self.template_description = self.get_template_description()
-        self.stack_name = kwargs['domain'].replace('.', '-')
+        self.stack_name = self.args.get('stack_name',
+                                        kwargs['domain'].replace('.', '-'))
 
         self.properties = MutableMap(**{
             'DomainName': self.args.domain,
@@ -77,7 +82,8 @@ class Certificate(Hook):
         self.acm_client = session.client('acm')
         self.r53_client = session.client('route53')
         self.stack = self.generate_stack(
-            variables={'ValidateRecordTTL': self.args.ttl}
+            variables={'ValidateRecordTTL': self.args.ttl,
+                       'DomainName': self.args.domain}
         )
 
     def _create_blueprint(self):
@@ -86,12 +92,18 @@ class Certificate(Hook):
         blueprint.template.set_version('2010-09-09')
         blueprint.template.set_description(self.template_description)
 
+        var_description = ('NO NOT CHANGE MANUALLY! Used to track the '
+                           'state of a value set outside of CloudFormation'
+                           ' using a Runway hook.')
+
         blueprint.VARIABLES = {
+            'DomainName': {
+                'type': CFNString,
+                'description': var_description
+            },
             'ValidateRecordTTL': {
                 'type': CFNString,
-                'description': 'NO NOT CHANGE MANUALLY! Used to track the '
-                               'state of a value set outside of CloudFormation'
-                               ' using a Runway hook.'
+                'description': var_description
             }
         }
 
@@ -101,7 +113,23 @@ class Certificate(Hook):
         ))
         blueprint.add_output('%sArn' % cert.title, cert.ref())
         blueprint.add_output('ValidateRecordTTL', Ref('ValidateRecordTTL'))
+        blueprint.add_output('DomainName', Ref('DomainName'))
         return blueprint
+
+    def domain_changed(self):
+        """Check to ensure domain has not changed for existing stack."""
+        try:
+            stack_info = self.provider.get_outputs(self.stack.fqn)
+            if self.args.domain != stack_info['DomainName']:
+                LOGGER.error('"domain" can\'t be changed for existing '
+                             'certificate in stack "%s"', self.stack.fqn)
+                return True
+        except StackDoesNotExist:
+            pass
+        except KeyError:
+            LOGGER.warning('Stack "%s" is missing output DomainName; '
+                           'update may fail', self.stack.fqn)
+        return False
 
     def get_certificate(self, interval=5, stack_name=None):
         """Get the certificate being created by a CloudFormation.
@@ -271,6 +299,9 @@ class Certificate(Hook):
 
     def _deploy(self):
         """Deploy an ACM Certificate."""
+        if self.domain_changed():
+            return None
+
         status = self.deploy_stack()
         cert_arn = self.get_certificate()
         result = {'CertificateArn': cert_arn}
@@ -286,14 +317,13 @@ class Certificate(Hook):
                 LOGGER.info('Waiting for certificate to validate; '
                             'this can take upwards of 30 minutes to '
                             'complete...')
-                self._wait_for_stack(self._deploy_action)
-                return result
-            if status.reason == 'updating existing stack':
+            elif status.reason == 'updating existing stack':
                 # get the cert ARN again in case it changed during update
                 cert_arn = self.get_certificate()
                 record = self.get_validation_record(cert_arn, status='SUCCESS')
                 self.update_record_set(record)
-                return result
+            self._wait_for_stack(self._deploy_action)
+            return result
         return None
 
     def _destroy(self):
