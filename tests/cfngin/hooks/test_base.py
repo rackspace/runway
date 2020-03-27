@@ -1,16 +1,20 @@
 """Tests for runway.cfngin.hooks.base."""
-# pylint: disable=no-self-use
+# pylint: disable=no-self-use,too-few-public-methods
 import logging
 
 import pytest
 from mock import MagicMock, patch
 
-from runway.cfngin.hooks.base import Hook
-from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
+from runway.cfngin.hooks.base import (Hook, HookBuildAction, HookDestroyAction,
+                                      HookStackDefinition)
+from runway.cfngin.status import (COMPLETE, FAILED, SKIPPED, SUBMITTED,
+                                  CompleteStatus)
+
+COMPLETE_W_REASON = CompleteStatus('test successful')
 
 
 class TestHook(object):
-    """Tests for Tests for runway.cfngin.hooks.base.Hook."""
+    """Tests for runway.cfngin.hooks.base.Hook."""
 
     def test_attributes(self, cfngin_context):
         """Test attributes set during __init__."""
@@ -108,7 +112,7 @@ class TestHook(object):
                                                         FAILED.name)
 
     @patch('runway.cfngin.hooks.base.HookDestroyAction.run',
-           MagicMock(side_effect=[SUBMITTED, COMPLETE]))
+           MagicMock(side_effect=[SUBMITTED, COMPLETE_W_REASON]))
     def test_destroy_stack(self, cfngin_context, caplog):
         """Test for destroy_stack with wait."""
         hook = Hook(cfngin_context, MagicMock())
@@ -121,8 +125,9 @@ class TestHook(object):
         assert caplog.records[0].message == '%s: %s' % (stack.name,
                                                         SUBMITTED.name)
         assert caplog.records[1].message == 'Waiting for stack to complete...'
-        assert caplog.records[2].message == '%s: %s' % (stack.name,
-                                                        COMPLETE.name)
+        assert caplog.records[2].message == '%s: %s (%s)' % (
+            stack.name, COMPLETE_W_REASON.name, COMPLETE_W_REASON.reason
+        )
 
     def test_post_deploy(self, cfngin_context):
         """Test post_deploy."""
@@ -151,3 +156,52 @@ class TestHook(object):
 
         with pytest.raises(NotImplementedError):
             hook.pre_destroy()
+
+
+class TestHookBuildAction(object):
+    """Tests for runway.cfngin.hooks.base.HookBuildAction."""
+
+    def test_provider(self, cfngin_context):
+        """Test provider property."""
+        provider = MagicMock()
+        obj = HookBuildAction(cfngin_context, provider)
+
+        assert obj.provider == provider
+
+    def test_build_provider(self, cfngin_context):
+        """Test build_provider."""
+        provider = MagicMock()
+        obj = HookBuildAction(cfngin_context, provider)
+
+        assert obj.build_provider(None) == provider
+
+    def test_run(self, cfngin_context, monkeypatch):
+        """Test run."""
+        obj = HookBuildAction(cfngin_context, MagicMock())
+        monkeypatch.setattr(obj, '_launch_stack', lambda: 'success')
+
+        assert obj.run() == 'success'
+
+
+class TestHookDestroyAction(object):
+    """Tests for runway.cfngin.hooks.base.HookDestroyAction."""
+
+    def test_run(self, cfngin_context, monkeypatch):
+        """Test run."""
+        obj = HookDestroyAction(cfngin_context, MagicMock())
+        monkeypatch.setattr(obj, '_destroy_stack', lambda: 'success')
+
+        assert obj.run() == 'success'
+
+
+class TestHookStackDefinition(object):
+    """Tests for runway.cfngin.hooks.base.HookStackDefinition."""
+
+    def test_getattr(self):
+        """Test __getattr__."""
+        obj = HookStackDefinition('test')
+
+        assert obj.name == 'test'
+
+        with pytest.raises(AttributeError):
+            assert obj.invalid
