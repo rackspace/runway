@@ -1,6 +1,6 @@
 """CFNgin hooks for AWS Certificate Manager."""
 import logging
-from time import sleep
+import time
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
@@ -131,21 +131,18 @@ class Certificate(Hook):
                            'update may fail', self.stack.fqn)
         return False
 
-    def get_certificate(self, interval=5, stack_name=None):
+    def get_certificate(self, interval=5):
         """Get the certificate being created by a CloudFormation.
 
         Args:
             interval (int): Number of seconds to wait between attempts.
-            stack_name (str): Name of CloudFormation stack containing a pending
-                certificate.
 
         Returns:
             str: Certificate ARN
 
         """
-        stack_name = stack_name or self.stack.fqn
         response = self.provider.cloudformation.describe_stack_resources(
-            StackName=stack_name,
+            StackName=self.stack.fqn,
             LogicalResourceId='Certificate'
         )['StackResources']
         if response:
@@ -153,18 +150,16 @@ class Certificate(Hook):
             if response[0].get('PhysicalResourceId'):
                 return response[0]['PhysicalResourceId']
         LOGGER.debug('Waiting for certificate to be created...')
-        sleep(interval)
-        return self.get_certificate(stack_name)
+        time.sleep(interval)
+        return self.get_certificate(interval=interval)
 
-    def get_validation_record(self, cert_arn=None, interval=5, stack_name=None,
+    def get_validation_record(self, cert_arn=None, interval=5,
                               status='PENDING_VALIDATION'):
         """Get validation record from the certificate being created.
 
         Args:
             cert_arn (str): ARN of the certificate to validate.
             interval (int): Number of seconds to wait between attempts.
-            stack_name (str): Name of CloudFormation stack containing a pending
-                certificate.
             status (str): Validation status to look for when finding a
                 validation record. Typically only "PENDING_VALIDATION" or
                 "SUCCESS" will be used.
@@ -176,9 +171,8 @@ class Certificate(Hook):
             ValueError: No pending or too many pending certificates.
 
         """
-        stack_name = stack_name or self.stack.fqn
         if not cert_arn:
-            cert_arn = self.get_certificate(stack_name)
+            cert_arn = self.get_certificate()
         cert = self.acm_client.describe_certificate(
             CertificateArn=cert_arn
         )['Certificate']
@@ -191,7 +185,7 @@ class Certificate(Hook):
         except KeyError:
             LOGGER.debug('Waiting for DomainValidationOptions to become '
                          'available for the certificate...')
-            sleep(interval)
+            time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn,
                                               interval=interval,
                                               status=status)
@@ -214,7 +208,7 @@ class Certificate(Hook):
         except KeyError:
             LOGGER.debug('Waiting for DomainValidationOptions.ResourceRecord '
                          'to become available for the certificate...')
-            sleep(interval)
+            time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn,
                                               interval=interval,
                                               status=status)
@@ -289,44 +283,40 @@ class Certificate(Hook):
         )
 
     def deploy(self):
-        """Wrap _deploy method with error handling to back track."""
+        """Deploy an ACM Certificate."""
         try:
-            return self._deploy()
+            if self.domain_changed():
+                return None
+
+            status = self.deploy_stack()
+            cert_arn = self.get_certificate()
+            result = {'CertificateArn': cert_arn}
+
+            if status == NO_CHANGE:
+                LOGGER.debug('Stack did not change; no action required')
+                return result
+
+            if status == SUBMITTED:
+                if status.reason == 'creating new stack':
+                    record = self.get_validation_record(cert_arn)
+                    self.put_record_set(record)
+                    LOGGER.info('Waiting for certificate to validate; '
+                                'this can take upwards of 30 minutes to '
+                                'complete...')
+                elif status.reason == 'updating existing stack':
+                    # get the cert ARN again in case it changed during update
+                    cert_arn = self.get_certificate()
+                    record = self.get_validation_record(cert_arn, status='SUCCESS')
+                    self.update_record_set(record)
+                self._wait_for_stack(self._deploy_action)
+                return result
+            return None
         except self.r53_client.exceptions.InvalidChangeBatch as err:
             LOGGER.error(err)
-            self._destroy()
-            return {}
-
-    def _deploy(self):
-        """Deploy an ACM Certificate."""
-        if self.domain_changed():
+            self.destroy()
             return None
 
-        status = self.deploy_stack()
-        cert_arn = self.get_certificate()
-        result = {'CertificateArn': cert_arn}
-
-        if status == NO_CHANGE:
-            LOGGER.debug('Stack did not change; no action required')
-            return result
-
-        if status == SUBMITTED:
-            if status.reason == 'creating new stack':
-                record = self.get_validation_record(cert_arn)
-                self.put_record_set(record)
-                LOGGER.info('Waiting for certificate to validate; '
-                            'this can take upwards of 30 minutes to '
-                            'complete...')
-            elif status.reason == 'updating existing stack':
-                # get the cert ARN again in case it changed during update
-                cert_arn = self.get_certificate()
-                record = self.get_validation_record(cert_arn, status='SUCCESS')
-                self.update_record_set(record)
-            self._wait_for_stack(self._deploy_action)
-            return result
-        return None
-
-    def _destroy(self):
+    def destroy(self):
         """Destroy an ACM certificate."""
         try:
             self.remove_validation_records()
@@ -347,7 +337,7 @@ class Certificate(Hook):
 
     def post_destroy(self):
         """Run during the **post_destroy** stage."""
-        return self._destroy()
+        return self.destroy()
 
     def pre_deploy(self):
         """Run during the **pre_deploy** stage."""
@@ -355,4 +345,4 @@ class Certificate(Hook):
 
     def pre_destroy(self):
         """Run during the **pre_destroy** stage."""
-        return self._destroy()
+        return self.destroy()
