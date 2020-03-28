@@ -1,16 +1,14 @@
 """Base class for CFNgin hooks."""
 import logging
 from collections import UserDict
-from typing import Any
 
 from troposphere import Tags
 
 from runway.util import MutableMap
 
 from ..actions import build
-from ..context import Context
+from ..exceptions import StackFailed
 from ..plan import COLOR_CODES
-from ..providers.aws.default import Provider
 from ..stack import Stack
 from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 
@@ -35,11 +33,7 @@ class Hook(object):
 
     """
 
-    def __init__(self,
-                 context: Context,
-                 provider: Provider,
-                 **kwargs: Any
-                 ) -> None:
+    def __init__(self, context, provider, **kwargs):
         """Instantiate class.
 
         Args:
@@ -185,31 +179,47 @@ class Hook(object):
 
         if wait and status != SKIPPED:
             status = self._wait_for_stack(action=action, stack=stack,
-                                          status=status)
+                                          last_status=status)
         return status
 
-    def _wait_for_stack(self, action, stack=None, status=None):
+    def _wait_for_stack(self, action, last_status=None, stack=None,
+                        till_reason=None):
         """Wait for a CloudFormation stack to complete.
 
         Args:
             action (BaseAction): Action to be taken against a stack.
+            last_status (Optional[Status]): The last status of the stack.
             stack (Optional[Stack]): A stack that has been acted upon.
-            status (Optional[Status]): The last status of the stack.
+            till_reason (Optional[str]): Status string to wait for before
+                returning. ``COMPLETE`` or ``FAILED`` status will return
+                before this condition if found.
 
         Returns:
             Status: Ending status of the stack.
 
+        Raises:
+            StackFailed: Stack is in a failed state.
+
         """
-        status = status or SUBMITTED
+        status = last_status or SUBMITTED
         stack = stack or self.stack
 
         while True:
             if status in (COMPLETE, FAILED):
                 break
-            LOGGER.info('Waiting for stack to complete...')
+            if (till_reason and status.reason) and status.reason == till_reason:
+                break
+            if last_status and last_status.reason != status.reason:
+                # log status changes like rollback
+                self._log_stack(stack, status)
+                last_status = status
+            LOGGER.debug('Waiting for stack to complete...')
             status = action.run(stack=stack, status=status)
 
         self._log_stack(stack, status)
+        if status == FAILED:
+            raise StackFailed(stack_name=stack.fqn,
+                              status_reason=status.reason)
         return status
 
 

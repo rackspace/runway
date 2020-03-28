@@ -9,7 +9,7 @@ from troposphere.certificatemanager import Certificate as CertificateResource
 from runway.util import MutableMap
 
 from ..blueprints.variables.types import CFNString
-from ..exceptions import StackDoesNotExist
+from ..exceptions import StackDoesNotExist, StackFailed, StackUpdateBadStatus
 from ..status import NO_CHANGE, SUBMITTED
 from .base import Hook
 from .utils import BlankBlueprint
@@ -53,7 +53,7 @@ class Certificate(Hook):
 
     """
 
-    def __init__(self, context, provider, **kwargs) -> None:
+    def __init__(self, context, provider, **kwargs):
         """Instantiate class.
 
         Args:
@@ -119,8 +119,18 @@ class Certificate(Hook):
     def domain_changed(self):
         """Check to ensure domain has not changed for existing stack."""
         try:
-            stack_info = self.provider.get_outputs(self.stack.fqn)
-            if self.args.domain != stack_info['DomainName']:
+            stack_info = self.provider.get_stack(self.stack.fqn)
+            if self.provider.is_stack_recreatable(stack_info):
+                LOGGER.debug('Stack is in a recreatable state; '
+                             'domain change does not matter')
+                return False
+            if self.provider.is_stack_in_progress(stack_info) or \
+                    self.provider.is_stack_rolling_back(stack_info):
+                LOGGER.debug('Stack is in progress; '
+                             "can't check for domain change")
+                return False
+            if self.args.domain != \
+                    self.provider.get_outputs(self.stack.fqn)['DomainName']:
                 LOGGER.error('"domain" can\'t be changed for existing '
                              'certificate in stack "%s"', self.stack.fqn)
                 return True
@@ -224,16 +234,24 @@ class Certificate(Hook):
                     self.args.hosted_zone_id)
         self.__change_record_set('CREATE', [record_set])
 
-    def remove_validation_records(self):
-        """Remove all record set entries used to validate an ACM Certificate."""
-        cert_arn = self.get_certificate()
-        cert = self.acm_client.describe_certificate(
-            CertificateArn=cert_arn
-        )['Certificate']
+    def remove_validation_records(self, records=None):
+        """Remove all record set entries used to validate an ACM Certificate.
 
-        records = [opt['ResourceRecord']
-                   for opt in cert.get('DomainValidationOptions', [])
-                   if opt['ValidationMethod'] == 'DNS']
+        Args:
+            records (Optional[List[Dict[str, str]]]): List of validation
+                records to remove from Route 53. This can be provided in cases
+                were the certificate has been deleted during a rollback.
+
+        """
+        if not records:
+            cert_arn = self.get_certificate()
+            cert = self.acm_client.describe_certificate(
+                CertificateArn=cert_arn
+            )['Certificate']
+
+            records = [opt['ResourceRecord']
+                       for opt in cert.get('DomainValidationOptions', [])
+                       if opt['ValidationMethod'] == 'DNS']
         LOGGER.info('Removing %i validation record(s) from "%s"...',
                     len(records), self.args.hosted_zone_id)
         self.__change_record_set('DELETE', records)
@@ -282,13 +300,16 @@ class Certificate(Hook):
             }
         )
 
-    def deploy(self):
+    def deploy(self, status=None):
         """Deploy an ACM Certificate."""
+        record = None
         try:
             if self.domain_changed():
                 return None
 
-            status = self.deploy_stack()
+            if not status:
+                status = self.deploy_stack()
+
             cert_arn = self.get_certificate()
             result = {'CertificateArn': cert_arn}
 
@@ -308,26 +329,55 @@ class Certificate(Hook):
                     cert_arn = self.get_certificate()
                     record = self.get_validation_record(cert_arn, status='SUCCESS')
                     self.update_record_set(record)
-                self._wait_for_stack(self._deploy_action)
+                elif status.reason == 'destroying stack for re-creation':
+                    # handle recreating a stack in a failed state
+                    return self.deploy(status=self._wait_for_stack(
+                        self._deploy_action,
+                        last_status=status,
+                        till_reason='creating new stack'
+                    ))
+                self._wait_for_stack(self._deploy_action, last_status=status)
                 return result
             return None
-        except self.r53_client.exceptions.InvalidChangeBatch as err:
+        except (self.r53_client.exceptions.InvalidChangeBatch,
+                StackFailed) as err:
             LOGGER.error(err)
-            self.destroy()
-            return None
+            self.destroy(records=[record], skip_r53=isinstance(
+                err, self.r53_client.exceptions.InvalidChangeBatch
+            ))
+        except StackUpdateBadStatus as err:
+            # don't try to destroy the stack when it can be in progress
+            LOGGER.error(err)
+        return None
 
-    def destroy(self):
-        """Destroy an ACM certificate."""
-        try:
-            self.remove_validation_records()
-        except self.r53_client.exceptions.InvalidChangeBatch:
-            # handle error that can be raised during create, its fine here
-            pass
-        except ClientError as err:
-            if err.response['Error']['Message'] != ('Stack with id {} does not'
-                                                    ' exist'.format(
-                                                        self.stack.fqn)):
-                raise
+    def destroy(self, records=None, skip_r53=False):
+        """Destroy an ACM certificate.
+
+        Args:
+            records (Optional[List[Dict[str, str]]]): List of validation
+                records to remove from Route 53. This can be provided in cases
+                were the certificate has been deleted during a rollback.
+            skip_r53 (bool): Skip the removal of validation records.
+
+        """
+        if not skip_r53:
+            try:
+                self.remove_validation_records(records)
+            except (self.r53_client.exceptions.InvalidChangeBatch,
+                    self.acm_client.exceptions.ResourceNotFoundException) as err:
+                # these error are fine if they happen during destruction but
+                # could require manual steps to finish cleanup.
+                LOGGER.warning('Deletion of the validation records failed '
+                               'with error:\n%s', err)
+            except ClientError as err:
+                if err.response['Error']['Message'] != ('Stack with id {} does'
+                                                        ' not exist'.format(
+                                                            self.stack.fqn)):
+                    raise
+                LOGGER.warning('Deletion of the validation records failed '
+                               'with error:\n%s', err)
+        else:
+            LOGGER.warning('Deletion of validation records was skipped')
         self.destroy_stack(wait=True)
         return True
 
