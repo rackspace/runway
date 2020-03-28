@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- `runway plan` for cfngin modules will now properly resolve output lookups when the original stack did not change or the reference stack is `locked: true`
+
+## [1.5.1] - 2020-03-25
+### Changed
+- (binary/npm versions only) bumped embedded awacs version to v0.9.8
+
+## [1.5.0] - 2020-03-24
 ### Added
 - `runway.cfngin.cfngin.CFNgin` class (can also be imported as `runway.cfngin.CFNgin`)
 - `runway.cfngin.context.Context.get_session()` method for creating a boto3 session using the correct AWS credentials
@@ -13,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `ssm` lookup usable in Runway and CFNgin config files
 - `troposphere` transform option for lookups
 - Private (authorized AKA Auth@Edge) static sites
+- `termination_protection` CFNgin stack option
 
 ### Changed
 - `get_session` can now accept AWS credentials when creating a thread-safe session
@@ -750,7 +759,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.4.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/onicagroup/runway/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/onicagroup/runway/compare/v1.4.4...v1.5.0
 [1.4.4]: https://github.com/onicagroup/runway/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/onicagroup/runway/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/onicagroup/runway/compare/v1.4.1...v1.4.2

@@ -341,6 +341,7 @@ class Stack(Model):
         stack_policy_path (StringType)
         tags (DictType)
         template_path (StringType)
+        termination_protection (BooleanType)
         variables (DictType)
 
     """
@@ -361,6 +362,7 @@ class Stack(Model):
     stack_policy_path = StringType(serialize_when_none=False)
     tags = DictType(StringType, serialize_when_none=False)
     template_path = StringType(serialize_when_none=False)
+    termination_protection = BooleanType(default=False)
     variables = DictType(AnyType, serialize_when_none=False)
 
     def validate_class_path(self, data, value):

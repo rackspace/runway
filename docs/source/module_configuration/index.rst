@@ -8,7 +8,6 @@ Module Configurations
     :name: mod-configs
 
     cdk
-    cloudformation
     custom
     kubernetes
     serverless

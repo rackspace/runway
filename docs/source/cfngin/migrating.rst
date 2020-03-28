@@ -1,19 +1,20 @@
-.. _CFNgin API Docs: ../apidocs/runway.cfngin.html
-.. _Custom Lookups: lookups.html#custom-lookup
 .. _Stacker: https://github.com/cloudtools/stacker
 
-Migrating from Stacker to CFNgin
-================================
+######################
+Migrating from Stacker
+######################
 
 .. important:: Most current uses of Runway with Stacker_ will continue to work.
                But, for imports from Stacker_, Runway will automatically redirect them to CFNgin.
                Because of this, you may experience errors depending on how you are consuming the Stacker_ components.
                This "shim" will remain in place until the release of Runway 2.0.0, no sooner then 2020-12.
 
-Blueprints
-----------
 
-All components available in Stacker_ 1.7.0 are available in CFNgin at the same path within ``runway.cfngin``.
+**********
+Blueprints
+**********
+
+All components available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
 
 .. rubric:: Example
 .. code-block:: python
@@ -26,17 +27,19 @@ All components available in Stacker_ 1.7.0 are available in CFNgin at the same p
     from runway.cfngin.blueprints.base import Blueprint
     from runway.cfngin.blueprints.variables.types import CFNString
 
+
+************
 Config Files
-------------
+************
 
-There are some config top-level keys that have changed when used CFNgin.
-Below is a table of the Stacker key and what they have been changed to for CFNgin
+There are some config top-level keys that have changed when used Runway's CFNgin.
+Below is a table of the Stacker key and what they have been changed to for Runway's CFNgin
 
-.. important:: The Stacker keys can still be used with CFNgin for the time being.
+.. important:: The Stacker keys can still be used with Runway's CFNgin for the time being.
                This will remain in place until the release of Runway 2.0.0, no sooner then 2020-12.
 
 +---------------------------+----------------------------+
-| Stacker                   | CFNgin                     |
+| Stacker                   | Runway's CFNgin            |
 +===========================+============================+
 | ``stacker_bucket``        | ``cfngin_bucket``          |
 +---------------------------+----------------------------+
@@ -47,9 +50,9 @@ Below is a table of the Stacker key and what they have been changed to for CFNgi
 
 
 Build-in Hooks
-~~~~~~~~~~~~~~
+==============
 
-All hooks available in Stacker_ 1.7.0 are available in CFNgin at the same path within ``runway.cfngin``.
+All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
 
 .. rubric:: Example Definition
 .. code-block:: yaml
@@ -64,14 +67,14 @@ All hooks available in Stacker_ 1.7.0 are available in CFNgin at the same path w
         args:
           command: echo "Hello $USER!"
 
-.. seealso:: `CFNgin API Docs`_
+.. seealso:: `CFNgin API Docs <../apidocs/runway.cfngin.html>`__
 
 
 Custom Lookups
-~~~~~~~~~~~~~~
+==============
 
-See the `Custom Lookups`_ section of the docs for detailed instructions on how lookups should be written.
+See the :ref:`Custom Lookups <custom lookup>` section of the docs for detailed instructions on how lookups should be written.
 
 .. important:: Stacker lookups (function and class styles) are supported for the time being.
-               It is recommended to update them to the CFNgin format outlined in `Custom Lookups`_.
+               It is recommended to update them to the Runway's CFNgin format outlined in :ref:`Custom Lookups <custom lookup>`.
                Support for Stacker style lookups will remain in place until the release of Runway 2.0.0, no sooner then 2020-12.

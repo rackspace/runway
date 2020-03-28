@@ -1,8 +1,10 @@
-.. _`hook_data`: config.html#pre-post-hooks
+.. _`hook_data`: configuration.html#pre-post-hooks
 .. _`aws_lambda hook`: ../apidocs/runway.cfngin.hooks.aws_lambda.html#runway.cfngin.hooks.aws_lambda.upload_lambda_functions
 .. _`aws_lambda blueprint`: https://github.com/cloudtools/stacker_blueprints/blob/master/stacker_blueprints/aws_lambda.py
-.. _package_sources: config.html#remote-package
-.. _sys_path: config.html#module-paths
+.. _package_sources: configuration.html#remote-package
+.. _sys_path: configuration.html#module-paths
+
+.. _cfngin-lookups:
 
 =======
 Lookups
@@ -13,7 +15,7 @@ Lookups
           registries. Runway config files can't use CFNgin lookups just as the
           CFNgin config cannot use Runway lookups.
 
-CFNgin provides the ability to dynamically replace values in the config via a
+Runway's CFNgin provides the ability to dynamically replace values in the config via a
 concept called lookups. A lookup is meant to take a value and convert
 it by calling out to another service or system.
 
@@ -70,7 +72,7 @@ dictionary:
   }
 
 
-CFNgin includes the following lookup types:
+Runway's CFNgin includes the following lookup types:
 
 - `output lookup`_
 - `ami lookup`_
@@ -520,7 +522,7 @@ dictionary.
 
 .. rubric:: Arguments
 
-This Lookup supports all :ref:`Common Lookup Arguments` but, the folling have
+This Lookup supports all :ref:`Common Lookup Arguments` but, the following have
 limited or no effect:
 
 - region
@@ -550,7 +552,7 @@ Custom Lookup
 --------------
 
 A custom lookup may be registered within the config.
-For more information see `Configuring Lookups <config.html#lookups>`_.
+For more information see `Configuring Lookups <configuration.html#lookups>`_.
 
 
 Writing A Custom Lookup

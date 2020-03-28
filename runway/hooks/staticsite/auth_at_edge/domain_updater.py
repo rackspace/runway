@@ -2,14 +2,13 @@
 import logging
 from typing import Any, Dict, Optional, Union  # pylint: disable=unused-import
 
-from runway.cfngin.session_cache import get_session
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
 from runway.cfngin.context import Context  # pylint: disable=unused-import
+from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
+from runway.cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 
 
-# pylint: disable=unused-argument
 def update(context,  # type: Context # pylint: disable=unused-import
            provider,  # type: BaseProvider
            **kwargs  # type: Optional[Dict[str, Any]]
@@ -36,7 +35,7 @@ def update(context,  # type: Context # pylint: disable=unused-import
 
     context_dict = {}
 
-    user_pool_id = kwargs['user_pool_id']
+    user_pool_id = context.hook_data['aae_user_pool_id_retriever']['id']
     client_id = kwargs['client_id']
     user_pool = cognito_client.describe_user_pool(UserPoolId=user_pool_id).get('UserPool')
     (user_pool_region, user_pool_hash) = user_pool_id.split('_')
@@ -68,6 +67,50 @@ def update(context,  # type: Context # pylint: disable=unused-import
             'Could not update user pool domain for user pool id %s.',
             user_pool_id
         )
+        LOGGER.error(err)
+        return False
+
+
+def delete(context,  # type: Context # pylint: disable=unused-import
+           provider,  # type: BaseProvider
+           **kwargs  # type: Optional[Dict[str, Any]]
+          ):  # noqa: E124
+    # type: (...) -> Union[Dict[str, Any], bool]
+    """Delete the domain if the user pool was created by Runway.
+
+    If a User Pool was created by Runway, and populated with a domain, that
+    domain must be deleted prior to the User Pool itself being deleted or an
+    error will occur. This process ensures that our generated domain name is
+    deleted, or skips if not able to find one.
+
+    Args:
+        context (:class:`runway.cfngin.context.Context`): The context
+            instance.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+            The provider instance
+
+    Keyword Args:
+        client_id (str): The ID of the Cognito User Pool Client
+    """
+    session = get_session(provider.region)
+    cognito_client = session.client('cognito-idp')
+
+    user_pool_id = context.hook_data['aae_user_pool_id_retriever']['id']
+    client_id = kwargs['client_id']
+    (_, user_pool_hash) = user_pool_id.split('_')
+    domain_prefix = ('%s-%s' % (user_pool_hash, client_id)).lower()
+
+    try:
+        cognito_client.delete_user_pool_domain(
+            UserPoolId=user_pool_id,
+            Domain=domain_prefix
+        )
+        return True
+    except cognito_client.exceptions.InvalidParameterException:
+        LOGGER.info('No domain found with prefix %s. Skipping deletion.', domain_prefix)
+        return True
+    except Exception as err:  # pylint: disable=broad-except
+        LOGGER.error('Could not delete the User Pool Domain.')
         LOGGER.error(err)
         return False
 

@@ -167,10 +167,12 @@ class Action(build.Action):
         if not build.should_submit(stack):
             return NotSubmittedStatus()
 
+        provider = self.build_provider(stack)
+
         if not build.should_update(stack):
+            stack.set_outputs(provider.get_outputs(stack.fqn))
             return NotUpdatedStatus()
 
-        provider = self.build_provider(stack)
         tags = build.build_stack_tags(stack)
 
         try:
@@ -182,6 +184,7 @@ class Action(build.Action):
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
             LOGGER.info('No changes: %s', stack.fqn)
+            stack.set_outputs(provider.get_outputs(stack.fqn))
         except exceptions.StackDoesNotExist:
             if self.context.persistent_graph:
                 return SkippedStatus('persistent graph: stack does not '

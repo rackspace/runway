@@ -63,7 +63,7 @@ def update(context,  # pylint: disable=unused-argument
             ClientId=kwargs['client_id'],
             CallbackURLs=redirect_uris_sign_in,
             LogoutURLs=redirect_uris_sign_out,
-            UserPoolId=kwargs['user_pool_id'],
+            UserPoolId=context.hook_data['aae_user_pool_id_retriever']['id'],
         )
         return True
     except Exception as err:  # pylint: disable=broad-except

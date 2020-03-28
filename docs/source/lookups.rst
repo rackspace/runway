@@ -1,7 +1,7 @@
+.. _Lookups:
+
 Lookups
 =======
-
-.. _Lookups:
 
 Runway Lookups allow the use of variables within the Runway config file. These
 variables can then be passed along to :ref:`deployments <runway-deployment>`,
