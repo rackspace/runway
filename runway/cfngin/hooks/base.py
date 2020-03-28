@@ -271,6 +271,7 @@ class HookStackDefinition(UserDict):
             'stack_policy_path': None,
             'tags': None,
             'template_path': None,
+            'termination_protection': False,
             'variables': None
         }
         values.update(kwargs)
