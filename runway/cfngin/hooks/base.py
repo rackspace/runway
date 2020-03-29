@@ -261,7 +261,8 @@ class HookDestroyAction(HookBuildAction):
         return self._destroy_stack(**kwargs)
 
 
-class HookStackDefinition(UserDict):
+# TODO remove multiple inheritance when droping python 2 support
+class HookStackDefinition(UserDict, object):
     """Stack definition for use in hooks to avoid cyclic imports."""
 
     def __init__(self, name, **kwargs):
