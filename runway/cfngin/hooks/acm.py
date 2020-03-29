@@ -340,10 +340,12 @@ class Certificate(Hook):
                 return result
             return None
         except (self.r53_client.exceptions.InvalidChangeBatch,
+                self.r53_client.exceptions.NoSuchHostedZone,
                 StackFailed) as err:
             LOGGER.error(err)
             self.destroy(records=[record], skip_r53=isinstance(
-                err, self.r53_client.exceptions.InvalidChangeBatch
+                err, (self.r53_client.exceptions.InvalidChangeBatch,
+                      self.r53_client.exceptions.NoSuchHostedZone)
             ))
         except StackUpdateBadStatus as err:
             # don't try to destroy the stack when it can be in progress
@@ -364,6 +366,7 @@ class Certificate(Hook):
             try:
                 self.remove_validation_records(records)
             except (self.r53_client.exceptions.InvalidChangeBatch,
+                    self.r53_client.exceptions.NoSuchHostedZone,
                     self.acm_client.exceptions.ResourceNotFoundException) as err:
                 # these error are fine if they happen during destruction but
                 # could require manual steps to finish cleanup.
@@ -377,7 +380,7 @@ class Certificate(Hook):
                 LOGGER.warning('Deletion of the validation records failed '
                                'with error:\n%s', err)
         else:
-            LOGGER.warning('Deletion of validation records was skipped')
+            LOGGER.info('Deletion of validation records was skipped')
         self.destroy_stack(wait=True)
         return True
 
