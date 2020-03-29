@@ -661,23 +661,6 @@ class TestCertificate(object):
 
         assert not cert.deploy()
 
-    # def test_deploy_failed_status(self, cfngin_context, monkeypatch):
-    #     """Test deploy with failed stack status."""
-    #     # setup context
-    #     cfngin_context.add_stubber('acm', 'us-east-1')
-    #     cfngin_context.add_stubber('route53', 'us-east-1')
-    #     cfngin_context.config.namespace = 'test'
-
-    #     cert = Certificate(context=cfngin_context,
-    #                        provider=MagicMock(),
-    #                        domain='example.com',
-    #                        hosted_zone_id='test')
-    #     monkeypatch.setattr(cert, 'domain_changed', lambda: False)
-    #     monkeypatch.setattr(cert, 'deploy_stack', lambda: STATUS.failed)
-    #     monkeypatch.setattr(cert, 'get_certificate', lambda: None)
-
-    #     assert not cert.deploy()
-
     def test_destory(self, cfngin_context, monkeypatch):
         """Test destory."""
         # setup context
