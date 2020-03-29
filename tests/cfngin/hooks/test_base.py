@@ -5,6 +5,7 @@ import logging
 import pytest
 from mock import MagicMock, patch
 
+from runway.cfngin.exceptions import StackFailed
 from runway.cfngin.hooks.base import (Hook, HookBuildAction, HookDestroyAction,
                                       HookStackDefinition)
 from runway.cfngin.status import (COMPLETE, FAILED, SKIPPED, SUBMITTED,
@@ -74,7 +75,7 @@ class TestHook(object):
         stack = MagicMock()
         stack.name = 'test-stack'
 
-        with caplog.at_level(logging.INFO, logger='runway.cfngin.hooks.base'):
+        with caplog.at_level(logging.DEBUG, logger='runway.cfngin.hooks.base'):
             assert hook.deploy_stack(stack=stack, wait=True) == COMPLETE
 
         assert caplog.records[0].message == '%s: %s' % (stack.name,
@@ -99,17 +100,14 @@ class TestHook(object):
 
     @patch('runway.cfngin.hooks.base.HookBuildAction.run',
            MagicMock(side_effect=[FAILED]))
-    def test_deploy_stack_wait_failed(self, cfngin_context, caplog):
+    def test_deploy_stack_wait_failed(self, cfngin_context):
         """Test for deploy_stack with wait and skip."""
         hook = Hook(cfngin_context, MagicMock())
         stack = MagicMock()
         stack.name = 'test-stack'
 
-        with caplog.at_level(logging.INFO, logger='runway.cfngin.hooks.base'):
+        with pytest.raises(StackFailed):
             assert hook.deploy_stack(stack=stack, wait=True) == FAILED
-
-        assert caplog.records[0].message == '%s: %s' % (stack.name,
-                                                        FAILED.name)
 
     @patch('runway.cfngin.hooks.base.HookDestroyAction.run',
            MagicMock(side_effect=[SUBMITTED, COMPLETE_W_REASON]))
@@ -119,7 +117,7 @@ class TestHook(object):
         stack = MagicMock()
         stack.name = 'test-stack'
 
-        with caplog.at_level(logging.INFO, logger='runway.cfngin.hooks.base'):
+        with caplog.at_level(logging.DEBUG, logger='runway.cfngin.hooks.base'):
             assert hook.destroy_stack(stack=stack, wait=True) == COMPLETE
 
         assert caplog.records[0].message == '%s: %s' % (stack.name,

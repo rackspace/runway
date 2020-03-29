@@ -22,6 +22,20 @@ STATUS = MutableMap(**{
 })
 
 
+def check_bool_is_true(val):
+    """Check if a value is a true bool."""
+    if val and isinstance(val, bool):
+        return True
+    raise ValueError('Value should be "True"; got {}'.format(val))
+
+
+def check_bool_is_false(val):
+    """Check if a value is a false bool."""
+    if not val and isinstance(val, bool):
+        return True
+    raise ValueError('Value should be "False"; got {}'.format(val))
+
+
 def gen_certificate(**kwargs):
     """Generate a response to describe_certificate."""
     data = {
@@ -173,15 +187,33 @@ class TestCertificate(object):
                            domain='example.com',
                            hosted_zone_id='test')
 
-        provider.get_outputs.side_effect = [{'DomainName': 'nope'},
-                                            {'DomainName': 'example.com'},
-                                            {},
-                                            StackDoesNotExist('test')]
+        domain_match = {'DomainName': 'example.com'}
+        checks = [
+            # is_stack_recreatable, is_stack_in_progress, is_stack_rolling_back, get_outputs
+            (False, False, False, {'DomainName': 'nope'}),
+            (False, False, False, domain_match),
+            (False, False, False, {}),
+            (False, False, False, StackDoesNotExist('test')),
+            (True, False, False, domain_match),
+            (False, True, False, domain_match),
+            (False, False, True, domain_match)
+        ]
 
+        provider.get_stack.return_value = True
+        provider.is_stack_recreatable.side_effect = [x[0] for x in checks]
+        provider.is_stack_in_progress.side_effect = [x[1] for x in checks]
+        provider.is_stack_rolling_back.side_effect = [x[2] for x in checks]
+        provider.get_outputs.side_effect = [x[3] for x in checks]
+
+        # output based
         assert cert.domain_changed()  # {'DomainName': 'nope'}
         assert not cert.domain_changed()  # {'DomainName': 'example.com'}
         assert not cert.domain_changed()  # {}
         assert not cert.domain_changed()  # StackDoesNotExist('test')
+        # status based
+        assert not cert.domain_changed()
+        assert not cert.domain_changed()
+        assert not cert.domain_changed()
 
     def test_get_certificate(self, cfngin_context, patch_time):
         """Test get_certificate."""
@@ -473,7 +505,8 @@ class TestCertificate(object):
         monkeypatch.setattr(cert, 'put_record_set',
                             lambda x: None
                             if x == 'get_validation_record' else ValueError)
-        monkeypatch.setattr(cert, '_wait_for_stack', lambda x: None)
+        monkeypatch.setattr(cert, '_wait_for_stack',
+                            lambda x, last_status: None)
 
         assert cert.deploy() == expected
 
@@ -500,7 +533,8 @@ class TestCertificate(object):
         monkeypatch.setattr(cert, 'update_record_set',
                             lambda x: None
                             if x == 'get_validation_record' else ValueError)
-        monkeypatch.setattr(cert, '_wait_for_stack', lambda x: None)
+        monkeypatch.setattr(cert, '_wait_for_stack',
+                            lambda x, last_status: None)
 
         assert cert.deploy() == expected
 
@@ -564,8 +598,10 @@ class TestCertificate(object):
                             lambda x: 'get_validation_record'
                             if x == cert_arn else ValueError)
         monkeypatch.setattr(cert, 'put_record_set', mock_put_record_set)
-        monkeypatch.setattr(cert, 'destroy', lambda: None)
-        monkeypatch.setattr(cert, '_wait_for_stack', lambda x: None)
+        monkeypatch.setattr(cert, 'destroy',
+                            lambda records, skip_r53: check_bool_is_true(skip_r53))
+        monkeypatch.setattr(cert, '_wait_for_stack',
+                            lambda x, last_status: None)
 
         assert not cert.deploy()
 
@@ -597,7 +633,7 @@ class TestCertificate(object):
                            provider=MagicMock(),
                            domain='example.com',
                            hosted_zone_id='test')
-        monkeypatch.setattr(cert, 'remove_validation_records', lambda: None)
+        monkeypatch.setattr(cert, 'remove_validation_records', lambda x: None)
         monkeypatch.setattr(cert, 'destroy_stack', lambda wait: None)
 
         assert cert.destroy()
@@ -614,7 +650,7 @@ class TestCertificate(object):
                            domain='example.com',
                            hosted_zone_id='test')
 
-        def mock_remove_validation_records():
+        def mock_remove_validation_records(_records):
             """Mock remove_validation_records."""
             raise cert.r53_client.exceptions.InvalidChangeBatch({}, '')
 
@@ -641,13 +677,13 @@ class TestCertificate(object):
                            hosted_zone_id='test')
         monkeypatch.setattr(cert, 'destroy_stack', lambda wait: None)
 
-        def raise_stack_not_exist():
+        def raise_stack_not_exist(_records):
             """Raise ClientError mimicing stack not existing."""
             raise build_client_error('Stack with id {} does not exist'.format(
                 cert.stack.fqn
             ))
 
-        def raise_other():
+        def raise_other(_records):
             """Raise other ClientError."""
             raise build_client_error('something')
 
