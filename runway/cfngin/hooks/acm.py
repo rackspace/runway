@@ -338,7 +338,6 @@ class Certificate(Hook):
                     ))
                 self._wait_for_stack(self._deploy_action, last_status=status)
                 return result
-            return None
         except (self.r53_client.exceptions.InvalidChangeBatch,
                 self.r53_client.exceptions.NoSuchHostedZone,
                 StackFailed) as err:

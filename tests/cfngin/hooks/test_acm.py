@@ -9,7 +9,8 @@ from botocore.stub import ANY, Stubber
 from mock import MagicMock
 from troposphere.certificatemanager import Certificate as CertificateResource
 
-from runway.cfngin.exceptions import StackDoesNotExist
+from runway.cfngin.exceptions import (StackDoesNotExist, StackFailed,
+                                      StackUpdateBadStatus)
 from runway.cfngin.hooks.acm import Certificate
 from runway.cfngin.status import FAILED, NO_CHANGE, SubmittedStatus
 from runway.util import MutableMap
@@ -18,6 +19,7 @@ STATUS = MutableMap(**{
     'failed': FAILED,
     'new': SubmittedStatus('creating new stack'),
     'no': NO_CHANGE,
+    'recreate': SubmittedStatus('destroying stack for re-creation'),
     'update': SubmittedStatus('updating existing stack')
 })
 
@@ -558,6 +560,35 @@ class TestCertificate(object):
 
         assert cert.deploy() == expected
 
+    def test_deploy_recreate(self, cfngin_context, monkeypatch):
+        """Test deploy with stack recreation."""
+        # setup context
+        cfngin_context.add_stubber('acm', 'us-east-1')
+        cfngin_context.add_stubber('route53', 'us-east-1')
+        cfngin_context.config.namespace = 'test'
+
+        cert_arn = 'arn:aws:acm:us-east-1:012345678901:certificate/test'
+        expected = {'CertificateArn': cert_arn}
+
+        cert = Certificate(context=cfngin_context,
+                           provider=MagicMock(),
+                           domain='example.com',
+                           hosted_zone_id='test')
+        monkeypatch.setattr(cert, 'domain_changed', lambda: False)
+        monkeypatch.setattr(cert, 'deploy_stack', lambda: STATUS.recreate)
+        monkeypatch.setattr(cert, 'get_certificate',
+                            MagicMock(side_effect=['old', cert_arn]))
+        monkeypatch.setattr(cert, '_wait_for_stack',
+                            MagicMock(side_effect=[STATUS.new, None]))
+        monkeypatch.setattr(cert, 'get_validation_record',
+                            lambda x: 'get_validation_record'
+                            if x == cert_arn else ValueError)
+        monkeypatch.setattr(cert, 'put_record_set',
+                            lambda x: None
+                            if x == 'get_validation_record' else ValueError)
+
+        assert cert.deploy() == expected
+
     def test_deploy_domain_changed(self, cfngin_context, monkeypatch):
         """Test deploy domain changed."""
         # setup context
@@ -573,8 +604,8 @@ class TestCertificate(object):
 
         assert not cert.deploy()
 
-    def test_deploy_invalid_change_batch(self, cfngin_context, monkeypatch):
-        """Test deploy with InvalidChangeBatch raised."""
+    def test_deploy_error_destroy(self, cfngin_context, monkeypatch):
+        """Test deploy with errors that result in destroy being called."""
         # setup context
         cfngin_context.add_stubber('acm', 'us-east-1')
         cfngin_context.add_stubber('route53', 'us-east-1')
@@ -587,26 +618,32 @@ class TestCertificate(object):
                            domain='example.com',
                            hosted_zone_id='test')
 
-        def mock_put_record_set(record_set):
-            """Mock put_record_set."""
-            raise cert.r53_client.exceptions.InvalidChangeBatch({}, '')
-
         monkeypatch.setattr(cert, 'domain_changed', lambda: False)
         monkeypatch.setattr(cert, 'deploy_stack', lambda: STATUS.new)
         monkeypatch.setattr(cert, 'get_certificate', lambda: cert_arn)
         monkeypatch.setattr(cert, 'get_validation_record',
                             lambda x: 'get_validation_record'
                             if x == cert_arn else ValueError)
-        monkeypatch.setattr(cert, 'put_record_set', mock_put_record_set)
+        monkeypatch.setattr(cert, 'put_record_set',
+                            MagicMock(side_effect=[
+                                cert.r53_client.exceptions.InvalidChangeBatch({}, ''),
+                                cert.r53_client.exceptions.NoSuchHostedZone({}, ''),
+                                None
+                            ]))
         monkeypatch.setattr(cert, 'destroy',
                             lambda records, skip_r53: check_bool_is_true(skip_r53))
         monkeypatch.setattr(cert, '_wait_for_stack',
-                            lambda x, last_status: None)
+                            MagicMock(side_effect=StackFailed('test')))
 
-        assert not cert.deploy()
+        assert not cert.deploy()  # cert.r53_client.exceptions.InvalidChangeBatch
+        assert not cert.deploy()  # cert.r53_client.exceptions.NoSuchHostedZone
 
-    def test_deploy_failed_status(self, cfngin_context, monkeypatch):
-        """Test deploy with failed stack status."""
+        monkeypatch.setattr(cert, 'destroy',
+                            lambda records, skip_r53: check_bool_is_false(skip_r53))
+        assert not cert.deploy()  # StackFailed
+
+    def test_deploy_error_no_destroy(self, cfngin_context, monkeypatch):
+        """Test deploy with errors that don't result in destroy being called."""
         # setup context
         cfngin_context.add_stubber('acm', 'us-east-1')
         cfngin_context.add_stubber('route53', 'us-east-1')
@@ -617,10 +654,29 @@ class TestCertificate(object):
                            domain='example.com',
                            hosted_zone_id='test')
         monkeypatch.setattr(cert, 'domain_changed', lambda: False)
-        monkeypatch.setattr(cert, 'deploy_stack', lambda: STATUS.failed)
-        monkeypatch.setattr(cert, 'get_certificate', lambda: None)
+        monkeypatch.setattr(cert, 'deploy_stack',
+                            MagicMock(side_effect=StackUpdateBadStatus('test',
+                                                                       'test',
+                                                                       'test')))
 
         assert not cert.deploy()
+
+    # def test_deploy_failed_status(self, cfngin_context, monkeypatch):
+    #     """Test deploy with failed stack status."""
+    #     # setup context
+    #     cfngin_context.add_stubber('acm', 'us-east-1')
+    #     cfngin_context.add_stubber('route53', 'us-east-1')
+    #     cfngin_context.config.namespace = 'test'
+
+    #     cert = Certificate(context=cfngin_context,
+    #                        provider=MagicMock(),
+    #                        domain='example.com',
+    #                        hosted_zone_id='test')
+    #     monkeypatch.setattr(cert, 'domain_changed', lambda: False)
+    #     monkeypatch.setattr(cert, 'deploy_stack', lambda: STATUS.failed)
+    #     monkeypatch.setattr(cert, 'get_certificate', lambda: None)
+
+    #     assert not cert.deploy()
 
     def test_destory(self, cfngin_context, monkeypatch):
         """Test destory."""
@@ -633,13 +689,17 @@ class TestCertificate(object):
                            provider=MagicMock(),
                            domain='example.com',
                            hosted_zone_id='test')
-        monkeypatch.setattr(cert, 'remove_validation_records', lambda x: None)
+        # should only be called once
+        monkeypatch.setattr(cert, 'remove_validation_records',
+                            MagicMock(return_value=None))
         monkeypatch.setattr(cert, 'destroy_stack', lambda wait: None)
 
         assert cert.destroy()
+        assert cert.destroy(skip_r53=True)
+        assert cert.remove_validation_records.call_count == 1  # pylint: disable=no-member
 
-    def test_destory_invalid_change_batch(self, cfngin_context, monkeypatch):
-        """Test destory with InvalidChangeBatch raised."""
+    def test_destory_aws_errors(self, cfngin_context, monkeypatch):
+        """Test destory with errors from AWS."""
         # setup context
         cfngin_context.add_stubber('acm', 'us-east-1')
         cfngin_context.add_stubber('route53', 'us-east-1')
@@ -650,14 +710,19 @@ class TestCertificate(object):
                            domain='example.com',
                            hosted_zone_id='test')
 
-        def mock_remove_validation_records(_records):
-            """Mock remove_validation_records."""
-            raise cert.r53_client.exceptions.InvalidChangeBatch({}, '')
-
-        monkeypatch.setattr(cert, 'remove_validation_records',
-                            mock_remove_validation_records)
+        monkeypatch.setattr(
+            cert,
+            'remove_validation_records',
+            MagicMock(side_effect=[
+                cert.r53_client.exceptions.InvalidChangeBatch({}, ''),
+                cert.r53_client.exceptions.NoSuchHostedZone({}, ''),
+                cert.acm_client.exceptions.ResourceNotFoundException({}, '')
+            ])
+        )
         monkeypatch.setattr(cert, 'destroy_stack', lambda wait: None)
 
+        assert cert.destroy()
+        assert cert.destroy()
         assert cert.destroy()
 
     def test_destroy_raise_client_error(self, cfngin_context, monkeypatch):
