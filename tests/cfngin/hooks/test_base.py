@@ -3,13 +3,13 @@
 import logging
 
 import pytest
-from mock import MagicMock, patch
+from mock import MagicMock, call, patch
 
 from runway.cfngin.exceptions import StackFailed
 from runway.cfngin.hooks.base import (Hook, HookBuildAction, HookDestroyAction,
                                       HookStackDefinition)
 from runway.cfngin.status import (COMPLETE, FAILED, SKIPPED, SUBMITTED,
-                                  CompleteStatus)
+                                  CompleteStatus, SubmittedStatus)
 
 COMPLETE_W_REASON = CompleteStatus('test successful')
 
@@ -126,6 +126,42 @@ class TestHook(object):
         assert caplog.records[2].message == '%s: %s (%s)' % (
             stack.name, COMPLETE_W_REASON.name, COMPLETE_W_REASON.reason
         )
+
+    def test_wait_for_stack_till_reason(self, cfngin_context):
+        """Test _wait_for_stack till_reason option."""
+        hook = Hook(cfngin_context, MagicMock())
+        stack = MagicMock(fqn='test-stack', name='stack')
+        action = MagicMock()
+        action.run.side_effect = [SUBMITTED,
+                                  SubmittedStatus('not yet'),
+                                  SubmittedStatus('catch'),
+                                  COMPLETE]
+
+        result = hook._wait_for_stack(action,  # pylint: disable=protected-access
+                                      stack=stack,
+                                      till_reason='catch')
+        assert result == SUBMITTED
+        assert result.reason == 'catch'
+
+    def test_wait_for_stack_log_change(self, cfngin_context, monkeypatch):
+        """Test _wait_for_stack log status change."""
+        hook = Hook(cfngin_context, MagicMock())
+        stack = MagicMock(fqn='test-stack', name='stack')
+        new_status = SubmittedStatus('new')
+        action = MagicMock()
+        action.run.side_effect = [new_status, COMPLETE]
+        mock_log = MagicMock()
+
+        monkeypatch.setattr(hook, '_log_stack', mock_log)
+
+        hook._wait_for_stack(action,  # pylint: disable=protected-access
+                             last_status=SubmittedStatus('original'),
+                             stack=stack,
+                             till_reason='catch')
+
+        mock_log.assert_has_calls([call(stack, new_status),
+                                   call(stack, COMPLETE)])
+        assert mock_log.call_count == 2
 
     def test_post_deploy(self, cfngin_context):
         """Test post_deploy."""
