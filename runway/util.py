@@ -303,6 +303,33 @@ def ensure_file_is_executable(path):
         sys.exit(1)
 
 
+@contextmanager
+def environ(env=None, **kwargs):
+    """Context manager for temporarily changing os.environ.
+
+    The original value of os.environ is restored upon exit.
+
+    Args:
+        env (Dict[str, str]): Dictionary to use when updating os.environ.
+
+    """
+    env = env or {}
+    env.update(kwargs)
+
+    original_env = {key: os.getenv(key) for key in env}
+    os.environ.update(env)
+
+    try:
+        yield
+    finally:
+        # always restore original values
+        for key, val in original_env.items():
+            if val is None:
+                del os.environ[key]
+            else:
+                os.environ[key] = val
+
+
 def load_object_from_string(fqcn):
     """Convert "." delimited strings to a python object.
 
