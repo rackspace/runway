@@ -135,7 +135,7 @@ class ConfigComponent(MutableMap):
 class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
     """A module defines the directory to be processed and applicable options.
 
-    It can consist of `CloudFormation`_ (using `CFNgin`_),
+    It can consist of `CloudFormation`_ (using `CFNgin <terminology.html#runway-s-cfngin>`_),
     `Terraform`_, `Serverless Framework`_, `AWS CDK`_, `Kubernetes`_, or
     a :ref:`Static Site<mod-staticsite>`. It is recommended to place the
     appropriate extension on each directory for identification (but it
