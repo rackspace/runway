@@ -1,4 +1,4 @@
-.. _Runway blueprints: https://github.com/onicagroup/runway/tree/master/src/runway/blueprints
+.. _Runway blueprints: https://github.com/onicagroup/r4y/tree/master/src/r4y/blueprints
 .. _troposphere: https://github.com/cloudtools/troposphere
 
 .. _Blueprint:
@@ -14,7 +14,7 @@ Where you would specify a raw Cloudformation template in a stack using the ``tem
 Traditionally :ref:`Blueprints <term-blueprint>` are built using troposphere_, but that is not absolutely necessary.
 
 Making your own should be easy, and you can take a lot of examples from `Runway blueprints`_.
-In the end, all that is required is that the :ref:`Blueprint <term-blueprint>` is a subclass of ``runway.cfngin.blueprints.base`` and it have the following methods:
+In the end, all that is required is that the :ref:`Blueprint <term-blueprint>` is a subclass of ``r4y.cfngin.blueprints.base`` and it have the following methods:
 
 .. code-block:: python
 
@@ -154,8 +154,8 @@ Below is an annotated example:
 
 .. code-block:: python
 
-    from runway.cfngin.blueprints.base import Blueprint
-    from runway.cfngin.blueprints.variables.types import TroposphereType
+    from r4y.cfngin.blueprints.base import Blueprint
+    from r4y.cfngin.blueprints.variables.types import TroposphereType
     from troposphere import s3, sns
 
     class Buckets(Blueprint):
@@ -257,7 +257,7 @@ to CloudFormation as a Parameter instead of only available to the
 Blueprint when rendering. This is useful if you want to leverage AWS-
 Specific Parameter types (e.g. ``List<AWS::EC2::Image::Id>``) or Systems
 Manager Parameter Store values (e.g. ``AWS::SSM::Parameter::Value<String>``).
-See ``runway.cfngin.blueprints.variables.types`` for available subclasses of the
+See ``r4y.cfngin.blueprints.variables.types`` for available subclasses of the
 ``CFNType``.
 
 Example
@@ -267,8 +267,8 @@ Below is an annotated example:
 
 .. code-block:: python
 
-    from runway.cfngin.blueprints.base import Blueprint
-    from runway.cfngin.blueprints.variables.types import (
+    from r4y.cfngin.blueprints.base import Blueprint
+    from r4y.cfngin.blueprints.variables.types import (
         CFNString,
         EC2AvailabilityZoneNameList,
     )
@@ -362,9 +362,9 @@ Below is an annotated example creating a security group:
   # we are importing Ref to allow for CFN References in the EC2 resource.  Tags
   # will be used to set the Name tag
   from troposphere import Ref, ec2, Tags
-  from runway.cfngin.blueprints.base import Blueprint
+  from r4y.cfngin.blueprints.base import Blueprint
   # CFNString is imported to allow for stand alone stack use
-  from runway.cfngin.blueprints.variables.types import CFNString
+  from r4y.cfngin.blueprints.variables.types import CFNString
 
   class SampleBlueprint(Blueprint):
 
@@ -405,7 +405,7 @@ to make sure they behave the way you expect they would, especially if there is
 any complex logic inside.
 
 To this end, a sub-class of the ``unittest.TestCase`` class has been
-provided: ``runway.cfngin.blueprints.testutil.BlueprintTestCase``. You use it
+provided: ``r4y.cfngin.blueprints.testutil.BlueprintTestCase``. You use it
 like the regular TestCase class, but it comes with an addition assertion:
 ``assertRenderedBlueprint``. This assertion takes a Blueprint object and renders
 it, then compares it to an expected output, usually in

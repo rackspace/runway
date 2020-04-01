@@ -17,10 +17,10 @@ class Terraform(IntegrationTest):
     tf_test_dir = os.path.join(base_dir, 'terraform_test.tf')
     tf_state_dir = os.path.join(base_dir, 'tf_state.cfn')
 
-    def copy_runway(self, template):
-        """Copy runway template to proper directory."""
-        template_file = os.path.join(self.template_dir, 'runway-{}.yml'.format(template))
-        copy_file(template_file, os.path.join(self.base_dir, 'runway.yml'))
+    def copy_r4y(self, template):
+        """Copy r4y template to proper directory."""
+        template_file = os.path.join(self.template_dir, 'r4y-{}.yml'.format(template))
+        copy_file(template_file, os.path.join(self.base_dir, 'r4y.yml'))
 
     def copy_template(self, template, name='main.tf'):
         """Copy template to Terraform module folder."""

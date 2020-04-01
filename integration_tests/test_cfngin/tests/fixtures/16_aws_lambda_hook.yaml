@@ -5,7 +5,7 @@ sys_path: ./
 
 pre_build:
   upload_lambdas:
-    path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+    path: r4y.cfngin.hooks.aws_lambda.upload_lambda_functions
     required: true
     data_key: lambda
     args:
@@ -46,7 +46,7 @@ stacks:
 
 post_destroy:
   purge_bucket:
-    path: runway.hooks.cleanup_s3.purge_bucket
+    path: r4y.hooks.cleanup_s3.purge_bucket
     required: True
     args:
       bucket_name: ${CFNGIN_NAMESPACE}-${region}

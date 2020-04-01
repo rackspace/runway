@@ -3,9 +3,9 @@ import logging
 import os
 import unittest
 
-from runway.sources.source import Source
+from r4y.sources.source import Source
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger('r4y')
 
 
 class SourceTester(unittest.TestCase):
@@ -19,7 +19,7 @@ class SourceTester(unittest.TestCase):
     def test_when_no_cache_dir_parameter_in_config(self):
         """The default when no cache_dir is passed in the config"""
         source = Source({})
-        self.assertEqual(source.cache_dir, os.path.expanduser('~/.runway_cache'))
+        self.assertEqual(source.cache_dir, os.path.expanduser('~/.r4y_cache'))
 
     def test_a_cache_directory_is_created(self):
         """Ensure a cache directory is created"""

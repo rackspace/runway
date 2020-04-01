@@ -3,7 +3,7 @@
 # pre_build happens before the build
 # post_build happens after the build
 pre_build:
-  - path: runway.cfngin.hooks.route53.create_domain
+  - path: r4y.cfngin.hooks.route53.create_domain
     required: true
     enabled: true
     # Additional args can be passed as a dict of key/value pairs

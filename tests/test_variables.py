@@ -5,12 +5,12 @@ from unittest import TestCase
 from mock import MagicMock
 from troposphere import s3
 
-from runway.cfngin.blueprints.variables.types import TroposphereType
-from runway.cfngin.exceptions import UnresolvedVariable
-from runway.cfngin.lookups import register_lookup_handler
-from runway.cfngin.stack import Stack
-from runway.util import MutableMap
-from runway.variables import Variable
+from r4y.cfngin.blueprints.variables.types import TroposphereType
+from r4y.cfngin.exceptions import UnresolvedVariable
+from r4y.cfngin.lookups import register_lookup_handler
+from r4y.cfngin.stack import Stack
+from r4y.util import MutableMap
+from r4y.variables import Variable
 
 from .cfngin.factories import generate_definition
 
@@ -27,7 +27,7 @@ CONTEXT = MutableMap(**{
 
 
 class TestCfnginVariables(TestCase):
-    """Tests for runway.cfngin.variables."""
+    """Tests for r4y.cfngin.variables."""
 
     def setUp(self):
         """Run before tests."""
@@ -224,7 +224,7 @@ class TestRunwayVariables(TestCase):
 
     def test_value_simple_str_lookup(self):
         """Test value for simple str lookup."""
-        var = Variable('test', '${env test}', 'runway')
+        var = Variable('test', '${env test}', 'r4y')
 
         self.assertFalse(var.resolved)
 
@@ -235,7 +235,7 @@ class TestRunwayVariables(TestCase):
 
     def test_value_complex_str(self):
         """Multiple lookups should be usable within a single string."""
-        var = Variable('test', 'the ${env what} was ${env test}ful', 'runway')
+        var = Variable('test', 'the ${env what} was ${env test}ful', 'r4y')
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, 'the {} was {}ful'.format(VALUE['what'],
@@ -243,49 +243,49 @@ class TestRunwayVariables(TestCase):
 
     def test_value_nested_str(self):
         """Variable lookups should be resolvable within each other."""
-        var = Variable('test', '${env ${env what}}', 'runway')
+        var = Variable('test', '${env ${env what}}', 'r4y')
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, VALUE['test'])
 
     def test_value_lookup_in_dict(self):
         """Variable lookups should be resolvable when used in a dict."""
-        var = Variable('test', {'my_dict': '${env test}'}, 'runway')
+        var = Variable('test', {'my_dict': '${env test}'}, 'r4y')
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, {'my_dict': VALUE['test']})
 
     def test_value_lookup_in_list(self):
         """Variable lookups should be resolvable when used in a list."""
-        var = Variable('test', ['${env test}'], 'runway')
+        var = Variable('test', ['${env test}'], 'r4y')
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, [VALUE['test']])
 
     def test_value_lookup_to_bool(self):
         """Variable lookups should be resolvable to a bool."""
-        var = Variable('test', '${env bool_val}', 'runway')
+        var = Variable('test', '${env bool_val}', 'r4y')
         var.resolve(CONTEXT)
 
         self.assertFalse(var.value)
 
     def test_value_lookup_to_dict(self):
         """Variable lookups should be resolvable to a dict value."""
-        var = Variable('test', '${env dict_val}', 'runway')
+        var = Variable('test', '${env dict_val}', 'r4y')
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, VALUE['dict_val'])
 
     def test_value_lookup_to_list(self):
         """Variable lookups should be resolvable to a list value."""
-        var = Variable('test', '${env list_val}', 'runway')
+        var = Variable('test', '${env list_val}', 'r4y')
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, VALUE['list_val'])
 
     def test_value_unresolved(self):
         """Should raise `UnresolvedVariable`."""
-        var = Variable('test', '${env test}', 'runway')
+        var = Variable('test', '${env test}', 'r4y')
 
         with self.assertRaises(UnresolvedVariable):
             print(var.value)

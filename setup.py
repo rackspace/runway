@@ -89,12 +89,12 @@ INSTALL_REQUIRES = [
 
 
 setup(
-    name='runway',
-    version=get_version('./runway/__init__.py'),
+    name='r4y',
+    version=get_version('./r4y/__init__.py'),
     description='Simplify infrastructure/app testing/deployment',
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url='https://github.com/onicagroup/runway',
+    url='https://github.com/onicagroup/r4y',
     author='Onica Group LLC',
     author_email='opensource@onica.com',
     license='Apache License 2.0',
@@ -116,11 +116,11 @@ setup(
     install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
-            'runway=runway.cli:main',
+            'r4y=r4y.cli:main',
         ],
     },
-    scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd',
-             'scripts/tf-runway', 'scripts/tf-runway.cmd',
-             'scripts/tfenv-runway', 'scripts/tfenv-runway.cmd'],
+    scripts=['scripts/stacker-r4y', 'scripts/stacker-r4y.cmd',
+             'scripts/tf-r4y', 'scripts/tf-r4y.cmd',
+             'scripts/tfenv-r4y', 'scripts/tfenv-r4y.cmd'],
     include_package_data=True  # needed for templates,blueprints,hooks
 )

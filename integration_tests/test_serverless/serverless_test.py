@@ -3,14 +3,14 @@ import os
 import tempfile
 import boto3
 
-from runway.s3_util import (download,
+from r4y.s3_util import (download,
                             get_matching_s3_keys,
                             purge_and_delete_bucket,
                             purge_bucket)
-from runway.util import change_dir, find_cfn_output
-from runway.module.serverless import get_src_hash
-from runway.commands.modules_command import assume_role
-from runway.hooks.staticsite.util import get_hash_of_files
+from r4y.util import change_dir, find_cfn_output
+from r4y.module.serverless import get_src_hash
+from r4y.commands.modules_command import assume_role
+from r4y.hooks.staticsite.util import get_hash_of_files
 
 from integration_tests.test_serverless.test_serverless import Serverless
 from integration_tests.util import run_command
@@ -28,7 +28,7 @@ class ServerlessTest(Serverless):
         self.template_dir = os.path.join(templates_dir, template)
         self.environment = environment
         self.logger = logger
-        self.runway_config_path = os.path.join(templates_dir, template, 'runway.yml')
+        self.r4y_config_path = os.path.join(templates_dir, template, 'r4y.yml')
 
     def get_serverless_bucket(self, stack_name, session):
         """Get bucket created by serverless."""
@@ -37,9 +37,9 @@ class ServerlessTest(Serverless):
         self.logger.debug('Found Stacks: ', stacks)
         return find_cfn_output('ServerlessDeploymentBucketName', stacks['Stacks'][0]['Outputs'])
 
-    def get_promote_zip_bucket(self, runway_config):
-        """Get promotezip bucket from runway config."""
-        deployment = runway_config['deployments'][0]
+    def get_promote_zip_bucket(self, r4y_config):
+        """Get promotezip bucket from r4y config."""
+        deployment = r4y_config['deployments'][0]
         module = deployment.get('modules')[0]
         return module.get('options', {})\
                      .get('promotezip', {})\
@@ -57,12 +57,12 @@ class ServerlessTest(Serverless):
 
     def get_configs(self):
         """Get Runway and Serverless parsed configs."""
-        return {'Runway': self.parse_config(os.path.join(self.template_dir, 'runway.yml')),
+        return {'Runway': self.parse_config(os.path.join(self.template_dir, 'r4y.yml')),
                 'Serverless':
                 self.parse_config(os.path.join(self.template_dir, 'serverless.yml'))}
 
     def get_zip_hashes(self, env):
-        """Get serverless and runway buckets."""
+        """Get serverless and r4y buckets."""
         configs = self.get_configs()
         promotezip_bucket = self.get_promote_zip_bucket(configs['Runway'])
 
@@ -93,14 +93,14 @@ class ServerlessTest(Serverless):
 
         return [get_hash_of_files(value) for key, value in zip_dirs.items()]
 
-    def run_runway(self, template, command='deploy'):
+    def run_r4y(self, template, command='deploy'):
         """Deploy serverless template."""
         template_dir = os.path.join(self.templates_dir, template)
         if os.path.isdir(template_dir):
             self.logger.info('Executing test "%s" in directory "%s"', template, template_dir)
             with change_dir(template_dir):
-                self.logger.info('Running "runway %s" on %s', command, template_dir)
-                return run_command(['runway', command], self.environment)
+                self.logger.info('Running "r4y %s" on %s', command, template_dir)
+                return run_command(['r4y', command], self.environment)
         else:
             self.logger.error('Directory not found: %s', template_dir)
             return 1
@@ -111,7 +111,7 @@ class ServerlessTest(Serverless):
         hashes = []
         for env in self.ENVS:
             self.set_environment(env)
-            assert self.run_runway(self.template_name) == 0,\
+            assert self.run_r4y(self.template_name) == 0,\
                 '{}: Failed to deploy in {} environment'.format(self.template_name, env)
             hashes.append(self.get_zip_hashes(env))
 
@@ -133,7 +133,7 @@ class ServerlessTest(Serverless):
                                                               env]),
                                                     session)
             purge_bucket(sls_bucket, session=session)
-            self.run_runway(self.template_name, 'destroy')
+            self.run_r4y(self.template_name, 'destroy')
 
         purge_and_delete_bucket(self.get_promote_zip_bucket(configs['Runway']))
         self.clean()

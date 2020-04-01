@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.actions.base."""
+"""Tests for r4y.cfngin.actions.base."""
 # pylint: disable=no-self-use,protected-access,unused-argument
 import unittest
 
@@ -7,11 +7,11 @@ from mock import MagicMock, PropertyMock, patch
 import botocore.exceptions
 from botocore.stub import ANY, Stubber
 
-from runway.cfngin.actions.base import BaseAction
-from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.plan import Graph, Plan, Step
-from runway.cfngin.providers.aws.default import Provider
-from runway.cfngin.session_cache import get_session
+from r4y.cfngin.actions.base import BaseAction
+from r4y.cfngin.blueprints.base import Blueprint
+from r4y.cfngin.plan import Graph, Plan, Step
+from r4y.cfngin.providers.aws.default import Provider
+from r4y.cfngin.session_cache import get_session
 
 from ..factories import MockProviderBuilder, mock_context
 
@@ -35,7 +35,7 @@ class MockBlueprint(Blueprint):
 
 
 class TestBaseAction(unittest.TestCase):
-    """Tests for runway.cfngin.actions.base.BaseAction."""
+    """Tests for r4y.cfngin.actions.base.BaseAction."""
 
     def setUp(self):
         """Run before tests."""
@@ -151,9 +151,9 @@ class TestBaseAction(unittest.TestCase):
             with self.assertRaises(botocore.exceptions.ClientError):
                 action.ensure_cfn_bucket()
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.actions.base.BaseAction._stack_action',
+    @patch('r4y.cfngin.actions.base.BaseAction._stack_action',
            new_callable=PropertyMock)
     def test_generate_plan_no_persist_exclude(self, mock_stack_action,
                                               mock_tags):
@@ -179,9 +179,9 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.actions.base.BaseAction._stack_action',
+    @patch('r4y.cfngin.actions.base.BaseAction._stack_action',
            new_callable=PropertyMock)
     def test_generate_plan_no_persist_include(self, mock_stack_action,
                                               mock_tags):
@@ -207,9 +207,9 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.actions.base.BaseAction._stack_action',
+    @patch('r4y.cfngin.actions.base.BaseAction._stack_action',
            new_callable=PropertyMock)
     def test_generate_plan_with_persist_exclude(self, mock_stack_action,
                                                 mock_tags):
@@ -236,9 +236,9 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.actions.base.BaseAction._stack_action',
+    @patch('r4y.cfngin.actions.base.BaseAction._stack_action',
            new_callable=PropertyMock)
     def test_generate_plan_with_persist_include(self, mock_stack_action,
                                                 mock_tags):
@@ -267,9 +267,9 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.actions.base.BaseAction._stack_action',
+    @patch('r4y.cfngin.actions.base.BaseAction._stack_action',
            new_callable=PropertyMock)
     def test_generate_plan_with_persist_no_lock_req(self, mock_stack_action,
                                                     mock_tags):
@@ -313,7 +313,7 @@ class TestBaseAction(unittest.TestCase):
             provider_builder=MockProviderBuilder(provider, region=region)
         )
 
-        with patch('runway.cfngin.actions.base.get_s3_endpoint',
+        with patch('r4y.cfngin.actions.base.get_s3_endpoint',
                    autospec=True, return_value=endpoint):
             self.assertEqual(
                 action.stack_template_url(blueprint),

@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.lookups.handlers.kms."""
+"""Tests for r4y.cfngin.lookups.handlers.kms."""
 import codecs
 import unittest
 
@@ -6,7 +6,7 @@ import boto3
 from botocore.stub import Stubber
 from mock import patch
 
-from runway.cfngin.lookups.handlers.kms import KmsLookup
+from r4y.cfngin.lookups.handlers.kms import KmsLookup
 
 from ...factories import SessionStub, mock_provider
 
@@ -14,7 +14,7 @@ REGION = 'us-east-1'
 
 
 class TestKMSHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.kms.KmsLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.kms.KmsLookup."""
 
     client = boto3.client('kms', region_name=REGION,
                           # bypass the need to have these in the env
@@ -27,7 +27,7 @@ class TestKMSHandler(unittest.TestCase):
         self.provider = mock_provider(region=REGION)
         self.secret = b'my secret'
 
-    @patch("runway.cfngin.lookups.handlers.kms.get_session",
+    @patch("r4y.cfngin.lookups.handlers.kms.get_session",
            return_value=SessionStub(client))
     def test_kms_handler(self, _mock_client):
         """Test kms handler."""
@@ -41,7 +41,7 @@ class TestKMSHandler(unittest.TestCase):
                                               provider=self.provider))
             self.stubber.assert_no_pending_responses()
 
-    @patch("runway.cfngin.lookups.handlers.kms.get_session",
+    @patch("r4y.cfngin.lookups.handlers.kms.get_session",
            return_value=SessionStub(client))
     def test_kms_handler_with_region(self, _mock_client):
         """Test kms handler with region."""

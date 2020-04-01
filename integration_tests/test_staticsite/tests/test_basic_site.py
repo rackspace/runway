@@ -1,7 +1,7 @@
 """Test deploying a base line static site."""
 import os
 
-from runway.util import change_dir
+from r4y.util import change_dir
 
 from integration_tests.test_staticsite.test_staticsite import StaticSite
 from integration_tests.util import run_command
@@ -18,9 +18,9 @@ class TestBasicSite(StaticSite):
         os.mkdir(self.staticsite_test_dir)
         os.mkdir(os.path.join(self.staticsite_test_dir, self.module_dir))
         os.mkdir(os.path.join(self.staticsite_test_dir, self.module_dir, 'build'))
-        self.copy_runway('basic-site')
+        self.copy_r4y('basic-site')
         with change_dir(self.staticsite_test_dir):
-            return run_command(['runway', 'deploy'])
+            return run_command(['r4y', 'deploy'])
 
     def run(self):
         """Run tests."""
@@ -32,5 +32,5 @@ class TestBasicSite(StaticSite):
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         self.delete_venv(self.module_dir)
         with change_dir(self.staticsite_test_dir):
-            run_command(['runway', 'destroy'])
+            run_command(['r4y', 'destroy'])
         self.clean()

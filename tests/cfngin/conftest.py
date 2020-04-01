@@ -5,7 +5,7 @@ import sys
 import py
 import pytest
 
-from runway.cfngin.dag import DAG
+from r4y.cfngin.dag import DAG
 
 if sys.version_info[0] > 2:
     from pathlib import Path  # pylint: disable=E

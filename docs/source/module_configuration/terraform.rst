@@ -13,7 +13,7 @@ align your Terraform directory with Runway's requirements & best practices.
 Part 1: Adding Terraform to Deployment
 --------------------------------------
 
-Start by adding your Terraform directory to your runway.yml's list of modules.
+Start by adding your Terraform directory to your r4y.yml's list of modules.
 
 (Note: to Runway, a module is just a directory in which to run
 ``terraform apply``, ``serverless deploy``, etc - no relation to Terraform's
@@ -23,12 +23,12 @@ Directory tree:
 ::
 
     .
-    ├── runway.yml
+    ├── r4y.yml
     └── terraformstuff.tf
         └── main.tf
 
 
-runway.yml:
+r4y.yml:
 ::
 
     ---
@@ -52,7 +52,7 @@ when deploying your module.
     0.11.6
 
 
-or in runway.yml, either for a single module::
+or in r4y.yml, either for a single module::
 
     ---
     deployments:
@@ -133,10 +133,10 @@ main.tf::
     }
 
 
-Backend Config in runway.yml
+Backend Config in r4y.yml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Backend config options can also be specified as a module option in runway.yml:
+Backend config options can also be specified as a module option in r4y.yml:
 
 Either for a single module::
 
@@ -165,11 +165,11 @@ and/or for a group of modules:
             dynamodb_table: mytable
 
 
-Backend CloudFormation Outputs in runway.yml
+Backend CloudFormation Outputs in r4y.yml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A recommended option for managing the state bucket and table is to create
-them via CloudFormation (try running ``runway gen-sample cfn`` to get a
+them via CloudFormation (try running ``r4y gen-sample cfn`` to get a
 template and stack definition for bucket/table stack). To further support this,
 backend config options can be looked up directly from CloudFormation
 outputs.
@@ -204,7 +204,7 @@ and/or for a group of modules:
             dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
 
 
-Backend SSM Parameters in runway.yml
+Backend SSM Parameters in r4y.yml
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Similar to the CloudFormation lookup, backend config options can be looked up
@@ -258,10 +258,10 @@ E.g. ``common-us-east-1.tfvars``::
     image_id = "ami-abc123"
 
 
-Values in runway.yml
+Values in r4y.yml
 ~~~~~~~~~~~~~~~~~~~~
 
-Variable values can also be specified as parameter values in runway.yml. It
+Variable values can also be specified as parameter values in r4y.yml. It
 is recommended to use `Lookups`_ in the ``parameters`` section to
 assist in selecting the appropriate values for the deploy environment and/or
 region being deployed to but, this is not a requirement if the value will

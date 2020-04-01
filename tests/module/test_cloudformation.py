@@ -1,16 +1,16 @@
-"""Test runway.module.cloudformation."""
+"""Test r4y.module.cloudformation."""
 # pylint: disable=protected-access,no-self-use
 import os
 
 from mock import patch
 
-from runway.context import Context
-from runway.module.cloudformation import CloudFormation
-from runway.util import MutableMap
+from r4y.context import Context
+from r4y.module.cloudformation import CloudFormation
+from r4y.util import MutableMap
 
 
 class TestCloudFormation(object):
-    """Test runway.module.cloudformation.CloudFormation."""
+    """Test r4y.module.cloudformation.CloudFormation."""
 
     @property
     def generic_options(self):
@@ -29,7 +29,7 @@ class TestCloudFormation(object):
                        env_region=region,
                        env_root=os.getcwd())
 
-    @patch('runway.cfngin.CFNgin.deploy')
+    @patch('r4y.cfngin.CFNgin.deploy')
     def test_deploy(self, mock_action, tmp_path):
         """Test deploy."""
         module = CloudFormation(self.get_context(),
@@ -38,7 +38,7 @@ class TestCloudFormation(object):
         module.deploy()
         mock_action.assert_called_once()
 
-    @patch('runway.cfngin.CFNgin.destroy')
+    @patch('r4y.cfngin.CFNgin.destroy')
     def test_destroy(self, mock_action, tmp_path):
         """Test destroy."""
         module = CloudFormation(self.get_context(),
@@ -47,7 +47,7 @@ class TestCloudFormation(object):
         module.destroy()
         mock_action.assert_called_once()
 
-    @patch('runway.cfngin.CFNgin.plan')
+    @patch('r4y.cfngin.CFNgin.plan')
     def test_plan(self, mock_action, tmp_path):
         """Test plan."""
         module = CloudFormation(self.get_context(),

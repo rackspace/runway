@@ -7,7 +7,7 @@ import boto3
 import yaml
 from send2trash import send2trash
 
-from runway.util import change_dir
+from r4y.util import change_dir
 
 from integration_tests.integration_test import IntegrationTest
 from integration_tests.util import (copy_dir, import_tests,
@@ -24,7 +24,7 @@ class ModuleTags(IntegrationTest):
     sampleapp_dir = os.path.join(base_dir, 'sampleapp')
 
     stacker_file = {
-        'namespace': 'runway-tests',
+        'namespace': 'r4y-tests',
         'stacker_bucket': '',
         'stacks': {}
     }
@@ -43,7 +43,7 @@ class ModuleTags(IntegrationTest):
         stacks = {}
 
         for i in range(1, 7):
-            stack_name = 'runway-tests-module-tags-' + str(i)
+            stack_name = 'r4y-tests-module-tags-' + str(i)
             try:
                 response = CFN_CLIENT.describe_stacks(
                     StackName=stack_name
@@ -73,9 +73,9 @@ class ModuleTags(IntegrationTest):
             with open(os.path.join(new_dir, 'stacker.yml'), 'w+') as yml:
                 yml.write(yaml.safe_dump(stacker_contents))
 
-    def runway_cmd(self, command, tags):
+    def r4y_cmd(self, command, tags):
         """Run a deploy command based on tags."""
-        cmd = ['runway', command]
+        cmd = ['r4y', command]
         for tag in tags:
             cmd.append('--tag')
             cmd.append(tag)

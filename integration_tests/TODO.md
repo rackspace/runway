@@ -34,11 +34,11 @@ deployments:
 
 ## Terraform
 
-### Map values provided in runway.yml environments
+### Map values provided in r4y.yml environments
 
 Ensure that environment dicts are properly converted to strings
 
-runway.yml
+r4y.yml
 ```
 ---
 global_variables: &global_variables

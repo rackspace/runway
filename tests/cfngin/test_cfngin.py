@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin entry point."""
+"""Tests for r4y.cfngin entry point."""
 # pylint: disable=no-self-use,protected-access
 import os
 import shutil
@@ -6,9 +6,9 @@ import shutil
 import pytest
 from mock import MagicMock, patch
 
-from runway.cfngin import CFNgin
-from runway.context import Context
-from runway.util import AWS_ENV_VARS
+from r4y.cfngin import CFNgin
+from r4y.context import Context
+from r4y.util import AWS_ENV_VARS
 
 
 def copy_fixture(src, dest):
@@ -30,7 +30,7 @@ def get_env_creds():
 
 
 class TestCFNgin(object):
-    """Test runway.cfngin.CFNgin."""
+    """Test r4y.cfngin.CFNgin."""
 
     @staticmethod
     def configure_mock_action_instance(mock_action):
@@ -82,7 +82,7 @@ class TestCFNgin(object):
                         sys_path=str(tmp_path))  # support python < 3.6
         assert result.env_file.test_value == 'lab-ca-central-1'
 
-    @patch('runway.cfngin.actions.build.Action')
+    @patch('r4y.cfngin.actions.build.Action')
     def test_deploy(self, mock_action, cfngin_fixtures, tmp_path):
         """Test deploy with two files & class init."""
         mock_instance = self.configure_mock_action_instance(mock_action)
@@ -119,7 +119,7 @@ class TestCFNgin(object):
                                          {'concurrency': 0,
                                           'tail': False}])
 
-    @patch('runway.cfngin.actions.destroy.Action')
+    @patch('r4y.cfngin.actions.destroy.Action')
     def test_destroy(self, mock_action, cfngin_fixtures, tmp_path):
         """Test destroy."""
         mock_instance = self.configure_mock_action_instance(mock_action)
@@ -154,14 +154,14 @@ class TestCFNgin(object):
         cfn_template.write_text(u'test_key: !Ref something')
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
 
-        caplog.set_level('ERROR', logger='runway.cfngin')
+        caplog.set_level('ERROR', logger='r4y.cfngin')
 
         with pytest.raises(SystemExit):
             cfngin.load(str(cfn_template))  # support python < 3.6
 
         assert 'appears to be a CloudFormation template' in caplog.text
 
-    @patch('runway.cfngin.actions.diff.Action')
+    @patch('r4y.cfngin.actions.diff.Action')
     def test_plan(self, mock_action, cfngin_fixtures, tmp_path):
         """Test plan."""
         mock_instance = self.configure_mock_action_instance(mock_action)

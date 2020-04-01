@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.providers.aws.default."""
+"""Tests for r4y.cfngin.providers.aws.default."""
 # pylint: disable=too-many-lines
 import copy
 import os.path
@@ -14,10 +14,10 @@ from botocore.exceptions import ClientError, UnStubbedResponseError
 from botocore.stub import Stubber
 from mock import MagicMock, patch
 
-from runway.cfngin import exceptions
-from runway.cfngin.actions.diff import DictValue
-from runway.cfngin.providers.aws import default
-from runway.cfngin.providers.aws.default import (DEFAULT_CAPABILITIES,
+from r4y.cfngin import exceptions
+from r4y.cfngin.actions.diff import DictValue
+from r4y.cfngin.providers.aws import default
+from r4y.cfngin.providers.aws.default import (DEFAULT_CAPABILITIES,
                                                  MAX_TAIL_RETRIES, Provider,
                                                  ask_for_approval,
                                                  create_change_set,
@@ -26,10 +26,10 @@ from runway.cfngin.providers.aws.default import (DEFAULT_CAPABILITIES,
                                                  requires_replacement,
                                                  summarize_params_diff,
                                                  wait_till_change_set_complete)
-from runway.cfngin.providers.base import Template
-from runway.cfngin.session_cache import get_session
-from runway.cfngin.stack import Stack
-from runway.util import MutableMap
+from r4y.cfngin.providers.base import Template
+from r4y.cfngin.session_cache import get_session
+from r4y.cfngin.stack import Stack
+from r4y.util import MutableMap
 
 if sys.version_info.major < 3:
     from pathlib2 import Path  # pylint: disable=E
@@ -181,7 +181,7 @@ def generate_change(action="Modify", resource_type="EC2::Instance",
 
 
 class TestMethods(unittest.TestCase):
-    """Tests for runway.cfngin.providers.aws.default."""
+    """Tests for r4y.cfngin.providers.aws.default."""
 
     def setUp(self):
         """Run before tests."""
@@ -236,7 +236,7 @@ class TestMethods(unittest.TestCase):
 
     def test_ask_for_approval(self):
         """Test ask for approval."""
-        get_input_path = "runway.cfngin.ui.get_raw_input"
+        get_input_path = "r4y.cfngin.ui.get_raw_input"
         with patch(get_input_path, return_value="y"):
             self.assertIsNone(ask_for_approval([], [], None))
 
@@ -247,7 +247,7 @@ class TestMethods(unittest.TestCase):
 
         with patch(get_input_path, side_effect=["v", "n"]) as mock_get_input:
             with patch(
-                    'runway.cfngin.providers.aws.default.output_full_changeset'
+                    'r4y.cfngin.providers.aws.default.output_full_changeset'
             ) as mock_full_changeset:
                 with self.assertRaises(exceptions.CancelExecution):
                     ask_for_approval([], [], True)
@@ -256,7 +256,7 @@ class TestMethods(unittest.TestCase):
 
     def test_ask_for_approval_with_params_diff(self):
         """Test ask for approval with params diff."""
-        get_input_path = "runway.cfngin.ui.get_raw_input"
+        get_input_path = "r4y.cfngin.ui.get_raw_input"
         params_diff = [
             DictValue('ParamA', None, 'new-param-value'),
             DictValue('ParamB', 'param-b-old-value', 'param-b-new-value-delta')
@@ -271,18 +271,18 @@ class TestMethods(unittest.TestCase):
 
         with patch(get_input_path, side_effect=["v", "n"]) as mock_get_input:
             with patch(
-                    'runway.cfngin.providers.aws.default.output_full_changeset'
+                    'r4y.cfngin.providers.aws.default.output_full_changeset'
             ) as mock_full_changeset:
                 with self.assertRaises(exceptions.CancelExecution):
                     ask_for_approval([], params_diff, True)
                 self.assertEqual(mock_full_changeset.call_count, 1)
             self.assertEqual(mock_get_input.call_count, 2)
 
-    @patch("runway.cfngin.providers.aws.default.format_params_diff")
-    @patch('runway.cfngin.providers.aws.default.yaml.safe_dump')
+    @patch("r4y.cfngin.providers.aws.default.format_params_diff")
+    @patch('r4y.cfngin.providers.aws.default.yaml.safe_dump')
     def test_output_full_changeset(self, mock_safe_dump, patched_format):
         """Test output full changeset."""
-        get_input_path = "runway.cfngin.ui.get_raw_input"
+        get_input_path = "r4y.cfngin.ui.get_raw_input"
 
         safe_dump_counter = 0
 
@@ -459,7 +459,7 @@ class TestMethods(unittest.TestCase):
 
 
 class TestProviderDefaultMode(unittest.TestCase):
-    """Tests for runway.cfngin.providers.aws.default default mode."""
+    """Tests for r4y.cfngin.providers.aws.default default mode."""
 
     def setUp(self):
         """Run before tests."""
@@ -492,8 +492,8 @@ class TestProviderDefaultMode(unittest.TestCase):
             self.provider.create_stack(stack_name, template, parameters, tags)
         self.stubber.assert_no_pending_responses()
 
-    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
-    @patch('runway.cfngin.providers.aws.default.create_change_set')
+    @patch('r4y.cfngin.providers.aws.default.Provider.update_termination_protection')
+    @patch('r4y.cfngin.providers.aws.default.create_change_set')
     def test_create_stack_with_changeset(self, patched_create_change_set,
                                          patched_update_term):
         """Test create_stack, force changeset, termination protection."""
@@ -744,7 +744,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             self.provider.noninteractive_destroy_stack('fake-stack')
         self.stubber.assert_no_pending_responses()
 
-    @patch('runway.cfngin.providers.aws.default.output_full_changeset')
+    @patch('r4y.cfngin.providers.aws.default.output_full_changeset')
     def test_get_stack_changes_update(self, mock_output_full_cs):
         """Test get stack changes update."""
         stack_name = "MockStack"
@@ -797,7 +797,7 @@ class TestProviderDefaultMode(unittest.TestCase):
                          expected_outputs)
         self.assertEqual(result, expected_outputs)
 
-    @patch('runway.cfngin.providers.aws.default.output_full_changeset')
+    @patch('r4y.cfngin.providers.aws.default.output_full_changeset')
     def test_get_stack_changes_create(self, mock_output_full_cs):
         """Test get stack changes create."""
         stack_name = "MockStack"
@@ -971,7 +971,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
 
 class TestProviderInteractiveMode(unittest.TestCase):
-    """Tests for runway.cfngin.providers.aws.default interactive mode."""
+    """Tests for r4y.cfngin.providers.aws.default interactive mode."""
 
     def setUp(self):
         """Run before tests."""
@@ -981,7 +981,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
             self.session, interactive=True, recreate_failed=True)
         self.stubber = Stubber(self.provider.cloudformation)
 
-    @patch('runway.cfngin.ui.get_raw_input')
+    @patch('r4y.cfngin.ui.get_raw_input')
     def test_interactive_destroy_stack(self, patched_input):
         """Test interactive_destroy_stack."""
         stack_name = 'fake-stack'
@@ -994,8 +994,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
             self.assertIsNone(self.provider.interactive_destroy_stack(stack_name))
             self.stubber.assert_no_pending_responses()
 
-    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
-    @patch('runway.cfngin.ui.get_raw_input')
+    @patch('r4y.cfngin.providers.aws.default.Provider.update_termination_protection')
+    @patch('r4y.cfngin.ui.get_raw_input')
     def test_interactive_destroy_stack_termination_protected(self,
                                                              patched_input,
                                                              patched_update_term):
@@ -1014,7 +1014,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         patched_input.assert_called_once()
         patched_update_term.assert_called_once_with(stack_name, False)
 
-    @patch('runway.cfngin.ui.get_raw_input')
+    @patch('r4y.cfngin.ui.get_raw_input')
     def test_destroy_stack_canceled(self, patched_input):
         """Test destroy stack canceled."""
         stack = {'StackName': 'MockStack'}
@@ -1030,8 +1030,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
                             replacements_only=replacements)
         self.assertEqual(provider.replacements_only, replacements)
 
-    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
-    @patch("runway.cfngin.providers.aws.default.ask_for_approval")
+    @patch('r4y.cfngin.providers.aws.default.Provider.update_termination_protection')
+    @patch("r4y.cfngin.providers.aws.default.ask_for_approval")
     def test_update_stack_execute_success_no_stack_policy(self,
                                                           patched_approval,
                                                           patched_update_term):
@@ -1068,8 +1068,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
                                                  fqn=stack_name)
         patched_update_term.assert_called_once_with(stack_name, False)
 
-    @patch('runway.cfngin.providers.aws.default.Provider.update_termination_protection')
-    @patch("runway.cfngin.providers.aws.default.ask_for_approval")
+    @patch('r4y.cfngin.providers.aws.default.Provider.update_termination_protection')
+    @patch("r4y.cfngin.providers.aws.default.ask_for_approval")
     def test_update_stack_execute_success_with_stack_policy(self,
                                                             patched_approval,
                                                             patched_update_term):
@@ -1137,8 +1137,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
                 i[1]
             )
 
-    @patch('runway.cfngin.providers.aws.default.output_full_changeset')
-    @patch('runway.cfngin.providers.aws.default.output_summary')
+    @patch('r4y.cfngin.providers.aws.default.output_full_changeset')
+    @patch('r4y.cfngin.providers.aws.default.output_summary')
     def test_get_stack_changes_interactive(self, mock_output_summary,
                                            mock_output_full_cs):
         """Test get stack changes interactive."""

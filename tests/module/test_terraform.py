@@ -1,7 +1,7 @@
 """Tests for terraform module."""
 import unittest
 
-from runway.module.terraform import update_env_vars_with_tf_var_values
+from r4y.module.terraform import update_env_vars_with_tf_var_values
 
 
 class TerraformFunctionTester(unittest.TestCase):

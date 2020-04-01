@@ -1,16 +1,16 @@
-"""Tests for runway.cfngin.config."""
+"""Tests for r4y.cfngin.config."""
 # pylint: disable=no-member
 import sys
 import unittest
 
 from yaml.constructor import ConstructorError
 
-from runway.cfngin import exceptions
-from runway.cfngin.config import (Config, Stack, dump, load, parse,
+from r4y.cfngin import exceptions
+from r4y.cfngin.config import (Config, Stack, dump, load, parse,
                                   process_remote_sources, render,
                                   render_parse_load)
-from runway.cfngin.environment import parse_environment
-from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
+from r4y.cfngin.environment import parse_environment
+from r4y.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
 
 CONFIG = """a: $a
 b: $b
@@ -18,7 +18,7 @@ c: $c"""
 
 
 class TestConfig(unittest.TestCase):
-    """Tests for runway.cfngin.config."""
+    """Tests for r4y.cfngin.config."""
 
     def test_render_missing_env(self):
         """Test render missing env."""
@@ -185,7 +185,7 @@ stacks: []
         assert error.__str__() == (
             "DEPRECATION: Stack definition vpc contains deprecated 'parameters'"
             ", rather than 'variables'. You are required to update your config. "
-            "See https://docs.onica.com/projects/runway/en/release/cfngin/config.html#variables "
+            "See https://docs.onica.com/projects/r4y/en/release/cfngin/config.html#variables "
             "for additional information."
         )
 
@@ -204,25 +204,25 @@ stacks: []
         namespace: prod
         stacker_bucket: cfngin-prod
         pre_build:
-          - path: runway.cfngin.hooks.route53.create_domain
+          - path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
               domain: mydomain.com
         post_build:
-          - path: runway.cfngin.hooks.route53.create_domain
+          - path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
               domain: mydomain.com
         pre_destroy:
-          - path: runway.cfngin.hooks.route53.create_domain
+          - path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
               domain: mydomain.com
         post_destroy:
-          - path: runway.cfngin.hooks.route53.create_domain
+          - path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
@@ -274,28 +274,28 @@ stacks: []
         stacker_bucket: cfngin-prod
         pre_build:
           prebuild_createdomain:
-            path: runway.cfngin.hooks.route53.create_domain
+            path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
               domain: mydomain.com
         post_build:
           postbuild_createdomain:
-            path: runway.cfngin.hooks.route53.create_domain
+            path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
               domain: mydomain.com
         pre_destroy:
           predestroy_createdomain:
-            path: runway.cfngin.hooks.route53.create_domain
+            path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
               domain: mydomain.com
         post_destroy:
           postdestroy_createdomain:
-            path: runway.cfngin.hooks.route53.create_domain
+            path: r4y.cfngin.hooks.route53.create_domain
             required: true
             enabled: true
             args:
@@ -353,7 +353,7 @@ stacks: []
 
             for hooks in [config.pre_build, config.post_build,
                           config.pre_destroy, config.post_destroy]:
-                assert hooks[0].path == 'runway.cfngin.hooks.route53.create_domain'
+                assert hooks[0].path == 'r4y.cfngin.hooks.route53.create_domain'
                 assert hooks[0].required
                 assert hooks[0].args == {"domain": "mydomain.com"}
 
@@ -557,7 +557,7 @@ stacks:
         with self.assertRaises(exceptions.InvalidConfig):
             parse(yaml_config)
 
-    def test_stacker_to_runway_field_conversion(self):
+    def test_stacker_to_r4y_field_conversion(self):
         """Ensure the correct value is being presented by the config."""
         yaml_config = """
         namespace: test

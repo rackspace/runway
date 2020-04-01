@@ -1,14 +1,14 @@
-"""Tests for runway.cfngin.lookups.handlers.default."""
+"""Tests for r4y.cfngin.lookups.handlers.default."""
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.context import Context
-from runway.cfngin.lookups.handlers.default import DefaultLookup
+from r4y.cfngin.context import Context
+from r4y.cfngin.lookups.handlers.default import DefaultLookup
 
 
 class TestDefaultLookup(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.default.DefaultLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.default.DefaultLookup."""
 
     def setUp(self):
         """Run before tests."""

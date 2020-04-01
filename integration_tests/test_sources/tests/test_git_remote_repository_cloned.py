@@ -3,7 +3,7 @@
 import os
 
 from integration_tests.test_sources.test_sources import TestSources
-from runway.util import change_dir
+from r4y.util import change_dir
 from util import run_command
 
 
@@ -19,9 +19,9 @@ class TestGitRemoteRepositoryCloned(TestSources):
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_runway('git')
+        self.copy_r4y('git')
         with change_dir(self.sources_test_dir):
-            return run_command(['runway', 'deploy'])
+            return run_command(['r4y', 'deploy'])
 
     def run(self):
         """Run tests."""
@@ -29,8 +29,8 @@ class TestGitRemoteRepositoryCloned(TestSources):
         self.set_environment('dev')
         self.deploy()
         with change_dir(self.sources_test_dir):
-            self.logger.info(os.path.isdir('.runway_cache'))
-            assert os.path.isdir('.runway_cache')
+            self.logger.info(os.path.isdir('.r4y_cache'))
+            assert os.path.isdir('.r4y_cache')
 
         change_dir(self.base_dir)
 
@@ -39,6 +39,6 @@ class TestGitRemoteRepositoryCloned(TestSources):
         self.set_env_var('CI', '1')
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.sources_test_dir):
-            run_command(['runway', 'destroy'])
+            run_command(['r4y', 'destroy'])
         self.clean()
         self.unset_env_var('CI')

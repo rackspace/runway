@@ -1,12 +1,12 @@
-"""Tests for runway.cfngin.blueprints.testutil."""
+"""Tests for r4y.cfngin.blueprints.testutil."""
 import unittest
 
 from troposphere import ecr
 
-from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.blueprints.testutil import BlueprintTestCase
-from runway.cfngin.context import Context
-from runway.variables import Variable
+from r4y.cfngin.blueprints.base import Blueprint
+from r4y.cfngin.blueprints.testutil import BlueprintTestCase
+from r4y.cfngin.context import Context
+from r4y.variables import Variable
 
 
 class Repositories(Blueprint):
@@ -34,7 +34,7 @@ class Repositories(Blueprint):
 
 
 class TestRepositories(BlueprintTestCase):
-    """Tests for runway.cfngin.blueprints.testutil.BlueprintTestCase."""
+    """Tests for r4y.cfngin.blueprints.testutil.BlueprintTestCase."""
 
     def test_create_template_passes(self):
         """Test create template passes."""

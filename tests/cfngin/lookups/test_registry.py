@@ -1,17 +1,17 @@
-"""Tests for runway.cfngin.lookups.registry."""
+"""Tests for r4y.cfngin.lookups.registry."""
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.exceptions import FailedVariableLookup, UnknownLookupType
-from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
-from runway.variables import Variable, VariableValueLookup
+from r4y.cfngin.exceptions import FailedVariableLookup, UnknownLookupType
+from r4y.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
+from r4y.variables import Variable, VariableValueLookup
 
 from ..factories import mock_context, mock_provider
 
 
 class TestRegistry(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.registry."""
+    """Tests for r4y.cfngin.lookups.registry."""
 
     def setUp(self):
         """Run before tests."""

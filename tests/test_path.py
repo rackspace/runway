@@ -2,10 +2,10 @@
 import logging
 import unittest
 
-from runway.sources.source import Source
-from runway.path import Path
+from r4y.sources.source import Source
+from r4y.path import Path
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger('r4y')
 
 
 class MockGitSource(Source):

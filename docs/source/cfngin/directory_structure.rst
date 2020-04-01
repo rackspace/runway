@@ -17,8 +17,8 @@ Blueprints
   .
   ├── Pipfile
   ├── Pipfile.lock
-  ├── runway.variables.yml
-  ├── runway.yml
+  ├── r4y.variables.yml
+  ├── r4y.yml
   └── sampleapp.cfn
       ├── blueprints
       │   ├── __init__.py
@@ -40,8 +40,8 @@ Cloudformation Templates
   .
   ├── Pipfile
   ├── Pipfile.lock
-  ├── runway.variables.yml
-  ├── runway.yml
+  ├── r4y.variables.yml
+  ├── r4y.yml
   └── sampleapp.cfn
       ├── templates
       │   ├── template-01.yml

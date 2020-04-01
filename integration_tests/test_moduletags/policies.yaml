@@ -6,4 +6,4 @@
         - 'cloudformation:CreateStack'
         - 'cloudformation:DeleteStack'
         - 'cloudformation:DescribeStacks'
-      Resource: 'arn:aws:cloudformation:*:*:stack/runway-tests-module-tags-*'
+      Resource: 'arn:aws:cloudformation:*:*:stack/r4y-tests-module-tags-*'

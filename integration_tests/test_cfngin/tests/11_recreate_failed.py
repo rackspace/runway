@@ -27,7 +27,7 @@ class TestRecreateFailed(Cfngin):
 
     def _deploy_bad(self):
         """Deploy failing config."""
-        code, _stdout, stderr = self.runway_cmd('deploy')
+        code, _stdout, stderr = self.r4y_cmd('deploy')
         assert code != 0, 'exit code should be non-zero since one config failed'
         expected_lines = [
             'recreate-failed: submitted (creating new stack)',
@@ -42,7 +42,7 @@ class TestRecreateFailed(Cfngin):
         """Deploy good config."""
         # get rid of the bad config so the good one can run
         send2trash(os.path.join(self.working_dir, FILE_BASENAME + '.1.yaml'))
-        code, _stdout, stderr = self.runway_cmd('deploy')
+        code, _stdout, stderr = self.r4y_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
             'recreate-failed: submitted (destroying stack for re-creation)',
@@ -60,5 +60,5 @@ class TestRecreateFailed(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')
+        self.r4y_cmd('destroy')
         self.cleanup_fixtures()

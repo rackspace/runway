@@ -1,7 +1,7 @@
 """Tests for lookup registry and common lookup functionality."""
 # pylint: disable=no-self-use
-from runway.lookups.registry import RUNWAY_LOOKUP_HANDLERS
-from runway.util import MutableMap
+from r4y.lookups.registry import RUNWAY_LOOKUP_HANDLERS
+from r4y.util import MutableMap
 
 VALUES = {
     'str_val': 'test'
@@ -21,26 +21,26 @@ class TestCommonLookupFunctionality(object):
 
     """
 
-    def test_handle_default(self, runway_context):
+    def test_handle_default(self, r4y_context):
         """Verify default value is handled by lookups."""
         lookup_handlers = RUNWAY_LOOKUP_HANDLERS.copy()
         lookup_handlers.pop('ssm')  # requires special testing
         for _, lookup in lookup_handlers.items():
             query = 'NOT_VALID::default=default value'
-            result = lookup.handle(query, context=runway_context,
+            result = lookup.handle(query, context=r4y_context,
                                    variables=VARIABLES)
 
             assert result == 'default value'
 
-    def test_handle_transform(self, runway_context):
+    def test_handle_transform(self, r4y_context):
         """Verify transform is handled by lookup."""
         lookup_handlers = RUNWAY_LOOKUP_HANDLERS.copy()
         lookup_handlers.pop('ssm')  # requires special testing
-        runway_context.env_vars.update(VALUES)
+        r4y_context.env_vars.update(VALUES)
 
         for _, lookup in lookup_handlers.items():
             query = 'NOT_VALID::default=false, transform=bool'
-            result = lookup.handle(query, context=runway_context,
+            result = lookup.handle(query, context=r4y_context,
                                    variables=VARIABLES)
 
             assert not result

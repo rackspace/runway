@@ -24,7 +24,7 @@ class TestRollbackWithDependent(Cfngin):
     def run(self):
         """Run the test."""
         self.copy_fixtures()
-        code, _stdout, stderr = self.runway_cmd('deploy')
+        code, _stdout, stderr = self.r4y_cmd('deploy')
         assert code != 0, 'exit code should be non-zero'
         expected_lines = [
             'dependent-rollback-parent: submitted (creating new stack)',
@@ -39,5 +39,5 @@ class TestRollbackWithDependent(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')
+        self.r4y_cmd('destroy')
         self.cleanup_fixtures()

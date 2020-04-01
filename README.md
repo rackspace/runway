@@ -1,10 +1,10 @@
 # Runway
 
-[![Build Status](https://travis-ci.org/onicagroup/runway.svg?branch=master)](https://travis-ci.org/onicagroup/runway)
-[![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
-[![npm](https://img.shields.io/npm/v/@onica/runway?style=flat)](https://www.npmjs.com/package/@onica/runway)
+[![Build Status](https://travis-ci.org/onicagroup/r4y.svg?branch=master)](https://travis-ci.org/onicagroup/r4y)
+[![PyPi](https://img.shields.io/pypi/v/r4y?style=flat)](https://pypi.org/project/r4y/)
+[![npm](https://img.shields.io/npm/v/@onica/r4y?style=flat)](https://www.npmjs.com/package/@onica/r4y)
 
-![runway-example.gif](https://raw.githubusercontent.com/onicagroup/runway/master/docs/runway-example.gif)
+![r4y-example.gif](https://raw.githubusercontent.com/onicagroup/r4y/master/docs/r4y-example.gif)
 
 Runway is a lightweight integration app designed to ease management of infrastructure tools.
 
@@ -60,14 +60,14 @@ Use one of the endpoints below to download a single-binary executable version of
 
 | Operating System | Endpoint                               |
 |------------------|----------------------------------------|
-| Linux            | <https://oni.ca/runway/latest/linux>   |
-| macOS            | <https://oni.ca/runway/latest/osx>     |
-| Windows          | <https://oni.ca/runway/latest/windows> |
+| Linux            | <https://oni.ca/r4y/latest/linux>   |
+| macOS            | <https://oni.ca/r4y/latest/osx>     |
+| Windows          | <https://oni.ca/r4y/latest/windows> |
 
 ```shell
-$ curl -L oni.ca/runway/latest/osx -o runway
-$ chmod +x runway
-$ ./runway init
+$ curl -L oni.ca/r4y/latest/osx -o r4y
+$ chmod +x r4y
+$ ./r4y init
 ```
 
 **Suggested use:** CloudFormation or Terraform projects
@@ -76,8 +76,8 @@ $ ./runway init
 ### npm
 
 ```shell
-$ npm i -D @onica/runway
-$ npx runway init
+$ npm i -D @onica/r4y
+$ npx r4y init
 ```
 
 **Suggested use:** Serverless or AWS CDK projects
@@ -86,11 +86,11 @@ $ npx runway init
 ### pip (or pipenv,poetry,etc)
 
 ```shell
-$ pip install runway
-$ runway init
+$ pip install r4y
+$ r4y init
 # OR
-$ pipenv install runway
-$ pipenv run runway init
+$ pipenv install r4y
+$ pipenv run r4y init
 ```
 
 **Suggested use:** Python projects
@@ -98,10 +98,10 @@ $ pipenv run runway init
 
 ## Documentation
 
-See the [doc site](https://docs.onica.com/projects/runway) for full documentation.
+See the [doc site](https://docs.onica.com/projects/r4y) for full documentation.
 
-Quickstart documentation, including CloudFormation templates and walkthrough can be found [here](https://docs.onica.com/projects/runway/en/latest/quickstart.html)
+Quickstart documentation, including CloudFormation templates and walkthrough can be found [here](https://docs.onica.com/projects/r4y/en/latest/quickstart.html)
 
 ## Community Chat
 
-Drop into the [#runway channel](https://kiwiirc.com/client/irc.freenode.net/?nick=RunwayHelp?#runway) for discussion/questions.
+Drop into the [#r4y channel](https://kiwiirc.com/client/irc.freenode.net/?nick=RunwayHelp?#r4y) for discussion/questions.

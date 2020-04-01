@@ -3,7 +3,7 @@
 import os.path
 import string
 
-from runway.util import MutableMap, load_object_from_string
+from r4y.util import MutableMap, load_object_from_string
 
 VALUE = {
     'bool_val': False,

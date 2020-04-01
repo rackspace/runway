@@ -1,4 +1,4 @@
-"""Integration tests for runway.cfngin."""
+"""Integration tests for r4y.cfngin."""
 from integration_tests.integration_test import IntegrationTest
 from integration_tests.util import execute_tests, import_tests
 

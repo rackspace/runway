@@ -5,8 +5,8 @@ from unittest import TestCase
 
 import yaml
 
-from runway.lookups.handlers.base import LookupHandler
-from runway.util import MutableMap
+from r4y.lookups.handlers.base import LookupHandler
+from r4y.util import MutableMap
 
 
 class TestLookupHandler(TestCase):

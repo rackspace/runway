@@ -33,27 +33,27 @@ Project Setup
 
    .. code-block:: shell
 
-       curl -L https://oni.ca/runway/latest/osx -o runway
-       chmod +x runway
+       curl -L https://oni.ca/r4y/latest/osx -o r4y
+       chmod +x r4y
 
    .. rubric:: Ubuntu
 
    .. code-block:: shell
 
-       curl -L https://oni.ca/runway/latest/linux -o runway
-       chmod +x runway
+       curl -L https://oni.ca/r4y/latest/linux -o r4y
+       chmod +x r4y
 
    .. rubric:: Windows
 
    .. code-block:: shell
 
-       iwr -Uri oni.ca/runway/latest/windows -OutFile runway.exe
+       iwr -Uri oni.ca/r4y/latest/windows -OutFile r4y.exe
 
 #. From a directory of your choosing run the following to generate a sample React project:
 
     .. code-block:: shell
 
-        pipenv run runway gen-sample static-react
+        pipenv run r4y gen-sample static-react
 
 #. A new folder will be created entitled ``static-react``. If you'd like your project to have a different name feel free to change it at this time:
 
@@ -72,7 +72,7 @@ Project Setup
 User Pool Setup
 ~~~~~~~~~~~~~~~
 
-#. The default ``runway.yml`` document that is provided with ``gen-sample static-react`` is a good baseline document for deploying a standard static single page application without the need of authentication. In this example we'll be leveraging ``Auth@Edge`` to provide protection to our application, not allowing anyone to view or download site resources without first authenticating. To accomplish this we need to create a Cognito UserPool. Login to your AWS Console and search for `cognito`.
+#. The default ``r4y.yml`` document that is provided with ``gen-sample static-react`` is a good baseline document for deploying a standard static single page application without the need of authentication. In this example we'll be leveraging ``Auth@Edge`` to provide protection to our application, not allowing anyone to view or download site resources without first authenticating. To accomplish this we need to create a Cognito UserPool. Login to your AWS Console and search for `cognito`.
 
     .. image:: ../images/staticsite/auth_at_edge/quickstart/cognito-home.png
 
@@ -108,7 +108,7 @@ User Pool Setup
 
     .. image:: ../images/staticsite/auth_at_edge/quickstart/cognito-temporary-password.png
 
-#. Now we need to retrieve the ARN for the User Pool we just created and add it to the ``deployments -> modules -> environments -> dev`` section of our ``runway.yml`` document. Click the ``General Settings`` list link to retrieve the ARN.
+#. Now we need to retrieve the ARN for the User Pool we just created and add it to the ``deployments -> modules -> environments -> dev`` section of our ``r4y.yml`` document. Click the ``General Settings`` list link to retrieve the ARN.
 
     .. image:: ../images/staticsite/auth_at_edge/quickstart/cognito-arn.png
 
@@ -126,7 +126,7 @@ Domain Aliases with ACM Certificate
     .. image:: ../images/staticsite/auth_at_edge/quickstart/acm-arn.png
 
 
-#. Create two entries in the ``runway.yml`` configuration file under the ``deployments -> modules -> environments -> dev`` heading. One for the alias we're looking to provide, and the other for it's ARN:
+#. Create two entries in the ``r4y.yml`` configuration file under the ``deployments -> modules -> environments -> dev`` heading. One for the alias we're looking to provide, and the other for it's ARN:
 
     .. code-block:: yaml
 
@@ -137,13 +137,13 @@ Domain Aliases with ACM Certificate
 Cleanup
 ~~~~~~~
 
-#. By default the ``gen-sample static-react`` sample ``runway.yaml`` document comes with ``staticsite_cf_disable: true`` added. Due to the nature of the authorization a Distribution is required. Remove this line from your config file.
+#. By default the ``gen-sample static-react`` sample ``r4y.yaml`` document comes with ``staticsite_cf_disable: true`` added. Due to the nature of the authorization a Distribution is required. Remove this line from your config file.
 
 
 Deploying
 ^^^^^^^^^
 
-Execute ``pipenv run runway deploy``, enter ``y``. Deployment will take some time (mostly waiting for the CloudFront distribution to stabilize).
+Execute ``pipenv run r4y deploy``, enter ``y``. Deployment will take some time (mostly waiting for the CloudFront distribution to stabilize).
 
 The CloudFront domain at which the site can be reached will be displayed near
 the last lines of output once deployment is complete, e.g.:
@@ -181,4 +181,4 @@ Sign-Out
 Teardown
 ^^^^^^^^
 
-Execute ``pipenv run runway destroy``, enter ``y``.
+Execute ``pipenv run r4y destroy``, enter ``y``.

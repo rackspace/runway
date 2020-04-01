@@ -14,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 def create_base_policy():
     """Creates the base policy."""
-    deploy_name_list = ['runway-int-test-']
+    deploy_name_list = ['r4y-int-test-']
     return iam.Policy(
         PolicyName='base-policy',
         PolicyDocument=PolicyDocument(

@@ -1,14 +1,14 @@
-"""Tests for runway.cfngin.actions.destroy."""
+"""Tests for r4y.cfngin.actions.destroy."""
 # pylint: disable=no-self-use,protected-access,unused-argument
 import unittest
 
 from mock import MagicMock, PropertyMock, patch
 
-from runway.cfngin.actions import destroy
-from runway.cfngin.context import Config, Context
-from runway.cfngin.exceptions import StackDoesNotExist
-from runway.cfngin.plan import Graph, Step
-from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
+from r4y.cfngin.actions import destroy
+from r4y.cfngin.context import Config, Context
+from r4y.cfngin.exceptions import StackDoesNotExist
+from r4y.cfngin.plan import Graph, Step
+from r4y.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -26,7 +26,7 @@ class MockStack(object):  # pylint: disable=too-few-public-methods
 
 
 class TestDestroyAction(unittest.TestCase):
-    """Tests for runway.cfngin.actions.destroy.DestroyAction."""
+    """Tests for r4y.cfngin.actions.destroy.DestroyAction."""
 
     def setUp(self):
         """Run before tests."""
@@ -136,13 +136,13 @@ class TestDestroyAction(unittest.TestCase):
         step._run_once()
         self.assertEqual(step.status, COMPLETE)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.context.Context.lock_persistent_graph',
+    @patch('r4y.cfngin.context.Context.lock_persistent_graph',
            new_callable=MagicMock)
-    @patch('runway.cfngin.context.Context.unlock_persistent_graph',
+    @patch('r4y.cfngin.context.Context.unlock_persistent_graph',
            new_callable=MagicMock)
-    @patch('runway.cfngin.plan.Plan.execute', new_callable=MagicMock)
+    @patch('r4y.cfngin.plan.Plan.execute', new_callable=MagicMock)
     def test_run_persist(self, mock_execute, mock_unlock, mock_lock,
                          mock_graph_tags):
         """Test run persist."""

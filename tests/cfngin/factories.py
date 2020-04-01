@@ -4,8 +4,8 @@ from collections import namedtuple
 
 from mock import MagicMock
 
-from runway.cfngin.config import Config, Stack
-from runway.cfngin.context import Context
+from r4y.cfngin.config import Config, Stack
+from r4y.cfngin.context import Context
 
 Lookup = namedtuple("Lookup", ("type", "input", "raw"))
 
@@ -79,7 +79,7 @@ class SessionStub(object):
 
     Example Usage:
 
-        @mock.patch('runway.cfngin.lookups.handlers.myfile.get_session',
+        @mock.patch('r4y.cfngin.lookups.handlers.myfile.get_session',
                 return_value=sessionStub(client))
         def myfile_test(self, client_stub):
             ...

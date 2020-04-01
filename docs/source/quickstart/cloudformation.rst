@@ -23,36 +23,36 @@ CloudFormation Quickstart
 
    .. code-block:: shell
 
-       $ curl -L https://oni.ca/runway/latest/osx -o runway
-       $ chmod +x runway
+       $ curl -L https://oni.ca/r4y/latest/osx -o r4y
+       $ chmod +x r4y
 
    .. rubric:: Ubuntu
 
    .. code-block:: shell
 
-       $ curl -L https://oni.ca/runway/latest/linux -o runway
-       $ chmod +x runway
+       $ curl -L https://oni.ca/r4y/latest/linux -o r4y
+       $ chmod +x r4y
 
    .. rubric:: Windows
 
    .. code-block:: shell
 
-       > iwr -Uri oni.ca/runway/latest/windows -OutFile runway.exe
+       > iwr -Uri oni.ca/r4y/latest/windows -OutFile r4y.exe
 
 #. Use Runway to :ref:`generate a sample<command-gen-sample>` `CloudFormation`_
-   :ref:`module<runway-module>`, edit the values in the environment file, and
-   create a :ref:`Runway config file<runway-config>` to use the
-   :ref:`module<runway-module>`.
+   :ref:`module<r4y-module>`, edit the values in the environment file, and
+   create a :ref:`Runway config file<r4y-config>` to use the
+   :ref:`module<r4y-module>`.
 
    .. rubric:: macOS/Linux
 
    .. code-block:: shell
 
-       $ runway gen-sample cfn
+       $ r4y gen-sample cfn
        $ sed -i -e "s/CUSTOMERNAMEHERE/mydemo/g; s/ENVIRONMENTNAMEHERE/dev/g; s/stacker-/stacker-$(uuidgen|tr "[:upper:]" "[:lower:]")-/g" sampleapp.cfn/dev-us-east-1.env
-       $ cat <<EOF >> runway.yml
+       $ cat <<EOF >> r4y.yml
        ---
-       # Full syntax at https://github.com/onicagroup/runway
+       # Full syntax at https://github.com/onicagroup/r4y
        deployments:
          - modules:
              - sampleapp.cfn
@@ -64,26 +64,26 @@ CloudFormation Quickstart
 
    .. code-block:: shell
 
-       $ runway gen-sample cfn
+       $ r4y gen-sample cfn
        $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('CUSTOMERNAMEHERE', 'mydemo') | Set-Content sampleapp.cfn\dev-us-east-1.env
        $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('ENVIRONMENTNAMEHERE', 'dev') | Set-Content sampleapp.cfn\dev-us-east-1.env
        $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('stacker-', 'stacker-' + [guid]::NewGuid() + '-') | Set-Content sampleapp.cfn\dev-us-east-1.env
        $ $RunwayTemplate = @"
        ---
-       # Full syntax at https://github.com/onicagroup/runway
+       # Full syntax at https://github.com/onicagroup/r4y
        deployments:
          - modules:
              - sampleapp.cfn
            regions:
              - us-east-1
        "@
-       $RunwayTemplate | Out-File -FilePath runway.yml -Encoding ASCII
+       $RunwayTemplate | Out-File -FilePath r4y.yml -Encoding ASCII
 
 #. :ref:`Deploy<command-deploy>` the stack.
 
    .. code-block:: shell
 
-       $ runway deploy
+       $ r4y deploy
 
 
 Now our stack is available at ``mydemo-dev-sampleapp``, e.g.:

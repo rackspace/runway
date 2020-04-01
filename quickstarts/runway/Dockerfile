@@ -19,6 +19,6 @@ RUN set -xe && \
   unzip tf.zip && \
   mv terraform /usr/local/bin/ && \
   pip install ply && \
-  pip install pipenv runway
+  pip install pipenv r4y
 
 CMD ["bash"]

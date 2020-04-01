@@ -19,16 +19,16 @@ on your operating system.
 +------------------+---------------------------------------------------+
 | Operating System | Endpoint                                          |
 +==================+===================================================+
-| Linux            | https://oni.ca/runway/latest/linux                |
+| Linux            | https://oni.ca/r4y/latest/linux                |
 +------------------+---------------------------------------------------+
-| macOS            | https://oni.ca/runway/latest/osx                  |
+| macOS            | https://oni.ca/r4y/latest/osx                  |
 +------------------+---------------------------------------------------+
-| Windows          | https://oni.ca/runway/latest/windows              |
+| Windows          | https://oni.ca/r4y/latest/windows              |
 +------------------+---------------------------------------------------+
 
 .. code-block:: shell
 
-    $ curl -L https://oni.ca/runway/latest/osx -o runway
+    $ curl -L https://oni.ca/r4y/latest/osx -o r4y
 
 .. note:: To install a specific version of Runway, you can replace ``latest``
           with a version number.
@@ -37,11 +37,11 @@ on your operating system.
 
 To use the single-binary, run it directly as shown below. Please note that
 after download, you may need to adjust the permissions before it can be
-executed. (eg. macOS/Ubuntu:``chmod +x runway``)
+executed. (eg. macOS/Ubuntu:``chmod +x r4y``)
 
 .. code-block:: shell
 
-    $ ./runway deploy
+    $ ./r4y deploy
 
 **Suggested use:** CloudFormation or Terraform projects
 
@@ -51,7 +51,7 @@ executed. (eg. macOS/Ubuntu:``chmod +x runway``)
 npm
 ^^^
 
-Runway is published on npm as ``@onica/runway``. It currently contains binaries
+Runway is published on npm as ``@onica/r4y``. It currently contains binaries
 to support macOS, Ubuntu, and Windows.
 
 While Runway can be installed globally like any other npm package, we strongly
@@ -60,13 +60,13 @@ recommend using it per-project as a dev dependency. See
 
 .. code-block:: shell
 
-    $ npm i -D @onica/runway
+    $ npm i -D @onica/r4y
 
 .. rubric:: Usage
 
 .. code-block:: shell
 
-    $ npx runway deploy
+    $ npx r4y deploy
 
 **Suggested use:** Serverless or AWS CDK projects
 
@@ -78,7 +78,7 @@ pip
 
 Runway runs on Python 2.7 and Python 3.5+.
 
-Runway is hosted on PyPI as the package named ``runway``. It can be installed
+Runway is hosted on PyPI as the package named ``r4y``. It can be installed
 like any other Python package, but we instead strongly recommend using it
 per-project with `pipenv <https://pypi.org/project/pipenv/>`_. See
 `Why Version Lock Per-Project`_ for more info regarding this suggestion.
@@ -89,7 +89,7 @@ per-project with `pipenv <https://pypi.org/project/pipenv/>`_. See
 Version Locking with Pipenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In your project's directory, execute ``pipenv install runway``. This will:
+In your project's directory, execute ``pipenv install r4y``. This will:
 
 #. Update (creating if missing) a ``Pipfile`` file with your project's Runway
    dependency
@@ -99,8 +99,8 @@ In your project's directory, execute ``pipenv install runway``. This will:
    versions/crypto-hashes of Runway (and dependencies) installed in your
    python virtual environment
 
-Now Runway can be used in the project via ``pipenv run runway ...``
-(e.g. ``pipenv run runway takeoff``).
+Now Runway can be used in the project via ``pipenv run r4y ...``
+(e.g. ``pipenv run r4y takeoff``).
 
 To ensure future users of the project use the same version of Runway,
 direct them (e.g. via a Makefile) to invoke it via

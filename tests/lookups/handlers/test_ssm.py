@@ -1,4 +1,4 @@
-"""Test runway.lookups.handlers.ssm."""
+"""Test r4y.lookups.handlers.ssm."""
 # pylint: disable=no-self-use,unused-import
 import json
 from datetime import datetime
@@ -6,8 +6,8 @@ from datetime import datetime
 import pytest
 import yaml
 
-from runway.cfngin.exceptions import FailedVariableLookup
-from runway.variables import Variable
+from r4y.cfngin.exceptions import FailedVariableLookup
+from r4y.variables import Variable
 
 
 def get_parameter_response(name, value, value_type='String', label=None,
@@ -37,43 +37,43 @@ def get_parameter_request(name, decrypt=True):
 
 
 class TestSsmLookup(object):
-    """Test runway.lookups.handlers.ssm.SsmLookup."""
+    """Test r4y.lookups.handlers.ssm.SsmLookup."""
 
-    def test_basic(self, cfngin_context, runway_context):
+    def test_basic(self, cfngin_context, r4y_context):
         """Test resolution of a basic lookup."""
         name = '/test/param'
         value = 'test value'
         cfngin_stubber = cfngin_context.add_stubber('ssm')
-        runway_stubber = runway_context.add_stubber('ssm')
+        r4y_stubber = r4y_context.add_stubber('ssm')
         cfngin_var = Variable('test_var', '${ssm %s}' % name,
                               variable_type='cfngin')
-        runway_var = Variable('test_var', '${ssm %s}' % name,
-                              variable_type='runway')
+        r4y_var = Variable('test_var', '${ssm %s}' % name,
+                              variable_type='r4y')
 
-        for stubber in [cfngin_stubber, runway_stubber]:
+        for stubber in [cfngin_stubber, r4y_stubber]:
             stubber.add_response('get_parameter',
                                  get_parameter_response(name, value),
                                  get_parameter_request(name))
 
-        with cfngin_stubber as cfn_stub, runway_stubber as rw_stub:
+        with cfngin_stubber as cfn_stub, r4y_stubber as rw_stub:
             cfngin_var.resolve(context=cfngin_context)
             assert cfngin_var.value == value
 
-            runway_var.resolve(context=runway_context)
-            assert runway_var.value == value
+            r4y_var.resolve(context=r4y_context)
+            assert r4y_var.value == value
 
         cfn_stub.assert_no_pending_responses()
         rw_stub.assert_no_pending_responses()
 
-    def test_default(self, runway_context):
+    def test_default(self, r4y_context):
         """Test resolution of a default value."""
         name = '/test/param'
         value = 'test value'
-        stubber = runway_context.add_stubber('ssm')
+        stubber = r4y_context.add_stubber('ssm')
         var = Variable(
             'test_var',
             '${ssm /test/invalid::load=json, default=${ssm %s}}' % name,
-            variable_type='runway'
+            variable_type='r4y'
         )
 
         stubber.add_response('get_parameter',
@@ -86,28 +86,28 @@ class TestSsmLookup(object):
                                  ))
 
         with stubber as stub:
-            var.resolve(context=runway_context)
+            var.resolve(context=r4y_context)
             assert var.value == value
             stub.assert_no_pending_responses()
 
-    def test_different_region(self, runway_context):
+    def test_different_region(self, r4y_context):
         """Test Lookup in region other than that set in Context."""
         name = '/test/param'
         value = 'test value'
-        stubber = runway_context.add_stubber('ssm', region='us-west-2')
+        stubber = r4y_context.add_stubber('ssm', region='us-west-2')
         var = Variable('test_var', '${ssm %s::region=us-west-2}' % name,
-                       variable_type='runway')
+                       variable_type='r4y')
 
         stubber.add_response('get_parameter',
                              get_parameter_response(name, value),
                              get_parameter_request(name))
 
         with stubber as stub:
-            var.resolve(context=runway_context)
+            var.resolve(context=r4y_context)
             assert var.value == value
             stub.assert_no_pending_responses()
 
-    def test_loaded_value(self, runway_context):
+    def test_loaded_value(self, r4y_context):
         """Test resolution of a JSON value."""
         name = '/test/param'
         raw_value = {
@@ -117,7 +117,7 @@ class TestSsmLookup(object):
             },
             'test_key': 'test_val'
         }
-        stubber = runway_context.add_stubber('ssm')
+        stubber = r4y_context.add_stubber('ssm')
         parsers = ['json', 'yaml']
         tests = [
             {
@@ -142,7 +142,7 @@ class TestSsmLookup(object):
             for test in tests:
                 var = Variable('test_var.{}'.format(parser),
                                test['lookup'].format(name=name, parser=parser),
-                               variable_type='runway')
+                               variable_type='r4y')
                 if parser == 'json':
                     dumped_value = json.dumps(raw_value)
                 elif parser == 'yaml':
@@ -156,15 +156,15 @@ class TestSsmLookup(object):
                                      get_parameter_request(name))
 
                 with stubber as stub:
-                    var.resolve(context=runway_context)
+                    var.resolve(context=r4y_context)
                     assert var.value == test['expected']
                     stub.assert_no_pending_responses()
 
-    def test_not_found(self, runway_context):
+    def test_not_found(self, r4y_context):
         """Test raises ParameterNotFound."""
         name = '/test/param'
-        stubber = runway_context.add_stubber('ssm')
-        var = Variable('test_var', '${ssm %s}' % name, variable_type='runway')
+        stubber = r4y_context.add_stubber('ssm')
+        var = Variable('test_var', '${ssm %s}' % name, variable_type='r4y')
 
         stubber.add_client_error('get_parameter',
                                  'ParameterNotFound',
@@ -173,7 +173,7 @@ class TestSsmLookup(object):
                                  ))
 
         with stubber as stub, pytest.raises(FailedVariableLookup) as err:
-            var.resolve(context=runway_context)
+            var.resolve(context=r4y_context)
 
         assert 'ParameterNotFound' in str(err.value)
         stub.assert_no_pending_responses()

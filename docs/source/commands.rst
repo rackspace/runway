@@ -17,116 +17,116 @@ Commands
 deploy
 ^^^^^^
 
-.. automodule:: runway.commands.deploy
+.. automodule:: r4y.commands.deploy
 
 .. _command-destroy:
 
 destroy
 ^^^^^^^
 
-.. automodule:: runway.commands.destroy
+.. automodule:: r4y.commands.destroy
 
 .. _command-dismantle:
 
 dismantle
 ^^^^^^^^^
 
-.. automodule:: runway.commands.dismantle
+.. automodule:: r4y.commands.dismantle
 
 .. _command-envvars:
 
 envvars
 ^^^^^^^
 
-.. automodule:: runway.commands.envvars
+.. automodule:: r4y.commands.envvars
 
 .. _command-gen-sample:
 
 gen-sample
 ^^^^^^^^^^
 
-.. automodule:: runway.commands.gen_sample
+.. automodule:: r4y.commands.gen_sample
 
 .. _command-init:
 
 init
 ^^^^
 
-.. automodule:: runway.commands.init
+.. automodule:: r4y.commands.init
 
 .. _command-kbenv:
 
 kbenv
 ^^^^^
 
-.. automodule:: runway.commands.kbenv
+.. automodule:: r4y.commands.kbenv
 
 .. _command-plan:
 
 plan
 ^^^^
 
-.. automodule:: runway.commands.plan
+.. automodule:: r4y.commands.plan
 
 .. _command-preflight:
 
 preflight
 ^^^^^^^^^
 
-.. automodule:: runway.commands.preflight
+.. automodule:: r4y.commands.preflight
 
 .. _command-run-aws:
 
 run-aws
 ^^^^^^^
 
-.. automodule:: runway.commands.run_aws
+.. automodule:: r4y.commands.run_aws
 
 .. _command-run-python:
 
 run-python
 ^^^^^^^^^^
 
-.. automodule:: runway.commands.run_python
+.. automodule:: r4y.commands.run_python
 
 .. _command-run-stacker:
 
 run-stacker
 ^^^^^^^^^^^
 
-.. automodule:: runway.commands.run_stacker
+.. automodule:: r4y.commands.run_stacker
 
 .. _command-takeoff:
 
 takeoff
 ^^^^^^^
 
-.. automodule:: runway.commands.takeoff
+.. automodule:: r4y.commands.takeoff
 
 .. _command-taxi:
 
 taxi
 ^^^^
 
-.. automodule:: runway.commands.taxi
+.. automodule:: r4y.commands.taxi
 
 .. _command-test:
 
 test
 ^^^^
 
-.. automodule:: runway.commands.test
+.. automodule:: r4y.commands.test
 
 .. _command-tfenv:
 
 tfenv
 ^^^^^
 
-.. automodule:: runway.commands.tfenv
+.. automodule:: r4y.commands.tfenv
 
 .. _command-whichenv:
 
 whichenv
 ^^^^^^^^
 
-.. automodule:: runway.commands.whichenv
+.. automodule:: r4y.commands.whichenv

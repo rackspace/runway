@@ -1,7 +1,7 @@
 .. _AWS CDK: https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _Serverless Framework: https://serverless.com/
-.. _CFNgin: terminology.html#runway-s-cfngin
+.. _CFNgin: terminology.html#r4y-s-cfngin
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
 .. _Kubernetes: https://kubernetes.io/
@@ -10,7 +10,7 @@
 .. _env lookup: lookups.html#env
 .. _var lookup: lookups.html#var
 
-.. _runway-config:
+.. _r4y-config:
 
 Runway Config File
 ==================
@@ -18,26 +18,26 @@ Runway Config File
 Top-Level Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: runway.config.Config
+.. autoclass:: r4y.config.Config
 
-.. _runway-deployment:
+.. _r4y-deployment:
 
 Deployment
 ^^^^^^^^^^
 
-.. autoclass:: runway.config.DeploymentDefinition
+.. autoclass:: r4y.config.DeploymentDefinition
 
-.. _runway-module:
+.. _r4y-module:
 
 Module
 ^^^^^^
 
-.. autoclass:: runway.config.ModuleDefinition
+.. autoclass:: r4y.config.ModuleDefinition
 
 Path
 ----
 
-.. automodule:: runway.path.Path
+.. automodule:: r4y.path.Path
 
 Git
 ~~~
@@ -76,32 +76,32 @@ respectively point the repository at the reference id specified.
 Type
 ----
 
-.. automodule:: runway.runway_module_type.RunwayModuleType
+.. automodule:: r4y.r4y_module_type.RunwayModuleType
 
 
-.. _runway-test:
+.. _r4y-test:
 
 Test
 ^^^^
 
-.. autoclass:: runway.config.TestDefinition
+.. autoclass:: r4y.config.TestDefinition
 
-.. _runway-variables:
+.. _r4y-variables:
 
 Variables
 ^^^^^^^^^
 
-.. autoclass:: runway.config.VariablesDefinition
+.. autoclass:: r4y.config.VariablesDefinition
 
 Sample
 ^^^^^^
 
-.. rubric:: runway.yml
+.. rubric:: r4y.yml
 .. code-block:: yaml
 
     ---
     # Order that tests will be run. Test execution is triggered with the
-    # 'runway test' command. Testing will fail and exit if any of the
+    # 'r4y test' command. Testing will fail and exit if any of the
     # individual tests fail unless they are marked with 'required: false'.
     # Please see the doc section dedicated to tests for more details.
 
@@ -188,7 +188,7 @@ Sample
               - app:example
               - tier:web
               - owner:onica
-              # example: `runway deploy --tag app:example --tag tier:web`
+              # example: `r4y deploy --tag app:example --tag tier:web`
               #   This would select any modules with BOTH app:example AND tier:web
         regions:
           - us-west-2
@@ -197,7 +197,7 @@ Sample
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-.. rubric:: variables.runway.yml
+.. rubric:: variables.r4y.yml
 .. code-block:: yaml
 
   account_alias:

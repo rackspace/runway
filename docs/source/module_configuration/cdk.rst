@@ -110,7 +110,7 @@ In Module Directory
       # Opt 3 - Booleans, in which case the module will always be deployed in the given environment
       # dev: true
 
-(in ``runway.module.yml``)
+(in ``r4y.module.yml``)
 
 Disabling NPM CI
 ----------------

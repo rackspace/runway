@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.context."""
+"""Tests for r4y.cfngin.context."""
 # pylint: disable=protected-access,too-many-public-methods
 import io
 import json
@@ -9,15 +9,15 @@ from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
 from mock import PropertyMock, patch
 
-from runway.cfngin.config import Config, load
-from runway.cfngin.context import Context, get_fqn
-from runway.cfngin.exceptions import (PersistentGraphCannotLock,
+from r4y.cfngin.config import Config, load
+from r4y.cfngin.context import Context, get_fqn
+from r4y.cfngin.exceptions import (PersistentGraphCannotLock,
                                       PersistentGraphCannotUnlock,
                                       PersistentGraphLockCodeMissmatch,
                                       PersistentGraphLocked,
                                       PersistentGraphUnlocked)
-from runway.cfngin.hooks.utils import handle_hooks
-from runway.cfngin.plan import Graph, json_serial
+from r4y.cfngin.hooks.utils import handle_hooks
+from r4y.cfngin.plan import Graph, json_serial
 
 BOTO3_CREDENTIALS = {
     'aws_access_key_id': 'foo',
@@ -55,7 +55,7 @@ def gen_s3_object_content(content):
 
 
 class TestContext(unittest.TestCase):
-    """Tests for runway.cfngin.context.Context."""
+    """Tests for r4y.cfngin.context.Context."""
 
     def setUp(self):
         """Run before tests."""
@@ -184,7 +184,7 @@ class TestContext(unittest.TestCase):
         context = Context(config=config)
         self.assertEqual(context.tags, {"cfngin_namespace": "test"})
 
-    @patch('runway.cfngin.context.get_session')
+    @patch('r4y.cfngin.context.get_session')
     def test_get_session(self, mock_get_session):
         """Test get_session."""
         creds = BOTO3_CREDENTIALS.copy()
@@ -255,7 +255,7 @@ class TestContext(unittest.TestCase):
         context = Context(config=Config(cp_config))
         self.assertEqual({}, context.persistent_graph_location)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
     def test_persistent_graph_lock_code_disabled(self, mock_prop):
         """Return 'None' when not used."""
@@ -509,7 +509,7 @@ class TestContext(unittest.TestCase):
             self.assertIsNone(context.put_persistent_graph(code))
             stubber.assert_no_pending_responses()
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
     def test_persistent_graph_locked(self, mock_prop):
         """Return 'True' or 'False' based on code property."""

@@ -14,13 +14,13 @@ Part 1: Adding Kubernetes to Deployment
 
 Start by adding your
 `Kustomize overlay organized <https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays>`_
-Kubernetes directory to your runway.yml's list of modules.
+Kubernetes directory to your r4y.yml's list of modules.
 
 Directory tree:
 ::
 
     .
-    ├── runway.yml
+    ├── r4y.yml
     └── kubernetesstuff.k8s
         ├── base
         │   ├── kustomization.yaml
@@ -32,7 +32,7 @@ Directory tree:
                 └── kustomization.yaml
 
 
-runway.yml:
+r4y.yml:
 ::
 
     ---
@@ -70,7 +70,7 @@ when deploying your module.
     1.14.5
 
 
-or in runway.yml, either for a single module::
+or in r4y.yml, either for a single module::
 
     ---
     deployments:
@@ -127,5 +127,5 @@ or an absolute one. E.g.::
           - prod
           - config
 
-(this would set ``KUBECONFIG`` to ``<path_to_runway.yml>/.kube/staging/config``
+(this would set ``KUBECONFIG`` to ``<path_to_r4y.yml>/.kube/staging/config``
 in the staging environment)

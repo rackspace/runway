@@ -1,4 +1,4 @@
-"""Tests runway/commands/modules_command.py."""
+"""Tests r4y/commands/modules_command.py."""
 import os
 import unittest
 from copy import deepcopy
@@ -8,22 +8,22 @@ import yaml
 from mock import patch
 from moto import mock_sts
 
-from runway.commands.modules_command import (select_modules_to_run,
+from r4y.commands.modules_command import (select_modules_to_run,
                                              validate_environment)
 
 
 def module_tag_config():
-    """Return a runway.yml file for testing module tags."""
+    """Return a r4y.yml file for testing module tags."""
     fixture_dir = path.join(
         path.dirname(path.dirname(path.realpath(__file__))),
         'fixtures'
     )
-    with open(path.join(fixture_dir, 'tag.runway.yml'), 'r') as stream:
+    with open(path.join(fixture_dir, 'tag.r4y.yml'), 'r') as stream:
         return yaml.safe_load(stream)
 
 
 class ModulesCommandTestCase(unittest.TestCase):
-    """Test runway/commands/modules_command.py."""
+    """Test r4y/commands/modules_command.py."""
 
     tag_yml = module_tag_config()
 
@@ -74,7 +74,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         """tag=[] should request input."""
         config = deepcopy(ModulesCommandTestCase.tag_yml)
         user_input = ['1']
-        with patch('runway.commands.modules_command.input',
+        with patch('r4y.commands.modules_command.input',
                    side_effect=user_input):
             result = select_modules_to_run(
                 config['deployments'][0], []
@@ -95,7 +95,7 @@ class ModulesCommandTestCase(unittest.TestCase):
         """command=destroy should only prompt with no tag of ci if one module."""
         config = deepcopy(ModulesCommandTestCase.tag_yml)
         user_input = ['y', '1']
-        with patch('runway.commands.modules_command.input',
+        with patch('r4y.commands.modules_command.input',
                    side_effect=user_input):
             result_single_no_tag = select_modules_to_run(
                 deepcopy(config['deployments'][1]), [], command='destroy'

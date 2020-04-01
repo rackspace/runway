@@ -22,7 +22,7 @@ class TestRunPython(Commands):
                                'buildpipeline.json'), 'r') as stream:
             expected_template = stream.read()
         generated_template = check_output(
-            ['runway',
+            ['r4y',
              'run-python',
              os.path.join(fixtures_path, 'buildpipeline.py')]
         ).decode()

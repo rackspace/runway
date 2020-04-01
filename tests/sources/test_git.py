@@ -2,9 +2,9 @@
 import logging
 import unittest
 
-from runway.sources.git import Git
+from r4y.sources.git import Git
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger('r4y')
 
 
 class GitTester(unittest.TestCase):
@@ -14,12 +14,12 @@ class GitTester(unittest.TestCase):
         """Ensure a directory string is returned."""
         fetched = Git(**{
             'options': {},
-            'uri': 'git://github.com/onicagroup/runway.git',
+            'uri': 'git://github.com/onicagroup/r4y.git',
             'location': '/'
         }).fetch()
         self.assertEqual(fetched, '/')
 
     def test_sanitize_git_path(self):
         """Ensure git path is property sanitized"""
-        path = Git().sanitize_git_path('git://github.com/onicagroup/runway.git')
-        self.assertEqual(path, 'github.com_onicagroup_runway')
+        path = Git().sanitize_git_path('git://github.com/onicagroup/r4y.git')
+        self.assertEqual(path, 'github.com_onicagroup_r4y')

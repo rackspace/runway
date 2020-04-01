@@ -1,4 +1,4 @@
-"""Tests for runway commands."""
+"""Tests for r4y commands."""
 import os
 
 from integration_tests.integration_test import IntegrationTest
@@ -6,7 +6,7 @@ from integration_tests.util import (import_tests, execute_tests)
 
 
 class Commands(IntegrationTest):
-    """Base class for all runway command testing testing."""
+    """Base class for all r4y command testing testing."""
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
     tests_dir = os.path.join(base_dir, 'tests')

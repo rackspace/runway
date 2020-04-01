@@ -1,16 +1,16 @@
-"""Tests for runway.cfngin.lookups.handlers.output."""
+"""Tests for r4y.cfngin.lookups.handlers.output."""
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.lookups.handlers.output import OutputLookup
-from runway.cfngin.stack import Stack
+from r4y.cfngin.lookups.handlers.output import OutputLookup
+from r4y.cfngin.stack import Stack
 
 from ...factories import generate_definition
 
 
 class TestOutputHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.output.OutputLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.output.OutputLookup."""
 
     def setUp(self):
         """Run before tests."""

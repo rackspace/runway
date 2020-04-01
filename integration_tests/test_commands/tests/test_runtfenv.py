@@ -27,14 +27,14 @@ class TestRunTFEnv(Commands):
         """Run tests."""
         self.set_env_var('AWS_DEFAULT_REGION', 'us-east-1')
         # init
-        check_output(['runway',
+        check_output(['r4y',
                       'tfenv',
                       'run',
                       'init',
                       self.get_path()]).decode()
 
         # apply
-        check_output(['runway',
+        check_output(['r4y',
                       'tfenv',
                       'run',
                       '--',
@@ -43,7 +43,7 @@ class TestRunTFEnv(Commands):
                       self.get_path()]).decode()
 
         # output
-        key = check_output(['runway',
+        key = check_output(['r4y',
                             'tfenv',
                             'run',
                             '--',
@@ -61,7 +61,7 @@ class TestRunTFEnv(Commands):
 
     def teardown(self):
         """Teardown any created resources."""
-        check_output(['runway',
+        check_output(['r4y',
                       'tfenv',
                       'run',
                       '--',

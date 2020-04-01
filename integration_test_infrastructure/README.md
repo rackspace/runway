@@ -17,6 +17,6 @@
 
 1. `pipenv sync`
 2. Login to the alt testing account
-3. `cd alt_account_role/common && pipenv run runway deploy`
+3. `cd alt_account_role/common && pipenv run r4y deploy`
 4. Login to the testing account
-5. `cd ../../codebuild/common && pipenv run runway deploy`
+5. `cd ../../codebuild/common && pipenv run r4y deploy`

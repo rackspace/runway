@@ -7,8 +7,8 @@ from awacs.aws import Allow, Policy, Principal, Statement
 from troposphere import (AccountId, Export, GetAtt, Join, Output, Partition,
                          Ref, Region, Sub, awslambda, iam)
 
-from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.blueprints.variables.types import CFNString
+from r4y.cfngin.blueprints.base import Blueprint
+from r4y.cfngin.blueprints.variables.types import CFNString
 
 
 class BlueprintClass(Blueprint):

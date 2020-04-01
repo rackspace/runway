@@ -11,8 +11,8 @@ class VersionTest(Terraform):
         """Deploy provider."""
         self.set_tf_version(version)
         self.copy_template('s3-backend.tf')
-        self.copy_runway('s3')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+        self.copy_r4y('s3')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         return code
 
     def run(self):
@@ -20,8 +20,8 @@ class VersionTest(Terraform):
         self.clean()
 
         # deploy tf state bucket
-        self.copy_runway('state')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+        self.copy_r4y('state')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         assert code == 0, 'exit code should be zero'
 
         assert self.deploy_version(11) == 0, '{}: Terraform version 11 failed'.format(__name__)
@@ -30,12 +30,12 @@ class VersionTest(Terraform):
     def teardown(self):
         """Teardown any created resources."""
         self.logger.info('Tearing down: %s', self.TEST_NAME)
-        code, _stdout, _stderr = self.runway_cmd('destroy')
+        code, _stdout, _stderr = self.r4y_cmd('destroy')
         assert code == 0, 'exit code should be zero'
 
         # destroy tf state bucket
-        self.copy_runway('state')
-        code, _stdout, _stderr = self.runway_cmd('destroy')
+        self.copy_r4y('state')
+        code, _stdout, _stderr = self.r4y_cmd('destroy')
         assert code == 0, 'exit code should be zero'
 
         self.clean()

@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.hooks.aws_lambda."""
+"""Tests for r4y.cfngin.hooks.aws_lambda."""
 # pylint: disable=invalid-name,no-self-use
 import os
 import os.path
@@ -16,10 +16,10 @@ from moto import mock_s3
 from testfixtures import ShouldRaise, TempDirectory, compare
 from troposphere.awslambda import Code
 
-from runway.cfngin.config import Config
-from runway.cfngin.context import Context
-from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
-from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
+from r4y.cfngin.config import Config
+from r4y.cfngin.context import Context
+from r4y.cfngin.exceptions import InvalidDockerizePipConfiguration
+from r4y.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
                                             copydir, dockerized_pip,
                                             find_requirements,
                                             handle_requirements,
@@ -47,7 +47,7 @@ F2_FILES = [p[3:] for p in ALL_FILES if p.startswith('f2')]
 
 
 class TestLambdaHooks(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.aws_lambda."""
+    """Tests for r4y.cfngin.hooks.aws_lambda."""
 
     _s3 = None
 
@@ -739,10 +739,10 @@ class TestShouldUseDocker(object):
         """Test value 'non-linux' with all possible platforms."""
         non_linux_os = ['aix', 'cygwin', 'darwin', 'win32']
         for non_linux in non_linux_os:
-            with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
+            with patch('r4y.cfngin.hooks.aws_lambda.sys') as mock_sys:
                 mock_sys.configure_mock(platform=non_linux)
                 assert should_use_docker('non-linux')
-        with patch('runway.cfngin.hooks.aws_lambda.sys') as mock_sys:
+        with patch('r4y.cfngin.hooks.aws_lambda.sys') as mock_sys:
             mock_sys.configure_mock(platform='linux')
             assert not should_use_docker('non-linux')
 

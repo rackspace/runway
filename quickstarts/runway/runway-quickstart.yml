@@ -117,7 +117,7 @@ Resources:
       IamInstanceProfile: !Ref RunwayInstanceProfile
       Tags:
         - Key: Name
-          Value: runway-linux
+          Value: r4y-linux
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -137,8 +137,8 @@ Resources:
             curl -o tf.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
                 unzip tf.zip && \
                 mv terraform /usr/local/bin/
-            # runway
-            pip install runway
+            # r4y
+            pip install r4y
 
   RunwayWindowsInstance:
     Condition: DeployWindows
@@ -162,7 +162,7 @@ Resources:
       IamInstanceProfile: !Ref RunwayInstanceProfile
       Tags:
         - Key: Name
-          Value: runway-windows
+          Value: r4y-windows
       UserData:
         Fn::Base64: !Sub |
           <powershell>
@@ -175,8 +175,8 @@ Resources:
           Invoke-WebRequest -Uri https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_windows_amd64.zip -OutFile tf.zip
           Expand-Archive .\tf.zip
           mv .\tf\terraform.exe C:\Windows\System32\
-          # runway
-          pip install runway
+          # r4y
+          pip install r4y
           </powershell>
 
   VPC:
@@ -187,14 +187,14 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: runway-quickstart
+          Value: r4y-quickstart
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: runway-quickstart
+          Value: r4y-quickstart
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -217,7 +217,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: runway-quickstart
+          Value: r4y-quickstart
 
   PublicRoute:
     Type: AWS::EC2::Route
@@ -236,8 +236,8 @@ Resources:
   RunwaySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: runway-quickstart
-      GroupDescription: runway-quickstart
+      GroupName: r4y-quickstart
+      GroupDescription: r4y-quickstart
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
@@ -249,7 +249,7 @@ Resources:
           CidrIp: !Join ['/', [!Ref SourceIP, 32]]
       Tags:
         - Key: Name
-          Value: runway-quickstart
+          Value: r4y-quickstart
       VpcId: !Ref VPC
 
   RunwayInstanceProfile:
@@ -257,7 +257,7 @@ Resources:
     Properties:
       Roles:
         - !If [DeployIamRole, !Ref RunwayIamRole, !Ref IamRoleName]
-      InstanceProfileName: runway-quickstart-InstanceProfile
+      InstanceProfileName: r4y-quickstart-InstanceProfile
 
   RunwayIamRole:
     Type: AWS::IAM::Role

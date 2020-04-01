@@ -45,11 +45,11 @@ class CrossAccountRole(Blueprint):
                         )
                     ]
                 ),
-                Description='Role used for cross account testing in runway',
+                Description='Role used for cross account testing in r4y',
                 ManagedPolicyArns=[
                     'arn:aws:iam::aws:policy/AdministratorAccess'
                 ],
-                RoleName=Join('-', ['runway-integration-test-role',
+                RoleName=Join('-', ['r4y-integration-test-role',
                                     variables['EnvironmentName'].ref])
             )
         )

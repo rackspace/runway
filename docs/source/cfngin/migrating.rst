@@ -14,7 +14,7 @@ Migrating from Stacker
 Blueprints
 **********
 
-All components available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
+All components available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``r4y.cfngin``.
 
 .. rubric:: Example
 .. code-block:: python
@@ -24,8 +24,8 @@ All components available in Stacker_ 1.7.0 are available in Runway's CFNgin at t
     from stacker.blueprints.variables.types import CFNString
 
     # now becomes this
-    from runway.cfngin.blueprints.base import Blueprint
-    from runway.cfngin.blueprints.variables.types import CFNString
+    from r4y.cfngin.blueprints.base import Blueprint
+    from r4y.cfngin.blueprints.variables.types import CFNString
 
 
 ************
@@ -52,7 +52,7 @@ Below is a table of the Stacker key and what they have been changed to for Runwa
 Build-in Hooks
 ==============
 
-All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
+All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``r4y.cfngin``.
 
 .. rubric:: Example Definition
 .. code-block:: yaml
@@ -63,11 +63,11 @@ All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the sa
         args:
           command: echo "Hello $USER!"
       now_becomes_this:
-        path: runway.cfngin.hooks.commands.run_command
+        path: r4y.cfngin.hooks.commands.run_command
         args:
           command: echo "Hello $USER!"
 
-.. seealso:: `CFNgin API Docs <../apidocs/runway.cfngin.html>`__
+.. seealso:: `CFNgin API Docs <../apidocs/r4y.cfngin.html>`__
 
 
 Custom Lookups

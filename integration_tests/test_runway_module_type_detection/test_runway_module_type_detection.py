@@ -16,7 +16,7 @@ class RunwayModuleTypeDetection(IntegrationTest):
     fixtures_dir = os.path.join(base_dir, 'fixtures')
     tests_dir = os.path.join(base_dir, 'tests')
 
-    mtd_test_dir = os.path.join(base_dir, 'runway_module_type_detection_test_dir')
+    mtd_test_dir = os.path.join(base_dir, 'r4y_module_type_detection_test_dir')
 
     def copy_fixture(self, name='two-regions-app.cfn'):
         """Copy fixture files for test."""
@@ -25,10 +25,10 @@ class RunwayModuleTypeDetection(IntegrationTest):
             os.path.join(self.mtd_test_dir, name)
         )
 
-    def copy_runway(self, template):
-        """Copy runway template to proper directory."""
-        template_file = os.path.join(self.fixtures_dir, 'runway-{}.yml'.format(template))
-        copy_file(template_file, os.path.join(self.mtd_test_dir, 'runway.yml'))
+    def copy_r4y(self, template):
+        """Copy r4y template to proper directory."""
+        template_file = os.path.join(self.fixtures_dir, 'r4y-{}.yml'.format(template))
+        copy_file(template_file, os.path.join(self.mtd_test_dir, 'r4y.yml'))
 
     def run(self):
         """Find all tests and run them."""

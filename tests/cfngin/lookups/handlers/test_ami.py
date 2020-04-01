@@ -1,11 +1,11 @@
-"""Tests for runway.cfngin.lookups.handlers.ami."""
+"""Tests for r4y.cfngin.lookups.handlers.ami."""
 import unittest
 
 import boto3
 import mock
 from botocore.stub import Stubber
 
-from runway.cfngin.lookups.handlers.ami import AmiLookup, ImageNotFound
+from r4y.cfngin.lookups.handlers.ami import AmiLookup, ImageNotFound
 
 from ...factories import SessionStub, mock_provider
 
@@ -13,7 +13,7 @@ REGION = "us-east-1"
 
 
 class TestAMILookup(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.ami.ImageNotFound."""
+    """Tests for r4y.cfngin.lookups.handlers.ami.ImageNotFound."""
 
     client = boto3.client("ec2", region_name=REGION,
                           # bypass the need to have these in the env
@@ -25,7 +25,7 @@ class TestAMILookup(unittest.TestCase):
         self.stubber = Stubber(self.client)
         self.provider = mock_provider(region=REGION)
 
-    @mock.patch("runway.cfngin.lookups.handlers.ami.get_session",
+    @mock.patch("r4y.cfngin.lookups.handlers.ami.get_session",
                 return_value=SessionStub(client))
     def test_basic_lookup_single_image(self, _mock_client):
         """Test basic lookup single image."""
@@ -54,7 +54,7 @@ class TestAMILookup(unittest.TestCase):
             )
             self.assertEqual(value, image_id)
 
-    @mock.patch("runway.cfngin.lookups.handlers.ami.get_session",
+    @mock.patch("r4y.cfngin.lookups.handlers.ami.get_session",
                 return_value=SessionStub(client))
     def test_basic_lookup_with_region(self, _mock_client):
         """Test basic lookup with region."""
@@ -83,7 +83,7 @@ class TestAMILookup(unittest.TestCase):
             )
             self.assertEqual(value, image_id)
 
-    @mock.patch("runway.cfngin.lookups.handlers.ami.get_session",
+    @mock.patch("r4y.cfngin.lookups.handlers.ami.get_session",
                 return_value=SessionStub(client))
     def test_basic_lookup_multiple_images(self, _mock_client):
         """Test basic lookup multiple images."""
@@ -131,7 +131,7 @@ class TestAMILookup(unittest.TestCase):
             )
             self.assertEqual(value, image_id)
 
-    @mock.patch("runway.cfngin.lookups.handlers.ami.get_session",
+    @mock.patch("r4y.cfngin.lookups.handlers.ami.get_session",
                 return_value=SessionStub(client))
     def test_basic_lookup_multiple_images_name_match(self, _mock_client):
         """Test basic lookup multiple images name match."""
@@ -169,7 +169,7 @@ class TestAMILookup(unittest.TestCase):
             )
             self.assertEqual(value, image_id)
 
-    @mock.patch("runway.cfngin.lookups.handlers.ami.get_session",
+    @mock.patch("r4y.cfngin.lookups.handlers.ami.get_session",
                 return_value=SessionStub(client))
     def test_basic_lookup_no_matching_images(self, _mock_client):
         """Test basic lookup no matching images."""
@@ -187,7 +187,7 @@ class TestAMILookup(unittest.TestCase):
                     provider=self.provider
                 )
 
-    @mock.patch("runway.cfngin.lookups.handlers.ami.get_session",
+    @mock.patch("r4y.cfngin.lookups.handlers.ami.get_session",
                 return_value=SessionStub(client))
     def test_basic_lookup_no_matching_images_from_name(self, _mock_client):
         """Test basic lookup no matching images from name."""

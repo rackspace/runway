@@ -6,7 +6,7 @@ provider "aws" {
 resource "random_uuid" "uuid" { }
 
 locals {
-  key = "/runway/tfenv/integrationtest/${random_uuid.uuid.result}"
+  key = "/r4y/tfenv/integrationtest/${random_uuid.uuid.result}"
 }
 
 resource "aws_ssm_parameter" "foo" {

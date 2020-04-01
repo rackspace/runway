@@ -1,13 +1,13 @@
-"""Tests for runway.cfngin.tokenize_userdata."""
+"""Tests for r4y.cfngin.tokenize_userdata."""
 import unittest
 
 import yaml
 
-from runway.cfngin.tokenize_userdata import cf_tokenize
+from r4y.cfngin.tokenize_userdata import cf_tokenize
 
 
 class TestCfTokenize(unittest.TestCase):
-    """Tests for runway.cfngin.tokenize_userdata."""
+    """Tests for r4y.cfngin.tokenize_userdata."""
 
     def test_tokenize(self):
         """Test tokenize."""

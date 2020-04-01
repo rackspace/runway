@@ -26,7 +26,7 @@ def import_tests(logger, path, pattern, use_abs=True):
         test_name = relpath.replace(os.path.sep, '.')
         logger.info('Found test: "%s". Attempting to import...', test_name)
         if use_abs:
-            final_path = os.path.abspath(relpath).split('/runway/')[1].replace('/', '.')
+            final_path = os.path.abspath(relpath).split('/r4y/')[1].replace('/', '.')
         else:
             final_path = relpath
         try:

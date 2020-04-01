@@ -9,7 +9,7 @@ from copy import deepcopy
 import yaml
 from send2trash import send2trash
 
-from runway.util import change_dir
+from r4y.util import change_dir
 
 
 class IntegrationTest(object):
@@ -33,7 +33,7 @@ class IntegrationTest(object):
         """Initialize base class."""
         self.logger = logger
         self.environment = deepcopy(env_vars or os.environ)
-        self.runway_config_path = None
+        self.r4y_config_path = None
         # roundabout way to get the file path of a subclass
         self.working_dir = os.path.abspath(os.path.dirname(
             sys.modules[self.__module__].__file__
@@ -96,7 +96,7 @@ class IntegrationTest(object):
         with open(path) as data_file:
             return yaml.safe_load(data_file)
 
-    def runway_cmd(self, action, *args, env_vars=None, tags=None, timeout=900):
+    def r4y_cmd(self, action, *args, env_vars=None, tags=None, timeout=900):
         """Run a deploy command based on tags.
 
         Args:
@@ -113,7 +113,7 @@ class IntegrationTest(object):
             of the process.
 
         """
-        cmd = ['runway', action]
+        cmd = ['r4y', action]
         if tags:
             for tag in tags:
                 cmd.extend(['--tag', tag])

@@ -1,12 +1,12 @@
-"""Tests for runway.cfngin.stacker."""
+"""Tests for r4y.cfngin.stacker."""
 import unittest
 
-from runway.cfngin.commands import Stacker
-from runway.cfngin.exceptions import InvalidConfig
+from r4y.cfngin.commands import Stacker
+from r4y.cfngin.exceptions import InvalidConfig
 
 
 class TestStacker(unittest.TestCase):
-    """Tests for runway.cfngin.stacker.Stacker."""
+    """Tests for r4y.cfngin.stacker.Stacker."""
 
     def test_stacker_build_parse_args(self):
         """Test stacker build parse args."""

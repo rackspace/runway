@@ -1,13 +1,13 @@
-"""Tests for runway.cfngin.blueprints.raw."""
+"""Tests for r4y.cfngin.blueprints.raw."""
 import json
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.blueprints.raw import (RawTemplateBlueprint,
+from r4y.cfngin.blueprints.raw import (RawTemplateBlueprint,
                                           get_template_params,
                                           get_template_path)
-from runway.variables import Variable
+from r4y.variables import Variable
 
 from ..factories import mock_context
 

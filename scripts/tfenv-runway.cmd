@@ -39,18 +39,18 @@ from __future__ import print_function
 import logging
 import sys
 
-from runway.env_mgr.tfenv import TFEnvManager
+from r4y.env_mgr.tfenv import TFEnvManager
 
 
 if __name__ == "__main__":
     # No immediate plans to remove. Not to be done prior to 2.0
-    print('DEPRECATION NOTICE: the "tfenv-runway" command has been deprecated '
-          'in favor of "runway tfenv"', file=sys.stderr)
+    print('DEPRECATION NOTICE: the "tfenv-r4y" command has been deprecated '
+          'in favor of "r4y tfenv"', file=sys.stderr)
     if len(sys.argv) in [2, 3] and sys.argv[1] == 'install':
         if len(sys.argv) == 3:
             TFEnvManager().install(sys.argv[2])
         else:
             TFEnvManager().install()
     else:
-        logging.error('Use like "tfenv-runway install 0.12.0"')
+        logging.error('Use like "tfenv-r4y install 0.12.0"')
         sys.exit(1)

@@ -1,9 +1,9 @@
 """Test to verify behavior of directory suffix based type."""
 import subprocess
 
-from runway.util import change_dir
+from r4y.util import change_dir
 
-from integration_tests.test_runway_module_type_detection.test_runway_module_type_detection import (
+from integration_tests.test_r4y_module_type_detection.test_r4y_module_type_detection import (
     RunwayModuleTypeDetection
 )
 
@@ -16,9 +16,9 @@ class TestSuffixTypeCFN(RunwayModuleTypeDetection):
     def deploy(self):
         """Deploy provider."""
         self.copy_fixture('sampleapp.cfn')
-        self.copy_runway('suffix-cfn')
+        self.copy_r4y('suffix-cfn')
         with change_dir(self.mtd_test_dir):
-            out = subprocess.check_output(['runway', 'deploy'], stderr=subprocess.STDOUT)
+            out = subprocess.check_output(['r4y', 'deploy'], stderr=subprocess.STDOUT)
             return 0 if "Skipping stacker build" in out.decode() else -1
 
     def run(self):

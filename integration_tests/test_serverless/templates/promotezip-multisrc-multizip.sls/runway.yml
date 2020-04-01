@@ -2,11 +2,11 @@
 
 deployments:
   - modules:
-    - name: runway-serverless-integration-test-multisrc-multizip
+    - name: r4y-serverless-integration-test-multisrc-multizip
       path: ./
       options:
         promotezip:
-          bucketname: runway-serverless-integration-test-multisrc-multizip
+          bucketname: r4y-serverless-integration-test-multisrc-multizip
     environments:
       dev:
         namespace: dev
@@ -17,5 +17,5 @@ deployments:
     regions:
       - us-east-1
     assume_role:
-      dev: &altaccountrole arn:aws:iam::395611358874:role/runway-integration-test-role-common
+      dev: &altaccountrole arn:aws:iam::395611358874:role/r4y-integration-test-role-common
       test: *altaccountrole

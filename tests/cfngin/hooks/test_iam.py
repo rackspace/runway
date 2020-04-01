@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.hooks.iam."""
+"""Tests for r4y.cfngin.hooks.iam."""
 import unittest
 
 import boto3
@@ -6,7 +6,7 @@ from awacs.helpers.trust import get_ecs_assumerole_policy
 from botocore.exceptions import ClientError
 from moto import mock_iam
 
-from runway.cfngin.hooks.iam import (_get_cert_arn_from_response,
+from r4y.cfngin.hooks.iam import (_get_cert_arn_from_response,
                                      create_ecs_service_role)
 
 from ..factories import mock_context, mock_provider
@@ -19,7 +19,7 @@ REGION = "us-east-1"
 
 
 class TestIAMHooks(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.iam."""
+    """Tests for r4y.cfngin.hooks.iam."""
 
     def setUp(self):
         """Run before tests."""

@@ -12,7 +12,7 @@ def update_api_endpoint():
     """Update app environment file with backend endpoint."""
     environment = subprocess.check_output(['pipenv',
                                            'run',
-                                           'runway',
+                                           'r4y',
                                            'whichenv']).decode().strip()
     environment_file = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),

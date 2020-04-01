@@ -24,7 +24,7 @@ class TestLockedStack(Cfngin):
     def run(self):
         """Run the test."""
         self.copy_fixtures()
-        code, _stdout, stderr = self.runway_cmd('deploy')
+        code, _stdout, stderr = self.r4y_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
             'Using default AWS provider mode',
@@ -39,5 +39,5 @@ class TestLockedStack(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')  # cleanup incase of failure
+        self.r4y_cmd('destroy')  # cleanup incase of failure
         self.cleanup_fixtures()

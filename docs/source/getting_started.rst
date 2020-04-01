@@ -15,7 +15,7 @@ first `module`_.
 Runway Config File
 ~~~~~~~~~~~~~~~~~~
 
-The :ref:`Runway config file<runway-config>` is usually stored at the root of
+The :ref:`Runway config file<r4y-config>` is usually stored at the root of
 a project repo. It defines the `modules <module>`_ that will be managed by
 Runway.
 
@@ -23,17 +23,17 @@ Runway.
 Deployment
 ~~~~~~~~~~
 
-A :ref:`deployment<runway-deployment>` contains a list of `modules <module>`_
+A :ref:`deployment<r4y-deployment>` contains a list of `modules <module>`_
 and options for all the `modules <module>`_ in the
-:ref:`deployment<runway-deployment>`. A `Runway config file`_ can contain
-multiple :ref:`deployments<runway-deployment>` and a
-:ref:`deployment<runway-deployment>` can contain multiple `modules <module>`_.
+:ref:`deployment<r4y-deployment>`. A `Runway config file`_ can contain
+multiple :ref:`deployments<r4y-deployment>` and a
+:ref:`deployment<r4y-deployment>` can contain multiple `modules <module>`_.
 
 
 Module
 ~~~~~~
 
-A :ref:`module<runway-module>` is a directory containing a single
+A :ref:`module<r4y-module>` is a directory containing a single
 infrastructure-as-code tool configuration of an application, a component, or
 some infrastructure (eg. a set of `CloudFormation`_ templates). It is
 defined in a `deployment`_ by path. Modules can also contain granular options
@@ -82,20 +82,20 @@ Deploying Your First Module
    .. code-block:: shell
 
        # macOS example
-       $ curl -L https://oni.ca/runway/latest/osx -o runway
-       $ chmod +x runway
+       $ curl -L https://oni.ca/r4y/latest/osx -o r4y
+       $ chmod +x r4y
 
-#. Use Runway to generate a sample :ref:`module<runway-module>` using the
+#. Use Runway to generate a sample :ref:`module<r4y-module>` using the
    :ref:`gen-sample<command-gen-sample>` command. This will give us a
-   preformatted :ref:`module<runway-module>` that is ready to be deployed after
+   preformatted :ref:`module<r4y-module>` that is ready to be deployed after
    we change a few variables. To read more about the directory structure,
    see :ref:`repo-structure`.
 
    .. code-block:: shell
 
-       $ ./runway gen-sample cfn
+       $ ./r4y gen-sample cfn
 
-#. To finish configuring our `CloudFormation`_ :ref:`module<runway-module>`
+#. To finish configuring our `CloudFormation`_ :ref:`module<r4y-module>`
    , lets open the ``dev-us-east-1.env`` file that was created in
    ``sampleapp.cfn/``. Here is where we will define values for our stacks that
    will be deployed as part of the **dev** environment in the **us-east-1**
@@ -113,21 +113,21 @@ Deploying Your First Module
        # The CFNgin bucket is used for CFN template uploads to AWS
        cfngin_bucket_name: cfngin-onica-us-east-1
 
-#. With the :ref:`module<runway-module>` ready to deploy, now we need to create
-   our :ref:`Runway config file<runway-config>`. Do to this, use the
+#. With the :ref:`module<r4y-module>` ready to deploy, now we need to create
+   our :ref:`Runway config file<r4y-config>`. Do to this, use the
    :ref:`init<command-init>` command to generate a sample file at the root of
    the project repo.
 
    .. code-block:: shell
 
-       $ ./runway init
+       $ ./r4y init
 
-   **runway.yml contents**
+   **r4y.yml contents**
 
    .. code-block:: yaml
 
        ---
-       # See full syntax at https://docs.onica.com/projects/runway/en/latest/
+       # See full syntax at https://docs.onica.com/projects/r4y/en/latest/
        deployments:
          - modules:
              - nameofmyfirstmodulefolder
@@ -136,10 +136,10 @@ Deploying Your First Module
          regions:
            - us-east-1
 
-#. Now, we need to modify the ``runway.yml`` file that was just created to
-   tell it where the :ref:`module<runway-module>` is located that we want it to
+#. Now, we need to modify the ``r4y.yml`` file that was just created to
+   tell it where the :ref:`module<r4y-module>` is located that we want it to
    deploy and what regions it will be deployed to. Each
-   :ref:`module<runway-module>` type has their own configuration options which
+   :ref:`module<r4y-module>` type has their own configuration options which
    are described in more detail in the
    :ref:`Module Configurations<module-configurations>` section but, for this
    example we are only concerned with the
@@ -150,7 +150,7 @@ Deploying Your First Module
    .. code-block:: yaml
 
        ---
-       # See full syntax at https://docs.onica.com/projects/runway/en/latest/
+       # See full syntax at https://docs.onica.com/projects/r4y/en/latest/
        deployments:
          - modules:
              - sampleapp.cfn
@@ -158,7 +158,7 @@ Deploying Your First Module
            - us-east-1
 
 #. Before we deploy, it is always a good idea to know how the
-   :ref:`module<runway-module>` will impact the currently deployed
+   :ref:`module<r4y-module>` will impact the currently deployed
    infrastructure in your AWS account. This is less of a concern for net-new
    infrastructure as it is when making modifications. But, for this example,
    lets run the :ref:`plan<command-plan>` command to see what is about to
@@ -166,17 +166,17 @@ Deploying Your First Module
 
       .. code-block:: shell
 
-       $ ./runway plan
+       $ ./r4y plan
 
 #. We are finally ready to deploy! Use the :ref:`deploy<command-deploy>`
-   command to deploy our :ref:`module<runway-module>`.
+   command to deploy our :ref:`module<r4y-module>`.
 
    .. code-block:: shell
 
-       $ ./runway deploy
+       $ ./r4y deploy
 
 We have only scratched the surface with what is possible in this example.
-Proceed below to find out how to delete the :ref:`module<runway-module>` we
+Proceed below to find out how to delete the :ref:`module<r4y-module>` we
 just deployed or, review the pages linked throughout this section to learn more
 about what we have done to this point before continuing.
 
@@ -190,7 +190,7 @@ From the root of the project directory we created in
 
 .. code-block:: shell
 
-    $ ./runway destroy
+    $ ./r4y destroy
 
 
 .. _non-interactive-mode:
@@ -199,10 +199,10 @@ Execution Without A TTY (non-interactive)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Runway allows you to set an environment variable to allow execution without a
 TTY or if STDIN is closed. This allows users to execute Runway
-:ref:`deployments<runway-deployment>` in their CI/CD infrastructure as code
+:ref:`deployments<r4y-deployment>` in their CI/CD infrastructure as code
 deployment systems avoiding the ``EOF when reading a line`` error message.
-In order to execute runway without a TTY, set the ``CI`` environment variable
-before your ``runway [deploy|destroy]`` execution.
+In order to execute r4y without a TTY, set the ``CI`` environment variable
+before your ``r4y [deploy|destroy]`` execution.
 
 .. important:: Executing Runway in this way will cause Runway to perform updates
                in your environment without prompt.  Use with caution.

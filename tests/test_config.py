@@ -6,14 +6,14 @@ from tempfile import NamedTemporaryFile
 import pytest
 import yaml
 
-from runway.cfngin.exceptions import UnresolvedVariable
-from runway.config import DeploymentDefinition, ModuleDefinition
+from r4y.cfngin.exceptions import UnresolvedVariable
+from r4y.config import DeploymentDefinition, ModuleDefinition
 # tries to test the imported class unless using "as"
-from runway.config import TestDefinition as ConfigTestDefinition
-from runway.config import VariablesDefinition
-from runway.util import MutableMap
+from r4y.config import TestDefinition as ConfigTestDefinition
+from r4y.config import VariablesDefinition
+from r4y.util import MutableMap
 
-YAML_FIXTURES = ['config.runway.yml', 'config.runway.variables.yml']
+YAML_FIXTURES = ['config.r4y.yml', 'config.r4y.variables.yml']
 ENV_VARS = {
     'AWS_REGION': 'us-east-1',
     'DEPLOY_ENVIRONMENT': 'test',
@@ -30,7 +30,7 @@ class TestDeploymentDefinition(object):
 
     def test_from_list(self, yaml_fixtures):
         """Test init of a deployment from a list."""
-        raw_config = deepcopy(yaml_fixtures['config.runway.yml']['deployments'])
+        raw_config = deepcopy(yaml_fixtures['config.r4y.yml']['deployments'])
         deployment = DeploymentDefinition.from_list(raw_config)[0]
         deployment_attrs = deployment.__dict__.keys()
 
@@ -41,8 +41,8 @@ class TestDeploymentDefinition(object):
 
     def test_pre_process_resolve(self, yaml_fixtures):
         """Test that pre-process resolution only resolves specific vars."""
-        raw_config = deepcopy(yaml_fixtures['config.runway.yml']['deployments'])
-        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
+        raw_config = deepcopy(yaml_fixtures['config.r4y.yml']['deployments'])
+        raw_vars = deepcopy(yaml_fixtures['config.r4y.variables.yml'])
         deployment = DeploymentDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -65,8 +65,8 @@ class TestDeploymentDefinition(object):
 
     def test_resolve(self, yaml_fixtures):
         """Test full resolution of variable attributes."""
-        raw_config = deepcopy(yaml_fixtures['config.runway.yml']['deployments'])
-        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
+        raw_config = deepcopy(yaml_fixtures['config.r4y.yml']['deployments'])
+        raw_vars = deepcopy(yaml_fixtures['config.r4y.variables.yml'])
         deployment = DeploymentDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -97,7 +97,7 @@ class TestModuleDefinition(object):
     def test_from_list(self, yaml_fixtures):
         """Test init of a module from a list."""
         raw_config = deepcopy(
-            yaml_fixtures['config.runway.yml']['deployments'][0]['modules'][0]
+            yaml_fixtures['config.r4y.yml']['deployments'][0]['modules'][0]
         )
         module = ModuleDefinition.from_list(raw_config)[0]
         module_attrs = module.__dict__.keys()
@@ -108,9 +108,9 @@ class TestModuleDefinition(object):
     def test_resolve(self, yaml_fixtures):
         """Test full resolution of variable attributes."""
         raw_config = deepcopy(
-            yaml_fixtures['config.runway.yml']['deployments'][0]['modules']
+            yaml_fixtures['config.r4y.yml']['deployments'][0]['modules']
         )
-        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
+        raw_vars = deepcopy(yaml_fixtures['config.r4y.variables.yml'])
         module = ModuleDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -134,7 +134,7 @@ class TestTestDefinition(object):
 
     def test_from_list(self, yaml_fixtures):
         """Test init of a deployment from a list."""
-        raw_config = deepcopy(yaml_fixtures['config.runway.yml']['tests'])
+        raw_config = deepcopy(yaml_fixtures['config.r4y.yml']['tests'])
         test = ConfigTestDefinition.from_list(raw_config)[0]
         test_attrs = test.__dict__.keys()
 
@@ -143,8 +143,8 @@ class TestTestDefinition(object):
 
     def test_resolve(self, yaml_fixtures):
         """Test full resolution of variable attributes."""
-        raw_config = deepcopy(yaml_fixtures['config.runway.yml']['tests'])
-        raw_vars = deepcopy(yaml_fixtures['config.runway.variables.yml'])
+        raw_config = deepcopy(yaml_fixtures['config.r4y.yml']['tests'])
+        raw_vars = deepcopy(yaml_fixtures['config.r4y.variables.yml'])
         test = ConfigTestDefinition.from_list(raw_config)[0]
         raw_context = {'env_vars': os.environ.copy()}
         raw_context['env_vars'].update(ENV_VARS)
@@ -169,7 +169,7 @@ class TestVariablesDefinition(object):
         """
         with NamedTemporaryFile(mode='w+', suffix='.yml') as var_file:
             var_file.write(
-                yaml.safe_dump(yaml_fixtures['config.runway.variables.yml'])
+                yaml.safe_dump(yaml_fixtures['config.r4y.variables.yml'])
             )
             var_file.seek(0)  # return curser to the top of the file
             result = VariablesDefinition.load(
@@ -181,7 +181,7 @@ class TestVariablesDefinition(object):
 
     def test_load_explicit_file_missing(self, caplog):
         """Test missing explicit file results in an error."""
-        caplog.set_level('ERROR', logger='runway')
+        caplog.set_level('ERROR', logger='r4y')
 
         with pytest.raises(SystemExit):
             VariablesDefinition.load(file_path='fake_file.yaml')
@@ -191,7 +191,7 @@ class TestVariablesDefinition(object):
 
     def test_load_no_file(self, caplog):
         """Should not error when default variables file is not found."""
-        caplog.set_level('INFO', logger='runway')
+        caplog.set_level('INFO', logger='r4y')
         result = VariablesDefinition.load()
 
         assert result.data == {}

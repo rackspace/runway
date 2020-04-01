@@ -1,4 +1,4 @@
-.. _Runway Config File: runway_config.html
+.. _Runway Config File: r4y_config.html
 
 #############
 Configuration
@@ -12,7 +12,7 @@ In addition to the `Runway Config File`_, there are two files that can be used f
 
 
 **********
-runway.yml
+r4y.yml
 **********
 
 .. rubric:: Example
@@ -233,7 +233,7 @@ Persistent Graph Example
 .. rubric:: Result
 
 Given the above config file and persistent graph,
-when running ``runway deploy``, the following will occur.
+when running ``r4y deploy``, the following will occur.
 
 #. The ``{"Key": "cfngin_lock_code", "Value": "123456"}`` tag is applied to
    **s3://cfngin-bucket/persistent_graphs/example/my_graph.json** to lock it
@@ -279,7 +279,7 @@ Remote Packages
 ---------------
 
 The ``package_sources`` top-level keyword can be used to define remote
-sources for :ref:`Blueprints` (e.g., retrieving ``src/runway/blueprints`` on github at
+sources for :ref:`Blueprints` (e.g., retrieving ``src/r4y/blueprints`` on github at
 tag ``v1.3.7``).
 
 The only required key for a git repository config is ``uri``, but ``branch``,
@@ -289,11 +289,11 @@ The only required key for a git repository config is ``uri``, but ``branch``,
 
   package_sources:
     git:
-      - uri: git@github.com:onicagroup/runway.git
-      - uri: git@github.com:onicagroup/runway.git
+      - uri: git@github.com:onicagroup/r4y.git
+      - uri: git@github.com:onicagroup/r4y.git
         tag: 1.0.0
         paths:
-          - src/runway/blueprints
+          - src/r4y/blueprints
       - uri: git@github.com:contoso/webapp.git
         branch: staging
       - uri: git@github.com:contoso/foo.git
@@ -333,7 +333,7 @@ Use the ``paths`` option when subdirectories of the repo/archive/directory
 should be added to CFNgins's ``sys.path``.
 
 Cloned repos/archives will be cached between builds; the cache location defaults
-to ``~/.runway_cache`` but can be manually specified via the ``cfngin_cache_dir``
+to ``~/.r4y_cache`` but can be manually specified via the ``cfngin_cache_dir``
 top-level keyword.
 
 
@@ -364,7 +364,7 @@ To allow remote configs to be selectively overridden, stack names & :ref:`hook <
 
   pre_build:
     my_route53_hook:
-      path: runway.cfngin.hooks.route53.create_domain:
+      path: r4y.cfngin.hooks.route53.create_domain:
       required: true
       enabled: true
       args:
@@ -424,7 +424,7 @@ the build action:
 
   pre_build:
     create_my_domain:
-      path: runway.cfngin.hooks.route53.create_domain
+      path: r4y.cfngin.hooks.route53.create_domain
       required: true
       enabled: true
       args:
@@ -439,7 +439,7 @@ should run in the environment CFNgin is running against:
 
   pre_build:
     create_my_domain:
-      path: runway.cfngin.hooks.route53.create_domain
+      path: r4y.cfngin.hooks.route53.create_domain
       required: true
       enabled: ${create_domain_bool}
       args:

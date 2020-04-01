@@ -7,8 +7,8 @@ from awacs.helpers.trust import make_simple_assume_policy
 from troposphere import codebuild, iam
 
 from integration_tests.runner import Runner
-from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.blueprints.variables.types import CFNString
+from r4y.cfngin.blueprints.base import Blueprint
+from r4y.cfngin.blueprints.variables.types import CFNString
 
 from .iam_policy_builder import IAMPolicyBuilder
 
@@ -65,7 +65,7 @@ class CodeBuild(Blueprint):
                 Artifacts=codebuild.Artifacts(
                     Type='NO_ARTIFACTS'
                 ),
-                Description=f'{test_name} runway integration tests',
+                Description=f'{test_name} r4y integration tests',
                 Environment=codebuild.Environment(
                     ComputeType='BUILD_GENERAL1_SMALL',
                     EnvironmentVariables=[
@@ -101,7 +101,7 @@ class CodeBuild(Blueprint):
                     Image='aws/codebuild/standard:2.0',
                     Type='LINUX_CONTAINER'
                 ),
-                Name=f'runway-int-test-{test_name}',
+                Name=f'r4y-int-test-{test_name}',
                 ServiceRole=codebuild_role.get_att('Arn'),
                 Source=codebuild.Source(
                     Type='GITHUB',
@@ -142,5 +142,5 @@ class CodeBuild(Blueprint):
 
 
 if __name__ == "__main__":
-    from runway.cfngin.context import Context
+    from r4y.cfngin.context import Context
     print(CodeBuild('test', Context({"namespace": "test"}), None).to_json())

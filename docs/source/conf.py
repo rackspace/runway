@@ -10,7 +10,7 @@
 import os.path
 from os.path import dirname, realpath
 
-from runway import __version__
+from r4y import __version__
 
 ROOT_DIR = dirname(dirname(dirname(realpath(__file__))))
 DOC_SRC = os.path.join(ROOT_DIR, 'docs/source')
@@ -18,7 +18,7 @@ DOC_SRC = os.path.join(ROOT_DIR, 'docs/source')
 
 # -- Project information -----------------------------------------------------
 
-project = u'runway'
+project = u'r4y'
 copyright = u'2019, Onica Group'
 author = u'Onica Group'
 
@@ -104,7 +104,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'runwaydoc'
+htmlhelp_basename = 'r4ydoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -131,7 +131,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'runway.tex', u'runway Documentation',
+    (master_doc, 'r4y.tex', u'r4y Documentation',
      u'Onica Group', 'manual'),
 ]
 
@@ -141,7 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'runway', u'runway Documentation',
+    (master_doc, 'r4y', u'r4y Documentation',
      [author], 1)
 ]
 
@@ -152,8 +152,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'runway', u'runway Documentation',
-     author, 'runway', 'One line description of project.',
+    (master_doc, 'r4y', u'r4y Documentation',
+     author, 'r4y', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -188,7 +188,7 @@ apidoc_excluded_paths = ['cfngin/commands', 'templates']
 apidoc_extra_args = [
     f"--templatedir={os.path.join(DOC_SRC, '_templates/apidocs')}"
 ]
-apidoc_module_dir = '../../runway'
+apidoc_module_dir = '../../r4y'
 apidoc_module_first = True
 apidoc_output_dir = 'apidocs'
 apidoc_separate_modules = True

@@ -11,10 +11,10 @@ class LocalToS3Backend(Terraform):
         """Deploy provider."""
         self.copy_template('{}-backend.tf'.format(backend))
         if backend == 's3':
-            self.copy_runway('s3')
+            self.copy_r4y('s3')
         else:
-            self.copy_runway('nos3')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+            self.copy_r4y('nos3')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         return code
 
     def run(self):
@@ -23,8 +23,8 @@ class LocalToS3Backend(Terraform):
         self.set_tf_version(11)
 
         # deploy tf state bucket
-        self.copy_runway('state')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+        self.copy_r4y('state')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         assert code == 0, 'exit code should be zero'
 
         assert self.deploy_backend('local') == 0, '{}: Local backend failed'.format(__name__)
@@ -33,12 +33,12 @@ class LocalToS3Backend(Terraform):
     def teardown(self):
         """Teardown any created resources."""
         self.logger.info('Tearing down: %s', self.TEST_NAME)
-        code, _stdout, _stderr = self.runway_cmd('destroy')
+        code, _stdout, _stderr = self.r4y_cmd('destroy')
         assert code == 0, 'exit code should be zero'
 
         # destroy tf state bucket
-        self.copy_runway('state')
-        code, _stdout, _stderr = self.runway_cmd('destroy')
+        self.copy_r4y('state')
+        code, _stdout, _stderr = self.r4y_cmd('destroy')
         assert code == 0, 'exit code should be zero'
 
         self.clean()

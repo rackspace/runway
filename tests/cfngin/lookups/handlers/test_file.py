@@ -1,5 +1,5 @@
 # encoding: utf-8
-"""Tests for runway.cfngin.lookups.handlers.file.
+"""Tests for r4y.cfngin.lookups.handlers.file.
 
 .. note: ``encoding: utf-8`` is required for python2 support due to a character
          in a string in ``test_yaml_codec_raw``.
@@ -13,7 +13,7 @@ import mock
 import yaml
 from troposphere import Base64, GenericHelperFn, Join
 
-from runway.cfngin.lookups.handlers.file import (FileLookup, json_codec,
+from r4y.cfngin.lookups.handlers.file import (FileLookup, json_codec,
                                                  parameterized_codec,
                                                  yaml_codec)
 
@@ -32,7 +32,7 @@ def to_template_dict(obj):
 
 
 class TestFileTranslator(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.file.FileLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.file.FileLookup."""
 
     @staticmethod
     def assertTemplateEqual(left, right):  # noqa: N802 pylint: disable=invalid-name
@@ -121,21 +121,21 @@ class TestFileTranslator(unittest.TestCase):
         out = json_codec(raw, parameterized=True)
         self.assertTemplateEqual(processed, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path',
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path',
                 return_value='')
     def test_file_loaded(self, content_mock):
         """Test file loaded."""
         FileLookup.handle(u'plain:file://tmp/test')
         content_mock.assert_called_with(u'file://tmp/test')
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path',
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path',
                 return_value=u'Hello, world')
     def test_handler_plain(self, _):
         """Test handler plain."""
         out = FileLookup.handle(u'plain:file://tmp/test')
         self.assertEqual(u'Hello, world', out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_b64(self, content_mock):
         """Test handler b64."""
         plain = u'Hello, world'
@@ -145,8 +145,8 @@ class TestFileTranslator(unittest.TestCase):
         out = FileLookup.handle(u'base64:file://tmp/test')
         self.assertEqual(encoded, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.parameterized_codec')
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.parameterized_codec')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_parameterized(self, content_mock, codec_mock):
         """Test handler parameterized."""
         result = mock.Mock()
@@ -157,8 +157,8 @@ class TestFileTranslator(unittest.TestCase):
 
         self.assertEqual(result, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.parameterized_codec')
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.parameterized_codec')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_parameterized_b64(self, content_mock, codec_mock):
         """Test handler parameterized b64."""
         result = mock.Mock()
@@ -169,8 +169,8 @@ class TestFileTranslator(unittest.TestCase):
 
         self.assertEqual(result, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.yaml_codec')
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.yaml_codec')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_yaml(self, content_mock, codec_mock):
         """Test handler yaml."""
         result = mock.Mock()
@@ -182,8 +182,8 @@ class TestFileTranslator(unittest.TestCase):
 
         self.assertEqual(result, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.yaml_codec')
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.yaml_codec')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_yaml_parameterized(self, content_mock, codec_mock):
         """Test handler yaml parameterized."""
         result = mock.Mock()
@@ -195,8 +195,8 @@ class TestFileTranslator(unittest.TestCase):
 
         self.assertEqual(result, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.json_codec')
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.json_codec')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_json(self, content_mock, codec_mock):
         """Test handler json."""
         result = mock.Mock()
@@ -208,8 +208,8 @@ class TestFileTranslator(unittest.TestCase):
 
         self.assertEqual(result, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.json_codec')
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.json_codec')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_handler_json_parameterized(self, content_mock, codec_mock):
         """Test handler json parameterized."""
         result = mock.Mock()
@@ -221,7 +221,7 @@ class TestFileTranslator(unittest.TestCase):
 
         self.assertEqual(result, out)
 
-    @mock.patch('runway.cfngin.lookups.handlers.file.read_value_from_path')
+    @mock.patch('r4y.cfngin.lookups.handlers.file.read_value_from_path')
     def test_unknown_codec(self, _):
         """Test unknown codec."""
         with self.assertRaises(KeyError):

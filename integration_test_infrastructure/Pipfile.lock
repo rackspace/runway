@@ -385,7 +385,7 @@
             ],
             "version": "==3.4.2"
         },
-        "runway": {
+        "r4y": {
             "editable": true,
             "path": "./.."
         },

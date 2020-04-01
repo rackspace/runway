@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.hooks.keypair."""
+"""Tests for r4y.cfngin.hooks.keypair."""
 # pylint: disable=redefined-outer-name
 import sys
 from collections import namedtuple
@@ -9,7 +9,7 @@ import mock
 import pytest
 from moto import mock_ec2, mock_ssm
 
-from runway.cfngin.hooks.keypair import ensure_keypair_exists
+from r4y.cfngin.hooks.keypair import ensure_keypair_exists
 
 from ..factories import mock_context, mock_provider
 
@@ -65,7 +65,7 @@ def ssm():
 @contextmanager
 def mock_input(lines=(), isatty=True):
     """Mock input."""
-    with mock.patch('runway.cfngin.hooks.keypair.get_raw_input',
+    with mock.patch('r4y.cfngin.hooks.keypair.get_raw_input',
                     side_effect=lines) as mock_get_raw_input:
         with mock.patch.object(sys.stdin, 'isatty', return_value=isatty):
             yield mock_get_raw_input

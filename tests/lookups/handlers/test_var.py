@@ -1,8 +1,8 @@
 """Tests for lookup handler for var."""
 from unittest import TestCase
 
-from runway.lookups.handlers.var import VarLookup
-from runway.util import MutableMap
+from r4y.lookups.handlers.var import VarLookup
+from r4y.util import MutableMap
 
 VARIABLES = MutableMap(**{
     'str_val': 'test',

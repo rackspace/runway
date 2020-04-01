@@ -1,9 +1,9 @@
-"""Tests for runway.cfngin.dag."""
+"""Tests for r4y.cfngin.dag."""
 import threading
 
 import pytest
 
-from runway.cfngin.dag import (DAGValidationError, ThreadedWalker,
+from r4y.cfngin.dag import (DAGValidationError, ThreadedWalker,
                                UnlimitedSemaphore)
 
 

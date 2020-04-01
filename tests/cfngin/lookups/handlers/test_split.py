@@ -1,11 +1,11 @@
-"""Tests for runway.cfngin.lookups.handlers.split."""
+"""Tests for r4y.cfngin.lookups.handlers.split."""
 import unittest
 
-from runway.cfngin.lookups.handlers.split import SplitLookup
+from r4y.cfngin.lookups.handlers.split import SplitLookup
 
 
 class TestSplitLookup(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.split.SplitLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.split.SplitLookup."""
 
     def test_single_character_split(self):
         """Test single character split."""

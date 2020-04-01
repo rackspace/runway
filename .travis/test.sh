@@ -16,7 +16,7 @@ fi
 
 ${PIPENV}pytest
 
-${PIPENV}flake8 --exclude=runway/cfngin,runway/embedded,runway/templates runway
-find runway -name '*.py' -not -path 'runway/cfngin*' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run ${PIPENV}pylint --rcfile=.pylintrc
-find runway/blueprints -name '*.py' | xargs ${PIPENV}pylint --disable=duplicate-code
+${PIPENV}flake8 --exclude=r4y/cfngin,r4y/embedded,r4y/templates r4y
+find r4y -name '*.py' -not -path 'r4y/cfngin*' -not -path 'r4y/embedded*' -not -path 'r4y/templates/stacker/*' -not -path 'r4y/templates/cdk-py/*' -not -path 'r4y/blueprints/*' | xargs pipenv run ${PIPENV}pylint --rcfile=.pylintrc
+find r4y/blueprints -name '*.py' | xargs ${PIPENV}pylint --disable=duplicate-code
 bash .travis/test_shim.sh

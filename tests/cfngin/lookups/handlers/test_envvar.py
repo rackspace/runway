@@ -1,12 +1,12 @@
-"""Tests for runway.cfngin.lookups.handlers.envvar."""
+"""Tests for r4y.cfngin.lookups.handlers.envvar."""
 import os
 import unittest
 
-from runway.cfngin.lookups.handlers.envvar import EnvvarLookup
+from r4y.cfngin.lookups.handlers.envvar import EnvvarLookup
 
 
 class TestEnvVarHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.envvar.EnvvarLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.envvar.EnvvarLookup."""
 
     def setUp(self):
         """Run before tests."""

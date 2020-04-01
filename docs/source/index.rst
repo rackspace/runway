@@ -23,7 +23,7 @@ Very simple configuration to:
    getting_started
    quickstart/index
    commands
-   runway_config
+   r4y_config
    module_configuration/index
    lookups
    defining_tests

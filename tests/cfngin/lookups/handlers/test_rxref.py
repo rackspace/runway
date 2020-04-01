@@ -1,15 +1,15 @@
-"""Tests for runway.cfngin.lookups.handlers.rxref."""
+"""Tests for r4y.cfngin.lookups.handlers.rxref."""
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.config import Config
-from runway.cfngin.context import Context
-from runway.cfngin.lookups.handlers.rxref import RxrefLookup
+from r4y.cfngin.config import Config
+from r4y.cfngin.context import Context
+from r4y.cfngin.lookups.handlers.rxref import RxrefLookup
 
 
 class TestRxrefHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.rxref.RxrefLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.rxref.RxrefLookup."""
 
     def setUp(self):
         """Run before tests."""

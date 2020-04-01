@@ -25,10 +25,10 @@ class CDK(IntegrationTest):
             os.path.join(self.cdk_test_dir, name)
         )
 
-    def copy_runway(self, template):
-        """Copy runway template to proper directory."""
-        template_file = os.path.join(self.fixtures_dir, 'runway-{}.yml'.format(template))
-        copy_file(template_file, os.path.join(self.cdk_test_dir, 'runway.yml'))
+    def copy_r4y(self, template):
+        """Copy r4y template to proper directory."""
+        template_file = os.path.join(self.fixtures_dir, 'r4y-{}.yml'.format(template))
+        copy_file(template_file, os.path.join(self.cdk_test_dir, 'r4y.yml'))
 
     def run(self):
         """Find all tests and run them."""

@@ -1,11 +1,11 @@
-"""Tests for runway.cfngin.hooks.ecs."""
+"""Tests for r4y.cfngin.hooks.ecs."""
 import unittest
 
 import boto3
 from moto import mock_ecs
 from testfixtures import LogCapture
 
-from runway.cfngin.hooks.ecs import create_clusters
+from r4y.cfngin.hooks.ecs import create_clusters
 
 from ..factories import mock_context, mock_provider
 
@@ -13,7 +13,7 @@ REGION = "us-east-1"
 
 
 class TestECSHooks(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.ecs."""
+    """Tests for r4y.cfngin.hooks.ecs."""
 
     def setUp(self):
         """Run before tests."""
@@ -24,7 +24,7 @@ class TestECSHooks(unittest.TestCase):
         """Test create single cluster."""
         with mock_ecs():
             cluster = "test-cluster"
-            logger = "runway.cfngin.hooks.ecs"
+            logger = "r4y.cfngin.hooks.ecs"
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
@@ -53,7 +53,7 @@ class TestECSHooks(unittest.TestCase):
         """Test create multiple clusters."""
         with mock_ecs():
             clusters = ("test-cluster0", "test-cluster1")
-            logger = "runway.cfngin.hooks.ecs"
+            logger = "r4y.cfngin.hooks.ecs"
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
@@ -82,7 +82,7 @@ class TestECSHooks(unittest.TestCase):
     def test_fail_create_cluster(self):
         """Test fail create cluster."""
         with mock_ecs():
-            logger = "runway.cfngin.hooks.ecs"
+            logger = "r4y.cfngin.hooks.ecs"
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 

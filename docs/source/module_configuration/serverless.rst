@@ -89,7 +89,7 @@ In Module Directory
       dev: true
       prod: true
 
-(in ``runway.module.yml``)
+(in ``r4y.module.yml``)
 
 Promoting Builds Through Environments
 -------------------------------------

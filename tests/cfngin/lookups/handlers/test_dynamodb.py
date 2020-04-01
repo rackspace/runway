@@ -1,17 +1,17 @@
-"""Tests for runway.cfngin.lookups.handlers.dynamodb."""
+"""Tests for r4y.cfngin.lookups.handlers.dynamodb."""
 import unittest
 
 import boto3
 import mock
 from botocore.stub import Stubber
 
-from runway.cfngin.lookups.handlers.dynamodb import DynamodbLookup
+from r4y.cfngin.lookups.handlers.dynamodb import DynamodbLookup
 
 from ...factories import SessionStub
 
 
 class TestDynamoDBHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.dynamodb.DynamodbLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.dynamodb.DynamodbLookup."""
 
     client = boto3.client('dynamodb', region_name='us-east-1',
                           # bypass the need to have these in the env
@@ -28,7 +28,7 @@ class TestDynamoDBHandler(unittest.TestCase):
                 {'S': 'ListVal2'}]},
             'Number1': {'N': '12345'}, }}}}
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_handler(self, _mock_client):
         """Test DynamoDB handler."""
@@ -48,7 +48,7 @@ class TestDynamoDBHandler(unittest.TestCase):
             value = DynamodbLookup.handle(base_lookup_key)
             self.assertEqual(value, base_lookup_key_valid)
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_number_handler(self, _mock_client):
         """Test DynamoDB number handler."""
@@ -69,7 +69,7 @@ class TestDynamoDBHandler(unittest.TestCase):
             value = DynamodbLookup.handle(base_lookup_key)
             self.assertEqual(value, base_lookup_key_valid)
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_list_handler(self, _mock_client):
         """Test DynamoDB list handler."""
@@ -90,7 +90,7 @@ class TestDynamoDBHandler(unittest.TestCase):
             value = DynamodbLookup.handle(base_lookup_key)
             self.assertEqual(value, base_lookup_key_valid)
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_empty_table_handler(self, _mock_client):
         """Test DynamoDB empty table handler."""
@@ -113,7 +113,7 @@ class TestDynamoDBHandler(unittest.TestCase):
                     'Please make sure to include a DynamoDB table name',
                     str(err))
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_missing_table_handler(self, _mock_client):
         """Test DynamoDB missing table handler."""
@@ -135,7 +135,7 @@ class TestDynamoDBHandler(unittest.TestCase):
                     'Please make sure to include a tablename',
                     str(err))
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_invalid_table_handler(self, _mock_client):
         """Test DynamoDB invalid table handler."""
@@ -159,7 +159,7 @@ class TestDynamoDBHandler(unittest.TestCase):
                     'Cannot find the DynamoDB table: FakeTable',
                     str(err))
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_invalid_partition_key_handler(self, _mock_client):
         """Test DynamoDB invalid partition key handler."""
@@ -184,7 +184,7 @@ class TestDynamoDBHandler(unittest.TestCase):
                     'No DynamoDB record matched the partition key: FakeKey',
                     str(err))
 
-    @mock.patch('runway.cfngin.lookups.handlers.dynamodb.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.dynamodb.get_session',
                 return_value=SessionStub(client))
     def test_dynamodb_invalid_partition_val_handler(self, _mock_client):
         """Test DynamoDB invalid partition val handler."""

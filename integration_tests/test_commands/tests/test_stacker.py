@@ -5,7 +5,7 @@ import boto3
 
 from integration_tests.test_commands.test_commands import Commands
 
-KEY = "/runway/integration-test/stacker"
+KEY = "/r4y/integration-test/stacker"
 VALUE = "foo"
 
 
@@ -29,7 +29,7 @@ class TestRunStacker(Commands):
         """Run tests."""
         path = self.get_stack_path()
         check_output(
-            ['runway',
+            ['r4y',
              'run-stacker',
              '--',
              'build',
@@ -44,7 +44,7 @@ class TestRunStacker(Commands):
         """Teardown any created resources."""
         path = self.get_stack_path()
         check_output(
-            ['runway',
+            ['r4y',
              'run-stacker',
              '--',
              'destroy',

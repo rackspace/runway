@@ -4,9 +4,9 @@ import logging
 
 from mock import patch
 
-from runway.context import Context
+from r4y.context import Context
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger('r4y')
 
 TEST_CREDENTIALS = {
     'AWS_ACCESS_KEY_ID': 'foo',
@@ -62,7 +62,7 @@ class TestContext(object):
 
     def test_is_python3(self):
         """Test is_python3."""
-        from runway.context import sys
+        from r4y.context import sys
         context = Context(env_name='test',
                           env_region='us-east-1',
                           env_root='./')
@@ -95,7 +95,7 @@ class TestContext(object):
 
         del context.env_vars['RUNWAY_MAX_CONCURRENT_MODULES']
 
-        with patch('runway.context.multiprocessing.cpu_count') as cpu_count:
+        with patch('r4y.context.multiprocessing.cpu_count') as cpu_count:
             cpu_count.return_value = 8
             assert context.max_concurrent_modules == 8
 
@@ -109,13 +109,13 @@ class TestContext(object):
 
         del context.env_vars['RUNWAY_MAX_CONCURRENT_REGIONS']
 
-        with patch('runway.context.multiprocessing.cpu_count') as cpu_count:
+        with patch('r4y.context.multiprocessing.cpu_count') as cpu_count:
             cpu_count.return_value = 8
             assert context.max_concurrent_regions == 8
 
     def test_use_concurrent(self):
         """Test use_concurrent."""
-        from runway.context import sys
+        from r4y.context import sys
         context = Context(env_name='test',
                           env_region='us-east-1',
                           env_root='./',

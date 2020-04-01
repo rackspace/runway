@@ -2,7 +2,7 @@
 import sys
 
 import pexpect
-from runway.util import change_dir
+from r4y.util import change_dir
 
 from integration_tests.test_cdk.test_cdk import CDK
 
@@ -15,9 +15,9 @@ class TestDeclineDeploy(CDK):
     def deploy(self):
         """Deploy provider."""
         self.copy_fixture('decline-deploy-app.cdk')
-        self.copy_runway('decline-deploy')
+        self.copy_r4y('decline-deploy')
         with change_dir(self.cdk_test_dir):
-            child = pexpect.spawn('runway deploy')
+            child = pexpect.spawn('r4y deploy')
             try:
                 child.logfile = sys.stdout.buffer
                 child.expect('Do you wish to deploy these changes (y/n)?', timeout=120)

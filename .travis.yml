@@ -121,7 +121,7 @@ deploy:
     local-dir: "artifacts/"
     upload-dir: $AWS_BUCKET_PREFIX
     on:
-      # This condition allows for onicagroup/runway to only supply AWS environment
+      # This condition allows for onicagroup/r4y to only supply AWS environment
       # variables on select branches that should be used for deployment of build
       # artifacts.
       # Forks are welcome to set these environment variables in their own travis-ci
@@ -136,7 +136,7 @@ deploy:
     api_key: $NPM_API_KEY
     skip_cleanup: true
     on:
-      # This condition allows for onicagroup/runway to only supply AWS environment
+      # This condition allows for onicagroup/r4y to only supply AWS environment
       # variables on select branches that should be used for deployment of build
       # artifacts.
       # Forks are welcome to set these environment variables in their own travis-ci

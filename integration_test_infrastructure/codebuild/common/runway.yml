@@ -7,8 +7,8 @@ deployments:
       - us-east-1
     parameters:
       namespace: common
-      bucket_name: runway-integration-testing-${env AWS_REGION}
-      repo_url: https://github.com/onicagroup/runway
+      bucket_name: r4y-integration-testing-${env AWS_REGION}
+      repo_url: https://github.com/onicagroup/r4y
     account_id:
       common: "523485371024"
 

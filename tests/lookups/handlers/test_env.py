@@ -1,8 +1,8 @@
 """Tests for lookup handler for env."""
 from unittest import TestCase
 
-from runway.lookups.handlers.env import EnvLookup
-from runway.util import MutableMap
+from r4y.lookups.handlers.env import EnvLookup
+from r4y.util import MutableMap
 
 
 CONTEXT = MutableMap(**{

@@ -101,15 +101,15 @@ def _override_env_vars(overrides):
 
 
 @pytest.fixture(scope='function')
-def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
+def cfngin_context(r4y_context):  # pylint: disable=redefined-outer-name
     """Create a mock CFNgin context object."""
     return MockCFNginContext(environment={},
-                             boto3_credentials=runway_context.boto3_credentials,
-                             region=runway_context.env_region)
+                             boto3_credentials=r4y_context.boto3_credentials,
+                             region=r4y_context.env_region)
 
 
 @pytest.fixture(scope='function')
-def runway_context(request):
+def r4y_context(request):
     """Create a mock Runway context object."""
     env_vars = {
         'AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),

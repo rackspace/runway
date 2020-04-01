@@ -1,8 +1,8 @@
-"""Tests for runway.cfngin.actions.diff."""
+"""Tests for r4y.cfngin.actions.diff."""
 import unittest
 
 from operator import attrgetter
-from runway.cfngin.actions.diff import (
+from r4y.cfngin.actions.diff import (
     diff_dictionaries,
     diff_parameters,
     DictValue
@@ -10,7 +10,7 @@ from runway.cfngin.actions.diff import (
 
 
 class TestDictValueFormat(unittest.TestCase):
-    """Tests for runway.cfngin.actions.diff.DictValue."""
+    """Tests for r4y.cfngin.actions.diff.DictValue."""
 
     def test_status(self):
         """Test status."""
@@ -44,7 +44,7 @@ class TestDictValueFormat(unittest.TestCase):
 
 
 class TestDiffDictionary(unittest.TestCase):
-    """Tests for runway.cfngin.actions.diff.diff_dictionaries."""
+    """Tests for r4y.cfngin.actions.diff.diff_dictionaries."""
 
     def test_diff_dictionaries(self):
         """Test diff dictionaries."""
@@ -79,7 +79,7 @@ class TestDiffDictionary(unittest.TestCase):
 
 
 class TestDiffParameters(unittest.TestCase):
-    """Tests for runway.cfngin.actions.diff.diff_parameters."""
+    """Tests for r4y.cfngin.actions.diff.diff_parameters."""
 
     def test_diff_parameters_no_changes(self):
         """Test diff parameters no changes."""

@@ -1,5 +1,5 @@
-.. _CloudFormation template: https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml
-.. _Dockerfile: https://github.com/onicagroup/runway/blob/master/quickstarts/runway/Dockerfile
+.. _CloudFormation template: https://github.com/onicagroup/r4y/blob/master/quickstarts/r4y/r4y-quickstart.yml
+.. _Dockerfile: https://github.com/onicagroup/r4y/blob/master/quickstarts/r4y/Dockerfile
 .. _Docker hub: https://hub.docker.com
 
 Other Ways to Use Runway
@@ -34,5 +34,5 @@ used with the following command.
 
 .. code-block:: shell
 
-    $ docker run -it --rm onica/runway-quickstart
+    $ docker run -it --rm onica/r4y-quickstart
 

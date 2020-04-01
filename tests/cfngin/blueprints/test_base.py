@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.blueprints.base."""
+"""Tests for r4y.cfngin.blueprints.base."""
 # pylint: disable=abstract-method,protected-access,unused-argument
 import sys
 import unittest
@@ -6,21 +6,21 @@ import unittest
 from mock import MagicMock, patch
 from troposphere import Base64, Ref, s3, sns
 
-from runway.cfngin.blueprints.base import (Blueprint, CFNParameter,
+from r4y.cfngin.blueprints.base import (Blueprint, CFNParameter,
                                            build_parameter, parse_user_data,
                                            resolve_variable,
                                            validate_allowed_values,
                                            validate_variable_type)
-from runway.cfngin.blueprints.variables.types import (
+from r4y.cfngin.blueprints.variables.types import (
     CFNCommaDelimitedList, CFNNumber, CFNString, EC2AvailabilityZoneNameList,
     TroposphereType)
-from runway.cfngin.exceptions import (InvalidLookupCombination,
+from r4y.cfngin.exceptions import (InvalidLookupCombination,
                                       InvalidUserdataPlaceholder,
                                       MissingVariable, UnresolvedVariable,
                                       UnresolvedVariables, ValidatorError,
                                       VariableTypeRequired)
-from runway.cfngin.lookups import register_lookup_handler
-from runway.variables import Variable
+from r4y.cfngin.lookups import register_lookup_handler
+from r4y.variables import Variable
 
 from ..factories import mock_context
 
@@ -35,7 +35,7 @@ register_lookup_handler("mock", mock_lookup_handler)
 
 
 class TestBuildParameter(unittest.TestCase):
-    """Tests for runway.cfngin.blueprints.base.build_parameter."""
+    """Tests for r4y.cfngin.blueprints.base.build_parameter."""
 
     def test_base_parameter(self):
         """Test base parameter."""
@@ -45,7 +45,7 @@ class TestBuildParameter(unittest.TestCase):
 
 
 class TestBlueprintRendering(unittest.TestCase):
-    """Tests for runway.cfngin.blueprints.base.Blueprint rendering."""
+    """Tests for r4y.cfngin.blueprints.base.Blueprint rendering."""
 
     def test_to_json(self):
         """Test to json."""
@@ -89,7 +89,7 @@ class TestBlueprintRendering(unittest.TestCase):
 
 
 class TestBaseBlueprint(unittest.TestCase):
-    """Tests for runway.cfngin.blueprints.base.Blueprint."""
+    """Tests for r4y.cfngin.blueprints.base.Blueprint."""
 
     def test_add_output(self):
         """Test add output."""
@@ -114,7 +114,7 @@ class TestBaseBlueprint(unittest.TestCase):
 
 
 class TestVariables(unittest.TestCase):
-    """Tests for runway.cfngin.blueprints.base.Blueprint variables."""
+    """Tests for r4y.cfngin.blueprints.base.Blueprint variables."""
 
     def test_defined_variables(self):
         """Test defined variables."""
@@ -787,7 +787,7 @@ class TestVariables(unittest.TestCase):
 
 
 class TestCFNParameter(unittest.TestCase):
-    """Tests for runway.cfngin.blueprints.base.CFNParameter."""
+    """Tests for r4y.cfngin.blueprints.base.CFNParameter."""
 
     def test_cfnparameter_convert_boolean(self):
         """Test cfnparameter convert boolean."""
@@ -832,9 +832,9 @@ class TestCFNParameter(unittest.TestCase):
         with self.assertRaises(InvalidUserdataPlaceholder):
             parse_user_data({}, raw_user_data, blueprint_name)
 
-    @patch('runway.cfngin.blueprints.base.read_value_from_path',
+    @patch('r4y.cfngin.blueprints.base.read_value_from_path',
            return_value='contents')
-    @patch('runway.cfngin.blueprints.base.parse_user_data')
+    @patch('r4y.cfngin.blueprints.base.parse_user_data')
     def test_read_user_data(self, parse_mock, file_mock):
         """Test read user data."""
         class TestBlueprint(Blueprint):

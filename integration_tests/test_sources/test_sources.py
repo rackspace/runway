@@ -21,10 +21,10 @@ class TestSources(IntegrationTest):
         """Initialize."""
         IntegrationTest.__init__(self, logger)
 
-    def copy_runway(self, template):
-        """Copy runway template to proper directory."""
-        template_file = os.path.join(self.fixtures_dir, 'runway-{}.yml'.format(template))
-        copy_file(template_file, os.path.join(self.sources_test_dir, 'runway.yml'))
+    def copy_r4y(self, template):
+        """Copy r4y template to proper directory."""
+        template_file = os.path.join(self.fixtures_dir, 'r4y-{}.yml'.format(template))
+        copy_file(template_file, os.path.join(self.sources_test_dir, 'r4y.yml'))
 
     def run(self):
         """Find all tests and run them."""
@@ -49,7 +49,7 @@ class TestSources(IntegrationTest):
             if os.path.isfile(template):
                 self.logger.debug('send2trash: "%s"', template)
                 send2trash(template)
-        folders = ['.runway_cache']
+        folders = ['.r4y_cache']
         for folder in folders:
             folder_path = os.path.join(self.sources_test_dir, folder)
             if os.path.isdir(folder_path):

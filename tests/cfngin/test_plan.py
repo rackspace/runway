@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.plan."""
+"""Tests for r4y.cfngin.plan."""
 # pylint: disable=protected-access,unused-argument
 import json
 import os
@@ -8,22 +8,22 @@ import unittest
 
 import mock
 
-from runway.cfngin.context import Config, Context
-from runway.cfngin.dag import walk
-from runway.cfngin.exceptions import (CancelExecution, GraphError,
+from r4y.cfngin.context import Config, Context
+from r4y.cfngin.dag import walk
+from r4y.cfngin.exceptions import (CancelExecution, GraphError,
                                       PersistentGraphLocked, PlanFailed)
-from runway.cfngin.lookups.registry import (register_lookup_handler,
+from r4y.cfngin.lookups.registry import (register_lookup_handler,
                                             unregister_lookup_handler)
-from runway.cfngin.plan import Graph, Plan, Step
-from runway.cfngin.stack import Stack
-from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
-from runway.cfngin.util import stack_template_key_name
+from r4y.cfngin.plan import Graph, Plan, Step
+from r4y.cfngin.stack import Stack
+from r4y.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
+from r4y.cfngin.util import stack_template_key_name
 
 from .factories import generate_definition, mock_context
 
 
 class TestStep(unittest.TestCase):
-    """Tests for runway.cfngin.plan.Step."""
+    """Tests for r4y.cfngin.plan.Step."""
 
     def setUp(self):
         """Run before tests."""
@@ -79,7 +79,7 @@ class TestStep(unittest.TestCase):
 
 
 class TestGraph(unittest.TestCase):
-    """Tests for runway.cfngin.plan.Graph."""
+    """Tests for r4y.cfngin.plan.Graph."""
 
     def setUp(self):
         """Run before tests."""
@@ -142,7 +142,7 @@ class TestGraph(unittest.TestCase):
 
 
 class TestPlan(unittest.TestCase):
-    """Tests for runway.cfngin.plan.Plan."""
+    """Tests for r4y.cfngin.plan.Plan."""
 
     def setUp(self):
         """Run before tests."""

@@ -8,8 +8,8 @@ from awacs.aws import AWSPrincipal, Policy, Statement
 from troposphere import GetAtt, Output, Ref, Sub, iam
 from troposphere.cloudformation import WaitCondition, WaitConditionHandle
 
-from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.blueprints.variables.types import (CFNCommaDelimitedList,
+from r4y.cfngin.blueprints.base import Blueprint
+from r4y.cfngin.blueprints.variables.types import (CFNCommaDelimitedList,
                                                       CFNNumber, CFNString,
                                                       EC2KeyPairKeyName,
                                                       EC2SecurityGroupId,

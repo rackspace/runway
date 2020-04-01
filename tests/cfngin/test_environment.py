@@ -1,7 +1,7 @@
-"""Tests for runway.cfngin.environment."""
+"""Tests for r4y.cfngin.environment."""
 import unittest
 
-from runway.cfngin.environment import parse_environment
+from r4y.cfngin.environment import parse_environment
 
 TEST_ENV = """key1: value1
 # some: comment
@@ -26,7 +26,7 @@ error
 
 
 class TestEnvironment(unittest.TestCase):
-    """Tests for runway.cfngin.environment."""
+    """Tests for r4y.cfngin.environment."""
 
     def test_simple_key_value_parsing(self):
         """Test simple key value parsing."""

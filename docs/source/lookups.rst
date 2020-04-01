@@ -4,8 +4,8 @@ Lookups
 =======
 
 Runway Lookups allow the use of variables within the Runway config file. These
-variables can then be passed along to :ref:`deployments <runway-deployment>`,
-:ref:`modules <runway-module>` and :ref:`tests <runway-test>`.
+variables can then be passed along to :ref:`deployments <r4y-deployment>`,
+:ref:`modules <r4y-module>` and :ref:`tests <r4y-test>`.
 
 The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``
 
@@ -45,7 +45,7 @@ value in the variables file can't be ``${env AWS_REGION}``. Well, it can but
 it will resolve to the literal value provided, not an AWS region like you may
 expect.
 
-.. automodule:: runway.lookups.handlers.base
+.. automodule:: r4y.lookups.handlers.base
 
 
 .. _build-in-lookups:
@@ -60,7 +60,7 @@ Build-in Lookups
 env
 ~~~
 
-.. automodule:: runway.lookups.handlers.env
+.. automodule:: r4y.lookups.handlers.env
 
 
 .. _ssm lookup:
@@ -69,7 +69,7 @@ env
 ssm
 ~~~
 
-.. automodule:: runway.lookups.handlers.ssm
+.. automodule:: r4y.lookups.handlers.ssm
 
 
 .. _var lookup:
@@ -78,4 +78,4 @@ ssm
 var
 ~~~
 
-.. automodule:: runway.lookups.handlers.var
+.. automodule:: r4y.lookups.handlers.var

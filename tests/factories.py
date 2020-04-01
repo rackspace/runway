@@ -2,9 +2,9 @@
 import boto3
 from botocore.stub import Stubber
 
-from runway.util import MutableMap
-from runway.context import Context as RunwayContext
-from runway.cfngin.context import Context as CFNginContext
+from r4y.util import MutableMap
+from r4y.context import Context as RunwayContext
+from r4y.cfngin.context import Context as CFNginContext
 
 
 class MockBoto3Session(object):

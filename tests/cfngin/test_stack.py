@@ -1,18 +1,18 @@
-"""Tests for runway.cfngin.stack."""
+"""Tests for r4y.cfngin.stack."""
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.config import Config
-from runway.cfngin.context import Context
-from runway.cfngin.lookups import register_lookup_handler
-from runway.cfngin.stack import Stack
+from r4y.cfngin.config import Config
+from r4y.cfngin.context import Context
+from r4y.cfngin.lookups import register_lookup_handler
+from r4y.cfngin.stack import Stack
 
 from .factories import generate_definition
 
 
 class TestStack(unittest.TestCase):
-    """Tests for runway.cfngin.stack.Stack."""
+    """Tests for r4y.cfngin.stack.Stack."""
 
     def setUp(self):
         """Run before tests."""

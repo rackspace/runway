@@ -19,7 +19,7 @@ Development Environment
 This project uses ``pipenv`` to create Python virtual environment. This must be installed on your system before setting up your dev environment.
 
 
-With pipenv installed, run ``make sync_all`` to setup your development environment. This will create all the requred virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
+With pipenv installed, run ``make sync_all`` to setup your development environment. This will create all the requred virtual environments to work on r4y, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
 
 Branch Requirements
 ~~~~~~~~~~~~~~~~~~~
@@ -169,7 +169,7 @@ Environment variables can be used to alter the functionality of Runway.
 Travis CI
 ---------
 
-If you would like to simulate a fully build/deploy of runway on your fork,
+If you would like to simulate a fully build/deploy of r4y on your fork,
 you can do so by first signing up and `Travis CI <https://travis-ci.org/>`_
 and linking it to your GitHub account. After doing so, there are a few
 environment variables that can be setup for your environment.

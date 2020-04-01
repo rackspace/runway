@@ -1,12 +1,12 @@
-"""Tests for runway.cfngin.util."""
+"""Tests for r4y.cfngin.util."""
 # pylint: disable=unused-argument,invalid-name
 import unittest
 
 import boto3
 import mock
 
-from runway.cfngin.config import GitPackageSource
-from runway.cfngin.util import (Extractor, SourceProcessor, TarExtractor,
+from r4y.cfngin.config import GitPackageSource
+from r4y.cfngin.util import (Extractor, SourceProcessor, TarExtractor,
                                 TarGzipExtractor, ZipExtractor, camel_to_snake,
                                 cf_safe_name, get_client_region,
                                 get_s3_endpoint, merge_map,
@@ -29,7 +29,7 @@ def mock_create_cache_directories(self, **kwargs):
 
 
 class TestUtil(unittest.TestCase):
-    """Tests for runway.cfngin.util."""
+    """Tests for r4y.cfngin.util."""
 
     def test_cf_safe_name(self):
         """Test cf safe name."""

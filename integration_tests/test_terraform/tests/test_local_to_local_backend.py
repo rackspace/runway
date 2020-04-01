@@ -10,8 +10,8 @@ class LocalToLocalBackend(Terraform):
     def deploy_backend(self, backend):
         """Deploy provider."""
         self.copy_template('{}-backend.tf'.format(backend))
-        self.copy_runway('nos3')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+        self.copy_r4y('nos3')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         return code
 
     def run(self):
@@ -28,6 +28,6 @@ class LocalToLocalBackend(Terraform):
     def teardown(self):
         """Teardown any created resources."""
         self.logger.info('Tearing down: %s', self.TEST_NAME)
-        code, _stdout, _stderr = self.runway_cmd('destroy')
+        code, _stdout, _stderr = self.r4y_cmd('destroy')
         assert code == 0, 'exit code should be zero'
         self.clean()

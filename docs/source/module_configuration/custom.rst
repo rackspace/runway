@@ -25,13 +25,13 @@ RunwayModule Class
 
 Runway provides a Python Class named ``RunwayModule`` that can be imported
 into your custom plugin/Python module. This base class will give you the
-ability to write your own module that can be added to your runway.yml
-deployment list (More info on runway.yml below). There are three required
+ability to write your own module that can be added to your r4y.yml
+deployment list (More info on r4y.yml below). There are three required
 functions::
 
-- plan - This code block gets called when ``runway taxi`` executes
-- deploy - This code block gets called when ``runway takeoff`` executes
-- destroy - This code block gets called when ``runway destroy`` executes
+- plan - This code block gets called when ``r4y taxi`` executes
+- deploy - This code block gets called when ``r4y takeoff`` executes
+- destroy - This code block gets called when ``r4y destroy`` executes
 
 All of these functions are required, but are permitted to be empty no-op/pass
 statements if applicable.
@@ -49,25 +49,25 @@ module. Some notable examples are::
 - self.path - path to your Runway module folder
 
 
-runway.yml Example
+r4y.yml Example
 -------------------
 
 After you have written your plugin, you need to add the module ``class_path``
-to your module's configuration. Below is an example ``runway.yml`` containing a
+to your module's configuration. Below is an example ``r4y.yml`` containing a
 single module that looks for an Ansible playbook in a folder at the root of
 your Runway environment (i.e. repo) named "security_group.ansible".
 
 Setting ``class_path`` tells Runway to import the DeployToAWS Python class,
-from a file named Ansible.py in a folder named "local_runway_extensions"
+from a file named Ansible.py in a folder named "local_r4y_extensions"
 (Standard Python import conventions apply). Runway will execute the ``deploy``
-function in your class when you perform a ``runway deploy`` (AKA takeoff).
+function in your class when you perform a ``r4y deploy`` (AKA takeoff).
 
 ::
 
     deployments:
       - modules:
           - path: security_group.ansible
-            class_path: local_runway_extensions.Ansible.DeployToAWS
+            class_path: local_r4y_extensions.Ansible.DeployToAWS
         regions:
           - us-east-1
 
@@ -80,11 +80,11 @@ with a naming convention of ``<env>-<region>.yaml`` within a fictional
 deploy, but this example does check to see if it is installed before execution
 and logs an error if not. The Runway plugin will only execute
 the ansible-playbook against a ``yaml`` file associated with the environment and set for the Runway
-execution and region defined in the ``runway.yml``.
+execution and region defined in the ``r4y.yml``.
 
-Using the above ``runway.yml`` and the plugin/playbook below saved to the Runway
+Using the above ``r4y.yml`` and the plugin/playbook below saved to the Runway
 module folder you will only have a deployment occur in the ``dev`` environment
-in ``us-east-1``.  If you decide to perform a runway deployment in the ``prod``
+in ``us-east-1``.  If you decide to perform a r4y deployment in the ``prod``
 environment, or in a different region, the ansible-playbook deployment will be
 skipped. This matches the behavior of the Runway's native modules.
 
@@ -97,10 +97,10 @@ skipped. This matches the behavior of the Runway's native modules.
     import sys
     import os
 
-    from runway.module import RunwayModule
-    from runway.util import which
+    from r4y.module import RunwayModule
+    from r4y.util import which
 
-    LOGGER = logging.getLogger('runway')
+    LOGGER = logging.getLogger('r4y')
 
 
     def check_for_playbook(playbook_path):
@@ -167,5 +167,5 @@ And below is the example Ansible playbook itself, saved as
             register: security_group
 
 
-The above would be deployed if ``runway deploy`` was executed in the ``dev``
+The above would be deployed if ``r4y deploy`` was executed in the ``dev``
 environment to ``us-east-1``.

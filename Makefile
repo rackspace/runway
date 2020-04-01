@@ -30,15 +30,15 @@ pipenv_lock:
 clean:
 	rm -rf build/
 	rm -rf dist/
-	rm -rf runway.egg-info/
+	rm -rf r4y.egg-info/
 	rm -rf tmp/
 	rm -rf src/
 	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
 lint:
-	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
-	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
+	pipenv run flake8 --exclude=r4y/embedded,r4y/templates r4y
+	find r4y -name '*.py' -not -path 'r4y/embedded*' -not -path 'r4y/templates/stacker/*' -not -path 'r4y/templates/cdk-py/*' -not -path 'r4y/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
+	find r4y/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 test:
 	pipenv run pytest
@@ -51,7 +51,7 @@ travistest:
 
 
 create_tfenv_ver_file:
-	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
+	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > r4y/templates/terraform/.terraform-version
 
 build: clean create_tfenv_ver_file
 	python setup.py sdist
@@ -60,23 +60,23 @@ travisbuild_file: clean sync create_tfenv_ver_file
 	pipenv run $(PYTHON) setup.py sdist
 	mkdir -p tmp
 	pipenv run pip install .
-	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
+	pipenv run $(PYTHON) -c "from __future__ import print_function; import r4y; print(r4y.__version__, end='')" > tmp/version.txt
 	mkdir -p artifacts/$$(cat tmp/version.txt)/pypi
 	mkdir -p artifacts/$$(cat tmp/version.txt)/$(TRAVIS_OS_NAME)
-	if [ $(TRAVIS_OS_NAME) = "linux" ]; then mv dist/* artifacts/$$(cat tmp/version.txt)/pypi; else rm -rf dist/runway-$$(cat tmp/version.txt).tar.gz; fi
-	pipenv run pyinstaller --noconfirm --clean runway.file.spec
+	if [ $(TRAVIS_OS_NAME) = "linux" ]; then mv dist/* artifacts/$$(cat tmp/version.txt)/pypi; else rm -rf dist/r4y-$$(cat tmp/version.txt).tar.gz; fi
+	pipenv run pyinstaller --noconfirm --clean r4y.file.spec
 	mv dist/* artifacts/$$(cat tmp/version.txt)/$(TRAVIS_OS_NAME)
 
 travisbuild_folder: clean sync create_tfenv_ver_file
 	mkdir -p tmp
 	pipenv run pip install .
-	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
+	pipenv run $(PYTHON) -c "from __future__ import print_function; import r4y; print(r4y.__version__, end='')" > tmp/version.txt
 	mkdir -p artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)
-	pipenv run pyinstaller --noconfirm --clean runway.folder.spec
+	pipenv run pyinstaller --noconfirm --clean r4y.folder.spec
 	if [ $(TRAVIS_OS_NAME) = "windows" ]; then \
-		7z a -ttar -so ./runway.tar ./dist/runway/* | 7z a -si ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/runway.tar.gz; \
+		7z a -ttar -so ./r4y.tar ./dist/r4y/* | 7z a -si ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/r4y.tar.gz; \
 	else \
-		tar -C dist/runway/ -czvf ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/runway.tar.gz .; \
+		tar -C dist/r4y/ -czvf ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/r4y.tar.gz .; \
 	fi;
 
 build_whl: clean create_tfenv_ver_file
@@ -84,7 +84,7 @@ build_whl: clean create_tfenv_ver_file
 
 release: clean create_tfenv_ver_file build
 	twine upload dist/*
-	curl -D - -X PURGE https://pypi.org/simple/runway
+	curl -D - -X PURGE https://pypi.org/simple/r4y
 
 npm_prep: version_file
 	cp npm/* . && cp npm/.[^.]* .
@@ -94,4 +94,4 @@ npm_prep: version_file
 
 version_file:
 	mkdir -p tmp
-	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
+	pipenv run $(PYTHON) -c "from __future__ import print_function; import r4y; print(r4y.__version__, end='')" > tmp/version.txt

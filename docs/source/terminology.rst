@@ -1,8 +1,8 @@
 .. _blueprints: terminology.html#blueprint
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _CloudFormation Parameters: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
-.. _module type: runway_config.html#type
-.. _Runway Config File: runway_config.html
+.. _module type: r4y_config.html#type
+.. _Runway Config File: r4y_config.html
 .. _stacks: terminology.html#stack
 .. _stack definitions: terminology.html#stack-definition
 .. _troposphere: https://github.com/cloudtools/troposphere
@@ -30,7 +30,7 @@ Standard deploy environments would be something like prod, dev, and test.
 Deployment
 ==========
 
-A :ref:`deployment<runway-deployment>` contains a list of `modules <#module>`_ and options for
+A :ref:`deployment<r4y-deployment>` contains a list of `modules <#module>`_ and options for
 all the modules_ in the deployment_.
 A `Runway config file`_ can contain multiple deployments_ and a deployment_ can contain multiple modules_.
 
@@ -45,7 +45,7 @@ These are only supported in select areas of the `Runway Config File`_ (see the c
 Module
 ======
 
-A :ref:`module<runway-module>` is a directory containing a single infrastructure-as-code tool configuration of an application, a component, or some infrastructure (eg. a set of `CloudFormation`_ templates).
+A :ref:`module<r4y-module>` is a directory containing a single infrastructure-as-code tool configuration of an application, a component, or some infrastructure (eg. a set of `CloudFormation`_ templates).
 It is defined in a `deployment`_ by path.
 Modules can also contain granular options that only pertain to it based on its `module type`_.
 

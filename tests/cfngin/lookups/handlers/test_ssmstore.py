@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.lookups.handlers.ssmstore."""
+"""Tests for r4y.cfngin.lookups.handlers.ssmstore."""
 import unittest
 
 import boto3
@@ -6,13 +6,13 @@ import mock
 from botocore.stub import Stubber
 from six import string_types
 
-from runway.cfngin.lookups.handlers.ssmstore import SsmstoreLookup
+from r4y.cfngin.lookups.handlers.ssmstore import SsmstoreLookup
 
 from ...factories import SessionStub
 
 
 class TestSSMStoreHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.ssmstore.SsmstoreLookup."""
+    """Tests for r4y.cfngin.lookups.handlers.ssmstore.SsmstoreLookup."""
 
     client = boto3.client('ssm', region_name='us-east-1',
                           # bypass the need to have these in the env
@@ -46,7 +46,7 @@ class TestSSMStoreHandler(unittest.TestCase):
         self.ssmkey = "ssmkey"
         self.ssmvalue = "ssmvalue"
 
-    @mock.patch('runway.cfngin.lookups.handlers.ssmstore.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.ssmstore.get_session',
                 return_value=SessionStub(client))
     def test_ssmstore_handler(self, _mock_client):
         """Test ssmstore handler."""
@@ -58,7 +58,7 @@ class TestSSMStoreHandler(unittest.TestCase):
             self.assertEqual(value, self.ssmvalue)
             self.assertIsInstance(value, string_types)
 
-    @mock.patch('runway.cfngin.lookups.handlers.ssmstore.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.ssmstore.get_session',
                 return_value=SessionStub(client))
     def test_ssmstore_invalid_value_handler(self, _mock_client):
         """Test ssmstore invalid value handler."""
@@ -71,7 +71,7 @@ class TestSSMStoreHandler(unittest.TestCase):
             except ValueError:
                 assert True
 
-    @mock.patch('runway.cfngin.lookups.handlers.ssmstore.get_session',
+    @mock.patch('r4y.cfngin.lookups.handlers.ssmstore.get_session',
                 return_value=SessionStub(client))
     def test_ssmstore_handler_with_region(self, _mock_client):
         """Test ssmstore handler with region."""

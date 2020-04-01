@@ -21,13 +21,13 @@ class TestRawTemplateDiff(Cfngin):
     def _build(self):
         """Execute and assert initial build."""
         self.set_environment('dev')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         assert code == 0, 'exit code should be zero'
 
     def _diff(self):
         """Execute and assert second build with no changes."""
         self.set_environment('dev2')
-        code, _stdout, stderr = self.runway_cmd('plan')
+        code, _stdout, stderr = self.r4y_cmd('plan')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
             '-WaitConditionCount = 1',
@@ -48,5 +48,5 @@ class TestRawTemplateDiff(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')
+        self.r4y_cmd('destroy')
         self.cleanup_fixtures()

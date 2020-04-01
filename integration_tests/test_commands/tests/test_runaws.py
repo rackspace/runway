@@ -18,7 +18,7 @@ class TestRunAWS(Commands):
     def run(self):
         """Run test."""
         response = check_output(
-            ['runway',
+            ['r4y',
              'run-aws',
              'sts',
              'get-caller-identity']

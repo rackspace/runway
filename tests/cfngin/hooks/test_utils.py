@@ -1,10 +1,10 @@
-"""Tests for runway.cfngin.hooks.utils."""
+"""Tests for r4y.cfngin.hooks.utils."""
 # pylint: disable=unused-argument
 import queue
 import unittest
 
-from runway.cfngin.config import Hook
-from runway.cfngin.hooks.utils import handle_hooks
+from r4y.cfngin.config import Hook
+from r4y.cfngin.hooks.utils import handle_hooks
 
 from ..factories import mock_context, mock_provider
 
@@ -12,7 +12,7 @@ HOOK_QUEUE = queue.Queue()
 
 
 class TestHooks(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.utils."""
+    """Tests for r4y.cfngin.hooks.utils."""
 
     def setUp(self):
         """Run before tests."""
@@ -33,19 +33,19 @@ class TestHooks(unittest.TestCase):
 
     def test_missing_required_hook_method(self):
         """Test missing required hook method."""
-        hooks = [{"path": "runway.cfngin.hooks.blah", "required": True}]
+        hooks = [{"path": "r4y.cfngin.hooks.blah", "required": True}]
         with self.assertRaises(AttributeError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
     def test_missing_non_required_hook_method(self):
         """Test missing non required hook method."""
-        hooks = [Hook({"path": "runway.cfngin.hooks.blah", "required": False})]
+        hooks = [Hook({"path": "r4y.cfngin.hooks.blah", "required": False})]
         handle_hooks("missing", hooks, self.provider, self.context)
         self.assertTrue(HOOK_QUEUE.empty())
 
     def test_default_required_hook(self):
         """Test default required hook."""
-        hooks = [Hook({"path": "runway.cfngin.hooks.blah"})]
+        hooks = [Hook({"path": "r4y.cfngin.hooks.blah"})]
         with self.assertRaises(AttributeError):
             handle_hooks("missing", hooks, self.provider, self.context)
 

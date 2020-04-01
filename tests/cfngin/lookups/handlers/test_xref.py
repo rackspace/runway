@@ -1,13 +1,13 @@
-"""Tests for runway.cfngin.lookups.handlers.xref."""
+"""Tests for r4y.cfngin.lookups.handlers.xref."""
 import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.lookups.handlers.xref import XrefLookup
+from r4y.cfngin.lookups.handlers.xref import XrefLookup
 
 
 class TestXrefHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.xref.XrefHandler."""
+    """Tests for r4y.cfngin.lookups.handlers.xref.XrefHandler."""
 
     def setUp(self):
         """Run before tests."""

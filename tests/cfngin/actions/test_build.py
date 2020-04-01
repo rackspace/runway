@@ -1,23 +1,23 @@
-"""Tests for runway.cfngin.actions.build."""
+"""Tests for r4y.cfngin.actions.build."""
 # pylint: disable=no-self-use,protected-access,unused-argument
 import unittest
 from collections import namedtuple
 
 from mock import MagicMock, PropertyMock, patch
 
-from runway.cfngin import exceptions
-from runway.cfngin.actions import build
-from runway.cfngin.actions.build import (UsePreviousParameterValue,
+from r4y.cfngin import exceptions
+from r4y.cfngin.actions import build
+from r4y.cfngin.actions.build import (UsePreviousParameterValue,
                                          _handle_missing_parameters,
                                          _resolve_parameters)
-from runway.cfngin.blueprints.variables.types import CFNString
-from runway.cfngin.context import Config, Context
-from runway.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
-from runway.cfngin.plan import Graph, Plan, Step
-from runway.cfngin.providers.aws.default import Provider
-from runway.cfngin.providers.base import BaseProvider
-from runway.cfngin.session_cache import get_session
-from runway.cfngin.status import (COMPLETE, FAILED, PENDING, SKIPPED,
+from r4y.cfngin.blueprints.variables.types import CFNString
+from r4y.cfngin.context import Config, Context
+from r4y.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
+from r4y.cfngin.plan import Graph, Plan, Step
+from r4y.cfngin.providers.aws.default import Provider
+from r4y.cfngin.providers.base import BaseProvider
+from r4y.cfngin.session_cache import get_session
+from r4y.cfngin.status import (COMPLETE, FAILED, PENDING, SKIPPED,
                                   SUBMITTED, NotSubmittedStatus)
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
@@ -57,7 +57,7 @@ class MockProvider(BaseProvider):
 
 
 class TestBuildAction(unittest.TestCase):
-    """Tests for runway.cfngin.actions.build.BuildAction."""
+    """Tests for r4y.cfngin.actions.build.BuildAction."""
 
     def setUp(self):
         """Run before tests."""
@@ -93,7 +93,7 @@ class TestBuildAction(unittest.TestCase):
             config.update(extra_config_args)
         return Context(config=Config(config), **kwargs)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
     def test_generate_plan_persist_destroy(self, mock_graph_tags):
         """Test generate plan persist destroy."""
@@ -208,13 +208,13 @@ class TestBuildAction(unittest.TestCase):
             build_action.run(outline=False)
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
+    @patch('r4y.cfngin.context.Context._persistent_graph_tags',
            new_callable=PropertyMock)
-    @patch('runway.cfngin.context.Context.lock_persistent_graph',
+    @patch('r4y.cfngin.context.Context.lock_persistent_graph',
            new_callable=MagicMock)
-    @patch('runway.cfngin.context.Context.unlock_persistent_graph',
+    @patch('r4y.cfngin.context.Context.unlock_persistent_graph',
            new_callable=MagicMock)
-    @patch('runway.cfngin.plan.Plan.execute', new_callable=MagicMock)
+    @patch('r4y.cfngin.plan.Plan.execute', new_callable=MagicMock)
     def test_run_persist(self, mock_execute, mock_unlock, mock_lock,
                          mock_graph_tags):
         """Test run persist."""
@@ -288,7 +288,7 @@ class TestBuildAction(unittest.TestCase):
 
 
 class TestLaunchStack(TestBuildAction):
-    """Tests for runway.cfngin.actions.build.BuildAction launch stack."""
+    """Tests for r4y.cfngin.actions.build.BuildAction launch stack."""
 
     def setUp(self):
         """Run before tests."""
@@ -468,7 +468,7 @@ class TestLaunchStack(TestBuildAction):
 
 
 class TestFunctions(unittest.TestCase):
-    """Tests for runway.cfngin.actions.build module level functions."""
+    """Tests for r4y.cfngin.actions.build module level functions."""
 
     def setUp(self):
         """Run before tests."""

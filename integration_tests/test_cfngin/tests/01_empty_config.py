@@ -18,10 +18,10 @@ class TestEmptyConfig(Cfngin):
     def run(self):
         """Run the test."""
         self.copy_fixtures()
-        code, _stdout, stderr = self.runway_cmd('deploy')
+        code, _stdout, stderr = self.r4y_cmd('deploy')
         assert code != 0, 'exit could should be non-zero'
         expected_lines = [
-            'runway.cfngin.exceptions.InvalidConfig'
+            'r4y.cfngin.exceptions.InvalidConfig'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'

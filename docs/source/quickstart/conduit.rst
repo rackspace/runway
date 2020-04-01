@@ -45,21 +45,21 @@ Setup
 
    .. code-block:: shell
 
-       curl -L https://oni.ca/runway/latest/osx -o runway
-       chmod +x runway
+       curl -L https://oni.ca/r4y/latest/osx -o r4y
+       chmod +x r4y
 
    .. rubric:: Ubuntu
 
    .. code-block:: shell
 
-       curl -L https://oni.ca/runway/latest/linux -o runway
-       chmod +x runway
+       curl -L https://oni.ca/r4y/latest/linux -o r4y
+       chmod +x r4y
 
    .. rubric:: Windows
 
    .. code-block:: shell
 
-       iwr -Uri oni.ca/runway/latest/windows -OutFile runway.exe
+       iwr -Uri oni.ca/r4y/latest/windows -OutFile r4y.exe
 
 #. Download the source files.
 
@@ -82,13 +82,13 @@ Setup
        mv angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend
        cd frontend
        mkdir scripts
-       cd scripts && { curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js ; cd -; }
+       cd scripts && { curl -O https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/build.js ; cd -; }
        sed -i 's/^\s*"build":\s.*$/    "build": "node scripts\/build",/' package.json
        sed -i 's/^\s*"rxjs":\s.*$/    "rxjs": "~6.3.3",/' package.json
        npm install
-       curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py
+       curl -O https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/update_env_endpoint.py
        cd ..
-       curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml
+       curl -O https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/r4y.yml
 
    .. rubric:: Windows
 
@@ -112,19 +112,19 @@ Setup
        cd frontend
        (gc .\package.json -raw).Replace("`"rxjs`": `"^6.2.1`"", "`"rxjs`": `"~6.3.3`"") | sc .\package.json
        mkdir scripts
-       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js -OutFile scripts/build.js
+       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/build.js -OutFile scripts/build.js
        $(gc .\package.json) -replace "^\s*`"build`":\s.*$", "    `"build`": `"node scripts/build`"," | Out-File .\package.json -Force -Encoding UTF8
        npm install
-       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py -OutFile update_env_endpoint.py
+       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/update_env_endpoint.py -OutFile update_env_endpoint.py
        cd ..
-       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/Pipfile -OutFile Pipfile
-       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml -OutFile runway.yml
+       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/Pipfile -OutFile Pipfile
+       Invoke-WebRequest https://raw.githubusercontent.com/onicagroup/r4y/master/quickstarts/conduit/r4y.yml -OutFile r4y.yml
 
 
 Deploying
 ^^^^^^^^^
 
-Execute ``pipenv run runway deploy``, enter ``all`` (to deploy the backend
+Execute ``pipenv run r4y deploy``, enter ``all`` (to deploy the backend
 followed by the frontend). Deployment will take some time (mostly waiting for
 the CloudFront distribution to stabilize).
 
@@ -137,7 +137,7 @@ the last lines of output once deployment is complete, e.g.:
 Teardown
 ^^^^^^^^
 
-Execute ``pipenv run runway destroy``, enter ``all``.
+Execute ``pipenv run r4y destroy``, enter ``all``.
 
 The backend DynamoDB tables will still be retained after the destroy is
 complete. They must be deleted separately:

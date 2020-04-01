@@ -8,11 +8,11 @@ Defining Tests
 Overview
 ========
 
-:ref:`Tests<runway-test>` can be defined in the
-:ref:`runway config file<runway-config>` to test your
-:ref:`modules<runway-module>` in any way you desire before deploying. They are
-run by using the ``runway test`` :ref:`command<command-test>`.
-:ref:`Tests<runway-test>` are run in the order they are defined.
+:ref:`Tests<r4y-test>` can be defined in the
+:ref:`r4y config file<r4y-config>` to test your
+:ref:`modules<r4y-module>` in any way you desire before deploying. They are
+run by using the ``r4y test`` :ref:`command<command-test>`.
+:ref:`Tests<r4y-test>` are run in the order they are defined.
 
 .. rubric:: Example:
 
@@ -28,11 +28,11 @@ run by using the ``runway test`` :ref:`command<command-test>`.
 Test Failures
 -------------
 
-The default behavior if one of the :ref:`tests<runway-test>` fails is to
+The default behavior if one of the :ref:`tests<r4y-test>` fails is to
 terminate execution. The subsequent commands will not be run and a non-zero
 exit code returned. This behavior can modified to continue testing and not
 result in a non-zero exit code on a per-test basis by adding ``required: false``
-to the :ref:`test definition<runway-test>`.
+to the :ref:`test definition<r4y-test>`.
 
 .. rubric:: Example:
 
@@ -61,8 +61,8 @@ Source: https://github.com/aws-cloudformation/cfn-python-lint
   *and additional checks. Includes checking valid values for resource properties*
   *and best practices*.
 
-In order to use this :ref:`test<runway-test>`, there must be a ``.cfnlintrc``
-file in the same directory as the :ref:`Runway config file<runway-config>`.
+In order to use this :ref:`test<r4y-test>`, there must be a ``.cfnlintrc``
+file in the same directory as the :ref:`Runway config file<r4y-config>`.
 
 .. rubric:: Example:
 
@@ -103,7 +103,7 @@ Source: https://github.com/adrienverge/yamllint
   *problems such as lines length, trailing spaces, indentation, etc*.
 
 A ``.yamllint`` file can be placed at in the same directory as the
-:ref:`Runway config file<runway-config>` to customize the linter or, the Runway
+:ref:`Runway config file<r4y-config>` to customize the linter or, the Runway
 provided template will be used.
 
 .. rubric:: Example:

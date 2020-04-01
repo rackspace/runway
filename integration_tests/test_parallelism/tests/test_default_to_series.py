@@ -1,5 +1,5 @@
 """Testing that when CI is not set it still will launch the regions in series"""
-from runway.util import change_dir
+from r4y.util import change_dir
 
 from integration_tests.test_parallelism.test_parallelism import Parallelism
 from integration_tests.util import run_command
@@ -13,9 +13,9 @@ class TestDefaultToSeries(Parallelism):
     def deploy(self):
         """Deploy provider."""
         self.copy_fixture('sampleapp.cfn')
-        self.copy_runway('default-to-series')
+        self.copy_r4y('default-to-series')
         with change_dir(self.parallelism_test_dir):
-            return run_command(['runway', 'deploy'])
+            return run_command(['r4y', 'deploy'])
 
     def run(self):
         """Run tests."""
@@ -27,5 +27,5 @@ class TestDefaultToSeries(Parallelism):
         self.set_env_var('CI', '1')
         self.logger.info('Tearing down: %s', self.TEST_NAME)
         with change_dir(self.parallelism_test_dir):
-            run_command(['runway', 'destroy'])
+            run_command(['r4y', 'destroy'])
         self.clean()

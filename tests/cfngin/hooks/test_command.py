@@ -1,13 +1,13 @@
-"""Tests for runway.cfngin.hooks.command."""
+"""Tests for r4y.cfngin.hooks.command."""
 import os
 import unittest
 from subprocess import PIPE
 
 import mock
 
-from runway.cfngin.config import Config
-from runway.cfngin.context import Context
-from runway.cfngin.hooks.command import run_command
+from r4y.cfngin.config import Config
+from r4y.cfngin.context import Context
+from r4y.cfngin.hooks.command import run_command
 
 from ..factories import mock_provider
 
@@ -37,7 +37,7 @@ class MockProcess(object):
 
 
 class TestCommandHook(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.command."""
+    """Tests for r4y.cfngin.hooks.command."""
 
     def setUp(self):
         """Run before tests."""
@@ -47,12 +47,12 @@ class TestCommandHook(unittest.TestCase):
 
         self.mock_process = MockProcess()
         self.popen_mock = \
-            mock.patch('runway.cfngin.hooks.command.Popen',
+            mock.patch('r4y.cfngin.hooks.command.Popen',
                        return_value=self.mock_process).start()
 
         self.devnull = mock.Mock()
         self.devnull_mock = \
-            mock.patch('runway.cfngin.hooks.command._devnull',
+            mock.patch('r4y.cfngin.hooks.command._devnull',
                        return_value=self.devnull).start()
 
     def tearDown(self):

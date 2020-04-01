@@ -44,7 +44,7 @@ to be skipped in subsequent runs.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.aws_lambda.upload_lambda_functions``
+``r4y.cfngin.hooks.aws_lambda.upload_lambda_functions``
 
 
 .. rubric:: Args
@@ -143,7 +143,7 @@ to be skipped in subsequent runs.
 
     pre_build:
       upload_functions:
-        path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+        path: r4y.cfngin.hooks.aws_lambda.upload_lambda_functions
         required: true
         enabled: true
         data_key: lambda
@@ -170,7 +170,7 @@ to be skipped in subsequent runs.
 .. code-block:: python
 
     from troposphere.awslambda import Function
-    from runway.cfngin.blueprints.base import Blueprint
+    from r4y.cfngin.blueprints.base import Blueprint
 
     class LambdaBlueprint(Blueprint):
         def create_template(self):
@@ -197,7 +197,7 @@ Build static site. Used by the staticsite_ module type.
 
 .. rubric:: Hook Path
 
-``runway.hooks.staticsite.build_staticsite.build``
+``r4y.hooks.staticsite.build_staticsite.build``
 
 
 .. rubric:: Args
@@ -215,7 +215,7 @@ Delete objects in bucket. Primarily used as a ``pre_destroy`` hook before deleti
 
 .. rubric:: Hook Path
 
-``runway.hooks.cleanup_s3.purge_bucket``
+``r4y.hooks.cleanup_s3.purge_bucket``
 
 
 .. rubric:: Args
@@ -224,13 +224,13 @@ Delete objects in bucket. Primarily used as a ``pre_destroy`` hook before deleti
     Name of the S3 bucket.
 
 **bucket_output_lookup (str)**
-    Value to pass to :class:`runway.cfngin.lookups.handlers.output.OutputLookup` to retrieve an S3 bucket name.
+    Value to pass to :class:`r4y.cfngin.lookups.handlers.output.OutputLookup` to retrieve an S3 bucket name.
 
 **bucket_rxref_lookup (str)**
-    Value to pass to :class:`runway.cfngin.lookups.handlers.rxref.RxrefLookup` to retrieve an S3 bucket name.
+    Value to pass to :class:`r4y.cfngin.lookups.handlers.rxref.RxrefLookup` to retrieve an S3 bucket name.
 
 **bucket_xref_lookup (str)**
-    Value to pass to :class:`runway.cfngin.lookups.handlers.xref.XrefLookup` to retrieve an S3 bucket name.
+    Value to pass to :class:`r4y.cfngin.lookups.handlers.xref.XrefLookup` to retrieve an S3 bucket name.
 
 
 cleanup_ssm.delete_param
@@ -243,7 +243,7 @@ Delete SSM parameter. Primarily used when an SSM parameter is created by a hook 
 
 .. rubric:: Hook Path
 
-``runway.hooks.cleanup_ssm.delete_param``
+``r4y.hooks.cleanup_ssm.delete_param``
 
 
 .. rubric:: Args
@@ -262,7 +262,7 @@ Run a custom command as a hook.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.command.run_command``
+``r4y.cfngin.hooks.command.run_command``
 
 
 .. rubric:: Args
@@ -307,14 +307,14 @@ Run a custom command as a hook.
 
     pre_build:
       command_copy_environment:
-        path: runway.cfngin.hooks.command.run_command
+        path: r4y.cfngin.hooks.command.run_command
         required: true
         enabled: true
         data_key: copy_env
         args:
           command: ['cp', 'environment.template', 'environment']
       command_git_rev_parse:
-        path: runway.cfngin.hooks.command.run_command
+        path: r4y.cfngin.hooks.command.run_command
         required: true
         enabled: true
         data_key: get_git_commit
@@ -323,7 +323,7 @@ Run a custom command as a hook.
           cwd: ./my-git-repo
           capture: true
       command_npm_install:
-        path: runway.cfngin.hooks.command.run_command
+        path: r4y.cfngin.hooks.command.run_command
         args:
           command: '`cd $PROJECT_DIR/project; npm install`'
           env:
@@ -341,7 +341,7 @@ Create ECS clusters.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.ecs.create_clusters``
+``r4y.cfngin.hooks.ecs.create_clusters``
 
 
 .. rubric:: Args
@@ -362,7 +362,7 @@ http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#ser
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.iam.create_ecs_service_role``
+``r4y.cfngin.hooks.iam.create_ecs_service_role``
 
 
 .. rubric:: Args
@@ -381,7 +381,7 @@ Ensure server cert exists.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.iam.ensure_server_cert_exists``
+``r4y.cfngin.hooks.iam.ensure_server_cert_exists``
 
 
 .. rubric:: Args
@@ -403,7 +403,7 @@ Ensure a specific keypair exists within AWS. If the key doesn't exist, upload it
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.keypair.ensure_keypair_exists``
+``r4y.cfngin.hooks.keypair.ensure_keypair_exists``
 
 
 .. rubric:: Args
@@ -437,7 +437,7 @@ Create a domain within route53.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.route53.create_domain``
+``r4y.cfngin.hooks.route53.create_domain``
 
 
 .. rubric:: Args
@@ -457,7 +457,7 @@ Used by the staticsite_ module type.
 
 .. rubric:: Hook Path
 
-``runway.hooks.staticsite.upload_staticsite.get_distribution_data``
+``r4y.hooks.staticsite.upload_staticsite.get_distribution_data``
 
 
 .. rubric:: Args
@@ -475,7 +475,7 @@ Sync static website to S3 bucket. Used by the staticsite_ module type.
 
 .. rubric:: Hook Path
 
-``runway.hooks.staticsite.upload_staticsite.sync``
+``r4y.hooks.staticsite.upload_staticsite.sync``
 
 
 .. rubric:: Args

@@ -35,7 +35,7 @@ class TestAwsLambda(Cfngin):
     def _build(self):
         """Execute and assert initial build."""
         self.set_environment('dev')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
+        code, _stdout, _stderr = self.r4y_cmd('deploy')
         assert code == 0, 'exit code should be zero'
 
     def run(self):
@@ -53,7 +53,7 @@ class TestAwsLambda(Cfngin):
 
     def teardown(self):
         """Teardown test."""
-        self.runway_cmd('destroy')
+        self.r4y_cmd('destroy')
         venv_dir = path.join(self.fixture_dir,
                              'lambda_src/dockerize_src/.venv')
         if path.isdir(venv_dir):
