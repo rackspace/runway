@@ -12,14 +12,16 @@ Example:
 
 """
 from __future__ import print_function
-from typing import Dict  # noqa pylint: disable=unused-import
+
 import logging
 import os
 import platform
 import sys
+from typing import Dict  # noqa pylint: disable=unused-import
 
-from ..runway_command import RunwayCommand, get_env
+from ...context import Context
 from ...util import merge_dicts, merge_nested_environment_dicts
+from ..runway_command import RunwayCommand, get_env
 
 LOGGER = logging.getLogger('runway')
 
@@ -43,18 +45,23 @@ class EnvVars(RunwayCommand):
 
     def execute(self):
         """Output Runway-defined environment variables."""
-        if self.runway_config.get('deployments'):
+        if self.runway_config.deployments:
+            context = Context(
+                env_name=get_env(self.env_root,
+                                 self.runway_config.ignore_git_branch),
+                env_region=None,
+                env_root=self.env_root,
+                env_vars=os.environ.copy()
+            )
             env_vars = {}
-            for i in self.runway_config.get('deployments'):
-                env_vars = merge_dicts(env_vars, i.get('env_vars', {}))
+            for deployment in self.runway_config.deployments:
+                deployment.resolve(context, self.runway_vars)
+                env_vars = merge_dicts(env_vars, deployment.env_vars)
             if env_vars:
                 env_vars = merge_nested_environment_dicts(
                     env_vars,
-                    env_name=get_env(
-                        os.getcwd(),
-                        ignore_git_branch=self.runway_config.get('ignore_git_branch'),
-                    ),
-                    env_root=os.getcwd()
+                    env_name=context.env_name,
+                    env_root=context.env_root
                 )
 
             if 'MSYSTEM' in os.environ and (
