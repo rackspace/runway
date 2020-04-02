@@ -4,19 +4,20 @@
 .. _staticsite: ../module_configuration/staticsite.html
 .. _sys_path: configuration.html#module-paths
 
-=====
+#####
 Hooks
-=====
+#####
 
 A hook is a python function or class method that is executed before or after the action is taken.
 To see how to define hooks in a config file see the `Pre & Post Hooks`_ documentation.
 
 
+**************
 Built-in Hooks
-==============
+**************
 
 acm.Certificate
----------------
+===============
 
 .. rubric:: Requirements
 
@@ -101,7 +102,7 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
 
 
 aws_lambda.upload_lambda_functions
-----------------------------------
+==================================
 
 .. rubric:: Description
 
@@ -273,7 +274,7 @@ to be skipped in subsequent runs.
 
 
 build_staticsite.build
-----------------------
+======================
 
 .. rubric:: Description
 
@@ -291,7 +292,7 @@ See staticsite_ module documentation for details.
 
 
 cleanup_s3.purge_bucket
------------------------
+=======================
 
 .. rubric:: Description
 
@@ -319,7 +320,7 @@ Delete objects in bucket. Primarily used as a ``pre_destroy`` hook before deleti
 
 
 cleanup_ssm.delete_param
-------------------------
+========================
 
 .. rubric:: Description
 
@@ -338,7 +339,7 @@ Delete SSM parameter. Primarily used when an SSM parameter is created by a hook 
 
 
 command.run_command
--------------------
+===================
 
 .. rubric:: Description
 
@@ -417,7 +418,7 @@ Run a custom command as a hook.
 
 
 ecs.create_clusters
--------------------
+===================
 
 .. rubric:: Description
 
@@ -436,7 +437,7 @@ Create ECS clusters.
 
 
 iam.create_ecs_service_role
----------------------------
+===========================
 
 .. rubric:: Description
 
@@ -457,7 +458,7 @@ http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#ser
 
 
 iam.ensure_server_cert_exists
------------------------------
+=============================
 
 .. rubric:: Description
 
@@ -479,7 +480,7 @@ Ensure server cert exists.
 
 
 keypair.ensure_keypair_exists
------------------------------
+=============================
 
 .. rubric:: Description
 
@@ -513,7 +514,7 @@ Ensure a specific keypair exists within AWS. If the key doesn't exist, upload it
 
 
 route53.create_domain
----------------------
+=====================
 
 .. rubric:: Description
 
@@ -532,7 +533,7 @@ Create a domain within route53.
 
 
 upload_staticsite.get_distribution_data
----------------------------------------
+=======================================
 
 .. rubric:: Description
 
@@ -551,7 +552,7 @@ See staticsite_ module documentation for details.
 
 
 upload_staticsite.sync
-----------------------
+======================
 
 .. rubric:: Description
 
@@ -568,8 +569,9 @@ Sync static website to S3 bucket. Used by the staticsite_ module type.
 See staticsite_ module documentation for details.
 
 
+*********************
 Writing A Custom Hook
-=====================
+*********************
 
 A custom hook must be in an executable, importable python package or standalone file.
 The hook must be importable using your current ``sys.path``.
@@ -600,7 +602,7 @@ If using boto3 in a hook, use ``context.get_session()`` instead of creating a ne
 
 
 Example Hook Function
----------------------
+=====================
 
 .. rubric:: local_path/hooks/my_hook.py
 .. code-block:: python
@@ -636,7 +638,7 @@ Example Hook Function
 
 
 Example Hook Class
----------------------
+==================
 
 .. rubric:: local_path/hooks/my_hook.py
 .. code-block:: python
