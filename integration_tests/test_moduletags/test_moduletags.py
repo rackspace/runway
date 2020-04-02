@@ -23,9 +23,10 @@ class ModuleTags(IntegrationTest):
     tests_dir = os.path.join(base_dir, 'tests')
     sampleapp_dir = os.path.join(base_dir, 'sampleapp')
 
-    stacker_file = {
+    cfngin_file = {
         'namespace': 'runway-tests',
-        'stacker_bucket': '',
+        'cfngin_bucket': '',
+        'sys_path': './',
         'stacks': {}
     }
     stack_definition = {
@@ -66,7 +67,7 @@ class ModuleTags(IntegrationTest):
         for i in range(1, 7):
             new_dir = os.path.join(self.base_dir, 'sampleapp' + str(i))
             copy_dir(os.path.join(self.base_dir, 'sampleapp'), new_dir)
-            stacker_contents = deepcopy(self.stacker_file)
+            stacker_contents = deepcopy(self.cfngin_file)
             stacker_contents['stacks'] = {
                 'module-tags-' + str(i): self.stack_definition
             }
