@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - `runway plan` for cfngin modules will now properly resolve output lookups when the original stack did not change or the reference stack is `locked: true`
+- `env_var` deployment/module will now work as expected when used with a CFNgin or staticsite module
 
 ## [1.5.1] - 2020-03-25
 ### Changed
