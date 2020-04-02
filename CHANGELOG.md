@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- `runway plan` for cfngin modules will now properly resolve output lookups when the original stack did not change or the reference stack is `locked: true`
+
+## [1.5.1] - 2020-03-25
+### Changed
+- (binary/npm versions only) bumped embedded awacs version to v0.9.8
 
 ## [1.5.0] - 2020-03-24
 ### Added
@@ -753,7 +759,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/onicagroup/runway/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/onicagroup/runway/compare/v1.4.4...v1.5.0
 [1.4.4]: https://github.com/onicagroup/runway/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/onicagroup/runway/compare/v1.4.2...v1.4.3

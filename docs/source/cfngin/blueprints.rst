@@ -1,40 +1,38 @@
-.. _Blueprint: term-cfngin-blueprint
-.. _Blueprints: Blueprint
-.. _Property Type: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-product-property-reference.html
-.. _Resource Type: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
 .. _Runway blueprints: https://github.com/onicagroup/runway/tree/master/src/runway/blueprints
 .. _troposphere: https://github.com/cloudtools/troposphere
 
+.. _Blueprint:
+.. _Blueprints:
 
 ==========
 Blueprints
 ==========
 
-Blueprints_ are python classes that dynamically build CloudFormation templates.
-Where you would specify a raw Cloudformation template in a stack using the ``template_path`` key, you instead specify a Blueprint_ python file using the ``class_path`` key.
+:ref:`Blueprints <term-blueprint>` are python classes that dynamically build CloudFormation templates.
+Where you would specify a raw Cloudformation template in a stack using the ``template_path`` key, you instead specify a :ref:`Blueprint <term-blueprint>` python file using the ``class_path`` key.
 
-Traditionally Blueprints_ are built using troposphere_, but that is not absolutely necessary.
+Traditionally :ref:`Blueprints <term-blueprint>` are built using troposphere_, but that is not absolutely necessary.
 
 Making your own should be easy, and you can take a lot of examples from `Runway blueprints`_.
-In the end, all that is required is that the Blueprint_ is a subclass of ``runway.cfngin.blueprints.base`` and it have the following methods:
+In the end, all that is required is that the :ref:`Blueprint <term-blueprint>` is a subclass of ``runway.cfngin.blueprints.base`` and it have the following methods:
 
 .. code-block:: python
 
-    # Initializes the Blueprint
-    def __init__(self, name, context, mappings=None):
+  # Initializes the Blueprint
+  def __init__(self, name, context, mappings=None):
 
-    # Updates self.template to create the actual template
-    def create_template(self):
+  # Updates self.template to create the actual template
+  def create_template(self):
 
-    # Returns a tuple: (version, rendered_template)
-    def render_template(self):
+  # Returns a tuple: (version, rendered_template)
+  def render_template(self):
 
 
 Variables
 =========
 
 A Blueprint can define a ``VARIABLES`` property that defines the variables
-it accepts from the `Config Variables <config.html#variables>`_.
+it accepts from the `Config Variables <configuration.html#variables>`_.
 
 ``VARIABLES`` should be a dictionary of ``<variable name>: <variable
 definition>``. The variable definition should be a dictionary which
@@ -105,8 +103,8 @@ TroposphereType
 ---------------
 
 The ``TroposphereType`` can be used to generate resources for use in the
-Blueprint_ directly from user-specified configuration. Which case applies depends
-on what ``type`` was chosen, and how it would be normally used in the Blueprint_
+:ref:`Blueprint <term-blueprint>` directly from user-specified configuration. Which case applies depends
+on what ``type`` was chosen, and how it would be normally used in the :ref:`Blueprint <term-blueprint>`
 (and CloudFormation in general).
 
 Resource Types
@@ -124,6 +122,8 @@ and the corresponding *values* are themselves dictionaries, to be used as
 parameters for creating each of multiple ``type`` objects. A list of those
 objects will be stored in the variable.
 
+.. _Resource Type: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+
 Property Types
 ^^^^^^^^^^^^^^
 
@@ -137,6 +137,8 @@ directly, and one object will be created and stored in the variable.
 When ``many`` is enabled, a list of dictionaries is expected. For each element,
 one corresponding call will be made to the ``type`` constructor, and all the
 objects produced will be stored (also as a list) in the variable.
+
+.. _Property Type: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-product-property-reference.html
 
 Optional variables
 ^^^^^^^^^^^^^^^^^^
@@ -321,8 +323,8 @@ Below is an annotated example:
 Utilizing Stack name within your Blueprint
 ==========================================
 
-Sometimes your Blueprint_ might want to utilize the already existing stack name
-within your Blueprint_. CFNgin provides access to both the fully qualified
+Sometimes your :ref:`Blueprint <term-blueprint>` might want to utilize the already existing stack name
+within your :ref:`Blueprint <term-blueprint>`. Runway's CFNgin provides access to both the fully qualified
 stack name matching what’s shown in the CloudFormation console, in addition to
 the stacks short name you have set in your YAML config.
 
@@ -336,7 +338,7 @@ namespace is ``CFNginIsCool`` and the stacks short name is
 
     CFNginIsCool-myAwesomeEC2Instance
 
-To use this in your Blueprint_, you can get the name from context using ``self.context.get_fqn(self.name)``.
+To use this in your :ref:`Blueprint <term-blueprint>`, you can get the name from context using ``self.context.get_fqn(self.name)``.
 
 Referencing the Stack short name
 --------------------------------
@@ -348,7 +350,7 @@ short name would be::
 
     myAwesomeEC2Instance
 
-To use this in your Blueprint_, you can get the name from self.name: ``self.name``
+To use this in your :ref:`Blueprint <term-blueprint>`, you can get the name from self.name: ``self.name``
 
 Example
 ^^^^^^^
@@ -398,7 +400,7 @@ Below is an annotated example creating a security group:
 Testing Blueprints
 ==================
 
-When writing your own Blueprints_ its useful to write tests for them in order
+When writing your own :ref:`Blueprints <term-blueprint>` its useful to write tests for them in order
 to make sure they behave the way you expect they would, especially if there is
 any complex logic inside.
 
