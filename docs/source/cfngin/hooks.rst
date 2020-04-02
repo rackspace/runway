@@ -505,8 +505,10 @@ If using boto3 in a hook, use ``context.get_session()`` instead of creating a ne
 .. code-block::
 
     """context.get_session() example."""
+    from runway.cfngin.context import Context
+    from runway.cfngin.providers.aws.default import Provider
 
-    def do_something(context, provider, **kwargs):
+    def do_something(context: Context, provider: Provider, **kwargs: str) -> None:
         """Do something."""
         session = context.get_session()
         s3_client = session.client('s3')
@@ -519,13 +521,21 @@ Example Hook Function
 .. code-block:: python
 
     """My hook."""
+    from typing import Dict
+
+    from runway.cfngin.context import Context
+    from runway.cfngin.providers.aws.default import Provider
 
 
-    def do_something(context, provider, is_failure=True, **kwargs):
+    def do_something(context: Context,
+                     provider: Provider,
+                     is_failure: bool = True,
+                     **kwargs: str
+                     ) -> Dict[str, str]:
         """Do something."""
         if is_failure:
-            return False
-        return f"You are not a failure {kwargs.get('name', 'Kevin')}."
+            return None
+        return {'result': f"You are not a failure {kwargs.get('name', 'Kevin')}."}
 
 .. rubric:: local_path/cfngin.yaml
 .. code-block:: yaml
@@ -533,7 +543,7 @@ Example Hook Function
     namespace: example
     sys_path: ./
 
-    hooks:
+    pre_build:
       my_hook_do_something:
         path: hooks.my_hook.do_something
         args:
@@ -547,18 +557,52 @@ Example Hook Class
 .. code-block:: python
 
     """My hook."""
+    import logging
+    from typing import Dict
 
-    class MyClass:
-        """My class."""
+    from runway.cfngin.hooks.base import Hook
 
-        SUCCESS_MESSAGE = 'You are not a failure {name}.'
+    LOGGER = logging.getLogger(__name__)
 
-        @classmethod
-        def do_something(cls, context, provider, is_failure=True, **kwargs):
-            """Do something."""
-            if is_failure:
-                return False
-            return self.SUCCESS_MESSAGE.format(name=kwargs.get('name', 'Kevin'))
+    class MyClass(Hook):
+        """My class does a thing.
+
+        Keyword Args:
+            is_failure (bool): Force the hook to fail if true.
+            name (str): Name used in the response.
+
+        Returns:
+            Dict[str, str]: Response message is stored in ``result``.
+
+        Example:
+        .. code-block:: yaml
+
+          pre_build:
+            my_hook_do_something:
+              path: hooks.my_hook.MyClass
+              args:
+                is_failure: False
+                name: Karen
+
+        """
+
+        def post_deploy(self) -> Dict[str, str]:
+            """Run during the **post_deploy** stage."""
+            if self.args.is_failure:
+                return None
+            return {'result': f"You are not a failure {self.args.name}."
+
+        def post_destroy(self) -> None:
+            """Run during the **post_destroy** stage."""
+            LOGGER.error('post_destroy is not supported by this hook')
+
+        def pre_deploy(self) -> None:
+            """Run during the **pre_deploy** stage."""
+            LOGGER.error('pre_deploy is not supported by this hook')
+
+        def pre_destroy(self) -> None:
+            """Run during the **pre_destroy** stage."""
+            LOGGER.error('pre_destroy is not supported by this hook')
 
 .. rubric:: local_path/cfngin.yaml
 .. code-block:: yaml
@@ -566,9 +610,9 @@ Example Hook Class
     namespace: example
     sys_path: ./
 
-    hooks:
+    pre_build:
       my_hook_do_something:
-        path: hooks.my_hook.MyClass.do_something
+        path: hooks.my_hook.MyClass
         args:
           is_failure: False
           name: Karen
