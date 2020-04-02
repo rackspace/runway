@@ -36,9 +36,10 @@ class Certificate(Hook):
             the resource record sets that you want to change. This must exist
             in the same account that the certificate will be created in.
         stack_name (Optional[str]): Provide a name for the stack used to
-            create the certificate. If not provided, the domain is used.
+            create the certificate. If not provided, the domain is used
+            (replacing ``.`` with ``-``).
         ttl (Optional[int]): The resource record cache time to live (TTL),
-            in seconds.
+            in seconds. (*default:* ``300``)
 
     Example:
     .. code-block: yaml
@@ -63,7 +64,7 @@ class Certificate(Hook):
                 Provider instance. (passed in by CFNgin)
 
         """
-        kwargs.setdefault('ttl', 30)
+        kwargs.setdefault('ttl', 300)
         super(Certificate, self).__init__(context, provider, **kwargs)
 
         self.template_description = self.get_template_description()
