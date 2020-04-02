@@ -6,7 +6,7 @@ import sys
 
 from yaml.constructor import ConstructorError
 
-from runway.util import AWS_ENV_VARS, MutableMap, cached_property
+from runway.util import MutableMap, cached_property, environ
 
 from .actions import build, destroy, diff
 from .config import render_parse_load as load_config
@@ -55,7 +55,6 @@ class CFNgin(object):
 
         """
         self.__ctx = ctx
-        self._aws_credential_backup = {}
         self._env_file_name = None
         self.concurrency = ctx.max_concurrent_cfngin_stacks
         self.interactive = ctx.is_interactive
@@ -72,7 +71,6 @@ class CFNgin(object):
             self.parameters.update(parameters)
 
         self._inject_common_parameters()
-        self._save_aws_credentials()
 
     @cached_property
     def env_file(self):
@@ -107,23 +105,22 @@ class CFNgin(object):
         """
         if self.should_skip(force):
             return
-        self._inject_aws_credentials()
         if not sys_path:
             sys_path = self.sys_path
         config_files = self.find_config_files(sys_path=sys_path)
 
-        for config in config_files:
-            ctx = self.load(config)
-            LOGGER.info('%s: deploying...', os.path.basename(config))
-            action = build.Action(
-                context=ctx,
-                provider_builder=self._get_provider_builder(
-                    ctx.config.service_role
+        with environ(self.__ctx.env_vars):
+            for config in config_files:
+                ctx = self.load(config)
+                LOGGER.info('%s: deploying...', os.path.basename(config))
+                action = build.Action(
+                    context=ctx,
+                    provider_builder=self._get_provider_builder(
+                        ctx.config.service_role
+                    )
                 )
-            )
-            action.execute(concurrency=self.concurrency,
-                           tail=self.tail)
-        self._restore_aws_credentials()
+                action.execute(concurrency=self.concurrency,
+                               tail=self.tail)
 
     def destroy(self, force=False, sys_path=None):
         """Run the CFNgin destroy action.
@@ -137,26 +134,25 @@ class CFNgin(object):
         """
         if self.should_skip(force):
             return
-        self._inject_aws_credentials()
         if not sys_path:
             sys_path = self.sys_path
         config_files = self.find_config_files(sys_path=sys_path)
         # destroy should run in reverse to handle dependencies
         config_files.reverse()
 
-        for config in config_files:
-            ctx = self.load(config)
-            LOGGER.info('%s: destroying...', os.path.basename(config))
-            action = destroy.Action(
-                context=ctx,
-                provider_builder=self._get_provider_builder(
-                    ctx.config.service_role
+        with environ(self.__ctx.env_vars):
+            for config in config_files:
+                ctx = self.load(config)
+                LOGGER.info('%s: destroying...', os.path.basename(config))
+                action = destroy.Action(
+                    context=ctx,
+                    provider_builder=self._get_provider_builder(
+                        ctx.config.service_role
+                    )
                 )
-            )
-            action.execute(concurrency=self.concurrency,
-                           force=True,
-                           tail=self.tail)
-        self._restore_aws_credentials()
+                action.execute(concurrency=self.concurrency,
+                               force=True,
+                               tail=self.tail)
 
     def load(self, config_path):
         """Load a CFNgin config into a context object.
@@ -197,22 +193,21 @@ class CFNgin(object):
         """
         if self.should_skip(force):
             return
-        self._inject_aws_credentials()
         if not sys_path:
             sys_path = self.sys_path
         config_files = self.find_config_files(sys_path=sys_path)
-        for config in config_files:
-            ctx = self.load(config)
-            LOGGER.info('%s: generating change sets...',
-                        os.path.basename(config))
-            action = diff.Action(
-                context=ctx,
-                provider_builder=self._get_provider_builder(
-                    ctx.config.service_role
+        with environ(self.__ctx.env_vars):
+            for config in config_files:
+                ctx = self.load(config)
+                LOGGER.info('%s: generating change sets...',
+                            os.path.basename(config))
+                action = diff.Action(
+                    context=ctx,
+                    provider_builder=self._get_provider_builder(
+                        ctx.config.service_role
+                    )
                 )
-            )
-            action.execute()
-        self._restore_aws_credentials()
+                action.execute()
 
     def should_skip(self, force=False):
         """Determine if action should be taken or not.
@@ -288,13 +283,6 @@ class CFNgin(object):
             service_role=service_role
         )
 
-    # TODO remove after deprecated `get_session` is removed
-    def _inject_aws_credentials(self):
-        """Change environment AWS credentials."""
-        LOGGER.debug('Injecting AWS credentials into the environment before '
-                     'running a CFNgin action')
-        os.environ.update(self.__ctx.current_aws_creds)
-
     def _inject_common_parameters(self):
         """Add common parameters if they don't already exist.
 
@@ -318,29 +306,6 @@ class CFNgin(object):
             self.parameters['environment'] = self.__ctx.env_name
         if not self.parameters.get('region'):
             self.parameters['region'] = self.region
-
-    # TODO remove after deprecated `get_session` is removed
-    def _save_aws_credentials(self):
-        """Save a copy of existing AWS credentials from the environment."""
-        LOGGER.debug('Creating a backup of AWS credentials from the '
-                     'environment before running CFNgin')
-        temp = os.environ.copy()
-        for name in AWS_ENV_VARS:
-            value = temp.get(name)
-            if value:
-                self._aws_credential_backup[name] = value
-
-    # TODO remove after deprecated `get_session` is removed
-    def _restore_aws_credentials(self):
-        """Restore original AWS credentials to the environment."""
-        LOGGER.debug('Restoring AWS credential backup post CFNgin action')
-        for name in AWS_ENV_VARS:
-            value = self._aws_credential_backup.get(name)
-            if value:
-                os.environ[name] = value
-            else:
-                # remove key if it exists, no error raised if it doesn't
-                os.environ.pop(name, None)
 
     @classmethod
     def find_config_files(cls, exclude=None, sys_path=None):
