@@ -7,7 +7,6 @@ Module Configurations
     :maxdepth: 1
     :name: mod-configs
 
-    cdk
     custom
     kubernetes
     serverless

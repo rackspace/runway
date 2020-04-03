@@ -31,6 +31,8 @@
         "forcerm",
         "kwarg",
         "lambci",
+        "mycdkmodule",
+        "myothercdkmodule",
         "nondockerizepip",
         "rxref",
         "stubbers"
