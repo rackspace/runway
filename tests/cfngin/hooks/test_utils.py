@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.utils."""
-# pylint: disable=unused-argument
+# pylint: disable=no-self-use,unused-argument
 import queue
 import unittest
 
@@ -53,8 +53,10 @@ class TestHooks(unittest.TestCase):
         """Test valid hook."""
         hooks = [
             Hook({"path": "tests.cfngin.hooks.test_utils.mock_hook",
-                  "required": True})]
-        handle_hooks("missing", hooks, self.provider, self.context)
+                  "required": True}),
+            Hook({'path': 'tests.cfngin.hooks.test_utils.MockHook',
+                  'required': True})]
+        handle_hooks('pre_build', hooks, self.provider, self.context)
         good = HOOK_QUEUE.get_nowait()
         self.assertEqual(good["provider"].region, "us-east-1")
         with self.assertRaises(queue.Empty):
@@ -157,6 +159,29 @@ class TestHooks(unittest.TestCase):
             self.context.hook_data["my_hook_results"]["default_lookup"],
             "default_value"
         )
+
+
+class MockHook(object):
+    """Mock hook class."""
+
+    def __init__(self, **kwargs):
+        """Instantiate class."""
+
+    def post_deploy(self):
+        """Run during the **post_deploy** stage."""
+        return {'status': 'success'}
+
+    def post_destroy(self):
+        """Run during the **post_destroy** stage."""
+        return {'status': 'success'}
+
+    def pre_deploy(self):
+        """Run during the **pre_deploy** stage."""
+        return {'status': 'success'}
+
+    def pre_destroy(self):
+        """Run during the **pre_destroy** stage."""
+        return {'status': 'success'}
 
 
 def mock_hook(*args, **kwargs):
