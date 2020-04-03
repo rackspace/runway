@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - lookups are now resolved when using the `runway envvars` command
 
+## Added
+- ACM CloudFormation hook
+
 ## [1.5.2] - 2020-04-02
 ### Fixed
 - `runway plan` for cfngin modules will now properly resolve output lookups when the original stack did not change or the reference stack is `locked: true`

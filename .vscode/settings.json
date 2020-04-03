@@ -17,9 +17,12 @@
     "python.linting.pylintEnabled": true,
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "cSpell.words": [
-        "Ngin",
         "CFNgin",
+        "CNAME",
+        "FQDN",
+        "FQDNs",
         "JWKS",
+        "Ngin",
         "PKCE",
         "boto",
         "cfngin",
@@ -29,8 +32,8 @@
         "kwarg",
         "lambci",
         "nondockerizepip",
-        "stubbers",
-        "rxref"
+        "rxref",
+        "stubbers"
     ],
     "pythonTestExplorer.testFramework": "pytest"
 }

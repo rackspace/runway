@@ -3,13 +3,22 @@ import collections
 import logging
 import os
 import sys
+from types import FunctionType
 
 from runway.util import load_object_from_string
 from runway.variables import Variable, resolve_variables
 
+from ..blueprints.base import Blueprint
 from ..exceptions import FailedVariableLookup
 
 LOGGER = logging.getLogger(__name__)
+
+
+class BlankBlueprint(Blueprint):
+    """Blueprint that can be built programatically."""
+
+    def create_template(self):
+        """Create template without raising NotImplementedError."""
 
 
 def full_path(path):
@@ -17,7 +26,8 @@ def full_path(path):
     return os.path.abspath(os.path.expanduser(path))
 
 
-def handle_hooks(stage, hooks, provider, context):
+# TODO split up to reduce number of statements
+def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-statements
     """Handle pre/post_build hooks.
 
     These are pieces of code that we want to run before/after the builder
@@ -43,6 +53,7 @@ def handle_hooks(stage, hooks, provider, context):
             raise ValueError("%s hook #%d missing path." % (stage, i))
 
     LOGGER.info("Executing %s hooks: %s", stage, ", ".join(hook_paths))
+    stage = stage.replace('build', 'deploy')  # TODO remove after full rename
     for hook in hooks:
         data_key = hook.data_key
         required = hook.required
@@ -78,7 +89,14 @@ def handle_hooks(stage, hooks, provider, context):
             kwargs = hook.args or {}
 
         try:
-            result = method(context=context, provider=provider, **kwargs)
+            if isinstance(method, FunctionType):
+                result = method(context=context, provider=provider,
+                                **kwargs)
+            else:
+                result = getattr(
+                    method(context=context, provider=provider, **kwargs),
+                    stage
+                )()
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Method %s threw an exception:", hook.path)
             if required:
