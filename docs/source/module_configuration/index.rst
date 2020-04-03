@@ -10,6 +10,5 @@ Module Configurations
     cdk
     custom
     kubernetes
-    serverless
     staticsite
     terraform
