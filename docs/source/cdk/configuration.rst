@@ -12,7 +12,7 @@ Prerequisites
 - `npm installed on the system <https://www.npmjs.com/get-npm>`__
 - CDK must be a dev dependency of the module (e.g. ``npm install --save-dev aws-cdk``)
 
-We strongly recommend you commit the package-lock.json that is generated after running ``npm install``
+We strongly recommend you commit the package-lock.json that is generated after running ``npm install``.
 
 
 ************
