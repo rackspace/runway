@@ -12,6 +12,8 @@ Prerequisites
 - `npm installed on the system <https://www.npmjs.com/get-npm>`__
 - Serverless must be a dev dependency of the module (e.g. ``npm install --save-dev serverless``)
 
+We strongly recommend you commit the package-lock.json that is generated after running ``npm install``.
+
 
 **************
 serverless.yml
