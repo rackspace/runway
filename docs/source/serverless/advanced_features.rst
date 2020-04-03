@@ -5,6 +5,26 @@ Advanced Features
 Advanced features and detailed information for using Serverless Framework with Runway.
 
 
+****************
+Disabling NPM CI
+****************
+
+At the start of each module execution, Runway will execute ``npm ci`` to ensure
+Serverless Framework is installed in the project (so Runway can execute it via
+``npx sls``. This can be disabled (e.g. for use when the ``node_modules``
+directory is pre-compiled) via the ``skip_npm_ci`` module option.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  ---
+  deployments:
+    - modules:
+        - path: myslsproject.sls
+          options:
+            skip_npm_ci: true
+
+
 *************************************
 Promoting Builds Through Environments
 *************************************
@@ -35,26 +55,6 @@ deployment (so environment-specific values/lookups will work as normal).
           options:
           promotezip:
             bucketname: my-build-account-bucket-name
-
-
-****************
-Disabling NPM CI
-****************
-
-At the start of each module execution, Runway will execute ``npm ci`` to ensure
-Serverless Framework is installed in the project (so Runway can execute it via
-``npx sls``. This can be disabled (e.g. for use when the ``node_modules``
-directory is pre-compiled) via the ``skip_npm_ci`` module option.
-
-.. rubric:: Example
-.. code-block:: yaml
-
-  ---
-  deployments:
-    - modules:
-        - path: myslsproject.sls
-          options:
-            skip_npm_ci: true
 
 
 *******************************************
