@@ -108,6 +108,27 @@ This means that Serverless must be included as a dev dependency in the **package
    serverless/advanced_features
 
 
+.. _mod-tf:
+
+Terraform
+=========
+
+TBD
+
+- `Configuration <terraform/configuration.html>`__
+- `Directory Structure <terraform/directory_structure.html>`__
+- `Advanced Features <terraform/advanced_features.html>`__
+
+.. toctree::
+   :caption: Terraform
+   :maxdepth: 2
+   :hidden:
+
+   terraform/configuration
+   terraform/directory_structure
+   terraform/advanced_features
+
+
 ******************
 Indices and tables
 ******************
