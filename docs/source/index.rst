@@ -33,6 +33,7 @@ Very simple configuration to:
    developers
    license
 
+
 ********************
 Module Configuration
 ********************
@@ -67,6 +68,10 @@ CloudFormation & Troposphere
 The CloudFormation module type is deployed using Runway's CloudFormation engine (CFNgin).
 It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_ templates that are written in the form of a :ref:`Blueprint`.
 
+- `Configuration <cfngin/configuration.html>`__
+- `Directory Structure <serverless/directory_structure.html>`__
+- `Advanced Features <cfngin/advanced_features.html>`__
+
 .. toctree::
    :caption: CloudFormation & Troposphere
    :maxdepth: 2
@@ -78,6 +83,29 @@ It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_
    cfngin/migrating
 
 .. _Troposphere: https://github.com/cloudtools/troposphere
+
+
+.. _mod-sls:
+
+Serverless Framework
+====================
+
+The Serverless module type is deployed using the `Serverless Framework <https://serverless.com>`__.
+Runway uses `system installed npm <https://www.npmjs.com/get-npm>`__ to install Serverless per-module.
+This means that Serverless must be included as a dev dependency in the **package.json** of the module.
+
+- `Configuration <serverless/configuration.html>`__
+- `Directory Structure <serverless/directory_structure.html>`__
+- `Advanced Features <serverless/advanced_features.html>`__
+
+.. toctree::
+   :caption: Serverless Framework
+   :maxdepth: 2
+   :hidden:
+
+   serverless/configuration
+   serverless/directory_structure
+   serverless/advanced_features
 
 
 ******************

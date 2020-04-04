@@ -9,6 +9,5 @@ Module Configurations
 
     custom
     kubernetes
-    serverless
     staticsite
     terraform
