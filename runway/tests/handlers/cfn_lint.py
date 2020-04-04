@@ -40,7 +40,8 @@ class CfnLintHandler(TestHandler):
                                                                                       args)
                 if not template_matches:
                     matches.extend(
-                        cfnlint.core.run_cli(
+                        # no-value issue is a py2 pylint false positive
+                        cfnlint.core.run_cli(  # pylint: disable=no-value-for-parameter
                             filename, template, rules,
                             args.regions, args.override_spec))
                 else:
