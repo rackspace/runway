@@ -37,6 +37,30 @@ Very simple configuration to:
 Module Configuration
 ********************
 
+
+.. _mod-cdk:
+
+AWS Cloud Development Kit (CDK)
+===============================
+
+The CDK module type is deployed using the `AWS Cloud Development Kit (CDK) <https://docs.aws.amazon.com/cdk/latest/guide/home.html>`__.
+Runway uses `system installed npm <https://www.npmjs.com/get-npm>`__ to install the CDK per-module.
+This means that the CDK must be included as a dev dependency in the **package.json** of the module.
+
+- `Configuration <cdk/configuration.html>`__
+- `Directory Structure <cdk/directory_structure.html>`__
+- `Advanced Features <cdk/advanced_features.html>`__
+
+.. toctree::
+   :caption: AWS Cloud Development Kit (CDK)
+   :maxdepth: 2
+   :hidden:
+
+   cdk/configuration
+   cdk/directory_structure
+   cdk/advanced_features
+
+
 CloudFormation & Troposphere
 ============================
 
