@@ -1,5 +1,6 @@
 """Terraform module."""
 import copy
+import json
 import logging
 import os
 import re
@@ -189,7 +190,7 @@ def update_env_vars_with_tf_var_values(os_env_vars, tf_vars):
                            for (nestedkey, nestedval) in val.items()])
             )
         elif isinstance(val, list):
-            os_env_vars["TF_VAR_%s" % key] = '[' + ','.join(val) + ']'
+            os_env_vars["TF_VAR_%s" % key] = json.dumps(val)
         else:
             os_env_vars["TF_VAR_%s" % key] = val
     return os_env_vars

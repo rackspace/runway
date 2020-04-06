@@ -12,7 +12,7 @@ class TerraformFunctionTester(unittest.TestCase):
         env_vars = update_env_vars_with_tf_var_values(
             {},
             {'foo': 'bar',
-             'list': ['test1', 'test2', 'test3'],
+             'list': ['foo', 1, True],
              'map': {'one': 'two',
                      'three': 'four'}}
         )
@@ -25,6 +25,6 @@ class TerraformFunctionTester(unittest.TestCase):
         #      'TF_VAR_map': '{ one = "two", three = "four" }'}
         # )
         self.assertTrue(env_vars['TF_VAR_foo'] == 'bar')
-        self.assertTrue(env_vars['TF_VAR_list'] == '[test1,test2,test3]')
+        self.assertTrue(env_vars['TF_VAR_list'] == '["foo", 1, true]')
         self.assertRegexpMatches(env_vars['TF_VAR_map'], r'one = "two"')  # noqa pylint: disable=deprecated-method
         self.assertRegexpMatches(env_vars['TF_VAR_map'], r'three = "four"')  # noqa pylint: disable=deprecated-method
