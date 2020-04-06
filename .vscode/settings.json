@@ -34,6 +34,8 @@
         "lambci",
         "mycdkmodule",
         "myothercdkmodule",
+        "mybucket",
+        "mytable",
         "nondockerizepip",
         "rxref",
         "stubbers"
