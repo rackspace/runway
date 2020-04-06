@@ -8,9 +8,9 @@ Advanced features and detailed information for using Terraform with Runway.
 
 .. _tf-backend:
 
-*******
-Backend
-*******
+*********************
+Backend Configuration
+*********************
 
 If your Terraform will only ever be used with a single backend, it can be defined inline.
 
@@ -133,13 +133,15 @@ outputs.
           dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
 
 
+---
+
 .. _tf-version:
 
-********
-Versions
-********
+******************
+Version Management
+******************
 
-By specifying the version via a ``.terraform-version`` file in your Terraform directory, or a module
+By specifying which version of Terraform to use via a ``.terraform-version`` file in your module directory, or a module
 option, Runway will automatically download & use that version for the module. This, alongside
 tightly pinning Terraform provider versions, is highly recommended to keep a predictable experience
 when deploying your module.

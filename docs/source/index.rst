@@ -113,7 +113,9 @@ This means that Serverless must be included as a dev dependency in the **package
 Terraform
 =========
 
-TBD
+Runway provides a simple way to run the Terraform versions you want with variable values specific to each environment.
+Terraform does not need to be installed prior to using this module type.
+Runway maintains a cache of Terraform versions on a system, downloading and installing different versions as needed.
 
 - `Configuration <terraform/configuration.html>`__
 - `Directory Structure <terraform/directory_structure.html>`__

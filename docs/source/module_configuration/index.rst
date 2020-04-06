@@ -10,4 +10,3 @@ Module Configurations
     custom
     kubernetes
     staticsite
-    terraform
