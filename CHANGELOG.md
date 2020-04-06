@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - lookups are now resolved when using the `runway envvars` command
+- Terraform list parameters from runway.yml will now properly formatted
 
 ## Added
 - ACM CloudFormation hook
