@@ -287,7 +287,7 @@ def argv(*args):
     """Context manager for temporarily changing sys.argv."""
     original_argv = sys.argv.copy()
     try:
-        sys.argv = args
+        sys.argv = list(args)  # convert tuple to list
         yield
     finally:
         # always restore original value
