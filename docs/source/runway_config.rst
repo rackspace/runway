@@ -197,7 +197,7 @@ Sample
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-.. rubric:: variables.runway.yml
+.. rubric:: runway.variables.yml
 .. code-block:: yaml
 
   account_alias:
