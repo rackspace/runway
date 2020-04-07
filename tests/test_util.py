@@ -2,10 +2,11 @@
 # pylint: disable=no-self-use
 import os
 import string
+import sys
 
 from mock import patch
 
-from runway.util import MutableMap, environ, load_object_from_string
+from runway.util import MutableMap, argv, environ, load_object_from_string
 
 VALUE = {
     'bool_val': False,
@@ -84,6 +85,20 @@ class TestMutableMap:
             'default_val', 'default should be used'
         assert mute_map.find('str_val', 'default_val') == \
             VALUE['str_val'], 'default should be ignored'
+
+
+@patch.object(sys, 'argv', ['runway', 'deploy'])
+def test_argv():
+    """Test argv."""
+    orig_expected = ['runway', 'deploy']
+    override = ['stacker', 'build', 'test.yml']
+
+    assert sys.argv == orig_expected, 'validate original value'
+
+    with argv(*override):
+        assert sys.argv == override, 'validate override'
+
+    assert sys.argv == orig_expected, 'validate value returned to original'
 
 
 @patch.object(os, 'environ', {'TEST_PARAM': 'initial value'})

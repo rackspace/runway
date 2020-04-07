@@ -282,6 +282,20 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
 
 
 @contextmanager
+def argv(*args):
+    # type: (str) -> None
+    """Context manager for temporarily changing sys.argv."""
+    # passing to list() creates a new instance
+    original_argv = list(sys.argv)  # TODO use .copy() after dropping python 2
+    try:
+        sys.argv = list(args)  # convert tuple to list
+        yield
+    finally:
+        # always restore original value
+        sys.argv = original_argv
+
+
+@contextmanager
 def change_dir(newdir):
     """Change directory.
 

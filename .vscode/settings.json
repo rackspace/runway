@@ -32,12 +32,13 @@
         "forcerm",
         "kwarg",
         "lambci",
+        "mybucket",
         "mycdkmodule",
         "myothercdkmodule",
-        "mybucket",
         "mytable",
         "nondockerizepip",
         "rxref",
+        "stacker's",
         "stubbers"
     ],
     "pythonTestExplorer.testFramework": "pytest"

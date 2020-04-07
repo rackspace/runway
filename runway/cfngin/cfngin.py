@@ -6,7 +6,7 @@ import sys
 
 from yaml.constructor import ConstructorError
 
-from runway.util import MutableMap, cached_property, environ
+from runway.util import MutableMap, argv, cached_property, environ
 
 from .actions import build, destroy, diff
 from .config import render_parse_load as load_config
@@ -113,14 +113,15 @@ class CFNgin(object):
             for config in config_files:
                 ctx = self.load(config)
                 LOGGER.info('%s: deploying...', os.path.basename(config))
-                action = build.Action(
-                    context=ctx,
-                    provider_builder=self._get_provider_builder(
-                        ctx.config.service_role
+                with argv('stacker', 'build', ctx.config_path):
+                    action = build.Action(
+                        context=ctx,
+                        provider_builder=self._get_provider_builder(
+                            ctx.config.service_role
+                        )
                     )
-                )
-                action.execute(concurrency=self.concurrency,
-                               tail=self.tail)
+                    action.execute(concurrency=self.concurrency,
+                                   tail=self.tail)
 
     def destroy(self, force=False, sys_path=None):
         """Run the CFNgin destroy action.
@@ -144,15 +145,16 @@ class CFNgin(object):
             for config in config_files:
                 ctx = self.load(config)
                 LOGGER.info('%s: destroying...', os.path.basename(config))
-                action = destroy.Action(
-                    context=ctx,
-                    provider_builder=self._get_provider_builder(
-                        ctx.config.service_role
+                with argv('stacker', 'destroy', ctx.config_path):
+                    action = destroy.Action(
+                        context=ctx,
+                        provider_builder=self._get_provider_builder(
+                            ctx.config.service_role
+                        )
                     )
-                )
-                action.execute(concurrency=self.concurrency,
-                               force=True,
-                               tail=self.tail)
+                    action.execute(concurrency=self.concurrency,
+                                   force=True,
+                                   tail=self.tail)
 
     def load(self, config_path):
         """Load a CFNgin config into a context object.
@@ -201,13 +203,14 @@ class CFNgin(object):
                 ctx = self.load(config)
                 LOGGER.info('%s: generating change sets...',
                             os.path.basename(config))
-                action = diff.Action(
-                    context=ctx,
-                    provider_builder=self._get_provider_builder(
-                        ctx.config.service_role
+                with argv('stacker', 'diff', ctx.config_path):
+                    action = diff.Action(
+                        context=ctx,
+                        provider_builder=self._get_provider_builder(
+                            ctx.config.service_role
+                        )
                     )
-                )
-                action.execute()
+                    action.execute()
 
     def should_skip(self, force=False):
         """Determine if action should be taken or not.
