@@ -10,11 +10,14 @@ from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 import awacs.s3
 import awacs.sts
 import awacs.logs
+import awacs.iam
+import awacs.awslambda
+import awacs.states
 from awacs.aws import (Action, Allow, Policy, PolicyDocument, Principal,
                        Statement)
 from awacs.helpers.trust import make_simple_assume_policy
 from troposphere import (AccountId, Join, NoValue, Output, Partition, Region, StackName, Sub, # noqa pylint: disable=unused-import
-                         awslambda, cloudfront, iam, s3)
+                         awslambda, cloudfront, iam, logs, s3, stepfunctions)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.context import Context
@@ -167,10 +170,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             ]
         return []
 
-    def get_directory_index_lambda_association(  # pylint: disable=no-self-use
-            self,
-            lambda_associations,  # List[cloudfront.LambdaFunctionAssociation]
-            directory_index_rewrite_version):  # awslambda.Version
+    def get_directory_index_lambda_association(self,  # pylint: disable=no-self-use
+                                               lambda_associations,  # type: List[cloudfront.LambdaFunctionAssociation] # noqa pylint: disable=line-too-long
+                                               directory_index_rewrite_version   # type: awslambda.Version # noqa pylint: disable=line-too-long
+                                              ):  # noqa E124
         # type: (...) ->  List[cloudfront.LambdaFunctionAssociation]
         """Retrieve the directory index lambda associations with the added rewriter.
 
@@ -186,11 +189,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
         return lambda_associations
 
-    def get_cloudfront_distribution_options(
-            self,
-            bucket,  # type: s3.Bucket
-            oai,  # type: cloudfront.CloudFrontOriginAccessIdentity
-            lambda_function_associations):  # List[cloudfront.LambdaFunctionAssociation]
+    def get_cloudfront_distribution_options(self,  # type: StaticSite
+                                            bucket,  # type: s3.Bucket
+                                            oai,  # type: cloudfront.CloudFrontOriginAccessIdentity # noqa pylint: disable=line-too-long
+                                            lambda_function_associations # type: List[cloudfront.LambdaFunctionAssociation] # noqa pylint: disable=line-too-long
+                                           ):
         # type: (...) -> Dict[str, Any]
         """Retrieve the options for our CloudFront distribution.
 
@@ -402,7 +405,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
     def add_lambda_execution_role(self,
                                   name='LambdaExecutionRole',  # type: str
-                                  function_name=''
+                                  function_name=''  # type: str
                                  ):  # noqa: E124
         # type: (...) -> iam.Role
         """Create the Lambda@Edge execution role."""
@@ -480,18 +483,25 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                 variables["RewriteDirectoryIndex"]
             )
 
-        return self.template.add_resource(
+        function = self.template.add_resource(
             awslambda.Function(
                 'CFDirectoryIndexRewrite',
-                Code=awslambda.Code(
-                    ZipFile=code_str
-                ),
+                Code=awslambda.Code(ZipFile=code_str),
+                DeletionPolicy='Retain',
                 Description='Rewrites CF directory HTTP requests to default page',  # noqa
                 Handler='index.handler',
                 Role=role.get_att('Arn'),
                 Runtime='nodejs10.x'
             )
         )
+
+        self.template.add_output(Output(
+            'LambdaCFDirectoryIndexRewriteArn',
+            Description='Directory Index Rewrite Function Arn',
+            Value=function.get_att('Arn')
+        ))
+
+        return function
 
     def add_cloudfront_directory_index_rewrite_version(self, directory_index_rewrite):
         # type: (awslambda.Function) -> awslambda.Version

@@ -358,9 +358,12 @@ def read_value_from_path(value):
     """
     if value.startswith('file://'):
         path = value.split('file://', 1)[1]
-        config_directory = get_config_directory()
-        relative_path = os.path.join(config_directory, path)
-        with open(relative_path) as read_file:
+        if os.path.isabs(path):
+            read_path = path
+        else:
+            config_directory = get_config_directory()
+            read_path = os.path.join(config_directory, path)
+        with open(read_path) as read_file:
             value = read_file.read()
     return value
 
