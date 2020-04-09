@@ -142,7 +142,6 @@ class Cleanup(Blueprint):
 
         return res
 
-    # TODO: Swap this with paramterized_codec
     def _get_self_destruct(self, replicated_lambda_remover):
         # type: (Dict[str, Union[awslambda.Function, Any]]) -> Dict[str, Any]
         res = {}
