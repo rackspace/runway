@@ -4,6 +4,9 @@ from __future__ import print_function
 import logging
 import os
 import sys
+from distutils.util import strtobool  # pylint: disable=E
+
+from six.moves import input
 
 from .base_command import BaseCommand
 from .. import __version__ as version
@@ -46,14 +49,48 @@ class RunwayCommand(BaseCommand):
                                   'subclasses of BaseCommand.')
 
 
-def get_env_from_branch(branch_name):
-    """Determine environment name from git branch name."""
+def get_env_from_user(default):
+    """Prompt user for environment.
+
+    Args:
+        default (str): Value to return if the user would not like to provide
+            their own value.
+
+    Returns:
+        str: Deploy environment.
+
+    """
+    if strtobool(input(
+            'Would you like to provide a difference deploy environment? [y/n]: ')):
+        response = None
+        while not response:
+            response = input('Deploy Environment: ')
+        return response
+    return default
+
+
+def get_env_from_branch(branch_name, prompt_if_unexpected=False):
+    """Determine environment name from git branch name.
+
+    Args:
+        branch_name (str): Git branch name to parse for the deploy environment.
+        prompt_if_unexpected (bool): If the branch name is an unexpected
+            format/value, the user will be prompted if they would like to
+            enter a different deploy environment. (*default:* ``False``)
+
+    Returns:
+        str: Deploy environment.
+
+    """
     if branch_name.startswith('ENV-'):
         return branch_name[4:]
     if branch_name == 'master':
         LOGGER.info('Translating git branch "master" to environment '
                     '"common"')
         return 'common'
+    if prompt_if_unexpected:
+        LOGGER.warning('Found unexpected branch name "%s"', branch_name)
+        return get_env_from_user(branch_name)
     return branch_name
 
 
@@ -64,8 +101,21 @@ def get_env_from_directory(directory_name):
     return directory_name
 
 
-def get_env(path, ignore_git_branch=False):
-    """Determine environment name."""
+def get_env(path, ignore_git_branch=False, prompt_if_unexpected=False):
+    """Determine environment name.
+
+    Args:
+        path (str): Path to check for deploy environment name.
+        ignore_git_branch (bool): Skip checking for git branch name.
+            (*default:* ``False``)
+        prompt_if_unexpected (bool): If the branch name is an unexpected
+            format/value, the user will be prompted if they would like to
+            enter a different deploy environment. (*default:* ``False``)
+
+    Returns:
+        str: Deploy environment.
+
+    """
     if 'DEPLOY_ENVIRONMENT' in os.environ:
         return os.environ['DEPLOY_ENVIRONMENT']
 
@@ -86,7 +136,7 @@ def get_env(path, ignore_git_branch=False):
             ).active_branch.name
             LOGGER.info('Deriving environment name from git branch %s...',
                         b_name)
-            return get_env_from_branch(b_name)
+            return get_env_from_branch(b_name, prompt_if_unexpected)
         except InvalidGitRepositoryError:
             pass
         except TypeError:
