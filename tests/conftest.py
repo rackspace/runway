@@ -108,6 +108,12 @@ def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
                              region=runway_context.env_region)
 
 
+@pytest.fixture
+def patch_time(monkeypatch):
+    """Patch built-in time object."""
+    monkeypatch.setattr('time.sleep', lambda s: None)
+
+
 @pytest.fixture(scope='function')
 def runway_context(request):
     """Create a mock Runway context object."""

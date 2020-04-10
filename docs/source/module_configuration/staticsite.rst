@@ -356,15 +356,19 @@ An example of a `Auth@Edge`_ static site configuration is as follows:
 
 .. code-block:: yaml
 
+  variables:
+    dev:
+      namespace: sample-app-dev
+      staticsite_user_pool_arn: arn:aws:cognito-idp:us-east-1:240134083525:userpool/us-east-1_cjVgcUyWV
+      
   deployments:
     - modules:
       - path: sample-app
         type: static
         parameters:
-          dev:
-            namespace: sample-app-dev
-            staticsite_auth_at_edge: true
-            staticsite_user_pool_arn: arn:aws:cognito-idp:us-east-1:240134083525:userpool/us-east-1_cjVgcUyWV
+          namespace: ${var ${env DEPLOY_ENVIRONMENT}.namespace}
+          staticsite_auth_at_edge: true
+          staticsite_user_pool_arn: ${var ${env DEPLOY_ENVIRONMENT}.staticsite_user_pool_arn}
       regions:
         # NOTE: Much like ACM certificates used with CloudFront,
         # Auth@Edge sites must be deployed to us-east-1

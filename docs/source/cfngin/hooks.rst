@@ -4,19 +4,105 @@
 .. _staticsite: ../module_configuration/staticsite.html
 .. _sys_path: configuration.html#module-paths
 
-=====
+#####
 Hooks
-=====
+#####
 
 A hook is a python function or class method that is executed before or after the action is taken.
 To see how to define hooks in a config file see the `Pre & Post Hooks`_ documentation.
 
 
+**************
 Built-in Hooks
-==============
+**************
+
+acm.Certificate
+===============
+
+.. rubric:: Requirements
+
+- Route 53 hosted zone
+
+    - authoritative for the domain the certificate is being created for
+    - in the same AWS account as the certificate being created
+
+
+.. rubric:: Description
+
+Manage a DNS validated certificate in AWS Certificate Manager.
+
+When used in the **pre_build** or **post_build** stage this hook will create a CloudFormation stack containing a DNS validated certificate.
+It will automatically create a record in Route 53 to validate the certificate and wait for the stack to complete before returning the ``CertificateArn`` as hook data.
+The CloudFormation stack also outputs the ARN of the certificate as ``CertificateArn`` so that it can be referenced from other stacks.
+
+When used in the **pre_destroy** or **post_destroy** stage this hook will delete the validation record from Route 53 then destroy the stack created during a deploy stage.
+
+If the hook fails during a deploy stage (e.g. stack rolls back or Route 53 can't be updated) all resources managed by this hook will be destroyed.
+This is done to avoid orphaning resources/record sets which would cause errors during subsequent runs.
+Resources effected include the CloudFormation stack it creates, ACM certificate, and Route 53 validation record.
+
+.. rubric:: Hook Path
+
+``runway.cfngin.hooks.acm.Certificate``
+
+
+.. rubric:: Args
+
+**alt_names (Optional[List[str]])**
+    Additional FQDNs to be included in the Subject Alternative Name extension of the ACM certificate.
+    For example, you can add *www.example.net* to a certificate for which the ``domain`` field is
+    *www.example.com* if users can reach your site by using either name.
+
+**domain (str)**
+    The fully qualified domain name (FQDN), such as *www.example.com*, with which you want to secure an ACM certificate.
+    Use an asterisk (``*``) to create a wildcard certificate that protects several sites in the same domain.
+    For example, *\*.example.com* protects *www.example.com*, *site.example.com*, and *images.example.com*.
+
+**hosted_zone_id (str)**
+    The ID of the Route 53 Hosted Zone that contains the resource record sets that you want to change.
+    This must exist in the same account that the certificate will be created in.
+
+**stack_name (Optional[str])**
+    Provide a name for the stack used to create the certificate. If not provided, the domain is used (replacing ``.`` with ``-``).
+    If the is provided in a deploy stage, its needs to be provided in the matching destroy stage.
+
+**ttl (Optional[int])**
+    The resource record cache time to live (TTL), in seconds. (*default:* ``300``)
+
+
+.. rubric:: Example
+.. code-block:: yaml
+
+    namespace: example
+    cfngin_bucket: ''
+
+    sys_path: ./
+
+    pre_build:
+      acm-cert:
+        path: runway.cfngin.hooks.acm.Certificate
+        required: true
+        args:
+          domain: www.example.com
+          hosted_zone_id: ${rxref example-com::HostedZone}
+
+    stack:
+      sampleapp:
+        class_path: blueprints.sampleapp.BlueprintClass
+        variables:
+          cert_arn: ${rxref www-example-com::CertificateArn}
+
+    post_destroy:
+      acm-cert:
+        path: runway.cfngin.hooks.acm.Certificate
+        required: true
+        args:
+          domain: www.example.com
+          hosted_zone_id: ${rxref example-com::HostedZone}
+
 
 aws_lambda.upload_lambda_functions
-----------------------------------
+==================================
 
 .. rubric:: Description
 
@@ -188,7 +274,7 @@ to be skipped in subsequent runs.
 
 
 build_staticsite.build
-----------------------
+======================
 
 .. rubric:: Description
 
@@ -206,7 +292,7 @@ See staticsite_ module documentation for details.
 
 
 cleanup_s3.purge_bucket
------------------------
+=======================
 
 .. rubric:: Description
 
@@ -234,7 +320,7 @@ Delete objects in bucket. Primarily used as a ``pre_destroy`` hook before deleti
 
 
 cleanup_ssm.delete_param
-------------------------
+========================
 
 .. rubric:: Description
 
@@ -253,7 +339,7 @@ Delete SSM parameter. Primarily used when an SSM parameter is created by a hook 
 
 
 command.run_command
--------------------
+===================
 
 .. rubric:: Description
 
@@ -332,7 +418,7 @@ Run a custom command as a hook.
 
 
 ecs.create_clusters
--------------------
+===================
 
 .. rubric:: Description
 
@@ -351,7 +437,7 @@ Create ECS clusters.
 
 
 iam.create_ecs_service_role
----------------------------
+===========================
 
 .. rubric:: Description
 
@@ -372,7 +458,7 @@ http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#ser
 
 
 iam.ensure_server_cert_exists
------------------------------
+=============================
 
 .. rubric:: Description
 
@@ -394,7 +480,7 @@ Ensure server cert exists.
 
 
 keypair.ensure_keypair_exists
------------------------------
+=============================
 
 .. rubric:: Description
 
@@ -428,7 +514,7 @@ Ensure a specific keypair exists within AWS. If the key doesn't exist, upload it
 
 
 route53.create_domain
----------------------
+=====================
 
 .. rubric:: Description
 
@@ -447,7 +533,7 @@ Create a domain within route53.
 
 
 upload_staticsite.get_distribution_data
----------------------------------------
+=======================================
 
 .. rubric:: Description
 
@@ -466,7 +552,7 @@ See staticsite_ module documentation for details.
 
 
 upload_staticsite.sync
-----------------------
+======================
 
 .. rubric:: Description
 
@@ -483,8 +569,9 @@ Sync static website to S3 bucket. Used by the staticsite_ module type.
 See staticsite_ module documentation for details.
 
 
+*********************
 Writing A Custom Hook
-=====================
+*********************
 
 A custom hook must be in an executable, importable python package or standalone file.
 The hook must be importable using your current ``sys.path``.
@@ -505,27 +592,37 @@ If using boto3 in a hook, use ``context.get_session()`` instead of creating a ne
 .. code-block::
 
     """context.get_session() example."""
+    from runway.cfngin.context import Context
+    from runway.cfngin.providers.aws.default import Provider
 
-    def do_something(context, provider, **kwargs):
+    def do_something(context: Context, provider: Provider, **kwargs: str) -> None:
         """Do something."""
         session = context.get_session()
         s3_client = session.client('s3')
 
 
 Example Hook Function
----------------------
+=====================
 
 .. rubric:: local_path/hooks/my_hook.py
 .. code-block:: python
 
     """My hook."""
+    from typing import Dict
+
+    from runway.cfngin.context import Context
+    from runway.cfngin.providers.aws.default import Provider
 
 
-    def do_something(context, provider, is_failure=True, **kwargs):
+    def do_something(context: Context,
+                     provider: Provider,
+                     is_failure: bool = True,
+                     **kwargs: str
+                     ) -> Dict[str, str]:
         """Do something."""
         if is_failure:
-            return False
-        return f"You are not a failure {kwargs.get('name', 'Kevin')}."
+            return None
+        return {'result': f"You are not a failure {kwargs.get('name', 'Kevin')}."}
 
 .. rubric:: local_path/cfngin.yaml
 .. code-block:: yaml
@@ -533,7 +630,7 @@ Example Hook Function
     namespace: example
     sys_path: ./
 
-    hooks:
+    pre_build:
       my_hook_do_something:
         path: hooks.my_hook.do_something
         args:
@@ -541,24 +638,58 @@ Example Hook Function
 
 
 Example Hook Class
----------------------
+==================
 
 .. rubric:: local_path/hooks/my_hook.py
 .. code-block:: python
 
     """My hook."""
+    import logging
+    from typing import Dict
 
-    class MyClass:
-        """My class."""
+    from runway.cfngin.hooks.base import Hook
 
-        SUCCESS_MESSAGE = 'You are not a failure {name}.'
+    LOGGER = logging.getLogger(__name__)
 
-        @classmethod
-        def do_something(cls, context, provider, is_failure=True, **kwargs):
-            """Do something."""
-            if is_failure:
-                return False
-            return self.SUCCESS_MESSAGE.format(name=kwargs.get('name', 'Kevin'))
+    class MyClass(Hook):
+        """My class does a thing.
+
+        Keyword Args:
+            is_failure (bool): Force the hook to fail if true.
+            name (str): Name used in the response.
+
+        Returns:
+            Dict[str, str]: Response message is stored in ``result``.
+
+        Example:
+        .. code-block:: yaml
+
+          pre_build:
+            my_hook_do_something:
+              path: hooks.my_hook.MyClass
+              args:
+                is_failure: False
+                name: Karen
+
+        """
+
+        def post_deploy(self) -> Dict[str, str]:
+            """Run during the **post_deploy** stage."""
+            if self.args.is_failure:
+                return None
+            return {'result': f"You are not a failure {self.args.name}."
+
+        def post_destroy(self) -> None:
+            """Run during the **post_destroy** stage."""
+            LOGGER.error('post_destroy is not supported by this hook')
+
+        def pre_deploy(self) -> None:
+            """Run during the **pre_deploy** stage."""
+            LOGGER.error('pre_deploy is not supported by this hook')
+
+        def pre_destroy(self) -> None:
+            """Run during the **pre_destroy** stage."""
+            LOGGER.error('pre_destroy is not supported by this hook')
 
 .. rubric:: local_path/cfngin.yaml
 .. code-block:: yaml
@@ -566,9 +697,9 @@ Example Hook Class
     namespace: example
     sys_path: ./
 
-    hooks:
+    pre_build:
       my_hook_do_something:
-        path: hooks.my_hook.MyClass.do_something
+        path: hooks.my_hook.MyClass
         args:
           is_failure: False
           name: Karen

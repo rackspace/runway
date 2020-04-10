@@ -6,6 +6,8 @@ import sys
 import tempfile
 import warnings
 
+from typing import Any, Dict, List, Union  # pylint: disable=unused-import
+
 import yaml
 
 from . import RunwayModule
@@ -34,9 +36,7 @@ class StaticSite(RunwayModule):
         super(StaticSite, self).__init__(context, path, options)
         self.name = self.options.get('name', self.options.get('path'))
         self.user_options = self.options.get('options', {})
-        self.parameters = self.options.get('parameters')
-        # Memoize
-        self.user_pool_id = ''
+        self.parameters = self.options.get('parameters')  # type: Dict[str, Any]
         self.region = self.context.env_region
         self._ensure_valid_environment_config()
         self._ensure_cloudfront_with_auth_at_edge()
@@ -88,11 +88,19 @@ class StaticSite(RunwayModule):
                         "config found for this environment/region",
                         self.options['path'])
 
-    def _setup_website_module(self, command):
+    def _setup_website_module(self,  # type: StaticSite
+                              command  # type: str
+                             ):  # noqa: E124
+        # type(...) -> return None
         """Create stacker configuration for website module."""
         module_dir = self._create_module_directory()
         self._create_dependencies_yaml(module_dir)
         self._create_staticsite_yaml(module_dir)
+        # Don't destroy with the other stacks
+        if command != 'destroy' and \
+           (self.parameters.get('staticsite_auth_at_edge') or
+            self.parameters.get('staticsite_rewrite_index_index')):  # noqa E129
+            self._create_cleanup_yaml(module_dir)
 
         cfn = CloudFormation(
             self.context,
@@ -121,6 +129,7 @@ class StaticSite(RunwayModule):
         ]
 
         if self.parameters.get('staticsite_auth_at_edge', False):
+            # Retrieve the appropriate callback urls from the User Pool Client
             pre_build = [{
                 'path': 'runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get',
                 'required': True,
@@ -132,6 +141,7 @@ class StaticSite(RunwayModule):
             }]
 
             if self.parameters.get('staticsite_create_user_pool', False):
+                # Retrieve the user pool id
                 pre_destroy.append({
                     'path': 'runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get',
                     'required': True,
@@ -139,6 +149,8 @@ class StaticSite(RunwayModule):
                     'args': self._get_user_pool_id_retriever_variables(),
                 })
 
+                # Delete the domain prior to trying to delete the
+                # User Pool Client that was created
                 pre_destroy.append({
                     'path': 'runway.hooks.staticsite.auth_at_edge.domain_updater.delete',
                     'required': True,
@@ -197,6 +209,22 @@ class StaticSite(RunwayModule):
         pre_destroy = [{'path': 'runway.hooks.cleanup_s3.purge_bucket',
                         'required': True,
                         'args': {'bucket_rxref_lookup': "%s::BucketName" % self.name}}]
+
+        if self.parameters.get('staticsite_rewrite_directory_index') or \
+           self.parameters.get('staticsite_auth_at_edge'):
+            replicated_function_vars = self._get_replicated_function_variables()
+            replicated_function_vars.update({
+                'state_machine_arn':
+                    '${rxref %s-cleanup::ReplicatedFunctionRemoverStateMachineArn}' % (
+                        self.name
+                    ),
+            })
+            pre_destroy.append({
+                'path': 'runway.hooks.staticsite.cleanup.execute',
+                'required': True,
+                'data_key': 'cleanup',
+                'args': replicated_function_vars
+            })
 
         post_destroy = [{'path': 'runway.hooks.cleanup_ssm.delete_param',
                          'args': {'parameter_name': hash_param}}]
@@ -260,6 +288,47 @@ class StaticSite(RunwayModule):
                 default_flow_style=False
             )
 
+    def _create_cleanup_yaml(self, module_dir):
+        replicated_function_vars = self._get_replicated_function_variables()
+
+        with open(os.path.join(module_dir, '03-cleanup.yaml'), 'w') as output_stream:  # noqa
+            yaml.dump(
+                {'namespace': '${namespace}',
+                 'cfngin_bucket': '',
+                 'stacks': {
+                     '%s-cleanup' % self.name: {
+                         'class_path': 'runway.blueprints.staticsite.cleanup.Cleanup',
+                         'variables': replicated_function_vars
+                     }
+                 }},
+                output_stream,
+                default_flow_style=False
+            )
+
+    def _get_replicated_function_variables(self):
+        replicated_function_vars = {
+            'stack_name': '${namespace}-%s-cleanup' % self.name,
+            'function_arns': [],
+            'DisableCloudFront': self.parameters.get('staticsite_cf_disable', False),
+        }  # type: Dict[str, Union[str, List[str]]]
+
+        if self.parameters.get('staticsite_rewrite_directory_index'):
+            replicated_function_vars['function_arns'].append(
+                '${rxref %s::LambdaCFDirectoryIndexRewriteArn}' % self.name
+            )
+
+        if self.parameters.get('staticsite_auth_at_edge'):
+            for lamb in ['CheckAuth',
+                         'HttpHeaders',
+                         'ParseAuth',
+                         'RefreshAuth',
+                         'SignOut']:
+                replicated_function_vars['function_arns'].append(
+                    '${rxref %s::Lambda%sArn}' % (self.name, lamb)
+                )
+
+        return replicated_function_vars
+
     def _get_site_stack_variables(self):
         site_stack_variables = {
             'Aliases': [],
@@ -273,7 +342,7 @@ class StaticSite(RunwayModule):
             'RedirectPathAuthRefresh':
                 '${default staticsite_redirect_path_auth_refresh::/refreshauth}',
             'SignOutUrl': '${default staticsite_sign_out_url::/signout}',
-            'WAFWebACL': self.parameters.get('staticsite_web_acl', '')
+            'WAFWebACL': self.parameters.get('staticsite_web_acl', ''),
         }
 
         if self.parameters.get('staticsite_aliases'):

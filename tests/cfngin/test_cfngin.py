@@ -8,7 +8,6 @@ from mock import MagicMock, patch
 
 from runway.cfngin import CFNgin
 from runway.context import Context
-from runway.util import AWS_ENV_VARS
 
 
 def copy_fixture(src, dest):
@@ -22,11 +21,6 @@ def copy_basic_fixtures(cfngin_fixtures, tmp_path):
                  dest=tmp_path / 'test-us-east-1.env')
     copy_fixture(src=cfngin_fixtures / 'configs' / 'basic.yml',
                  dest=tmp_path / 'basic.yml')
-
-
-def get_env_creds():
-    """Return AWS creds from the environment."""
-    return {name: os.environ.get(name) for name in AWS_ENV_VARS if os.environ.get(name)}
 
 
 class TestCFNgin(object):
@@ -98,8 +92,6 @@ class TestCFNgin(object):
                         sys_path=str(tmp_path))  # support python < 3.6
         cfngin.deploy()
 
-        assert get_env_creds() == cfngin._aws_credential_backup, \
-            'env vars should be reverted upon completion'
         assert cfngin.concurrency == 0
         assert not cfngin.interactive
         assert cfngin.parameters.bucket_name == 'cfngin-bucket'
@@ -129,8 +121,6 @@ class TestCFNgin(object):
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         cfngin.destroy()
 
-        assert get_env_creds() == cfngin._aws_credential_backup, \
-            'env vars should be reverted upon completion'
         mock_action.assert_called_once()
         mock_instance.execute.assert_called_once_with(concurrency=0,
                                                       force=True,
@@ -171,8 +161,6 @@ class TestCFNgin(object):
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         cfngin.plan()
 
-        assert get_env_creds() == cfngin._aws_credential_backup, \
-            'env vars should be reverted upon completion'
         mock_action.assert_called_once()
         mock_instance.execute.assert_called_once_with()
 

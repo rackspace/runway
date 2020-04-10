@@ -1,9 +1,12 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
-import os.path
+import os
 import string
+import sys
 
-from runway.util import MutableMap, load_object_from_string
+from mock import patch
+
+from runway.util import MutableMap, argv, environ, load_object_from_string
 
 VALUE = {
     'bool_val': False,
@@ -82,6 +85,34 @@ class TestMutableMap:
             'default_val', 'default should be used'
         assert mute_map.find('str_val', 'default_val') == \
             VALUE['str_val'], 'default should be ignored'
+
+
+@patch.object(sys, 'argv', ['runway', 'deploy'])
+def test_argv():
+    """Test argv."""
+    orig_expected = ['runway', 'deploy']
+    override = ['stacker', 'build', 'test.yml']
+
+    assert sys.argv == orig_expected, 'validate original value'
+
+    with argv(*override):
+        assert sys.argv == override, 'validate override'
+
+    assert sys.argv == orig_expected, 'validate value returned to original'
+
+
+@patch.object(os, 'environ', {'TEST_PARAM': 'initial value'})
+def test_environ():
+    """Test environ."""
+    orig_expected = {'TEST_PARAM': 'initial value'}
+    override = {'TEST_PARAM': 'override', 'new_param': 'value'}
+
+    assert os.environ == orig_expected, 'validate original value'
+
+    with environ(override):
+        assert os.environ == override, 'validate override'
+
+    assert os.environ == orig_expected, 'validate value returned to original'
 
 
 def test_load_object_from_string():

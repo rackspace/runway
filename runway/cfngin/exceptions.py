@@ -423,6 +423,30 @@ class StackUpdateBadStatus(Exception):
         super(StackUpdateBadStatus, self).__init__(message, *args, **kwargs)
 
 
+class StackFailed(Exception):
+    """Raised when a stack action fails.
+
+    Primarily used with hooks that act on stacks.
+
+    """
+
+    def __init__(self, stack_name, status_reason=None):
+        """Instantiate class.
+
+        Args:
+            stack_name (str): Name of the stack.
+            status_reason (str): The reason for the current status.
+
+        """
+        self.stack_name = stack_name
+        self.status_reason = status_reason
+
+        message = 'Stack "{}" failed'.format(stack_name)
+        if status_reason:
+            message += ' with reason "{}"'.format(status_reason)
+        super(StackFailed, self).__init__(message)
+
+
 class UnableToExecuteChangeSet(Exception):
     """Raised if changeset execution status is not ``AVAILABLE``."""
 

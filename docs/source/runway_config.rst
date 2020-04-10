@@ -1,7 +1,7 @@
 .. _AWS CDK: https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _Serverless Framework: https://serverless.com/
-.. _CFNgin: cfngin/index.html
+.. _CFNgin: index.html#cloudformation-troposphere
 .. _Terraform: https://www.terraform.io
 .. _Troposphere: https://github.com/cloudtools/troposphere
 .. _Kubernetes: https://kubernetes.io/
@@ -197,7 +197,7 @@ Sample
     # be disabled entirely (see "Repo Structure")
     # ignore_git_branch: true
 
-.. rubric:: variables.runway.yml
+.. rubric:: runway.variables.yml
 .. code-block:: yaml
 
   account_alias:

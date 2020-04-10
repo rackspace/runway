@@ -282,6 +282,20 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
 
 
 @contextmanager
+def argv(*args):
+    # type: (str) -> None
+    """Context manager for temporarily changing sys.argv."""
+    # passing to list() creates a new instance
+    original_argv = list(sys.argv)  # TODO use .copy() after dropping python 2
+    try:
+        sys.argv = list(args)  # convert tuple to list
+        yield
+    finally:
+        # always restore original value
+        sys.argv = original_argv
+
+
+@contextmanager
 def change_dir(newdir):
     """Change directory.
 
@@ -301,6 +315,33 @@ def ensure_file_is_executable(path):
             not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]):
         print("Error: File %s is not executable" % path)
         sys.exit(1)
+
+
+@contextmanager
+def environ(env=None, **kwargs):
+    """Context manager for temporarily changing os.environ.
+
+    The original value of os.environ is restored upon exit.
+
+    Args:
+        env (Dict[str, str]): Dictionary to use when updating os.environ.
+
+    """
+    env = env or {}
+    env.update(kwargs)
+
+    original_env = {key: os.getenv(key) for key in env}
+    os.environ.update(env)
+
+    try:
+        yield
+    finally:
+        # always restore original values
+        for key, val in original_env.items():
+            if val is None:
+                del os.environ[key]
+            else:
+                os.environ[key] = val
 
 
 def load_object_from_string(fqcn):
