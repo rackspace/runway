@@ -219,9 +219,7 @@ class Cleanup(Blueprint):
                                             Partition,
                                             ':iam::',
                                             AccountId,
-                                            ':role/',
-                                            StackName,
-                                            '-*'
+                                            ':role/*',
                                         ]),
                                     ]
                                 )

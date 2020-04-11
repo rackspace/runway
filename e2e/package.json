@@ -1,0 +1,25 @@
+{
+  "name": "javascript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "npm run build && node .webpack/main.js"
+  },
+  "author": "Shane Smith",
+  "license": "ISC",
+  "dependencies": {
+    "@onica/runway": "^1.6.0",
+    "@types/node": "^13.11.1",
+    "@types/selenium-webdriver": "^4.0.9",
+    "aws-sdk": "^2.656.0",
+    "colors": "^1.4.0",
+    "selenium-webdriver": "^4.0.0-alpha.7",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

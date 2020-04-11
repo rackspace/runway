@@ -1,0 +1,16 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+      "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "object-literal-sort-keys": false,
+    "quotemark": [true, "single"],
+    "no-unused-expression": false,
+    "variable-name": [true, "check-format", "allow-leading-underscore"],
+    "interface-name": [true, "always-prefix"],
+    "one-variable-per-declaration": false
+  },
+  "rulesDirectory": []
+}

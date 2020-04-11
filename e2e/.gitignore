@@ -1,0 +1,4 @@
+!package.json
+/.webpack
+/node_modules
+.venv

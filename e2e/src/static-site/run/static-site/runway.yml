@@ -1,0 +1,10 @@
+deployments:
+  - modules:
+    - name: static-site-e2e
+      path: static-site
+      type: static
+      environments:
+        dev:
+          namespace: dev
+    regions:
+      - us-east-1

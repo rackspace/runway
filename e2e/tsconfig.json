@@ -1,0 +1,19 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "module": "esNext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "baseUrl": "src",
+    "rootDirs": [ "src", "test" ],
+    "sourceMap": true,
+    "declaration": false,
+    "removeComments": true,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "target": "es2017",
+    "typeRoots": [ "node_modules/@types", "@types" ],
+    "lib": [ "es2017" ]
+  }
+}

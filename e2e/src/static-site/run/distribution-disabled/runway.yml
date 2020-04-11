@@ -1,0 +1,11 @@
+deployments:
+  - modules:
+    - name: static-site-e2e
+      path: static-site
+      type: static
+      environments:
+        dev:
+          namespace: dev
+          staticsite_cf_disable: true
+    regions:
+      - us-east-1

@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+runway = {editable = true,git = "https://github.com/onicagroup/runway.git",ref = "master"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
