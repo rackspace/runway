@@ -351,8 +351,8 @@ def load_object_from_string(fqcn, try_reload=False):
         fqcn (str): A "." delimited string representing the full path to an
             object (function, class, variable) inside a module
         try_reload (bool): Try to reload the module so any global variables
-            set within the file during import are reloaded. This should only
-            apply to modules that are already imported and are not builtin.
+            set within the file during import are reloaded. This only applies
+            to modules that are already imported and are not builtin.
 
     Returns:
         Any: Object being imported from the provided path.
@@ -373,10 +373,7 @@ def load_object_from_string(fqcn, try_reload=False):
                 sys.modules.get(module_path) and
                 module_path.split('.')[0] not in sys.builtin_module_names  # skip builtins
         ):
-            # This will reload imports such as hooks to allow global
-            # definitions dependent on env vars to be redefined with their
-            # expected values when using a context manager to alter values
-            # of os.environ during execution.
+            # TODO remove is next major release; backport circumvents expected functionality
             #
             # pylint<2.3.1 incorrectly identifies this
             # pylint: disable=too-many-function-args
