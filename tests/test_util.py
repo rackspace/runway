@@ -141,6 +141,11 @@ def test_load_object_from_string_reload_conditions(mock_six):
     builtin_test = 'sys.version_info'
     mock_hook = 'tests.fixtures.mock_hooks.GLOBAL_VALUE'
 
+    try:
+        del sys.modules['tests.fixtures.mock_hooks']
+    except:  # noqa pylint: disable=bare-except
+        pass
+
     load_object_from_string(builtin_test, try_reload=False)
     mock_six.moves.reload_module.assert_not_called()
 
