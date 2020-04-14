@@ -3,6 +3,8 @@
 import queue
 import unittest
 
+from mock import call, patch
+
 from runway.cfngin.config import Hook
 from runway.cfngin.hooks.utils import handle_hooks
 
@@ -49,14 +51,19 @@ class TestHooks(unittest.TestCase):
         with self.assertRaises(AttributeError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
-    def test_valid_hook(self):
+    @patch('runway.cfngin.hooks.utils.load_object_from_string')
+    def test_valid_hook(self, mock_load):
         """Test valid hook."""
+        mock_load.side_effect = [mock_hook, MockHook]
         hooks = [
             Hook({"path": "tests.cfngin.hooks.test_utils.mock_hook",
                   "required": True}),
             Hook({'path': 'tests.cfngin.hooks.test_utils.MockHook',
                   'required': True})]
         handle_hooks('pre_build', hooks, self.provider, self.context)
+        assert mock_load.call_count == 2
+        mock_load.assert_has_calls([call(hooks[0].path, try_reload=True),
+                                    call(hooks[1].path, try_reload=True)])
         good = HOOK_QUEUE.get_nowait()
         self.assertEqual(good["provider"].region, "us-east-1")
         with self.assertRaises(queue.Empty):
