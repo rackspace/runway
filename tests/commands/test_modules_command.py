@@ -42,9 +42,8 @@ class TestModulesCommand(object):
         monkeypatch.setattr(MODULE_PATH + '.select_modules_to_run',
                             lambda a, b, c, d, e: a)
         monkeypatch.setattr(MODULE_PATH + '.get_env', get_env)
-        # python 2 passes 2 args (cls, path) but python 3 only passes 1 (path)
         monkeypatch.setattr(Config, 'find_config_file',
-                            lambda x, y=None: os.getcwd() + 'runway.yml')
+                            MagicMock(return_value=os.getcwd() + 'runway.yml'))
         monkeypatch.setattr(ModulesCommand, 'runway_config', test_config)
         monkeypatch.setattr(ModulesCommand, '_process_deployments',
                             lambda obj, y, x: None)
