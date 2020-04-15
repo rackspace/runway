@@ -6,11 +6,16 @@ from os import path
 
 import pytest
 import yaml
-from mock import patch
+from mock import MagicMock, call, patch
 from moto import mock_sts
 
-from runway.commands.modules_command import (select_modules_to_run,
+from runway.commands.modules_command import (ModulesCommand,
+                                             select_modules_to_run,
                                              validate_environment)
+from runway.config import Config
+from runway.util import environ
+
+MODULE_PATH = 'runway.commands.modules_command'
 
 
 @pytest.fixture(scope='function')
@@ -22,6 +27,39 @@ def module_tag_config():
     )
     with open(path.join(fixture_dir, 'tag.runway.yml'), 'r') as stream:
         return yaml.safe_load(stream)
+
+
+class TestModulesCommand(object):
+    """Test runway.commands.modules_command.ModulesCommand."""
+
+    def test_run(self, monkeypatch):
+        """Test run method."""
+        # TODO test _process_deployments instead of mocking it out
+        deployments = [{'modules': ['test'], 'regions':'us-east-1'}]
+        test_config = Config(deployments=deployments, tests=[])
+        get_env = MagicMock(return_value='test')
+
+        monkeypatch.setattr(MODULE_PATH + '.select_modules_to_run',
+                            lambda a, b, c, d, e: a)
+        monkeypatch.setattr(MODULE_PATH + '.get_env', get_env)
+        monkeypatch.setattr(Config, 'find_config_file',
+                            lambda x: x + 'runway.yml')
+        monkeypatch.setattr(ModulesCommand, 'runway_config', test_config)
+        monkeypatch.setattr(ModulesCommand, '_process_deployments',
+                            lambda obj, y, x: None)
+
+        obj = ModulesCommand(cli_arguments={})
+
+        with environ({}):
+            os.environ.pop('CI', None)
+            assert not obj.run(test_config.deployments, command='plan')
+            os.environ['CI'] = '1'
+            assert not obj.run(test_config.deployments, command='plan')
+
+        get_env.assert_has_calls([call(os.getcwd(), False,
+                                       prompt_if_unexpected=True),
+                                  call(os.getcwd(), False,
+                                       prompt_if_unexpected=False)])
 
 
 class TestSelectModulesToRun(object):
