@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- prompt to optionally provide an explicit deploy environment when git branch name is unexpected (e.g. feature branch) when run interactively
 
 ## [1.6.1] - 2020-04-14
 ### Fixed
