@@ -344,11 +344,18 @@ def environ(env=None, **kwargs):
                 os.environ[key] = val
 
 
-def load_object_from_string(fqcn):
+def load_object_from_string(fqcn, try_reload=False):
     """Convert "." delimited strings to a python object.
 
-    Given a "." delimited string representing the full path to an object
-    (function, class, variable) inside a module, return that object.
+    Args:
+        fqcn (str): A "." delimited string representing the full path to an
+            object (function, class, variable) inside a module
+        try_reload (bool): Try to reload the module so any global variables
+            set within the file during import are reloaded. This only applies
+            to modules that are already imported and are not builtin.
+
+    Returns:
+        Any: Object being imported from the provided path.
 
     Example::
 
@@ -359,9 +366,20 @@ def load_object_from_string(fqcn):
     """
     module_path = "__main__"
     object_name = fqcn
-    if "." in fqcn:
-        module_path, object_name = fqcn.rsplit(".", 1)
-        importlib.import_module(module_path)
+    if '.' in object_name:
+        module_path, object_name = fqcn.rsplit('.', 1)
+        if (
+                try_reload and
+                sys.modules.get(module_path) and
+                module_path.split('.')[0] not in sys.builtin_module_names  # skip builtins
+        ):
+            # TODO remove is next major release; backport circumvents expected functionality
+            #
+            # pylint<2.3.1 incorrectly identifies this
+            # pylint: disable=too-many-function-args
+            six.moves.reload_module(sys.modules[module_path])
+        else:
+            importlib.import_module(module_path)
     return getattr(sys.modules[module_path], object_name)
 
 

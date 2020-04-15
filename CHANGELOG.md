@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.6.1] - 2020-04-14
+### Fixed
+- global variables in hooks are now reloaded between uses to mimic functionality present in `>1.5.0`
+
 ## [1.6.0] - 2020-04-07
 ### Fixed
 - lookups are now resolved when using the `runway envvars` command
@@ -772,7 +776,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/onicagroup/runway/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/onicagroup/runway/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/onicagroup/runway/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/onicagroup/runway/compare/v1.5.0...v1.5.1
