@@ -322,7 +322,8 @@ class ModulesCommand(RunwayCommand):
         if deployments is None:
             deployments = self.runway_config['deployments']
         context = Context(env_name=get_env(self.env_root,
-                                           self.runway_config.ignore_git_branch),
+                                           self.runway_config.ignore_git_branch,
+                                           prompt_if_unexpected=bool(not os.getenv('CI'))),
                           env_region=None,
                           env_root=self.env_root,
                           env_vars=os.environ.copy(),
