@@ -64,7 +64,7 @@ def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-s
             continue
 
         try:
-            method = load_object_from_string(hook.path)
+            method = load_object_from_string(hook.path, try_reload=True)
         except (AttributeError, ImportError):
             LOGGER.exception("Unable to load method at %s:", hook.path)
             if required:

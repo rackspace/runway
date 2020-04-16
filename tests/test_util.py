@@ -4,7 +4,7 @@ import os
 import string
 import sys
 
-from mock import patch
+from mock import MagicMock, patch
 
 from runway.util import MutableMap, argv, environ, load_object_from_string
 
@@ -124,3 +124,36 @@ def test_load_object_from_string():
     )
     for test in tests:
         assert load_object_from_string(test[0]) is test[1]
+
+    obj_path = 'tests.fixtures.mock_hooks.GLOBAL_VALUE'
+    # check value from os.environ
+    assert load_object_from_string(obj_path, try_reload=True) == 'us-east-1'
+
+    with environ({'AWS_DEFAULT_REGION': 'us-west-2'}):
+        # check value from os.environ after changing it to ensure reload
+        assert load_object_from_string(obj_path, try_reload=True) == 'us-west-2'
+
+
+@patch('runway.util.six')
+def test_load_object_from_string_reload_conditions(mock_six):
+    """Test load_object_from_string reload conditions."""
+    mock_six.moves.reload_module.return_value = MagicMock()
+    builtin_test = 'sys.version_info'
+    mock_hook = 'tests.fixtures.mock_hooks.GLOBAL_VALUE'
+
+    try:
+        del sys.modules['tests.fixtures.mock_hooks']
+    except:  # noqa pylint: disable=bare-except
+        pass
+
+    load_object_from_string(builtin_test, try_reload=False)
+    mock_six.moves.reload_module.assert_not_called()
+
+    load_object_from_string(builtin_test, try_reload=True)
+    mock_six.moves.reload_module.assert_not_called()
+
+    load_object_from_string(mock_hook, try_reload=True)
+    mock_six.moves.reload_module.assert_not_called()
+
+    load_object_from_string(mock_hook, try_reload=True)
+    mock_six.moves.reload_module.assert_called_once()

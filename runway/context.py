@@ -24,7 +24,7 @@ def echo_detected_environment(env_name, env_vars):
                     "the current git branch or parent directory).")
     else:
         LOGGER.info("Environment \"%s\" was determined from the current "
-                    "git branch or parent directory.",
+                    "git branch, parent directory, or manual entry.",
                     env_name)
         LOGGER.info("If this is not the environment name, update the branch/folder name or "
                     "set an override value via the %s environment variable",

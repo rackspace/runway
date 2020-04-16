@@ -1,17 +1,24 @@
 """Tests runway/commands/modules_command.py."""
+# pylint: disable=no-self-use,redefined-outer-name
 import os
-import unittest
 from copy import deepcopy
 from os import path
 
+import pytest
 import yaml
-from mock import patch
+from mock import MagicMock, call, patch
 from moto import mock_sts
 
-from runway.commands.modules_command import (select_modules_to_run,
+from runway.commands.modules_command import (ModulesCommand,
+                                             select_modules_to_run,
                                              validate_environment)
+from runway.config import Config
+from runway.util import environ
+
+MODULE_PATH = 'runway.commands.modules_command'
 
 
+@pytest.fixture(scope='function')
 def module_tag_config():
     """Return a runway.yml file for testing module tags."""
     fixture_dir = path.join(
@@ -22,103 +29,128 @@ def module_tag_config():
         return yaml.safe_load(stream)
 
 
-class ModulesCommandTestCase(unittest.TestCase):
-    """Test runway/commands/modules_command.py."""
+class TestModulesCommand(object):
+    """Test runway.commands.modules_command.ModulesCommand."""
 
-    tag_yml = module_tag_config()
+    def test_run(self, monkeypatch):
+        """Test run method."""
+        # TODO test _process_deployments instead of mocking it out
+        deployments = [{'modules': ['test'], 'regions':'us-east-1'}]
+        test_config = Config(deployments=deployments, tests=[])
+        get_env = MagicMock(return_value='test')
 
-    def test_select_modules_to_run_tag_test_app(self):
+        monkeypatch.setattr(MODULE_PATH + '.select_modules_to_run',
+                            lambda a, b, c, d, e: a)
+        monkeypatch.setattr(MODULE_PATH + '.get_env', get_env)
+        monkeypatch.setattr(Config, 'find_config_file',
+                            MagicMock(return_value=os.getcwd() + 'runway.yml'))
+        monkeypatch.setattr(ModulesCommand, 'runway_config', test_config)
+        monkeypatch.setattr(ModulesCommand, '_process_deployments',
+                            lambda obj, y, x: None)
+
+        obj = ModulesCommand(cli_arguments={})
+
+        with environ({}):
+            os.environ.pop('CI', None)
+            assert not obj.run(test_config.deployments, command='plan')
+            os.environ['CI'] = '1'
+            assert not obj.run(test_config.deployments, command='plan')
+
+        get_env.assert_has_calls([call(os.getcwd(), False,
+                                       prompt_if_unexpected=True),
+                                  call(os.getcwd(), False,
+                                       prompt_if_unexpected=False)])
+
+
+class TestSelectModulesToRun(object):
+    """Test runway.commands.modules_command.select_modules_to_run."""
+
+    def test_tag_test_app(self, module_tag_config):
         """tag=[app:test-app] should return 2 modules."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['app:test-app']
 
         result = [
             select_modules_to_run(deployment, tags)
-            for deployment in config['deployments']
+            for deployment in module_tag_config['deployments']
         ]
-        self.assertEqual(len(result[0]['modules']), 1)
-        self.assertEqual(result[0]['modules'][0]['path'], 'sampleapp1.cfn')
-        self.assertEqual(len(result[1]['modules']), 0)
-        self.assertEqual(len(result[2]['modules']), 1)
-        self.assertEqual(result[2]['modules'][0]['path'], 'sampleapp4.cfn')
+        assert len(result[0]['modules']) == 1
+        assert result[0]['modules'][0]['path'] == 'sampleapp1.cfn'
+        assert not result[1]['modules']
+        assert len(result[2]['modules']) == 1
+        assert result[2]['modules'][0]['path'] == 'sampleapp4.cfn'
 
-    def test_select_modules_to_run_tag_iac(self):
+    def test_tag_iac(self, module_tag_config):
         """tag=[tier:iac] should return 2 modules."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['tier:iac']
 
         result = [
             select_modules_to_run(deployment, tags)
-            for deployment in config['deployments']
+            for deployment in module_tag_config['deployments']
         ]
-        self.assertEqual(len(result[0]['modules']), 2)
-        self.assertEqual(result[0]['modules'][0]['path'], 'sampleapp1.cfn')
-        self.assertEqual(result[0]['modules'][1]['path'], 'sampleapp2.cfn')
-        self.assertEqual(len(result[1]['modules']), 0)
-        self.assertEqual(len(result[2]['modules']), 0)
+        assert len(result[0]['modules']) == 2
+        assert result[0]['modules'][0]['path'] == 'sampleapp1.cfn'
+        assert result[0]['modules'][1]['path'] == 'sampleapp2.cfn'
+        assert not result[1]['modules']
+        assert not result[2]['modules']
 
-    def test_select_modules_to_run_two_tags(self):
+    def test_two_tags(self, module_tag_config):
         """tag=[tier:iac, app:test-app] should return 1 module."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
         tags = ['tier:iac', 'app:test-app']
         result = [
             select_modules_to_run(deployment, tags)
-            for deployment in config['deployments']
+            for deployment in module_tag_config['deployments']
         ]
-        self.assertEqual(len(result[0]['modules']), 1)
-        self.assertEqual(result[0]['modules'][0]['path'], 'sampleapp1.cfn')
-        self.assertEqual(len(result[1]['modules']), 0)
-        self.assertEqual(len(result[2]['modules']), 0)
+        assert len(result[0]['modules']) == 1
+        assert result[0]['modules'][0]['path'] == 'sampleapp1.cfn'
+        assert not result[1]['modules']
+        assert not result[2]['modules']
 
-    def test_select_modules_to_run_no_tags(self):
+    def test_no_tags(self, module_tag_config):
         """tag=[] should request input."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
         user_input = ['1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
             result = select_modules_to_run(
-                config['deployments'][0], []
+                module_tag_config['deployments'][0], []
             )
-        self.assertEqual(result['modules'][0],
-                         config['deployments'][0]['modules'][0])
+        assert result['modules'][0] == \
+            module_tag_config['deployments'][0]['modules'][0]
 
-    def test_select_modules_to_run_no_tags_ci(self):
+    def test_no_tags_ci(self, module_tag_config):
         """tag=[], ci=true should not request input and return everything."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
         result = [
             select_modules_to_run(deployment, [], ci='true')
-            for deployment in config['deployments']
+            for deployment in module_tag_config['deployments']
         ]
-        self.assertEqual(result, config['deployments'])
+        assert result == module_tag_config['deployments']
 
-    def test_select_modules_to_run_destroy(self):
+    def test_destroy(self, module_tag_config):
         """command=destroy should only prompt with no tag of ci if one module."""
-        config = deepcopy(ModulesCommandTestCase.tag_yml)
         user_input = ['y', '1']
         with patch('runway.commands.modules_command.input',
                    side_effect=user_input):
             result_single_no_tag = select_modules_to_run(
-                deepcopy(config['deployments'][1]), [], command='destroy'
+                deepcopy(module_tag_config['deployments'][1]), [], command='destroy'
             )
             result_no_tag = select_modules_to_run(
-                deepcopy(config['deployments'][0]), [], command='destroy'
+                deepcopy(module_tag_config['deployments'][0]), [], command='destroy'
             )
-        self.assertEqual(result_single_no_tag['modules'][0],
-                         config['deployments'][1]['modules'][0])
-        self.assertEqual(result_no_tag['modules'][0],
-                         config['deployments'][0]['modules'][0])
+        assert result_single_no_tag['modules'][0] == \
+            module_tag_config['deployments'][1]['modules'][0]
+        assert result_no_tag['modules'][0] == \
+            module_tag_config['deployments'][0]['modules'][0]
         result_tag = select_modules_to_run(
-            deepcopy(config['deployments'][0]), ['app:test-app'],
+            deepcopy(module_tag_config['deployments'][0]), ['app:test-app'],
             command='destroy'
         )
-        self.assertEqual(result_tag['modules'][0],
-                         config['deployments'][0]['modules'][0])
+        assert result_tag['modules'][0] == \
+            module_tag_config['deployments'][0]['modules'][0]
         result_tag_ci = select_modules_to_run(
-            deepcopy(config['deployments'][0]), [], command='destroy',
+            deepcopy(module_tag_config['deployments'][0]), [], command='destroy',
             ci='true'
         )
-        self.assertEqual(result_tag_ci['modules'],
-                         config['deployments'][0]['modules'])
+        assert result_tag_ci['modules'] == \
+            module_tag_config['deployments'][0]['modules']
 
 
 class TestValidateEnvironment(object):
