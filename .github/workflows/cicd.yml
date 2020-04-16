@@ -69,9 +69,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./.venv
-          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+          key: ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
           restore-keys: |
-            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+            ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
       - # &pipenv_sync_27
         name: Setup Python Virtual Environment (2.7)
         if: matrix.python-version == '2.7'  && matrix.os != 'windows-latest'
@@ -169,9 +169,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./.venv
-          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+          key: ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
           restore-keys: |
-            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+            ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
       # - *pipenv_sync
       - name: Setup Python Virtual Environment (3.x)
         if: matrix.python-version != '2.7'
@@ -250,9 +250,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./.venv
-          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+          key: ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
           restore-keys: |
-            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+            ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
       # - *pipenv_sync
       - name: Setup Python Virtual Environment (3.x)
         if: matrix.python-version != '2.7'
@@ -421,9 +421,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ./.venv
-          key: ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+          key: ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
           restore-keys: |
-            ${{ github.ref	}}-${{ matrix.os }}-venv-${{ matrix.python-version }}
+            ${{ github.ref }}-${{ matrix.os }}-venv-${{ matrix.python-version }}
       # - *pipenv_sync
       - name: Setup Python Virtual Environment (3.x)
         run: pipenv sync --dev
