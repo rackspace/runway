@@ -97,7 +97,7 @@ class Certificate(Hook):
                            'state of a value set outside of CloudFormation'
                            ' using a Runway hook.')
 
-        blueprint.VARIABLES = {
+        blueprint.VARIABLES = {  # pylint: disable=invalid-name
             'DomainName': {
                 'type': CFNString,
                 'description': var_description
