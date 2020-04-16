@@ -97,7 +97,10 @@ class Certificate(Hook):
                            'state of a value set outside of CloudFormation'
                            ' using a Runway hook.')
 
-        blueprint.VARIABLES = {  # pylint: disable=invalid-name
+        # for some reason cicd linting reports this but it is not reported when
+        # linted locally. disabling invalid-name directly also does not seem
+        # to work with the version of pylint being used.
+        blueprint.VARIABLES = {  # pylint: disable=C
             'DomainName': {
                 'type': CFNString,
                 'description': var_description
