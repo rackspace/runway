@@ -277,6 +277,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          scope: '@onica'
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed tree -y
       # - *cache_pip_ubuntu
@@ -343,6 +344,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
+          scope: '@onica'
       - name: Download Artifact
         uses: actions/download-artifact@v1.0.0
         with:
