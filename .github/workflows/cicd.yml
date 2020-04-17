@@ -358,7 +358,7 @@ jobs:
         if: startsWith(github.event.ref, 'refs/tags')
         # TODO support alpha, beta, and rc tags
         run: |
-          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} --access public \;
+          find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish {} --access public \;
 
   build-pypi:
     name: Build PyPi 📦
