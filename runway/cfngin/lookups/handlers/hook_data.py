@@ -6,6 +6,7 @@ import warnings
 from troposphere import BaseAWSObject
 
 from runway.lookups.handlers.base import LookupHandler
+from runway.util import MutableMap  # abs to support import through shim
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "hook_data"
@@ -49,7 +50,10 @@ class HookDataLookup(LookupHandler):
         except ValueError:
             query, args = cls.legacy_parse(value)
 
-        result = context.hook_data.find(query, args.get('default'))
+        hook_data = MutableMap(**context.hook_data)
+
+        # TODO use context.hook_data directly in next major release
+        result = hook_data.find(query, args.get('default'))
 
         if isinstance(result, BaseAWSObject) and \
                 args.get('get') and \

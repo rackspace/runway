@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - prompt to optionally provide an explicit deploy environment when git branch name is unexpected (e.g. feature branch) when run interactively
 
+### Fixed
+- cfngin `hook_data` is once again stored as a `dict` rather than `MutableMap` to support stacker hooks/lookups/blueprints that do not handle the `MutableMap` data type when consuming hook_data.
+
 ## [1.6.1] - 2020-04-14
 ### Fixed
 - global variables in hooks are now reloaded between uses to mimic functionality present in `>1.5.0`

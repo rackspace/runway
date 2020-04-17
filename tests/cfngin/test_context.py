@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.context."""
-# pylint: disable=protected-access,too-many-public-methods
+# pylint: disable=no-self-use,protected-access,too-many-public-methods
 import io
 import json
 import unittest
@@ -72,6 +72,22 @@ class TestContext(unittest.TestCase):
                 {'name': 'stack1'}, {'name': 'stack2', 'requires': ['stack1']}]
         }
         self.persist_graph_config = Config(self.persist_graph_raw_config)
+
+    def test_attributes(self):
+        """Test class attributes."""
+        context = Context(
+            config=Config({}),
+            region='us-east-1'
+        )
+
+        assert isinstance(context.config, Config)
+        assert context.config_path == './'
+        assert context.bucket_region == 'us-east-1'
+        assert not context.environment  # TODO check value
+        assert isinstance(context.force_stacks, list)
+        assert isinstance(context.hook_data, dict)
+        assert context.s3_conn  # TODO check value
+        assert isinstance(context.stack_names, list)
 
     def test_context_optional_keys_set(self):
         """Test context optional keys set."""
