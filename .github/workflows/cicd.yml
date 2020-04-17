@@ -331,7 +331,7 @@ jobs:
     env:
       NODE_VERSION: 12
       NPM_PACKAGE_NAME: '@onica/runway'
-      NODE_AUTH_TOKEN: ${{secrets.npm_api_token}}
+      NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
       fail-fast: true
       matrix:
