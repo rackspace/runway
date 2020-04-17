@@ -1,11 +1,3 @@
-ifeq ($(TRAVIS_OS_NAME), osx)
-	# the only os that defaults 'python' to python2
-	PYTHON = python3
-else
-	PYTHON = python
-endif
-
-
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 
@@ -44,11 +36,7 @@ test:
 	pipenv run pytest
 
 test_shim:
-	./.travis/test_shim.sh
-
-travistest:
-	./.travis/test.sh
-
+	bash ./.github/scripts/cicd/test_shim.sh
 
 create_tfenv_ver_file:
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
@@ -56,42 +44,27 @@ create_tfenv_ver_file:
 build: clean create_tfenv_ver_file
 	python setup.py sdist
 
-travisbuild_file: clean sync create_tfenv_ver_file
-	pipenv run $(PYTHON) setup.py sdist
-	mkdir -p tmp
-	pipenv run pip install .
-	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
-	mkdir -p artifacts/$$(cat tmp/version.txt)/pypi
-	mkdir -p artifacts/$$(cat tmp/version.txt)/$(TRAVIS_OS_NAME)
-	if [ $(TRAVIS_OS_NAME) = "linux" ]; then mv dist/* artifacts/$$(cat tmp/version.txt)/pypi; else rm -rf dist/runway-$$(cat tmp/version.txt).tar.gz; fi
-	pipenv run pyinstaller --noconfirm --clean runway.file.spec
-	mv dist/* artifacts/$$(cat tmp/version.txt)/$(TRAVIS_OS_NAME)
+build_pyinstaller_file: clean create_tfenv_ver_file
+	bash ./.github/scripts/cicd/build_pyinstaller.sh file
 
-travisbuild_folder: clean sync create_tfenv_ver_file
-	mkdir -p tmp
-	pipenv run pip install .
-	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
-	mkdir -p artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)
-	pipenv run pyinstaller --noconfirm --clean runway.folder.spec
-	if [ $(TRAVIS_OS_NAME) = "windows" ]; then \
-		7z a -ttar -so ./runway.tar ./dist/runway/* | 7z a -si ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/runway.tar.gz; \
-	else \
-		tar -C dist/runway/ -czvf ./artifacts/$$(cat tmp/version.txt)/npm/$(TRAVIS_OS_NAME)/runway.tar.gz .; \
-	fi;
+build_pyinstaller_folder: clean create_tfenv_ver_file
+	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
 
 build_whl: clean create_tfenv_ver_file
-	$(PYTHON) setup.py bdist_wheel --universal
+	python setup.py bdist_wheel --universal
 
 release: clean create_tfenv_ver_file build
 	twine upload dist/*
 	curl -D - -X PURGE https://pypi.org/simple/runway
 
-npm_prep: version_file
-	cp npm/* . && cp npm/.[^.]* .
-	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(cat tmp/version.txt)}\"" package.json > tmp/package.json
-	jq ".name = \"$${NPM_PACKAGE_NAME-$${TRAVIS_BRANCH-undefined}}\"" tmp/package.json > package.json
-	rm -rf tmp/package.json
-
-version_file:
+# requires setuptools-scm and setuptools global python installs
+# copies artifacts to src & npm package files to the root of the repo
+# updates package.json with the name of the package & semver version from scm (formated for npm)
+npm_prep:
 	mkdir -p tmp
-	pipenv run $(PYTHON) -c "from __future__ import print_function; import runway; print(runway.__version__, end='')" > tmp/version.txt
+	mkdir -p src
+	cp -r artifacts/$$(python ./setup.py --version)/* src/
+	cp npm/* . && cp npm/.[^.]* .
+	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(python ./setup.py --version | sed -En "s/\.dev/-dev/p")}\"" package.json > tmp/package.json
+	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
+	rm -rf tmp/package.json

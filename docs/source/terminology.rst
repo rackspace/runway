@@ -32,7 +32,7 @@ Deployment
 
 A :ref:`deployment<runway-deployment>` contains a list of `modules <#module>`_ and options for
 all the modules_ in the deployment_.
-A `Runway config file`_ can contain multiple deployments_ and a deployment_ can contain multiple modules_.
+A `Runway config file`_ can contain multiple :ref:`deployments<runway-deployment>` and a deployment_ can contain multiple modules_.
 
 
 Lookup (Runway)

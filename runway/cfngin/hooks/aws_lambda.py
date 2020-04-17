@@ -350,6 +350,8 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
                                           stdout=requirements,
                                           stderr=subprocess.PIPE)
         if int(sys.version[0]) > 2:
+            # TODO remove pylint disable when dropping python2
+            # pylint: disable=unexpected-keyword-arg
             _stdout, stderr = pipenv_process.communicate(timeout=timeout)
         else:
             _stdout, stderr = pipenv_process.communicate()
@@ -495,8 +497,9 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
     # exclude potential virtual environments in the package
     excludes.append('.venv/')
 
+    # TODO remove pylint disable when dropping python2
     with tempfile.TemporaryDirectory(
-            prefix='cfngin', dir=temp_root
+            prefix='cfngin', dir=temp_root  # pylint: disable=bad-continuation
     ) as tmpdir:
         tmp_req = os.path.join(tmpdir, 'requirements.txt')
         copydir(package_root, tmpdir, includes, excludes, follow_symlinks)
@@ -518,6 +521,8 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
                                         cwd=tmpdir, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
             if int(sys.version[0]) > 2:
+                # TODO remove pylint disable when dropping python2
+                # pylint: disable=unexpected-keyword-arg
                 _stdout, stderr = pip_proc.communicate(timeout=kwargs.get(
                     'pipenv_timeout', 900
                 ))

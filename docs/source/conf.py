@@ -10,7 +10,7 @@
 import os.path
 from os.path import dirname, realpath
 
-from runway import __version__
+from pkg_resources import get_distribution
 
 ROOT_DIR = dirname(dirname(dirname(realpath(__file__))))
 DOC_SRC = os.path.join(ROOT_DIR, 'docs/source')
@@ -22,10 +22,10 @@ project = u'runway'
 copyright = u'2019, Onica Group'
 author = u'Onica Group'
 
-# The short X.Y version
-version = u''
 # The full version, including alpha/beta/rc tags
-release = __version__
+release = get_distribution('runway').version
+# The short X.Y version
+version = '.'.join(release.split('.')[:2])
 
 
 # -- General configuration ---------------------------------------------------

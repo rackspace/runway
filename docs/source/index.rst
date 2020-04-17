@@ -30,7 +30,7 @@ Very simple configuration to:
    repo_structure
    terminology
    apidocs/index
-   developers
+   developers/index
    license
 
 

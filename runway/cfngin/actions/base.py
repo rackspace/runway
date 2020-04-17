@@ -245,6 +245,7 @@ class BaseAction(object):
         tail = self._tail_stack if tail else None
 
         def target_fn(*_args, **_kwargs):
+            """Target function."""
             return COMPLETE
 
         steps = [

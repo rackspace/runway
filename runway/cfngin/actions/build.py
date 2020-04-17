@@ -461,6 +461,7 @@ class Action(BaseAction):
         persist_graph = self.context.persistent_graph.transposed()
 
         def target_fn(*_args, **_kwargs):
+            """Target function."""
             return COMPLETE
 
         for ind_node, dep_nodes in persist_graph.dag.graph.items():
