@@ -414,6 +414,7 @@ jobs:
         uses: actions/download-artifact@v1.0.0
         with:
           name: pypi-dist
+          path: dist
       - name: Publish Distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@v1.1.0
         with:
