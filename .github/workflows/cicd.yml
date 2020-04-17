@@ -275,6 +275,7 @@ jobs:
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
         uses: actions/setup-node@v1.4.1
         with:
+          always-auth: true
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
           scope: '@onica'
@@ -342,6 +343,7 @@ jobs:
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
         uses: actions/setup-node@v1.4.1
         with:
+          always-auth: true
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
           scope: '@onica'
@@ -353,12 +355,12 @@ jobs:
       - name: Publish Distribution 📦 to npm (dev)
         if: github.ref == 'refs/heads/master'
         run: |
-          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} --always-auth=true -access public --tag dev \;
+          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} -access public --tag dev \;
       - name: Publish Distribution 📦 to npm
         if: startsWith(github.event.ref, 'refs/tags')
         # TODO support alpha, beta, and rc tags
         run: |
-          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} --always-auth=true --access public \;
+          find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish {} --access public \;
 
   build-pypi:
     name: Build PyPi 📦
