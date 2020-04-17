@@ -9,6 +9,8 @@ if sys.version_info.minor < 8:
 else:
     from importlib.metadata import version, PackageNotFoundError  # pylint: disable=E
 
+# some change
+
 sys.modules['stacker'] = cfngin  # shim to remove stacker dependency
 sys.modules['stacker.variables'] = variables  # shim to support standard variables
 
