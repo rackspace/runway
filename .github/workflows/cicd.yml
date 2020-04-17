@@ -243,8 +243,7 @@ jobs:
 
   build-npm:
     name: Build npm 📦
-    # TODO uncomment if block
-    # if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
+    if: github.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags')
     needs:
       - test-python
       - build-pyinstaller-onefolder
