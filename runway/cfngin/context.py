@@ -3,8 +3,6 @@ import collections
 import json
 import logging
 
-from runway.util import MutableMap  # abs to support import through shim
-
 from .config import Config
 from .exceptions import (PersistentGraphCannotLock,
                          PersistentGraphCannotUnlock,
@@ -89,7 +87,7 @@ class Context(object):
         self.bucket_region = self.config.cfngin_bucket_region or region
         self.environment = environment
         self.force_stacks = force_stacks or []
-        self.hook_data = MutableMap()
+        self.hook_data = {}  # TODO change to MutableMap in next major release
         self.region = region
         self.s3_conn = self.get_session(region=self.bucket_region).client('s3')
         self.stack_names = stack_names or []
