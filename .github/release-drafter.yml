@@ -12,6 +12,9 @@ categories:
   - title: '🐛 Bug Fixes'
     labels:
       - 'bug'
+  - title: '🧶 Dependencies'
+    labels:
+      - dependencies
   - title: '📖 Doc Updates'
     labels:
       - documentation
