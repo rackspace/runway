@@ -1,6 +1,11 @@
 name: CI/CD
 
-on: push
+on:
+  pull_request:  # any pull request
+  push:
+    branches:
+      - master
+      - release
 
 env:
   AWS_DEFAULT_REGION: us-east-1
