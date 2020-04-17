@@ -10,7 +10,6 @@
   "author": "Shane Smith",
   "license": "ISC",
   "dependencies": {
-    "@onica/runway": "^1.6.0",
     "@types/node": "^13.11.1",
     "@types/selenium-webdriver": "^4.0.9",
     "aws-sdk": "^2.656.0",

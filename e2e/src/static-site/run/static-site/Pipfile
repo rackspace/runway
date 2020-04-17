@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-runway = {editable = true,git = "https://github.com/onicagroup/runway.git",ref = "master"}
+runway = {editable = true, path = "./../../../../../"}
 
 [dev-packages]
 
