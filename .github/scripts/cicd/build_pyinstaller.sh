@@ -24,7 +24,17 @@ RUNWAY_VERSION=`pipenv run python ./setup.py --version`
 
 pipenv run python setup.py sdist
 pipenv run pip install .
-mkdir -p artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
 rm -rf dist/runway-$RUNWAY_VERSION.tar.gz
 pipenv run pyinstaller --noconfirm --clean runway.$1.spec
-mv dist/* artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
+
+if [ "$1" == 'file' ]; then
+    mkdir -p artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
+    mv dist/* artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
+else
+    mkdir -p artifacts/$LOCAL_OS_NAME
+    if [ "$OS_NAME" == "windows-latest" ]; then
+        7z a -ttar -so ./runway.tar ./dist/runway/* | 7z a -si ./artifacts/$LOCAL_OS_NAME/runway.tar.gz
+    else
+        tar -C dist/runway/ -czvf ./artifacts/$LOCAL_OS_NAME/runway.tar.gz .
+    fi
+fi
