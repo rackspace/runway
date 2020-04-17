@@ -271,7 +271,7 @@ jobs:
         uses: actions/setup-node@v1.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.npmjs.org
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed tree -y
       # - *cache_pip_ubuntu
@@ -337,7 +337,7 @@ jobs:
         uses: actions/setup-node@v1.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.npmjs.org
       - name: Download Artifact
         uses: actions/download-artifact@v1.0.0
         with:
@@ -414,6 +414,7 @@ jobs:
         uses: actions/download-artifact@v1.0.0
         with:
           name: pypi-dist
+          path: dist
       - name: Publish Distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@v1.1.0
         with:
