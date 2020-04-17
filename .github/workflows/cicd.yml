@@ -275,6 +275,7 @@ jobs:
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
         uses: actions/setup-node@v1.4.1
         with:
+          always-auth: true
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
           scope: '@onica'
@@ -342,6 +343,7 @@ jobs:
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
         uses: actions/setup-node@v1.4.1
         with:
+          always-auth: true
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
           scope: '@onica'
