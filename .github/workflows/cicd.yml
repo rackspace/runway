@@ -23,7 +23,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: [2.7, 3.5, 3.6, 3.7]
+        python-version: [2.7, 3.6, 3.7]
     runs-on: ${{ matrix.os }}
     env:
       # populating AWS creds with fake values
@@ -87,12 +87,6 @@ jobs:
         name: Setup Python Virtual Environment (3.x)
         if: matrix.python-version != '2.7'
         run: pipenv sync --dev
-      - # &install_pipenv_legacy
-        name: Install Legacy Python Dependencies
-        if: matrix.python-version == '3.5'
-        # install missing dependency for older versions of python
-        # the version of pytest we are using only requires install for <3.4
-        run: pipenv install "pathlib2>=2.2.0" --dev
       - name: Run Linters
         run: make lint
       - name: Run Unit Tests
