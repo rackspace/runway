@@ -7,7 +7,7 @@ name = "pypi"
 runway = {editable = true,path = "."}
 # these don't get pulled into the lock correctly when using ^ with >=3.7
 pathlib2 = {version = ">=2.3.0",python_version = '<="3.4"'}
-importlib-resources = {version = "~=1.0.2",python_version = '<"3.7"'}
+importlib-resources = {version = ">=1.4",python_version = '<"3.7"'}
 
 [dev-packages]
 # python3 flake8-docstrings fails with pydocstyle 4:
