@@ -254,7 +254,6 @@ jobs:
       - build-pyinstaller-onefolder
     env:
       NODE_VERSION: 12
-      NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: true
       matrix:
@@ -332,7 +331,6 @@ jobs:
     env:
       CI: true
       NODE_VERSION: 12
-      NPM_PACKAGE_NAME: '@onica/runway'
       NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
       fail-fast: true
@@ -353,10 +351,14 @@ jobs:
           path: artifacts
       - name: Publish Distribution 📦 to npm (dev)
         if: github.ref == 'refs/heads/master'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         run: |
           find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish {} -access public --tag dev \;
       - name: Publish Distribution 📦 to npm
         if: startsWith(github.event.ref, 'refs/tags')
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         # TODO support alpha, beta, and rc tags
         run: |
           find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish {} --access public \;
