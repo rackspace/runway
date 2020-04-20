@@ -351,12 +351,6 @@ jobs:
         with:
           name: npm-pack
           path: artifacts
-      - name: Configure npm
-        run: |
-          npm config set //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN
-          npm config set scope "@platcorp"
-          npm config set always-auth true
-          npm config list
       - name: Publish Distribution 📦 to npm (dev)
         if: github.ref == 'refs/heads/master'
         run: |
