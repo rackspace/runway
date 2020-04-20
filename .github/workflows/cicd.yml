@@ -317,7 +317,7 @@ jobs:
         run: |
           npm pack
           rm -rf artifacts && mkdir -p artifacts
-          find . -name 'onica-runway-*.*.*-*.tgz' -exec mv {} artifacts/ \;
+          find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1.0.0
         with:
@@ -354,13 +354,13 @@ jobs:
       - name: Configure npm
         run: |
           npm config set //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN
-          npm config set scope "@onica"
+          npm config set scope "@platcorp"
           npm config set always-auth true
           npm config list
       - name: Publish Distribution 📦 to npm (dev)
         if: github.ref == 'refs/heads/master'
         run: |
-          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish {} -access public --tag dev \;
+          find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish {} -access public --tag dev \;
       - name: Publish Distribution 📦 to npm
         if: startsWith(github.event.ref, 'refs/tags')
         # TODO support alpha, beta, and rc tags
