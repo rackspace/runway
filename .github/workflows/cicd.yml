@@ -254,6 +254,7 @@ jobs:
       - build-pyinstaller-onefolder
     env:
       NODE_VERSION: 12
+      NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: true
       matrix:
@@ -331,6 +332,7 @@ jobs:
     env:
       CI: true
       NODE_VERSION: 12
+      NPM_PACKAGE_NAME: '@onica/runway'
       NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
       fail-fast: true
