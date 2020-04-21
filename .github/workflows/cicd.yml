@@ -351,7 +351,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         run: |
-          find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish --access public --tag dev {} +
+          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
       - name: Publish Distribution 📦 to npm
         if: startsWith(github.ref, 'refs/tags')
         env:
