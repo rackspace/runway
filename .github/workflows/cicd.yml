@@ -466,7 +466,6 @@ jobs:
         with:
           name: pyinstaller-onefile-windows-latest
           path: artifacts
-      # TODO add step to update url shortener to change 'latest' to point here if tagged release
       - name: Install AWS CLI & Upload 📦
         run: |
           pip install "awscli~=1.18.19"
