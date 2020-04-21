@@ -1,3 +1,6 @@
+export:
+	pipenv lock --requirements > requirements.txt
+
 lint: lint-flake8 lint-pylint lint-mypy
 
 lint-flake8:

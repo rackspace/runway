@@ -110,7 +110,7 @@ def command(bucket_name: str,
             version: str,
             table_region: str = 'us-east-1'
             ) -> None:
-    """CLI interface for this script file."""
+    """Update/add URLs to the URL shortener."""
     logging.basicConfig(level=logging.INFO,
                         handlers=[HDLR])
     logging.getLogger('botocore').setLevel(logging.ERROR)
