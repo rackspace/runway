@@ -1,12 +1,13 @@
 """Update Runway release URLs."""
 # pylint: disable=no-member
 import logging
-from typing import TypedDict
+from typing import Optional, TypedDict, Union
 
 import boto3
 import click
 from mypy_boto3.boto3_session import Session
 from mypy_boto3_dynamodb.service_resource import Table
+from semver import VersionInfo
 
 LOGGER = logging.getLogger('update_urls')
 HDLR = logging.StreamHandler()
@@ -19,17 +20,29 @@ TARGET_TEMPLATE = ('https://{bucket_name}.s3-{region}.amazonaws.com/runway/'
 OS_NAMES = ['linux', 'osx', 'windows']
 
 
-class UrlDdbEntry(TypedDict):
-    """DynamoDB entry for the URL shortener.
+def get_version_from_tag_ref(_ctx: Optional[click.Context],
+                             _param: Optional[Union[click.Option, click.Parameter]],
+                             value: str
+                             ) -> str:
+    """Get package version from a GitHub Action's ref containing a tag.
 
-    Attributes:
-        id: The path after oni.ca in the shortened URL.
-        target: The URL that is resolved from the shortened URL.
+    To be used as the callback of a click option or parameter.
+
+    Args:
+        ctx: Click context object.
+        param: The click option or parameter the callback is being used with.
+        value: Value passed to the option or parameter from the CLI.
+
+    Returns:
+        str: The SemVer version number.
 
     """
-
-    id: str
-    target: str
+    version = value.replace('refs/tags/', '')  # strip git ref
+    if version.startswith('v'):  # strip leading "v"
+        version = version[1:]
+    if VersionInfo.isvalid(version):  # valid SemVer
+        return version
+    raise ValueError(f'version of "{version}" does not follow SemVer')
 
 
 def put_item(table: Table, id_val: str, target: str) -> None:
@@ -51,6 +64,7 @@ def put_item(table: Table, id_val: str, target: str) -> None:
               help='Name of the DynamoDB table containing entries for the URL '
               'shortener.')
 @click.option('--version', metavar='<version>', required=True,
+              callback=get_version_from_tag_ref,
               help='Runway version being release.')
 @click.option('--table-region', metavar='<table-region>', default='us-east-1',
               help='AWS region where the DynamoDB table is located.')
