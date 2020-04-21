@@ -7,6 +7,8 @@ verify_ssl = true
 pylint = "*"
 flake8 = "*"
 mypy = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [packages]
 boto3 = "==1.12.42"
