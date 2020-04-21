@@ -1,13 +1,14 @@
 """Tests for update_urls."""
 # pylint: disable=no-member
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import ANY, MagicMock, call, patch
 
 import boto3
 import pytest
 from botocore.stub import Stubber
+from click.testing import CliRunner
 from mypy_boto3_dynamodb.service_resource import Table
 
-from update_urls import sanitize_version, put_item, handler
+from update_urls import command, handler, put_item, sanitize_version
 
 
 def test_sanitize_version():
@@ -81,3 +82,21 @@ def test_handler(mock_put_item):
                       'runway/1.1.0/windows/runway.exe'))
 
     mock_put_item.assert_has_calls(calls)
+
+
+@patch('update_urls.handler')
+def test_command(mock_handler):
+    """Test command."""
+    runner = CliRunner()
+    result = runner.invoke(command,
+                           args=['--bucket-name', 'test-bucket',
+                                 '--bucket-region', 'us-west-2',
+                                 '--version', 'refs/tags/1.0.0',
+                                 '--table', 'test-table',
+                                 '--latest'],
+                           env={'AWS_ACCESS_KEY_ID': 'testing',
+                                'AWS_SECRET_ACCESS_KEY': 'testing',
+                                'AWS_DEFAULT_REGION': 'us-east-1'})
+    assert result.exit_code == 0
+    mock_handler.assert_called_once_with(ANY, 'test-bucket', 'us-west-2',
+                                         '1.0.0', True)

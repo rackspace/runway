@@ -9,5 +9,8 @@ lint-mypy:
 lint-pylint:
 	pipenv run pylint update_urls.py --rcfile=./../../../.pylintrc
 
+sync:
+	pipenv sync --dev
+
 test:
 	pytest ./test_update_urls.py --cov=update_urls
