@@ -65,6 +65,6 @@ npm_prep:
 	mkdir -p src
 	cp -r artifacts/$$(python ./setup.py --version)/* src/
 	cp npm/* . && cp npm/.[^.]* .
-	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(python ./setup.py --version | sed -En "s/\.dev/-dev/p")}\"" package.json > tmp/package.json
+	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(python ./setup.py --version | sed -E "s/\.dev/-dev/")}\"" package.json > tmp/package.json
 	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
 	rm -rf tmp/package.json
