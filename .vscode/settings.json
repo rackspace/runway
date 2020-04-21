@@ -19,11 +19,10 @@
     "cSpell.words": [
         "CFNgin",
         "CNAME",
+        "Docstring",
         "FQDN",
         "FQDNs",
-        "Docstring",
         "JWKS",
-        "Ngin",
         "NOSPIN",
         "Ngin",
         "PKCE",
@@ -89,6 +88,7 @@
         "testfixtures",
         "unshallow",
         "urllib",
+        "urlshortener",
         "wontfix",
         "xmltodict",
         "xray"
