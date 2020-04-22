@@ -1,22 +1,22 @@
 sync:
 	pipenv sync --dev
 
-deploy: sync
+deploy:
 	pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
 	PIPENV_MAX_DEPTH=5 pipenv run runway deploy && \
 	popd
 
-destroy: sync
+destroy:
 	pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
 	PIPENV_MAX_DEPTH=5 pipenv run runway destroy && \
 	popd
 
-test: sync
+test:
 	pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
 	PIPENV_MAX_DEPTH=5 pipenv run runway test && \
 	popd
 
-plan: sync
+plan:
 	pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
 	PIPENV_MAX_DEPTH=5 pipenv run runway plan && \
 	popd
