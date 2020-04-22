@@ -1,0 +1,23 @@
+ignore_git_branch: true
+
+tests:
+  - name: lint_bucket-and-user.cdk
+    type: script
+    required: true
+    args:
+      commands:
+        - pushd bucket-and-user.cdk && npm install -D && npm run lint && popd
+
+deployments:
+  - modules:
+      - path: bucket-and-user.cdk
+        parameters:
+          urlshortener_ddb_arn: arn:aws:dynamodb:us-east-1:093415447880:table/onica-urlshortener-prod
+          environment: ${env DEPLOY_ENVIRONMENT}
+        options:
+          build_steps:
+            - npm run build
+    regions:
+      - us-west-2
+    account_id:
+      common: '093415447880'  # onica-public-prod

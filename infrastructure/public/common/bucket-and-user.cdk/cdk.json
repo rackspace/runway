@@ -1,0 +1,4 @@
+{
+    "app": "node bin/app.js",
+    "versionReporting": false
+}
