@@ -339,7 +339,7 @@ def environ(env=None, **kwargs):
         # always restore original values
         for key, val in original_env.items():
             if val is None:
-                del os.environ[key]
+                os.environ.pop(key, None)  # handle key missing
             else:
                 os.environ[key] = val
 
