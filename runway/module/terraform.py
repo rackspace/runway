@@ -9,6 +9,7 @@ import sys
 import warnings
 
 from send2trash import send2trash
+from six import string_types
 
 from ..cfngin.lookups.handlers.output import deconstruct
 from ..env_mgr.tfenv import TFEnvManager
@@ -316,6 +317,17 @@ class TerraformOptions(ModuleOptions):
 
         return result
 
+    @staticmethod
+    def resolve_version(context, terraform_version=None, **_):
+        """Resolve terraform_version option."""
+        if not terraform_version or isinstance(terraform_version, string_types):
+            return terraform_version
+        if isinstance(terraform_version, dict):
+            return terraform_version.get(context.env_name,
+                                         terraform_version.get('*'))
+        raise TypeError('terraform_version must be of type str or '
+                        'Dict[str, str]; got type %s' % type(terraform_version))
+
     @classmethod
     def parse(cls, context, path=None, **kwargs):  # pylint: disable=arguments-differ
         """Parse the options definition and return an options object.
@@ -348,8 +360,7 @@ class TerraformOptions(ModuleOptions):
         return cls(args=kwargs.get('args', []),
                    backend=TerraformBackendConfig.parse(context, path,
                                                         **kwargs),
-                   version=cls.merge_nested_env_dicts(
-                       kwargs.get('terraform_version')))
+                   version=cls.resolve_version(context, **kwargs))
 
 
 class TerraformBackendConfig(ModuleOptions):
@@ -396,11 +407,11 @@ class TerraformBackendConfig(ModuleOptions):
         return cmd_list
 
     @staticmethod
-    def resolve_cfn_outputs(cfn_client, **kwargs):
+    def resolve_cfn_outputs(client, **kwargs):
         """Resolve CloudFormation output values.
 
         Args:
-            cfn_client (CloudformationClient): Boto3 Cloudformation client.
+            client (CloudformationClient): Boto3 Cloudformation client.
 
         Keyword Args:
             bucket (Optional[str]): Cloudformation output containing an S3
@@ -419,17 +430,17 @@ class TerraformBackendConfig(ModuleOptions):
         for key, val in kwargs.items():
             query = deconstruct(val)
             result[key] = find_cfn_output(query.output_name,
-                                          cfn_client.describe_stacks(
+                                          client.describe_stacks(
                                               StackName=query.stack_name
                                           )['Stacks'][0]['Outputs'])
         return result
 
     @staticmethod
-    def resolve_ssm_params(ssm_client, **kwargs):
+    def resolve_ssm_params(client, **kwargs):
         """Resolve SSM parameters.
 
         Args:
-            ssm_client (SSMClient): Boto3 SSM client.
+            client (SSMClient): Boto3 SSM client.
 
         Keyword Args:
             bucket (Optional[str]): SSM parameter containing an S3 bucket name.
@@ -445,7 +456,8 @@ class TerraformBackendConfig(ModuleOptions):
                    '"ssm" lookup should be used instead.')
         warnings.warn(dep_msg, DeprecationWarning)
         LOGGER.warning(dep_msg)
-        return {key: ssm_client.get_parameter(Name=val)['Parameter']['Value']
+        return {key: client.get_parameter(Name=val, WithDecryption=True)
+                     ['Parameter']['Value']  # noqa
                 for key, val in kwargs.items()}
 
     @staticmethod
@@ -520,11 +532,11 @@ class TerraformBackendConfig(ModuleOptions):
 
         if kwargs.get('terraform_backend_cfn_outputs'):
             result.update(cls.resolve_cfn_outputs(
-                cfn_client=session.client('cloudformation'),
+                client=session.client('cloudformation'),
                 **kwargs['terraform_backend_cfn_outputs']))
         if kwargs.get('terraform_backend_ssm_params'):
             result.update(cls.resolve_ssm_params(
-                cfn_client=session.client('ssm'),
+                client=session.client('ssm'),
                 **kwargs['terraform_backend_ssm_params']))
 
         if result and not result.get('region'):
