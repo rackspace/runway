@@ -65,7 +65,13 @@ class TestTerraformOptions(object):
           'terraform_backend_config': {'bucket': 'foo',
                                        'dynamodb_table': 'bar',
                                        'region': 'us-west-2'},
-          'terraform_version': '0.11.6'})
+          'terraform_version': '0.11.6'}),
+        ({'args': ['-key=val'],  # deprecated
+          'terraform_backend_config': {'test': {'bucket': 'foo',
+                                                'dynamodb_table': 'bar'},
+                                       'prod': {'bucket': 'invalid',
+                                                'dynamodb_table': 'invalid'}},
+          'terraform_version': {'test': '0.12', 'prod': '0.11.6'}})
     ])
     @patch('runway.module.terraform.TerraformBackendConfig.parse')
     def test_parse(self, mock_backend, config, monkeypatch, runway_context):
@@ -226,7 +232,6 @@ class TestTerraformBackendConfig(object):
             str(tmp_path), 'test', 'us-east-1'
         ) == expected
 
-    # TODO add deprecated config examples (e.g. env map)
     @pytest.mark.parametrize('config, expected_region', [
         ({'terraform_backend_config': {'bucket': 'foo',
                                        'dynamodb_table': 'bar',
@@ -273,6 +278,11 @@ class TestTerraformBackendConfig(object):
                                             'dynamodb_table': 'nope'},
           'terraform_backend_ssm_params': {'bucket': 'foo',  # deprecated
                                            'dynamodb_table': 'bar'}},
+         'us-east-1'),
+        ({'terraform_backend_config': {'test': {'bucket': 'foo',  # deprecated
+                                                'dynamodb_table': 'bar'},
+                                       'prod': {'bucket': 'invalid',
+                                                'dynamodb_table': 'invalid'}}},
          'us-east-1')
     ])
     def test_parse(self, monkeypatch, runway_context, config, expected_region):
