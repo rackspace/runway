@@ -1,8 +1,8 @@
 """Tests for terraform module."""
 # pylint: disable=no-self-use,unused-argument
 import sys
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
 
 import boto3
 import pytest

@@ -153,12 +153,13 @@ class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disabl
             Any
 
         """
-        if isinstance(data, (list, set, tuple, type(None), six.string_types)):
+        if isinstance(data, (list, type(None), six.string_types)):
             return data
         if isinstance(data, dict):
             return {key: merge_nested_environment_dicts(value, env_name)
                     for key, value in data.items()}
-        raise NotImplementedError('"%s" type is unsupported' % type(data))
+        raise TypeError('expected type of list, NoneType, or str; '
+                        'got type %s' % type(data))
 
     @classmethod
     def parse(cls, context, **kwargs):
@@ -197,6 +198,9 @@ class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disabl
         Returns:
             The value associated with the provided key/attribute name.
 
+        Raises:
+            KeyError: Key does not exist in the object.
+
         Example:
             .. codeblock: python
 
@@ -205,7 +209,10 @@ class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disabl
                 # value
 
         """
-        return getattr(self, key)
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         """Implement assignment to self[key].
