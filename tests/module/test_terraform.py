@@ -1,5 +1,6 @@
 """Tests for terraform module."""
 # pylint: disable=no-self-use,unused-argument
+import sys
 from datetime import datetime
 
 import boto3
@@ -71,10 +72,18 @@ class TestTerraformOptions(object):
         """Test parse."""
         mock_backend.return_value = 'successfully parsed backend'
 
-        def assert_resolve_version_kwargs(context, terraform_version=None, **_):
-            """Assert args passed to the method during parse."""
-            assert config.get('terraform_version') == terraform_version
-            return 'successfully resolved version'
+        if sys.version_info.major < 3:  # python 2 support
+            def assert_resolve_version_kwargs(_self, context,
+                                              terraform_version=None, **_):
+                """Assert args passed to the method during parse."""
+                assert config.get('terraform_version') == terraform_version
+                return 'successfully resolved version'
+        else:
+            def assert_resolve_version_kwargs(context, terraform_version=None,
+                                              **_):
+                """Assert args passed to the method during parse."""
+                assert config.get('terraform_version') == terraform_version
+                return 'successfully resolved version'
 
         monkeypatch.setattr(TerraformOptions, 'resolve_version',
                             assert_resolve_version_kwargs)
@@ -263,36 +272,49 @@ class TestTerraformBackendConfig(object):
     ])
     def test_parse(self, monkeypatch, runway_context, config, expected_region):
         """Test parse."""
-        if config.get('terraform_backend_cfn_outputs'):
-            runway_context.add_stubber('cloudformation', expected_region)
+        runway_context.add_stubber('cloudformation', expected_region)
+        runway_context.add_stubber('ssm', expected_region)
 
-            def assert_cfn_kwargs(client, **kwargs):
+        if sys.version_info.major < 3:  # python 2 support
+            def assert_cfn_kwargs(_, client, **kwargs):
                 """Assert args passed to the method during parse."""
                 assert kwargs == config.get('terraform_backend_cfn_outputs')
                 return kwargs
 
-            monkeypatch.setattr(TerraformBackendConfig, 'resolve_cfn_outputs',
-                                assert_cfn_kwargs)
+            def assert_ssm_kwargs(_, client, **kwargs):
+                """Assert args passed to the method during parse."""
+                assert kwargs == config.get('terraform_backend_ssm_params')
+                return kwargs
 
-        if config.get('terraform_backend_ssm_params'):
-            runway_context.add_stubber('ssm', expected_region)
+            def assert_get_backend_tfvars_file_args(_, path, env_name, env_region):
+                """Assert args passed to the method during parse."""
+                assert path == './'
+                assert env_name == 'test'
+                assert env_region == 'us-east-1'
+                return 'success'
+        else:
+            def assert_cfn_kwargs(client, **kwargs):
+                """Assert args passed to the method during parse."""
+                assert kwargs == config.get('terraform_backend_cfn_outputs')
+                return kwargs
 
             def assert_ssm_kwargs(client, **kwargs):
                 """Assert args passed to the method during parse."""
                 assert kwargs == config.get('terraform_backend_ssm_params')
                 return kwargs
 
-            monkeypatch.setattr(TerraformBackendConfig,
-                                'resolve_ssm_params',
-                                assert_ssm_kwargs)
+            def assert_get_backend_tfvars_file_args(path, env_name, env_region):
+                """Assert args passed to the method during parse."""
+                assert path == './'
+                assert env_name == 'test'
+                assert env_region == 'us-east-1'
+                return 'success'
 
-        def assert_get_backend_tfvars_file_args(path, env_name, env_region):
-            """Assert args passed to the method during parse."""
-            assert path == './'
-            assert env_name == 'test'
-            assert env_region == 'us-east-1'
-            return 'success'
-
+        monkeypatch.setattr(TerraformBackendConfig, 'resolve_cfn_outputs',
+                            assert_cfn_kwargs)
+        monkeypatch.setattr(TerraformBackendConfig,
+                            'resolve_ssm_params',
+                            assert_ssm_kwargs)
         monkeypatch.setattr(TerraformBackendConfig, 'get_backend_tfvars_file',
                             assert_get_backend_tfvars_file_args)
 
