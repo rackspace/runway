@@ -5,8 +5,7 @@ import platform
 import subprocess
 import sys
 
-from six import string_types
-from six.moves import UserDict
+import six
 
 from ..util import merge_nested_environment_dicts, which
 
@@ -139,8 +138,7 @@ class RunwayModule(object):
                                   'yourself!')
 
 
-# TODO remove multiple inheritance when droping python 2 support
-class ModuleOptions(UserDict, object):
+class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
     """Base class for Runway module options."""
 
     @staticmethod
@@ -155,7 +153,7 @@ class ModuleOptions(UserDict, object):
             Any
 
         """
-        if isinstance(data, (list, set, tuple, type(None), string_types)):
+        if isinstance(data, (list, set, tuple, type(None), six.string_types)):
             return data
         if isinstance(data, dict):
             return {key: merge_nested_environment_dicts(value, env_name)
@@ -171,6 +169,24 @@ class ModuleOptions(UserDict, object):
 
         """
         raise NotImplementedError
+
+    def __delitem__(self, key):
+        # type: (str) -> None
+        """Implement deletion of self[key].
+
+        Args:
+            key: Attribute name to remove from the object.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                del obj['key']
+                print(obj.__dict__)
+                # {}
+
+        """
+        delattr(self, key)
 
     def __getitem__(self, key):
         """Implement evaluation of self[key].
@@ -190,3 +206,49 @@ class ModuleOptions(UserDict, object):
 
         """
         return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        """Implement assignment to self[key].
+
+        Args:
+            key: Attribute name to associate with a value.
+            value: Value of a key/attribute.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions()
+                obj['key'] = 'value'
+                print(obj['key'])
+                # value
+
+        """
+        setattr(self, key, value)
+
+    def __len__(self):
+        # type: () -> int
+        """Implement the built-in function len().
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                print(len(obj))
+                # 1
+
+        """
+        return len(self.__dict__)
+
+    def __iter__(self):
+        """Return iterator object that can iterate over all attributes.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                for k, v in obj.items():
+                    print(f'{key}: {value}')
+                # key: value
+
+        """
+        return iter(self.__dict__)
