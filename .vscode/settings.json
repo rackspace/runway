@@ -81,6 +81,7 @@
         "pytz",
         "pywin",
         "rxref",
+        "skipif",
         "smmap",
         "sshpubkeys",
         "stacker's",
