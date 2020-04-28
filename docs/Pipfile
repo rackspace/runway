@@ -8,5 +8,8 @@ Sphinx = "~=2.3"
 sphinx_rtd_theme = "===0.4.2"
 # just for http.server py2/py3 syntax consistency in manual doc testing
 future = "~= 0.16"
-runway = {editable = true, path = "./.."}
+runway = {editable = true,path = "./.."}
 sphinxcontrib-apidoc = "*"
+
+[dev-packages]
+doc8 = "*"
