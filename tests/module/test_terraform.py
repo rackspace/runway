@@ -129,6 +129,29 @@ class TestTerraformOptions(object):
 class TestTerraformBackendConfig(object):
     """Test runway.module.terraform.TerraformBackendConfig."""
 
+    @pytest.mark.parametrize('input_data, expected_items', [
+        ({}, []),
+        ({'bucket': 'test-bucket'}, ['bucket=test-bucket']),
+        ({'dynamodb_table': 'test-table'}, ['dynamodb_table=test-table']),
+        ({'region': 'us-east-1'}, ['region=us-east-1']),
+        ({'bucket': 'test-bucket', 'dynamodb_table': 'test-table'},
+         ['bucket=test-bucket', 'dynamodb_table=test-table']),
+        ({'bucket': 'test-bucket', 'dynamodb_table': 'test-table',
+          'region': 'us-east-1'},
+         ['bucket=test-bucket', 'dynamodb_table=test-table',
+          'region=us-east-1']),
+        ({'bucket': 'test-bucket', 'dynamodb_table': 'test-table',
+          'region': 'us-east-1', 'filename': 'anything'},
+         ['bucket=test-bucket', 'dynamodb_table=test-table',
+          'region=us-east-1'])
+    ])
+    def test_init_args(self, input_data, expected_items):
+        """Test init_args."""
+        expected = []
+        for i in expected_items:
+            expected.extend(['-backend-config', i])
+        assert TerraformBackendConfig(**input_data).init_args == expected
+
     @pytest.mark.parametrize('kwargs, stack_info,expected', [
         ({'bucket': 'tf-state::BucketName',
           'dynamodb_table': 'tf-state::TableName'},
