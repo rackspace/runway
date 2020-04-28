@@ -83,7 +83,7 @@ Each element of the argument/option should be it's own list item (e.b. ``--confi
             args:
               - '--config'
               - sls.yml
-      regions
+      regions:
         - us-east-2
       environments:
         example: true
