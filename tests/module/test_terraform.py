@@ -2,6 +2,7 @@
 # pylint: disable=no-self-use,unused-argument
 import sys
 from datetime import datetime
+from contextlib import contextmanager
 
 import boto3
 import pytest
@@ -10,6 +11,12 @@ from mock import patch
 
 from runway.module.terraform import (TerraformBackendConfig, TerraformOptions,
                                      update_env_vars_with_tf_var_values)
+
+
+@contextmanager
+def does_not_raise():
+    """Use for conditional pytest.raises when using parametrize."""
+    yield
 
 
 def test_update_env_vars_with_tf_var_values():
@@ -110,20 +117,27 @@ class TestTerraformOptions(object):
         assert result.version == 'successfully resolved version'
         mock_backend.assert_called_once_with(runway_context, './', **config)
 
-    @pytest.mark.parametrize('terraform_version, expected',
-                             [('0.11.6', '0.11.6'),
-                              ({'test': '0.12', 'prod': '0.11.6'}, '0.12'),  # deprecated
-                              ({'*': '0.11.6', 'test': '0.12'}, '0.12'),  # deprecated
-                              ({'*': '0.11.6', 'prod': '0.12'}, '0.11.6'),  # deprecated
-                              ({'prod': '0.11.6'}, None),  # deprecated
-                              (None, None)])
-    def test_resolve_version(self, runway_context, terraform_version, expected):
+    @pytest.mark.parametrize('terraform_version, expected, exception',
+                             [('0.11.6', '0.11.6', does_not_raise()),
+                              ({'test': '0.12', 'prod': '0.11.6'},  # deprecated
+                               '0.12', does_not_raise()),
+                              ({'*': '0.11.6', 'test': '0.12'},  # deprecated
+                               '0.12', does_not_raise()),
+                              ({'*': '0.11.6', 'prod': '0.12'},  # deprecated
+                               '0.11.6', does_not_raise()),
+                              ({'prod': '0.11.6'}, None,  # deprecated
+                               does_not_raise()),
+                              (None, None, does_not_raise()),
+                              (13, None, pytest.raises(TypeError))])
+    def test_resolve_version(self, runway_context, terraform_version,
+                             expected, exception):
         """Test resolve_version."""
         config = {'something': None}
         if terraform_version:
             config['terraform_version'] = terraform_version
-        assert TerraformOptions.resolve_version(runway_context,
-                                                **config) == expected
+        with exception:
+            assert TerraformOptions.resolve_version(runway_context,
+                                                    **config) == expected
 
 
 class TestTerraformBackendConfig(object):
