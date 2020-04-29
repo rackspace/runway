@@ -699,7 +699,7 @@ class VariableValueLookup(VariableValue):
 
         """
         if isinstance(self.handler, type):
-            import warnings
+            import warnings  # pylint: disable=import-outside-toplevel
             warn_msg = ('Old style lookup in use. Please upgrade to use '
                         'the new style of Lookups that accepts '
                         '"**kwargs".')

@@ -4,7 +4,7 @@ import json
 import socket
 import sys
 # This false pylint error is only an issue on py2
-from six.moves.urllib.parse import urlparse  # pylint: disable=relative-import
+from six.moves.urllib.parse import urlparse  # pylint: disable=E
 import requests
 from cryptography.hazmat.primitives import serialization
 from OpenSSL import SSL
