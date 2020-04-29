@@ -101,15 +101,6 @@ They can be added to any any fork to enable *similar* results but, you will need
 .. _secrets: https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets
 
 
-****************
-Issue Management
-****************
-
-Assigns first responders to a newly opened issue and applies initial labels of ``status:review_required`` and ``priority:low`` to denote that one of the first responders has not reviewed the issue yet and set initial triage level.
-
-This will also try to identify if the issue is a feature request, bug report, or question based by looking for keywords and apply the appropriate label. The issue templates will result in the corresponding label being applied.
-
-
 ******************
 Release Management
 ******************

@@ -2,8 +2,8 @@
 name: Bug report
 about: Create a report to help us improve
 title: "[BUG] report"
-labels: ''
-assignees: ''
+labels: bug, priority:low, status:review_needed
+assignees: ITProKyle, troyready
 
 ---
 
