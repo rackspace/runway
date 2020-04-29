@@ -133,7 +133,80 @@ outputs.
           dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
 
 
----
+----
+
+
+.. _tf-args:
+
+******************************************
+Specifying Terraform CLI Arguments/Options
+******************************************
+
+Runway can pass custom arguments/options to the Terraform CLI by using the ``args`` option.
+
+The value of ``args`` can be provided in one of two ways.
+The simplest way is to provide a *list* of arguments/options which will be appended to ``terraform apply`` when executed by Runway.
+Each element of the argument/option should be it's own list item (e.g. ``-parallelism=25 -no-color`` would be ``['-parallelism=25, '-no-color']``).
+
+For more control, a map can be provided to pass arguments/options to other commands.
+Arguments can be passed to ``terraform apply``, ``terraform init``, and/or ``terraform plan`` by using the *action* as the key in the map (see the **Runway Example** section below).
+The value of each key in the map must be a list as described in the previous section.
+
+.. important::
+  The following arguments/options are provided by Runway and should not be provided manually:
+  *auto-approve*, *backend-config*, *force*, *reconfigure*, *update*, and *var-file*.
+  Providing any of these manually could result in unintended side-effects.
+
+
+.. rubric:: Runway Example
+.. code-block:: yaml
+
+  ---
+  deployments:
+    - modules:
+        - path: sampleapp-01.tf
+          options:
+            args:
+              - '-no-color'
+              - '-parallelism=25'
+        - path: sampleapp-02.tf
+          options:
+            args:
+              apply:
+                - '-no-color'
+                - '-parallelism=25'
+              init:
+                - '-no-color'
+              plan:
+                - '-no-color'
+                - '-parallelism=25'
+      regions:
+        - us-east-2
+      environments:
+        example: true
+
+.. rubric:: Command Equivalent
+.. code-block::
+
+  # runway deploy - sampleapp-01.tf
+  terraform init -reconfigure
+  terraform apply -no-color -parallelism=25 -auto-approve=false
+
+  # runway plan - sampleapp-01.tf
+  terraform plan
+
+.. code-block::
+
+  # runway deploy - sampleapp-02.tf
+  terraform init -reconfigure -no-color
+  terraform apply -no-color -parallelism=25 -auto-approve=false
+
+  # runway plan - sampleapp-02.tf
+  terraform plan -no-color -parallelism=25
+
+
+----
+
 
 .. _tf-version:
 
