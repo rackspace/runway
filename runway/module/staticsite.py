@@ -140,7 +140,7 @@ class StaticSite(RunwayModule):
                 }
             }]
 
-            if self.parameters.get('staticsite_create_user_pool', False):
+            if self.parameters.get('staticsite_create_user_pool'):
                 # Retrieve the user pool id
                 pre_destroy.append({
                     'path': 'runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get',
@@ -156,6 +156,14 @@ class StaticSite(RunwayModule):
                     'required': True,
                     'data_key': 'aae_domain_updater',
                     'args': self._get_domain_updater_variables(),
+                })
+            else:
+                # Retrieve the user pool id
+                pre_build.append({
+                    'path': 'runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get',
+                    'required': True,
+                    'data_key': 'aae_user_pool_id_retriever',
+                    'args': self._get_user_pool_id_retriever_variables(),
                 })
 
         with open(os.path.join(module_dir, '01-dependencies.yaml'), 'w') as output_stream:  # noqa
