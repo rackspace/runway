@@ -34,15 +34,13 @@ Options specific to Terraform Modules.
 
 **terraform_version (Optional[Union[str, Dict[str, str]]])**
   String containing the Terraform version or a mapping of deploy environment to a Terraform version.
-  See :ref:`Versions <tf-version>` for more details.
+  See :ref:`Version Management <tf-version>` for more details.
 
   .. rubric:: Example
   .. code-block:: yaml
 
     options:
-      terraform_version:
-        "*": 0.11.13  # applies to all environments
-        # prod: 0.9.0  # can also be specified for a specific environment
+      terraform_version: 0.11.13
 
 
 *********

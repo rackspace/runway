@@ -230,7 +230,10 @@ when deploying your module.
   ---
   deployments:
     - modules:
-        - path: sampleapp.tf
+        - path: sampleapp-01.tf
+          options:
+            terraform_version: 0.11.13
+        - path: sampleapp-02.tf
           options:
             terraform_version:
               "*": 0.11.13  # applies to all environments
