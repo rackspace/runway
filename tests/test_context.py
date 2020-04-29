@@ -1,10 +1,12 @@
 """Tests for context module."""
 # pylint: disable=protected-access,no-self-use
 import logging
+import os
 
 from mock import patch
 
 from runway.context import Context
+from runway.util import environ
 
 LOGGER = logging.getLogger('runway')
 
@@ -197,3 +199,38 @@ class TestContext(object):
         assert context.env_vars['OLD_AWS_ACCESS_KEY_ID'] == 'foo'
         assert context.env_vars['OLD_AWS_SECRET_ACCESS_KEY'] == 'bar'
         assert context.env_vars['OLD_AWS_SESSION_TOKEN'] == 'foobar'
+
+    def test_init(self, tmp_path):
+        """Test init process."""
+        env_name = 'test'
+        env_region = 'us-east-1'
+        env_root = str(tmp_path)
+        config_file = tmp_path / 'config'
+        config_file.write_text(u'[profile test]\n'
+                               'aws_access_key_id = bar\n'
+                               'aws_secret_access_key = foo')
+
+        with environ(dict(AWS_PROFILE='test', **TEST_CREDENTIALS)):
+            env_vars = os.environ.copy()
+            env_vars['DEPLOY_ENVIRONMENT'] = env_name
+
+            ctx = Context(env_name, env_region, env_root)
+            assert not ctx.command
+            assert not ctx.debug
+            assert ctx.env_name == env_name
+            assert ctx.env_region == env_region
+            assert ctx.env_root == env_root
+            assert sorted(ctx.env_vars) == sorted(env_vars)
+
+        with environ({'AWS_PROFILE': 'test', 'AWS_CONFIG_FILE': str(config_file)}):
+            os.environ.pop('AWS_ACCESS_KEY_ID', None)
+            os.environ.pop('AWS_SECRET_ACCESS_KEY', None)
+            os.environ.pop('AWS_SESSION_TOKEN', None)
+
+            env_vars = os.environ.copy()
+            env_vars['DEPLOY_ENVIRONMENT'] = env_name
+
+            ctx = Context(env_name, env_region, env_root)
+            assert ctx.env_vars != os.environ
+            assert ctx.env_vars['AWS_ACCESS_KEY_ID'] == 'bar'
+            assert ctx.env_vars['AWS_SECRET_ACCESS_KEY'] == 'foo'

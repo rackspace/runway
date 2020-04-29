@@ -5,8 +5,8 @@ import multiprocessing
 import os
 import sys
 
-from .util import AWS_ENV_VARS
 from .cfngin.session_cache import get_session
+from .util import AWS_ENV_VARS
 
 LOGGER = logging.getLogger('runway')
 
@@ -53,6 +53,7 @@ class Context(object):
 
         if not self._env_name_from_env:
             self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
+        self.__inject_profile_credentials()  # TODO remove after IaC tools support AWS SSO
 
     @property
     def boto3_credentials(self):
@@ -247,3 +248,31 @@ class Context(object):
                 self.env_vars[i] = self.env_vars['OLD_' + i]
             elif i in self.env_vars:
                 self.env_vars.pop(i)
+
+    @property
+    def __credentials_in_environ(self):  # TODO remove after IaC tools support AWS SSO
+        # type: () -> bool
+        """Wether AWS credentials exist in os.environ."""
+        return bool(os.getenv('AWS_ACCESS_KEY_ID') or
+                    os.getenv('AWS_SECRET_ACCESS_KEY'))
+
+    def __inject_profile_credentials(self):  # TODO remove after IaC tools support AWS SSO
+        """Inject AWS credentials into self.env_vars if using an AWS profile.
+
+        This is to enable support of AWS SSO profiles until all IaC tools that
+        Runway wraps supports these types of profiles.
+
+        """
+        profile = self.env_vars.get('AWS_PROFILE')
+
+        if self.current_aws_creds or not profile:
+            return
+
+        creds = self.get_session(profile=profile) \
+            .get_credentials() \
+            .get_frozen_credentials()
+
+        self.env_vars['AWS_ACCESS_KEY_ID'] = creds.access_key
+        self.env_vars['AWS_SECRET_ACCESS_KEY'] = creds.secret_key
+        if creds.token:
+            self.env_vars['AWS_SESSION_TOKEN'] = creds.token

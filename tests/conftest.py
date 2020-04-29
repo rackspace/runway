@@ -36,7 +36,7 @@ def aws_credentials():
     for key, value in saved_env.items():
         LOG.info('Restoring saved env var: %s=%s', key, value)
         if value is None:
-            del os.environ[key]
+            os.environ.pop(key, None)  # handle key missing
         else:
             os.environ[key] = value
 

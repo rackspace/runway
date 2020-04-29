@@ -5,6 +5,8 @@ import warnings
 
 import boto3
 
+from runway.aws_sso_botocore.session import Session
+
 from .ui import ui
 
 LOGGER = logging.getLogger(__name__)
@@ -53,6 +55,7 @@ def get_session(region=None,
     session = boto3.Session(aws_access_key_id=access_key,
                             aws_secret_access_key=secret_key,
                             aws_session_token=session_token,
+                            botocore_session=Session(),
                             region_name=region,
                             profile_name=profile)
     cred_provider = session._session.get_component('credential_provider')
