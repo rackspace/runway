@@ -111,6 +111,7 @@ def test_environ():
 
     with environ(override):
         assert os.environ == override, 'validate override'
+        assert os.environ.pop('new_param') == 'value'
 
     assert os.environ == orig_expected, 'validate value returned to original'
 
