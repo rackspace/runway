@@ -1,4 +1,4 @@
-"""Refresh the authorization token for new credentials."""
+"""Refresh authorization token for new credentials."""
 
 import logging
 import traceback

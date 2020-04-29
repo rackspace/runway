@@ -3,7 +3,7 @@
 
 When the information is not present or an error occurs due to verification a new
 request to Cognito will be made to authorize the user. The user will be taken
-to the Cognito login page to enter their information, and so long as it is valid,
+to the Cognito login page to enter their information, and as long as it is valid,
 the information will be passed to the parsing agent.
 
 If a refresh token exists and it has expired (after 1 hour) do an automatic refresh
