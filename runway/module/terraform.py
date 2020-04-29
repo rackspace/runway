@@ -401,8 +401,8 @@ class TerraformBackendConfig(ModuleOptions):
                 cmd_list.append('-backend-config')
                 cmd_list.append(key + '=' + self[key])
             else:
-                LOGGER.warning("Skipping terraform backend config option \"%s\" "
-                               "-- no value provided", key)
+                LOGGER.debug("Skipping terraform backend config option \"%s\" "
+                             "-- no value provided", key)
         return cmd_list
 
     @staticmethod
