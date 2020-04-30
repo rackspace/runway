@@ -61,10 +61,10 @@ Execution
    (e.g. ``git push <remote> release``)
 
 6. Create a signed tag on the *release* branch for the new version.
-   (e.g. ``git tag --annotate --sign v0.0.0``)
+   (e.g. ``git tag --sign v0.0.0``)
 
 7. Push the new tag to the **onicagroup/runway** remote.
-   (e.g. ``git push <remote> <tag-name>``)
+   (e.g. ``git push <remote> v0.0.0``)
 
 At this point, GitHub Action will begin final linting & testing before building the deployment packages & automatically publishing them to npm, PyPi, and AWS S3.
 The **CI/CD** workflow can be monitored for progress.

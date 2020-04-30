@@ -11,3 +11,4 @@ Guidelines and processes for the maintainers of this project.
 
    labels
    release_process
+   infrastructure

@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [1.7.3] - 2020-04-29
+### Fixed
+- Static Site Auth@Edge deployments with pre-existing userpools
+
 ### Added
 - support for AWS SSO profile as the initial credential source
 - support for `args` to be passed to Terraform CLI commands
@@ -799,7 +803,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.7.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.7.3...HEAD
+[1.7.3]: https://github.com/onicagroup/runway/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/onicagroup/runway/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/onicagroup/runway/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/onicagroup/runway/compare/v1.6.1...v1.7.0

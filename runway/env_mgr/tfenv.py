@@ -14,8 +14,8 @@ import zipfile
 import hcl
 import requests
 # Old pylint on py2.7 incorrectly flags these
-from six.moves.urllib.request import urlretrieve  # noqa pylint: disable=import-error,line-too-long
-from six.moves.urllib.error import URLError  # noqa pylint: disable=import-error,relative-import,line-too-long
+from six.moves.urllib.request import urlretrieve  # pylint: disable=E
+from six.moves.urllib.error import URLError  # pylint: disable=E
 
 from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
 from ..util import get_hash_for_filename, sha256sum

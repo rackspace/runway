@@ -1,9 +1,10 @@
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 
-# not actually a sync since we need to skip-lock but maintains naming
+# changes that need to be made inorder to sync python two (may also require deletion of the existing lock file)
 sync_two:
-	PIPENV_VENV_IN_PROJECT=1 pipenv install --dev --two --skip-lock
+	pipenv install "astroid<2.0" "pylint<2.0" --dev
+	PIPENV_VENV_IN_PROJECT=1 pipenv install --dev
 
 # sync all virtual environments used by this project with their Pipfile.lock
 sync_all:
@@ -30,6 +31,12 @@ clean:
 lint:
 	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
 	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
+	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
+
+# linting for python 2, requires additional disables
+lint_two:
+	pipenv run flake8 --exclude=runway/embedded,runway/templates runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-option-value,relative-import
 	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 test:

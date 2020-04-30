@@ -290,6 +290,7 @@ class Step(object):
             :class:`Step`
 
         """
+        # pylint: disable=import-outside-toplevel
         from runway.cfngin.config import Stack as StackConfig
         from runway.cfngin.stack import Stack
 

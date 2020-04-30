@@ -1,7 +1,7 @@
 """Parse the given Cognito/Local authorization information.
 
 Ensure the parsed Cognito and Local authorization information from the retrieved
-query string parameter and cookie headers matches our expectations. If it doesn't
+query string parameter and cookie headers matches expectations. If it doesn't
 then inform the user of a bad request, otherwise retrieve the Cognito tokens to
 add to the cookie headers.
 """

@@ -1,0 +1,17 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "linterOptions": {
+        "exclude": [
+            "bin/*.d.ts",
+            "lib/*.d.ts"
+        ]
+    },
+    "rules": {
+        "no-unused-expression": [true, "allow-new"]
+    },
+    "rulesDirectory": []
+}

@@ -4,6 +4,7 @@
 .coverage
 .eggs
 *.egg-info
+.mypy_cache
 build
 dist
 docs/source/_build
@@ -31,6 +32,9 @@ preuninstall.js
 # Test artifacts & copied fixtures
 tests/fixtures/blueprints/*-result
 integration_tests/test_cfngin/tests/[0-9][0-9]_*.yaml
+
+# Infrastructure
+!infrastructure/**/**/**/package.json
 
 # Programatically generated doc pages
 docs/source/apidocs
