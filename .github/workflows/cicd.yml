@@ -468,8 +468,40 @@ jobs:
         with:
           name: pyinstaller-onefile-windows-latest
           path: artifacts
-      # TODO add step to update url shortener to change 'latest' to point here if tagged release
       - name: Install AWS CLI & Upload 📦
         run: |
           pip install "awscli~=1.18.19"
           aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read
+
+  update-urlshortener:
+    name: Update URL Shortener
+    if: startsWith(github.ref, 'refs/tags')
+    needs:
+      - publish-s3
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+      BUCKET_NAME: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
+      BUCKET_REGION: us-west-2
+      TABLE: onica-urlshortener-prod
+      TABLE_REGION: us-east-1
+      VERSION: ${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2.0.0
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install Dependencies & Run Script
+        working-directory: .github/scripts/urlshortener
+        run: |
+          pip install -r requirements.txt
+          python update_urls.py \
+            --bucket-name $BUCKET_NAME \
+            --bucket-region $BUCKET_REGION \
+            --table $TABLE \
+            --table-region $TABLE_REGION \
+            --version $VERSION \
+            --latest
