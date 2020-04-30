@@ -126,8 +126,8 @@ def get_env(path, ignore_git_branch=False, prompt_if_unexpected=False):
     else:
         # These are not located with the top imports because they throw an
         # error if git isn't installed
-        from git import Repo as GitRepo
-        from git.exc import InvalidGitRepositoryError
+        from git import Repo as GitRepo  # pylint: disable=import-outside-toplevel
+        from git.exc import InvalidGitRepositoryError  # pylint: disable=import-outside-toplevel
 
         try:
             b_name = GitRepo(

@@ -83,6 +83,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 def generate_tfstate_cfn_template():
     """Return rendered CFN template yaml."""
+    # pylint: disable=import-outside-toplevel
     from runway.blueprints.tf_state import TfState
 
     return to_yaml(TfState('test',
@@ -169,6 +170,7 @@ def generate_sample_k8s_cfn_repo(env_root):
                      repo_dir)
         sys.exit(1)
 
+    # pylint: disable=import-outside-toplevel
     from runway.blueprints.k8s.k8s_master import Cluster
     from runway.blueprints.k8s.k8s_iam import Iam
     from runway.blueprints.k8s.k8s_workers import NodeGroup as WorkerNodeGroup

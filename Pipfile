@@ -20,8 +20,8 @@ flake8-docstrings = "*"
 flake8 = "*"
 # pylint and astroid pinned to avoid "Instance of '' has no 'Bucket' member"
 # error when using boto3. https://github.com/PyCQA/pylint/issues/3134
-pylint = "<2.3.1"
-astroid = "<2.2.5"
+pylint = ">=2.5.0"
+astroid = ">=2.4.0"
 # stuck at 3.5 till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
 pyinstaller = "==3.5"
 pytest = "<5.0"  # last version that supports 2.7 - allows install with 2/3

@@ -677,8 +677,7 @@ class Provider(BaseProvider):
                     if cancel.wait(TAIL_RETRY_SLEEP):
                         return
                     continue
-                else:
-                    raise
+                raise
 
     @staticmethod
     def _tail_print(event):

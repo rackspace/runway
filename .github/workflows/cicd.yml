@@ -75,20 +75,22 @@ jobs:
         if: matrix.python-version == '2.7' && matrix.os != 'windows-latest'
         run: |
           rm -rf Pipfile.lock
-          pipenv install "pylint<2.0" --dev
-          pipenv sync --dev
+          make sync_two
       - # &pipenv_sync_27_windows
         name: Setup Python Virtual Environment (2.7) (windows)
         if: matrix.python-version == '2.7' && matrix.os == 'windows-latest'
         run: |
           Remove-Item -Path $Env:GITHUB_WORKSPACE\Pipfile.lock -Force
-          pipenv install "pylint<2.0" --dev
-          pipenv sync --dev
+          make sync_two
       - # &pipenv_sync
         name: Setup Python Virtual Environment (3.x)
         if: matrix.python-version != '2.7'
         run: pipenv sync --dev
-      - name: Run Linters
+      - name: Run Linters (2.7)
+        if: matrix.python-version == '2.7'
+        run: make lint_two
+      - name: Run Linters (3.x)
+        if: matrix.python-version != '2.7'
         run: make lint
       - name: Run Unit Tests
         if: matrix.os != 'windows-latest'
