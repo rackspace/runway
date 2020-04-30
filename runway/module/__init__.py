@@ -1,12 +1,13 @@
 """Runway module module."""
-
 import logging
 import os
 import platform
 import subprocess
 import sys
 
-from ..util import which
+import six
+
+from ..util import merge_nested_environment_dicts, which
 
 LOGGER = logging.getLogger('runway')
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
@@ -135,3 +136,126 @@ class RunwayModule(object):
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError('You must implement the destroy() method '
                                   'yourself!')
+
+
+class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
+    """Base class for Runway module options."""
+
+    @staticmethod
+    def merge_nested_env_dicts(data, env_name=None):
+        """Merge nested env dicts.
+
+        Args:
+            data (Any): Data to try to merge.
+            env_name (Optional[str]): Current environment.
+
+        Returns:
+            Any
+
+        """
+        if isinstance(data, (list, type(None), six.string_types)):
+            return data
+        if isinstance(data, dict):
+            return {key: merge_nested_environment_dicts(value, env_name)
+                    for key, value in data.items()}
+        raise TypeError('expected type of list, NoneType, or str; '
+                        'got type %s' % type(data))
+
+    @classmethod
+    def parse(cls, context, **kwargs):
+        """Parse module options definition to extract usable options.
+
+        Args:
+            context (Context): Runway context object.
+
+        """
+        raise NotImplementedError
+
+    def __delitem__(self, key):
+        # type: (str) -> None
+        """Implement deletion of self[key].
+
+        Args:
+            key: Attribute name to remove from the object.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                del obj['key']
+                print(obj.__dict__)
+                # {}
+
+        """
+        delattr(self, key)
+
+    def __getitem__(self, key):
+        """Implement evaluation of self[key].
+
+        Args:
+            key: Attribute name to return the value for.
+
+        Returns:
+            The value associated with the provided key/attribute name.
+
+        Raises:
+            KeyError: Key does not exist in the object.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                print(obj['key'])
+                # value
+
+        """
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            raise KeyError(key)
+
+    def __setitem__(self, key, value):
+        """Implement assignment to self[key].
+
+        Args:
+            key: Attribute name to associate with a value.
+            value: Value of a key/attribute.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions()
+                obj['key'] = 'value'
+                print(obj['key'])
+                # value
+
+        """
+        setattr(self, key, value)
+
+    def __len__(self):
+        # type: () -> int
+        """Implement the built-in function len().
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                print(len(obj))
+                # 1
+
+        """
+        return len(self.__dict__)
+
+    def __iter__(self):
+        """Return iterator object that can iterate over all attributes.
+
+        Example:
+            .. codeblock: python
+
+                obj = ModuleOptions(**{'key': 'value'})
+                for k, v in obj.items():
+                    print(f'{key}: {value}')
+                # key: value
+
+        """
+        return iter(self.__dict__)

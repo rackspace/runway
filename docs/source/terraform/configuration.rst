@@ -9,6 +9,17 @@ Options
 
 Options specific to Terraform Modules.
 
+**args (Optional[Union[Dict[str, List[str]], List[str]]])**
+  List of CLI arguments/options to pass to Terraform.
+  See :ref:`Specifying Terraform CLI Arguments/Options <tf-args>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      args:
+        - '-parallelism=25'
+
 **terraform_backend_config (Optional[Dict[str, str]])**
   Mapping to configure Terraform backend. See :ref:`Backend <tf-backend>` for more details.
 
@@ -21,16 +32,15 @@ Options specific to Terraform Modules.
         dynamodb_table: mytable
         region: us-east-1
 
-**terraform_version (Optional[Dict[str, str]])**
-  Mapping of deploy environment to a Terraform version. See :ref:`Versions <tf-version>` for more details.
+**terraform_version (Optional[Union[str, Dict[str, str]]])**
+  String containing the Terraform version or a mapping of deploy environment to a Terraform version.
+  See :ref:`Version Management <tf-version>` for more details.
 
   .. rubric:: Example
   .. code-block:: yaml
 
     options:
-      terraform_version:
-        "*": 0.11.13  # applies to all environments
-        # prod: 0.9.0  # can also be specified for a specific environment
+      terraform_version: 0.11.13
 
 
 *********

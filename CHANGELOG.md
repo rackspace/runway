@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - support for AWS SSO profile as the initial credential source
+- support for `args` to be passed to Terraform CLI commands
 
 ## [1.7.2] - 2020-04-21
 ### Fixed

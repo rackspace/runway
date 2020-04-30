@@ -1,21 +1,4 @@
 {
-    "files.insertFinalNewline": true,
-    "python.linting.flake8Enabled": true,
-    "python.linting.mypyEnabled": false,
-    "python.testing.pytestArgs": [
-        "tests",
-        "--no-cov"
-    ],
-    "restructuredtext.builtDocumentationPath": "${workspaceRoot}/docs/build/html",
-    "restructuredtext.confPath": "${workspaceFolder}/docs/source",
-    "restructuredtext.updateOnTextChanged": "true",
-    "restructuredtext.linter.extraArgs": [
-        "--ignore D001"
-    ],
-    "restructuredtext.preview.scrollEditorWithPreview": false,
-    "restructuredtext.preview.scrollPreviewWithEditor": false,
-    "python.linting.pylintEnabled": true,
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "cSpell.words": [
         "CFNgin",
         "CNAME",
@@ -41,6 +24,7 @@
         "entrypoints",
         "epub",
         "executables",
+        "fnull",
         "forcerm",
         "gitdb",
         "gitpython",
@@ -81,11 +65,13 @@
         "pywin",
         "rxref",
         "semver",
+        "skipif",
         "smmap",
         "sshpubkeys",
         "stacker's",
         "stubbers",
         "testfixtures",
+        "tfvar",
         "unshallow",
         "urllib",
         "urlshortener",
@@ -93,5 +79,23 @@
         "xmltodict",
         "xray"
     ],
-    "pythonTestExplorer.testFramework": "pytest"
+    "files.insertFinalNewline": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": false,
+    "python.linting.pylintEnabled": true,
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "python.testing.pytestArgs": [
+        "tests",
+        "--no-cov"
+    ],
+    "pythonTestExplorer.testFramework": "pytest",
+    "restructuredtext.builtDocumentationPath": "${workspaceRoot}/docs/build/html",
+    "restructuredtext.confPath": "${workspaceFolder}/docs/source",
+    "restructuredtext.linter.extraArgs": [
+        "--ignore D001"
+    ],
+    "restructuredtext.preview.scrollEditorWithPreview": false,
+    "restructuredtext.preview.scrollPreviewWithEditor": false,
+    "restructuredtext.sphinxBuildPath": "${workspaceFolder}/docs/.venv/bin/sphinx-build",
+    "restructuredtext.updateOnTextChanged": "true"
 }
