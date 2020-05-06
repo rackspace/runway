@@ -1,6 +1,7 @@
 """Serverless module."""
 from __future__ import print_function
 
+import argparse
 import logging
 import os
 import re
@@ -19,6 +20,11 @@ from ..util import change_dir, which
 from . import (ModuleOptions, RunwayModule, format_npm_command_for_logging,
                generate_node_command, run_module_command, run_npm_install,
                warn_on_boto_env_vars)
+
+if sys.version_info[0] > 2:  # TODO remove after droping python 2
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger('runway')
 
@@ -148,11 +154,100 @@ def deploy_package(sls_opts, bucketname, context, path):
 class Serverless(RunwayModule):
     """Serverless Runway Module."""
 
+    def __init__(self, context, path, options=None):
+        """Instantiate class.
+
+        Args:
+            context (Context): Runway context object.
+            path (str): Path to the module.
+            options (Dict[str, Dict[str, Any]]): Everything in the module
+                definition merged with applicable values from the deployment
+                definition.
+
+        """
+        super(Serverless, self).__init__(context, path, options)
+        del self.options  # remove the attr set by the parent class
+        options.pop('path', None)  # this
+
+        self._raw_path = options.pop('path', None)  # unresolved path
+        self.environments = options.pop('environments', {})
+        self.options = ServerlessOptions.parse(**options.pop('options', {}))
+        self.parameters = options.pop('parameters', {})
+
+        for k, v in options.items():
+            setattr(self, k, v)
+
+        LOGGER.warning(self.path)
+
+    def run_cmd(self, command, *args, arg_list=None, exit_on_error=True):
+        """Run a command with this modules underlying CLI.
+
+        Args:
+            command (str): The command to be executed with Serverless.
+
+        Keyword Args:
+            arg_list (Optional[List[str]]): List of arguments to include in
+                the command.
+            exit_on_error (bool): Perform sys.exit if the command fails.
+
+        """
+        args = list(args)
+        args.extend(arg_list or [])
+        args.insert(0, command)
+        cmd = generate_node_command(command='sls',
+                                    command_opts=args,
+                                    path=self.path)
+        run_module_command(cmd_list=cmd,
+                           env_vars=self.context.env_vars,
+                           exit_on_error=exit_on_error)
+
+    def print(self, item_path=None, output_format='yaml'):
+        """Print the Serverless file with all variables resolved.
+
+        Keyword Args:
+            item_path (Optional[str]): Period-separated path to print a
+                sub-value (eg: "provider.name").
+            output_format (str) Print configuration in given format
+                ("yaml", "json", "text"). *(default: yaml)*
+
+        Returns:
+            Path: Path object for the output file.
+
+        Raises:
+            SystemExit: If a runway-tmp.serverless.yml file already exists.
+
+        """
+        args = ['print',
+                '--region', self.context.env_region,
+                '--stage', self.context.env_name,
+                '--format', output_format]
+        if item_path:
+            args.extend(['--path', item_path])
+        args.extend(self.options.args)
+
+        output_file = Path(self.path) / 'runway-tmp.serverless.yml'
+        if output_file.exists():
+            LOGGER.error('Unable to save resolved Serverless file. '
+                         'Runway temporary file already exists: %s',
+                         output_file)
+            sys.exit(1)
+
+        with open(output_file, 'w') as file_:
+            proc = subprocess.Popen(generate_node_command(command='sls',
+                                                          command_opts=args,
+                                                          path=self.path),
+                                    cwd=self.path, stdout=file_,
+                                    env=self.context.env_vars)
+            if proc.wait() != 0:
+                file_.close()
+                output_file.unlink()
+                sys.exit(proc.returncode)
+        return output_file
+
     def run_serverless(self, command='deploy'):
         """Run Serverless."""
         response = {'skipped_configs': False}
         sls_opts = [command]
-        options = ServerlessOptions.parse(**self.options.get('options', {}))
 
         if not which('npm'):
             LOGGER.error('"npm" not found in path or is not executable; '
@@ -172,22 +267,23 @@ class Serverless(RunwayModule):
         sls_env_file = get_sls_config_file(self.path,
                                            self.context.env_name,
                                            self.context.env_region)
-        sls_opts.extend(options.args)
+        sls_opts.extend(self.options.args)
 
         sls_cmd = generate_node_command(command='sls',
                                         command_opts=sls_opts,
                                         path=self.path)
 
         if (
-                self.options['parameters'] or
+                self.parameters or
                 os.path.isfile(os.path.join(self.path, sls_env_file))
         ):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
-                    run_npm_install(self.path, self.options, self.context)
-                    if command == 'deploy' and options.promotezip:
+                    run_npm_install(self.path, {'options': self.options},
+                                    self.context)
+                    if command == 'deploy' and self.options.promotezip:
                         deploy_package(sls_opts,
-                                       options.promotezip['bucketname'],
+                                       self.options.promotezip['bucketname'],
                                        self.context,
                                        self.path)
                         return response
@@ -252,9 +348,26 @@ class ServerlessOptions(ModuleOptions):
 
         """
         super(ServerlessOptions, self).__init__()
+        self._arg_parser = self._create_arg_parser()
         self.args = args or []
+        self.cli_args, _ = self._arg_parser.parse_known_args(self.args)
         self.promotezip = promotezip or {}
         self.skip_npm_ci = skip_npm_ci
+
+    @staticmethod
+    def _create_arg_parser():
+        """Create argparse parser to parse args.
+
+        Used to pull arguments out of self.args when logic could change
+        depending on values provided.
+
+        Returns:
+            argparse.ArgumentParser
+
+        """
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-c', '--config', default=None)
+        return parser
 
     @classmethod
     def parse(cls, **kwargs):  # pylint: disable=arguments-differ
