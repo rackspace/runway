@@ -8,15 +8,17 @@ import shutil
 import subprocess
 import sys
 import tempfile
+
 import yaml
 
 from runway.hooks.staticsite.util import get_hash_of_files
-from . import (
-    RunwayModule, format_npm_command_for_logging, generate_node_command,
-    run_module_command, run_npm_install, warn_on_boto_env_vars
-)
+
+from ..s3_util import (does_s3_object_exist, download, ensure_bucket_exists,
+                       upload)
 from ..util import change_dir, which
-from ..s3_util import ensure_bucket_exists, does_s3_object_exist, download, upload
+from . import (ModuleOptions, RunwayModule, format_npm_command_for_logging,
+               generate_node_command, run_module_command, run_npm_install,
+               warn_on_boto_env_vars)
 
 LOGGER = logging.getLogger('runway')
 
@@ -93,12 +95,9 @@ def get_src_hash(sls_config, path):
 
     return hashes
 
-def deploy_package(sls_opts, options, context, path): # noqa pylint: disable=too-many-locals
-    """Run sls package command."""
-    bucketname = options.get('options', {}).get('promotezip', {}).get('bucketname', {})
-    if not bucketname:
-        raise ValueError('"bucketname" must be specified when using "promotezip"')
 
+def deploy_package(sls_opts, bucketname, context, path):
+    """Run sls package command."""
     package_dir = tempfile.mkdtemp()
     LOGGER.debug('Package directory: %s', package_dir)
 
@@ -153,6 +152,7 @@ class Serverless(RunwayModule):
         """Run Serverless."""
         response = {'skipped_configs': False}
         sls_opts = [command]
+        options = ServerlessOptions.parse(**self.options.get('options', {}))
 
         if not which('npm'):
             LOGGER.error('"npm" not found in path or is not executable; '
@@ -172,7 +172,7 @@ class Serverless(RunwayModule):
         sls_env_file = get_sls_config_file(self.path,
                                            self.context.env_name,
                                            self.context.env_region)
-        sls_opts.extend(self.options.get('options', {}).get('args', []))
+        sls_opts.extend(options.args)
 
         sls_cmd = generate_node_command(command='sls',
                                         command_opts=sls_opts,
@@ -185,9 +185,9 @@ class Serverless(RunwayModule):
             if os.path.isfile(os.path.join(self.path, 'package.json')):
                 with change_dir(self.path):
                     run_npm_install(self.path, self.options, self.context)
-                    if command == 'deploy' and self.options.get('options', {}).get('promotezip', {}): # noqa pylint: disable=line-too-long
+                    if command == 'deploy' and options.promotezip:
                         deploy_package(sls_opts,
-                                       self.options,
+                                       options.promotezip['bucketname'],
                                        self.context,
                                        self.path)
                         return response
@@ -232,3 +232,55 @@ class Serverless(RunwayModule):
     def destroy(self):
         """Run serverless remove."""
         self.run_serverless(command='remove')
+
+
+class ServerlessOptions(ModuleOptions):
+    """Module options for Serverless."""
+
+    def __init__(self, args=None, promotezip=None, skip_npm_ci=False):
+        """Instantiate class.
+
+        Keyword Args:
+            args (Optional[List[str]]): Arguments to append to Serverless CLI
+                commands. These will always be placed after the default
+                arguments provided by Runway.
+            promotezip (Optional[Dict[str, str]]): If provided, promote
+                Serverless generated zip files between environments from a
+                *build* AWS account.
+            skip_npm_ci (bool): Skip the ``npm ci`` Runway executes at the
+                begining of each Serverless module run.
+
+        """
+        super(ServerlessOptions, self).__init__()
+        self.args = args or []
+        self.promotezip = promotezip or {}
+        self.skip_npm_ci = skip_npm_ci
+
+    @classmethod
+    def parse(cls, **kwargs):  # pylint: disable=arguments-differ
+        """Parse the options definition and return an options object.
+
+        Keyword Args:
+            args (Optional[List[str]]): Arguments to append to Serverless CLI
+                commands. These will always be placed after the default
+                arguments provided by Runway.
+            promotezip (Optional[Dict[str, str]]): If provided, promote
+                Serverless generated zip files between environments from a
+                *build* AWS account.
+            skip_npm_ci (bool): Skip the ``npm ci`` Runway executes at the
+                begining of each Serverless module run.
+
+        Returns:
+            ServerlessOptions
+
+        Raises:
+            ValueError: promotezip was provided but missing bucketname.
+
+        """
+        promotezip = kwargs.get('promotezip')
+        if promotezip and not promotezip.get('bucketname'):
+            raise ValueError('"bucketname" must be specified when using '
+                             '"promotezip": {}'.format(promotezip))
+        return cls(args=kwargs.get('args'),
+                   promotezip=promotezip,
+                   skip_npm_ci=kwargs.get('skip_npm_ci', False))
