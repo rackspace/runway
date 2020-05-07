@@ -13,6 +13,7 @@
         "altgraph",
         "atomicwrites",
         "boto",
+        "bufsize",
         "certifi",
         "cffi",
         "cfngin",
