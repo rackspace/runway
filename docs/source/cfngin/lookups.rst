@@ -562,7 +562,7 @@ A custom lookup must be in an executable, importable python package or standalon
 The lookup must be importable using your current ``sys.path``.
 This takes into account the sys_path_ defined in the config file as well as any ``paths`` of package_sources_.
 
-The lookup must be a class, preferable with a base class of :class:`runway.cfngin.lookups.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
+The lookup must be a class, preferable with a base class of :class:`runway.lookups.handlers.base.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
 There must be only one lookup per file.
 The file containing the lookup class must have a ``TYPE_NAME`` global variable with a value of the name that will be used to register the lookup.
 
@@ -576,10 +576,10 @@ If using boto3 in a lookup, use ``context.get_session()`` instead of creating a 
 .. code-block:: python
 
     """Example lookup."""
-    from runway.lookups.base import LookupHandler
     from runway.cfngin.context import Context
     from runway.cfngin.providers.base import BaseProvider
     from runway.cfngin.util import read_value_from_path
+    from runway.lookups.handlers.base import LookupHandler
 
     TYPE_NAME = 'mylookup'
 
