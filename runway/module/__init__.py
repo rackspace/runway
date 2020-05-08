@@ -147,6 +147,7 @@ class RunwayModule(object):
 class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
     """Base class for Runway modules that use npm."""
 
+    # TODO we need a better name than "options" or pass in as kwargs
     def __init__(self, context, path, options=None):
         """Instantiate class.
 
@@ -164,7 +165,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
         # potential future state of RunwayModule attributes in a future release
         self._raw_path = Path(options.pop('path')) if options.get('path') else None
-        self.environments = options.pop('environments', {})
+        self.environments = options.pop('environments', None)
         self.options = options.pop('options', {})
         self.parameters = options.pop('parameters', {})
         self.path = Path(self.path)  # convert to path object

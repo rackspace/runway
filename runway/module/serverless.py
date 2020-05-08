@@ -263,7 +263,7 @@ class Serverless(RunwayModuleNpm):
 
         if self.options.promotezip:
             # TODO refactor deploy_package to be part of the class
-            deploy_package(['deploy', *self.cli_args, *self.options.args],
+            deploy_package(['deploy'] + self.cli_args + self.options.args,
                            self.options.promotezip['bucketname'],
                            self.context,
                            str(self.path))
