@@ -3,9 +3,9 @@
 import logging
 import sys
 from contextlib import contextmanager
-from mock import MagicMock, call, patch
 
 import pytest
+from mock import MagicMock, call, patch
 
 from runway.module import NPM_BIN, ModuleOptions, RunwayModuleNpm
 

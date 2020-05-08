@@ -347,20 +347,20 @@ class Serverless(RunwayModuleNpm):
 class ServerlessOptions(ModuleOptions):
     """Module options for Serverless."""
 
-    def __init__(self, args=None, extend_serverless_yml=None, promotezip=None,
+    def __init__(self, args, extend_serverless_yml, promotezip,
                  skip_npm_ci=False):
         """Instantiate class.
 
         Keyword Args:
-            args (Optional[List[str]]): Arguments to append to Serverless CLI
+            args (List[str]): Arguments to append to Serverless CLI
                 commands. These will always be placed after the default
                 arguments provided by Runway.
-            extend_serverless_yml (Optional[Dict[str, Any]]): If provided,
+            extend_serverless_yml (Dict[str, Any]): If provided,
                 a temporary Serverless config will be created will be created
                 from what exists in the module directory then the value of
                 this option will be merged into it. The temporary file will
                 be deleted at the end of execution.
-            promotezip (Optional[Dict[str, str]]): If provided, promote
+            promotezip (Dict[str, str]): If provided, promote
                 Serverless generated zip files between environments from a
                 *build* AWS account.
             skip_npm_ci (bool): Skip the ``npm ci`` Runway executes at the
@@ -369,11 +369,13 @@ class ServerlessOptions(ModuleOptions):
         """
         super(ServerlessOptions, self).__init__()
         self._arg_parser = self._create_arg_parser()
-        self.extend_serverless_yml = extend_serverless_yml or {}
+        self.extend_serverless_yml = extend_serverless_yml
         cli_args, self._unknown_cli_args = \
-            self._arg_parser.parse_known_args(args)
+            self._arg_parser.parse_known_args(args.copy()
+                                              if isinstance(args, list)
+                                              else [])
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
-        self.promotezip = promotezip or {}
+        self.promotezip = promotezip
         self.skip_npm_ci = skip_npm_ci
 
     @property
@@ -447,11 +449,11 @@ class ServerlessOptions(ModuleOptions):
             ValueError: promotezip was provided but missing bucketname.
 
         """
-        promotezip = kwargs.get('promotezip')
+        promotezip = kwargs.get('promotezip', {})
         if promotezip and not promotezip.get('bucketname'):
             raise ValueError('"bucketname" must be specified when using '
                              '"promotezip": {}'.format(promotezip))
-        return cls(args=kwargs.get('args'),
-                   extend_serverless_yml=kwargs.get('extend_serverless_yml'),
+        return cls(args=kwargs.get('args', []),
+                   extend_serverless_yml=kwargs.get('extend_serverless_yml', {}),
                    promotezip=promotezip,
                    skip_npm_ci=kwargs.get('skip_npm_ci', False))
