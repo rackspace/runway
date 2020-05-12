@@ -115,7 +115,6 @@ class RunwayModule(object):
 
     def __init__(self, context, path, options=None):
         """Initialize base class."""
-        self._env_file = None
         self.context = context
 
         self.path = path
@@ -153,13 +152,14 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
         Args:
             context (Context): Runway context object.
-            path (str): Path to the module.
+            path (Union[str, Path]): Path to the module.
             options (Dict[str, Dict[str, Any]]): Everything in the module
                 definition merged with applicable values from the deployment
                 definition.
 
         """
         self.check_for_npm()  # fail fast
+        options = options or {}
         super(RunwayModuleNpm, self).__init__(context, path, options)
         del self.options  # remove the attr set by the parent class
 
@@ -168,7 +168,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         self.environments = options.pop('environments', None)
         self.options = options.pop('options', {})
         self.parameters = options.pop('parameters', {})
-        self.path = Path(self.path)  # convert to path object
+        self.path = path if isinstance(self.path, Path) else Path(self.path)
 
         for k, v in options.items():
             setattr(self, k, v)

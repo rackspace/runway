@@ -24,28 +24,6 @@ def does_not_raise():
 class TestRunwayModuleNpm(object):
     """Test runway.module.RunwayModuleNpm."""
 
-    @patch.object(RunwayModuleNpm, 'check_for_npm', MagicMock(return_value=None))
-    @patch('runway.module.warn_on_boto_env_vars')
-    def test_init(self, mock_warn, runway_context, tmp_path):
-        """Test init and the attributes set in init."""
-        options = {
-            'environments': True,  # can only be True of a falsy value (but not dict)
-            'options': {'test_option': 'option_value'},
-            'parameters': {'test_parameter': 'parameter_value'}
-        }
-        obj = RunwayModuleNpm(context=runway_context,
-                              path=str(tmp_path),
-                              options=options.copy())
-
-        obj.check_for_npm.assert_called_once()  # pylint: disable=no-member
-        assert obj.context == runway_context
-        assert obj.environments == options['environments']
-        assert obj.options == options['options']
-        assert obj.parameters == options['parameters']
-        assert isinstance(obj.path, Path)
-        assert str(obj.path) == str(tmp_path)
-        mock_warn.assert_called_once_with(runway_context.env_vars)
-
     @patch('runway.module.which')
     @patch('runway.module.warn_on_boto_env_vars', MagicMock(return_value=None))
     def test_check_for_npm(self, mock_which, caplog, runway_context):
@@ -62,7 +40,39 @@ class TestRunwayModuleNpm(object):
 
         assert ['tests: "npm" not found in path or is not executable; '
                 'please ensure it is installed correctly.'] == \
-            [rec.message for rec in caplog.records]
+            caplog.messages
+
+    @patch.object(RunwayModuleNpm, 'check_for_npm', MagicMock(return_value=None))
+    @patch('runway.module.warn_on_boto_env_vars')
+    def test_init(self, mock_warn, runway_context, tmp_path):
+        """Test init and the attributes set in init."""
+        # pylint: disable=no-member
+        options = {
+            'environments': True,  # can only be True of a falsy value (but not dict)
+            'options': {'test_option': 'option_value'},
+            'parameters': {'test_parameter': 'parameter_value'},
+            'extra': 'something'
+        }
+        obj = RunwayModuleNpm(context=runway_context,
+                              path=str(tmp_path),
+                              options=options.copy())
+
+        obj.check_for_npm.assert_called_once()
+        assert obj.context == runway_context
+        assert obj.environments == options['environments']
+        assert obj.extra == options['extra']
+        assert obj.options == options['options']
+        assert obj.parameters == options['parameters']
+        assert isinstance(obj.path, Path)
+        assert str(obj.path) == str(tmp_path)
+        mock_warn.assert_called_once_with(runway_context.env_vars)
+
+        obj = RunwayModuleNpm(context=runway_context,
+                              path=tmp_path)
+        assert not obj.environments
+        assert not obj.options
+        assert not obj.parameters
+        assert obj.path == tmp_path
 
     @patch('runway.module.format_npm_command_for_logging')
     def test_log_npm_command(self, mock_log, caplog, patch_module_npm,
@@ -75,8 +85,7 @@ class TestRunwayModuleNpm(object):
         caplog.set_level(logging.INFO, logger='runway')
         assert not obj.log_npm_command(['npm', 'test'])
         mock_log.assert_called_once_with(['npm', 'test'])
-        assert ['tests: Running "success"'] == [rec.message
-                                                for rec in caplog.records]
+        assert ['tests: Running "success"'] == caplog.messages
 
     @patch('runway.module.use_npm_ci')
     @patch('runway.module.subprocess')
@@ -112,7 +121,7 @@ class TestRunwayModuleNpm(object):
         expected_logs.append('tests: Running npm install...')
         expected_calls.append(call([NPM_BIN, 'install']))
 
-        assert expected_logs == [rec.message for rec in caplog.records]
+        assert expected_logs == caplog.messages
         moc_proc.check_call.assert_has_calls(expected_calls)
 
     def test_package_json_missing(self, caplog, patch_module_npm,
@@ -126,7 +135,7 @@ class TestRunwayModuleNpm(object):
         assert obj.package_json_missing()
         assert [
             '{}: Module is missing a "package.json"'.format(tmp_path.name)
-        ] == [rec.message for rec in caplog.records]
+        ] == caplog.messages
 
         (tmp_path / 'package.json').touch()
         assert not obj.package_json_missing()

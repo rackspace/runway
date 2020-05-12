@@ -17,14 +17,9 @@ from runway.hooks.staticsite.util import get_hash_of_files
 
 from ..s3_util import (does_s3_object_exist, download, ensure_bucket_exists,
                        upload)
-from ..util import merge_dicts
+from ..util import cached_property, merge_dicts
 from . import (ModuleOptions, RunwayModuleNpm, format_npm_command_for_logging,
                generate_node_command, run_module_command)
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger('runway')
 
@@ -162,7 +157,7 @@ class Serverless(RunwayModuleNpm):
             result.append('--verbose')
         return result
 
-    @property
+    @cached_property
     def env_file(self):
         """Find the environment file for the module.
 
@@ -170,13 +165,11 @@ class Serverless(RunwayModuleNpm):
             Path: Path object for the environment file that was found.
 
         """
-        if not self._env_file:
-            for name in gen_sls_config_files(self.stage, self.region):
-                test_path = Path(self.path) / name
-                if test_path.is_file():
-                    self._env_file = test_path
-                    break
-        return self._env_file
+        for name in gen_sls_config_files(self.stage, self.region):
+            test_path = self.path / name
+            if test_path.is_file():
+                return test_path
+        return None
 
     @property
     def skip(self):
@@ -215,11 +208,11 @@ class Serverless(RunwayModuleNpm):
                                 self.options.extend_serverless_yml)
         # using a unique name to prevent collisions when run in parallel
         tmp_file = self.path / '{}.tmp.serverless.yml'.format(uuid.uuid4())
-        LOGGER.info('%s: Creating temporary serverless config... "%s"',
-                    self.path.name, tmp_file.name)
-        tmp_file.write_text(yaml.safe_dump(final_yml))
 
         try:
+            LOGGER.debug('%s: Creating temporary serverless config... "%s"',
+                         self.path.name, tmp_file.name)
+            tmp_file.write_text(yaml.safe_dump(final_yml))
             # update args from options with the new config name
             self.options.update_args('config', str(tmp_file.name))
             func(skip_install=True)
@@ -271,14 +264,12 @@ class Serverless(RunwayModuleNpm):
         run_module_command(cmd_list=self.gen_cmd('deploy'),
                            env_vars=self.context.env_vars)
 
-    def sls_print(self, item_path=None, output_format='yaml', skip_install=False):
+    def sls_print(self, item_path=None, skip_install=False):
         """Execute ``sls print`` command.
 
         Keyword Args:
             item_path (Optional[str]): Period-separated path to print a
                 sub-value (eg: "provider.name").
-            output_format (str) Print configuration in given format
-                ("yaml", "json", "text"). *(default: yaml)*
             skip_install (bool): Skip ``npm install`` before running the
                 Serverless command. (*default:* ``False``)
 
@@ -292,11 +283,13 @@ class Serverless(RunwayModuleNpm):
         if not skip_install:
             self.npm_install()
 
-        args = ['--format', output_format]
+        args = ['--format', 'yaml']
         if item_path:
             args.extend(['--path', item_path])
-        return yaml.safe_load(subprocess.check_output(self.gen_cmd('print'),
-                                                      env=self.context.env_vars))
+        return yaml.safe_load(subprocess.check_output(
+            self.gen_cmd('print', args_list=args),
+            env=self.context.env_vars
+        ))
 
     def sls_remove(self, skip_install=False):
         """Execute ``sls remove`` command.
@@ -310,9 +303,10 @@ class Serverless(RunwayModuleNpm):
             self.npm_install()
         stack_missing = False  # track output for acceptable error
         proc = subprocess.Popen(self.gen_cmd('remove'),
-                                stdout=subprocess.PIPE,
+                                bufsize=1,
                                 env=self.context.env_vars,
-                                bufsize=1, universal_newlines=True)
+                                stdout=subprocess.PIPE,
+                                universal_newlines=True)
         with proc.stdout:  # live output
             for line in proc.stdout:
                 print(line, end='')
