@@ -167,6 +167,7 @@ class TestServerless(object):
     def test_gen_cmd(self, mock_cmd, command, monkeypatch, runway_context,
                      tmp_path):
         """Test gen_cmd."""
+        # pylint: disable=no-member
         monkeypatch.setattr(Serverless, 'log_npm_command', MagicMock())
         mock_cmd.return_value = ['success']
         obj = Serverless(runway_context, tmp_path,

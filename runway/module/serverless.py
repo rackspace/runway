@@ -213,12 +213,19 @@ class Serverless(RunwayModuleNpm):
         try:
             LOGGER.debug('%s: Creating temporary serverless config... "%s"',
                          self.path.name, tmp_file.name)
-            tmp_file.write_text(yaml.safe_dump(final_yml))
+            if self.context.is_python3:
+                tmp_file.write_text(yaml.safe_dump(final_yml))
+            else:  # TODO remove handling when dropping python 2 support
+                tmp_file.write_text(yaml.safe_dump(final_yml).decode('UTF-8'))
             # update args from options with the new config name
             self.options.update_args('config', str(tmp_file.name))
             func(skip_install=True)
         finally:
-            tmp_file.unlink()  # always cleanup the temp file
+            try:
+                tmp_file.unlink()  # always cleanup the temp file
+            except OSError as err:
+                # catch error raised if file does not exist
+                LOGGER.debug(err)
 
     def gen_cmd(self, command, args_list=None):
         """Generate and log a Serverless command.
@@ -366,7 +373,7 @@ class ServerlessOptions(ModuleOptions):
         self._arg_parser = self._create_arg_parser()
         self.extend_serverless_yml = extend_serverless_yml
         cli_args, self._unknown_cli_args = \
-            self._arg_parser.parse_known_args(args.copy()
+            self._arg_parser.parse_known_args(list(args)  # python 2 compatible
                                               if isinstance(args, list)
                                               else [])
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict

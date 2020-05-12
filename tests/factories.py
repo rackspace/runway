@@ -1,6 +1,7 @@
 """Test classes."""
 import io
 import os
+import sys
 
 import boto3
 from botocore.stub import Stubber
@@ -175,7 +176,10 @@ class MockProcess(object):  # pylint: disable=too-few-public-methods
         io_base = io.StringIO() if self.text_mode else io.BytesIO()
 
         if result:
-            io_base.write(result)
+            if sys.version_info.major < 3:
+                io_base.write(result.decode('UTF-8'))
+            else:
+                io_base.write(result)
             io_base.seek(0)  # return to the begining of the stream
         return io_base
 
