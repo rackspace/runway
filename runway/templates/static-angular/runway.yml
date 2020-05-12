@@ -12,6 +12,6 @@ deployments:
         build_output: dist/sample-app
         build_steps:
           - npm install
-          - ng build
+          - npx ng build
     regions:
       - us-east-1
