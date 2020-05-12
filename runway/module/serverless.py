@@ -137,6 +137,7 @@ class Serverless(RunwayModuleNpm):
                 definition.
 
         """
+        options = options or {}
         super(Serverless, self).__init__(context, path, options.copy())
 
         self.options = ServerlessOptions.parse(**options.get('options', {}))

@@ -165,7 +165,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
         # potential future state of RunwayModule attributes in a future release
         self._raw_path = Path(options.pop('path')) if options.get('path') else None
-        self.environments = options.pop('environments', None)
+        self.environments = options.pop('environments', {})
         self.options = options.pop('options', {})
         self.parameters = options.pop('parameters', {})
         self.path = path if isinstance(self.path, Path) else Path(self.path)
