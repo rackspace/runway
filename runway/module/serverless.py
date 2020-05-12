@@ -137,9 +137,9 @@ class Serverless(RunwayModuleNpm):
                 definition.
 
         """
-        super(Serverless, self).__init__(context, path, options)
+        super(Serverless, self).__init__(context, path, options.copy())
 
-        self.options = ServerlessOptions.parse(**self.options)
+        self.options = ServerlessOptions.parse(**options.get('options', {}))
         self.region = self.context.env_region
         self.stage = self.context.env_name
 
