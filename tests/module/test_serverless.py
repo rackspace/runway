@@ -193,13 +193,22 @@ class TestServerless(object):
                                          command_opts=expected_opts,
                                          path=tmp_path)
 
-    def test_init(self, runway_context):
+    def test_init(self, caplog, runway_context):
         """Test init and the attributes set in init."""
+        caplog.set_level(logging.ERROR, logger='runway')
         obj = Serverless(runway_context, './tests',
                          {'options': {'skip_npm_ci': True}})
         assert isinstance(obj.options, ServerlessOptions)
         assert obj.region == runway_context.env_region
         assert obj.stage == runway_context.env_name
+
+        with pytest.raises(SystemExit):
+            assert not Serverless(runway_context, './tests',
+                                  {'options': {
+                                      'promotezip': {'invalid': 'value'}
+                                  }})
+        assert ['tests: "bucketname" must be provided when using '
+                '"options.promotezip": {\'invalid\': \'value\'}'] == caplog.messages
 
     def test_plan(self, caplog, runway_context):
         """Test plan."""

@@ -139,8 +139,12 @@ class Serverless(RunwayModuleNpm):
         """
         options = options or {}
         super(Serverless, self).__init__(context, path, options.copy())
-
-        self.options = ServerlessOptions.parse(**options.get('options', {}))
+        try:
+            self.options = ServerlessOptions.parse(**options.get('options',
+                                                                 {}))
+        except ValueError as err:
+            LOGGER.error('%s: %s', self.path.name, err)
+            sys.exit(1)
         self.region = self.context.env_region
         self.stage = self.context.env_name
 
@@ -264,6 +268,7 @@ class Serverless(RunwayModuleNpm):
 
         if self.options.promotezip:
             # TODO refactor deploy_package to be part of the class
+            self.path.absolute()
             deploy_package(['deploy'] + self.cli_args + self.options.args,
                            self.options.promotezip['bucketname'],
                            self.context,
@@ -453,8 +458,8 @@ class ServerlessOptions(ModuleOptions):
         """
         promotezip = kwargs.get('promotezip', {})
         if promotezip and not promotezip.get('bucketname'):
-            raise ValueError('"bucketname" must be specified when using '
-                             '"promotezip": {}'.format(promotezip))
+            raise ValueError('"bucketname" must be provided when using '
+                             '"options.promotezip": {}'.format(promotezip))
         return cls(args=kwargs.get('args', []),
                    extend_serverless_yml=kwargs.get('extend_serverless_yml', {}),
                    promotezip=promotezip,
