@@ -1,4 +1,4 @@
-.. _Runway Config File: runway_config.html
+.. _Runway Config File: ../runway_config.html
 
 #############
 Configuration
