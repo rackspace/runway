@@ -227,8 +227,8 @@ class Serverless(RunwayModuleNpm):
             try:
                 tmp_file.unlink()  # always cleanup the temp file
             except OSError as err:
-                # catch error raised if file does not exist
-                LOGGER.debug(err)
+                # catch error raised if file does not exist but this is fine
+                LOGGER.debug('%s: %s', self.path.name, err)
 
     def gen_cmd(self, command, args_list=None):
         """Generate and log a Serverless command.

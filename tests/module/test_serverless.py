@@ -2,6 +2,7 @@
 # pylint: disable=no-self-use,unused-argument
 import logging
 import subprocess
+import sys
 
 import pytest
 import yaml
@@ -131,10 +132,11 @@ class TestServerless(object):
         del obj.env_file
 
     @patch('runway.module.serverless.merge_dicts')
-    def test_extend_serverless_yml(self, mock_merge, monkeypatch,
+    def test_extend_serverless_yml(self, mock_merge, caplog, monkeypatch,
                                    runway_context, tmp_path):
         """Test extend_serverless_yml."""
         # pylint: disable=no-member
+        caplog.set_level(logging.DEBUG, logger='runway')
         mock_func = MagicMock()
         mock_merge.return_value = {'key': 'val'}
         monkeypatch.setattr(Serverless, 'npm_install', MagicMock())
@@ -161,6 +163,13 @@ class TestServerless(object):
         assert tmp_file.endswith('.tmp.serverless.yml')
         assert not (tmp_path / tmp_file).exists(), \
             'should always be deleted after calling "func"'
+
+        caplog.clear()
+        monkeypatch.setattr('{}.Path.unlink'.format(
+            'pathlib' if sys.version_info.major == 3 else 'pathlib2'
+        ), MagicMock(side_effect=OSError('test OSError')))
+        assert not obj.extend_serverless_yml(mock_func)
+        assert '{}: test OSError'.format(tmp_path.name) in caplog.messages
 
     @patch('runway.module.serverless.generate_node_command')
     @pytest.mark.parametrize('command', [('deploy'), ('remove'), ('print')])
