@@ -45,7 +45,7 @@ def gen_sls_config_files(stage, region):
 
 def run_sls_print(sls_opts, env_vars, path):
     """Run sls print command."""
-    sls_info_opts = sls_opts
+    sls_info_opts = list(sls_opts)
     sls_info_opts[0] = 'print'
     sls_info_opts.extend(['--format', 'yaml'])
     sls_info_cmd = generate_node_command(command='sls',
@@ -84,8 +84,7 @@ def deploy_package(sls_opts, bucketname, context, path):
     hashes = get_src_hash(sls_config, path)
 
     sls_opts[0] = 'package'
-    sls_opts.extend(['--package', os.path.relpath(package_dir,
-                                                  path)])
+    sls_opts.extend(['--package', package_dir])
     sls_package_cmd = generate_node_command(command='sls',
                                             command_opts=sls_opts,
                                             path=path)
