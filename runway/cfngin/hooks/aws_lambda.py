@@ -1,5 +1,6 @@
 """AWS Lambda hook."""
 import hashlib
+import json
 import logging
 import os
 import stat
@@ -23,10 +24,12 @@ from ..exceptions import (InvalidDockerizePipConfiguration, PipenvError,
 from ..session_cache import get_session
 from ..util import ensure_s3_bucket
 
-if sys.version_info[0] < 3:
+if sys.version_info.major < 3:
     from backports import tempfile  # pylint: disable=E
+    from pathlib2 import Path  # pylint: disable=E
 else:
-    import tempfile
+    from pathlib import Path  # pylint: disable=E
+    import tempfile  # pylint: disable=E
 
 # mask to retrieve only UNIX file permissions from the external attributes
 # field of a ZIP entry.
@@ -313,7 +316,11 @@ def handle_requirements(package_root, dest_path, requirements,
                                   timeout=pipenv_timeout)
     if requirements['requirements.txt']:
         LOGGER.info('lambda: using requirements.txt for dependencies')
-        return os.path.join(dest_path, 'requirements.txt')
+        result = os.path.join(dest_path, 'requirements.txt')
+        if not os.path.isfile(result):  # copy file if accidentally excluded
+            copyfile(os.path.join(package_root, 'requirements.txt'), result,
+                     follow_symlinks=True)
+        return result
     if requirements['Pipfile'] or requirements['Pipfile.lock']:
         LOGGER.info('lambda: using pipenv for dependencies')
         return _handle_use_pipenv(package_root=package_root,
@@ -339,6 +346,9 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
         PipenvError: Non-zero exit code returned by pipenv process.
 
     """
+    if getattr(sys, 'frozen', False):
+        LOGGER.error('pipenv can only be used with python installed from PyPi')
+        sys.exit(1)
     LOGGER.info('lambda.pipenv: Creating requirements.txt from Pipfile...')
     req_path = os.path.join(dest_path, 'requirements.txt')
     cmd = ['pipenv', 'lock', '--requirements', '--keep-outdated']
@@ -513,27 +523,30 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
         if should_use_docker(dockerize_pip):
             dockerized_pip(tmpdir, **kwargs)
         else:
+            tmp_script = Path(tmpdir) / '__runway_run_pip_install.py'
             pip_cmd = [python_path or sys.executable, '-m',
                        'pip', 'install',
-                       '-t', tmpdir,
-                       '-r', tmp_req]
-            pip_proc = subprocess.Popen(pip_cmd,
-                                        cwd=tmpdir, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
-            if int(sys.version[0]) > 2:
-                # TODO remove pylint disable when dropping python2
-                # pylint: disable=unexpected-keyword-arg
-                _stdout, stderr = pip_proc.communicate(timeout=kwargs.get(
-                    'pipenv_timeout', 900
-                ))
+                       '--target', tmpdir,
+                       '--requirement', tmp_req]
+
+            if getattr(sys, 'frozen', False):  # TODO default to False
+                tmp_script.write_text(os.linesep.join([
+                    'import runpy',
+                    'from runway.util import argv',
+                    'with argv(*{}):'.format(json.dumps(pip_cmd[2:])),
+                    '   runpy.run_module("pip", run_name="__main__")\n'
+                ]))
+                cmd = ['runway', 'run-python', str(tmp_script)]
             else:
-                _stdout, stderr = pip_proc.communicate()
-            if pip_proc.returncode != 0:
-                if int(sys.version[0]) > 2:
-                    stderr = stderr.decode('UTF-8')
-                LOGGER.error('"%s" failed with the following output:\n%s',
-                             ' '.join(pip_cmd), stderr)
+                cmd = pip_cmd
+
+            try:
+                subprocess.check_call(cmd)
+            except subprocess.CalledProcessError:
                 raise PipError
+            finally:
+                if tmp_script.is_file():
+                    tmp_script.unlink()
 
         req_files = _find_files(tmpdir, includes='**', follow_symlinks=False)
         return _zip_files(req_files, tmpdir)
