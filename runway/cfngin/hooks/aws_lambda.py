@@ -318,8 +318,7 @@ def handle_requirements(package_root, dest_path, requirements,
         LOGGER.info('lambda: using requirements.txt for dependencies')
         result = os.path.join(dest_path, 'requirements.txt')
         if not os.path.isfile(result):  # copy file if accidentally excluded
-            copyfile(os.path.join(package_root, 'requirements.txt'), result,
-                     follow_symlinks=True)
+            copyfile(os.path.join(package_root, 'requirements.txt'), result)
         return result
     if requirements['Pipfile'] or requirements['Pipfile.lock']:
         LOGGER.info('lambda: using pipenv for dependencies')
