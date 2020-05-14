@@ -85,11 +85,13 @@ import troposphere  # noqa
 import awacs  # noqa
 import awscli  # noqa
 import botocore  # noqa
+import pip  # noqa
 hiddenimports.extend(get_submodules(runway))
 hiddenimports.extend(get_submodules(troposphere))
 hiddenimports.extend(get_submodules(awacs))
 hiddenimports.extend(get_submodules(awscli))
 hiddenimports.extend(get_submodules(botocore))
+hiddenimports.extend(get_submodules(pip))
 # needed due to pkg_resources dropping python2 support
 # can be removed on the next pyinstaller release
 # https://github.com/pypa/setuptools/issues/1963#issuecomment-582084099
