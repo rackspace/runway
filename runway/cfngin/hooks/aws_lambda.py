@@ -535,7 +535,7 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
                     'with argv(*{}):'.format(json.dumps(pip_cmd[2:])),
                     '   runpy.run_module("pip", run_name="__main__")\n'
                 ]))
-                cmd = ['runway', 'run-python', str(tmp_script)]
+                cmd = [sys.executable, 'run-python', str(tmp_script)]
             else:
                 cmd = pip_cmd
 
