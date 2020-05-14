@@ -18,8 +18,8 @@ import awacs.logs
 
 from awacs.aws import Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (AccountId, Join, Output, Partition, Region, StackName, Sub,
-                         awslambda, iam, stepfunctions)
+from troposphere import (AccountId, Join, NoValue, Output, Partition, Region,
+                         StackName, Sub, awslambda, iam, stepfunctions)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.util import read_value_from_path
@@ -34,6 +34,11 @@ class Cleanup(Blueprint):
         'DisableCloudFront': {'type': bool,
                               'default': False,
                               'description': 'Whether to disable CF'},
+        'RoleBoundaryArn': {'type': str,
+                            'default': '',
+                            'description': '(Optional) IAM Role permissions '
+                                           'boundary applied to any created '
+                                           'roles.'},
         'function_arns': {'type': list,
                           'default': [],
                           'description': 'List of function ARNs that need to '
@@ -49,6 +54,13 @@ class Cleanup(Blueprint):
         """CloudFront enabled conditional."""
         return not self.get_variables().get('DisableCloudFront', False)
 
+    @property
+    def role_boundary_specified(self):
+        # type: () -> bool
+        """IAM Role Boundary specified conditional."""
+        return self.get_variables()['RoleBoundaryArn'] != ''
+
+
     def create_template(self):
         # type: () -> None
         """Create template (main function called by Stacker)."""
@@ -62,10 +74,15 @@ class Cleanup(Blueprint):
     def _get_replicated_lambda_remover_lambda(self):
         # type: () -> Dict[str, Any]
         res = {}
+        variables = self.get_variables()
         res['role'] = self.template.add_resource(
             iam.Role(
                 'ReplicatedLambdaRemoverRole',
                 AssumeRolePolicyDocument=make_simple_assume_policy('lambda.amazonaws.com'),
+                PermissionsBoundary=(
+                    variables['RoleBoundaryArn'] if self.role_boundary_specified
+                    else NoValue
+                ),
                 Policies=[
                     iam.Policy(
                         PolicyName="LambdaLogCreation",
@@ -151,6 +168,10 @@ class Cleanup(Blueprint):
             iam.Role(
                 'SelfDestructRole',
                 AssumeRolePolicyDocument=make_simple_assume_policy('lambda.amazonaws.com'),
+                PermissionsBoundary=(
+                    variables['RoleBoundaryArn'] if self.role_boundary_specified
+                    else NoValue
+                ),
                 Policies=[
                     iam.Policy(
                         PolicyName="LambdaLogCreation",
@@ -320,12 +341,17 @@ class Cleanup(Blueprint):
                                                   self_destruct_function # type: Dict[str, Union[awslambda.Function, iam.Role, Any]] # noqa pylint: disable=line-too-long
                                                  ):
         # type (...) -> iam.Role
+        variables = self.get_variables()
         entity = Join('.', ['states', Region, 'amazonaws.com'])
 
         return self.template.add_resource(
             iam.Role(
                 'StateMachineRole',
                 AssumeRolePolicyDocument=make_simple_assume_policy(entity),
+                PermissionsBoundary=(
+                    variables['RoleBoundaryArn'] if self.role_boundary_specified
+                    else NoValue
+                ),
                 Policies=[
                     iam.Policy(
                         PolicyName="InvokeLambda",

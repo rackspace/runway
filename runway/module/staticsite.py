@@ -272,7 +272,7 @@ class StaticSite(RunwayModule):
 
         if self.parameters.get('staticsite_role_boundary_arn', False):
             site_stack_variables['RoleBoundaryArn'] = \
-                self.parameters.pop('staticsite_role_boundary_arn')
+                self.parameters['staticsite_role_boundary_arn']
 
         # If lambda_function_associations or custom_error_responses defined,
         # add to stack config
@@ -298,6 +298,9 @@ class StaticSite(RunwayModule):
 
     def _create_cleanup_yaml(self, module_dir):
         replicated_function_vars = self._get_replicated_function_variables()
+        if self.parameters.get('staticsite_role_boundary_arn', False):
+            replicated_function_vars['RoleBoundaryArn'] = \
+                self.parameters.pop('staticsite_role_boundary_arn')
 
         with open(os.path.join(module_dir, '03-cleanup.yaml'), 'w') as output_stream:  # noqa
             yaml.dump(
