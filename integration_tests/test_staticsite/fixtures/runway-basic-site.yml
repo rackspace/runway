@@ -1,7 +1,7 @@
 deployments:
   - modules:
     - path: basic-site
-      class_path: runway.module.staticsite.StaticSite
+      type: static
       environments:
         dev:
           namespace: basic-site-dev

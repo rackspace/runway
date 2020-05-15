@@ -1,7 +1,7 @@
 deployments:
   - modules:
     - path: sample-app
-      class_path: runway.module.staticsite.StaticSite
+      type: static
       environments:
         dev:
           namespace: sample-app-dev
