@@ -8,8 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - ability to extend a Serverless configuration file the `extend_serverless_yml` option
 
+### Changed
+- when `sys.frozen`, `runway run-python` will be used by `runway.cfngin.hooks.aws_lambda` to run a dynamically generated script that can use internal `pip` unless a python path is explicitly provided
+
 ### Fixed
 - the value of `environments` is once again used to determine if a serverless module should be skipped
+- lookup argument values can now contain `=` without raising _"too many values to unpack"_
 - Runway now invokes cfn-lint as if it were interacting with the CLI to remove version compatibility issues
 
 ## [1.7.3] - 2020-04-29
