@@ -49,12 +49,12 @@ Git
 Git remote resources can be used as modules for your Runway project. Below is
 an example of git remote path.
 
-Example:
-    .. code-block:: yaml
+.. rubric:: Example
+.. code-block:: yaml
 
-        deployments:
-            - modules:
-                - git::git://github.com/foo/bar.git//my/path?branch=develop
+  deployments:
+      - modules:
+          - git::git://github.com/foo/bar.git//my/path?branch=develop
 
 The path is broken down into the following attributes:
 
