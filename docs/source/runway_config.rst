@@ -34,10 +34,14 @@ Module
 
 .. autoclass:: runway.config.ModuleDefinition
 
+.. _runway-module-path:
+
 Path
 ----
 
 .. automodule:: runway.path.Path
+
+.. _runway-module-path-git:
 
 Git
 ~~~

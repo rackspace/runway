@@ -5,6 +5,8 @@ Advanced Features
 Advanced features and detailed information for using Serverless Framework with Runway.
 
 
+.. _sls-skip-npm-ci:
+
 ****************
 Disabling NPM CI
 ****************
@@ -24,6 +26,89 @@ directory is pre-compiled) via the ``skip_npm_ci`` module option.
           options:
             skip_npm_ci: true
 
+
+.. _sls-extend-yml:
+
+*****************************************
+Extending a Serverless Configuration File
+*****************************************
+
+Runway has the ability to extend the contents of a *serverless.yml* file using the value of the ``extend_serverless_yml`` option.
+The value of this option is recursively merged into a resolved clone of the module's Serverless configuration.
+To create this resolved clone, Runway uses "`serverless print`_" (including `args <sls-args>`_) to resolve the module's Serverless configuration file and output the contents to a temporary file.
+The temporary file is deleted after each execution of Runway.
+
+This functionality can be especially useful when used alongside :ref:`remote module paths <runway-module-path>` such as a module from a :ref:`git repository <runway-module-path-git>` to change values on the fly without needing to modify the source for small differences in each environment.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  deployments:
+    - modules:
+        - path: git::git://github.com/onicagroup/example.git//sampleapp?tag=v1.0.0
+          options:
+            extend_serverless_yml:
+              custom:
+                env:
+                  memorySize: 512
+      regions:
+        - us-east-1
+
+
+.. _serverless print: https://www.serverless.com/framework/docs/providers/aws/cli-reference/print/
+
+Merge Logic
+===========
+
+The two data sources are merged by iterating over their content and combining the lowest level nodes possible.
+
+.. rubric:: Example
+
+**serverless.yml**
+
+.. code-block:: yaml
+
+  functions:
+    example:
+      handler: handler.example
+      runtime: python3.8
+      memorySize: 512
+
+**runway.yml**
+
+.. code-block:: yaml
+
+  deployments:
+    - modules:
+        - path: sampleapp.sls
+          options:
+            extend_serverless_yml:
+              functions:
+                example:
+                  memorySize: 1024
+              resources:
+                Resources:
+                  ExampleResource:
+                    Type: AWS::CloudFormation::WaitConditionHandle
+      regions:
+        - us-east-1
+
+Result
+
+.. code-block:: yaml
+
+  functions:
+    example:
+      handler: handler.example
+      runtime: python3.8
+      memorySize: 1024
+    resources:
+      Resources:
+        ExampleResource:
+          Type: AWS::CloudFormation::WaitConditionHandle
+
+
+.. _sls-promotezip:
 
 *************************************
 Promoting Builds Through Environments
@@ -56,6 +141,8 @@ deployment (so environment-specific values/lookups will work as normal).
           promotezip:
             bucketname: my-build-account-bucket-name
 
+
+.. _sls-args:
 
 *******************************************
 Specifying Serverless CLI Arguments/Options

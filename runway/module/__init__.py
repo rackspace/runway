@@ -9,6 +9,11 @@ import six
 
 from ..util import merge_nested_environment_dicts, which
 
+if sys.version_info[0] > 2:  # TODO remove after droping python 2
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
+
 LOGGER = logging.getLogger('runway')
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
 NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
@@ -136,6 +141,84 @@ class RunwayModule(object):
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError('You must implement the destroy() method '
                                   'yourself!')
+
+
+class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
+    """Base class for Runway modules that use npm."""
+
+    # TODO we need a better name than "options" or pass in as kwargs
+    def __init__(self, context, path, options=None):
+        """Instantiate class.
+
+        Args:
+            context (Context): Runway context object.
+            path (Union[str, Path]): Path to the module.
+            options (Dict[str, Dict[str, Any]]): Everything in the module
+                definition merged with applicable values from the deployment
+                definition.
+
+        """
+        self.check_for_npm()  # fail fast
+        options = options or {}
+        super(RunwayModuleNpm, self).__init__(context, path, options)
+        del self.options  # remove the attr set by the parent class
+
+        # potential future state of RunwayModule attributes in a future release
+        self._raw_path = Path(options.pop('path')) if options.get('path') else None
+        self.environments = options.pop('environments', {})
+        self.options = options.pop('options', {})
+        self.parameters = options.pop('parameters', {})
+        self.path = path if isinstance(self.path, Path) else Path(self.path)
+
+        for k, v in options.items():
+            setattr(self, k, v)
+
+        warn_on_boto_env_vars(self.context.env_vars)
+
+    def check_for_npm(self):
+        """Ensure npm is installed and in the current path."""
+        if not which('npm'):
+            LOGGER.error('%s: "npm" not found in path or is not executable; '
+                         'please ensure it is installed correctly.',
+                         self.path.name)
+            sys.exit(1)
+
+    def log_npm_command(self, command):
+        """Log an npm command that is going to be run.
+
+        Args:
+            command (List[str]): List that will be passed into a subprocess.
+
+        """
+        LOGGER.info('%s: Running "%s"', self.path.name,
+                    format_npm_command_for_logging(command))
+
+    def npm_install(self):
+        """Run ``npm install``."""
+        if self.options.get('skip_npm_ci'):
+            LOGGER.info("%s: Skipping npm ci and npm install...",
+                        self.path.name)
+        elif self.context.is_noninteractive and use_npm_ci(str(self.path)):
+            LOGGER.info("%s: Running npm ci...",
+                        self.path.name)
+            subprocess.check_call([NPM_BIN, 'ci'])
+        else:
+            LOGGER.info("%s: Running npm install...",
+                        self.path.name)
+            subprocess.check_call([NPM_BIN, 'install'])
+
+    def package_json_missing(self):
+        """Check for the existence for a package.json file in the module.
+
+        Returns:
+            bool: True if the file was not found.
+
+        """
+        if not (self.path / 'package.json').is_file():
+            LOGGER.warning('%s: Module is missing a "package.json"',
+                           self.path.name)
+            return True
+        return False
 
 
 class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
