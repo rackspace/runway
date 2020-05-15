@@ -15,6 +15,59 @@ Prerequisites
 We strongly recommend you commit the package-lock.json that is generated after running ``npm install``.
 
 
+*******
+Options
+*******
+
+Options specific to Serverless Framework modules.
+
+**args (Optional[List[str]]**
+  List of CLI arguments/options to pass to the Serverless Framework CLI.
+  See :ref:`Specifying Serverless CLI Arguments/Options <sls-args>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      args:
+        - '--config'
+        - sls.yml
+
+**extend_serverless_yml (Optional[Dict[str, Any]])**
+  If provided, the value of this option will be recursively merged into the modules *serverless.yml* file.
+  See :ref:`Extending a Serverless Configuration File <sls-extend-yml>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      extend_serverless_yml:
+        custom:
+          env:
+            memorySize: 512
+
+**promotezip (Optional[Dict[str, str]])**
+  If provided, promote Serverless Framework generated zip files between environments from a *build* AWS account.
+  See :ref:`Promoting Builds Through Environments <sls-promotezip>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      promotezip:
+        bucketname: my-build-account-bucket-name
+
+**skip_npm_ci (bool)**
+  Skip running ``npm ci`` in the module directory prior to processing the module *(default: false)*.
+  See :ref:`Disabling NPM CI <sls-skip-npm-ci>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      skip_npm_ci: true
+
+
 **************
 serverless.yml
 **************

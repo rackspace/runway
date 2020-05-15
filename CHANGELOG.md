@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- ability to extend a Serverless configuration file the `extend_serverless_yml` option
+
+### Fixed
+- the value of `environments` is once again used to determine if a serverless module should be skipped
+
 ## [1.7.3] - 2020-04-29
 ### Fixed
 - Static Site Auth@Edge deployments with pre-existing userpools
