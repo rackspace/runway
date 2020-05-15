@@ -76,28 +76,24 @@ class TestLookupHandler(object):
         assert LookupHandler.load(json.dumps(value), parser='json') == value
         assert LookupHandler.load(yaml.dump(value), parser='yaml') == value
 
-    def test_parse(self):
-        """Basic value parsing."""
-        expected_query = 'my_query'
-
-        result_query, result_args = LookupHandler.parse(expected_query)
-
-        assert result_query == expected_query
-        assert result_args == {}
-
-    def test_parse_args(self):
-        """Parse query and args from value."""
-        expected_args = {
-            'key1': 'val1'
-        }
-        expected_query = 'my_query'
-        value = '{}::{}'.format(expected_query, ','.join([
-            '{}={}'.format(key, val) for key, val in expected_args.items()
-        ]))
-
-        result_query, result_args = LookupHandler.parse(value)
-
-        assert result_query == expected_query
+    @pytest.mark.parametrize('query, raw_args, expected_args', [
+        ('query', None, {}),
+        ('query', 'key1=val1', {'key1': 'val1'}),
+        ('query.something', 'key1=val1,key2=val2', {'key1': 'val1',
+                                                    'key2': 'val2'}),
+        ('query.something', 'key1=val1, key2=val2', {'key1': 'val1',
+                                                     'key2': 'val2'}),
+        ('query-something', 'key1=val-1', {'key1': 'val-1'}),
+        ('query:something', 'key1=val:1', {'key1': 'val:1'}),
+        ('query=something', 'key1=val=1', {'key1': 'val=1'}),
+        ('query==something', 'key1=val==1', {'key1': 'val==1'}),
+    ])
+    def test_parse(self, query, raw_args, expected_args):
+        """Test parse."""
+        value = '{}::{}'.format(query, raw_args)
+        result_query, result_args = LookupHandler.parse(value if raw_args
+                                                        else query)
+        assert result_query == query
         assert result_args == expected_args
 
     def test_transform_bool_to_bool(self):
