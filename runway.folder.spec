@@ -9,7 +9,7 @@ import os
 import pkgutil
 from pkg_resources import get_distribution, get_entry_info
 
-from PyInstaller.utils.hooks import copy_metadata
+from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 
 # distutils not included with virtualenv < 20 so we have to import it here
 # can be removed once we can upgrade virtualenv and pyinstaller
@@ -40,7 +40,7 @@ def get_submodules(package):
     """
     return [name for _, name, _ in
             pkgutil.walk_packages(path=package.__path__,
-                                  prefix=package.__name__+'.',
+                                  prefix=package.__name__ + '.',
                                   onerror=lambda x: None)]
 
 
@@ -73,6 +73,9 @@ data_files.append(('{}/botocore/data'.format(get_distribution('botocore').locati
                    'botocore/data/'))
 data_files.append(('{}/awscli/data'.format(get_distribution('awscli').location),
                    'awscli/data/'))
+data_files.extend(collect_data_files('distutils'))
+data_files.extend(collect_data_files('pip'))
+data_files.extend(collect_data_files('wheel'))
 data_files.append(copy_metadata('runway')[0])  # support scm version
 
 # pyinstaller is not able to find dependencies of dependencies
@@ -86,12 +89,16 @@ import troposphere  # noqa
 import awacs  # noqa
 import awscli  # noqa
 import botocore  # noqa
+import pip  # noqa
+import wheel  # noqa
 hiddenimports.extend(get_submodules(runway))
 hiddenimports.extend(get_submodules(troposphere))
 hiddenimports.extend(get_submodules(awacs))
 hiddenimports.extend(get_submodules(awscli))
-hiddenimports.extend(get_submodules(awscli))
 hiddenimports.extend(get_submodules(botocore))
+hiddenimports.extend(get_submodules(pip))
+hiddenimports.extend(get_submodules(wheel))
+hiddenimports.extend(get_submodules(distutils))
 # needed due to pkg_resources dropping python2 support
 # can be removed on the next pyinstaller release
 # https://github.com/pypa/setuptools/issues/1963#issuecomment-582084099
