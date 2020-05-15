@@ -5,6 +5,7 @@ import os
 import os.path
 # python2 supported pylint incorrectly detects this for python3.8
 import random  # pylint: disable=syntax-error
+import sys
 import unittest
 from io import BytesIO as StringIO
 from zipfile import ZipFile
@@ -14,6 +15,9 @@ import botocore
 import pytest
 from mock import ANY, MagicMock, patch
 from moto import mock_s3
+from testfixtures import ShouldRaise, TempDirectory, compare
+from troposphere.awslambda import Code
+
 from runway.cfngin.config import Config
 from runway.cfngin.context import Context
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
@@ -24,8 +28,6 @@ from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
                                             select_bucket_region,
                                             should_use_docker,
                                             upload_lambda_functions)
-from testfixtures import ShouldRaise, TempDirectory, compare
-from troposphere.awslambda import Code
 
 from ..factories import mock_provider
 from ..fixtures.mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
@@ -537,6 +539,7 @@ class TestLambdaHooks(unittest.TestCase):
     def test_frozen(self, mock_sys, mock_proc):
         """Test building with pip when frozen."""
         mock_sys.frozen = True
+        mock_sys.version_info = sys.version_info
         with self.temp_directory_with_files() as temp_dir:
             self.run_hook(functions={
                 'MyFunction': {

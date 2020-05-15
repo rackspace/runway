@@ -527,12 +527,16 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
 
             # Pyinstaller build or explicit python path
             if getattr(sys, 'frozen', False) and not python_path:
-                tmp_script.write_text(os.linesep.join([
+                script_contents = os.linesep.join([
                     'import runpy',
                     'from runway.util import argv',
                     'with argv(*{}):'.format(json.dumps(pip_cmd[2:])),
                     '   runpy.run_module("pip", run_name="__main__")\n'
-                ]), encoding='UTF-8')  # TODO remove encoding when dropping python 2
+                ])
+                # TODO remove python 2 logic when dropping python 2
+                tmp_script.write_text(script_contents
+                                      if sys.version_info.major > 2
+                                      else script_contents.decode('UTF-8'))
                 cmd = [sys.executable, 'run-python', str(tmp_script)]
             else:
                 cmd = pip_cmd
