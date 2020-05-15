@@ -60,7 +60,6 @@ class Cleanup(Blueprint):
         """IAM Role Boundary specified conditional."""
         return self.get_variables()['RoleBoundaryArn'] != ''
 
-
     def create_template(self):
         # type: () -> None
         """Create template (main function called by Stacker)."""
