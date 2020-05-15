@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - the value of `environments` is once again used to determine if a serverless module should be skipped
 - lookup argument values can now contain `=` without raising _"too many values to unpack"_
 - Runway now invokes cfn-lint as if it were interacting with the CLI to remove version compatibility issues
+- staticsite auth@edge: cleanup stack uses IAM role boundary if specified
 
 ## [1.7.3] - 2020-04-29
 ### Fixed
