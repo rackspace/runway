@@ -5,13 +5,14 @@ import os.path
 # python2 supported pylint incorrectly detects this for python3.8
 import random  # pylint: disable=syntax-error
 import unittest
+import logging
 from io import BytesIO as StringIO
 from zipfile import ZipFile
 
 import boto3
 import botocore
 import pytest
-from mock import patch
+from mock import ANY, MagicMock, patch
 from moto import mock_s3
 from testfixtures import ShouldRaise, TempDirectory, compare
 from troposphere.awslambda import Code
@@ -520,6 +521,35 @@ class TestLambdaHooks(unittest.TestCase):
                 'f2/f2.js',
             ])
 
+    @mock_s3
+    @patch('runway.cfngin.hooks.aws_lambda.subprocess')
+    @patch('runway.cfngin.hooks.aws_lambda.find_requirements',
+           MagicMock(return_value={'requirements.txt': True,
+                                   'Pipfile': False,
+                                   'Pipfile.lock': False}))
+    @patch('runway.cfngin.hooks.aws_lambda.copydir', MagicMock())
+    @patch('runway.cfngin.hooks.aws_lambda.handle_requirements',
+           MagicMock(return_value='./tests/requirements.txt'))
+    @patch('runway.cfngin.hooks.aws_lambda._find_files', MagicMock())
+    @patch('runway.cfngin.hooks.aws_lambda._zip_files',
+           MagicMock(return_value=('zip_contents', 'content_hash')))
+    @patch('runway.cfngin.hooks.aws_lambda._upload_code', MagicMock())
+    @patch('runway.cfngin.hooks.aws_lambda.sys')
+    def test_frozen(self, mock_sys, mock_proc):
+        """Test building with pip when frozen."""
+        mock_sys.frozen = True
+        with self.temp_directory_with_files() as temp_dir:
+            self.run_hook(functions={
+                'MyFunction': {
+                    'path': temp_dir.path + '/f1',
+                    'include': ['*.py', 'test2/']
+                }
+            })
+        mock_proc.check_call.assert_called_once_with([ANY, 'run-python', ANY])
+        assert mock_proc.check_call.call_args.args[0][2].endswith(
+            '__runway_run_pip_install.py'
+        )
+
 
 class TestDockerizePip(object):
     """Test dockerize_pip."""
@@ -685,6 +715,24 @@ class TestHandleRequirements(object):
             assert tmp_dir.read('Pipfile.lock')
             assert tmp_dir.read('requirements.txt') == \
                 b'-i https://pypi.org/simple\n\n'
+
+    def test_frozen_pipenv(self, caplog, monkeypatch, tmp_path):
+        """Test use pipenv from Pyinstaller build."""
+        caplog.set_level(logging.ERROR, logger='runway.cfngin.hooks.aws_lambda')
+        monkeypatch.setattr('runway.cfngin.hooks.aws_lambda.sys.frozen', True, raising=False)
+
+        with pytest.raises(SystemExit) as excinfo:
+            handle_requirements(package_root=str(tmp_path),
+                                dest_path=str(tmp_path),
+                                requirements={
+                                    'requirements.txt': False,
+                                    'Pipfile': True,
+                                    'Pipfile.lock': False
+                                })
+        assert excinfo.value.code == 1
+        assert [
+            'pipenv can only be used with python installed from PyPi'
+        ] == caplog.messages
 
     def test_implicit_pipenv(self):
         """Test implicit use of pipenv."""
