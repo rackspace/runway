@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - the value of `environments` is once again used to determine if a serverless module should be skipped
+- lookup argument values can now contain `=` without raising _"too many values to unpack"_
 
 ## [1.7.3] - 2020-04-29
 ### Fixed

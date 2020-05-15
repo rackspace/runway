@@ -229,7 +229,7 @@ class LookupHandler(object):
         """
         split_args = args.split(',')
         return {key.strip(): value.strip() for key, value in
-                [arg.split('=') for arg in split_args]}
+                [arg.split('=', 1) for arg in split_args]}
 
     @classmethod
     def load(cls, value, parser=None, **kwargs):
