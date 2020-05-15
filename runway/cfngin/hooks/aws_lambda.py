@@ -528,7 +528,8 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
                        '--target', tmpdir,
                        '--requirement', tmp_req]
 
-            if getattr(sys, 'frozen', False):  # TODO default to False
+            # Pyinstaller build or explicit python path
+            if getattr(sys, 'frozen', False) and not python_path:
                 tmp_script.write_text(os.linesep.join([
                     'import runpy',
                     'from runway.util import argv',
