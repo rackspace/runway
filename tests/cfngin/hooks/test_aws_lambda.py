@@ -1,11 +1,11 @@
 """Tests for runway.cfngin.hooks.aws_lambda."""
+import logging
 # pylint: disable=invalid-name,no-self-use
 import os
 import os.path
 # python2 supported pylint incorrectly detects this for python3.8
 import random  # pylint: disable=syntax-error
 import unittest
-import logging
 from io import BytesIO as StringIO
 from zipfile import ZipFile
 
@@ -14,9 +14,6 @@ import botocore
 import pytest
 from mock import ANY, MagicMock, patch
 from moto import mock_s3
-from testfixtures import ShouldRaise, TempDirectory, compare
-from troposphere.awslambda import Code
-
 from runway.cfngin.config import Config
 from runway.cfngin.context import Context
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
@@ -27,6 +24,8 @@ from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
                                             select_bucket_region,
                                             should_use_docker,
                                             upload_lambda_functions)
+from testfixtures import ShouldRaise, TempDirectory, compare
+from troposphere.awslambda import Code
 
 from ..factories import mock_provider
 from ..fixtures.mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
@@ -724,11 +723,9 @@ class TestHandleRequirements(object):
         with pytest.raises(SystemExit) as excinfo:
             handle_requirements(package_root=str(tmp_path),
                                 dest_path=str(tmp_path),
-                                requirements={
-                                    'requirements.txt': False,
-                                    'Pipfile': True,
-                                    'Pipfile.lock': False
-                                })
+                                requirements={'requirements.txt': False,
+                                              'Pipfile': True,
+                                              'Pipfile.lock': False})
         assert excinfo.value.code == 1
         assert [
             'pipenv can only be used with python installed from PyPi'
