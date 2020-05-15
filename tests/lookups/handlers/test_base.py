@@ -1,20 +1,20 @@
 """Tests for lookup handler base class."""
-# pytest: disable=no-self-use
+# pylint: disable=no-self-use
 import json
-from unittest import TestCase
 
+import pytest
 import yaml
 
 from runway.lookups.handlers.base import LookupHandler
 from runway.util import MutableMap
 
 
-class TestLookupHandler(TestCase):
+class TestLookupHandler(object):
     """Tests for LookupHandler."""
 
     def test_abstract_handle(self):
         """Handle should not be implimented."""
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             LookupHandler.handle(None, None)
 
     def test_dependencies(self):
@@ -63,7 +63,7 @@ class TestLookupHandler(TestCase):
             mute_map, get='nested.bool', transform='str'
         ) == '"True"'
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             LookupHandler.format_results(['something'], get='key')
 
     def test_load_no_parser(self):
@@ -82,8 +82,8 @@ class TestLookupHandler(TestCase):
 
         result_query, result_args = LookupHandler.parse(expected_query)
 
-        self.assertEqual(result_query, expected_query)
-        self.assertEqual(result_args, {})
+        assert result_query == expected_query
+        assert result_args == {}
 
     def test_parse_args(self):
         """Parse query and args from value."""
@@ -97,16 +97,17 @@ class TestLookupHandler(TestCase):
 
         result_query, result_args = LookupHandler.parse(value)
 
-        self.assertEqual(result_query, expected_query)
-        self.assertEqual(result_args, expected_args)
+        assert result_query == expected_query
+        assert result_args == expected_args
 
     def test_transform_bool_to_bool(self):
         """Bool should be returned as is."""
         result_true = LookupHandler.transform(True, to_type='bool')
         result_false = LookupHandler.transform(False, to_type='bool')
 
-        self.assertTrue(result_true)
-        self.assertFalse(result_false)
+        assert isinstance(result_true, bool) and isinstance(result_false, bool)
+        assert result_true
+        assert not result_false
 
     def test_transform_no_type(self):
         """Test transform with no type."""
@@ -121,52 +122,45 @@ class TestLookupHandler(TestCase):
         result_true = LookupHandler.transform('true', to_type='bool')
         result_false = LookupHandler.transform('false', to_type='bool')
 
-        self.assertTrue(result_true)
-        self.assertFalse(result_false)
+        assert isinstance(result_true, bool) and isinstance(result_false, bool)
+        assert result_true
+        assert not result_false
 
     def test_transform_type_check(self):
         """Transform to bool type check."""
-        with self.assertRaises(TypeError, msg='dict should raise an error'):
+        with pytest.raises(TypeError):
             LookupHandler.transform({'key1': 'val1'}, to_type='bool')
 
-        with self.assertRaises(TypeError, msg='list should raise an error'):
+        with pytest.raises(TypeError):
             LookupHandler.transform(['li1'], to_type='bool')
 
-        with self.assertRaises(TypeError, msg='number should raise an error'):
+        with pytest.raises(TypeError):
             LookupHandler.transform(10, to_type='bool')
 
-        with self.assertRaises(TypeError, msg='float should raise an error'):
+        with pytest.raises(TypeError):
             LookupHandler.transform(10.0, to_type='bool')
 
-        with self.assertRaises(TypeError, msg='NoneType should raise an error'):
+        with pytest.raises(TypeError):
             LookupHandler.transform(None, to_type='bool')
 
     def test_transform_str_direct(self):
         """Test types that are directly transformed to strings."""
-        self.assertEqual(LookupHandler.transform('test', 'str'), 'test')
-        self.assertEqual(LookupHandler.transform({'key1': 'val1'}, 'str'),
-                         json.dumps(json.dumps({'key1': 'val1'}, indent=0)))
-        self.assertEqual(LookupHandler.transform(True, 'str'), '"True"')
+        assert LookupHandler.transform('test', 'str') == 'test'
+        assert LookupHandler.transform({'key1': 'val1'}, 'str') == \
+            json.dumps(json.dumps({'key1': 'val1'}, indent=0))
+        assert LookupHandler.transform(True, 'str') == '"True"'
 
     def test_transform_str_list(self):
         """Test list type joined to create string."""
-        self.assertEqual(
-            LookupHandler.transform(['val1', 'val2'], to_type='str'),
-            'val1,val2'
-        )
-        self.assertEqual(
-            LookupHandler.transform(set(['val', 'val']), to_type='str'),
-            'val'
-        )
-        self.assertEqual(
-            LookupHandler.transform(('val1', 'val2'), to_type='str'),
-            'val1,val2'
-        )
+        assert LookupHandler.transform(['val1', 'val2'],
+                                       to_type='str') == 'val1,val2'
+        assert LookupHandler.transform(set(['val', 'val']),
+                                       to_type='str') == 'val'
+        assert LookupHandler.transform(('val1', 'val2'),
+                                       to_type='str') == 'val1,val2'
 
     def test_transform_str_list_delimiter(self):
         """Test list to string with a specified delimiter."""
-        self.assertEqual(
-            LookupHandler.transform(['val1', 'val2'], to_type='str',
-                                    delimiter='|'),
-            'val1|val2'
-        )
+        assert LookupHandler.transform(
+            ['val1', 'val2'], to_type='str', delimiter='|'
+        ) == 'val1|val2'
