@@ -497,6 +497,7 @@ jobs:
       - name: Install Dependencies & Run Script
         working-directory: .github/scripts/urlshortener
         run: |
+          pip install wheel
           pip install -r requirements.txt
           python update_urls.py \
             --bucket-name $BUCKET_NAME \
