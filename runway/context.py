@@ -4,9 +4,12 @@ import logging
 import multiprocessing
 import os
 import sys
+from distutils.util import strtobool  # pylint: disable=E
+
+from six import string_types
 
 from .cfngin.session_cache import get_session
-from .util import AWS_ENV_VARS
+from .util import AWS_ENV_VARS, cached_property
 
 LOGGER = logging.getLogger('runway')
 
@@ -71,6 +74,29 @@ class Context(object):
         """
         return {name: self.env_vars.get(name)
                 for name in AWS_ENV_VARS if self.env_vars.get(name)}
+
+    @cached_property
+    def disable_color(self):
+        """Wether to explicitly disable color output.
+
+        Primarily applies to IaC being wrapped by Runway.
+
+        Returns:
+            bool
+
+        """
+        colorize = self.env_vars.get('RUNWAY_COLORIZE')  # explicitly enable/disable
+        try:
+            if isinstance(colorize, bool):  # catch False
+                return not colorize
+            if colorize:
+                if isinstance(colorize, string_types):
+                    return not strtobool(colorize)
+        except ValueError:
+            pass  # likely invalid RUNWAY_COLORIZE value
+        if sys.stdout.isatty():
+            return False
+        return True
 
     @property
     def is_interactive(self):
