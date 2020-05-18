@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `destroy_stack` is now aware of `action=diff` and prints a different confirmation prompt
 
 ## [1.8.0] - 2020-05-16
 ### Fixed
