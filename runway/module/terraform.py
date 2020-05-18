@@ -40,11 +40,13 @@ def get_workspace_tfvars_file(path, environment, region):
 
 def run_terraform_init(tf_bin,  # pylint: disable=too-many-arguments
                        module_path, module_options, env_name, env_region,
-                       env_vars):
+                       env_vars, disable_color=False):
     """Run Terraform init."""
     cmd_opts = {'env_vars': env_vars,
                 'exit_on_error': False,
                 'cmd_list': [tf_bin, 'init', '-reconfigure']}
+    if disable_color:
+        cmd_opts['cmd_list'].append('-no-color')
 
     if module_options.backend_config.init_args:
         LOGGER.info('Using provided backend values "%s"',
@@ -106,6 +108,8 @@ class Terraform(RunwayModule):
         """Run Terraform."""
         response = {'skipped_configs': False}
         tf_cmd = [command]
+        if self.context.disable_color:
+            tf_cmd.append('-no-color')
         options = TerraformOptions.parse(self.context, self.path,
                                          **self.options.get('options', {}))
 
@@ -170,14 +174,16 @@ class Terraform(RunwayModule):
                     module_options=options,
                     env_name=self.context.env_name,
                     env_region=self.context.env_region,
-                    env_vars=env_vars
+                    env_vars=env_vars,
+                    disable_color=self.context.disable_color
                 )
 
                 LOGGER.debug('Checking current Terraform workspace...')
                 current_tf_workspace = subprocess.check_output(
                     [tf_bin,
                      'workspace',
-                     'show'],
+                     'show'] + (['-no-color']
+                                if self.context.disable_color else []),
                     env=env_vars
                 ).strip().decode()
                 if current_tf_workspace != self.context.env_name:
@@ -188,14 +194,16 @@ class Terraform(RunwayModule):
                     LOGGER.debug('Checking available Terraform '
                                  'workspaces...')
                     available_tf_envs = subprocess.check_output(
-                        [tf_bin, 'workspace', 'list'],
+                        [tf_bin, 'workspace', 'list'] +
+                        (['-no-color'] if self.context.disable_color else []),
                         env=env_vars
                     ).decode()
                     if re.compile("^[*\\s]\\s%s$" % self.context.env_name,
                                   re.M).search(available_tf_envs):
                         run_module_command(
                             cmd_list=[tf_bin, 'workspace', 'select',
-                                      self.context.env_name],
+                                      self.context.env_name] +
+                            (['-no-color'] if self.context.disable_color else []),
                             env_vars=env_vars
                         )
                     else:
@@ -204,7 +212,8 @@ class Terraform(RunwayModule):
                                     self.context.env_name)
                         run_module_command(
                             cmd_list=[tf_bin, 'workspace', 'new',
-                                      self.context.env_name],
+                                      self.context.env_name] +
+                            (['-no-color'] if self.context.disable_color else []),
                             env_vars=env_vars
                         )
                     LOGGER.info('Re-running terraform init after workspace '
@@ -215,12 +224,14 @@ class Terraform(RunwayModule):
                         module_options=options,
                         env_name=self.context.env_name,
                         env_region=self.context.env_region,
-                        env_vars=env_vars
+                        env_vars=env_vars,
+                        disable_color=self.context.disable_color
                     )
                 LOGGER.info('Executing "terraform get" to update remote '
                             'modules')
                 run_module_command(
-                    cmd_list=[tf_bin, 'get', '-update=true'],
+                    cmd_list=[tf_bin, 'get', '-update=true'] +
+                    (['-no-color'] if self.context.disable_color else []),
                     env_vars=env_vars
                 )
                 LOGGER.info("Running Terraform %s on %s (\"%s\")",

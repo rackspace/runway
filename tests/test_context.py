@@ -4,7 +4,7 @@ import logging
 import os
 
 import pytest
-from mock import MagicMock, patch
+from mock import patch
 
 from runway.context import Context
 from runway.util import environ
