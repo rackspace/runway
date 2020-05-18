@@ -178,6 +178,7 @@ class TestServerless(object):
         """Test gen_cmd."""
         # pylint: disable=no-member
         monkeypatch.setattr(Serverless, 'log_npm_command', MagicMock())
+        monkeypatch.setattr(runway_context, 'disable_color', False)
         mock_cmd.return_value = ['success']
         obj = Serverless(runway_context, tmp_path,
                          {'options': {'args': ['--config', 'test']}})
@@ -195,6 +196,8 @@ class TestServerless(object):
         mock_cmd.reset_mock()
 
         obj.context.env_vars['CI'] = '1'
+        monkeypatch.setattr(runway_context, 'disable_color', True)
+        expected_opts.append('--no-color')
         if command not in ['remove', 'print']:
             expected_opts.append('--conceal')
         assert obj.gen_cmd(command, args_list=['--extra-arg']) == ['success']
@@ -267,6 +270,7 @@ class TestServerless(object):
                         runway_context, tmp_path):
         """Test sls_deploy."""
         # pylint: disable=no-member
+        monkeypatch.setattr(runway_context, 'disable_color', False)
         monkeypatch.setattr(Serverless, 'gen_cmd',
                             MagicMock(return_value=['deploy']))
         monkeypatch.setattr(Serverless, 'npm_install', MagicMock())
@@ -292,6 +296,19 @@ class TestServerless(object):
             str(tmp_path)
         )
         mock_run.assert_called_once()
+
+        monkeypatch.setattr(runway_context, 'disable_color', True)
+        assert not obj.sls_deploy(skip_install=True)
+        mock_deploy.assert_called_with(
+            ['deploy',
+             '--region', runway_context.env_region,
+             '--stage', runway_context.env_name,
+             '--config', 'test.yml',
+             '--no-color'],
+            'test-bucket',
+            runway_context,
+            str(tmp_path)
+        )
 
     def test_sls_print(self, monkeypatch, runway_context):
         """Test sls_print."""
