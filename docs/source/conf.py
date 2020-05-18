@@ -39,10 +39,15 @@ version = '.'.join(release.split('.')[:2])
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinxcontrib.apidoc'
 ]
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None)  # link to python docs
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
