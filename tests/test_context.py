@@ -52,14 +52,14 @@ class TestContext(object):
         (ValueError, False, True)
     ])
     @patch('runway.context.sys.stdout')
-    def test_disable_color(self, mock_stdout, colorize, isatty, expected):
-        """Test disable_color."""
+    def test_no_color(self, mock_stdout, colorize, isatty, expected):
+        """Test no_color."""
         mock_stdout.isatty.return_value = isatty
         env_vars = {}
         if colorize is not None:
             env_vars['RUNWAY_COLORIZE'] = colorize
         ctx = Context('test', 'us-east-1', './tests', env_vars=env_vars)
-        assert ctx.disable_color == expected
+        assert ctx.no_color == expected
 
     def test_is_interactive(self):
         """Test is_interactive."""

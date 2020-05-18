@@ -76,7 +76,7 @@ class Context(object):
                 for name in AWS_ENV_VARS if self.env_vars.get(name)}
 
     @cached_property
-    def disable_color(self):
+    def no_color(self):
         """Wether to explicitly disable color output.
 
         Primarily applies to IaC being wrapped by Runway.

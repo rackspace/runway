@@ -87,17 +87,22 @@ def use_npm_ci(path):
 def run_npm_install(path, options, context):
     """Run npm install/ci."""
     # Use npm ci if available (npm v5.7+)
+    cmd = [NPM_BIN, '<place-holder>']
+    if context.no_color:
+        cmd.append('--no-color')
     if options.get('options', {}).get('skip_npm_ci'):
         LOGGER.info("Skipping npm ci or npm install on %s...",
                     os.path.basename(path))
-    elif context.env_vars.get('CI') and use_npm_ci(path):
+        return
+    if context.env_vars.get('CI') and use_npm_ci(path):
         LOGGER.info("Running npm ci on %s...",
                     os.path.basename(path))
-        subprocess.check_call([NPM_BIN, 'ci'])
+        cmd[1] = 'ci'
     else:
         LOGGER.info("Running npm install on %s...",
                     os.path.basename(path))
-        subprocess.check_call([NPM_BIN, 'install'])
+        cmd[1] = 'install'
+    subprocess.check_call(cmd)
 
 
 def warn_on_boto_env_vars(env_vars):
@@ -195,17 +200,22 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
     def npm_install(self):
         """Run ``npm install``."""
+        cmd = [NPM_BIN, '<place-holder>']
+        if self.context.no_color:
+            cmd.append('--no-color')
         if self.options.get('skip_npm_ci'):
             LOGGER.info("%s: Skipping npm ci and npm install...",
                         self.path.name)
-        elif self.context.is_noninteractive and use_npm_ci(str(self.path)):
+            return
+        if self.context.is_noninteractive and use_npm_ci(str(self.path)):
             LOGGER.info("%s: Running npm ci...",
                         self.path.name)
-            subprocess.check_call([NPM_BIN, 'ci'])
+            cmd[1] = 'ci'
         else:
             LOGGER.info("%s: Running npm install...",
                         self.path.name)
-            subprocess.check_call([NPM_BIN, 'install'])
+            cmd[1] = 'install'
+        subprocess.check_call(cmd)
 
     def package_json_missing(self):
         """Check for the existence for a package.json file in the module.
