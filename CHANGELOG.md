@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - a@e check_auth will now try to refresh tokens 5 minutes before expiration instead of waiting for it to expire
+- `runway test` will now return a non-zero exit code if any non-required tests failed
 
 ## [1.8.0] - 2020-05-16
 ### Fixed
