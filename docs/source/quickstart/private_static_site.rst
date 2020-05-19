@@ -16,7 +16,6 @@ Prerequisites
 - The following installed tools:
 
     - npm
-    - yarn
     - git (Available out of the box on macOS)
 
 Setup
