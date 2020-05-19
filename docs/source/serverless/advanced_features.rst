@@ -155,8 +155,8 @@ The value of ``args`` must be a list of arguments/options to pass to the CLI.
 Each element of the argument/option should be it's own list item (e.g. ``--config sls.yml`` would be ``['--config', 'sls.yml']``).
 
 .. important::
-  Do not provide ``--region <region>`` or ``--stage <stage>`` here.
-  These will be provided by Runway.
+  Do not provide ``--region <region>`` or ``--stage <stage>`` here, these will be provided by Runway.
+  Runway will also provide ``--no-color`` if stdout is not a TTY.
 
 
 .. rubric:: Runway Example

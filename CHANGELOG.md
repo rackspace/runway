@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - `destroy_stack` is now aware of `action=diff` and prints a different confirmation prompt
+- `-no-color`/`--no-color` option automatically added to cdk, npm, sls, and tf commands
+  - looks at `RUNWAY_COLORIZE` env var for an explicit enable/disable
+  - if not set, checks `sys.stdout.isatty()` to determine if option should be provided
 
 ## [1.8.0] - 2020-05-16
 ### Fixed

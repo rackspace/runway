@@ -3,6 +3,7 @@
 import logging
 import os
 
+import pytest
 from mock import patch
 
 from runway.context import Context
@@ -39,6 +40,26 @@ class TestContext(object):
                           env_vars=TEST_CREDENTIALS.copy())
 
         assert context.current_aws_creds == TEST_CREDENTIALS
+
+    @pytest.mark.parametrize('colorize, isatty, expected', [
+        (None, True, False),
+        (None, False, True),
+        (True, False, False),
+        (False, True, True),
+        ('true', False, False),
+        ('false', True, True),
+        (ValueError, True, False),
+        (ValueError, False, True)
+    ])
+    @patch('runway.context.sys.stdout')
+    def test_no_color(self, mock_stdout, colorize, isatty, expected):
+        """Test no_color."""
+        mock_stdout.isatty.return_value = isatty
+        env_vars = {}
+        if colorize is not None:
+            env_vars['RUNWAY_COLORIZE'] = colorize
+        ctx = Context('test', 'us-east-1', './tests', env_vars=env_vars)
+        assert ctx.no_color == expected
 
     def test_is_interactive(self):
         """Test is_interactive."""
