@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - looks at `RUNWAY_COLORIZE` env var for an explicit enable/disable
   - if not set, checks `sys.stdout.isatty()` to determine if option should be provided
 
+### Changed
+- a@e check_auth will now try to refresh tokens 5 minutes before expiration instead of waiting for it to expire
+
 ## [1.8.0] - 2020-05-16
 ### Fixed
 - the value of `environments` is once again used to determine if a serverless module should be skipped
