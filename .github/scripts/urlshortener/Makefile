@@ -16,4 +16,4 @@ sync:
 	pipenv sync --dev
 
 test:
-	pytest ./test_update_urls.py --cov=update_urls
+	pipenv run pytest ./test_update_urls.py --cov=update_urls
