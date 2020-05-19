@@ -28,23 +28,20 @@ run by using the ``runway test`` :ref:`command<command-test>`.
 Test Failures
 -------------
 
-The default behavior if one of the :ref:`tests<runway-test>` fails is to
-terminate execution. The subsequent commands will not be run and a non-zero
-exit code returned. This behavior can modified to continue testing and not
-result in a non-zero exit code on a per-test basis by adding ``required: false``
-to the :ref:`test definition<runway-test>`.
+The default behavior if a :ref:`tests<runway-test>` fails is to continue running the rest of the tests and return a non-zero exit code at the end.
+This behavior can modified to allow testing to continue by adding ``required: true`` to the :ref:`test definition<runway-test>`.
+This will terminate execution if test fails and no further tests will be run.
 
-.. rubric:: Example:
+.. rubric:: Example
+.. code-block:: yaml
 
-::
-
-    tests:
-      - name: hello-world
-        type: script
-        required: false
-        args:
-          commands:
-            - echo "Hello World!"  && exit 1
+  tests:
+    - name: hello-world
+      type: script
+      required: true
+      args:
+        commands:
+          - echo "Hello World!"  && exit 1
 
 
 .. _built-in-test-types:

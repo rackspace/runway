@@ -52,6 +52,8 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
                           env_vars=os.environ.copy(),
                           command='test')
 
+        failed_tests = []
+
         LOGGER.info('Found %i test(s)', len(test_definitions))
         for test in test_definitions:
             test.resolve(context, self.runway_vars)
@@ -78,4 +80,11 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
                     traceback.print_exc()
                 LOGGER.error('Test failed: %s', test.name)
                 if test.required:
+                    LOGGER.error('Failed test was required, the remaining '
+                                 'tests have been skipped')
                     sys.exit(1)
+                failed_tests.append(test.name)
+        if failed_tests:
+            LOGGER.error('The following tests failed: %s',
+                         ', '.join(failed_tests))
+            sys.exit(1)
