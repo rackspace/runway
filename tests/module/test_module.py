@@ -89,9 +89,10 @@ class TestRunwayModuleNpm(object):
 
     @patch('runway.module.use_npm_ci')
     @patch('runway.module.subprocess')
-    def test_npm_install(self, moc_proc, mock_ci, caplog, patch_module_npm,
-                         runway_context):
+    def test_npm_install(self, moc_proc, mock_ci, caplog, monkeypatch,
+                         patch_module_npm, runway_context):
         """Test npm_install."""
+        monkeypatch.setattr(runway_context, 'no_color', False)
         caplog.set_level(logging.INFO, logger='runway')
         obj = RunwayModuleNpm(context=runway_context,
                               path='./tests',
@@ -120,6 +121,18 @@ class TestRunwayModuleNpm(object):
         assert not obj.npm_install()
         expected_logs.append('tests: Running npm install...')
         expected_calls.append(call([NPM_BIN, 'install']))
+
+        monkeypatch.setattr(runway_context, 'no_color', True)
+        assert not obj.npm_install()
+        expected_logs.append('tests: Running npm install...')
+        expected_calls.append(call([NPM_BIN, 'install', '--no-color']))
+
+        obj.options['skip_npm_ci'] = False
+        obj.context.env_vars['CI'] = True
+        mock_ci.return_value = True
+        assert not obj.npm_install()
+        expected_logs.append('tests: Running npm ci...')
+        expected_calls.append(call([NPM_BIN, 'ci', '--no-color']))
 
         assert expected_logs == caplog.messages
         moc_proc.check_call.assert_has_calls(expected_calls)

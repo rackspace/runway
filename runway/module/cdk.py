@@ -39,6 +39,8 @@ class CloudDevelopmentKit(RunwayModule):
         """Run CDK."""
         response = {'skipped_configs': False}
         cdk_opts = [command]
+        if self.context.no_color:
+            cdk_opts.append('--no-color')
 
         if not which('npm'):
             LOGGER.error('"npm" not found in path or is not executable; '
@@ -95,7 +97,8 @@ class CloudDevelopmentKit(RunwayModule):
                                 cdk_opts.append('--require-approval=never')
                             bootstrap_command = generate_node_command(
                                 'cdk',
-                                ['bootstrap'] + cdk_context_opts,
+                                ['bootstrap'] + cdk_context_opts +
+                                (['--no-color'] if self.context.no_color else []),
                                 self.path
                             )
                             LOGGER.info('Running cdk bootstrap...')

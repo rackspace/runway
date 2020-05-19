@@ -154,7 +154,7 @@ The value of each key in the map must be a list as described in the previous sec
 
 .. important::
   The following arguments/options are provided by Runway and should not be provided manually:
-  *auto-approve*, *backend-config*, *force*, *reconfigure*, *update*, and *var-file*.
+  *auto-approve*, *backend-config*, *force*, *no-color*, *reconfigure*, *update*, and *var-file*.
   Providing any of these manually could result in unintended side-effects.
 
 

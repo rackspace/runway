@@ -246,6 +246,8 @@ class Serverless(RunwayModuleNpm):
         """
         args = [command] + self.cli_args + self.options.args
         args.extend(args_list or [])
+        if self.context.no_color and '--no-color' not in args:
+            args.append('--no-color')
         if command not in ['remove', 'print'] and self.context.is_noninteractive:
             args.append('--conceal')  # hide secrets from serverless output
         cmd = generate_node_command(command='sls',
@@ -268,7 +270,10 @@ class Serverless(RunwayModuleNpm):
         if self.options.promotezip:
             # TODO refactor deploy_package to be part of the class
             self.path.absolute()
-            deploy_package(['deploy'] + self.cli_args + self.options.args,
+            sls_opts = ['deploy'] + self.cli_args + self.options.args
+            if self.context.no_color and '--no-color' not in sls_opts:
+                sls_opts.append('--no-color')
+            deploy_package(sls_opts,
                            self.options.promotezip['bucketname'],
                            self.context,
                            str(self.path))
