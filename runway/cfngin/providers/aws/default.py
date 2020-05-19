@@ -1016,13 +1016,20 @@ class Provider(BaseProvider):
 
         """
         LOGGER.debug("Using interactive provider mode for %s.", fqn)
+        action = kwargs.get('action', 'destroy')
 
         approval_options = ['y', 'n']
         try:
             ui.lock()
-            approval = approval or ui.ask("Destroy stack '{}'? [{}] ".format(
-                fqn, '/'.join(approval_options)
-            )).lower()
+            approval = approval or ui.ask(
+                "Destroy {description}stack '{fqn}'{detail}? [{opts}] ".format(
+                    description='temporary ' if action == 'diff' else '',
+                    fqn=fqn,
+                    detail=' created to generate a change set'
+                    if action == 'diff' else '',
+                    opts='/'.join(approval_options)
+                )
+            ).lower()
         finally:
             ui.unlock()
 
@@ -1370,7 +1377,9 @@ class Provider(BaseProvider):
                 if self.is_stack_in_review(temp_stack):
                     LOGGER.debug('Removing temporary stack that is created '
                                  'with a ChangeSet of type "CREATE"')
-                    self.destroy_stack(temp_stack)
+                    # this method is currently only used by one action so
+                    # hardcoding should be fine for now.
+                    self.destroy_stack(temp_stack, action='diff')
             except exceptions.StackDoesNotExist:
                 # not an issue if the stack was already cleaned up
                 LOGGER.debug('Stack does not exist: %s', stack.fqn)
