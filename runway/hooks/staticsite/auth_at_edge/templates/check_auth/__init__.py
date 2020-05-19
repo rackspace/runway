@@ -71,7 +71,7 @@ def handler(event, _context):
 
         # If we have a refresh token and the expiration date has passed
         # then forward the user to the refresh agent
-        if now > exp_date and refresh_token:
+        if now > (exp_date - datetime.timedelta(minutes=5)) and refresh_token:
             headers = {
                 # Redirect the user to the refresh agent
                 'location': [
