@@ -69,7 +69,7 @@ The CloudFormation module type is deployed using Runway's CloudFormation engine 
 It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_ templates that are written in the form of a :ref:`Blueprint`.
 
 - `Configuration <cfngin/configuration.html>`__
-- `Directory Structure <serverless/directory_structure.html>`__
+- `Directory Structure <cfngin/directory_structure.html>`__
 - `Advanced Features <cfngin/advanced_features.html>`__
 
 .. toctree::
