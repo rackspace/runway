@@ -8,5 +8,4 @@ Module Configurations
     :name: mod-configs
 
     custom
-    kubernetes
     staticsite

@@ -1,16 +1,12 @@
-.. _mod-k8s:
-
 Kubernetes
 ==========
-
-Kubernetes manifests can be deployed via Runway, offering an ideal way to
-handle core infrastructure-layer (e.g. shared ConfigMaps & Service Accounts)
-configuration of clusters. Perform the following steps to align your k8s
-directories with Runway's requirements & best practices.
 
 
 Part 1: Adding Kubernetes to Deployment
 ---------------------------------------
+
+.. I think i was able to translate everything over to the new structure pretty well except for maybe this section.
+.. Does anything in this section need to be covered more in one of the new sections?
 
 Start by adding your
 `Kustomize overlay organized <https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays>`_
@@ -55,77 +51,3 @@ manifests::
 
     resources:
       - service.yaml
-
-
-Part 2: Specify the Kubectl Version
--------------------------------------
-
-By specifying the version via a ``.kubectl-version`` file in your overlay
-directory, or a module option, Runway will automatically download & use that
-version for the module. This is recommended to keep a predictable experience
-when deploying your module.
-
-.kubectl-version::
-
-    1.14.5
-
-
-or in runway.yml, either for a single module::
-
-    ---
-    deployments:
-      - modules:
-          - path: myk8smodule
-            options:
-              kubectl_version:
-                "*": 1.14.5  # applies to all environments
-                # prod: 1.13.0  # can also be specified for a specific environment
-
-
-and/or for a group of modules:
-::
-
-    ---
-    deployments:
-      - modules:
-          - path: myk8smodule
-          - path: anotherk8smodule
-        module_options:  # shared between all modules in deployment
-          kubectl_version:
-            "*": 1.14.5  # applies to all environments
-            # prod: 1.13.0  # can also be specified for a specific environment
-
-
-Without a version specified, Runway will fallback to whatever ``kubectl``
-it finds first in your PATH.
-
-
-Part 3: Setting KUBECONFIG location
--------------------------------------
-
-If using a non-default kubeconfig location, you can provide it using Runway's
-option for setting environment variables. This can be set as a relative path
-or an absolute one. E.g.::
-
-    ---
-    deployments:
-      - modules:
-          - path: myk8smodule
-            options:
-              kubectl_version:
-      - regions:
-          - us-east-1
-    env_vars:
-      staging:
-        KUBECONFIG:
-          - .kube
-          - staging
-          - config
-      prod:
-        KUBECONFIG:
-          - .kube
-          - prod
-          - config
-
-(this would set ``KUBECONFIG`` to ``<path_to_runway.yml>/.kube/staging/config``
-in the staging environment)
