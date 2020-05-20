@@ -11,7 +11,7 @@ deployments:
       options:
         build_output: build
         build_steps:
-          - yarn install
-          - yarn run build
+          - npm install
+          - npm run build
     regions:
       - us-east-1
