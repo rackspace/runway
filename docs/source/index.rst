@@ -94,6 +94,7 @@ Kubernetes manifests can be deployed via Runway offering an ideal way to handle 
 
 - `Configuration <kubernetes/configuration.html>`__
 - `Directory Structure <kubernetes/directory_structure.html>`__
+- `Examples <kubernetes/examples.html>`__
 - `Advanced Features <kubernetes/advanced_features.html>`__
 
 .. toctree::
@@ -103,6 +104,7 @@ Kubernetes manifests can be deployed via Runway offering an ideal way to handle 
 
    kubernetes/configuration
    kubernetes/directory_structure
+   kubernetes/examples
    kubernetes/advanced_features
 
 
