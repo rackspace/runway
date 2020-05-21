@@ -189,7 +189,11 @@ napoleon_google_docstring = True
 napoleon_include_init_with_doc = False
 
 # -- Options for sphinxcontrib.apidoc  ----------------------------------------
-apidoc_excluded_paths = ['cfngin/commands', 'templates']
+apidoc_excluded_paths = [
+    'cfngin/commands',
+    'hooks/staticsite/auth_at_edge/templates',
+    'templates'
+]
 apidoc_extra_args = [
     f"--templatedir={os.path.join(DOC_SRC, '_templates/apidocs')}"
 ]

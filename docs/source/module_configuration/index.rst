@@ -9,4 +9,3 @@ Module Configurations
 
     custom
     kubernetes
-    staticsite
