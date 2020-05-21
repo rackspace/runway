@@ -62,6 +62,8 @@ This means that the CDK must be included as a dev dependency in the **package.js
    cdk/advanced_features
 
 
+.. _mod-cfn:
+
 CloudFormation & Troposphere
 ============================
 
@@ -129,6 +131,36 @@ This means that Serverless must be included as a dev dependency in the **package
    serverless/configuration
    serverless/directory_structure
    serverless/advanced_features
+
+
+.. _mod-staticsite:
+
+Static Site
+===========
+
+This module type performs idempotent deployments of static websites.
+It combines CloudFormation stacks (for S3 buckets & CloudFront Distribution) with additional logic to build & sync the sites.
+
+A start-to-finish example walkthrough is available in the :ref:`Conduit quickstart<qs-conduit>`.
+
+.. note::
+  The CloudFront Distribution that is created by default can take a significant amount of time to spin up on initial deploy (5 to 60 minutes is not abnormal).
+  Incorporating CloudFront with a static site is a common best practice, however, if you are working on a development project it may benefit you to add the :ref:`staticsite_cf_disable <staticsite_cf_disable>` parameter.
+
+- `Configuration <staticsite/configuration.html>`__
+- `Directory Structure <staticsite/directory_structure.html>`__
+- `Examples <staticsite/examples.html>`__
+- `Advanced Features <staticsite/advanced_features.html>`__
+
+.. toctree::
+   :caption: Static Site
+   :maxdepth: 2
+   :hidden:
+
+   staticsite/configuration
+   staticsite/directory_structure
+   staticsite/examples
+   staticsite/advanced_features
 
 
 .. _mod-tf:
