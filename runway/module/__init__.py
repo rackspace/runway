@@ -1,4 +1,5 @@
 """Runway module module."""
+from distutils.version import LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
 import logging
 import os
 import platform
@@ -39,6 +40,15 @@ def generate_node_command(command, command_opts, path):
             cmd_list = [NPX_BIN,
                         '-c',
                         "%s %s" % (command, ' '.join(command_opts))]
+        # Python 3.8+ removes the silly need for redundant quoting
+        # https://docs.python.org/3/whatsnew/3.8.html#optimizations
+        elif platform.libc_ver()[1] and (
+                LooseVersion(platform.libc_ver()[1]) >= LooseVersion('2.24')) and (
+                    LooseVersion('.'.join([str(i) for i in sys.version_info[0:2]])) >=
+                    LooseVersion('3.8')):
+            cmd_list = [NPX_BIN,
+                        '-c',
+                        "'%s %s'" % (command, ' '.join(command_opts))]
         else:
             # The nested app-through-npx-via-subprocess command invocation
             # requires this redundant quoting
