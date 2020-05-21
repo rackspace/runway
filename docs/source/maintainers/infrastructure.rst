@@ -39,10 +39,14 @@ onica-public-prod
 .. rubric:: Resources
 
 - public S3 bucket that houses build artifacts
+
   - binary executables
+
 - IAM user used by GitHub Actions & it's policies
+
   - able to sync with the artifact bucket
   - add entries to a DynamoDB table for the ``oni.ca`` URL shortener app
+
     - path to download the binary executables from S3
 
 
