@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `runway test` will now return a non-zero exit code if any non-required tests failed
 - `static-react` sample uses npm instead of yarn
 
+### Fixed
+- the friendly error when npm can't be found has returned
+
 ## [1.8.0] - 2020-05-16
 ### Fixed
 - the value of `environments` is once again used to determine if a serverless module should be skipped
