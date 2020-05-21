@@ -161,7 +161,9 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
    terraform/directory_structure
    terraform/advanced_features
 
+
 ----
+
 
 .. toctree::
    :caption: Developers Guide
@@ -185,7 +187,6 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
    :maxdepth: 2
    :hidden:
 
-   self/mod-tf
    License <license>
    terminology
 
