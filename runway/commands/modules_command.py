@@ -314,6 +314,28 @@ def validate_environment(module_name, env_def, env_vars):
                     'expected type of bool, list, or str' % type(env_def))
 
 
+def strict_environment(context, env_def):
+    """Assess environments when running in strict mode."""
+    if isinstance(env_def, bool):
+        return env_def
+    if not env_def:  # falsy value but not False
+        return None  # None should be treated differently
+
+    env = env_def.get(context.env_name, False)
+    if isinstance(env, bool):
+        return env
+
+    account_id = context.account_id
+    accepted_values = ['{}/{}'.format(account_id, context.env_region),
+                       account_id, context.env_region, int(account_id)]
+
+    if isinstance(env, (int, six.string_types)):
+        return env in accepted_values
+    if isinstance(env, list):
+        return any(val in env for val in accepted_values)
+    return False
+
+
 class ModulesCommand(RunwayCommand):
     """Env deployment class."""
 
@@ -329,6 +351,9 @@ class ModulesCommand(RunwayCommand):
                           env_vars=os.environ.copy(),
                           command=command)
         context.env_vars['RUNWAYCONFIG'] = self.runway_config_path
+
+        if self.runway_config.strict:
+            LOGGER.warning('!!!! STRICT MODE IS ENABLED !!!!')
 
         # set default names if needed
         for i, deployment in enumerate(deployments):
@@ -543,10 +568,18 @@ class ModulesCommand(RunwayCommand):
         module_opts = merge_dicts(module_opts, module.data)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
+        # leave environments alone for legacy support and strict
         module_opts['environment'] = module_opts['environments'].get(
             context.env_name, {}
         )
-        if isinstance(module_opts['environment'], dict):  # legacy support
+        if self.runway_config.strict:
+            module_opts['environment'] = strict_environment(
+                context, module_opts['environments']
+            )
+            if module_opts['environment'] is False:  # ignore None
+                LOGGER.info('------- Skipping module "%s" -------', module.name)
+                return
+        elif isinstance(module_opts['environment'], dict):  # legacy support
             module_opts['parameters'].update(module_opts['environment'])
             if module_opts['parameters']:
                 # deploy if env is empty but params are provided

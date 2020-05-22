@@ -1055,6 +1055,7 @@ class Config(ConfigComponent):
 
     def __init__(self,
                  deployments,  # type: List[Dict[str, Any]]
+                 strict=False,  # type: bool
                  tests=None,  # type: List[Dict[str, Any]]
                  ignore_git_branch=False,  # type: bool
                  variables=None  # type: Optional[Dict[str, Any]]
@@ -1067,6 +1068,7 @@ class Config(ConfigComponent):
             deployments (List[Dict[str, Any]]): A list of
                 :class:`deployments<runway.config.DeploymentDefinition>`
                 that are processed in the order they are defined.
+            strict (bool): **BETA FEATURE** Enable strict configuration.
             tests (Optional[List[Dict[str, Any]]]): A list of
                 :class:`tests<runway.config.TestDefinition>` that are
                 processed in the order they are defined.
@@ -1102,6 +1104,7 @@ class Config(ConfigComponent):
 
         """
         self.deployments = DeploymentDefinition.from_list(deployments)
+        self.strict = strict
         self.tests = TestDefinition.from_list(tests)
         self.ignore_git_branch = ignore_git_branch
 
@@ -1120,6 +1123,7 @@ class Config(ConfigComponent):
         with open(config_path) as data_file:
             config_file = yaml.safe_load(data_file)
             result = Config(config_file.pop('deployments'),
+                            config_file.pop('strict', False),
                             config_file.pop('tests', []),
                             config_file.pop('ignore_git_branch',
                                             config_file.pop(
