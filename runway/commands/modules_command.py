@@ -1,27 +1,25 @@
 """Runway env module."""
 from __future__ import print_function
 
-# pylint trips up on this in virtualenv
-# https://github.com/PyCQA/pylint/issues/73
-from distutils.util import strtobool  # noqa pylint: disable=no-name-in-module,import-error
-
 import copy
 import logging
 import os
 import sys
-
 from builtins import input
+# pylint trips up on this in virtualenv
+# https://github.com/PyCQA/pylint/issues/73
+from distutils.util import \
+    strtobool  # noqa pylint: disable=no-name-in-module,import-error
 
 import boto3
 import six
 import yaml
 
-from .runway_command import RunwayCommand, get_env
 from ..context import Context
 from ..path import Path
 from ..runway_module_type import RunwayModuleType
-from ..util import (change_dir, extract_boto_args_from_env, merge_dicts,
-                    merge_nested_environment_dicts)
+from ..util import change_dir, merge_dicts, merge_nested_environment_dicts
+from .runway_command import RunwayCommand, get_env
 
 if sys.version_info[0] > 2:
     import concurrent.futures
@@ -266,74 +264,68 @@ def validate_account_credentials(deployment, context):
                                account_alias)
 
 
-def validate_environment(module_name, env_def, env_vars):
+def validate_environment(context, module, env_def, strict=False):
     """Check if an environment should be deployed to.
 
     Args:
-        module_name (str): Name of the module being validated.
-        env_def (Union[bool, str, List[str]]): Environment definition from
-            the config file. Can be bool, string of "$ACCOUNT_ID/$REGION",
-            or a list of strings.
-        env_vars (Dict[str, str]): Environment variables.
+        context (Context): Runway context object.
+        module (ModuleDefinition): Runway module definition.
+        env_def (Union[bool, Dict[str, Union[bool, str, List[str]]], List[str]]):
+            Environment definition. This should usually be the merged dict of
+            a deployment and module environment definition but will recursively
+            handle nested portions of the definition.
+        strict (bool): Wither to consider the current environment missing from
+            definition as a failure.
 
     Returns:
-        Booleon value of wether to deploy or not.
+        Union[bool, NoneType]: Booleon value of wether to deploy or not.
 
     """
-    if isinstance(env_def, bool):  # explicit enable or disable
-        if env_def:
-            LOGGER.debug('Module \'%s\' explicitly enabled', module_name)
-            return True
-
-        LOGGER.info('')
-        LOGGER.info(
-            '---- Skipping module \'%s\'; explicitly disabled ----------',
-            module_name
-        )
-        return False
-
-    if isinstance(env_def, (list, six.string_types)):
-        boto_args = extract_boto_args_from_env(env_vars)
-        sts_client = boto3.client('sts', **boto_args)
-        current_env = '{}/{}'.format(
-            sts_client.get_caller_identity()['Account'],
-            env_vars['AWS_DEFAULT_REGION']
-        )
-
-        if current_env in env_def:
-            LOGGER.debug('Current environment \'%s\' found in %s for module \'%s\'',
-                         current_env, str(env_def), module_name)
-            return True
-        LOGGER.info('')
-        LOGGER.info(
-            '---- Skipping module \'%s\'; account_id/region mismatch ---',
-            module_name
-        )
-        return False
-    raise TypeError('env_def of type "%s" provided to validate_environment; '
-                    'expected type of bool, list, or str' % type(env_def))
-
-
-def strict_environment(context, env_def):
-    """Assess environments when running in strict mode."""
-    if isinstance(env_def, bool):
+    if isinstance(env_def, bool) or not env_def:
+        if env_def is True:
+            LOGGER.debug('%s: explicitly enabled', module.name)
+        elif env_def is False:
+            LOGGER.info('')
+            LOGGER.info('%s: skipped; explicitly disabled', module.name)
+        else:
+            LOGGER.debug('%s: environment not defined; '
+                         'module will determine deployment', module.name)
+            env_def = None
         return env_def
-    if not env_def:  # falsy value but not False
-        return None  # None should be treated differently
-
-    env = env_def.get(context.env_name, False)
-    if isinstance(env, bool):
-        return env
+    if isinstance(env_def, dict):
+        if context.env_name not in env_def:
+            if strict:
+                LOGGER.info('%s: skipped; environment not in definition',
+                            module.name)
+                return False
+            LOGGER.info('%s: environment not in definition; '
+                        'module will determine deployment', module.name)
+            return None
+        return validate_environment(context, module,
+                                    env_def.get(context.env_name, False))
 
     account_id = context.account_id
     accepted_values = ['{}/{}'.format(account_id, context.env_region),
                        account_id, context.env_region, int(account_id)]
+    result = False
 
-    if isinstance(env, (int, six.string_types)):
-        return env in accepted_values
-    if isinstance(env, list):
-        return any(val in env for val in accepted_values)
-    return False
+    if isinstance(env_def, (int, six.string_types)):
+        LOGGER.debug('%s: checking if "%s" in %s', module.name, env_def,
+                     accepted_values)
+        result = env_def in accepted_values
+    elif isinstance(env_def, list):
+        LOGGER.debug('%s: checking if any(%s in %s)', module.name, env_def,
+                     accepted_values)
+        result = any(val in env_def for val in accepted_values)
+    else:
+        LOGGER.warning('%s: skipped; unsupported type for environments "%s"',
+                       module.name, type(env_def))
+        return False
+
+    if result is False:
+        LOGGER.info('')
+        LOGGER.info('%s: skipped; account_id/region mismatch', module.name)
+    return result
 
 
 class ModulesCommand(RunwayCommand):
@@ -568,28 +560,23 @@ class ModulesCommand(RunwayCommand):
         module_opts = merge_dicts(module_opts, module.data)
         module_opts = load_module_opts_from_file(path.module_root, module_opts)
 
-        # leave environments alone for legacy support and strict
         module_opts['environment'] = module_opts['environments'].get(
             context.env_name, {}
         )
-        if self.runway_config.strict:
-            module_opts['environment'] = strict_environment(
-                context, module_opts['environments']
-            )
-            if module_opts['environment'] is False:  # ignore None
-                LOGGER.info('------- Skipping module "%s" -------', module.name)
-                return
-        elif isinstance(module_opts['environment'], dict):  # legacy support
+        if isinstance(module_opts['environment'], dict) and not self.runway_config.strict:
             module_opts['parameters'].update(module_opts['environment'])
             if module_opts['parameters']:
                 # deploy if env is empty but params are provided
                 module_opts['environment'] = True
         else:
-            if not validate_environment(module.name,
-                                        module_opts['environment'],
-                                        context.env_vars):
+            module_opts['environment'] = validate_environment(
+                context=context,
+                module=module,
+                env_def=module_opts['environments'],
+                strict=self.runway_config.strict
+            )
+            if module_opts['environment'] is False:  # ignore None
                 return  # skip if env validation fails
-            module_opts['environment'] = True
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
