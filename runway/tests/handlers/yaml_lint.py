@@ -59,6 +59,5 @@ class YamllintHandler(TestHandler):
         yamllint_options = ["--config-file=%s" % yamllint_config]
         yamllint_options.extend(cls.get_yamllint_options(base_dir))
 
-        print(yamllint_options)
         with argv(*['yamllint'] + yamllint_options):
             runpy.run_module('yamllint', run_name='__main__')
