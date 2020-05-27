@@ -12,7 +12,7 @@ import sys
 from six import string_types
 import yaml
 
-from .util import MutableMap
+from .util import MutableMap, cached_property
 from .variables import Variable
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
@@ -421,6 +421,61 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                     name, ', '.join(mod.keys())
                 )
         return results
+
+
+class FutureDefinition(MutableMap):
+    """Opt-in to future default functionality before the next major release.
+
+    Availability of these toggles will be removed at each major release as
+    the functionality will then be considered current.
+
+    Lookups are not supported as these values should be static.
+
+    """
+
+    def __init__(self, *_args, strict_environments=False, **kwargs):
+        # type: (Any, bool, bool) -> None
+        """Instantiate class.
+
+        Keyword Args:
+            strict_environments (bool): Either to enable strict environments.
+
+        """
+        self.strict_environments = strict_environments
+
+        if kwargs:
+            LOGGER.warning(
+                'Invalid key(s) found in "future" have been ignored: %s',
+                ', '.join(kwargs.keys())
+            )
+
+    @cached_property
+    def enabled(self):
+        # type: () -> List[str]
+        """List all enabled future functionality.
+
+        Returns:
+            List[str]: All functionality that is enabled.
+
+        """
+        return [k for k, v in self.data.items() if v]
+
+    def __setattr__(self, key, value):
+        # type: (str, bool) -> None
+        """Set attribute to a bool value only.
+
+        Args:
+            key (str): Attribute name.
+            value (bool): Attribute value.
+
+        Raises:
+            TypeError: Value is not bool.
+
+        """
+        if isinstance(value, bool):
+            return super(FutureDefinition, self).__setattr__(key, value)
+        raise TypeError('unsupported type {} for future.{}; '
+                        'must be of type "bool"'.format(type(value), key))
 
 
 class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
@@ -1055,7 +1110,7 @@ class Config(ConfigComponent):
 
     def __init__(self,
                  deployments,  # type: List[Dict[str, Any]]
-                 strict=False,  # type: bool
+                 future=None,  # type: Dict[str, bool]
                  tests=None,  # type: List[Dict[str, Any]]
                  ignore_git_branch=False,  # type: bool
                  variables=None  # type: Optional[Dict[str, Any]]
@@ -1068,7 +1123,8 @@ class Config(ConfigComponent):
             deployments (List[Dict[str, Any]]): A list of
                 :class:`deployments<runway.config.DeploymentDefinition>`
                 that are processed in the order they are defined.
-            strict (bool): **BETA FEATURE** Enable strict configuration.
+            future (Dict[str, bool]): Enable future functionality before
+                it is made standard in the next major release.
             tests (Optional[List[Dict[str, Any]]]): A list of
                 :class:`tests<runway.config.TestDefinition>` that are
                 processed in the order they are defined.
@@ -1103,8 +1159,9 @@ class Config(ConfigComponent):
             - :class:`test<runway.config.TestDefinition>`
 
         """
+        future = future or {}
         self.deployments = DeploymentDefinition.from_list(deployments)
-        self.strict = strict
+        self.future = FutureDefinition(**future)
         self.tests = TestDefinition.from_list(tests)
         self.ignore_git_branch = ignore_git_branch
 
@@ -1123,7 +1180,7 @@ class Config(ConfigComponent):
         with open(config_path) as data_file:
             config_file = yaml.safe_load(data_file)
             result = Config(config_file.pop('deployments'),
-                            config_file.pop('strict', False),
+                            config_file.pop('future', {}),
                             config_file.pop('tests', []),
                             config_file.pop('ignore_git_branch',
                                             config_file.pop(

@@ -301,7 +301,8 @@ def validate_environment(context, module, env_def, strict=False):
                         'module will determine deployment', module.name)
             return None
         return validate_environment(context, module,
-                                    env_def.get(context.env_name, False))
+                                    env_def.get(context.env_name, False),
+                                    strict)
 
     account_id = context.account_id
     accepted_values = ['{}/{}'.format(account_id, context.env_region),
@@ -343,8 +344,10 @@ class ModulesCommand(RunwayCommand):
                           command=command)
         context.env_vars['RUNWAYCONFIG'] = self.runway_config_path
 
-        if self.runway_config.strict:
-            LOGGER.warning('!!!! STRICT MODE IS ENABLED !!!!')
+        if self.runway_config.future.enabled:
+            LOGGER.info('Future functionality enabled: %s',
+                        ', '.join(self.runway_config.future.enabled))
+            LOGGER.info('')
 
         # set default names if needed
         for i, deployment in enumerate(deployments):
@@ -562,7 +565,8 @@ class ModulesCommand(RunwayCommand):
         module_opts['environment'] = module_opts['environments'].get(
             context.env_name, {}
         )
-        if isinstance(module_opts['environment'], dict) and not self.runway_config.strict:
+        if isinstance(module_opts['environment'], dict) and \
+                not self.runway_config.future.strict_environments:
             module_opts['parameters'].update(module_opts['environment'])
             if module_opts['parameters']:
                 # deploy if env is empty but params are provided
@@ -572,7 +576,7 @@ class ModulesCommand(RunwayCommand):
                 context=context,
                 module=module,
                 env_def=module_opts['environments'],
-                strict=self.runway_config.strict
+                strict=self.runway_config.future.strict_environments
             )
             if module_opts['environment'] is False:  # ignore None
                 return  # skip if env validation fails
