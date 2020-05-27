@@ -12,39 +12,127 @@
 
 .. _runway-config:
 
+##################
 Runway Config File
-==================
+##################
 
+
+***********************
 Top-Level Configuration
-^^^^^^^^^^^^^^^^^^^^^^^
+***********************
 
 .. autoclass:: runway.config.Config
 
+
 .. _runway-deployment:
 
+**********
 Deployment
-^^^^^^^^^^
+**********
 
 .. autoclass:: runway.config.DeploymentDefinition
 
+
+.. _runway-future:
+
+******
+Future
+******
+
+Toggles to opt-in to future, potentially backward compatibility breaking functionality before it is made standard in the next major release.
+
+Availability of these toggles will be removed at each major release as the functionality will then be made standard.
+
+**static_environments (bool)**
+  When enabled, handling of ``environments`` for Deployment_ and Module_ definitions is changed to prevent processing of modules when the current environment is not defined in the Runway config file.
+
+  If ``environments`` is defined and the current :ref:`deploy environment <term-deploy-env>` is not in the definition, the module will be skipped.
+  If ``environments`` is not defined, the module will be processed. This does not mean that action will be taken but that the type of the module will then determine if action will be taken.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+      future:
+        static_environments: true
+
+      deployments:
+        - environments:
+            prod:
+              - 111111111111/us-east-1
+              - 111111111111/us-west-2
+            dev:
+              - 222222222222
+          modules:
+            - path: sampleapp-01.cfn
+            - path: sampleapp-02.cfn
+              environments:
+                dev: 222222222222/us-east-1
+                feature/something-new: true
+          regions: &regions
+            - ca-central-1
+            - us-east-1
+            - us-west-2
+        - modules:
+            - path: sampleapp-03.cfn
+            - path: sampleapp-04.cfn
+              environments:
+                dev-ca:
+                  - ca-cental-1
+          regions: *regions
+
+  Given the above Runway configuration file, the following will occur for each module:
+
+  **sampleapp-01.cfn**
+    Processed if:
+
+    - environment is **prod** and AWS account ID is **111111111111** and region is (**us-east-1** or **us-west-2**)
+    - environment is **dev** and AWS account ID is **222222222222** and region is *anything*
+
+    All other combinations will result in the module being skipped.
+
+  **sampleapp-02.cfn**
+    Processed if:
+
+    - environment is **prod** and AWS account ID is **111111111111** and region is (**us-east-1** or **us-west-2**)
+    - environment is **dev** and AWS account ID is **222222222222** and region is **us-east-1**
+    - environment is **feature/something-new** and AWS account ID is *anything* and region is *anything*
+
+    All other combinations will result in the module being skipped.
+
+  **sampleapp-03.cfn**
+    Processed if:
+
+    - environment is *anything* and AWS account ID is *anything* and region is *anything*
+
+  **sampleapp-04.cfn**
+    Processed if:
+
+    - environment is **dev-ca** and AWS account ID is *anything* and region is **ca-central-1**
+
+    All other combinations will result in the module being skipped.
+
+  .. versionadded:: 1.9.0
+
+
 .. _runway-module:
 
+******
 Module
-^^^^^^
+******
 
 .. autoclass:: runway.config.ModuleDefinition
 
 .. _runway-module-path:
 
 Path
-----
+====
 
 .. automodule:: runway.path.Path
 
 .. _runway-module-path-git:
 
 Git
-~~~
+---
 
 Git remote resources can be used as modules for your Runway project. Below is
 an example of git remote path.
@@ -77,28 +165,34 @@ where the module is housed
 accepts three different types of options: `commit`, `tag`, or `branch`. These
 respectively point the repository at the reference id specified.
 
+
 Type
-----
+====
 
 .. automodule:: runway.runway_module_type.RunwayModuleType
 
 
 .. _runway-test:
 
+****
 Test
-^^^^
+****
 
 .. autoclass:: runway.config.TestDefinition
 
+
 .. _runway-variables:
 
+*********
 Variables
-^^^^^^^^^
+*********
 
 .. autoclass:: runway.config.VariablesDefinition
 
+
+******
 Sample
-^^^^^^
+******
 
 .. rubric:: runway.yml
 .. code-block:: yaml

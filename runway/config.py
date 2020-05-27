@@ -424,7 +424,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
 
 class FutureDefinition(MutableMap):
-    """Opt-in to future default functionality before the next major release.
+    """Opt-in to future functionality before the next major release.
 
     Availability of these toggles will be removed at each major release as
     the functionality will then be considered current.
@@ -438,7 +438,7 @@ class FutureDefinition(MutableMap):
         """Instantiate class.
 
         Keyword Args:
-            strict_environments (bool): Either to enable strict environments.
+            strict_environments (bool): Wither to enable strict environments.
 
         """
         self.strict_environments = strict_environments
