@@ -8,8 +8,7 @@ import sys
 from builtins import input
 # pylint trips up on this in virtualenv
 # https://github.com/PyCQA/pylint/issues/73
-from distutils.util import \
-    strtobool  # noqa pylint: disable=no-name-in-module,import-error
+from distutils.util import strtobool  # noqa pylint: disable=E
 
 import boto3
 import six
