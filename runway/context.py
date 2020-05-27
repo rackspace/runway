@@ -60,7 +60,7 @@ class Context(object):
 
     @property
     def account_id(self):
-        """Gets the AccountId of the current AWS account.
+        """Get the AccountId of the current AWS account.
 
         Returns:
             str: AWS Account ID.
