@@ -60,19 +60,19 @@ def Entrypoint(dist, group, name, **kwargs):  # noqa
 # files that are not explicitly imported but consumed at runtime
 # need to be included as data_files.
 data_files = [
-    (os.path.join(CLI_PATH, 'templates'), './runway/templates/'),
-    (os.path.join(CLI_PATH, 'blueprints'), './runway/blueprints/'),
-    (os.path.join(CLI_PATH, 'hooks'), './runway/hooks/')
+    (os.path.join(CLI_PATH, 'templates'), './runway/templates'),
+    (os.path.join(CLI_PATH, 'blueprints'), './runway/blueprints'),
+    (os.path.join(CLI_PATH, 'hooks'), './runway/hooks')
 ]
-
 data_files.append(('{}/yamllint/conf'.format(get_distribution('yamllint').location),
                    'yamllint/conf/'))
-data_files.append(('{}/cfnlint/data'.format(get_distribution('cfn-lint').location),
-                   'cfnlint/data/'))
+data_files.append(('{}/cfnlint/rules'.format(get_distribution('cfn-lint').location),
+                   'cfnlint/rules/'))
 data_files.append(('{}/botocore/data'.format(get_distribution('botocore').location),
                    'botocore/data/'))
 data_files.append(('{}/awscli/data'.format(get_distribution('awscli').location),
                    'awscli/data/'))
+data_files.extend(collect_data_files('cfnlint'))
 data_files.extend(collect_data_files('distutils'))
 data_files.extend(collect_data_files('pip'))
 data_files.extend(collect_data_files('wheel'))
@@ -91,6 +91,8 @@ import awscli  # noqa
 import botocore  # noqa
 import pip  # noqa
 import wheel  # noqa
+import yamllint  # noqa
+import cfnlint  # noqa
 hiddenimports.extend(get_submodules(runway))
 hiddenimports.extend(get_submodules(troposphere))
 hiddenimports.extend(get_submodules(awacs))
@@ -99,6 +101,8 @@ hiddenimports.extend(get_submodules(botocore))
 hiddenimports.extend(get_submodules(pip))
 hiddenimports.extend(get_submodules(wheel))
 hiddenimports.extend(get_submodules(distutils))
+hiddenimports.extend(get_submodules(yamllint))
+hiddenimports.extend(get_submodules(cfnlint))
 # needed due to pkg_resources dropping python2 support
 # can be removed on the next pyinstaller release
 # https://github.com/pypa/setuptools/issues/1963#issuecomment-582084099
