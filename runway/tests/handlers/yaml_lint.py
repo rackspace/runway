@@ -30,7 +30,7 @@ class YamllintHandler(TestHandler):
 
     @classmethod
     def get_yamllint_options(cls, path):
-        # type: (str, bool) -> List[str]
+        # type: (str) -> List[str]
         """Return yamllint option list."""
         yamllint_options = []
 
