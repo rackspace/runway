@@ -433,8 +433,8 @@ class FutureDefinition(MutableMap):
 
     """
 
-    def __init__(self, *_args, strict_environments=False, **kwargs):
-        # type: (Any, bool, bool) -> None
+    def __init__(self, strict_environments=False, **kwargs):
+        # type: (bool, bool) -> None
         """Instantiate class.
 
         Keyword Args:
