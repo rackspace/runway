@@ -184,6 +184,30 @@ class MockProcess(object):  # pylint: disable=too-few-public-methods
         return io_base
 
 
+class MockRunwayConfig(MutableMap):
+    """Mock Runway config object."""
+
+    def __init__(self, **kwargs):
+        """Instantiate class."""
+        super(MockRunwayConfig, self).__init__()
+        self._kwargs = kwargs
+        self.deployments = []
+        self.tests = []
+        self.ignore_git_branch = False
+        self.variables = MutableMap()
+
+        # classmethods
+        self.find_config_file = MagicMock(name='find_config_file',
+                                          return_value='./runway.yml')
+        self.load_from_file = MagicMock(name='load_from_file',
+                                        return_value=self)
+
+    def __call__(self, **kwargs):
+        """Mock call to return self."""
+        self._kwargs = kwargs
+        return self
+
+
 class MockRunwayContext(RunwayContext):
     """Subclass Runway context object for tests."""
 

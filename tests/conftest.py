@@ -1,4 +1,5 @@
 """Pytest fixtures and plugins."""
+# pylint: disable=redefined-outer-name
 import logging
 import os
 from typing import Dict, Optional
@@ -6,7 +7,7 @@ from typing import Dict, Optional
 import pytest
 import yaml
 
-from .factories import MockCFNginContext, MockRunwayContext
+from .factories import MockCFNginContext, MockRunwayConfig, MockRunwayContext
 
 LOG = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ def fixture_dir():
 
 
 @pytest.fixture(scope='module')
-def yaml_fixtures(request, fixture_dir):  # pylint: disable=redefined-outer-name
+def yaml_fixtures(request, fixture_dir):
     """Load test fixture yaml files.
 
     Uses a list of file paths within the fixture directory loaded from the
@@ -101,7 +102,7 @@ def _override_env_vars(overrides):
 
 
 @pytest.fixture(scope='function')
-def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
+def cfngin_context(runway_context):
     """Create a mock CFNgin context object."""
     return MockCFNginContext(environment={},
                              boto3_credentials=runway_context.boto3_credentials,
@@ -112,6 +113,21 @@ def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
 def patch_time(monkeypatch):
     """Patch built-in time object."""
     monkeypatch.setattr('time.sleep', lambda s: None)
+
+
+@pytest.fixture(scope='function')
+def patch_runway_config(request, monkeypatch, runway_config):
+    """Patch Runway config and return a mock config object."""
+    patch_path = getattr(request.module, 'PATCH_RUNWAY_CONFIG', None)
+    if patch_path:
+        monkeypatch.setattr(patch_path, runway_config)
+    return runway_config
+
+
+@pytest.fixture(scope='function')
+def runway_config(request, monkeypatch):
+    """Create a mock runway config object."""
+    return MockRunwayConfig()
 
 
 @pytest.fixture(scope='function')
