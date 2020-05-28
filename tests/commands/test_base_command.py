@@ -8,8 +8,8 @@ from mock import call
 from runway.commands.base_command import BaseCommand
 from runway.util import MutableMap
 
-MOD = 'runway.commands.base_command'
-PATCH_RUNWAY_CONFIG = MOD + '.Config'
+MODULE = 'runway.commands.base_command'
+PATCH_RUNWAY_CONFIG = MODULE + '.Config'
 
 
 class TestBaseCommand(object):

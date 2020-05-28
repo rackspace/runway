@@ -11,7 +11,7 @@ class BaseCommand(object):
 
     Attributes:
         DEPRECATION_MSG (str): Template for command deprecation messages.
-        SKIP_FIND_CONFIG (bool): Wither to skip looking for a Runway config file.
+        SKIP_FIND_CONFIG (bool): Wether to skip looking for a Runway config file.
 
     """
 
