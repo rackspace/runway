@@ -2,7 +2,7 @@
 # pylint: disable=redefined-outer-name
 import logging
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 import pytest
 import yaml
@@ -70,37 +70,6 @@ def yaml_fixtures(request, fixture_dir):
     return result
 
 
-def _override_env_vars(overrides):
-    # type: (Dict[str, Optional[str]]) -> Dict[str, str]
-    """Use a dict to override os.environ values.
-
-    Ensure AWS SDK finds some (bogus) credentials in the environment and
-    doesn't try to use other providers.
-
-    """
-    overrides = {
-        'AWS_ACCESS_KEY_ID': 'testing',
-        'AWS_SECRET_ACCESS_KEY': 'testing',
-        'AWS_DEFAULT_REGION': 'us-east-1'
-    }
-    saved_env = {}
-    for key, value in overrides.items():
-        LOG.info('Overriding env var: {}={}'.format(key, value))
-        saved_env[key] = os.environ.get(key, None)
-        os.environ[key] = value
-
-    yield
-
-    for key, value in saved_env.items():
-        LOG.info('Restoring saved env var: {}={}'.format(key, value))
-        if value is None:
-            del os.environ[key]
-        else:
-            os.environ[key] = value
-
-    saved_env.clear()
-
-
 @pytest.fixture(scope='function')
 def cfngin_context(runway_context):
     """Create a mock CFNgin context object."""
@@ -125,7 +94,7 @@ def patch_runway_config(request, monkeypatch, runway_config):
 
 
 @pytest.fixture(scope='function')
-def runway_config(request, monkeypatch):
+def runway_config():
     """Create a mock runway config object."""
     return MockRunwayConfig()
 
