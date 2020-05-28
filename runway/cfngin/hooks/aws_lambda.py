@@ -521,8 +521,19 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
             pip_cmd = [python_path or sys.executable, '-m',
                        'pip', 'install',
                        '--target', tmpdir,
-                       '--requirement', tmp_req]
+                       '--requirement', tmp_req,
+                       '--no-color']  # disable color for potential errors
 
+            LOGGER.info(
+                'The following output from pip may include incompatibility errors. '
+                'For the most part, these can be ignored unless you are '
+                'experiencing issues with the end result. '
+                'Because of how pip handles dependencies, '
+                'these errors can be reported for incompatibility between '
+                'packages installed in your current environment and those '
+                'being installed to the targeted directory even if there are '
+                'no issues in the target directory.'
+            )
             # Pyinstaller build or explicit python path
             if getattr(sys, 'frozen', False) and not python_path:
                 script_contents = os.linesep.join([

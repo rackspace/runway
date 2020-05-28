@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `-no-color`/`--no-color` option automatically added to cdk, npm, sls, and tf commands
   - looks at `RUNWAY_COLORIZE` env var for an explicit enable/disable
   - if not set, checks `sys.stdout.isatty()` to determine if option should be provided
+- notice about *false alarm* compatibility errors when using pip with the aws_lambda hook
 
 ### Changed
 - a@e check_auth will now try to refresh tokens 5 minutes before expiration instead of waiting for it to expire
 - `runway test` will now return a non-zero exit code if any non-required tests failed
 - `static-react` sample uses npm instead of yarn
 - `yamllint` is now invoked using `runpy` instead of using `runway run-python`
+- aws_lambda hook will no longer use colorized pip output so its *false alarm* compatibility errors are less menacing
 
 ### Fixed
 - issue where `yamllint` and `cfnlint` could not be imported/executed from the Pyinstaller executables
