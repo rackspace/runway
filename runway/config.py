@@ -438,7 +438,7 @@ class FutureDefinition(MutableMap):
         """Instantiate class.
 
         Keyword Args:
-            strict_environments (bool): Wither to enable strict environments.
+            strict_environments (bool): Wether to enable strict environments.
 
         """
         self.strict_environments = strict_environments

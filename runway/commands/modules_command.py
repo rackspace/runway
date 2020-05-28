@@ -273,7 +273,7 @@ def validate_environment(context, module, env_def, strict=False):
             Environment definition. This should usually be the merged dict of
             a deployment and module environment definition but will recursively
             handle nested portions of the definition.
-        strict (bool): Wither to consider the current environment missing from
+        strict (bool): Wether to consider the current environment missing from
             definition as a failure.
 
     Returns:
