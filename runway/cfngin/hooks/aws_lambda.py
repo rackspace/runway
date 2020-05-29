@@ -464,6 +464,29 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
         LOGGER.info('lambda.docker: %s', log.decode().strip())
 
 
+def _pip_has_no_color_option(python_path):
+    """Return boolean on whether pip is new enough to have --no-color option.
+
+    pip v10 introduced this option.
+
+    """
+    try:
+        pip_version_string = subprocess.check_output(
+            [python_path,
+             '-c',
+             'from __future__ import print_function;'
+             'import pip;'
+             'print(pip.__version__)']
+        )
+        if sys.version_info[0] > 2 and isinstance(pip_version_string, bytes):
+            pip_version_string = pip_version_string.decode()
+        if int(pip_version_string.split('.')[0]) > 10:
+            return True
+    except (AttributeError, ValueError, subprocess.CalledProcessError):
+        LOGGER.debug('Error checking pip version; assuming it to be pre-v10')
+    return False
+
+
 def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
                  follow_symlinks=False, python_path=None,
                  requirements_files=None, use_pipenv=False, **kwargs):
@@ -521,7 +544,8 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
             pip_cmd = [python_path or sys.executable, '-m',
                        'pip', 'install',
                        '--target', tmpdir,
-                       '--requirement', tmp_req]
+                       '--requirement', tmp_req,
+                       '--no-color']
 
             # Pyinstaller build or explicit python path
             if getattr(sys, 'frozen', False) and not python_path:
@@ -537,7 +561,16 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
                                       else script_contents.decode('UTF-8'))
                 cmd = [sys.executable, 'run-python', str(tmp_script)]
             else:
+                if not _pip_has_no_color_option(pip_cmd[0]):
+                    pip_cmd.remove('--no-color')
                 cmd = pip_cmd
+
+            LOGGER.info(
+                'The following output from pip may include incompatibility errors. '
+                'These can generally be ignored (pip will erroneously warn '
+                'about conflicts between the packages in your Lambda zip and '
+                'your host system).'
+            )
 
             try:
                 subprocess.check_call(cmd)
