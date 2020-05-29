@@ -305,8 +305,10 @@ class SafeHaven(AbstractContextManager):
         self.__os_environ = deepcopy(os.environ)
         self.__sys_argv = list(sys.argv)
         # deepcopy can't pickle sys.modules and dict()/.copy() are not safe
+        # pylint: disable=unnecessary-comprehension
         self.__sys_modules = {k: v for k, v in sys.modules.items()}
         self.__sys_path = list(sys.path)
+        # more informative origin for log statements
         self.log = logging.getLogger('runway.' + self.__class__.__name__)
 
         if isinstance(argv, list):
@@ -318,6 +320,7 @@ class SafeHaven(AbstractContextManager):
 
     def reset_all(self):
         """Reset all values cached by this context manager."""
+        self.log.debug('resetting all managed values...')
         self.reset_os_environ()
         self.reset_sys_argv()
         self.reset_sys_modules()
@@ -336,6 +339,8 @@ class SafeHaven(AbstractContextManager):
     def reset_sys_modules(self):
         """Reset the value of sys.modules."""
         self.log.debug('resetting sys.modules: %s', self.__sys_modules)
+        # sys.modules can be manipulated to force reloading modules but,
+        # replacing it outright does not work as expected
         for module in list(sys.modules.keys()):
             if module not in self.__sys_modules:
                 self.log.debug('removed sys.module: {"%s": "%s"}', module,
@@ -353,10 +358,12 @@ class SafeHaven(AbstractContextManager):
             SafeHaven: Instance of the context manager.
 
         """
+        self.log.debug('entering a safe haven...')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Exit the context manager."""
+        self.log.debug('leaving the safe haven...')
         self.reset_all()
 
 
