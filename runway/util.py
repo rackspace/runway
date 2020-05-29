@@ -1,17 +1,21 @@
 """Utility functions."""
 from __future__ import print_function
-from typing import Any, Dict, Iterator, List, Optional, Union  # noqa pylint: disable=unused-import
 
-from contextlib import contextmanager
 import hashlib
 import importlib
 import json
+import logging
 import os
 import platform
 import re
 import stat
-from subprocess import check_call
 import sys
+from contextlib import AbstractContextManager, contextmanager
+from copy import deepcopy
+from subprocess import check_call
+from typing import (Any, Dict, Iterator,  # noqa pylint: disable=unused-import
+                    List, Optional, Union)
+
 import six
 
 AWS_ENV_VARS = ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
@@ -279,6 +283,81 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         # type: () -> str
         """Return string representation of the object."""
         return json.dumps(self.data)
+
+
+class SafeHaven(AbstractContextManager):
+    """Context manager that caches and resets important values on exit.
+
+    Caches and resets os.environ, sys.argv, sys.modules, and sys.path.
+
+    """
+
+    # pylint: disable=redefined-outer-name
+    def __init__(self, argv=None, environ=None, sys_path=None):
+        """Instantiate class.
+
+        Args:
+            argv (Optional[List[str]]): Override the value of sys.argv.
+            environ (Optional[Dict[str, str]]): Override the value of os.environ.
+            sys_path (Optional[List[str]]): Override the value of sys.path.
+
+        """
+        self.__os_environ = deepcopy(os.environ)
+        self.__sys_argv = list(sys.argv)
+        # deepcopy can't pickle sys.modules and dict()/.copy() are not safe
+        self.__sys_modules = {k: v for k, v in sys.modules.items()}
+        self.__sys_path = list(sys.path)
+        self.log = logging.getLogger('runway.' + self.__class__.__name__)
+
+        if isinstance(argv, list):
+            sys.argv = argv
+        if isinstance(environ, dict):
+            os.environ = environ
+        if isinstance(sys_path, list):
+            sys.path = sys_path
+
+    def reset_all(self):
+        """Reset all values cached by this context manager."""
+        self.reset_os_environ()
+        self.reset_sys_argv()
+        self.reset_sys_modules()
+        self.reset_sys_path()
+
+    def reset_os_environ(self):
+        """Reset the value of os.environ."""
+        self.log.debug('resetting os.environ: %s', self.__os_environ)
+        os.environ = self.__os_environ
+
+    def reset_sys_argv(self):
+        """Reset the value of sys.argv."""
+        self.log.debug('resetting sys.argv: %s', self.__sys_argv)
+        sys.argv = self.__sys_argv
+
+    def reset_sys_modules(self):
+        """Reset the value of sys.modules."""
+        self.log.debug('resetting sys.modules: %s', self.__sys_modules)
+        for module in list(sys.modules.keys()):
+            if module not in self.__sys_modules:
+                self.log.debug('removed sys.module: {"%s": "%s"}', module,
+                               sys.modules.pop(module))
+
+    def reset_sys_path(self):
+        """Reset the value of sys.path."""
+        self.log.debug('resetting sys.path: %s', self.__sys_path)
+        sys.path = self.__sys_path
+
+    def __enter__(self):
+        """Enter the context manager.
+
+        Returns:
+            SafeHaven: Instance of the context manager.
+
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the context manager."""
+        self.reset_all()
 
 
 @contextmanager
