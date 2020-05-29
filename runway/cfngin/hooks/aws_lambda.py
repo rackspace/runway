@@ -1,4 +1,4 @@
-"""AWS Lambda hook."""
+"""AWS Lambda hook."""  # pylint: disable=too-many-lines
 import hashlib
 import json
 import logging
