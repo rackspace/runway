@@ -467,7 +467,19 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
 def _pip_has_no_color_option(python_path):
     """Return boolean on whether pip is new enough to have --no-color option.
 
-    pip v10 introduced this option.
+    pip v10 introduced this option, and it's used to minimize the effect of
+    pip falsely indicating errors like the following:
+
+    "ERROR: awscli 1.18.64 has requirement rsa<=3.5.0,>=3.1.2, but you'll
+    have rsa 4.0 which is incompatible."
+
+    An error like that (colored in red) will appear when there's a conflict
+    between the host & target environments, which is not helpful in the
+    context of building a Lambda zip that will never interact with the
+    running python system.
+
+    Ideally this mitigation (and this function by assocation) can be removed
+    by an enhancement or replacement of pip for building the packages.
 
     """
     try:
