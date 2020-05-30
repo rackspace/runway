@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `-no-color`/`--no-color` option automatically added to cdk, npm, sls, and tf commands
   - looks at `RUNWAY_COLORIZE` env var for an explicit enable/disable
   - if not set, checks `sys.stdout.isatty()` to determine if option should be provided
+<<<<<<< HEAD
+=======
+- notice about *false alarm* compatibility errors when using pip with the aws_lambda hook
+>>>>>>> Update CHANGELOG.md
 
 ### Changed
 - a@e check_auth will now try to refresh tokens 5 minutes before expiration instead of waiting for it to expire
