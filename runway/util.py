@@ -11,7 +11,6 @@ import re
 import stat
 import sys
 from contextlib import AbstractContextManager, contextmanager
-from copy import deepcopy
 from subprocess import check_call
 from typing import (Any, Dict, Iterator,  # noqa pylint: disable=unused-import
                     List, Optional, Union)
@@ -298,11 +297,11 @@ class SafeHaven(AbstractContextManager):
 
         Args:
             argv (Optional[List[str]]): Override the value of sys.argv.
-            environ (Optional[Dict[str, str]]): Override the value of os.environ.
+            environ (Optional[Dict[str, str]]): Update os.environ.
             sys_path (Optional[List[str]]): Override the value of sys.path.
 
         """
-        self.__os_environ = deepcopy(os.environ)
+        self.__os_environ = dict(os.environ)
         self.__sys_argv = list(sys.argv)
         # deepcopy can't pickle sys.modules and dict()/.copy() are not safe
         # pylint: disable=unnecessary-comprehension
@@ -314,7 +313,7 @@ class SafeHaven(AbstractContextManager):
         if isinstance(argv, list):
             sys.argv = argv
         if isinstance(environ, dict):
-            os.environ = environ
+            os.environ.update(environ)
         if isinstance(sys_path, list):
             sys.path = sys_path
 
@@ -329,7 +328,8 @@ class SafeHaven(AbstractContextManager):
     def reset_os_environ(self):
         """Reset the value of os.environ."""
         self.log.debug('resetting os.environ: %s', self.__os_environ)
-        os.environ = self.__os_environ
+        os.environ.clear()
+        os.environ.update(self.__os_environ)
 
     def reset_sys_argv(self):
         """Reset the value of sys.argv."""
@@ -416,18 +416,16 @@ def environ(env=None, **kwargs):
     env = env or {}
     env.update(kwargs)
 
-    original_env = {key: os.getenv(key) for key in env}
+    original_env = dict(os.environ)
     os.environ.update(env)
 
     try:
+        print('Entered environ...')
         yield
     finally:
         # always restore original values
-        for key, val in original_env.items():
-            if val is None:
-                os.environ.pop(key, None)  # handle key missing
-            else:
-                os.environ[key] = val
+        os.environ.clear()
+        os.environ.update(original_env)
 
 
 def load_object_from_string(fqcn, try_reload=False):

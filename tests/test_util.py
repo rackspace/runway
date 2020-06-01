@@ -101,16 +101,17 @@ def test_argv():
     assert sys.argv == orig_expected, 'validate value returned to original'
 
 
-@patch.object(os, 'environ', {'TEST_PARAM': 'initial value'})
 def test_environ():
     """Test environ."""
-    orig_expected = {'TEST_PARAM': 'initial value'}
+    orig_expected = dict(os.environ)
     override = {'TEST_PARAM': 'override', 'new_param': 'value'}
+    override_expected = dict(orig_expected)
+    override_expected.update(override)
 
     assert os.environ == orig_expected, 'validate original value'
 
     with environ(override):
-        assert os.environ == override, 'validate override'
+        assert os.environ == override_expected, 'validate override'
         assert os.environ.pop('new_param') == 'value'
 
     assert os.environ == orig_expected, 'validate value returned to original'
