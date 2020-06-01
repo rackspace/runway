@@ -1,13 +1,16 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
+import logging
 import os
 import string
 import sys
 
+import pytest
 from mock import MagicMock, patch
+from runway.util import (MutableMap, SafeHaven, argv, environ,
+                         load_object_from_string)
 
-from runway.util import MutableMap, argv, environ, load_object_from_string
-
+MODULE = 'runway.util'
 VALUE = {
     'bool_val': False,
     'dict_val': {'test': 'success'},
@@ -85,6 +88,127 @@ class TestMutableMap:
             'default_val', 'default should be used'
         assert mute_map.find('str_val', 'default_val') == \
             VALUE['str_val'], 'default should be ignored'
+
+
+class TestSafeHaven(object):
+    """Test SafeHaven context manager."""
+
+    TEST_PARAMS = [
+        (None), ('string'), ({}), ({'TEST_KEY': 'TEST_VAL'}),
+        (['runway', 'test'])
+    ]
+
+    def test_context_manager_magic(self, caplog, monkeypatch):
+        """Test init and the attributes it sets."""
+        mock_reset_all = MagicMock()
+        caplog.set_level(logging.DEBUG, 'runway.SafeHaven')
+        monkeypatch.setattr(MODULE + '.os', MagicMock())
+        monkeypatch.setattr(MODULE + '.sys', MagicMock())
+        monkeypatch.setattr(SafeHaven, 'reset_all', mock_reset_all)
+
+        with SafeHaven() as result:
+            assert isinstance(result, SafeHaven)
+        mock_reset_all.assert_called_once()
+        assert caplog.messages == ['entering a safe haven...',
+                                   'leaving the safe haven...']
+
+    @pytest.mark.parametrize('provided', TEST_PARAMS)
+    def test_os_environ(self, provided, caplog, monkeypatch):
+        """Test os.environ interactions."""
+        caplog.set_level(logging.DEBUG, 'runway.SafeHaven')
+        monkeypatch.setattr(SafeHaven, 'reset_all', MagicMock())
+
+        orig_val = dict(os.environ)
+        expected_val = dict(os.environ)
+        expected_logs = ['entering a safe haven...',
+                         'resetting os.environ: %s' % orig_val,
+                         'leaving the safe haven...']
+
+        if isinstance(provided, dict):
+            expected_val.update(provided)
+
+        with SafeHaven(environ=provided) as obj:
+            assert os.environ == expected_val
+            os.environ.update({'SOMETHING_ELSE': 'val'})
+            obj.reset_os_environ()
+        assert os.environ == orig_val
+        assert caplog.messages == expected_logs
+
+    def test_reset_all(self, caplog, monkeypatch):
+        """Test reset_all."""
+        mock_method = MagicMock()
+        caplog.set_level(logging.DEBUG, 'runway.SafeHaven')
+        monkeypatch.setattr(SafeHaven, 'reset_os_environ', mock_method)
+        monkeypatch.setattr(SafeHaven, 'reset_sys_argv', mock_method)
+        monkeypatch.setattr(SafeHaven, 'reset_sys_modules', mock_method)
+        monkeypatch.setattr(SafeHaven, 'reset_sys_path', mock_method)
+
+        expected_logs = ['entering a safe haven...',
+                         'resetting all managed values...',
+                         'leaving the safe haven...',
+                         'resetting all managed values...']
+
+        with SafeHaven() as obj:
+            obj.reset_all()
+            assert mock_method.call_count == 4
+        assert mock_method.call_count == 8  # called again on exit
+        assert caplog.messages == expected_logs
+
+    @pytest.mark.parametrize('provided', TEST_PARAMS)
+    def test_sys_argv(self, provided, caplog, monkeypatch):
+        """Test sys.argv interactions."""
+        caplog.set_level(logging.DEBUG, 'runway.SafeHaven')
+        monkeypatch.setattr(SafeHaven, 'reset_all', MagicMock())
+
+        orig_val = list(sys.argv)
+        expected_val = provided if isinstance(provided, list) else list(sys.argv)
+        expected_logs = ['entering a safe haven...',
+                         'resetting sys.argv: %s' % orig_val,
+                         'leaving the safe haven...']
+
+        with SafeHaven(argv=provided) as obj:
+            assert sys.argv == expected_val
+            sys.argv.append('something-else')
+            obj.reset_sys_argv()
+        assert sys.argv == orig_val
+        assert caplog.messages == expected_logs
+
+    def test_sys_modules(self, caplog, monkeypatch):
+        """Test sys.modules interactions."""
+        caplog.set_level(logging.DEBUG, 'runway.SafeHaven')
+        monkeypatch.setattr(SafeHaven, 'reset_all', MagicMock())
+
+        # pylint: disable=unnecessary-comprehension
+        orig_val = {k: v for k, v in sys.modules.items()}
+        expected_logs = ['entering a safe haven...',
+                         'resetting sys.modules: %s' % orig_val]
+
+        with SafeHaven() as obj:
+            from .fixtures import mock_hooks  # noqa pylint: disable=E,W,C
+            assert sys.modules != orig_val
+            obj.reset_sys_modules()
+        assert sys.modules == orig_val
+        assert caplog.messages[:2] == expected_logs
+        assert caplog.messages[-1] == 'leaving the safe haven...'
+
+    @pytest.mark.parametrize('provided', TEST_PARAMS)
+    def test_sys_path(self, provided, caplog, monkeypatch):
+        """Test sys.path interactions."""
+        caplog.set_level(logging.DEBUG, 'runway.SafeHaven')
+        monkeypatch.setattr(SafeHaven, 'reset_all', MagicMock())
+
+        orig_val = list(sys.path)
+        expected_val = provided if isinstance(provided, list) else list(sys.path)
+        expected_logs = ['entering a safe haven...',
+                         'resetting sys.path: %s' % orig_val,
+                         'leaving the safe haven...']
+
+        with SafeHaven(sys_path=provided) as obj:
+            assert sys.path == expected_val
+            sys.path.append('something-else')
+            obj.reset_sys_path()
+        assert sys.path == orig_val
+        assert caplog.messages == expected_logs
 
 
 @patch.object(sys, 'argv', ['runway', 'deploy'])
