@@ -425,7 +425,6 @@ def environ(env=None, **kwargs):
     os.environ.update(env)
 
     try:
-        print('Entered environ...')
         yield
     finally:
         # always restore original values
