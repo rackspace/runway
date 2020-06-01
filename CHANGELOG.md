@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - issue where `yamllint` and `cfnlint` could not be imported/executed from the Pyinstaller executables
 
+### Fixed
+- the friendly error when npm can't be found has returned
+
 ## [1.8.0] - 2020-05-16
 ### Fixed
 - the value of `environments` is once again used to determine if a serverless module should be skipped
