@@ -10,12 +10,17 @@ import platform
 import re
 import stat
 import sys
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 from subprocess import check_call
 from typing import (Any, Dict, Iterator,  # noqa pylint: disable=unused-import
                     List, Optional, Union)
 
 import six
+
+if sys.version_info >= (3, 6):
+    from contextlib import AbstractContextManager  # pylint: disable=E
+else:
+    AbstractContextManager = object
 
 AWS_ENV_VARS = ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
                 'AWS_SESSION_TOKEN')
