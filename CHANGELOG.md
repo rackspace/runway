@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - issue where `yamllint` and `cfnlint` could not be imported/executed from the Pyinstaller executables
+- fixed issue where CFNgin blueprints/hooks/lookups would encounter namespace collisions because imports were not being unloaded between instances
 
 ### Fixed
 - the friendly error when npm can't be found has returned
