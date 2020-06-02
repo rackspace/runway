@@ -1,21 +1,27 @@
 """Tests runway/commands/modules_command.py."""
 # pylint: disable=no-self-use,redefined-outer-name
+import datetime
+import logging
 import os
-from copy import deepcopy
 from os import path
 
 import pytest
 import yaml
-from mock import MagicMock, call, patch
+from mock import MagicMock, call
 from moto import mock_sts
 
-from runway.commands.modules_command import (ModulesCommand,
+from runway.commands.modules_command import (ModulesCommand, assume_role,
+                                             load_module_opts_from_file,
+                                             post_deploy_assume_role,
+                                             pre_deploy_assume_role,
                                              select_modules_to_run,
                                              validate_environment)
 from runway.config import Config
 from runway.util import environ
 
-MODULE_PATH = 'runway.commands.modules_command'
+from ..factories import MockBoto3Session
+
+MODULE = 'runway.commands.modules_command'
 
 
 @pytest.fixture(scope='function')
@@ -29,6 +35,201 @@ def module_tag_config():
         return yaml.safe_load(stream)
 
 
+@pytest.mark.parametrize('session_name, duration, region, env_vars', [
+    (None, None, 'us-east-1', None),
+    ('my_session', 900, 'us-west-2', {'AWS_ACCESS_KEY_ID': 'env-var-access-key',
+                                      'AWS_SECRET_ACCESS_KEY': 'env-secret-key',
+                                      'AWS_SESSION_TOKEN': 'env-session-token'})
+])
+def test_assume_role(session_name, duration, region, env_vars, caplog, monkeypatch):
+    """Test assume_role."""
+    caplog.set_level(logging.INFO, logger='runway')
+    role_arn = 'arn:aws:iam::123456789012:role/test'
+    session = MockBoto3Session(region_name=region)
+    _client, stubber = session.register_client('sts')
+    monkeypatch.setattr(MODULE + '.boto3', session)
+
+    expected = {'AWS_ACCESS_KEY_ID': 'test-aws-access-key-id',
+                'AWS_SECRET_ACCESS_KEY': 'test-secret-key',
+                'AWS_SESSION_TOKEN': 'test-session-token'}
+    expected_sts_client = {'region_name': region}
+    expected_parameters = {'RoleArn': role_arn,
+                           'RoleSessionName': session_name or 'runway'}
+    if duration:
+        expected_parameters['DurationSeconds'] = duration
+    if env_vars:
+        expected_sts_client.update({k.lower(): v for k, v in env_vars.items()})
+
+    stubber.add_response('assume_role',
+                         {'Credentials': {
+                             'AccessKeyId': expected['AWS_ACCESS_KEY_ID'],
+                             'SecretAccessKey': expected['AWS_SECRET_ACCESS_KEY'],
+                             'SessionToken': expected['AWS_SESSION_TOKEN'],
+                             'Expiration': datetime.datetime.now()
+                         }, 'AssumedRoleUser': {'AssumedRoleId': 'test-role-id',
+                                                'Arn': role_arn + '/user'}},
+                         expected_parameters)
+    with stubber:
+        assert assume_role(role_arn, session_name=session_name,
+                           duration_seconds=duration, region=region,
+                           env_vars=env_vars) == expected
+    stubber.assert_no_pending_responses()
+    session.assert_client_called_with('sts', **expected_sts_client)
+    assert caplog.messages == ["Assuming role %s..." % role_arn]
+
+
+def test_load_module_opts_from_file(tmp_path):
+    """Test load_module_opts_from_file."""
+    mod_opts = {'initial': 'val'}
+    file_content = {'file_key': 'file_val'}
+    merged = {'file_key': 'file_val', 'initial': 'val'}
+    file_path = tmp_path / 'runway.module.yml'
+
+    assert load_module_opts_from_file(str(tmp_path), mod_opts.copy()) == mod_opts
+
+    file_path.write_text(yaml.safe_dump(file_content))
+    assert load_module_opts_from_file(str(tmp_path), mod_opts.copy()) == merged
+
+
+def test_post_deploy_assume_role(monkeypatch, runway_context):
+    """Test post_deploy_assume_role."""
+    mock_restore = MagicMock()
+    monkeypatch.setattr(runway_context, 'restore_existing_iam_env_vars',
+                        mock_restore)
+
+    assert not post_deploy_assume_role('test', runway_context)
+    mock_restore.assert_not_called()
+    assert not post_deploy_assume_role({'key': 'val'}, runway_context)
+    mock_restore.assert_not_called()
+    assert not post_deploy_assume_role({'post_deploy_env_revert': False},
+                                       runway_context)
+    mock_restore.assert_not_called()
+    assert not post_deploy_assume_role({'post_deploy_env_revert': True},
+                                       runway_context)
+    mock_restore.assert_called_once()
+    assert not post_deploy_assume_role({'post_deploy_env_revert': 'any'},
+                                       runway_context)
+    assert mock_restore.call_count == 2
+
+
+@pytest.mark.parametrize('config', [
+    ('arn:aws:iam::123456789012:role/test'),
+    ({}),
+    ({'post_deploy_env_revert': False,
+      'arn': 'arn:aws:iam::123456789012:role/test'}),
+    ({'post_deploy_env_revert': True,
+      'arn': 'arn:aws:iam::123456789012:role/test',
+      'duration': 900}),
+    ({'post_deploy_env_revert': True,
+      'session_name': 'test-custom',
+      'arn': 'arn:aws:iam::123456789012:role/test',
+      'duration': 900}),
+    ({'test': {'arn': 'arn:aws:iam::123456789012:role/test'}}),
+    ({'nope': {'arn': 'arn:aws:iam::123456789012:role/test'}}),
+    ({'test': 'arn:aws:iam::123456789012:role/test'})
+])
+def test_pre_deploy_assume_role(config, caplog, monkeypatch, runway_context):
+    """Test pre_deploy_assume_role."""
+    caplog.set_level(logging.INFO, logger='runway')
+    orig_creds = runway_context.boto3_credentials.copy()
+    assume_response = {'AWS_ACCESS_KEY_ID': 'assumed_access_key',
+                       'AWS_SECRET_ACCESS_KEY': 'assumed_secret_key',
+                       'AWS_SESSION_TOKEN': 'assume_session_token'}
+    expected_creds = {k.lower(): v for k, v in assume_response.items()}
+    mock_save = MagicMock()
+    monkeypatch.setattr(runway_context, 'save_existing_iam_env_vars', mock_save)
+    runway_context.env_name = 'test'
+    mock_assume = MagicMock(return_value=assume_response.copy())
+    monkeypatch.setattr(MODULE + '.assume_role', mock_assume)
+
+    assert not pre_deploy_assume_role(config, runway_context)
+
+    if isinstance(config, dict):
+        def get_value(key):
+            """Get value from config."""
+            env_val = config.get(runway_context.env_name)
+            result = config.get(key)
+            if not result and key == 'arn' and isinstance(env_val, str):
+                return env_val
+            if not result and isinstance(env_val, dict):
+                return env_val.get(key)
+            return result
+
+        arn = get_value('arn')
+        duration = get_value('duration')
+
+        if arn:
+            assert runway_context.boto3_credentials == expected_creds
+            mock_assume.assert_called_once_with(role_arn=arn,
+                                                session_name=config.get(
+                                                    'session_name'
+                                                ),
+                                                duration_seconds=duration,
+                                                region=runway_context.env_region,
+                                                env_vars=runway_context.env_vars)
+            if config.get('post_deploy_env_revert'):
+                mock_save.assert_called_once()
+        else:
+            mock_assume.assert_not_called()
+            assert runway_context.boto3_credentials == orig_creds
+            assert caplog.messages == ['Skipping iam:AssumeRole; no role found'
+                                       ' for environment test...']
+    else:
+        assert runway_context.boto3_credentials == expected_creds
+        mock_assume.assert_called_once_with(role_arn=config,
+                                            region=runway_context.env_region,
+                                            env_vars=runway_context.env_vars)
+
+
+@pytest.mark.parametrize('deployment, kwargs, mock_input, expected', [
+    ('min_required', {'ci': True}, None, ['sampleapp-01.cfn']),
+    ({'name': 'no_modules'}, {}, None, 1),  # config class makes this obsolete
+    ('min_required', {'command': 'deploy'}, None, ['sampleapp-01.cfn']),
+    ('min_required', {'command': 'destroy', 'ci': True}, None,
+     ['sampleapp-01.cfn']),
+    ('min_required', {'command': 'destroy'}, MagicMock(return_value='y'),
+     ['sampleapp-01.cfn']),
+    ('min_required', {'command': 'destroy'}, MagicMock(return_value='n'), 0),
+    ('min_required_multi', {}, MagicMock(return_value='all'),
+     ['sampleapp-01.cfn', 'sampleapp-02.cfn']),
+    ('min_required_multi', {}, MagicMock(return_value=''), 1),
+    ('min_required_multi', {}, MagicMock(return_value='0'), 1),
+    ('min_required_multi', {}, MagicMock(return_value='-1'), 1),
+    ('min_required_multi', {}, MagicMock(return_value='invalid'), 1),
+    ('simple_parallel_module', {'command': 'destroy'},
+     MagicMock(side_effect=['1', '2']), ['sampleapp-02.cfn']),
+    ('tagged_multi', {'tags': ['app:test-app']}, None,
+     ['sampleapp-01.cfn', 'sampleapp-02.cfn', 'sampleapp-03.cfn']),
+    ('tagged_multi', {'tags': ['app:test-app', 'tier:iac'], 'ci': True},
+     None, ['sampleapp-01.cfn']),
+    ('tagged_multi', {'tags': ['no-match']}, None, []),
+])
+def test_select_modules_to_run(deployment, kwargs, mock_input, expected,
+                               fx_deployments, monkeypatch, caplog):
+    """Test select_modules_to_run."""
+    caplog.set_level(logging.INFO, logger='runway')
+    if isinstance(deployment, str):
+        deployment = fx_deployments.load(deployment)
+    monkeypatch.setattr(MODULE + '.input', mock_input)
+
+    if isinstance(expected, int):
+        with pytest.raises(SystemExit) as excinfo:
+            assert not select_modules_to_run(deployment, **kwargs)
+        assert excinfo.value.code == expected
+    else:
+        filtered_deployment = select_modules_to_run(deployment, **kwargs)
+        result = []
+        for mod in filtered_deployment.modules:
+            if mod.name == 'parallel_parent':
+                result.extend([m.path for m in mod.child_modules])
+            else:
+                result.append(mod.path)
+        assert result == expected
+
+    if mock_input:
+        mock_input.assert_called()
+
+
 class TestModulesCommand(object):
     """Test runway.commands.modules_command.ModulesCommand."""
 
@@ -39,9 +240,9 @@ class TestModulesCommand(object):
         test_config = Config(deployments=deployments, tests=[])
         get_env = MagicMock(return_value='test')
 
-        monkeypatch.setattr(MODULE_PATH + '.select_modules_to_run',
+        monkeypatch.setattr(MODULE + '.select_modules_to_run',
                             lambda a, b, c, d, e: a)
-        monkeypatch.setattr(MODULE_PATH + '.get_env', get_env)
+        monkeypatch.setattr(MODULE + '.get_env', get_env)
         monkeypatch.setattr(Config, 'find_config_file',
                             MagicMock(return_value=os.getcwd() + 'runway.yml'))
         monkeypatch.setattr(ModulesCommand, 'runway_config', test_config)
@@ -60,97 +261,6 @@ class TestModulesCommand(object):
                                        prompt_if_unexpected=True),
                                   call(os.getcwd(), False,
                                        prompt_if_unexpected=False)])
-
-
-class TestSelectModulesToRun(object):
-    """Test runway.commands.modules_command.select_modules_to_run."""
-
-    def test_tag_test_app(self, module_tag_config):
-        """tag=[app:test-app] should return 2 modules."""
-        tags = ['app:test-app']
-
-        result = [
-            select_modules_to_run(deployment, tags)
-            for deployment in module_tag_config['deployments']
-        ]
-        assert len(result[0]['modules']) == 1
-        assert result[0]['modules'][0]['path'] == 'sampleapp1.cfn'
-        assert not result[1]['modules']
-        assert len(result[2]['modules']) == 1
-        assert result[2]['modules'][0]['path'] == 'sampleapp4.cfn'
-
-    def test_tag_iac(self, module_tag_config):
-        """tag=[tier:iac] should return 2 modules."""
-        tags = ['tier:iac']
-
-        result = [
-            select_modules_to_run(deployment, tags)
-            for deployment in module_tag_config['deployments']
-        ]
-        assert len(result[0]['modules']) == 2
-        assert result[0]['modules'][0]['path'] == 'sampleapp1.cfn'
-        assert result[0]['modules'][1]['path'] == 'sampleapp2.cfn'
-        assert not result[1]['modules']
-        assert not result[2]['modules']
-
-    def test_two_tags(self, module_tag_config):
-        """tag=[tier:iac, app:test-app] should return 1 module."""
-        tags = ['tier:iac', 'app:test-app']
-        result = [
-            select_modules_to_run(deployment, tags)
-            for deployment in module_tag_config['deployments']
-        ]
-        assert len(result[0]['modules']) == 1
-        assert result[0]['modules'][0]['path'] == 'sampleapp1.cfn'
-        assert not result[1]['modules']
-        assert not result[2]['modules']
-
-    def test_no_tags(self, module_tag_config):
-        """tag=[] should request input."""
-        user_input = ['1']
-        with patch('runway.commands.modules_command.input',
-                   side_effect=user_input):
-            result = select_modules_to_run(
-                module_tag_config['deployments'][0], []
-            )
-        assert result['modules'][0] == \
-            module_tag_config['deployments'][0]['modules'][0]
-
-    def test_no_tags_ci(self, module_tag_config):
-        """tag=[], ci=true should not request input and return everything."""
-        result = [
-            select_modules_to_run(deployment, [], ci='true')
-            for deployment in module_tag_config['deployments']
-        ]
-        assert result == module_tag_config['deployments']
-
-    def test_destroy(self, module_tag_config):
-        """command=destroy should only prompt with no tag of ci if one module."""
-        user_input = ['y', '1']
-        with patch('runway.commands.modules_command.input',
-                   side_effect=user_input):
-            result_single_no_tag = select_modules_to_run(
-                deepcopy(module_tag_config['deployments'][1]), [], command='destroy'
-            )
-            result_no_tag = select_modules_to_run(
-                deepcopy(module_tag_config['deployments'][0]), [], command='destroy'
-            )
-        assert result_single_no_tag['modules'][0] == \
-            module_tag_config['deployments'][1]['modules'][0]
-        assert result_no_tag['modules'][0] == \
-            module_tag_config['deployments'][0]['modules'][0]
-        result_tag = select_modules_to_run(
-            deepcopy(module_tag_config['deployments'][0]), ['app:test-app'],
-            command='destroy'
-        )
-        assert result_tag['modules'][0] == \
-            module_tag_config['deployments'][0]['modules'][0]
-        result_tag_ci = select_modules_to_run(
-            deepcopy(module_tag_config['deployments'][0]), [], command='destroy',
-            ci='true'
-        )
-        assert result_tag_ci['modules'] == \
-            module_tag_config['deployments'][0]['modules']
 
 
 class TestValidateEnvironment(object):

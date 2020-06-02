@@ -1,0 +1,8 @@
+# minimum requirement for a valid deployment with more than one module and region
+
+modules:
+  - sampleapp-01.cfn
+  - sampleapp-02.cfn
+regions:
+  - us-east-1
+  - us-west-2

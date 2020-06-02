@@ -1,0 +1,6 @@
+# minimum requirement for a valid deployment
+
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

@@ -4,11 +4,13 @@ import os
 import sys
 
 import boto3
+import yaml
 from botocore.stub import Stubber
 from mock import MagicMock
 from six import string_types
 
 from runway.cfngin.context import Context as CFNginContext
+from runway.config import DeploymentDefinition
 from runway.context import Context as RunwayContext
 from runway.util import MutableMap
 
@@ -21,7 +23,7 @@ class MockBoto3Session(object):
     """
 
     def __init__(self,
-                 clients,
+                 clients=None,
                  aws_access_key_id=None,
                  aws_secret_access_key=None,
                  aws_session_token=None,
@@ -38,14 +40,21 @@ class MockBoto3Session(object):
             region_name (Optional[str]): Same as boto3.Session.
 
         """
-        self._clients = clients
+        self._clients = clients or {}
+        self._client_calls = {}
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.aws_session_token = aws_session_token
         self.profile_name = profile_name
         self.region_name = region_name
 
-    def client(self, service_name, region_name=None, **_):
+    def assert_client_called_with(self, service_name, **kwargs):
+        """Assert a client was created with the provided kwargs."""
+        key = '{}.{}'.format(service_name, kwargs.get('region_name',
+                                                      self.region_name))
+        assert self._client_calls[key] == kwargs
+
+    def client(self, service_name, **kwargs):
         """Return a stubbed client.
 
         Args:
@@ -58,8 +67,25 @@ class MockBoto3Session(object):
             KeyError: Client was not stubbed from Context before trying to use.
 
         """
-        key = '{}.{}'.format(service_name, region_name or self.region_name)
+        key = '{}.{}'.format(service_name, kwargs.get('region_name',
+                                                      self.region_name))
+        self._client_calls[key] = kwargs
         return self._clients[key]
+
+    def register_client(self, service_name, region_name=None):
+        """Register a client for the boto3 session.
+
+        Args:
+            service_name (str): The name of a service, e.g. 's3' or 'ec2'.
+            region_name (Optional[str]): AWS region.
+
+        """
+        key = '{}.{}'.format(service_name, region_name or self.region_name)
+        client = boto3.client(service_name,
+                              region_name=region_name or self.region_name)
+        stubber = Stubber(client)
+        self._clients[key] = client
+        return client, stubber
 
     def service(self, service_name, region_name=None):
         """Not implimented."""
@@ -250,3 +276,83 @@ class MockRunwayContext(RunwayContext):
         return MockBoto3Session(clients=self._boto3_test_client,
                                 profile_name=profile,
                                 region_name=region or self.env_region)
+
+
+class YamlLoader(object):
+    """Load YAML files from a directory."""
+
+    def __init__(self, root, load_class=None, load_type='default'):
+        """Instantiate class.
+
+        Args:
+            root (Path): Root directory.
+            load_class (Any): Class to use with load method.
+            load_type (str): Contolls how content is passed to the load_class.
+
+        """
+        self.load_class = load_class
+        self.load_type = load_type
+        root.absolute()
+        self.root = root
+
+    def get(self, file_name):
+        """Get raw YAML file contents.
+
+        Args:
+            file_name (str): Name of the file to load.
+
+        Returns:
+            Dict[str, Any]: Content of the file loaded by PyYAML.
+
+        """
+        if not file_name.endswith('.yml') or not file_name.endswith('.yaml'):
+            file_name += '.yml'
+        if sys.version_info.major > 2:
+            content = (self.root / file_name).read_text()
+        else:
+            content = (self.root / file_name).read_text().decode()
+        return yaml.safe_load(content)
+
+    def load(self, file_name):
+        """Load YAML file contents.
+
+        Args:
+            file_name (str): Name of the file to load.
+
+        Returns:
+            Any
+
+        """
+        if not self.load_class:
+            raise ValueError('load_class must be set to use this method')
+        if self.load_type == 'default':
+            return self.load_class(self.get(file_name))
+        if self.load_type == 'kwargs':
+            return self.load_class(**self.get(file_name))
+        raise ValueError('invalid load_type; "{}"'.format(self.load_type))
+
+
+class YamlLoaderDeploymet(YamlLoader):
+    """Load deployment YAML files from a directory."""
+
+    def __init__(self, root):
+        """Instantiate class.
+
+        Args:
+            root (Path): Root directory.
+
+        """
+        super(YamlLoaderDeploymet, self).__init__(root,
+                                                  load_class=DeploymentDefinition)
+
+    def load(self, file_name):
+        """Load YAML file contents.
+
+        Args:
+            file_name (str): Name of the file to load.
+
+        Returns:
+            DeploymentDefinition
+
+        """
+        return self.load_class.from_list([self.get(file_name)])[0]

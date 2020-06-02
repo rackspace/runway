@@ -2,14 +2,22 @@
 # pylint: disable=redefined-outer-name
 import logging
 import os
+import sys
 from typing import Dict
 
 import pytest
 import yaml
 
-from .factories import MockCFNginContext, MockRunwayConfig, MockRunwayContext
+from .factories import (MockCFNginContext, MockRunwayConfig, MockRunwayContext,
+                        YamlLoaderDeploymet)
+
+if sys.version_info.major > 2:  # TODO remove after droping python 2
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
 
 LOG = logging.getLogger(__name__)
+TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -51,6 +59,12 @@ def fixture_dir():
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         'fixtures')
     return path
+
+
+@pytest.fixture(scope='function')
+def fx_deployments():
+    """Return yaml loader for deployment fixtures."""
+    return YamlLoaderDeploymet(TEST_ROOT / 'fixtures' / 'deployments')
 
 
 @pytest.fixture(scope='module')

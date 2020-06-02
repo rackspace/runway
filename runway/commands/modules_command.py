@@ -112,8 +112,8 @@ def pre_deploy_assume_role(assume_role_config, context):
         )
 
 
-def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disable=too-many-branches,invalid-name
-                          ci=False, env_name=None):
+def select_modules_to_run(deployment, tags=None,  # noqa pylint: disable=too-many-branches,invalid-name
+                          command=None, ci=False, env_name=None):
     """Select modules to run based on tags.
 
     Args:
@@ -128,6 +128,7 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         Deployment with filtered modules.
 
     """
+    tags = tags or []
     if ci and not tags:
         return deployment
     modules_to_deploy = []
@@ -180,7 +181,8 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         return deployment
 
     for module in modules:
-        if isinstance(module, str):
+        # checking for string should have been made obsolete by config parser
+        if isinstance(module, str):  # cov: ignore
             LOGGER.warning('Module "%s.%s" is defined as a string '
                            'which cannot be used with the "--tag" '
                            'option so it has been skipped. Please '
@@ -190,7 +192,8 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
             continue  # this doesn't need to return an error
         if module.get('child_modules'):
             module['child_modules'] = [x for x in module['child_modules']
-                                       if x.get('tags') and all(i in x['tags'] for i in tags)]
+                                       if x.get('tags') and all(i in x['tags']
+                                       for i in tags)]
             if module.get('child_modules'):
                 modules_to_deploy.append(module)
         elif module.get('tags') and all(i in module['tags'] for i in tags):
