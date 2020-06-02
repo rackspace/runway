@@ -245,11 +245,6 @@ def validate_account_id(sts_client, account_id):
 
 def validate_account_credentials(deployment, context):
     """Exit if requested deployment account doesn't match credentials."""
-    boto_args = {'region_name': context.env_vars['AWS_DEFAULT_REGION']}
-    for i in ['aws_access_key_id', 'aws_secret_access_key',
-              'aws_session_token']:
-        if context.env_vars.get(i.upper()):
-            boto_args[i] = context.env_vars[i.upper()]
     if isinstance(deployment.get('account_id'), (int, six.string_types)):
         account_id = str(deployment['account_id'])
     elif deployment.get('account_id', {}).get(context.env_name):
@@ -257,7 +252,7 @@ def validate_account_credentials(deployment, context):
     else:
         account_id = None
     if account_id:
-        validate_account_id(boto3.client('sts', **boto_args), account_id)
+        validate_account_id(context.get_session().client('sts'), account_id)
     if isinstance(deployment.get('account_alias'), six.string_types):
         account_alias = deployment['account_alias']
     elif deployment.get('account_alias', {}).get(context.env_name):
@@ -265,7 +260,7 @@ def validate_account_credentials(deployment, context):
     else:
         account_alias = None
     if account_alias:
-        validate_account_alias(boto3.client('iam', **boto_args),
+        validate_account_alias(context.get_session().client('iam'),
                                account_alias)
 
 

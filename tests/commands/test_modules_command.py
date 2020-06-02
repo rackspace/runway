@@ -5,9 +5,11 @@ import logging
 import os
 from os import path
 
+import boto3
 import pytest
 import yaml
-from mock import MagicMock, call
+from botocore.stub import Stubber
+from mock import ANY, MagicMock, call
 from moto import mock_sts
 
 from runway.commands.modules_command import (ModulesCommand, assume_role,
@@ -15,6 +17,9 @@ from runway.commands.modules_command import (ModulesCommand, assume_role,
                                              post_deploy_assume_role,
                                              pre_deploy_assume_role,
                                              select_modules_to_run,
+                                             validate_account_alias,
+                                             validate_account_id,
+                                             validate_account_credentials,
                                              validate_environment)
 from runway.config import Config
 from runway.util import environ
@@ -228,6 +233,104 @@ def test_select_modules_to_run(deployment, kwargs, mock_input, expected,
 
     if mock_input:
         mock_input.assert_called()
+
+
+def test_validate_account_alias(caplog):
+    """Test validate_account_alias."""
+    caplog.set_level(logging.INFO, logger='runway')
+    alias = 'test-alias'
+    iam_client = boto3.client('iam')
+    stubber = Stubber(iam_client)
+
+    stubber.add_response('list_account_aliases', {'AccountAliases': [alias]})
+    stubber.add_response('list_account_aliases', {'AccountAliases': ['no-match']})
+
+    with stubber:
+        assert not validate_account_alias(iam_client, alias)
+        with pytest.raises(SystemExit) as excinfo:
+            assert validate_account_alias(iam_client, alias)
+        assert excinfo.value.code == 1
+    stubber.assert_no_pending_responses()
+    assert caplog.messages == [
+        'Verified current AWS account alias matches required alias {}.'.format(alias),
+        'Current AWS account aliases "{}" do not match required account'
+        ' alias {} in Runway config.'.format('no-match', alias)
+    ]
+
+
+def test_validate_account_id(caplog):
+    """Test validate_account_id."""
+    caplog.set_level(logging.INFO, logger='runway')
+    account_id = '123456789012'
+    arn = 'arn:aws:sts:us-east-1/irrelevant'
+    user = 'irrelevant'
+    sts_client = boto3.client('sts')
+    stubber = Stubber(sts_client)
+
+    stubber.add_response('get_caller_identity', {'UserId': user,
+                                                 'Account': account_id,
+                                                 'Arn': arn})
+    stubber.add_response('get_caller_identity', {'UserId': user,
+                                                 'Account': '012345678901',
+                                                 'Arn': arn})
+    stubber.add_response('get_caller_identity', {'UserId': user,
+                                                 'Arn': arn})
+
+    with stubber:
+        assert not validate_account_id(sts_client, account_id)
+        with pytest.raises(SystemExit) as excinfo:
+            assert validate_account_id(sts_client, account_id)
+        assert excinfo.value.code == 1
+        with pytest.raises(SystemExit) as excinfo:
+            assert validate_account_id(sts_client, account_id)
+        assert excinfo.value.code == 1
+    stubber.assert_no_pending_responses()
+    assert caplog.messages == [
+        'Verified current AWS account matches required account id %s.' % account_id,
+        'Current AWS account 012345678901 does not match required account'
+        ' %s in Runway config.' % account_id,
+        'Error checking current account ID'
+    ]
+
+
+def test_validate_account_credentials(fx_deployments, monkeypatch,
+                                      runway_context):
+    """Test validate_account_credentials."""
+    mock_alias = MagicMock()
+    mock_id = MagicMock()
+    account_id = '123456789012'
+    alias = 'test'
+
+    # can ignore these
+    runway_context.add_stubber('iam')
+    runway_context.add_stubber('sts')
+
+    monkeypatch.setattr(MODULE + '.validate_account_alias', mock_alias)
+    monkeypatch.setattr(MODULE + '.validate_account_id', mock_id)
+
+    assert not validate_account_credentials(
+        fx_deployments.load('min_required'), runway_context)
+    mock_alias.assert_not_called()
+    mock_id.assert_not_called()
+
+    assert not validate_account_credentials(
+        fx_deployments.load('validate_account'), runway_context)
+    mock_alias.assert_called_once_with(ANY, alias)
+    mock_id.assert_called_once_with(ANY, account_id)
+
+    assert not validate_account_credentials(
+        fx_deployments.load('validate_account_map'), runway_context)
+    mock_alias.assert_called_with(ANY, alias)
+    mock_id.assert_called_with(ANY, account_id)
+
+    mock_alias.reset_mock()
+    mock_id.reset_mock()
+    runway_context.env_name = 'something-else'
+
+    assert not validate_account_credentials(
+        fx_deployments.load('validate_account_map'), runway_context)
+    mock_alias.assert_not_called()
+    mock_id.assert_not_called()
 
 
 class TestModulesCommand(object):
