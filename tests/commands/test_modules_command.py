@@ -6,6 +6,7 @@ import os
 from os import path
 
 import boto3
+import six
 import pytest
 import yaml
 from botocore.stub import Stubber
@@ -92,7 +93,7 @@ def test_load_module_opts_from_file(tmp_path):
 
     assert load_module_opts_from_file(str(tmp_path), mod_opts.copy()) == mod_opts
 
-    file_path.write_text(yaml.safe_dump(file_content))
+    file_path.write_text(six.u(yaml.safe_dump(file_content)))
     assert load_module_opts_from_file(str(tmp_path), mod_opts.copy()) == merged
 
 
