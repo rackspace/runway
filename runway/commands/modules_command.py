@@ -193,7 +193,7 @@ def select_modules_to_run(deployment, tags=None,  # noqa pylint: disable=too-man
         if module.get('child_modules'):
             module['child_modules'] = [x for x in module['child_modules']
                                        if x.get('tags') and all(i in x['tags']
-                                       for i in tags)]
+                                                                for i in tags)]
             if module.get('child_modules'):
                 modules_to_deploy.append(module)
         elif module.get('tags') and all(i in module['tags'] for i in tags):
