@@ -375,6 +375,11 @@ class TestModulesCommand(object):
         assert not ModulesCommand()._execute_deployment(deployment,
                                                         runway_context,
                                                         region, parallel)
+        ModulesCommand._process_modules.assert_called_once_with(
+            deployment,
+            # context will be a new instance if parallel
+            runway_context if not parallel else ANY
+        )
 
         if parallel:
             assert runway_context.env_region == 'us-east-1'
@@ -507,6 +512,64 @@ class TestModulesCommand(object):
         mock_futures.wait.called_once()
         assert executor.submit.return_value.result.call_count == \
             len(deployment.parallel_regions)
+
+    @pytest.mark.parametrize('deployment', [('min_required'),
+                                            ('min_required_multi')])
+    def test_process_modules(self, deployment, fx_deployments, monkeypatch,
+                             runway_context):
+        """Test _process_modules."""
+        # pylint: disable=no-member
+        deployment = fx_deployments.load(deployment)
+        monkeypatch.setattr(ModulesCommand, '_deploy_module', MagicMock())
+
+        assert not ModulesCommand()._process_modules(deployment, runway_context)
+        ModulesCommand._deploy_module.assert_has_calls([
+            call(module, deployment, runway_context)
+            for module in deployment.modules
+        ])
+
+    @patch('runway.commands.modules_command.concurrent.futures')
+    @pytest.mark.skipif(sys.version_info.major < 3,
+                        reason='only supported by python 3')
+    @pytest.mark.parametrize('deployment, use_concurrent', [
+        ('simple_parallel_module', True),
+        ('simple_parallel_module', False),
+    ])
+    def test_process_modules_parallel(self, mock_futures, deployment,
+                                      use_concurrent, fx_deployments,
+                                      monkeypatch, runway_context):
+        """Test _process_modules with parallel regions."""
+        # pylint: disable=no-member
+        deployment = fx_deployments.load(deployment)
+        executor = MagicMock()
+        mock_futures.ProcessPoolExecutor.return_value = executor
+        runway_context.use_concurrent = use_concurrent
+
+        monkeypatch.setattr(ModulesCommand, '_deploy_module', MagicMock())
+
+        assert not ModulesCommand()._process_modules(deployment, runway_context)
+        if use_concurrent:
+            mock_futures.ProcessPoolExecutor.assert_called_once_with(
+                max_workers=runway_context.max_concurrent_modules
+            )
+            executor.submit.assert_has_calls([
+                call(ModulesCommand._deploy_module, x, deployment,
+                     runway_context)
+                for x in deployment.modules[0].child_modules
+            ])
+            mock_futures.wait.assert_called_once()
+            assert executor.submit.return_value.result.call_count == \
+                len(deployment.modules[0].child_modules)
+            ModulesCommand._deploy_module.assert_called_once_with(
+                deployment.modules[1],
+                deployment,
+                runway_context
+            )
+        else:
+            ModulesCommand._deploy_module.assert_has_calls([
+                call(module, deployment, runway_context)
+                for module in deployment.modules[0].child_modules
+            ] + [call(deployment.modules[1], deployment, runway_context)])
 
     @patch(MODULE + '.select_modules_to_run')
     @patch(MODULE + '.get_env')
