@@ -571,6 +571,18 @@ class TestModulesCommand(object):
                 for module in deployment.modules[0].child_modules
             ] + [call(deployment.modules[1], deployment, runway_context)])
 
+    def test_reverse_deployments(self, fx_deployments, monkeypatch):
+        """Test reverse_deployments."""
+        deployment = fx_deployments.load('min_required')
+        monkeypatch.setattr(deployment, 'reverse', MagicMock())
+        mock_deployments = MagicMock()
+        mock_deployments.__iter__.return_value = iter([deployment])
+
+        assert ModulesCommand.reverse_deployments(None) == []
+        assert ModulesCommand.reverse_deployments(mock_deployments)
+        mock_deployments.reverse.assert_called_once()
+        deployment.reverse.assert_called_once()
+
     @patch(MODULE + '.select_modules_to_run')
     @patch(MODULE + '.get_env')
     @patch(MODULE + '.Context')
@@ -662,6 +674,50 @@ class TestModulesCommand(object):
         # pylint: disable=no-member
         ModulesCommand._process_deployments.assert_called_once_with(ANY,
                                                                     mock_context)
+
+    @pytest.mark.parametrize('config, command, mock_input, expected', [
+        ('min_required', 'build', None, ['deployment_1']),
+        ('min_required', 'destroy', None, ['deployment_1']),
+        ('min_required_multi', 'deploy', MagicMock(return_value='1'),
+         ['deployment_1']),
+        ('min_required_multi', 'destroy', MagicMock(return_value='1'),
+         ['deployment_1']),
+        ('min_required_multi', 'deploy', MagicMock(return_value='2'),
+         ['deployment_2']),
+        ('min_required_multi', 'destroy', MagicMock(return_value='2'),
+         ['deployment_2']),
+        ('min_required_multi', 'deploy', MagicMock(return_value='all'),
+         ['deployment_1', 'deployment_2']),
+        ('min_required_multi', 'destroy', MagicMock(return_value='all'),
+         ['deployment_1', 'deployment_2']),
+        ('min_required_multi', 'deploy', MagicMock(return_value=''), 1),
+        ('min_required_multi', 'destroy', MagicMock(return_value=''), 1),
+    ])
+    def test_select_deployment_to_run(self, config, command, mock_input, expected,
+                                      fx_config, monkeypatch):
+        """Test select_deployment_to_run."""
+        config = fx_config.load(config)
+        monkeypatch.setattr(MODULE + '.input', mock_input)
+
+        assert ModulesCommand.select_deployment_to_run([], command) == []
+
+        if isinstance(expected, int):
+            with pytest.raises(SystemExit) as excinfo:
+                assert not ModulesCommand.select_deployment_to_run(
+                    config.deployments,
+                    command
+                )
+            assert excinfo.value.code == expected
+        else:
+            result = ModulesCommand.select_deployment_to_run(
+                config.deployments,
+                command
+            )
+            assert [r.name for r in result] == expected
+        if mock_input:
+            mock_input.assert_called_once_with(
+                'Enter number of deployment to run (or "all"): '
+            )
 
 
 class TestValidateEnvironment(object):

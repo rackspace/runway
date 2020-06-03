@@ -1,0 +1,10 @@
+deployments:
+  - modules:
+      - sampleapp.cfn
+    regions:
+      - us-east-1
+  - modules:
+      - sampleapp.cfn
+    regions:
+      - us-east-1
+      - us-west-2
