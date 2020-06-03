@@ -351,6 +351,56 @@ class TestModulesCommand(object):
         with pytest.raises(NotImplementedError):
             ModulesCommand().execute()
 
+    @patch(MODULE + '.pre_deploy_assume_role')
+    @patch(MODULE + '.validate_account_credentials')
+    @patch(MODULE + '.post_deploy_assume_role')
+    @pytest.mark.parametrize('deployment, region, parallel', [
+        ('min_required', 'us-west-2', False),
+        ('min_required', 'us-west-2', True),
+        ('validate_account', 'us-west-2', False),
+        ('validate_account', 'us-west-2', True),
+        ('simple_assume_role', 'us-west-2', False),
+        ('simple_assume_role', 'us-west-2', True)
+    ])
+    def test_execute_deployment(self, mock_post_deploy_assume_role,
+                                mock_validate_account_credentials,
+                                mock_pre_deploy_assume_role,
+                                deployment, region, parallel,
+                                fx_deployments, monkeypatch, runway_context):
+        """Test _execute_deployment."""
+        # pylint: disable=no-member
+        deployment = fx_deployments.load(deployment)
+        monkeypatch.setattr(ModulesCommand, '_process_modules', MagicMock())
+
+        assert not ModulesCommand()._execute_deployment(deployment,
+                                                        runway_context,
+                                                        region, parallel)
+
+        if parallel:
+            assert runway_context.env_region == 'us-east-1'
+        else:
+            assert runway_context.env_region == region
+            assert runway_context.env_vars['AWS_DEFAULT_REGION'] == region
+            assert runway_context.env_vars['AWS_REGION'] == region
+
+        if deployment.assume_role:
+            mock_pre_deploy_assume_role.assume_called_once_with(
+                deployment.assume_role,
+                # context will be a new instance if parallel
+                runway_context if not parallel else ANY
+            )
+            mock_post_deploy_assume_role.assume_called_once_with(
+                deployment.assume_role,
+                # context will be a new instance if parallel
+                runway_context if not parallel else ANY
+            )
+        if deployment.account_id or deployment.account_alias:
+            mock_validate_account_credentials.assert_called_once_with(
+                deployment,
+                # context will be a new instance if parallel
+                runway_context if not parallel else ANY
+            )
+
     @patch(MODULE + '.merge_dicts')
     @patch(MODULE + '.merge_nested_environment_dicts')
     def test_process_deployments(self, mock_merge_nested_environment_dicts,
