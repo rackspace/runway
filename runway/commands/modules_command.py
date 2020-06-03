@@ -328,11 +328,6 @@ class ModulesCommand(RunwayCommand):
                           command=command)
         context.env_vars['RUNWAYCONFIG'] = self.runway_config_path
 
-        # set default names if needed
-        for i, deployment in enumerate(deployments):
-            if not deployment.get('name'):
-                deployment['name'] = 'deployment_' + str(i + 1)
-
         if command == 'destroy':
             LOGGER.info('WARNING!')
             LOGGER.info('Runway is running in DESTROY mode.')

@@ -1,16 +1,16 @@
 """Tests runway/commands/modules_command.py."""
-# pylint: disable=no-self-use,redefined-outer-name
+# pylint: disable=no-self-use,protected-access,redefined-outer-name
 import datetime
 import logging
 import os
 from os import path
 
 import boto3
-import six
 import pytest
+import six
 import yaml
 from botocore.stub import Stubber
-from mock import ANY, MagicMock, call
+from mock import ANY, MagicMock, patch
 from moto import mock_sts
 
 from runway.commands.modules_command import (ModulesCommand, assume_role,
@@ -19,15 +19,15 @@ from runway.commands.modules_command import (ModulesCommand, assume_role,
                                              pre_deploy_assume_role,
                                              select_modules_to_run,
                                              validate_account_alias,
-                                             validate_account_id,
                                              validate_account_credentials,
+                                             validate_account_id,
                                              validate_environment)
-from runway.config import Config
 from runway.util import environ
 
 from ..factories import MockBoto3Session
 
 MODULE = 'runway.commands.modules_command'
+PATCH_RUNWAY_CONFIG = 'runway.commands.base_command.Config'
 
 
 @pytest.fixture(scope='function')
@@ -334,37 +334,109 @@ def test_validate_account_credentials(fx_deployments, monkeypatch,
     mock_id.assert_not_called()
 
 
+@pytest.mark.usefixtures('patch_runway_config')
 class TestModulesCommand(object):
-    """Test runway.commands.modules_command.ModulesCommand."""
+    """Test runway.commands.modules_command.ModulesCommand.
 
-    def test_run(self, monkeypatch):
-        """Test run method."""
-        # TODO test _process_deployments instead of mocking it out
-        deployments = [{'modules': ['test'], 'regions':'us-east-1'}]
-        test_config = Config(deployments=deployments, tests=[])
-        get_env = MagicMock(return_value='test')
+    Protected methods are being patched and tested. While not best practice,
+    the logic is too dense not to. It needs to be refactored into smaller
+    chunks to be properly tested but, this is a "first pass" so that we
+    have some coverage pre-refactor.
 
-        monkeypatch.setattr(MODULE + '.select_modules_to_run',
-                            lambda a, b, c, d, e: a)
-        monkeypatch.setattr(MODULE + '.get_env', get_env)
-        monkeypatch.setattr(Config, 'find_config_file',
-                            MagicMock(return_value=os.getcwd() + 'runway.yml'))
-        monkeypatch.setattr(ModulesCommand, 'runway_config', test_config)
-        monkeypatch.setattr(ModulesCommand, '_process_deployments',
-                            lambda obj, y, x: None)
+    """
 
-        obj = ModulesCommand(cli_arguments={})
+    @pytest.mark.wip
+    @patch(MODULE + '.select_modules_to_run')
+    @patch(MODULE + '.get_env')
+    @patch(MODULE + '.Context')
+    @pytest.mark.parametrize('config, command, cli_args, mock_input', [
+        ('min_required', 'deploy', {}, None),
+        ('min_required', 'destroy', {}, None),
+        ('min_required', 'plan', {}, None),
+        ('min_required', 'deploy', {'--tag': ['something']}, None),
+        ('min_required', 'destroy', {'--tag': ['something']}, None),
+        ('min_required', 'plan', {'--tag': ['something']}, None),
+        ('min_required', 'deploy', {}, MagicMock(return_value='y')),
+        ('min_required', 'destroy', {}, MagicMock(return_value='y')),
+        ('min_required', 'plan', {}, MagicMock(return_value='y')),
+        ('min_required', 'deploy', {'--tag': ['something']},
+         MagicMock(return_value='y')),
+        ('min_required', 'destroy', {'--tag': ['something']},
+         MagicMock(return_value='y')),
+        ('min_required', 'plan', {'--tag': ['something']},
+         MagicMock(return_value='y')),
+        ('min_required', 'deploy', {}, MagicMock(return_value='n')),
+        ('min_required', 'destroy', {}, MagicMock(return_value='n')),
+        ('min_required', 'plan', {}, MagicMock(return_value='n')),
+        ('min_required', 'deploy', {'--tag': ['something']},
+         MagicMock(return_value='n')),
+        ('min_required', 'destroy', {'--tag': ['something']},
+         MagicMock(return_value='n')),
+        ('min_required', 'plan', {'--tag': ['something']},
+         MagicMock(return_value='n'))
+    ])
+    def test_run(self, mock_context, mock_get_env, mock_select_modules_to_run,
+                 config, command, cli_args, mock_input,
+                 fx_config, monkeypatch):
+        """Test run."""
+        config = fx_config.load(config)
 
-        with environ({}):
-            os.environ.pop('CI', None)
-            assert not obj.run(test_config.deployments, command='plan')
-            os.environ['CI'] = '1'
-            assert not obj.run(test_config.deployments, command='plan')
+        mock_get_env.return_value = 'test'
+        mock_context.return_value = mock_context
+        mock_context.is_interactive = bool(mock_input)
+        mock_context.is_noninteractive = not bool(mock_input)  # True if None
+        mock_context.env_vars = {}
 
-        get_env.assert_has_calls([call(os.getcwd(), False,
-                                       prompt_if_unexpected=True),
-                                  call(os.getcwd(), False,
-                                       prompt_if_unexpected=False)])
+        monkeypatch.setattr(MODULE + '.input', mock_input)
+        monkeypatch.setattr(ModulesCommand, 'reverse_deployments',
+                            MagicMock(return_value=['reversed-deployments']))
+        monkeypatch.setattr(ModulesCommand, 'runway_config', config)
+        monkeypatch.setattr(ModulesCommand, 'select_deployment_to_run',
+                            MagicMock(return_value=['deployment']))
+        monkeypatch.setattr(ModulesCommand, '_process_deployments', MagicMock())
+
+        if command == 'destroy' and mock_input and mock_input.return_value != 'y':
+            with pytest.raises(SystemExit) as excinfo:
+                ModulesCommand(cli_args).run(command=command)
+            mock_input.assert_called_once_with('Proceed?: ')
+            assert excinfo.value.code == 0
+            return  # end here since a lot of the rest will be skipped
+
+        env_vars = {}
+        if not mock_input:
+            env_vars['CI'] = '1'
+
+        with environ(env_vars):
+            ModulesCommand(cli_args).run(command=command)
+
+            mock_get_env.assert_called_once_with(
+                os.getcwd(), config.ignore_git_branch,
+                prompt_if_unexpected=bool(mock_input)
+            )
+            mock_context.assert_called_once_with(env_name='test',
+                                                 env_region=None,
+                                                 env_root=os.getcwd(),
+                                                 env_vars=os.environ,
+                                                 command=command)
+
+        assert mock_context.env_vars['RUNWAYCONFIG'] == './runway.yml'
+
+        if command == 'destroy' and mock_input:
+            mock_input.assert_called_once_with('Proceed?: ')
+            ModulesCommand.reverse_deployments.assert_called_once()
+
+        if mock_context.is_noninteractive or cli_args.get('--tag'):
+            mock_select_modules_to_run.assert_called()
+        else:
+            ModulesCommand.select_deployment_to_run.assert_called_once_with(
+                config.deployments, command)
+            mock_select_modules_to_run.assert_called_once_with(
+                'deployment', cli_args.get('--tag'), command,
+                mock_context.is_noninteractive, mock_context.env_name
+            )
+        # pylint: disable=no-member
+        ModulesCommand._process_deployments.assert_called_once_with(ANY,
+                                                                    mock_context)
 
 
 class TestValidateEnvironment(object):

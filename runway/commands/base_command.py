@@ -20,7 +20,7 @@ class BaseCommand(object):
     SKIP_FIND_CONFIG = False  # set to true for commands that don't need config
 
     def __init__(self,
-                 cli_arguments,  # type: Dict[str, Any]
+                 cli_arguments=None,  # type: Optional[Dict[str, Any]]
                  env_root=None,  # type: Optional[str]
                  runway_config_dir=None  # type: Optional[str]
                  # pylint only complains for python2
@@ -29,12 +29,12 @@ class BaseCommand(object):
         """Initialize base class.
 
         Args:
-            cli_arguments (Dict[str, Any]): Args passed from docopt.
+            cli_arguments (Optional[Dict[str, Any]]): Args passed from docopt.
             env_root (Optional[str]): Root directory for the current environment.
             runway_config_dir (Optional[str]): Path to the Runway config file.
 
         """
-        self._cli_arguments = cli_arguments
+        self._cli_arguments = cli_arguments or {}
 
         if env_root is None:
             self.env_root = os.getcwd()

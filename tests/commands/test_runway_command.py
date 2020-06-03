@@ -23,7 +23,7 @@ class TestRunwayCommand(object):
     def test_execute(self):
         """Test execute."""
         with pytest.raises(NotImplementedError) as excinfo:
-            assert RunwayCommand({}).execute()
+            assert RunwayCommand().execute()
         assert str(excinfo.value) == \
             'execute must be implimented for subclasses of BaseCommand.'
 

@@ -8,8 +8,10 @@ from typing import Dict
 import pytest
 import yaml
 
+from runway.config import Config
+
 from .factories import (MockCFNginContext, MockRunwayConfig, MockRunwayContext,
-                        YamlLoaderDeploymet)
+                        YamlLoader, YamlLoaderDeploymet)
 
 if sys.version_info.major > 2:  # TODO remove after droping python 2
     from pathlib import Path  # pylint: disable=E
@@ -52,6 +54,17 @@ def aws_credentials():
     saved_env.clear()
 
 
+@pytest.fixture(scope='session', autouse=True)
+def sanitize_environment():
+    # type: () -> None
+    """Remove variables from the environment that could interfere with tests."""
+    env_vars = ['CI', 'DEBUG', 'DEPLOY_ENVIRONMENT', 'CFNGIN_STACK_POLL_TIME',
+                'RUNWAY_MAX_CONCURRENT_MODULES',
+                'RUNWAY_MAX_CONCURRENT_REGIONS']
+    for var in env_vars:
+        os.environ.pop(var, None)
+
+
 @pytest.fixture(scope='package')
 def fixture_dir():
     # type: () -> str
@@ -61,9 +74,17 @@ def fixture_dir():
     return path
 
 
+@pytest.fixture(scope='module')
+def fx_config():
+    """Return YAML loader for config fixtures."""
+    return YamlLoader(TEST_ROOT / 'fixtures' / 'configs',
+                      load_class=Config,
+                      load_type='kwargs')
+
+
 @pytest.fixture(scope='function')
 def fx_deployments():
-    """Return yaml loader for deployment fixtures."""
+    """Return YAML loader for deployment fixtures."""
     return YamlLoaderDeploymet(TEST_ROOT / 'fixtures' / 'deployments')
 
 

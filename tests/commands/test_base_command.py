@@ -26,7 +26,7 @@ class TestBaseCommand(object):
         """Test execute."""
         patch_runway_config.find_config_file.return_value = 'runway.yml'
         with pytest.raises(NotImplementedError) as excinfo:
-            assert BaseCommand({}, env_root='./',
+            assert BaseCommand(env_root='./',
                                runway_config_dir='./').execute()
         assert str(excinfo.value) == \
             'execute must be implimented for subclasses of BaseCommand.'
@@ -52,7 +52,7 @@ class TestBaseCommand(object):
         runway_config_dir = tmp_path / 'some_dir'
         runway_yml = str(runway_config_dir / 'runway.yml')
         patch_runway_config.find_config_file.return_value = runway_yml
-        obj = BaseCommand({}, env_root=str(tmp_path),
+        obj = BaseCommand(env_root=str(tmp_path),
                           runway_config_dir=str(runway_config_dir))
 
         assert obj._cli_arguments == {}
@@ -69,7 +69,7 @@ class TestBaseCommand(object):
         env_root = os.path.join(cwd, 'tests')
         patch_runway_config.find_config_file.side_effect = [SystemExit,
                                                             'runway.yml']
-        obj = BaseCommand({}, env_root=env_root)
+        obj = BaseCommand(env_root=env_root)
 
         assert obj.runway_config_path == 'runway.yml'
         assert obj.env_root == cwd_parent
@@ -79,7 +79,7 @@ class TestBaseCommand(object):
     def test_init_skip_find_config(self, monkeypatch, patch_runway_config):
         """Test init where SKIP_FIND_CONFIG=True (subclasses)."""
         monkeypatch.setattr(BaseCommand, 'SKIP_FIND_CONFIG', True)
-        obj = BaseCommand({})
+        obj = BaseCommand()
 
         assert obj._runway_config is None
         assert obj.runway_config_path is None
@@ -87,7 +87,7 @@ class TestBaseCommand(object):
 
     def test_runway_config(self, patch_runway_config):
         """Test runway config."""
-        obj = BaseCommand({})
+        obj = BaseCommand()
         assert obj.runway_config == patch_runway_config
         # ensure value is properly cached
         assert obj._runway_config == obj.runway_config
@@ -96,7 +96,7 @@ class TestBaseCommand(object):
 
     def test_runway_vars(self, patch_runway_config):
         """Test runway_vars."""
-        obj = BaseCommand({})
+        obj = BaseCommand()
         assert isinstance(obj.runway_config, MutableMap)
         assert obj.runway_vars.data == {}
         patch_runway_config.load_from_file.assert_called_once()
