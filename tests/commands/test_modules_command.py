@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import sys
 from os import path
 
 import boto3
@@ -10,7 +11,7 @@ import pytest
 import six
 import yaml
 from botocore.stub import Stubber
-from mock import ANY, MagicMock, patch
+from mock import ANY, MagicMock, call, patch
 from moto import mock_sts
 
 from runway.commands.modules_command import (ModulesCommand, assume_role,
@@ -345,7 +346,118 @@ class TestModulesCommand(object):
 
     """
 
-    @pytest.mark.wip
+    def test_execute(self):
+        """Test execute."""
+        with pytest.raises(NotImplementedError):
+            ModulesCommand().execute()
+
+    @patch(MODULE + '.merge_dicts')
+    @patch(MODULE + '.merge_nested_environment_dicts')
+    def test_process_deployments(self, mock_merge_nested_environment_dicts,
+                                 mock_merge_dicts, fx_config, monkeypatch,
+                                 runway_context):
+        """Test _process_deployments."""
+        config = fx_config.load('min_required')  # single deployment for tests
+        deployment = config.deployments[0]
+        monkeypatch.setattr(deployment, 'resolve', MagicMock())
+        monkeypatch.setattr(ModulesCommand, 'runway_config', config)
+        monkeypatch.setattr(ModulesCommand, '_execute_deployment', MagicMock())
+
+        ModulesCommand()._process_deployments(config.deployments,
+                                              runway_context)
+
+        deployment.resolve.assert_called_once_with(runway_context,
+                                                   config.variables,
+                                                   pre_process=True)
+        # pylint: disable=no-member
+        ModulesCommand._execute_deployment.assert_has_calls([
+            call(deployment, runway_context, region)
+            for region in deployment.regions
+        ])
+        mock_merge_nested_environment_dicts.assert_not_called()
+        mock_merge_dicts.assert_not_called()
+
+        copy_env_vars = runway_context.env_vars.copy()
+        deployment._env_vars = MagicMock()
+        deployment._env_vars.value = {'key': 'val'}
+        mock_merge_nested_environment_dicts.return_value = {'state': 'env'}
+        mock_merge_dicts.return_value = {'state': 'merged'}
+        ModulesCommand()._process_deployments(config.deployments,
+                                              runway_context)
+        mock_merge_nested_environment_dicts.assert_called_once_with(
+            {'key': 'val'},
+            env_name=runway_context.env_name,
+            env_root=os.getcwd()
+        )
+        mock_merge_dicts.assert_called_once_with(copy_env_vars,
+                                                 {'state': 'env'})
+        assert runway_context.env_vars == {'state': 'merged'}
+        assert ModulesCommand._execute_deployment.call_count == 2
+
+        ModulesCommand._execute_deployment.reset_mock()
+        deployment.modules = []
+        ModulesCommand({'--tag': ['something']})._process_deployments(
+            config.deployments,
+            runway_context
+        )
+        ModulesCommand._execute_deployment.assert_not_called()
+
+        config = fx_config.load('min_required')
+        deployment = config.deployments[0]
+        monkeypatch.setattr(deployment, 'resolve', MagicMock())
+        deployment._regions = MagicMock()
+        deployment._regions.value = []
+        with pytest.raises(SystemExit) as excinfo:
+            ModulesCommand()._process_deployments(config.deployments,
+                                                  runway_context)
+        assert excinfo.value.code == 1
+
+    @patch('runway.commands.modules_command.concurrent.futures')
+    @pytest.mark.skipif(sys.version_info.major < 3,
+                        reason='only supported by python 3')
+    @pytest.mark.parametrize('config, use_concurrent', [
+        ('simple_parallel_regions.1', True),
+        ('simple_parallel_regions.1', False),
+        ('simple_parallel_regions.2', True),
+        ('simple_parallel_regions.2', False)
+    ])
+    def test_process_deployments_parallel(self, mock_futures,
+                                          config, use_concurrent,
+                                          fx_config, monkeypatch,
+                                          runway_context):
+        """Test _process_deployments with parallel regions."""
+        # pylint: disable=no-member
+        config = fx_config.load(config)  # single deployment for tests
+        deployment = config.deployments[0]
+        executor = MagicMock()
+        mock_futures.ProcessPoolExecutor.return_value = executor
+        runway_context.use_concurrent = use_concurrent
+        monkeypatch.setattr(deployment, 'resolve', MagicMock())
+        monkeypatch.setattr(ModulesCommand, 'runway_config', config)
+        monkeypatch.setattr(ModulesCommand, '_execute_deployment', MagicMock())
+
+        ModulesCommand()._process_deployments(config.deployments,
+                                              runway_context)
+
+        deployment.resolve.assert_called_once_with(runway_context,
+                                                   config.variables,
+                                                   pre_process=True)
+
+        if not use_concurrent:
+            ModulesCommand._execute_deployment.assert_called()
+            return
+
+        mock_futures.ProcessPoolExecutor.assert_called_once_with(
+            max_workers=runway_context.max_concurrent_regions
+        )
+        executor.submit.has_calls([
+            (ModulesCommand._execute_deployment, deployment, runway_context,
+             region, True) for region in deployment.parallel_regions
+        ])
+        mock_futures.wait.called_once()
+        assert executor.submit.return_value.result.call_count == \
+            len(deployment.parallel_regions)
+
     @patch(MODULE + '.select_modules_to_run')
     @patch(MODULE + '.get_env')
     @patch(MODULE + '.Context')

@@ -392,6 +392,7 @@ class ModulesCommand(RunwayCommand):
                 # to the next deployment rather than exiting
                 continue
 
+            # check should be obsolete, checked when the config is parsed
             if deployment.regions or deployment.parallel_regions:
                 if deployment.env_vars:
                     deployment_env_vars = merge_nested_environment_dicts(

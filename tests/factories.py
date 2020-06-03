@@ -251,6 +251,7 @@ class MockRunwayContext(RunwayContext):
                                                 command=command)
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
+        self._use_concurrent = True
 
     def add_stubber(self, service_name, region=None):
         """Add a stubber to context.
@@ -276,6 +277,21 @@ class MockRunwayContext(RunwayContext):
         return MockBoto3Session(clients=self._boto3_test_client,
                                 profile_name=profile,
                                 region_name=region or self.env_region)
+
+    @property
+    def use_concurrent(self):
+        """Override property of parent with something that can be set."""
+        return self._use_concurrent
+
+    @use_concurrent.setter
+    def use_concurrent(self, value):
+        """Override property of parent with something that can be set.
+
+        Args:
+            value (bool): New value for the attribute.
+
+        """
+        self._use_concurrent = value
 
 
 class YamlLoader(object):
