@@ -638,7 +638,7 @@ class ModulesCommand(RunwayCommand):
         return [selected_deployment]
 
 
-def _module_name_for_display(module):
+def _module_name_for_display(module):  # this is obsolete
     """Extract a name for the module."""
     if isinstance(module, dict):
         return module['path']
@@ -660,6 +660,7 @@ def _module_menu_entry(module, environment_name):
 
 def _deployment_menu_entry(deployment):
     """Build a string to display in the 'select deployment' menu."""
-    paths = ", ".join([_module_name_for_display(module) for module in deployment['modules']])
+    paths = ", ".join([_module_name_for_display(module)
+                       for module in deployment['modules']])
     regions = ", ".join(deployment.get('regions', []))
     return "%s - %s (%s)" % (deployment.get('name'), paths, regions)

@@ -14,7 +14,11 @@ from botocore.stub import Stubber
 from mock import ANY, MagicMock, call, patch
 from moto import mock_sts
 
-from runway.commands.modules_command import (ModulesCommand, assume_role,
+from runway.commands.modules_command import (ModulesCommand,
+                                             _deployment_menu_entry,
+                                             _module_menu_entry,
+                                             _module_name_for_display,
+                                             assume_role,
                                              load_module_opts_from_file,
                                              post_deploy_assume_role,
                                              pre_deploy_assume_role,
@@ -85,6 +89,16 @@ def test_assume_role(session_name, duration, region, env_vars, caplog, monkeypat
     assert caplog.messages == ["Assuming role %s..." % role_arn]
 
 
+@pytest.mark.parametrize('deployment, expected', [
+    ('min_required', 'deployment_1 - sampleapp-01.cfn (us-east-1)'),
+    ('min_required_multi',
+     'deployment_1 - sampleapp-01.cfn, sampleapp-02.cfn (us-east-1, us-west-2)')
+])
+def test_deployment_menu_entry(deployment, expected, fx_deployments):
+    """Test _deployment_menu_entry."""
+    assert _deployment_menu_entry(fx_deployments.load(deployment)) == expected
+
+
 def test_load_module_opts_from_file(tmp_path):
     """Test load_module_opts_from_file."""
     mod_opts = {'initial': 'val'}
@@ -96,6 +110,28 @@ def test_load_module_opts_from_file(tmp_path):
 
     file_path.write_text(six.u(yaml.safe_dump(file_content)))
     assert load_module_opts_from_file(str(tmp_path), mod_opts.copy()) == merged
+
+
+@pytest.mark.parametrize('module, expected', [
+    ('string', 'string'),
+    ({'path': 'simple-dict'}, 'simple-dict'),
+    ({'path': 'env-mismatch', 'environments': {'dev': True}}, 'env-mismatch'),
+    ({'path': 'env-match', 'environments': {'test': 'something'}},
+     'env-match (something)')
+])
+def test_module_menu_entry(module, expected):
+    """Test _module_menu_entry."""
+    assert _module_menu_entry(module, 'test') == expected
+
+
+@pytest.mark.parametrize('module, expected', [
+    ({'path': 'path-dict'}, 'path-dict'),
+    ('string', 'string'),
+    (MagicMock(path='path-attr'), 'path-attr')
+])
+def test_module_name_for_display(module, expected):
+    """Test _module_name_for_display."""
+    assert _module_name_for_display(module) == expected
 
 
 def test_post_deploy_assume_role(monkeypatch, runway_context):
