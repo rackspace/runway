@@ -3,11 +3,15 @@
 import logging
 import os
 
+import boto3
 import pytest
+from botocore.stub import Stubber
 from mock import patch
 
 from runway.context import Context
 from runway.util import environ
+
+from .factories import MockBoto3Session
 
 LOGGER = logging.getLogger('runway')
 
@@ -20,6 +24,30 @@ TEST_CREDENTIALS = {
 
 class TestContext(object):
     """Test Context class."""
+
+    def test_account_id(self, monkeypatch):
+        """Test account_id."""
+        account_id = '123456789012'
+        client = boto3.client('sts')
+        stubber = Stubber(client)
+        mock_session = MockBoto3Session(clients={'sts.us-east-1': client},
+                                        region_name='us-east-1')
+        monkeypatch.setattr(Context, 'get_session', lambda self_: mock_session)
+        context = Context(env_name='test',
+                          env_region='us-east-1',
+                          env_root='./',
+                          env_vars={})
+
+        stubber.add_response(method='get_caller_identity',
+                             service_response={'UserId': 'test-user',
+                                               'Account': account_id,
+                                               'Arn': 'arn:aws:iam::{}:'
+                                                      'user/test-user'
+                                                      .format(account_id)})
+
+        with stubber as stub:
+            assert context.account_id == account_id
+        stub.assert_no_pending_responses()
 
     def test_boto3_credentials(self):
         """Test boto3_credentials."""

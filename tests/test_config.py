@@ -1,13 +1,15 @@
 """Test Runway config classes."""
+# pylint: disable=no-self-use
+import logging
 import os
 from copy import deepcopy
 from tempfile import NamedTemporaryFile
 
 import pytest
 import yaml
-
 from runway.cfngin.exceptions import UnresolvedVariable
-from runway.config import DeploymentDefinition, ModuleDefinition
+from runway.config import (DeploymentDefinition, FutureDefinition,
+                           ModuleDefinition)
 # tries to test the imported class unless using "as"
 from runway.config import TestDefinition as ConfigTestDefinition
 from runway.config import VariablesDefinition
@@ -86,6 +88,36 @@ class TestDeploymentDefinition(object):
         assert deployment.regions == ['us-east-1']
 
         assert not deployment.parallel_regions, 'not set in test config, should be None'
+
+
+class TestFutureDefinition(object):
+    """Test FutureDefinition."""
+
+    def test_init(self, caplog):
+        """Test init and the attributes it sets."""
+        caplog.set_level(logging.INFO, logger='runway')
+        config = {
+            'strict_environments': True,
+            'invalid_key': True
+        }
+
+        result = FutureDefinition(**config)
+        assert result.strict_environments is config['strict_environments']
+        assert caplog.messages == [
+            'Invalid key(s) found in "future" have been ignored: invalid_key'
+        ]
+
+        with pytest.raises(TypeError):
+            assert not FutureDefinition(strict_environments='true')
+        assert not any(val for val in FutureDefinition().data.values())
+
+    @pytest.mark.parametrize('config, expected', [
+        ({'strict_environments': True}, ['strict_environments']),
+        ({'strict_environments': False}, [])
+    ])
+    def test_enabled(self, config, expected):
+        """Tested enabled."""
+        assert FutureDefinition(**config).enabled == expected
 
 
 class TestModuleDefinition(object):

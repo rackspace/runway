@@ -199,8 +199,19 @@ class MockRunwayContext(RunwayContext):
                                                 env_root=env_root,
                                                 env_vars=env_vars,
                                                 command=command)
+        self._account_id = '123456789012'
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
+
+    @property
+    def account_id(self):
+        """Override account_id."""
+        return self._account_id
+
+    @account_id.setter
+    def account_id(self, value):
+        """Set account_id."""
+        self._account_id = value
 
     def add_stubber(self, service_name, region=None):
         """Add a stubber to context.
