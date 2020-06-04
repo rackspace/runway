@@ -503,10 +503,8 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
     # exclude potential virtual environments in the package
     excludes.append('.venv/')
 
-    # TODO remove pylint disable when dropping python2
-    with tempfile.TemporaryDirectory(
-            prefix='cfngin', dir=temp_root  # pylint: disable=bad-continuation
-    ) as tmpdir:
+    with tempfile.TemporaryDirectory(prefix='cfngin',
+                                     dir=temp_root) as tmpdir:
         tmp_req = os.path.join(tmpdir, 'requirements.txt')
         copydir(package_root, tmpdir, includes, excludes, follow_symlinks)
         tmp_req = handle_requirements(package_root=package_root,

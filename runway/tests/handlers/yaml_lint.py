@@ -3,13 +3,11 @@
 import glob
 import logging
 import os
-import sys
-import tempfile
-from typing import Dict, Any, List  # pylint: disable=unused-import
+import runpy
+from typing import Any, Dict, List  # pylint: disable=unused-import
 
 from runway.tests.handlers.base import TestHandler
-from runway.tests.handlers.script import ScriptHandler
-from runway.util import change_dir
+from runway.util import argv
 
 TYPE_NAME = 'yamllint'
 LOGGER = logging.getLogger('runway')
@@ -31,23 +29,13 @@ class YamllintHandler(TestHandler):
         return yaml_files + yml_files
 
     @classmethod
-    def get_yamllint_options(cls, path, quote_paths=True):
-        # type: (str, bool) -> List[str]
+    def get_yamllint_options(cls, path):
+        # type: (str) -> List[str]
         """Return yamllint option list."""
-        dirs_to_scan = cls.get_dirs(path)
-        files_at_base = cls.get_yaml_files_at_path(path)
         yamllint_options = []
 
-        if dirs_to_scan:
-            yamllint_options.extend(
-                ["\"%s\"" % x if quote_paths else x for x in dirs_to_scan]
-            )
-        if files_at_base:
-            yamllint_options.extend(
-                ["\"%s\"" % x if quote_paths else x for x in files_at_base]
-            )
-
-        return yamllint_options
+        return yamllint_options + cls.get_dirs(path) + \
+            cls.get_yaml_files_at_path(path)
 
     @classmethod
     def handle(cls, name, args):
@@ -69,41 +57,7 @@ class YamllintHandler(TestHandler):
             )
 
         yamllint_options = ["--config-file=%s" % yamllint_config]
-        yamllint_options.extend(cls.get_yamllint_options(base_dir,
-                                                         not getattr(sys, 'frozen', False)))
+        yamllint_options.extend(cls.get_yamllint_options(base_dir))
 
-        if getattr(sys, 'frozen', False):
-            # running in pyinstaller single-exe, so sys.executable will
-            # be the all-in-one Runway binary
-
-            # This would be a little more natural if yamllint was imported
-            # directly, but that has unclear license implications so instead
-            # we'll generate the setuptools invocation script here and shell
-            # out to it
-            yamllint_invocation_script = (
-                "import sys;"
-                "from yamllint.cli import run;"
-                "sys.argv = [%s];"
-                "sys.exit(run());" % ','.join(
-                    "'%s'" % i for i in ['yamllint'] + yamllint_options
-                )
-            )
-
-            temp_fd, temp_path = tempfile.mkstemp(prefix='yamllint')
-            os.close(temp_fd)
-            with open(temp_path, 'w') as fileobj:
-                fileobj.write(yamllint_invocation_script)
-
-            yl_cmd = sys.executable + ' run-python ' + temp_path
-        else:
-            # traditional python execution
-            yl_cmd = "yamllint " + ' '.join(yamllint_options)
-        with change_dir(base_dir):
-            try:
-                ScriptHandler().handle(
-                    'yamllint',
-                    {'commands': [yl_cmd]}
-                )
-            finally:
-                if getattr(sys, 'frozen', False):
-                    os.remove(temp_path)
+        with argv(*['yamllint'] + yamllint_options):
+            runpy.run_module('yamllint', run_name='__main__')
