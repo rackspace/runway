@@ -27,6 +27,8 @@ from runway.commands.modules_command import (ModulesCommand,
                                              validate_account_credentials,
                                              validate_account_id,
                                              validate_environment)
+from runway.config import Config
+from runway.util import MutableMap, environ
 from runway.util import environ
 
 from ..factories import MockBoto3Session
@@ -892,43 +894,59 @@ class TestModulesCommand(object):
             )
 
 
-class TestValidateEnvironment(object):
-    """Tests for validate_environment."""
-
-    MOCK_ACCOUNT_ID = '123456789012'
-
-    def test_bool_match(self):
-        """True bool should match."""
-        assert validate_environment('test_module', True, os.environ)
-
-    def test_bool_not_match(self):
-        """False bool should not match."""
-        assert not validate_environment('test_module', False, os.environ)
-
-    @mock_sts
-    def test_list_match(self):
-        """Env in list should match."""
-        assert validate_environment('test_module',
-                                    [self.MOCK_ACCOUNT_ID + '/us-east-1'],
-                                    os.environ)
-
-    @mock_sts
-    def test_list_not_match(self):
-        """Env not in list should not match."""
-        assert not validate_environment('test_module',
-                                        [self.MOCK_ACCOUNT_ID + '/us-east-2'],
-                                        os.environ)
-
-    @mock_sts
-    def test_str_match(self):
-        """Env in string should match."""
-        assert validate_environment('test_module',
-                                    self.MOCK_ACCOUNT_ID + '/us-east-1',
-                                    os.environ)
-
-    @mock_sts
-    def test_str_not_match(self):
-        """Env not in string should not match."""
-        assert not validate_environment('test_module',
-                                        self.MOCK_ACCOUNT_ID + '/us-east-2',
-                                        os.environ)
+@pytest.mark.parametrize('env_def, strict, expected, expected_logs', [
+    (True, False, True, ['test_module: explicitly enabled']),
+    (False, False, False, ['test_module: skipped; explicitly disabled']),
+    (['123456789012/us-east-1'], False, True, []),
+    (['123456789012/us-east-2'], False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ('123456789012/us-east-1', False, True, []),
+    ('123456789012/us-east-2', False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({}, False, None,
+     ['test_module: environment not defined; module will determine deployment']),
+    ({}, True, None,
+     ['test_module: environment not defined; module will determine deployment']),
+    ({'example': '111111111111/us-east-1'}, False, None,
+     ['test_module: environment not in definition; module will determine deployment']),
+    ({'example': '111111111111/us-east-1'}, True, False,
+     ['test_module: skipped; environment not in definition']),
+    ({'test': False}, False, False,
+     ['test_module: skipped; explicitly disabled']),
+    ({'test': True}, False, True, ['test_module: explicitly enabled']),
+    ({'test': '123456789012/us-east-1'}, False, True, []),
+    ({'test': '123456789012/us-east-2'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': '123456789012'}, False, True, []),
+    ({'test': '111111111111'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': 123456789012}, False, True, []),
+    ({'test': 111111111111}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': 'us-east-1'}, False, True, []),
+    ({'test': 'us-east-2'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['123456789012/us-east-1', '123456789012/us-east-2']}, False,
+     True, []),
+    ({'test': ['123456789012/us-east-2']}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['123456789012', '111111111111']}, False, True, []),
+    ({'test': ['111111111111']}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': [123456789012, 111111111111]}, False, True, []),
+    ({'test': [111111111111]}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['us-east-1', 'us-east-2']}, False, True, []),
+    ({'test': ['us-east-2']}, False, False,
+     ['test_module: skipped; account_id/region mismatch'])
+])
+def test_validate_environment(env_def, strict, expected, expected_logs,
+                              caplog, runway_context):
+    """Test validate_environment."""
+    mock_module = MutableMap(name='test_module')
+    caplog.set_level(logging.DEBUG, logger='runway')
+    assert validate_environment(runway_context, mock_module, env_def, strict) \
+        is expected
+    # all() does not give an output that can be used for troubleshooting failures
+    for log in expected_logs:
+        assert log in caplog.messages

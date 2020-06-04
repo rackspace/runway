@@ -59,6 +59,17 @@ class Context(object):
         self.__inject_profile_credentials()  # TODO remove after IaC tools support AWS SSO
 
     @property
+    def account_id(self):
+        """Get the AccountId of the current AWS account.
+
+        Returns:
+            str: AWS Account ID.
+
+        """
+        client = self.get_session().client('sts')
+        return client.get_caller_identity()['Account']
+
+    @property
     def boto3_credentials(self):
         """Return a dict of boto3 credentials."""
         return {key.lower(): value

@@ -38,3 +38,6 @@ integration_tests/test_cfngin/tests/[0-9][0-9]_*.yaml
 
 # Programatically generated doc pages
 docs/source/apidocs
+
+# vscode settings
+.vscode/bookmarks.json

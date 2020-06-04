@@ -1,13 +1,19 @@
 """Update Runway release URLs."""
 # pylint: disable=no-member
 import logging
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import boto3
 import click
-from mypy_boto3.boto3_session import Session
-from mypy_boto3_dynamodb.service_resource import Table
+
 from semver import VersionInfo
+
+if TYPE_CHECKING:  # only req boto3-stubs as a dev dependency
+    from mypy_boto3.boto3_session import Session
+    from mypy_boto3_dynamodb.service_resource import Table
+else:
+    Session = object
+    Table = object
 
 LOGGER = logging.getLogger('update_urls')
 HDLR = logging.StreamHandler()

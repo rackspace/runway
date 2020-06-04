@@ -29,6 +29,10 @@ pre_build:
               - '*.py'
             exclude:
               - '*.pyc'
+        authatedge:
+            path: ./fixtures/lambda_src/authatedge_src
+            exclude:
+              - '*.pyc'
 
 stacks:
   test-dockerize:
@@ -43,6 +47,11 @@ stacks:
       Code: ${hook_data lambda::nondockerize}
       Entrypoint: nondockerize.handler
       AppName: nondockerizepip
+  test-authatedge:
+    class_path: fixtures.lambda_function.BlueprintClass
+    variables:
+      Code: ${hook_data lambda::authatedge}
+      AppName: authatedge
 
 post_destroy:
   purge_bucket:
