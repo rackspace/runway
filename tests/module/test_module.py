@@ -42,22 +42,24 @@ class TestRunwayModuleNpm(object):
                 'please ensure it is installed correctly.'] == \
             caplog.messages
 
-    @patch.object(RunwayModuleNpm, 'check_for_npm', MagicMock(return_value=None))
+    @patch('runway.module.which')
     @patch('runway.module.warn_on_boto_env_vars')
-    def test_init(self, mock_warn, runway_context, tmp_path):
+    def test_init(self, mock_warn, mock_which, caplog, runway_context, tmp_path):
         """Test init and the attributes set in init."""
         # pylint: disable=no-member
+        caplog.set_level(logging.ERROR, logger='runway')
+        mock_which.side_effect = [True, True, False]
         options = {
             'environments': True,  # can only be True of a falsy value (but not dict)
             'options': {'test_option': 'option_value'},
             'parameters': {'test_parameter': 'parameter_value'},
             'extra': 'something'
         }
-        obj = RunwayModuleNpm(context=runway_context,
+        obj = RunwayModuleNpm(context=runway_context,  # side_effect[0]
                               path=str(tmp_path),
                               options=options.copy())
 
-        obj.check_for_npm.assert_called_once()
+        mock_which.assert_called_once()
         assert obj.context == runway_context
         assert obj.environments == options['environments']
         assert obj.extra == options['extra']
@@ -67,12 +69,22 @@ class TestRunwayModuleNpm(object):
         assert str(obj.path) == str(tmp_path)
         mock_warn.assert_called_once_with(runway_context.env_vars)
 
-        obj = RunwayModuleNpm(context=runway_context,
+        obj = RunwayModuleNpm(context=runway_context,  # side_effect[1]
                               path=tmp_path)
         assert not obj.environments
         assert not obj.options
         assert not obj.parameters
         assert obj.path == tmp_path
+
+        caplog.clear()
+        with pytest.raises(SystemExit) as excinfo:
+            obj = RunwayModuleNpm(context=runway_context,  # side_effect[2]
+                                  path=tmp_path)
+        assert excinfo.value.code > 0  # non-zero exit code
+        assert caplog.messages == [
+            '{}: "npm" not found in path or is not executable; '
+            'please ensure it is installed correctly.'.format(tmp_path.name)
+        ]
 
     @patch('runway.module.format_npm_command_for_logging')
     def test_log_npm_command(self, mock_log, caplog, patch_module_npm,
