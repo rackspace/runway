@@ -43,7 +43,7 @@ Toggles to opt-in to future, potentially backward compatibility breaking functio
 
 Availability of these toggles will be removed at each major release as the functionality will then be made standard.
 
-**static_environments (bool)**
+**strict_environments (bool)**
   When enabled, handling of ``environments`` for Deployment_ and Module_ definitions is changed to prevent processing of modules when the current environment is not defined in the Runway config file.
 
   If ``environments`` is defined and the current :ref:`deploy environment <term-deploy-env>` is not in the definition, the module will be skipped.
@@ -53,7 +53,7 @@ Availability of these toggles will be removed at each major release as the funct
   .. code-block:: yaml
 
       future:
-        static_environments: true
+        strict_environments: true
 
       deployments:
         - environments:

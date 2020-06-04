@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `-no-color`/`--no-color` option automatically added to cdk, npm, sls, and tf commands
   - looks at `RUNWAY_COLORIZE` env var for an explicit enable/disable
   - if not set, checks `sys.stdout.isatty()` to determine if option should be provided
-- `future.static_environments` top-level configuration option
+- `future.strict_environments` top-level configuration option
   - modifies how `deployment.environments`/`module.environments` are handled
 
 ### Changed
