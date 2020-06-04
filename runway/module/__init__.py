@@ -163,7 +163,6 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
                 definition.
 
         """
-        self.check_for_npm()  # fail fast
         options = options or {}
         super(RunwayModuleNpm, self).__init__(context, path, options)
         del self.options  # remove the attr set by the parent class
@@ -178,6 +177,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         for k, v in options.items():
             setattr(self, k, v)
 
+        self.check_for_npm()  # fail fast
         warn_on_boto_env_vars(self.context.env_vars)
 
     def check_for_npm(self):

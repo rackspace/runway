@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.8.1] - 2020-06-04
 ### Added
 - `destroy_stack` is now aware of `action=diff` and prints a different confirmation prompt
 - `-no-color`/`--no-color` option automatically added to cdk, npm, sls, and tf commands
@@ -15,6 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - a@e check_auth will now try to refresh tokens 5 minutes before expiration instead of waiting for it to expire
 - `runway test` will now return a non-zero exit code if any non-required tests failed
 - `static-react` sample uses npm instead of yarn
+- `yamllint` is now invoked using `runpy` instead of using `runway run-python`
+
+### Fixed
+- issue where `yamllint` and `cfnlint` could not be imported/executed from the Pyinstaller executables
+- fixed issue where CFNgin blueprints/hooks/lookups would encounter namespace collisions because imports were not being unloaded between instances
+
+### Fixed
+- the friendly error when npm can't be found has returned
 
 ## [1.8.0] - 2020-05-16
 ### Fixed
@@ -827,7 +837,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.1...HEAD
+[1.8.1]: https://github.com/onicagroup/runway/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/onicagroup/runway/compare/v1.7.3...v1.8.0
 [1.7.3]: https://github.com/onicagroup/runway/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/onicagroup/runway/compare/v1.7.1...v1.7.2
