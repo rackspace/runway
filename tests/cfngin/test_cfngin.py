@@ -1,10 +1,10 @@
 """Tests for runway.cfngin entry point."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=no-self-use,protected-access.redefined-outer-name
 import os
 import shutil
 
 import pytest
-from mock import MagicMock, patch
+from mock import MagicMock, call, patch
 
 from runway.cfngin import CFNgin
 from runway.context import Context
@@ -21,6 +21,15 @@ def copy_basic_fixtures(cfngin_fixtures, tmp_path):
                  dest=tmp_path / 'test-us-east-1.env')
     copy_fixture(src=cfngin_fixtures / 'configs' / 'basic.yml',
                  dest=tmp_path / 'basic.yml')
+
+
+@pytest.fixture(scope='function')
+def patch_safehaven(monkeypatch):
+    """Patch SafeHaven."""
+    mock_haven = MagicMock()
+    mock_haven.return_value = mock_haven
+    monkeypatch.setattr('runway.cfngin.cfngin.SafeHaven', mock_haven)
+    return mock_haven
 
 
 class TestCFNgin(object):
@@ -77,7 +86,8 @@ class TestCFNgin(object):
         assert result.env_file.test_value == 'lab-ca-central-1'
 
     @patch('runway.cfngin.actions.build.Action')
-    def test_deploy(self, mock_action, cfngin_fixtures, tmp_path):
+    def test_deploy(self, mock_action, cfngin_fixtures, tmp_path,
+                    patch_safehaven):
         """Test deploy with two files & class init."""
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
@@ -110,21 +120,41 @@ class TestCFNgin(object):
                                           'tail': False},
                                          {'concurrency': 0,
                                           'tail': False}])
+        patch_safehaven.assert_has_calls([
+            call(environ=context.env_vars),
+            call.__enter__(),
+            call(argv=['stacker', 'build', str(tmp_path / 'basic.yml')]),
+            call.__enter__(),
+            call.__exit__(None, None, None),
+            call(argv=['stacker', 'build', str(tmp_path / 'basic2.yml')]),
+            call.__enter__(),
+            call.__exit__(None, None, None),
+            call.__exit__(None, None, None),
+        ])
 
     @patch('runway.cfngin.actions.destroy.Action')
-    def test_destroy(self, mock_action, cfngin_fixtures, tmp_path):
+    def test_destroy(self, mock_action, cfngin_fixtures, tmp_path,
+                     patch_safehaven):
         """Test destroy."""
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
 
-        # support python < 3.6
-        cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
+        context = self.get_context()
+        cfngin = CFNgin(ctx=context, sys_path=str(tmp_path))
         cfngin.destroy()
 
         mock_action.assert_called_once()
         mock_instance.execute.assert_called_once_with(concurrency=0,
                                                       force=True,
                                                       tail=False)
+        patch_safehaven.assert_has_calls([
+            call(environ=context.env_vars),
+            call.__enter__(),
+            call(argv=['stacker', 'destroy', str(tmp_path / 'basic.yml')]),
+            call.__enter__(),
+            call.__exit__(None, None, None),
+            call.__exit__(None, None, None),
+        ])
 
     def test_load(self, cfngin_fixtures, tmp_path):
         """Test load."""
@@ -152,17 +182,26 @@ class TestCFNgin(object):
         assert 'appears to be a CloudFormation template' in caplog.text
 
     @patch('runway.cfngin.actions.diff.Action')
-    def test_plan(self, mock_action, cfngin_fixtures, tmp_path):
+    def test_plan(self, mock_action, cfngin_fixtures, tmp_path,
+                  patch_safehaven):
         """Test plan."""
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
 
-        # support python < 3.6
-        cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
+        context = self.get_context()
+        cfngin = CFNgin(ctx=context, sys_path=str(tmp_path))
         cfngin.plan()
 
         mock_action.assert_called_once()
         mock_instance.execute.assert_called_once_with()
+        patch_safehaven.assert_has_calls([
+            call(environ=context.env_vars),
+            call.__enter__(),
+            call(argv=['stacker', 'diff', str(tmp_path / 'basic.yml')]),
+            call.__enter__(),
+            call.__exit__(None, None, None),
+            call.__exit__(None, None, None),
+        ])
 
     def test_should_skip(self, cfngin_fixtures, tmp_path):
         """Test should_skip."""

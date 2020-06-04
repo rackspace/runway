@@ -70,7 +70,7 @@ The CloudFormation module type is deployed using Runway's CloudFormation engine 
 It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_ templates that are written in the form of a :ref:`Blueprint`.
 
 - `Configuration <cfngin/configuration.html>`__
-- `Directory Structure <serverless/directory_structure.html>`__
+- `Directory Structure <cfngin/directory_structure.html>`__
 - `Advanced Features <cfngin/advanced_features.html>`__
 
 .. toctree::
@@ -84,6 +84,29 @@ It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_
    cfngin/migrating
 
 .. _Troposphere: https://github.com/cloudtools/troposphere
+
+
+.. _mod-k8s:
+
+Kubernetes
+==========
+
+Kubernetes manifests can be deployed via Runway offering an ideal way to handle core infrastructure-layer (e.g. shared ConfigMaps & Service Accounts) configuration of clusters by using `Kustomize overlays <https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays>`__.
+
+- `Configuration <kubernetes/configuration.html>`__
+- `Directory Structure <kubernetes/directory_structure.html>`__
+- `Examples <kubernetes/examples.html>`__
+- `Advanced Features <kubernetes/advanced_features.html>`__
+
+.. toctree::
+   :caption: CloudFormation & Troposphere
+   :maxdepth: 2
+   :hidden:
+
+   kubernetes/configuration
+   kubernetes/directory_structure
+   kubernetes/examples
+   kubernetes/advanced_features
 
 
 .. _mod-sls:
