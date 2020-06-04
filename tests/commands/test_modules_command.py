@@ -382,6 +382,142 @@ class TestModulesCommand(object):
 
     """
 
+    @patch(MODULE + '.validate_environment')
+    @patch(MODULE + '.merge_nested_environment_dicts')
+    @patch(MODULE + '.Path')
+    @patch(MODULE + '.RunwayModuleType')
+    @patch(MODULE + '.change_dir')
+    @pytest.mark.parametrize('deployment, command, deprecated_env', [
+        ('min_required', 'deploy', False),
+        ('min_required', 'destroy', False),
+        ('min_required', 'plan', False),
+        ('validate_account', 'deploy', False),
+        ('validate_account', 'destroy', False),
+        ('validate_account', 'plan', False),
+        ('simple_env_vars', 'deploy', False),
+        ('simple_env_vars', 'destroy', False),
+        ('simple_env_vars', 'plan', False),
+        ('simple_env_vars_map', 'deploy', False),
+        ('simple_env_vars_map', 'destroy', False),
+        ('simple_env_vars_map', 'plan', False),
+        ('environments_map_deprecated', 'deploy', True),
+        ('environments_map_deprecated', 'destroy', True),
+        ('environments_map_deprecated', 'plan', True),
+        ('environments_map_list', 'deploy', False),
+        ('environments_map_list', 'destroy', False),
+        ('environments_map_list', 'plan', False),
+        ('environments_map_str', 'deploy', False),
+        ('environments_map_str', 'destroy', False),
+        ('environments_map_str', 'plan', False),
+    ])
+    def test_deploy_module(self, mock_change_dir, mock_runwaymoduletype,
+                           mock_path,
+                           mock_merge_nested_environment_dicts,
+                           mock_validate_environment,
+                           deployment, command, deprecated_env,
+                           fx_deployments, monkeypatch, runway_context):
+        """Test _deploy_module.
+
+        This test is not well designed but it is about as good as it can be
+        given the density of logic and branches in the corresponding method.
+
+        """
+        deployment = fx_deployments.load(deployment)
+        module = deployment.modules[0]
+        runway_context.command = command
+        mock_module_instance = MagicMock()
+
+        mock_runwaymoduletype.return_value = mock_runwaymoduletype
+        mock_runwaymoduletype.module_class.return_value = mock_module_instance
+
+        monkeypatch.setattr(deployment, 'resolve', MagicMock())
+        monkeypatch.setattr(module, 'resolve', MagicMock())
+        monkeypatch.setattr(MODULE + '.load_module_opts_from_file',
+                            lambda x, y: y)  # return module_opts
+
+        assert not ModulesCommand()._deploy_module(module, deployment,
+                                                   runway_context)
+        # second arg should be a mock
+        deployment.resolve.assert_called_once_with(runway_context, ANY)
+        deployment.resolve.assert_called_once_with(runway_context, ANY)
+        mock_path.assert_called_once_with(module, os.getcwd(),
+                                          os.path.join(os.getcwd(),
+                                          '.runway_cache'))
+        if deployment.env_vars or module.env_vars:
+            mock_merge_nested_environment_dicts.assert_called_once_with(
+                ANY, env_name=runway_context.env_name, env_root=os.getcwd()
+            )  # ANY is a dict constructed during execution
+            mock_runwaymoduletype.module_class.assert_called_once_with(
+                context=ANY,  # context object is altered if env_vars
+                path=mock_path().module_root,
+                options=ANY  # dict constructed during execution
+            )
+        else:
+            mock_merge_nested_environment_dicts.assert_not_called()
+            mock_runwaymoduletype.module_class.assert_called_once_with(
+                context=runway_context,
+                path=mock_path().module_root,
+                options=ANY  # dict constructed during execution
+            )
+        if (deployment.environments or module.environments) and \
+                not deprecated_env:
+            mock_validate_environment.assert_called_once_with(
+                # second arg is constructed during execution
+                module.name, ANY, runway_context.env_vars
+            )
+        else:
+            mock_validate_environment.assert_not_called()
+        mock_change_dir.assert_has_calls([call(mock_path().module_root),
+                                          call().__enter__(),
+                                          call().__exit__(None, None, None)])
+        # last two args come from module_opts
+        mock_runwaymoduletype.assert_called_once_with(mock_path().module_root,
+                                                      ANY, ANY)
+        mock_module_instance[command].assert_called_once_with()
+
+    @patch(MODULE + '.validate_environment')
+    @patch(MODULE + '.RunwayModuleType')
+    def test_deploy_module_invalid_env(self, mock_runwaymoduletype,
+                                       mock_validate_environment,
+                                       fx_deployments, monkeypatch,
+                                       runway_context):
+        """Test _deploy_module where validate_environment fails."""
+        deployment = fx_deployments.load('environments_map_str')
+        module = deployment.modules[0]
+
+        monkeypatch.setattr(deployment, 'resolve', MagicMock())
+        monkeypatch.setattr(module, 'resolve', MagicMock())
+        monkeypatch.setattr(MODULE + '.load_module_opts_from_file',
+                            lambda x, y: y)  # return module_opts
+        mock_validate_environment.return_value = False
+
+        assert not ModulesCommand()._deploy_module(module, deployment,
+                                                   runway_context)
+        mock_validate_environment.assert_called_once()
+        mock_runwaymoduletype.assert_not_called()
+
+    @patch(MODULE + '.hasattr')
+    def test_deploy_module_missing_method(self, mock_hasattr,
+                                          fx_deployments, monkeypatch,
+                                          runway_context):
+        """Test _deploy_module where the command method is missing."""
+        deployment = fx_deployments.load('min_required')
+        module = deployment.modules[0]
+
+        mock_hasattr.return_value = False
+        monkeypatch.setattr(deployment, 'resolve', MagicMock())
+        monkeypatch.setattr(module, 'resolve', MagicMock())
+        monkeypatch.setattr(MODULE + '.load_module_opts_from_file',
+                            lambda x, y: y)  # return module_opts
+        monkeypatch.setattr(MODULE + '.change_dir', MagicMock())
+
+        with pytest.raises(SystemExit) as excinfo:
+            assert ModulesCommand()._deploy_module(module, deployment,
+                                                   runway_context)
+        assert excinfo.value.code == 1
+        # ANY is a child mock
+        mock_hasattr.assert_called_once_with(ANY, runway_context.command)
+
     def test_execute(self):
         """Test execute."""
         with pytest.raises(NotImplementedError):

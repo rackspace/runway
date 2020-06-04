@@ -584,8 +584,7 @@ class ModulesCommand(RunwayCommand):
                 options=module_opts
             )
             if hasattr(module_instance, context.command):
-                command_method = getattr(module_instance, context.command)
-                command_method()
+                module_instance[context.command]()
             else:
                 LOGGER.error("'%s' is missing method '%s'",
                              module_instance, context.command)
