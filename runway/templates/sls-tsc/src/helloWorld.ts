@@ -13,9 +13,9 @@ import {
 import "source-map-support/register";
 
 /** AWS Lambda entrypoint */
-export let handler: APIGatewayProxyHandler = async (
+export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent,
-  context: Context,
+  context: Context, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<APIGatewayProxyResult> => {
   return {
     statusCode: 200,

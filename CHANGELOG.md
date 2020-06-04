@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- `sls-tsc` sample updated to use eslint in favor of deprecated tslint
+
 ## [1.8.1] - 2020-06-04
 ### Added
 - `destroy_stack` is now aware of `action=diff` and prints a different confirmation prompt
