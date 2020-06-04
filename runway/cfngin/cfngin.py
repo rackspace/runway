@@ -6,7 +6,7 @@ import sys
 
 from yaml.constructor import ConstructorError
 
-from runway.util import MutableMap, argv, cached_property, environ
+from runway.util import MutableMap, SafeHaven, cached_property
 
 from .actions import build, destroy, diff
 from .config import render_parse_load as load_config
@@ -109,11 +109,11 @@ class CFNgin(object):
             sys_path = self.sys_path
         config_files = self.find_config_files(sys_path=sys_path)
 
-        with environ(self.__ctx.env_vars):
+        with SafeHaven(environ=self.__ctx.env_vars):
             for config in config_files:
                 ctx = self.load(config)
                 LOGGER.info('%s: deploying...', os.path.basename(config))
-                with argv('stacker', 'build', ctx.config_path):
+                with SafeHaven(argv=['stacker', 'build', ctx.config_path]):
                     action = build.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -141,11 +141,11 @@ class CFNgin(object):
         # destroy should run in reverse to handle dependencies
         config_files.reverse()
 
-        with environ(self.__ctx.env_vars):
+        with SafeHaven(environ=self.__ctx.env_vars):
             for config in config_files:
                 ctx = self.load(config)
                 LOGGER.info('%s: destroying...', os.path.basename(config))
-                with argv('stacker', 'destroy', ctx.config_path):
+                with SafeHaven(argv=['stacker', 'destroy', ctx.config_path]):
                     action = destroy.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -198,12 +198,12 @@ class CFNgin(object):
         if not sys_path:
             sys_path = self.sys_path
         config_files = self.find_config_files(sys_path=sys_path)
-        with environ(self.__ctx.env_vars):
+        with SafeHaven(environ=self.__ctx.env_vars):
             for config in config_files:
                 ctx = self.load(config)
                 LOGGER.info('%s: generating change sets...',
                             os.path.basename(config))
-                with argv('stacker', 'diff', ctx.config_path):
+                with SafeHaven(argv=['stacker', 'diff', ctx.config_path]):
                     action = diff.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
