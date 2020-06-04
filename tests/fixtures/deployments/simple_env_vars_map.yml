@@ -4,7 +4,7 @@ env_vars:
   dev:
     deployment_var: other-val
 modules:
-  - path: sampleapp.cfn
+  - path: sampleapp-01.cfn
     env_vars:
       test:
         deployment_var: val

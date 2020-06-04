@@ -1,5 +1,5 @@
 assume_role: arn:aws:iam::123456789012:role/test
 modules:
-  - sampleapp.cfn
+  - sampleapp-01.cfn
 regions:
   - us-east-1

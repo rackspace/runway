@@ -7,6 +7,6 @@ account_id:
   prod: 222222222222
   test: 123456789012
 modules:
-  - sampleapp.cfn
+  - sampleapp-01.cfn
 regions:
   - us-east-1

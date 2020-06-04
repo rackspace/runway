@@ -12,7 +12,6 @@ import six
 import yaml
 from botocore.stub import Stubber
 from mock import ANY, MagicMock, call, patch
-from moto import mock_sts
 
 from runway.commands.modules_command import (ModulesCommand,
                                              _deployment_menu_entry,
@@ -27,9 +26,7 @@ from runway.commands.modules_command import (ModulesCommand,
                                              validate_account_credentials,
                                              validate_account_id,
                                              validate_environment)
-from runway.config import Config
 from runway.util import MutableMap, environ
-from runway.util import environ
 
 from ..factories import MockBoto3Session
 
@@ -373,6 +370,66 @@ def test_validate_account_credentials(fx_deployments, monkeypatch,
     mock_id.assert_not_called()
 
 
+@pytest.mark.parametrize('env_def, strict, expected, expected_logs', [
+    ({'invalid'}, False, False,
+     ['test_module: skipped; unsupported type for environments "<class \'set\'>"']),
+    (True, False, True, ['test_module: explicitly enabled']),
+    (False, False, False, ['test_module: skipped; explicitly disabled']),
+    (['123456789012/us-east-1'], False, True, []),
+    (['123456789012/us-east-2'], False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ('123456789012/us-east-1', False, True, []),
+    ('123456789012/us-east-2', False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({}, False, None,
+     ['test_module: environment not defined; module will determine deployment']),
+    ({}, True, None,
+     ['test_module: environment not defined; module will determine deployment']),
+    ({'example': '111111111111/us-east-1'}, False, None,
+     ['test_module: environment not in definition; module will determine deployment']),
+    ({'example': '111111111111/us-east-1'}, True, False,
+     ['test_module: skipped; environment not in definition']),
+    ({'test': False}, False, False,
+     ['test_module: skipped; explicitly disabled']),
+    ({'test': True}, False, True, ['test_module: explicitly enabled']),
+    ({'test': '123456789012/us-east-1'}, False, True, []),
+    ({'test': '123456789012/us-east-2'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': '123456789012'}, False, True, []),
+    ({'test': '111111111111'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': 123456789012}, False, True, []),
+    ({'test': 111111111111}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': 'us-east-1'}, False, True, []),
+    ({'test': 'us-east-2'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['123456789012/us-east-1', '123456789012/us-east-2']}, False,
+     True, []),
+    ({'test': ['123456789012/us-east-2']}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['123456789012', '111111111111']}, False, True, []),
+    ({'test': ['111111111111']}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': [123456789012, 111111111111]}, False, True, []),
+    ({'test': [111111111111]}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['us-east-1', 'us-east-2']}, False, True, []),
+    ({'test': ['us-east-2']}, False, False,
+     ['test_module: skipped; account_id/region mismatch'])
+])
+def test_validate_environment(env_def, strict, expected, expected_logs,
+                              caplog, runway_context):
+    """Test validate_environment."""
+    mock_module = MutableMap(name='test_module')
+    caplog.set_level(logging.DEBUG, logger='runway')
+    assert validate_environment(runway_context, mock_module, env_def, strict) \
+        is expected
+    # all() does not give an output that can be used for troubleshooting failures
+    for log in expected_logs:
+        assert log in caplog.messages
+
+
 @pytest.mark.usefixtures('patch_runway_config')
 class TestModulesCommand(object):
     """Test runway.commands.modules_command.ModulesCommand.
@@ -389,35 +446,43 @@ class TestModulesCommand(object):
     @patch(MODULE + '.Path')
     @patch(MODULE + '.RunwayModuleType')
     @patch(MODULE + '.change_dir')
-    @pytest.mark.parametrize('deployment, command, deprecated_env', [
-        ('min_required', 'deploy', False),
-        ('min_required', 'destroy', False),
-        ('min_required', 'plan', False),
-        ('validate_account', 'deploy', False),
-        ('validate_account', 'destroy', False),
-        ('validate_account', 'plan', False),
-        ('simple_env_vars', 'deploy', False),
-        ('simple_env_vars', 'destroy', False),
-        ('simple_env_vars', 'plan', False),
-        ('simple_env_vars_map', 'deploy', False),
-        ('simple_env_vars_map', 'destroy', False),
-        ('simple_env_vars_map', 'plan', False),
-        ('environments_map_deprecated', 'deploy', True),
-        ('environments_map_deprecated', 'destroy', True),
-        ('environments_map_deprecated', 'plan', True),
-        ('environments_map_list', 'deploy', False),
-        ('environments_map_list', 'destroy', False),
-        ('environments_map_list', 'plan', False),
-        ('environments_map_str', 'deploy', False),
-        ('environments_map_str', 'destroy', False),
-        ('environments_map_str', 'plan', False),
+    @pytest.mark.parametrize('deployment, command, strict, should_validate_env', [
+        ('min_required', 'deploy', True, True),
+        ('min_required', 'deploy', False, False),
+        ('min_required', 'destroy', False, False),
+        ('min_required', 'plan', False, False),
+        ('validate_account', 'deploy', True, True),
+        ('validate_account', 'deploy', False, False),
+        ('validate_account', 'destroy', False, False),
+        ('validate_account', 'plan', False, False),
+        ('simple_env_vars', 'deploy', True, True),
+        ('simple_env_vars', 'deploy', False, False),
+        ('simple_env_vars', 'destroy', False, False),
+        ('simple_env_vars', 'plan', False, False),
+        ('simple_env_vars_map', 'deploy', True, True),
+        ('simple_env_vars_map', 'deploy', False, False),
+        ('simple_env_vars_map', 'destroy', False, False),
+        ('simple_env_vars_map', 'plan', False, False),
+        ('environments_map_deprecated', 'deploy', True, True),
+        ('environments_map_deprecated', 'deploy', False, False),
+        ('environments_map_deprecated', 'destroy', False, False),
+        ('environments_map_deprecated', 'plan', False, False),
+        ('environments_map_list', 'deploy', True, True),
+        ('environments_map_list', 'deploy', False, True),
+        ('environments_map_list', 'destroy', False, True),
+        ('environments_map_list', 'plan', False, True),
+        ('environments_map_str', 'deploy', True, True),
+        ('environments_map_str', 'deploy', False, True),
+        ('environments_map_str', 'destroy', False, True),
+        ('environments_map_str', 'plan', False, True),
     ])
     def test_deploy_module(self, mock_change_dir, mock_runwaymoduletype,
                            mock_path,
                            mock_merge_nested_environment_dicts,
                            mock_validate_environment,
-                           deployment, command, deprecated_env,
-                           fx_deployments, monkeypatch, runway_context):
+                           deployment, command, strict, should_validate_env,
+                           fx_deployments, monkeypatch, runway_context,
+                           patch_runway_config):
         """Test _deploy_module.
 
         This test is not well designed but it is about as good as it can be
@@ -428,6 +493,7 @@ class TestModulesCommand(object):
         module = deployment.modules[0]
         runway_context.command = command
         mock_module_instance = MagicMock()
+        patch_runway_config.future.strict_environments = strict
 
         mock_runwaymoduletype.return_value = mock_runwaymoduletype
         mock_runwaymoduletype.module_class.return_value = mock_module_instance
@@ -461,11 +527,13 @@ class TestModulesCommand(object):
                 path=mock_path().module_root,
                 options=ANY  # dict constructed during execution
             )
-        if (deployment.environments or module.environments) and \
-                not deprecated_env:
+        if should_validate_env:
             mock_validate_environment.assert_called_once_with(
                 # second arg is constructed during execution
-                module.name, ANY, runway_context.env_vars
+                context=ANY,  # potentially changed runway_context
+                env_def=ANY,  # merged dict of environments
+                module=module,
+                strict=strict
             )
         else:
             mock_validate_environment.assert_not_called()
@@ -791,6 +859,7 @@ class TestModulesCommand(object):
                  fx_config, monkeypatch):
         """Test run."""
         config = fx_config.load(config)
+        config.future.strict_environments = True
 
         mock_get_env.return_value = 'test'
         mock_context.return_value = mock_context
@@ -892,61 +961,3 @@ class TestModulesCommand(object):
             mock_input.assert_called_once_with(
                 'Enter number of deployment to run (or "all"): '
             )
-
-
-@pytest.mark.parametrize('env_def, strict, expected, expected_logs', [
-    (True, False, True, ['test_module: explicitly enabled']),
-    (False, False, False, ['test_module: skipped; explicitly disabled']),
-    (['123456789012/us-east-1'], False, True, []),
-    (['123456789012/us-east-2'], False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ('123456789012/us-east-1', False, True, []),
-    ('123456789012/us-east-2', False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({}, False, None,
-     ['test_module: environment not defined; module will determine deployment']),
-    ({}, True, None,
-     ['test_module: environment not defined; module will determine deployment']),
-    ({'example': '111111111111/us-east-1'}, False, None,
-     ['test_module: environment not in definition; module will determine deployment']),
-    ({'example': '111111111111/us-east-1'}, True, False,
-     ['test_module: skipped; environment not in definition']),
-    ({'test': False}, False, False,
-     ['test_module: skipped; explicitly disabled']),
-    ({'test': True}, False, True, ['test_module: explicitly enabled']),
-    ({'test': '123456789012/us-east-1'}, False, True, []),
-    ({'test': '123456789012/us-east-2'}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': '123456789012'}, False, True, []),
-    ({'test': '111111111111'}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': 123456789012}, False, True, []),
-    ({'test': 111111111111}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': 'us-east-1'}, False, True, []),
-    ({'test': 'us-east-2'}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': ['123456789012/us-east-1', '123456789012/us-east-2']}, False,
-     True, []),
-    ({'test': ['123456789012/us-east-2']}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': ['123456789012', '111111111111']}, False, True, []),
-    ({'test': ['111111111111']}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': [123456789012, 111111111111]}, False, True, []),
-    ({'test': [111111111111]}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
-    ({'test': ['us-east-1', 'us-east-2']}, False, True, []),
-    ({'test': ['us-east-2']}, False, False,
-     ['test_module: skipped; account_id/region mismatch'])
-])
-def test_validate_environment(env_def, strict, expected, expected_logs,
-                              caplog, runway_context):
-    """Test validate_environment."""
-    mock_module = MutableMap(name='test_module')
-    caplog.set_level(logging.DEBUG, logger='runway')
-    assert validate_environment(runway_context, mock_module, env_def, strict) \
-        is expected
-    # all() does not give an output that can be used for troubleshooting failures
-    for log in expected_logs:
-        assert log in caplog.messages

@@ -218,6 +218,7 @@ class MockRunwayConfig(MutableMap):
         super(MockRunwayConfig, self).__init__()
         self._kwargs = kwargs
         self.deployments = []
+        self.future = MagicMock()
         self.tests = []
         self.ignore_git_branch = False
         self.variables = MutableMap()
