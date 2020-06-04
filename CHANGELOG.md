@@ -5,9 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `future.strict_environments` top-level configuration option
+  - modifies how `deployment.environments`/`module.environments` are handled
+- notice about *false alarm* compatibility errors when using pip with the aws_lambda hook
 
 ### Changed
 - `sls-tsc` sample updated to use eslint in favor of deprecated tslint
+- log format of module skip information no longer includes extra characters and is now prefixed by the module name
+- aws_lambda hook will no longer use colorized pip output so its *false alarm* compatibility errors are less menacing
 
 ## [1.8.1] - 2020-06-04
 ### Added
@@ -15,15 +21,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `-no-color`/`--no-color` option automatically added to cdk, npm, sls, and tf commands
   - looks at `RUNWAY_COLORIZE` env var for an explicit enable/disable
   - if not set, checks `sys.stdout.isatty()` to determine if option should be provided
-- `future.strict_environments` top-level configuration option
-  - modifies how `deployment.environments`/`module.environments` are handled
 
 ### Changed
 - a@e check_auth will now try to refresh tokens 5 minutes before expiration instead of waiting for it to expire
 - `runway test` will now return a non-zero exit code if any non-required tests failed
 - `static-react` sample uses npm instead of yarn
 - `yamllint` is now invoked using `runpy` instead of using `runway run-python`
-- log format of module skip information no longer includes extra characters and is now prefixed by the module name
 
 ### Fixed
 - issue where `yamllint` and `cfnlint` could not be imported/executed from the Pyinstaller executables

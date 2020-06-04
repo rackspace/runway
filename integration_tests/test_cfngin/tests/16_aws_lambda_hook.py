@@ -1,15 +1,17 @@
 """Test AWS Lambda hook."""
 # flake8: noqa
 # pylint: disable=invalid-name
-from os import path
-from os.path import basename
+import os
+import pty
+import tempfile
 
 import boto3
 from send2trash import send2trash
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
+from runway.util import environ
 
-FILE_BASENAME = '.'.join(basename(__file__).split('.')[:-1])
+FILE_BASENAME = '.'.join(os.path.basename(__file__).split('.')[:-1])
 
 
 class TestAwsLambda(Cfngin):
@@ -33,10 +35,27 @@ class TestAwsLambda(Cfngin):
         return resp['StatusCode']
 
     def _build(self):
-        """Execute and assert initial build."""
-        self.set_environment('dev')
-        code, _stdout, _stderr = self.runway_cmd('deploy')
-        assert code == 0, 'exit code should be zero'
+        """Execute and assert initial build.
+
+        Explicitly spawning with a tty here to ensure output
+        (e.g. from pip) includes color
+
+        """
+        with environ({**os.environ, **{'DEPLOY_ENVIRONMENT': 'dev'}}):
+            with tempfile.TemporaryFile() as pty_output:
+                def read_pty(fds):
+                    """Append tty output to file descriptor."""
+                    data = os.read(fds, 1024)
+                    pty_output.write(data)
+                    return data
+
+                spawn_result = pty.spawn(['runway', 'deploy'], read_pty)
+                assert spawn_result == 0, 'exit code should be zero'
+                pty_output.seek(0)
+                combined_output = pty_output.read().decode()
+                assert '\x1b[31mERROR: ' not in combined_output, (
+                    'no red ERROR should be present'
+                )
 
     def run(self):
         """Run test."""
@@ -46,7 +65,8 @@ class TestAwsLambda(Cfngin):
         client = boto3.client('lambda', region_name=self.region)
 
         functions = ['dockerizepip-integrationtest',
-                     'nondockerizepip-integrationtest']
+                     'nondockerizepip-integrationtest',
+                     'authatedge-integrationtest']
         for func_name in functions:
             assert self.invoke_lambda(client, func_name) == 200, \
                 f'{self.TEST_NAME}: Execution of lambda {func_name} failed'
@@ -54,8 +74,8 @@ class TestAwsLambda(Cfngin):
     def teardown(self):
         """Teardown test."""
         self.runway_cmd('destroy')
-        venv_dir = path.join(self.fixture_dir,
-                             'lambda_src/dockerize_src/.venv')
-        if path.isdir(venv_dir):
+        venv_dir = os.path.join(self.fixture_dir,
+                                'lambda_src/dockerize_src/.venv')
+        if os.path.isdir(venv_dir):
             send2trash(venv_dir)
         self.cleanup_fixtures()
