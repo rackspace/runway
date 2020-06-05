@@ -583,7 +583,7 @@ class ModulesCommand(RunwayCommand):
 
         LOGGER.info("")
         LOGGER.info("---- Processing module '%s' for '%s' in %s --------------",
-                    module.path,
+                    module.name,
                     context.env_name,
                     context.env_region)
         LOGGER.info("Module options: %s", module_opts)
@@ -669,8 +669,8 @@ class ModulesCommand(RunwayCommand):
 
 def _module_name_for_display(module):
     """Extract a name for the module."""
-    if isinstance(module, dict):
-        return module['path']
+    if isinstance(module, six.moves.collections_abc.Mapping) or isinstance(module, dict):
+        return module.get('name')
     try:
         return module.path
     except Exception:  # pylint: disable=broad-except
