@@ -14,6 +14,9 @@ import boto3
 import six
 import yaml
 
+# pylint false positive
+from six.moves.collections_abc import Mapping  # pylint: disable=E
+
 from ..context import Context
 from ..path import Path
 from ..runway_module_type import RunwayModuleType
@@ -669,8 +672,8 @@ class ModulesCommand(RunwayCommand):
 
 def _module_name_for_display(module):
     """Extract a name for the module."""
-    if isinstance(module, six.moves.collections_abc.Mapping) or isinstance(module, dict):
-        return module.get('name')
+    if isinstance(module, (dict, Mapping)):
+        return module.get('name', module['path'])
     try:
         return module.path
     except Exception:  # pylint: disable=broad-except
