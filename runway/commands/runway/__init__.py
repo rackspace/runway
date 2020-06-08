@@ -2,7 +2,7 @@
 
 # pylint: disable = wildcard-import
 
-from .envvars import *  # noqa
+from .envvars import EnvVars  # noqa
 from .gen_sample import *  # noqa
 from .init import *  # noqa
 from .preflight import *  # noqa
