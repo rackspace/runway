@@ -17,34 +17,64 @@ LOGGER = logging.getLogger('runway')
 class RunwayCommand(BaseCommand):
     """Base class for deployer classes."""
 
-    def path_only_contains_dirs(self, path):
-        """Return boolean on whether a path only contains directories."""
+    @classmethod
+    def path_only_contains_dirs(cls, path):
+        """Return boolean on whether a path only contains directories.
+
+        Args:
+            path (str): Root path to check.
+
+        Returns:
+            bool: Wether the path only contains directories.
+
+        """
         pathlistdir = os.listdir(path)
         if pathlistdir == []:
             return True
         if any(os.path.isfile(os.path.join(path, i)) for i in pathlistdir):
             return False
-        return all(self.path_only_contains_dirs(os.path.join(path, i)) for i in pathlistdir)  # noqa
+        return all(cls.path_only_contains_dirs(os.path.join(path, i))
+                   for i in pathlistdir)
 
-    def get_empty_dirs(self, path):
-        """Return a list of empty directories in path."""
+    @classmethod
+    def get_empty_dirs(cls, path):
+        """Return a list of empty directories in path.
+
+        Args:
+            path (str): Root path to check.
+
+        Returns:
+            List[str]: List of empty directory names.
+
+        """
         empty_dirs = []
         for i in os.listdir(path):
             child_path = os.path.join(path, i)
-            if i == '.git' or os.path.isfile(child_path) or os.path.islink(child_path):  # noqa
-                continue
-            if self.path_only_contains_dirs(child_path):
+            if i == '.git' or os.path.isfile(child_path) or \
+                    os.path.islink(child_path):
+                continue  # cov: ignore
+            if cls.path_only_contains_dirs(child_path):
                 empty_dirs.append(i)
         return empty_dirs
 
     @staticmethod
     def version():
-        """Show current package version."""
+        """Show current package version.
+
+        Returns:
+            str: Runway version.
+
+        """
         print(version)
 
     def execute(self):
         # type: () -> None
-        """Execute the command."""
+        """Execute the command.
+
+        Raises:
+            NotImplementedError: Method not defined in subclass.
+
+        """
         raise NotImplementedError('execute must be implimented for '
                                   'subclasses of BaseCommand.')
 

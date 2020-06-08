@@ -1,0 +1,12 @@
+account_alias:
+  dev: dev
+  prod: prod
+  test: test
+account_id:
+  dev: 111111111111
+  prod: 222222222222
+  test: 123456789012
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

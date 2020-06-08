@@ -109,8 +109,8 @@ def pre_deploy_assume_role(assume_role_config, context):
         )
 
 
-def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disable=too-many-branches,invalid-name
-                          ci=False, env_name=None):
+def select_modules_to_run(deployment, tags=None,  # noqa pylint: disable=too-many-branches,invalid-name
+                          command=None, ci=False, env_name=None):
     """Select modules to run based on tags.
 
     Args:
@@ -125,6 +125,7 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         Deployment with filtered modules.
 
     """
+    tags = tags or []
     if ci and not tags:
         return deployment
     modules_to_deploy = []
@@ -177,7 +178,8 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
         return deployment
 
     for module in modules:
-        if isinstance(module, str):
+        # checking for string should have been made obsolete by config parser
+        if isinstance(module, str):  # cov: ignore
             LOGGER.warning('Module "%s.%s" is defined as a string '
                            'which cannot be used with the "--tag" '
                            'option so it has been skipped. Please '
@@ -187,7 +189,8 @@ def select_modules_to_run(deployment, tags, command=None,  # noqa pylint: disabl
             continue  # this doesn't need to return an error
         if module.get('child_modules'):
             module['child_modules'] = [x for x in module['child_modules']
-                                       if x.get('tags') and all(i in x['tags'] for i in tags)]
+                                       if x.get('tags') and all(i in x['tags']
+                                                                for i in tags)]
             if module.get('child_modules'):
                 modules_to_deploy.append(module)
         elif module.get('tags') and all(i in module['tags'] for i in tags):
@@ -239,11 +242,6 @@ def validate_account_id(sts_client, account_id):
 
 def validate_account_credentials(deployment, context):
     """Exit if requested deployment account doesn't match credentials."""
-    boto_args = {'region_name': context.env_vars['AWS_DEFAULT_REGION']}
-    for i in ['aws_access_key_id', 'aws_secret_access_key',
-              'aws_session_token']:
-        if context.env_vars.get(i.upper()):
-            boto_args[i] = context.env_vars[i.upper()]
     if isinstance(deployment.get('account_id'), (int, six.string_types)):
         account_id = str(deployment['account_id'])
     elif deployment.get('account_id', {}).get(context.env_name):
@@ -251,7 +249,7 @@ def validate_account_credentials(deployment, context):
     else:
         account_id = None
     if account_id:
-        validate_account_id(boto3.client('sts', **boto_args), account_id)
+        validate_account_id(context.get_session().client('sts'), account_id)
     if isinstance(deployment.get('account_alias'), six.string_types):
         account_alias = deployment['account_alias']
     elif deployment.get('account_alias', {}).get(context.env_name):
@@ -259,7 +257,7 @@ def validate_account_credentials(deployment, context):
     else:
         account_alias = None
     if account_alias:
-        validate_account_alias(boto3.client('iam', **boto_args),
+        validate_account_alias(context.get_session().client('iam'),
                                account_alias)
 
 
@@ -349,11 +347,6 @@ class ModulesCommand(RunwayCommand):
                         ', '.join(self.runway_config.future.enabled))
             LOGGER.info('')
 
-        # set default names if needed
-        for i, deployment in enumerate(deployments):
-            if not deployment.get('name'):
-                deployment['name'] = 'deployment_' + str(i + 1)
-
         if command == 'destroy':
             LOGGER.info('WARNING!')
             LOGGER.info('Runway is running in DESTROY mode.')
@@ -418,6 +411,7 @@ class ModulesCommand(RunwayCommand):
                 # to the next deployment rather than exiting
                 continue
 
+            # check should be obsolete, checked when the config is parsed
             if deployment.regions or deployment.parallel_regions:
                 if deployment.env_vars:
                     deployment_env_vars = merge_nested_environment_dicts(
@@ -613,8 +607,7 @@ class ModulesCommand(RunwayCommand):
                 options=module_opts
             )
             if hasattr(module_instance, context.command):
-                command_method = getattr(module_instance, context.command)
-                command_method()
+                module_instance[context.command]()
             else:
                 LOGGER.error("'%s' is missing method '%s'",
                              module_instance, context.command)
@@ -667,7 +660,7 @@ class ModulesCommand(RunwayCommand):
         return [selected_deployment]
 
 
-def _module_name_for_display(module):
+def _module_name_for_display(module):  # this is obsolete
     """Extract a name for the module."""
     if isinstance(module, dict):
         return module['path']
@@ -689,6 +682,7 @@ def _module_menu_entry(module, environment_name):
 
 def _deployment_menu_entry(deployment):
     """Build a string to display in the 'select deployment' menu."""
-    paths = ", ".join([_module_name_for_display(module) for module in deployment['modules']])
+    paths = ", ".join([_module_name_for_display(module)
+                       for module in deployment['modules']])
     regions = ", ".join(deployment.get('regions', []))
     return "%s - %s (%s)" % (deployment.get('name'), paths, regions)

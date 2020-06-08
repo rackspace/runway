@@ -1,0 +1,14 @@
+env_vars:
+  test:
+    deployment_var: val
+  dev:
+    deployment_var: other-val
+modules:
+  - path: sampleapp-01.cfn
+    env_vars:
+      test:
+        deployment_var: val
+      dev:
+        deployment_var: other-val
+regions:
+  - us-east-1

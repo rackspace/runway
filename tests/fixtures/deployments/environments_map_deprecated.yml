@@ -1,0 +1,9 @@
+environments:
+  test:
+    key: val
+  dev:
+    key: other-val
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

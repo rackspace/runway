@@ -1,0 +1,6 @@
+account_alias: test
+account_id: 123456789012
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

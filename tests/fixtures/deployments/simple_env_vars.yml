@@ -1,0 +1,8 @@
+env_vars:
+  deployment_var: val
+modules:
+  - path: sampleapp-01.cfn
+    env_vars:
+      module_var: val
+regions:
+  - us-east-1

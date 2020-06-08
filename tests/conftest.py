@@ -1,14 +1,25 @@
 """Pytest fixtures and plugins."""
+# pylint: disable=redefined-outer-name
 import logging
 import os
-from typing import Dict, Optional
+import sys
+from typing import Dict
 
 import pytest
 import yaml
 
-from .factories import MockCFNginContext, MockRunwayContext
+from runway.config import Config
+
+from .factories import (MockCFNginContext, MockRunwayConfig, MockRunwayContext,
+                        YamlLoader, YamlLoaderDeploymet)
+
+if sys.version_info.major > 2:  # TODO remove after droping python 2
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
 
 LOG = logging.getLogger(__name__)
+TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -43,6 +54,17 @@ def aws_credentials():
     saved_env.clear()
 
 
+@pytest.fixture(scope='session', autouse=True)
+def sanitize_environment():
+    # type: () -> None
+    """Remove variables from the environment that could interfere with tests."""
+    env_vars = ['CI', 'DEBUG', 'DEPLOY_ENVIRONMENT', 'CFNGIN_STACK_POLL_TIME',
+                'RUNWAY_MAX_CONCURRENT_MODULES',
+                'RUNWAY_MAX_CONCURRENT_REGIONS']
+    for var in env_vars:
+        os.environ.pop(var, None)
+
+
 @pytest.fixture(scope='package')
 def fixture_dir():
     # type: () -> str
@@ -53,7 +75,21 @@ def fixture_dir():
 
 
 @pytest.fixture(scope='module')
-def yaml_fixtures(request, fixture_dir):  # pylint: disable=redefined-outer-name
+def fx_config():
+    """Return YAML loader for config fixtures."""
+    return YamlLoader(TEST_ROOT / 'fixtures' / 'configs',
+                      load_class=Config,
+                      load_type='kwargs')
+
+
+@pytest.fixture(scope='function')
+def fx_deployments():
+    """Return YAML loader for deployment fixtures."""
+    return YamlLoaderDeploymet(TEST_ROOT / 'fixtures' / 'deployments')
+
+
+@pytest.fixture(scope='module')
+def yaml_fixtures(request, fixture_dir):
     """Load test fixture yaml files.
 
     Uses a list of file paths within the fixture directory loaded from the
@@ -69,39 +105,8 @@ def yaml_fixtures(request, fixture_dir):  # pylint: disable=redefined-outer-name
     return result
 
 
-def _override_env_vars(overrides):
-    # type: (Dict[str, Optional[str]]) -> Dict[str, str]
-    """Use a dict to override os.environ values.
-
-    Ensure AWS SDK finds some (bogus) credentials in the environment and
-    doesn't try to use other providers.
-
-    """
-    overrides = {
-        'AWS_ACCESS_KEY_ID': 'testing',
-        'AWS_SECRET_ACCESS_KEY': 'testing',
-        'AWS_DEFAULT_REGION': 'us-east-1'
-    }
-    saved_env = {}
-    for key, value in overrides.items():
-        LOG.info('Overriding env var: {}={}'.format(key, value))
-        saved_env[key] = os.environ.get(key, None)
-        os.environ[key] = value
-
-    yield
-
-    for key, value in saved_env.items():
-        LOG.info('Restoring saved env var: {}={}'.format(key, value))
-        if value is None:
-            del os.environ[key]
-        else:
-            os.environ[key] = value
-
-    saved_env.clear()
-
-
 @pytest.fixture(scope='function')
-def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
+def cfngin_context(runway_context):
     """Create a mock CFNgin context object."""
     return MockCFNginContext(environment={},
                              boto3_credentials=runway_context.boto3_credentials,
@@ -112,6 +117,21 @@ def cfngin_context(runway_context):  # pylint: disable=redefined-outer-name
 def patch_time(monkeypatch):
     """Patch built-in time object."""
     monkeypatch.setattr('time.sleep', lambda s: None)
+
+
+@pytest.fixture(scope='function')
+def patch_runway_config(request, monkeypatch, runway_config):
+    """Patch Runway config and return a mock config object."""
+    patch_path = getattr(request.module, 'PATCH_RUNWAY_CONFIG', None)
+    if patch_path:
+        monkeypatch.setattr(patch_path, runway_config)
+    return runway_config
+
+
+@pytest.fixture(scope='function')
+def runway_config():
+    """Create a mock runway config object."""
+    return MockRunwayConfig()
 
 
 @pytest.fixture(scope='function')

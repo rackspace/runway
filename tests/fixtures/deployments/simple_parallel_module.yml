@@ -1,0 +1,9 @@
+# test.commands.modules_command.py::TestModulesCommand::test_process_modules_parallel
+#   relies on the module structure of this deployment to remain the same.
+modules:
+  - parallel:
+      - sampleapp-01.cfn
+      - sampleapp-02.cfn
+  - sampleapp-03.cfn
+regions:
+  - us-east-1

@@ -1,0 +1,9 @@
+environments:
+  test:
+    - 123456789012/us-east-1
+  dev:
+    - 012345678901/us-west-2
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

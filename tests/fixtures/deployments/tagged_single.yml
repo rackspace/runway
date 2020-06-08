@@ -1,0 +1,7 @@
+modules:
+  - path: sampleapp-01.cfn
+    tags:
+      - app:test-app
+      - tier:iac
+regions:
+  - us-east-1
