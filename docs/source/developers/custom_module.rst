@@ -1,14 +1,16 @@
 .. _mod-custom:
 
+#####################
 Custom Plugin Support
-=====================
+#####################
 
 Need to expand Runway to wrap other tools? Yes - you can do that with custom
 plugin support.
 
 
+********
 Overview
---------
+********
 
 Runway can import Python modules that can perform custom deployments with your
 own set of Runway modules. Let's say for example you want to have Runway
@@ -20,25 +22,32 @@ providing additional support for non-native modules. Although written in
 Python, these plugins can natively execute non Python binaries.
 
 
+******************
 RunwayModule Class
-------------------
+******************
 
 Runway provides a Python Class named ``RunwayModule`` that can be imported
 into your custom plugin/Python module. This base class will give you the
 ability to write your own module that can be added to your runway.yml
 deployment list (More info on runway.yml below). There are three required
-functions::
+functions:
 
-- plan - This code block gets called when ``runway taxi`` executes
-- deploy - This code block gets called when ``runway takeoff`` executes
-- destroy - This code block gets called when ``runway destroy`` executes
+**plan**
+  This code block gets called when ``runway taxi`` executes
+
+**deploy**
+  This code block gets called when ``runway takeoff`` executes
+
+**destroy**
+  This code block gets called when ``runway destroy`` executes
 
 All of these functions are required, but are permitted to be empty no-op/pass
 statements if applicable.
 
 
+**************
 Context Object
---------------
+**************
 
 ``self.context`` includes many helpful resources for use in your Python
 module. Some notable examples are::
@@ -49,8 +58,9 @@ module. Some notable examples are::
 - self.path - path to your Runway module folder
 
 
+******************
 runway.yml Example
--------------------
+******************
 
 After you have written your plugin, you need to add the module ``class_path``
 to your module's configuration. Below is an example ``runway.yml`` containing a
@@ -62,15 +72,14 @@ from a file named Ansible.py in a folder named "local_runway_extensions"
 (Standard Python import conventions apply). Runway will execute the ``deploy``
 function in your class when you perform a ``runway deploy`` (AKA takeoff).
 
-::
+.. code-block:: yaml
 
-    deployments:
-      - modules:
-          - path: security_group.ansible
-            class_path: local_runway_extensions.Ansible.DeployToAWS
-        regions:
-          - us-east-1
-
+  deployments:
+    - modules:
+        - path: security_group.ansible
+          class_path: local_runway_extensions.Ansible.DeployToAWS
+      regions:
+        - us-east-1
 
 Below is the ``Ansible.py`` module referenced above that wraps the
 ``ansible-playbook`` command. It will be responsible for deploying an EC2 Security Group from the playbook
@@ -88,7 +97,7 @@ in ``us-east-1``.  If you decide to perform a runway deployment in the ``prod``
 environment, or in a different region, the ansible-playbook deployment will be
 skipped. This matches the behavior of the Runway's native modules.
 
-::
+.. code-block:: python
 
     """Ansible Plugin example for Runway."""
 
@@ -143,29 +152,26 @@ skipped. This matches the behavior of the Runway's native modules.
             LOGGER.info('Destroy not currently supported for Ansible')
             pass
 
-
-
 And below is the example Ansible playbook itself, saved as
 ``dev-us-east-1.yaml`` in the security_group.ansible folder:
 
-::
+.. code-block:: yaml
 
-    - hosts: localhost
-      connection: local
-      gather_facts: false
-      tasks:
-          - name: create a security group in us-east-1
-            ec2_group:
-              name: dmz
-              description: Dev example ec2 group
-              region: us-east-1
-              rules:
-                - proto: tcp
-                  from_port: 80
-                  to_port: 80
-                  cidr_ip: 0.0.0.0/0
-            register: security_group
-
+  - hosts: localhost
+    connection: local
+    gather_facts: false
+    tasks:
+        - name: create a security group in us-east-1
+          ec2_group:
+            name: dmz
+            description: Dev example ec2 group
+            region: us-east-1
+            rules:
+              - proto: tcp
+                from_port: 80
+                to_port: 80
+                cidr_ip: 0.0.0.0/0
+          register: security_group
 
 The above would be deployed if ``runway deploy`` was executed in the ``dev``
 environment to ``us-east-1``.

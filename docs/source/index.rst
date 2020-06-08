@@ -16,6 +16,7 @@ Very simple configuration to:
     avoid convoluted Makefiles / CI jobs
 
 .. toctree::
+   :caption: Runway
    :maxdepth: 2
    :hidden:
 
@@ -24,14 +25,12 @@ Very simple configuration to:
    quickstart/index
    commands
    runway_config
-   module_configuration/index
    lookups
    defining_tests
    repo_structure
-   terminology
-   apidocs/index
-   developers/index
-   license
+
+
+----
 
 
 ********************
@@ -184,6 +183,36 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
    terraform/configuration
    terraform/directory_structure
    terraform/advanced_features
+
+
+----
+
+
+.. toctree::
+   :caption: Developers Guide
+   :maxdepth: 2
+   :glob:
+   :hidden:
+
+   apidocs/index
+   developers/*
+
+.. toctree::
+   :caption: Maintainers Guide
+   :maxdepth: 2
+   :glob:
+   :hidden:
+
+   maintainers/*
+
+.. toctree::
+   :caption: Additional Information
+   :maxdepth: 2
+   :hidden:
+
+   License <license>
+   terminology
+
 
 
 ******************
