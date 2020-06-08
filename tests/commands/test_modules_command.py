@@ -372,7 +372,7 @@ def test_validate_account_credentials(fx_deployments, monkeypatch,
 
 @pytest.mark.parametrize('env_def, strict, expected, expected_logs', [
     ({'invalid'}, False, False,
-     ['test_module: skipped; unsupported type for environments "<class \'set\'>"']),
+     ['test_module: skipped; unsupported type for environments "%s"' % type(set())]),
     (True, False, True, ['test_module: explicitly enabled']),
     (False, False, False, ['test_module: skipped; explicitly disabled']),
     (['123456789012/us-east-1'], False, True, []),
