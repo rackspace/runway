@@ -173,6 +173,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         self.options = options.pop('options', {})
         self.parameters = options.pop('parameters', {})
         self.path = path if isinstance(self.path, Path) else Path(self.path)
+        self.name = options.get('name', self.path.name)
 
         for k, v in options.items():
             setattr(self, k, v)
@@ -185,7 +186,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         if not which('npm'):
             LOGGER.error('%s: "npm" not found in path or is not executable; '
                          'please ensure it is installed correctly.',
-                         self.path.name)
+                         self.name)
             sys.exit(1)
 
     def log_npm_command(self, command):
@@ -195,7 +196,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             command (List[str]): List that will be passed into a subprocess.
 
         """
-        LOGGER.info('%s: Running "%s"', self.path.name,
+        LOGGER.info('%s: Running "%s"', self.name,
                     format_npm_command_for_logging(command))
 
     def npm_install(self):
@@ -205,15 +206,15 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             cmd.append('--no-color')
         if self.options.get('skip_npm_ci'):
             LOGGER.info("%s: Skipping npm ci and npm install...",
-                        self.path.name)
+                        self.name)
             return
         if self.context.is_noninteractive and use_npm_ci(str(self.path)):
             LOGGER.info("%s: Running npm ci...",
-                        self.path.name)
+                        self.name)
             cmd[1] = 'ci'
         else:
             LOGGER.info("%s: Running npm install...",
-                        self.path.name)
+                        self.name)
             cmd[1] = 'install'
         subprocess.check_call(cmd)
 
@@ -226,7 +227,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         """
         if not (self.path / 'package.json').is_file():
             LOGGER.warning('%s: Module is missing a "package.json"',
-                           self.path.name)
+                           self.name)
             return True
         return False
 
