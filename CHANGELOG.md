@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.8.2] - 2020-06-09
+### Fixed
+- Static site deployment regression in v1.8.1 (troposphere/awacs now excluded from module unloading)
+
 ### Added
 - `future.strict_environments` top-level configuration option
   - modifies how `deployment.environments`/`module.environments` are handled
@@ -846,7 +851,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.2...HEAD
+[1.8.2]: https://github.com/onicagroup/runway/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/onicagroup/runway/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/onicagroup/runway/compare/v1.7.3...v1.8.0
 [1.7.3]: https://github.com/onicagroup/runway/compare/v1.7.2...v1.7.3
