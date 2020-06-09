@@ -28,9 +28,8 @@ CLICK_CONTEXT_SETTINGS = dict(
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.version_option(__version__, message='%(version)s')
-@click.pass_context
-def cli(ctx):
-    # type: (click.Context) -> None
+def cli():
+    # type: () -> None
     """Runway CLI."""
 
 
