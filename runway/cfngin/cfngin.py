@@ -109,11 +109,13 @@ class CFNgin(object):
             sys_path = self.sys_path
         config_files = self.find_config_files(sys_path=sys_path)
 
-        with SafeHaven(environ=self.__ctx.env_vars):
+        with SafeHaven(environ=self.__ctx.env_vars,
+                       sys_modules_exclude=['awacs', 'troposphere']):
             for config in config_files:
                 ctx = self.load(config)
                 LOGGER.info('%s: deploying...', os.path.basename(config))
-                with SafeHaven(argv=['stacker', 'build', ctx.config_path]):
+                with SafeHaven(argv=['stacker', 'build', ctx.config_path],
+                               sys_modules_exclude=['awacs', 'troposphere']):
                     action = build.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(

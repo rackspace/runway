@@ -147,6 +147,18 @@ class RunwayModule(object):
         raise NotImplementedError('You must implement the destroy() method '
                                   'yourself!')
 
+    def __getitem__(self, key):
+        """Make the object subscriptable.
+
+        Args:
+            key (str): Attribute to get.
+
+        Returns:
+            Any
+
+        """
+        return getattr(self, key)
+
 
 class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
     """Base class for Runway modules that use npm."""

@@ -297,12 +297,16 @@ class SafeHaven(AbstractContextManager):
     """
 
     # pylint: disable=redefined-outer-name
-    def __init__(self, argv=None, environ=None, sys_path=None):
+    def __init__(self, argv=None, environ=None, sys_modules_exclude=None,
+                 sys_path=None):
         """Instantiate class.
 
         Args:
             argv (Optional[List[str]]): Override the value of sys.argv.
             environ (Optional[Dict[str, str]]): Update os.environ.
+            sys_modules_exclude (Optional[List[str]]): A list of modules to
+                exclude when reverting sys.modules to its previous state.
+                These are checked as ``module.startswith(name)``.
             sys_path (Optional[List[str]]): Override the value of sys.path.
 
         """
@@ -314,6 +318,7 @@ class SafeHaven(AbstractContextManager):
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
         self.log = logging.getLogger('runway.' + self.__class__.__name__)
+        self.sys_modules_exclude = sys_modules_exclude or []
 
         if isinstance(argv, list):
             sys.argv = argv
@@ -347,7 +352,9 @@ class SafeHaven(AbstractContextManager):
         # sys.modules can be manipulated to force reloading modules but,
         # replacing it outright does not work as expected
         for module in list(sys.modules.keys()):
-            if module not in self.__sys_modules:
+            if module not in self.__sys_modules and \
+                    not any(module.startswith(n)
+                            for n in self.sys_modules_exclude):
                 self.log.debug('removed sys.module: {"%s": "%s"}', module,
                                sys.modules.pop(module))
 
