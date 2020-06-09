@@ -191,6 +191,22 @@ class TestSafeHaven(object):
         assert caplog.messages[:2] == expected_logs
         assert caplog.messages[-1] == 'leaving the safe haven...'
 
+    def test_sys_modules_exclude(self, monkeypatch):
+        """Test sys.modules interations with excluded module."""
+        monkeypatch.setattr(SafeHaven, 'reset_all', MagicMock())
+
+        module = 'tests.fixtures.mock_hooks'
+
+        assert module not in sys.modules
+        with SafeHaven(sys_modules_exclude=module) as obj:
+            from .fixtures import mock_hooks  # noqa pylint: disable=E,W,C
+            assert module in sys.modules
+            obj.reset_sys_modules()
+        assert module in sys.modules
+        # cleanup
+        del sys.modules[module]
+        assert module not in sys.modules
+
     @pytest.mark.parametrize('provided', TEST_PARAMS)
     def test_sys_path(self, provided, caplog, monkeypatch):
         """Test sys.path interactions."""
