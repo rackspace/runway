@@ -121,12 +121,15 @@ class TestCFNgin(object):
                                          {'concurrency': 0,
                                           'tail': False}])
         patch_safehaven.assert_has_calls([
-            call(environ=context.env_vars),
+            call(environ=context.env_vars,
+                 sys_modules_exclude=['awacs', 'troposphere']),
             call.__enter__(),
-            call(argv=['stacker', 'build', str(tmp_path / 'basic.yml')]),
+            call(argv=['stacker', 'build', str(tmp_path / 'basic.yml')],
+                 sys_modules_exclude=['awacs', 'troposphere']),
             call.__enter__(),
             call.__exit__(None, None, None),
-            call(argv=['stacker', 'build', str(tmp_path / 'basic2.yml')]),
+            call(argv=['stacker', 'build', str(tmp_path / 'basic2.yml')],
+                 sys_modules_exclude=['awacs', 'troposphere']),
             call.__enter__(),
             call.__exit__(None, None, None),
             call.__exit__(None, None, None),
