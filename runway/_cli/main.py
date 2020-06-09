@@ -1,11 +1,24 @@
 """Runway CLI entrypoint."""
+import logging
 import sys
 
 import click
 
-from . import commands
 from runway import __version__
 
+from ..cfngin.logger import ColorFormatter
+from . import commands
+
+COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
+LOGGER = logging.getLogger('runway')
+HDLR = logging.StreamHandler()
+HDLR.setFormatter(ColorFormatter(
+    COLOR_FORMAT if sys.stdout.isatty() else logging.BASIC_FORMAT
+))
+logging.basicConfig(level=logging.INFO,
+                    handlers=[HDLR])
+# botocore info is spammy
+logging.getLogger('botocore').setLevel(logging.ERROR)
 
 CLICK_CONTEXT_SETTINGS = dict(
     help_option_names=['-h', '--help'],

@@ -1,10 +1,10 @@
-"""Generate a sample Serverless project using python."""
+"""Generate a sample AWS CDK project using TypeScript."""
 import logging
 import sys
 
 import click
 
-from .utils import TEMPLATES, convert_gitignore, copy_sample
+from .utils import TEMPLATES, copy_sample
 
 if sys.version_info.major > 2:
     from pathlib import Path  # pylint: disable=E
@@ -14,17 +14,16 @@ else:
 LOGGER = logging.getLogger(__name__)
 
 
-@click.command('sls-py', short_help='sls + python (sampleapp.sls)')
+@click.command('cdk-tsc', short_help='cdk + tsc (sampleapp.cdk)')
 @click.pass_context
-def sls_py(ctx):
+def cdk_tsc(ctx):
     # type: (click.Context) -> None
-    """Generate a sample Serverless project using python."""
-    src = TEMPLATES / 'sls-py'
-    dest = Path.cwd() / 'sampleapp.sls'
-
+    """Generate a sample AWS CDK project using TypeScript."""
+    src = TEMPLATES / 'cdk-tsc'
+    dest = Path.cwd() / 'sampleapp.cdk'
     copy_sample(ctx, src, dest)
-    convert_gitignore(dest / '_gitignore')
+    # .gitignore already exists
 
-    LOGGER.info("Sample Serverless module created at %s", dest)
+    LOGGER.info("Sample CDK module created at %s", dest)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
                 '"npm install" to generate its lockfile.', dest)

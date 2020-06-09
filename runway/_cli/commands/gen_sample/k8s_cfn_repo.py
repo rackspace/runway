@@ -1,7 +1,55 @@
 """Generate a sample CloudFormation project using Kubernetes."""
+import logging
+import sys
+
 import click
+import six
+from cfn_flip import to_yaml
+
+from ....blueprints.k8s.k8s_iam import Iam
+from ....blueprints.k8s.k8s_master import Cluster
+from ....blueprints.k8s.k8s_workers import NodeGroup
+from ....cfngin.context import Context as CFNginContext
+from .utils import TEMPLATES, convert_gitignore, copy_sample
+
+if sys.version_info.major > 2:
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
+
+LOGGER = logging.getLogger(__name__)
 
 
-@click.command('k8s-cfn-repo')
-def k8s_cfn_repo():
+@click.command('k8s-cfn-repo',
+               short_help='k8s + cfn (k8s-cfn-infrastructure)')
+@click.pass_context
+def k8s_cfn_repo(ctx):
+    # type: (click.Context) -> None
     """Generate a sample CloudFormation project using Kubernetes."""
+    src = TEMPLATES / 'k8s-cfn-repo'
+    dest = Path.cwd() / 'k8s-cfn-infrastructure'
+
+    copy_sample(ctx, src, dest)
+    convert_gitignore(dest / '_gitignore')
+
+    master_templates = dest / 'k8s-master.cfn/templates'
+    worker_templates = dest / 'k8s-workers.cfn/templates'
+    env = {'namespace': 'test'}
+
+    LOGGER.debug('rendering master templates...')
+    master_templates.mkdir()
+    (master_templates / 'k8s_iam.yaml').write_text(six.u(
+        to_yaml(Iam('test', CFNginContext(env.copy()), None).to_json())
+    ))
+    (master_templates / 'k8s_master.yaml').write_text(six.u(
+        to_yaml(Cluster('test', CFNginContext(env.copy()), None).to_json())
+    ))
+
+    LOGGER.debug('rendering worker templates...')
+    worker_templates.mkdir()
+    (worker_templates / 'k8s_workers.yaml').write_text(six.u(
+        to_yaml(NodeGroup('test', CFNginContext(env.copy()), None).to_json())
+    ))
+
+    LOGGER.info("Sample k8s infrastructure repo created at %s", dest)
+    LOGGER.info('(see its README for setup and deployment instructions)')
