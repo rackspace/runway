@@ -36,6 +36,8 @@ class Repositories(Blueprint):
 class TestRepositories(BlueprintTestCase):
     """Tests for runway.cfngin.blueprints.testutil.BlueprintTestCase."""
 
+    OUTPUT_PATH = "tests/unit/fixtures/blueprints"
+
     def test_create_template_passes(self):
         """Test create template passes."""
         ctx = Context({'namespace': 'test'})

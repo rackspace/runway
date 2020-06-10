@@ -31,7 +31,7 @@ vpc_parameters: &vpc_parameters
 
 stacks:
   - name: vpc
-    class_path: tests.cfngin.fixtures.mock_blueprints.VPC
+    class_path: tests.unit.cfngin.fixtures.mock_blueprints.VPC
     variables:
       InstanceType: m3.medium
       SshKeyName: default
@@ -49,9 +49,8 @@ stacks:
       # Options
       #InternalDomain: internal
   - name: bastion
-    class_path: tests.cfngin.fixtures.mock_blueprints.Bastion
-    ## !! This should break, parameters not allowed in 1.0
-    parameters:
+    class_path: tests.unit.cfngin.fixtures.mock_blueprints.Bastion
+    variables:
       # Extends the parameters dict with the contents of the vpc_parameters
       # anchor. Basically we're including all VPC Outputs in the parameters
       # of the bastion stack. Note: Stacker figures out, automatically, which

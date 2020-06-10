@@ -498,7 +498,7 @@ class TestProviderDefaultMode(unittest.TestCase):
                                          patched_update_term):
         """Test create_stack, force changeset, termination protection."""
         stack_name = 'fake_stack'
-        template_path = Path('./tests/cfngin/fixtures/cfn_template.yaml')
+        template_path = Path('./tests/unit/cfngin/fixtures/cfn_template.yaml')
         template = Template(body=template_path.read_text())
         parameters = []
         tags = []

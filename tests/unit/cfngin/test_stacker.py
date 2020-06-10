@@ -15,8 +15,8 @@ class TestStacker(unittest.TestCase):
             ["build",
              "-r", "us-west-2",
              "-e", "namespace=test.override",
-             "tests/cfngin/fixtures/basic.env",
-             "tests/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+             "tests/unit/cfngin/fixtures/basic.env",
+             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
         )
         self.assertEqual(args.region, "us-west-2")
         self.assertFalse(args.outline)
@@ -29,8 +29,8 @@ class TestStacker(unittest.TestCase):
         args = stacker.parse_args(
             ["build",
              "-e", "namespace=test.override",
-             "tests/cfngin/fixtures/basic.env",
-             "tests/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+             "tests/unit/cfngin/fixtures/basic.env",
+             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
         )
         self.assertEqual(args.region, None)
 
@@ -40,8 +40,8 @@ class TestStacker(unittest.TestCase):
         args = stacker.parse_args(
             ["build",
              "-r", "us-west-2",
-             "tests/cfngin/fixtures/basic.env",
-             "tests/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+             "tests/unit/cfngin/fixtures/basic.env",
+             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
         )
         stacker.configure(args)
         stacks_dict = args.context.get_stacks_dict()
@@ -61,8 +61,8 @@ class TestStacker(unittest.TestCase):
         args = stacker.parse_args(
             ["build",
              "-r", "us-west-2",
-             "tests/cfngin/fixtures/basic.env",
-             "tests/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+             "tests/unit/cfngin/fixtures/basic.env",
+             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
         )
         stacker.configure(args)
         stacks_dict = args.context.get_stacks_dict()
@@ -76,8 +76,8 @@ class TestStacker(unittest.TestCase):
         args = stacker.parse_args(
             ["build",
              "-r", "us-west-2",
-             "tests/cfngin/fixtures/basic.env",
-             "tests/cfngin/fixtures/vpc-bastion-db-web.yaml",
+             "tests/unit/cfngin/fixtures/basic.env",
+             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
              "--stacks", "vpc",
              "--stacks", "bastion"]
         )
@@ -91,8 +91,8 @@ class TestStacker(unittest.TestCase):
         args = stacker.parse_args(
             ["build",
              "-r", "us-west-2",
-             "tests/cfngin/fixtures/basic.env",
-             "tests/cfngin/fixtures/vpc-bastion-db-web-pre-1.0.yaml"]
+             "tests/unit/cfngin/fixtures/basic.env",
+             "tests/unit/cfngin/fixtures/vpc-bastion-db-web-pre-1.0.yaml"]
         )
         with self.assertRaises(InvalidConfig):
             stacker.configure(args)
@@ -103,8 +103,8 @@ class TestStacker(unittest.TestCase):
         args = stacker.parse_args(
             [
                 "build", "-r", "us-west-2",
-                "tests/cfngin/fixtures/not-basic.env",
-                "tests/cfngin/fixtures/vpc-custom-log-format-info.yaml"
+                "tests/unit/cfngin/fixtures/not-basic.env",
+                "tests/unit/cfngin/fixtures/vpc-custom-log-format-info.yaml"
             ]
         )
         stacker.configure(args)

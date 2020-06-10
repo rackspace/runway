@@ -3,7 +3,7 @@ log_formats:
 
 stacks:
   - name: vpc
-    class_path: tests.cfngin.fixtures.mock_blueprints.VPC
+    class_path: tests.unit.cfngin.fixtures.mock_blueprints.VPC
     variables:
       InstanceType: m3.medium
       SshKeyName: default

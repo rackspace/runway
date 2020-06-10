@@ -56,9 +56,9 @@ class TestHooks(unittest.TestCase):
         """Test valid hook."""
         mock_load.side_effect = [mock_hook, MockHook]
         hooks = [
-            Hook({"path": "tests.cfngin.hooks.test_utils.mock_hook",
+            Hook({"path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
                   "required": True}),
-            Hook({'path': 'tests.cfngin.hooks.test_utils.MockHook',
+            Hook({'path': 'tests.unit.cfngin.hooks.test_utils.MockHook',
                   'required': True})]
         handle_hooks('pre_build', hooks, self.provider, self.context)
         assert mock_load.call_count == 2
@@ -72,7 +72,7 @@ class TestHooks(unittest.TestCase):
     def test_valid_enabled_hook(self):
         """Test valid enabled hook."""
         hooks = [
-            Hook({"path": "tests.cfngin.hooks.test_utils.mock_hook",
+            Hook({"path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
                   "required": True, "enabled": True})]
         handle_hooks("missing", hooks, self.provider, self.context)
         good = HOOK_QUEUE.get_nowait()
@@ -83,7 +83,7 @@ class TestHooks(unittest.TestCase):
     def test_valid_enabled_false_hook(self):
         """Test valid enabled false hook."""
         hooks = [
-            Hook({"path": "tests.cfngin.hooks.test_utils.mock_hook",
+            Hook({"path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
                   "required": True, "enabled": False})]
         handle_hooks("missing", hooks, self.provider, self.context)
         self.assertTrue(HOOK_QUEUE.empty())
@@ -91,23 +91,23 @@ class TestHooks(unittest.TestCase):
     def test_context_provided_to_hook(self):
         """Test context provided to hook."""
         hooks = [
-            Hook({"path": "tests.cfngin.hooks.test_utils.context_hook",
+            Hook({"path": "tests.unit.cfngin.hooks.test_utils.context_hook",
                   "required": True})]
         handle_hooks("missing", hooks, "us-east-1", self.context)
 
     def test_hook_failure(self):
         """Test hook failure."""
         hooks = [
-            Hook({"path": "tests.cfngin.hooks.test_utils.fail_hook",
+            Hook({"path": "tests.unit.cfngin.hooks.test_utils.fail_hook",
                   "required": True})]
         with self.assertRaises(SystemExit):
             handle_hooks("fail", hooks, self.provider, self.context)
-        hooks = [{"path": "tests.cfngin.hooks.test_utils.exception_hook",
+        hooks = [{"path": "tests.unit.cfngin.hooks.test_utils.exception_hook",
                   "required": True}]
         with self.assertRaises(Exception):
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
-            Hook({"path": "tests.cfngin.hooks.test_utils.exception_hook",
+            Hook({"path": "tests.unit.cfngin.hooks.test_utils.exception_hook",
                   "required": False})]
         # Should pass
         handle_hooks("ignore_exception", hooks, self.provider, self.context)
@@ -116,12 +116,12 @@ class TestHooks(unittest.TestCase):
         """Test return data hook."""
         hooks = [
             Hook({
-                "path": "tests.cfngin.hooks.test_utils.result_hook",
+                "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
                 "data_key": "my_hook_results"
             }),
             # Shouldn't return data
             Hook({
-                "path": "tests.cfngin.hooks.test_utils.context_hook"
+                "path": "tests.unit.cfngin.hooks.test_utils.context_hook"
             })
         ]
         handle_hooks("result", hooks, "us-east-1", self.context)
@@ -139,11 +139,11 @@ class TestHooks(unittest.TestCase):
         """Test return data hook duplicate key."""
         hooks = [
             Hook({
-                "path": "tests.cfngin.hooks.test_utils.result_hook",
+                "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
                 "data_key": "my_hook_results"
             }),
             Hook({
-                "path": "tests.cfngin.hooks.test_utils.result_hook",
+                "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
                 "data_key": "my_hook_results"
             })
         ]
@@ -154,7 +154,7 @@ class TestHooks(unittest.TestCase):
     def test_resolve_lookups_in_args(self):
         """Test the resolution of lookups in hook args."""
         hooks = [Hook({
-            "path": "tests.cfngin.hooks.test_utils.kwargs_hook",
+            "path": "tests.unit.cfngin.hooks.test_utils.kwargs_hook",
             "data_key": "my_hook_results",
             "args": {
                 "default_lookup": "${default env_var::default_value}"

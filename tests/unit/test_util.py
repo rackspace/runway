@@ -195,7 +195,7 @@ class TestSafeHaven(object):
         """Test sys.modules interations with excluded module."""
         monkeypatch.setattr(SafeHaven, 'reset_all', MagicMock())
 
-        module = 'tests.fixtures.mock_hooks'
+        module = 'tests.unit.fixtures.mock_hooks'
 
         assert module not in sys.modules
         with SafeHaven(sys_modules_exclude=module) as obj:
@@ -267,7 +267,7 @@ def test_load_object_from_string():
     for test in tests:
         assert load_object_from_string(test[0]) is test[1]
 
-    obj_path = 'tests.fixtures.mock_hooks.GLOBAL_VALUE'
+    obj_path = 'tests.unit.fixtures.mock_hooks.GLOBAL_VALUE'
     # check value from os.environ
     assert load_object_from_string(obj_path, try_reload=True) == 'us-east-1'
 
@@ -281,10 +281,10 @@ def test_load_object_from_string_reload_conditions(mock_six):
     """Test load_object_from_string reload conditions."""
     mock_six.moves.reload_module.return_value = MagicMock()
     builtin_test = 'sys.version_info'
-    mock_hook = 'tests.fixtures.mock_hooks.GLOBAL_VALUE'
+    mock_hook = 'tests.unit.fixtures.mock_hooks.GLOBAL_VALUE'
 
     try:
-        del sys.modules['tests.fixtures.mock_hooks']
+        del sys.modules['tests.unit.fixtures.mock_hooks']
     except:  # noqa pylint: disable=bare-except
         pass
 

@@ -56,7 +56,7 @@ def generate_definition(base_name, stack_id, **overrides):
     """Generate definitions."""
     definition = {
         "name": "%s.%d" % (base_name, stack_id),
-        "class_path": "tests.cfngin.fixtures.mock_blueprints.%s" % (
+        "class_path": "tests.unit.cfngin.fixtures.mock_blueprints.%s" % (
             base_name.upper()),
         "requires": []
     }

@@ -11,9 +11,9 @@ from runway.variables import Variable
 
 from ..factories import mock_context
 
-RAW_JSON_TEMPLATE_PATH = 'tests/cfngin/fixtures/cfn_template.json'
-RAW_YAML_TEMPLATE_PATH = 'tests/cfngin/fixtures/cfn_template.yaml'
-RAW_J2_TEMPLATE_PATH = 'tests/cfngin/fixtures/cfn_template.json.j2'
+RAW_JSON_TEMPLATE_PATH = 'tests/unit/cfngin/fixtures/cfn_template.json'
+RAW_YAML_TEMPLATE_PATH = 'tests/unit/cfngin/fixtures/cfn_template.yaml'
+RAW_J2_TEMPLATE_PATH = 'tests/unit/cfngin/fixtures/cfn_template.json.j2'
 
 
 def test_get_template_path_local_file(tmpdir):

@@ -223,7 +223,7 @@ class TestContext(unittest.TestCase):
         """Test hook with sys path."""
         config = Config({
             "namespace": "test",
-            "sys_path": "./tests/cfngin",
+            "sys_path": "./tests/unit/cfngin",
             "pre_build": [
                 {
                     "data_key": "myHook",

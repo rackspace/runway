@@ -457,7 +457,7 @@ stacks:
     def test_lookup_with_sys_path(self):
         """Test lookup with sys path."""
         config = Config({
-            "sys_path": "./tests/cfngin",
+            "sys_path": "./tests/unit/cfngin",
             "lookups": {
                 "custom": "fixtures.mock_lookups.handler"}})
         load(config)
