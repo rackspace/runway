@@ -1,4 +1,4 @@
-"""Test command ``runway gen-sample``."""
+"""Test ``runway gen-sample`` command."""
 # pylint: disable=unused-argument
 import logging
 
