@@ -42,6 +42,7 @@
         "jsonpatch",
         "jsonpickle",
         "jsonpointer",
+        "kustomization",
         "kwarg",
         "lambci",
         "localtoc",

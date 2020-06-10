@@ -29,13 +29,10 @@ def convert_gitignore(src):
         Optional[Path]: The renamed file if it was created.
 
     """
-    if src.is_file():
-        gitignore = src.parent / '.gitignore'
-        LOGGER.debug('renaming "%s" to "%s"', src, gitignore)
-        src.rename(gitignore)
-        return gitignore
-    LOGGER.debug('source file "%s" does not exist', src)
-    return None
+    gitignore = src.parent / '.gitignore'
+    LOGGER.debug('renaming "%s" to "%s"', src, gitignore)
+    src.rename(gitignore)
+    return gitignore
 
 
 def copy_sample(ctx, src, dest):

@@ -26,5 +26,5 @@ def sls_py(ctx):
     convert_gitignore(dest / '_gitignore')
 
     LOGGER.info("Sample Serverless module created at %s", dest)
-    LOGGER.info('To finish its setup, change to the %s directory and execute '
-                '"npm install" to generate its lockfile.', dest)
+    LOGGER.info('To finish it\'s setup, change to the %s directory and execute'
+                ' "npm install" to generate it\'s lockfile.', dest)

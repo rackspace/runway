@@ -26,5 +26,5 @@ def cdk_csharp(ctx):
     convert_gitignore(dest / 'dot_gitignore')
 
     LOGGER.info("Sample C# CDK module created at %s", dest)
-    LOGGER.info('To finish its setup, change to the %s directory and execute '
-                '"npm install" to generate its lockfile.', dest)
+    LOGGER.info('To finish it\'s setup, change to the %s directory and execute'
+                ' "npm install" to generate it\'s lockfile.', dest)

@@ -25,5 +25,5 @@ def cdk_tsc(ctx):
     # .gitignore already exists
 
     LOGGER.info("Sample CDK module created at %s", dest)
-    LOGGER.info('To finish its setup, change to the %s directory and execute '
-                '"npm install" to generate its lockfile.', dest)
+    LOGGER.info('To finish it\'s setup, change to the %s directory and execute'
+                ' "npm install" to generate it\'s lockfile.', dest)
