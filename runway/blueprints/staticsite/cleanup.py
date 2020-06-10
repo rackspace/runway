@@ -338,7 +338,7 @@ class Cleanup(Blueprint):
     def _get_replicated_lambda_state_machine_role(self,
                                                   remover_function,  # type: Dict[str, Union[awslambda.Function, iam.Role, Any]] # noqa pylint: disable=line-too-long
                                                   self_destruct_function # type: Dict[str, Union[awslambda.Function, iam.Role, Any]] # noqa pylint: disable=line-too-long
-                                                 ):
+                                                  ):
         # type (...) -> iam.Role
         variables = self.get_variables()
         entity = Join('.', ['states', Region, 'amazonaws.com'])
