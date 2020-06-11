@@ -1,7 +1,7 @@
 """Run a kubectl command."""
 import logging
 import subprocess
-from typing import List  # noqa pylint: disable=unused-import
+from typing import Tuple  # noqa pylint: disable=unused-import
 
 import click
 
@@ -12,10 +12,10 @@ LOGGER = logging.getLogger(__name__)
 
 @click.command('run', short_help='run kubectl',
                context_settings={'ignore_unknown_options': True})
-@click.argument('args', nargs=-1)
+@click.argument('args', metavar='<args>', nargs=-1)
 @click.pass_context
 def run(ctx, args):
-    # type: (click.Context, List[str]) -> None
+    # type: (click.Context, Tuple[str, ...]) -> None
     """Run a kubectl command.
 
     Uses the version of kubectl specified in the ".kubectl-version" file

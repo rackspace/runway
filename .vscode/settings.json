@@ -20,6 +20,7 @@
         "cffi",
         "cfngin",
         "chardet",
+        "clidriver",
         "cognito",
         "cpython",
         "cygwin",
