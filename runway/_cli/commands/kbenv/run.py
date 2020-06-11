@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 
 @click.command('run', short_help='run kubectl',
                context_settings={'ignore_unknown_options': True})
-@click.argument('args', metavar='<args>', nargs=-1)
+@click.argument('args', metavar='<args>', nargs=-1, required=True)
 @click.pass_context
 def run(ctx, args):
     # type: (click.Context, Tuple[str, ...]) -> None

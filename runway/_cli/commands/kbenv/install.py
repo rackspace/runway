@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.command('install', short_help='install kubectl')
-@click.argument('version', metavar='<version>', required=False)
+@click.argument('version', metavar='[<version>]', required=False)
 def install(version):
     # type: (str) -> None
     """Install the specified <version> of kubectl (e.g. v1.14.0).

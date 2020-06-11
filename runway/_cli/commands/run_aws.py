@@ -11,7 +11,7 @@ from ...util import SafeHaven
 
 @click.command('run-aws', short_help='bundled awscli',
                context_settings={'ignore_unknown_options': True})
-@click.argument('args', metavar='<args>', nargs=-1)
+@click.argument('args', metavar='<args>', nargs=-1, required=True)
 @click.pass_context
 def run_aws(ctx, args):
     # type: (click.Context, Tuple[str, ...]) -> None
