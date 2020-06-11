@@ -1,4 +1,4 @@
-"""Empty init for python import traversal."""
+"""``runway gen-sample`` command group."""
 import click
 
 from .cdk_csharp import cdk_csharp

@@ -30,7 +30,11 @@ CLICK_CONTEXT_SETTINGS = dict(
 @click.version_option(__version__, message='%(version)s')
 def cli():
     # type: () -> None
-    """Runway CLI."""
+    """Runway CLI.
+
+    Full documentation available at https://docs.onica.com/projects/runway/.
+
+    """
 
 
 # register all the other commands from the importable modules defined
