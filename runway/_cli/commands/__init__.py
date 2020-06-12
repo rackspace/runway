@@ -5,6 +5,7 @@ from .kbenv import kbenv
 from .run_aws import run_aws
 from .run_python import run_python
 from .run_stacker import run_stacker
+from .tfenv import tfenv
 
 __all__ = [
     'gen_sample',
@@ -12,5 +13,6 @@ __all__ = [
     'kbenv',
     'run_aws',
     'run_python',
-    'run_stacker'
+    'run_stacker',
+    'tfenv'
 ]
