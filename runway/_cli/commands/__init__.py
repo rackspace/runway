@@ -5,6 +5,7 @@ from .kbenv import kbenv
 from .run_aws import run_aws
 from .run_python import run_python
 from .run_stacker import run_stacker
+from .test import test
 from .tfenv import tfenv
 
 __all__ = [
@@ -14,5 +15,6 @@ __all__ = [
     'run_aws',
     'run_python',
     'run_stacker',
+    'test',
     'tfenv'
 ]

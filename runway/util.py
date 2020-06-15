@@ -286,7 +286,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
     def __str__(self):
         # type: () -> str
         """Return string representation of the object."""
-        return json.dumps(self.data)
+        return json.dumps(self.data, default=json_serial)
 
 
 class SafeHaven(AbstractContextManager):
@@ -437,6 +437,13 @@ def environ(env=None, **kwargs):
         # always restore original values
         os.environ.clear()
         os.environ.update(original_env)
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code."""
+    if isinstance(obj, MutableMap):
+        return obj.data
+    raise TypeError("Type %s not serializable" % type(obj))
 
 
 def load_object_from_string(fqcn, try_reload=False):

@@ -1,19 +1,23 @@
 """Runway config file module."""
 # pylint: disable=super-init-not-called,too-many-lines
-from typing import (Any, Dict, List, Optional,  # pylint: disable=unused-import
-                    Union, Iterator, TYPE_CHECKING)
-
-# python2 supported pylint is unable to load this when in a venv
-from distutils.util import strtobool  # pylint: disable=no-name-in-module,import-error
 import logging
 import os
 import sys
+# python2 supported pylint is unable to load this when in a venv
+from distutils.util import strtobool  # pylint: disable=E
+from typing import (TYPE_CHECKING, Any, Dict,  # pylint: disable=unused-import
+                    Iterator, List, Optional, Union)
 
-from six import string_types
 import yaml
+from six import string_types
 
 from .util import MutableMap, cached_property
 from .variables import Variable
+
+if sys.version_info.major > 2:
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
@@ -1170,41 +1174,45 @@ class Config(ConfigComponent):
 
     @classmethod
     def load_from_file(cls, config_path):
-        # type: (str) -> Config
+        # type: (Path) -> Config
         """Load config file into a Config object."""
-        if not os.path.isfile(config_path):
+        if not isinstance(config_path, Path):  # legacy support
+            config_path = Path(config_path)
+        if not config_path.is_file():
             LOGGER.error("Runway config file was not found (looking for "
                          "%s)",
                          config_path)
             sys.exit(1)
-        with open(config_path) as data_file:
-            config_file = yaml.safe_load(data_file)
-            result = Config(config_file.pop('deployments'),
-                            config_file.pop('future', {}),
-                            config_file.pop('tests', []),
-                            config_file.pop('ignore_git_branch',
-                                            config_file.pop(
-                                                'ignore-git-branch',
-                                                False)),
-                            config_file.pop('variables', {}))
 
-            if config_file:
-                LOGGER.warning(
-                    'Invalid keys found in runway file have been ignored: %s',
-                    ', '.join(config_file.keys())
-                )
-            return result
+        config_file = yaml.safe_load(config_path.read_text())
+        result = Config(config_file.pop('deployments'),
+                        config_file.pop('future', {}),
+                        config_file.pop('tests', []),
+                        config_file.pop('ignore_git_branch',
+                                        config_file.pop(
+                                            'ignore-git-branch',
+                                            False)),
+                        config_file.pop('variables', {}))
+
+        if config_file:
+            LOGGER.warning(
+                'Invalid keys found in runway file have been ignored: %s',
+                ', '.join(config_file.keys())
+            )
+        return result
 
     @classmethod
     def find_config_file(cls, config_dir=None):
-        # type: (Optional[str]) -> str
+        # type: (Optional[Path]) -> Path
         """Find the Runway config file."""
+        if not isinstance(config_dir, Path):  # legacy support
+            config_dir = Path(config_dir)
         if not config_dir:
-            config_dir = os.getcwd()
+            config_dir = Path.cwd()
 
         for name in cls.accepted_names:
-            conf_path = os.path.join(config_dir, name)
-            if os.path.isfile(conf_path):
+            conf_path = config_dir / name
+            if conf_path.is_file():
                 return conf_path
 
         LOGGER.error('Runway config file was not found. Looking for one '

@@ -15,7 +15,6 @@ def does_not_raise():
     yield
 
 
-@pytest.mark.wip
 @pytest.mark.parametrize('regions, mock_input, expected, exception', [
     (['us-east-1'], MagicMock(), 'us-east-1', does_not_raise()),
     (['us-east-1', 'us-west-2'], MagicMock(return_value='1'), 'us-east-1',
