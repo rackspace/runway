@@ -49,7 +49,7 @@ class _CliGroup(click.Group):
         """
         if not ctx.args:
             return {}
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument('-e', '--deploy-environment',
                             default=os.getenv('DEPLOY_ENVIRONMENT'))
         args, _ = parser.parse_known_args(list(ctx.args))
