@@ -8,6 +8,8 @@ from .run_python import run_python
 from .run_stacker import run_stacker
 from .test import test
 from .tfenv import tfenv
+from .whichenv import whichenv
+
 
 __all__ = [
     'gen_sample',
@@ -18,5 +20,6 @@ __all__ = [
     'run_python',
     'run_stacker',
     'test',
-    'tfenv'
+    'tfenv',
+    'whichenv'
 ]
