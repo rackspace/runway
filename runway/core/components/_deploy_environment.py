@@ -252,10 +252,12 @@ class DeployEnvironment(object):
             DeployEnvironment: New instance with the same contents.
 
         """
-        return self.__class__(environ=self.vars.copy(),
-                              explicit_name=self.name,
-                              ignore_git_branch=self._ignore_git_branch,
-                              root_dir=self.root_dir)
+        obj = self.__class__(environ=self.vars.copy(),
+                             explicit_name=self.name,
+                             ignore_git_branch=self._ignore_git_branch,
+                             root_dir=self.root_dir)
+        obj.name_derived_from = self.name_derived_from
+        return obj
 
     def log_name(self):
         # type: () -> None
