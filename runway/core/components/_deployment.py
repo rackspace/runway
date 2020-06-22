@@ -29,8 +29,8 @@ class Deployment(object):
     def __init__(self,
                  context,  # type: Context
                  definition,  # type: DeploymentDefinition
+                 future=None,  # type: Optional[FutureDefinition]
                  variables=None,  # type: VariablesDefinition
-                 future=None  # type: Optional[FutureDefinition]
                  ):
         # type: (...) -> None
         """Instantiate class.
@@ -38,9 +38,9 @@ class Deployment(object):
         Args:
             context (Context): Runway context object.
             definition (DeploymentDefinition): A single deployment definition.
-            variables (VariablesDefinition): Runway variables.
             future (Optional[FutureDefinition]): Future functionality
                 configuration.
+            variables (VariablesDefinition): Runway variables.
 
         """
         self._future = future or FutureDefinition()
@@ -77,7 +77,9 @@ class Deployment(object):
         if isinstance(self.definition.account_id, (int, six.string_types)):
             return str(self.definition.account_id)
         if isinstance(self.definition.account_id, dict):
-            return self.definition.account_id.get(self.ctx.env.name)
+            result = self.definition.account_id.get(self.ctx.env.name)
+            if result:
+                return str(result)
         return None
 
     @property
@@ -123,6 +125,7 @@ class Deployment(object):
                 return {'role_arn': env_assume_role, **top_level}
             LOGGER.info('Skipping iam:AssumeRole; no role found for deploy '
                         'environment "%s"...', self.ctx.env.name)
+            return {}
         LOGGER.debug('role found: %s', assume_role)
         return {'role_arn': assume_role}
 
@@ -136,7 +139,7 @@ class Deployment(object):
     def use_async(self):
         # type: () -> bool
         """Whether to use asynchronous method."""
-        return self.definition.parallel_regions and self.ctx.use_concurrent
+        return bool(self.definition.parallel_regions and self.ctx.use_concurrent)
 
     def deploy(self):
         # type: () -> None
@@ -254,14 +257,21 @@ class Deployment(object):
             self.run(action, region)
 
     @classmethod
-    def run_list(cls, action, context, deployments, variables):
-        # type: (Context, List[DeploymentDefinition], VariablesDefinition) -> None
+    def run_list(cls,
+                 action,  # type: str
+                 context,  # type: Context
+                 deployments,  # type: List[DeploymentDefinition]
+                 future,  # type: FutureDefinition
+                 variables  # type: VariablesDefinition
+                 ):
+        # type: (...) -> None
         """Run a list of deployments.
 
         Args:
             action (str): Name of action to run.
             context (Context): Runway context.
             deployments (List[DeploymentDefinition]): List of deployments to run.
+            future (FutureDefinition): Future definition.
             variables (VariablesDefinition): Runway variables for lookup
                 resolution.
 
@@ -277,7 +287,10 @@ class Deployment(object):
                 LOGGER.warning('No modules found for deployment "%s"',
                                deployment.name)
                 continue
-            cls(context, deployment, variables)[action]()
+            cls(context=context,
+                definition=deployment,
+                future=future,
+                variables=variables)[action]()
 
     def __getitem__(self, key):
         """Make the object subscriptable.

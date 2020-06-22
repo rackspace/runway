@@ -49,6 +49,7 @@ class Runway(object):
         Deployment.run_list(action='deploy',
                             context=self.ctx,
                             deployments=deployments or self.deployments,
+                            future=self.future,
                             variables=self.variables)
 
     def destory(self):
