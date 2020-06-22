@@ -17,7 +17,6 @@ LOGGER = logging.getLogger(__name__)
 def test(ctx, **_):
     """Execute tests as defined in the Runway config."""
     test_definitions = ctx.obj.runway_config.tests
-    print(test_definitions)
 
     if not test_definitions:
         LOGGER.error(
@@ -36,11 +35,7 @@ def test(ctx, **_):
             click.secho(i, bold=True, err=True)
         ctx.exit(1)
 
-    context = Context(env_name=ctx.obj.env.name,
-                      env_region=None,
-                      env_root=str(ctx.obj.root_dir),
-                      env_vars=ctx.obj.env.vars.copy(),
-                      command='test')
+    context = Context(command='test', deploy_environment=ctx.obj.env)
 
     failed_tests = []
 

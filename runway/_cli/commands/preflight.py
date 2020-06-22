@@ -3,8 +3,8 @@ import logging
 
 import click
 
-from .test import test
 from .. import options
+from .test import test
 
 LOGGER = logging.getLogger(__name__)
 

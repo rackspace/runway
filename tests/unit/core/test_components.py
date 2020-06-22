@@ -21,7 +21,7 @@ MODULE = 'runway.core.components'
 class TestDeployEnvironment(object):
     """Test runway.core.components.DeployEnvironment."""
 
-    @patch(MODULE + '.git')
+    @patch(MODULE + '._deploy_environment.git')
     def test_branch_name(self, mock_git):
         """Test branch_name."""
         branch_name = 'test'
@@ -34,7 +34,7 @@ class TestDeployEnvironment(object):
         mock_git.Repo.assert_called_once_with(os.getcwd(),
                                               search_parent_directories=True)
 
-    @patch(MODULE + '.git')
+    @patch(MODULE + '._deploy_environment.git')
     def test_branch_name_invalid_repo(self, mock_git):
         """Test branch_name handle InvalidGitRepositoryError."""
         mock_git.Repo.side_effect = InvalidGitRepositoryError
@@ -47,14 +47,14 @@ class TestDeployEnvironment(object):
     def test_branch_name_no_git(self, monkeypatch, caplog):
         """Test branch_name git ImportError."""
         caplog.set_level(logging.DEBUG, logger='runway.core.components')
-        monkeypatch.setattr(MODULE + '.git', object)
+        monkeypatch.setattr(MODULE + '._deploy_environment.git', object)
         obj = DeployEnvironment()
 
         assert obj.branch_name is None
         assert ('failed to import git; ensure git is your path and executable '
                 'to read the branch name') in caplog.messages
 
-    @patch(MODULE + '.git')
+    @patch(MODULE + '._deploy_environment.git')
     def test_branch_name_type_error(self, mock_git, caplog):
         """Test branch_name handle TypeError."""
         caplog.set_level(logging.WARNING, logger='runway')
@@ -118,7 +118,7 @@ class TestDeployEnvironment(object):
     def test_name_from_branch(self, branch, environ, expected, monkeypatch):
         """Test name from branch."""
         mock_prompt = MagicMock(return_value='user_value')
-        monkeypatch.setattr('runway.core.components.click.prompt',
+        monkeypatch.setattr('runway.core.components._deploy_environment.click.prompt',
                             mock_prompt)
         monkeypatch.setattr(DeployEnvironment, 'branch_name', branch)
         obj = DeployEnvironment(environ=environ)

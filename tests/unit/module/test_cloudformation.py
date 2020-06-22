@@ -1,12 +1,12 @@
 """Test runway.module.cloudformation."""
 # pylint: disable=protected-access,no-self-use
-import os
-
 from mock import patch
 
-from runway.context import Context
+from runway.core.components import DeployEnvironment
 from runway.module.cloudformation import CloudFormation
 from runway.util import MutableMap
+
+from ..factories import MockRunwayContext
 
 
 class TestCloudFormation(object):
@@ -25,9 +25,11 @@ class TestCloudFormation(object):
     @staticmethod
     def get_context(name='test', region='us-east-1'):
         """Create a basic Runway context object."""
-        return Context(env_name=name,
-                       env_region=region,
-                       env_root=os.getcwd())
+        context = MockRunwayContext(deploy_environment=DeployEnvironment(
+            explicit_name=name
+        ))
+        context.env.aws_region = region
+        return context
 
     @patch('runway.cfngin.CFNgin.deploy')
     def test_deploy(self, mock_action, tmp_path):

@@ -56,7 +56,7 @@ class CFNgin(object):
         """
         self.__ctx = ctx
         self._env_file_name = None
-        self.concurrency = ctx.max_concurrent_cfngin_stacks
+        self.concurrency = ctx.env.max_concurrent_cfngin_stacks
         self.interactive = ctx.is_interactive
         self.parameters = MutableMap()
         self.recreate_failed = ctx.is_noninteractive

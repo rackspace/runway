@@ -50,6 +50,7 @@ class _CliGroup(click.Group):
         if not ctx.args:
             return {}
         parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument('--ci', action='store_true')
         parser.add_argument('-e', '--deploy-environment',
                             default=os.getenv('DEPLOY_ENVIRONMENT'))
         args, _ = parser.parse_known_args(list(ctx.args))
@@ -73,6 +74,8 @@ def cli(ctx):
 
     """
     if ctx.invoked_subcommand:  # skip of bare execution
+        if 'CI' in os.environ and not ctx.meta['global.options'].get('ci'):
+            ctx.meta['global.options']['ci'] = True
         ctx.obj = CliContext(**ctx.meta['global.options'])
 
 

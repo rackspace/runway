@@ -117,18 +117,18 @@ class TestRunwayModuleNpm(object):
         expected_logs.append('tests: Skipping npm ci and npm install...')
 
         obj.options['skip_npm_ci'] = False
-        obj.context.env_vars['CI'] = True
+        obj.context.env.ci = True
         mock_ci.return_value = True
         assert not obj.npm_install()
         expected_logs.append('tests: Running npm ci...')
         expected_calls.append(call([NPM_BIN, 'ci']))
 
-        obj.context.env_vars['CI'] = False
+        obj.context.env.ci = False
         assert not obj.npm_install()
         expected_logs.append('tests: Running npm install...')
         expected_calls.append(call([NPM_BIN, 'install']))
 
-        obj.context.env_vars['CI'] = True
+        obj.context.env.ci = True
         mock_ci.return_value = False
         assert not obj.npm_install()
         expected_logs.append('tests: Running npm install...')
@@ -140,7 +140,7 @@ class TestRunwayModuleNpm(object):
         expected_calls.append(call([NPM_BIN, 'install', '--no-color']))
 
         obj.options['skip_npm_ci'] = False
-        obj.context.env_vars['CI'] = True
+        obj.context.env.ci = True
         mock_ci.return_value = True
         assert not obj.npm_install()
         expected_logs.append('tests: Running npm ci...')

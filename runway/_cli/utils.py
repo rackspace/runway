@@ -1,13 +1,15 @@
 """CLI utils."""
 import logging
 import sys
-from typing import Any, Iterator  # noqa pylint: disable=W
+from typing import Any, Iterator, List, Tuple  # noqa pylint: disable=W
 
+import click
+import yaml
 from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
 from ..core.components import DeployEnvironment
 from ..commands.runway_command import get_env  # TODO update path
-from ..config import Config
+from ..config import Config, DeploymentDefinition, ModuleDefinition
 from ..util import cached_property
 
 if sys.version_info.major > 2:
@@ -21,10 +23,11 @@ LOGGER = logging.getLogger(__name__)
 class CliContext(MutableMapping):
     """CLI context object."""
 
-    def __init__(self, deploy_environment=None, **_):
+    def __init__(self, ci=False, deploy_environment=None, **_):
         """Instantiate class."""
         self._deploy_environment = deploy_environment
         self.root_dir = Path.cwd()
+        self.env.ci = ci
 
     @cached_property
     def env(self):
@@ -169,3 +172,114 @@ class CliContext(MutableMapping):
         # type: () -> str
         """Return string representation of the object."""
         return 'CliContext({})'.format(self.__dict__)
+
+
+def select_deployments(ctx, deployments):
+    # type: (click.Context, List[DeploymentDefinition]) -> List[DeploymentDefinition]
+    """Interactively select which deployments to run.
+
+    Args:
+        ctx: Current click context.
+        deployments: List of deployment(s) to choose from.
+
+    Returns:
+        Selected deployment(s).
+
+    """
+    if len(deployments) == 1:
+        choice = 1
+    else:
+        click.secho('\nConfigured deployments\n', bold=True, underline=True)
+        click.echo(yaml.safe_dump({i + 1: d.menu_entry
+                                   for i, d in enumerate(deployments)}))
+        if ctx.command.name == 'destroy':
+            click.echo('(operating in destroy mode -- "all" will destroy all '
+                       'deployments in reverse order)\n')
+        choice = click.prompt(
+            'Enter number of deployment to run (or "all")',
+            default='all',
+            show_choices=False,
+            type=click.Choice([str(n) for n in
+                               range(1, len(deployments) + 1)] + ['all'])
+        )
+    if choice != 'all':
+        deployments = [deployments[int(choice) - 1]]
+        deployments[0].modules = select_modules(ctx, deployments[0].modules)
+    return deployments
+
+
+def select_modules(ctx, modules):
+    # type: (click.Context, List[ModuleDefinition]) -> List[ModuleDefinition]
+    """Interactively select which modules to run.
+
+    Args:
+        ctx: Current click context.
+        modules: List of module(s) to choose from.
+
+    Returns:
+        Selected module(s).
+
+    """
+    if len(modules) == 1:
+        if ctx.command.name == 'destroy':
+            LOGGER.info('(only one deployment detected; all modules '
+                        'automatically selected for termination)')
+            if not click.confirm('Proceed?'):
+                ctx.exit(0)
+        return modules
+    click.secho('\nConfigured modules\n', bold=True, underline=True)
+    click.echo(yaml.safe_dump({i + 1: m.menu_entry
+                               for i, m in enumerate(modules)}))
+    if ctx.command.name == 'destroy':
+        click.echo('(operating in destroy mode -- "all" will destroy all '
+                   'modules in reverse order)\n')
+    choice = click.prompt(
+        'Enter number of module to run (or "all")',
+        default='all',
+        show_choices=False,
+        type=click.Choice([str(n) for n in
+                           range(1, len(modules) + 1)] + ['all'])
+    )
+    click.echo('')
+    if choice == 'all':
+        return modules
+    modules = [modules[int(choice) - 1]]
+    if modules[0].child_modules:
+        return select_modules(ctx, modules[0].child_modules)
+    return modules
+
+
+def select_modules_using_tags(ctx,  # type: click.Context
+                              deployments,  # type: List[DeploymentDefinition]
+                              tags  # type: Tuple[str, ...]
+                              ):
+    # type: (...) -> List[DeploymentDefinition]
+    """Select modules to run using tags.
+
+    Args:
+        ctx: Current click context.
+        deployments: List of deployments to check.
+        tags: List of tags to filter modules.
+
+    Returns:
+        List of selected deployments with selected modules.
+
+    """
+    deployments_to_run = []
+    for deployment in deployments:
+        modules_to_run = []
+        for module in deployment.modules:
+            if module.child_modules:
+                module.child_modules = [c for c in module.child_modules
+                                        if all(t in c.tags for t in tags)]
+                if module.child_modules:
+                    modules_to_run.append(module)
+            elif all(t in module.tags for t in tags):
+                modules_to_run.append(module)
+        if modules_to_run:
+            deployment.modules = modules_to_run
+            deployments_to_run.append(deployment)
+    if deployments_to_run:
+        return deployments_to_run
+    LOGGER.error('No modules found with the provided tag(s): %s', ', '.join(tags))
+    return ctx.exit(1)

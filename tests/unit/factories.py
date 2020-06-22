@@ -12,6 +12,7 @@ from six import string_types
 from runway.cfngin.context import Context as CFNginContext
 from runway.config import DeploymentDefinition
 from runway.context import Context as RunwayContext
+from runway.core.components import DeployEnvironment
 from runway.util import MutableMap
 
 
@@ -238,32 +239,16 @@ class MockRunwayConfig(MutableMap):
 class MockRunwayContext(RunwayContext):
     """Subclass Runway context object for tests."""
 
-    def __init__(self,
-                 env_name,
-                 env_region,
-                 env_root,
-                 env_vars=None,
-                 command=None):
+    def __init__(self, command=None, deploy_environment=None):
         """Instantiate class."""
-        super(MockRunwayContext, self).__init__(env_name=env_name or 'test',
-                                                env_region=env_region or 'us-east-1',
-                                                env_root=env_root,
-                                                env_vars=env_vars,
-                                                command=command)
-        self._account_id = '123456789012'
+        if not deploy_environment:
+            deploy_environment = DeployEnvironment(environ={},
+                                                   explicit_name='test')
+        super(MockRunwayContext, self).__init__(command=command,
+                                                deploy_environment=deploy_environment)
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True
-
-    @property
-    def account_id(self):
-        """Override account_id."""
-        return self._account_id
-
-    @account_id.setter
-    def account_id(self, value):
-        """Set account_id."""
-        self._account_id = value
 
     def add_stubber(self, service_name, region=None):
         """Add a stubber to context.

@@ -367,6 +367,15 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                          'of str'.format(self.name, value, type(value)))
 
     @property
+    def menu_entry(self):
+        """Return menu entry representation of this module."""
+        if self.child_modules:
+            return '{name} [{children}]'.format(
+                name=self.name,
+                children=', '.join([c.menu_entry for c in self.child_modules]))
+        return self.name
+
+    @property
     def options(self):
         # type: () -> Dict[Any, Any]
         """Access the value of an attribute that supports variables."""
@@ -772,6 +781,15 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             return value
         raise ValueError('{}.assume_role is of type {}; expected type '
                          'of dict or str'.format(self.name, type(value)))
+
+    @property
+    def menu_entry(self):
+        """Return menu entry representation of this deployment."""
+        return '{name} - {modules} ({regions})'.format(
+            name=self.name,
+            modules=', '.join([module.name for module in self.modules]),
+            regions=', '.join(self.regions or self.parallel_regions)
+        )
 
     @property
     def module_options(self):

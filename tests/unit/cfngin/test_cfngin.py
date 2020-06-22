@@ -1,13 +1,14 @@
 """Tests for runway.cfngin entry point."""
 # pylint: disable=no-self-use,protected-access.redefined-outer-name
-import os
 import shutil
 
 import pytest
 from mock import MagicMock, call, patch
 
 from runway.cfngin import CFNgin
-from runway.context import Context
+from runway.core.components import DeployEnvironment
+
+from ..factories import MockRunwayContext
 
 
 def copy_fixture(src, dest):
@@ -46,9 +47,11 @@ class TestCFNgin(object):
     @staticmethod
     def get_context(name='test', region='us-east-1'):
         """Create a basic Runway context object."""
-        return Context(env_name=name,
-                       env_region=region,
-                       env_root=os.getcwd())
+        context = MockRunwayContext(deploy_environment=DeployEnvironment(
+            explicit_name=name
+        ))
+        context.env.aws_region = region
+        return context
 
     def test_env_file(self, tmp_path):
         """Test that the correct env file is selected."""

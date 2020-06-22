@@ -1,7 +1,6 @@
 """Runway context module."""
 import logging
 # needed for python2 cpu_count, can be replace with python3 os.cpu_count()
-import multiprocessing
 import os
 import sys
 from distutils.util import strtobool  # pylint: disable=E
@@ -9,7 +8,8 @@ from distutils.util import strtobool  # pylint: disable=E
 from six import string_types
 
 from .cfngin.session_cache import get_session
-from .util import AWS_ENV_VARS, cached_property
+from .core.components import DeployEnvironment
+from .util import cached_property
 
 LOGGER = logging.getLogger('runway')
 
@@ -38,36 +38,58 @@ def echo_detected_environment(env_name, env_vars):
 class Context(object):
     """Runway execution context."""
 
-    env_override_name = 'DEPLOY_ENVIRONMENT'
+    # def __init__(self, env_name,  # pylint: disable=too-many-arguments
+    #              env_region, env_root, env_vars=None,
+    #              command=None):
+    #     """Initialize base class."""
+    #     self.env_name = env_name
+    #     self._env_region = env_region
+    #     self.env_root = env_root
+    #     self.command = command
+    #     self.env_vars = env_vars or os.environ.copy()
+    #     self._env_name_from_env = bool(self.env_vars.get(self.env_override_name))
+    #     self.debug = bool(self.env_vars.get('DEBUG'))
 
-    def __init__(self, env_name,  # pylint: disable=too-many-arguments
-                 env_region, env_root, env_vars=None,
-                 command=None):
-        """Initialize base class."""
-        self.env_name = env_name
-        self.env_region = env_region
-        self.env_root = env_root
+    #     self.echo_detected_environment()
+
+    #     if not self._env_name_from_env:
+    #         self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
+    #     self.__inject_profile_credentials()  # TODO remove after IaC tools support AWS SSO
+
+    def __init__(self, *_, command=None, deploy_environment=None):
+        # type: (DeployEnvironment) -> None
+        """Instantiate class."""
         self.command = command
-        self.env_vars = env_vars or os.environ.copy()
-        self._env_name_from_env = bool(self.env_vars.get(self.env_override_name))
-        self.debug = bool(self.env_vars.get('DEBUG'))
+        self.env = deploy_environment or DeployEnvironment()
+        self.debug = self.env.debug
+        # TODO remove after IaC tools support AWS SSO
+        self.__inject_profile_credentials()
 
-        self.echo_detected_environment()
-
-        if not self._env_name_from_env:
-            self.env_vars.update({'DEPLOY_ENVIRONMENT': self.env_name})
-        self.__inject_profile_credentials()  # TODO remove after IaC tools support AWS SSO
+    @cached_property
+    def env_name(self):
+        """Get name from deploy environment [DEPRECATED]."""
+        return self.env.name
 
     @property
-    def account_id(self):
-        """Get the AccountId of the current AWS account.
+    def env_root(self):
+        """Get environment root directory [DEPRECATED]."""
+        return str(self.env.root_dir)
 
-        Returns:
-            str: AWS Account ID.
+    @property
+    def env_vars(self):
+        """Get environment variables [DEPRECATED]."""
+        return self.env.vars
 
-        """
-        client = self.get_session().client('sts')
-        return client.get_caller_identity()['Account']
+    # @property
+    # def account_id(self):
+    #     """Get the AccountId of the current AWS account.
+
+    #     Returns:
+    #         str: AWS Account ID.
+
+    #     """
+    #     client = self.get_session().client('sts')
+    #     return client.get_caller_identity()['Account']
 
     @property
     def boto3_credentials(self):
@@ -83,11 +105,23 @@ class Context(object):
             Dict[str, str]
 
         """
-        return {name: self.env_vars.get(name)
-                for name in AWS_ENV_VARS if self.env_vars.get(name)}
+        return self.env.aws_credentials
+
+    @property
+    def env_region(self):
+        # type: () -> str
+        """Get or set the current AWS region [DEPRECATED]."""
+        return self.env.aws_region
+
+    @env_region.setter
+    def env_region(self, region):
+        # type: (str) -> None
+        """Set the AWS region [DEPRECATED]."""
+        self.env.aws_region = region
 
     @cached_property
     def no_color(self):
+        # type: () -> bool
         """Wether to explicitly disable color output.
 
         Primarily applies to IaC being wrapped by Runway.
@@ -96,21 +130,19 @@ class Context(object):
             bool
 
         """
-        colorize = self.env_vars.get('RUNWAY_COLORIZE')  # explicitly enable/disable
+        colorize = self.env.vars.get('RUNWAY_COLORIZE')  # explicitly enable/disable
         try:
             if isinstance(colorize, bool):  # catch False
                 return not colorize
-            if colorize:
-                if isinstance(colorize, string_types):
-                    return not strtobool(colorize)
+            if colorize and isinstance(colorize, string_types):
+                return not strtobool(colorize)
         except ValueError:
             pass  # likely invalid RUNWAY_COLORIZE value
-        if sys.stdout.isatty():
-            return False
-        return True
+        return not sys.stdout.isatty()
 
     @property
     def is_interactive(self):
+        # type: () -> bool
         """Wether the user should be prompted or not.
 
         Determined by the existed of ``CI`` in the environment.
@@ -119,10 +151,11 @@ class Context(object):
             bool
 
         """
-        return not bool(self.env_vars.get('CI'))
+        return not self.env.ci
 
     @property
     def is_noninteractive(self):
+        # type: () -> bool
         """Wether the user should be prompted or not.
 
         Determined by the existed of ``CI`` in the environment.
@@ -132,10 +165,11 @@ class Context(object):
             bool
 
         """
-        return bool(self.env_vars.get('CI'))
+        return self.env.ci
 
     @property
     def is_python3(self):
+        # type: () -> bool
         """Wether running in Python 3 or not.
 
         Used for Python compatability decisions.
@@ -147,71 +181,8 @@ class Context(object):
         return sys.version_info.major > 2
 
     @property
-    def max_concurrent_cfngin_stacks(self):
-        """Max number of CFNgin stacks that can be deployed concurrently.
-
-        This property can be set by exporting
-        ``RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS``. If no value is specified, the
-        value will be constrained based on the underlying graph.
-
-        Returns:
-            int: Value from environment variable or ``0``.
-
-        """
-        return int(
-            self.env_vars.get('RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS', '0')
-        )
-
-    @property
-    def max_concurrent_modules(self):
-        """Max number of modules that can be deployed to concurrently.
-
-        This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_MODULES``.
-        If no value is specified, ``min(61, os.cpu_count())`` is used.
-
-        On Windows, this must be equal to or lower than ``61``.
-
-        **IMPORTANT:** When using ``parallel_regions`` and ``child_modules``
-        together, please consider the nature of their relationship when
-        manually setting this value. (``parallel_regions * child_modules``)
-
-        Returns:
-            int: Value from environment variable or ``min(61, os.cpu_count())``
-
-        """
-        value = self.env_vars.get('RUNWAY_MAX_CONCURRENT_MODULES')
-
-        if value:
-            return int(value)
-        # TODO update to `os.cpu_count()` when dropping python2
-        return min(61, multiprocessing.cpu_count())
-
-    @property
-    def max_concurrent_regions(self):
-        """Max number of regions that can be deployed to concurrently.
-
-        This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_REGIONS``.
-        If no value is specified, ``min(61, os.cpu_count())`` is used.
-
-        On Windows, this must be equal to or lower than ``61``.
-
-        **IMPORTANT:** When using ``parallel_regions`` and ``child_modules``
-        together, please consider the nature of their relationship when
-        manually setting this value. (``parallel_regions * child_modules``)
-
-        Returns:
-            int: Value from environment variable or ``min(61, os.cpu_count())``
-
-        """
-        value = self.env_vars.get('RUNWAY_MAX_CONCURRENT_REGIONS')
-
-        if value:
-            return int(value)
-        # TODO update to `os.cpu_count()` when dropping python2
-        return min(61, multiprocessing.cpu_count())
-
-    @property
     def use_concurrent(self):
+        # type: () -> bool
         """Wether to use concurrent.futures or not.
 
         Noninteractive is required for concurrent execution to prevent weird
@@ -224,28 +195,28 @@ class Context(object):
             bool
 
         """
-        if self.is_noninteractive and self.is_python3:
-            return True
+        if self.is_noninteractive:
+            if self.is_python3:
+                return True
+            LOGGER.warning('Parallel execution disabled; Python 3+ is required')
+        LOGGER.warning('Parallel execution disabled; not running in CI mode')
         return False
 
+    def copy(self):
+        # type: () -> Context
+        """Copy the contents of this object into a new instance.
+
+        Returns:
+            Context: New instance with the same contents.
+
+        """
+        return self.__class__(command=self.command,
+                              deploy_environment=self.env.copy())
+
     def echo_detected_environment(self):
+        # type: () -> None
         """Print a helper note about how the environment was determined."""
-        LOGGER.info("")
-        if self._env_name_from_env:
-            LOGGER.info("Environment \"%s\" was determined from the %s "
-                        "environment variable.", self.env_name,
-                        self.env_override_name)
-            LOGGER.info("If this is not correct, update "
-                        "the value (or unset it to fall back to the name of "
-                        "the current git branch or parent directory).")
-        else:
-            LOGGER.info("Environment \"%s\" was determined from the current "
-                        "git branch or parent directory.",
-                        self.env_name)
-            LOGGER.info("If this is not the environment name, update the "
-                        "branch/folder name or set an override value via "
-                        "the %s environment variable", self.env_override_name)
-        LOGGER.info("")
+        self.env.log_name()
 
     def get_session(self, profile=None, region=None):
         """Create a thread-safe boto3 session.
@@ -269,22 +240,8 @@ class Context(object):
                 'secret_key': creds.get('aws_secret_access_key'),
                 'session_token': creds.get('aws_session_token')
             })
-            LOGGER.warning('Current env_region: %s', self.env_region)
-        return get_session(region=region or self.env_region, **kwargs)
-
-    def save_existing_iam_env_vars(self):
-        """Backup IAM environment variables for later restoration."""
-        for i in AWS_ENV_VARS:
-            if i in self.env_vars:
-                self.env_vars['OLD_' + i] = self.env_vars[i]
-
-    def restore_existing_iam_env_vars(self):
-        """Restore backed up IAM environment variables."""
-        for i in AWS_ENV_VARS:
-            if 'OLD_' + i in self.env_vars:
-                self.env_vars[i] = self.env_vars['OLD_' + i]
-            elif i in self.env_vars:
-                self.env_vars.pop(i)
+            LOGGER.warning('Current env_region: %s', self.env.aws_region)
+        return get_session(region=region or self.env.aws_region, **kwargs)
 
     @property
     def __credentials_in_environ(self):  # TODO remove after IaC tools support AWS SSO
@@ -300,16 +257,14 @@ class Context(object):
         Runway wraps supports these types of profiles.
 
         """
-        profile = self.env_vars.get('AWS_PROFILE')
-
-        if self.current_aws_creds or not profile:
+        if self.current_aws_creds or not self.env.aws_profile:
             return
 
-        creds = self.get_session(profile=profile) \
+        creds = self.get_session(profile=self.env.aws_profile) \
             .get_credentials() \
             .get_frozen_credentials()
 
-        self.env_vars['AWS_ACCESS_KEY_ID'] = creds.access_key
-        self.env_vars['AWS_SECRET_ACCESS_KEY'] = creds.secret_key
+        self.env.vars['AWS_ACCESS_KEY_ID'] = creds.access_key
+        self.env.vars['AWS_SECRET_ACCESS_KEY'] = creds.secret_key
         if creds.token:
-            self.env_vars['AWS_SESSION_TOKEN'] = creds.token
+            self.env.vars['AWS_SESSION_TOKEN'] = creds.token

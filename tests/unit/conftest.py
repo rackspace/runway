@@ -9,6 +9,7 @@ import pytest
 import yaml
 
 from runway.config import Config
+from runway.core.components import DeployEnvironment
 
 from .factories import (MockCFNginContext, MockRunwayConfig, MockRunwayContext,
                         YamlLoader, YamlLoaderDeploymet)
@@ -155,8 +156,6 @@ def runway_context(request):
     }
     env_vars.update(getattr(request.module, 'AWS_CREDENTIALS', creds))
     env_vars.update(getattr(request.module, 'ENV_VARS', {}))
-    return MockRunwayContext(env_name='test',
-                             env_region='us-east-1',
-                             env_root=os.getcwd(),
-                             env_vars=env_vars,
-                             command='test')
+    return MockRunwayContext(command='test',
+                             deploy_environment=DeployEnvironment(environ=env_vars,
+                                                                  explicit_name='test'))
