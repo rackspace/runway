@@ -8,10 +8,11 @@ from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
 import six
 import yaml
 
-from ...runway_module_type import RunwayModuleType
-from ...config import FutureDefinition
+from ...config import FutureDefinition, VariablesDefinition
 from ...path import Path as ModulePath
-from ...util import cached_property, change_dir, merge_dicts, merge_nested_environment_dicts
+from ...runway_module_type import RunwayModuleType
+from ...util import (cached_property, change_dir, merge_dicts,
+                     merge_nested_environment_dicts)
 from ..providers import aws
 
 if sys.version_info.major > 2:
@@ -34,9 +35,9 @@ class Module(object):
     def __init__(self,
                  context,  # type: Context
                  definition,  # type: ModuleDefinition
-                 variables,  # type: VariablesDefinition
                  deployment=None,  # type: Optional[DeploymentDefinition]
-                 future=None  # type: Optional[FutureDefinition]
+                 future=None,  # type: Optional[FutureDefinition]
+                 variables=None,  # type: Optional[VariablesDefinition]
                  ):
         # type: (...) -> None
         """Instantiate class.
@@ -44,31 +45,31 @@ class Module(object):
         Args:
             context (Context): Runway context object.
             definition (ModuleDefinition): A single module definition.
-            variables (VariablesDefinition): Runway variables.
             deployment (Optional[DeploymentDefinition]): Deployment that this
                 module is a part of.
             future (Optional[FutureDefinition]): Future functionality
                 configuration.
+            variables (Optional[VariablesDefinition]): Runway variables.
 
         """
         self.__deployment = deployment
         self.__future = future or FutureDefinition()
-        self.__variables = variables
+        self.__variables = variables or VariablesDefinition()
         self.ctx = context.copy()  # each module has it's own instance of context
         definition.resolve(self.ctx, variables)
         self.definition = definition
         self.name = self.definition.name
-        self.__merge_env_vars()
+        # self.__merge_env_vars()
 
     @cached_property
     def child_modules(self):
         # type: () -> List[Module]
         """Return child modules."""
         return [self.__class__(context=self.ctx,
-                               definition=self.definition,
-                               variables=self.__variables,
+                               definition=child,
                                deployment=self.__deployment,
-                               future=self.__future)
+                               future=self.__future,
+                               variables=self.__variables)
                 for child in self.definition.child_modules]
 
     @cached_property
@@ -76,13 +77,15 @@ class Module(object):
         # type: () -> ModulePath
         """Return resolve module path."""
         return ModulePath(self.definition, self.ctx.env.root_dir,
-                          os.path.join(self.ctx.env.root_dir, '.runway_cache'))
+                          str(self.ctx.env.root_dir / '.runway_cache'))
 
     @cached_property
     def payload(self):  # lazy load the payload
         # type: () -> Dict[str, Any]
         """Return payload to be passed to module class handler class."""
-        payload = {}
+        payload = {
+            'environments': {}
+        }
         if self.__deployment:
             payload.update({
                 'environments': self.__deployment.environments,
@@ -94,6 +97,7 @@ class Module(object):
         payload['environment'] = payload['environments'].get(
             self.ctx.env.name, {}
         )
+        self.__merge_env_vars(payload.pop('env_vars', {}))
         return payload
 
     @cached_property
@@ -104,7 +108,7 @@ class Module(object):
                 self.__future.strict_environments:
             return self.__handle_deprecated_environmet()
         is_valid = validate_environment(self.ctx, self,
-                                        self.payload['environment'],
+                                        self.payload['environments'],
                                         strict=self.__future.strict_environments)
         self.payload['environment'] = is_valid
         if isinstance(is_valid, bool):
@@ -123,7 +127,7 @@ class Module(object):
     def use_async(self):
         # type: () -> bool
         """Whether to use asynchronous method."""
-        return self.definition.parallel_regions and self.ctx.use_concurrent
+        return bool(self.definition.child_modules and self.ctx.use_concurrent)
 
     def deploy(self):
         # type: () -> None
@@ -209,17 +213,19 @@ class Module(object):
             return yaml.safe_load(opts_file.read_text())
         return {}
 
-    def __merge_env_vars(self):
-        # type: () -> None
+    def __merge_env_vars(self, env_vars):
+        # type: (Dict[str, Any]) -> None
         """Merge defined env_vars into context.env_vars."""
-        if self.definition.env_vars:
-            env_vars = merge_nested_environment_dicts(self.definition.env_vars,
-                                                      env_name=self.ctx.env.name,
-                                                      env_root=str(self.ctx.env.root_dir))
-            if env_vars:
+        if env_vars:
+            resolved_env_vars = merge_nested_environment_dicts(
+                env_vars,
+                env_name=self.ctx.env.name,
+                env_root=str(self.ctx.env.root_dir)
+            )
+            if resolved_env_vars:
                 LOGGER.info('OS environment variable overrides being applied '
-                            'this module: %s', str(env_vars))
-            self.ctx.env.vars = merge_dicts(self.ctx.env_vars, env_vars)
+                            'this module: %s', str(resolved_env_vars))
+            self.ctx.env.vars = merge_dicts(self.ctx.env_vars, resolved_env_vars)
 
     def __handle_deprecated_environmet(self):
         # type: (Dict[str, Any]) -> None
@@ -254,9 +260,9 @@ class Module(object):
         for module in modules:
             cls(context=context,
                 definition=module,
-                variables=variables,
                 deployment=deployment,
-                future=future)[action]()
+                future=future,
+                variables=variables)[action]()
 
     def __getitem__(self, key):
         """Make the object subscriptable.

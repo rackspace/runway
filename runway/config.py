@@ -119,6 +119,8 @@ class ConfigComponent(MutableMap):
     def __getitem__(self, key):
         # type: (str) -> Any
         """Implement evaluation of self[key]."""
+        if not isinstance(key, string_types):
+            raise TypeError('indices must be a string')
         result = getattr(self, key, getattr(self, key.replace('-', '_')))
 
         if isinstance(result, Variable):
