@@ -2,9 +2,9 @@
 import logging
 import sys
 
-if sys.version_info >= (3, 6):
+if sys.version_info >= (3, 6):  # cov: ignore
     from contextlib import AbstractContextManager  # pylint: disable=E
-else:
+else:  # cov: ignore
     AbstractContextManager = object
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
@@ -14,7 +14,7 @@ class AssumeRole(AbstractContextManager):
     """Context manager for assuming an AWS role."""
 
     def __init__(self, context, role_arn=None, duration_seconds=None,
-                 revert_on_exit=False, session_name=None):
+                 revert_on_exit=True, session_name=None):
         """Instantiate class.
 
         Args:
@@ -61,7 +61,7 @@ class AssumeRole(AbstractContextManager):
         LOGGER.info('Assuming role %s...', self.role_arn)
         response = sts_client.assume_role(**self._kwargs)
         LOGGER.debug('sts.assume_role respsone: %s', response)
-        self.assumed_role_user.update(response['AssumeRoleUser'])
+        self.assumed_role_user.update(response['AssumedRoleUser'])
         self.credentials.update(response['Credentials'])
         self.ctx.env_vars.update({
             'AWS_ACCESS_KEY_ID': response['Credentials']['AccessKeyId'],

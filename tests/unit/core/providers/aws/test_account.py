@@ -19,7 +19,7 @@ class TestAccountDetails(object):
     def test_id(self, runway_context):
         """Test id."""
         account_id = '123456789012'
-        arn = 'arn:aws:{}::iam:user/test-user'.format(account_id)
+        arn = 'arn:aws:iam::{}:user/test-user'.format(account_id)
         stubber = runway_context.add_stubber('sts')
         stubber.add_response('get_caller_identity', {'UserId': 'test-user',
                                                      'Account': account_id,

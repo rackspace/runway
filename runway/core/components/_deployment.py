@@ -127,7 +127,8 @@ class Deployment(object):
                         'environment "%s"...', self.ctx.env.name)
             return {}
         LOGGER.debug('role found: %s', assume_role)
-        return {'role_arn': assume_role}
+        return {'role_arn': assume_role,
+                'revert_on_exit': False}
 
     @cached_property
     def regions(self):

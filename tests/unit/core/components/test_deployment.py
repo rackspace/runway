@@ -81,7 +81,8 @@ class TestDeployment(object):
 
     @pytest.mark.parametrize('config, expected', [
         ('min_required', {}),
-        ('simple_assume_role', {'role_arn': 'arn:aws:iam::123456789012:role/test'}),
+        ('simple_assume_role', {'role_arn': 'arn:aws:iam::123456789012:role/test',
+                                'revert_on_exit': False}),
         ('assume_role_verbose', {'role_arn': 'arn:aws:iam::123456789012:role/test',
                                  'revert_on_exit': True,
                                  'session_name': 'runway-test',
