@@ -107,15 +107,15 @@ class CFNgin(object):
             return
         if not sys_path:
             sys_path = self.sys_path
-        config_files = self.find_config_files(sys_path=sys_path)
+        config_file_names = self.find_config_files(sys_path=sys_path)
 
         with SafeHaven(environ=self.__ctx.env_vars,
                        sys_modules_exclude=['awacs', 'troposphere']):
-            for config in config_files:
-                ctx = self.load(config)
-                LOGGER.info('%s: deploying...', os.path.basename(config))
-                with SafeHaven(argv=['stacker', 'build', ctx.config_path],
+            for config_name in config_file_names:
+                LOGGER.info('%s: deploying...', os.path.basename(config_name))
+                with SafeHaven(argv=['stacker', 'build', config_name],
                                sys_modules_exclude=['awacs', 'troposphere']):
+                    ctx = self.load(config_name)
                     action = build.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -139,15 +139,15 @@ class CFNgin(object):
             return
         if not sys_path:
             sys_path = self.sys_path
-        config_files = self.find_config_files(sys_path=sys_path)
+        config_file_names = self.find_config_files(sys_path=sys_path)
         # destroy should run in reverse to handle dependencies
-        config_files.reverse()
+        config_file_names.reverse()
 
         with SafeHaven(environ=self.__ctx.env_vars):
-            for config in config_files:
-                ctx = self.load(config)
-                LOGGER.info('%s: destroying...', os.path.basename(config))
-                with SafeHaven(argv=['stacker', 'destroy', ctx.config_path]):
+            for config_name in config_file_names:
+                LOGGER.info('%s: destroying...', os.path.basename(config_name))
+                with SafeHaven(argv=['stacker', 'destroy', config_name]):
+                    ctx = self.load(config_name)
                     action = destroy.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -171,8 +171,7 @@ class CFNgin(object):
         LOGGER.debug('%s: loading...', os.path.basename(config_path))
         try:
             config = self._get_config(config_path)
-            context = self._get_context(config, config_path)
-            return context
+            return self._get_context(config, config_path)
         except ConstructorError as err:
             if err.problem.startswith('could not determine a constructor '
                                       'for the tag \'!'):
@@ -199,13 +198,13 @@ class CFNgin(object):
             return
         if not sys_path:
             sys_path = self.sys_path
-        config_files = self.find_config_files(sys_path=sys_path)
+        config_file_names = self.find_config_files(sys_path=sys_path)
         with SafeHaven(environ=self.__ctx.env_vars):
-            for config in config_files:
-                ctx = self.load(config)
+            for config_name in config_file_names:
                 LOGGER.info('%s: generating change sets...',
-                            os.path.basename(config))
-                with SafeHaven(argv=['stacker', 'diff', ctx.config_path]):
+                            os.path.basename(config_name))
+                with SafeHaven(argv=['stacker', 'diff', config_name]):
+                    ctx = self.load(config_name)
                     action = diff.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
