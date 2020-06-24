@@ -61,6 +61,33 @@ Options
             exclusions:
               - foo/*
 
+**environment_files (Optional[List[Dict[str, str]]])**
+  Specifies extra files that should be uploaded to S3 after the build.
+
+  Use ``environment_files`` if you want to have a single build artifact that can be used
+  in many environments. These files should be excluded from source hashing and the build
+  system. The end result is that you have a build artifact that can be deployed in any
+  environment and behave exactly the same.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      environment_files:
+        - name: config.json # yaml or other text files are supported
+          content: # this object will be json or yaml serialized
+            endpoint: ${var api_endpoint.${env DEPLOY_ENVIRONMENT}}
+        - name: logo.png
+          ref: logo-${env DEPLOY_ENVIRONMENT}.png # a reference to an existing file
+
+  The example above produces a file named ``config.json`` with the contents below and a
+  ``logo.png`` file.
+
+  .. code-block:: json
+
+    {
+      "endpoint": "<api_endpoint value>"
+    }
 
 **********
 Parameters
