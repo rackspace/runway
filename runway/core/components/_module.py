@@ -1,6 +1,5 @@
 """Runway module object."""
 import logging
-import os
 import sys
 from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
                     Optional, Union)
@@ -22,8 +21,7 @@ else:
     from pathlib2 import Path  # pylint: disable=E
 
 if TYPE_CHECKING:
-    from ...config import (DeploymentDefinition, ModuleDefinition,  # noqa
-                           VariablesDefinition)
+    from ...config import DeploymentDefinition, ModuleDefinition  # noqa
     from ...context import Context  # noqa
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
@@ -59,7 +57,6 @@ class Module(object):
         definition.resolve(self.ctx, variables)
         self.definition = definition
         self.name = self.definition.name
-        # self.__merge_env_vars()
 
     @cached_property
     def child_modules(self):

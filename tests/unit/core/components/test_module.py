@@ -8,8 +8,8 @@ import six
 import yaml
 from mock import MagicMock, call, patch
 
-from runway.core.components import Deployment, Module
 from runway.config import FutureDefinition
+from runway.core.components import Deployment, Module
 
 MODULE = 'runway.core.components._module'
 
@@ -66,7 +66,24 @@ class TestModule(object):
                                           str(runway_context.env.root_dir /
                                               '.runway_cache'))
 
-    def test_payload(self, cd_tmp_path, fx_deployments, runway_context):
+    def test_payload_with_deployment(self, cd_tmp_path, fx_deployments,
+                                     runway_context):
+        """Test payload with deployment values."""
+        runway_context.env.root_dir = cd_tmp_path
+        mod_dir = cd_tmp_path / 'sampleapp-01.cfn'
+        mod_dir.mkdir()
+        deployment = fx_deployments.load('simple_module_options')
+        mod = Module(context=runway_context,
+                     definition=deployment.modules[0],
+                     deployment=deployment)
+        result = mod.payload
+
+        assert result['options']['deployment_option'] == 'deployment-val'
+        assert result['options']['module_option'] == 'module-val'
+        assert result['options']['overlap_option'] == 'module-val'
+
+    def test_payload_with_local_config(self, cd_tmp_path, fx_deployments,
+                                       runway_context):
         """Test payload."""
         runway_context.env.root_dir = cd_tmp_path
         mod_dir = cd_tmp_path / 'sampleapp-01.cfn'
@@ -82,7 +99,6 @@ class TestModule(object):
         mod = Module(context=runway_context,
                      definition=fx_deployments.load('simple_env_vars_map').modules[0])
         result = mod.payload
-        # assert not result
 
         assert mod.ctx.env.vars['deployment_var'] == 'val'
         assert mod.ctx.env.vars['map-var'] == opts['env_vars']['test']['map-var']
@@ -189,8 +205,8 @@ class TestModule(object):
     @patch(MODULE + '.concurrent.futures')
     @pytest.mark.skipif(sys.version_info.major < 3,
                         reason='only supported by python 3')
-    def test_deploy_async(self, mock_futures, caplog, fx_deployments, monkeypatch,
-                          runway_context):
+    def test_deploy_async(self, mock_futures, caplog, fx_deployments,
+                          monkeypatch, runway_context):
         """Test deploy async."""
         caplog.set_level(logging.INFO, logger='runway')
         executor = MagicMock()
