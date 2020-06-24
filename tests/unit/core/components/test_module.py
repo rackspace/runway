@@ -10,6 +10,8 @@ from mock import MagicMock, call, patch
 
 from runway.config import FutureDefinition
 from runway.core.components import Deployment, Module
+from runway.core.components._module import validate_environment
+from runway.util import MutableMap
 
 MODULE = 'runway.core.components._module'
 
@@ -286,3 +288,66 @@ class TestModule(object):
             future=MagicMock()
         )
         assert mock_deploy.call_count == 2
+
+
+@pytest.mark.parametrize('env_def, strict, expected, expected_logs', [
+    ({'invalid'}, False, False,
+     ['test_module: skipped; unsupported type for environments "%s"' % type(set())]),
+    (True, False, True, ['test_module: explicitly enabled']),
+    (False, False, False, ['test_module: skipped; explicitly disabled']),
+    (['123456789012/us-east-1'], False, True, []),
+    (['123456789012/us-east-2'], False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ('123456789012/us-east-1', False, True, []),
+    ('123456789012/us-east-2', False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({}, False, None,
+     ['test_module: environment not defined; module will determine deployment']),
+    ({}, True, None,
+     ['test_module: environment not defined; module will determine deployment']),
+    ({'example': '111111111111/us-east-1'}, False, None,
+     ['test_module: environment not in definition; module will determine deployment']),
+    ({'example': '111111111111/us-east-1'}, True, False,
+     ['test_module: skipped; environment not in definition']),
+    ({'test': False}, False, False,
+     ['test_module: skipped; explicitly disabled']),
+    ({'test': True}, False, True, ['test_module: explicitly enabled']),
+    ({'test': '123456789012/us-east-1'}, False, True, []),
+    ({'test': '123456789012/us-east-2'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': '123456789012'}, False, True, []),
+    ({'test': '111111111111'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': 123456789012}, False, True, []),
+    ({'test': 111111111111}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': 'us-east-1'}, False, True, []),
+    ({'test': 'us-east-2'}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['123456789012/us-east-1', '123456789012/us-east-2']}, False,
+     True, []),
+    ({'test': ['123456789012/us-east-2']}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['123456789012', '111111111111']}, False, True, []),
+    ({'test': ['111111111111']}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': [123456789012, 111111111111]}, False, True, []),
+    ({'test': [111111111111]}, False, False,
+     ['test_module: skipped; account_id/region mismatch']),
+    ({'test': ['us-east-1', 'us-east-2']}, False, True, []),
+    ({'test': ['us-east-2']}, False, False,
+     ['test_module: skipped; account_id/region mismatch'])
+])
+def test_validate_environment(env_def, strict, expected, expected_logs,
+                              caplog, monkeypatch, runway_context):
+    """Test validate_environment."""
+    mock_module = MutableMap(name='test_module')
+    caplog.set_level(logging.DEBUG, logger='runway')
+    monkeypatch.setattr(MODULE + '.aws', MagicMock(
+        **{'AccountDetails.return_value': MagicMock(id='123456789012')}
+    ))
+    assert validate_environment(runway_context, mock_module, env_def, strict) \
+        is expected
+    # all() does not give an output that can be used for troubleshooting failures
+    for log in expected_logs:
+        assert log in caplog.messages

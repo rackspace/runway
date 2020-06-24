@@ -2,6 +2,7 @@
 # pylint: disable=no-self-use
 import logging
 from datetime import datetime
+
 from runway.core.providers.aws import AssumeRole
 
 NEW_CREDENTIALS = {
