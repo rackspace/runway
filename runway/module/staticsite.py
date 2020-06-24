@@ -213,7 +213,7 @@ class StaticSite(RunwayModule):
                            'cf_disabled': site_stack_variables['DisableCloudFront'],
                            'distributionid_output_lookup': '%s::CFDistributionId' % (self.name),
                            'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % self.name}}]  # noqa pylint: disable=line-too-long
-        
+
         if self.user_options.get('environment_files'):
             post_build.append({
                 'path': 'runway.hooks.staticsite.upload_staticsite_env.sync',
