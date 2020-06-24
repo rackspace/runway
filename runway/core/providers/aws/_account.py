@@ -33,7 +33,8 @@ class AccountDetails(object):
         # have a single alias, but at least this implementation should be
         # future-proof.
         aliases = []
-        paginator = self.session.client('iam').get_paginator('list_account_aliases')
+        paginator = self.__session.client('iam') \
+            .get_paginator('list_account_aliases')
         response_iterator = paginator.paginate()
         for page in response_iterator:
             aliases.extend(page.get('AccountAliases', []))
@@ -48,10 +49,10 @@ class AccountDetails(object):
             str: AWS account ID.
 
         """
-        return self.session.client('sts').get_caller_identity()['Account']
+        return self.__session.client('sts').get_caller_identity()['Account']
 
     @cached_property
-    def session(self):
+    def __session(self):
         """Get a cached boto3 session.
 
         Session creation was moved out of class init to improve performance
