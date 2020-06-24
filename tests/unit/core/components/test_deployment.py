@@ -1,12 +1,13 @@
 """Test runway.core.components.deployment."""
 # pylint: disable=no-self-use,protected-access
 import logging
+import sys
 
 import pytest
-from mock import MagicMock, patch
+from mock import MagicMock, call, patch
 
-from runway.core.components import Deployment
 from runway.config import FutureDefinition, VariablesDefinition
+from runway.core.components import Deployment
 
 MODULE = 'runway.core.components._deployment'
 
@@ -130,25 +131,56 @@ class TestDeployment(object):
                          definition=fx_deployments.load(config))
         assert obj.use_async == expected
 
-    @pytest.mark.parametrize('async_used', [(True), (False)])
-    def test_deploy(self, async_used, fx_deployments, monkeypatch,
-                    runway_context):
+    def test_deploy(self, fx_deployments, monkeypatch, runway_context):
         """Test deploy."""
-        mock_async = MagicMock()
-        monkeypatch.setattr(Deployment, '_Deployment__async', mock_async)
-        mock_sync = MagicMock()
-        monkeypatch.setattr(Deployment, '_Deployment__sync', mock_sync)
-        runway_context._use_concurrent = async_used
+        mock_run = MagicMock()
+        monkeypatch.setattr(Deployment, 'run', mock_run)
+        obj = Deployment(context=runway_context,
+                         definition=fx_deployments.load('min_required'))
+        assert not obj.deploy()
+        mock_run.assert_called_once_with('deploy', 'us-east-1')
+
+    @patch(MODULE + '.concurrent.futures')
+    @pytest.mark.skipif(sys.version_info.major < 3,
+                        reason='only supported by python 3')
+    def test_deploy_async(self, mock_futures, caplog, fx_deployments,
+                          monkeypatch, runway_context):
+        """Test deploy async."""
+        caplog.set_level(logging.INFO, logger='runway')
+        executor = MagicMock()
+        mock_futures.ProcessPoolExecutor.return_value = executor
+        monkeypatch.setattr(Deployment, 'use_async', True)
+
         obj = Deployment(context=runway_context,
                          definition=fx_deployments.load('simple_parallel_regions'))
-        assert obj.deploy()
+        assert not obj.deploy()
+        assert 'Processing regions in parallel (output will be interwoven)' in \
+            caplog.messages
+        mock_futures.ProcessPoolExecutor.assert_called_once_with(
+            max_workers=runway_context.env.max_concurrent_regions
+        )
+        executor.submit.assert_has_calls([
+            call(obj.run, 'deploy', 'us-east-1'),
+            call(obj.run, 'deploy', 'us-west-2')
+        ])
+        mock_futures.wait.assert_called_once()
+        assert executor.submit.return_value.result.call_count == 2
 
-        if async_used:
-            mock_async.assert_called_once_with('deploy')
-            mock_sync.assert_not_called()
-        else:
-            mock_async.assert_not_called()
-            mock_sync.assert_called_once_with('deploy')
+    def test_deploy_sync(self, caplog, fx_deployments, monkeypatch,
+                         runway_context):
+        """Test deploy sync."""
+        caplog.set_level(logging.INFO, logger='runway')
+        mock_run = MagicMock()
+        monkeypatch.setattr(Deployment, 'use_async', False)
+        monkeypatch.setattr(Deployment, 'run', mock_run)
+
+        obj = Deployment(context=runway_context,
+                         definition=fx_deployments.load('simple_parallel_regions'))
+        assert not obj.deploy()
+        assert 'Processing regions sequentially: us-east-1, us-west-2' in \
+            caplog.messages
+        mock_run.assert_has_calls([call('deploy', 'us-east-1'),
+                                   call('deploy', 'us-west-2')])
 
     @patch(MODULE + '.aws')
     @patch(MODULE + '.Module')
