@@ -201,7 +201,6 @@ class CFNgin(object):
         config_file_names = self.find_config_files(sys_path=sys_path)
         with SafeHaven(environ=self.__ctx.env_vars):
             for config_name in config_file_names:
-                ctx = self.load(config_name)
                 LOGGER.info('%s: generating change sets...',
                             os.path.basename(config_name))
                 with SafeHaven(argv=['stacker', 'diff', config_name]):
