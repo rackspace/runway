@@ -6,7 +6,6 @@ Runway's core logic has been mocked out to test on separately from the CLI.
 """
 import logging
 
-import pytest
 from click.testing import CliRunner
 from mock import patch
 
@@ -65,7 +64,7 @@ def test_deploy_options_deploy_environment(mock_runway, cd_tmp_path, cp_config):
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_options_tag(mock_runway, caplog, cd_tmp_path, cp_config):
     """Test deploy option --tag."""
-    caplog.set_level(logging.ERROR, logger='runway._cli.commands.deploy')
+    caplog.set_level(logging.ERROR, logger='runway.cli.commands.deploy')
     cp_config('tagged_modules', cd_tmp_path)
     runner = CliRunner()
     assert runner.invoke(cli, ['deploy',
@@ -91,7 +90,6 @@ def test_deploy_options_tag(mock_runway, caplog, cd_tmp_path, cp_config):
         in caplog.messages
 
 
-@pytest.mark.wip
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_select_deployment(mock_runway, cd_tmp_path, cp_config):
     """Test deploy select from two deployments."""
@@ -105,7 +103,6 @@ def test_deploy_select_deployment(mock_runway, cd_tmp_path, cp_config):
     assert deployments[0].name == 'deployment_1'
 
 
-@pytest.mark.wip
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_select_deployment_all(mock_runway, cd_tmp_path, cp_config):
     """Test deploy select all deployments."""
@@ -121,7 +118,6 @@ def test_deploy_select_deployment_all(mock_runway, cd_tmp_path, cp_config):
     assert len(deployments[1].modules) == 2
 
 
-@pytest.mark.wip
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_select_module(mock_runway, cd_tmp_path, cp_config):
     """Test deploy select from two modules."""
@@ -135,7 +131,6 @@ def test_deploy_select_module(mock_runway, cd_tmp_path, cp_config):
     assert deployment.modules[0].name == 'sampleapp-03.cfn'
 
 
-@pytest.mark.wip
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_select_module_all(mock_runway, cd_tmp_path, cp_config):
     """Test deploy select all modules."""
@@ -150,7 +145,6 @@ def test_deploy_select_module_all(mock_runway, cd_tmp_path, cp_config):
     assert deployment.modules[1].name == 'sampleapp-03.cfn'
 
 
-@pytest.mark.wip
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_select_module_child_modules(mock_runway, cd_tmp_path, cp_config):
     """Test deploy select child module."""
@@ -164,7 +158,6 @@ def test_deploy_select_module_child_modules(mock_runway, cd_tmp_path, cp_config)
     assert deployment.modules[0].name == 'parallel-sampleapp-01.cfn'
 
 
-@pytest.mark.wip
 @patch(MODULE + '.Runway', spec=Runway, spec_set=True)
 def test_deploy_select_module_child_modules_all(mock_runway, cd_tmp_path,
                                                 cp_config):

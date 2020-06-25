@@ -20,7 +20,7 @@ def test_tfenv_install(cd_tmp_path, caplog):
     For best results, remove any existing installs.
 
     """
-    caplog.set_level(logging.DEBUG, logger='runway._cli.commands.tfenv')
+    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.tfenv')
     (cd_tmp_path / '.terraform-version').write_text(six.u('0.12.0'))
     runner = CliRunner()
     result = runner.invoke(cli, ['tfenv', 'install'])
@@ -46,7 +46,7 @@ def test_tfenv_install_version(caplog):
     For best results, remove any existing installs.
 
     """
-    caplog.set_level(logging.DEBUG, logger='runway._cli.commands.tfenv')
+    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.tfenv')
     runner = CliRunner()
     result = runner.invoke(cli, ['tfenv', 'install', '0.12.1'])
     assert result.exit_code == 0

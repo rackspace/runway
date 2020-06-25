@@ -10,7 +10,7 @@ from runway._cli import cli
 
 def test_cdk_csharp(cd_tmp_path, caplog):
     """Test ``runway gen-sample cdk-csharp`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'cdk-csharp'])
     assert result.exit_code == 0
@@ -43,7 +43,7 @@ def test_cdk_csharp(cd_tmp_path, caplog):
 
 def test_cdk_py(cd_tmp_path, caplog):
     """Test ``runway gen-sample cdk-py`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'cdk-py'])
     assert result.exit_code == 0
@@ -75,7 +75,7 @@ def test_cdk_py(cd_tmp_path, caplog):
 
 def test_cdk_tsc(cd_tmp_path, caplog):
     """Test ``runway gen-sample cdk-tsc`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'cdk-tsc'])
     assert result.exit_code == 0
@@ -107,7 +107,7 @@ def test_cdk_tsc(cd_tmp_path, caplog):
 
 def test_cfn(cd_tmp_path, caplog):
     """Test ``runway gen-sample cfn`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'cfn'])
     assert result.exit_code == 0
@@ -131,7 +131,7 @@ def test_cfn(cd_tmp_path, caplog):
 
 def test_cfngin(cd_tmp_path, caplog):
     """Test ``runway gen-sample cfngin`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'cfngin'])
     assert result.exit_code == 0
@@ -156,7 +156,7 @@ def test_cfngin(cd_tmp_path, caplog):
 
 def test_k8s_cfn_repo(cd_tmp_path, caplog):
     """Test ``runway gen-sample k8s-cfn-repo`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'k8s-cfn-repo'])
     assert result.exit_code == 0
@@ -207,7 +207,7 @@ def test_k8s_cfn_repo(cd_tmp_path, caplog):
 
 def test_k8s_tf_repo(cd_tmp_path, caplog):
     """Test ``runway gen-sample k8s-tf-repo`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'k8s-tf-repo'])
     assert result.exit_code == 0
@@ -254,7 +254,7 @@ def test_k8s_tf_repo(cd_tmp_path, caplog):
 
 def test_sls_py(cd_tmp_path, caplog):
     """Test ``runway gen-sample sls-py`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'sls-py'])
     assert result.exit_code == 0
@@ -285,7 +285,7 @@ def test_sls_py(cd_tmp_path, caplog):
 
 def test_sls_tsc(cd_tmp_path, caplog):
     """Test ``runway gen-sample sls-tsc`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'sls-tsc'])
     assert result.exit_code == 0
@@ -318,7 +318,7 @@ def test_sls_tsc(cd_tmp_path, caplog):
 
 def test_stacker(cd_tmp_path, caplog):
     """Test ``runway gen-sample stacker`` command."""
-    caplog.set_level(logging.WARNING, logger='runway._cli')
+    caplog.set_level(logging.WARNING, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'stacker'])
     assert result.exit_code == 0
@@ -328,7 +328,7 @@ def test_stacker(cd_tmp_path, caplog):
 
 def test_static_angular(cd_tmp_path, caplog):
     """Test ``runway gen-sample static-angular`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'static-angular'])
     assert result.exit_code == 0
@@ -382,7 +382,7 @@ def test_static_angular(cd_tmp_path, caplog):
 
 def test_static_react(cd_tmp_path, caplog):
     """Test ``runway gen-sample static-react`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'static-react'])
     assert result.exit_code == 0
@@ -422,7 +422,7 @@ def test_static_react(cd_tmp_path, caplog):
 
 def test_tf(cd_tmp_path, caplog):
     """Test ``runway gen-sample tf`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'tf'])
     assert result.exit_code == 0
@@ -461,7 +461,7 @@ def test_tf(cd_tmp_path, caplog):
 ])
 def test_dir_exists(command, dir_name, caplog, cd_tmp_path):
     """Test ``runway gen-sample`` commands when directory exists."""
-    caplog.set_level(logging.ERROR, logger='runway._cli.gen_sample')
+    caplog.set_level(logging.ERROR, logger='runway.cli.gen_sample')
     dir_path = cd_tmp_path / dir_name
     dir_path.mkdir()
 

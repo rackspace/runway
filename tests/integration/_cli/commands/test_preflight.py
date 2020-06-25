@@ -1,30 +1,22 @@
 """Test ``runway preflight``."""
 import logging
 
-import six
-import yaml
 from click.testing import CliRunner
+from mock import MagicMock
 
 from runway._cli import cli
+from runway._cli.commands import test
 
 
-SUCCESS = {
-    'name': 'success',
-    'type': 'script',
-    'args': {
-        'commands': ['echo "Hello world"']
-    }
-}
-
-
-def test_preflight(cd_tmp_path, caplog):
+def test_preflight(caplog, monkeypatch):
     """Test ``runway preflight``."""
-    caplog.set_level(logging.DEBUG, logger='runway._cli.commands.preflight')
-    runway_yml = cd_tmp_path / 'runway.yml'
-    runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
-                                                'tests': [SUCCESS.copy()]})))
+    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.preflight')
+    mock_forward = MagicMock()
+    monkeypatch.setattr('click.Context.forward', mock_forward)
 
     runner = CliRunner()
-    result = runner.invoke(cli, ['preflight'])
+    result = runner.invoke(cli, ['preflight',
+                                 '--deploy-environment', 'test'])
     assert result.exit_code == 0
     assert 'forwarding to test...' in caplog.messages
+    mock_forward.assert_called_once_with(test, deploy_environment='test')

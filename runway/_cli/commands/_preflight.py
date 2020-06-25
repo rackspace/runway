@@ -9,7 +9,7 @@ from ._test import test
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
-@click.command('preflight', short_help='alias from test')
+@click.command('preflight', short_help='alias for test')
 @options.deploy_environment
 @click.pass_context
 def preflight(ctx, **kwargs):

@@ -7,6 +7,7 @@ from ._preflight import preflight
 from ._run_aws import run_aws
 from ._run_python import run_python
 from ._run_stacker import run_stacker
+from ._takeoff import takeoff
 from ._test import test
 from ._tfenv import tfenv
 from ._whichenv import whichenv
@@ -21,6 +22,7 @@ __all__ = [
     'run_aws',
     'run_python',
     'run_stacker',
+    'takeoff',
     'test',
     'tfenv',
     'whichenv'

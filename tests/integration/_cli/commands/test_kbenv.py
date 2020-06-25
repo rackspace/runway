@@ -20,7 +20,7 @@ def test_kbenv_install(cd_tmp_path, caplog):
     For best results, remove any existing installs.
 
     """
-    caplog.set_level(logging.DEBUG, logger='runway._cli.commands.kbenv')
+    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.kbenv')
     (cd_tmp_path / '.kubectl-version').write_text(six.u('v1.14.1'))
     runner = CliRunner()
     result = runner.invoke(cli, ['kbenv', 'install'])
@@ -46,7 +46,7 @@ def test_kbenv_install_version(caplog):
     For best results, remove any existing installs.
 
     """
-    caplog.set_level(logging.DEBUG, logger='runway._cli.commands.kbenv')
+    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.kbenv')
     runner = CliRunner()
     result = runner.invoke(cli, ['kbenv', 'install', 'v1.14.0'])
     assert result.exit_code == 0

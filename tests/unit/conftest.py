@@ -76,9 +76,8 @@ def sanitize_environment():
 def fixture_dir():
     # type: () -> str
     """Path to the fixture directory."""
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         'fixtures')
-    return path
 
 
 @pytest.fixture(scope='module')

@@ -36,7 +36,7 @@ def test_run_stacker_separator():
 
 def test_run_stacker_version(caplog):
     """Test ``runway run-stacker --version``."""
-    caplog.set_level(logging.WARNING, logger='runway._cli.commands')
+    caplog.set_level(logging.WARNING, logger='runway.cli.commands')
     runner = CliRunner()
     result = runner.invoke(cli, ['run-stacker', '--version'])
     assert result.exit_code == 0
