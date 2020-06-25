@@ -26,7 +26,8 @@ class CliContext(MutableMapping):
         """Instantiate class."""
         self._deploy_environment = deploy_environment
         self.root_dir = Path.cwd()
-        self.env.ci = ci
+        if ci:  # prevents unnecessary loading of runway config
+            self.env.ci = ci
 
     @cached_property
     def env(self):
