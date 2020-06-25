@@ -1204,7 +1204,7 @@ class Config(ConfigComponent):
                          config_path)
             sys.exit(1)
 
-        config_file = yaml.safe_load(config_path.read_text())
+        config_file = yaml.safe_load(config_path.read_text()) or {}
         result = Config(config_file.pop('deployments'),
                         config_file.pop('future', {}),
                         config_file.pop('tests', []),

@@ -1,0 +1,22 @@
+deployments:
+  - modules:
+      - path: sampleapp-01.cfn
+        tags:
+          - app:test-app
+          - tier:iac
+      - path: sampleapp-02.cfn
+        tags:
+          - app:test-app
+          - tier:other-app
+      - parallel:
+          - path: sampleapp-03.cfn
+            tags:
+              - app:test-app
+          - path: sampleapp-04.cfn
+            tags:
+              - tier:other-app
+          - path: sampleapp-05.cfn
+      - path: sampleapp-06.cfn
+    regions:
+      - us-east-1
+      - us-west-2

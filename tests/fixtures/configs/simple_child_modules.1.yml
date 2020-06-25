@@ -1,0 +1,8 @@
+deployments:
+  - modules:
+      - path: sampleapp-01.cfn
+      - parallel:
+          - path: parallel-sampleapp-01.cfn
+          - path: parallel-sampleapp-02.cfn
+    regions:
+      - us-east-1

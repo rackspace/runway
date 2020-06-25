@@ -20,8 +20,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 def deploy(ctx, tags, **_):
     # type: (click.Context, Tuple[str, ...], Any) -> None
     """Deploy infrastructure as code modules with Runway."""
-    runway = Runway(ctx.obj.runway_config, Context(
-        deploy_environment=ctx.obj.env))
+    runway = Runway(ctx.obj.runway_config,
+                    Context(deploy_environment=ctx.obj.env))
     if tags:
         runway.deploy(select_modules_using_tags(
             ctx, ctx.obj.runway_config.deployments, tags

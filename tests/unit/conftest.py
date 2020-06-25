@@ -84,7 +84,7 @@ def fixture_dir():
 @pytest.fixture(scope='module')
 def fx_config():
     """Return YAML loader for config fixtures."""
-    return YamlLoader(TEST_ROOT / 'fixtures' / 'configs',
+    return YamlLoader(TEST_ROOT.parent / 'fixtures' / 'configs',
                       load_class=Config,
                       load_type='kwargs')
 

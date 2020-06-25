@@ -7,9 +7,8 @@ import click
 import yaml
 from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
-from ..core.components import DeployEnvironment
-from ..commands.runway_command import get_env  # TODO update path
 from ..config import Config, DeploymentDefinition, ModuleDefinition
+from ..core.components import DeployEnvironment
 from ..util import cached_property
 
 if sys.version_info.major > 2:
@@ -65,12 +64,6 @@ class CliContext(MutableMapping):
 
         """
         return getattr(self, key, default)
-
-    def get_env(self, prompt_if_unexpected=False):
-        """Get the current deploy environment."""
-        return get_env(path=self.root_dir,
-                       ignore_git_branch=self.runway_config.ignore_git_branch,
-                       prompt_if_unexpected=prompt_if_unexpected)
 
     def __bool__(self):
         # type: () -> bool
