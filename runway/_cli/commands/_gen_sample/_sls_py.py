@@ -11,7 +11,7 @@ if sys.version_info.major > 2:
 else:
     from pathlib2 import Path  # pylint: disable=E
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('sls-py', short_help='sls + python (sampleapp.sls)')

@@ -3,9 +3,9 @@ import logging
 
 import click
 
-from .cfngin import cfngin
+from ._cfngin import cfngin
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('stacker', short_help='deprecated, use cfngin')

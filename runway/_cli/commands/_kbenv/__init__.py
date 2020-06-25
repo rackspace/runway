@@ -1,8 +1,8 @@
 """``runway kbenv`` command group."""
 import click
 
-from .install import install
-from .run import run
+from ._install import install
+from ._run import run
 
 
 __all__ = ['install', 'run']

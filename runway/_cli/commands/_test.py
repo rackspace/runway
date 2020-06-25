@@ -8,7 +8,7 @@ from ...context import Context
 from ...tests.registry import TEST_HANDLERS
 from .. import options
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('test', short_help='run tests')

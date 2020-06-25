@@ -8,7 +8,7 @@ from ...cfngin.logger import setup_logging
 from ...cfngin.commands import Stacker
 from ...util import SafeHaven
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('run-stacker', short_help='deprecated, bundled stacker',

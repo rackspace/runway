@@ -5,7 +5,7 @@ import click
 
 from ....env_mgr.kbenv import KBEnvManager
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('install', short_help='install kubectl')

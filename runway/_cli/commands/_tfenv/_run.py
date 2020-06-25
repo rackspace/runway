@@ -7,7 +7,7 @@ import click
 
 from ....env_mgr.tfenv import TFEnvManager
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('run', short_help='run terraform',

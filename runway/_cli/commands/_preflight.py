@@ -4,9 +4,9 @@ import logging
 import click
 
 from .. import options
-from .test import test
+from ._test import test
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('preflight', short_help='alias from test')
