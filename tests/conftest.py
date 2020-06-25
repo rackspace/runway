@@ -26,11 +26,11 @@ def cd_tmp_path(tmp_path):
         Path: Temporary path object.
 
     """
-    prev_dir = Path.cwd()
+    prev_dir = os.getcwd()
     os.chdir(str(tmp_path))
     try:
         yield tmp_path
-    except:  # noqa pylint: disable=W
+    finally:
         os.chdir(prev_dir)
 
 
