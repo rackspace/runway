@@ -139,6 +139,19 @@ class Module(object):
             return self.__async('deploy')
         return self.__sync('deploy')
 
+    def destroy(self):
+        # type: () -> None
+        """Destroy the module.
+
+        High level method for running a deployment.
+
+        """
+        if not self.child_modules:
+            return self.run('destroy')
+        if self.use_async:
+            return self.__async('destroy')
+        return self.__sync('destroy')
+
     def run(self, action):
         # type: (str) -> None
         """Run a single module.
@@ -177,7 +190,8 @@ class Module(object):
             action (str): Name of action to run.
 
         """
-        LOGGER.info('Processing modules in parallel (output will be interwoven)')
+        LOGGER.info('Processing modules in parallel... '
+                    '(output will be interwoven)')
         # Can't use threading or ThreadPoolExecutor here because
         # we need to be able to do things like `cd` which is not
         # thread safe.
@@ -198,7 +212,7 @@ class Module(object):
             action (str): Name of action to run.
 
         """
-        LOGGER.info('Processing modules sequentially')
+        LOGGER.info('Processing modules sequentially...')
         for module in self.child_modules:
             module.run(action)
 

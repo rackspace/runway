@@ -149,12 +149,26 @@ class Deployment(object):
         High level method for running a deployment.
 
         """
-        LOGGER.info('Attempting to deploy "%s" to region(s): %s',
-                    self.ctx.env.name,
-                    ", ".join(self.regions))
+        LOGGER.debug('attempting to deploy "%s" to region(s): %s',
+                     self.ctx.env.name,
+                     ', '.join(self.regions))
         if self.use_async:
             return self.__async('deploy')
         return self.__sync('deploy')
+
+    def destroy(self):
+        # type: () -> None
+        """Destroy the deployment.
+
+        High level method for running a deployment.
+
+        """
+        LOGGER.debug('attempting to destroy "%s" in regions(s): %s',
+                     self.ctx.env.name,
+                     ', '.join(self.regions))
+        if self.use_async:
+            return self.__async('destroy')
+        return self.__sync('destroy')
 
     def run(self, action, region):
         # type: (str, str) -> None
@@ -231,7 +245,8 @@ class Deployment(object):
             action (str): Name of action to run.
 
         """
-        LOGGER.info('Processing regions in parallel (output will be interwoven)')
+        LOGGER.info('Processing regions in parallel... '
+                    '(output will be interwoven)')
         executor = concurrent.futures.ProcessPoolExecutor(
             max_workers=self.ctx.env.max_concurrent_regions
         )
@@ -249,8 +264,7 @@ class Deployment(object):
             action (str): Name of action to run.
 
         """
-        LOGGER.info('Processing regions sequentially: %s',
-                    ', '.join(self.regions))
+        LOGGER.info('Processing regions sequentially...')
         for region in self.regions:
             LOGGER.info("")
             LOGGER.info('====== Processing region %s ======',

@@ -235,13 +235,13 @@ class DeployEnvironment(object):
         if self.__name:
             name = self.__name
         elif not self._ignore_git_branch and self.branch_name:
-            self.name_derived_from = 'branch'
+            self.name_derived_from = self.name_derived_from or 'branch'
             name = self._parse_branch_name()
         else:
             self.name_derived_from = 'directory'
             name = self.root_dir.name[4:] \
                 if self.root_dir.name.startswith('ENV-') else self.root_dir.name
-        self.vars['DEPLOY_ENVIRONEMT'] = name
+        self.vars['DEPLOY_ENVIRONMENT'] = name
         return name
 
     def copy(self):
@@ -262,22 +262,23 @@ class DeployEnvironment(object):
     def log_name(self):
         # type: () -> None
         """Output name to log."""
+        name = self.name  # resolve if not already resolved
         LOGGER.info('')
         if self.name_derived_from == 'explicit':
             LOGGER.info('Environment "%s" is explicitly defined in the environment.',
-                        self.name)
+                        name)
             LOGGER.info('If this is not correct, update '
                         'the value or unset it to fall back to the name of '
                         'the current git branch or parent directory.')
         elif self.name_derived_from == 'branch':
             LOGGER.info('Environment "%s" was determined from the current git branch.',
-                        self.name)
+                        name)
             LOGGER.info('If this is not the environment name, update the '
                         'branch name or set an override via the '
                         'DEPLOY_ENVIRONMENT environment variable.')
         elif self.name_derived_from == 'directory':
             LOGGER.info('Environment "%s" was determined from the current directory.',
-                        self.name)
+                        name)
             LOGGER.info('If this is not the environment name, update the '
                         'directory name or set an override via the '
                         'DEPLOY_ENVIRONMENT environment variable.')
@@ -295,6 +296,9 @@ class DeployEnvironment(object):
         if not self.ci:
             LOGGER.warning('Found unexpected branch name "%s"',
                            self.branch_name)
-            return click.prompt('Deploy environment name',
-                                default=self.branch_name, type=click.STRING)
+            result = click.prompt('Deploy environment name',
+                                  default=self.branch_name, type=click.STRING)
+            if result != self.branch_name:
+                self.name_derived_from = 'explicit'
+            return result
         return self.branch_name

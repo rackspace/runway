@@ -155,7 +155,7 @@ class TestDeployment(object):
         obj = Deployment(context=runway_context,
                          definition=fx_deployments.load('simple_parallel_regions'))
         assert not obj.deploy()
-        assert 'Processing regions in parallel (output will be interwoven)' in \
+        assert 'Processing regions in parallel... (output will be interwoven)' in \
             caplog.messages
         mock_futures.ProcessPoolExecutor.assert_called_once_with(
             max_workers=runway_context.env.max_concurrent_regions
@@ -178,10 +178,30 @@ class TestDeployment(object):
         obj = Deployment(context=runway_context,
                          definition=fx_deployments.load('simple_parallel_regions'))
         assert not obj.deploy()
-        assert 'Processing regions sequentially: us-east-1, us-west-2' in \
+        assert 'Processing regions sequentially...' in \
             caplog.messages
         mock_run.assert_has_calls([call('deploy', 'us-east-1'),
                                    call('deploy', 'us-west-2')])
+
+    @pytest.mark.parametrize('async_used', [(True), (False)])
+    def test_destroy(self, async_used, fx_deployments, monkeypatch,
+                     runway_context):
+        """Test destroy."""
+        mock_async = MagicMock()
+        monkeypatch.setattr(Deployment, '_Deployment__async', mock_async)
+        mock_sync = MagicMock()
+        monkeypatch.setattr(Deployment, '_Deployment__sync', mock_sync)
+        runway_context._use_concurrent = async_used
+        obj = Deployment(context=runway_context,
+                         definition=fx_deployments.load('simple_parallel_regions'))
+        assert obj.destroy()
+
+        if async_used:
+            mock_async.assert_called_once_with('destroy')
+            mock_sync.assert_not_called()
+        else:
+            mock_async.assert_not_called()
+            mock_sync.assert_called_once_with('destroy')
 
     @patch(MODULE + '.aws')
     @patch(MODULE + '.Module')
@@ -272,7 +292,7 @@ class TestDeployment(object):
         assert 'Verified current AWS account matches required account id' in logs
         assert 'Verified current AWS account alias matches required alias' in logs
 
-    @pytest.mark.parametrize('action', [('deploy')])
+    @pytest.mark.parametrize('action', [('deploy'), ('destroy')])
     def test_run_list(self, action, monkeypatch, runway_context):
         """Test run_list."""
         dep0 = MagicMock()

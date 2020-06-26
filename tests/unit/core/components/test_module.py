@@ -218,7 +218,7 @@ class TestModule(object):
         obj = Module(context=runway_context,
                      definition=fx_deployments.load('simple_parallel_module').modules[0])
         assert not obj.deploy()
-        assert 'Processing modules in parallel (output will be interwoven)' in \
+        assert 'Processing modules in parallel... (output will be interwoven)' in \
             caplog.messages
         mock_futures.ProcessPoolExecutor.assert_called_once_with(
             max_workers=runway_context.env.max_concurrent_modules
@@ -241,8 +241,45 @@ class TestModule(object):
         mod = Module(context=runway_context,
                      definition=fx_deployments.load('simple_parallel_module').modules[0])
         assert not mod.deploy()
-        assert 'Processing modules sequentially' in caplog.messages
+        assert 'Processing modules sequentially...' in caplog.messages
         mock_run.assert_has_calls([call('deploy'), call('deploy')])
+
+    @pytest.mark.parametrize('async_used', [(True), (False)])
+    def test_destroy(self, async_used, fx_deployments, monkeypatch,
+                     runway_context):
+        """Test destroy."""
+        mock_async = MagicMock()
+        monkeypatch.setattr(Module, '_Module__async', mock_async)
+        mock_sync = MagicMock()
+        monkeypatch.setattr(Module, '_Module__sync', mock_sync)
+        # runway_context._use_concurrent = async_used
+        monkeypatch.setattr(Module, 'use_async', async_used)
+        mod = Module(context=runway_context,
+                     definition=fx_deployments.load('simple_parallel_module').modules[0])
+        assert mod.destroy()
+
+        if async_used:
+            mock_async.assert_called_once_with('destroy')
+            mock_sync.assert_not_called()
+        else:
+            mock_async.assert_not_called()
+            mock_sync.assert_called_once_with('destroy')
+
+    def test_destroy_no_children(self, fx_deployments, monkeypatch,
+                                 runway_context):
+        """Test destroy with not child modules."""
+        mock_async = MagicMock()
+        monkeypatch.setattr(Module, '_Module__async', mock_async)
+        mock_sync = MagicMock()
+        monkeypatch.setattr(Module, '_Module__sync', mock_sync)
+        mock_run = MagicMock()
+        monkeypatch.setattr(Module, 'run', mock_run)
+        mod = Module(context=runway_context,
+                     definition=fx_deployments.load('min_required').modules[0])
+        assert mod.destroy()
+        mock_run.assert_called_once_with('destroy')
+        mock_async.assert_not_called()
+        mock_sync.assert_not_called()
 
     @patch(MODULE + '.change_dir')
     def test_run(self, mock_change_dir, fx_deployments, monkeypatch,

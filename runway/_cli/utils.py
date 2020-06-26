@@ -1,13 +1,15 @@
 """CLI utils."""
 import logging
 import sys
-from typing import Any, Iterator, List, Tuple  # noqa pylint: disable=W
+from typing import (Any, Iterator, List, Optional,  # noqa pylint: disable=W
+                    Tuple)
 
 import click
 import yaml
 from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
 from ..config import Config, DeploymentDefinition, ModuleDefinition
+from ..context import Context as RunwayContext
 from ..core.components import DeployEnvironment
 from ..util import cached_property
 
@@ -65,6 +67,20 @@ class CliContext(MutableMapping):
 
         """
         return getattr(self, key, default)
+
+    def get_runway_context(self, deploy_environment=None):
+        # type: (Optional[DeployEnvironment]) -> RunwayContext
+        """Get a Runway context object.
+
+        Args:
+            deploy_environment (Optional[DeployEnvironment]): Object
+                representing the current deploy environment.
+
+        Returns
+            RunwayContext
+
+        """
+        return RunwayContext(deploy_environment=deploy_environment or self.env)
 
     def __bool__(self):
         # type: () -> bool
@@ -182,6 +198,7 @@ def select_deployments(ctx, deployments):
     """
     if len(deployments) == 1:
         choice = 1
+        LOGGER.debug('only one deployment detected; no selection necessary')
     else:
         click.secho('\nConfigured deployments\n', bold=True, underline=True)
         click.echo(yaml.safe_dump({i + 1: d.menu_entry
@@ -215,9 +232,10 @@ def select_modules(ctx, modules):
 
     """
     if len(modules) == 1:
+        LOGGER.debug('only one module detected; no selection necessary')
         if ctx.command.name == 'destroy':
-            LOGGER.info('(only one deployment detected; all modules '
-                        'automatically selected for termination)')
+            LOGGER.info('Only one module detected; all modules '
+                        'automatically selected for deletion.')
             if not click.confirm('Proceed?'):
                 ctx.exit(0)
         return modules

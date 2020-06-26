@@ -47,14 +47,15 @@ class _CliGroup(click.Group):
         configuration such as logging or context object setup.
 
         """
-        if not ctx.args:
-            return {}
-        parser = argparse.ArgumentParser(add_help=False)
-        parser.add_argument('--ci', action='store_true')
-        parser.add_argument('-e', '--deploy-environment',
-                            default=os.getenv('DEPLOY_ENVIRONMENT'))
-        args, _ = parser.parse_known_args(list(ctx.args))
-        return vars(args)
+        if isinstance(ctx.args, (list, tuple)):
+            parser = argparse.ArgumentParser(add_help=False)
+            parser.add_argument('--ci', action='store_true',
+                                default=bool(os.getenv('CI')))
+            parser.add_argument('-e', '--deploy-environment',
+                                default=os.getenv('DEPLOY_ENVIRONMENT'))
+            args, _ = parser.parse_known_args(list(ctx.args))
+            return vars(args)
+        return {}
 
     def invoke(self, ctx):
         # type: (click.Context) -> Any
@@ -73,10 +74,7 @@ def cli(ctx):
     Full documentation available at https://docs.onica.com/projects/runway/.
 
     """
-    if ctx.invoked_subcommand:  # skip of bare execution
-        if 'CI' in os.environ and not ctx.meta['global.options'].get('ci'):
-            ctx.meta['global.options']['ci'] = True
-        ctx.obj = CliContext(**ctx.meta['global.options'])
+    ctx.obj = CliContext(**ctx.meta['global.options'])
 
 
 # register all the other commands from the importable modules defined

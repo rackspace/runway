@@ -45,12 +45,54 @@ class Runway(object):
                 all deployments in the config will be run.
 
         """
-        self.ctx.command = 'deploy'
-        Deployment.run_list(action='deploy',
+        self.__run_action('deploy', deployments if deployments is not None else
+                          self.deployments)
+
+    def destroy(self, deployments=None):
+        # type: (Optional[List[DeploymentDefinition]]) -> None
+        """Destroy action.
+
+        Args:
+            deployments: List of deployments to run. If not provided,
+                all deployments in the config will be run in reverse.
+
+        """
+        self.__run_action('destroy', deployments if deployments is not None else
+                          self.reverse_deployments(self.deployments))
+        if not deployments:
+            # return config attribute to original state
+            self.reverse_deployments(self.deployments)
+
+    @staticmethod
+    def reverse_deployments(deployments):
+        # type: (List[DeploymentDefinition]) -> List[DeploymentDefinition]
+        """Reverse deployments and the modules within them.
+
+        Args:
+            deployments: List of deployments to reverse.
+
+        Returns:
+            Deployments and modules in reverse order.
+
+        """
+        result = []
+        for deployment in deployments:
+            deployment.reverse()
+            result.insert(0, deployment)
+        return result
+
+    def __run_action(self, action, deployments):
+        # type: (Optional[List[DeploymentDefinition]]) -> None
+        """Run an action on a list of deployments.
+
+        Args:
+            action: Name of the action.
+            deployments: List of deployments to run.
+
+        """
+        self.ctx.command = action
+        Deployment.run_list(action=action,
                             context=self.ctx,
-                            deployments=deployments or self.deployments,
+                            deployments=deployments,
                             future=self.future,
                             variables=self.variables)
-
-    def destory(self):
-        """Destroy action."""
