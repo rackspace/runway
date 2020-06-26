@@ -5,6 +5,7 @@ from ._dismantle import dismantle
 from ._gen_sample import gen_sample
 from ._init import init
 from ._kbenv import kbenv
+from ._plan import plan
 from ._preflight import preflight
 from ._run_aws import run_aws
 from ._run_python import run_python
@@ -14,7 +15,6 @@ from ._test import test
 from ._tfenv import tfenv
 from ._whichenv import whichenv
 
-
 __all__ = [
     'deploy',
     'destroy',
@@ -22,6 +22,7 @@ __all__ = [
     'gen_sample',
     'init',
     'kbenv',
+    'plan',
     'preflight',
     'run_aws',
     'run_python',

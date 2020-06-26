@@ -203,6 +203,26 @@ class TestDeployment(object):
             mock_async.assert_not_called()
             mock_sync.assert_called_once_with('destroy')
 
+    @pytest.mark.parametrize('async_used', [(True), (False)])
+    def test_plan(self, async_used, caplog, fx_deployments, monkeypatch,
+                  runway_context):
+        """Test plan."""
+        caplog.set_level(logging.INFO, logger='runway')
+        mock_async = MagicMock()
+        monkeypatch.setattr(Deployment, '_Deployment__async', mock_async)
+        mock_sync = MagicMock()
+        monkeypatch.setattr(Deployment, '_Deployment__sync', mock_sync)
+        runway_context._use_concurrent = async_used
+        obj = Deployment(context=runway_context,
+                         definition=fx_deployments.load('simple_parallel_regions'))
+        assert obj.plan()
+
+        if async_used:
+            assert 'Processing of regions will be done in parallel ' \
+                'during deploy/destroy.' in caplog.messages
+        mock_async.assert_not_called()
+        mock_sync.assert_called_once_with('plan')
+
     @patch(MODULE + '.aws')
     @patch(MODULE + '.Module')
     def test_run(self, mock_module, mock_aws, fx_deployments, monkeypatch,

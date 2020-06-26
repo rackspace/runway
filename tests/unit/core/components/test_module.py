@@ -252,7 +252,6 @@ class TestModule(object):
         monkeypatch.setattr(Module, '_Module__async', mock_async)
         mock_sync = MagicMock()
         monkeypatch.setattr(Module, '_Module__sync', mock_sync)
-        # runway_context._use_concurrent = async_used
         monkeypatch.setattr(Module, 'use_async', async_used)
         mod = Module(context=runway_context,
                      definition=fx_deployments.load('simple_parallel_module').modules[0])
@@ -267,7 +266,7 @@ class TestModule(object):
 
     def test_destroy_no_children(self, fx_deployments, monkeypatch,
                                  runway_context):
-        """Test destroy with not child modules."""
+        """Test destroy with no child modules."""
         mock_async = MagicMock()
         monkeypatch.setattr(Module, '_Module__async', mock_async)
         mock_sync = MagicMock()
@@ -278,6 +277,45 @@ class TestModule(object):
                      definition=fx_deployments.load('min_required').modules[0])
         assert mod.destroy()
         mock_run.assert_called_once_with('destroy')
+        mock_async.assert_not_called()
+        mock_sync.assert_not_called()
+
+    @pytest.mark.parametrize('async_used', [(True), (False)])
+    def test_plan(self, async_used, caplog, fx_deployments, monkeypatch,
+                  runway_context):
+        """Test plan."""
+        caplog.set_level(logging.INFO, logger='runway')
+        mock_async = MagicMock()
+        monkeypatch.setattr(Module, '_Module__async', mock_async)
+        mock_sync = MagicMock()
+        monkeypatch.setattr(Module, '_Module__sync', mock_sync)
+        monkeypatch.setattr(Module, 'use_async', async_used)
+        mod = Module(context=runway_context,
+                     definition=fx_deployments.load('simple_parallel_module').modules[0])
+        assert mod.plan()
+
+        if async_used:
+            assert 'Processing of modules will be done in parallel ' \
+                'during deploy/destroy.' in caplog.messages
+        mock_async.assert_not_called()
+        mock_sync.assert_called_once_with('plan')
+
+    @pytest.mark.parametrize('async_used', [(True), (False)])
+    def test_plan_no_children(self, async_used, caplog, fx_deployments,
+                              monkeypatch, runway_context):
+        """Test plan with no child modules."""
+        caplog.set_level(logging.INFO, logger='runway')
+        mock_async = MagicMock()
+        monkeypatch.setattr(Module, '_Module__async', mock_async)
+        mock_sync = MagicMock()
+        monkeypatch.setattr(Module, '_Module__sync', mock_sync)
+        mock_run = MagicMock()
+        monkeypatch.setattr(Module, 'run', mock_run)
+        monkeypatch.setattr(Module, 'use_async', async_used)
+        mod = Module(context=runway_context,
+                     definition=fx_deployments.load('min_required').modules[0])
+        assert mod.plan()
+        mock_run.assert_called_once_with('plan')
         mock_async.assert_not_called()
         mock_sync.assert_not_called()
 

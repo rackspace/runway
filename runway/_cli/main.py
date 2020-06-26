@@ -30,12 +30,18 @@ CLICK_CONTEXT_SETTINGS = dict(
 )
 
 
-class _CliGroup(click.Group):
+class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
     """Extends the use of click.Group.
 
     This should only be used for the main application group.
 
     """
+
+    def invoke(self, ctx):
+        # type: (click.Context) -> Any
+        """Replace invoke command to pass along args."""
+        ctx.meta['global.options'] = self.__parse_global_options(ctx)
+        return super(_CliGroup, self).invoke(ctx)
 
     @staticmethod
     def __parse_global_options(ctx):
@@ -56,12 +62,6 @@ class _CliGroup(click.Group):
             args, _ = parser.parse_known_args(list(ctx.args))
             return vars(args)
         return {}
-
-    def invoke(self, ctx):
-        # type: (click.Context) -> Any
-        """Replace invoke command to pass along args."""
-        ctx.meta['global.options'] = self.__parse_global_options(ctx)
-        return super(_CliGroup, self).invoke(ctx)
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS, cls=_CliGroup)

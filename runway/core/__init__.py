@@ -63,6 +63,18 @@ class Runway(object):
             # return config attribute to original state
             self.reverse_deployments(self.deployments)
 
+    def plan(self, deployments=None):
+        # type: (Optional[List[DeploymentDefinition]]) -> None
+        """Plan action.
+
+        Args:
+            deployments: List of deployments to run. If not provided,
+                all deployments in the config will be run.
+
+        """
+        self.__run_action('plan', deployments if deployments is not None else
+                          self.deployments)
+
     @staticmethod
     def reverse_deployments(deployments):
         # type: (List[DeploymentDefinition]) -> List[DeploymentDefinition]

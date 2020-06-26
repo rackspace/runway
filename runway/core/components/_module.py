@@ -130,7 +130,7 @@ class Module(object):
         # type: () -> None
         """Deploy the module.
 
-        High level method for running a deployment.
+        High level method for running a module.
 
         """
         if not self.child_modules:
@@ -143,7 +143,7 @@ class Module(object):
         # type: () -> None
         """Destroy the module.
 
-        High level method for running a deployment.
+        High level method for running a module.
 
         """
         if not self.child_modules:
@@ -151,6 +151,20 @@ class Module(object):
         if self.use_async:
             return self.__async('destroy')
         return self.__sync('destroy')
+
+    def plan(self):
+        # type: () -> None
+        """Plan for the next deploy of the module.
+
+        High level method for running a module.
+
+        """
+        if not self.child_modules:
+            return self.run('plan')
+        if self.use_async:
+            LOGGER.info('Processing of modules will be done in parallel '
+                        'during deploy/destroy.')
+        return self.__sync('plan')
 
     def run(self, action):
         # type: (str) -> None

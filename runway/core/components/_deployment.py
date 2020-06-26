@@ -170,6 +170,22 @@ class Deployment(object):
             return self.__async('destroy')
         return self.__sync('destroy')
 
+    def plan(self):
+        # type: () -> None
+        """Plan for the next deploy of the deployment.
+
+        High level method for running a deployment.
+
+        """
+        LOGGER.debug('attempting to plan for the next deploy of "%s" to'
+                     ' region(s): %s',
+                     self.ctx.env.name,
+                     ', '.join(self.regions))
+        if self.use_async:
+            LOGGER.info('Processing of regions will be done in parallel '
+                        'during deploy/destroy.')
+        return self.__sync('plan')
+
     def run(self, action, region):
         # type: (str, str) -> None
         """Run a single deployment in a single region.
