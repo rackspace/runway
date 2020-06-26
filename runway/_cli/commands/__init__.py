@@ -11,6 +11,7 @@ from ._run_aws import run_aws
 from ._run_python import run_python
 from ._run_stacker import run_stacker
 from ._takeoff import takeoff
+from ._taxi import taxi
 from ._test import test
 from ._tfenv import tfenv
 from ._whichenv import whichenv
@@ -28,6 +29,7 @@ __all__ = [
     'run_python',
     'run_stacker',
     'takeoff',
+    'taxi',
     'test',
     'tfenv',
     'whichenv'
