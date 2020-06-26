@@ -1,6 +1,7 @@
 """Runway command import aggregation."""
 from ._deploy import deploy
 from ._destroy import destroy
+from ._dismantle import dismantle
 from ._gen_sample import gen_sample
 from ._init import init
 from ._kbenv import kbenv
@@ -17,6 +18,7 @@ from ._whichenv import whichenv
 __all__ = [
     'deploy',
     'destroy',
+    'dismantle',
     'gen_sample',
     'init',
     'kbenv',
