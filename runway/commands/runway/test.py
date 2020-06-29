@@ -78,6 +78,8 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
                 # tool it is wrapping.
                 if not isinstance(err, SystemExit):
                     traceback.print_exc()
+                elif err.code == 0:
+                    next  # Tests calling sys.exit(0) don't indicate failure
                 LOGGER.error('Test failed: %s', test.name)
                 if test.required:
                     LOGGER.error('Failed test was required, the remaining '
