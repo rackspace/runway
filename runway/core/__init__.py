@@ -1,8 +1,9 @@
 """Core Runway API."""
-from typing import TYPE_CHECKING, List, Optional  # noqa pylint: disable=W
+from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
+                    Optional)
 
-from .components import Deployment, DeployEnvironment
 from ..context import Context
+from .components import DeployEnvironment, Deployment
 
 if TYPE_CHECKING:
     from ..config import Config, DeploymentDefinition
@@ -62,6 +63,17 @@ class Runway(object):
         if not deployments:
             # return config attribute to original state
             self.reverse_deployments(self.deployments)
+
+    def get_env_vars(self, deployments=None):
+        # type: (Optional[List[DeploymentDefinition]]) -> Dict[str, Any]
+        """Get env_vars defined in the config."""
+        deployments = deployments or self.deployments
+        result = {}
+        for deployment in deployments:
+            obj = Deployment(context=self.ctx, definition=deployment,
+                             variables=self.variables)
+            result.update(obj.env_vars_config)
+        return result
 
     def plan(self, deployments=None):
         # type: (Optional[List[DeploymentDefinition]]) -> None

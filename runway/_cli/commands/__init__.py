@@ -2,6 +2,7 @@
 from ._deploy import deploy
 from ._destroy import destroy
 from ._dismantle import dismantle
+from ._envvars import envvars
 from ._gen_sample import gen_sample
 from ._init import init
 from ._kbenv import kbenv
@@ -20,6 +21,7 @@ __all__ = [
     'deploy',
     'destroy',
     'dismantle',
+    'envvars',
     'gen_sample',
     'init',
     'kbenv',

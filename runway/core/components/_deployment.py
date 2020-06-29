@@ -1,11 +1,12 @@
 """Runway deployment object."""
 import logging
 import sys
-from typing import (TYPE_CHECKING, Dict, List,  # noqa pylint: disable=W
+from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
                     Optional, Union)
 
 import six
 
+from ...cfngin.exceptions import UnresolvedVariable
 from ...config import FutureDefinition, VariablesDefinition
 from ...util import (cached_property, merge_dicts,
                      merge_nested_environment_dicts)
@@ -130,6 +131,20 @@ class Deployment(object):
         return {'role_arn': assume_role,
                 'revert_on_exit': False}
 
+    @property
+    def env_vars_config(self):
+        # type: () -> Dict[str, Any]
+        """Parse the definition to get the correct env_vars configuration."""
+        try:
+            if not self.definition.env_vars:
+                return {}
+        except UnresolvedVariable:
+            self.definition._env_vars.resolve(self.ctx,  # pylint: disable=protected-access
+                                              variables=self._variables)
+        return merge_nested_environment_dicts(self.definition.env_vars,
+                                              env_name=self.ctx.env.name,
+                                              env_root=str(self.ctx.env.root_dir))
+
     @cached_property
     def regions(self):
         # type: () -> List[str]
@@ -244,14 +259,10 @@ class Deployment(object):
     def __merge_env_vars(self):
         # type: () -> None
         """Merge defined env_vars into context.env_vars."""
-        if self.definition.env_vars:
-            env_vars = merge_nested_environment_dicts(self.definition.env_vars,
-                                                      env_name=self.ctx.env.name,
-                                                      env_root=str(self.ctx.env.root_dir))
-            if env_vars:
-                LOGGER.info('OS environment variable overrides being applied '
-                            'this deployment: %s', str(env_vars))
-            self.ctx.env.vars = merge_dicts(self.ctx.env.vars, env_vars)
+        if self.env_vars_config:
+            LOGGER.info('OS environment variable overrides being applied '
+                        'this deployment: %s', str(self.env_vars_config))
+        self.ctx.env.vars = merge_dicts(self.ctx.env.vars, self.env_vars_config)
 
     def __async(self, action):
         # type: (str) -> None

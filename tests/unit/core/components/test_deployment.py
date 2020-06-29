@@ -4,9 +4,11 @@ import logging
 import sys
 
 import pytest
-from mock import MagicMock, call, patch
+from mock import MagicMock, PropertyMock, call, patch
 
-from runway.config import FutureDefinition, VariablesDefinition
+from runway.cfngin.exceptions import UnresolvedVariable
+from runway.config import (DeploymentDefinition, FutureDefinition,
+                           VariablesDefinition)
 from runway.core.components import Deployment
 
 MODULE = 'runway.core.components._deployment'
@@ -104,6 +106,31 @@ class TestDeployment(object):
         result = obj.assume_role_config
         assert {k: result[k] for k in sorted(result)} == \
             {k: expected[k] for k in sorted(expected)}
+
+    def test_env_vars_config_unresolved(self, fx_deployments, monkeypatch,
+                                        runway_context):
+        """Test env_vars_config unresolved."""
+        expected = {'key': 'val'}
+
+        monkeypatch.setattr(MODULE + '.merge_nested_environment_dicts',
+                            MagicMock(return_value=expected))
+        monkeypatch.setattr(Deployment, '_Deployment__merge_env_vars',
+                            MagicMock(return_value=None))
+        monkeypatch.setattr(DeploymentDefinition, 'env_vars',
+                            PropertyMock(side_effect=[
+                                UnresolvedVariable('test', MagicMock()),
+                                expected
+                            ]))
+        monkeypatch.setattr(DeploymentDefinition, '_env_vars', PropertyMock(),
+                            raising=False)
+
+        raw_deployment = fx_deployments.get('min_required')
+        deployment = DeploymentDefinition.from_list([raw_deployment])[0]
+        obj = Deployment(context=runway_context,
+                         definition=deployment)
+
+        assert obj.env_vars_config == expected
+        obj.definition._env_vars.resolve.assert_called_once()
 
     @pytest.mark.parametrize('config, expected', [
         ('min_required', ['us-east-1']),
