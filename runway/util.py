@@ -348,7 +348,7 @@ class SafeHaven(AbstractContextManager):
 
     def reset_sys_modules(self):
         """Reset the value of sys.modules."""
-        self.log.debug('resetting sys.modules: %s', self.__sys_modules)
+        self.log.debug('resetting sys.modules...')
         # sys.modules can be manipulated to force reloading modules but,
         # replacing it outright does not work as expected
         for module in list(sys.modules.keys()):
