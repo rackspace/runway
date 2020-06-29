@@ -12,6 +12,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('dismantle', short_help='alias for destroy')
 @options.ci
+@options.debug
 @options.deploy_environment
 @options.tags
 @click.pass_context

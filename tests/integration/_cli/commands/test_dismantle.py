@@ -22,6 +22,6 @@ def test_dismantle(caplog, monkeypatch):
                                  '--tag', 'tag2'])
     assert result.exit_code == 0
     assert 'forwarding to destroy...' in caplog.messages
-    mock_forward.assert_called_once_with(destroy, ci=True,
+    mock_forward.assert_called_once_with(destroy, ci=True, debug=0,
                                          deploy_environment='test',
                                          tags=('tag1', 'tag2'))

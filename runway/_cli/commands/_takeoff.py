@@ -12,6 +12,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('takeoff', short_help='alias for deploy')
 @options.ci
+@options.debug
 @options.deploy_environment
 @options.tags
 @click.pass_context

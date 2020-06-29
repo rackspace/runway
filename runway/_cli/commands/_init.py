@@ -1,9 +1,12 @@
 """Creates a sample :ref:`runway-config` in the current directory."""
 import logging
 import sys
+from typing import Any  # pylint: disable=W
 
 import click
 import six
+
+from .. import options
 
 if sys.version_info.major > 2:
     from pathlib import Path  # pylint: disable=E
@@ -24,9 +27,10 @@ deployments:
 
 
 @click.command('init', short_help='create runway.yml')
+@options.debug
 @click.pass_context
-def init(ctx):
-    # type: (click.Context) -> None
+def init(ctx, **_):
+    # type: (click.Context, Any) -> None
     """Create an example runway.yml file in the currect directory."""
     runway_yml = Path.cwd() / 'runway.yml'
 

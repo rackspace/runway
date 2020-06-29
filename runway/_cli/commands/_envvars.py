@@ -13,6 +13,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('envvars')
+@options.debug
 @options.deploy_environment
 @click.pass_context
 def envvars(ctx, **_):
@@ -25,7 +26,8 @@ def envvars(ctx, **_):
     NOTE: Only outputs env_vars defined in deployments, not modules.
 
     """
-    logging.getLogger('runway').setLevel(logging.ERROR)  # suppress warnings
+    if not ctx.obj.debug:
+        logging.getLogger('runway').setLevel(logging.ERROR)  # suppress warnings
     ctx.obj.env.ci = True  # suppress any prompts
     env_vars = Runway(ctx.obj.runway_config,
                       ctx.obj.get_runway_context()).get_env_vars()

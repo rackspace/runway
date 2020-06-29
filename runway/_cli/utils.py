@@ -24,9 +24,11 @@ LOGGER = logging.getLogger(__name__)
 class CliContext(MutableMapping):
     """CLI context object."""
 
-    def __init__(self, ci=False, deploy_environment=None, **_):
+    def __init__(self, ci=False, debug=0, deploy_environment=None, **_):
+        # type: (bool, int, Optional[str], Any) -> None
         """Instantiate class."""
         self._deploy_environment = deploy_environment
+        self.debug = debug
         self.root_dir = Path.cwd()
         if ci:  # prevents unnecessary loading of runway config
             self.env.ci = ci

@@ -13,6 +13,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('destroy', short_help='destroy things')
 @options.ci
+@options.debug
 @options.deploy_environment
 @options.tags
 @click.pass_context

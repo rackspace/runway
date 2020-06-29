@@ -9,7 +9,7 @@ from runway._cli import cli
 
 def test_init(cd_tmp_path, caplog):
     """Test ``runway init`` command."""
-    caplog.set_level(logging.INFO, logger='runway._cli')
+    caplog.set_level(logging.INFO, logger='runway.cli')
     runner = CliRunner()
     result = runner.invoke(cli, ['init'])
     assert result.exit_code == 0
@@ -29,7 +29,7 @@ def test_init(cd_tmp_path, caplog):
 
 def test_init_file_exists(cd_tmp_path, caplog):
     """Test ``runway init`` command with existing file."""
-    caplog.set_level(logging.ERROR, logger='runway._cli')
+    caplog.set_level(logging.ERROR, logger='runway.cli')
     (cd_tmp_path / 'runway.yml').touch()
     runner = CliRunner()
     result = runner.invoke(cli, ['init'])

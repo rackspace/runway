@@ -19,4 +19,4 @@ def test_preflight(caplog, monkeypatch):
                                  '--deploy-environment', 'test'])
     assert result.exit_code == 0
     assert 'forwarding to test...' in caplog.messages
-    mock_forward.assert_called_once_with(test, deploy_environment='test')
+    mock_forward.assert_called_once_with(test, debug=0, deploy_environment='test')

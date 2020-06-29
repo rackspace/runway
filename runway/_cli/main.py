@@ -2,27 +2,17 @@
 import argparse
 import logging
 import os
-import sys
 from typing import Any, Dict  # pylint: disable=W
 
 import click
 
 from runway import __version__
 
-from ..cfngin.logger import ColorFormatter
-from . import commands
+from . import commands, options
+from .logs import setup_logging
 from .utils import CliContext
 
-COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
-LOGGER = logging.getLogger('runway')
-HDLR = logging.StreamHandler()
-HDLR.setFormatter(ColorFormatter(
-    COLOR_FORMAT if sys.stdout.isatty() else logging.BASIC_FORMAT
-))
-logging.basicConfig(level=logging.INFO,
-                    handlers=[HDLR])
-# botocore info is spammy
-logging.getLogger('botocore').setLevel(logging.ERROR)
+LOGGER = logging.getLogger('runway.cli')
 
 CLICK_CONTEXT_SETTINGS = dict(
     help_option_names=['-h', '--help'],
@@ -53,10 +43,16 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
         configuration such as logging or context object setup.
 
         """
+        try:
+            debug_count = int(os.getenv('DEBUG', '0'))
+        except ValueError:
+            LOGGER.error('DEBUG environment variable must be an intiger.')
+            ctx.exit(1)
         if isinstance(ctx.args, (list, tuple)):
             parser = argparse.ArgumentParser(add_help=False)
             parser.add_argument('--ci', action='store_true',
                                 default=bool(os.getenv('CI')))
+            parser.add_argument('--debug', default=debug_count, action='count')
             parser.add_argument('-e', '--deploy-environment',
                                 default=os.getenv('DEPLOY_ENVIRONMENT'))
             args, _ = parser.parse_known_args(list(ctx.args))
@@ -66,15 +62,18 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS, cls=_CliGroup)
 @click.version_option(__version__, message='%(version)s')
+@options.debug
 @click.pass_context
-def cli(ctx):
-    # type: (click.Context) -> None
+def cli(ctx, **_):
+    # type: (click.Context, Any) -> None
     """Runway CLI.
 
     Full documentation available at https://docs.onica.com/projects/runway/.
 
     """
-    ctx.obj = CliContext(**ctx.meta['global.options'])
+    opts = ctx.meta['global.options']
+    setup_logging(debug=opts['debug'])
+    ctx.obj = CliContext(**opts)
 
 
 # register all the other commands from the importable modules defined

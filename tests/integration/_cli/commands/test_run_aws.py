@@ -16,7 +16,7 @@ def test_run_aws_head_bucket(monkeypatch):
     """Test ``runway run-aws s3api head-bucket``."""
     monkeypatch.setenv('AWS_ACCESS_KEY_ID', 'testing')
     monkeypatch.setenv('AWS_SECRET_ACCESS_KEY', 'testing')
-    monkeypatch.setenv('DEBUG', '')
+    monkeypatch.setenv('DEBUG', '0')
     runner = CliRunner()
     result = runner.invoke(cli, ['run-aws', 's3api', 'head-bucket',
                                  '--bucket', 'example-bucket',

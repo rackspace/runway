@@ -1,7 +1,10 @@
 """``runway run-aws`` command."""
 import sys
+from typing import Any  # pylint: disable=W
 
 import click
+
+from .. import options
 
 if sys.version_info.major > 2:
     from pathlib import Path  # pylint: disable=E
@@ -12,8 +15,9 @@ else:
 @click.command('run-python', short_help='bundled python')
 @click.argument('filename', metavar='<filename>', required=True,
                 type=click.Path(exists=True, dir_okay=False))
-def run_python(filename):
-    # type: (str) -> None
+@options.debug
+def run_python(filename, **_):
+    # type: (str, Any) -> None
     """Execute a python script using a bundled copy of python.
 
     This command can execute actions using python without requiring python to

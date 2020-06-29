@@ -1,20 +1,21 @@
 """``runway run-aws`` command."""
 import logging
-import os
-from typing import Tuple  # noqa pylint: disable=unused-import
+from typing import Any, Tuple  # noqa pylint: disable=unused-import
 
 import click
 from awscli.clidriver import create_clidriver
 
 from ...util import SafeHaven
+from .. import options
 
 
 @click.command('run-aws', short_help='bundled awscli',
                context_settings={'ignore_unknown_options': True})
 @click.argument('args', metavar='<args>', nargs=-1, required=True)
+@options.debug
 @click.pass_context
-def run_aws(ctx, args):
-    # type: (click.Context, Tuple[str, ...]) -> None
+def run_aws(ctx, args, **_):
+    # type: (click.Context, Tuple[str, ...], Any) -> None
     """Execute awscli commands using the version bundled with Runway.
 
     This command gives access to the awscli when it might not
@@ -24,7 +25,7 @@ def run_aws(ctx, args):
     before the awscli command.
 
     """
-    if not os.environ.get('DEBUG') and '--debug' not in args:
+    if not ctx.obj.debug:
         # suppress awscli debug logs
         for name, logger in logging.getLogger('awscli').manager.loggerDict.items():
             if name.startswith('awscli.') and isinstance(logger, logging.Logger):

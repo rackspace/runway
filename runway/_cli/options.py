@@ -7,6 +7,10 @@ ci = click.option('--ci',
                   envvar='CI',
                   is_flag=True,
                   help='Run in noninteractive mode.')
+debug = click.option('--debug', count=True,
+                     envvar='DEBUG',
+                     help='Supply once to display Runway debug logs. '
+                     'Supply twice to display all debug logs.')
 deploy_environment = click.option('-e', '--deploy-environment',
                                   envvar='DEPLOY_ENVIRONMENT',
                                   metavar='<env-name>',

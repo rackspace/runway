@@ -13,6 +13,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('deploy', short_help='deploy things')
 @options.ci
+@options.debug
 @options.deploy_environment
 @options.tags
 @click.pass_context

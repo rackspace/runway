@@ -12,6 +12,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('taxi', short_help='alias for plan')
 @options.ci
+@options.debug
 @options.deploy_environment
 @options.tags
 @click.pass_context
