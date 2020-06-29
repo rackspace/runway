@@ -78,14 +78,15 @@ class Test(BaseCommand):  # pylint: disable=too-few-public-methods
                 # tool it is wrapping.
                 if not isinstance(err, SystemExit):
                     traceback.print_exc()
-                elif err.code == 0:
-                    next  # Tests calling sys.exit(0) don't indicate failure
-                LOGGER.error('Test failed: %s', test.name)
-                if test.required:
-                    LOGGER.error('Failed test was required, the remaining '
-                                 'tests have been skipped')
-                    sys.exit(1)
-                failed_tests.append(test.name)
+
+                if not (isinstance(err, SystemExit) and (
+                        err.code == 0)):  # Tests calling sys.exit(0) don't indicate failure
+                    LOGGER.error('Test failed: %s', test.name)
+                    if test.required:
+                        LOGGER.error('Failed test was required, the remaining '
+                                     'tests have been skipped')
+                        sys.exit(1)
+                    failed_tests.append(test.name)
         if failed_tests:
             LOGGER.error('The following tests failed: %s',
                          ', '.join(failed_tests))
