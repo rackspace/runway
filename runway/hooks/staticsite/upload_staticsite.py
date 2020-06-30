@@ -6,7 +6,7 @@ from operator import itemgetter
 
 from ...cfngin.lookups.handlers.output import OutputLookup
 from ...cfngin.session_cache import get_session
-from ...commands.runway.run_aws import aws_cli
+from ...core.providers import aws
 
 LOGGER = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ def sync(context, provider, **kwargs):
         # Using the awscli for s3 syncing is incredibly suboptimal, but on
         # balance it's probably the most stable/efficient option for syncing
         # the files until https://github.com/boto/boto3/issues/358 is resolved
-        aws_cli(['s3',
+        aws.cli(['s3',
                  'sync',
                  context.hook_data['staticsite']['app_directory'],
                  "s3://%s/" % bucket_name,

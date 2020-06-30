@@ -7,7 +7,7 @@ import click
 
 from ...core import Runway
 from .. import options
-from ..utils import select_deployments, select_modules_using_tags
+from ..utils import select_deployments
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
@@ -35,15 +35,7 @@ def deploy(ctx, tags, **_):  # noqa: D301
     3. Deploys selected in the order defined.
 
     """
-    if tags:
-        deployments = select_modules_using_tags(
-            ctx, ctx.obj.runway_config.deployments, tags
-        )
-    elif ctx.obj.env.ci:
-        deployments = ctx.obj.runway_config.deployments
-    else:
-        deployments = select_deployments(
-            ctx, ctx.obj.runway_config.deployments
-        )
+    deployments = select_deployments(ctx, ctx.obj.runway_config.deployments,
+                                     tags)
     Runway(ctx.obj.runway_config,
            ctx.obj.get_runway_context()).deploy(deployments)

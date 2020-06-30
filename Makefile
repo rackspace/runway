@@ -1,3 +1,9 @@
+.PHONY: list sync sync_two sync_all pipenv_lock clean lint lint_two test test-integration test-unit test_shim create_tfenv_ver_file build build_pyinstaller_file build_pyinstaller_folder build_whl release npm_prep
+
+# list all targets in this Makefile
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 

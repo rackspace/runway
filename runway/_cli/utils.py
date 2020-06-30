@@ -186,9 +186,14 @@ class CliContext(MutableMapping):
         return 'CliContext({})'.format(self.__dict__)
 
 
-def select_deployments(ctx, deployments):
+def select_deployments(ctx,  # type: click.Context
+                       deployments,  # type: List[DeploymentDefinition]
+                       tags=None  # type: Optional[Tuple[str, ...]]
+                       ):
     # type: (click.Context, List[DeploymentDefinition]) -> List[DeploymentDefinition]
-    """Interactively select which deployments to run.
+    """Select which deployments to run.
+
+    Uses tags, interactive prompts, or selects all.
 
     Args:
         ctx: Current click context.
@@ -198,6 +203,10 @@ def select_deployments(ctx, deployments):
         Selected deployment(s).
 
     """
+    if tags:
+        return select_modules_using_tags(ctx, deployments, tags)
+    if ctx.obj.env.ci:
+        return deployments
     if len(deployments) == 1:
         choice = 1
         LOGGER.debug('only one deployment detected; no selection necessary')

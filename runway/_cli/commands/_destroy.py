@@ -7,7 +7,7 @@ import click
 
 from ...core import Runway
 from .. import options
-from ..utils import select_deployments, select_modules_using_tags
+from ..utils import select_deployments
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
@@ -43,18 +43,8 @@ def destroy(ctx, tags, **_):  # noqa: D301
         if not click.confirm('\nProceed?'):
             ctx.exit(0)
         click.echo('')
-
-    if tags:
-        deployments = Runway.reverse_deployments(select_modules_using_tags(
-            ctx, ctx.obj.runway_config.deployments, tags
-        ))
-    elif ctx.obj.env.ci:
-        deployments = Runway.reverse_deployments(
-            ctx.obj.runway_config.deployments
-        )
-    else:
-        deployments = Runway.reverse_deployments(select_deployments(
-            ctx, ctx.obj.runway_config.deployments
-        ))
+    deployments = Runway.reverse_deployments(
+        select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
+    )
     Runway(ctx.obj.runway_config,
            ctx.obj.get_runway_context()).destroy(deployments)
