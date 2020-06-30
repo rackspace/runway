@@ -1,4 +1,4 @@
-"""Generate a sample AWS CDK project using python."""
+"""``runway gen-sample cdk-py`` command."""
 import logging
 import sys
 

@@ -1,4 +1,5 @@
 """``runway test`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 import traceback
 
@@ -16,7 +17,16 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.deploy_environment
 @click.pass_context
 def test(ctx, **_):
-    """Execute tests as defined in the Runway config."""
+    """Execute tests as defined in the Runway config.
+
+    If one of the tests fail, the command will exit immediately unless
+    "required: false" is set on the failing test.
+
+    If the failing test is not required, the next test will be executed.
+
+    If any of the tests fail, the command will exit with a non-zero exit code.
+
+    """
     test_definitions = ctx.obj.runway_config.tests
 
     if not test_definitions:

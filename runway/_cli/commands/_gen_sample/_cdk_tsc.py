@@ -1,4 +1,4 @@
-"""Generate a sample AWS CDK project using TypeScript."""
+"""``runway gen-sample cdk-tsc`` command."""
 import logging
 import sys
 

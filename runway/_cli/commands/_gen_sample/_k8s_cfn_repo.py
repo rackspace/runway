@@ -1,4 +1,4 @@
-"""Generate a sample CloudFormation project using Kubernetes."""
+"""``runway gen-sample k8s-cfn`` command."""
 import logging
 import sys
 

@@ -1,4 +1,5 @@
 """``runway plan`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 import os
 import platform
@@ -19,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 def envvars(ctx, **_):
     """Output env_vars defined in the Runway config file.
 
-    OS environment variables can be set in Runway config file for different
+    OS environment variables can be set in the Runway config file for different
     Runway environments (e.g. dev & prod KUBECONFIG values).
     This command allows access to these values for use outside of Runway.
 

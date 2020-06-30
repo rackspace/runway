@@ -1,4 +1,5 @@
 """``runway run-aws`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import sys
 from typing import Any  # pylint: disable=W
 

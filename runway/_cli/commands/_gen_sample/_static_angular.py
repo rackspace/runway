@@ -1,4 +1,4 @@
-"""Generate a sample static site project using Angular."""
+"""``runway gen-sample static-angular`` command."""
 import logging
 import sys
 

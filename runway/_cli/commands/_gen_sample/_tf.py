@@ -1,4 +1,4 @@
-"""Generate a sample Terraform project."""
+"""``runway gen-sample tf`` command."""
 import logging
 import sys
 

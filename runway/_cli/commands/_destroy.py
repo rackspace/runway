@@ -1,4 +1,5 @@
 """``runway destroy`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 from typing import Any, Tuple  # pylint: disable=W
 
@@ -17,9 +18,23 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.deploy_environment
 @options.tags
 @click.pass_context
-def destroy(ctx, tags, **_):
+def destroy(ctx, tags, **_):  # noqa: D301
     # type: (click.Context, Tuple[str, ...], Any) -> None
-    """Destroy infrastructure as code modules with Runway."""
+    """Destroy infrastructure as code.
+
+    \b
+    1. Determines the deploy environment.
+        - option
+        - "DEPLOY_ENVIRONMENT" environment variable
+        - git branch name (strips "ENV-" prefix, master => common)
+        - current working directory
+    2. Selects deployments & modules to deploy.
+        - (default) prompts
+        - (tags) module contains all tags
+        - (non-interactive) all
+    3. Destroys selected in reverse the order defined.
+
+    """
     if not ctx.obj.env.ci:
         click.secho('[WARNING] Runway is about to be run in DESTROY mode. '
                     '[WARNING]', bold=True, fg='red')

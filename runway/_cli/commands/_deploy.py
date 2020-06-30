@@ -1,4 +1,5 @@
 """``runway deploy`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 from typing import Any, Tuple  # pylint: disable=W
 
@@ -17,9 +18,23 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.deploy_environment
 @options.tags
 @click.pass_context
-def deploy(ctx, tags, **_):
+def deploy(ctx, tags, **_):  # noqa: D301
     # type: (click.Context, Tuple[str, ...], Any) -> None
-    """Deploy infrastructure as code modules with Runway."""
+    """Deploy infrastructure as code.
+
+    \b
+    1. Determines the deploy environment.
+        - option
+        - "DEPLOY_ENVIRONMENT" environment variable
+        - git branch name (strips "ENV-" prefix, master => common)
+        - current working directory
+    2. Selects deployments & modules to deploy.
+        - (default) prompts
+        - (tags) module contains all tags
+        - (non-interactive) all
+    3. Deploys selected in the order defined.
+
+    """
     if tags:
         deployments = select_modules_using_tags(
             ctx, ctx.obj.runway_config.deployments, tags

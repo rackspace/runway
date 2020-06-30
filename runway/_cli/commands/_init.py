@@ -1,4 +1,5 @@
-"""Creates a sample :ref:`runway-config` in the current directory."""
+"""``runway init`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 import sys
 from typing import Any  # pylint: disable=W

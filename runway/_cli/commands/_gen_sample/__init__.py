@@ -1,4 +1,5 @@
 """``runway gen-sample`` command group."""
+# docs: file://./../../../../docs/source/commands.rst
 import click
 
 from ._cdk_csharp import cdk_csharp
@@ -50,7 +51,13 @@ COMMANDS = [
 
 @click.group('gen-sample', short_help='generate sample module/project')
 def gen_sample():
-    """Generate a sample Runway module/project."""
+    """Generate a sample Runway module module/project.
+
+    The sample is created in the current directory.
+    If a directory already exists with the name Runway tries to use,
+    the sample will not be created.
+
+    """
 
 
 for cmd in COMMANDS:  # register commands

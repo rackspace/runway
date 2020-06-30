@@ -1,4 +1,4 @@
-"""Generate a sample Serverless project using python."""
+"""``runway gen-sample sls-py`` command."""
 import logging
 import sys
 

@@ -1,4 +1,4 @@
-"""Generate a sample Terraform project using Kubernetes."""
+"""``runway gen-sample k8s-tf`` command."""
 import logging
 import shutil
 import sys

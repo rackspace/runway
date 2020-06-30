@@ -1,4 +1,4 @@
-"""Generate a sample static site project using React."""
+"""``runway gen-sample static-react`` command."""
 import logging
 import sys
 

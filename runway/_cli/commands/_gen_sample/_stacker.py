@@ -1,4 +1,4 @@
-"""[DEPRECATED] Generate a sample CFNgin project using Blueprints."""
+"""``runway gen-sample stacker`` command."""
 import logging
 
 import click

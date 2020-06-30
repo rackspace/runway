@@ -1,4 +1,4 @@
-"""Generate a sample CFNgin project using Blueprints."""
+"""``runway gen-sample cfngin`` command."""
 import logging
 import shutil
 import sys

@@ -1,4 +1,5 @@
 """``runway run-aws`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 from typing import Any, Tuple  # noqa pylint: disable=unused-import
 

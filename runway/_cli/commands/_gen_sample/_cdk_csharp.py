@@ -1,4 +1,4 @@
-"""Generate a sample AWS CDK project using C#."""
+"""``runway gen-sample cdk-csharp`` command."""
 import logging
 import sys
 

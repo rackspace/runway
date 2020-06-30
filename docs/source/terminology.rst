@@ -23,8 +23,16 @@ Deploy Environment
 ==================
 
 Deploy environments are used for selecting the options/variables/parameters to be used with each Module_.
-They can be defined by the name of a directory (if its not a git repo), git branch, or environment variable (``DEPLOY_ENVIRONMENT``).
+The deploy environment is derived from the current directory (if its not a git repo), active git branch, or environment variable (``DEPLOY_ENVIRONMENT``).
 Standard deploy environments would be something like prod, dev, and test.
+
+When using a git branch, Runway expects the branch to be prefixed with **ENV-**.
+If this is found, Runway knows that it should always use the value that follows the prefix.
+If it's the **master** branch, Runway will use the deploy environment name of *common*.
+If the branch name does not follow either of these schemas and Runway is being run interactively from the CLI, it will prompt of confirmation of the deploy environment that should be used.
+
+When using a directory, Runway expects the directory's name to be prefixed with **ENV-**.
+If this is found, Runway knows that it should always use the value that follows the prefix.
 
 
 Deployment

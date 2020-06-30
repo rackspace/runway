@@ -1,4 +1,4 @@
-"""Generate a sample Serverless project using TypeScript."""
+"""``runway gen-sample sls-tsc`` command."""
 import logging
 import sys
 

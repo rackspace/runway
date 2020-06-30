@@ -1,4 +1,5 @@
 """``runway takeoff`` command."""
+# docs: file://./../../../docs/source/commands.rst
 import logging
 from typing import Any, Tuple  # pylint: disable=W
 
@@ -10,7 +11,7 @@ from ._deploy import deploy
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
-@click.command('takeoff', short_help='alias for deploy')
+@click.command('takeoff', short_help='alias of deploy')
 @options.ci
 @options.debug
 @options.deploy_environment
@@ -18,10 +19,6 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.pass_context
 def takeoff(ctx, **kwargs):
     # type: (click.Context, Tuple[str, ...], Any) -> None
-    """Alias for "runway deploy".
-
-    Deploy infrastructure as code modules with Runway.
-
-    """
+    """Alias of "runway deploy"."""
     LOGGER.debug('forwarding to deploy...')
     ctx.forward(deploy, **kwargs)

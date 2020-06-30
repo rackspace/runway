@@ -1,4 +1,4 @@
-"""Generate a sample CFNgin project using CloudFormation."""
+"""``runway gen-sample cfn` command."""
 import logging
 import sys
 
