@@ -181,7 +181,7 @@ class TestSafeHaven(object):
         # pylint: disable=unnecessary-comprehension
         orig_val = {k: v for k, v in sys.modules.items()}
         expected_logs = ['entering a safe haven...',
-                         'resetting sys.modules: %s' % orig_val]
+                         'resetting sys.modules...']
 
         with SafeHaven() as obj:
             from .fixtures import mock_hooks  # noqa pylint: disable=E,W,C

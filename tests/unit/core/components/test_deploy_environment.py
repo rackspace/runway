@@ -225,7 +225,10 @@ class TestDeployEnvironment(object):
         monkeypatch.setattr(DeployEnvironment, 'branch_name', branch)
         obj = DeployEnvironment(environ=environ)
         assert obj.name == expected
-        assert obj.name_derived_from == 'branch'
+        if expected == 'user_value':
+            assert obj.name_derived_from == 'explicit'
+        else:
+            assert obj.name_derived_from == 'branch'
 
         if obj.ci:
             mock_prompt.assert_not_called()
