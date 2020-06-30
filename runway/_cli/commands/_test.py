@@ -76,7 +76,7 @@ def test(ctx, **_):
             if not isinstance(err, SystemExit):
                 traceback.print_exc()
             elif err.code == 0:
-                    continue  # tests with zero exit code don't indicate failure
+                continue  # tests with zero exit code don't indicate failure
             LOGGER.error('Test failed: %s', tst.name)
             if tst.required:
                 LOGGER.error('Failed test was required, the remaining '
