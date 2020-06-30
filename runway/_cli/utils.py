@@ -8,7 +8,8 @@ import click
 import yaml
 from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
-from ..config import Config, DeploymentDefinition, ModuleDefinition
+from ..config import (Config, DeploymentDefinition,  # noqa pylint: disable=W
+                      ModuleDefinition)
 from ..context import Context as RunwayContext
 from ..core.components import DeployEnvironment
 from ..util import cached_property
@@ -189,7 +190,8 @@ class CliContext(MutableMapping):
 def select_deployments(ctx,  # type: click.Context
                        deployments,  # type: List[DeploymentDefinition]
                        tags=None  # type: Optional[Tuple[str, ...]]
-                       ):
+                       # TODO remove after dropping python 2
+                       ):  # pylint: disable=bad-continuation
     # type: (click.Context, List[DeploymentDefinition]) -> List[DeploymentDefinition]
     """Select which deployments to run.
 
@@ -275,7 +277,8 @@ def select_modules(ctx, modules):
 def select_modules_using_tags(ctx,  # type: click.Context
                               deployments,  # type: List[DeploymentDefinition]
                               tags  # type: Tuple[str, ...]
-                              ):
+                              # TODO remove after dropping python 2
+                              ):  # pylint: disable=bad-continuation
     # type: (...) -> List[DeploymentDefinition]
     """Select modules to run using tags.
 

@@ -193,7 +193,8 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                             bucket,  # type: s3.Bucket
                                             oai,  # type: cloudfront.CloudFrontOriginAccessIdentity # noqa pylint: disable=line-too-long
                                             lambda_function_associations # type: List[cloudfront.LambdaFunctionAssociation] # noqa pylint: disable=line-too-long
-                                            ):
+                                            # TODO remove after dropping python 2
+                                            ):  # pylint: disable=bad-continuation
         # type: (...) -> Dict[str, Any]
         """Retrieve the options for our CloudFront distribution.
 

@@ -28,14 +28,15 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 class DeployEnvironment(object):
     """Runway deploy environment."""
 
-    def __init__(self,
-                 *_,  # type: Any
-                 environ=None,  # type: Optional[Dict[str, str]]
-                 explicit_name=None,  # type: Optional[str]
-                 ignore_git_branch=False,  # type: bool
-                 root_dir=None  # type: Optional[Path]
-                 ):
-        # type: (...) -> None
+    # TODO implement propper keyword-only args when dropping python 2
+    # def __init__(self,
+    #              *: Any,
+    #              environ: Optional[Dict[str, str]] = None,
+    #              explicit_name: Optional[str] = None,
+    #              ignore_git_branch: bool = False,
+    #              root_dir: Optional[Path] = None
+    #              ) -> None:
+    def __init__(self, _=None, **kwargs):
         """Instantiate class.
 
         Keyword Args:
@@ -47,11 +48,12 @@ class DeployEnvironment(object):
             root_dir (Optional[Path]): Root directory of the project.
 
         """
-        self.__name = explicit_name
-        self._ignore_git_branch = ignore_git_branch
-        self.name_derived_from = 'explicit' if explicit_name else None
+        self.__name = kwargs.pop('explicit_name', None)
+        self._ignore_git_branch = kwargs.pop('ignore_git_branch', False)
+        self.name_derived_from = 'explicit' if self.__name else None
+        root_dir = kwargs.pop('root_dir', None)
         self.root_dir = root_dir if root_dir else Path.cwd()
-        self.vars = environ or os.environ.copy()
+        self.vars = kwargs.pop('environ', os.environ.copy())
 
     @property
     def aws_credentials(self):

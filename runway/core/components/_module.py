@@ -21,8 +21,8 @@ else:
     from pathlib2 import Path  # pylint: disable=E
 
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition, ModuleDefinition  # noqa
-    from ...context import Context  # noqa
+    from ...config import DeploymentDefinition, ModuleDefinition  # pylint: disable=W
+    from ...context import Context  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
@@ -36,7 +36,8 @@ class Module(object):
                  deployment=None,  # type: Optional[DeploymentDefinition]
                  future=None,  # type: Optional[FutureDefinition]
                  variables=None,  # type: Optional[VariablesDefinition]
-                 ):
+                 # TODO remove after dropping python 2
+                 ):  # pylint: disable=bad-continuation
         # type: (...) -> None
         """Instantiate class.
 
@@ -268,7 +269,8 @@ class Module(object):
                  variables,  # type: VariablesDefinition
                  deployment=None,  # type: Optional[DeploymentDefinition]
                  future=None  # type: Optional[FutureDefinition]
-                 ):
+                 # TODO remove after dropping python 2
+                 ):  # pylint: disable=bad-continuation
         # type: (...) -> None
         """Run a list of modules.
 

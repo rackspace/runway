@@ -17,8 +17,8 @@ if sys.version_info.major > 2:
     import concurrent.futures
 
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition  # noqa
-    from ...context import Context  # noqa
+    from ...config import DeploymentDefinition  # pylint: disable=W
+    from ...context import Context  # pylint: disable=W
 
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
@@ -32,7 +32,8 @@ class Deployment(object):
                  definition,  # type: DeploymentDefinition
                  future=None,  # type: Optional[FutureDefinition]
                  variables=None,  # type: VariablesDefinition
-                 ):
+                 # TODO remove after dropping python 2
+                 ):  # pylint: disable=bad-continuation
         # type: (...) -> None
         """Instantiate class.
 
@@ -107,23 +108,19 @@ class Deployment(object):
             if assume_role.get('arn'):
                 LOGGER.debug('role found in the top level dict: %s',
                              assume_role['arn'])
-                return {
-                    'role_arn': assume_role['arn'],
-                    'duration_seconds': assume_role.get('duration'),
-                    **top_level
-                }
+                return dict(role_arn=assume_role['arn'],
+                            duration_seconds=assume_role.get('duration'),
+                            **top_level)
             if assume_role.get(self.ctx.env.name):
                 env_assume_role = assume_role[self.ctx.env.name]
                 if isinstance(env_assume_role, dict):
                     LOGGER.debug('role found in deploy environment dict: %s',
                                  env_assume_role['arn'])
-                    return {
-                        'role_arn': env_assume_role['arn'],
-                        'duration_seconds': env_assume_role.get('duration'),
-                        **top_level
-                    }
+                    return dict(role_arn=env_assume_role['arn'],
+                                duration_seconds=env_assume_role.get('duration'),
+                                **top_level)
                 LOGGER.debug('role found for environment: %s', env_assume_role)
-                return {'role_arn': env_assume_role, **top_level}
+                return dict(role_arn=env_assume_role, **top_level)
             LOGGER.info('Skipping iam:AssumeRole; no role found for deploy '
                         'environment "%s"...', self.ctx.env.name)
             return {}
@@ -305,7 +302,8 @@ class Deployment(object):
                  deployments,  # type: List[DeploymentDefinition]
                  future,  # type: FutureDefinition
                  variables  # type: VariablesDefinition
-                 ):
+                 # TODO remove after dropping python 2
+                 ):  # pylint: disable=bad-continuation
         # type: (...) -> None
         """Run a list of deployments.
 

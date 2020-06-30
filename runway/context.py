@@ -15,11 +15,23 @@ LOGGER = logging.getLogger('runway')
 class Context(object):
     """Runway execution context."""
 
-    def __init__(self, *_, command=None, deploy_environment=None):
-        # type: (DeployEnvironment) -> None
-        """Instantiate class."""
-        self.command = command
-        self.env = deploy_environment or DeployEnvironment()
+    # TODO implement propper keyword-only args when dropping python 2
+    # def __init__(self,
+    #              *: Any,
+    #              command: Optional[str] = None,
+    #              deploy_environment: Optional[DeployEnvironment] = None
+    #              ) -> None:
+    def __init__(self, _=None, **kwargs):
+        """Instantiate class.
+
+        Keywork Arguments:
+            command (Optional[str]): Runway command/action being run.
+            deploy_environment (Optional[DeployEnvironment]): Current
+                deploy environment.
+
+        """
+        self.command = kwargs.pop('command', None)
+        self.env = kwargs.pop('deploy_environment', DeployEnvironment())
         self.debug = self.env.debug
         # TODO remove after IaC tools support AWS SSO
         self.__inject_profile_credentials()
