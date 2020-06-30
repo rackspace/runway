@@ -215,6 +215,38 @@ This command allows access to these values for use outside of Runway.
 ----
 
 
+.. _command-docs:
+
+****
+docs
+****
+
+.. file://./../../runway/_cli/commands/_docs.py
+
+Open the Runway documentation web site using the default web browser.
+
+
+.. rubric:: Usage
+.. code-block:: text
+
+  $ runway docs [OPTIONS]
+
+
+.. rubric:: Options
+.. code-block:: text
+
+  --debug                         Supply once to display Runway debug logs.
+                                  Supply twice to display all debug logs.
+
+
+.. rubric:: Example
+.. code-block:: shell
+
+  $ runway docs
+
+----
+
+
 .. _command-gen-sample:
 
 **********

@@ -2,6 +2,7 @@
 from ._deploy import deploy
 from ._destroy import destroy
 from ._dismantle import dismantle
+from ._docs import docs
 from ._envvars import envvars
 from ._gen_sample import gen_sample
 from ._init import init
@@ -21,6 +22,7 @@ __all__ = [
     'deploy',
     'destroy',
     'dismantle',
+    'docs',
     'envvars',
     'gen_sample',
     'init',

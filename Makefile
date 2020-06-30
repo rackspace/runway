@@ -46,13 +46,16 @@ lint_two:
 	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 test:
-	pipenv run pytest --cov=runway --cov-report term:skip-covered --integration
+	@echo "Running integration & unit tests..."
+	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration
 
 test-integration:
-	pipenv run pytest --cov=runway --cov-report term:skip-covered --integration-only
+	@echo "Running integration tests..."
+	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration-only
 
 test-unit:
-	pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing
+	@echo "Running unit tests..."
+	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing
 
 test_shim:
 	bash ./.github/scripts/cicd/test_shim.sh

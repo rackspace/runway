@@ -13,7 +13,7 @@ from .. import options
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
-@click.command('envvars')
+@click.command('envvars', short_help='exportable env_vars')
 @options.debug
 @options.deploy_environment
 @click.pass_context
