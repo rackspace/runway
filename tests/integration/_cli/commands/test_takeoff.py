@@ -8,8 +8,9 @@ from runway._cli import cli
 from runway._cli.commands import deploy
 
 
-def test_takeoff(caplog, monkeypatch):
+def test_takeoff(caplog, cd_tmp_path, cp_config, monkeypatch):
     """Test takeoff."""
+    cp_config('min_required', cd_tmp_path)
     caplog.set_level(logging.DEBUG, logger='runway.cli.commands.takeoff')
     mock_forward = MagicMock()
     monkeypatch.setattr('click.Context.forward', mock_forward)
