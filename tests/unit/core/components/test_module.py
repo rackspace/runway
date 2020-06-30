@@ -64,7 +64,7 @@ class TestModule(object):
 
         assert mod.path == 'module-path'
         mock_path.assert_called_once_with(mod.definition,
-                                          runway_context.env.root_dir,
+                                          str(runway_context.env.root_dir),
                                           str(runway_context.env.root_dir /
                                               '.runway_cache'))
 

@@ -1,6 +1,8 @@
 """Test ``runway envvars``."""
 import logging
+import sys
 
+import pytest
 from click.testing import CliRunner
 
 from mock import MagicMock
@@ -15,6 +17,8 @@ PSH_OUTPUT = ('$env:TEST_VAR_01 = "deployment_1"\n'
               '$env:TEST_VAR_02 = "deployment_2"\n')
 
 
+@pytest.mark.skipif(sys.version_info.major < 3,
+                    reason='python 2 dicts are not ordered')
 def test_envvars(cd_tmp_path, cp_config, monkeypatch):
     """Test envvars."""
     monkeypatch.setattr('platform.system', MagicMock(return_value='Darwin'))
@@ -25,6 +29,8 @@ def test_envvars(cd_tmp_path, cp_config, monkeypatch):
     assert result.output == POSIX_OUTPUT
 
 
+@pytest.mark.skipif(sys.version_info.major < 3,
+                    reason='python 2 dicts are not ordered')
 def test_envvar_windows(cd_tmp_path, cp_config, monkeypatch):
     """Test envvars for Windows."""
     monkeypatch.setattr('platform.system', MagicMock(return_value='Windows'))

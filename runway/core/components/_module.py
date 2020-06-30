@@ -74,7 +74,7 @@ class Module(object):
     def path(self):  # lazy load the path
         # type: () -> ModulePath
         """Return resolve module path."""
-        return ModulePath(self.definition, self.ctx.env.root_dir,
+        return ModulePath(self.definition, str(self.ctx.env.root_dir),
                           str(self.ctx.env.root_dir / '.runway_cache'))
 
     @cached_property
