@@ -146,6 +146,29 @@ class DeployEnvironment(object):
             self.vars.pop('DEBUG', None)
 
     @property
+    def ignore_git_branch(self):
+        # type: () -> bool
+        """Whether to ignore git branch when determining name."""
+        return self._ignore_git_branch
+
+    @ignore_git_branch.setter
+    def ignore_git_branch(self, value):
+        # type: (bool) -> None
+        """Set the value of ignore_git_branch.
+
+        Cached name is deleted when changing this value.
+
+        """
+        if self._ignore_git_branch != value:
+            self._ignore_git_branch = value
+            try:
+                del self.name
+                LOGGER.debug('value of ignore_git_branch has changed; '
+                             'cleared cached name so it can be determined again')
+            except AttributeError:
+                pass  # it's fine if it does not exist yes
+
+    @property
     def max_concurrent_cfngin_stacks(self):
         # type: () -> int
         """Max number of CFNgin stacks that can be deployed concurrently.
@@ -236,7 +259,7 @@ class DeployEnvironment(object):
         """Deploy environment name."""
         if self.__name:
             name = self.__name
-        elif not self._ignore_git_branch and self.branch_name:
+        elif not self.ignore_git_branch and self.branch_name:
             self.name_derived_from = self.name_derived_from or 'branch'
             name = self._parse_branch_name()
         else:

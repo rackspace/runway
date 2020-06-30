@@ -39,7 +39,6 @@ class CliContext(MutableMapping):
         """Name of the current deploy environment."""
         return DeployEnvironment(
             explicit_name=self._deploy_environment,
-            ignore_git_branch=self.runway_config.ignore_git_branch,
             root_dir=self.root_dir
         )
 
@@ -47,7 +46,9 @@ class CliContext(MutableMapping):
     def runway_config(self):
         # type: () -> Config
         """Runway config."""
-        return Config.load_from_file(self.runway_config_path)
+        config = Config.load_from_file(self.runway_config_path)
+        self.env.ignore_git_branch = config.ignore_git_branch
+        return config
 
     @cached_property
     def runway_config_path(self):

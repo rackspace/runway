@@ -61,17 +61,6 @@ def aws_credentials():
     saved_env.clear()
 
 
-@pytest.fixture(scope='session', autouse=True)
-def sanitize_environment():
-    # type: () -> None
-    """Remove variables from the environment that could interfere with tests."""
-    env_vars = ['CI', 'DEBUG', 'DEPLOY_ENVIRONMENT', 'CFNGIN_STACK_POLL_TIME',
-                'RUNWAY_MAX_CONCURRENT_MODULES',
-                'RUNWAY_MAX_CONCURRENT_REGIONS']
-    for var in env_vars:
-        os.environ.pop(var, None)
-
-
 @pytest.fixture(scope='package')
 def fixture_dir():
     # type: () -> str

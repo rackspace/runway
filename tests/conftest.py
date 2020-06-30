@@ -38,3 +38,14 @@ def cd_tmp_path(tmp_path):
 def root_dir():
     """Return a path object to the root directory."""
     return Path(__file__).parent.parent
+
+
+@pytest.fixture(scope='session', autouse=True)
+def sanitize_environment():
+    # type: () -> None
+    """Remove variables from the environment that could interfere with tests."""
+    env_vars = ['CI', 'DEBUG', 'DEPLOY_ENVIRONMENT', 'CFNGIN_STACK_POLL_TIME',
+                'RUNWAY_MAX_CONCURRENT_MODULES',
+                'RUNWAY_MAX_CONCURRENT_REGIONS']
+    for var in env_vars:
+        os.environ.pop(var, None)
