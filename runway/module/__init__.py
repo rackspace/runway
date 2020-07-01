@@ -1,5 +1,4 @@
 """Runway module module."""
-from distutils.version import LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
 import logging
 import os
 import platform
@@ -25,10 +24,8 @@ def format_npm_command_for_logging(command):
     if platform.system().lower() == 'windows':
         if command[0] == 'npx.cmd' and command[1] == '-c':
             return "npx.cmd -c \"%s\"" % " ".join(command[2:])
-        return " ".join(command)
-    # Strip out redundant npx quotes not needed when executing the command
-    # directly
-    return " ".join(command).replace('\'\'', '\'')
+        return ' '.join(command)
+    return ' '.join(command)
 
 
 def generate_node_command(command, command_opts, path):
@@ -36,25 +33,9 @@ def generate_node_command(command, command_opts, path):
     if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
         LOGGER.debug("Using npx to invoke %s.", command)
-        if platform.system().lower() == 'windows':
-            cmd_list = [NPX_BIN,
-                        '-c',
-                        "%s %s" % (command, ' '.join(command_opts))]
-        # Python 3.8+ removes the silly need for redundant quoting
-        # https://docs.python.org/3/whatsnew/3.8.html#optimizations
-        elif platform.libc_ver()[1] and (
-                LooseVersion(platform.libc_ver()[1]) >= LooseVersion('2.24')) and (
-                    LooseVersion('.'.join([str(i) for i in sys.version_info[0:2]])) >=
-                    LooseVersion('3.8')):
-            cmd_list = [NPX_BIN,
-                        '-c',
-                        "'%s %s'" % (command, ' '.join(command_opts))]
-        else:
-            # The nested app-through-npx-via-subprocess command invocation
-            # requires this redundant quoting
-            cmd_list = [NPX_BIN,
-                        '-c',
-                        "''%s %s''" % (command, ' '.join(command_opts))]
+        cmd_list = [NPX_BIN,
+                    '-c',
+                    "%s %s" % (command, ' '.join(command_opts))]
     else:
         LOGGER.debug('npx not found; falling back invoking %s shell script '
                      'directly.', command)
