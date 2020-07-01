@@ -12,11 +12,12 @@ your user will be able to install additional Python packages via
 
 1. Ensure you have a working python environment:
     - On macOS:
+        - Note: Substitute ``.bash_profile`` in place of ``.zsh`` below if using Bash (e.g. macOS pre-Catalina)
         - Add local python bin directories to $PATH::
 
-            if ! grep '\.local\/bin' ~/.bash_profile > /dev/null 2>&1 || ! grep 'Library\/Python\/2\.7\/bin' ~/.bash_profile > /dev/null 2>&1 ; then echo 'export PATH="$HOME/Library/Python/2.7/bin:$HOME/.local/bin:$PATH"' >> ~/.bash_profile; fi
+            if ! grep '\.local\/bin' ~/.zsh > /dev/null 2>&1 || ! grep 'Library\/Python\/2\.7\/bin' ~/.zsh > /dev/null 2>&1 ; then echo 'export PATH="$HOME/Library/Python/2.7/bin:$HOME/.local/bin:$PATH"' >> ~/.zsh; fi
 
-        - Run ``source ~/.bash_profile`` to use the updated PATH.
+        - Run ``source ~/.zsh`` to use the updated PATH.
         - Install pip::
 
             if [ ! -e ~/Library/Python/2.7/bin/pip ]; then easy_install --user pip; fi
