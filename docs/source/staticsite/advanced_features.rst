@@ -50,3 +50,41 @@ An example of an *Auth@Edge* static site configuration is as follows:
 
 The *Auth@Edge* functionality uses an existing Cognito User Pool (optionally configured with federated identity providers) or can create one for you with the :ref:`staticsite_create_user_pool <staticsite_create_user_pool>` option.
 A user pool app client will be automatically created within the pool for use with the application.
+
+.. _static-extra-files:
+
+***********
+Extra Files
+***********
+The extra files option allows you to use a single build across many deployments. Some popular front end frameworks
+guide you into including environment specfic parameters as part of the build. i.e. Angular and Redux-React. This forces
+you to abandon `12 factor priciples <https://en.wikipedia.org/wiki/Twelve-Factor_App_methodology>`_ and slows down
+deployments to other environments.
+
+The static site ``extra_files`` option solves this problem by moving environment configuration out of your code and
+into runway. A small change to the way the application references environment config will need to be made.
+
+#. While bootstraping or early in the application lifecycle, make an HTTP call to load one of the ``extra_files``.
+
+#. Make the content of the ``extra_file`` available to your app using an appropriate abstraction.
+
+See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in Angular and React.
+
+.. rubric:: Configuration (``extra_files`` list item)
+
+**name (str)**
+    The destination name of the file to create.
+
+**file (Optional[str])**
+    A reference to an existing file. The content of this file will be uploaded to the static site S3 bucket using the
+    name as the object key. This or ``content`` must be specified.
+
+**content_type (Optional[str])**
+    An explicit content type of the file. If not given, the content type will be auto detected based on the name. Only 
+    ``.json``, ``.yml``, and ``.yaml`` extentions are recognized automatically.
+
+    * ``application/json`` to serialize ``content`` into JSON.
+    * ``text/yaml`` to serialize ``content`` into YAML.
+
+**content (Optional[Union[str,List[Any],Dict[str, Any]]])**
+    Inline content that will be used as the file content. This or ``file`` must be specified.

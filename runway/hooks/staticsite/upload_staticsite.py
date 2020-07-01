@@ -2,7 +2,11 @@
 # TODO move to runway.cfngin.hooks on next major release
 import logging
 import time
+import os
+import json
 from operator import itemgetter
+
+import yaml
 
 from ...cfngin.lookups.handlers.output import OutputLookup
 from ...cfngin.session_cache import get_session
@@ -200,4 +204,97 @@ def prune_archives(context, session):
             Bucket=context.hook_data['staticsite']['artifact_bucket_name'],
             Delete={'Objects': [{'Key': i} for i in objects]}
         )
+    return True
+
+
+def auto_detect_content_type(filename):
+    """Auto detects the content type based on the filename."""
+    _, ext = os.path.splitext(filename)
+
+    if ext == '.json':
+        return 'application/json'
+
+    if ext in ['.yml', '.yaml']:
+        return 'text/yaml'
+
+    return None
+
+
+def sync_extra_files(context, provider, bucket, **kwargs):
+    """Sync static website extra files to S3 bucket.
+
+    Keyword Args:
+
+        context (:class:`runway.cfngin.context.Context`): The context
+            instance.
+        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+            The provider instance.
+        bucket (str): The static site bucket name.
+        files (List[Dict[str, str]]): List of files and file content that
+            should be uploaded.
+
+    """
+    files = kwargs.get('files', [])
+
+    LOGGER.debug('bucket: %s', bucket)
+    LOGGER.debug('files: %s', json.dumps(files))
+
+    session = context.get_session()
+    s3_client = session.client('s3')
+    uploaded = 0
+
+    for extra_file in files:
+        filename = extra_file.get('name')
+        content_type = extra_file.get('content_type', auto_detect_content_type(filename))
+
+        LOGGER.debug('name: %s, content_type: %s', filename, content_type)
+
+        if extra_file.get('content'):
+            content = extra_file['content']
+
+            if isinstance(content, (dict, list)):
+                if content_type == 'application/json':
+                    content = json.dumps(content)
+                elif content_type == 'text/yaml':
+                    content = yaml.safe_dump(content)
+                else:
+                    raise ValueError(
+                        '"content_type" must be json or yaml if "content" is not a string')
+
+            if not isinstance(content, str):
+                raise TypeError('unsupported content: %s' % type(content))
+
+            if content:
+                LOGGER.info('Uploading extra file: %s', filename)
+
+                s3_client.put_object(
+                    Bucket=bucket,
+                    Key=filename,
+                    Body=content,
+                    ContentType=content_type
+                )
+
+                uploaded += 1
+
+        elif extra_file.get('file'):
+            source_file = extra_file['file']
+
+            LOGGER.info('Uploading extra file %s as %s ', source_file, filename)
+
+            content_type = extra_file.get('content_type', auto_detect_content_type(filename))
+
+            extra_args = None
+
+            if content_type:
+                extra_args = {'ContentType': content_type}
+
+            s3_client.upload_file(source_file, bucket, filename, ExtraArgs=extra_args)
+
+            uploaded += 1
+
+    if not kwargs.get('cf_disabled', False) and uploaded > 0:
+        # For now, always invalidate when a file has been uploaded
+        distribution = get_distribution_data(context, provider, **kwargs)
+        invalidate_distribution(session, **distribution)
+
     return True

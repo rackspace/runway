@@ -214,13 +214,16 @@ class StaticSite(RunwayModule):
                            'distributionid_output_lookup': '%s::CFDistributionId' % (self.name),
                            'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % self.name}}]  # noqa pylint: disable=line-too-long
 
-        if self.user_options.get('environment_files'):
+        if self.user_options.get('extra_files'):
             post_build.append({
-                'path': 'runway.hooks.staticsite.upload_staticsite_env.sync',
+                'path': 'runway.hooks.staticsite.upload_staticsite.sync_extra_files',
                 'required': True,
                 'args': {
                     'bucket': '${output %s::BucketName}' % self.name,
-                    'files': self.user_options.get('environment_files')
+                    'files': self.user_options.get('extra_files'),
+                    'cf_disabled': site_stack_variables['DisableCloudFront'],
+                    'distributionid_output_lookup': '%s::CFDistributionId' % (self.name),
+                    'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % self.name
                 }
             })
 
