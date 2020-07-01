@@ -158,6 +158,27 @@ class TestDeployEnvironment(object):
         assert not obj.debug
         assert 'DEBUG' not in obj.vars
 
+    def test_ignore_git_branch(self):
+        """Test ignore_git_branch."""
+        obj = DeployEnvironment(environ={}, explicit_name='first')
+
+        assert not obj.ignore_git_branch
+        assert obj.name == 'first'
+
+        obj._DeployEnvironment__name = 'second'
+        obj.ignore_git_branch = False
+        assert obj.name == 'first'
+        assert not obj.ignore_git_branch
+
+        obj.ignore_git_branch = True
+        assert obj.name == 'second'
+        assert obj.ignore_git_branch
+
+        # delete attr before setting new val to force AttributeError
+        del obj.name
+        obj.ignore_git_branch = False
+        assert obj.name == 'second'
+
     def test_max_concurrent_cfngin_stacks(self):
         """Test max_concurrent_cfngin_stacks."""
         obj = DeployEnvironment(environ={})

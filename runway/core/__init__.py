@@ -142,7 +142,7 @@ class Runway(object):
 
         LOGGER.info('Found %i test(s)', len(self.tests))
         for tst in self.tests:
-            tst.resolve(self.ctx, self.variables)
+            tst.resolve(self.ctx, variables=self.variables)
             LOGGER.info("")
             LOGGER.info("")
             LOGGER.info("======= Running test '%s' ===========================",
@@ -150,8 +150,8 @@ class Runway(object):
             try:
                 handler = _TEST_HANDLERS[tst.type]
             except KeyError:
-                LOGGER.error('Unable to find handler for test %s of '
-                             'type %s', tst.name, tst.type)
+                LOGGER.error('Unable to find handler for test "%s" of '
+                             'type "%s"', tst.name, tst.type)
                 if tst.required:
                     _sys.exit(1)
                 failed_tests.append(tst.name)

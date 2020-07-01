@@ -58,7 +58,7 @@ def test_test_invalid_type(cd_tmp_path, capfd, caplog):
     logs = '\n'.join(caplog.messages)
     assert 'Found 2 test(s)' in logs
     assert "Running test 'invalid-type'" in logs
-    assert 'Unable to find handler for test invalid-type of type invalid' in logs
+    assert 'Unable to find handler for test "invalid-type" of type "invalid"' in logs
     assert "Running test 'success'" in logs
     assert 'Hello world' in captured.out
     assert 'The following tests failed: invalid-type' in logs
@@ -80,7 +80,7 @@ def test_test_invalid_type_required(cd_tmp_path, capfd, caplog):
     logs = '\n'.join(caplog.messages)
     assert 'Found 2 test(s)' in logs
     assert "Running test 'invalid-type-required'" in logs
-    assert 'Unable to find handler for test invalid-type-required of type invalid' in logs
+    assert 'Unable to find handler for test "invalid-type-required" of type "invalid"' in logs
     assert "Running test 'success'" not in logs
     assert 'Hello world' not in captured.out
 
