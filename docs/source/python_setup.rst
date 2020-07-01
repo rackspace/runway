@@ -3,24 +3,20 @@
 Python Setup
 ============
 
-Perform the following to install/configure Python & pipenv. Afterwards,
-your user will be able to install additional Python packages via
-``pip install --user``
+Perform the following to install/configure Python & package management tools.
 
 .. note:: All commands below are to be run as your user.
           (i.e. not root/sudo/Administrator).
 
 1. Ensure you have a working python environment:
     - On macOS:
-        - Note: Substitute ``.bash_profile`` in place of ``.zsh`` below if using Bash (e.g. macOS pre-Catalina)
+        - Note: Substitute ``.bash_profile`` in place of ``.zshrc`` below if using Bash (e.g. macOS pre-Catalina)
         - Add local python bin directories to $PATH::
 
-            if ! grep '\.local\/bin' ~/.zsh > /dev/null 2>&1 || ! grep 'Library\/Python\/2\.7\/bin' ~/.zsh > /dev/null 2>&1 ; then echo 'export PATH="$HOME/Library/Python/2.7/bin:$HOME/.local/bin:$PATH"' >> ~/.zsh; fi
+            PYTHONVER=$(python3 -c "import sys;print(str(sys.version_info.major)+'.'+str(sys.version_info.minor))")
+            if ! grep -s '\.local\/bin' ~/.zshrc > /dev/null 2>&1 || ! grep -s "Library\/Python\/$PYTHONVER/bin" ~/.zshrc > /dev/null 2>&1 ; then echo "export PATH=\"\$HOME/Library/Python/$PYTHONVER/bin:\$HOME/.local/bin:\$PATH\"" >> ~/.zshrc; fi
 
-        - Run ``source ~/.zsh`` to use the updated PATH.
-        - Install pip::
-
-            if [ ! -e ~/Library/Python/2.7/bin/pip ]; then easy_install --user pip; fi
+        - Run ``source ~/.zshrc`` to use the updated PATH.
 
     - On Windows:
         - Install `Python <https://www.python.org/>`_ (choose the latest ``Windows x86-64 executable installer`` and run it):
@@ -52,11 +48,34 @@ your user will be able to install additional Python packages via
 
             sudo apt -y install python3-pip
 
-2. Install `pipenv <https://pipenv.readthedocs.io/en/latest/>`_:
-    - On macOS / Windows::
+2. Install python package managers::
 
-        pip install --user pipenv
+        pip3 install --user pipenv pipx
 
-    - On Ubuntu Linux::
+Package Installation
+--------------------
 
-        pip3 install --user pipenv
+Afterwards, your user will be able to install additional Python packages using
+one of the following tools. Each wraps the base pip package manager and
+automatically manages virtual environments to ensure package dependencies don't
+conflict.
+
+pipx
+~~~~
+
+Global CLIs & utilities, like the AWS CLI, can be installed via
+`pipx <https://github.com/pipxproject/pipx>`_::
+
+        pipx install awscli
+
+pipenv
+~~~~~~
+
+Utilities used in a project should generally have their versions stored in the
+project repository, so users (now and in the future) and remote build systems
+use the same versions specified in the repo.
+
+`pipenv <https://github.com/pipxproject/pipx>`_ works similarly to pipx, but
+creates a lockfile that can be checked into a repo::
+
+        pipenv install runway
