@@ -12,6 +12,8 @@ else:
 
 def pytest_addoption(parser):
     """Add pytest CLI options."""
+    parser.addoption('--functional', action='store_true', default=False,
+                     help='run only functional tests')
     parser.addoption('--integration', action='store_true', default=False,
                      help='include integration tests in regular testing')
     parser.addoption('--integration-only', action='store_true', default=False,

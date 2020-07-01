@@ -25,7 +25,8 @@ TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
 
 def pytest_ignore_collect(path, config):  # pylint: disable=unused-argument
     """Determine if this directory should have its tests collected."""
-    # return config.getoption('integration-only', False)
+    if config.option.functional:
+        return True
     return config.option.integration_only
 
 

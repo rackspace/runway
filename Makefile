@@ -49,6 +49,10 @@ test:
 	@echo "Running integration & unit tests..."
 	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration
 
+test-functional:
+	@echo "Running functional tests..."
+	@pipenv run pytest --functional --no-cov
+
 test-integration:
 	@echo "Running integration tests..."
 	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration-only
