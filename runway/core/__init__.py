@@ -7,7 +7,7 @@ from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
 
 from ..context import Context
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
-from . import components
+from . import components, providers
 
 if TYPE_CHECKING:
     from ..config import Config, DeploymentDefinition
@@ -15,8 +15,9 @@ if TYPE_CHECKING:
 LOGGER = _logging.getLogger(__name__)
 
 __all__ = [
+    'Runway',
     'components',
-    'Runway'
+    'providers'
 ]
 
 
@@ -77,7 +78,15 @@ class Runway(object):
 
     def get_env_vars(self, deployments=None):
         # type: (Optional[List[DeploymentDefinition]]) -> Dict[str, Any]
-        """Get env_vars defined in the config."""
+        """Get env_vars defined in the config.
+
+        Args:
+            deployments: List of deployments to get env_vars from.
+
+        Returns:
+            Resolved env_vars from the deployments.
+
+        """
         deployments = deployments or self.deployments
         result = {}
         for deployment in deployments:
