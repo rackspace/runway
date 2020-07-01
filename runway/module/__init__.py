@@ -21,10 +21,9 @@ NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
 
 def format_npm_command_for_logging(command):
     """Convert npm command list to string for display to user."""
-    if platform.system().lower() == 'windows':
-        if command[0] == 'npx.cmd' and command[1] == '-c':
-            return "npx.cmd -c \"%s\"" % " ".join(command[2:])
-        return ' '.join(command)
+    if platform.system().lower() == 'windows' and (
+            command[0] == 'npx.cmd' and command[1] == '-c'):
+        return "npx.cmd -c \"%s\"" % " ".join(command[2:])
     return ' '.join(command)
 
 
