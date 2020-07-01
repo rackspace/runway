@@ -1,4 +1,6 @@
 """Core Runway API."""
+from __future__ import print_function  # TODO remove when dripping python 2
+
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
