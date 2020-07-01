@@ -44,7 +44,7 @@ INVALID_TYPE_REQUIRED = {
 
 def test_test_invalid_type(cd_tmp_path, capfd, caplog):
     """Test ``runway test`` with two tests; one invalid."""
-    caplog.set_level(logging.INFO, logger='runway.cli.commands.test')
+    caplog.set_level(logging.INFO, logger='runway.core')
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
                                                 'tests': [INVALID_TYPE.copy(),
@@ -66,7 +66,7 @@ def test_test_invalid_type(cd_tmp_path, capfd, caplog):
 
 def test_test_invalid_type_required(cd_tmp_path, capfd, caplog):
     """Test ``runway test`` with two tests; one invalid required."""
-    caplog.set_level(logging.INFO, logger='runway.cli.commands.test')
+    caplog.set_level(logging.INFO, logger='runway.core')
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
                                                 'tests': [INVALID_TYPE_REQUIRED.copy(),
@@ -99,7 +99,7 @@ def test_test_not_defined(cd_tmp_path, caplog):
 
 def test_test_single_successful(cd_tmp_path, capfd, caplog):
     """Test ``runway test`` with a single, successful test."""
-    caplog.set_level(logging.INFO, logger='runway.cli.commands.test')
+    caplog.set_level(logging.INFO, logger='runway.core')
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
                                                 'tests': [SUCCESS.copy()]})))
@@ -117,7 +117,7 @@ def test_test_single_successful(cd_tmp_path, capfd, caplog):
 
 def test_test_two_test(cd_tmp_path, capfd, caplog):
     """Test ``runway test`` with two tests; one failing."""
-    caplog.set_level(logging.INFO, logger='runway.cli.commands.test')
+    caplog.set_level(logging.INFO, logger='runway.core')
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
                                                 'tests': [FAIL.copy(),
@@ -139,7 +139,7 @@ def test_test_two_test(cd_tmp_path, capfd, caplog):
 
 def test_test_two_test_required(cd_tmp_path, capfd, caplog):
     """Test ``runway test`` with two tests; one failing required."""
-    caplog.set_level(logging.INFO, logger='runway.cli.commands.test')
+    caplog.set_level(logging.INFO, logger='runway.core')
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
                                                 'tests': [FAIL_REQUIRED.copy(),

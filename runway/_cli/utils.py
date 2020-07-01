@@ -61,17 +61,6 @@ class CliContext(MutableMapping):
             self.root_dir = self.root_dir.parent
             return Config.find_config_file(config_dir=self.root_dir)
 
-    def get(self, key, default=None):
-        # type: (str, Any) -> Any
-        """Implement evaluation of self.get.
-
-        Args:
-            key: Attribute name to return the value for.
-            default: Value to return if attribute is not found.
-
-        """
-        return getattr(self, key, default)
-
     def get_runway_context(self, deploy_environment=None):
         # type: (Optional[DeployEnvironment]) -> RunwayContext
         """Get a Runway context object.
@@ -85,13 +74,6 @@ class CliContext(MutableMapping):
 
         """
         return RunwayContext(deploy_environment=deploy_environment or self.env)
-
-    def __bool__(self):
-        # type: () -> bool
-        """Implement evaluation of instances as a bool."""
-        return bool(self.__dict__)
-
-    __nonzero__ = __bool__  # python2 compatability
 
     def __getitem__(self, key):
         # type: (str) -> Any
@@ -114,7 +96,8 @@ class CliContext(MutableMapping):
                 # value
 
         """
-        return getattr(self, key)
+        # ignore coverage for standard implimentation
+        return getattr(self, key)  # cov: ignore
 
     def __setitem__(self, key, value):
         # type: (str, Any) -> None
@@ -133,7 +116,8 @@ class CliContext(MutableMapping):
                 # value
 
         """
-        setattr(self, key, value)
+        # ignore coverage for standard implimentation
+        setattr(self, key, value)  # cov: ignore
 
     def __delitem__(self, key):
         # type: (str) -> None
@@ -151,7 +135,8 @@ class CliContext(MutableMapping):
                 # {}
 
         """
-        delattr(self, key)
+        # ignore coverage for standard implimentation
+        delattr(self, key)  # cov: ignore
 
     def __len__(self):
         # type: () -> int
@@ -165,7 +150,8 @@ class CliContext(MutableMapping):
                 # 1
 
         """
-        return len(self.__dict__)
+        # ignore coverage for standard implimentation
+        return len(self.__dict__)  # cov: ignore
 
     def __iter__(self):
         # type: () -> Iterator[Any]
@@ -180,12 +166,14 @@ class CliContext(MutableMapping):
                 # key: value
 
         """
-        return iter(self.__dict__)
+        # ignore coverage for standard implimentation
+        return iter(self.__dict__)  # cov: ignore
 
     def __str__(self):
         # type: () -> str
         """Return string representation of the object."""
-        return 'CliContext({})'.format(self.__dict__)
+        # ignore coverage for standard implimentation
+        return 'CliContext({})'.format(self.__dict__)  # cov: ignore
 
 
 def select_deployments(ctx,  # type: click.Context

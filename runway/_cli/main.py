@@ -43,21 +43,14 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
         configuration such as logging or context object setup.
 
         """
-        try:
-            debug_count = int(os.getenv('DEBUG', '0'))
-        except ValueError:
-            LOGGER.error('DEBUG environment variable must be an intiger.')
-            ctx.exit(1)
-        if isinstance(ctx.args, (list, tuple)):
-            parser = argparse.ArgumentParser(add_help=False)
-            parser.add_argument('--ci', action='store_true',
-                                default=bool(os.getenv('CI')))
-            parser.add_argument('--debug', default=debug_count, action='count')
-            parser.add_argument('-e', '--deploy-environment',
-                                default=os.getenv('DEPLOY_ENVIRONMENT'))
-            args, _ = parser.parse_known_args(list(ctx.args))
-            return vars(args)
-        return {}
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument('--ci', action='store_true',
+                            default=bool(os.getenv('CI')))
+        parser.add_argument('--debug', default=int(os.getenv('DEBUG', '0')), action='count')
+        parser.add_argument('-e', '--deploy-environment',
+                            default=os.getenv('DEPLOY_ENVIRONMENT'))
+        args, _ = parser.parse_known_args(list(ctx.args))
+        return vars(args)
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS, cls=_CliGroup)
@@ -85,4 +78,5 @@ for cmd in commands.__all__:
 def main():
     # type: () -> None
     """Runway CLI entrypoint."""
-    cli.main()
+    # only called with installed; skipped when invoked from cli test runner
+    cli.main()  # cov: ignore

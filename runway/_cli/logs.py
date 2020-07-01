@@ -24,12 +24,15 @@ def setup_logging(_=None, **kwargs):
     ))
     if debug >= 2:
         logging.basicConfig(level=logging.DEBUG)
+        LOGGER.debug('set level of all loggers to DEBUG')
     else:
         logging.basicConfig(level=logging.INFO,
                             handlers=[hdlr])
-        LOGGER.debug('setting botocore log level to ERROR')
+        LOGGER.debug('set level of all loggers to INFO')
         logging.getLogger('botocore').setLevel(logging.ERROR)
+        LOGGER.debug('set level of botocore logger to ERROR')
 
         if debug:
             LOGGER.setLevel(logging.DEBUG)
+            LOGGER.debug('set level of runway logger to DEBUG')
     LOGGER.debug('inatalized logging for Runway')
