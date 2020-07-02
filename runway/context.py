@@ -200,7 +200,6 @@ class Context(object):
                 'secret_key': creds.get('aws_secret_access_key'),
                 'session_token': creds.get('aws_session_token')
             })
-            LOGGER.warning('Current env_region: %s', self.env.aws_region)
         return get_session(region=region or self.env.aws_region, **kwargs)
 
     # TODO remove after IaC tools support AWS SSO

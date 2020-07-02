@@ -57,8 +57,9 @@ class CliContext(MutableMapping):
         try:
             return Config.find_config_file(config_dir=self.root_dir)
         except SystemExit:
-            LOGGER.debug('')
+            LOGGER.debug('checking parent directory...')
             self.root_dir = self.root_dir.parent
+            self.env.root_dir = self.root_dir
             return Config.find_config_file(config_dir=self.root_dir)
 
     def get_runway_context(self, deploy_environment=None):
