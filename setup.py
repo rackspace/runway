@@ -83,7 +83,7 @@ setup(
     use_scm_version={"local_scheme": local_scheme},
     entry_points={
         'console_scripts': [
-            'runway=runway._cli.main:main'
+            'runway=runway._cli.main:cli'
         ],
     },
     scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd',

@@ -73,10 +73,3 @@ def cli(ctx, **_):
 # in commands.
 for cmd in commands.__all__:
     cli.add_command(getattr(commands, cmd))
-
-
-def main():
-    # type: () -> None
-    """Runway CLI entrypoint."""
-    # only called with installed; skipped when invoked from cli test runner
-    cli.main()  # cov: ignore
