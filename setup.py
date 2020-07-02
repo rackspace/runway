@@ -29,7 +29,6 @@ INSTALL_REQUIRES = [
     'cfn-lint',
     'click>=7.1',
     'docker',
-    'docopt',
     'requests',
     'future',
     'pyhcl~=0.4',

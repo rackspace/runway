@@ -37,24 +37,24 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:0774f347d9d2437fc0e51d9f2c7a3fcadab00aa80bce7180f0c188f4327f7da7",
-                "sha256:f95fc8d1d1d0dce71801a845420c933afe04420b724fd032961a178474a39e16"
+                "sha256:30067e5e846b308b99ca87413b240589a3f063cee98257632798cc2282d280ce",
+                "sha256:7e0d026ff9e2c2628dc2cbbd42feea053205f55e316f76e79dd9e2018d78b577"
             ],
-            "version": "==1.18.92"
+            "version": "==1.18.93"
         },
         "boto3": {
             "hashes": [
-                "sha256:3c654c1b8f9708e0b457ea1d312ee53451368d09b571ce737dc1f46484112bc1",
-                "sha256:974a4a495fa876f4e8180e2690c840152f06cc3badbe865f05ed731efadcbf44"
+                "sha256:c2a223f4b48782e8b160b2130265e2a66081df111f630a5a384d6909e29a5aa9",
+                "sha256:ce5a4ab6af9e993d1864209cbbb6f4812f65fbc57ad6b95e5967d8bf38b1dcfb"
             ],
-            "version": "==1.14.15"
+            "version": "==1.14.16"
         },
         "botocore": {
             "hashes": [
-                "sha256:34ebc56471a75ea28bfd39f1665d58ee13229c75e8cd6c62b2e2abf1f3e75f0f",
-                "sha256:bb3d3e6aa1fb0caac5909421404218fa7fdcdfc5a1b597ec93cb3affb8326d26"
+                "sha256:99d995ef99cf77458a661f3fc64e0c3a4ce77ca30facfdf0472f44b2953dd856",
+                "sha256:fe0c4f7cd6b67eff3b7cb8dff6709a65d6fca10b7b7449a493b2036915e98b4c"
             ],
-            "version": "==1.17.15"
+            "version": "==1.17.16"
         },
         "certifi": {
             "hashes": [
@@ -168,12 +168,6 @@
                 "sha256:26eebadce7e298f55b76a88c4f8802476c5eaddbdbe38dbc6cce8781c47c9b54"
             ],
             "version": "==4.2.2"
-        },
-        "docopt": {
-            "hashes": [
-                "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"
-            ],
-            "version": "==0.6.2"
         },
         "docutils": {
             "hashes": [
