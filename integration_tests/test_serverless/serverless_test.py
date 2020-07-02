@@ -2,8 +2,6 @@
 import os
 import tempfile
 
-import boto3
-
 from integration_tests.test_serverless.test_serverless import Serverless
 from integration_tests.util import run_command
 # from runway.commands.modules_command import assume_role
@@ -48,14 +46,10 @@ class ServerlessTest(Serverless):
     def get_session(self, role_arn):
         """Get assumed role session."""
         self.logger.info('Assuming role: %s', role_arn)
-        # env_vars = os.environ.copy()
-        # role = assume_role(role_arn, env_vars=env_vars)
-        with aws.AssumeRole(Context(), role_arn=role_arn,
+        ctx = Context()
+        with aws.AssumeRole(ctx, role_arn=role_arn,
                             session_name='runway-integration-tests'):
-            return boto3.session.Session(role['AWS_ACCESS_KEY_ID'],
-                                         role['AWS_SECRET_ACCESS_KEY'],
-                                         role['AWS_SESSION_TOKEN'],
-                                         'us-east-1')
+            return ctx.get_session(region='us-east-1')
 
     def get_configs(self):
         """Get Runway and Serverless parsed configs."""
