@@ -7,12 +7,12 @@ import traceback as _traceback
 from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
                     Optional)
 
-from ..context import Context
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
 from . import components, providers
 
 if TYPE_CHECKING:
     from ..config import Config, DeploymentDefinition
+    from ..context import Context
 
 LOGGER = _logging.getLogger(__name__)
 
@@ -26,8 +26,8 @@ __all__ = [
 class Runway(object):
     """Runway's core functionality."""
 
-    def __init__(self, config, context=None):
-        # type: (Config, Optional[Context]) -> None
+    def __init__(self, config, context):
+        # type: (Config, Context) -> None
         """Instantiate class.
 
         Args:
@@ -35,20 +35,12 @@ class Runway(object):
             context: Runway context.
 
         """
+        self.ctx = context
         self.deployments = config.deployments
         self.future = config.future
         self.tests = config.tests
         self.ignore_git_branch = config.ignore_git_branch
         self.variables = config.variables
-
-        if context:
-            self.ctx = context
-        else:
-            self.ctx = Context(
-                deploy_environment=components.DeployEnvironment(
-                    ignore_git_branch=self.ignore_git_branch
-                )
-            )
         self.ctx.env.log_name()
 
     def deploy(self, deployments=None):

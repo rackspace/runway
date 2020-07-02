@@ -13,25 +13,16 @@ MODULE = 'runway.core'
 class TestRunway(object):
     """Test runway.core.Runway."""
 
-    @patch(MODULE + '.components.DeployEnvironment')
-    @patch(MODULE + '.Context')
-    def test_init(self, mock_context, mock_env, runway_config):
+    def test_init(self, runway_config, runway_context):
         """Test init default values."""
-        mock_context.return_value = mock_context
-        mock_env.return_value = mock_env
-        result = Runway(runway_config)
+        result = Runway(runway_config, runway_context)
 
-        mock_context.assert_called_once_with(deploy_environment=mock_env)
-        mock_env.assert_called_once_with(
-            ignore_git_branch=runway_config.ignore_git_branch
-        )
         assert result.deployments == runway_config.deployments
         assert result.future == runway_config.future
         assert result.tests == runway_config.tests
         assert result.ignore_git_branch == runway_config.ignore_git_branch
         assert result.variables == runway_config.variables
-        assert result.ctx == mock_context
-        mock_context.env.log_name.assert_called_once_with()
+        assert result.ctx == runway_context
 
     @patch(MODULE + '.components.Deployment')
     def test_deploy(self, mock_deployment, runway_config, runway_context):
