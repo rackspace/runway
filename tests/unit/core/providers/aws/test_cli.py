@@ -16,19 +16,10 @@ def test_cli(mock_clidriver, caplog):
     mock_clidriver.return_value = mock_clidriver
     mock_clidriver.main.return_value = 0
 
-    assert not cli('test')
+    assert not cli(['test'])
     assert 'passing "test" to awscli...' in caplog.messages
     mock_clidriver.assert_called_once_with()
-    mock_clidriver.main.assert_called_once_with('test')
-
-
-@patch(MODULE + '.create_clidriver')
-def test_cli_no_cmd(mock_clidriver):
-    """Test cli with no cmd."""
-    with pytest.raises(ValueError) as excinfo:
-        assert cli()
-    assert str(excinfo.value) == 'cmd must be provided'
-    mock_clidriver.assert_not_called()
+    mock_clidriver.main.assert_called_once_with(['test'])
 
 
 @patch(MODULE + '.create_clidriver')
@@ -38,5 +29,5 @@ def test_cli_non_zero(mock_clidriver):
     mock_clidriver.main.return_value = 1
 
     with pytest.raises(RuntimeError) as excinfo:
-        assert cli('test')
+        assert cli(['test'])
     assert str(excinfo.value) == 'AWS CLI exited with code 1'
