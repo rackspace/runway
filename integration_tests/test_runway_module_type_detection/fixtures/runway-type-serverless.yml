@@ -1,6 +1,0 @@
-deployments:
-  - modules:
-    - path: type_serverless
-      type: serverless
-    regions:
-      - us-east-1

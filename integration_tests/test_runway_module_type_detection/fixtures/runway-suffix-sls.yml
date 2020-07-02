@@ -1,5 +1,0 @@
-deployments:
-  - modules:
-    - path: sampleapp.sls
-    regions:
-      - us-east-1

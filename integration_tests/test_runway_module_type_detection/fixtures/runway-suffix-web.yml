@@ -1,5 +1,0 @@
-deployments:
-  - modules:
-    - path: sampleapp.web
-    regions:
-      - us-east-1
