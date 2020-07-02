@@ -386,7 +386,10 @@ class TerraformBackendConfig(ModuleOptions):
                'terraform_backend_cfn_outputs',
                'terraform_backend_ssm_params']
 
-    def __init__(self, bucket=None, dynamodb_table=None, filename=None, region=None):
+    def __init__(self, bucket=None, dynamodb_table=None,  # pylint: disable=too-many-arguments
+                 filename=None, region=None, key=None, encrypt=None, acl=None, kms_key_id=None,
+                 role_arn=None, assume_role_policy=None, external_id=None, session_name=None,
+                 workspace_key_prefix=None):
         """Instantiate class.
 
         Args:
@@ -395,19 +398,41 @@ class TerraformBackendConfig(ModuleOptions):
             filename (Optional[str]): .tfvar file name for backend configuration.
             region (Optional[str]): AWS region where both the provided DynamoDB table
                 and S3 bucket are located.
+            key (Optional[str]): S3 key suffix (filename) for the state.
+            workspace_key_prefix (Optional[str]): S3 key prefix to the environment.
+            encrypt (Optional[str]): Whether to enable server side encryption of the state file.
+            acl (Optional[str]): Canned ACL to be applied to the state file.
+            kms_key_id (Optional[str]): KMS Key to use for encrypting the state.
+            role_arn (Optional[str]): Role to assume for accessing the state.
+            assume_role_policy (Optional[str]): Permissions applied when assuming the role_arn.
+            external_id (Optional[str]): External ID to use when assuming the role_arn.
+            session_name (Optional[str]): Session name to use when assuming the role_arn.
 
         """
         super(TerraformBackendConfig, self).__init__()
         self.bucket = bucket
         self.dynamodb_table = dynamodb_table
         self.region = region
+        self.key = key
+        self.workspace_key_prefix = workspace_key_prefix
+        self.encrypt = encrypt
+        self.acl = acl
+        self.kms_key_id = kms_key_id
+
+        self.role_arn = role_arn
+        self.assume_role_policy = assume_role_policy
+        self.external_id = external_id
+        self.session_name = session_name
+
         self.filename = filename
 
     @cached_property
     def init_args(self):
         """Return command line arguments for init."""
         cmd_list = []
-        for key in ('bucket', 'dynamodb_table', 'region'):
+        for key in ('acl', 'assume_role_policy', 'bucket', 'dynamodb_table', 'encrypt',
+                    'external_id', 'key', 'kms_key_id', 'region', 'role_arn', 'session_name',
+                    'workspace_key_prefix'):
             if self.get(key):
                 cmd_list.append('-backend-config')
                 cmd_list.append(key + '=' + self[key])
