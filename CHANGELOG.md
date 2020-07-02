@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.8.5] - 2020-07-01
+### Fixed
+- Serverless/CDK execution on Ubuntu 20.04
+
+### Added
+- Additional terraform backend options (e.g. `key`) can be used
+
 ## [1.8.4] - 2020-06-29
 ### Fixed
 - Fixed a regression with `runway test` indicating test failures when tests exit code 0
@@ -859,7 +866,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.4...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.5...HEAD
+[1.8.5]: https://github.com/onicagroup/runway/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/onicagroup/runway/compare/v1.8.3...v1.8.4
 [1.8.3]: https://github.com/onicagroup/runway/compare/v1.8.2...v1.8.3
 [1.8.2]: https://github.com/onicagroup/runway/compare/v1.8.1...v1.8.2
