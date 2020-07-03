@@ -568,23 +568,6 @@ Sync static website to S3 bucket. Used by the :ref:`Static Site <staticsite>` mo
 
 See :ref:`Static Site <staticsite>` module documentation for details.
 
-upload_staticsite.sync_extra_files
-==================================
-
-.. rubric:: Description
-
-Sync static website extra files to S3 bucket. Used by the :ref:`Static Site <staticsite>` module type.
-
-
-.. rubric:: Hook Path
-
-``runway.hooks.staticsite.upload_staticsite.sync_extra_files``
-
-
-.. rubric:: Args
-
-See :ref:`Static Site <staticsite>` module documentation for details.
-
 *********************
 Writing A Custom Hook
 *********************

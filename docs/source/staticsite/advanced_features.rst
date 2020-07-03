@@ -88,3 +88,7 @@ See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in A
 
 **content (Optional[Union[str,List[Any],Dict[str, Any]]])**
     Inline content that will be used as the file content. This or ``file`` must be specified.
+
+.. note::
+
+    If none of the files or content changed between builds and source hashing is enabled, the upload will be skipped.

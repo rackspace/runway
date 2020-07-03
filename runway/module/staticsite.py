@@ -210,22 +210,10 @@ class StaticSite(RunwayModule):
                        'args': {
                            'bucket_output_lookup': '%s::BucketName' % self.name,
                            'website_url': '%s::BucketWebsiteURL' % self.name,
+                           'extra_files': self.user_options.get('extra_files', []),
                            'cf_disabled': site_stack_variables['DisableCloudFront'],
                            'distributionid_output_lookup': '%s::CFDistributionId' % (self.name),
                            'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % self.name}}]  # noqa pylint: disable=line-too-long
-
-        if self.user_options.get('extra_files'):
-            post_build.append({
-                'path': 'runway.hooks.staticsite.upload_staticsite.sync_extra_files',
-                'required': True,
-                'args': {
-                    'bucket': '${output %s::BucketName}' % self.name,
-                    'files': self.user_options.get('extra_files'),
-                    'cf_disabled': site_stack_variables['DisableCloudFront'],
-                    'distributionid_output_lookup': '%s::CFDistributionId' % (self.name),
-                    'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % self.name
-                }
-            })
 
         pre_destroy = [{'path': 'runway.hooks.cleanup_s3.purge_bucket',
                         'required': True,
