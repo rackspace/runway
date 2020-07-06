@@ -28,6 +28,7 @@ INSTALL_REQUIRES = [
     'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
     'click>=7.1',
+    'coloredlogs',
     'docker',
     'requests',
     'future',
