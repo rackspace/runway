@@ -16,6 +16,7 @@ DOCS_URL = 'https://docs.onica.com/projects/runway/'
 
 @click.command('docs', short_help='open doc site')
 @options.debug
+@options.verbose
 def docs(**_):
     # type: (Any) -> None
     """Open the Runway documentation web site using the default web browser."""

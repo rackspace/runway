@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('install', short_help='install kubectl')
 @click.argument('version', metavar='[<version>]', required=False)
 @options.debug
+@options.verbose
 def install(version, **_):
     # type: (str, Any) -> None
     """Install the specified <version> of kubectl (e.g. v1.14.0).

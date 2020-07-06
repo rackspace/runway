@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('envvars', short_help='exportable env_vars')
 @options.debug
 @options.deploy_environment
+@options.verbose
 @click.pass_context
 def envvars(ctx, **_):
     """Output env_vars defined in the Runway config file.

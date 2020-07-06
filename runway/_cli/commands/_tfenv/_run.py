@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
                context_settings={'ignore_unknown_options': True})
 @click.argument('args', metavar='<args>', nargs=-1, required=True)
 @options.debug
+@options.verbose
 @click.pass_context
 def run(ctx, args, **_):
     # type: (click.Context, Tuple[str, ...], Any) -> None

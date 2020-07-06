@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.deploy_environment
 @options.tags
+@options.verbose
 @click.pass_context
 def plan(ctx, tags, **_):
     # type: (click.Context, Tuple[str, ...], Any) -> None

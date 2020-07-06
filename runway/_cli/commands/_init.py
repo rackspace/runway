@@ -29,6 +29,7 @@ deployments:
 
 @click.command('init', short_help='create runway.yml')
 @options.debug
+@options.verbose
 @click.pass_context
 def init(ctx, **_):
     # type: (click.Context, Any) -> None

@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.deploy_environment
 @options.tags
+@options.verbose
 @click.pass_context
 def taxi(ctx, **kwargs):
     # type: (click.Context, Tuple[str, ...], Any) -> None

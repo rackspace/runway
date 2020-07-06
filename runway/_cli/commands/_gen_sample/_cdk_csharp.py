@@ -4,6 +4,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
 
 if sys.version_info.major > 2:
@@ -15,6 +16,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('cdk-csharp', short_help='cdk + c# (sampleapp.cdk)')
+@options.debug
+@options.verbose
 @click.pass_context
 def cdk_csharp(ctx):
     # type: (click.Context) -> None

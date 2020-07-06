@@ -4,6 +4,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import TEMPLATES, copy_sample
 
 if sys.version_info.major > 2:
@@ -15,6 +16,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('cdk-tsc', short_help='cdk + tsc (sampleapp.cdk)')
+@options.debug
+@options.verbose
 @click.pass_context
 def cdk_tsc(ctx):
     # type: (click.Context) -> None

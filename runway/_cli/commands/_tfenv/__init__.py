@@ -15,6 +15,7 @@ COMMANDS = [install, run]
 
 @click.group('tfenv', short_help='terraform (install|run)')
 @options.debug
+@options.verbose
 def tfenv(**_):
     # type: (Any) -> None
     """Terraform version management and execution.

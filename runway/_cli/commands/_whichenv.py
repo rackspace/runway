@@ -10,6 +10,7 @@ from .. import options
 
 @click.command('whichenv', short_help='current deploy environment')
 @options.debug
+@options.verbose
 @click.pass_context
 def whichenv(ctx, **_):  # noqa: D301
     """Print the current deploy environment name to stdout.

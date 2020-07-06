@@ -27,3 +27,9 @@ tags = click.option('--tag', 'tags',
                     ' list of tags that are treated as "AND". '
                     '(e.g. "--tag <tag1> --tag <tag2>" would select all modules'
                     ' with BOTH tags).')
+
+verbose = click.option('--verbose',
+                       default=False,
+                       envvar='VERBOSE',
+                       is_flag=True,
+                       help='Display Runway verbose logs.')

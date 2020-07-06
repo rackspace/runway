@@ -5,6 +5,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import (TEMPLATES, convert_gitignore, copy_sample,
                     write_tfstate_template)
 
@@ -18,6 +19,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('k8s-tf-repo',
                short_help='k8s + tf (k8s-tf-infrastructure)')
+@options.debug
+@options.verbose
 @click.pass_context
 def k8s_tf_repo(ctx):
     # type: (click.Context) -> None

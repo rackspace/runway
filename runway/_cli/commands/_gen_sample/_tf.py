@@ -5,6 +5,7 @@ import sys
 import click
 
 from ....env_mgr.tfenv import get_latest_tf_version
+from ... import options
 from .utils import TEMPLATES, copy_sample
 
 if sys.version_info.major > 2:
@@ -16,6 +17,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('tf', short_help='tf (sampleapp.tf)')
+@options.debug
+@options.verbose
 @click.pass_context
 def tf(ctx):  # pylint: disable=invalid-name
     # type: (click.Context) -> None

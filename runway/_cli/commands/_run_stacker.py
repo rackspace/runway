@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
                context_settings={'ignore_unknown_options': True})
 @click.argument('args', metavar='<args>', nargs=-1, required=True)
 @options.debug
+@options.verbose
 def run_stacker(args, **_):
     # type: (Tuple[str, ...], Any) -> None
     """Execute a command using the "shimmed" Stacker (aka CFNgin).

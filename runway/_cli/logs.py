@@ -1,11 +1,61 @@
 """Runway CLI logging setup."""
 import logging
-import sys
 
-from ..cfngin.logger import ColorFormatter
+import coloredlogs
 
-COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
+from runway import LogLevels
+
+# COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger('runway')
+
+LOG_FORMAT = '%(name)s: %(message)s'
+LOG_FORMAT_W_LEVEL = '[%(levelname)s]%(name)s: %(message)s'
+LOG_FIELD_STYLES = {
+    'asctime': {
+        'color': 'green'
+    },
+    'hostname': {
+        'color': 'magenta'
+    },
+    'levelname': {
+        # 'color': 'black',
+        # 'bold': True
+    },
+    'name': {},
+    'programname': {
+        'color': 'cyan'
+    }
+}
+LOG_LEVEL_STYLES = {
+    'critical': {
+        'color': 'red',
+        'bold': True
+    },
+    'debug': {
+        'color': 'green'
+    },
+    'error': {
+        'color': 'red'
+    },
+    'info': {},
+    'notice': {
+        'color': 'magenta'
+    },
+    'spam': {
+        'color': 'green',
+        'faint': True
+    },
+    'success': {
+        'color': 'green',
+        'bold': True
+    },
+    'verbose': {
+        'color': 'cyan'
+    },
+    'warning': {
+        'color': 'yellow'
+    }
+}
 
 
 # TODO implement propper keyword-only args when dropping python 2
@@ -18,21 +68,17 @@ def setup_logging(_=None, **kwargs):
 
     """
     debug = kwargs.pop('debug', 0)
-    hdlr = logging.StreamHandler()
-    hdlr.setFormatter(ColorFormatter(
-        COLOR_FORMAT if sys.stdout.isatty() else logging.BASIC_FORMAT
-    ))
-    if debug >= 2:
-        logging.basicConfig(level=logging.DEBUG)
-        LOGGER.debug('set level of all loggers to DEBUG')
-    else:
-        logging.basicConfig(level=logging.INFO,
-                            handlers=[hdlr])
-        LOGGER.debug('set level of all loggers to INFO')
-        logging.getLogger('botocore').setLevel(logging.ERROR)
-        LOGGER.debug('set level of botocore logger to ERROR')
+    log_settings = {
+        'fmt': LOG_FORMAT_W_LEVEL,
+        'field_styles': LOG_FIELD_STYLES,
+        'level_styles': LOG_LEVEL_STYLES
+    }
+    runway_log_level = LogLevels.INFO if not debug else LogLevels.DEBUG
+    dependency_log_level = LogLevels.ERROR if debug < 2 else LogLevels.DEBUG
 
-        if debug:
-            LOGGER.setLevel(logging.DEBUG)
-            LOGGER.debug('set level of runway logger to DEBUG')
+    coloredlogs.install(runway_log_level, logger=LOGGER, **log_settings)
+    coloredlogs.install(dependency_log_level,
+                        logger=logging.getLogger('botocore'), **log_settings)
+    coloredlogs.install(dependency_log_level,
+                        logger=logging.getLogger('urllib3'), **log_settings)
     LOGGER.debug('inatalized logging for Runway')

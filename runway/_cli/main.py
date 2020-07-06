@@ -46,9 +46,12 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
         parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument('--ci', action='store_true',
                             default=bool(os.getenv('CI')))
-        parser.add_argument('--debug', default=int(os.getenv('DEBUG', '0')), action='count')
+        parser.add_argument('--debug', default=int(os.getenv('DEBUG', '0')),
+                            action='count')
         parser.add_argument('-e', '--deploy-environment',
                             default=os.getenv('DEPLOY_ENVIRONMENT'))
+        parser.add_argument('--verbose', action='store_true',
+                            default=bool(os.getenv('VERBOSE')))
         args, _ = parser.parse_known_args(list(ctx.args))
         return vars(args)
 
@@ -56,6 +59,7 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS, cls=_CliGroup)
 @click.version_option(__version__, message='%(version)s')
 @options.debug
+@options.verbose
 @click.pass_context
 def cli(ctx, **_):
     # type: (click.Context, Any) -> None

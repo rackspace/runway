@@ -3,12 +3,15 @@ import logging
 
 import click
 
+from ... import options
 from ._cfngin import cfngin
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('stacker', short_help='deprecated, use cfngin')
+@options.debug
+@options.verbose
 @click.pass_context
 def stacker(ctx):
     # type: (click.Context) -> None

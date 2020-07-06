@@ -10,6 +10,7 @@ from ....blueprints.k8s.k8s_iam import Iam
 from ....blueprints.k8s.k8s_master import Cluster
 from ....blueprints.k8s.k8s_workers import NodeGroup
 from ....cfngin.context import Context as CFNginContext
+from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
 
 if sys.version_info.major > 2:
@@ -22,6 +23,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('k8s-cfn-repo',
                short_help='k8s + cfn (k8s-cfn-infrastructure)')
+@options.debug
+@options.verbose
 @click.pass_context
 def k8s_cfn_repo(ctx):
     # type: (click.Context) -> None

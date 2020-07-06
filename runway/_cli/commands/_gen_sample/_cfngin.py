@@ -5,6 +5,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import ROOT, TEMPLATES, copy_sample
 
 if sys.version_info.major > 2:
@@ -17,6 +18,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('cfngin',
                short_help="cfngin + troposphere (sampleapp.cfn)")
+@options.debug
+@options.verbose
 @click.pass_context
 def cfngin(ctx):
     # type: (click.Context) -> None
