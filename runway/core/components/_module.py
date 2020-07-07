@@ -1,4 +1,5 @@
 """Runway module object."""
+import json
 import logging
 import sys
 from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
@@ -7,6 +8,7 @@ from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
 import six
 import yaml
 
+from ..._logging import PrefixAdaptor
 from ...config import FutureDefinition, VariablesDefinition
 from ...path import Path as ModulePath
 from ...runway_module_type import RunwayModuleType
@@ -58,6 +60,7 @@ class Module(object):
         definition.resolve(self.ctx, variables)
         self.definition = definition
         self.name = self.definition.name
+        self.log = PrefixAdaptor(self.fqn, LOGGER)
 
     @cached_property
     def child_modules(self):
@@ -69,6 +72,13 @@ class Module(object):
                                future=self.__future,
                                variables=self.__variables)
                 for child in self.definition.child_modules]
+
+    @cached_property
+    def fqn(self):
+        """Fully qualified name."""
+        if not self.__deployment:
+            return self.name
+        return '{}.{}'.format(self.__deployment.name, self.name)
 
     @cached_property
     def path(self):  # lazy load the path
@@ -105,8 +115,9 @@ class Module(object):
         if isinstance(self.payload['environment'], dict) and not \
                 self.__future.strict_environments:
             return self.__handle_deprecated_environmet()
-        is_valid = validate_environment(self.ctx, self,
+        is_valid = validate_environment(self.ctx,
                                         self.payload['environments'],
+                                        logger=self.log,
                                         strict=self.__future.strict_environments)
         self.payload['environment'] = is_valid
         if isinstance(is_valid, bool):
@@ -163,8 +174,8 @@ class Module(object):
         if not self.child_modules:
             return self.run('plan')
         if self.use_async:
-            LOGGER.info('Processing of modules will be done in parallel '
-                        'during deploy/destroy.')
+            self.log.info('processing of modules will be done in parallel '
+                          'during deploy/destroy.')
         return self.__sync('plan')
 
     def run(self, action):
@@ -178,11 +189,13 @@ class Module(object):
 
         """
         LOGGER.info('')
-        LOGGER.info('------ Processing module "%s" for "%s" in %s ------',
-                    self.name,
-                    self.ctx.env.name,
-                    self.ctx.env.aws_region)
-        LOGGER.debug("module payload: %s", self.payload)
+        # LOGGER.info('------ Processing module "%s" for "%s" in %s ------',
+        #             self.name,
+        #             self.ctx.env.name,
+        #             self.ctx.env.aws_region)
+        self.log.notice('processing module in %s (in-progress)',
+                        self.ctx.env.aws_region)
+        self.log.verbose("module payload: %s", json.dumps(self.payload))
         if self.should_skip:
             return
         with change_dir(self.path.module_root):
@@ -194,8 +207,10 @@ class Module(object):
             if hasattr(inst, action):
                 inst[action]()
             else:
-                LOGGER.error('"%s" is missing method "%s"', inst, action)
+                self.log.error('"%s" is missing method "%s"', inst, action)
                 sys.exit(1)
+        self.log.success('processing module in %s (complete)',
+                         self.ctx.env.aws_region)
 
     def __async(self, action):
         # type: (str) -> None
@@ -205,8 +220,8 @@ class Module(object):
             action (str): Name of action to run.
 
         """
-        LOGGER.info('Processing modules in parallel... '
-                    '(output will be interwoven)')
+        self.log.info('processing modules in parallel... '
+                      '(output will be interwoven)')
         # Can't use threading or ThreadPoolExecutor here because
         # we need to be able to do things like `cd` which is not
         # thread safe.
@@ -227,7 +242,7 @@ class Module(object):
             action (str): Name of action to run.
 
         """
-        LOGGER.info('Processing modules sequentially...')
+        self.log.info('processing modules sequentially...')
         for module in self.child_modules:
             module.run(action)
 
@@ -236,6 +251,7 @@ class Module(object):
         """Load module options from local file."""
         opts_file = Path(self.path.module_root) / 'runway.module.yml'
         if opts_file.is_file():
+            self.log.verbose('module-level config file found')
             return yaml.safe_load(opts_file.read_text())
         return {}
 
@@ -249,9 +265,12 @@ class Module(object):
                 env_root=str(self.ctx.env.root_dir)
             )
             if resolved_env_vars:
-                LOGGER.info('OS environment variable overrides being applied '
-                            'this module: %s', str(resolved_env_vars))
-            self.ctx.env.vars = merge_dicts(self.ctx.env_vars, resolved_env_vars)
+                self.log.verbose('environment variable overrides are being '
+                                 'applied to this module')
+                self.log.debug('environment variable overrides: %s',
+                               resolved_env_vars)
+                self.ctx.env.vars = merge_dicts(self.ctx.env_vars,
+                                                resolved_env_vars)
 
     def __handle_deprecated_environmet(self):
         # type: (Dict[str, Any]) -> None
@@ -304,16 +323,13 @@ class Module(object):
         return getattr(self, key)
 
 
-def validate_environment(context, module, env_def, strict=False):
+def validate_environment(context, env_def, logger=None, strict=False):
     """Check if an environment should be deployed to.
 
     Args:
         context (Context): Runway context object.
         module (ModuleDefinition): Runway module definition.
-        env_def (Union[bool, Dict[str, Union[bool, str, List[str]]], List[str]]):
-            Environment definition. This should usually be the merged dict of
-            a deployment and module environment definition but will recursively
-            handle nested portions of the definition.
+        logger (Optional[logging.Logger]): Logger to log messages to.
         strict (bool): Wether to consider the current environment missing from
             definition as a failure.
 
@@ -321,29 +337,28 @@ def validate_environment(context, module, env_def, strict=False):
         Union[bool, NoneType]: Booleon value of wether to deploy or not.
 
     """
+    logger = logger or LOGGER
     if isinstance(env_def, bool) or not env_def:
         if env_def is True:
-            LOGGER.debug('%s: explicitly enabled', module.name)
+            logger.verbose('explicitly enabled')
         elif env_def is False:
-            LOGGER.info('')
-            LOGGER.info('%s: skipped; explicitly disabled', module.name)
+            logger.info('skipped; explicitly disabled')
         else:
-            LOGGER.debug('%s: environment not defined; '
-                         'module will determine deployment', module.name)
+            logger.verbose('environment not defined; '
+                           'module will determine deployment')
             env_def = None
         return env_def
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
             if strict:
-                LOGGER.info('%s: skipped; environment not in definition',
-                            module.name)
+                logger.info('%s: skipped; environment not in definition')
                 return False
-            LOGGER.info('%s: environment not in definition; '
-                        'module will determine deployment', module.name)
+            logger.info('environment not in definition; '
+                        'module will determine deployment')
             return None
-        return validate_environment(context, module,
+        return validate_environment(context,
                                     env_def.get(context.env.name, False),
-                                    strict)
+                                    logger=logger, strict=strict)
 
     account = aws.AccountDetails(context)
     accepted_values = ['{}/{}'.format(account.id, context.env.aws_region),
@@ -351,19 +366,16 @@ def validate_environment(context, module, env_def, strict=False):
     result = False
 
     if isinstance(env_def, (int, six.string_types)):
-        LOGGER.debug('%s: checking if "%s" in %s', module.name, env_def,
-                     accepted_values)
+        logger.debug('checking if "%s" in %s', env_def, accepted_values)
         result = env_def in accepted_values
     elif isinstance(env_def, list):
-        LOGGER.debug('%s: checking if any(%s in %s)', module.name, env_def,
-                     accepted_values)
+        logger.debug('checking if any(%s in %s)', env_def, accepted_values)
         result = any(val in env_def for val in accepted_values)
     else:
-        LOGGER.warning('%s: skipped; unsupported type for environments "%s"',
-                       module.name, type(env_def))
+        logger.warning('skipped; unsupported type for environments "%s"',
+                       type(env_def))
         return False
 
     if not result:
-        LOGGER.info('')
-        LOGGER.info('%s: skipped; account_id/region mismatch', module.name)
+        logger.info('skipped; account_id/region mismatch')
     return result

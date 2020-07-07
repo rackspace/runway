@@ -9,7 +9,7 @@ from .cfngin.session_cache import get_session
 from .core.components import DeployEnvironment
 from .util import cached_property
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class Context(object):
@@ -170,6 +170,7 @@ class Context(object):
             Context: New instance with the same contents.
 
         """
+        LOGGER.debug('creating a copy of Runway context...')
         return self.__class__(command=self.command,
                               deploy_environment=self.env.copy())
 
@@ -193,8 +194,12 @@ class Context(object):
         # save to var so its not calculated multiple times
         creds = self.boto3_credentials
         if profile:
+            LOGGER.verbose('creating AWS session using profile "%s"...',
+                           profile)
             kwargs['profile'] = profile
         elif creds:
+            LOGGER.verbose('creating AWS session using credentials from '
+                           'the environment...')
             kwargs.update({
                 'access_key': creds.get('aws_access_key_id'),
                 'secret_key': creds.get('aws_secret_access_key'),

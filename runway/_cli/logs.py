@@ -11,8 +11,8 @@ from ..util import cached_property
 # COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger('runway')
 
-LOG_FORMAT = '%(levelname)s:runway: %(message)s'
-LOG_FORMAT_VERBOSE = '%(levelname)s:%(name)s: %(message)s'
+LOG_FORMAT = '%(levelname)s:runway:%(message)s'
+LOG_FORMAT_VERBOSE = '%(levelname)s:%(name)s:%(message)s'
 LOG_FIELD_STYLES = {
     'asctime': {},
     'hostname': {},

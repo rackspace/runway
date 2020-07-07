@@ -67,7 +67,7 @@ class CliContext(MutableMapping):
         try:
             return Config.find_config_file(config_dir=self.root_dir)
         except SystemExit:
-            LOGGER.verbose('checking parent directory...')
+            LOGGER.info('trying parent directory')
             self.root_dir = self.root_dir.parent
             self.env.root_dir = self.root_dir
             return Config.find_config_file(config_dir=self.root_dir)

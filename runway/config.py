@@ -24,7 +24,7 @@ else:
 if TYPE_CHECKING:
     from .context import Context  # noqa: F401 pylint: disable=unused-import
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 NoneType = type(None)
 
 
@@ -111,9 +111,14 @@ class ConfigComponent(MutableMap):
                 populated until processing has begun.
 
         """
+        if pre_process:
+            LOGGER.verbose('%s: resolving variables for pre-processing...',
+                           self.name)
+        else:
+            LOGGER.verbose('%s: resolving variables...', self.name)
         for attr in (self.PRE_PROCESS_VARIABLES if pre_process
                      else self.SUPPORTS_VARIABLES):
-            LOGGER.debug('Resolving %s.%s', self.name, attr)
+            LOGGER.debug('%s: resolving %s...', self.name, attr)
             getattr(self, '_' + attr).resolve(context, variables=variables)
 
     def __getitem__(self, key):
@@ -1050,10 +1055,14 @@ class VariablesDefinition(MutableMap):
                             'must of be of type str but got types {} and {}'.format(
                                 type(file_path), type(sys_path)))
         if not sys_path:
+            LOGGER.debug('sys_path not provided; using current working '
+                         'direcotry')
             sys_path = os.getcwd()
 
         if file_path:
             result = os.path.join(sys_path, file_path)
+            LOGGER.verbose('using explicit variables file: %s',
+                           result)
             if os.path.isfile(result):
                 return result
             LOGGER.error('The provided variables "%s" file could not '
@@ -1062,7 +1071,9 @@ class VariablesDefinition(MutableMap):
 
         for name in cls.default_names:
             result = os.path.join(sys_path, name)
+            LOGGER.debug('looking for variables file: %s', result)
             if os.path.isfile(result):
+                LOGGER.verbose('found variables file: %s', result)
                 return result
 
         LOGGER.info('Could not find %s in the current directory. '
@@ -1091,13 +1102,17 @@ class VariablesDefinition(MutableMap):
     def _load_from_file(cls, file_path):
         # type: (str) -> VariablesDefinition
         """Load the variables file into an object."""
+        LOGGER.debug('attempting to load variables files: %s',
+                     file_path)
         if not os.path.isfile(file_path):
             LOGGER.error('The provided variables "%s" file could not '
                          'be found.', file_path)
             sys.exit(1)
 
         with open(file_path) as data_file:
-            return cls(**yaml.safe_load(data_file))
+            result = cls(**yaml.safe_load(data_file))
+            LOGGER.debug('variables file loaded')
+            return result
 
 
 class Config(ConfigComponent):
@@ -1204,6 +1219,7 @@ class Config(ConfigComponent):
                          config_path)
             sys.exit(1)
 
+        LOGGER.debug('attempting to load config: %s', config_path)
         config_file = yaml.safe_load(config_path.read_text()) or {}
         result = Config(config_file.pop('deployments'),
                         config_file.pop('future', {}),
@@ -1219,20 +1235,25 @@ class Config(ConfigComponent):
                 'Invalid keys found in runway file have been ignored: %s',
                 ', '.join(config_file.keys())
             )
+        LOGGER.debug('config loaded')
         return result
 
     @classmethod
     def find_config_file(cls, config_dir=None):
         # type: (Optional[Path]) -> Path
         """Find the Runway config file."""
-        if not isinstance(config_dir, Path):  # legacy support
-            config_dir = Path(config_dir)
         if not config_dir:
+            LOGGER.debug('config_dir not provided; using current '
+                         'working directory')
             config_dir = Path.cwd()
+        elif not isinstance(config_dir, Path):  # legacy support
+            config_dir = Path(config_dir)
 
         for name in cls.accepted_names:
             conf_path = config_dir / name
+            LOGGER.debug('looking for variables file: %s', conf_path)
             if conf_path.is_file():
+                LOGGER.verbose('found config: %s', conf_path)
                 return conf_path
 
         LOGGER.error('Runway config file was not found. Looking for one '
