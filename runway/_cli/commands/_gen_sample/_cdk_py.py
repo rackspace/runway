@@ -27,6 +27,6 @@ def cdk_py(ctx):
     copy_sample(ctx, src, dest)
     # .gitignore already exists
 
-    LOGGER.info("Sample CDK module created at %s", dest)
-    LOGGER.info('To finish it\'s setup, change to the %s directory and execute'
-                ' "npm install" to generate it\'s lockfile.', dest)
+    LOGGER.success("Sample CDK module created at %s", dest)
+    LOGGER.notice('To finish it\'s setup, change to the %s directory and '
+                  'execute "npm install" to generate it\'s lockfile.', dest)

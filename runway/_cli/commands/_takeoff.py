@@ -21,5 +21,5 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 def takeoff(ctx, **kwargs):
     # type: (click.Context, Tuple[str, ...], Any) -> None
     """Alias of "runway deploy"."""
-    LOGGER.debug('forwarding to deploy...')
+    LOGGER.verbose('forwarding to deploy...')
     ctx.forward(deploy, **kwargs)

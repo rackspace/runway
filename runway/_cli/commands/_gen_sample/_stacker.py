@@ -18,5 +18,5 @@ def stacker(ctx):
     """[DEPRECATED] Generate a sample CFNgin project using Blueprints."""
     LOGGER.warning('This command has been deprecated and will be removed in '
                    'the next major release.')
-    LOGGER.debug('forwarding to cfngin...')
+    LOGGER.verbose('forwarding to cfngin...')
     ctx.forward(cfngin)

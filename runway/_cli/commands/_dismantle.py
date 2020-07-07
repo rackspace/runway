@@ -21,5 +21,5 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 def dismantle(ctx, **kwargs):
     # type: (click.Context, Tuple[str, ...], Any) -> None
     """Alias of "runway destroy"."""
-    LOGGER.debug('forwarding to destroy...')
+    LOGGER.verbose('forwarding to destroy...')
     ctx.forward(destroy, **kwargs)

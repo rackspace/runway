@@ -31,4 +31,4 @@ def cfn(ctx):
     copy_sample(ctx, src, dest)
     templates.mkdir()
     write_tfstate_template(tf_state)
-    LOGGER.info("Sample CloudFormation module created at %s", dest)
+    LOGGER.success("Sample CloudFormation module created at %s", dest)

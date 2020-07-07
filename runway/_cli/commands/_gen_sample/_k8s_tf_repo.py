@@ -39,5 +39,5 @@ def k8s_tf_repo(ctx):
     tfstate_dir.mkdir()
     write_tfstate_template(tfstate_dir / 'tf_state.yml')
 
-    LOGGER.info("Sample k8s infrastructure repo created at %s", dest)
-    LOGGER.info('(see its README for setup and deployment instructions)')
+    LOGGER.success("Sample k8s infrastructure repo created at %s", dest)
+    LOGGER.notice('See the README for setup and deployment instructions.')

@@ -39,7 +39,7 @@ def k8s_cfn_repo(ctx):
     worker_templates = dest / 'k8s-workers.cfn/templates'
     env = {'namespace': 'test'}
 
-    LOGGER.debug('rendering master templates...')
+    LOGGER.verbose('rendering master templates...')
     master_templates.mkdir()
     (master_templates / 'k8s_iam.yaml').write_text(six.u(
         to_yaml(Iam('test', CFNginContext(env.copy()), None).to_json())
@@ -48,11 +48,11 @@ def k8s_cfn_repo(ctx):
         to_yaml(Cluster('test', CFNginContext(env.copy()), None).to_json())
     ))
 
-    LOGGER.debug('rendering worker templates...')
+    LOGGER.verbose('rendering worker templates...')
     worker_templates.mkdir()
     (worker_templates / 'k8s_workers.yaml').write_text(six.u(
         to_yaml(NodeGroup('test', CFNginContext(env.copy()), None).to_json())
     ))
 
-    LOGGER.info("Sample k8s infrastructure repo created at %s", dest)
-    LOGGER.info('(see its README for setup and deployment instructions)')
+    LOGGER.success("Sample k8s infrastructure repo created at %s", dest)
+    LOGGER.notice('See the README for setup and deployment instructions.')

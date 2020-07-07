@@ -34,5 +34,5 @@ def docs(**_):
             # Remove the env var as a last resort:
             LOGGER.debug('temporarily removing environ: %s', lp_key)
             os.environ.pop(lp_key, None)
-        LOGGER.debug('launching url: %s', DOCS_URL)
+        LOGGER.verbose('launching url: %s', DOCS_URL)
         click.launch(DOCS_URL)

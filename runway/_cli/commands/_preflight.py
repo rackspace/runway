@@ -17,5 +17,5 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.pass_context
 def preflight(ctx, **kwargs):
     """Alias of "runway test"."""
-    LOGGER.debug('forwarding to test...')
+    LOGGER.verbose('forwarding to test...')
     ctx.forward(test, **kwargs)

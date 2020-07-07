@@ -29,5 +29,5 @@ def static_angular(ctx):
     copy_sample(ctx, src, dest)
     convert_gitignore(dest / 'sampleapp.web/_gitignore')
 
-    LOGGER.info("Sample static Angular site repo created at %s", dest)
-    LOGGER.info('(see its README for setup and deployment instructions)')
+    LOGGER.success("Sample static Angular site repo created at %s", dest)
+    LOGGER.notice('See the README for setup and deployment instructions.')

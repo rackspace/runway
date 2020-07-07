@@ -28,16 +28,18 @@ def envvars(ctx, **_):
     NOTE: Only outputs env_vars defined in deployments, not modules.
 
     """
-    if not ctx.obj.debug:
+    if not (ctx.obj.debug or ctx.obj.verbose):
         logging.getLogger('runway').setLevel(logging.ERROR)  # suppress warnings
-    ctx.obj.env.ci = True  # suppress any prompts
+
+    ctx.obj.env.ci = True
+    LOGGER.verbose('forced Runway to non-interactive mode to suppress prompts')
     env_vars = Runway(ctx.obj.runway_config,
                       ctx.obj.get_runway_context()).get_env_vars()
 
     if not env_vars:
         LOGGER.error('No env_vars defined in %s', ctx.obj.runway_config_path)
         ctx.exit(1)
-    LOGGER.debug('printing env_vars: %s', env_vars)
+    LOGGER.debug('env_vars: %s', env_vars)
     print_env_vars(env_vars)
 
 

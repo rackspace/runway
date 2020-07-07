@@ -21,5 +21,5 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 def taxi(ctx, **kwargs):
     # type: (click.Context, Tuple[str, ...], Any) -> None
     """Alias of "runway plan"."""
-    LOGGER.debug('forwarding to plan...')
+    LOGGER.verbose('forwarding to plan...')
     ctx.forward(plan, **kwargs)

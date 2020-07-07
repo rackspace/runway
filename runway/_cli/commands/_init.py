@@ -36,6 +36,7 @@ def init(ctx, **_):
     """Create an example runway.yml file in the currect directory."""
     runway_yml = Path.cwd() / 'runway.yml'
 
+    LOGGER.verbose('checking for preexisting runway.yml file...')
     if runway_yml.is_file():
         LOGGER.error('There is already a %s file in the current directory',
                      runway_yml.name)
@@ -43,8 +44,8 @@ def init(ctx, **_):
 
     # TODO remove use of six when dropping python 2
     runway_yml.write_text(six.u(RUNWAY_YML))
-    LOGGER.info('runway.yml generated')
-    LOGGER.info(
+    LOGGER.success('runway.yml generated')
+    LOGGER.notice(
         'See addition getting started information at '
         'https://docs.onica.com/projects/runway/en/latest/getting_started.html'
     )

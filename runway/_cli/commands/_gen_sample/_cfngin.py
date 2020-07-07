@@ -39,5 +39,5 @@ def cfngin(ctx):
                     str(blueprints / '__init__.py'))
     shutil.copyfile(str(src_blueprints / 'tf_state.py'), str(tf_state))
     tf_state.chmod(tf_state.stat().st_mode | 0o0111)
-    LOGGER.info("Sample CFNgin module created at %s",
-                dest)
+    LOGGER.success("Sample CFNgin module created at %s",
+                   dest)

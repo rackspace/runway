@@ -69,7 +69,7 @@ def cli(ctx, **_):
 
     """
     opts = ctx.meta['global.options']
-    setup_logging(debug=opts['debug'])
+    setup_logging(debug=opts['debug'], verbose=opts['verbose'])
     ctx.obj = CliContext(**opts)
 
 

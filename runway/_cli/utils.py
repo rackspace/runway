@@ -25,12 +25,22 @@ LOGGER = logging.getLogger(__name__)
 class CliContext(MutableMapping):
     """CLI context object."""
 
-    def __init__(self, ci=False, debug=0, deploy_environment=None, **_):
+    def __init__(self, ci=False, debug=0, deploy_environment=None,
+                 verbose=False, **_):
         # type: (bool, int, Optional[str], Any) -> None
-        """Instantiate class."""
+        """Instantiate class.
+
+        Keyword Args:
+            ci (bool): Whether Runway is being run in non-interactive mode.
+            debug (int): Debug level
+            deploy_environment (str): Name of the deploy environment.
+            verbose (bool): Whether to display verbose logs.
+
+        """
         self._deploy_environment = deploy_environment
         self.debug = debug
         self.root_dir = Path.cwd()
+        self.verbose = verbose
         if ci:  # prevents unnecessary loading of runway config
             self.env.ci = ci
 
@@ -57,7 +67,7 @@ class CliContext(MutableMapping):
         try:
             return Config.find_config_file(config_dir=self.root_dir)
         except SystemExit:
-            LOGGER.debug('checking parent directory...')
+            LOGGER.verbose('checking parent directory...')
             self.root_dir = self.root_dir.parent
             self.env.root_dir = self.root_dir
             return Config.find_config_file(config_dir=self.root_dir)

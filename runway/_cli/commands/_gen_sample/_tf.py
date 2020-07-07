@@ -31,4 +31,4 @@ def tf(ctx):  # pylint: disable=invalid-name
     if not (src / '.terraform-version').is_file():
         (dest / '.terraform-version').write_text(get_latest_tf_version())
 
-    LOGGER.info("Sample Terraform app created at %s", dest)
+    LOGGER.success("Sample Terraform app created at %s", dest)

@@ -28,5 +28,5 @@ def static_react(ctx):
 
     copy_sample(ctx, src, dest)
 
-    LOGGER.info("Sample static React site repo created at %s", dest)
-    LOGGER.info('(see its README for setup and deployment instructions)')
+    LOGGER.success("Sample static React site repo created at %s", dest)
+    LOGGER.notice('See the README for setup and deployment instructions.')
