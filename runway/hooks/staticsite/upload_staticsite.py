@@ -227,7 +227,14 @@ def prune_archives(context, session):
 
 
 def auto_detect_content_type(filename):
-    """Auto detects the content type based on the filename."""
+    """Auto detects the content type based on the filename.
+
+    Args:
+        filename (str): A filename to use to auto detect the content type.
+    Returns:
+        str: The content type of the file. None if the content type could not be detected.
+
+    """
     _, ext = os.path.splitext(filename)
 
     if ext == '.json':
@@ -240,14 +247,29 @@ def auto_detect_content_type(filename):
 
 
 def get_content_type(extra_file):
-    """Return the content type of the file."""
+    """Return the content type of the file.
+
+    Args:
+        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file configuration.
+    Returns:
+        str: The content type of the extra file. If 'content_type' is provided then that is
+             returned, otherways it is auto detected based on the name.
+
+    """
     return extra_file.get(
         'content_type',
         auto_detect_content_type(extra_file.get('name')))
 
 
 def get_content(extra_file):
-    """Get serialized content based on content_type."""
+    """Get serialized content based on content_type.
+
+    Args:
+        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file configuration.
+    Returns:
+        str: Serialized content based on the content_type.
+
+    """
     content_type = extra_file.get('content_type')
     content = extra_file.get('content')
 
@@ -275,6 +297,13 @@ def calculate_hash_of_extra_files(extra_files):
 
     All attributes of the extra file object are includeded when hashing:
     name, content_type, content, and file data.
+
+    Args:
+        extra_files (List[Dict[str, Union[str, Dict[Any]]]]): The list of extra file
+            configurations.
+    Returns:
+        str: The hash of all the files.
+
     """
     file_hash = hashlib.md5()
 
@@ -301,7 +330,15 @@ def calculate_hash_of_extra_files(extra_files):
 
 
 def get_ssm_value(session, name):
-    """Get the ssm parameter value."""
+    """Get the ssm parameter value.
+
+    Args:
+        session (:class:`runway.cfngin.session.Session`): The CFNgin session.
+        name (str): The parameter name.
+    Returns:
+        str: The parameter value
+
+    """
     ssm_client = session.client('ssm')
 
     try:
@@ -311,7 +348,15 @@ def get_ssm_value(session, name):
 
 
 def set_ssm_value(session, name, value, description=''):
-    """Set the ssm parameter."""
+    """Set the ssm parameter.
+
+    Args:
+        session (:class:`runway.cfngin.session.Session`): The CFNgin session.
+        name (str): The name of the parameter.
+        value (str): The value of the paramter.
+        description (str): A description of the parameter.
+
+    """
     ssm_client = session.client('ssm')
 
     ssm_client.put_parameter(
