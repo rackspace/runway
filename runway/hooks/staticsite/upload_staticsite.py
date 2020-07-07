@@ -60,7 +60,7 @@ def sync(context, provider, **kwargs):
         hash_tracking_parameter=build_context.get('hash_tracking_parameter')
     )
 
-    if len(extra_files) > 0:
+    if extra_files:
         invalidate_cache = True
 
     if build_context['deploy_is_current']:
@@ -330,7 +330,7 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
     LOGGER.debug('bucket: %s', bucket)
     LOGGER.debug('extra_files: %s', json.dumps(extra_files))
 
-    if len(extra_files) == 0:
+    if not extra_files:
         return []
 
     session = context.get_session()
