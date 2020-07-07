@@ -82,16 +82,17 @@ def sync(context, provider, **kwargs):
 
         invalidate_cache = True
 
-        LOGGER.info("staticsite: sync " "complete")
-
-        update_ssm_hash(context, session)
-
     if kwargs.get('cf_disabled', False):
         display_static_website_url(kwargs.get('website_url'), provider, context)
 
-    if invalidate_cache:
+    elif invalidate_cache:
         distribution = get_distribution_data(context, provider, **kwargs)
         invalidate_distribution(session, **distribution)
+
+    LOGGER.info("staticsite: sync " "complete")
+
+    if not build_context['deploy_is_current']:
+        update_ssm_hash(context, session)
 
     prune_archives(context, session)
 
@@ -246,7 +247,7 @@ def get_content_type(extra_file):
 
 
 def get_content(extra_file):
-    """."""
+    """Get serialized content based on content_type."""
     content_type = extra_file.get('content_type')
     content = extra_file.get('content')
 
@@ -267,7 +268,14 @@ def get_content(extra_file):
 
 
 def calculate_hash_of_extra_files(extra_files):
-    """."""
+    """Return a hash of all of the given extra files.
+
+    Adapted from stacker.hooks.aws_lambda; used according to its license:
+    https://github.com/cloudtools/stacker/blob/1.4.0/LICENSE
+
+    All attributes of the extra file object are includeded when hashing:
+    name, content_type, content, and file data.
+    """
     file_hash = hashlib.md5()
 
     for extra_file in sorted(extra_files, key=lambda extra_file: extra_file['name']):
@@ -293,7 +301,7 @@ def calculate_hash_of_extra_files(extra_files):
 
 
 def get_ssm_value(session, name):
-    """."""
+    """Get the ssm parameter value."""
     ssm_client = session.client('ssm')
 
     try:
@@ -303,7 +311,7 @@ def get_ssm_value(session, name):
 
 
 def set_ssm_value(session, name, value, description=''):
-    """."""
+    """Set the ssm parameter."""
     ssm_client = session.client('ssm')
 
     ssm_client.put_parameter(

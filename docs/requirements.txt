@@ -1,5 +1,4 @@
 -i https://pypi.org/simple
--e ./..
 alabaster==0.7.12
 attrs==19.3.0
 awacs==0.9.8

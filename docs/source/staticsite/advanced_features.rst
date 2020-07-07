@@ -86,7 +86,7 @@ See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in A
     * ``application/json`` to serialize ``content`` into JSON.
     * ``text/yaml`` to serialize ``content`` into YAML.
 
-**content (Optional[Union[str,List[Any],Dict[str, Any]]])**
+**content (Optional[Union[str, List[Any], Dict[str, Any]]])**
     Inline content that will be used as the file content. This or ``file`` must be specified.
 
 .. note::

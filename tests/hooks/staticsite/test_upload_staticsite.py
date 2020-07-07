@@ -1,5 +1,5 @@
 """Test runway.hooks.staticsite.upload_staticsite."""
-# pylint: disable=no-self-use,unused-import
+# pylint: disable=no-self-use,unused-import,too-few-public-methods
 
 import json
 import yaml
@@ -19,44 +19,31 @@ from runway.hooks.staticsite.upload_staticsite import (
 class TestAutoDetectContentType(object):
     """Test runway.hooks.staticsite.upload_staticsite.auto_detect_content_type."""
 
-    def test_json(self):
-        """Test .json file names return application/json."""
-        assert auto_detect_content_type('test.json') == 'application/json'
-
-    def test_yml(self):
-        """Test .yml file names return text/yaml."""
-        assert auto_detect_content_type('test.yml') == 'text/yaml'
-
-    def test_yaml(self):
-        """Test .yaml file names return text/yaml."""
-        assert auto_detect_content_type('test.yaml') == 'text/yaml'
-
-    def test_default_content_type(self):
-        """Test that None is returned by default."""
-        assert auto_detect_content_type('test.txt') is None
-
-    def test_no_extension(self):
-        """Test filenames without an extention returns None."""
-        assert auto_detect_content_type('test') is None
+    @pytest.mark.parametrize('provided, expected', [
+        ('prefix.test.json', 'application/json'),
+        ('test.json', 'application/json'),
+        ('test.yml', 'text/yaml'),
+        ('test.yaml', 'text/yaml'),
+        ('test.txt', None),
+        ('test', None),
+        ('.test', None)
+    ])
+    def test_auto_detect_content_type(self, provided, expected):
+        """Test auto_detect_content_type."""
+        assert auto_detect_content_type(provided) == expected
 
 
 class TestGetContentType(object):
     """Test runway.hooks.staticsite.upload_staticsite.get_content_type."""
 
-    def test_with_content_type(self):
-        """Test that provided content_type is used."""
-        assert get_content_type({
-            'name': 'test.txt',
-            'content_type': 'text/plain'
-        }) == 'text/plain'
-
-    def test_wout_content_type(self):
-        """Test that auto content_type is used."""
-        assert get_content_type({'name': 'test.json'}) == 'application/json'
-
-    def test_wout_content_type_and_auto(self):
-        """Test that None is returned for unknown content_type."""
-        assert get_content_type({'name': 'test.txt'}) is None
+    @pytest.mark.parametrize('provided, expected', [
+        ({'name': 'test.txt', 'content_type': 'text/plain'}, 'text/plain'),
+        ({'name': 'test.json'}, 'application/json'),
+        ({'name': 'test.txt'}, None)
+    ])
+    def test_get_content_type(self, provided, expected):
+        """Test get_content_type."""
+        assert get_content_type(provided) == expected
 
 
 class TestGetContent(object):
@@ -94,46 +81,13 @@ class TestGetContent(object):
 class TestCalculateExtraFilesHash(object):
     """Test runway.hooks.staticsite.upload_staticsite.calculate_hash_of_extra_files."""
 
-    def test_name_is_included(self):
-        """Test name is included in the hash."""
-        a = {
-            'name': 'a',
-        }
-
-        b = {
-            'name': 'b'
-        }
-
-        assert (calculate_hash_of_extra_files([a]) !=
-                calculate_hash_of_extra_files([b]))
-
-    def test_content_type_is_included(self):
-        """Test content_type is included in the hash."""
-        a = {
-            'name': 'test',
-            'content_type': 'a'
-        }
-
-        b = {
-            'name': 'test',
-            'content_type': 'b'
-        }
-
-        assert (calculate_hash_of_extra_files([a]) !=
-                calculate_hash_of_extra_files([b]))
-
-    def test_content(self):
-        """Test content is included in the hash."""
-        a = {
-            'name': 'test',
-            'content': 'a'
-        }
-
-        b = {
-            'name': 'test',
-            'content': 'b'
-        }
-
+    @pytest.mark.parametrize('a, b', [
+        ({'name': 'a'}, {'name': 'b'}),
+        ({'name': 'test', 'content_type': 'a'}, {'name': 'test', 'content_type': 'b'}),
+        ({'name': 'test', 'content': 'a'}, {'name': 'test', 'content': 'b'})
+    ])
+    def test_calculate_hash_of_extra_files(self, a, b):
+        """Test calculate_hash_of_extra_files."""
         assert (calculate_hash_of_extra_files([a]) !=
                 calculate_hash_of_extra_files([b]))
 
