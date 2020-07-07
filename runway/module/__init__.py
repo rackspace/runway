@@ -21,13 +21,10 @@ NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
 
 def format_npm_command_for_logging(command):
     """Convert npm command list to string for display to user."""
-    if platform.system().lower() == 'windows':
-        if command[0] == 'npx.cmd' and command[1] == '-c':
-            return "npx.cmd -c \"%s\"" % " ".join(command[2:])
-        return " ".join(command)
-    # Strip out redundant npx quotes not needed when executing the command
-    # directly
-    return " ".join(command).replace('\'\'', '\'')
+    if platform.system().lower() == 'windows' and (
+            command[0] == 'npx.cmd' and command[1] == '-c'):
+        return "npx.cmd -c \"%s\"" % " ".join(command[2:])
+    return ' '.join(command)
 
 
 def generate_node_command(command, command_opts, path):
@@ -35,16 +32,9 @@ def generate_node_command(command, command_opts, path):
     if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
         LOGGER.debug("Using npx to invoke %s.", command)
-        if platform.system().lower() == 'windows':
-            cmd_list = [NPX_BIN,
-                        '-c',
-                        "%s %s" % (command, ' '.join(command_opts))]
-        else:
-            # The nested app-through-npx-via-subprocess command invocation
-            # requires this redundant quoting
-            cmd_list = [NPX_BIN,
-                        '-c',
-                        "''%s %s''" % (command, ' '.join(command_opts))]
+        cmd_list = [NPX_BIN,
+                    '-c',
+                    "%s %s" % (command, ' '.join(command_opts))]
     else:
         LOGGER.debug('npx not found; falling back invoking %s shell script '
                      'directly.', command)

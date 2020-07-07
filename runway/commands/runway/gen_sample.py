@@ -303,9 +303,9 @@ def generate_sample_cdk_tsc_module(env_root, module_dir=None):
             os.path.join(module_dir, i[0], i[1]),
         )
     with open(os.path.join(module_dir, '.gitignore'), 'w') as stream:
-        stream.write('*.js\n')
-        stream.write('*.d.ts\n')
-        stream.write('node_modules\n')
+        for i in ['*.js', '*.d.ts', 'node_modules', '.cdk.staging', 'cdk.out',
+                  'cdk.context.json']:
+            stream.write(i + '\n')
     LOGGER.info("Sample CDK module created at %s", module_dir)
     LOGGER.info('To finish its setup, change to the %s directory and execute '
                 '"npm install" to generate its lockfile.', module_dir)
