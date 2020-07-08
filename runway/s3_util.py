@@ -8,7 +8,7 @@ import boto3
 from boto3.s3.transfer import S3Transfer
 from botocore.exceptions import ClientError
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 def _get_client(session=None, region=None):
@@ -34,18 +34,21 @@ def purge_bucket(bucket_name, region='us-east-1', session=None):
         bucket = s3_resource.Bucket(bucket_name)
         bucket.object_versions.delete()
     else:
-        LOGGER.warning('Bucket "%s" does not exist in region "%s"', bucket_name, region)
+        LOGGER.warning('bucket "%s" does not exist in region "%s"',
+                       bucket_name, region)
 
 
 def delete_bucket(bucket_name, region='us-east-1', session=None):
     """Delete bucket."""
     if does_bucket_exist(bucket_name, region, session):
-        LOGGER.info('Deleting bucket "%s"', bucket_name)
+        LOGGER.verbose('delete bucket "%s"...', bucket_name)
         s3_resource = _get_resource(session, region)
         bucket = s3_resource.Bucket(bucket_name)
         bucket.delete()
+        LOGGER.info('delete bucket "%s"', bucket_name)
     else:
-        LOGGER.warning('Bucket "%s" does not exist in region "%s"', bucket_name, region)
+        LOGGER.warning('bucket "%s" does not exist in region "%s"',
+                       bucket_name, region)
 
 
 def does_bucket_exist(bucket_name, region='us-east-1', session=None):
@@ -57,10 +60,10 @@ def does_bucket_exist(bucket_name, region='us-east-1', session=None):
         return True
     except ClientError as exc:
         if exc.response['Error']['Message'] == 'Not Found':
-            LOGGER.info("Bucket \"%s\" does not exist", bucket_name)
+            LOGGER.info('bucket "%s" does not exist', bucket_name)
             return False
         if exc.response['Error']['Message'] == 'Forbidden':
-            LOGGER.exception("Access denied for bucket %s (permissions?)",
+            LOGGER.exception('access denied for bucket "%s" (permissions?)',
                              bucket_name)
             raise
 
@@ -68,7 +71,7 @@ def does_bucket_exist(bucket_name, region='us-east-1', session=None):
 def ensure_bucket_exists(bucket_name, region='us-east-1', session=None):
     """Ensure S3 bucket exists."""
     if not does_bucket_exist(bucket_name, region, session):
-        LOGGER.info("Bucket \"%s\" does not exist, creating...", bucket_name)
+        LOGGER.info('creating bucket "%s" (in-progress)', bucket_name)
         s3_client = _get_client(session, region)
         if region == 'us-east-1':
             create_bucket_opts = {}
@@ -84,6 +87,7 @@ def ensure_bucket_exists(bucket_name, region='us-east-1', session=None):
         # it is ready to add the encryption settings.
         bucket_waiter = s3_client.get_waiter('bucket_exists')
         bucket_waiter.wait(Bucket=bucket_name)
+        LOGGER.info('creating bucket "%s" (complete)', bucket_name)
 
         # enable default encryption
         s3_client.put_bucket_encryption(Bucket=bucket_name,
@@ -94,6 +98,7 @@ def ensure_bucket_exists(bucket_name, region='us-east-1', session=None):
                                                 }
                                             }]
                                         })
+        LOGGER.verbose('enabled encryption for bucket "%s"', bucket_name)
 
 
 def does_s3_object_exist(bucket, key, session=None, region='us-east-1'):
@@ -102,8 +107,10 @@ def does_s3_object_exist(bucket, key, session=None, region='us-east-1'):
 
     try:
         s3_resource.Object(bucket, key).load()
+        LOGGER.debug('s3 object exists: %s/%s', bucket, key)
     except ClientError as exc:
         if exc.response['Error']['Code'] == '404':
+            LOGGER.debug('s3 object does not exist: %s/%s', bucket, key)
             return False
         raise
     return True
@@ -112,7 +119,7 @@ def does_s3_object_exist(bucket, key, session=None, region='us-east-1'):
 def upload(bucket, key, filename, session=None):
     """Upload file to S3 bucket."""
     s3_client = _get_client(session)
-    LOGGER.info('Uploading %s to %s/%s', filename, bucket, key)
+    LOGGER.info('uploading %s to s3://%s/%s...', filename, bucket, key)
     s3_client.upload_file(filename, bucket, key)
 
 
@@ -121,6 +128,7 @@ def download(bucket, key, file_path, session=None):
     s3_client = _get_client(session)
 
     transfer = S3Transfer(s3_client)
+    LOGGER.info('downloading s3://%s/%s to %s...', bucket, key, file_path)
     transfer.download_file(bucket, key, file_path)
     return file_path
 
@@ -136,6 +144,7 @@ def download_and_extract_to_mkdtemp(bucket, key, session=None):
     zip_ref.extractall(output_dir)
     zip_ref.close()
     os.remove(temp_file)
+    LOGGER.verbose('extracted %s to %s', temp_file, output_dir)
     return output_dir
 
 

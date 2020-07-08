@@ -13,8 +13,9 @@ from six.moves.urllib.error import URLError  # pylint: disable=E
 from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
 from ..util import md5sum
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 KB_VERSION_FILENAME = '.kubectl-version'
+RELEASE_URI = 'https://storage.googleapis.com/kubernetes-release/release'
 
 
 # Branch and local variable count will go down when py2 support is dropped
@@ -41,9 +42,10 @@ def download_kb_release(version,  # noqa pylint: disable=too-many-locals,too-man
 
     download_dir = tempfile.mkdtemp()
     filename = 'kubectl.exe' if kb_platform == 'windows' else 'kubectl'
-    kb_url = "https://storage.googleapis.com/kubernetes-release/release/%s/bin/%s/%s" % (version, kb_platform, arch)  # noqa pylint: disable=line-too-long
+    kb_url = "%s/%s/bin/%s/%s" % (RELEASE_URI, version, kb_platform, arch)
 
     try:
+        LOGGER.verbose('downloading kubectl from %s...', kb_url)
         for i in [filename, filename + '.md5']:
             urlretrieve(kb_url + '/' + i,
                         os.path.join(download_dir, i))
@@ -55,7 +57,7 @@ def download_kb_release(version,  # noqa pylint: disable=too-many-locals,too-man
         kb_hash = stream.read().rstrip('\n')
 
     if kb_hash != md5sum(os.path.join(download_dir, filename)):
-        LOGGER.error("Downloaded kubectl %s does not match md5 %s",
+        LOGGER.error("downloaded kubectl %s does not match md5 %s",
                      filename, kb_hash)
         sys.exit(1)
 
@@ -75,9 +77,9 @@ def get_version_requested(path):
     kb_version_path = os.path.join(path,
                                    KB_VERSION_FILENAME)
     if not os.path.isfile(kb_version_path):
-        LOGGER.error("kubectl install attempted and no %s file present to "
-                     "dictate the version. Please create it (e.g.  write "
-                     "\"1.14.0\" (without quotes) to the file and try again",
+        LOGGER.error('kubectl install attempted and no %s file present to '
+                     'dictate the version; please create it. (e.g. write '
+                     '"1.14.0", without quotes, to the file and try again)',
                      KB_VERSION_FILENAME)
         sys.exit(1)
     with open(kb_version_path, 'r') as stream:
@@ -115,10 +117,10 @@ class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
                                 version_requested,
                                 'kubectl') + self.command_suffix
 
-        LOGGER.info("Downloading and using kubectl version %s ...",
+        LOGGER.info("downloading and using kubectl version %s ...",
                     version_requested)
         download_kb_release(version_requested, versions_dir)
-        LOGGER.info("Downloaded kubectl %s successfully", version_requested)
+        LOGGER.info("downloaded kubectl %s successfully", version_requested)
         return os.path.join(versions_dir,
                             version_requested,
                             'kubectl') + self.command_suffix

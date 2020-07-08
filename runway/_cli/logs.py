@@ -11,13 +11,15 @@ from ..util import cached_property
 # COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger('runway')
 
-LOG_FORMAT = '%(levelname)s:runway:%(message)s'
-LOG_FORMAT_VERBOSE = '%(levelname)s:%(name)s:%(message)s'
+LOG_FORMAT = '[%(programname)s] %(message)s'
+LOG_FORMAT_VERBOSE = logging.BASIC_FORMAT
 LOG_FIELD_STYLES = {
     'asctime': {},
     'hostname': {},
     'levelname': {},
+    'message': {},
     'name': {},
+    'prefix': {},
     'programname': {}
 }
 LOG_LEVEL_STYLES = {
@@ -185,6 +187,7 @@ def setup_logging(*_, **kwargs):
                         logger=botocore_logger, **settings.coloredlogs)
     coloredlogs.install(settings.dependency_log_level,
                         logger=urllib3_logger, **settings.coloredlogs)
+
     LOGGER.debug('runway log level: %s', LOGGER.getEffectiveLevel().name)
     LOGGER.debug('dependency log levels: %s', {
         'botocore': botocore_logger.getEffectiveLevel(),

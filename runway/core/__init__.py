@@ -7,7 +7,11 @@ import traceback as _traceback
 from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
                     Optional)
 
+import yaml as _yaml
+from .._logging import PrefixAdaptor as _PrefixAdaptor
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
+from ..util import YamlDumper as _YamlDumper
+from ..util import DOC_SITE
 from . import components, providers
 
 if TYPE_CHECKING:
@@ -123,44 +127,37 @@ class Runway(object):
     def test(self):
         """Run tests defined in the config."""
         if not self.tests:
-            LOGGER.error(
-                'Use of "runway test" without defining tests in the runway config '
-                'file has been removed. See '
-                'https://docs.onica.com/projects/runway/en/release/defining_tests.html'
-            )
-            LOGGER.error('E.g.:')
-            for i in ['tests:',
-                      '  - name: example-test',
-                      '    type: script',
-                      '    required: true',
-                      '    args:',
-                      '      commands:',
-                      '        - echo "Success!"',
-                      '']:
-                print(i)
+            LOGGER.error('No tests are defined in the Runway config.')
+            LOGGER.error('To learn more about using Runway to run tests, '
+                         'visit %s/page/defining_tests.html.', DOC_SITE)
+            LOGGER.error('Example test:\n%s', _yaml.dump({
+                'tests': [{'name': 'example-test',
+                           'type': 'script',
+                           'required': True,
+                           'args': {'commands': ['echo "Success!"']}}]
+            }, Dumper=_YamlDumper))
             _sys.exit(1)
         self.ctx.command = 'test'
 
         failed_tests = []
 
-        LOGGER.info('Found %i test(s)', len(self.tests))
+        LOGGER.info('found %i test(s)', len(self.tests))
         for tst in self.tests:
             tst.resolve(self.ctx, variables=self.variables)
-            LOGGER.info("")
-            LOGGER.info("")
-            LOGGER.info("======= Running test '%s' ===========================",
-                        tst.name)
+            logger = _PrefixAdaptor(tst.name, LOGGER)
+            logger.notice('running test (in-progress)')
             try:
                 handler = _TEST_HANDLERS[tst.type]
             except KeyError:
-                LOGGER.error('Unable to find handler for test "%s" of '
-                             'type "%s"', tst.name, tst.type)
+                logger.error('unable to find handler of '
+                             'type "%s"', tst.type)
                 if tst.required:
                     _sys.exit(1)
                 failed_tests.append(tst.name)
                 continue
             try:
                 handler.handle(tst.name, tst.args)
+                logger.success('running test (pass)')
             except (Exception, SystemExit) as err:  # pylint: disable=broad-except
                 # for lack of an easy, better way to do this atm, assume
                 # SystemExits are due to a test failure and the failure reason
@@ -170,16 +167,17 @@ class Runway(object):
                     _traceback.print_exc()
                 elif err.code == 0:
                     continue  # tests with zero exit code don't indicate failure
-                LOGGER.error('Test failed: %s', tst.name)
+                logger.error('running test (fail)')
                 if tst.required:
-                    LOGGER.error('Failed test was required, the remaining '
+                    logger.error('failed test was required; the remaining '
                                  'tests have been skipped')
                     _sys.exit(1)
                 failed_tests.append(tst.name)
         if failed_tests:
-            LOGGER.error('The following tests failed: %s',
+            LOGGER.error('the following tests failed: %s',
                          ', '.join(failed_tests))
             _sys.exit(1)
+        LOGGER.success('all tests passed')
 
     def __run_action(self, action, deployments):
         # type: (Optional[List[DeploymentDefinition]]) -> None

@@ -9,7 +9,7 @@ import sys
 
 from .util import (load_object_from_string)
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 # noqa pylint: disable=too-few-public-methods
@@ -92,17 +92,24 @@ class RunwayModuleType(object):
             object: The specified module class
 
         """
-        if not self.class_path:
+        if self.class_path:
+            LOGGER.debug('module class "%s" determined from explicit '
+                         'definition', self.class_path)
+        else:
             self._set_class_path_based_on_extension()
 
         if not self.class_path and self.type_str:
             self.class_path = self.TYPE_MAP.get(self.type_str, None)
+            if self.class_path:
+                LOGGER.debug('module class "%s" determined from explicit type',
+                             self.class_path)
 
         if not self.class_path:
             self._set_class_path_based_on_autodetection()
 
         if not self.class_path:
-            LOGGER.error('No module class found for %s', os.path.basename(self.path))
+            LOGGER.error('module class could not be determined from '
+                         'path "%s"', os.path.basename(self.path))
             sys.exit(1)
 
         return load_object_from_string(self.class_path)
@@ -114,6 +121,9 @@ class RunwayModuleType(object):
         basename_split = basename.split('.')
         extension = basename_split[len(basename_split) - 1]
         self.class_path = self.EXTENSION_MAP.get(extension, None)
+        if self.class_path:
+            LOGGER.debug('module class "%s" determined from path '
+                         'extension "%s"', self.class_path, extension)
 
     def _set_class_path_based_on_autodetection(self):
         # type() -> void
@@ -131,6 +141,9 @@ class RunwayModuleType(object):
             or self._has_glob('*.yaml') \
                 or self._has_glob('*.yml'):
             self.class_path = self.TYPE_MAP.get('cloudformation', None)
+        if self.class_path:
+            LOGGER.debug('module class "%s" determined from autodetection',
+                         self.class_path)
 
     def _is_file(self, file_name):
         # type(str) -> boolean

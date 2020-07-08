@@ -14,7 +14,7 @@ if sys.version_info[0] > 2:  # TODO remove after droping python 2
 else:
     from pathlib2 import Path  # pylint: disable=E
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
 NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
 
@@ -109,15 +109,23 @@ class RunwayModule(object):
     """Base class for Runway modules."""
 
     def __init__(self, context, path, options=None):
-        """Initialize base class."""
+        """Instantiate class.
+
+        Args:
+            context (Context): Runway context object.
+            path (Union[str, Path]): Path to the module.
+            options (Dict[str, Dict[str, Any]]): Everything in the module
+                definition merged with applicable values from the deployment
+                definition.
+
+        """
         self.context = context
-
-        self.path = path
-
-        if options is None:
-            self.options = {}
-        else:
-            self.options = options
+        self.path = str(path)
+        self.options = {} if options is None else options
+        if isinstance(path, Path):
+            self.name = options.get('name', path.name)
+        else:  # until we can replace path with a Path object here, handle str
+            self.name = options.get('name', Path(path).name)
 
     # the rest of these 'abstract' methods must have names which match
     #  the commands defined in `cli.py`
@@ -175,7 +183,6 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         self.options = options.pop('options', {})
         self.parameters = options.pop('parameters', {})
         self.path = path if isinstance(self.path, Path) else Path(self.path)
-        self.name = options.get('name', self.path.name)
 
         for k, v in options.items():
             setattr(self, k, v)

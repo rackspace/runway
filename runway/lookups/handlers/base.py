@@ -170,7 +170,7 @@ class LookupHandler(object):
         if transform:
             return cls.transform(value, to_type=transform, **kwargs)
         if isinstance(value, MutableMap):
-            LOGGER.debug('Returning data from MutableMap')
+            LOGGER.debug('returning data from MutableMap')
             return value.data
         return value
 

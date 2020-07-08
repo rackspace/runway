@@ -8,7 +8,7 @@ import six
 
 from .sources.git import Git
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class Path(object):  # pylint: disable=too-many-instance-attributes

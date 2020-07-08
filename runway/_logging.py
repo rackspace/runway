@@ -31,7 +31,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
 
     """
 
-    def __init__(self, prefix, logger, prefix_template='{prefix}: {msg}'):
+    def __init__(self, prefix, logger, prefix_template='{prefix}:{msg}'):
         """Instantiate class.
 
         Args:

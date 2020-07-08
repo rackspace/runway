@@ -58,34 +58,34 @@ class AssumeRole(AbstractContextManager):
         if self.revert_on_exit:
             self.save_existing_iam_env_vars()
         sts_client = self.ctx.get_session().client('sts')
-        LOGGER.info('Assuming role %s...', self.role_arn)
+        LOGGER.info('assuming role %s...', self.role_arn)
         response = sts_client.assume_role(**self._kwargs)
         LOGGER.debug('sts.assume_role respsone: %s', response)
         self.assumed_role_user.update(response['AssumedRoleUser'])
         self.credentials.update(response['Credentials'])
-        self.ctx.env_vars.update({
+        self.ctx.env.vars.update({
             'AWS_ACCESS_KEY_ID': response['Credentials']['AccessKeyId'],
             'AWS_SECRET_ACCESS_KEY': response['Credentials']['SecretAccessKey'],
             'AWS_SESSION_TOKEN': response['Credentials']['SessionToken']
         })
+        LOGGER.verbose('updated environment with assumed credentials')
 
     def restore_existing_iam_env_vars(self):
         """Restore backed up IAM environment variables."""
         for k in self.ctx.current_aws_creds.keys():
             old = 'OLD_' + k
             if self.ctx.env_vars.get(old):
-                LOGGER.debug('reverting environment variable %s to its '
-                             'previous value', k)
                 self.ctx.env_vars[k] = self.ctx.env_vars.pop(old)
+                LOGGER.debug('reverted environment variables: %s', k)
             else:
-                LOGGER.debug('removing %s from the environment', k)
                 self.ctx.env_vars.pop(k, None)
+                LOGGER.debug('removed environment variables: %s ', k)
 
     def save_existing_iam_env_vars(self):
         """Backup IAM environment variables for later restoration."""
         for k, v in self.ctx.current_aws_creds.items():
             new = 'OLD_' + k
-            LOGGER.debug('saving environment variable %s as %s', k, new)
+            LOGGER.debug('saving environment variable "%s" as "%s"', k, new)
             self.ctx.env_vars[new] = v
 
     def __enter__(self):

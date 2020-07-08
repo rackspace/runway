@@ -16,6 +16,7 @@ from typing import (Any, Dict, Iterator,  # noqa pylint: disable=unused-import
                     List, Optional, Union)
 
 import six
+import yaml
 
 if sys.version_info >= (3, 6):
     from contextlib import AbstractContextManager  # pylint: disable=E
@@ -24,6 +25,7 @@ else:
 
 AWS_ENV_VARS = ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
                 'AWS_SESSION_TOKEN')
+DOC_SITE = 'https://docs.onica.com/projects/runway'
 EMBEDDED_LIB_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'embedded'
@@ -377,6 +379,28 @@ class SafeHaven(AbstractContextManager):
         """Exit the context manager."""
         self.log.debug('leaving the safe haven...')
         self.reset_all()
+
+
+# TODO remove after https://github.com/yaml/pyyaml/issues/234 is resolved
+class YamlDumper(yaml.Dumper):
+    """Custom YAML Dumper.
+
+    This Dumper allows for YAML to be output to follow YAML spec 1.2,
+    example 2.3 of collections (2.1). This provides an output that is more
+    humanreadable and complies with yamllint.
+
+    Example:
+        >>> print(yaml.dump({'key': ['val1', 'val2']}, Dumper=YamlDumper))
+
+    Note:
+        YAML 1.2 Specification: https://yaml.org/spec/1.2/spec.html
+        used for reference.
+
+    """
+
+    def increase_indent(self, flow=False, indentless=False):
+        """Override parent method."""
+        return super(YamlDumper, self).increase_indent(flow, False)
 
 
 @contextmanager

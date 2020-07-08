@@ -5,21 +5,18 @@ import os
 import subprocess
 import sys
 
-from . import (
-    RunwayModule, format_npm_command_for_logging, generate_node_command,
-    run_module_command, run_npm_install, warn_on_boto_env_vars
-)
-from ..util import (
-    change_dir, run_commands, which
-)
+from .._logging import PrefixAdaptor
+from ..util import change_dir, run_commands, which
+from . import (RunwayModule, generate_node_command, run_module_command,
+               run_npm_install, warn_on_boto_env_vars)
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 def get_cdk_stacks(module_path, env_vars, context_opts):
     """Return list of CDK stacks."""
-    LOGGER.debug('Listing stacks in the CDK app prior to '
-                 'diff')
+    LOGGER.debug('listing stacks in the CDK app prior to '
+                 'diff...')
     result = subprocess.check_output(
         generate_node_command(
             command='cdk',
@@ -29,11 +26,28 @@ def get_cdk_stacks(module_path, env_vars, context_opts):
     )
     if isinstance(result, bytes):  # python3 returns encoded bytes
         result = result.decode()
-    return result.strip().split('\n')
+    result = result.strip().split('\n')
+    LOGGER.debug('found stacks: %s', result)
+    return result
 
 
 class CloudDevelopmentKit(RunwayModule):
     """CDK Runway Module."""
+
+    def __init__(self, context, path, options=None):
+        """Instantiate class.
+
+        Args:
+            context (Context): Runway context object.
+            path (Union[str, Path]): Path to the module.
+            options (Dict[str, Dict[str, Any]]): Everything in the module
+                definition merged with applicable values from the deployment
+                definition.
+
+        """
+        super(CloudDevelopmentKit, self).__init__(context, path, options)
+        # logger needs to be created here to use the correct logger
+        self.logger = PrefixAdaptor(self.name, LOGGER)
 
     def run_cdk(self, command='deploy'):  # pylint: disable=too-many-branches
         """Run CDK."""
@@ -43,8 +57,8 @@ class CloudDevelopmentKit(RunwayModule):
             cdk_opts.append('--no-color')
 
         if not which('npm'):
-            LOGGER.error('"npm" not found in path or is not executable; '
-                         'please ensure it is installed correctly.')
+            self.logger.error('"npm" not found in path or is not executable; '
+                              'please ensure it is installed correctly.')
             sys.exit(1)
 
         if 'DEBUG' in self.context.env_vars:
@@ -58,8 +72,7 @@ class CloudDevelopmentKit(RunwayModule):
                     run_npm_install(self.path, self.options, self.context)
                     if self.options.get('options', {}).get('build_steps',
                                                            []):
-                        LOGGER.info("Running build steps for %s...",
-                                    os.path.basename(self.path))
+                        self.logger.info('build steps (in-progress)')
                         run_commands(
                             commands=self.options.get('options',
                                                       {}).get('build_steps',
@@ -67,14 +80,13 @@ class CloudDevelopmentKit(RunwayModule):
                             directory=self.path,
                             env=self.context.env_vars
                         )
+                        self.logger.info('build steps (complete)')
                     cdk_context_opts = []
                     for (key, val) in self.options['parameters'].items():
                         cdk_context_opts.extend(['-c', "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)
                     if command == 'diff':
-                        LOGGER.info("Running cdk %s on each stack in %s",
-                                    command,
-                                    os.path.basename(self.path))
+                        self.logger.info("diff'ing each stack (in-progress)")
                         for i in get_cdk_stacks(self.path,
                                                 self.context.env_vars,
                                                 cdk_context_opts):
@@ -86,6 +98,7 @@ class CloudDevelopmentKit(RunwayModule):
                                 ),
                                 env=self.context.env_vars
                             )
+                        self.logger.info("diff'ing each stack (complete)")
                     else:
                         # Make sure we're targeting all stacks
                         if command in ['deploy', 'destroy']:
@@ -101,36 +114,28 @@ class CloudDevelopmentKit(RunwayModule):
                                 (['--no-color'] if self.context.no_color else []),
                                 self.path
                             )
-                            LOGGER.info('Running cdk bootstrap...')
+                            self.logger.info('bootstrap (in-progress)')
                             run_module_command(cmd_list=bootstrap_command,
                                                env_vars=self.context.env_vars)
-                        elif command == 'destroy' and 'CI' in self.context.env_vars:  # noqa
+                            self.logger.info('bootstrap (complete)')
+                        elif command == 'destroy' and \
+                                self.context.is_noninteractive:
                             cdk_opts.append('-f')  # Don't prompt
                         cdk_command = generate_node_command(
                             'cdk',
                             cdk_opts,
                             self.path
                         )
-                        LOGGER.info("Running cdk %s on %s (\"%s\")",
-                                    command,
-                                    os.path.basename(self.path),
-                                    format_npm_command_for_logging(cdk_command))  # noqa
+                        self.logger.info('%s (in-progress)', command)
                         run_module_command(cmd_list=cdk_command,
                                            env_vars=self.context.env_vars)
+                        self.logger.info('%s (complete)', command)
             else:
-                LOGGER.info(
-                    "Skipping cdk %s of %s; no \"package.json\" "
-                    "file was found (need a package file specifying "
-                    "aws-cdk in devDependencies)",
-                    command,
-                    os.path.basename(self.path))
+                self.logger.info('skipped; package.json with aws-cdk as a '
+                                 'devDependencies is required for this module '
+                                 'type')
         else:
-            LOGGER.info(
-                "Skipping cdk %s of %s; no config for "
-                "this environment found or current account/region does not "
-                "match configured environment",
-                command,
-                os.path.basename(self.path))
+            self.logger.info('skipped; environment required but not defined')
             response['skipped_configs'] = True
         return response
 

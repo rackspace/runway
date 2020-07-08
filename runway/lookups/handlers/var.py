@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from ...context import Context  # noqa: F401 pylint: disable=unused-import
 
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 TYPE_NAME = 'var'
 
 

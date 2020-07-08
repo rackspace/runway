@@ -11,6 +11,7 @@ from typing import (TYPE_CHECKING, Any, Dict,  # pylint: disable=unused-import
 import yaml
 from six import string_types
 
+from ._logging import PrefixAdaptor
 from .util import MutableMap, cached_property
 from .variables import Variable
 
@@ -111,14 +112,15 @@ class ConfigComponent(MutableMap):
                 populated until processing has begun.
 
         """
+        logger = PrefixAdaptor(self.name, LOGGER) \
+            if hasattr(self, 'name') else LOGGER
         if pre_process:
-            LOGGER.verbose('%s: resolving variables for pre-processing...',
-                           self.name)
+            logger.verbose('resolving variables for pre-processing...')
         else:
-            LOGGER.verbose('%s: resolving variables...', self.name)
+            logger.verbose('resolving variables...')
         for attr in (self.PRE_PROCESS_VARIABLES if pre_process
                      else self.SUPPORTS_VARIABLES):
-            LOGGER.debug('%s: resolving %s...', self.name, attr)
+            logger.debug('resolving %s...', attr)
             getattr(self, '_' + attr).resolve(context, variables=variables)
 
     def __getitem__(self, key):
