@@ -294,8 +294,6 @@ class TestDeployEnvironment(object):
     ])
     def test_log_name(self, derived_from, expected, caplog, monkeypatch):
         """Test log_name."""
-        expected.insert(0, '')
-        expected.append('')
         caplog.set_level(logging.INFO, logger='runway')
         monkeypatch.setattr(DeployEnvironment, 'name', 'test')
         obj = DeployEnvironment()

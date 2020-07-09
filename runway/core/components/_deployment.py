@@ -51,7 +51,7 @@ class Deployment(object):
         self.definition = definition
         self.ctx = context
         self.name = self.definition.name
-        self.log = PrefixAdaptor(self.name, LOGGER)
+        self.logger = PrefixAdaptor(self.name, LOGGER)
         self.__merge_env_vars()
 
     @property
@@ -98,8 +98,8 @@ class Deployment(object):
         """
         assume_role = self.definition.assume_role
         if not assume_role:
-            self.log.debug('assume_role not configured for deployment: %s',
-                           self.name)
+            self.logger.debug('assume_role not configured for deployment: %s',
+                              self.name)
             return {}
         if isinstance(assume_role, dict):
             top_level = {
@@ -108,25 +108,26 @@ class Deployment(object):
                 'session_name': assume_role.get('session_name')
             }
             if assume_role.get('arn'):
-                self.log.debug('role found in the top level dict: %s',
-                               assume_role['arn'])
+                self.logger.debug('role found in the top level dict: %s',
+                                  assume_role['arn'])
                 return dict(role_arn=assume_role['arn'],
                             duration_seconds=assume_role.get('duration'),
                             **top_level)
             if assume_role.get(self.ctx.env.name):
                 env_assume_role = assume_role[self.ctx.env.name]
                 if isinstance(env_assume_role, dict):
-                    self.log.debug('role found in deploy environment dict: %s',
-                                   env_assume_role['arn'])
+                    self.logger.debug('role found in deploy environment dict: %s',
+                                      env_assume_role['arn'])
                     return dict(role_arn=env_assume_role['arn'],
                                 duration_seconds=env_assume_role.get('duration'),
                                 **top_level)
-                self.log.debug('role found for environment: %s', env_assume_role)
+                self.logger.debug('role found for environment: %s',
+                                  env_assume_role)
                 return dict(role_arn=env_assume_role, **top_level)
-            self.log.info('skipping iam:AssumeRole; no role found for deploy '
-                          'environment "%s"...', self.ctx.env.name)
+            self.logger.info('skipping iam:AssumeRole; no role found for deploy'
+                             ' environment "%s"...', self.ctx.env.name)
             return {}
-        self.log.debug('role found: %s', assume_role)
+        self.logger.debug('role found: %s', assume_role)
         return {'role_arn': assume_role,
                 'revert_on_exit': False}
 
@@ -163,8 +164,8 @@ class Deployment(object):
         High level method for running a deployment.
 
         """
-        self.log.verbose('attempting to deploy to region(s): %s',
-                         ', '.join(self.regions))
+        self.logger.verbose('attempting to deploy to region(s): %s',
+                            ', '.join(self.regions))
         if self.use_async:
             return self.__async('deploy')
         return self.__sync('deploy')
@@ -176,8 +177,8 @@ class Deployment(object):
         High level method for running a deployment.
 
         """
-        self.log.verbose('attempting to destroy in regions(s): %s',
-                         ', '.join(self.regions))
+        self.logger.verbose('attempting to destroy in regions(s): %s',
+                            ', '.join(self.regions))
         if self.use_async:
             return self.__async('destroy')
         return self.__sync('destroy')
@@ -189,11 +190,11 @@ class Deployment(object):
         High level method for running a deployment.
 
         """
-        self.log.verbose('attempting to plan for the next deploy to'
-                         ' region(s): %s', ', '.join(self.regions))
+        self.logger.verbose('attempting to plan for the next deploy to'
+                            ' region(s): %s', ', '.join(self.regions))
         if self.use_async:
-            self.log.notice('processing of regions will be done in parallel '
-                            'during deploy/destroy.')
+            self.logger.notice('processing of regions will be done in parallel '
+                               'during deploy/destroy')
         return self.__sync('plan')
 
     def run(self, action, region):
@@ -233,31 +234,31 @@ class Deployment(object):
         account = aws.AccountDetails(self.ctx)
         if self.account_id_config:
             if self.account_id_config != account.id:
-                self.log.error('current AWS account "%s" does not match '
-                               'required account "%s" in Runway config.',
-                               account.id,
-                               self.account_id_config)
+                self.logger.error('current AWS account "%s" does not match '
+                                  'required account "%s" in Runway config.',
+                                  account.id,
+                                  self.account_id_config)
                 sys.exit(1)
-            self.log.info('verified current AWS account matches required '
-                          'account id "%s".', self.account_id_config)
+            self.logger.info('verified current AWS account matches required '
+                             'account id "%s".', self.account_id_config)
         if self.account_alias_config:
             if self.account_alias_config not in account.aliases:
-                self.log.error('current AWS account aliases "%s" do not match '
-                               'required account alias "%s" in Runway config.',
-                               ','.join(account.aliases),
-                               self.account_alias_config)
+                self.logger.error('current AWS account aliases "%s" do not match '
+                                  'required account alias "%s" in Runway config.',
+                                  ','.join(account.aliases),
+                                  self.account_alias_config)
                 sys.exit(1)
-            self.log.info('verified current AWS account alias matches '
-                          'required alias "%s".', self.account_alias_config)
+            self.logger.info('verified current AWS account alias matches '
+                             'required alias "%s".', self.account_alias_config)
 
     def __merge_env_vars(self):
         # type: () -> None
         """Merge defined env_vars into context.env_vars."""
         if self.env_vars_config:
-            self.log.verbose('environment variable overrides are being '
-                             'applied to this deployment')
-            self.log.debug('environment variable overrides: %s',
-                           self.env_vars_config)
+            self.logger.verbose('environment variable overrides are being '
+                                'applied to this deployment')
+            self.logger.debug('environment variable overrides: %s',
+                              self.env_vars_config)
             self.ctx.env.vars = merge_dicts(self.ctx.env.vars,
                                             self.env_vars_config)
 
@@ -269,8 +270,8 @@ class Deployment(object):
             action (str): Name of action to run.
 
         """
-        self.log.info('processing regions in parallel... '
-                      '(output will be interwoven)')
+        self.logger.info('processing regions in parallel... '
+                         '(output will be interwoven)')
         executor = concurrent.futures.ProcessPoolExecutor(
             max_workers=self.ctx.env.max_concurrent_regions
         )
@@ -288,9 +289,9 @@ class Deployment(object):
             action (str): Name of action to run.
 
         """
-        self.log.info('processing regions sequentially...')
+        self.logger.info('processing regions sequentially...')
         for region in self.regions:
-            self.log.verbose('processing AWS region: %s', region)
+            self.logger.verbose('processing AWS region: %s', region)
             self.run(action, region)
 
     @classmethod
@@ -322,15 +323,17 @@ class Deployment(object):
                              variables=variables)
             LOGGER.info('')
             LOGGER.info('')
-            deployment.log.notice('processing deployment (in-progress)')
+            deployment.logger.notice('processing deployment (in-progress)')
             if not definition.modules:
-                deployment.log.warning('skipping; no modules found in definition')
+                deployment.logger.warning(
+                    'skipped; no modules found in definition'
+                )
                 continue
             cls(context=context,
                 definition=definition,
                 future=future,
                 variables=variables)[action]()
-            deployment.log.success('processing deployment (complete)')
+            deployment.logger.success('processing deployment (complete)')
 
     def __getitem__(self, key):
         """Make the object subscriptable.

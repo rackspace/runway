@@ -60,7 +60,7 @@ class Module(object):
         definition.resolve(self.ctx, variables)
         self.definition = definition
         self.name = self.definition.name
-        self.log = PrefixAdaptor(self.fqn, LOGGER)
+        self.logger = PrefixAdaptor(self.fqn, LOGGER)
 
     @cached_property
     def child_modules(self):
@@ -117,7 +117,7 @@ class Module(object):
             return self.__handle_deprecated_environmet()
         is_valid = validate_environment(self.ctx,
                                         self.payload['environments'],
-                                        logger=self.log,
+                                        logger=self.logger,
                                         strict=self.__future.strict_environments)
         self.payload['environment'] = is_valid
         if isinstance(is_valid, bool):
@@ -174,8 +174,8 @@ class Module(object):
         if not self.child_modules:
             return self.run('plan')
         if self.use_async:
-            self.log.info('processing of modules will be done in parallel '
-                          'during deploy/destroy.')
+            self.logger.info('processing of modules will be done in parallel '
+                             'during deploy/destroy')
         return self.__sync('plan')
 
     def run(self, action):
@@ -189,13 +189,9 @@ class Module(object):
 
         """
         LOGGER.info('')
-        # LOGGER.info('------ Processing module "%s" for "%s" in %s ------',
-        #             self.name,
-        #             self.ctx.env.name,
-        #             self.ctx.env.aws_region)
-        self.log.notice('processing module in %s (in-progress)',
-                        self.ctx.env.aws_region)
-        self.log.verbose("module payload: %s", json.dumps(self.payload))
+        self.logger.notice('processing module in %s (in-progress)',
+                           self.ctx.env.aws_region)
+        self.logger.verbose("module payload: %s", json.dumps(self.payload))
         if self.should_skip:
             return
         with change_dir(self.path.module_root):
@@ -207,10 +203,10 @@ class Module(object):
             if hasattr(inst, action):
                 inst[action]()
             else:
-                self.log.error('"%s" is missing method "%s"', inst, action)
+                self.logger.error('"%s" is missing method "%s"', inst, action)
                 sys.exit(1)
-        self.log.success('processing module in %s (complete)',
-                         self.ctx.env.aws_region)
+        self.logger.success('processing module in %s (complete)',
+                            self.ctx.env.aws_region)
 
     def __async(self, action):
         # type: (str) -> None
@@ -220,8 +216,8 @@ class Module(object):
             action (str): Name of action to run.
 
         """
-        self.log.info('processing modules in parallel... '
-                      '(output will be interwoven)')
+        self.logger.info('processing modules in parallel... '
+                         '(output will be interwoven)')
         # Can't use threading or ThreadPoolExecutor here because
         # we need to be able to do things like `cd` which is not
         # thread safe.
@@ -242,7 +238,7 @@ class Module(object):
             action (str): Name of action to run.
 
         """
-        self.log.info('processing modules sequentially...')
+        self.logger.info('processing modules sequentially...')
         for module in self.child_modules:
             module.run(action)
 
@@ -251,7 +247,7 @@ class Module(object):
         """Load module options from local file."""
         opts_file = Path(self.path.module_root) / 'runway.module.yml'
         if opts_file.is_file():
-            self.log.verbose('module-level config file found')
+            self.logger.verbose('module-level config file found')
             return yaml.safe_load(opts_file.read_text())
         return {}
 
@@ -265,10 +261,10 @@ class Module(object):
                 env_root=str(self.ctx.env.root_dir)
             )
             if resolved_env_vars:
-                self.log.verbose('environment variable overrides are being '
-                                 'applied to this module')
-                self.log.debug('environment variable overrides: %s',
-                               resolved_env_vars)
+                self.logger.verbose('environment variable overrides are being '
+                                    'applied to this module')
+                self.logger.debug('environment variable overrides: %s',
+                                  resolved_env_vars)
                 self.ctx.env.vars = merge_dicts(self.ctx.env_vars,
                                                 resolved_env_vars)
 
@@ -351,7 +347,7 @@ def validate_environment(context, env_def, logger=None, strict=False):
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
             if strict:
-                logger.info('%s: skipped; environment not in definition')
+                logger.info('skipped; environment not in definition')
                 return False
             logger.info('environment not in definition; '
                         'module will determine deployment')

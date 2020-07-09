@@ -201,13 +201,13 @@ class Serverless(RunwayModuleNpm):
             if self.parameters or self.environments or self.env_file:
                 return False
             self.logger.info(
-                'skipping; config file for this stage/region not found'
+                'skipped; config file for this stage/region not found'
                 ' -- looking for one of: %s',
                 ', '.join(gen_sls_config_files(self.stage, self.region))
             )
         else:
             self.logger.info(
-                'skipping; package.json with "serverless" as a devDependencies'
+                'skipped; package.json with "serverless" in devDependencies'
                 ' is required for this module type'
             )
         return True
@@ -233,7 +233,7 @@ class Serverless(RunwayModuleNpm):
             else:  # TODO remove handling when dropping python 2 support
                 tmp_file.write_text(yaml.safe_dump(final_yml).decode('UTF-8'))
             self.logger.debug('created temporary Serverless config: %s',
-                              tmp_file.path)
+                              tmp_file)
             self.options.update_args('config', str(tmp_file.name))
             self.logger.debug(
                 'updated options.args with temporary Serverless config: %s',

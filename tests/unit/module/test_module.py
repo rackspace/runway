@@ -38,8 +38,8 @@ class TestRunwayModuleNpm(object):
         with pytest.raises(SystemExit):
             assert not obj.check_for_npm()
 
-        assert ['tests: "npm" not found in path or is not executable; '
-                'please ensure it is installed correctly.'] == \
+        assert ['"npm" not found in path or is not executable; '
+                'please ensure it is installed correctly'] == \
             caplog.messages
 
     @patch('runway.module.which')
@@ -82,8 +82,8 @@ class TestRunwayModuleNpm(object):
                                   path=tmp_path)
         assert excinfo.value.code > 0  # non-zero exit code
         assert caplog.messages == [
-            '{}: "npm" not found in path or is not executable; '
-            'please ensure it is installed correctly.'.format(tmp_path.name)
+            '"npm" not found in path or is not executable; '
+            'please ensure it is installed correctly'.format(tmp_path.name)
         ]
 
     @patch('runway.module.format_npm_command_for_logging')
@@ -94,10 +94,10 @@ class TestRunwayModuleNpm(object):
         obj = RunwayModuleNpm(context=runway_context,
                               path='./tests',
                               options={})
-        caplog.set_level(logging.INFO, logger='runway')
+        caplog.set_level(logging.DEBUG, logger='runway')
         assert not obj.log_npm_command(['npm', 'test'])
         mock_log.assert_called_once_with(['npm', 'test'])
-        assert ['tests: Running "success"'] == caplog.messages
+        assert ['node command: success'] == caplog.messages
 
     @patch('runway.module.use_npm_ci')
     @patch('runway.module.subprocess')
@@ -114,36 +114,36 @@ class TestRunwayModuleNpm(object):
 
         obj.options['skip_npm_ci'] = True
         assert not obj.npm_install()
-        expected_logs.append('tests: Skipping npm ci and npm install...')
+        expected_logs.append('skipped npm ci/npm install')
 
         obj.options['skip_npm_ci'] = False
         obj.context.env.ci = True
         mock_ci.return_value = True
         assert not obj.npm_install()
-        expected_logs.append('tests: Running npm ci...')
+        expected_logs.append('running npm ci...')
         expected_calls.append(call([NPM_BIN, 'ci']))
 
         obj.context.env.ci = False
         assert not obj.npm_install()
-        expected_logs.append('tests: Running npm install...')
+        expected_logs.append('running npm install...')
         expected_calls.append(call([NPM_BIN, 'install']))
 
         obj.context.env.ci = True
         mock_ci.return_value = False
         assert not obj.npm_install()
-        expected_logs.append('tests: Running npm install...')
+        expected_logs.append('running npm install...')
         expected_calls.append(call([NPM_BIN, 'install']))
 
         monkeypatch.setattr(runway_context, 'no_color', True)
         assert not obj.npm_install()
-        expected_logs.append('tests: Running npm install...')
+        expected_logs.append('running npm install...')
         expected_calls.append(call([NPM_BIN, 'install', '--no-color']))
 
         obj.options['skip_npm_ci'] = False
         obj.context.env.ci = True
         mock_ci.return_value = True
         assert not obj.npm_install()
-        expected_logs.append('tests: Running npm ci...')
+        expected_logs.append('running npm ci...')
         expected_calls.append(call([NPM_BIN, 'ci', '--no-color']))
 
         assert expected_logs == caplog.messages
@@ -152,14 +152,14 @@ class TestRunwayModuleNpm(object):
     def test_package_json_missing(self, caplog, patch_module_npm,
                                   runway_context, tmp_path):
         """Test package_json_missing."""
-        caplog.set_level(logging.WARNING, logger='runway')
+        caplog.set_level(logging.DEBUG, logger='runway')
         obj = RunwayModuleNpm(context=runway_context,
                               path=str(tmp_path),
                               options={})
 
         assert obj.package_json_missing()
         assert [
-            '{}: Module is missing a "package.json"'.format(tmp_path.name)
+            'module is missing package.json'.format(tmp_path.name)
         ] == caplog.messages
 
         (tmp_path / 'package.json').touch()

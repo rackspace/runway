@@ -150,17 +150,13 @@ def test_create_in_ssm(provider, context, ssh_key, ssm_key_id):
     assert param_details.get('KeyId') == ssm_key_id
 
 
-def test_interactive_non_terminal_input(capsys, provider, context):
+def test_interactive_non_terminal_input(provider, context):
     """Test interactive non terminal input."""
     with mock_input(isatty=False) as _input:
         result = ensure_keypair_exists(provider, context,
                                        keypair=KEY_PAIR_NAME)
         _input.assert_not_called()
     assert result is False
-
-    output = capsys.readouterr()
-    assert not output.out
-    assert not output.err
 
 
 def test_interactive_retry_cancel(provider, context):

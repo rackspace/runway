@@ -123,18 +123,6 @@ class LogSettings(object):
         return result
 
     @cached_property
-    def dependency_log_level(self):
-        """Return dependency log level.
-
-        Returns:
-            LogLevel
-
-        """
-        if self.debug > 1:
-            return LogLevels.DEBUG
-        return LogLevels.ERROR
-
-    @cached_property
     def level_styles(self):
         """Return log level styles.
 
@@ -153,8 +141,8 @@ class LogSettings(object):
         return result
 
     @cached_property
-    def runway_log_level(self):
-        """Return Runway log level.
+    def log_level(self):
+        """Return log level to use.
 
         Returns:
             LogLevel
@@ -178,19 +166,13 @@ def setup_logging(*_, **kwargs):
     settings = LogSettings(debug=kwargs.pop('debug', 0),
                            verbose=kwargs.pop('verbose', False))
 
-    botocore_logger = logging.getLogger('botocore')
-    urllib3_logger = logging.getLogger('urllib3')
-
-    coloredlogs.install(settings.runway_log_level, logger=LOGGER,
+    coloredlogs.install(settings.log_level, logger=LOGGER,
                         **settings.coloredlogs)
-    coloredlogs.install(settings.dependency_log_level,
-                        logger=botocore_logger, **settings.coloredlogs)
-    coloredlogs.install(settings.dependency_log_level,
-                        logger=urllib3_logger, **settings.coloredlogs)
+    LOGGER.debug('runway log level: %s', LOGGER.getEffectiveLevel())
 
-    LOGGER.debug('runway log level: %s', LOGGER.getEffectiveLevel().name)
-    LOGGER.debug('dependency log levels: %s', {
-        'botocore': botocore_logger.getEffectiveLevel(),
-        'urllib3': urllib3_logger.getEffectiveLevel()
-    })
+    if settings.debug == 2:
+        coloredlogs.install(settings.log_level,
+                            logger=logging.getLogger('botocore'),
+                            **settings.coloredlogs)
+        LOGGER.debug('set dependency log level to debug')
     LOGGER.debug('initalized logging for Runway')

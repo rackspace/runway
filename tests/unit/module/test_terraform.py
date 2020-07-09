@@ -212,7 +212,7 @@ class TestTerraformBackendConfig(object):
     def test_resolve_ssm_params(self, caplog, kwargs, parameters, expected):
         """Test resolve_ssm_params."""
         # this test is not compatable with python 2 due to how it handles dicts
-        caplog.set_level('WARNING', logger='runway')
+        caplog.set_level('WARNING')
 
         client = boto3.client('ssm')
         stubber = Stubber(client)
@@ -235,7 +235,7 @@ class TestTerraformBackendConfig(object):
                 client, **kwargs
             ) == expected
         stubber.assert_no_pending_responses()
-        assert 'deprecated' in caplog.records[0].msg
+        assert 'deprecated' in '\n'.join(caplog.messages)
 
     def test_gen_backend_tfvars_filenames(self):
         """Test gen_backend_tfvars_filenames."""

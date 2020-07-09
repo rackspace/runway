@@ -47,7 +47,7 @@ class StaticSite(RunwayModule):
         if self.parameters:
             self._setup_website_module(command='plan')
         else:
-            self.logger.info('skipping; environment required but not defined')
+            self.logger.info('skipped; environment required but not defined')
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
@@ -75,14 +75,14 @@ class StaticSite(RunwayModule):
                     )
             self._setup_website_module(command='deploy')
         else:
-            self.logger.info('skipping; environment required but not defined')
+            self.logger.info('skipped; environment required but not defined')
 
     def destroy(self):
         """Create website CFN module and run stacker destroy."""
         if self.parameters:
             self._setup_website_module(command='destroy')
         else:
-            self.logger.info('skipping; environment required but not defined')
+            self.logger.info('skipped; environment required but not defined')
 
     def _setup_website_module(self,  # type: StaticSite
                               command  # type: str

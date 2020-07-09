@@ -25,4 +25,5 @@ def test_taxi(caplog, cd_tmp_path, cp_config, monkeypatch):
     assert 'forwarding to plan...' in caplog.messages
     mock_forward.assert_called_once_with(plan, ci=True, debug=0,
                                          deploy_environment='test',
-                                         tags=('tag1', 'tag2'))
+                                         tags=('tag1', 'tag2'),
+                                         verbose=False)

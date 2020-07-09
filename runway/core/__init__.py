@@ -127,9 +127,9 @@ class Runway(object):
     def test(self):
         """Run tests defined in the config."""
         if not self.tests:
-            LOGGER.error('No tests are defined in the Runway config.')
-            LOGGER.error('To learn more about using Runway to run tests, '
-                         'visit %s/page/defining_tests.html.', DOC_SITE)
+            LOGGER.error('no tests defined in runway.yml')
+            LOGGER.error('to learn more about using Runway to run tests, '
+                         'visit %s/page/defining_tests.html', DOC_SITE)
             LOGGER.error('Example test:\n%s', _yaml.dump({
                 'tests': [{'name': 'example-test',
                            'type': 'script',
@@ -169,7 +169,7 @@ class Runway(object):
                     continue  # tests with zero exit code don't indicate failure
                 logger.error('running test (fail)')
                 if tst.required:
-                    logger.error('failed test was required; the remaining '
+                    logger.error('test required; the remaining '
                                  'tests have been skipped')
                     _sys.exit(1)
                 failed_tests.append(tst.name)

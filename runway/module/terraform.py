@@ -275,7 +275,7 @@ class Terraform(RunwayModule):
         else:
             response['skipped_configs'] = True
             self.logger.info(
-                'skipping; tfvars for this environmet/region not found '
+                'skipped; tfvars for this environmet/region not found '
                 '-- looking for one of: %s',
                 ', '.join(gen_workspace_tfvars_files(
                     self.context.env.name,

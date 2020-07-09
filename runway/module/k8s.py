@@ -51,7 +51,7 @@ def generate_response(overlay_path, module_path, environment, region):
     if os.path.isdir(overlay_path) and os.path.isfile(configfile):
         LOGGER.info("processing kustomize overlay: %s", configfile)
         return {'skipped_configs': False}
-    LOGGER.info("skipping; kustomize overlay for this environment/region not"
+    LOGGER.info("skipped; kustomize overlay for this environment/region not"
                 " found -- looking for one of: %s",
                 ', '.join([os.path.join(module_path, 'overlays', i,
                                         'kustomization.yaml')

@@ -194,7 +194,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         """Ensure npm is installed and in the current path."""
         if not which('npm'):
             self.logger.error('"npm" not found in path or is not executable; '
-                              'please ensure it is installed correctly.')
+                              'please ensure it is installed correctly')
             sys.exit(1)
 
     def log_npm_command(self, command):

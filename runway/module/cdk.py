@@ -134,7 +134,7 @@ class CloudDevelopmentKit(RunwayModule):
                                            logger=self.logger)
                         self.logger.info('%s (complete)', command)
             else:
-                self.logger.info('skipped; package.json with "aws-cdk" as a '
+                self.logger.info('skipped; package.json with "aws-cdk" in '
                                  'devDependencies is required for this module '
                                  'type')
         else:
