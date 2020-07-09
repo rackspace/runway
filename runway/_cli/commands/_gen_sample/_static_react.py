@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def static_react(ctx):
+def static_react(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample static site project using React."""
     src = TEMPLATES / 'static-react'

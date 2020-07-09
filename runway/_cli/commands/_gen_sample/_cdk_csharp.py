@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def cdk_csharp(ctx):
+def cdk_csharp(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample AWS CDK project using C#."""
     src = TEMPLATES / 'cdk-csharp'

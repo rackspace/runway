@@ -13,10 +13,10 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def stacker(ctx):
+def stacker(ctx, **kwargs):
     # type: (click.Context) -> None
     """[DEPRECATED] Generate a sample CFNgin project using Blueprints."""
     LOGGER.warning('This command has been deprecated and will be removed in '
                    'the next major release.')
     LOGGER.verbose('forwarding to cfngin...')
-    ctx.forward(cfngin)
+    ctx.forward(cfngin, **kwargs)

@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def tf(ctx):  # pylint: disable=invalid-name
+def tf(ctx, **_):  # pylint: disable=invalid-name
     # type: (click.Context) -> None
     """Generate a sample Terraform project."""
     src = TEMPLATES / 'terraform'

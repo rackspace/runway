@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def static_angular(ctx):
+def static_angular(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample static site project using Angular."""
     src = TEMPLATES / 'static-angular'

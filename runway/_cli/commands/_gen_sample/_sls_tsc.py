@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def sls_tsc(ctx):
+def sls_tsc(ctx, **_):
     """Generate a sample Serverless project using TypeScript."""
     src = TEMPLATES / 'sls-tsc'
     dest = Path.cwd() / 'sampleapp.sls'

@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def cfn(ctx):
+def cfn(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample CFNgin project using CloudFormation."""
     src = TEMPLATES / 'cfn'

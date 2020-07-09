@@ -26,7 +26,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def k8s_cfn_repo(ctx):
+def k8s_cfn_repo(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample CloudFormation project using Kubernetes."""
     src = TEMPLATES / 'k8s-cfn-repo'

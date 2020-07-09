@@ -22,7 +22,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def k8s_tf_repo(ctx):
+def k8s_tf_repo(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample Terraform project using Kubernetes."""
     src = TEMPLATES / 'k8s-tf-repo'

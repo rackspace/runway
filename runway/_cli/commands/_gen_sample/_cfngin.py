@@ -21,7 +21,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def cfngin(ctx):
+def cfngin(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample CFNgin project using Blueprints."""
     src = TEMPLATES / 'cfngin'

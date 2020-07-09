@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.debug
 @options.verbose
 @click.pass_context
-def sls_py(ctx):
+def sls_py(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample Serverless project using python."""
     src = TEMPLATES / 'sls-py'
