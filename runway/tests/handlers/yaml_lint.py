@@ -6,11 +6,11 @@ import os
 import runpy
 from typing import Any, Dict, List  # pylint: disable=unused-import
 
-from runway.tests.handlers.base import TestHandler
-from runway.util import argv
+from ...tests.handlers.base import TestHandler
+from ...util import argv
 
 TYPE_NAME = 'yamllint'
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class YamllintHandler(TestHandler):

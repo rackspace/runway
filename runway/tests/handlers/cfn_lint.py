@@ -2,10 +2,11 @@
 import logging
 import runpy
 import sys
-from typing import Any, Dict  # pylint: disable=unused-import
+from typing import Any, Dict  # noqa pylint: disable=W
 
 import yaml
 
+from ..._logging import PrefixAdaptor
 from ...util import argv
 from .base import TestHandler
 
@@ -15,7 +16,7 @@ else:
     from pathlib import Path  # pylint: disable=E
 
 TYPE_NAME = 'cfn-lint'
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class CfnLintHandler(TestHandler):
@@ -29,10 +30,11 @@ class CfnLintHandler(TestHandler):
         Relies on .cfnlintrc file to be located beside the Runway config file.
 
         """
+        logger = PrefixAdaptor(name, LOGGER)
         cfnlintrc = Path('./.cfnlintrc')
 
         if not cfnlintrc.is_file():
-            LOGGER.error('File must exist to use this test: %s', cfnlintrc)
+            logger.error('file must exist to use this test: %s', cfnlintrc)
             sys.exit(1)
 
         # prevent duplicate log messages by not passing to the root logger
@@ -44,6 +46,6 @@ class CfnLintHandler(TestHandler):
             if err.code != 0:  # ignore zero exit codes but re-raise for non-zero
                 if not (yaml.safe_load(cfnlintrc.read_text()) or
                         {}).get('templates'):
-                    LOGGER.warning('cfnlintrc is missing a "templates" '
+                    logger.warning('cfnlintrc is missing a "templates" '
                                    'section which is required by cfn-lint')
                 raise

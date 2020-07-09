@@ -1,14 +1,15 @@
 """Script test runner."""
 import logging
-import sys
 import subprocess
+import sys
 from subprocess import CalledProcessError
-from typing import Dict, Any  # pylint: disable=unused-import
+from typing import Any, Dict  # noqa pylint: disable=W
 
-from runway.tests.handlers.base import TestHandler
+from ..._logging import PrefixAdaptor
+from ...tests.handlers.base import TestHandler
 
 TYPE_NAME = 'script'
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class ScriptHandler(TestHandler):
@@ -34,15 +35,15 @@ class ScriptHandler(TestHandler):
     def handle(cls, name, args):
         # type: (str, Dict[str, Any]) -> None
         """Perform the actual test."""
+        logger = PrefixAdaptor(name, LOGGER)
         for cmd in args['commands']:
             try:
                 exit_code = subprocess.call(cmd, shell=True)
                 if exit_code != 0:
                     raise ValueError(exit_code)
             except CalledProcessError as err:
-                LOGGER.error('%s: failed to execute command: %s',
-                             name, cmd)
+                logger.error('failed to execute command: %s', cmd)
                 raise err
             except ValueError:
-                LOGGER.error('%s: failed command: %s', name, cmd)
+                logger.error('failed command: %s', cmd)
                 sys.exit(1)

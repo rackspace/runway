@@ -4,13 +4,11 @@ Abstract parent class for a 'Source' type object.
 Allows us to specify specific remote sourced resources for out application
 (Git, S3, ect.)
 """
-# pylint: disable=unused-import
-from typing import Dict, Optional, Union  # noqa: F401
-
-import os
 import logging
+import os
+from typing import Dict, Optional, Union  # noqa pylint: disable=W
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class Source(object):
