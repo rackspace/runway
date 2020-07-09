@@ -111,8 +111,8 @@ class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         # matching version is already installed
         if os.path.isdir(os.path.join(versions_dir,
                                       version_requested)):
-            LOGGER.info("kubectl version %s already installed; using "
-                        "it...", version_requested)
+            LOGGER.verbose("kubectl version %s already installed; using "
+                           "it...", version_requested)
             return os.path.join(versions_dir,
                                 version_requested,
                                 'kubectl') + self.command_suffix
@@ -120,7 +120,7 @@ class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         LOGGER.info("downloading and using kubectl version %s ...",
                     version_requested)
         download_kb_release(version_requested, versions_dir)
-        LOGGER.info("downloaded kubectl %s successfully", version_requested)
+        LOGGER.verbose("downloaded kubectl %s successfully", version_requested)
         return os.path.join(versions_dir,
                             version_requested,
                             'kubectl') + self.command_suffix

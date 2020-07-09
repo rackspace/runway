@@ -180,8 +180,8 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             # matching version is already installed
             if os.path.isdir(os.path.join(versions_dir,
                                           version_requested)):
-                LOGGER.info("Terraform version %s already installed; using "
-                            "it...", version_requested)
+                LOGGER.verbose("Terraform version %s already installed; using "
+                               "it...", version_requested)
                 return os.path.join(versions_dir,
                                     version_requested,
                                     'terraform') + self.command_suffix
@@ -200,8 +200,8 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         # already been downloaded
         if os.path.isdir(os.path.join(versions_dir,
                                       version)):
-            LOGGER.info("Terraform version %s already installed; using it...",
-                        version)
+            LOGGER.verbose("Terraform version %s already installed; using it...",
+                           version)
             return os.path.join(versions_dir,
                                 version,
                                 'terraform') + self.command_suffix
@@ -209,7 +209,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         LOGGER.info("downloading and using Terraform version %s ...",
                     version)
         download_tf_release(version, versions_dir, self.command_suffix)
-        LOGGER.info("downloaded Terraform %s successfully", version)
+        LOGGER.verbose("downloaded Terraform %s successfully", version)
         return os.path.join(versions_dir,
                             version,
                             'terraform') + self.command_suffix

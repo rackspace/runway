@@ -51,11 +51,11 @@ def generate_response(overlay_path, module_path, environment, region):
     if os.path.isdir(overlay_path) and os.path.isfile(configfile):
         LOGGER.info("processing kustomize overlay: %s", configfile)
         return {'skipped_configs': False}
-    LOGGER.error("skipping; kustomize overlay for this environment/region not"
-                 " found -- looking for one of \"%s\"",
-                 ', '.join([os.path.join(module_path, 'overlays', i,
-                                         'kustomization.yaml')
-                            for i in gen_overlay_dirs(environment, region)]))
+    LOGGER.info("skipping; kustomize overlay for this environment/region not"
+                " found -- looking for one of: %s",
+                ', '.join([os.path.join(module_path, 'overlays', i,
+                                        'kustomization.yaml')
+                           for i in gen_overlay_dirs(environment, region)]))
     return {'skipped_configs': True}
 
 
@@ -149,7 +149,8 @@ class K8s(RunwayModule):
             self.logger.info('%s (in-progress)', command)
             self.logger.debug('running kubectl command: %s',
                               ' '.join(kubectl_command))
-            run_module_command(kubectl_command, self.context.env.vars)
+            run_module_command(kubectl_command, self.context.env.vars,
+                               logger=self.logger)
             self.logger.info('%s (complete)', command)
         return response
 
