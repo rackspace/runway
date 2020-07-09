@@ -102,7 +102,7 @@ class RunwayLogger(logging.Logger):
             level (int): Log level.
 
         """
-        super().__init__(name, level)
+        super(RunwayLogger, self).__init__(name, level)
         logging.addLevelName(LogLevels.VERBOSE, LogLevels.VERBOSE.name)
         logging.addLevelName(LogLevels.NOTICE, LogLevels.NOTICE.name)
         logging.addLevelName(LogLevels.SUCCESS, LogLevels.SUCCESS.name)
