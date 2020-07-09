@@ -1,16 +1,17 @@
 """Retrieve the ID of the Cognito User Pool."""
+# pylint: disable=unused-argument
 import logging
+from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa pylint: disable=W
 
-from typing import Any, Dict, Optional  # pylint: disable=unused-import
-
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
-from runway.cfngin.context import Context  # noqa pylint: disable=unused-import
+if TYPE_CHECKING:
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get(context,  # pylint: disable=unused-argument
-        provider,  # pylint: disable=unused-argument
+def get(context,
+        provider,
         **kwargs
        ):  # noqa: E124
     # type: (Context, BaseProvider, Optional[Dict[str, Any]]) -> Dict

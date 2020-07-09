@@ -33,9 +33,8 @@ limited or no effect:
 
 """
 # pylint: disable=arguments-differ
-from typing import Any, TYPE_CHECKING  # pylint: disable=unused-import
-
 import logging
+from typing import TYPE_CHECKING, Any  # pylint: disable=unused-import
 
 from .base import LookupHandler
 

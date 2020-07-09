@@ -1,10 +1,12 @@
 """User Pool Client Domain Updater."""
+# pylint: disable=unused-argument
 import logging
-from typing import Any, Dict, Optional, Union  # pylint: disable=unused-import
+from typing import (TYPE_CHECKING, Any, Dict,  # pylint: disable=unused-import
+                    Optional, Union)
 
-from runway.cfngin.context import Context  # pylint: disable=unused-import
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
-from runway.cfngin.session_cache import get_session
+if TYPE_CHECKING:
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +32,7 @@ def update(context,  # type: Context
         user_pool_id (str): The ID of the Cognito User Pool
         client_id (str): The ID of the Cognito User Pool Client
     """
-    session = get_session(provider.region)
+    session = context.get_session()
     cognito_client = session.client('cognito-idp')
 
     context_dict = {}
@@ -62,12 +64,8 @@ def update(context,  # type: Context
             user_pool_region
         )
         return context_dict
-    except Exception as err:  # pylint: disable=broad-except
-        LOGGER.error(
-            'Could not update user pool domain for user pool id %s.',
-            user_pool_id
-        )
-        LOGGER.error(err)
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.exception('could not update user pool domain: %s', user_pool_id)
         return False
 
 
@@ -92,7 +90,7 @@ def delete(context,  # type: Context # pylint: disable=unused-import
     Keyword Args:
         client_id (str): The ID of the Cognito User Pool Client
     """
-    session = get_session(provider.region)
+    session = context.get_session()
     cognito_client = session.client('cognito-idp')
 
     user_pool_id = context.hook_data['aae_user_pool_id_retriever']['id']
@@ -107,11 +105,12 @@ def delete(context,  # type: Context # pylint: disable=unused-import
         )
         return True
     except cognito_client.exceptions.InvalidParameterException:
-        LOGGER.info('No domain found with prefix %s. Skipping deletion.', domain_prefix)
+        LOGGER.info(
+            'skipped deletion; no domain with prefix "%s"', domain_prefix
+        )
         return True
-    except Exception as err:  # pylint: disable=broad-except
-        LOGGER.error('Could not delete the User Pool Domain.')
-        LOGGER.error(err)
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.exception('could not delete user pool domain')
         return False
 
 

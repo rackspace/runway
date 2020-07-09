@@ -3,19 +3,18 @@
 Dependency pre-hook responsible for ensuring correct
 callback urls are retrieved or a temporary one is used in it's place.
 """
-
+# pylint: disable=unused-argument
 import logging
+from typing import TYPE_CHECKING, Any, Dict, Optional  # pylint: disable=W
 
-from typing import Any, Dict, Optional  # pylint: disable=unused-import
-
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
-from runway.cfngin.context import Context  # noqa pylint: disable=unused-import
-from runway.cfngin.session_cache import get_session
+if TYPE_CHECKING:
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get(context,  # pylint: disable=unused-argument
+def get(context,
         provider,
         **kwargs
        ):  # noqa: E124
@@ -38,7 +37,7 @@ def get(context,  # pylint: disable=unused-argument
         user_pool_id (str): The ID of the User Pool to check for a client
         stack_name (str) The name of the stack to check against
     """
-    session = get_session(provider.region)
+    session = context.get_session()
     cloudformation_client = session.client('cloudformation')
     cognito_client = session.client('cognito-idp')
 
