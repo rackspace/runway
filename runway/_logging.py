@@ -6,18 +6,18 @@ from enum import IntEnum
 class LogLevels(IntEnum):
     """All available log levels."""
 
-    NOTSET: int = 0
-    DEBUG: int = 10
-    VERBOSE: int = 15
-    INFO: int = 20
-    NOTICE: int = 25
-    WARNING: int = 30
-    SUCCESS: int = 35
-    ERROR: int = 40
-    CRITICAL: int = 50
+    NOTSET = 0
+    DEBUG = 10
+    VERBOSE = 15
+    INFO = 20
+    NOTICE = 25
+    WARNING = 30
+    SUCCESS = 35
+    ERROR = 40
+    CRITICAL = 50
 
     @classmethod
-    def has_value(cls, value: int) -> bool:
+    def has_value(cls, value):
         """Check if IntEnum has a value."""
         return value in cls._value2member_map_   # pylint: disable=no-member
 
