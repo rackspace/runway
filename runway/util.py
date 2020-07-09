@@ -357,8 +357,8 @@ class SafeHaven(AbstractContextManager):
             if module not in self.__sys_modules and \
                     not any(module.startswith(n)
                             for n in self.sys_modules_exclude):
-                self.log.debug('removed sys.module: {"%s": "%s"}', module,
-                               sys.modules.pop(module))
+                self.logger.debug('removed sys.module: {"%s": "%s"}', module,
+                                  sys.modules.pop(module))
 
     def reset_sys_path(self):
         """Reset the value of sys.path."""
