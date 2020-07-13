@@ -210,6 +210,7 @@ class StaticSite(RunwayModule):
                        'args': {
                            'bucket_output_lookup': '%s::BucketName' % self.name,
                            'website_url': '%s::BucketWebsiteURL' % self.name,
+                           'extra_files': self.user_options.get('extra_files', []),
                            'cf_disabled': site_stack_variables['DisableCloudFront'],
                            'distributionid_output_lookup': '%s::CFDistributionId' % (self.name),
                            'distributiondomain_output_lookup': '%s::CFDistributionDomainName' % self.name}}]  # noqa pylint: disable=line-too-long

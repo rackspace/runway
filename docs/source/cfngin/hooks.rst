@@ -538,7 +538,7 @@ upload_staticsite.get_distribution_data
 .. rubric:: Description
 
 Retrieve information about the CloudFront distribution.
-Used by the staticsite_ module type.
+Used by the :ref:`Static Site <staticsite>` module type.
 
 
 .. rubric:: Hook Path
@@ -548,7 +548,7 @@ Used by the staticsite_ module type.
 
 .. rubric:: Args
 
-See staticsite_ module documentation for details.
+See :ref:`Static Site <staticsite>` module documentation for details.
 
 
 upload_staticsite.sync
@@ -556,7 +556,7 @@ upload_staticsite.sync
 
 .. rubric:: Description
 
-Sync static website to S3 bucket. Used by the staticsite_ module type.
+Sync static website to S3 bucket. Used by the :ref:`Static Site <staticsite>` module type.
 
 
 .. rubric:: Hook Path
@@ -566,8 +566,7 @@ Sync static website to S3 bucket. Used by the staticsite_ module type.
 
 .. rubric:: Args
 
-See staticsite_ module documentation for details.
-
+See :ref:`Static Site <staticsite>` module documentation for details.
 
 *********************
 Writing A Custom Hook

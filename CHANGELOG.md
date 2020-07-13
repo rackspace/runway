@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Add `extra_files` option for static sites
+
 ### Fixed
 - fixed an issue where serverless@<1.70.0 (version is not exact) would fail to deploy when using `promotezip`
 
