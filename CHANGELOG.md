@@ -5,10 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Add `extra_files` option for static sites
 
+## [1.9.0] - 2020-07-13
 ### Fixed
 - fixed an issue where serverless@<1.70.0 (version is not exact) would fail to deploy when using `promotezip`
+
+### Added
+- Add `extra_files` option for static sites
 
 ## [1.8.5] - 2020-07-01
 ### Fixed
@@ -870,7 +873,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.8.5...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/onicagroup/runway/compare/v1.8.5...v1.9.0
 [1.8.5]: https://github.com/onicagroup/runway/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/onicagroup/runway/compare/v1.8.3...v1.8.4
 [1.8.3]: https://github.com/onicagroup/runway/compare/v1.8.2...v1.8.3
