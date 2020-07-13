@@ -185,7 +185,7 @@ class Terraform(RunwayModule):
                     send2trash(os.path.join(self.path, '.terraform'))
                     self.logger.verbose('.terraform directory deleted')
 
-                self.logger.info('init (in-progress)')
+                self.logger.info('init (in progress)')
                 run_terraform_init(
                     tf_bin=tf_bin,
                     module_path=self.path,
@@ -258,7 +258,7 @@ class Terraform(RunwayModule):
                     env_vars=env_vars,
                     logger=self.logger
                 )
-                self.logger.info('%s (in-progress)', command)
+                self.logger.info('%s (in progress)', command)
                 if any(key.startswith('TF_VAR_') for key, _val in env_vars.items()):
                     self.logger.debug(
                         "Terraform variable environment variables: %s",

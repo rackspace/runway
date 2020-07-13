@@ -189,7 +189,7 @@ class Module(object):
 
         """
         LOGGER.info('')
-        self.logger.notice('processing module in %s (in-progress)',
+        self.logger.notice('processing module in %s (in progress)',
                            self.ctx.env.aws_region)
         self.logger.verbose("module payload: %s", json.dumps(self.payload))
         if self.should_skip:

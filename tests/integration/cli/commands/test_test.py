@@ -57,9 +57,9 @@ def test_test_invalid_type(cd_tmp_path, capfd, caplog):
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
     assert 'found 2 test(s)' in logs
-    assert 'invalid-type:running test (in-progress)' in logs
+    assert 'invalid-type:running test (in progress)' in logs
     assert 'invalid-type:unable to find handler of type "invalid"' in logs
-    assert "success:running test (in-progress)" in logs
+    assert "success:running test (in progress)" in logs
     assert 'Hello world' in captured.out
     assert "success:running test (pass)" in logs
 
@@ -78,9 +78,9 @@ def test_test_invalid_type_required(cd_tmp_path, caplog):
 
     logs = '\n'.join(caplog.messages)
     assert 'found 2 test(s)' in logs
-    assert 'invalid-type-required:running test (in-progress)' in logs
+    assert 'invalid-type-required:running test (in progress)' in logs
     assert 'invalid-type-required:unable to find handler of type "invalid"' in logs
-    assert "success:running test (in-progress)" not in logs
+    assert "success:running test (in progress)" not in logs
 
 
 def test_test_not_defined(cd_tmp_path, caplog):
@@ -109,7 +109,7 @@ def test_test_single_successful(cd_tmp_path, capfd, caplog):
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
     assert 'found 1 test(s)' in logs
-    assert "success:running test (in-progress)" in logs
+    assert "success:running test (in progress)" in logs
     assert 'Hello world' in captured.out
     assert "success:running test (pass)" in logs
 
@@ -129,9 +129,9 @@ def test_test_two_test(cd_tmp_path, capfd, caplog):
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
     assert 'found 2 test(s)' in logs
-    assert "fail:running test (in-progress)" in logs
+    assert "fail:running test (in progress)" in logs
     assert 'fail:running test (fail)' in logs
-    assert "success:running test (in-progress)" in logs
+    assert "success:running test (in progress)" in logs
     assert 'Hello world' in captured.out
     assert "success:running test (pass)" in logs
     assert 'the following tests failed: fail' in logs
@@ -152,9 +152,9 @@ def test_test_two_test_required(cd_tmp_path, capfd, caplog):
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
     assert 'found 2 test(s)' in logs
-    assert "fail-required:running test (in-progress)" in logs
+    assert "fail-required:running test (in progress)" in logs
     assert "fail-required:running test (fail)" in logs
     assert 'fail-required:test required; the remaining tests have been skipped' \
         in logs
-    assert "success:running test (in-progress)" not in logs
+    assert "success:running test (in progress)" not in logs
     assert 'Hello world' not in captured.out

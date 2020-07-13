@@ -110,7 +110,7 @@ def build(context, provider, **kwargs):
         )
     else:
         if options.get('build_steps'):
-            LOGGER.info('build steps (in-progress)')
+            LOGGER.info('build steps (in progress)')
             run_commands(options['build_steps'], options['path'])
             LOGGER.info('build steps (complete)')
         zip_and_upload(build_output, context_dict['artifact_bucket_name'],

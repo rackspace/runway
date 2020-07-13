@@ -73,7 +73,7 @@ class CloudDevelopmentKit(RunwayModule):
                                     logger=self.logger)
                     if self.options.get('options', {}).get('build_steps',
                                                            []):
-                        self.logger.info('build steps (in-progress)')
+                        self.logger.info('build steps (in progress)')
                         run_commands(
                             commands=self.options.get('options',
                                                       {}).get('build_steps',
@@ -87,7 +87,7 @@ class CloudDevelopmentKit(RunwayModule):
                         cdk_context_opts.extend(['-c', "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)
                     if command == 'diff':
-                        self.logger.info("plan (in-progress)")
+                        self.logger.info("plan (in progress)")
                         for i in get_cdk_stacks(self.path,
                                                 self.context.env.vars,
                                                 cdk_context_opts):
@@ -115,7 +115,7 @@ class CloudDevelopmentKit(RunwayModule):
                                 (['--no-color'] if self.context.no_color else []),
                                 self.path
                             )
-                            self.logger.info('bootstrap (in-progress)')
+                            self.logger.info('bootstrap (in progress)')
                             run_module_command(cmd_list=bootstrap_command,
                                                env_vars=self.context.env.vars,
                                                logger=self.logger)
@@ -128,7 +128,7 @@ class CloudDevelopmentKit(RunwayModule):
                             cdk_opts,
                             self.path
                         )
-                        self.logger.info('%s (in-progress)', command)
+                        self.logger.info('%s (in progress)', command)
                         run_module_command(cmd_list=cdk_command,
                                            env_vars=self.context.env.vars,
                                            logger=self.logger)

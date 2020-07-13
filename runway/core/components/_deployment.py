@@ -323,7 +323,7 @@ class Deployment(object):
                              variables=variables)
             LOGGER.info('')
             LOGGER.info('')
-            deployment.logger.notice('processing deployment (in-progress)')
+            deployment.logger.notice('processing deployment (in progress)')
             if not definition.modules:
                 deployment.logger.warning(
                     'skipped; no modules found in definition'

@@ -104,7 +104,7 @@ class StaticSite(RunwayModule):
             module_dir,
             {i: self.options[i] for i in self.options if i != 'class_path'}
         )
-        self.logger.info('%s (in-progress)', command)
+        self.logger.info('%s (in progress)', command)
         getattr(cfn, command)()
         self.logger.info('%s (complete)', command)
 

@@ -100,7 +100,7 @@ def deploy_package(sls_opts, bucketname, context, path, logger=LOGGER):
                                             command_opts=sls_opts,
                                             path=path)
 
-    logger.info('package %s (in-progress)', os.path.basename(path))
+    logger.info('package %s (in progress)', os.path.basename(path))
     run_module_command(cmd_list=sls_package_cmd,
                        env_vars=context.env.vars,
                        logger=logger)
@@ -126,7 +126,7 @@ def deploy_package(sls_opts, bucketname, context, path, logger=LOGGER):
                                            command_opts=sls_opts,
                                            path=path)
 
-    logger.info('deploy (in-progress)')
+    logger.info('deploy (in progress)')
     run_module_command(cmd_list=sls_deploy_cmd,
                        env_vars=context.env.vars,
                        logger=logger)
@@ -301,7 +301,7 @@ class Serverless(RunwayModuleNpm):
                            str(self.path),
                            self.logger)
             return
-        self.logger.info('deploy (in-progress)')
+        self.logger.info('deploy (in progress)')
         run_module_command(cmd_list=self.gen_cmd('deploy'),
                            env_vars=self.context.env.vars,
                            logger=self.logger)
@@ -352,7 +352,7 @@ class Serverless(RunwayModuleNpm):
         if not skip_install:
             self.npm_install()
         stack_missing = False  # track output for acceptable error
-        self.logger.info('destroy (in-progress)')
+        self.logger.info('destroy (in progress)')
         proc = subprocess.Popen(self.gen_cmd('remove'),
                                 bufsize=1,
                                 env=self.context.env.vars,

@@ -71,7 +71,7 @@ def does_bucket_exist(bucket_name, region='us-east-1', session=None):
 def ensure_bucket_exists(bucket_name, region='us-east-1', session=None):
     """Ensure S3 bucket exists."""
     if not does_bucket_exist(bucket_name, region, session):
-        LOGGER.info('creating bucket "%s" (in-progress)', bucket_name)
+        LOGGER.info('creating bucket "%s" (in progress)', bucket_name)
         s3_client = _get_client(session, region)
         if region == 'us-east-1':
             create_bucket_opts = {}

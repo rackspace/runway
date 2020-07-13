@@ -145,7 +145,7 @@ class Runway(object):
         for tst in self.tests:
             tst.resolve(self.ctx, variables=self.variables)
             logger = _PrefixAdaptor(tst.name, LOGGER)
-            logger.notice('running test (in-progress)')
+            logger.notice('running test (in progress)')
             try:
                 handler = _TEST_HANDLERS[tst.type]
             except KeyError:

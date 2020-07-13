@@ -146,7 +146,7 @@ class K8s(RunwayModule):
                 kubectl_command.append('--ignore-not-found=true')
             kubectl_command.extend(['-k', kustomize_config_path])
 
-            self.logger.info('%s (in-progress)', command)
+            self.logger.info('%s (in progress)', command)
             self.logger.debug('running kubectl command: %s',
                               ' '.join(kubectl_command))
             run_module_command(kubectl_command, self.context.env.vars,
