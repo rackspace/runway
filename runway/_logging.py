@@ -47,6 +47,36 @@ class PrefixAdaptor(logging.LoggerAdapter):
         self.prefix = prefix
         self.prefix_template = prefix_template
 
+    # TODO remove when dropping python 2
+    def getEffectiveLevel(self):  # noqa pylint: disable=invalid-name
+        # type: () -> int
+        """ Get the effective level for the underlying logger.
+
+        Python 2 backport.
+
+        """
+        return self.logger.getEffectiveLevel()
+
+    # TODO remove when dropping python 2
+    def hasHandlers(self):  # noqa pylint: disable=invalid-name
+        # type: () -> bool
+        """See if the underlying logger has any handlers.
+
+        Python 2 backport.
+
+        """
+        return self.logger.hasHandlers()
+
+    # TODO remove when dropping python 2
+    def isEnabledFor(self, level):  # noqa pylint: disable=invalid-name
+        # type: (int) -> bool
+        """Is this logger enabled for level 'level'?
+
+        Python 2 backport.
+
+        """
+        return self.logger.isEnabledFor(level)
+
     def notice(self, msg, *args, **kwargs):
         """Delegate a notice call to the underlying logger.
 
@@ -69,6 +99,16 @@ class PrefixAdaptor(logging.LoggerAdapter):
 
         """
         return self.prefix_template.format(prefix=self.prefix, msg=msg), kwargs
+
+    # TODO remove when dropping python 2
+    def setLevel(self, level):  # noqa pylint: disable=invalid-name
+        # type: () -> None
+        """Set the specified level on the underlying logger.
+
+        Python 2 backport.
+
+        """
+        self.logger.setLevel(level)
 
     def success(self, msg, *args, **kwargs):
         """Delegate a success call to the underlying logger.
