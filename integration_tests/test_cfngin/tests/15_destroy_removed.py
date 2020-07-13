@@ -24,15 +24,15 @@ class DestroyRemoved(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'other was removed from the Stacker config file so it is being destroyed.',
-            'other: submitted (submitted for destruction)',
-            'other: complete (stack destroyed)'
+            'other:removed from the CFNgin config file; it is being destroyed',
+            'other:submitted (submitted for destruction)',
+            'other:complete (stack destroyed)'
         ]
         for stack in ['vpc', 'bastion', 'other']:
-            expected_lines.append(f'{stack}: submitted (creating new stack)')
-            expected_lines.append(f'{stack}: complete (creating new stack)')
+            expected_lines.append(f'{stack}:submitted (creating new stack)')
+            expected_lines.append(f'{stack}:complete (creating new stack)')
             if stack != 'other':
-                expected_lines.append(f'{stack}: skipped (nochange)')
+                expected_lines.append(f'{stack}:skipped (nochange)')
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
 

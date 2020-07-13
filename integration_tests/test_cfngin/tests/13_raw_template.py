@@ -23,9 +23,8 @@ class TestRawTemplate(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'Using default AWS provider mode',
-            'raw-template-vpc: submitted (creating new stack)',
-            'raw-template-vpc: complete (creating new stack)'
+            'raw-template-vpc:submitted (creating new stack)',
+            'raw-template-vpc:complete (creating new stack)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -35,8 +34,7 @@ class TestRawTemplate(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'Using default AWS provider mode',
-            'raw-template-vpc: skipped (nochange)'
+            'raw-template-vpc:skipped (nochange)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -46,8 +44,8 @@ class TestRawTemplate(Cfngin):
         code, _stdout, stderr = self.runway_cmd('destroy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'raw-template-vpc: submitted (submitted for destruction)',
-            'raw-template-vpc: complete (stack destroyed)'
+            'raw-template-vpc:submitted (submitted for destruction)',
+            'raw-template-vpc:complete (stack destroyed)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
