@@ -29,17 +29,38 @@ class UI(object):
         """Obtain an exclusive lock on the UI for the current thread."""
         return self._lock.acquire()
 
+    def log(self, lvl, msg, *args, logger=LOGGER, **kwargs):
+        """Log the message if the current thread owns the underlying lock.
+
+        Args:
+            lvl (int): Log level.
+            msg (Union[str, Exception]): String template or exception to use
+                for the log record.
+            logger (Union[logging.LoggerAdaptor, logging.Logger]): Specific
+                logger to log to.
+
+        """
+        self.lock()
+        try:
+            return logger.log(lvl, msg, *args, **kwargs)
+        finally:
+            self.unlock()
+
     def unlock(self, *_args, **_kwargs):
         """Release the lock on the UI."""
         return self._lock.release()
 
-    def info(self, *args, **kwargs):
-        """Log the line if the current thread owns the underlying lock."""
-        self.lock()
-        try:
-            return LOGGER.info(*args, **kwargs)
-        finally:
-            self.unlock()
+    def info(self, msg, *args, logger=LOGGER, **kwargs):
+        """Log the line if the current thread owns the underlying lock.
+
+        Args:
+            msg (Union[str, Exception]): String template or exception to use
+                for the log record.
+            logger (Union[logging.LoggerAdaptor, logging.Logger]): Specific
+                logger to log to.
+
+        """
+        self.log(logging.INFO, msg, logger=logger, *args, **kwargs)
 
     def ask(self, message):
         """Collect input from a user in a multithreaded environment.

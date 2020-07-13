@@ -251,7 +251,7 @@ class Step(object):
 
         """
         if status is not self.status:
-            LOGGER.debug("Setting %s state to %s.", self.stack.name,
+            LOGGER.debug("setting %s state to %s...", self.stack.name,
                          status.name)
             self.status = status
             self.last_updated = time.time()
@@ -657,7 +657,7 @@ class Plan(object):
 
         """
         steps = 1
-        LOGGER.log(level, "Plan \"%s\":", self.description)
+        LOGGER.log(level, "plan \"%s\":", self.description)
         for step in self.steps:
             LOGGER.log(
                 level,
@@ -682,7 +682,7 @@ class Plan(object):
                 Provider to use when resolving the blueprints.
 
         """
-        LOGGER.info("Dumping \"%s\"...", self.description)
+        LOGGER.info("dumping \"%s\"...", self.description)
         directory = os.path.expanduser(directory)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -701,7 +701,7 @@ class Plan(object):
             if not os.path.exists(blueprint_dir):
                 os.makedirs(blueprint_dir)
 
-            LOGGER.info("Writing stack \"%s\" -> %s", step.name, path)
+            LOGGER.info("writing stack \"%s\" -> %s", step.name, path)
             with open(path, "w") as _file:
                 _file.write(blueprint.rendered)
 
@@ -765,13 +765,13 @@ class Plan(object):
                                             'cloudformation'))):
                 if step.fn.__name__ == '_destroy_stack':
                     self.context.persistent_graph.pop(step)
-                    LOGGER.debug("Removed step '%s' from the persistent graph",
+                    LOGGER.debug("removed step '%s' from the persistent graph",
                                  step.name)
                 elif step.fn.__name__ == '_launch_stack':
                     self.context.persistent_graph.add_step_if_not_exists(
                         step, add_dependencies=True, add_dependants=True
                     )
-                    LOGGER.debug("Added step '%s' to the persistent graph",
+                    LOGGER.debug("added step '%s' to the persistent graph",
                                  step.name)
                 else:
                     return result

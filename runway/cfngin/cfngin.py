@@ -6,6 +6,7 @@ import sys
 
 from yaml.constructor import ConstructorError
 
+from runway._logging import PrefixAdaptor
 from runway.util import MutableMap, SafeHaven, cached_property
 
 from .actions import build, destroy, diff
@@ -67,7 +68,7 @@ class CFNgin(object):
         self.parameters.update(self.env_file)
 
         if parameters:
-            LOGGER.debug('Adding Runway parameters to CFNgin parameters')
+            LOGGER.debug('adding Runway parameters to CFNgin parameters')
             self.parameters.update(parameters)
 
         self._inject_common_parameters()
@@ -87,7 +88,7 @@ class CFNgin(object):
         for _, file_name in enumerate(supported_names):
             file_path = os.path.join(self.sys_path, file_name)
             if os.path.isfile(file_path):
-                LOGGER.info('Found environment file: %s', file_path)
+                LOGGER.info('found environment file: %s', file_path)
                 self._env_file_name = file_path
                 with open(file_path, 'r') as file_:
                     result.update(parse_environment(file_.read()))
@@ -112,7 +113,8 @@ class CFNgin(object):
         with SafeHaven(environ=self.__ctx.env_vars,
                        sys_modules_exclude=['awacs', 'troposphere']):
             for config_name in config_file_names:
-                LOGGER.info('%s: deploying...', os.path.basename(config_name))
+                logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
+                logger.notice('deploy (in-progress)')
                 with SafeHaven(argv=['stacker', 'build', config_name],
                                sys_modules_exclude=['awacs', 'troposphere']):
                     ctx = self.load(config_name)
@@ -124,6 +126,7 @@ class CFNgin(object):
                     )
                     action.execute(concurrency=self.concurrency,
                                    tail=self.tail)
+                logger.success('deploy (complete)')
 
     def destroy(self, force=False, sys_path=None):
         """Run the CFNgin destroy action.
@@ -145,7 +148,8 @@ class CFNgin(object):
 
         with SafeHaven(environ=self.__ctx.env_vars):
             for config_name in config_file_names:
-                LOGGER.info('%s: destroying...', os.path.basename(config_name))
+                logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
+                logger.notice('destroy (in-progress)')
                 with SafeHaven(argv=['stacker', 'destroy', config_name]):
                     ctx = self.load(config_name)
                     action = destroy.Action(
@@ -157,6 +161,7 @@ class CFNgin(object):
                     action.execute(concurrency=self.concurrency,
                                    force=True,
                                    tail=self.tail)
+                logger.success('destroy (complete)')
 
     def load(self, config_path):
         """Load a CFNgin config into a context object.
@@ -168,19 +173,17 @@ class CFNgin(object):
             :class:`runway.cfngin.context.Context`
 
         """
-        LOGGER.debug('%s: loading...', os.path.basename(config_path))
+        LOGGER.debug('loading CFNgin config: %s', os.path.basename(config_path))
         try:
             config = self._get_config(config_path)
             return self._get_context(config, config_path)
         except ConstructorError as err:
             if err.problem.startswith('could not determine a constructor '
                                       'for the tag \'!'):
-                LOGGER.error('"%s" appears to be a CloudFormation template, '
-                             'but is located in the top level of a module '
-                             'alongside the CloudFormation config files (i.e. '
-                             'the file or files indicating the stack names & '
-                             'parameters). Please move the template to a '
-                             'subdirectory.', config_path)
+                LOGGER.error('"%s" is located in the module\'s root directory '
+                             'and appears to be a CloudFormation template; '
+                             'please move CloudFormation templates to a '
+                             'subdirectory', config_path)
                 sys.exit(1)
             raise
 
@@ -201,8 +204,8 @@ class CFNgin(object):
         config_file_names = self.find_config_files(sys_path=sys_path)
         with SafeHaven(environ=self.__ctx.env_vars):
             for config_name in config_file_names:
-                LOGGER.info('%s: generating change sets...',
-                            os.path.basename(config_name))
+                logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
+                logger.notice('plan (in-progress)')
                 with SafeHaven(argv=['stacker', 'diff', config_name]):
                     ctx = self.load(config_name)
                     action = diff.Action(
@@ -212,6 +215,7 @@ class CFNgin(object):
                         )
                     )
                     action.execute()
+                logger.success('plan (complete)')
 
     def should_skip(self, force=False):
         """Determine if action should be taken or not.
@@ -226,8 +230,7 @@ class CFNgin(object):
         """
         if force or self.env_file:
             return False
-        LOGGER.info('Skipping module; environment not explicitly enabled '
-                    'and no environment file found')
+        LOGGER.info('skipped; no parameters and environment file not found')
         return True
 
     def _get_config(self, file_path, validate=True):
@@ -277,9 +280,9 @@ class CFNgin(object):
 
         """
         if self.interactive:
-            LOGGER.info('Using interactive AWS provider mode.')
+            LOGGER.verbose('using interactive AWS provider mode')
         else:
-            LOGGER.info('Using default AWS provider mode.')
+            LOGGER.verbose('using default AWS provider mode')
         return ProviderBuilder(
             interactive=self.interactive,
             recreate_failed=self.recreate_failed,

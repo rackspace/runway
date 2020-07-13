@@ -12,10 +12,10 @@ from .ui import ui
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PROFILE = None
-DEPRECATION_MSG = ('Use of "get_session" without providing credentials or a '
-                   'profile has been deprecated and will raise an error after '
-                   'the next major release. Please use the "get_session" '
-                   'method of the context object instead.')
+DEPRECATION_MSG = (
+    '"session_cache.get_session" has been deprecated; '
+    'use the "get_session" method of the context object instead'
+)
 # A global credential cache that can be shared among boto3 sessions. This is
 # inherently threadsafe thanks to the GIL:
 # https://docs.python.org/3/glossary.html#term-global-interpreter-lock
@@ -41,10 +41,10 @@ def get_session(region=None,
 
     """
     if profile:
-        LOGGER.debug('Building session using profile "%s" in region "%s"',
+        LOGGER.debug('building session using profile "%s" in region "%s"',
                      profile, region or 'default')
     elif access_key:
-        LOGGER.debug('Building session with Access Key "%s" in region "%s"',
+        LOGGER.debug('building session with Access Key "%s" in region "%s"',
                      access_key, region or 'default')
     elif os.environ.get('AWS_ACCESS_KEY_ID'):
         # TODO raise an error so we don't need to modify os.environ for cfngin
