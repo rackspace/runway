@@ -4,15 +4,14 @@ import logging
 import os
 import re
 import tempfile
-from distutils.dir_util import \
-    copy_tree  # pylint: disable=import-error, no-name-in-module
+from distutils.dir_util import copy_tree  # pylint: disable=E
 from tempfile import mkstemp
 from typing import TYPE_CHECKING, Any, Dict, Optional  # pylint: disable=W
 
 from ....cfngin.hooks import aws_lambda
 
 if TYPE_CHECKING:
-    from runway.cfngin.providers.base import BaseProvider
+    from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 # The functions associated with Auth@Edge
 FUNCTIONS = [

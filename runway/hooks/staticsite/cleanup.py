@@ -5,8 +5,7 @@ import logging
 from typing import Any, Dict, Optional, Union  # pylint: disable=unused-import
 
 from runway.cfngin.context import Context  # pylint: disable=unused-import
-from runway.cfngin.providers.base import \
-    BaseProvider  # pylint: disable=unused-import
+from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 

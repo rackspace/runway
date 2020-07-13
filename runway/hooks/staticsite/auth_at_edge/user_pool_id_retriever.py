@@ -4,8 +4,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa pylint: disable=W
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context
-    from ....cfngin.providers.base import BaseProvider
+    from ....cfngin.context import Context  # pylint: disable=W
+    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 
