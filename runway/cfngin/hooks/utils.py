@@ -42,7 +42,7 @@ def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-s
 
     """
     if not hooks:
-        LOGGER.debug("No %s hooks defined.", stage)
+        LOGGER.debug("no %s hooks defined", stage)
         return
 
     hook_paths = []
@@ -52,21 +52,21 @@ def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-s
         except KeyError:
             raise ValueError("%s hook #%d missing path." % (stage, i))
 
-    LOGGER.info("Executing %s hooks: %s", stage, ", ".join(hook_paths))
+    LOGGER.info("executing %s hooks: %s", stage, ", ".join(hook_paths))
     stage = stage.replace('build', 'deploy')  # TODO remove after full rename
     for hook in hooks:
         data_key = hook.data_key
         required = hook.required
 
         if not hook.enabled:
-            LOGGER.debug("hook with method %s is disabled, skipping",
+            LOGGER.debug("hook with method %s is disabled; skipping",
                          hook.path)
             continue
 
         try:
             method = load_object_from_string(hook.path, try_reload=True)
         except (AttributeError, ImportError):
-            LOGGER.exception("Unable to load method at %s:", hook.path)
+            LOGGER.exception("unable to load method at %s", hook.path)
             if required:
                 raise
             continue
@@ -77,12 +77,13 @@ def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-s
                 resolve_variables(args, context, provider)
             except FailedVariableLookup:
                 if 'pre' in stage:
-                    LOGGER.error('Lookups that change the order of '
-                                 'execution, like "output", can only be '
-                                 'used in "post_*" hooks. Please '
-                                 'ensure that the hook being used does '
-                                 'not rely on a stack, hook_data, or '
-                                 'context that does not exist yet.')
+                    LOGGER.error(
+                        'lookups that change the order of execution, like '
+                        '"output", can only be used in "post_*" hooks; '
+                        'please ensure that the hook being used does '
+                        'not rely on a stack, hook_data, or context that '
+                        'does not exist yet'
+                    )
                 raise
             kwargs = {v.name: v.value for v in args}
         else:
@@ -98,24 +99,24 @@ def handle_hooks(stage, hooks, provider, context):  # pylint: disable=too-many-s
                     stage
                 )()
         except Exception:  # pylint: disable=broad-except
-            LOGGER.exception("Method %s threw an exception:", hook.path)
+            LOGGER.exception("method %s threw an exception", hook.path)
             if required:
                 raise
             continue
 
         if not result:
             if required:
-                LOGGER.error("Required hook %s failed. Return value: %s",
+                LOGGER.error("required hook %s failed; return value: %s",
                              hook.path, result)
                 sys.exit(1)
-            LOGGER.warning("Non-required hook %s failed. Return value: %s",
+            LOGGER.warning("non-required hook %s failed; return value: %s",
                            hook.path, result)
         else:
             if isinstance(result, collections.Mapping):
                 if data_key:
-                    LOGGER.debug("Adding result for hook %s to context in "
-                                 "data_key %s.", hook.path, data_key)
+                    LOGGER.debug("adding result for hook %s to context in "
+                                 "data_key %s", hook.path, data_key)
                     context.set_hook_data(data_key, result)
                 else:
-                    LOGGER.debug("Hook %s returned result data, but no data "
-                                 "key set, so ignoring.", hook.path)
+                    LOGGER.debug("hook %s returned result data but no data "
+                                 "key set; ignoring", hook.path)

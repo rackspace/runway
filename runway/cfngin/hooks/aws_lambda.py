@@ -72,14 +72,14 @@ def copydir(source, destination, includes, excludes=None,
         parent = os.path.dirname(dir_name)
         if not os.path.isdir(parent):
             _mkdir(parent)
-        LOGGER.debug('lambda.copydir: Creating directory: %s', dir_name)
+        LOGGER.debug('creating directory: %s', dir_name)
         os.mkdir(dir_name)
 
     for file_name in files:
         src = os.path.join(source, file_name)
         dest = os.path.join(destination, file_name)
         try:
-            LOGGER.debug('lambda.copydir: Copying file "%s" to "%s"',
+            LOGGER.debug('copying file "%s" to "%s"',
                          src, dest)
             copyfile(src, dest)
         # python2 raises an IOError here
@@ -158,7 +158,7 @@ def _zip_files(files, root):
         # if file list is a generator, save the contents so it can be reused
         # since generators are empty after the first iteration and cannot be
         # rewound.
-        LOGGER.debug('lambda: Converting file generater to list for reuse...')
+        LOGGER.debug('converting file generater to list for reuse...')
         files = list(files)
     with ZipFile(zip_data, 'w', ZIP_DEFLATED) as zip_file:
         for file_name in files:
@@ -174,7 +174,7 @@ def _zip_files(files, root):
                 new_perms = 0o644
 
             if new_perms != perms:
-                LOGGER.debug("lambda: fixing perms: %s: %o => %o",
+                LOGGER.debug("fixing perms: %s: %o => %o",
                              zip_entry.filename, perms, new_perms)
                 new_attr = (
                     (zip_entry.external_attr & ~ZIP_PERMS_MASK) | (new_perms << 16)
@@ -268,17 +268,17 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
         RuntimeError: when the generated archive would be empty.
 
     """
-    LOGGER.info('lambda: base directory: %s', root)
+    LOGGER.info('base directory: %s', root)
 
     files = list(_find_files(root, includes, excludes, follow_symlinks))
     if not files:
         raise RuntimeError('Empty list of files for Lambda payload. Check '
                            'your include/exclude options for errors.')
 
-    LOGGER.info('lambda: adding %d files:', len(files))
+    LOGGER.info('adding %d files:', len(files))
 
     for file_name in files:
-        LOGGER.debug('lambda: + %s', file_name)
+        LOGGER.debug(' + %s', file_name)
 
     return _zip_files(files, root)
 
@@ -310,15 +310,15 @@ def handle_requirements(package_root, dest_path, requirements,
 
     """
     if use_pipenv:
-        LOGGER.info('lambda: explicitly using pipenv')
+        LOGGER.info('explicitly using pipenv')
         return _handle_use_pipenv(package_root=package_root,
                                   dest_path=dest_path, python_path=python_path,
                                   timeout=pipenv_timeout)
     if requirements['requirements.txt']:
-        LOGGER.info('lambda: using requirements.txt for dependencies')
+        LOGGER.info('using requirements.txt for dependencies')
         return os.path.join(dest_path, 'requirements.txt')
     if requirements['Pipfile'] or requirements['Pipfile.lock']:
-        LOGGER.info('lambda: using pipenv for dependencies')
+        LOGGER.info('using pipenv for dependencies')
         return _handle_use_pipenv(package_root=package_root,
                                   dest_path=dest_path, python_path=python_path,
                                   timeout=pipenv_timeout)
@@ -345,7 +345,7 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
     if getattr(sys, 'frozen', False):
         LOGGER.error('pipenv can only be used with python installed from PyPi')
         sys.exit(1)
-    LOGGER.info('lambda.pipenv: Creating requirements.txt from Pipfile...')
+    LOGGER.info('creating requirements.txt from Pipfile...')
     req_path = os.path.join(dest_path, 'requirements.txt')
     cmd = ['pipenv', 'lock', '--requirements', '--keep-outdated']
     if python_path:
@@ -365,7 +365,7 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
             return req_path
         if int(sys.version[0]) > 2:
             stderr = stderr.decode('UTF-8')
-        LOGGER.error('lambda.pipenv: "%s" failed with the following '
+        LOGGER.error('"%s" failed with the following '
                      'output:\n%s', ' '.join(cmd), stderr)
         raise PipenvError
 
@@ -408,7 +408,7 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
     if docker_file:
         if not os.path.isfile(docker_file):
             raise ValueError('could not find docker_file "%s"' % docker_file)
-        LOGGER.info('lambda.docker: Building docker image from "%s".',
+        LOGGER.info('building docker image from "%s"',
                     docker_file)
         response = client.images.build(
             path=os.path.dirname(docker_file),
@@ -424,18 +424,18 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
                     LOGGER.info(log_msg['stream'].strip('\n'))
         else:
             docker_image = response.id
-        LOGGER.info('lambda.docker: Docker image "%s" created.', docker_image)
+        LOGGER.info('docker image "%s" created', docker_image)
     if runtime:
         if runtime not in SUPPORTED_RUNTIMES:
             raise ValueError('invalid runtime "{}" must be one of {}'.format(
                 runtime, str(SUPPORTED_RUNTIMES)
             ))
         docker_image = 'lambci/lambda:build-%s' % runtime
-        LOGGER.debug('lambda.docker: Selected docker image "%s" based on '
-                     'provided runtime', docker_image)
+        LOGGER.debug('selected docker image "%s" based on provided runtime',
+                     docker_image)
 
     if sys.platform.lower() == 'win32':
-        LOGGER.debug('lambda.docker: Formatted docker mount path for Windows')
+        LOGGER.debug('formatted docker mount path for Windows')
         work_dir = work_dir.replace('\\', '/')
 
     work_dir_mount = docker.types.Mount(target='/var/task',
@@ -445,7 +445,7 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
         'python -m pip install -t /var/task -r /var/task/requirements.txt'
     )
 
-    LOGGER.info('lambda.docker: Using docker image "%s" to build deployment '
+    LOGGER.info('using docker image "%s" to build deployment '
                 'package...', docker_image)
 
     container = client.containers.run(image=docker_image,
@@ -461,7 +461,7 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
                               stream=True,
                               tail=0):
         # without strip there are a bunch blank lines in the output
-        LOGGER.info('lambda.docker: %s', log.decode().strip())
+        LOGGER.info(log.decode().strip())
 
 
 def _pip_has_no_color_option(python_path):
@@ -478,7 +478,7 @@ def _pip_has_no_color_option(python_path):
     context of building a Lambda zip that will never interact with the
     running python system.
 
-    Ideally this mitigation (and this function by assocation) can be removed
+    Ideally this mitigation (and this function by association) can be removed
     by an enhancement or replacement of pip for building the packages.
 
     """
@@ -495,7 +495,7 @@ def _pip_has_no_color_option(python_path):
         if int(pip_version_string.split('.')[0]) > 10:
             return True
     except (AttributeError, ValueError, subprocess.CalledProcessError):
-        LOGGER.debug('Error checking pip version; assuming it to be pre-v10')
+        LOGGER.debug('error checking pip version; assuming it to be pre-v10')
     return False
 
 
@@ -650,13 +650,13 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash,
             through.
 
     """
-    LOGGER.debug('lambda: ZIP hash: %s', content_hash)
+    LOGGER.debug('ZIP hash: %s', content_hash)
     key = '{}lambda-{}-{}.zip'.format(prefix, name, content_hash)
 
     if _head_object(s3_conn, bucket, key):
-        LOGGER.info('lambda: object %s already exists, not uploading', key)
+        LOGGER.info('object already exists; not uploading: %s', key)
     else:
-        LOGGER.info('lambda: uploading object %s', key)
+        LOGGER.info('uploading object: %s', key)
         s3_conn.put_object(Bucket=bucket, Key=key, Body=contents,
                            ContentType='application/zip',
                            ACL=payload_acl)
@@ -750,7 +750,7 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
     excludes = _check_pattern_list(options.get('exclude'), 'exclude',
                                    default=[])
 
-    LOGGER.debug('lambda: processing function %s', name)
+    LOGGER.debug('processing function: %s', name)
 
     # os.path.join will ignore other parameters if the right-most one is an
     # absolute path, which is exactly what we want.
@@ -972,11 +972,11 @@ def upload_lambda_functions(context, provider, **kwargs):
     custom_bucket = kwargs.get('bucket')
     if not custom_bucket:
         bucket_name = context.bucket_name
-        LOGGER.info("lambda: using default bucket from CFNgin: %s",
+        LOGGER.info("using default bucket from CFNgin: %s",
                     bucket_name)
     else:
         bucket_name = custom_bucket
-        LOGGER.info("lambda: using custom bucket: %s", bucket_name)
+        LOGGER.info("using custom bucket: %s", bucket_name)
 
     custom_bucket_region = kwargs.get("bucket_region")
     if not custom_bucket and custom_bucket_region:

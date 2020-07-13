@@ -16,16 +16,16 @@ class Action(BaseAction):  # pylint: disable=abstract-method
 
     def run(self, **kwargs):
         """Get information on CloudFormation stacks."""
-        LOGGER.info('Outputs for stacks: %s', self.context.get_fqn())
+        LOGGER.info('outputs for stacks: %s', self.context.get_fqn())
         if not self.context.get_stacks():
-            LOGGER.warning('WARNING: No stacks detected (error in config?)')
+            LOGGER.warning('no stacks detected (error in config?)')
         for stack in self.context.get_stacks():
             provider = self.build_provider(stack)
 
             try:
                 provider_stack = provider.get_stack(stack.fqn)
             except exceptions.StackDoesNotExist:
-                LOGGER.info('Stack "%s" does not exist.', stack.fqn,)
+                LOGGER.info('%s:stack does not exist', stack.fqn,)
                 continue
 
             LOGGER.info('%s:', stack.fqn)

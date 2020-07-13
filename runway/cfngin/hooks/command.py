@@ -98,7 +98,7 @@ def run_command(provider, context, command, capture=False, interactive=False,
         full_env.update(env)
         env = full_env
 
-    LOGGER.info('Running command: %s', command)
+    LOGGER.info('running command: %s', command)
 
     proc = Popen(command, stdin=in_type, stdout=out_err_type,
                  stderr=out_err_type, env=env, **kwargs)
@@ -115,9 +115,9 @@ def run_command(provider, context, command, capture=False, interactive=False,
 
         # Don't print the command line again if we already did earlier
         if LOGGER.isEnabledFor(logging.INFO):
-            LOGGER.warning('Command failed with returncode %d', status)
+            LOGGER.warning('command failed with returncode %d', status)
         else:
-            LOGGER.warning('Command failed with returncode %d: %s', status,
+            LOGGER.warning('command failed with returncode %d: %s', status,
                            command)
 
         return None

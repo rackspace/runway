@@ -198,7 +198,7 @@ class BaseAction(object):
                 raise
 
         if template_exists and not force:
-            LOGGER.debug("Cloudformation template %s already exists.",
+            LOGGER.debug("CloudFormation template already exists: %s",
                          template_url)
             return template_url
         self.s3_conn.put_object(Bucket=self.bucket_name,
@@ -206,7 +206,7 @@ class BaseAction(object):
                                 Body=blueprint.rendered,
                                 ServerSideEncryption='AES256',
                                 ACL='bucket-owner-full-control')
-        LOGGER.debug("Blueprint %s pushed to %s.", blueprint.name,
+        LOGGER.debug("blueprint %s pushed to %s", blueprint.name,
                      template_url)
         return template_url
 

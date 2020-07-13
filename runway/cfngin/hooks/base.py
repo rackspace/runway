@@ -8,7 +8,6 @@ from runway.util import MutableMap
 
 from ..actions import build
 from ..exceptions import StackFailed
-from ..plan import COLOR_CODES
 from ..stack import Stack
 from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 
@@ -154,11 +153,17 @@ class Hook(object):
                 logged.
 
         """
-        msg = "%s: %s" % (stack.name, status.name)
+        msg = '{}:{}'.format(stack.name, status.name)
         if status.reason:
-            msg += " (%s)" % (status.reason)
-        color_code = COLOR_CODES.get(status.code, 37)
-        LOGGER.info(msg, extra={"color": color_code})
+            msg += " (%s)" % status.reason
+        if status.code == SUBMITTED.code:
+            LOGGER.notice(msg)
+        elif status.code == COMPLETE.code:
+            LOGGER.success(msg)
+        elif status.code == FAILED.code:
+            LOGGER.error(msg)
+        else:
+            LOGGER.info(msg)
 
     def _run_stack_action(self, action, stack=None, wait=None):
         """Run a CFNgin hook modified for use in hooks.
@@ -213,7 +218,7 @@ class Hook(object):
                 # log status changes like rollback
                 self._log_stack(stack, status)
                 last_status = status
-            LOGGER.debug('Waiting for stack to complete...')
+            LOGGER.debug('waiting for stack to complete...')
             status = action.run(stack=stack, status=status)
 
         self._log_stack(stack, status)

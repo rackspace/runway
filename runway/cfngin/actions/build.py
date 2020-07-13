@@ -36,11 +36,11 @@ def should_update(stack):
     """
     if stack.locked:
         if not stack.force:
-            LOGGER.debug("Stack %s locked and not in --force list. "
-                         "Refusing to update.", stack.name)
+            LOGGER.debug("%s:locked and not in --force list; "
+                         "refusing to update", stack.name)
             return False
-        LOGGER.debug("Stack %s locked, but is in --force "
-                     "list.", stack.name)
+        LOGGER.debug("%s:locked but is in --force "
+                     "list", stack.name)
     return True
 
 
@@ -57,7 +57,7 @@ def should_submit(stack):
     if stack.enabled:
         return True
 
-    LOGGER.debug("Stack %s is not enabled.  Skipping.", stack.name)
+    LOGGER.debug("%s:skipped; stack is not enabled", stack.name)
     return False
 
 
@@ -98,16 +98,16 @@ def _resolve_parameters(parameters, blueprint):
 
     for key, value in parameters.items():
         if key not in param_defs:
-            LOGGER.debug("Blueprint %s does not use parameter %s.",
+            LOGGER.debug("blueprint %s does not use parameter %s",
                          blueprint.name, key)
             continue
         if value is None:
-            LOGGER.debug("Got None value for parameter %s, not submitting it "
-                         "to cloudformation, default value should be used.",
+            LOGGER.debug("got NoneType value for parameter %s; not submitting it "
+                         "to cloudformation, default value should be used",
                          key)
             continue
         if isinstance(value, bool):
-            LOGGER.debug("Converting parameter %s boolean \"%s\" to string.",
+            LOGGER.debug("converting parameter %s boolean \"%s\" to string",
                          key, value)
             value = str(value).lower()
         params[key] = value
@@ -151,7 +151,7 @@ def _handle_missing_parameters(parameter_values, all_params, required_params,
         for param in missing_params:
             if param in stack_parameters:
                 LOGGER.debug(
-                    "Using previous value for parameter %s from existing "
+                    "using previous value for parameter %s from existing "
                     "stack",
                     param
                 )
@@ -255,12 +255,12 @@ class Action(BaseAction):
         try:
             stack_data = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
-            LOGGER.debug("Stack %s does not exist.", stack.fqn)
+            LOGGER.debug("%s:stack does not exist", stack.fqn)
             if kwargs.get("status", None) == SUBMITTED:
                 return DESTROYED_STATUS
             return StackDoesNotExistStatus()
 
-        LOGGER.debug("Stack %s provider status: %s",
+        LOGGER.debug("%s:provider status: %s",
                      provider.get_stack_name(stack_data),
                      provider.get_stack_status(stack_data))
         try:
@@ -271,7 +271,7 @@ class Action(BaseAction):
             wait = stack.in_progress_behavior == "wait"
             if wait and provider.is_stack_in_progress(stack_data):
                 return WAITING
-            LOGGER.debug("Destroying stack: %s", stack.fqn)
+            LOGGER.debug("%s:destroying stack", stack.fqn)
             provider.destroy_stack(stack_data, action='build')
             return DESTROYING_STATUS
         except CancelExecution:
@@ -311,7 +311,7 @@ class Action(BaseAction):
         recreate = False
         if provider_stack and old_status == SUBMITTED:
             LOGGER.debug(
-                "Stack %s provider status: %s",
+                "%s:provider status: %s",
                 stack.fqn,
                 provider.get_stack_status(provider_stack),
             )
@@ -320,7 +320,7 @@ class Action(BaseAction):
                 if 'rolling back' in old_status.reason:
                     return old_status
 
-                LOGGER.debug("Stack %s entered a roll back", stack.fqn)
+                LOGGER.debug("%s:entered roll back", stack.fqn)
                 if 'updating' in old_status.reason:
                     reason = 'rolling back update'
                 else:
@@ -328,10 +328,10 @@ class Action(BaseAction):
 
                 return SubmittedStatus(reason)
             elif provider.is_stack_in_progress(provider_stack):
-                LOGGER.debug("Stack %s in progress.", stack.fqn)
+                LOGGER.debug("%s:in progress", stack.fqn)
                 return old_status
             elif provider.is_stack_destroyed(provider_stack):
-                LOGGER.debug("Stack %s finished deleting", stack.fqn)
+                LOGGER.debug("%s:finished deleting", stack.fqn)
                 recreate = True
                 # Continue with creation afterwards
             # Failure must be checked *before* completion, as both will be true
@@ -343,7 +343,7 @@ class Action(BaseAction):
                     reason = reason.replace('rolling', 'rolled')
                 status_reason = provider.get_rollback_status_reason(stack.fqn)
                 LOGGER.info(
-                    "%s Stack Roll Back Reason: %s", stack.fqn, status_reason)
+                    "%s:roll back reason: %s", stack.fqn, status_reason)
                 return FailedStatus(reason)
 
             elif provider.is_stack_completed(provider_stack):
@@ -353,10 +353,10 @@ class Action(BaseAction):
             else:
                 return old_status
 
-        LOGGER.debug("Resolving stack %s", stack.fqn)
+        LOGGER.debug("%s:resolving stack", stack.fqn)
         stack.resolve(self.context, self.provider)
 
-        LOGGER.debug("Launching stack %s now.", stack.fqn)
+        LOGGER.debug("%s:launching stack now", stack.fqn)
         template = self._template(stack.blueprint)
         stack_policy = self._stack_policy(stack)
         tags = build_stack_tags(stack)
@@ -364,13 +364,13 @@ class Action(BaseAction):
         force_change_set = stack.blueprint.requires_change_set
 
         if recreate:
-            LOGGER.debug("Re-creating stack: %s", stack.fqn)
+            LOGGER.debug("%s:re-creating stack", stack.fqn)
             provider.create_stack(stack.fqn, template, parameters,
                                   tags, stack_policy=stack_policy,
                                   termination_protection=stack.termination_protection)
             return SubmittedStatus("re-creating stack")
         if not provider_stack:
-            LOGGER.debug("Creating new stack: %s", stack.fqn)
+            LOGGER.debug("%s:creating new stack", stack.fqn)
             provider.create_stack(stack.fqn, template, parameters, tags,
                                   force_change_set,
                                   stack_policy=stack_policy,
@@ -395,7 +395,7 @@ class Action(BaseAction):
                     termination_protection=stack.termination_protection
                 )
 
-                LOGGER.debug("Updating existing stack: %s", stack.fqn)
+                LOGGER.debug("%s:updating existing stack", stack.fqn)
                 return SubmittedStatus("updating existing stack")
             return SubmittedStatus("destroying stack for re-creation")
         except CancelExecution:
@@ -520,11 +520,11 @@ class Action(BaseAction):
         outline = kwargs.get('outline', False)
         plan = self.__generate_plan(tail=kwargs.get('tail'))
         if not plan.keys():
-            LOGGER.warning('WARNING: No stacks detected (error in config?)')
+            LOGGER.warning('no stacks detected (error in config?)')
         if not outline and not dump:
             plan.outline(logging.DEBUG)
             self.context.lock_persistent_graph(plan.lock_code)
-            LOGGER.debug("Launching stacks: %s", ", ".join(plan.keys()))
+            LOGGER.debug("launching stacks: %s", ", ".join(plan.keys()))
             walker = build_walker(kwargs.get('concurrency', 0))
             try:
                 plan.execute(walker)

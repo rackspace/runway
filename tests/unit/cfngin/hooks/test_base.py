@@ -64,8 +64,8 @@ class TestHook(object):
         with caplog.at_level(logging.INFO, logger='runway.cfngin.hooks.base'):
             assert hook.deploy_stack(stack=stack, wait=False) == COMPLETE
 
-        assert caplog.records[0].message == '%s: %s' % (stack.name,
-                                                        COMPLETE.name)
+        assert caplog.records[0].message == '%s:%s' % (stack.name,
+                                                       COMPLETE.name)
 
     @patch('runway.cfngin.hooks.base.HookBuildAction.run',
            MagicMock(side_effect=[SUBMITTED, COMPLETE]))
@@ -78,11 +78,11 @@ class TestHook(object):
         with caplog.at_level(logging.DEBUG, logger='runway.cfngin.hooks.base'):
             assert hook.deploy_stack(stack=stack, wait=True) == COMPLETE
 
-        assert caplog.records[0].message == '%s: %s' % (stack.name,
-                                                        SUBMITTED.name)
-        assert caplog.records[1].message == 'Waiting for stack to complete...'
-        assert caplog.records[2].message == '%s: %s' % (stack.name,
-                                                        COMPLETE.name)
+        assert caplog.records[0].message == '%s:%s' % (stack.name,
+                                                       SUBMITTED.name)
+        assert caplog.records[1].message == 'waiting for stack to complete...'
+        assert caplog.records[2].message == '%s:%s' % (stack.name,
+                                                       COMPLETE.name)
 
     @patch('runway.cfngin.hooks.base.HookBuildAction.run',
            MagicMock(side_effect=[SKIPPED]))
@@ -95,8 +95,8 @@ class TestHook(object):
         with caplog.at_level(logging.INFO, logger='runway.cfngin.hooks.base'):
             assert hook.deploy_stack(stack=stack, wait=True) == SKIPPED
 
-        assert caplog.records[0].message == '%s: %s' % (stack.name,
-                                                        SKIPPED.name)
+        assert caplog.records[0].message == '%s:%s' % (stack.name,
+                                                       SKIPPED.name)
 
     @patch('runway.cfngin.hooks.base.HookBuildAction.run',
            MagicMock(side_effect=[FAILED]))
@@ -120,10 +120,10 @@ class TestHook(object):
         with caplog.at_level(logging.DEBUG, logger='runway.cfngin.hooks.base'):
             assert hook.destroy_stack(stack=stack, wait=True) == COMPLETE
 
-        assert caplog.records[0].message == '%s: %s' % (stack.name,
-                                                        SUBMITTED.name)
-        assert caplog.records[1].message == 'Waiting for stack to complete...'
-        assert caplog.records[2].message == '%s: %s (%s)' % (
+        assert caplog.records[0].message == '%s:%s' % (stack.name,
+                                                       SUBMITTED.name)
+        assert caplog.records[1].message == 'waiting for stack to complete...'
+        assert caplog.records[2].message == '%s:%s (%s)' % (
             stack.name, COMPLETE_W_REASON.name, COMPLETE_W_REASON.reason
         )
 

@@ -1,11 +1,10 @@
 """CFNgin lookup registry."""
 import logging
-import warnings
 
 from six import string_types
 
 from runway.lookups.handlers import ssm
-from runway.util import load_object_from_string
+from runway.util import DOC_SITE, load_object_from_string
 
 from ..exceptions import FailedVariableLookup, UnknownLookupType
 from .handlers import ami, default, dynamodb, envvar
@@ -13,6 +12,7 @@ from .handlers import file as file_handler
 from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref
 
 CFNGIN_LOOKUP_HANDLERS = {}
+LOGGER = logging.getLogger(__name__)
 
 
 def register_lookup_handler(lookup_type, handler_or_path):
@@ -25,21 +25,17 @@ def register_lookup_handler(lookup_type, handler_or_path):
 
     """
     handler = handler_or_path
+    LOGGER.debug('registering CFNgin lookup: %s=%s', lookup_type, handler_or_path)
     if isinstance(handler_or_path, string_types):
         handler = load_object_from_string(handler_or_path)
     CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
     if not isinstance(handler, type):
         # Hander is a not a new-style handler
-        logger = logging.getLogger(__name__)
-        logger.warning("Registering lookup `%s`: Please upgrade to use the "
-                       "new style of Lookups.", lookup_type)
-        warnings.warn(
-            # For some reason, this does not show up...
-            # Leaving it in anyway
-            "Lookup `%s`: Please upgrade to use the new style of Lookups"
-            "." % lookup_type,
-            DeprecationWarning,
-            stacklevel=2,
+        LOGGER.warning(
+            'lookup "%s" uses a deprecated format; to learn how to write '
+            'lookups visit %s/page/cfngin/lookups.html#writing-a-custom-lookup',
+            lookup_type,
+            DOC_SITE
         )
 
 
