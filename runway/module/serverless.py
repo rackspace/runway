@@ -75,7 +75,15 @@ def get_src_hash(sls_config, path):
 
 
 def deploy_package(sls_opts, bucketname, context, path):
-    """Run sls package command."""
+    """Run sls package command.
+
+    Args:
+        sls_opts (List[str]): List of options for Serverless CLI.
+        bucketname (str): S3 Bucket name.
+        context (Context): Runway context object.
+        path (str): Module path.
+
+    """
     package_dir = tempfile.mkdtemp()
     LOGGER.debug('Package directory: %s', package_dir)
 
@@ -109,6 +117,10 @@ def deploy_package(sls_opts, bucketname, context, path):
             upload(bucketname, hash_zip, zip_name)
 
     sls_opts[0] = 'deploy'
+    # --package must be provided to "deploy" as a relative path to support
+    # serverless@<1.70.0. the fix to support absolute path was implimented
+    # somewhere between 1.60.0 and 1.70.0.
+    sls_opts[-1] = os.path.relpath(package_dir)
     sls_deploy_cmd = generate_node_command(command='sls',
                                            command_opts=sls_opts,
                                            path=path)

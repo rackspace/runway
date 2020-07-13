@@ -99,7 +99,7 @@ Kubernetes manifests can be deployed via Runway offering an ideal way to handle 
 - `Advanced Features <kubernetes/advanced_features.html>`__
 
 .. toctree::
-   :caption: CloudFormation & Troposphere
+   :caption: Kubernetes
    :maxdepth: 2
    :hidden:
 
