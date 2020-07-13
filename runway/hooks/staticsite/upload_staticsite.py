@@ -174,7 +174,8 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
         domain (string): The distribution domain.
 
     """
-    LOGGER.info("invalidating CloudFront distribution: %s", identifier)
+    LOGGER.info("invalidating CloudFront distribution: %s (%s)",
+                identifier, domain)
     cf_client = session.client('cloudfront')
     cf_client.create_invalidation(
         DistributionId=identifier,
