@@ -95,6 +95,7 @@ class BaseAction(object):
     """
 
     DESCRIPTION = 'Base action'
+    NAME = None
 
     def __init__(self, context, provider_builder=None, cancel=None):
         """Instantiate class.
@@ -278,4 +279,10 @@ class BaseAction(object):
     def _tail_stack(self, stack, cancel, retries=0, **kwargs):
         """Tail a stack's event stream."""
         provider = self.build_provider(stack)
-        return provider.tail_stack(stack, cancel, retries, **kwargs)
+        return provider.tail_stack(
+            stack,
+            cancel,
+            action=self.NAME,
+            retries=retries,
+            **kwargs
+        )

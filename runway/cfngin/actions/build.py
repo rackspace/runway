@@ -202,6 +202,7 @@ class Action(BaseAction):
     """
 
     DESCRIPTION = 'Create/Update stacks'
+    NAME = 'build'
 
     @staticmethod
     def build_parameters(stack, provider_stack=None):

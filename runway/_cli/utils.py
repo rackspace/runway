@@ -1,5 +1,6 @@
 """CLI utils."""
 import logging
+import os
 import sys
 from typing import (Any, Iterator, List, Optional,  # noqa pylint: disable=W
                     Tuple)
@@ -38,16 +39,24 @@ class CliContext(MutableMapping):
 
         """
         self._deploy_environment = deploy_environment
+        self.ci = ci
         self.debug = debug
         self.root_dir = Path.cwd()
         self.verbose = verbose
-        if ci:  # prevents unnecessary loading of runway config
-            self.env.ci = ci
 
     @cached_property
     def env(self):
         """Name of the current deploy environment."""
+        environ = os.environ.copy()
+        # carefully update environ with values passed from the cli
+        if self.ci and 'CI' not in environ:
+            environ['CI'] = '1'
+        if self.debug and 'DEBUG' not in environ:
+            environ['DEBUG'] = str(self.debug)
+        if self.verbose and 'VERBOSE' not in environ:
+            environ['VERBOSE'] = '1'
         return DeployEnvironment(
+            environ=environ,
             explicit_name=self._deploy_environment,
             root_dir=self.root_dir
         )

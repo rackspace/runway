@@ -71,6 +71,7 @@ class Action(BaseAction):
     """Responsible for outputing a graph for the current CFNgin config."""
 
     DESCRIPTION = 'Print graph'
+    NAME = 'graph'
 
     @property
     def _stack_action(self):

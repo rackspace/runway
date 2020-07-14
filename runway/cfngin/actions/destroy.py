@@ -28,6 +28,7 @@ class Action(BaseAction):
     """
 
     DESCRIPTION = 'Destroy stacks'
+    NAME = 'destroy'
 
     @property
     def _stack_action(self):

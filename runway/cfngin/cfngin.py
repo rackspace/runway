@@ -63,7 +63,7 @@ class CFNgin(object):
         self.recreate_failed = ctx.is_noninteractive
         self.region = ctx.env_region
         self.sys_path = sys_path or os.getcwd()
-        self.tail = ctx.debug
+        self.tail = bool(ctx.env.debug or ctx.env.verbose)
 
         self.parameters.update(self.env_file)
 

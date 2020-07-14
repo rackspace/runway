@@ -649,19 +649,25 @@ class Provider(BaseProvider):
         """Whether the status of the stack indicates if 'review in progress'."""
         return self.get_stack_status(stack) == self.REVIEW_STATUS
 
-    def tail_stack(self, stack, cancel, log_func=None):
+    def tail_stack(self, stack, cancel, action=None, log_func=None,
+                   retries=None):
         """Tail the events of a stack."""
         def _log_func(event):
-            event_args = [event['ResourceStatus'], event['ResourceType'],
-                          event.get('ResourceStatusReason', None)]
-            # filter out any values that are empty
-            event_args = [arg for arg in event_args if arg]
-            template = " ".join(["[%s]"] + ["%s" for _ in event_args])
-            LOGGER.info(template, *([stack.fqn] + event_args))
+            template = '[%s] %s %s %s'
+            event_args = [
+                event['LogicalResourceId'],
+                event['ResourceType'],
+                event['ResourceStatus']
+            ]
+            if event.get('ResourceStatusReason'):
+                template += ' (%s)'
+                event_args.append(event['ResourceStatusReason'])
+            LOGGER.verbose(template, *([stack.fqn] + event_args))
 
         log_func = log_func or _log_func
+        retries = retries or MAX_TAIL_RETRIES
 
-        LOGGER.info("%s:tailing stack...", stack.fqn)
+        LOGGER.debug("%s:tailing stack...", stack.fqn)
 
         attempts = 0
         while True:
@@ -671,12 +677,23 @@ class Provider(BaseProvider):
                           include_initial=False)
                 break
             except botocore.exceptions.ClientError as err:
-                if "does not exist" in str(err) and attempts < MAX_TAIL_RETRIES:
-                    # stack might be in the process of launching, wait for a
-                    # second and try again
-                    if cancel.wait(TAIL_RETRY_SLEEP):
+                if "does not exist" in str(err):
+                    LOGGER.debug(
+                        '%s:unable to tail stack; it does not exist',
+                        stack.fqn
+                    )
+                    if action == 'destroy':
+                        LOGGER.debug(
+                            '%s:stack was deleted before it could be tailed',
+                            stack.fqn
+                        )
                         return
-                    continue
+                    if attempts < retries:
+                        # stack might be in the process of launching, wait for a
+                        # second and try again
+                        if cancel.wait(TAIL_RETRY_SLEEP):
+                            return
+                        continue
                 raise
 
     @staticmethod

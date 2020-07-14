@@ -153,6 +153,7 @@ class Action(build.Action):
     """
 
     DESCRIPTION = 'Diff stacks'
+    NAME = 'diff'
 
     @property
     def _stack_action(self):

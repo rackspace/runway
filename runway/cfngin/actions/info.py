@@ -14,6 +14,8 @@ class Action(BaseAction):  # pylint: disable=abstract-method
 
     """
 
+    NAME = 'info'
+
     def run(self, **kwargs):
         """Get information on CloudFormation stacks."""
         LOGGER.info('outputs for stacks: %s', self.context.get_fqn())

@@ -275,6 +275,21 @@ class DeployEnvironment(object):
             self._update_vars({'DEPLOY_ENVIRONMENT': name})
         return name
 
+    @property
+    def verbose(self):
+        # type: () -> bool
+        """Get verbose setting from the environment."""
+        return 'VERBOSE' in self.vars
+
+    @verbose.setter
+    def verbose(self, value):
+        # type: (Any) -> None
+        """Set the value of VERBOSE."""
+        if value:
+            self._update_vars({'VERBOSE': '1'})
+        else:
+            self.vars.pop('VERBOSE', None)
+
     def copy(self):
         # type: () -> DeployEnvironment
         """Copy the contents of this object into a new instance.

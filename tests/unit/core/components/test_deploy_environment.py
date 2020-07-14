@@ -265,6 +265,20 @@ class TestDeployEnvironment(object):
         assert obj.name == expected
         assert obj.name_derived_from == 'directory'
 
+    def test_verbose(self):
+        """Test verbose."""
+        obj = DeployEnvironment(environ={})
+
+        assert not obj.verbose
+
+        obj.verbose = True
+        assert obj.verbose
+        assert obj.vars['VERBOSE'] == '1'
+
+        obj.verbose = False
+        assert not obj.verbose
+        assert 'VERBOSE' not in obj.vars
+
     def test_copy(self, monkeypatch, tmp_path):
         """Test copy."""
         monkeypatch.setattr(DeployEnvironment, 'name', 'test')
