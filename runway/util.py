@@ -339,13 +339,15 @@ class SafeHaven(AbstractContextManager):
 
     def reset_os_environ(self):
         """Reset the value of os.environ."""
-        self.logger.debug('resetting os.environ: %s', self.__os_environ)
+        self.logger.debug('resetting os.environ: %s',
+                          json.dumps(self.__os_environ))
         os.environ.clear()
         os.environ.update(self.__os_environ)
 
     def reset_sys_argv(self):
         """Reset the value of sys.argv."""
-        self.logger.debug('resetting sys.argv: %s', self.__sys_argv)
+        self.logger.debug('resetting sys.argv: %s',
+                          json.dumps(self.__sys_argv))
         sys.argv = self.__sys_argv
 
     def reset_sys_modules(self):
@@ -362,7 +364,7 @@ class SafeHaven(AbstractContextManager):
 
     def reset_sys_path(self):
         """Reset the value of sys.path."""
-        self.logger.debug('resetting sys.path: %s', self.__sys_path)
+        self.logger.debug('resetting sys.path: %s', json.dumps(self.__sys_path))
         sys.path = self.__sys_path
 
     def __enter__(self):

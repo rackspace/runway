@@ -792,14 +792,13 @@ class Provider(BaseProvider):
                 protection.
 
         """
-        LOGGER.debug("attempting to create stack %s:", fqn)
-        LOGGER.debug("    parameters: %s", parameters)
-        LOGGER.debug("    tags: %s", tags)
-        if template.url:
-            LOGGER.debug("    template_url: %s", template.url)
-        else:
-            LOGGER.debug("    no template url; uploading template "
-                         "directly")
+        LOGGER.debug("attempting to create stack %s: %s", fqn, json.dumps({
+            'parameters': parameters,
+            'tags': tags,
+            'template_url': template.url
+        }))
+        if not template.url:
+            LOGGER.debug("no template url; uploading template directly")
         if force_change_set:
             LOGGER.debug("force_change_set set to True; creating stack with "
                          "changeset")
@@ -951,13 +950,13 @@ class Provider(BaseProvider):
                 protection.
 
         """
-        LOGGER.debug("attempting to update stack %s:", fqn)
-        LOGGER.debug("    parameters: %s", parameters)
-        LOGGER.debug("    tags: %s", tags)
-        if template.url:
-            LOGGER.debug("    template_url: %s", template.url)
-        else:
-            LOGGER.debug("    no template url; uploading template directly")
+        LOGGER.debug("attempting to update stack %s: %s", fqn, json.dumps({
+            'parameters': parameters,
+            'tags': tags,
+            'template_url': template.url
+        }))
+        if not template.url:
+            LOGGER.debug("no template url; uploading template directly")
         update_method = self.select_update_method(force_interactive,
                                                   force_change_set)
 
