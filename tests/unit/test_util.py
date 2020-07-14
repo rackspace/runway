@@ -1,6 +1,7 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
 import logging
+import json
 import os
 import string
 import sys
@@ -121,7 +122,7 @@ class TestSafeHaven(object):
         orig_val = dict(os.environ)
         expected_val = dict(os.environ)
         expected_logs = ['entering a safe haven...',
-                         'resetting os.environ: %s' % orig_val,
+                         'resetting os.environ: %s' % json.dumps(orig_val),
                          'leaving the safe haven...']
 
         if isinstance(provided, dict):
@@ -163,7 +164,7 @@ class TestSafeHaven(object):
         orig_val = list(sys.argv)
         expected_val = provided if isinstance(provided, list) else list(sys.argv)
         expected_logs = ['entering a safe haven...',
-                         'resetting sys.argv: %s' % orig_val,
+                         'resetting sys.argv: %s' % json.dumps(orig_val),
                          'leaving the safe haven...']
 
         with SafeHaven(argv=provided) as obj:
@@ -216,7 +217,7 @@ class TestSafeHaven(object):
         orig_val = list(sys.path)
         expected_val = provided if isinstance(provided, list) else list(sys.path)
         expected_logs = ['entering a safe haven...',
-                         'resetting sys.path: %s' % orig_val,
+                         'resetting sys.path: %s' % json.dumps(orig_val),
                          'leaving the safe haven...']
 
         with SafeHaven(sys_path=provided) as obj:
