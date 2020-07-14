@@ -12,6 +12,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('whichenv', short_help='current deploy environment')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def whichenv(ctx, **_):  # noqa: D301

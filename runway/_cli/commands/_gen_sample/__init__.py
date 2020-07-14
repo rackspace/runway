@@ -52,6 +52,7 @@ COMMANDS = [
 
 @click.group('gen-sample', short_help='generate sample module/project')
 @options.debug
+@options.no_color
 @options.verbose
 def gen_sample(**_):
     """Generate a sample Runway module module/project.

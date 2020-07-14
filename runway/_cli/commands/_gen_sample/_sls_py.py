@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('sls-py', short_help='sls + python (sampleapp.sls)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def sls_py(ctx, **_):

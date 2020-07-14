@@ -24,6 +24,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('k8s-cfn-repo',
                short_help='k8s + cfn (k8s-cfn-infrastructure)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def k8s_cfn_repo(ctx, **_):

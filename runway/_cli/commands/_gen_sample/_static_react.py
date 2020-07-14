@@ -18,6 +18,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('static-react',
                short_help='react static site (static-react)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def static_react(ctx, **_):

@@ -50,6 +50,8 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
                             action='count')
         parser.add_argument('-e', '--deploy-environment',
                             default=os.getenv('DEPLOY_ENVIRONMENT'))
+        parser.add_argument('--no-color', action='store_true',
+                            default=bool(os.getenv('RUNWAY_NO_COLOR')))
         parser.add_argument('--verbose', action='store_true',
                             default=bool(os.getenv('VERBOSE')))
         args, _ = parser.parse_known_args(list(ctx.args))
@@ -59,6 +61,7 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS, cls=_CliGroup)
 @click.version_option(__version__, message='%(version)s')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def cli(ctx, **_):
@@ -69,7 +72,11 @@ def cli(ctx, **_):
 
     """
     opts = ctx.meta['global.options']
-    setup_logging(debug=opts['debug'], verbose=opts['verbose'])
+    setup_logging(
+        debug=opts['debug'],
+        no_color=opts['no_color'],
+        verbose=opts['verbose']
+    )
     ctx.obj = CliContext(**opts)
 
 

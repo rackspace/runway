@@ -18,6 +18,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('cfn',
                short_help="cfngin + cfn (sampleapp.cfn)")
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def cfn(ctx, **_):

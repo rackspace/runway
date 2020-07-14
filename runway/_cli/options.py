@@ -19,6 +19,12 @@ deploy_environment = click.option('-e', '--deploy-environment',
                                   help='Manually specify the name of the '
                                   'deploy environment.')
 
+no_color = click.option('--no-color',
+                        default=False,
+                        envvar='RUNWAY_NO_COLOR',
+                        is_flag=True,
+                        help="Disable color in Runway's logs.")
+
 tags = click.option('--tag', 'tags',
                     metavar='<tag>...',
                     multiple=True,

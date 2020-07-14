@@ -18,6 +18,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('tf', short_help='tf (sampleapp.tf)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def tf(ctx, **_):  # pylint: disable=invalid-name

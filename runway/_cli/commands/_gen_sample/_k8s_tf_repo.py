@@ -20,6 +20,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('k8s-tf-repo',
                short_help='k8s + tf (k8s-tf-infrastructure)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def k8s_tf_repo(ctx, **_):

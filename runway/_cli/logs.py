@@ -63,15 +63,17 @@ class LogSettings(object):
         'level_styles': os.getenv('COLOREDLOGS_LEVEL_STYLES')
     }
 
-    def __init__(self, debug=0, verbose=False):
+    def __init__(self, debug=0, no_color=False, verbose=False):
         """Instantiate class.
 
         Args:
             debug (int): Debug level.
+            no_color (bool): Disable color in Runway's logs.
             verbose (bool): Whether to display verbose logs.
 
         """
         self.debug = debug
+        self.no_color = no_color
         self.verbose = verbose
 
     @property
@@ -100,7 +102,7 @@ class LogSettings(object):
         """
         if self.ENV['fmt']:
             return self.ENV['fmt']
-        if self.debug or self.verbose:
+        if self.debug or self.no_color or self.verbose:
             return LOG_FORMAT_VERBOSE
         return LOG_FORMAT
 
@@ -115,6 +117,9 @@ class LogSettings(object):
             Dict[str, Any]
 
         """
+        if self.no_color:
+            return {}
+
         result = LOG_FIELD_STYLES.copy()
         if self.ENV['field_styles']:
             result.update(coloredlogs.parse_encoded_styles(
@@ -133,6 +138,9 @@ class LogSettings(object):
             Dict[str, Any]
 
         """
+        if self.no_color:
+            return {}
+
         result = LOG_LEVEL_STYLES.copy()
         if self.ENV['level_styles']:
             result.update(coloredlogs.parse_encoded_styles(
@@ -163,8 +171,11 @@ def setup_logging(*_, **kwargs):
         debug (int): Debug level (0-2).
 
     """
-    settings = LogSettings(debug=kwargs.pop('debug', 0),
-                           verbose=kwargs.pop('verbose', False))
+    settings = LogSettings(
+        debug=kwargs.pop('debug', 0),
+        no_color=kwargs.pop('no_color', False),
+        verbose=kwargs.pop('verbose', False)
+    )
 
     coloredlogs.install(settings.log_level, logger=LOGGER,
                         **settings.coloredlogs)

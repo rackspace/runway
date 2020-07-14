@@ -18,6 +18,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('static-angular',
                short_help='angular static site (static-angular)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def static_angular(ctx, **_):

@@ -19,6 +19,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('cfngin',
                short_help="cfngin + troposphere (sampleapp.cfn)")
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def cfngin(ctx, **_):

@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('cdk-csharp', short_help='cdk + c# (sampleapp.cdk)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def cdk_csharp(ctx, **_):

@@ -24,5 +24,6 @@ def test_preflight(caplog, cd_tmp_path, cp_config, monkeypatch):
         test,
         debug=0,
         deploy_environment='test',
+        no_color=False,
         verbose=False
     )

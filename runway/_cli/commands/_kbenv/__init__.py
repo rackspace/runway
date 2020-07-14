@@ -15,6 +15,7 @@ COMMANDS = [install, run]
 
 @click.group('kbenv', short_help='kubectl (install|run)')
 @options.debug
+@options.no_color
 @options.verbose
 def kbenv(**_):
     # type: (Any) -> None

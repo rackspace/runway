@@ -19,10 +19,12 @@ def test_dismantle(caplog, cd_tmp_path, cp_config, monkeypatch):
     result = runner.invoke(cli, ['dismantle',
                                  '--ci',
                                  '--deploy-environment', 'test',
+                                 '--no-color',
                                  '--tag', 'tag1',
                                  '--tag', 'tag2'])
     assert result.exit_code == 0
     assert 'forwarding to destroy...' in caplog.messages
     mock_forward.assert_called_once_with(destroy, ci=True, debug=0,
                                          deploy_environment='test',
+                                         no_color=True,
                                          tags=('tag1', 'tag2'), verbose=False)

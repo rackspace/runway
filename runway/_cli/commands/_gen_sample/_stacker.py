@@ -11,6 +11,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('stacker', short_help='deprecated, use cfngin')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def stacker(ctx, **kwargs):

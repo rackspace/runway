@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('install', short_help='install terraform')
 @click.argument('version', metavar='[<version>]', required=False, default=None)
 @options.debug
+@options.no_color
 @options.verbose
 def install(version, **_):
     # type: (str, Any) -> None

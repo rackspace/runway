@@ -17,6 +17,7 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('cdk-tsc', short_help='cdk + tsc (sampleapp.cdk)')
 @options.debug
+@options.no_color
 @options.verbose
 @click.pass_context
 def cdk_tsc(ctx, **_):
