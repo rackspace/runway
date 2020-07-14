@@ -52,11 +52,13 @@ When this command is used, the following will take place:
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
   --tag <tag>...                  Select modules by tag or tags.
                                   This option can be specified more than once to
                                   build a list of tags that are treated as "AND".
                                   (e.g. "--tag <tag1> --tag <tag2>" would select
                                   all modules with BOTH tags).
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -116,11 +118,13 @@ When this command is used, the following will take place:
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
   --tag <tag>...                  Select modules by tag or tags.
                                   This option can be specified more than once to
                                   build a list of tags that are treated as "AND".
                                   (e.g. "--tag <tag1> --tag <tag2>" would select
                                   all modules with BOTH tags).
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -158,11 +162,13 @@ Alias of :ref:`command-destroy`.
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
   --tag <tag>...                  Select modules by tag or tags.
                                   This option can be specified more than once to
                                   build a list of tags that are treated as "AND".
                                   (e.g. "--tag <tag1> --tag <tag2>" would select
                                   all modules with BOTH tags).
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -203,6 +209,8 @@ This command allows access to these values for use outside of Runway.
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -237,6 +245,8 @@ Open the Runway documentation web site using the default web browser.
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -303,6 +313,15 @@ If a directory already exists with the name Runway tries to use, the sample will
   $ runway gen-sample [OPTIONS] <sample>
 
 
+.. rubric:: Options
+.. code-block:: text
+
+  --debug                         Supply once to display Runway debug logs.
+                                  Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
+
+
 .. rubric:: Example
 .. code-block:: shell
 
@@ -333,6 +352,8 @@ Creates a sample :ref:`runway-config` in the current directory.
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -371,6 +392,8 @@ Compatible with `alexppg/kbenv <https://github.com/alexppg/kbenv>`__.
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -407,6 +430,8 @@ Uses the version of kubectl_ specified in the ``.kubectl-version`` file in the c
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -463,11 +488,13 @@ When this command is used, the following will take place:
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
   --tag <tag>...                  Select modules by tag or tags.
                                   This option can be specified more than once to
                                   build a list of tags that are treated as "AND".
                                   (e.g. "--tag <tag1> --tag <tag2>" would select
                                   all modules with BOTH tags).
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -504,6 +531,8 @@ Alias of :ref:`command-test`.
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -540,6 +569,8 @@ This command gives access to the awscli when it might not otherwise be installed
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -577,6 +608,8 @@ When installed from PyPI, the current interpreter is used.
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -615,6 +648,8 @@ This command allows direct access to Runway's CloudFormation management tool.
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -651,11 +686,13 @@ Alias of :ref:`command-deploy`
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
   --tag <tag>...                  Select modules by tag or tags.
                                   This option can be specified more than once to
                                   build a list of tags that are treated as "AND".
                                   (e.g. "--tag <tag1> --tag <tag2>" would select
                                   all modules with BOTH tags).
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -693,11 +730,13 @@ Alias of :ref:`command-plan`.
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
   --tag <tag>...                  Select modules by tag or tags.
                                   This option can be specified more than once to
                                   build a list of tags that are treated as "AND".
                                   (e.g. "--tag <tag1> --tag <tag2>" would select
                                   all modules with BOTH tags).
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -738,6 +777,8 @@ If any tests fail, the command with exit with a non-zero exit code.
                                   Supply twice to display all debug logs.
   -e, --deploy-environment <env-name>
                                   Manually specify the name of the deploy environment.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -774,6 +815,8 @@ If this file doesn't exist, nothing will be installed.
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -810,6 +853,8 @@ Uses the version of Terraform_ specified in the ``.terraform-version`` file in t
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
@@ -849,6 +894,8 @@ When run, the :ref:`deploy environment <term-deploy-env>`  will be determined fr
 
   --debug                         Supply once to display Runway debug logs.
                                   Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
 
 
 .. rubric:: Example
