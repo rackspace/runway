@@ -311,23 +311,34 @@ class DeployEnvironment(object):
         """Output name to log."""
         name = self.name  # resolve if not already resolved
         if self.name_derived_from == 'explicit':
-            LOGGER.info('Environment "%s" is explicitly defined in the environment.',
-                        name)
-            LOGGER.info('If this is not correct, update '
-                        'the value or unset it to fall back to the name of '
-                        'the current git branch or parent directory.')
+            LOGGER.info(
+                'deploy environment "%s" is explicitly defined in the environment',
+                name
+            )
+            LOGGER.info(
+                'if not correct, update the value or unset it to fall back '
+                'to the name of the current git branch or parent directory'
+            )
         elif self.name_derived_from == 'branch':
-            LOGGER.info('Environment "%s" was determined from the current git branch.',
-                        name)
-            LOGGER.info('If this is not the environment name, update the '
-                        'branch name or set an override via the '
-                        'DEPLOY_ENVIRONMENT environment variable.')
+            LOGGER.info(
+                'deploy environment "%s" was determined from the current '
+                'git branch',
+                name
+            )
+            LOGGER.info(
+                'if not correct, update the branch name or set an override '
+                'via the DEPLOY_ENVIRONMENT environment variable'
+            )
         elif self.name_derived_from == 'directory':
-            LOGGER.info('Environment "%s" was determined from the current directory.',
-                        name)
-            LOGGER.info('If this is not the environment name, update the '
-                        'directory name or set an override via the '
-                        'DEPLOY_ENVIRONMENT environment variable.')
+            LOGGER.info(
+                'deploy environment "%s" was determined from the current '
+                'directory',
+                name
+            )
+            LOGGER.info(
+                'if not correct, update the directory name or set an '
+                'override via the DEPLOY_ENVIRONMENT environment variable'
+            )
 
     def _parse_branch_name(self):
         # type: () -> str

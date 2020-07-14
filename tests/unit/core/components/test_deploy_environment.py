@@ -293,18 +293,21 @@ class TestDeployEnvironment(object):
         assert obj_copy.vars == obj.vars
 
     @pytest.mark.parametrize('derived_from, expected', [
-        ('explicit', ['Environment "test" is explicitly defined in the environment.',
-                      'If this is not correct, update '
-                      'the value or unset it to fall back to the name of '
-                      'the current git branch or parent directory.']),
-        ('branch', ['Environment "test" was determined from the current git branch.',
-                    'If this is not the environment name, update the '
-                    'branch name or set an override via the '
-                    'DEPLOY_ENVIRONMENT environment variable.']),
-        ('directory', ['Environment "test" was determined from the current directory.',
-                       'If this is not the environment name, update the '
-                       'directory name or set an override via the '
-                       'DEPLOY_ENVIRONMENT environment variable.'])
+        ('explicit', ['deploy environment "test" is explicitly defined '
+                      'in the environment',
+                      'if not correct, update the value or unset it to '
+                      'fall back to the name of the current git branch '
+                      'or parent directory']),
+        ('branch', ['deploy environment "test" was determined from the '
+                    'current git branch',
+                    'if not correct, update the branch name or set an '
+                    'override via the DEPLOY_ENVIRONMENT environment '
+                    'variable']),
+        ('directory', ['deploy environment "test" was determined from '
+                       'the current directory',
+                       'if not correct, update the directory name or '
+                       'set an override via the DEPLOY_ENVIRONMENT '
+                       'environment variable'])
     ])
     def test_log_name(self, derived_from, expected, caplog, monkeypatch):
         """Test log_name."""
