@@ -58,9 +58,9 @@ class LogSettings(object):
     """CLI log settings."""
 
     ENV = {
-        'field_styles': os.getenv('COLOREDLOGS_FIELD_STYLES'),
-        'fmt': os.getenv('COLOREDLOGS_LOG_FORMAT'),
-        'level_styles': os.getenv('COLOREDLOGS_LEVEL_STYLES')
+        'field_styles': os.getenv('RUNWAY_LOG_FIELD_STYLES'),
+        'fmt': os.getenv('RUNWAY_LOG_FORMAT'),
+        'level_styles': os.getenv('RUNWAY_LOG_LEVEL_STYLES')
     }
 
     def __init__(self, debug=0, no_color=False, verbose=False):
@@ -94,7 +94,7 @@ class LogSettings(object):
     def fmt(self):
         """Return log record format.
 
-        If "COLOREDLOGS_LOG_FORMAT" exists in the environment, it will be used.
+        If "RUNWAY_LOG_FORMAT" exists in the environment, it will be used.
 
         Returns:
             str
@@ -110,7 +110,7 @@ class LogSettings(object):
     def field_styles(self):
         """Return log field styles.
 
-        If "COLOREDLOGS_FIELD_STYLES" exists in the environment, it will be
+        If "RUNWAY_LOG_FIELD_STYLES" exists in the environment, it will be
         used to update the Runway LOG_FIELD_STYLES.
 
         Returns:
@@ -131,7 +131,7 @@ class LogSettings(object):
     def level_styles(self):
         """Return log level styles.
 
-        If "COLOREDLOGS_LEVEL_STYLES" exists in the environment, it will be
+        If "RUNWAY_LOG_LEVEL_STYLES" exists in the environment, it will be
         used to update the Runway LOG_LEVEL_STYLES.
 
         Returns:
