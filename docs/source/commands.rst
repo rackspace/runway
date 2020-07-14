@@ -285,7 +285,7 @@ If a directory already exists with the name Runway tries to use, the sample will
 |                    | bucket & DDB table (perfect for storing Terraform_|
 |                    | backend state)                                    |
 +--------------------+---------------------------------------------------+
-| `cfngin`           | :ref:`Troposphere <mod-cfn>` identical to the     |
+| ``cfngin``         | :ref:`Troposphere <mod-cfn>` identical to the     |
 |                    | ``cfn`` sample but written in Python              |
 +--------------------+---------------------------------------------------+
 | ``k8s-cfn-repo``   | :ref:`mod-k8s` EKS cluster & sample app using     |

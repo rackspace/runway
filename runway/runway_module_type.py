@@ -23,7 +23,7 @@ class RunwayModuleType(object):
     Runway determines the type of module you are trying to
     deploy in 3 different ways. First, it will check for the
     ``type`` property as described here, next it will look
-    for a suffix as described in :ref:`Module Definition<mod-definition>`,
+    for a suffix as described in :ref:`Module Definition<runway-module>`,
     and finally it will attempt to autodetect your module
     type by scanning the files of the project. If none of
     those settings produces a valid result an error will

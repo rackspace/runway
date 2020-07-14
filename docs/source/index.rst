@@ -32,6 +32,7 @@ Very simple configuration to:
 
 ----
 
+.. _module-configurations:
 
 ********************
 Module Configuration

@@ -120,6 +120,7 @@ config_ file.
 .. rubric:: Example
 
 .. code-block:: json
+
     {
         "stack1": [],
         "stack2": [
