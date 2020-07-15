@@ -1,19 +1,17 @@
 """Re-usable class for Serverless testing."""
 import os
 import tempfile
-import boto3
-
-from runway.s3_util import (download,
-                            get_matching_s3_keys,
-                            purge_and_delete_bucket,
-                            purge_bucket)
-from runway.util import change_dir, find_cfn_output
-from runway.module.serverless import get_src_hash
-from runway.commands.modules_command import assume_role
-from runway.hooks.staticsite.util import get_hash_of_files
 
 from integration_tests.test_serverless.test_serverless import Serverless
 from integration_tests.util import run_command
+# from runway.commands.modules_command import assume_role
+from runway.context import Context
+from runway.core.providers import aws
+from runway.hooks.staticsite.util import get_hash_of_files
+from runway.module.serverless import get_src_hash
+from runway.s3_util import (download, get_matching_s3_keys,
+                            purge_and_delete_bucket, purge_bucket)
+from runway.util import change_dir, find_cfn_output
 
 
 class ServerlessTest(Serverless):
@@ -48,12 +46,10 @@ class ServerlessTest(Serverless):
     def get_session(self, role_arn):
         """Get assumed role session."""
         self.logger.info('Assuming role: %s', role_arn)
-        env_vars = os.environ.copy()
-        role = assume_role(role_arn, env_vars=env_vars)
-        return boto3.session.Session(role['AWS_ACCESS_KEY_ID'],
-                                     role['AWS_SECRET_ACCESS_KEY'],
-                                     role['AWS_SESSION_TOKEN'],
-                                     'us-east-1')
+        ctx = Context()
+        with aws.AssumeRole(ctx, role_arn=role_arn,
+                            session_name='runway-integration-tests'):
+            return ctx.get_session(region='us-east-1')
 
     def get_configs(self):
         """Get Runway and Serverless parsed configs."""

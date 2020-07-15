@@ -1,0 +1,10 @@
+module_options:
+  deployment_option: deployment-val
+  overlap_option: deployment-val
+modules:
+  - path: sampleapp-01.cfn
+    options:
+      module_option: module-val
+      overlap_option: module-val
+regions:
+  - us-east-1

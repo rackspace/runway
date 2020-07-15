@@ -1,0 +1,17 @@
+deployments:
+  - name: deployment_1
+    env_vars:
+      TEST_VAR_01: deployment_1
+      TEST_VAR_SHARED: deployment_1
+    modules:
+      - sampleapp.cfn
+    regions:
+      - us-east-1
+  - name: deployment_2
+    env_vars:
+      TEST_VAR_02: deployment_2
+      TEST_VAR_SHARED: deployment_2
+    modules:
+      - sampleapp.cfn
+    regions:
+      - us-east-1

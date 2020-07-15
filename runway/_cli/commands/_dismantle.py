@@ -1,0 +1,24 @@
+"""``runway dismantle`` command."""
+# docs: file://./../../../docs/source/commands.rst
+import logging
+from typing import Any, Tuple  # pylint: disable=W
+
+import click
+
+from .. import options
+from ._destroy import destroy
+
+LOGGER = logging.getLogger(__name__.replace('._', '.'))
+
+
+@click.command('dismantle', short_help='alias of destroy')
+@options.ci
+@options.debug
+@options.deploy_environment
+@options.tags
+@click.pass_context
+def dismantle(ctx, **kwargs):
+    # type: (click.Context, Tuple[str, ...], Any) -> None
+    """Alias of "runway destroy"."""
+    LOGGER.debug('forwarding to destroy...')
+    ctx.forward(destroy, **kwargs)

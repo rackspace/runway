@@ -1,5 +1,0 @@
-deployments:
-  - modules:
-    - path: sampleapp.k8s
-    regions:
-      - us-east-1

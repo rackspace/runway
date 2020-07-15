@@ -27,8 +27,8 @@ INSTALL_REQUIRES = [
     'boto3>=1.9.111<2.0',
     'cfn_flip>=1.2.1',  # 1.2.1+ require PyYAML 4.1+
     'cfn-lint',
+    'click>=7.1',
     'docker',
-    'docopt',
     'requests',
     'future',
     'pyhcl~=0.4',
@@ -82,7 +82,7 @@ setup(
     use_scm_version={"local_scheme": local_scheme},
     entry_points={
         'console_scripts': [
-            'runway=runway.cli:main',
+            'runway=runway._cli.main:cli'
         ],
     },
     scripts=['scripts/stacker-runway', 'scripts/stacker-runway.cmd',

@@ -1,6 +1,0 @@
-deployments:
-  - modules:
-    - path: type_kubernetes
-      type: kubernetes
-    regions:
-      - us-east-1

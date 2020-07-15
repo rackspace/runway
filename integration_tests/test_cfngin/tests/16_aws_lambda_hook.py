@@ -2,14 +2,14 @@
 # flake8: noqa
 # pylint: disable=invalid-name
 import os
-import pty
-import tempfile
 
 import boto3
+from click.testing import CliRunner
 from send2trash import send2trash
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
-from runway.util import environ
+from runway._cli import cli
+from runway.util import change_dir
 
 FILE_BASENAME = '.'.join(os.path.basename(__file__).split('.')[:-1])
 
@@ -41,21 +41,15 @@ class TestAwsLambda(Cfngin):
         (e.g. from pip) includes color
 
         """
-        with environ({**os.environ, **{'DEPLOY_ENVIRONMENT': 'dev'}}):
-            with tempfile.TemporaryFile() as pty_output:
-                def read_pty(fds):
-                    """Append tty output to file descriptor."""
-                    data = os.read(fds, 1024)
-                    pty_output.write(data)
-                    return data
-
-                spawn_result = pty.spawn(['runway', 'deploy'], read_pty)
-                assert spawn_result == 0, 'exit code should be zero'
-                pty_output.seek(0)
-                combined_output = pty_output.read().decode()
-                assert '\x1b[31mERROR: ' not in combined_output, (
-                    'no red ERROR should be present'
-                )
+        with change_dir(self.working_dir):
+            runner = CliRunner()
+            result = runner.invoke(cli, ['deploy',
+                                         '--deploy-environment', 'dev',
+                                         '--ci'],
+                                   color=True)
+            assert result.exit_code == 0, 'exit code should be zero'
+            assert '\x1b[31mERROR: ' not in result.output, \
+                'no red ERROR should be present'
 
     def run(self):
         """Run test."""

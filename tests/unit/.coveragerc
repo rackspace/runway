@@ -1,0 +1,6 @@
+[run]
+omit =
+    */runway/_cli/*
+    */runway/aws_sso_botocore/*
+    */runway/blueprints/*
+    */runway/templates/*

@@ -1,0 +1,9 @@
+assume_role:
+  arn: arn:aws:iam::123456789012:role/test
+  post_deploy_env_revert: true
+  session_name: runway-test
+  duration: 300
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

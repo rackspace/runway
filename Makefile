@@ -1,3 +1,9 @@
+.PHONY: list sync sync_two sync_all pipenv_lock clean lint lint_two test test-integration test-unit test_shim create_tfenv_ver_file build build_pyinstaller_file build_pyinstaller_folder build_whl release npm_prep
+
+# list all targets in this Makefile
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
 sync:
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
 
@@ -40,7 +46,20 @@ lint_two:
 	find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 
 test:
-	pipenv run pytest
+	@echo "Running integration & unit tests..."
+	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration
+
+test-functional:
+	@echo "Running functional tests..."
+	@pipenv run pytest --functional --no-cov
+
+test-integration:
+	@echo "Running integration tests..."
+	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration-only
+
+test-unit:
+	@echo "Running unit tests..."
+	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing
 
 test_shim:
 	bash ./.github/scripts/cicd/test_shim.sh

@@ -1,16 +1,16 @@
 """CFNgin hook for syncing static website to S3 bucket."""
 # TODO move to runway.cfngin.hooks on next major release
-import logging
-import time
-import os
-import json
 import hashlib
+import json
+import logging
+import os
+import time
 from operator import itemgetter
 
 import yaml
 
 from ...cfngin.lookups.handlers.output import OutputLookup
-from ...commands.runway.run_aws import aws_cli
+from ...core.providers import aws
 
 LOGGER = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def sync(context, provider, **kwargs):
         for extra_file in [f['name'] for f in kwargs.get('extra_files', [])]:
             sync_args.extend(['--exclude', extra_file])
 
-        aws_cli(sync_args)
+        aws.cli(sync_args)
 
         invalidate_cache = True
 

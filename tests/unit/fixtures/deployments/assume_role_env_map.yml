@@ -1,0 +1,9 @@
+assume_role:
+  session_name: runway-test
+  test: arn:aws:iam::123456789012:role/test
+  dev: arn:aws:iam::111111111111:role/test
+  prod: arn:aws:iam::222222222222:role/test
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

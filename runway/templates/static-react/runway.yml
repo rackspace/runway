@@ -1,13 +1,10 @@
 deployments:
   - modules:
-    - path: sample-app
+    - path: sampleapp.web
       type: static
-      environments:
-        dev:
-          namespace: sample-app-dev
-          staticsite_cf_disable: true
-        prod:
-          namespace: sample-app-prod
+      parameters:
+        namespace: sampleapp-${env DEPLOY_ENVIRONMENT}
+        staticsite_cf_disable: ${var cf_disable.${env DEPLOY_ENVIRONMENT}::default=false, transform=bool}
       options:
         build_output: build
         build_steps:
@@ -15,3 +12,7 @@ deployments:
           - npm run build
     regions:
       - us-east-1
+
+variables:
+  cf_disable:
+    dev: true

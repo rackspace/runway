@@ -1,0 +1,11 @@
+assume_role:
+  dev:
+    arn: arn:aws:iam::111111111111:role/test
+    duration_seconds: 300
+  prod:
+    arn: arn:aws:iam::222222222222:role/test
+    duration_seconds: 900
+modules:
+  - sampleapp-01.cfn
+regions:
+  - us-east-1

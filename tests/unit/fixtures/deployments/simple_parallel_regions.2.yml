@@ -1,0 +1,6 @@
+modules:
+  - sampleapp-01.cfn
+regions:
+  parallel:
+    - us-east-1
+    - us-west-2

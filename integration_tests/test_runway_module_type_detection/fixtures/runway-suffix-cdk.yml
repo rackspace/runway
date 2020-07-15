@@ -1,5 +1,0 @@
-deployments:
-  - modules:
-    - path: sampleapp.cdk
-    regions:
-      - us-east-1

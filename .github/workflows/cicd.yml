@@ -92,7 +92,7 @@ jobs:
       - name: Run Linters (3.x)
         if: matrix.python-version != '2.7'
         run: make lint
-      - name: Run Unit Tests
+      - name: Run Integration & Unit Tests
         if: matrix.os != 'windows-latest'
         # assertions assume linux so some fail when run on windows
         run: make test

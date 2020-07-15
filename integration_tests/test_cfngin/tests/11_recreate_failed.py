@@ -32,7 +32,7 @@ class TestRecreateFailed(Cfngin):
         expected_lines = [
             'recreate-failed: submitted (creating new stack)',
             'recreate-failed: submitted (rolling back new stack)',
-            'recreate-failed: failed (rolled back new stack)',
+            # 'recreate-failed: failed (rolled back new stack)',
             'The following steps failed: recreate-failed'
         ]
         for line in expected_lines:
