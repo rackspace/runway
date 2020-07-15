@@ -76,7 +76,7 @@ setup(
     ],
     python_requires='>=2.6',
     keywords='cli',
-    packages=find_packages(exclude=('tests', 'integration_tests')),
+    packages=find_packages(exclude=('integration*', 'tests*')),
     install_requires=INSTALL_REQUIRES,
     setup_requires=['setuptools_scm'],
     use_scm_version={"local_scheme": local_scheme},
