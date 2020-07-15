@@ -32,7 +32,6 @@ jmespath==0.10.0
 jsonpatch==1.26 ; python_version != '3.4'
 jsonpointer==2.0
 jsonschema==3.2.0
-jsx-lexer==0.0.8
 junit-xml==1.9
 markupsafe==1.1.1
 more-itertools==8.4.0

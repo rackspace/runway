@@ -1244,6 +1244,8 @@ class Config(ConfigComponent):
     def find_config_file(cls, config_dir=None):
         # type: (Optional[Path]) -> Path
         """Find the Runway config file."""
+        if not isinstance(config_dir, Path):  # legacy support
+            config_dir = Path(config_dir)
         if not config_dir:
             LOGGER.debug('config_dir not provided; using current '
                          'working directory')

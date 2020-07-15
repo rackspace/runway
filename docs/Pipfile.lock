@@ -292,14 +292,6 @@
             ],
             "version": "==3.2.0"
         },
-        "jsx-lexer": {
-            "hashes": [
-                "sha256:1cb35102b78525aa3f587dc327f3208c0e1c76d5cdea64d4f9c3ced05d10c017",
-                "sha256:b879c7fafe974440a1dd9f9544dfb8629fa22078ada7f769c8fbb06149eac5d1"
-            ],
-            "index": "pypi",
-            "version": "==0.0.8"
-        },
         "junit-xml": {
             "hashes": [
                 "sha256:ec5ca1a55aefdd76d28fcc0b135251d156c7106fa979686a4b48d62b761b4732"
