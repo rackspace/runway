@@ -2,6 +2,10 @@
 Runway Documentation
 ####################
 
+.. image:: images/runway-example.gif
+   :align: center
+   :alt: runway-example.gif
+
 Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease management of per-environment configs & deployment.
 
 Very simple configuration to:
