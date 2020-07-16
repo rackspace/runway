@@ -1,19 +1,17 @@
 """'Git' type Path Source."""
 from __future__ import absolute_import
-# pylint: disable=unused-import
-from typing import List, Dict, Optional, Union  # noqa: F401
 
-import tempfile
+import logging
+import os
 import shutil
 import subprocess
-
-import os
 import sys
-import logging
+import tempfile
+from typing import Dict, List, Optional, Union  # noqa pylint: disable=W
 
 from .source import Source
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 class Git(Source):
@@ -84,12 +82,13 @@ class Git(Source):
             ref (str): The git reference value
 
         """
-        LOGGER.debug("Invoking git to retrieve commit id for repo %s...", self.uri)
-        lsremote_output = subprocess.check_output(['git', 'ls-remote', self.uri, ref])
+        cmd = ['git', 'ls-remote', self.uri, ref]
+        LOGGER.debug('getting commit ID from repo: %s', ' '.join(cmd))
+        lsremote_output = subprocess.check_output(cmd)
         # pylint: disable=unsupported-membership-test
         if b"\t" in lsremote_output:
             commit_id = lsremote_output.split(b"\t")[0]  # type List[str]
-            LOGGER.debug("Matching commit id found: %s", commit_id)
+            LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id
         raise ValueError("Ref \"%s\" not found for repo %s." % (ref, self.uri))
 

@@ -2,6 +2,7 @@
 # docs: file://./../../../../docs/source/commands.rst
 import click
 
+from ... import options
 from ._cdk_csharp import cdk_csharp
 from ._cdk_py import cdk_py
 from ._cdk_tsc import cdk_tsc
@@ -50,7 +51,10 @@ COMMANDS = [
 
 
 @click.group('gen-sample', short_help='generate sample module/project')
-def gen_sample():
+@options.debug
+@options.no_color
+@options.verbose
+def gen_sample(**_):
     """Generate a sample Runway module module/project.
 
     The sample is created in the current directory.

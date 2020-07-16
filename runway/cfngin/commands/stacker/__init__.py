@@ -26,7 +26,7 @@ class Stacker(BaseCommand):
 
     DEPRECATION_MSG = ("Runway's Stacker CLI components have been deprecated "
                        "and will be removed in the next major release of "
-                       "Runway.")
+                       "Runway")
 
     def configure(self, options):
         """Configure CLI command."""
@@ -60,9 +60,9 @@ class Stacker(BaseCommand):
 
         super(Stacker, self).configure(options)
         if options.interactive:
-            LOGGER.info("Using interactive AWS provider mode.")
+            LOGGER.info("using interactive AWS provider mode")
         else:
-            LOGGER.info("Using default AWS provider mode")
+            LOGGER.info("using default AWS provider mode")
 
     def add_arguments(self, parser):
         """Add CLI arguments."""

@@ -3,6 +3,8 @@ import collections
 import json
 import logging
 
+from runway._logging import PrefixAdaptor
+
 from .config import Config
 from .exceptions import (PersistentGraphCannotLock,
                          PersistentGraphCannotUnlock,
@@ -88,6 +90,7 @@ class Context(object):
         self.environment = environment
         self.force_stacks = force_stacks or []
         self.hook_data = {}  # TODO change to MutableMap in next major release
+        self.logger = PrefixAdaptor(config_path, LOGGER)
         self.region = region
         self.s3_conn = self.get_session(region=self.bucket_region).client('s3')
         self.stack_names = stack_names or []
@@ -110,8 +113,8 @@ class Context(object):
                     self.s3_conn.get_object_tagging(
                         **self.persistent_graph_location).get('TagSet', {})}
         except self.s3_conn.exceptions.NoSuchKey:
-            LOGGER.debug('Persistant graph object does not exist in S3; '
-                         'could not get tags')
+            self.logger.debug('persistant graph object does not exist in S3; '
+                              'could not get tags')
             return {}
 
     @property
@@ -159,16 +162,17 @@ class Context(object):
 
             if self.s3_bucket_verified:
                 try:
-                    LOGGER.debug('Getting persistent graph from s3:\n%s',
-                                 json.dumps(self.persistent_graph_location,
-                                            indent=4))
+                    self.logger.debug(
+                        'getting persistent graph from s3:\n%s',
+                        json.dumps(self.persistent_graph_location, indent=4)
+                    )
                     content = self.s3_conn.get_object(
                         ResponseContentType='application/json',
                         **self.persistent_graph_location
                     )['Body'].read().decode('utf-8')
                 except self.s3_conn.exceptions.NoSuchKey:
-                    LOGGER.info('Persistant graph object does not exist '
-                                'in S3; creating one now.')
+                    self.logger.info('persistant graph object does not exist '
+                                     'in s3; creating one now...')
                     self.s3_conn.put_object(
                         Body=content,
                         ServerSideEncryption='AES256',
@@ -283,8 +287,8 @@ class Context(object):
             # Don't upload stack templates to S3 if `cfngin_bucket` is
             # explicitly set to an empty string.
             if self.config.cfngin_bucket == '':
-                LOGGER.debug("Not uploading to s3 because `cfngin_bucket` "
-                             "is explicitly set to an empty string")
+                self.logger.debug('not uploading to s3; cfngin_bucket '
+                                  'is explicitly set to an empty string')
                 return False
 
             # If no namespace is specificied, and there's no explicit
@@ -292,8 +296,8 @@ class Context(object):
             # sense because we can't realistically auto generate a cfngin
             # bucket name in this case.
             if not self.namespace and not self.config.cfngin_bucket:
-                LOGGER.debug("Not uploading to s3 because there is no "
-                             "namespace set, and no cfngin_bucket set")
+                self.logger.debug('not uploading to s3; namespace & '
+                                  'cfngin_bucket not provided')
                 return False
 
         return True
@@ -422,10 +426,10 @@ class Context(object):
                 ]},
                 **self.persistent_graph_location
             )
-            LOGGER.info('Locked persistent graph "%s" with lock ID "%s".',
-                        '/'.join([self.persistent_graph_location['Bucket'],
-                                  self.persistent_graph_location['Key']]),
-                        lock_code)
+            self.logger.info('locked persistent graph "%s" with lock ID "%s"',
+                             '/'.join([self.persistent_graph_location['Bucket'],
+                                       self.persistent_graph_location['Key']]),
+                             lock_code)
         except self.s3_conn.exceptions.NoSuchKey:
             raise PersistentGraphCannotLock('s3 object does not exist')
 
@@ -445,7 +449,7 @@ class Context(object):
 
         if not self.persistent_graph.to_dict():
             self.s3_conn.delete_object(**self.persistent_graph_location)
-            LOGGER.debug('Removed empty persistent graph object from S3')
+            self.logger.debug('removed empty persistent graph object from S3')
             return
 
         if not self.persistent_graph_locked:
@@ -468,8 +472,8 @@ class Context(object):
                                    lock_code),
             **self.persistent_graph_location
         )
-        LOGGER.debug('Persistent graph updated:\n%s',
-                     self.persistent_graph.dumps(indent=4))
+        self.logger.debug('persistent graph updated:\n%s',
+                          self.persistent_graph.dumps(indent=4))
 
     def set_hook_data(self, key, data):
         """Set hook data for the given key.
@@ -511,12 +515,12 @@ class Context(object):
                     **self.persistent_graph_location
                 )
             except self.s3_conn.exceptions.NoSuchKey:
-                LOGGER.info('Persistent graph was deleted and does not '
-                            'need to be unlocked.')
+                self.logger.info('persistent graph deleted; does not '
+                                 'need to be unlocked')
                 return True
 
-        LOGGER.debug('Unlocking persistent graph "%s".',
-                     self.persistent_graph_location)
+        self.logger.verbose('unlocking persistent graph "%s"...',
+                            self.persistent_graph_location)
 
         if not self.persistent_graph_locked:
             raise PersistentGraphCannotUnlock(PersistentGraphUnlocked(
@@ -532,9 +536,13 @@ class Context(object):
             except self.s3_conn.exceptions.NoSuchKey:
                 pass
             self._persistent_graph_lock_code = None
-            LOGGER.info('Unlocked persistent graph "%s".',
-                        '/'.join([self.persistent_graph_location['Bucket'],
-                                  self.persistent_graph_location['Key']]))
+            self.logger.info(
+                'unlocked persistent graph "%s"',
+                '/'.join([
+                    self.persistent_graph_location['Bucket'],
+                    self.persistent_graph_location['Key']
+                ])
+            )
             return True
         raise PersistentGraphCannotUnlock(
             PersistentGraphLockCodeMissmatch(

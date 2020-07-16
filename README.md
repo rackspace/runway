@@ -4,7 +4,7 @@
 [![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
 [![npm](https://img.shields.io/npm/v/@onica/runway?style=flat)](https://www.npmjs.com/package/@onica/runway)
 
-![runway-example.gif](https://raw.githubusercontent.com/onicagroup/runway/master/docs/runway-example.gif)
+![runway-example.gif](https://raw.githubusercontent.com/onicagroup/runway/master/docs/source/images/runway-example.gif)
 
 Runway is a lightweight integration app designed to ease management of infrastructure tools.
 

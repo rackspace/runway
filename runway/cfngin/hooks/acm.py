@@ -122,12 +122,12 @@ class Certificate(Hook):
         try:
             stack_info = self.provider.get_stack(self.stack.fqn)
             if self.provider.is_stack_recreatable(stack_info):
-                LOGGER.debug('Stack is in a recreatable state; '
+                LOGGER.debug('stack is in a recreatable state; '
                              'domain change does not matter')
                 return False
             if self.provider.is_stack_in_progress(stack_info) or \
                     self.provider.is_stack_rolling_back(stack_info):
-                LOGGER.debug('Stack is in progress; '
+                LOGGER.debug('stack is in progress; '
                              "can't check for domain change")
                 return False
             if self.args.domain != \
@@ -138,7 +138,7 @@ class Certificate(Hook):
         except StackDoesNotExist:
             pass
         except KeyError:
-            LOGGER.warning('Stack "%s" is missing output DomainName; '
+            LOGGER.warning('stack "%s" is missing output DomainName; '
                            'update may fail', self.stack.fqn)
         return False
 
@@ -160,7 +160,7 @@ class Certificate(Hook):
             # can be returned without having a PhysicalResourceId
             if response[0].get('PhysicalResourceId'):
                 return response[0]['PhysicalResourceId']
-        LOGGER.debug('Waiting for certificate to be created...')
+        LOGGER.debug('waiting for certificate to be created...')
         time.sleep(interval)
         return self.get_certificate(interval=interval)
 
@@ -194,7 +194,7 @@ class Certificate(Hook):
                 if opt['ValidationStatus'] == status
             ]
         except KeyError:
-            LOGGER.debug('Waiting for DomainValidationOptions to become '
+            LOGGER.debug('waiting for DomainValidationOptions to become '
                          'available for the certificate...')
             time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn,
@@ -217,7 +217,7 @@ class Certificate(Hook):
             # the validation option can exists before the record set is ready
             return domain_validation[0]['ResourceRecord']
         except KeyError:
-            LOGGER.debug('Waiting for DomainValidationOptions.ResourceRecord '
+            LOGGER.debug('waiting for DomainValidationOptions.ResourceRecord '
                          'to become available for the certificate...')
             time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn,
@@ -231,7 +231,7 @@ class Certificate(Hook):
             record_set (Dict[str, str]): Record set to be added to Route 53.
 
         """
-        LOGGER.info('Adding validation record to "%s"',
+        LOGGER.info('adding validation record to hosted zone: %s',
                     self.args.hosted_zone_id)
         self.__change_record_set('CREATE', [record_set])
 
@@ -253,7 +253,7 @@ class Certificate(Hook):
             records = [opt['ResourceRecord']
                        for opt in cert.get('DomainValidationOptions', [])
                        if opt['ValidationMethod'] == 'DNS']
-        LOGGER.info('Removing %i validation record(s) from "%s"...',
+        LOGGER.info('removing %i validation record(s) from hosted zone: %s',
                     len(records), self.args.hosted_zone_id)
         self.__change_record_set('DELETE', records)
 
@@ -264,7 +264,7 @@ class Certificate(Hook):
             record_set (Dict[str, str]): Record set to be updated in Route 53.
 
         """
-        LOGGER.info('Updating record set...')
+        LOGGER.info('updating record set...')
         self.__change_record_set('UPSERT', [record_set])
 
     def __change_record_set(self, action, record_sets):
@@ -290,7 +290,7 @@ class Certificate(Hook):
             }
         } for record in record_sets]
 
-        LOGGER.debug('Making the following changes to hosted zone "%s":\n%s',
+        LOGGER.debug('making the following changes to hosted zone "%s":\n%s',
                      self.args.hosted_zone_id, changes)
 
         self.r53_client.change_resource_record_sets(
@@ -315,14 +315,14 @@ class Certificate(Hook):
             result = {'CertificateArn': cert_arn}
 
             if status == NO_CHANGE:
-                LOGGER.debug('Stack did not change; no action required')
+                LOGGER.debug('stack did not change; no action required')
                 return result
 
             if status == SUBMITTED:
                 if status.reason == 'creating new stack':
                     record = self.get_validation_record(cert_arn)
                     self.put_record_set(record)
-                    LOGGER.info('Waiting for certificate to validate; '
+                    LOGGER.info('waiting for certificate to validate; '
                                 'this can take upwards of 30 minutes to '
                                 'complete...')
                 elif status.reason == 'updating existing stack':
@@ -370,17 +370,17 @@ class Certificate(Hook):
                     self.acm_client.exceptions.ResourceNotFoundException) as err:
                 # these error are fine if they happen during destruction but
                 # could require manual steps to finish cleanup.
-                LOGGER.warning('Deletion of the validation records failed '
+                LOGGER.warning('deletion of the validation records failed '
                                'with error:\n%s', err)
             except ClientError as err:
                 if err.response['Error']['Message'] != ('Stack with id {} does'
                                                         ' not exist'.format(
                                                             self.stack.fqn)):
                     raise
-                LOGGER.warning('Deletion of the validation records failed '
+                LOGGER.warning('deletion of the validation records failed '
                                'with error:\n%s', err)
         else:
-            LOGGER.info('Deletion of validation records was skipped')
+            LOGGER.info('deletion of validation records was skipped')
         self.destroy_stack(wait=True)
         return True
 

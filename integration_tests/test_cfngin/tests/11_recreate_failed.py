@@ -30,9 +30,8 @@ class TestRecreateFailed(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code != 0, 'exit code should be non-zero since one config failed'
         expected_lines = [
-            'recreate-failed: submitted (creating new stack)',
-            'recreate-failed: submitted (rolling back new stack)',
-            # 'recreate-failed: failed (rolled back new stack)',
+            'recreate-failed:submitted (creating new stack)',
+            'recreate-failed:submitted (rolling back new stack)',
             'The following steps failed: recreate-failed'
         ]
         for line in expected_lines:
@@ -45,9 +44,9 @@ class TestRecreateFailed(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'recreate-failed: submitted (destroying stack for re-creation)',
-            'recreate-failed: submitted (creating new stack)',
-            'recreate-failed: complete (creating new stack)'
+            'recreate-failed:submitted (destroying stack for re-creation)',
+            'recreate-failed:submitted (creating new stack)',
+            'recreate-failed:complete (creating new stack)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'

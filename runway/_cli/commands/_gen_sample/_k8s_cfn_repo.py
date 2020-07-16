@@ -10,6 +10,7 @@ from ....blueprints.k8s.k8s_iam import Iam
 from ....blueprints.k8s.k8s_master import Cluster
 from ....blueprints.k8s.k8s_workers import NodeGroup
 from ....cfngin.context import Context as CFNginContext
+from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
 
 if sys.version_info.major > 2:
@@ -22,8 +23,11 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('k8s-cfn-repo',
                short_help='k8s + cfn (k8s-cfn-infrastructure)')
+@options.debug
+@options.no_color
+@options.verbose
 @click.pass_context
-def k8s_cfn_repo(ctx):
+def k8s_cfn_repo(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample CloudFormation project using Kubernetes."""
     src = TEMPLATES / 'k8s-cfn-repo'
@@ -36,7 +40,7 @@ def k8s_cfn_repo(ctx):
     worker_templates = dest / 'k8s-workers.cfn/templates'
     env = {'namespace': 'test'}
 
-    LOGGER.debug('rendering master templates...')
+    LOGGER.verbose('rendering master templates...')
     master_templates.mkdir()
     (master_templates / 'k8s_iam.yaml').write_text(six.u(
         to_yaml(Iam('test', CFNginContext(env.copy()), None).to_json())
@@ -45,11 +49,11 @@ def k8s_cfn_repo(ctx):
         to_yaml(Cluster('test', CFNginContext(env.copy()), None).to_json())
     ))
 
-    LOGGER.debug('rendering worker templates...')
+    LOGGER.verbose('rendering worker templates...')
     worker_templates.mkdir()
     (worker_templates / 'k8s_workers.yaml').write_text(six.u(
         to_yaml(NodeGroup('test', CFNginContext(env.copy()), None).to_json())
     ))
 
-    LOGGER.info("Sample k8s infrastructure repo created at %s", dest)
-    LOGGER.info('(see its README for setup and deployment instructions)')
+    LOGGER.success("Sample k8s infrastructure repo created at %s", dest)
+    LOGGER.notice('See the README for setup and deployment instructions.')

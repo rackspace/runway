@@ -29,7 +29,7 @@ def cancel():
     def cancel_execution(signum, _frame):
         """Cancel execution."""
         signame = SIGNAL_NAMES.get(signum, signum)
-        LOGGER.info("Signal %s received, quitting "
+        LOGGER.info("signal %s received, quitting "
                     "(this can take some time)...", signame)
         cancel_event.set()
 

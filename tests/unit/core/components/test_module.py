@@ -11,7 +11,6 @@ from mock import MagicMock, call, patch
 from runway.config import FutureDefinition
 from runway.core.components import Deployment, Module
 from runway.core.components._module import validate_environment
-from runway.util import MutableMap
 
 MODULE = 'runway.core.components._module'
 
@@ -145,7 +144,8 @@ class TestModule(object):
         else:
             assert result is (bool(not validate) if isinstance(validate, bool)
                               else False)
-            mock_validate.assert_called_once_with(mod.ctx, mod, env,
+            mock_validate.assert_called_once_with(mod.ctx, env,
+                                                  logger=mod.logger,
                                                   strict=strict)
 
     @patch(MODULE + '.ModulePath')
@@ -218,8 +218,8 @@ class TestModule(object):
         obj = Module(context=runway_context,
                      definition=fx_deployments.load('simple_parallel_module').modules[0])
         assert not obj.deploy()
-        assert 'Processing modules in parallel... (output will be interwoven)' in \
-            caplog.messages
+        assert 'parallel_parent:processing modules in parallel... (output ' \
+            'will be interwoven)' in caplog.messages
         mock_futures.ProcessPoolExecutor.assert_called_once_with(
             max_workers=runway_context.env.max_concurrent_modules
         )
@@ -241,7 +241,8 @@ class TestModule(object):
         mod = Module(context=runway_context,
                      definition=fx_deployments.load('simple_parallel_module').modules[0])
         assert not mod.deploy()
-        assert 'Processing modules sequentially...' in caplog.messages
+        assert 'parallel_parent:processing modules sequentially...' in \
+            caplog.messages
         mock_run.assert_has_calls([call('deploy'), call('deploy')])
 
     @pytest.mark.parametrize('async_used', [(True), (False)])
@@ -295,8 +296,8 @@ class TestModule(object):
         assert mod.plan()
 
         if async_used:
-            assert 'Processing of modules will be done in parallel ' \
-                'during deploy/destroy.' in caplog.messages
+            assert 'parallel_parent:processing of modules will be done in ' \
+                'parallel during deploy/destroy' in caplog.messages
         mock_async.assert_not_called()
         mock_sync.assert_called_once_with('plan')
 
@@ -367,61 +368,60 @@ class TestModule(object):
 
 @pytest.mark.parametrize('env_def, strict, expected, expected_logs', [
     ({'invalid'}, False, False,
-     ['test_module: skipped; unsupported type for environments "%s"' % type(set())]),
-    (True, False, True, ['test_module: explicitly enabled']),
-    (False, False, False, ['test_module: skipped; explicitly disabled']),
+     ['skipped; unsupported type for environments "%s"' % type(set())]),
+    (True, False, True, ['explicitly enabled']),
+    (False, False, False, ['skipped; explicitly disabled']),
     (['123456789012/us-east-1'], False, True, []),
     (['123456789012/us-east-2'], False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ('123456789012/us-east-1', False, True, []),
     ('123456789012/us-east-2', False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({}, False, None,
-     ['test_module: environment not defined; module will determine deployment']),
+     ['environment not defined; module will determine deployment']),
     ({}, True, None,
-     ['test_module: environment not defined; module will determine deployment']),
+     ['environment not defined; module will determine deployment']),
     ({'example': '111111111111/us-east-1'}, False, None,
-     ['test_module: environment not in definition; module will determine deployment']),
+     ['environment not in definition; module will determine deployment']),
     ({'example': '111111111111/us-east-1'}, True, False,
-     ['test_module: skipped; environment not in definition']),
+     ['skipped; environment not in definition']),
     ({'test': False}, False, False,
-     ['test_module: skipped; explicitly disabled']),
-    ({'test': True}, False, True, ['test_module: explicitly enabled']),
+     ['skipped; explicitly disabled']),
+    ({'test': True}, False, True, ['explicitly enabled']),
     ({'test': '123456789012/us-east-1'}, False, True, []),
     ({'test': '123456789012/us-east-2'}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': '123456789012'}, False, True, []),
     ({'test': '111111111111'}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': 123456789012}, False, True, []),
     ({'test': 111111111111}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': 'us-east-1'}, False, True, []),
     ({'test': 'us-east-2'}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': ['123456789012/us-east-1', '123456789012/us-east-2']}, False,
      True, []),
     ({'test': ['123456789012/us-east-2']}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': ['123456789012', '111111111111']}, False, True, []),
     ({'test': ['111111111111']}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': [123456789012, 111111111111]}, False, True, []),
     ({'test': [111111111111]}, False, False,
-     ['test_module: skipped; account_id/region mismatch']),
+     ['skipped; account_id/region mismatch']),
     ({'test': ['us-east-1', 'us-east-2']}, False, True, []),
     ({'test': ['us-east-2']}, False, False,
-     ['test_module: skipped; account_id/region mismatch'])
+     ['skipped; account_id/region mismatch'])
 ])
 def test_validate_environment(env_def, strict, expected, expected_logs,
                               caplog, monkeypatch, runway_context):
     """Test validate_environment."""
-    mock_module = MutableMap(name='test_module')
     caplog.set_level(logging.DEBUG, logger='runway')
     monkeypatch.setattr(MODULE + '.aws', MagicMock(
         **{'AccountDetails.return_value': MagicMock(id='123456789012')}
     ))
-    assert validate_environment(runway_context, mock_module, env_def, strict) \
+    assert validate_environment(runway_context, env_def, strict=strict) \
         is expected
     # all() does not give an output that can be used for troubleshooting failures
     for log in expected_logs:

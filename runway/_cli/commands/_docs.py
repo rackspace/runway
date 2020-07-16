@@ -16,6 +16,8 @@ DOCS_URL = 'https://docs.onica.com/projects/runway/'
 
 @click.command('docs', short_help='open doc site')
 @options.debug
+@options.no_color
+@options.verbose
 def docs(**_):
     # type: (Any) -> None
     """Open the Runway documentation web site using the default web browser."""
@@ -33,5 +35,5 @@ def docs(**_):
             # Remove the env var as a last resort:
             LOGGER.debug('temporarily removing environ: %s', lp_key)
             os.environ.pop(lp_key, None)
-        LOGGER.debug('launching url: %s', DOCS_URL)
+        LOGGER.verbose('launching url: %s', DOCS_URL)
         click.launch(DOCS_URL)

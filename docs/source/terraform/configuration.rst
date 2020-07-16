@@ -71,7 +71,7 @@ runway.yml
 ==========
 
 Variable values can also be specified as parameter values in runway.yml. It
-is recommended to use `Lookups`_ in the ``parameters`` section to
+is recommended to use :ref:`Lookups` in the ``parameters`` section to
 assist in selecting the appropriate values for the deploy environment and/or
 region being deployed to but, this is not a requirement if the value will
 remain the same.

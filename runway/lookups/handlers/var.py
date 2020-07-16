@@ -33,9 +33,8 @@ limited or no effect:
 
 """
 # pylint: disable=arguments-differ
-from typing import Any, TYPE_CHECKING  # pylint: disable=unused-import
-
 import logging
+from typing import TYPE_CHECKING, Any  # pylint: disable=unused-import
 
 from .base import LookupHandler
 
@@ -46,7 +45,7 @@ if TYPE_CHECKING:
     from ...context import Context  # noqa: F401 pylint: disable=unused-import
 
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 TYPE_NAME = 'var'
 
 

@@ -95,7 +95,7 @@ def get_or_create_hosted_zone(client, zone_name):
     if zone_id:
         return zone_id
 
-    LOGGER.debug("Zone %s does not exist, creating.", zone_name)
+    LOGGER.debug("zone %s does not exist; creating", zone_name)
 
     reference = uuid.uuid4().hex
 
@@ -177,7 +177,7 @@ def create_route53_zone(client, zone_name):
         return zone_id
 
     new_soa = copy.deepcopy(old_soa)
-    LOGGER.debug("Updating negative caching value on zone %s to 300.",
+    LOGGER.debug("updating negative caching value on zone %s to 300",
                  zone_name)
     new_soa.text.min_ttl = "300"
     client.change_resource_record_sets(
@@ -436,15 +436,19 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region,
             response = s3_client.get_bucket_versioning(Bucket=bucket_name)
             state = response.get('Status', 'disabled').lower()
             if state != 'enabled':
-                LOGGER.warning('WARNING: Versioning is %s on bucket "%s". '
-                               'It is recommended to enable versioning '
-                               'when using persistent graphs.', state,
-                               bucket_name)
+                LOGGER.warning(
+                    'versioning is %s on bucket "%s"; it is recommended to '
+                    'enable versioning when using persistent graphs',
+                    state,
+                    bucket_name
+                )
             if response.get('MFADelete', 'Disabled') != 'Disabled':
-                LOGGER.warning('WARNING: MFADelete must be disabled on '
-                               'bucket "%s" when using persistent graphs'
-                               ' to allow for propper management of the '
-                               'graphs.', bucket_name)
+                LOGGER.warning(
+                    'MFADelete must be disabled on bucket "%s" when using '
+                    'persistent graphs to allow for propper management of '
+                    'the graphs',
+                    bucket_name
+                )
     except botocore.exceptions.ClientError as err:
         if err.response['Error']['Message'] == "Not Found":
             # can't use s3_client.exceptions.NoSuchBucket here.
@@ -464,11 +468,10 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region,
                                                 })
             return
         if err.response['Error']['Message'] == "Forbidden":
-            LOGGER.exception("Access denied for bucket %s.  Did you remember "
+            LOGGER.exception("Access denied for bucket %s. Did you remember "
                              "to use a globally unique name?", bucket_name)
         else:
-            LOGGER.exception("Error creating bucket %s. Error %s",
-                             bucket_name, err.response)
+            LOGGER.exception('error creating bucket "%s"', bucket_name)
         raise
 
 
@@ -622,8 +625,8 @@ class SourceProcessor(object):
         for suffix, class_ in extractor_map.items():
             if config['key'].endswith(suffix):
                 extractor = class_()
-                LOGGER.debug("Using extractor %s for S3 object \"%s\" in "
-                             "bucket %s.",
+                LOGGER.debug("using extractor %s for S3 object \"%s\" in "
+                             "bucket %s",
                              class_.__name__,
                              config['key'],
                              config['bucket'])
@@ -655,7 +658,7 @@ class SourceProcessor(object):
                     **extra_s3_args
                 )['LastModified'].astimezone(dateutil.tz.tzutc())
             except botocore.exceptions.ClientError as client_error:
-                LOGGER.error("Error checking modified date of "
+                LOGGER.error("error checking modified date of "
                              "s3://%s/%s : %s",
                              config['bucket'],
                              config['key'],
@@ -664,8 +667,8 @@ class SourceProcessor(object):
             dir_name += "-%s" % modified_date.strftime(self.ISO8601_FORMAT)
         cached_dir_path = os.path.join(self.package_cache_dir, dir_name)
         if not os.path.isdir(cached_dir_path):
-            LOGGER.debug("Remote package s3://%s/%s does not appear to have "
-                         "been previously downloaded - starting download and "
+            LOGGER.debug("remote package s3://%s/%s does not appear to have "
+                         "been previously downloaded; starting download and "
                          "extraction to %s",
                          config['bucket'],
                          config['key'],
@@ -674,7 +677,7 @@ class SourceProcessor(object):
             tmp_package_path = os.path.join(tmp_dir, dir_name)
             try:
                 extractor.set_archive(os.path.join(tmp_dir, dir_name))
-                LOGGER.debug("Starting remote package download from S3 to %s "
+                LOGGER.debug("starting remote package download from S3 to %s "
                              "with extra S3 options \"%s\"",
                              extractor.archive,
                              str(extra_s3_args))
@@ -683,11 +686,11 @@ class SourceProcessor(object):
                     extractor.archive,
                     ExtraArgs=extra_s3_args
                 )
-                LOGGER.debug("Download complete; extracting downloaded "
+                LOGGER.debug("download complete; extracting downloaded "
                              "package to %s",
                              tmp_package_path)
                 extractor.extract(tmp_package_path)
-                LOGGER.debug("Moving extracted package directory %s to the "
+                LOGGER.debug("moving extracted package directory %s to the "
                              "CFNgin cache at %s",
                              dir_name,
                              self.package_cache_dir)
@@ -695,9 +698,8 @@ class SourceProcessor(object):
             finally:
                 shutil.rmtree(tmp_dir)
         else:
-            LOGGER.debug("Remote package s3://%s/%s appears to have "
-                         "been previously downloaded to %s -- bypassing "
-                         "download",
+            LOGGER.debug("remote package s3://%s/%s appears to have "
+                         "been previously downloaded to %s; download skipped",
                          config['bucket'],
                          config['key'],
                          cached_dir_path)
@@ -723,8 +725,8 @@ class SourceProcessor(object):
 
         # We can skip cloning the repo if it's already been cached
         if not os.path.isdir(cached_dir_path):
-            LOGGER.debug("Remote repo %s does not appear to have been "
-                         "previously downloaded - starting clone to %s",
+            LOGGER.debug("remote repo %s does not appear to have been "
+                         "previously downloaded; starting clone to %s",
                          config['uri'],
                          cached_dir_path)
             tmp_dir = tempfile.mkdtemp(prefix='cfngin')
@@ -737,8 +739,8 @@ class SourceProcessor(object):
             finally:
                 shutil.rmtree(tmp_dir)
         else:
-            LOGGER.debug("Remote repo %s appears to have been previously "
-                         "cloned to %s -- bypassing download",
+            LOGGER.debug("remote repo %s appears to have been previously "
+                         "cloned to %s; download skipped",
                          config['uri'],
                          cached_dir_path)
 
@@ -766,7 +768,7 @@ class SourceProcessor(object):
             for path in config['paths']:
                 path_to_append = os.path.join(cached_dir_path,
                                               path)
-                LOGGER.debug("Appending \"%s\" to python sys.path",
+                LOGGER.debug("appending to python sys.path: %s",
                              path_to_append)
                 sys.path.append(path_to_append)
         else:
@@ -791,13 +793,13 @@ class SourceProcessor(object):
             str: A commit id
 
         """
-        LOGGER.debug("Invoking git to retrieve commit id for repo %s...", uri)
+        LOGGER.debug('getting commit ID from repo: %s', ' '.join(uri))
         ls_remote_output = subprocess.check_output(['git', 'ls-remote', uri,
                                                     ref])
         # incorrectly detected - https://github.com/PyCQA/pylint/issues/3045
         if b"\t" in ls_remote_output:  # pylint: disable=unsupported-membership-test
             commit_id = ls_remote_output.split(b"\t")[0]
-            LOGGER.debug("Matching commit id found: %s", commit_id)
+            LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id
         raise ValueError("Ref \"%s\" not found for repo %s." % (ref, uri))
 

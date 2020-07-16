@@ -12,10 +12,14 @@ Environment Variables
 Environment variables can be used to alter the functionality of Runway.
 
 **CI (Any)**
-  If not ``undefined``, Runway will operate in non-iterative mode,
+  If not ``undefined``, Runway will operate in non-iterative mode.
 
-**DEBUG (Any)**
-  If not ``undefined``, debug logs will be shown.
+**DEBUG (int)**
+  Used to select the debug logs to display
+
+  - ``0`` or not defined with show no debug logs
+  - ``1`` will show Runway's debug logs
+  - ``2`` will show Runway's debug logs and some dependency debug logs (e.g. botocore)
 
 **DEPLOY_ENVIRONMENT (str)**
   Explicitly define the deploy environment.
@@ -53,3 +57,31 @@ Environment variables can be used to alter the functionality of Runway.
   **IMPORTANT:** When using ``parallel_regions`` and ``child_modules``
   together, please consider the nature of their relationship when
   manually setting this value. (``parallel_regions * child_modules``)
+
+**RUNWAY_LOG_FIELD_STYLES (str)**
+  Can be provided to customize the styling (color, bold, etc) used for `LogRecord attributes`_ (except for message).
+  By default, Runway does not apply style to fields.
+  For information on how to format the value, see the documentation provided by coloredlogs_.
+
+**RUNWAY_LOG_FORMAT (str)**
+  Can be provided to use a custom log message format.
+  The value should be a format string using %-formatting.
+  In addition to being able to use `LogRecord attributes`_ in the string, Runway provides the additional fields of ``%(hostname)s`` and ``%(programname)s``.
+
+  If not provided, ``[%(programname)s] %(message)s`` is used unless using debug, verbose or no color.
+  In that case, ``%(levelname)s:%(name)s:%(message)s`` is used.
+
+**RUNWAY_LOG_LEVEL_STYLES (str)**
+  Can be provided to customize the styling (color, bold, etc) used for log messages sent to each log level.
+  If provided, the parsed value will be merged with Runway's default styling.
+  For information on how to format the value, see the documentation provided by coloredlogs_.
+
+**RUNWAY_NO_COLOR (Any)**
+  Disable Runway's colorized logs.
+  Providing this will also change the log format to ``%(levelname)s:%(name)s:%(message)s``.
+
+**VERBOSE (Any)**
+  If not ``undefined``, Runway will display verbose logs and change the logging format to ``%(levelname)s:%(name)s:%(message)s``.
+
+.. _LogRecord attributes: https://docs.python.org/3/library/logging.html#logrecord-attributes
+.. _coloredlogs: https://coloredlogs.readthedocs.io/en/latest/api.html#changing-the-colors-styles

@@ -12,6 +12,8 @@ import yaml
 from botocore.config import Config
 from six.moves import urllib
 
+from runway.util import DOC_SITE
+
 from ... import exceptions
 from ...actions.diff import DictValue, diff_parameters
 from ...actions.diff import format_params_diff as format_diff
@@ -87,30 +89,28 @@ def get_output_dict(stack):
 def s3_fallback(fqn, template, parameters, tags, method,
                 change_set_name=None, service_role=None):
     """Falling back to legacy stacker S3 bucket region for templates."""
-    LOGGER.warning("DEPRECATION WARNING: Falling back to legacy "
-                   "stacker S3 bucket region for templates. See "
-                   "https://docs.onica.com/projects/runway/en/release/"
-                   "cfngin/config.html#s3-bucket"
-                   " for more information.")
+    LOGGER.warning('falling back to deprecated, legacy stacker S3 bucket '
+                   'region for templates; to learn how to correctly provide an '
+                   's3 bucket, visit %s/page/cfngin/configuration.html#s3-bucket',
+                   DOC_SITE)
     # extra line break on purpose to avoid status updates removing URL
     # from view
     LOGGER.warning("\n")
-    LOGGER.debug("Modifying the S3 TemplateURL to point to "
+    LOGGER.debug("modifying the S3 TemplateURL to point to "
                  "us-east-1 endpoint")
     template_url = template.url
     template_url_parsed = urllib.parse.urlparse(template_url)
     template_url_parsed = template_url_parsed._replace(
         netloc="s3.amazonaws.com")
     template_url = urllib.parse.urlunparse(template_url_parsed)
-    LOGGER.debug("Using template_url: %s", template_url)
+    LOGGER.debug("using template_url: %s", template_url)
     args = generate_cloudformation_args(
         fqn, parameters, tags, template,
         service_role=service_role,
         change_set_name=change_set_name
     )
 
-    response = method(**args)
-    return response
+    return method(**args)
 
 
 def get_change_set_name():
@@ -323,7 +323,7 @@ def wait_till_change_set_complete(cfn_client, change_set_id, try_count=25,
             break
         if sleep_time == max_sleep:
             LOGGER.debug(
-                "Still waiting on changeset for another %s seconds",
+                "waiting on changeset for another %s seconds",
                 sleep_time
             )
         time.sleep(sleep_time)
@@ -338,7 +338,7 @@ def wait_till_change_set_complete(cfn_client, change_set_id, try_count=25,
 def create_change_set(cfn_client, fqn, template, parameters, tags,
                       change_set_type='UPDATE', service_role=None):
     """Create CloudFormation change set."""
-    LOGGER.debug("Attempting to create change set of type %s for stack: %s.",
+    LOGGER.debug("attempting to create change set of type %s for stack: %s",
                  change_set_type,
                  fqn)
     args = generate_cloudformation_args(
@@ -369,16 +369,16 @@ def create_change_set(cfn_client, fqn, template, parameters, tags,
         if ("didn't contain changes" in response["StatusReason"] or
                 "No updates are to be performed" in response["StatusReason"]):
             LOGGER.debug(
-                "Stack %s did not change, not updating and removing "
-                "changeset.",
+                "%s:stack did not change; not updating and removing "
+                "changeset",
                 fqn,
             )
             cfn_client.delete_change_set(ChangeSetName=change_set_id)
             raise exceptions.StackDidNotChange()
         LOGGER.warning(
-            "Got strange status, '%s' for changeset '%s'. Not deleting for "
+            "got strange status, '%s' for changeset '%s'; not deleting for "
             "further investigation - you will need to delete the changeset "
-            "manually.",
+            "manually",
             status, change_set_id
         )
         raise exceptions.UnhandledChangeSetStatus(
@@ -492,7 +492,7 @@ def generate_stack_policy_args(stack_policy=None):
     """
     args = {}
     if stack_policy:
-        LOGGER.debug("Stack has a stack policy")
+        LOGGER.debug("stack has a stack policy")
         if stack_policy.url:
             # CFNgin currently does not support uploading stack policies to
             # S3, so this will never get hit (unless your implementing S3
@@ -524,8 +524,8 @@ class ProviderBuilder(object):  # pylint: disable=too-few-public-methods
                 # assume provider is in provider dictionary.
                 provider = self.providers[key]
             except KeyError:
-                LOGGER.debug('Missed memorized lookup (%s), creating new AWS '
-                             'Provider.', key)
+                LOGGER.debug('missed memorized lookup (%s); creating new AWS '
+                             'provider', key)
                 if not region:
                     region = self.region
                 # memoize the result for later.
@@ -649,19 +649,25 @@ class Provider(BaseProvider):
         """Whether the status of the stack indicates if 'review in progress'."""
         return self.get_stack_status(stack) == self.REVIEW_STATUS
 
-    def tail_stack(self, stack, cancel, log_func=None):
+    def tail_stack(self, stack, cancel, action=None, log_func=None,
+                   retries=None):
         """Tail the events of a stack."""
         def _log_func(event):
-            event_args = [event['ResourceStatus'], event['ResourceType'],
-                          event.get('ResourceStatusReason', None)]
-            # filter out any values that are empty
-            event_args = [arg for arg in event_args if arg]
-            template = " ".join(["[%s]"] + ["%s" for _ in event_args])
-            LOGGER.info(template, *([stack.fqn] + event_args))
+            template = '[%s] %s %s %s'
+            event_args = [
+                event['LogicalResourceId'],
+                event['ResourceType'],
+                event['ResourceStatus']
+            ]
+            if event.get('ResourceStatusReason'):
+                template += ' (%s)'
+                event_args.append(event['ResourceStatusReason'])
+            LOGGER.verbose(template, *([stack.fqn] + event_args))
 
         log_func = log_func or _log_func
+        retries = retries or MAX_TAIL_RETRIES
 
-        LOGGER.info("Tailing stack: %s", stack.fqn)
+        LOGGER.debug("%s:tailing stack...", stack.fqn)
 
         attempts = 0
         while True:
@@ -671,12 +677,23 @@ class Provider(BaseProvider):
                           include_initial=False)
                 break
             except botocore.exceptions.ClientError as err:
-                if "does not exist" in str(err) and attempts < MAX_TAIL_RETRIES:
-                    # stack might be in the process of launching, wait for a
-                    # second and try again
-                    if cancel.wait(TAIL_RETRY_SLEEP):
+                if "does not exist" in str(err):
+                    LOGGER.debug(
+                        '%s:unable to tail stack; it does not exist',
+                        stack.fqn
+                    )
+                    if action == 'destroy':
+                        LOGGER.debug(
+                            '%s:stack was deleted before it could be tailed',
+                            stack.fqn
+                        )
                         return
-                    continue
+                    if attempts < retries:
+                        # stack might be in the process of launching, wait for a
+                        # second and try again
+                        if cancel.wait(TAIL_RETRY_SLEEP):
+                            return
+                        continue
                 raise
 
     @staticmethod
@@ -762,11 +779,11 @@ class Provider(BaseProvider):
         approval = kwargs.pop('approval', None)
         force_interactive = kwargs.pop('force_interactive', False)
         fqn = self.get_stack_name(stack)
-        LOGGER.debug("Attempting to delete stack %s", fqn)
+        LOGGER.debug("%s:attempting to delete stack", fqn)
 
         if action == 'build':
-            LOGGER.info('%s was removed from the Stacker config file '
-                        'so it is being destroyed.', fqn)
+            LOGGER.info('%s:removed from the CFNgin config file; '
+                        'it is being destroyed', fqn)
 
         destroy_method = self.select_destroy_method(force_interactive)
         return destroy_method(fqn=fqn, action=action,
@@ -792,17 +809,16 @@ class Provider(BaseProvider):
                 protection.
 
         """
-        LOGGER.debug("Attempting to create stack %s:.", fqn)
-        LOGGER.debug("    parameters: %s", parameters)
-        LOGGER.debug("    tags: %s", tags)
-        if template.url:
-            LOGGER.debug("    template_url: %s", template.url)
-        else:
-            LOGGER.debug("    no template url, uploading template "
-                         "directly.")
+        LOGGER.debug("attempting to create stack %s: %s", fqn, json.dumps({
+            'parameters': parameters,
+            'tags': tags,
+            'template_url': template.url
+        }))
+        if not template.url:
+            LOGGER.debug("no template url; uploading template directly")
         if force_change_set:
-            LOGGER.debug("force_change_set set to True, creating stack with "
-                         "changeset.")
+            LOGGER.debug("force_change_set set to True; creating stack with "
+                         "changeset")
             _changes, change_set_id = create_change_set(
                 self.cloudformation, fqn, template, parameters, tags,
                 'CREATE', service_role=self.service_role, **kwargs
@@ -916,7 +932,7 @@ class Provider(BaseProvider):
 
             ask_for_approval(include_verbose=False, fqn=stack_name)
 
-        LOGGER.warning('Destroying stack \"%s\" for re-creation', stack_name)
+        LOGGER.warning('%s:destroying stack for re-creation', stack_name)
         self.destroy_stack(stack, approval='y')
 
         return False
@@ -951,13 +967,13 @@ class Provider(BaseProvider):
                 protection.
 
         """
-        LOGGER.debug("Attempting to update stack %s:", fqn)
-        LOGGER.debug("    parameters: %s", parameters)
-        LOGGER.debug("    tags: %s", tags)
-        if template.url:
-            LOGGER.debug("    template_url: %s", template.url)
-        else:
-            LOGGER.debug("    no template url, uploading template directly.")
+        LOGGER.debug("attempting to update stack %s: %s", fqn, json.dumps({
+            'parameters': parameters,
+            'tags': tags,
+            'template_url': template.url
+        }))
+        if not template.url:
+            LOGGER.debug("no template url; uploading template directly")
         update_method = self.select_update_method(force_interactive,
                                                   force_change_set)
 
@@ -980,7 +996,7 @@ class Provider(BaseProvider):
 
         if stack['EnableTerminationProtection'] != termination_protection:
             LOGGER.debug(
-                'Updating termination protection of stack "%s" to "%s"',
+                '%s:updating termination protection of stack to "%s"',
                 fqn,
                 termination_protection
             )
@@ -1004,7 +1020,7 @@ class Provider(BaseProvider):
         if stack_policy:
             kwargs = generate_stack_policy_args(stack_policy)
             kwargs["StackName"] = fqn
-            LOGGER.debug("Setting stack policy on %s.", fqn)
+            LOGGER.debug("%s:adding stack policy", fqn)
             self.cloudformation.set_stack_policy(**kwargs)
 
     def interactive_destroy_stack(self, fqn, approval=None, **kwargs):
@@ -1015,7 +1031,7 @@ class Provider(BaseProvider):
             approval (Optional[str]): Response to approval prompt.
 
         """
-        LOGGER.debug("Using interactive provider mode for %s.", fqn)
+        LOGGER.debug("%s:using interactive provider mode", fqn)
         action = kwargs.get('action', 'destroy')
 
         approval_options = ['y', 'n']
@@ -1071,7 +1087,7 @@ class Provider(BaseProvider):
                 the tags that should be applied to the Cloudformation stack.
 
         """
-        LOGGER.debug("Using interactive provider mode for %s.", fqn)
+        LOGGER.debug("%s:using interactive provider mode", fqn)
         changes, change_set_id = create_change_set(
             self.cloudformation, fqn, template, parameters, tags,
             'UPDATE', service_role=self.service_role
@@ -1120,7 +1136,7 @@ class Provider(BaseProvider):
             fqn (str): A fully qualified stack name.
 
         """
-        LOGGER.debug("Destroying stack: %s", fqn)
+        LOGGER.debug("%s:destroying stack", fqn)
         args = {"StackName": fqn}
         if self.service_role:
             args["RoleARN"] = self.service_role
@@ -1149,8 +1165,7 @@ class Provider(BaseProvider):
                 that should be applied to the Cloudformation stack.
 
         """
-        LOGGER.debug("Using non-interactive changeset provider mode "
-                     "for %s.", fqn)
+        LOGGER.debug("%s:using non-interactive changeset provider mode", fqn)
         _changes, change_set_id = create_change_set(
             self.cloudformation, fqn, template, parameters, tags,
             'UPDATE', service_role=self.service_role
@@ -1195,7 +1210,7 @@ class Provider(BaseProvider):
                 A template object representing a stack policy.
 
         """
-        LOGGER.debug("Using default provider mode for %s.", fqn)
+        LOGGER.debug("%s:using default provider mode", fqn)
         args = generate_cloudformation_args(
             fqn, parameters, tags, template,
             service_role=self.service_role,
@@ -1206,10 +1221,7 @@ class Provider(BaseProvider):
             self.cloudformation.update_stack(**args)
         except botocore.exceptions.ClientError as err:
             if "No updates are to be performed." in str(err):
-                LOGGER.debug(
-                    "Stack %s did not change, not updating.",
-                    fqn,
-                )
+                LOGGER.debug("%s:stack did not change; not updating", fqn)
                 raise exceptions.StackDidNotChange
             if err.response['Error']['Message'] == ('TemplateURL must '
                                                     'reference a valid '
@@ -1346,15 +1358,15 @@ class Provider(BaseProvider):
             # scope of changes that can invalidate a change
             if resc_change and (resc_change.get('Replacement') == 'True' or
                                 'Properties' in resc_change['Scope']):
-                LOGGER.debug('%s added to invalidation list for %s',
-                             resc_change['LogicalResourceId'], stack.fqn)
+                LOGGER.debug('%s:added to invalidation list: %s',
+                             stack.fqn, resc_change['LogicalResourceId'])
                 refs_to_invalidate.append(resc_change['LogicalResourceId'])
 
         # invalidate cached outputs with inferred changes
         for output, props in old_template.get('Outputs', {}).items():
             if any(r in str(props['Value']) for r in refs_to_invalidate):
                 self._outputs[stack.fqn].pop(output)
-                LOGGER.debug('Removed %s from the outputs of %s',
+                LOGGER.debug('%s:removed from the outputs: %s',
                              output, stack.fqn)
 
         # push values for new + invalidated outputs to outputs
@@ -1375,14 +1387,14 @@ class Provider(BaseProvider):
             try:
                 temp_stack = self.get_stack(stack.fqn)
                 if self.is_stack_in_review(temp_stack):
-                    LOGGER.debug('Removing temporary stack that is created '
+                    LOGGER.debug('removing temporary stack that is created '
                                  'with a ChangeSet of type "CREATE"')
                     # this method is currently only used by one action so
                     # hardcoding should be fine for now.
                     self.destroy_stack(temp_stack, action='diff')
             except exceptions.StackDoesNotExist:
                 # not an issue if the stack was already cleaned up
-                LOGGER.debug('Stack does not exist: %s', stack.fqn)
+                LOGGER.debug('%s:stack does not exist', stack.fqn)
 
         return self.get_outputs(stack.fqn)
 

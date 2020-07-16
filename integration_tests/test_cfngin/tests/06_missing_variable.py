@@ -27,7 +27,7 @@ class TestMissingVariable(Cfngin):
         assert code != 0, 'exit code should be non-zero'
         expected_lines = [
             'MissingVariable: Variable "PrivateSubnets" in blueprint "vpc" is missing',
-            'vpc: failed (Variable "PrivateSubnets" in blueprint "vpc" is missing)'
+            'vpc:failed (Variable "PrivateSubnets" in blueprint "vpc" is missing)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'

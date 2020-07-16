@@ -37,7 +37,7 @@ def create_clusters(provider, context, **kwargs):
     try:
         clusters = kwargs["clusters"]
     except KeyError:
-        LOGGER.error("setup_clusters hook missing \"clusters\" argument")
+        LOGGER.error("clusters argument required but not provided")
         return False
 
     if isinstance(clusters, string_types):
@@ -45,7 +45,7 @@ def create_clusters(provider, context, **kwargs):
 
     cluster_info = {}
     for cluster in clusters:
-        LOGGER.debug("Creating ECS cluster: %s", cluster)
+        LOGGER.debug("creating ECS cluster: %s", cluster)
         response = conn.create_cluster(clusterName=cluster)
         cluster_info[response["cluster"]["clusterName"]] = response
     return {"clusters": cluster_info}

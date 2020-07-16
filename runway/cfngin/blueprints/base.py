@@ -49,14 +49,14 @@ class CFNParameter(object):
             if isinstance(value, acceptable_type):
                 acceptable = True
                 if acceptable_type == bool:
-                    LOGGER.debug("Converting parameter %s boolean '%s' "
-                                 "to string.", name, value)
+                    LOGGER.debug("converting parameter %s boolean '%s' "
+                                 "to string", name, value)
                     value = str(value).lower()
                     break
 
                 if acceptable_type == int:
-                    LOGGER.debug("Converting parameter %s integer '%s' "
-                                 "to string.", name, value)
+                    LOGGER.debug("converting parameter %s integer '%s' "
+                                 "to string", name, value)
                     value = str(value)
                     break
 
@@ -386,7 +386,7 @@ class Blueprint(object):
         parameters = self.get_parameter_definitions()
 
         if not parameters:
-            LOGGER.debug("No parameters defined.")
+            LOGGER.debug("no parameters defined")
             return
 
         for name, attrs in parameters.items():
@@ -467,7 +467,7 @@ class Blueprint(object):
             return
 
         for name, mapping in self.mappings.items():
-            LOGGER.debug("Adding mapping %s.", name)
+            LOGGER.debug("adding mapping %s", name)
             self.template.add_mapping(name, mapping)
 
     def reset_template(self):

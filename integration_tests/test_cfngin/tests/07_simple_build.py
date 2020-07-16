@@ -25,9 +25,9 @@ class TestSimpleBuild(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'Using default AWS provider mode',
-            'simple-build-vpc: submitted (creating new stack)',
-            'simple-build-vpc: complete (creating new stack)'
+            'using default AWS provider mode',
+            'simple-build-vpc:submitted (creating new stack)',
+            'simple-build-vpc:complete (creating new stack)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -37,8 +37,8 @@ class TestSimpleBuild(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'Using default AWS provider mode',
-            'simple-build-vpc: skipped (nochange)'
+            'using default AWS provider mode',
+            'simple-build-vpc:skipped (nochange)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -48,8 +48,8 @@ class TestSimpleBuild(Cfngin):
         code, _stdout, stderr = self.runway_cmd('destroy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'simple-build-vpc: submitted (submitted for destruction)',
-            'simple-build-vpc: complete (stack destroyed)'
+            'simple-build-vpc:submitted (submitted for destruction)',
+            'simple-build-vpc:complete (stack destroyed)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -57,11 +57,13 @@ class TestSimpleBuild(Cfngin):
     def run(self):
         """Run the test."""
         self.copy_fixtures()
+        self.set_env_var('VERBOSE', '1')
         self._build()
         self._update_no_change()
         self._destroy()
 
     def teardown(self):
         """Teardown any created resources and delete files."""
+        self.unset_env_var('VERBOSE')
         self.runway_cmd('destroy')  # cleanup incase of failure
         self.cleanup_fixtures()

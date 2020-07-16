@@ -1,0 +1,407 @@
+# The configurations that used for the recording, feel free to edit them
+config:
+
+  # Specify a command to be executed
+  # like `/bin/bash -l`, `ls`, or any other commands
+  # the default is bash for Linux
+  # or powershell.exe for Windows
+  command: pipenv shell
+
+  # Specify the current working directory path
+  # the default is the current working directory path
+  cwd: /Users/kyle/repos/runway/.demo
+
+  # Export additional ENV variables
+  env:
+    recording: true
+    AWS_PROFILE: runway-example
+    CI: 1
+    DEPLOY_ENVIRONMENT: lab
+
+  # Explicitly set the number of columns
+  # or use `auto` to take the current
+  # number of columns of your shell
+  cols: 132
+
+  # Explicitly set the number of rows
+  # or use `auto` to take the current
+  # number of rows of your shell
+  rows: 43
+
+  # Amount of times to repeat GIF
+  # If value is -1, play once
+  # If value is 0, loop indefinitely
+  # If value is a positive number, loop n times
+  repeat: 0
+
+  # Quality
+  # 1 - 100
+  quality: 100
+
+  # Delay between frames in ms
+  # If the value is `auto` use the actual recording delays
+  frameDelay: auto
+
+  # Maximum delay between frames in ms
+  # Ignored if the `frameDelay` isn't set to `auto`
+  # Set to `auto` to prevent limiting the max idle time
+  maxIdleTime: 2000
+
+  # The surrounding frame box
+  # The `type` can be null, window, floating, or solid
+  # To hide the title use the value null
+  # Don't forget to add a backgroundColor style with a null as type
+  frameBox:
+    type: floating
+    title: runway
+    style:
+      backgroundColor: "#272c33"
+      # setup full screen view
+      border: 0px black solid
+      border-radius: 0px
+      boxShadow: none
+      margin: 0px
+
+  # Add a watermark image to the rendered gif
+  # You need to specify an absolute path for
+  # the image on your machine or a URL, and you can also
+  # add your own CSS styles
+  watermark:
+    imagePath: null
+    style:
+      position: absolute
+      right: 15px
+      bottom: 15px
+      width: 100px
+      opacity: 0.9
+
+  # Cursor style can be one of
+  # `block`, `underline`, or `bar`
+  cursorStyle: block
+
+  # Font family
+  # You can use any font that is installed on your machine
+  # in CSS-like syntax
+  fontFamily: "Fira Mono for Powerline, Monaco, Lucida Console, Ubuntu Mono, Monospace"
+
+  # The size of the font
+  fontSize: 14
+
+  # The height of lines
+  lineHeight: 1
+
+  # The spacing between letters
+  letterSpacing: 0
+
+  # Theme
+  theme:
+    background: "transparent"
+    foreground: "#abb1bf"
+    cursor: "#c7c7c7"
+    black: "#272c33"
+    red: "#e26a72"
+    green: "#96c475"
+    yellow: "#d29a61"
+    blue: "#5cadf1"
+    magenta: "#c774df"
+    cyan: "#51b5c3"
+    white: "#abb1bf"
+    brightBlack: "#272c33"
+    brightRed: "#e26a72"
+    brightGreen: "#96c475"
+    brightYellow: "#d29a61"
+    brightBlue: "#5cadf1"
+    brightMagenta: "#c774df"
+    brightCyan: "#51b5c3"
+    brightWhite: "#abb1bf"
+
+# Records, feel free to edit them
+records:
+  - delay: 0
+    content: "\r\e[49m\e[44m\e[30m runway/example \e[49m\e[34m\e[39m\e[0m "
+  - delay: 90
+    content: r
+  - delay: 90
+    content: "\bru"
+  - delay: 90
+    content: 'n'
+  - delay: 90
+    content: w
+  - delay: 90
+    content: a
+  - delay: 90
+    content: 'y'
+  - delay: 90
+    content: ' '
+  - delay: 90
+    content: d
+  - delay: 90
+    content: e
+  - delay: 90
+    content: p
+  - delay: 90
+    content: l
+  - delay: 90
+    content: o
+  - delay: 90
+    content: 'y'
+  - delay: 90
+    content: "\e[?1l\e>\e[?2004l\r\r\n\e]133;C;\a"
+  - delay: 300
+    content: "[runway] deploy environment \"lab\" is explicitly defined in the environment\r\n[runway] if not correct, update the value or unset it to fall back to the name of the current git branch or parent directory\r\n[runway] \r\n[runway] \r\n[runway] \e[33mdeployment_1:processing deployment (in progress)\e[0m\r\n[runway] deployment_1:processing regions sequentially...\r\n[runway] \r\n[runway] \e[33mdeployment_1.tf-state.cfn:processing module in us-east-1 (in progress)\e[0m\r\n"
+  - delay: 30
+    content: "[runway] \e[33mconfig.yml:deploy (in progress)\e[0m\r\n"
+  - delay: 300
+    content: "[runway] \e[33mtf-state:submitted (creating new stack)\e[0m\r\n"
+  - delay: 300
+    content: "[runway] \e[1;32mtf-state:complete (creating new stack)\e[0m\r\n[runway] \e[1;32mconfig.yml:deploy (complete)\e[0m\r\n[runway] \e[1;32mdeployment_1.tf-state.cfn:processing module in us-east-1 (complete)\e[0m\r\n[runway] \r\n[runway] \e[33mdeployment_1.sampleapp.tf:processing module in us-east-1 (in progress)\e[0m\r\n"
+  - delay: 300
+    content: "[runway] sampleapp.tf:init (in progress)\r\n[runway] sampleapp.tf:using backend values from runway.yml\r\n"
+  - delay: 195
+    content: "\r\n\e[0m\e[1mInitializing the backend...\e[0m\r\n"
+  - delay: 300
+    content: "\e[0m\e[32m\r\nSuccessfully configured the backend \"s3\"! Terraform will automatically\r\nuse this backend unless the backend configuration changes.\e[0m\r\n"
+  - delay: 300
+    content: "\r\n\e[0m\e[1mInitializing provider plugins...\e[0m\r\n- Checking for available provider plugins...\r\n"
+  - delay: 214
+    content: "- Downloading plugin for provider \"aws\" (hashicorp/aws) 2.70.0...\r\n"
+  - delay: 300
+    content: "\r\n\e[0m\e[1m\e[32mTerraform has been successfully initialized!\e[0m\e[32m\e[0m\r\n\e[0m\e[32m\r\nYou may now begin working with Terraform. Try running \"terraform plan\" to see\r\nany changes that are required for your infrastructure. All Terraform commands\r\nshould now work.\r\n\r\nIf you ever set or change modules or backend configuration for Terraform,\r\nrerun this command to reinitialize your working directory. If you forget, other\r\ncommands will detect it and remind you to do so if necessary.\e[0m\r\n"
+  - delay: 59
+    content: "[runway] sampleapp.tf:workspace currently set to default; switching to lab...\r\n"
+  - delay: 300
+    content: "[runway] sampleapp.tf:workspace lab does not exist; creating it...\r\n"
+  - delay: 300
+    content: "\e[0m\e[32m\e[1mCreated and switched to workspace \"lab\"!\e[0m\e[32m\r\n\r\nYou're now on a new, empty workspace. Workspaces isolate their state,\r\nso if you run \"terraform plan\" Terraform will not see any existing state\r\nfor this configuration.\e[0m\r\n[runway] sampleapp.tf:using backend values from runway.yml\r\n"
+  - delay: 54
+    content: "\r\n\e[0m\e[1mInitializing the backend...\e[0m\r\n"
+  - delay: 300
+    content: "\e[0m\e[32m\r\nSuccessfully configured the backend \"s3\"! Terraform will automatically\r\nuse this backend unless the backend configuration changes.\e[0m\r\n"
+  - delay: 300
+    content: "\r\n\e[0m\e[1mInitializing provider plugins...\e[0m\r\n"
+  - delay: 596
+    content: "\r\n\e[0m\e[1m\e[32mTerraform has been successfully initialized!\e[0m\e[32m\e[0m\r\n\e[0m\e[32m\r\nYou may now begin working with Terraform. Try running \"terraform plan\" to see\r\nany changes that are required for your infrastructure. All Terraform commands\r\nshould now work.\r\n\r\nIf you ever set or change modules or backend configuration for Terraform,\r\nrerun this command to reinitialize your working directory. If you forget, other\r\ncommands will detect it and remind you to do so if necessary.\e[0m\r\n"
+  - delay: 6
+    content: "[runway] sampleapp.tf:init (complete)\r\n[runway] sampleapp.tf:updating remote modules...\r\n"
+  - delay: 49
+    content: "[runway] sampleapp.tf:apply (in progress)\r\n"
+  - delay: 300
+    content: "\e[0m\e[1maws_sqs_queue.terraform_queue: Creating...\e[0m\e[0m\r\n"
+  - delay: 300
+    content: "\e[0m\e[1maws_sqs_queue.terraform_queue: Creation complete after 1s [id=https://sqs.us-east-1.amazonaws.com/433204113401/terraform-20200714225538681900000001]\e[0m\e[0m\r\n"
+  - delay: 300
+    content: "\e[33m\r\n\e[1m\e[33mWarning: \e[0m\e[0m\e[1mInterpolation-only expressions are deprecated\e[0m\r\n\r\n\e[0m  on main.tf line 14, in provider \"aws\":\r\n  14:   region = \e[4m\"${var.region}\"\e[0m\r\n\e[0m\r\nTerraform 0.11 and earlier required all non-constant expressions to be\r\nprovided via interpolation syntax, but this pattern is now deprecated. To\r\nsilence this warning, remove the \"${ sequence from the start and the }\"\r\nsequence from the end of this expression, leaving just the inner expression.\r\n\r\nTemplate interpolation syntax is still used to construct strings from\r\nexpressions when the template includes multiple interpolation sequences or a\r\nmixture of literal strings and interpolations. This deprecation applies only\r\nto templates that consist entirely of a single interpolation sequence.\r\n\e[0m\e[0m\r\n\e[0m\e[1m\e[32m\r\nApply complete! Resources: 1 added, 0 changed, 0 destroyed.\e[0m\r\n"
+  - delay: 407
+    content: "Releasing state lock. This may take a few moments...\r\n"
+  - delay: 253
+    content: "[runway] sampleapp.tf:apply (complete)\r\n[runway] \e[1;32mdeployment_1.sampleapp.tf:processing module in us-east-1 (complete)\e[0m\r\n[runway] \r\n[runway] \e[33mdeployment_1.sampleapp.sls:processing module in us-east-1 (in progress)\e[0m\r\n"
+  - delay: 300
+    content: "[runway] sampleapp.sls:running npm ci...\r\n"
+  - delay: 438
+    content: "\e[37;40mnpm\e[0m \e[0m\e[30;43mWARN\e[0m \e[0m\e[35mprepare\e[0m removing existing node_modules/ before installation\r\n\e[0m"
+  - delay: 300
+    content: "\r\n> fsevents@1.2.13 install /Users/kyle/repos/runway/.demo/sampleapp.sls/node_modules/fsevents\r\n> node install.js\r\n\r\n"
+  - delay: 300
+    content: "  SOLINK_MODULE(target) Release/.node\r\n"
+  - delay: 84
+    content: "  CXX(target) Release/obj.target/fse/fsevents.o\r\n"
+  - delay: 300
+    content: "  SOLINK_MODULE(target) Release/fse.node\r\n"
+  - delay: 300
+    content: "\r\n> serverless@1.71.1 postinstall /Users/kyle/repos/runway/.demo/sampleapp.sls/node_modules/serverless\r\n> node ./scripts/postinstall.js\r\n\r\n"
+  - delay: 300
+    content: "added 1258 packages in 15.956s\r\n"
+  - delay: 18
+    content: "[runway] sampleapp.sls:deploy (in progress)\r\n"
+  - delay: 300
+    content: "Serverless: Bundling with Webpack...\r\n"
+  - delay: 300
+    content: "Time: \e[1m2403\e[39m\e[22mms\r\nBuilt at: 07/14/2020 \e[1m3:56:03 PM\e[39m\e[22m\r\n                \e[1mAsset\e[39m\e[22m      \e[1mSize\e[39m\e[22m  \e[1mChunks\e[39m\e[22m  \e[1m\e[39m\e[22m                 \e[1m\e[39m\e[22m\e[1mChunk Names\e[39m\e[22m\r\n    \e[1m\e[32msrc/helloWorld.js\e[39m\e[22m  34.3 KiB       \e[1m0\e[39m\e[22m  \e[1m\e[32m[emitted]\e[39m\e[22m        src/helloWorld\r\n\e[1m\e[32msrc/helloWorld.js.map\e[39m\e[22m   176 KiB       \e[1m0\e[39m\e[22m  \e[1m\e[32m[emitted] [dev]\e[39m\e[22m  src/helloWorld\r\nEntrypoint \e[1msrc/helloWorld\e[39m\e[22m = \e[1m\e[32msrc/helloWorld.js\e[39m\e[22m \e[1m\e[32msrc/helloWorld.js.map\e[39m\e[22m\r\n [0] \e[1m./node_modules/source-map/lib/util.js\e[39m\e[22m 12.6 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [1] \e[1m./node_modules/source-map/lib/source-map-generator.js\e[39m\e[22m 14 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [2] \e[1m./node_modules/source-map/lib/base64-vlq.js\e[39m\e[22m 4.6 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [3] \e[1m./node_modules/source-map/lib/array-set.js\e[39m\e[22m 3.12 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [4] \e[1m./src/helloWorld.ts\e[39m\e[22m 363 bytes {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [5] \e[1m./node_modules/source-map-support/register.js\e[39m\e[22m 25 bytes {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [6] \e[1m./node_modules/source-map-support/source-map-support.js\e[39m\e[22m 19.3 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [7] \e[1m(webpack)/buildin/module.js\e[39m\e[22m 497 bytes {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n [8] \e[1m./node_modules/source-map/source-map.js\e[39m\e[22m 405 bytes {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n[10] \e[1m./node_modules/source-map/lib/mapping-list.js\e[39m\e[22m 2.28 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n[11] \e[1m./node_modules/source-map/lib/source-map-consumer.js\e[39m\e[22m 39.6 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n[14] \e[1m./node_modules/source-map/lib/source-node.js\e[39m\e[22m 13.5 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n[15] \e[1mexternal \"path\"\e[39m\e[22m 42 bytes {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n[16] \e[1mexternal \"fs\"\e[39m\e[22m 42 bytes {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[33m [optional]\e[39m\e[22m\e[1m\e[32m [built]\e[39m\e[22m\r\n[17] \e[1m./node_modules/buffer-from/index.js\e[39m\e[22m 1.56 KiB {\e[1m\e[33m0\e[39m\e[22m}\e[1m\e[32m [built]\e[39m\e[22m\r\n    + 3 hidden modules\r\n"
+  - delay: 36
+    content: "Serverless: Packaging service...\r\n"
+  - delay: 410
+    content: "Serverless: Creating Stack...\r\n"
+  - delay: 530
+    content: "Serverless: Checking Stack create progress...\r\n"
+  - delay: 90
+    content: ...
+  - delay: 90
+    content: .
+  - delay: 90
+    content: "....\r\nServerless: Stack create finished...\r\n"
+  - delay: 300
+    content: "Serverless: Uploading CloudFormation file to S3...\r\n"
+  - delay: 300
+    content: "Serverless: Uploading artifacts...\r\nServerless: Uploading service replaceme-myslsservice.zip file to S3 (71.45 KB)...\r\n"
+  - delay: 300
+    content: "Serverless: Validating template...\r\n"
+  - delay: 300
+    content: "Serverless: Updating Stack...\r\n"
+  - delay: 300
+    content: "Serverless: Checking Stack update progress...\r\n"
+  - delay: 300
+    content: .......
+  - delay: 90
+    content: .....
+  - delay: 90
+    content: ...
+  - delay: 90
+    content: ....
+  - delay: 90
+    content: .........
+  - delay: 90
+    content: ..
+  - delay: 90
+    content: "...\r\nServerless: Stack update finished...\r\n"
+  - delay: 300
+    content: "Service Information\r\nservice: replaceme-myslsservice\r\nstage: lab\r\nregion: us-east-1\r\nstack: replaceme-myslsservice-lab\r\nresources: 12\r\napi keys:\r\n  None\r\nendpoints:\r\n  GET - https://10r4kmmi1e.execute-api.us-east-1.amazonaws.com/lab/hello-world\r\nfunctions:\r\n  helloWorld: replaceme-myslsservice-lab-helloWorld\r\nlayers:\r\n  None\r\n"
+  - delay: 356
+    content: "Serverless: Run the \"serverless\" command to setup monitoring, troubleshooting and testing.\r\n"
+  - delay: 46
+    content: "[runway] sampleapp.sls:deploy (complete)\r\n[runway] \e[1;32mdeployment_1.sampleapp.sls:processing module in us-east-1 (complete)\e[0m\r\n[runway] \r\n[runway] \e[33mdeployment_1.sampleapp.cdk:processing module in us-east-1 (in progress)\e[0m\r\n"
+  - delay: 300
+    content: "[runway] sampleapp.cdk:running npm ci...\r\n"
+  - delay: 435
+    content: "\e[37;40mnpm\e[0m \e[0m\e[30;43mWARN\e[0m \e[0m\e[35mprepare\e[0m removing existing node_modules/ before installation\r\n\e[0m"
+  - delay: 300
+    content: "added 216 packages in 2.916s\r\n"
+  - delay: 11
+    content: "[runway] sampleapp.cdk:build steps (in progress)\r\n"
+  - delay: 300
+    content: "\e[39m\e[1mCreating a virtualenv for this project…\e[39m\e[22m\r\nPipfile: \e[31m\e[1m/Users/kyle/repos/runway/.demo/sampleapp.cdk/Pipfile\e[39m\e[22m\r\n\e[39m\e[1mUsing\e[39m\e[22m \e[31m\e[1m/usr/local/bin/python3\e[39m\e[22m \e[32m\e[22m(3.8.3)\e[39m\e[22m \e[39m\e[1mto create virtualenv…\e[39m\e[22m\r\n"
+  - delay: 5726
+    content: "\e[34m\e[22mAlready using interpreter /usr/local/opt/python@3.8/bin/python3.8\r\nUsing base prefix '/usr/local/Cellar/python@3.8/3.8.3_1/Frameworks/Python.framework/Versions/3.8'\r\nNew python executable in /Users/kyle/repos/runway/.demo/sampleapp.cdk/.venv/bin/python3.8\r\nAlso creating executable in /Users/kyle/repos/runway/.demo/sampleapp.cdk/.venv/bin/python\r\nInstalling setuptools, pip, wheel...\r\ndone.\r\nRunning virtualenv with interpreter /usr/local/bin/python3\r\n\e[39m\e[22m\r\n"
+  - delay: 57
+    content: "Virtualenv location: \e[32m\e[22m/Users/kyle/repos/runway/.demo/sampleapp.cdk/.venv\e[39m\e[22m\r\n"
+  - delay: 117
+    content: "\e[39m\e[1mInstalling dependencies from Pipfile.lock (223542)…\e[39m\e[22m\r\n"
+  - delay: 29
+    content: "     \e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 0/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 318
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 1/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 7
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 2/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 3/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 4/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 7
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 5/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 9
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 6/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 7
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 7/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 9
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 8/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 10
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 9/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 10/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 9
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 11/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 19
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 12/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 40
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 13/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 49
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 14/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 21
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 15/27 — \e[30m\e[22m00:00:00\e[39m\e[22m\r"
+  - delay: 3358
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 16/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 17/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 18/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 19/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 8
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 20/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 9
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 21/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 11
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 22/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 20
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 23/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 17
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 24/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 22
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 25/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 27
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m\e[30m\e[22m-\e[39m\e[22m 26/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r"
+  - delay: 11
+    content: "     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m 27/27 — \e[30m\e[22m00:00:02\e[39m\e[22m\r     \e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m\e[32m\e[1m=\e[39m\e[22m 27/27 — \e[30m\e[22m00:00:04\e[39m\e[22m\r\r\n"
+  - delay: 90
+    content: "\e[32m\e[22mAll dependencies are now up-to-date!\e[39m\e[22m\r\n"
+  - delay: 12
+    content: "\e[0m"
+  - delay: 96
+    content: "[runway] sampleapp.cdk:build steps (complete)\r\n[runway] sampleapp.cdk:bootstrap (in progress)\r\n"
+  - delay: 300
+    content: " ⏳  Bootstrapping environment aws://433204113401/us-east-1...\r\n"
+  - delay: 300
+    content: "CDKToolkit: creating CloudFormation changeset...\r\n"
+  - delay: 300
+    content: " ✅  Environment aws://433204113401/us-east-1 bootstrapped (no changes).\r\n"
+  - delay: 20
+    content: "[runway] sampleapp.cdk:bootstrap (complete)\r\n[runway] sampleapp.cdk:deploy (in progress)\r\n"
+  - delay: 300
+    content: "runway-cdk-py-sample: deploying...\r\n"
+  - delay: 758
+    content: "runway-cdk-py-sample: creating CloudFormation changeset...\r\n"
+  - delay: 300
+    content: "\e[K[··························································] (0/11)\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[2A\e[K[··························································] (0/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::SNS::Topic        | MyFirstTopic\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::SQS::Queue        | MyFirstQueue\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████▎····················································] (1/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::SNS::Topic        | MyFirstTopic\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████▎····················································] (1/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::SNS::Topic        | MyFirstTopic\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████▎····················································] (1/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::SNS::Topic        | MyFirstTopic\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████▎····················································] (1/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::SNS::Topic        | MyFirstTopic\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[██████████▌···············································] (2/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████████████████████·····································] (4/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████████████████████·····································] (4/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[█████████████████████·····································] (4/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-0\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-2\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████▋··························] (6/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-3\r\n\e[K3:58:07 PM | CREATE_IN_PROGRESS   | AWS::S3::Bucket        | MyHelloConstruct/Bucket-1\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[██████████████████████████████████████████▏···············] (8/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[██████████████████████████████████████████▏···············] (8/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[██████████████████████████████████████████▏···············] (8/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[██████████████████████████████████████████▏···············] (8/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[██████████████████████████████████████████▏···············] (8/11)\r\n\e[K\r\n\e[K3:58:06 PM | CREATE_IN_PROGRESS   | AWS::IAM::User         | MyUser\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K3:58:44 PM | CREATE_IN_PROGRESS   | AWS::IAM::Policy       | MyUser/DefaultPolicy\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K3:58:45 PM | CREATE_IN_PROGRESS   | AWS::IAM::Policy       | MyUser/DefaultPolicy\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K3:58:45 PM | CREATE_IN_PROGRESS   | AWS::IAM::Policy       | MyUser/DefaultPolicy\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K3:58:45 PM | CREATE_IN_PROGRESS   | AWS::IAM::Policy       | MyUser/DefaultPolicy\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K3:58:45 PM | CREATE_IN_PROGRESS   | AWS::IAM::Policy       | MyUser/DefaultPolicy\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[███████████████████████████████████████████████▍··········] (9/11)\r\n\e[K\r\n\e[K3:58:45 PM | CREATE_IN_PROGRESS   | AWS::IAM::Policy       | MyUser/DefaultPolicy\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K[████████████████████████████████████████████████████▋·····] (10/11)\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n"
+  - delay: 300
+    content: "\e[8A\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\e[K\r\n\r\n ✅  runway-cdk-py-sample\r\n\r\nStack ARN:\r\narn:aws:cloudformation:us-east-1:433204113401:stack/runway-cdk-py-sample/745ec940-c625-11ea-b495-0ee5b554e1bc\r\n"
+  - delay: 20
+    content: "[runway] sampleapp.cdk:deploy (complete)\r\n[runway] \e[1;32mdeployment_1.sampleapp.cdk:processing module in us-east-1 (complete)\e[0m\r\n[runway] \e[1;32mdeployment_1:processing deployment (complete)\e[0m\r\n"
+  - delay: 20
+    content: "\r\e[49m\e[44m\e[30m runway/example \e[49m\e[34m\e[39m\e[0m "
+  - delay: 9001
+    content: "\e[0m\r\n"

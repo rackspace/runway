@@ -3,11 +3,8 @@
 from past.builtins import basestring
 
 from ..util import load_object_from_string
-
-from .handlers import script
-from .handlers import cfn_lint
+from .handlers import cfn_lint, script
 from .handlers import yaml_lint as yamllint
-
 
 TEST_HANDLERS = {}
 

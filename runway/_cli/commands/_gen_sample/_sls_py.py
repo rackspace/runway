@@ -4,6 +4,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
 
 if sys.version_info.major > 2:
@@ -15,8 +16,11 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('sls-py', short_help='sls + python (sampleapp.sls)')
+@options.debug
+@options.no_color
+@options.verbose
 @click.pass_context
-def sls_py(ctx):
+def sls_py(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample Serverless project using python."""
     src = TEMPLATES / 'sls-py'
@@ -25,6 +29,6 @@ def sls_py(ctx):
     copy_sample(ctx, src, dest)
     convert_gitignore(dest / '_gitignore')
 
-    LOGGER.info("Sample Serverless module created at %s", dest)
-    LOGGER.info('To finish it\'s setup, change to the %s directory and execute'
-                ' "npm install" to generate it\'s lockfile.', dest)
+    LOGGER.success("Sample Serverless module created at %s", dest)
+    LOGGER.notice('To finish it\'s setup, change to the %s directory and '
+                  'execute "npm install" to generate it\'s lockfile.', dest)

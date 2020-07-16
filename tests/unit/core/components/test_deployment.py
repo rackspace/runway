@@ -182,7 +182,7 @@ class TestDeployment(object):
         obj = Deployment(context=runway_context,
                          definition=fx_deployments.load('simple_parallel_regions'))
         assert not obj.deploy()
-        assert 'Processing regions in parallel... (output will be interwoven)' in \
+        assert 'deployment_1:processing regions in parallel... (output will be interwoven)' in \
             caplog.messages
         mock_futures.ProcessPoolExecutor.assert_called_once_with(
             max_workers=runway_context.env.max_concurrent_regions
@@ -205,7 +205,7 @@ class TestDeployment(object):
         obj = Deployment(context=runway_context,
                          definition=fx_deployments.load('simple_parallel_regions'))
         assert not obj.deploy()
-        assert 'Processing regions sequentially...' in \
+        assert 'deployment_1:processing regions sequentially...' in \
             caplog.messages
         mock_run.assert_has_calls([call('deploy', 'us-east-1'),
                                    call('deploy', 'us-west-2')])
@@ -245,8 +245,8 @@ class TestDeployment(object):
         assert obj.plan()
 
         if async_used:
-            assert 'Processing of regions will be done in parallel ' \
-                'during deploy/destroy.' in caplog.messages
+            assert 'deployment_1:processing of regions will be done in ' \
+                'parallel during deploy/destroy' in caplog.messages
         mock_async.assert_not_called()
         mock_sync.assert_called_once_with('plan')
 
@@ -327,7 +327,7 @@ class TestDeployment(object):
             assert obj.validate_account_credentials()
         assert excinfo.value.code == 1
         logs = '\n'.join(caplog.messages)
-        assert 'Verified current AWS account matches required account id' in logs
+        assert 'verified current AWS account matches required account id' in logs
         assert 'do not match required account alias "test"' in logs
         caplog.clear()
         del logs
@@ -336,8 +336,8 @@ class TestDeployment(object):
         account.aliases = ['test']
         assert not obj.validate_account_credentials()
         logs = '\n'.join(caplog.messages)
-        assert 'Verified current AWS account matches required account id' in logs
-        assert 'Verified current AWS account alias matches required alias' in logs
+        assert 'verified current AWS account matches required account id' in logs
+        assert 'verified current AWS account alias matches required alias' in logs
 
     @pytest.mark.parametrize('action', [('deploy'), ('destroy')])
     def test_run_list(self, action, monkeypatch, runway_context):

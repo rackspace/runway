@@ -21,7 +21,7 @@ class TestNoStacksInConfig(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'WARNING: No stacks detected (error in config?)'
+            'no stacks detected (error in config?)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'

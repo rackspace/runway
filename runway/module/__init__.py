@@ -14,7 +14,7 @@ if sys.version_info[0] > 2:  # TODO remove after droping python 2
 else:
     from pathlib2 import Path  # pylint: disable=E
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
 NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
 
@@ -27,28 +27,30 @@ def format_npm_command_for_logging(command):
     return ' '.join(command)
 
 
-def generate_node_command(command, command_opts, path):
+def generate_node_command(command, command_opts, path, logger=LOGGER):
     """Return node bin command list for subprocess execution."""
     if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
-        LOGGER.debug("Using npx to invoke %s.", command)
         cmd_list = [NPX_BIN,
                     '-c',
                     "%s %s" % (command, ' '.join(command_opts))]
     else:
-        LOGGER.debug('npx not found; falling back invoking %s shell script '
-                     'directly.', command)
+        logger.debug(
+            'npx not found; falling back to invoking shell script directly'
+        )
         cmd_list = [
             os.path.join(path,
                          'node_modules',
                          '.bin',
                          command)
         ] + command_opts
+    logger.debug('node command: %s', format_npm_command_for_logging(cmd_list))
     return cmd_list
 
 
-def run_module_command(cmd_list, env_vars, exit_on_error=True):
+def run_module_command(cmd_list, env_vars, exit_on_error=True, logger=LOGGER):
     """Shell out to provisioner command."""
+    logger.debug('running command: %s', ' '.join(cmd_list))
     if exit_on_error:
         try:
             subprocess.check_call(cmd_list, env=env_vars)
@@ -74,23 +76,20 @@ def use_npm_ci(path):
     return False
 
 
-def run_npm_install(path, options, context):
+def run_npm_install(path, options, context, logger=LOGGER):
     """Run npm install/ci."""
     # Use npm ci if available (npm v5.7+)
     cmd = [NPM_BIN, '<place-holder>']
     if context.no_color:
         cmd.append('--no-color')
     if options.get('options', {}).get('skip_npm_ci'):
-        LOGGER.info("Skipping npm ci or npm install on %s...",
-                    os.path.basename(path))
+        logger.info("skipped npm ci/npm install")
         return
     if context.env_vars.get('CI') and use_npm_ci(path):
-        LOGGER.info("Running npm ci on %s...",
-                    os.path.basename(path))
+        logger.info("running npm ci...")
         cmd[1] = 'ci'
     else:
-        LOGGER.info("Running npm install on %s...",
-                    os.path.basename(path))
+        logger.info("running npm install...")
         cmd[1] = 'install'
     subprocess.check_call(cmd)
 
@@ -109,15 +108,24 @@ class RunwayModule(object):
     """Base class for Runway modules."""
 
     def __init__(self, context, path, options=None):
-        """Initialize base class."""
+        """Instantiate class.
+
+        Args:
+            context (Context): Runway context object.
+            path (Union[str, Path]): Path to the module.
+            options (Dict[str, Dict[str, Any]]): Everything in the module
+                definition merged with applicable values from the deployment
+                definition.
+
+        """
         self.context = context
-
-        self.path = path
-
-        if options is None:
-            self.options = {}
-        else:
-            self.options = options
+        self.logger = LOGGER
+        self.path = str(path)
+        self.options = {} if options is None else options
+        if isinstance(path, Path):
+            self.name = options.get('name', path.name)
+        else:  # until we can replace path with a Path object here, handle str
+            self.name = options.get('name', Path(path).name)
 
     # the rest of these 'abstract' methods must have names which match
     #  the commands defined in `cli.py`
@@ -175,7 +183,6 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         self.options = options.pop('options', {})
         self.parameters = options.pop('parameters', {})
         self.path = path if isinstance(self.path, Path) else Path(self.path)
-        self.name = options.get('name', self.path.name)
 
         for k, v in options.items():
             setattr(self, k, v)
@@ -186,9 +193,8 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
     def check_for_npm(self):
         """Ensure npm is installed and in the current path."""
         if not which('npm'):
-            LOGGER.error('%s: "npm" not found in path or is not executable; '
-                         'please ensure it is installed correctly.',
-                         self.name)
+            self.logger.error('"npm" not found in path or is not executable; '
+                              'please ensure it is installed correctly')
             sys.exit(1)
 
     def log_npm_command(self, command):
@@ -198,8 +204,10 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             command (List[str]): List that will be passed into a subprocess.
 
         """
-        LOGGER.info('%s: Running "%s"', self.name,
-                    format_npm_command_for_logging(command))
+        self.logger.debug(
+            'node command: %s',
+            format_npm_command_for_logging(command)
+        )
 
     def npm_install(self):
         """Run ``npm install``."""
@@ -207,16 +215,13 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         if self.context.no_color:
             cmd.append('--no-color')
         if self.options.get('skip_npm_ci'):
-            LOGGER.info("%s: Skipping npm ci and npm install...",
-                        self.name)
+            self.logger.info("skipped npm ci/npm install")
             return
         if self.context.is_noninteractive and use_npm_ci(str(self.path)):
-            LOGGER.info("%s: Running npm ci...",
-                        self.name)
+            self.logger.info("running npm ci...")
             cmd[1] = 'ci'
         else:
-            LOGGER.info("%s: Running npm install...",
-                        self.name)
+            self.logger.info("running npm install...")
             cmd[1] = 'install'
         subprocess.check_call(cmd)
 
@@ -228,8 +233,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
         """
         if not (self.path / 'package.json').is_file():
-            LOGGER.warning('%s: Module is missing a "package.json"',
-                           self.name)
+            self.logger.debug('module is missing package.json')
             return True
         return False
 

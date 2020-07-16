@@ -4,7 +4,7 @@ import os
 import platform
 import sys
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 def ensure_versions_dir_exists(env_path):

@@ -169,7 +169,10 @@ class TestServerless(object):
             'pathlib' if sys.version_info.major == 3 else 'pathlib2'
         ), MagicMock(side_effect=OSError('test OSError')))
         assert not obj.extend_serverless_yml(mock_func)
-        assert '{}: test OSError'.format(tmp_path.name) in caplog.messages
+        assert '{}:encountered an error when trying to delete the ' \
+            'temporary Serverless config'.format(
+                tmp_path.name
+            ) in caplog.messages
 
     @patch('runway.module.serverless.generate_node_command')
     @pytest.mark.parametrize('command', [('deploy'), ('remove'), ('print')])
@@ -177,7 +180,6 @@ class TestServerless(object):
                      tmp_path):
         """Test gen_cmd."""
         # pylint: disable=no-member
-        monkeypatch.setattr(Serverless, 'log_npm_command', MagicMock())
         monkeypatch.setattr(runway_context, 'no_color', False)
         mock_cmd.return_value = ['success']
         obj = Serverless(runway_context, tmp_path,
@@ -191,8 +193,8 @@ class TestServerless(object):
         assert obj.gen_cmd(command, args_list=['--extra-arg']) == ['success']
         mock_cmd.assert_called_once_with(command='sls',
                                          command_opts=expected_opts,
+                                         logger=obj.logger,
                                          path=tmp_path)
-        obj.log_npm_command.assert_called_once_with(['success'])
         mock_cmd.reset_mock()
 
         obj.context.env_vars['CI'] = '1'
@@ -203,6 +205,7 @@ class TestServerless(object):
         assert obj.gen_cmd(command, args_list=['--extra-arg']) == ['success']
         mock_cmd.assert_called_once_with(command='sls',
                                          command_opts=expected_opts,
+                                         logger=obj.logger,
                                          path=tmp_path)
 
     def test_init(self, caplog, runway_context):
@@ -219,8 +222,7 @@ class TestServerless(object):
                                   {'options': {
                                       'promotezip': {'invalid': 'value'}
                                   }})
-        assert ['tests: "bucketname" must be provided when using '
-                '"options.promotezip": {\'invalid\': \'value\'}'] == caplog.messages
+        assert ['tests:error encountered while parsing options'] == caplog.messages
 
     def test_plan(self, caplog, runway_context):
         """Test plan."""
@@ -228,29 +230,32 @@ class TestServerless(object):
         obj = Serverless(runway_context, './tests')
 
         assert not obj.plan()
-        assert ['Planning not currently supported for Serverless'] == \
+        assert ['tests:plan not currently supported for Serverless'] == \
             caplog.messages
 
     def test_skip(self, caplog, monkeypatch, runway_context, tmp_path):
         """Test skip."""
-        caplog.set_level(logging.WARNING, logger='runway')
+        caplog.set_level(logging.INFO, logger='runway')
         obj = Serverless(runway_context, tmp_path)
         monkeypatch.setattr(obj, 'package_json_missing', lambda: True)
         monkeypatch.setattr(obj, 'env_file', False)
 
         assert obj.skip
-        assert ['{}: The Serverless module type requires a package file '
-                'specifying serverless in devDependencies'.format(tmp_path.name),
-                '{}: Skipping module'.format(tmp_path.name)] == caplog.messages
+        assert [
+            '{}:skipped; package.json with "serverless" in devDependencies'
+            ' is required for this module type'.format(tmp_path.name)
+        ] == caplog.messages
         caplog.clear()
 
         monkeypatch.setattr(obj, 'package_json_missing', lambda: False)
         assert obj.skip
-        assert ['{}: No config file for this stage/region found (looking for '
-                'one of "{}")'.format(tmp_path.name,
-                                      ', '.join(gen_sls_config_files(obj.stage,
-                                                                     obj.region))),
-                '{}: Skipping module'.format(tmp_path.name)] == caplog.messages
+        assert [
+            '{}:skipped; config file for this stage/region not found'
+            ' -- looking for one of: {}'.format(
+                tmp_path.name,
+                ', '.join(gen_sls_config_files(obj.stage, obj.region))
+            )
+        ] == caplog.messages
         caplog.clear()
 
         obj.environments = True
@@ -281,7 +286,8 @@ class TestServerless(object):
         obj.npm_install.assert_called_once()
         obj.gen_cmd.assert_called_once_with('deploy')
         mock_run.assert_called_once_with(cmd_list=['deploy'],
-                                         env_vars=runway_context.env_vars)
+                                         env_vars=runway_context.env_vars,
+                                         logger=obj.logger)
 
         obj.options.promotezip['bucketname'] = 'test-bucket'
         assert not obj.sls_deploy(skip_install=True)
@@ -293,7 +299,8 @@ class TestServerless(object):
              '--config', 'test.yml'],
             'test-bucket',
             runway_context,
-            str(tmp_path)
+            str(tmp_path),
+            obj.logger
         )
         mock_run.assert_called_once()
 
@@ -307,7 +314,8 @@ class TestServerless(object):
              '--no-color'],
             'test-bucket',
             runway_context,
-            str(tmp_path)
+            str(tmp_path),
+            obj.logger
         )
 
     def test_sls_print(self, monkeypatch, runway_context):

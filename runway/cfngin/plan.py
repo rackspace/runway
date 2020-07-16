@@ -6,6 +6,8 @@ import threading
 import time
 import uuid
 
+from runway._logging import LogLevels, PrefixAdaptor
+
 from .dag import DAG, DAGValidationError, walk
 from .exceptions import (CancelExecution, GraphError, PersistentGraphLocked,
                          PlanFailed)
@@ -15,12 +17,6 @@ from .ui import ui
 from .util import merge_map, stack_template_key_name
 
 LOGGER = logging.getLogger(__name__)
-
-COLOR_CODES = {
-    SUBMITTED.code: 33,  # yellow
-    COMPLETE.code: 32,   # green
-    FAILED.code: 31,     # red
-}
 
 
 def json_serial(obj):
@@ -36,20 +32,6 @@ def json_serial(obj):
     if isinstance(obj, set):
         return list(obj)
     raise TypeError
-
-
-def log_step(step):
-    """Construct a log message for a set and log it to the UI.
-
-    Args:
-        step (:class:`Step`): The step to be logged.
-
-    """
-    msg = "%s: %s" % (step, step.status.name)
-    if step.status.reason:
-        msg += " (%s)" % (step.status.reason)
-    color_code = COLOR_CODES.get(step.status.code, 37)
-    ui.info(msg, extra={"color": color_code})
 
 
 def merge_graphs(graph1, graph2):
@@ -79,6 +61,8 @@ class Step(object):
         fn (Optional[Callable]): Function to run to execute the step.
             This function will be ran multiple times until the step is "done".
         last_updated (float): Time when the step was last updated.
+        logger (logging.LoggerAdaptor): Logger for logging messages about
+            the step.
         stack (:class:`runway.cfngin.stack.Stack`): the stack associated with
             this step
         status (:class:`runway.cfngin.status.Status`): The status of step.
@@ -103,6 +87,7 @@ class Step(object):
         self.stack = stack
         self.status = PENDING
         self.last_updated = time.time()
+        self.logger = PrefixAdaptor(self.stack.name, LOGGER)
         self.fn = fn
         self.watch_func = watch_func
 
@@ -251,16 +236,30 @@ class Step(object):
 
         """
         if status is not self.status:
-            LOGGER.debug("Setting %s state to %s.", self.stack.name,
+            LOGGER.debug("setting %s state to %s...", self.stack.name,
                          status.name)
             self.status = status
             self.last_updated = time.time()
             if self.stack.logging:
-                log_step(self)
+                self.log_step()
 
     def complete(self):
         """Shortcut for ``set_status(COMPLETE)``."""
         self.set_status(COMPLETE)
+
+    def log_step(self):
+        """Construct a log message for a set and log it to the UI."""
+        msg = self.status.name
+        if self.status.reason:
+            msg += " (%s)" % self.status.reason
+        if self.status.code == SUBMITTED.code:
+            ui.log(LogLevels.NOTICE, msg, logger=self.logger)
+        elif self.status.code == COMPLETE.code:
+            ui.log(LogLevels.SUCCESS, msg, logger=self.logger)
+        elif self.status.code == FAILED.code:
+            ui.log(LogLevels.ERROR, msg, logger=self.logger)
+        else:
+            ui.info(msg, logger=self.logger)
 
     def skip(self):
         """Shortcut for ``set_status(SKIPPED)``."""
@@ -657,7 +656,7 @@ class Plan(object):
 
         """
         steps = 1
-        LOGGER.log(level, "Plan \"%s\":", self.description)
+        LOGGER.log(level, "plan \"%s\":", self.description)
         for step in self.steps:
             LOGGER.log(
                 level,
@@ -682,7 +681,7 @@ class Plan(object):
                 Provider to use when resolving the blueprints.
 
         """
-        LOGGER.info("Dumping \"%s\"...", self.description)
+        LOGGER.info("dumping \"%s\"...", self.description)
         directory = os.path.expanduser(directory)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -701,7 +700,7 @@ class Plan(object):
             if not os.path.exists(blueprint_dir):
                 os.makedirs(blueprint_dir)
 
-            LOGGER.info("Writing stack \"%s\" -> %s", step.name, path)
+            LOGGER.info("writing stack \"%s\" -> %s", step.name, path)
             with open(path, "w") as _file:
                 _file.write(blueprint.rendered)
 
@@ -765,13 +764,13 @@ class Plan(object):
                                             'cloudformation'))):
                 if step.fn.__name__ == '_destroy_stack':
                     self.context.persistent_graph.pop(step)
-                    LOGGER.debug("Removed step '%s' from the persistent graph",
+                    LOGGER.debug("removed step '%s' from the persistent graph",
                                  step.name)
                 elif step.fn.__name__ == '_launch_stack':
                     self.context.persistent_graph.add_step_if_not_exists(
                         step, add_dependencies=True, add_dependants=True
                     )
-                    LOGGER.debug("Added step '%s' to the persistent graph",
+                    LOGGER.debug("added step '%s' to the persistent graph",
                                  step.name)
                 else:
                     return result

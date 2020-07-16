@@ -27,12 +27,11 @@ class TestLockedStack(Cfngin):
         code, _stdout, stderr = self.runway_cmd('deploy')
         assert code == 0, 'exit code should be zero'
         expected_lines = [
-            'Using default AWS provider mode',
-            'locked-stack-vpc: submitted (creating new stack)',
-            'locked-stack-vpc: complete (creating new stack)',
-            'locked-stack-vpc: skipped (locked)',
-            'locked-stack-bastion: submitted (creating new stack)',
-            'locked-stack-bastion: complete (creating new stack)'
+            'locked-stack-vpc:submitted (creating new stack)',
+            'locked-stack-vpc:complete (creating new stack)',
+            'locked-stack-vpc:skipped (locked)',
+            'locked-stack-bastion:submitted (creating new stack)',
+            'locked-stack-bastion:complete (creating new stack)'
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'

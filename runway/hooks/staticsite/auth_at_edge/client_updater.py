@@ -3,13 +3,13 @@
 Responsible for updating the User Pool Client with the generated
 distribution url + callback url paths.
 """
-
+# pylint: disable=unused-argument
 import logging
-from typing import Any, Dict, Optional  # pylint: disable=unused-import
+from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa pylint: disable=W
 
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
-from runway.cfngin.context import Context  # noqa pylint: disable=unused-import
-from runway.cfngin.session_cache import get_session
+if TYPE_CHECKING:
+    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
+    from ....cfngin.context import Context  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def update(context,  # pylint: disable=unused-argument
         oauth_scopes (List[str]): A list of all available validation
             scopes for oauth
     """
-    session = get_session(provider.region)
+    session = context.get_session()
     cognito_client = session.client('cognito-idp')
 
     # Combine alternate domains with main distribution
@@ -66,8 +66,6 @@ def update(context,  # pylint: disable=unused-argument
             UserPoolId=context.hook_data['aae_user_pool_id_retriever']['id'],
         )
         return True
-    except Exception as err:  # pylint: disable=broad-except
-        LOGGER.error('Was not able to update the callback urls on '
-                     'the user pool client')
-        LOGGER.error(err)
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.exception('unable to update user pool client callback urls')
         return False

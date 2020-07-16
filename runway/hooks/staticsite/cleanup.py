@@ -1,11 +1,11 @@
 """Replicated Function Remover."""
-import logging
+# pylint: disable=unused-argument
 import json
+import logging
 from typing import Any, Dict, Optional, Union  # pylint: disable=unused-import
 
 from runway.cfngin.context import Context  # pylint: disable=unused-import
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=unused-import
-from runway.cfngin.session_cache import get_session
+from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def execute(context,  # type: Context # pylint: disable=unused-argument
         state_machine_arn (str): The ARN of the State Machine to execute
         stack_name (str): The name of the Cleanup stack to delete
     """
-    session = get_session(provider.region)
+    session = context.get_session()
     step_functions_client = session.client('stepfunctions')
 
     try:
@@ -50,7 +50,6 @@ def execute(context,  # type: Context # pylint: disable=unused-argument
             })
         )
         return True
-    except Exception as err:  # pylint: disable=broad-except
-        LOGGER.error('Could not execute cleanup process.')
-        LOGGER.error(err)
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.exception('could not complete cleanup')
         return False

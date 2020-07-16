@@ -13,6 +13,8 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.command('test', short_help='run tests')
 @options.debug
 @options.deploy_environment
+@options.no_color
+@options.verbose
 @click.pass_context
 def test(ctx, **_):
     """Execute tests as defined in the Runway config.

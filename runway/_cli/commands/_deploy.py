@@ -16,7 +16,9 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.ci
 @options.debug
 @options.deploy_environment
+@options.no_color
 @options.tags
+@options.verbose
 @click.pass_context
 def deploy(ctx, tags, **_):  # noqa: D301
     # type: (click.Context, Tuple[str, ...], Any) -> None

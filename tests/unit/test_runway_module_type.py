@@ -46,8 +46,9 @@ class TestRunwayModuleType(object):
         with pytest.raises(SystemExit) as excinfo:
             assert not RunwayModuleType(str(cd_tmp_path))
         assert excinfo.value.code == 1
-        assert 'No module class found for ' + str(cd_tmp_path.name) in \
-            caplog.messages
+        assert 'module class could not be determined from path "{}"'.format(
+            cd_tmp_path.name
+        ) in caplog.messages
 
     def test_from_class_path(self, cd_tmp_path):
         """Test from class_path."""

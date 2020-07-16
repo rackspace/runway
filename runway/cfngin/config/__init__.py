@@ -14,6 +14,8 @@ from schematics.types import (BaseType, BooleanType, DictType, ListType,
                               ModelType, StringType)
 from six import text_type
 
+from runway.util import DOC_SITE
+
 from .. import exceptions
 from ..lookups import register_lookup_handler
 from ..util import SourceProcessor, merge_map, yaml_to_ordered_dict
@@ -47,11 +49,10 @@ def render_parse_load(raw_config, environment=None, validate=True):
     if config.namespace is None:
         namespace = environment.get("namespace")
         if namespace:
-            LOGGER.warning("DEPRECATION WARNING: specifying namespace in the "
-                           "environment is deprecated. See "
-                           "https://docs.onica.com/projects/runway/en/"
-                           "release/cfngin/config.html#namespace "
-                           "for more info.")
+            LOGGER.warning('specifying namespace in the environment is '
+                           'deprecated; to learn how to specify it correctly '
+                           'visit %s/page/cfngin/configuration.html#namespace',
+                           DOC_SITE)
             config.namespace = namespace
 
     if validate:
@@ -141,9 +142,9 @@ def load(config):
 
     """
     if config.sys_path:
-        LOGGER.debug("Appending %s to sys.path.", config.sys_path)
+        LOGGER.debug("appending to sys.path: %s", config.sys_path)
         sys.path.append(config.sys_path)
-        LOGGER.debug("sys.path is now %s", sys.path)
+        LOGGER.debug("sys.path: %s", sys.path)
     if config.lookups:
         for key, handler in config.lookups.items():
             register_lookup_handler(key, handler)
@@ -190,7 +191,7 @@ def process_remote_sources(raw_config, environment=None):
         processor.get_package_sources()
         if processor.configs_to_merge:
             for i in processor.configs_to_merge:
-                LOGGER.debug("Merging in remote config \"%s\"", i)
+                LOGGER.debug("merging in remote config: %s", i)
                 remote_config = yaml.safe_load(open(i))
                 config = merge_map(remote_config, config)
             # Call the render again as the package_sources may have merged in
@@ -533,7 +534,7 @@ class Config(Model):
         if not excess_keys:
             return data
 
-        LOGGER.debug('Removing excess keys from config input: %s',
+        LOGGER.debug('removing excess keys from config: %s',
                      excess_keys)
         clean_data = data.copy()
         for key in excess_keys:
@@ -585,9 +586,9 @@ class Config(Model):
         If in use, show deprecation warning.
 
         """
-        msg = ('Use of "stacker_bucket" has been deprecated and will be '
-               'removed after the next major release. Please use '
-               '"cfngin_bucket".')
+        msg = (
+            'stacker_bucket has been deprecated; use cfngin_bucket instead'
+        )
         if value or value == '':
             warnings.warn(msg, DeprecationWarning)
             LOGGER.warning(msg)
@@ -598,9 +599,10 @@ class Config(Model):
         If in use, show deprecation warning.
 
         """
-        msg = ('Use of "stacker_bucket_region" has been deprecated and will '
-               'be removed after the next major release. Please use '
-               '"cfngin_bucket_region".')
+        msg = (
+            'stacker_bucket_region has been deprecated; use '
+            'cfngin_bucket_region instead'
+        )
         if value:
             warnings.warn(msg, DeprecationWarning)
             LOGGER.warning(msg)
@@ -611,9 +613,10 @@ class Config(Model):
         If in use, show deprecation warning.
 
         """
-        msg = ('Use of "stacker_cache_dir" has been deprecated and will '
-               'be removed after the next major release. Please use '
-               '"cfngin_cache_dir".')
+        msg = (
+            'stacker_cache_dir has been deprecated; use '
+            'cfngin_cache_dir instead'
+        )
         if value:
             warnings.warn(msg, DeprecationWarning)
             LOGGER.warning(msg)

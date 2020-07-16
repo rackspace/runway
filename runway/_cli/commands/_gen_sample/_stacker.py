@@ -3,17 +3,21 @@ import logging
 
 import click
 
+from ... import options
 from ._cfngin import cfngin
 
 LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 
 @click.command('stacker', short_help='deprecated, use cfngin')
+@options.debug
+@options.no_color
+@options.verbose
 @click.pass_context
-def stacker(ctx):
+def stacker(ctx, **kwargs):
     # type: (click.Context) -> None
     """[DEPRECATED] Generate a sample CFNgin project using Blueprints."""
     LOGGER.warning('This command has been deprecated and will be removed in '
                    'the next major release.')
-    LOGGER.debug('forwarding to cfngin...')
-    ctx.forward(cfngin)
+    LOGGER.verbose('forwarding to cfngin...')
+    ctx.forward(cfngin, **kwargs)

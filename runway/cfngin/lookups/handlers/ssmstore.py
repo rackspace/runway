@@ -15,8 +15,8 @@ TYPE_NAME = "ssmstore"
 class SsmstoreLookup(LookupHandler):
     """AWS SSM Parameter Store lookup."""
 
-    DEPRECATION_MSG = ('The "ssmstore" lookup has been deprecated. '
-                       'The "ssm" lookup should be used instead.')
+    DEPRECATION_MSG = ('ssmstore lookup has been deprecated; '
+                       'use the ssm lookup instead')
 
     @classmethod
     def handle(cls, value, context=None, provider=None, **kwargs):

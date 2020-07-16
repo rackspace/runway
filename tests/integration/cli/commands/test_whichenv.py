@@ -17,9 +17,6 @@ def test_whichenv(caplog, cd_tmp_path):
     result = runner.invoke(cli, ['whichenv'], env={})
     assert result.exit_code == 0
     assert result.output == cd_tmp_path.name + '\n'
-    assert 'set level of all loggers to INFO' in caplog.messages
-    assert 'set level of botocore logger to ERROR' in caplog.messages
-    assert 'set level of runway logger to DEBUG' not in caplog.messages
 
 
 def test_whichenv_debug(caplog, cd_tmp_path):
@@ -31,9 +28,8 @@ def test_whichenv_debug(caplog, cd_tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['whichenv', '--debug'])
     assert result.exit_code == 0
-    assert 'set level of all loggers to INFO' in caplog.messages
-    assert 'set level of botocore logger to ERROR' in caplog.messages
-    assert 'set level of runway logger to DEBUG' in caplog.messages
+    assert 'runway log level: 10' in caplog.messages
+    assert 'set dependency log level to debug' not in caplog.messages
 
 
 def test_whichenv_debug_debug(caplog, cd_tmp_path):
@@ -45,7 +41,8 @@ def test_whichenv_debug_debug(caplog, cd_tmp_path):
     runner = CliRunner()
     result = runner.invoke(cli, ['whichenv'], env={'DEBUG': '2'})
     assert result.exit_code == 0
-    assert 'set level of all loggers to DEBUG' in caplog.messages
+    assert 'runway log level: 10' in caplog.messages
+    assert 'set dependency log level to debug' in caplog.messages
 
 
 def test_whichenv_invalid_debug_environ(cd_tmp_path):

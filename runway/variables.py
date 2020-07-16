@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from .config import VariablesDefinition  # noqa: F401 pylint: disable=unused-import
 
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 def resolve_variables(variables, context, provider):
@@ -51,10 +51,10 @@ class Variable(object):
             value: The variable itself.
 
         """
-        LOGGER.debug('Initalized variable "%s".', name)
         self.name = name
         self._raw_value = value
         self._value = VariableValue.parse(value, variable_type)
+        LOGGER.debug('initalized variable: %s', name)
 
     @property
     def dependencies(self):
@@ -668,7 +668,7 @@ class VariableValueLookup(VariableValue):
             if isinstance(err, TypeError):
                 # handle lookups that don't accept all the args we want
                 # to pass to it
-                LOGGER.debug('Encountered %s: %s - trying legacy resolver',
+                LOGGER.debug('encountered %s: %s - trying legacy resolver',
                              type(err), err)
                 try:
                     return self._resolve(self._resolve_legacy(context=context,

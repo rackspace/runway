@@ -20,7 +20,7 @@ def cli(cmd):
         RuntimeError: awscli returned a non-zero exit code.
 
     """
-    LOGGER.debug('passing "%s" to awscli...', ' '.join(cmd))
+    LOGGER.debug('passing command to awscli: %s', ' '.join(cmd))
     with SafeHaven(argv=cmd, environ={'LC_CTYPE': 'en_US.UTF'}):
         exit_code = create_clidriver().main(cmd)
         if exit_code:  # non-zero exit code

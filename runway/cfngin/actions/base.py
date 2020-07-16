@@ -95,6 +95,7 @@ class BaseAction(object):
     """
 
     DESCRIPTION = 'Base action'
+    NAME = None
 
     def __init__(self, context, provider_builder=None, cancel=None):
         """Instantiate class.
@@ -198,7 +199,7 @@ class BaseAction(object):
                 raise
 
         if template_exists and not force:
-            LOGGER.debug("Cloudformation template %s already exists.",
+            LOGGER.debug("CloudFormation template already exists: %s",
                          template_url)
             return template_url
         self.s3_conn.put_object(Bucket=self.bucket_name,
@@ -206,7 +207,7 @@ class BaseAction(object):
                                 Body=blueprint.rendered,
                                 ServerSideEncryption='AES256',
                                 ACL='bucket-owner-full-control')
-        LOGGER.debug("Blueprint %s pushed to %s.", blueprint.name,
+        LOGGER.debug("blueprint %s pushed to %s", blueprint.name,
                      template_url)
         return template_url
 
@@ -278,4 +279,10 @@ class BaseAction(object):
     def _tail_stack(self, stack, cancel, retries=0, **kwargs):
         """Tail a stack's event stream."""
         provider = self.build_provider(stack)
-        return provider.tail_stack(stack, cancel, retries, **kwargs)
+        return provider.tail_stack(
+            stack,
+            cancel,
+            action=self.NAME,
+            retries=retries,
+            **kwargs
+        )

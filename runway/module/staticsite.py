@@ -1,19 +1,18 @@
 """Static website module."""
-
 import logging
 import os
 import sys
 import tempfile
-import warnings
-
 from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 
 import yaml
 
+from .._logging import PrefixAdaptor
+from ..util import YamlDumper
 from . import RunwayModule
 from .cloudformation import CloudFormation
 
-LOGGER = logging.getLogger('runway')
+LOGGER = logging.getLogger(__name__)
 
 
 def add_url_scheme(url):
@@ -34,10 +33,11 @@ class StaticSite(RunwayModule):
     def __init__(self, context, path, options=None):
         """Initialize."""
         super(StaticSite, self).__init__(context, path, options)
-        self.name = self.options.get('name', self.options.get('path'))
         self.user_options = self.options.get('options', {})
         self.parameters = self.options.get('parameters')  # type: Dict[str, Any]
-        self.region = self.context.env_region
+        self.region = self.context.env.aws_region
+        # logger needs to be created here to use the correct logger
+        self.logger = PrefixAdaptor(self.name, LOGGER)
         self._ensure_valid_environment_config()
         self._ensure_cloudfront_with_auth_at_edge()
         self._ensure_correct_region_with_auth_at_edge()
@@ -47,52 +47,49 @@ class StaticSite(RunwayModule):
         if self.parameters:
             self._setup_website_module(command='plan')
         else:
-            LOGGER.info("Skipping staticsite plan of %s; no environment "
-                        "config found for this environment/region",
-                        self.options['path'])
+            self.logger.info('skipped; environment required but not defined')
 
     def deploy(self):
         """Create website CFN module and run stacker build."""
         if self.parameters:
             if self.parameters.get('staticsite_cf_disable', False) is False:
-                msg = ("Please Note: Initial creation or updates to distribution settings "
-                       "(e.g. url rewrites) will take quite a while (up to an hour). "
-                       "Unless you receive an error your deployment is still running.")
-                LOGGER.info(msg.upper())
+                self.logger.warning(
+                    'initial creation of & updates to distributions can take '
+                    'up to an hour to complete'
+                )
 
                 # Auth@Edge warning about subsequent deploys
-                if self.parameters.get('staticsite_auth_at_edge', False) is True:
-                    msg = ("PLEASE NOTE: A hook that is part of the dependencies stack of "
-                           "the Auth@Edge static site deployment is designed to verify that "
-                           "the correct Callback URLs are being used when a User Pool Client "
-                           "already exists for the application. This ensures that there is no "
-                           "interruption of service while the deployment reaches the stage "
-                           "where the Callback URLs are updated to that of the Distribution. "
-                           "Because of this you will receive a change set request on your first "
-                           "subsequent deploy from the first, or any subsequent ones where the "
-                           "alias domains have changed.")
-                    LOGGER.info(msg)
-
+                if self.parameters.get('staticsite_auth_at_edge', False) and \
+                        self.context.is_interactive:
+                    self.logger.warning(
+                        "A hook that is part of the dependencies stack of "
+                        "the Auth@Edge static site deployment is designed "
+                        "to verify that the correct Callback URLs are "
+                        "being used when a User Pool Client already "
+                        "exists for the application. This ensures that "
+                        "there is no interruption of service while the "
+                        "deployment reaches the stage where the Callback "
+                        "URLs are updated to that of the Distribution. "
+                        "Because of this you may receive a change set "
+                        "prompt on subsequent deploys."
+                    )
             self._setup_website_module(command='deploy')
         else:
-            LOGGER.info("Skipping staticsite deploy of %s; no environment "
-                        "config found for this environment/region",
-                        self.options['path'])
+            self.logger.info('skipped; environment required but not defined')
 
     def destroy(self):
         """Create website CFN module and run stacker destroy."""
         if self.parameters:
             self._setup_website_module(command='destroy')
         else:
-            LOGGER.info("Skipping staticsite destroy of %s; no environment "
-                        "config found for this environment/region",
-                        self.options['path'])
+            self.logger.info('skipped; environment required but not defined')
 
     def _setup_website_module(self,  # type: StaticSite
                               command  # type: str
                              ):  # noqa: E124
         # type(...) -> return None
-        """Create stacker configuration for website module."""
+        """Create CFNgin configuration for website module."""
+        self.logger.info('generating CFNgin config...')
         module_dir = self._create_module_directory()
         self._create_dependencies_yaml(module_dir)
         self._create_staticsite_yaml(module_dir)
@@ -107,14 +104,13 @@ class StaticSite(RunwayModule):
             module_dir,
             {i: self.options[i] for i in self.options if i != 'class_path'}
         )
+        self.logger.info('%s (in progress)', command)
         getattr(cfn, command)()
+        self.logger.info('%s (complete)', command)
 
     def _create_module_directory(self):
         module_dir = tempfile.mkdtemp()
-        LOGGER.info("staticsite: Generating CloudFormation configuration for "
-                    "module %s in %s",
-                    self.name,
-                    module_dir)
+        self.logger.debug('using temporary directory: %s', module_dir)
         return module_dir
 
     def _create_dependencies_yaml(self, module_dir):
@@ -166,19 +162,25 @@ class StaticSite(RunwayModule):
                     'args': self._get_user_pool_id_retriever_variables(),
                 })
 
+        content = {
+            'namespace': '${namespace}',
+            'cfngin_bucket': '',
+            'stacks': {
+                "%s-dependencies" % self.name: {
+                    'class_path': 'runway.blueprints.staticsite.dependencies.Dependencies',
+                    'variables': self._get_dependencies_variables()
+                }
+            },
+            'pre_build': pre_build,
+            'pre_destroy': pre_destroy
+        }
+
         with open(os.path.join(module_dir, '01-dependencies.yaml'), 'w') as output_stream:  # noqa
-            yaml.dump(
-                {'namespace': '${namespace}',
-                 'cfngin_bucket': '',
-                 'stacks': {
-                     "%s-dependencies" % self.name: {
-                         'class_path': 'runway.blueprints.staticsite.dependencies.Dependencies',
-                         'variables': self._get_dependencies_variables()}},
-                 'pre_build': pre_build,
-                 'pre_destroy': pre_destroy},
-                output_stream,
-                default_flow_style=False
-            )
+            yaml.dump(content, output_stream, default_flow_style=False)
+        self.logger.debug(
+            'created 01-dependencies.yaml:\n%s',
+            yaml.dump(content, Dumper=YamlDumper)
+        )
 
     def _create_staticsite_yaml(self, module_dir):
         # Default parameter name matches build_staticsite hook
@@ -281,21 +283,27 @@ class StaticSite(RunwayModule):
             if self.parameters.get("staticsite_%s" % i):
                 site_stack_variables[i] = self.parameters.pop("staticsite_%s" % i)
 
+        content = {
+            'namespace': '${namespace}',
+            'cfngin_bucket': '',
+            'pre_build': pre_build,
+            'stacks': {
+                self.name: {
+                    'class_path': 'runway.blueprints.staticsite.%s' % class_path,
+                    'variables': site_stack_variables
+                }
+            },
+            'post_build': post_build,
+            'pre_destroy': pre_destroy,
+            'post_destroy': post_destroy
+        }
+
         with open(os.path.join(module_dir, '02-staticsite.yaml'), 'w') as output_stream:  # noqa
-            yaml.dump(
-                {'namespace': '${namespace}',
-                 'cfngin_bucket': '',
-                 'pre_build': pre_build,
-                 'stacks': {
-                     self.name: {
-                         'class_path': 'runway.blueprints.staticsite.%s' % class_path,  # noqa
-                         'variables': site_stack_variables}},
-                 'post_build': post_build,
-                 'pre_destroy': pre_destroy,
-                 'post_destroy': post_destroy},
-                output_stream,
-                default_flow_style=False
-            )
+            yaml.dump(content, output_stream, default_flow_style=False)
+        self.logger.debug(
+            'created 02-staticsite.yaml:\n%s',
+            yaml.dump(content, Dumper=YamlDumper)
+        )
 
     def _create_cleanup_yaml(self, module_dir):
         replicated_function_vars = self._get_replicated_function_variables()
@@ -303,19 +311,23 @@ class StaticSite(RunwayModule):
             replicated_function_vars['RoleBoundaryArn'] = \
                 self.parameters.pop('staticsite_role_boundary_arn')
 
+        content = {
+            'namespace': '${namespace}',
+            'cfngin_bucket': '',
+            'stacks': {
+                '%s-cleanup' % self.name: {
+                    'class_path': 'runway.blueprints.staticsite.cleanup.Cleanup',
+                    'variables': replicated_function_vars
+                }
+            }
+        }
+
         with open(os.path.join(module_dir, '03-cleanup.yaml'), 'w') as output_stream:  # noqa
-            yaml.dump(
-                {'namespace': '${namespace}',
-                 'cfngin_bucket': '',
-                 'stacks': {
-                     '%s-cleanup' % self.name: {
-                         'class_path': 'runway.blueprints.staticsite.cleanup.Cleanup',
-                         'variables': replicated_function_vars
-                     }
-                 }},
-                output_stream,
-                default_flow_style=False
-            )
+            yaml.dump(content, output_stream, default_flow_style=False)
+        self.logger.debug(
+            'created 03-cleanup.yaml:\n%s',
+            yaml.dump(content, Dumper=YamlDumper)
+        )
 
     def _get_replicated_function_variables(self):
         replicated_function_vars = {
@@ -365,15 +377,16 @@ class StaticSite(RunwayModule):
                 self.parameters['staticsite_acmcert_arn']
 
         if self.parameters.get('staticsite_acmcert_ssm_param'):
-            dep_msg = ('Use of the "staticsite_acmcert_ssm_param" option has '
-                       'been deprecated. The "staticsite_acmcert_arn" option '
-                       'with an "ssm" lookup should be used instead.')
-            warnings.warn(dep_msg, DeprecationWarning)
-            LOGGER.warning(dep_msg)
-            site_stack_variables['AcmCertificateArn'] = '${ssmstore ${staticsite_acmcert_ssm_param}}'  # noqa pylint: disable=line-too-long
+            self.logger.warning(
+                'staticsite_acmcert_ssm_param option has been deprecated; '
+                'use staticsite_acmcert_arn with an ssm lookup'
+            )
+            site_stack_variables['AcmCertificateArn'] = \
+                '${ssmstore ${staticsite_acmcert_ssm_param}}'
 
         if self.parameters.get('staticsite_enable_cf_logging', True):
-            site_stack_variables['LogBucketName'] = "${rxref %s-dependencies::AWSLogBucketName}" % self.name  # noqa pylint: disable=line-too-long
+            site_stack_variables['LogBucketName'] = \
+                "${rxref %s-dependencies::AWSLogBucketName}" % self.name
 
         if self.parameters.get('staticsite_auth_at_edge', False):
             self._ensure_auth_at_edge_requirements()
@@ -388,7 +401,8 @@ class StaticSite(RunwayModule):
             site_stack_variables['CookieSettings'] = self._get_cookie_settings()
             site_stack_variables['OAuthScopes'] = self._get_oauth_scopes()
             # pylint: disable=line-too-long
-            site_stack_variables['SupportedIdentityProviders'] = self._get_supported_identity_providers()  # noqa
+            site_stack_variables['SupportedIdentityProviders'] = \
+                self._get_supported_identity_providers()
         else:
             # If lambda_function_associations or custom_error_responses defined,
             # add to stack config. Only if not using Auth@Edge
@@ -509,10 +523,14 @@ class StaticSite(RunwayModule):
         }
 
     def _ensure_auth_at_edge_requirements(self):
-        if not self.parameters.get('staticsite_user_pool_arn') and \
-           not self.parameters.get('staticsite_create_user_pool'):
-            LOGGER.fatal("A Cognito UserPool ARN is required with Auth@Edge. "
-                         "You can supply your own or have one created.")
+        if not (
+                self.parameters.get('staticsite_user_pool_arn') or
+                self.parameters.get('staticsite_create_user_pool')
+        ):
+            self.logger.error(
+                "staticsite_user_pool_arn or staticsite_create_user_pool "
+                "is required for Auth@Edge; "
+            )
             sys.exit(1)
 
     def _ensure_correct_region_with_auth_at_edge(self):
@@ -521,20 +539,21 @@ class StaticSite(RunwayModule):
         Lambda@Edge is only available within the us-east-1 region.
         """
         if self.parameters.get('staticsite_auth_at_edge', False) and self.region != 'us-east-1':
-            LOGGER.fatal("Auth@Edge must be deployed in us-east-1.")
+            self.logger.error("Auth@Edge must be deployed in us-east-1.")
             sys.exit(1)
 
     def _ensure_cloudfront_with_auth_at_edge(self):
         """Exit if both the Auth@Edge and CloudFront disablement are true."""
         if self.parameters.get('staticsite_cf_disable', False) and \
            self.parameters.get('staticsite_auth_at_edge', False):
-            LOGGER.fatal("CloudFront cannot be disabled when using Auth@Edge")
+            self.logger.error(
+                'staticsite_cf_disable must be "false" if '
+                'staticsite_auth_at_edge is "true"'
+            )
             sys.exit(1)
 
     def _ensure_valid_environment_config(self):
         """Exit if config is invalid."""
         if not self.parameters.get('namespace'):
-            LOGGER.fatal("staticsite: module %s's environment configuration is "
-                         "missing a namespace definition!",
-                         self.name)
+            self.logger.error('namespace parameter is required but not defined')
             sys.exit(1)

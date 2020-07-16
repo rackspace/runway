@@ -201,7 +201,7 @@ def test_k8s_cfn_repo(cd_tmp_path, caplog):
 
     assert caplog.messages == [
         'Sample k8s infrastructure repo created at {}'.format(str(repo)),
-        '(see its README for setup and deployment instructions)'
+        'See the README for setup and deployment instructions.'
     ]
 
 
@@ -248,7 +248,7 @@ def test_k8s_tf_repo(cd_tmp_path, caplog):
 
     assert caplog.messages == [
         'Sample k8s infrastructure repo created at {}'.format(str(repo)),
-        '(see its README for setup and deployment instructions)'
+        'See the README for setup and deployment instructions.'
     ]
 
 
@@ -322,8 +322,8 @@ def test_stacker(cd_tmp_path, caplog):
     runner = CliRunner()
     result = runner.invoke(cli, ['gen-sample', 'stacker'])
     assert result.exit_code == 0
-    assert caplog.messages == ['This command has been deprecated and will be '
-                               'removed in the next major release.']
+    assert caplog.messages[0] == ('This command has been deprecated and will be '
+                                  'removed in the next major release.')
 
 
 def test_static_angular(cd_tmp_path, caplog):
@@ -376,7 +376,7 @@ def test_static_angular(cd_tmp_path, caplog):
 
     assert caplog.messages == [
         'Sample static Angular site repo created at {}'.format(str(repo)),
-        '(see its README for setup and deployment instructions)'
+        'See the README for setup and deployment instructions.'
     ]
 
 
@@ -416,7 +416,7 @@ def test_static_react(cd_tmp_path, caplog):
 
     assert caplog.messages == [
         'Sample static React site repo created at {}'.format(str(repo)),
-        '(see its README for setup and deployment instructions)'
+        'See the README for setup and deployment instructions.'
     ]
 
 

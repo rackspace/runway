@@ -56,15 +56,15 @@ def test_test_invalid_type(cd_tmp_path, capfd, caplog):
 
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
-    assert 'Found 2 test(s)' in logs
-    assert "Running test 'invalid-type'" in logs
-    assert 'Unable to find handler for test "invalid-type" of type "invalid"' in logs
-    assert "Running test 'success'" in logs
+    assert 'found 2 test(s)' in logs
+    assert 'invalid-type:running test (in progress)' in logs
+    assert 'invalid-type:unable to find handler of type "invalid"' in logs
+    assert "success:running test (in progress)" in logs
     assert 'Hello world' in captured.out
-    assert 'The following tests failed: invalid-type' in logs
+    assert "success:running test (pass)" in logs
 
 
-def test_test_invalid_type_required(cd_tmp_path, capfd, caplog):
+def test_test_invalid_type_required(cd_tmp_path, caplog):
     """Test ``runway test`` with two tests; one invalid required."""
     caplog.set_level(logging.INFO, logger='runway.core')
     runway_yml = cd_tmp_path / 'runway.yml'
@@ -76,25 +76,23 @@ def test_test_invalid_type_required(cd_tmp_path, capfd, caplog):
     result = runner.invoke(cli, ['test'])
     assert result.exit_code == 1
 
-    captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
-    assert 'Found 2 test(s)' in logs
-    assert "Running test 'invalid-type-required'" in logs
-    assert 'Unable to find handler for test "invalid-type-required" of type "invalid"' in logs
-    assert "Running test 'success'" not in logs
-    assert 'Hello world' not in captured.out
+    assert 'found 2 test(s)' in logs
+    assert 'invalid-type-required:running test (in progress)' in logs
+    assert 'invalid-type-required:unable to find handler of type "invalid"' in logs
+    assert "success:running test (in progress)" not in logs
 
 
 def test_test_not_defined(cd_tmp_path, caplog):
     """Test ``runway test`` with no tests defined."""
-    caplog.set_level(logging.ERROR, logger='runway')
+    caplog.set_level(logging.ERROR)
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': []})))
 
     runner = CliRunner()
     result = runner.invoke(cli, ['test'])
     assert result.exit_code == 1
-    assert 'without defining tests in the runway config' in caplog.messages[0]
+    assert 'no tests defined in runway.yml' in caplog.messages
 
 
 def test_test_single_successful(cd_tmp_path, capfd, caplog):
@@ -110,9 +108,10 @@ def test_test_single_successful(cd_tmp_path, capfd, caplog):
 
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
-    assert 'Found 1 test(s)' in logs
-    assert "Running test 'success'" in logs
+    assert 'found 1 test(s)' in logs
+    assert "success:running test (in progress)" in logs
     assert 'Hello world' in captured.out
+    assert "success:running test (pass)" in logs
 
 
 def test_test_two_test(cd_tmp_path, capfd, caplog):
@@ -129,17 +128,18 @@ def test_test_two_test(cd_tmp_path, capfd, caplog):
 
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
-    assert 'Found 2 test(s)' in logs
-    assert "Running test 'fail'" in logs
-    assert 'Test failed: fail' in logs
-    assert "Running test 'success'" in logs
+    assert 'found 2 test(s)' in logs
+    assert "fail:running test (in progress)" in logs
+    assert 'fail:running test (fail)' in logs
+    assert "success:running test (in progress)" in logs
     assert 'Hello world' in captured.out
-    assert 'The following tests failed: fail' in logs
+    assert "success:running test (pass)" in logs
+    assert 'the following tests failed: fail' in logs
 
 
 def test_test_two_test_required(cd_tmp_path, capfd, caplog):
     """Test ``runway test`` with two tests; one failing required."""
-    caplog.set_level(logging.INFO, logger='runway.core')
+    caplog.set_level(logging.INFO)
     runway_yml = cd_tmp_path / 'runway.yml'
     runway_yml.write_text(six.u(yaml.safe_dump({'deployments': [],
                                                 'tests': [FAIL_REQUIRED.copy(),
@@ -151,9 +151,10 @@ def test_test_two_test_required(cd_tmp_path, capfd, caplog):
 
     captured = capfd.readouterr()
     logs = '\n'.join(caplog.messages)
-    assert 'Found 2 test(s)' in logs
-    assert "Running test 'fail-required'" in logs
-    assert 'Test failed: fail-required' in logs
-    assert 'Failed test was required, the remaining tests have been skipped' in logs
-    assert "Running test 'success'" not in logs
+    assert 'found 2 test(s)' in logs
+    assert "fail-required:running test (in progress)" in logs
+    assert "fail-required:running test (fail)" in logs
+    assert 'fail-required:test required; the remaining tests have been skipped' \
+        in logs
+    assert "success:running test (in progress)" not in logs
     assert 'Hello world' not in captured.out

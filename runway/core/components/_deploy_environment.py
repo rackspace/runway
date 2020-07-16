@@ -1,4 +1,5 @@
 """Runway deploy environment object."""
+import json
 import logging
 # needed for python2 cpu_count, can be replace with python3 os.cpu_count()
 import multiprocessing
@@ -72,7 +73,7 @@ class DeployEnvironment(object):
     def aws_profile(self, profile_name):
         # type: (str) -> None
         """Set AWS profile in the environment."""
-        self.vars['AWS_PROFILE'] = profile_name
+        self._update_vars({'AWS_PROFILE': profile_name})
 
     @property
     def aws_region(self):
@@ -84,7 +85,7 @@ class DeployEnvironment(object):
     def aws_region(self, region):
         # type: (str) -> None
         """Set AWS region environment variables."""
-        self.vars.update({'AWS_DEFAULT_REGION': region, 'AWS_REGION': region})
+        self._update_vars({'AWS_DEFAULT_REGION': region, 'AWS_REGION': region})
 
     @cached_property
     def branch_name(self):
@@ -126,7 +127,7 @@ class DeployEnvironment(object):
         # type: (Any) -> None
         """Set the value of CI."""
         if value:
-            self.vars['CI'] = '1'
+            self._update_vars({'CI': '1'})
         else:
             self.vars.pop('CI', None)
 
@@ -141,7 +142,7 @@ class DeployEnvironment(object):
         # type: (Any) -> None
         """Set the value of DEBUG."""
         if value:
-            self.vars['DEBUG'] = '1'
+            self._update_vars({'DEBUG': '1'})
         else:
             self.vars.pop('DEBUG', None)
 
@@ -189,7 +190,7 @@ class DeployEnvironment(object):
     def max_concurrent_cfngin_stacks(self, value):
         # type: (Union[int, str]) -> None
         """Set RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS."""
-        self.vars['RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS'] = value
+        self._update_vars({'RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS': value})
 
     @property
     def max_concurrent_modules(self):
@@ -220,7 +221,7 @@ class DeployEnvironment(object):
     def max_concurrent_modules(self, value):
         # type: (Union[int, str])-> None
         """Set RUNWAY_MAX_CONCURRENT_MODULES."""
-        self.vars['RUNWAY_MAX_CONCURRENT_MODULES'] = value
+        self._update_vars({'RUNWAY_MAX_CONCURRENT_MODULES': value})
 
     @property
     def max_concurrent_regions(self):
@@ -251,7 +252,7 @@ class DeployEnvironment(object):
     def max_concurrent_regions(self, value):
         # type: (Union[int, str]) -> None
         """Set RUNWAY_MAX_CONCURRENT_REGIONS."""
-        self.vars['RUNWAY_MAX_CONCURRENT_REGIONS'] = value
+        self._update_vars({'RUNWAY_MAX_CONCURRENT_REGIONS': value})
 
     @cached_property
     def name(self):
@@ -264,10 +265,30 @@ class DeployEnvironment(object):
             name = self._parse_branch_name()
         else:
             self.name_derived_from = 'directory'
-            name = self.root_dir.name[4:] \
-                if self.root_dir.name.startswith('ENV-') else self.root_dir.name
-        self.vars['DEPLOY_ENVIRONMENT'] = name
+            if self.root_dir.name.startswith('ENV-'):
+                LOGGER.verbose('stripped "ENV-" from the directory name "%s"',
+                               self.root_dir.name)
+                name = self.root_dir.name[4:]
+            else:
+                name = self.root_dir.name
+        if self.vars.get('DEPLOY_ENVIRONMENT') != name:
+            self._update_vars({'DEPLOY_ENVIRONMENT': name})
         return name
+
+    @property
+    def verbose(self):
+        # type: () -> bool
+        """Get verbose setting from the environment."""
+        return 'VERBOSE' in self.vars
+
+    @verbose.setter
+    def verbose(self, value):
+        # type: (Any) -> None
+        """Set the value of VERBOSE."""
+        if value:
+            self._update_vars({'VERBOSE': '1'})
+        else:
+            self.vars.pop('VERBOSE', None)
 
     def copy(self):
         # type: () -> DeployEnvironment
@@ -277,6 +298,7 @@ class DeployEnvironment(object):
             DeployEnvironment: New instance with the same contents.
 
         """
+        LOGGER.debug('creating a copy of the deploy environment...')
         obj = self.__class__(environ=self.vars.copy(),
                              explicit_name=self.name,
                              ignore_git_branch=self._ignore_git_branch,
@@ -288,35 +310,45 @@ class DeployEnvironment(object):
         # type: () -> None
         """Output name to log."""
         name = self.name  # resolve if not already resolved
-        LOGGER.info('')
         if self.name_derived_from == 'explicit':
-            LOGGER.info('Environment "%s" is explicitly defined in the environment.',
-                        name)
-            LOGGER.info('If this is not correct, update '
-                        'the value or unset it to fall back to the name of '
-                        'the current git branch or parent directory.')
+            LOGGER.info(
+                'deploy environment "%s" is explicitly defined in the environment',
+                name
+            )
+            LOGGER.info(
+                'if not correct, update the value or unset it to fall back '
+                'to the name of the current git branch or parent directory'
+            )
         elif self.name_derived_from == 'branch':
-            LOGGER.info('Environment "%s" was determined from the current git branch.',
-                        name)
-            LOGGER.info('If this is not the environment name, update the '
-                        'branch name or set an override via the '
-                        'DEPLOY_ENVIRONMENT environment variable.')
+            LOGGER.info(
+                'deploy environment "%s" was determined from the current '
+                'git branch',
+                name
+            )
+            LOGGER.info(
+                'if not correct, update the branch name or set an override '
+                'via the DEPLOY_ENVIRONMENT environment variable'
+            )
         elif self.name_derived_from == 'directory':
-            LOGGER.info('Environment "%s" was determined from the current directory.',
-                        name)
-            LOGGER.info('If this is not the environment name, update the '
-                        'directory name or set an override via the '
-                        'DEPLOY_ENVIRONMENT environment variable.')
-        LOGGER.info('')
+            LOGGER.info(
+                'deploy environment "%s" was determined from the current '
+                'directory',
+                name
+            )
+            LOGGER.info(
+                'if not correct, update the directory name or set an '
+                'override via the DEPLOY_ENVIRONMENT environment variable'
+            )
 
     def _parse_branch_name(self):
         # type: () -> str
         """Parse branch name for use as deploy environment name."""
         if self.branch_name.startswith('ENV-'):
+            LOGGER.verbose('stripped "ENV-" from the branch name "%s"',
+                           self.branch_name)
             return self.branch_name[4:]
         if self.branch_name == 'master':
-            LOGGER.info('Translating git branch "master" to environment '
-                        '"common"')
+            LOGGER.verbose('translated branch name "master" to "common"')
             return 'common'
         if not self.ci:
             LOGGER.warning('Found unexpected branch name "%s"',
@@ -327,3 +359,15 @@ class DeployEnvironment(object):
                 self.name_derived_from = 'explicit'
             return result
         return self.branch_name
+
+    def _update_vars(self, env_vars):
+        # type: (Dict[str, str]) -> None
+        """Update vars and log the change.
+
+        Args:
+            env_vars (Dict[str, str]): Dict to update self.vars with.
+
+        """
+        self.vars.update(env_vars)
+        LOGGER.verbose('updated environment variables: %s',
+                       json.dumps(env_vars))

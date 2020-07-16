@@ -1,5 +1,6 @@
 """CLI utils."""
 import logging
+import os
 import sys
 from typing import (Any, Iterator, List, Optional,  # noqa pylint: disable=W
                     Tuple)
@@ -25,19 +26,37 @@ LOGGER = logging.getLogger(__name__)
 class CliContext(MutableMapping):
     """CLI context object."""
 
-    def __init__(self, ci=False, debug=0, deploy_environment=None, **_):
+    def __init__(self, ci=False, debug=0, deploy_environment=None,
+                 verbose=False, **_):
         # type: (bool, int, Optional[str], Any) -> None
-        """Instantiate class."""
+        """Instantiate class.
+
+        Keyword Args:
+            ci (bool): Whether Runway is being run in non-interactive mode.
+            debug (int): Debug level
+            deploy_environment (str): Name of the deploy environment.
+            verbose (bool): Whether to display verbose logs.
+
+        """
         self._deploy_environment = deploy_environment
+        self.ci = ci
         self.debug = debug
         self.root_dir = Path.cwd()
-        if ci:  # prevents unnecessary loading of runway config
-            self.env.ci = ci
+        self.verbose = verbose
 
     @cached_property
     def env(self):
         """Name of the current deploy environment."""
+        environ = os.environ.copy()
+        # carefully update environ with values passed from the cli
+        if self.ci and 'CI' not in environ:
+            environ['CI'] = '1'
+        if self.debug and 'DEBUG' not in environ:
+            environ['DEBUG'] = str(self.debug)
+        if self.verbose and 'VERBOSE' not in environ:
+            environ['VERBOSE'] = '1'
         return DeployEnvironment(
+            environ=environ,
             explicit_name=self._deploy_environment,
             root_dir=self.root_dir
         )
@@ -57,7 +76,7 @@ class CliContext(MutableMapping):
         try:
             return Config.find_config_file(config_dir=self.root_dir)
         except SystemExit:
-            LOGGER.debug('checking parent directory...')
+            LOGGER.info('trying parent directory')
             self.root_dir = self.root_dir.parent
             self.env.root_dir = self.root_dir
             return Config.find_config_file(config_dir=self.root_dir)

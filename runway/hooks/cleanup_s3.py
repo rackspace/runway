@@ -7,14 +7,13 @@ from botocore.exceptions import ClientError
 from ..cfngin.lookups.handlers.output import OutputLookup
 from ..cfngin.lookups.handlers.rxref import RxrefLookup
 from ..cfngin.lookups.handlers.xref import XrefLookup
-from ..cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 
 
 def purge_bucket(context, provider, **kwargs):
     """Delete objects in bucket."""
-    session = get_session(provider.region)
+    session = context.get_session()
 
     if kwargs.get('bucket_name'):
         bucket_name = kwargs['bucket_name']
@@ -29,17 +28,20 @@ def purge_bucket(context, provider, **kwargs):
             value = kwargs['bucket_xref_lookup']
             handler = XrefLookup.handle
         else:
-            LOGGER.fatal('No bucket name/source provided.')
+            LOGGER.error('bucket_name required but not defined')
             return False
 
+        stack_name = context.get_fqn(value.split('::')[0])
         try:  # Exit early if the bucket's stack is already deleted
             session.client('cloudformation').describe_stacks(
-                StackName=context.get_fqn(value.split('::')[0])
+                StackName=stack_name
             )
         except ClientError as exc:
             if 'does not exist' in exc.response['Error']['Message']:
-                LOGGER.info('S3 bucket stack appears to have already been '
-                            'deleted...')
+                LOGGER.info(
+                    'stack "%s" does not exist; unable to resolve bucket name',
+                    stack_name
+                )
                 return True
             raise
 
@@ -54,8 +56,10 @@ def purge_bucket(context, provider, **kwargs):
         s3_resource.meta.client.head_bucket(Bucket=bucket_name)
     except ClientError as exc:
         if exc.response['Error']['Code'] == '404':
-            LOGGER.info("%s S3 bucket appears to have already been deleted...",
-                        bucket_name)
+            LOGGER.info(
+                'bucket "%s" does not exist; unable to complete purge',
+                bucket_name
+            )
             return True
         raise
 

@@ -6,7 +6,7 @@ import warnings
 from troposphere import BaseAWSObject
 
 from runway.lookups.handlers.base import LookupHandler
-from runway.util import MutableMap  # abs to support import through shim
+from runway.util import DOC_SITE, MutableMap  # abs to support import through shim
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "hook_data"
@@ -15,8 +15,11 @@ TYPE_NAME = "hook_data"
 class HookDataLookup(LookupHandler):
     """Hook data lookup."""
 
-    DEPRECATION_MSG = ('Lookup query syntax "<hook_name>::<key>" has been '
-                       'deprecated. Please use the new lookup query syntax.')
+    DEPRECATION_MSG = (
+        'lookup query syntax "<hook_name>::<key>" has been deprecated; to '
+        'learn how to use the new lookup query syntax visit '
+        '{}/page/lookups.html'.format(DOC_SITE)
+    )
 
     @classmethod
     def legacy_parse(cls, value):

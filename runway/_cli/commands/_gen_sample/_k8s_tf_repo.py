@@ -5,6 +5,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import (TEMPLATES, convert_gitignore, copy_sample,
                     write_tfstate_template)
 
@@ -18,8 +19,11 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('k8s-tf-repo',
                short_help='k8s + tf (k8s-tf-infrastructure)')
+@options.debug
+@options.no_color
+@options.verbose
 @click.pass_context
-def k8s_tf_repo(ctx):
+def k8s_tf_repo(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample Terraform project using Kubernetes."""
     src = TEMPLATES / 'k8s-tf-repo'
@@ -36,5 +40,5 @@ def k8s_tf_repo(ctx):
     tfstate_dir.mkdir()
     write_tfstate_template(tfstate_dir / 'tf_state.yml')
 
-    LOGGER.info("Sample k8s infrastructure repo created at %s", dest)
-    LOGGER.info('(see its README for setup and deployment instructions)')
+    LOGGER.success("Sample k8s infrastructure repo created at %s", dest)
+    LOGGER.notice('See the README for setup and deployment instructions.')

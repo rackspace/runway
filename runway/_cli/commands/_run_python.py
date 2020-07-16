@@ -17,6 +17,8 @@ else:
 @click.argument('filename', metavar='<filename>', required=True,
                 type=click.Path(exists=True, dir_okay=False))
 @options.debug
+@options.no_color
+@options.verbose
 def run_python(filename, **_):
     # type: (str, Any) -> None
     """Execute a python script using a bundled copy of python.

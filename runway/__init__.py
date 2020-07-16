@@ -1,7 +1,14 @@
 """Set package version."""
+# pylint: disable=wrong-import-position
+import logging
 import sys
 
-from . import cfngin, variables
+from ._logging import LogLevels, RunwayLogger  # noqa  isort:skip
+
+logging.setLoggerClass(RunwayLogger)  # isort:skip
+
+# these need to be imported after setting the logger class
+from . import cfngin, variables  # noqa isort:skip
 
 if sys.version_info.minor < 8:
     # importlib.metadata is standard lib for python>=3.8, use backport

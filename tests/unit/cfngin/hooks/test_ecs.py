@@ -42,7 +42,7 @@ class TestECSHooks(unittest.TestCase):
                     (
                         logger,
                         "DEBUG",
-                        "Creating ECS cluster: %s" % cluster
+                        "creating ECS cluster: %s" % cluster
                     )
                 )
 
@@ -72,7 +72,7 @@ class TestECSHooks(unittest.TestCase):
                         (
                             logger,
                             "DEBUG",
-                            "Creating ECS cluster: %s" % cluster
+                            "creating ECS cluster: %s" % cluster
                         )
                     )
 
@@ -97,7 +97,7 @@ class TestECSHooks(unittest.TestCase):
                     (
                         logger,
                         "ERROR",
-                        "setup_clusters hook missing \"clusters\" argument"
+                        "clusters argument required but not provided"
                     )
                 )
 

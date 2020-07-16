@@ -4,6 +4,7 @@ import sys
 
 import click
 
+from ... import options
 from .utils import TEMPLATES, copy_sample, write_tfstate_template
 
 if sys.version_info.major > 2:
@@ -16,8 +17,11 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 
 @click.command('cfn',
                short_help="cfngin + cfn (sampleapp.cfn)")
+@options.debug
+@options.no_color
+@options.verbose
 @click.pass_context
-def cfn(ctx):
+def cfn(ctx, **_):
     # type: (click.Context) -> None
     """Generate a sample CFNgin project using CloudFormation."""
     src = TEMPLATES / 'cfn'
@@ -28,4 +32,4 @@ def cfn(ctx):
     copy_sample(ctx, src, dest)
     templates.mkdir()
     write_tfstate_template(tf_state)
-    LOGGER.info("Sample CloudFormation module created at %s", dest)
+    LOGGER.success("Sample CloudFormation module created at %s", dest)

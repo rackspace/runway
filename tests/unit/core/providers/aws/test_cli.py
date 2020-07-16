@@ -17,7 +17,7 @@ def test_cli(mock_clidriver, caplog):
     mock_clidriver.main.return_value = 0
 
     assert not cli(['test'])
-    assert 'passing "test" to awscli...' in caplog.messages
+    assert 'passing command to awscli: test' in caplog.messages
     mock_clidriver.assert_called_once_with()
     mock_clidriver.main.assert_called_once_with(['test'])
 

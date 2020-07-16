@@ -12,7 +12,7 @@ from . import utils
 
 LOGGER = logging.getLogger(__name__)
 
-KEYPAIR_LOG_MESSAGE = "keypair: %s (%s) %s"
+KEYPAIR_LOG_MESSAGE = "keypair %s (%s) %s"
 
 
 def get_existing_key_pair(ec2, keypair_name):
@@ -32,7 +32,7 @@ def get_existing_key_pair(ec2, keypair_name):
             "fingerprint": keypair["KeyFingerprint"],
         }
 
-    LOGGER.info("keypair: \"%s\" not found", keypair_name)
+    LOGGER.info('keypair "%s" not found', keypair_name)
     return None
 
 
@@ -62,7 +62,7 @@ def read_public_key_file(path):
 
         return data.strip()
     except (ValueError, IOError, OSError) as err:
-        LOGGER.error("Failed to read public key file %s: %s", path, str(err))
+        LOGGER.error('failed to read public key file :%s": %s', path, str(err))
         return None
 
 
@@ -91,7 +91,7 @@ def create_key_pair_in_ssm(ec2, ssm, keypair_name, parameter_name,
             kms_key_label = kms_key_id
             kms_args = {"KeyId": kms_key_id}
 
-        LOGGER.info("Storing generated key in SSM parameter \"%s\" "
+        LOGGER.info("storing generated key in SSM parameter \"%s\" "
                     "using KMS key \"%s\"", parameter_name, kms_key_label)
 
         ssm.put_parameter(
@@ -106,7 +106,7 @@ def create_key_pair_in_ssm(ec2, ssm, keypair_name, parameter_name,
         # Erase the key pair if we failed to store it in SSM, since the
         # private key will be lost anyway
 
-        LOGGER.exception("Failed to store generated key in SSM, deleting "
+        LOGGER.exception("failed to store generated key in SSM; deleting "
                          "created key pair as private key will be lost")
         ec2.delete_key_pair(KeyName=keypair_name, DryRun=False)
         return None
@@ -139,7 +139,7 @@ def create_key_pair_local(ec2, keypair_name, dest_dir):
     key_path = os.path.join(dest_dir, file_name)
     if os.path.isfile(key_path):
         # This mimics the old boto2 keypair.save error
-        LOGGER.error("\"%s\" already exists in \"%s\" directory",
+        LOGGER.error("\"%s\" already exists in directory \"%s\"",
                      file_name, dest_dir)
         return None
 
@@ -260,7 +260,7 @@ def ensure_keypair_exists(provider, context, **kwargs):
         elif action == "create":
             keypair = create_key_pair_local(ec2, keypair_name, path)
         else:
-            LOGGER.warning("no action to find keypair, failing")
+            LOGGER.error("no action to find keypair")
 
     if not keypair:
         return False

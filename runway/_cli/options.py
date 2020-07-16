@@ -19,6 +19,12 @@ deploy_environment = click.option('-e', '--deploy-environment',
                                   help='Manually specify the name of the '
                                   'deploy environment.')
 
+no_color = click.option('--no-color',
+                        default=False,
+                        envvar='RUNWAY_NO_COLOR',
+                        is_flag=True,
+                        help="Disable color in Runway's logs.")
+
 tags = click.option('--tag', 'tags',
                     metavar='<tag>...',
                     multiple=True,
@@ -27,3 +33,9 @@ tags = click.option('--tag', 'tags',
                     ' list of tags that are treated as "AND". '
                     '(e.g. "--tag <tag1> --tag <tag2>" would select all modules'
                     ' with BOTH tags).')
+
+verbose = click.option('--verbose',
+                       default=False,
+                       envvar='VERBOSE',
+                       is_flag=True,
+                       help='Display Runway verbose logs.')

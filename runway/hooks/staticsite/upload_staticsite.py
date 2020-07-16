@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 def get_archives_to_prune(archives, hook_data):
     """Return list of keys to delete.
 
-    Keyword Args:
+    Args:
         archives (Dict): The full list of file archives
         hook_data (Dict): CFNgin hook data
 
@@ -38,8 +38,7 @@ def get_archives_to_prune(archives, hook_data):
 def sync(context, provider, **kwargs):
     """Sync static website to S3 bucket.
 
-    Keyword Args:
-
+    Args:
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
@@ -64,7 +63,7 @@ def sync(context, provider, **kwargs):
         invalidate_cache = True
 
     if build_context['deploy_is_current']:
-        LOGGER.info('staticsite: skipping upload; latest version already deployed')
+        LOGGER.info('skipped upload; latest version already deployed')
     else:
         # Using the awscli for s3 syncing is incredibly suboptimal, but on
         # balance it's probably the most stable/efficient option for syncing
@@ -89,7 +88,7 @@ def sync(context, provider, **kwargs):
         distribution = get_distribution_data(context, provider, **kwargs)
         invalidate_distribution(session, **distribution)
 
-    LOGGER.info("staticsite: sync " "complete")
+    LOGGER.info("sync complete")
 
     if not build_context['deploy_is_current']:
         update_ssm_hash(context, session)
@@ -102,7 +101,7 @@ def sync(context, provider, **kwargs):
 def display_static_website_url(website_url_handle, provider, context):
     """Based on the url handle display the static website url.
 
-    Keyword Args:
+    Args:
         website_url_handle (str): the Output handle for the website url
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
             The provider instance.
@@ -118,7 +117,7 @@ def display_static_website_url(website_url_handle, provider, context):
 def update_ssm_hash(context, session):
     """Update the SSM hash with the new tracking data.
 
-    Keyword Args:
+    Args:
         context (:class:`runway.cfngin.context.Context`): context instance
         session (:class:`runway.cfngin.session.Session`): CFNgin session
 
@@ -129,7 +128,7 @@ def update_ssm_hash(context, session):
         hash_param = build_context['hash_tracking_parameter']
         hash_value = build_context['hash']
 
-        LOGGER.info("staticsite: updating environment SSM parameter %s with hash %s",
+        LOGGER.info("updating SSM parameter %s with hash %s",
                     hash_param,
                     hash_value)
 
@@ -142,14 +141,14 @@ def update_ssm_hash(context, session):
 def get_distribution_data(context, provider, **kwargs):
     """Retrieve information about the distribution.
 
-    Keyword Args:
+    Args:
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
             The provider instance
 
     """
-    LOGGER.info("Retrieved distribution data")
+    LOGGER.verbose("retrieved distribution data")
     return {
         'identifier': OutputLookup.handle(
             kwargs.get('distributionid_output_lookup'),
@@ -168,14 +167,15 @@ def get_distribution_data(context, provider, **kwargs):
 def invalidate_distribution(session, identifier='', path='', domain='', **_):
     """Invalidate the current distribution.
 
-    Keyword Args:
-        session (Session): The current CFNgin session
-        identifier (string): The distribution id
-        path (string): The distribution path
-        domain (string): The distribution domain
+    Args:
+        session (Session): The current CFNgin session.
+        identifier (string): The distribution id.
+        path (string): The distribution path.
+        domain (string): The distribution domain.
 
     """
-    LOGGER.info("staticsite: Invalidating CF distribution")
+    LOGGER.info("invalidating CloudFront distribution: %s (%s)",
+                identifier, domain)
     cf_client = session.client('cloudfront')
     cf_client.create_invalidation(
         DistributionId=identifier,
@@ -186,21 +186,21 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
             'CallerReference': str(time.time())}
     )
 
-    LOGGER.info("staticsite: CF invalidation of %s (domain %s) " "complete", identifier, domain)
+    LOGGER.info("CloudFront invalidation complete")
     return True
 
 
 def prune_archives(context, session):
     """Prune the archives from the bucket.
 
-    Keyword Args:
+    Args:
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         session (:class:`runway.cfngin.session.Session`): The CFNgin
             session.
 
     """
-    LOGGER.info("staticsite: cleaning up old site archives...")
+    LOGGER.info("cleaning up old site archives...")
     archives = []
     s3_client = session.client('s3')
     list_objects_v2_paginator = s3_client.get_paginator('list_objects_v2')
@@ -231,8 +231,10 @@ def auto_detect_content_type(filename):
 
     Args:
         filename (str): A filename to use to auto detect the content type.
+
     Returns:
-        str: The content type of the file. None if the content type could not be detected.
+        str: The content type of the file. None if the content type
+        could not be detected.
 
     """
     _, ext = os.path.splitext(filename)
@@ -250,10 +252,13 @@ def get_content_type(extra_file):
     """Return the content type of the file.
 
     Args:
-        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file configuration.
+        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file
+            configuration.
+
     Returns:
-        str: The content type of the extra file. If 'content_type' is provided then that is
-             returned, otherways it is auto detected based on the name.
+        str: The content type of the extra file. If 'content_type' is
+        provided then that is returned, otherways it is auto detected
+        based on the name.
 
     """
     return extra_file.get(
@@ -265,7 +270,9 @@ def get_content(extra_file):
     """Get serialized content based on content_type.
 
     Args:
-        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file configuration.
+        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file
+            configuration.
+
     Returns:
         str: Serialized content based on the content_type.
 
@@ -281,7 +288,9 @@ def get_content(extra_file):
             if content_type == 'text/yaml':
                 return yaml.safe_dump(content)
 
-            raise ValueError('"content_type" must be json or yaml if "content" is not a string')
+            raise ValueError(
+                '"content_type" must be json or yaml if "content" is not a string'
+            )
 
         if not isinstance(content, str):
             raise TypeError('unsupported content: %s' % type(content))
@@ -295,12 +304,13 @@ def calculate_hash_of_extra_files(extra_files):
     Adapted from stacker.hooks.aws_lambda; used according to its license:
     https://github.com/cloudtools/stacker/blob/1.4.0/LICENSE
 
-    All attributes of the extra file object are includeded when hashing:
+    All attributes of the extra file object are included when hashing:
     name, content_type, content, and file data.
 
     Args:
-        extra_files (List[Dict[str, Union[str, Dict[Any]]]]): The list of extra file
-            configurations.
+        extra_files (List[Dict[str, Union[str, Dict[Any]]]]): The list of
+            extra file configurations.
+
     Returns:
         str: The hash of all the files.
 
@@ -314,12 +324,12 @@ def calculate_hash_of_extra_files(extra_files):
             file_hash.update((extra_file['content_type'] + "\0").encode())
 
         if extra_file.get('content'):
-            LOGGER.debug('hashing content %s', extra_file['name'])
+            LOGGER.debug('hashing content: %s', extra_file['name'])
             file_hash.update((extra_file['content'] + "\0").encode())
 
         if extra_file.get('file'):
             with open(extra_file['file'], "rb") as filedes:
-                LOGGER.debug('hashing file %s', extra_file['file'])
+                LOGGER.debug('hashing file: %s', extra_file['file'])
                 for chunk in iter(lambda: filedes.read(4096), ""):  # noqa pylint: disable=cell-var-from-loop
                     if not chunk:
                         break
@@ -335,8 +345,9 @@ def get_ssm_value(session, name):
     Args:
         session (:class:`runway.cfngin.session.Session`): The CFNgin session.
         name (str): The parameter name.
+
     Returns:
-        str: The parameter value
+        str: The parameter value.
 
     """
     ssm_client = session.client('ssm')
@@ -371,17 +382,16 @@ def set_ssm_value(session, name, value, description=''):
 def sync_extra_files(context, bucket, extra_files, **kwargs):
     """Sync static website extra files to S3 bucket.
 
-    Keyword Args:
+    Args:
 
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         bucket (str): The static site bucket name.
-        extra_files (List[Dict[str, str]]): List of files and file content that should be
-            uploaded.
+        extra_files (List[Dict[str, str]]): List of files and file content
+            that should be uploaded.
 
     """
-    LOGGER.debug('bucket: %s', bucket)
-    LOGGER.debug('extra_files: %s', json.dumps(extra_files))
+    LOGGER.debug('extra_files to sync: %s', json.dumps(extra_files))
 
     if not extra_files:
         return []
@@ -409,7 +419,9 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
         hash_new = calculate_hash_of_extra_files(extra_files)
 
         if hash_new == hash_old:
-            LOGGER.info("Skipping extra files upload; latest version already deployed")
+            LOGGER.info(
+                "skipped upload of extra files; latest version already deployed"
+            )
             return []
 
     for extra_file in extra_files:
@@ -419,7 +431,7 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
         source = extra_file.get('file')
 
         if content:
-            LOGGER.info('Uploading extra file: %s', filename)
+            LOGGER.info('uploading extra file: %s', filename)
 
             s3_client.put_object(
                 Bucket=bucket,
@@ -431,7 +443,7 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
             uploaded.append(filename)
 
         if source:
-            LOGGER.info('Uploading extra file: %s as %s ', source, filename)
+            LOGGER.info('uploading extra file: %s as %s ', source, filename)
 
             extra_args = None
 
@@ -443,7 +455,11 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
             uploaded.append(filename)
 
     if hash_new:
-        LOGGER.info("Updating extra files SSM parameter %s with hash %s", hash_param, hash_new)
+        LOGGER.info(
+            "updating extra files SSM parameter %s with hash %s",
+            hash_param,
+            hash_new
+        )
         set_ssm_value(session, hash_param, hash_new)
 
     return uploaded

@@ -15,10 +15,12 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @options.ci
 @options.debug
 @options.deploy_environment
+@options.no_color
 @options.tags
+@options.verbose
 @click.pass_context
 def takeoff(ctx, **kwargs):
     # type: (click.Context, Tuple[str, ...], Any) -> None
     """Alias of "runway deploy"."""
-    LOGGER.debug('forwarding to deploy...')
+    LOGGER.verbose('forwarding to deploy...')
     ctx.forward(deploy, **kwargs)

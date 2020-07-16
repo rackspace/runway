@@ -153,6 +153,7 @@ class Action(build.Action):
     """
 
     DESCRIPTION = 'Diff stacks'
+    NAME = 'diff'
 
     @property
     def _stack_action(self):
@@ -183,7 +184,7 @@ class Action(build.Action):
             )
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
-            LOGGER.info('No changes: %s', stack.fqn)
+            LOGGER.info('%s:no changes', stack.fqn)
             stack.set_outputs(provider.get_outputs(stack.fqn))
         except exceptions.StackDoesNotExist:
             if self.context.persistent_graph:
@@ -203,9 +204,9 @@ class Action(build.Action):
                                    include_persistent_graph=True)
         plan.outline(logging.DEBUG)
         if plan.keys():
-            LOGGER.info("Diffing stacks: %s", ", ".join(plan.keys()))
+            LOGGER.info("diffing stacks: %s", ", ".join(plan.keys()))
         else:
-            LOGGER.warning('WARNING: No stacks detected (error in config?)')
+            LOGGER.warning('no stacks detected (error in config?)')
         walker = build_walker(kwargs.get('concurrency', 0))
         plan.execute(walker)
 

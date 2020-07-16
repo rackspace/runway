@@ -128,7 +128,7 @@ class TestRunway(object):
         obj.tests = [MagicMock(type='success'),
                      MagicMock(type='fail_system_exit_0')]
         assert not obj.test()
-        assert 'The following tests failed' not in '\n'.join(caplog.messages)
+        assert 'the following tests failed' not in '\n'.join(caplog.messages)
         test_handlers['success'].handle.assert_called_with(obj.tests[0].name,
                                                            obj.tests[0].args)
         test_handlers['fail_system_exit_0'].handle.assert_called_with(
@@ -145,9 +145,7 @@ class TestRunway(object):
         with pytest.raises(SystemExit) as excinfo:
             assert not obj.test()
         assert excinfo.value.code == 1
-        assert 'The following tests failed: fail_system_exit_1' in caplog.messages
-        assert 'Failed test was required, the remaining tests have been skipped' \
-            not in caplog.messages
+        assert 'the following tests failed: fail_system_exit_1' in caplog.messages
         test_handlers['fail_system_exit_1'].handle.assert_called_with(
             obj.tests[0].name, obj.tests[0].args
         )
@@ -162,8 +160,8 @@ class TestRunway(object):
         with pytest.raises(SystemExit) as excinfo:
             assert not obj.test()
         assert excinfo.value.code == 1
-        assert 'Test failed: exception' in caplog.messages
-        assert 'Failed test was required, the remaining tests have been skipped' \
+        assert 'exception:running test (fail)' in caplog.messages
+        assert 'exception:test required; the remaining tests have been skipped' \
             in caplog.messages
         test_handlers['exception'].handle.assert_called_with(
             obj.tests[0].name, obj.tests[0].args
@@ -183,15 +181,15 @@ class TestRunway(object):
         with pytest.raises(SystemExit) as excinfo:
             assert obj.test()
         assert excinfo.value.code == 1
-        assert 'Unable to find handler for test "test" of type "missing"' in \
+        assert 'test:unable to find handler of type "missing"' in \
             caplog.messages
-        assert 'The following tests failed: test' not in caplog.messages
+        assert 'the following tests failed: test' not in caplog.messages
 
         obj.tests[0].required = False
         with pytest.raises(SystemExit) as excinfo:
             assert obj.test()
         assert excinfo.value.code == 1
-        assert 'The following tests failed: test' in caplog.messages
+        assert 'the following tests failed: test' in caplog.messages
 
     def test_test_no_tests(self, caplog, runway_config, runway_context):
         """Test test with no tests defined."""
@@ -201,5 +199,5 @@ class TestRunway(object):
         with pytest.raises(SystemExit) as excinfo:
             assert obj.test()
         assert excinfo.value.code == 1
-        assert 'Use of "runway test" without defining tests' in \
+        assert 'no tests defined in runway.yml' in \
             caplog.messages[0]

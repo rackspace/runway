@@ -28,6 +28,7 @@ class Action(BaseAction):
     """
 
     DESCRIPTION = 'Destroy stacks'
+    NAME = 'destroy'
 
     @property
     def _stack_action(self):
@@ -45,7 +46,7 @@ class Action(BaseAction):
         try:
             provider_stack = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
-            LOGGER.debug("Stack %s does not exist.", stack.fqn)
+            LOGGER.debug("%s:stack does not exist", stack.fqn)
             # Once the stack has been destroyed, it doesn't exist. If the
             # status of the step was SUBMITTED, we know we just deleted it,
             # otherwise it should be skipped
@@ -54,7 +55,7 @@ class Action(BaseAction):
             return StackDoesNotExistStatus()
 
         LOGGER.debug(
-            "Stack %s provider status: %s",
+            "%s:provider status: %s",
             provider.get_stack_name(provider_stack),
             provider.get_stack_status(provider_stack),
         )
@@ -62,7 +63,7 @@ class Action(BaseAction):
             return DESTROYED_STATUS
         if provider.is_stack_in_progress(provider_stack):
             return DESTROYING_STATUS
-        LOGGER.debug("Destroying stack: %s", stack.fqn)
+        LOGGER.debug("%s:destroying stack", stack.fqn)
         provider.destroy_stack(provider_stack)
         return DESTROYING_STATUS
 
@@ -81,7 +82,7 @@ class Action(BaseAction):
         plan = self._generate_plan(tail=kwargs.get('tail'), reverse=True,
                                    include_persistent_graph=True)
         if not plan.keys():
-            LOGGER.warning('WARNING: No stacks detected (error in config?)')
+            LOGGER.warning('no stacks detected (error in config?)')
         if kwargs.get('force', False):
             # need to generate a new plan to log since the outline sets the
             # steps to COMPLETE in order to log them

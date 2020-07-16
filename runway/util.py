@@ -16,6 +16,7 @@ from typing import (Any, Dict, Iterator,  # noqa pylint: disable=unused-import
                     List, Optional, Union)
 
 import six
+import yaml
 
 if sys.version_info >= (3, 6):
     from contextlib import AbstractContextManager  # pylint: disable=E
@@ -24,6 +25,7 @@ else:
 
 AWS_ENV_VARS = ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
                 'AWS_SESSION_TOKEN')
+DOC_SITE = 'https://docs.onica.com/projects/runway'
 EMBEDDED_LIB_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'embedded'
@@ -317,7 +319,7 @@ class SafeHaven(AbstractContextManager):
         self.__sys_modules = {k: v for k, v in sys.modules.items()}
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
-        self.log = logging.getLogger('runway.' + self.__class__.__name__)
+        self.logger = logging.getLogger('runway.' + self.__class__.__name__)
         self.sys_modules_exclude = sys_modules_exclude or []
 
         if isinstance(argv, list):
@@ -329,7 +331,7 @@ class SafeHaven(AbstractContextManager):
 
     def reset_all(self):
         """Reset all values cached by this context manager."""
-        self.log.debug('resetting all managed values...')
+        self.logger.debug('resetting all managed values...')
         self.reset_os_environ()
         self.reset_sys_argv()
         self.reset_sys_modules()
@@ -337,30 +339,32 @@ class SafeHaven(AbstractContextManager):
 
     def reset_os_environ(self):
         """Reset the value of os.environ."""
-        self.log.debug('resetting os.environ: %s', self.__os_environ)
+        self.logger.debug('resetting os.environ: %s',
+                          json.dumps(self.__os_environ))
         os.environ.clear()
         os.environ.update(self.__os_environ)
 
     def reset_sys_argv(self):
         """Reset the value of sys.argv."""
-        self.log.debug('resetting sys.argv: %s', self.__sys_argv)
+        self.logger.debug('resetting sys.argv: %s',
+                          json.dumps(self.__sys_argv))
         sys.argv = self.__sys_argv
 
     def reset_sys_modules(self):
         """Reset the value of sys.modules."""
-        self.log.debug('resetting sys.modules...')
+        self.logger.debug('resetting sys.modules...')
         # sys.modules can be manipulated to force reloading modules but,
         # replacing it outright does not work as expected
         for module in list(sys.modules.keys()):
             if module not in self.__sys_modules and \
                     not any(module.startswith(n)
                             for n in self.sys_modules_exclude):
-                self.log.debug('removed sys.module: {"%s": "%s"}', module,
-                               sys.modules.pop(module))
+                self.logger.debug('removed sys.module: {"%s": "%s"}', module,
+                                  sys.modules.pop(module))
 
     def reset_sys_path(self):
         """Reset the value of sys.path."""
-        self.log.debug('resetting sys.path: %s', self.__sys_path)
+        self.logger.debug('resetting sys.path: %s', json.dumps(self.__sys_path))
         sys.path = self.__sys_path
 
     def __enter__(self):
@@ -370,13 +374,35 @@ class SafeHaven(AbstractContextManager):
             SafeHaven: Instance of the context manager.
 
         """
-        self.log.debug('entering a safe haven...')
+        self.logger.debug('entering a safe haven...')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Exit the context manager."""
-        self.log.debug('leaving the safe haven...')
+        self.logger.debug('leaving the safe haven...')
         self.reset_all()
+
+
+# TODO remove after https://github.com/yaml/pyyaml/issues/234 is resolved
+class YamlDumper(yaml.Dumper):
+    """Custom YAML Dumper.
+
+    This Dumper allows for YAML to be output to follow YAML spec 1.2,
+    example 2.3 of collections (2.1). This provides an output that is more
+    humanreadable and complies with yamllint.
+
+    Example:
+        >>> print(yaml.dump({'key': ['val1', 'val2']}, Dumper=YamlDumper))
+
+    Note:
+        YAML 1.2 Specification: https://yaml.org/spec/1.2/spec.html
+        used for reference.
+
+    """
+
+    def increase_indent(self, flow=False, indentless=False):
+        """Override parent method."""
+        return super(YamlDumper, self).increase_indent(flow, False)
 
 
 @contextmanager
