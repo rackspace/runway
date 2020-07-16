@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.10.0] - 2020-07-16
+### Changed
+- cli is now managed via click
+- logging is greatly improved in consistency and formatting
+
+### Fixed
+- tests are no longer packaged in distributable
+
 ## [1.9.0] - 2020-07-13
 ### Fixed
 - fixed an issue where serverless@<1.70.0 (version is not exact) would fail to deploy when using `promotezip`
@@ -873,7 +881,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/onicagroup/runway/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/onicagroup/runway/compare/v1.8.5...v1.9.0
 [1.8.5]: https://github.com/onicagroup/runway/compare/v1.8.4...v1.8.5
 [1.8.4]: https://github.com/onicagroup/runway/compare/v1.8.3...v1.8.4
