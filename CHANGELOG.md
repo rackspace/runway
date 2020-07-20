@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- will now also check for `serverless.ts` when auto-detecting module type based on directory contents
 
 ## [1.10.0] - 2020-07-16
 ### Changed

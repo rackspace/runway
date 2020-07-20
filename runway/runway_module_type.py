@@ -128,8 +128,11 @@ class RunwayModuleType(object):
     def _set_class_path_based_on_autodetection(self):
         # type() -> void
         """Based on the files detected in the base path set the class_path."""
-        if (self._is_file('serverless.yml') or self._is_file('serverless.js')) \
-                and self._is_file('package.json'):
+        if any(
+                self._is_file(sls) for sls in [
+                    'serverless.js', 'serverless.ts', 'serverless.yml'
+                ]
+        ) and self._is_file('package.json'):
             self.class_path = self.TYPE_MAP.get('serverless', None)
         elif self._has_glob('*.tf'):
             self.class_path = self.TYPE_MAP.get('terraform', None)

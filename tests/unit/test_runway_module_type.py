@@ -24,6 +24,7 @@ class TestRunwayModuleType(object):
         (['overlays/', 'kustomization.yaml', 'cdk.json'], K8s),
         (['serverless.yml', 'package.json', 'cdk.json'], Serverless),
         (['serverless.js', 'package.json', 'cdk.json'], Serverless),
+        (['serverless.ts', 'package.json', 'cdk.json'], Serverless),
         (['any.tf', 'serverless.yml'], Terraform)
     ])
     def test_autodetection(self, files, expected, cd_tmp_path):
