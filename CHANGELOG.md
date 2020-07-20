@@ -5,12 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.10.1] - 2020-07-20
 ### Fixed
 - fixed an issue where AWS account alias/id validation was not using the context object with assumed credentials when running in parallel
 
 ### Changed
 - will now also check for `serverless.ts` when auto-detecting module type based on directory contents
-
 
 ## [1.10.0] - 2020-07-16
 ### Changed
@@ -887,7 +888,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.10.1...HEAD
+[1.10.1]: https://github.com/onicagroup/runway/compare/v1.10.0...v1.10.1
 [1.10.0]: https://github.com/onicagroup/runway/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/onicagroup/runway/compare/v1.8.5...v1.9.0
 [1.8.5]: https://github.com/onicagroup/runway/compare/v1.8.4...v1.8.5
