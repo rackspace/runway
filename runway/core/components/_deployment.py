@@ -214,7 +214,7 @@ class Deployment(object):
 
         with aws.AssumeRole(context, **self.assume_role_config):
             self.definition.resolve(context, self._variables)
-            self.validate_account_credentials()
+            self.validate_account_credentials(context)
             Module.run_list(action=action,
                             context=context,
                             deployment=self.definition,
@@ -222,16 +222,19 @@ class Deployment(object):
                             modules=self.definition.modules,
                             variables=self._variables)
 
-    def validate_account_credentials(self):
-        # type: () -> None
+    def validate_account_credentials(self, context=None):
+        # type: (Optional[Context]) -> None
         """Exit if requested deployment account doesn't match credentials.
+
+        Args:
+            context (Optional[Context]): Context object.
 
         Raises:
             SystemExit: AWS Account associated with the current credentials
                 did not match the defined criteria.
 
         """
-        account = aws.AccountDetails(self.ctx)
+        account = aws.AccountDetails(context or self.ctx)
         if self.account_id_config:
             if self.account_id_config != account.id:
                 self.logger.error('current AWS account "%s" does not match '
