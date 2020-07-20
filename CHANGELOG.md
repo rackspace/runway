@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - fixed an issue where AWS account alias/id validation was not using the context object with assumed credentials when running in parallel
 
+### Changed
+- will now also check for `serverless.ts` when auto-detecting module type based on directory contents
+
+
 ## [1.10.0] - 2020-07-16
 ### Changed
 - cli is now managed via click
