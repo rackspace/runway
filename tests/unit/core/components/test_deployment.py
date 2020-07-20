@@ -268,7 +268,7 @@ class TestDeployment(object):
         assert runway_context.command == 'deploy'
         assert runway_context.env.aws_region == 'us-west-2'
         mock_resolve.assert_called_once_with(runway_context, obj._variables)
-        mock_validate.assert_called_once_with()
+        mock_validate.assert_called_once_with(runway_context)
         mock_aws.AssumeRole.assert_called_once_with(runway_context)
         mock_aws.AssumeRole().__enter__.assert_called_once()
         mock_module.run_list.assert_called_once_with(action='deploy',
