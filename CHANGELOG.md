@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
-- fixed an issue where AWS account alias/id validation was not using a context object with assumed credentials when running in parallel
+- fixed an issue where AWS account alias/id validation was not using the context object with assumed credentials when running in parallel
 
 ## [1.10.0] - 2020-07-16
 ### Changed
