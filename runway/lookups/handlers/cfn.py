@@ -1,12 +1,16 @@
 """Retrieve a value from CloudFormation Stack outputs."""
 # pylint: disable=arguments-differ
-import logging
 import json
+import logging
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # pylint: disable=W
+from typing import (TYPE_CHECKING, Any, Dict, Optional,  # pylint: disable=W
+                    Union)
+
+from botocore.exceptions import ClientError
+
+from runway.cfngin.exceptions import OutputDoesNotExist, StackDoesNotExist
 
 from .base import LookupHandler
-from runway.cfngin.exceptions import OutputDoesNotExist
 
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
@@ -34,7 +38,15 @@ class CfnLookup(LookupHandler):
     @staticmethod
     def should_use_provider(args, provider):
         # type: (Dict[str, str], Optional['Provider']) -> bool
-        """Determine if the provider should be used for the lookup."""
+        """Determine if the provider should be used for the lookup.
+
+        This will open happen when the lookup is used with CFNgin.
+
+        Args:
+            args: Parsed arguments provided to the lookup.
+            provider: CFNgin provider.
+
+        """
         if provider:
             if args.get('region') and provider.region != args['region']:
                 LOGGER.debug('not using provider; requested region does not match')
@@ -49,21 +61,21 @@ class CfnLookup(LookupHandler):
 
         Args:
             client: Boto3 CloudFormation client.
-            query: What to get.
+            query (OutputQuery): What to get.
 
         Returns:
             str: Value of the requested output.
 
-        Raises:
-            OutputDoesNotExist: Output could not be found on the Stack.
-
         """
+        LOGGER.debug('describing stack: %s', query.stack_name)
         stack = client.describe_stacks(StackName=query.stack_name)['Stacks'][0]
         outputs = {
             output['OutputKey']: output['OutputValue']
             for output in stack.get('Outputs', [])
         }
-        LOGGER.debug('stack outputs:\n%s', json.dumps(outputs))
+        LOGGER.debug(
+            '%s stack outputs: %s', stack['StackName'], json.dumps(outputs)
+        )
         return outputs[query.output_name]
 
     @classmethod
@@ -81,6 +93,13 @@ class CfnLookup(LookupHandler):
             context: The current context object.
             provider: AWS provider.
 
+        Returns:
+            Result of the query.
+
+        Raises:
+            OutputDoesNotExist: Output does not exist on the Stack provided
+                and default was not provided.
+
         """
         raw_query, args = cls.parse(value)
         try:
@@ -92,15 +111,24 @@ class CfnLookup(LookupHandler):
 
         try:
             if cls.should_use_provider(args, provider):
+                # this will only happen when used from cfngin
                 result = provider.get_output(query.stack_name, query.output_name)
             else:
                 cfn_client = context.get_session(region=args.get('region')) \
                     .client('cloudformation')
                 result = cls.get_stack_output(cfn_client, query)
-        except KeyError:
+        except (ClientError, KeyError, StackDoesNotExist) as err:
             if 'default' in args:
-                args.pop('load')  # don't load a default value
+                LOGGER.debug(
+                    'unable to resolve lookup for CloudFormation Stack '
+                    'output "%s"; using default',
+                    raw_query,
+                    exc_info=True
+                )
+                args.pop('load', None)  # don't load a default value
                 result = args.pop('default')
+            elif isinstance(err, (ClientError, StackDoesNotExist)):
+                raise
             else:
                 raise OutputDoesNotExist(query.stack_name, query.output_name)
         return cls.format_results(result, **args)

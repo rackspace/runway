@@ -75,14 +75,15 @@ def get_output_dict(stack):
         stack.
 
     """
-    outputs = {}
     if not stack.get('Outputs'):
         return outputs
-
-    for output in stack['Outputs']:
-        LOGGER.debug("    %s %s: %s", stack['StackName'], output['OutputKey'],
-                     output['OutputValue'])
-        outputs[output['OutputKey']] = output['OutputValue']
+    outputs = {
+        output['OutputKey']: output['OutputValue']
+        for output in stack.get('Outputs', [])
+    }
+    LOGGER.debug(
+        '%s stack outputs: %s', stack['StackName'], json.dumps(outputs)
+    )
     return outputs
 
 
