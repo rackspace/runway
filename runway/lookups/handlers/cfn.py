@@ -65,13 +65,6 @@ LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "cfn"
 
 OutputQuery = namedtuple('OutputQuery', ('stack_name', 'output_name'))
-OutputQuery.__doc__ = """Named tuple representing the query for a Stack output.
-
-Attrs:
-    stack_name (str): CloudFormation Stack name.
-    output_name (str): CloudFormation Stack output name.
-
-"""
 
 
 class CfnLookup(LookupHandler):
