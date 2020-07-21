@@ -71,12 +71,18 @@ Backend config options can also be specified as a module option in the `Runway C
   ---
   deployments:
     - modules:
-        - path: sampleapp.tf
+        - path: sampleapp-01.tf
           options:
             terraform_backend_config:
               bucket: mybucket
               dynamodb_table: mytable
               region: us-east-1
+        - path: sampleapp-02.tf
+          options:
+            terraform_backend_config:
+              bucket: ${cfn common-tf-state.TerraformStateBucketName}
+              dynamodb_table: ${cfn common-tf-state.TerraformStateTableName}
+              region: ${env AWS_REGION}
 
 .. rubric:: Deployment Level
 .. code-block:: yaml
@@ -91,46 +97,6 @@ Backend config options can also be specified as a module option in the `Runway C
           bucket: ${ssm ParamNameHere::region=us-east-1}
           dynamodb_table: ${ssm ParamNameHere::region=us-east-1}
           region: ${env AWS_REGION}
-
-
-runway.yml From CloudFormation Outputs
-======================================
-
-A recommended option for managing the state bucket and table is to create
-them via CloudFormation (try running ``runway gen-sample cfn`` to get a
-template and stack definition for bucket/table stack). To further support this,
-backend config options can be looked up directly from CloudFormation
-outputs.
-
-.. rubric:: Module Level
-.. code-block:: yaml
-
-  ---
-  deployments:
-    - modules:
-        - path: sampleapp.tf
-          options:
-            terraform_backend_config:
-              region: us-east-1
-            terraform_backend_cfn_outputs:
-              bucket: StackName::OutputName  # e.g. common-tf-state::TerraformStateBucketName
-              dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformStateTableName
-
-
-.. rubric:: Deployment Level
-.. code-block:: yaml
-
-  ---
-  deployments:
-    - modules:
-        - path: sampleapp-01.tf
-        - path: sampleapp-02.tf
-      module_options:  # shared between all modules in deployment
-        terraform_backend_config:
-          region: us-east-1
-        terraform_backend_cfn_outputs:
-          bucket: StackName::OutputName  # e.g. common-tf-state::TerraformStateBucketName
-          dynamodb_table: StackName::OutputName  # e.g. common-tf-state::TerraformLockTableName
 
 
 ----

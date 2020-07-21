@@ -27,9 +27,9 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
         path: sampleapp.tf
         options:
           terraform_backend_config:
-            region: us-east-1
             bucket: ${cfn common-tf-state.TerraformStateBucketName::region=us-east-1}
             dynamodb_table: ${cfn common-tf-state.TerraformStateTableName::region=us-east-1}
+            region: us-east-1
 
 .. code-block:: yaml
   :caption: CFNgin config

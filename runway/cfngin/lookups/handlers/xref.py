@@ -12,7 +12,7 @@ TYPE_NAME = "xref"
 class XrefLookup(LookupHandler):
     """Xref lookup."""
 
-    DEPRECATION_MSG = ('xref lookup has been deprecated; '
+    DEPRECATION_MSG = ('xref Lookup has been deprecated; '
                        'use the cfn lookup instead')
 
     @classmethod
