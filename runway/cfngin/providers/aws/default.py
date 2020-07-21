@@ -76,7 +76,7 @@ def get_output_dict(stack):
 
     """
     if not stack.get('Outputs'):
-        return outputs
+        return {}
     outputs = {
         output['OutputKey']: output['OutputValue']
         for output in stack.get('Outputs', [])
