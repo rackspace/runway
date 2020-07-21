@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `cfn` Lookup usable in Runway and CFNgin config files
+
+### Changed
+- `terraform_backend_cfn_outputs` option is now deprecated
+- `xref` Lookup is now deprecated
 
 ## [1.10.1] - 2020-07-20
 ### Fixed
