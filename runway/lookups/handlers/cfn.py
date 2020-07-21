@@ -59,7 +59,7 @@ from .base import LookupHandler
 if TYPE_CHECKING:
     from runway.context import Context as RunwayContext  # noqa: F401 pylint: disable=W
     from runway.cfngin.context import Context as CFNginContext  # noqa: F401 pylint: disable=W
-    from runway.cfngin.providers.aws.default import Provider
+    from runway.cfngin.providers.aws.default import Provider  # noqa: F401 pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "cfn"
@@ -126,7 +126,8 @@ class CfnLookup(LookupHandler):
                context,  # type: Union['CFNginContext', 'RunwayContext']
                provider=None,  # type: Optional['Provider']
                **_  # type: Any
-               ):
+               # TODO remove disable when droping python 2 support
+               ):  # pylint: disable=bad-continuation
         # type: (...) -> Any
         """Retrieve a value from CloudFormation Stack outputs.
 
