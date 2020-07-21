@@ -6,9 +6,9 @@
 
 .. _cfngin-lookups:
 
-=======
+#######
 Lookups
-=======
+#######
 
 .. note:: Runway lookups and CFNgin lookups are not interchangeable. While they
           do share a similar base class and syntax, they exist in two different
@@ -76,6 +76,7 @@ Runway's CFNgin includes the following lookup types:
 
 - `output lookup`_
 - `ami lookup`_
+- `cfn lookup`_
 - `custom lookup`_
 - `default lookup`_
 - `dynamodb lookup`_
@@ -87,10 +88,22 @@ Runway's CFNgin includes the following lookup types:
 - ssm_ lookup
 - `xref lookup`_
 
+**********
+cfn Lookup
+**********
+
+.. important::
+  The Stack must exist in CloudFormation before the config using this Lookup begins processing to successfully get a value.
+  This means that it must have been deployed using another Runway module, deployed from a config that is run before the one using it, deployed manually, or deployed in the same config using ``required``/``required_by`` to specify a dependency between the Stacks.
+
+.. automodule:: runway.lookups.handlers.cfn
+
+
 .. _`output lookup`:
 
+*************
 Output Lookup
--------------
+*************
 
 The ``output`` lookup takes a value of the format:
 ``<stack name>::<output name>`` and retrieves the output from the given stack
@@ -109,8 +122,9 @@ You can specify an output lookup with the following syntax:
 
 .. _`default lookup`:
 
+**************
 default Lookup
---------------
+**************
 
 The ``default`` lookup type will check if a value exists for the variable
 in the environment file, then fall back to a default defined in the CFNgin
@@ -143,8 +157,9 @@ value.
 
 .. _`kms lookup`:
 
+**********
 KMS Lookup
-----------
+**********
 
 The ``kms`` lookup type decrypts its input value.
 
@@ -183,8 +198,9 @@ value is large) using the ``file://`` prefix, ie::
 
 .. _`xref lookup`:
 
+***********
 XRef Lookup
------------
+***********
 
 The ``xref`` lookup type is very similar to the ``output`` lookup type, the
 difference being that ``xref`` resolves output values from stacks that
@@ -211,8 +227,9 @@ requirements.
 
 .. _`rxref lookup`:
 
+************
 RXRef Lookup
-------------
+************
 
 The ``rxref`` lookup type is very similar to the ``xref`` lookup type,
 the difference being that ``rxref`` will lookup output values from stacks
@@ -252,8 +269,9 @@ within the same CFNgin YAML config.
 
 .. _`file lookup`:
 
+***********
 File Lookup
------------
+***********
 
 The ``file`` lookup type allows the loading of arbitrary data from files on
 disk. The lookup additionally supports using a ``codec`` to manipulate or
@@ -367,16 +385,18 @@ Basic examples::
         Resource: "{{MyResource}}"
 
 
+***
 ssm
----
+***
 
 .. automodule:: runway.lookups.handlers.ssm
 
 
 .. _`ssmstore lookup`:
 
+**************************
 SSM Parameter Store Lookup
---------------------------
+**************************
 
 .. deprecated:: 1.5.0
   Replaced by ssm_
@@ -409,10 +429,12 @@ values)
 The region can be omitted (e.g. ``DBUser: ${ssmstore MyDBUser}``), in which
 case ``us-east-1`` will be assumed.
 
+
 .. _`dynamodb lookup`:
 
+***************
 DynamoDb Lookup
---------------------------
+***************
 
 The ``dynamodb`` lookup type retrieves a value from a DynamoDb table.
 
@@ -450,8 +472,9 @@ You can lookup values inside of a map.
 
 .. _`envvar lookup`:
 
+************************
 Shell Environment Lookup
-------------------------
+************************
 
 The ``envvar`` lookup type retrieves a value from a variable in the shell's
 environment.
@@ -472,10 +495,12 @@ in the lookup, like so::
 
   DBUser: ${envvar file://dbuser_file.txt}
 
+
 .. _`ami lookup`:
 
+**************
 EC2 AMI Lookup
---------------
+**************
 
 The ``ami`` lookup is meant to search for the most recent AMI created that
 matches the given filters.
@@ -506,10 +531,12 @@ Example::
   # Note: The region is optional, and defaults to the current CFNgin region
   ImageId: ${ami [<region>@]owners:self,888888888888,amazon name_regex:server[0-9]+ architecture:i386}
 
+
 .. _`hook_data lookup`:
 
+****************
 Hook Data Lookup
-----------------
+****************
 
 When using hooks, you can have the hook store results in the
 `hook_data`_ dictionary on the context by setting ``data_key`` in the hook
@@ -548,15 +575,16 @@ limited or no effect:
 
 .. _`custom lookup`:
 
+*************
 Custom Lookup
---------------
+*************
 
 A custom lookup may be registered within the config.
 For more information see `Configuring Lookups <configuration.html#lookups>`_.
 
 
 Writing A Custom Lookup
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 A custom lookup must be in an executable, importable python package or standalone file.
 The lookup must be importable using your current ``sys.path``.

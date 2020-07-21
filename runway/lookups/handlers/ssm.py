@@ -14,7 +14,7 @@ Parameters of type ``StringList`` are returned as a list.
 This Lookup supports all :ref:`Common Lookup Arguments`.
 
 
-.. Example
+.. rubric:: Example
 .. code-block:: yaml
 
   deployment:
