@@ -104,13 +104,17 @@ class CfnLookup(LookupHandler):
         raw_query, args = cls.parse(value)
         try:
             query = OutputQuery(*raw_query.split('.'))
-        except ValueError:
+        except TypeError:
             raise ValueError(
-                'query must be <stack-name>.<output-name>; got ' + raw_query
+                'query must be <stack-name>.<output-name>; got "{}"'.format(
+                    raw_query
+                )
             )
 
         try:
-            if cls.should_use_provider(args, provider):
+            # dict is not perserved in mock call so it must be a copy of
+            # args for testing to function correctly
+            if cls.should_use_provider(args.copy(), provider):
                 # this will only happen when used from cfngin
                 result = provider.get_output(query.stack_name, query.output_name)
             else:
@@ -118,6 +122,7 @@ class CfnLookup(LookupHandler):
                     .client('cloudformation')
                 result = cls.get_stack_output(cfn_client, query)
         except (ClientError, KeyError, StackDoesNotExist) as err:
+            # StackDoesNotExist is only raised by provider
             if 'default' in args:
                 LOGGER.debug(
                     'unable to resolve lookup for CloudFormation Stack '
