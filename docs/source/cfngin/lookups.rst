@@ -202,6 +202,9 @@ value is large) using the ``file://`` prefix, ie::
 XRef Lookup
 ***********
 
+.. deprecated:: 1.11.0
+  Replaced by `cfn lookup`_
+
 The ``xref`` lookup type is very similar to the ``output`` lookup type, the
 difference being that ``xref`` resolves output values from stacks that
 aren't contained within the current CFNgin namespace, but are existing stacks

@@ -1,6 +1,6 @@
 """Retrieve a value from CloudFormation Stack Outputs.
 
-They query syntax for this lookup is ``<stack-name>.<output-name>``.
+The query syntax for this lookup is ``<stack-name>.<output-name>``.
 When specifying the output name, be sure to use the *Logical ID* of
 the output; not the *Export.Name*.
 

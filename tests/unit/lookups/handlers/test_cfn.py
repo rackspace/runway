@@ -10,7 +10,7 @@ from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 from mock import MagicMock, patch
 
-from runway.cfngin.exceptions import StackDoesNotExist, OutputDoesNotExist
+from runway.cfngin.exceptions import OutputDoesNotExist, StackDoesNotExist
 from runway.lookups.handlers.cfn import TYPE_NAME, CfnLookup, OutputQuery
 
 
