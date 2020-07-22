@@ -1,5 +1,7 @@
 """Test runway.env_mgr."""
 # pylint: disable=no-self-use,unused-argument
+from mock import MagicMock
+
 from runway.env_mgr import EnvManager
 
 
@@ -9,7 +11,8 @@ class TestEnvManager(object):
     def test_bin(self, platform_darwin, cd_tmp_path, monkeypatch):
         """Test bin."""
         home = cd_tmp_path / 'home'
-        monkeypatch.setattr('runway.env_mgr.Path.home', lambda: home)
+        monkeypatch.setattr('runway.env_mgr.Path.home',
+                            MagicMock(return_value=home))
         obj = EnvManager('test-bin', 'test-dir')
         obj.current_version = '1.0.0'
 
@@ -18,7 +21,8 @@ class TestEnvManager(object):
     def test_darwin(self, platform_darwin, cd_tmp_path, monkeypatch):
         """Test init on Darwin platform."""
         home = cd_tmp_path / 'home'
-        monkeypatch.setattr('runway.env_mgr.Path.home', lambda: home)
+        monkeypatch.setattr('runway.env_mgr.Path.home',
+                            MagicMock(return_value=home))
         obj = EnvManager('test-bin', 'test-dir')
 
         assert not obj.current_version
@@ -36,7 +40,8 @@ class TestEnvManager(object):
     def test_windows(self, platform_windows, cd_tmp_path, monkeypatch):
         """Test init on Windows platform."""
         home = cd_tmp_path / 'home'
-        monkeypatch.setattr('runway.env_mgr.Path.home', lambda: home)
+        monkeypatch.setattr('runway.env_mgr.Path.home',
+                            MagicMock(return_value=home))
         monkeypatch.delenv('APPDATA', raising=False)
         obj = EnvManager('test-bin', 'test-dir')
 

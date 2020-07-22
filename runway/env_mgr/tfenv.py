@@ -76,7 +76,7 @@ def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-man
     tf_zipfile.close()
     shutil.rmtree(download_dir)
     result = version_dir / ('terraform' + command_suffix)
-    result.chmod(result.stat().st_mode | 0o0111)
+    result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
 def get_available_tf_versions(include_prerelease=False):
@@ -188,8 +188,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
         # Now that a version has been selected, skip downloading if it's
         # already been downloaded
-        if os.path.isdir(os.path.join(self.versions_dir,
-                                      version)):
+        if (self.versions_dir / version).is_dir():
             LOGGER.verbose("Terraform version %s already installed; using it...",
                            version)
             self.current_version = version

@@ -65,13 +65,8 @@ def download_kb_release(version,  # noqa pylint: disable=too-many-locals,too-man
     shutil.move(os.path.join(download_dir, filename),
                 str(version_dir / filename))
     shutil.rmtree(download_dir)
-    os.chmod(  # ensure it is executable
-        os.path.join(version_dir, filename),
-        os.stat(os.path.join(version_dir,
-                             filename)).st_mode | 0o0111
-    )
     result = version_dir / filename
-    result.chmod(result.stat().st_mode | 0o0111)
+    result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
 def get_version_requested(path):
