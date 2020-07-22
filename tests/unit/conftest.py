@@ -115,6 +115,18 @@ def patch_time(monkeypatch):
     monkeypatch.setattr('time.sleep', lambda s: None)
 
 
+@pytest.fixture
+def platform_darwin(monkeypatch):
+    """Patch platform.system to always return "Darwin"."""
+    monkeypatch.setattr('platform.system', lambda: 'Darwin')
+
+
+@pytest.fixture
+def platform_windows(monkeypatch):
+    """Patch platform.system to always return "Windows"."""
+    monkeypatch.setattr('platform.system', lambda: 'Windows')
+
+
 @pytest.fixture(scope='function')
 def patch_runway_config(request, monkeypatch, runway_config):
     """Patch Runway config and return a mock config object."""

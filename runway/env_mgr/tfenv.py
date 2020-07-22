@@ -17,7 +17,7 @@ import requests
 from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 from six.moves.urllib.error import URLError  # pylint: disable=E
 
-from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
+from . import EnvManager, handle_bin_download_error
 from ..util import get_hash_for_filename, sha256sum
 
 LOGGER = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-man
                         versions_dir, command_suffix, tf_platform=None,
                         arch=None):
     """Download Terraform archive and return path to it."""
-    version_dir = os.path.join(versions_dir, version)
+    version_dir = versions_dir / version
 
     if arch is None:
         arch = (
@@ -71,16 +71,12 @@ def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-man
         sys.exit(1)
 
     tf_zipfile = zipfile.ZipFile(os.path.join(download_dir, filename))
-    os.mkdir(version_dir)
-    tf_zipfile.extractall(version_dir)
+    version_dir.mkdir(parents=True, exist_ok=True)
+    tf_zipfile.extractall(str(version_dir))
     tf_zipfile.close()
     shutil.rmtree(download_dir)
-    os.chmod(  # ensure it is executable
-        os.path.join(version_dir,
-                     'terraform' + command_suffix),
-        os.stat(os.path.join(version_dir,
-                             'terraform' + command_suffix)).st_mode | 0o0111
-    )
+    result = version_dir / ('terraform' + command_suffix)
+    result.chmod(result.stat().st_mode | 0o0111)
 
 
 def get_available_tf_versions(include_prerelease=False):
@@ -133,39 +129,35 @@ def find_min_required(path):
 
 def get_version_requested(path):
     """Return string listing requested Terraform version."""
-    tf_version_path = os.path.join(path,
-                                   TF_VERSION_FILENAME)
-    if not os.path.isfile(tf_version_path):
+    tf_version_path = path / TF_VERSION_FILENAME
+    if not tf_version_path.is_file():
         LOGGER.error('Terraform install attempted and no %s file present to '
                      'dictate the version; please create it. (e.g. write '
                      '"0.11.13", without quotes, to the file and try again)',
                      TF_VERSION_FILENAME)
         sys.exit(1)
-    with open(tf_version_path, 'r') as stream:
-        ver = stream.read().rstrip()
-    return ver
+    return tf_version_path.read_text().strip()
 
 
 class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Terraform version management.
 
-    Designed to be compatible with https://github.com/tfutils/tfenv .
+    Designed to be compatible with https://github.com/tfutils/tfenv.
+
     """
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(TFEnvManager, self).__init__('tfenv', path)
+        super(TFEnvManager, self).__init__('terraform', 'tfenv', path)
 
     def install(self, version_requested=None):
         """Ensure Terraform is available."""
-        versions_dir = ensure_versions_dir_exists(self.env_dir)
-
         if not version_requested:
             version_requested = get_version_requested(self.path)
 
         if re.match(r'^min-required$', version_requested):
             LOGGER.debug('tfenv: detecting minimal required version')
-            version_requested = find_min_required(self.path)
+            version_requested = find_min_required(str(self.path))
 
         if re.match(r'^latest:.*$', version_requested):
             regex = re.search(r'latest:(.*)', version_requested).group(1)
@@ -178,13 +170,11 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             include_prerelease_versions = True
             # Return early (i.e before reaching out to the internet) if the
             # matching version is already installed
-            if os.path.isdir(os.path.join(versions_dir,
-                                          version_requested)):
+            if (self.versions_dir / version_requested).is_dir():
                 LOGGER.verbose("Terraform version %s already installed; using "
                                "it...", version_requested)
-                return os.path.join(versions_dir,
-                                    version_requested,
-                                    'terraform') + self.command_suffix
+                self.current_version = version_requested
+                return str(self.bin)
 
         try:
             version = next(i
@@ -198,18 +188,16 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
         # Now that a version has been selected, skip downloading if it's
         # already been downloaded
-        if os.path.isdir(os.path.join(versions_dir,
+        if os.path.isdir(os.path.join(self.versions_dir,
                                       version)):
             LOGGER.verbose("Terraform version %s already installed; using it...",
                            version)
-            return os.path.join(versions_dir,
-                                version,
-                                'terraform') + self.command_suffix
+            self.current_version = version
+            return str(self.bin)
 
         LOGGER.info("downloading and using Terraform version %s ...",
                     version)
-        download_tf_release(version, versions_dir, self.command_suffix)
+        download_tf_release(version, self.versions_dir, self.command_suffix)
         LOGGER.verbose("downloaded Terraform %s successfully", version)
-        return os.path.join(versions_dir,
-                            version,
-                            'terraform') + self.command_suffix
+        self.current_version = version
+        return str(self.bin)
