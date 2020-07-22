@@ -27,7 +27,20 @@ If your Terraform will only ever be used with a single backend, it can be define
   }
 
 However, it's generally preferable to separate the backend configuration out from the rest of the Terraform code.
-Choose from one of the following options.
+This form of configuration is known as `partial configuration`_ and allows for dynamic or secret values to be passed in at runtime.
+
+Below are examples of how to implement `partial configuration`_ with Runway.
+All examples provided showcase the use of the s3 backend type as it is the easiest to use when going from zero to deployed (try :ref:`runway gen-sample cfngin <command-gen-sample>` for quickstart Terraform backend infrastructure).
+However, Runway supports the use of any `backend type <https://www.terraform.io/docs/backends/types/index.html>`__ (refer to Terraform's documentation for proper `partial configuration`_ instructions).
+
+.. seealso::
+  https://www.terraform.io/docs/backends/config.html#partial-configuration
+    Terraform partial configuration
+
+  https://www.terraform.io/docs/backends/types/index.html
+    Terraform backend types
+
+.. _partial configuration: https://www.terraform.io/docs/backends/config.html#partial-configuration
 
 
 Backend Config File

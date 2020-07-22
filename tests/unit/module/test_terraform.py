@@ -1,5 +1,5 @@
 """Tests for terraform module."""
-# pylint: disable=no-self-use,unused-argument
+# pylint: disable=no-self-use,protected-access,unused-argument
 import sys
 from contextlib import contextmanager
 from datetime import datetime
@@ -157,7 +157,7 @@ class TestTerraformBackendConfig(object):
         ({'bucket': 'test-bucket', 'dynamodb_table': 'test-table',
           'region': 'us-east-1', 'filename': 'anything'},
          ['bucket=test-bucket', 'dynamodb_table=test-table',
-          'region=us-east-1'])
+          'region=us-east-1', 'filename=anything'])
     ])
     def test_init_args(self, input_data, expected_items):
         """Test init_args."""
@@ -375,7 +375,7 @@ class TestTerraformBackendConfig(object):
 
         result = TerraformBackendConfig.parse(runway_context, './', **config)
 
-        assert result.bucket == 'foo'
-        assert result.dynamodb_table == 'bar'
-        assert result.region == expected_region
-        assert result.filename == 'success'
+        assert result._raw_config['bucket'] == 'foo'
+        assert result._raw_config['dynamodb_table'] == 'bar'
+        assert result._raw_config['region'] == expected_region
+        assert result._raw_config['filename'] == 'success'
