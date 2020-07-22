@@ -104,7 +104,7 @@ class TestFutureDefinition(object):
         result = FutureDefinition(**config)
         assert result.strict_environments is config['strict_environments']
         assert caplog.messages == [
-            'Invalid key(s) found in "future" have been ignored: invalid_key'
+            'invalid key(s) found in "future" have been ignored: invalid_key'
         ]
 
         with pytest.raises(TypeError):
@@ -218,8 +218,8 @@ class TestVariablesDefinition(object):
         with pytest.raises(SystemExit):
             VariablesDefinition.load(file_path='fake_file.yaml')
 
-        assert caplog.records[0].msg == ('The provided variables "%s" file '
-                                         'could not be found.')
+        assert caplog.records[0].msg == ('provided variables file "%s" '
+                                         'could not be found')
 
     def test_load_no_file(self, caplog):
         """Should not error when default variables file is not found."""
@@ -227,6 +227,6 @@ class TestVariablesDefinition(object):
         result = VariablesDefinition.load()
 
         assert result.data == {}
-        assert caplog.records[0].msg == ('Could not find %s in the current '
-                                         'directory. Continuing without a '
-                                         'variables file.')
+        assert caplog.records[0].msg == ('could not find %s in the current '
+                                         'directory; continuing without a '
+                                         'variables file')
