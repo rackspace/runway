@@ -420,7 +420,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                 path = '[' + ', '.join([x.path for x in child_modules]) + ']'
                 if mod:
                     LOGGER.warning(
-                        'Invalid keys found in parallel module config have been ignored: %s',
+                        'invalid keys found in parallel module config have been ignored: %s',
                         ', '.join(mod.keys())
                     )
             else:
@@ -439,7 +439,7 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
                                child_modules=child_modules))
             if mod:
                 LOGGER.warning(
-                    'Invalid keys found in module %s have been ignored: %s',
+                    'invalid keys found in module %s have been ignored: %s',
                     name, ', '.join(mod.keys())
                 )
         return results
@@ -467,7 +467,7 @@ class FutureDefinition(MutableMap):
 
         if kwargs:
             LOGGER.warning(
-                'Invalid key(s) found in "future" have been ignored: %s',
+                'invalid key(s) found in "future" have been ignored: %s',
                 ', '.join(kwargs.keys())
             )
 
@@ -755,7 +755,7 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
         if deployment:
             LOGGER.warning(
-                'Invalid keys found in deployment %s have been ignored: %s',
+                'invalid keys found in deployment %s have been ignored: %s',
                 self.name, ', '.join(deployment.keys())
             )
 
@@ -972,7 +972,7 @@ class TestDefinition(ConfigComponent):
 
             if test:
                 LOGGER.warning(
-                    'Invalid keys found in test %s have been ignored: %s',
+                    'invalid keys found in test %s have been ignored: %s',
                     name, ', '.join(test.keys())
                 )
         return results
@@ -1067,8 +1067,8 @@ class VariablesDefinition(MutableMap):
                            result)
             if os.path.isfile(result):
                 return result
-            LOGGER.error('The provided variables "%s" file could not '
-                         'be found.', result)
+            LOGGER.error('provided variables file "%s" could not '
+                         'be found', result)
             sys.exit(1)
 
         for name in cls.default_names:
@@ -1078,8 +1078,8 @@ class VariablesDefinition(MutableMap):
                 LOGGER.verbose('found variables file: %s', result)
                 return result
 
-        LOGGER.info('Could not find %s in the current directory. '
-                    'Continuing without a variables file.',
+        LOGGER.info('could not find %s in the current directory; '
+                    'continuing without a variables file',
                     ' or '.join(cls.default_names))
         return None
 
@@ -1107,8 +1107,8 @@ class VariablesDefinition(MutableMap):
         LOGGER.debug('attempting to load variables files: %s',
                      file_path)
         if not os.path.isfile(file_path):
-            LOGGER.error('The provided variables "%s" file could not '
-                         'be found.', file_path)
+            LOGGER.error('provided variables file "%s" could not '
+                         'be found', file_path)
             sys.exit(1)
 
         with open(file_path) as data_file:
@@ -1234,7 +1234,7 @@ class Config(ConfigComponent):
 
         if config_file:
             LOGGER.warning(
-                'Invalid keys found in runway file have been ignored: %s',
+                'invalid keys found in runway file have been ignored: %s',
                 ', '.join(config_file.keys())
             )
         LOGGER.debug('config loaded')
