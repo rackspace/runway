@@ -660,10 +660,10 @@ class TerraformBackendConfig(ModuleOptions):
                             self.config_file.name)
                 return ['-backend-config=' + self.config_file.name]
             LOGGER.info(
-                "backend tfvars file not found -- looking for one "
+                "backend file not found -- looking for one "
                 "of: %s",
                 ', '.join(
-                    self.gen_backend_tfvars_filenames(
+                    self.gen_backend_filenames(
                         self.__ctx.env.name,
                         self.__ctx.env.aws_region
                     )
@@ -736,8 +736,8 @@ class TerraformBackendConfig(ModuleOptions):
                 for key, val in kwargs.items()}
 
     @staticmethod
-    def gen_backend_tfvars_filenames(environment, region):
-        """Generate possible Terraform backend tfvars filenames.
+    def gen_backend_filenames(environment, region):
+        """Generate possible Terraform backend filenames.
 
         Args:
             environment (str): Current deploy environment.
@@ -747,15 +747,24 @@ class TerraformBackendConfig(ModuleOptions):
             List[str]: List of possible file names.
 
         """
-        return [
-            "backend-%s-%s.tfvars" % (environment, region),
-            "backend-%s.tfvars" % environment,
-            "backend-%s.tfvars" % region,
-            "backend.tfvars"
+        formats = [
+            'backend-{environment}-{region}.{extension}',
+            'backend-{environment}.{extension}',
+            'backend*{region}.{extension}',
+            'backend.{extension}'
         ]
+        result = []
+        for fmt in formats:
+            for ext in ['hcl', 'tfvars']:
+                result.append(fmt.format(
+                    environment=environment,
+                    extension=ext,
+                    region=region
+                ))
+        return result
 
     @classmethod
-    def get_backend_tfvars_file(cls, path, environment, region):
+    def get_backend_file(cls, path, environment, region):
         """Determine Terraform backend file.
 
         Args:
@@ -764,11 +773,10 @@ class TerraformBackendConfig(ModuleOptions):
             region (str): Current AWS region.
 
         Returns:
-            Optional[str]: Path to a .tfvars file.
+            Optional[Path]: Path to a hcl/tfvars file.
 
         """
-        backend_filenames = cls.gen_backend_tfvars_filenames(environment,
-                                                             region)
+        backend_filenames = cls.gen_backend_filenames(environment, region)
         for name in backend_filenames:
             test_path = path / name
             if test_path.is_file():
@@ -821,7 +829,7 @@ class TerraformBackendConfig(ModuleOptions):
             result['region'] = context.env.aws_region
 
         if path:
-            result['config_file'] = cls.get_backend_tfvars_file(
+            result['config_file'] = cls.get_backend_file(
                 path, context.env.name, context.env.aws_region
             )
         return cls(context=context, **result)
