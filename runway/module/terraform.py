@@ -6,8 +6,9 @@ import re
 import subprocess
 import sys
 
-from send2trash import send2trash
 from six import string_types
+
+from send2trash import send2trash
 
 from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
@@ -74,7 +75,7 @@ class Terraform(RunwayModule):
 
         """
         options = options or {}
-        super(Terraform, self).__init__(context, path, options)
+        super(Terraform, self).__init__(context.copy(), path, options)
         del self.options  # remove the attr set by the parent class
 
         # logger needs to be created here to use the correct logger
@@ -227,6 +228,64 @@ class Terraform(RunwayModule):
             cmd.append('-no-color')
         return cmd
 
+    def handle_backend(self):
+        """Handle backend configuration.
+
+        This needs to be run before "skip" is assessed or env_file/auto_tfvars
+        is used in case their behavior needs to be altered.
+
+        """
+        if not self.tfenv.backend['type']:
+            self.logger.info(
+                'unable to determine backend for module; no special handling'
+                'will be applied'
+            )
+            return
+        try:
+            self['_%s_backend_handler' % self.tfenv.backend['type']]()
+        except AttributeError:
+            self.logger.debug(
+                'backed "%s" does not require special handling',
+                self.tfenv.backend['type'], exc_info=True
+            )
+
+    def _remote_backend_handler(self):
+        """Handle special setting required for using a remote backend."""
+        if not self.tfenv.backend['config'].get('workspaces'):
+            self.logger.warning(
+                '"workspaces" not defined in backend config; unable to '
+                'apply appropriate handling -- processing may fail'
+            )
+            return
+
+        if self.tfenv.backend['config']['workspaces'].get('prefix'):
+            self.logger.debug(
+                'handling use of backend config: remote.workspaces.prefix'
+            )
+            self.context.env.vars.update({'TF_WORKSPACE': self.context.env.name})
+            self.logger.debug(
+                'set environment variable "TF_WORKSPACE" to avoid prompt '
+                'during init by pre-selecting an appropriate workspace'
+            )
+            self.logger.debug(
+                'forcing parameters to be written to an runway-parameters.auto.tfvars'
+            )
+            # this is because variables cannot be added inline or via environment
+            # variables when using a remote backend
+            self.options.write_auto_tfvars = True
+
+        if self.tfenv.backend['config']['workspaces'].get('name'):
+            self.logger.debug(
+                'handling use of backend config: remote.workspaces.name'
+            )
+            # this can't be set or it will cause errors
+            self.context.env.vars.pop('TF_WORKSPACE', None)
+            self.required_workspace = 'default'
+            self.logger.info(
+                'forcing use of static workspace "default"; '
+                'required for use of "backend.remote.workspaces.name"'
+            )
+
     def handle_parameters(self):
         """Handle parameters.
 
@@ -236,7 +295,6 @@ class Terraform(RunwayModule):
         if self.auto_tfvars.exists():
             return
 
-        self.context = self.context.copy()
         self.context.env.vars = update_env_vars_with_tf_var_values(
             self.context.env.vars, self.parameters
         )
@@ -402,6 +460,7 @@ class Terraform(RunwayModule):
     def run(self, command):
         """Run module."""
         try:
+            self.handle_backend()
             if self.skip:
                 return
             self.handle_parameters()
