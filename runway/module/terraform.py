@@ -8,6 +8,7 @@ import sys
 
 from six import string_types
 
+import hcl
 from send2trash import send2trash
 
 from .._logging import PrefixAdaptor
@@ -241,6 +242,15 @@ class Terraform(RunwayModule):
                 'will be applied'
             )
             return
+        handler = '_%s_backend_handler' % self.tfenv.backend['type']
+        if hasattr(self, handler):
+            self.tfenv.backend['config'].update(
+                self.options.backend_config.get_full_configuration()
+            )
+            self.logger.debug(
+                'full backend config: %s',
+                json.dumps(self.tfenv.backend['config'])
+            )
         try:
             self['_%s_backend_handler' % self.tfenv.backend['type']]()
         except AttributeError:
@@ -624,7 +634,7 @@ class TerraformBackendConfig(ModuleOptions):
                'terraform_backend_cfn_outputs',
                'terraform_backend_ssm_params']
 
-    def __init__(self, context, filename=None, **kwargs):
+    def __init__(self, context, config_file=None, **kwargs):
         """Instantiate class.
 
         See Terraform documentation for the keyword arguments needed for the
@@ -636,7 +646,7 @@ class TerraformBackendConfig(ModuleOptions):
         super(TerraformBackendConfig, self).__init__()
         self.__ctx = context
         self._raw_config = kwargs
-        self.filename = filename
+        self.config_file = config_file
 
     @cached_property
     def init_args(self):
@@ -645,10 +655,10 @@ class TerraformBackendConfig(ModuleOptions):
         for k, v in self._raw_config.items():
             result.extend(['-backend-config', '{}={}'.format(k, v)])
         if not result:
-            if self.filename:
+            if self.config_file:
                 LOGGER.info('using backend config file: %s',
-                            self.filename)
-                return ['-backend-config=' + self.filename]
+                            self.config_file.name)
+                return ['-backend-config=' + self.config_file.name]
             LOGGER.info(
                 "backend tfvars file not found -- looking for one "
                 "of: %s",
@@ -662,6 +672,14 @@ class TerraformBackendConfig(ModuleOptions):
             return []
         LOGGER.info('using backend values from runway.yml')
         LOGGER.debug('provided backend values: %s', json.dumps(result))
+        return result
+
+    def get_full_configuration(self):
+        """Get full backend configuration."""
+        if not self.config_file:
+            return self._raw_config
+        result = hcl.loads(self.config_file.read_text())
+        result.update(self._raw_config)
         return result
 
     @staticmethod
@@ -752,8 +770,9 @@ class TerraformBackendConfig(ModuleOptions):
         backend_filenames = cls.gen_backend_tfvars_filenames(environment,
                                                              region)
         for name in backend_filenames:
-            if (path / name).is_file():
-                return name
+            test_path = path / name
+            if test_path.is_file():
+                return test_path
         return None
 
     @classmethod
@@ -802,7 +821,7 @@ class TerraformBackendConfig(ModuleOptions):
             result['region'] = context.env.aws_region
 
         if path:
-            result['filename'] = cls.get_backend_tfvars_file(path,
-                                                             context.env.name,
-                                                             context.env.aws_region)
+            result['config_file'] = cls.get_backend_tfvars_file(
+                path, context.env.name, context.env.aws_region
+            )
         return cls(context=context, **result)
