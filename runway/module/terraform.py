@@ -254,7 +254,7 @@ class Terraform(RunwayModule):
         try:
             self['_%s_backend_handler' % self.tfenv.backend['type']]()
         except AttributeError:
-            self.logger.debug(
+            self.logger.verbose(
                 'backed "%s" does not require special handling',
                 self.tfenv.backend['type'], exc_info=True
             )
@@ -268,24 +268,25 @@ class Terraform(RunwayModule):
             )
             return
 
+        self.logger.verbose(
+            'forcing parameters to be written to runway-parameters.auto.tfvars.json'
+        )
+        # this is because variables cannot be added inline or via environment
+        # variables when using a remote backend
+        self.options.write_auto_tfvars = True
+
         if self.tfenv.backend['config']['workspaces'].get('prefix'):
-            self.logger.debug(
+            self.logger.verbose(
                 'handling use of backend config: remote.workspaces.prefix'
             )
             self.context.env.vars.update({'TF_WORKSPACE': self.context.env.name})
-            self.logger.debug(
+            self.logger.verbose(
                 'set environment variable "TF_WORKSPACE" to avoid prompt '
                 'during init by pre-selecting an appropriate workspace'
             )
-            self.logger.debug(
-                'forcing parameters to be written to an runway-parameters.auto.tfvars'
-            )
-            # this is because variables cannot be added inline or via environment
-            # variables when using a remote backend
-            self.options.write_auto_tfvars = True
 
         if self.tfenv.backend['config']['workspaces'].get('name'):
-            self.logger.debug(
+            self.logger.verbose(
                 'handling use of backend config: remote.workspaces.name'
             )
             # this can't be set or it will cause errors
