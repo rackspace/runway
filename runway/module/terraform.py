@@ -751,7 +751,7 @@ class TerraformBackendConfig(ModuleOptions):
         formats = [
             'backend-{environment}-{region}.{extension}',
             'backend-{environment}.{extension}',
-            'backend*{region}.{extension}',
+            'backend-{region}.{extension}',
             'backend.{extension}'
         ]
         result = []
