@@ -1,7 +1,6 @@
 """Terraform module."""
 import json
 import logging
-import os
 import re
 import subprocess
 import sys
@@ -34,14 +33,6 @@ def gen_workspace_tfvars_files(environment, region):
         # Fallback to environment name only
         "%s.tfvars" % environment
     ]
-
-
-def get_workspace_tfvars_file(path, environment, region):
-    """Determine Terraform workspace-specific tfvars file name."""
-    for name in gen_workspace_tfvars_files(environment, region):
-        if os.path.isfile(os.path.join(path, name)):
-            return name
-    return "%s.tfvars" % environment  # fallback to generic name
 
 
 def update_env_vars_with_tf_var_values(os_env_vars, tf_vars):
@@ -97,21 +88,21 @@ class Terraform(RunwayModule):
     @cached_property
     def auto_tfvars(self):
         """Return auto.tfvars file if one is being used."""
-        try:
-            if self.tfenv.current_version:
-                current_version = tuple(
-                    int(i) for i in self.tfenv.current_version.split('.')
-                )
-                if current_version < (0, 10):
-                    self.logger.warning(
-                        'Terraform version does not support the use of '
-                        '*.auto.tfvars; some variables may be missing'
-                    )
-        except Exception:  # pylint: disable=broad-except
-            self.logger.debug('unable to parse current version',
-                              exc_info=True)
         file_path = self.path / 'runway-parameters.auto.tfvars.json'
         if self.parameters and self.options.write_auto_tfvars:
+            try:
+                if self.tfenv.current_version:
+                    current_version = tuple(
+                        int(i) for i in self.tfenv.current_version.split('.')
+                    )
+                    if current_version < (0, 10):
+                        self.logger.warning(
+                            'Terraform version does not support the use of '
+                            '*.auto.tfvars; some variables may be missing'
+                        )
+            except Exception:  # pylint: disable=broad-except
+                self.logger.debug('unable to parse current version',
+                                  exc_info=True)
             file_path.write_text(json.dumps(self.parameters, indent=4))
         return file_path
 
@@ -251,9 +242,8 @@ class Terraform(RunwayModule):
                 'full backend config: %s',
                 json.dumps(self.tfenv.backend['config'])
             )
-        try:
             self['_%s_backend_handler' % self.tfenv.backend['type']]()
-        except AttributeError:
+        else:
             self.logger.verbose(
                 'backed "%s" does not require special handling',
                 self.tfenv.backend['type'], exc_info=True
@@ -369,9 +359,12 @@ class Terraform(RunwayModule):
             ]
         )
         try:
-            # could this use check_output instead?
-            run_module_command(cmd, self.context.env.vars,
-                               exit_on_error=False, logger=self.logger)
+            run_module_command(
+                cmd,
+                env_vars=self.context.env.vars,
+                exit_on_error=False,
+                logger=self.logger
+            )
         except subprocess.CalledProcessError as shelloutexc:
             # An error during initialization can leave things in an inconsistent
             # state (e.g. backend configured but no providers downloaded). Marking
@@ -421,7 +414,6 @@ class Terraform(RunwayModule):
             workspace (str): Terraform workspace to create.
 
         """
-        # TODO skip when using remote backend
         self.logger.debug('creating workspace: %s', workspace)
         run_module_command(
             self.gen_command(['workspace', 'new'], [workspace]),
@@ -468,7 +460,7 @@ class Terraform(RunwayModule):
         self.logger.debug('current Terraform workspace: %s', workspace)
         return workspace
 
-    def run(self, command):
+    def run(self, action):
         """Run module."""
         try:
             self.handle_backend()
@@ -487,9 +479,9 @@ class Terraform(RunwayModule):
                 self.terraform_init()
             self.logger.info('init (complete)')
             self.terraform_get()
-            self.logger.info('%s (in progress)', command)
-            self['terraform_' + command]()
-            self.logger.info('%s (complete)', command)
+            self.logger.info('%s (in progress)', action)
+            self['terraform_' + action]()
+            self.logger.info('%s (complete)', action)
         finally:
             if self.auto_tfvars.exists():
                 self.auto_tfvars.unlink()
@@ -657,8 +649,8 @@ class TerraformBackendConfig(ModuleOptions):
             result.extend(['-backend-config', '{}={}'.format(k, v)])
         if not result:
             if self.config_file:
-                LOGGER.info('using backend config file: %s',
-                            self.config_file.name)
+                LOGGER.verbose('using backend config file: %s',
+                               self.config_file.name)
                 return ['-backend-config=' + self.config_file.name]
             LOGGER.info(
                 "backend file not found -- looking for one "

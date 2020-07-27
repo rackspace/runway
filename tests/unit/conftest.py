@@ -148,7 +148,7 @@ def runway_context(request):
     env_vars = {
         'AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),
         'DEFAULT_AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),
-        'DEPLOY_ENVIRONMET': getattr(request.module, 'DEPLOY_ENVIRONMET', 'test')
+        'DEPLOY_ENVIRONMENT': getattr(request.module, 'DEPLOY_ENVIRONMENT', 'test')
     }
     creds = {
         'AWS_ACCESS_KEY_ID': 'test_access_key',
