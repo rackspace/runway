@@ -2,15 +2,17 @@
 import logging
 import os
 import sys
-from typing import (Any, Iterator, List, Optional,  # noqa pylint: disable=W
-                    Tuple)
+from typing import Any, Iterator, List, Optional, Tuple  # noqa pylint: disable=W
 
 import click
 import yaml
 from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
-from ..config import (Config, DeploymentDefinition,  # noqa pylint: disable=W
-                      ModuleDefinition)
+from ..config import (  # noqa pylint: disable=W
+    Config,
+    DeploymentDefinition,
+    ModuleDefinition,
+)
 from ..context import Context as RunwayContext
 from ..core.components import DeployEnvironment
 from ..util import cached_property

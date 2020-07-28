@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-
 from aws_cdk import core
-
 from hello1.hello_stack import MyStack1
 from hello2.hello_stack import MyStack2
 

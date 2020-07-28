@@ -6,9 +6,16 @@ import unittest
 from yaml.constructor import ConstructorError
 
 from runway.cfngin import exceptions
-from runway.cfngin.config import (Config, Stack, dump, load, parse,
-                                  process_remote_sources, render,
-                                  render_parse_load)
+from runway.cfngin.config import (
+    Config,
+    Stack,
+    dump,
+    load,
+    parse,
+    process_remote_sources,
+    render,
+    render_parse_load,
+)
 from runway.cfngin.environment import parse_environment
 from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
 

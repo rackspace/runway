@@ -1,12 +1,8 @@
 """Tests for runway.cfngin.actions.diff."""
 import unittest
-
 from operator import attrgetter
-from runway.cfngin.actions.diff import (
-    diff_dictionaries,
-    diff_parameters,
-    DictValue
-)
+
+from runway.cfngin.actions.diff import DictValue, diff_dictionaries, diff_parameters
 
 
 class TestDictValueFormat(unittest.TestCase):

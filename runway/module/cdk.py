@@ -1,5 +1,4 @@
 """CDK module."""
-
 import logging
 import os
 import subprocess
@@ -7,8 +6,13 @@ import sys
 
 from .._logging import PrefixAdaptor
 from ..util import change_dir, run_commands, which
-from . import (RunwayModule, generate_node_command, run_module_command,
-               run_npm_install, warn_on_boto_env_vars)
+from . import (
+    RunwayModule,
+    generate_node_command,
+    run_module_command,
+    run_npm_install,
+    warn_on_boto_env_vars,
+)
 
 LOGGER = logging.getLogger(__name__)
 

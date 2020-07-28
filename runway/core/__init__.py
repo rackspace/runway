@@ -4,14 +4,14 @@ from __future__ import print_function  # TODO remove when dripping python 2
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
-from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
-                    Optional)
+from typing import TYPE_CHECKING, Any, Dict, List, Optional  # noqa pylint: disable=W
 
 import yaml as _yaml
+
 from .._logging import PrefixAdaptor as _PrefixAdaptor
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
-from ..util import YamlDumper as _YamlDumper
 from ..util import DOC_SITE
+from ..util import YamlDumper as _YamlDumper
 from . import components, providers
 
 if TYPE_CHECKING:

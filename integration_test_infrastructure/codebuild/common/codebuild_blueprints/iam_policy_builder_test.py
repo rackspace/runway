@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 """Test suite for the iam policy builder."""
 import unittest
-from unittest.mock import (
-    create_autospec, Mock
-)
-from iam_policy_builder import (
-    IAMPolicyBuilder, IAMPolicyFinder
-)
+from unittest.mock import Mock, create_autospec
+
+from iam_policy_builder import IAMPolicyBuilder, IAMPolicyFinder
 
 
 class IAMPolicyFinderTest(unittest.TestCase):

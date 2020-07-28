@@ -6,10 +6,20 @@ import pytest
 from mock import MagicMock, call, patch
 
 from runway.cfngin.exceptions import StackFailed
-from runway.cfngin.hooks.base import (Hook, HookBuildAction, HookDestroyAction,
-                                      HookStackDefinition)
-from runway.cfngin.status import (COMPLETE, FAILED, SKIPPED, SUBMITTED,
-                                  CompleteStatus, SubmittedStatus)
+from runway.cfngin.hooks.base import (
+    Hook,
+    HookBuildAction,
+    HookDestroyAction,
+    HookStackDefinition,
+)
+from runway.cfngin.status import (
+    COMPLETE,
+    FAILED,
+    SKIPPED,
+    SUBMITTED,
+    CompleteStatus,
+    SubmittedStatus,
+)
 
 COMPLETE_W_REASON = CompleteStatus('test successful')
 

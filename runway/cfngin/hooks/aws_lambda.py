@@ -19,8 +19,7 @@ import formic
 from six import string_types
 from troposphere.awslambda import Code
 
-from ..exceptions import (InvalidDockerizePipConfiguration, PipenvError,
-                          PipError)
+from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..session_cache import get_session
 from ..util import ensure_s3_bucket
 

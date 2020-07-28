@@ -7,19 +7,29 @@ by the primary stack.
 from __future__ import print_function
 
 import json
-import os
 import logging
+import os
 from typing import Any, Dict, Union  # pylint: disable=unused-import
 
 import awacs.awslambda
 import awacs.cloudformation
 import awacs.iam
 import awacs.logs
-
 from awacs.aws import Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (AccountId, Join, NoValue, Output, Partition, Region,
-                         StackName, Sub, awslambda, iam, stepfunctions)
+from troposphere import (
+    AccountId,
+    Join,
+    NoValue,
+    Output,
+    Partition,
+    Region,
+    StackName,
+    Sub,
+    awslambda,
+    iam,
+    stepfunctions,
+)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.util import read_value_from_path

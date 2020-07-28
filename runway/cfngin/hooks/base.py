@@ -1,8 +1,8 @@
 """Base class for CFNgin hooks."""
 import logging
 
-from troposphere import Tags
 from six.moves import UserDict
+from troposphere import Tags
 
 from runway.util import MutableMap
 

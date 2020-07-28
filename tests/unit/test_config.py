@@ -7,10 +7,10 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 import yaml
+
 from runway.cfngin.exceptions import UnresolvedVariable
-from runway.config import (DeploymentDefinition, FutureDefinition,
-                           ModuleDefinition)
 # tries to test the imported class unless using "as"
+from runway.config import DeploymentDefinition, FutureDefinition, ModuleDefinition
 from runway.config import TestDefinition as ConfigTestDefinition
 from runway.config import VariablesDefinition
 from runway.util import MutableMap

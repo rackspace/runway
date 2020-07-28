@@ -6,8 +6,7 @@ import sys
 import click
 
 from ... import options
-from .utils import (TEMPLATES, convert_gitignore, copy_sample,
-                    write_tfstate_template)
+from .utils import TEMPLATES, convert_gitignore, copy_sample, write_tfstate_template
 
 if sys.version_info.major > 2:
     from pathlib import Path  # pylint: disable=E

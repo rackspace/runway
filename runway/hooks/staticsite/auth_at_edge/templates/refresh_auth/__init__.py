@@ -1,11 +1,15 @@
 """Refresh authorization token for new credentials."""
-
 import logging
 import traceback
-from urllib.parse import parse_qs # noqa pylint: disable=no-name-in-module, import-error
+from urllib.parse import parse_qs  # noqa pylint: disable=E
 
-from shared import (create_error_html, extract_and_parse_cookies, get_config,  # noqa pylint: disable=import-error
-                    get_cookie_headers, http_post_with_retry)
+from shared import (  # noqa pylint: disable=import-error
+    create_error_html,
+    extract_and_parse_cookies,
+    get_config,
+    get_cookie_headers,
+    http_post_with_retry,
+)
 
 LOGGER = logging.getLogger(__name__)
 CONFIG = get_config()

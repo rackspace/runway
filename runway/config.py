@@ -5,8 +5,15 @@ import os
 import sys
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=E
-from typing import (TYPE_CHECKING, Any, Dict,  # pylint: disable=unused-import
-                    Iterator, List, Optional, Union)
+from typing import (  # pylint: disable=unused-import
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Union,
+)
 
 import yaml
 from six import string_types

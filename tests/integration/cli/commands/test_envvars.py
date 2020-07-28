@@ -4,10 +4,9 @@ import sys
 
 import pytest
 from click.testing import CliRunner
-
 from mock import MagicMock
-from runway._cli import cli
 
+from runway._cli import cli
 
 POSIX_OUTPUT = ('export TEST_VAR_01="deployment_1"\n'
                 'export TEST_VAR_SHARED="deployment_2"\n'

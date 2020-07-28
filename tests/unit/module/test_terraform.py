@@ -9,8 +9,11 @@ import pytest
 from botocore.stub import Stubber
 from mock import patch
 
-from runway.module.terraform import (TerraformBackendConfig, TerraformOptions,
-                                     update_env_vars_with_tf_var_values)
+from runway.module.terraform import (
+    TerraformBackendConfig,
+    TerraformOptions,
+    update_env_vars_with_tf_var_values,
+)
 
 
 @contextmanager

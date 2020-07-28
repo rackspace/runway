@@ -16,11 +16,9 @@ import yaml
 from runway.hooks.staticsite.util import get_hash_of_files
 
 from .._logging import PrefixAdaptor
-from ..s3_util import (does_s3_object_exist, download, ensure_bucket_exists,
-                       upload)
+from ..s3_util import does_s3_object_exist, download, ensure_bucket_exists, upload
 from ..util import YamlDumper, cached_property, merge_dicts
-from . import (ModuleOptions, RunwayModuleNpm, generate_node_command,
-               run_module_command)
+from . import ModuleOptions, RunwayModuleNpm, generate_node_command, run_module_command
 
 LOGGER = logging.getLogger(__name__)
 

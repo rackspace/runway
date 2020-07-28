@@ -7,17 +7,30 @@ import logging
 import os
 from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 
-import awacs.s3
-import awacs.sts
-import awacs.logs
-import awacs.iam
 import awacs.awslambda
+import awacs.iam
+import awacs.logs
+import awacs.s3
 import awacs.states
-from awacs.aws import (Action, Allow, Policy, PolicyDocument, Principal,
-                       Statement)
+import awacs.sts
+from awacs.aws import Action, Allow, Policy, PolicyDocument, Principal, Statement
 from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (AccountId, Join, NoValue, Output, Partition, Region, StackName, Sub, # noqa pylint: disable=unused-import
-                         awslambda, cloudfront, iam, logs, s3, stepfunctions)
+from troposphere import (  # noqa pylint: disable=unused-import
+    AccountId,
+    Join,
+    NoValue,
+    Output,
+    Partition,
+    Region,
+    StackName,
+    Sub,
+    awslambda,
+    cloudfront,
+    iam,
+    logs,
+    s3,
+    stepfunctions,
+)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.context import Context

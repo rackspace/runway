@@ -1,14 +1,28 @@
 """CFNgin build action."""
 import logging
 
-from ..exceptions import (CancelExecution, MissingParameterException,
-                          StackDidNotChange, StackDoesNotExist)
+from ..exceptions import (
+    CancelExecution,
+    MissingParameterException,
+    StackDidNotChange,
+    StackDoesNotExist,
+)
 from ..hooks import utils
 from ..plan import Graph, Plan, Step
 from ..providers.base import Template
-from ..status import (COMPLETE, INTERRUPTED, PENDING, SUBMITTED, WAITING,
-                      CompleteStatus, DidNotChangeStatus, FailedStatus,
-                      NotSubmittedStatus, NotUpdatedStatus, SkippedStatus)
+from ..status import (
+    COMPLETE,
+    INTERRUPTED,
+    PENDING,
+    SUBMITTED,
+    WAITING,
+    CompleteStatus,
+    DidNotChangeStatus,
+    FailedStatus,
+    NotSubmittedStatus,
+    NotUpdatedStatus,
+    SkippedStatus,
+)
 from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from ..status import SubmittedStatus
 from .base import STACK_POLL_TIME, BaseAction, build_walker

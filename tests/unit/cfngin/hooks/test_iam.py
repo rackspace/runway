@@ -6,8 +6,7 @@ from awacs.helpers.trust import get_ecs_assumerole_policy
 from botocore.exceptions import ClientError
 from moto import mock_iam
 
-from runway.cfngin.hooks.iam import (_get_cert_arn_from_response,
-                                     create_ecs_service_role)
+from runway.cfngin.hooks.iam import _get_cert_arn_from_response, create_ecs_service_role
 
 from ..factories import mock_context, mock_provider
 

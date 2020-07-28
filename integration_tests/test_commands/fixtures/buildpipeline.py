@@ -4,11 +4,6 @@ from __future__ import print_function
 
 from os import path
 
-from troposphere import (
-    AWSHelperFn, AccountId, Join, Output, Partition, Region, awslambda,
-    codecommit, codebuild, codepipeline, events, iam, s3
-)
-
 import awacs.awslambda
 import awacs.codebuild
 import awacs.codecommit
@@ -18,10 +13,25 @@ import awacs.s3
 import awacs.ssm
 from awacs.aws import Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
+from troposphere import (
+    AccountId,
+    AWSHelperFn,
+    Join,
+    Output,
+    Partition,
+    Region,
+    awslambda,
+    codebuild,
+    codecommit,
+    codepipeline,
+    events,
+    iam,
+    s3,
+)
 
-from stacker.lookups.handlers.file import parameterized_codec
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import CFNString
+from stacker.lookups.handlers.file import parameterized_codec
 
 AWS_LAMBDA_DIR = path.join(path.dirname(path.realpath(__file__)),
                            'aws_lambda')

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """Clean out old ECR images."""
-from builtins import input  # pylint: disable=redefined-builtin
-
-import os
 import logging
+import os
+from builtins import input  # pylint: disable=redefined-builtin
 
 import boto3
 

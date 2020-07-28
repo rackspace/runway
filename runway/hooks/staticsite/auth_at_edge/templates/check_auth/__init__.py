@@ -14,14 +14,21 @@ import datetime
 import hashlib
 import json
 import logging
-import secrets  # pylint: disable=import-error
 import re
-from urllib.parse import quote_plus, urlencode  # noqa pylint: disable=no-name-in-module, import-error
+import secrets  # pylint: disable=import-error
+from urllib.parse import (  # noqa pylint: disable=no-name-in-module, import-error
+    quote_plus,
+    urlencode,
+)
 
 from jose import jwt  # pylint: disable=import-error
 
 from jwks_rsa.client import JwksClient  # pylint: disable=import-error
-from shared import decode_token, extract_and_parse_cookies, get_config  # noqa pylint: disable=import-error
+from shared import (  # noqa pylint: disable=import-error
+    decode_token,
+    extract_and_parse_cookies,
+    get_config,
+)
 
 LOGGER = logging.getLogger(__file__)
 

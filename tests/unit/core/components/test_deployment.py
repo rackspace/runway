@@ -7,8 +7,7 @@ import pytest
 from mock import MagicMock, PropertyMock, call, patch
 
 from runway.cfngin.exceptions import UnresolvedVariable
-from runway.config import (DeploymentDefinition, FutureDefinition,
-                           VariablesDefinition)
+from runway.config import DeploymentDefinition, FutureDefinition, VariablesDefinition
 from runway.core.components import Deployment
 
 MODULE = 'runway.core.components._deployment'

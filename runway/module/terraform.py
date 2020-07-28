@@ -13,8 +13,7 @@ from six import string_types
 from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
 from ..env_mgr.tfenv import TFEnvManager
-from ..util import (DOC_SITE, cached_property, change_dir, find_cfn_output,
-                    which)
+from ..util import DOC_SITE, cached_property, change_dir, find_cfn_output, which
 from . import ModuleOptions, RunwayModule, run_module_command
 
 FAILED_INIT_FILENAME = '.init_failed'

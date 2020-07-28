@@ -1,16 +1,21 @@
 """Runway deployment object."""
 import logging
 import sys
-from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
-                    Optional, Union)
+from typing import (  # noqa pylint: disable=W
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Union,
+)
 
 import six
 
 from ..._logging import PrefixAdaptor
 from ...cfngin.exceptions import UnresolvedVariable
 from ...config import FutureDefinition, VariablesDefinition
-from ...util import (cached_property, merge_dicts,
-                     merge_nested_environment_dicts)
+from ...util import cached_property, merge_dicts, merge_nested_environment_dicts
 from ..providers import aws
 from ._module import Module
 

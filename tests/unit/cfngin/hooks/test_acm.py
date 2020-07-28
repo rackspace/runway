@@ -9,8 +9,11 @@ from botocore.stub import ANY, Stubber
 from mock import MagicMock
 from troposphere.certificatemanager import Certificate as CertificateResource
 
-from runway.cfngin.exceptions import (StackDoesNotExist, StackFailed,
-                                      StackUpdateBadStatus)
+from runway.cfngin.exceptions import (
+    StackDoesNotExist,
+    StackFailed,
+    StackUpdateBadStatus,
+)
 from runway.cfngin.hooks.acm import Certificate
 from runway.cfngin.status import FAILED, NO_CHANGE, SubmittedStatus
 from runway.util import MutableMap

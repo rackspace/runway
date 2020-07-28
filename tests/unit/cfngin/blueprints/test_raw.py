@@ -4,9 +4,11 @@ import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.blueprints.raw import (RawTemplateBlueprint,
-                                          get_template_params,
-                                          get_template_path)
+from runway.cfngin.blueprints.raw import (
+    RawTemplateBlueprint,
+    get_template_params,
+    get_template_path,
+)
 from runway.variables import Variable
 
 from ..factories import mock_context

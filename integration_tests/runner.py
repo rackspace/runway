@@ -1,10 +1,11 @@
 """Runner for integration tests."""
 from __future__ import print_function
-import os
+
 import logging
+import os
 
 from .integration_test import IntegrationTest
-from .util import (execute_tests, import_tests)
+from .util import execute_tests, import_tests
 
 
 class Runner(object):

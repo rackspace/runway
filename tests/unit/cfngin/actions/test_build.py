@@ -7,9 +7,11 @@ from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin import exceptions
 from runway.cfngin.actions import build
-from runway.cfngin.actions.build import (UsePreviousParameterValue,
-                                         _handle_missing_parameters,
-                                         _resolve_parameters)
+from runway.cfngin.actions.build import (
+    UsePreviousParameterValue,
+    _handle_missing_parameters,
+    _resolve_parameters,
+)
 from runway.cfngin.blueprints.variables.types import CFNString
 from runway.cfngin.context import Config, Context
 from runway.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
@@ -17,8 +19,14 @@ from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.providers.base import BaseProvider
 from runway.cfngin.session_cache import get_session
-from runway.cfngin.status import (COMPLETE, FAILED, PENDING, SKIPPED,
-                                  SUBMITTED, NotSubmittedStatus)
+from runway.cfngin.status import (
+    COMPLETE,
+    FAILED,
+    PENDING,
+    SKIPPED,
+    SUBMITTED,
+    NotSubmittedStatus,
+)
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 

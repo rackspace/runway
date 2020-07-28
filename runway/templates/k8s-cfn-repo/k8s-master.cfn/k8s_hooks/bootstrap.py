@@ -1,7 +1,8 @@
 """Execute the AWS CLI update-kubeconfig command."""
 from __future__ import print_function
-import os
+
 import logging
+import os
 import shutil
 
 import six

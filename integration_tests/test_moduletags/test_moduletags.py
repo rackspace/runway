@@ -1,5 +1,6 @@
 """Tests for module tags."""
 from __future__ import print_function
+
 import os
 from copy import deepcopy
 
@@ -7,11 +8,9 @@ import boto3
 import yaml
 from send2trash import send2trash
 
-from runway.util import change_dir
-
 from integration_tests.integration_test import IntegrationTest
-from integration_tests.util import (copy_dir, import_tests,
-                                    execute_tests, run_command)
+from integration_tests.util import copy_dir, execute_tests, import_tests, run_command
+from runway.util import change_dir
 
 CFN_CLIENT = boto3.client('cloudformation', region_name='us-east-1')
 

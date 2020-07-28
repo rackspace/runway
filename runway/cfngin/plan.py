@@ -9,10 +9,16 @@ import uuid
 from runway._logging import LogLevels, PrefixAdaptor
 
 from .dag import DAG, DAGValidationError, walk
-from .exceptions import (CancelExecution, GraphError, PersistentGraphLocked,
-                         PlanFailed)
-from .status import (COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED,
-                     FailedStatus, SkippedStatus)
+from .exceptions import CancelExecution, GraphError, PersistentGraphLocked, PlanFailed
+from .status import (
+    COMPLETE,
+    FAILED,
+    PENDING,
+    SKIPPED,
+    SUBMITTED,
+    FailedStatus,
+    SkippedStatus,
+)
 from .ui import ui
 from .util import merge_map, stack_template_key_name
 

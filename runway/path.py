@@ -1,9 +1,9 @@
 """Runway configuration 'path' settings."""
 # pylint: disable=unused-import
+import logging
+import os
 from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
-import os
-import logging
 import six
 
 from .sources.git import Git

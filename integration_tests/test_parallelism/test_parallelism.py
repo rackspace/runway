@@ -1,12 +1,11 @@
 """Testing parallelism in deployments."""
-import os
 import glob
+import os
 
 from send2trash import send2trash
 
 from integration_tests.integration_test import IntegrationTest
-from integration_tests.util import (copy_file, copy_dir, import_tests,
-                                    execute_tests)
+from integration_tests.util import copy_dir, copy_file, execute_tests, import_tests
 
 
 class Parallelism(IntegrationTest):

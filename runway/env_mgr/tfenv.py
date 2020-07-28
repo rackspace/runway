@@ -1,5 +1,4 @@
 """Terraform version management."""
-from distutils.version import LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
 import glob
 import json
 import logging
@@ -10,15 +9,16 @@ import shutil
 import sys
 import tempfile
 import zipfile
+from distutils.version import LooseVersion  # noqa pylint: disable=E
 
 import hcl
 import requests
 # Old pylint on py2.7 incorrectly flags these
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 from six.moves.urllib.error import URLError  # pylint: disable=E
+from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
-from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
 from ..util import get_hash_for_filename, sha256sum
+from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = '.terraform-version'

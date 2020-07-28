@@ -1,6 +1,6 @@
 """Execute the AWS CLI update-kubeconfig to generate your kubectl config."""
-import os
 import logging
+import os
 
 from runway.cfngin.lookups.handlers.output import OutputLookup
 from runway.cfngin.session_cache import get_session

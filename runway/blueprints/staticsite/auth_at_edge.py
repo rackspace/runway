@@ -10,11 +10,20 @@ from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 import awacs.logs
 import awacs.s3
 from awacs.aws import Allow, Principal, Statement
-from troposphere import (AccountId, Join,  # noqa pylint: disable=unused-import
-                         NoValue, Output, StackName, awslambda, cloudfront,
-                         iam, s3)
+from troposphere import (  # noqa pylint: disable=unused-import
+    AccountId,
+    Join,
+    NoValue,
+    Output,
+    StackName,
+    awslambda,
+    cloudfront,
+    iam,
+    s3,
+)
 
 from runway.cfngin.context import Context  # pylint: disable=unused-import
+
 from .staticsite import StaticSite
 
 LOGGER = logging.getLogger('runway')

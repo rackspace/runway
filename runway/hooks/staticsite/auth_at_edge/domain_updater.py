@@ -1,8 +1,13 @@
 """User Pool Client Domain Updater."""
 # pylint: disable=unused-argument
 import logging
-from typing import (TYPE_CHECKING, Any, Dict,  # pylint: disable=unused-import
-                    Optional, Union)
+from typing import (  # pylint: disable=unused-import
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Optional,
+    Union,
+)
 
 if TYPE_CHECKING:
     from ....cfngin.context import Context  # pylint: disable=W

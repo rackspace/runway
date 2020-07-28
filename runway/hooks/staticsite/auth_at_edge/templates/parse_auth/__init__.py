@@ -6,14 +6,19 @@ then inform the user of a bad request, otherwise retrieve the Cognito tokens to
 add to the cookie headers.
 """
 
+import base64
 import json
 import logging
 import traceback
-import base64
 from urllib.parse import parse_qs  # noqa pylint: disable=no-name-in-module,import-error
 
-from shared import (create_error_html, extract_and_parse_cookies, get_config,  # noqa pylint: disable=import-error
-                    get_cookie_headers, http_post_with_retry)
+from shared import (  # noqa pylint: disable=import-error
+    create_error_html,
+    extract_and_parse_cookies,
+    get_config,
+    get_cookie_headers,
+    http_post_with_retry,
+)
 
 LOGGER = logging.getLogger(__name__)
 CONFIG = get_config()
