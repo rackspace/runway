@@ -832,6 +832,7 @@ class TestTerraformBackendConfig(object):
         backend.config_file = config_file
         assert backend.get_full_configuration() == {'key1': 'val1', 'key2': 'val2'}
 
+    @pytest.mark.skipif(sys.version_info.major < 3, reason='python 2 dict is unordered')
     @pytest.mark.parametrize('input_data, expected_items', [
         ({}, []),
         ({'some-key': 'anything'}, ['some-key=anything']),
