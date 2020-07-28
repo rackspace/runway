@@ -9,7 +9,7 @@ from mock import MagicMock, patch
 
 from runway.env_mgr.tfenv import (TF_VERSION_FILENAME, TFEnvManager,
                                   get_available_tf_versions,
-                                  get_latest_tf_version, get_version_requested)
+                                  get_latest_tf_version)
 
 MODULE = 'runway.env_mgr.tfenv'
 
@@ -41,17 +41,6 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
     mock_get_available_tf_versions.assert_called_once_with(False)
     assert get_latest_tf_version(include_prerelease=True) == 'latest'
     mock_get_available_tf_versions.assert_called_with(True)
-
-
-def test_get_version_requested(tmp_path):
-    """Test runway.env_mgr.tfenv.get_version_requested."""
-    tf_version = tmp_path / TF_VERSION_FILENAME
-    with pytest.raises(SystemExit) as excinfo:
-        assert get_version_requested(tmp_path)
-    assert excinfo.value.code == 1
-
-    tf_version.write_text(six.u('0.12.0'))
-    assert get_version_requested(tmp_path) == '0.12.0'
 
 
 class TestTFEnvManager(object):
@@ -102,15 +91,33 @@ class TestTFEnvManager(object):
         })
         assert tfenv.get_min_required() == '0.12.0'
 
+    def test_get_version_from_file(self, tmp_path):
+        """Test get_version_from_file."""
+        tfenv = TFEnvManager(tmp_path)
+
+        # no version file or path
+        assert not tfenv.get_version_from_file()
+        del tfenv.version_file
+
+        # path provided
+        version_file = tmp_path / '.version'
+        version_file.write_text(six.u('0.11.5'))
+        assert tfenv.get_version_from_file(version_file) == '0.11.5'
+
+        # path not provided; use version file
+        version_file = tmp_path / TF_VERSION_FILENAME
+        version_file.write_text(six.u('0.12.0'))
+        assert tfenv.get_version_from_file(version_file) == '0.12.0'
+
     @patch(MODULE + '.get_available_tf_versions')
-    @patch(MODULE + '.get_version_requested')
     @patch(MODULE + '.download_tf_release')
-    def test_install(self, mock_download, mock_get_version_requested,
+    def test_install(self, mock_download,
                      mock_available_versions, monkeypatch, tmp_path):
         """Test install."""
         mock_available_versions.return_value = ['0.12.0', '0.11.5']
-        mock_get_version_requested.return_value = '0.11.5'
         monkeypatch.setattr(TFEnvManager, 'versions_dir', tmp_path)
+        monkeypatch.setattr(TFEnvManager, 'get_version_from_file',
+                            MagicMock(return_value='0.11.5'))
         tfenv = TFEnvManager(tmp_path)
 
         assert tfenv.install('0.12.0')
@@ -187,6 +194,16 @@ class TestTFEnvManager(object):
         assert tfenv.current_version == '0.12.0'
         tfenv.get_min_required.assert_called_once_with()  # pylint: disable=no-member
 
+    def test_install_no_version(self, tmp_path):
+        """Test install with no version available."""
+        tfenv = TFEnvManager(tmp_path)
+
+        with pytest.raises(ValueError) as excinfo:
+            assert tfenv.install()
+        assert str(excinfo.value) == (
+            'version not provided and unable to find a .terraform-version file'
+        )
+
     @patch(MODULE + '.get_available_tf_versions')
     @patch(MODULE + '.download_tf_release')
     def test_install_unavailable(self, mock_download, mock_available_versions,
@@ -219,3 +236,24 @@ class TestTFEnvManager(object):
         tfenv = TFEnvManager(tmp_path)
 
         assert tfenv.terraform_block == content['terraform']
+
+    def test_version_file(self, tmp_path):
+        """Test version_file."""
+        subdir = tmp_path / 'subdir'
+        subdir.mkdir()
+        tfenv = TFEnvManager(subdir)
+
+        # no version file
+        assert not tfenv.version_file
+        del tfenv.version_file
+
+        # version file in parent dir
+        expected = tmp_path / TF_VERSION_FILENAME
+        expected.touch()
+        assert tfenv.version_file == expected
+        del tfenv.version_file
+
+        # version file in module dir
+        expected = subdir / TF_VERSION_FILENAME
+        expected.touch()
+        assert tfenv.version_file == expected

@@ -200,35 +200,29 @@ class TestTerraform(object):
         assert obj.skip == expected
 
     @patch(MODULE + '.TFEnvManager')
-    def test_tfenv(self, mock_tfenv, monkeypatch, runway_context, tmp_path):
+    def test_tfenv(self, mock_tfenv, runway_context, tmp_path):
         """Test tfenv."""
         mock_tfenv.return_value = 'tfenv'
         obj = Terraform(runway_context, tmp_path)
 
-        monkeypatch.setattr(obj, 'tf_version_file', False)
         assert obj.tfenv == 'tfenv'
         mock_tfenv.assert_called_once_with(tmp_path)
 
-        del obj.tfenv
-        monkeypatch.setattr(obj, 'tf_version_file', tmp_path)
-        assert obj.tfenv == 'tfenv'
-        mock_tfenv.assert_called_with(tmp_path.parent)
-
     def test_tf_bin_file(self, monkeypatch, runway_context, tmp_path):
         """Test tf_bin version in file."""
-        mock_tfenv = MagicMock()
+        mock_tfenv = MagicMock(version_file=True)
         mock_tfenv.install.return_value = 'success'
         monkeypatch.setattr(Terraform, 'tfenv', mock_tfenv)
-        monkeypatch.setattr(Terraform, 'tf_version_file', True)
         obj = Terraform(runway_context, tmp_path)
         assert obj.tf_bin == 'success'
-        mock_tfenv.install.assert_called_once_with()
+        mock_tfenv.install.assert_called_once_with(None)
 
     @patch(MODULE + '.which')
     def test_tf_bin_global(self, mock_which, monkeypatch,
                            runway_context, tmp_path):
         """Test tf_bin from global install."""
-        monkeypatch.setattr(Terraform, 'tf_version_file', False)
+        mock_tfenv = MagicMock(install=MagicMock(side_effect=ValueError))
+        monkeypatch.setattr(Terraform, 'tfenv', mock_tfenv)
         mock_which.return_value = True
         obj = Terraform(runway_context, tmp_path)
         assert obj.tf_bin == 'terraform'
@@ -239,7 +233,8 @@ class TestTerraform(object):
                             runway_context, tmp_path):
         """Test tf_bin missing."""
         caplog.set_level(LogLevels.ERROR, logger=MODULE)
-        monkeypatch.setattr(Terraform, 'tf_version_file', False)
+        mock_tfenv = MagicMock(install=MagicMock(side_effect=ValueError))
+        monkeypatch.setattr(Terraform, 'tfenv', mock_tfenv)
         mock_which.return_value = False
         obj = Terraform(runway_context, tmp_path)
         with pytest.raises(SystemExit) as excinfo:
@@ -262,29 +257,6 @@ class TestTerraform(object):
         obj = Terraform(runway_context, tmp_path, options=options)
         assert obj.tf_bin == 'success'
         mock_tfenv.install.assert_called_once_with('0.12.0')
-
-    def test_tf_version_file(self, runway_context, tmp_path):
-        """Test tf_version_file."""
-        subdir = tmp_path / 'subdir'
-        subdir.mkdir()
-        runway_context.env.root_dir = tmp_path
-
-        # no version file
-        obj = Terraform(runway_context, subdir)
-        assert not obj.tf_version_file
-        del obj.tf_version_file
-
-        # version file in parent directory
-        expected = tmp_path / '.terraform-version'
-        expected.touch()
-        assert obj.tf_version_file == expected
-        del obj.tf_version_file
-
-        # version file in module dir
-        expected = subdir / '.terraform-version'
-        expected.touch()
-        assert obj.tf_version_file == expected
-        del obj.tf_version_file
 
     @patch(MODULE + '.send2trash')
     def test_cleanup_failed_init(self, mock_send2trash, runway_context, tmp_path):

@@ -5,10 +5,9 @@ import re
 import subprocess
 import sys
 
-from six import string_types
-
 import hcl
 from send2trash import send2trash
+from six import string_types
 
 from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
@@ -156,25 +155,20 @@ class Terraform(RunwayModule):
     @cached_property
     def tfenv(self):
         """Terraform environmet manager."""
-        if self.tf_version_file:
-            return TFEnvManager(self.tf_version_file.parent)
         return TFEnvManager(self.path)
 
     @cached_property
     def tf_bin(self):
         """Path to Terraform binary."""
-        # TODO remove conversion to str when dropping python 2 support
-        if self.options.version:  # from runway config
+        try:
             return self.tfenv.install(self.options.version)
-        if self.tf_version_file:
-            return self.tfenv.install()
-
-        # last resort
-        self.logger.verbose(
-            'terraform version not specified; resorting to global install'
-        )
-        if which('terraform'):
-            return 'terraform'
+        except ValueError:
+            self.logger.debug('terraform install failed', exc_info=True)
+            self.logger.verbose(
+                'terraform version not specified; resorting to global install'
+            )
+            if which('terraform'):
+                return 'terraform'
         self.logger.error(
             'terraform not available and a version to install not specified'
         )
@@ -184,20 +178,6 @@ class Terraform(RunwayModule):
             DOC_SITE
         )
         sys.exit(1)
-
-    @cached_property
-    def tf_version_file(self):
-        """Find a ".terraform-version" file for the module.
-
-        Returns:
-            Path: Path to the Terraform version file.
-
-        """
-        for parent in [self.path, self.context.env.root_dir]:
-            test_path = parent / '.terraform-version'
-            if test_path.is_file():
-                return test_path
-        return None
 
     def cleanup_failed_init(self):
         """Cleanup a failed "terraform init"."""
@@ -241,6 +221,10 @@ class Terraform(RunwayModule):
             self.logger.debug(
                 'full backend config: %s',
                 json.dumps(self.tfenv.backend['config'])
+            )
+            self.logger.verbose(
+                'handling use of backend config: %s',
+                self.tfenv.backend['type']
             )
             self['_%s_backend_handler' % self.tfenv.backend['type']]()
         else:

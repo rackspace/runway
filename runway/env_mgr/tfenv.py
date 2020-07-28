@@ -11,12 +11,11 @@ import zipfile
 from distutils.version import \
     LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
 
+import hcl
 import requests
 # Old pylint on py2.7 incorrectly flags these
 from six.moves.urllib.error import URLError  # pylint: disable=E
 from six.moves.urllib.request import urlretrieve  # pylint: disable=E
-
-import hcl
 
 from ..util import cached_property, get_hash_for_filename, sha256sum
 from . import EnvManager, handle_bin_download_error
@@ -99,18 +98,6 @@ def get_latest_tf_version(include_prerelease=False):
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def get_version_requested(path):
-    """Return string listing requested Terraform version."""
-    tf_version_path = path / TF_VERSION_FILENAME
-    if not tf_version_path.is_file():
-        LOGGER.error('Terraform install attempted and no %s file present to '
-                     'dictate the version; please create it. (e.g. write '
-                     '"0.11.13", without quotes, to the file and try again)',
-                     TF_VERSION_FILENAME)
-        sys.exit(1)
-    return tf_version_path.read_text().strip()
-
-
 class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Terraform version management.
 
@@ -152,6 +139,21 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         LOGGER.debug('parsed Terraform configuration: %s', json.dumps(result))
         return result
 
+    @cached_property
+    def version_file(self):
+        """Find and return a ".terraform-version" file if one is present.
+
+        Returns:
+            Optional[Path]: Path to the Terraform version file.
+
+        """
+        for path in [self.path, self.path.parent]:
+            test_path = path / TF_VERSION_FILENAME
+            if test_path.is_file():
+                LOGGER.debug('using version file: %s', test_path)
+                return test_path
+        return None
+
     def get_min_required(self):
         """Get the defined minimum required version of Terraform.
 
@@ -179,10 +181,31 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
                      'files')
         sys.exit(1)
 
+    def get_version_from_file(self, file_path=None):
+        """Get Terraform version from a file.
+
+        Args:
+            file_path (Optional[Path]): Path to file that will be read.
+
+        """
+        file_path = file_path or self.version_file
+        if file_path and file_path.is_file():
+            return file_path.read_text().strip()
+        LOGGER.debug(
+            'file path not provided and version file could not be found'
+        )
+        return None
+
     def install(self, version_requested=None):
         """Ensure Terraform is available."""
+        version_requested = version_requested or self.get_version_from_file()
+
         if not version_requested:
-            version_requested = get_version_requested(self.path)
+            raise ValueError(
+                'version not provided and unable to find a {} file'.format(
+                    TF_VERSION_FILENAME
+                )
+            )
 
         if re.match(r'^min-required$', version_requested):
             LOGGER.debug('tfenv: detecting minimal required version')
