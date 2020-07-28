@@ -8,8 +8,7 @@ import shutil
 import sys
 import tempfile
 import zipfile
-from distutils.version import \
-    LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
+from distutils.version import LooseVersion  # noqa pylint: disable=E
 
 import hcl
 import requests

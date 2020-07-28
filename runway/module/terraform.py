@@ -192,7 +192,7 @@ class Terraform(RunwayModule):
     def gen_command(self, command, args_list=None):
         """Generate Terraform command."""
         if isinstance(command, (list, tuple)):
-            cmd = [self.tf_bin, *command]
+            cmd = [self.tf_bin] + command
         else:
             cmd = [self.tf_bin, command]
         cmd.extend(args_list or [])
@@ -290,7 +290,7 @@ class Terraform(RunwayModule):
         https://www.terraform.io/docs/commands/apply.html
 
         """
-        args_list = [*self.env_file, *self.options.args['apply']]
+        args_list = self.env_file + self.options.args['apply']
         if self.context.env.ci:
             args_list.append('-auto-approve=true')
         else:
@@ -309,7 +309,7 @@ class Terraform(RunwayModule):
         """
         run_module_command(
             self.gen_command(
-                'destroy', ['-force', *self.env_file]
+                'destroy', ['-force'] + self.env_file
             ),
             env_vars=self.context.env.vars,
             logger=self.logger
@@ -336,11 +336,8 @@ class Terraform(RunwayModule):
         """
         cmd = self.gen_command(
             'init',
-            [
-                '-reconfigure',
-                *self.options.backend_config.init_args,
-                *self.options.args['init']
-            ]
+            ['-reconfigure'] + self.options.backend_config.init_args +
+            self.options.args['init']
         )
         try:
             run_module_command(
@@ -366,7 +363,7 @@ class Terraform(RunwayModule):
         """
         run_module_command(
             self.gen_command(
-                'plan', [*self.env_file, *self.options.args['plan']]
+                'plan', self.env_file + self.options.args['plan']
             ),
             env_vars=self.context.env.vars,
             logger=self.logger
