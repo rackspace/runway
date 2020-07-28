@@ -48,10 +48,13 @@ Backend Config File
 
 Backend config options can be specified in a separate file or multiple files per environment and/or region using one of the following naming schemes.
 
-- ``backend-ENV-REGION.tfvars``
-- ``backend-ENV.tfvars``
-- ``backend-REGION.tfvars``
-- ``backend.tfvars``
+- *backend-ENV-REGION.hcl/tfvars*
+- *backend-ENV.hcl/tfvars*
+- *backend-REGION.hcl/tfvars*
+- *backend.hcl/tfvars*
+
+.. versionchanged:: 1.11.0
+    Added support for hcl files.
 
 .. rubric:: Example
 .. code-block::
@@ -77,6 +80,18 @@ runway.yml
 
 Backend config options can also be specified as a module option in the `Runway Config File`_.
 :ref:`Lookups` can be used to provide dynamic values to this option.
+
+.. important::
+  There is a *bug* in Terraform 0.12 that prevents passing blocks to ``-backend-config`` (`issue <https://github.com/hashicorp/terraform/issues/21830>`__).
+  This means that for backends that use blocks in their config (e.g. remote), the blocks must be provided via file.
+  Attributes are unaffected.
+
+  .. code-block::
+    :caption: backend.hcl
+
+    workspaces {
+      prefix = "example-"
+    }
 
 .. rubric:: Module Level
 .. code-block:: yaml
