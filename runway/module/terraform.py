@@ -6,8 +6,8 @@ import subprocess
 import sys
 
 import hcl
+import six
 from send2trash import send2trash
-from six import string_types
 
 from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
@@ -102,7 +102,7 @@ class Terraform(RunwayModule):
             except Exception:  # pylint: disable=broad-except
                 self.logger.debug('unable to parse current version',
                                   exc_info=True)
-            file_path.write_text(json.dumps(self.parameters, indent=4))
+            file_path.write_text(six.u(json.dumps(self.parameters, indent=4)))
         return file_path
 
     @cached_property
@@ -547,7 +547,7 @@ class TerraformOptions(ModuleOptions):
     @staticmethod
     def resolve_version(context, terraform_version=None, **_):
         """Resolve terraform_version option."""
-        if not terraform_version or isinstance(terraform_version, string_types):
+        if not terraform_version or isinstance(terraform_version, six.string_types):
             return terraform_version
         if isinstance(terraform_version, dict):
             return terraform_version.get(context.env.name,
