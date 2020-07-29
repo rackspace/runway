@@ -5,10 +5,18 @@ import os
 import sys
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=E
-from typing import (TYPE_CHECKING, Any, Dict,  # pylint: disable=unused-import
-                    Iterator, List, Optional, Union)
+from typing import (  # pylint: disable=unused-import
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Union,
+)
 
 import yaml
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from six import string_types
 
 from ._logging import PrefixAdaptor
@@ -1133,6 +1141,7 @@ class Config(ConfigComponent):
             ---
             # See full syntax at https://github.com/onicagroup/runway
             ignore_git_branch: true
+            runway_version: ">=1.11, <2.0"
             tests:
               - name: example
                 type: script
@@ -1152,8 +1161,9 @@ class Config(ConfigComponent):
     def __init__(self,
                  deployments,  # type: List[Dict[str, Any]]
                  future=None,  # type: Dict[str, bool]
-                 tests=None,  # type: List[Dict[str, Any]]
                  ignore_git_branch=False,  # type: bool
+                 runway_version=None,  # type: Optional[str]
+                 tests=None,  # type: List[Dict[str, Any]]
                  variables=None  # type: Optional[Dict[str, Any]]
                  # pylint only complains for python2
                  ):  # pylint: disable=bad-continuation
@@ -1166,17 +1176,23 @@ class Config(ConfigComponent):
                 that are processed in the order they are defined.
             future (Dict[str, bool]): Enable future functionality before
                 it is made standard in the next major release.
-            tests (Optional[List[Dict[str, Any]]]): A list of
-                :class:`tests<runway.config.TestDefinition>` that are
-                processed in the order they are defined.
             ignore_git_branch (bool): Disable git branch lookup when
                 using environment folders, non-git VCS, or defining the
                 ``DEPLOY_ENVIRONMENT`` environment variable before
                 execution. Note that defining ``DEPLOY_ENVIRONMENT``
                 will automatically ignore the git branch.
+            runway_version (Optional[str]): Specify a version of Runway
+                required to run use this configuration. The value of this
+                field is PEP 440 compliant.
+            tests (Optional[List[Dict[str, Any]]]): A list of
+                :class:`tests<runway.config.TestDefinition>` that are
+                processed in the order they are defined.
             variables (Optional[Dict[str, Any]]): A map that defines the
                 location of a variables file and/or the variables
                 themselves.
+
+        .. versionadded:: 1.11.0
+            The **runway_version** option.
 
         .. rubric:: Lookup Resolution
 
@@ -1187,27 +1203,47 @@ class Config(ConfigComponent):
         |                     | details on support within a deploymet         |
         |                     | definition.                                   |
         +---------------------+-----------------------------------------------+
-        | ``tests``           | No direct support. See `Test`_ for details on |
-        |                     | support within a test definition.             |
+        | ``future``          | None                                          |
         +---------------------+-----------------------------------------------+
         |``ignore_git_branch``| None                                          |
+        +---------------------+-----------------------------------------------+
+        | ``runway_version``  | None                                          |
+        +---------------------+-----------------------------------------------+
+        | ``tests``           | No direct support. See `Test`_ for details on |
+        |                     | support within a test definition.             |
         +---------------------+-----------------------------------------------+
         | ``variables``       | None                                          |
         +---------------------+-----------------------------------------------+
 
         References:
+            - https://www.python.org/dev/peps/pep-0440/#version-specifiers
             - :class:`deployment<runway.config.DeploymentDefinition>`
             - :class:`test<runway.config.TestDefinition>`
 
         """
         future = future or {}
+        runway_version = str(runway_version) if runway_version else '>1.10'
         self.deployments = DeploymentDefinition.from_list(deployments)
         self.future = FutureDefinition(**future)
-        self.tests = TestDefinition.from_list(tests)
         self.ignore_git_branch = ignore_git_branch
 
+        self.tests = TestDefinition.from_list(tests)
         variables = variables or {}
         self.variables = VariablesDefinition.load(**variables)
+
+        try:
+            self.runway_version = SpecifierSet(runway_version, prereleases=True)
+        except InvalidSpecifier:
+            if any(runway_version.startswith(i)
+                   for i in ['!', '~', '<', '>', '=']):
+                raise
+            LOGGER.debug(
+                'runway_version is not a valid version specifier; '
+                'trying as an exact version', exc_info=True
+            )
+            self.runway_version = SpecifierSet(
+                '==' + runway_version, prereleases=True
+            )
 
     @classmethod
     def load_from_file(cls, config_path):
@@ -1223,14 +1259,17 @@ class Config(ConfigComponent):
 
         LOGGER.debug('attempting to load config: %s', config_path)
         config_file = yaml.safe_load(config_path.read_text()) or {}
-        result = Config(config_file.pop('deployments'),
-                        config_file.pop('future', {}),
-                        config_file.pop('tests', []),
-                        config_file.pop('ignore_git_branch',
-                                        config_file.pop(
-                                            'ignore-git-branch',
-                                            False)),
-                        config_file.pop('variables', {}))
+        result = Config(
+            config_file.pop('deployments'),
+            future=config_file.pop('future', {}),
+            ignore_git_branch=config_file.pop(
+                'ignore_git_branch',
+                config_file.pop('ignore-git-branch', False)
+            ),
+            runway_version=config_file.pop('runway_version', None),
+            tests=config_file.pop('tests', []),
+            variables=config_file.pop('variables', {})
+        )
 
         if config_file:
             LOGGER.warning(

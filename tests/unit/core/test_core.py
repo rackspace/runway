@@ -24,6 +24,15 @@ class TestRunway(object):
         assert result.variables == runway_config.variables
         assert result.ctx == runway_context
 
+    @pytest.mark.wip
+    def test_init_unsupported_version(self, monkeypatch, runway_config,
+                                      runway_context):
+        """Test init with unsupported version."""
+        monkeypatch.setattr(MODULE + '.__version__', '0.1')
+        with pytest.raises(SystemExit) as excinfo:
+            assert not Runway(runway_config, runway_context)
+        assert excinfo.value.code == 1
+
     @patch(MODULE + '.components.Deployment')
     def test_deploy(self, mock_deployment, runway_config, runway_context):
         """Test deploy."""

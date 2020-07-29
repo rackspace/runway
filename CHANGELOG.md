@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- the `runway_version` option can be used in the config to add a required Runway [version specifier](https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 
 ## [1.10.1] - 2020-07-20
 ### Fixed
