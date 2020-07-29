@@ -184,14 +184,27 @@ class Runway(object):
 
     def __assert_config_version(self):
         """Assert the config supports this version of Runway."""
-        if __version__ not in self.required_version:
-            LOGGER.error(
-                'current Runway version "%s" does not match "%s" '
-                'required by this config file',
+        if __version__ in self.required_version:
+            LOGGER.debug(
+                'current Runway version "%s" matches "%s" required by '
+                'this config file',
                 __version__,
                 self.required_version
             )
-            _sys.exit(1)
+            return
+        if __version__.startswith('0.') and 'dev' in __version__:
+            LOGGER.warning(
+                'Runway is being used from a shallow clone of the repo; '
+                'config version will not be enforced as version cannot '
+                'be determined')
+            return
+        LOGGER.error(
+            'current Runway version "%s" does not match "%s" '
+            'required by this config file',
+            __version__,
+            self.required_version
+        )
+        _sys.exit(1)
 
     def __run_action(self, action, deployments):
         # type: (Optional[List[DeploymentDefinition]]) -> None
