@@ -1,6 +1,4 @@
 """Terraform version management."""
-from distutils.version import LooseVersion  # noqa pylint: disable=import-error,no-name-in-module
-import glob
 import json
 import logging
 import os
@@ -10,15 +8,16 @@ import shutil
 import sys
 import tempfile
 import zipfile
+from distutils.version import LooseVersion  # noqa pylint: disable=E
 
 import hcl
 import requests
 # Old pylint on py2.7 incorrectly flags these
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 from six.moves.urllib.error import URLError  # pylint: disable=E
+from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
-from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
-from ..util import get_hash_for_filename, sha256sum
+from ..util import cached_property, get_hash_for_filename, sha256sum
+from . import EnvManager, handle_bin_download_error
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = '.terraform-version'
@@ -29,7 +28,7 @@ def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-man
                         versions_dir, command_suffix, tf_platform=None,
                         arch=None):
     """Download Terraform archive and return path to it."""
-    version_dir = os.path.join(versions_dir, version)
+    version_dir = versions_dir / version
 
     if arch is None:
         arch = (
@@ -71,16 +70,12 @@ def download_tf_release(version,  # noqa pylint: disable=too-many-locals,too-man
         sys.exit(1)
 
     tf_zipfile = zipfile.ZipFile(os.path.join(download_dir, filename))
-    os.mkdir(version_dir)
-    tf_zipfile.extractall(version_dir)
+    version_dir.mkdir(parents=True, exist_ok=True)
+    tf_zipfile.extractall(str(version_dir))
     tf_zipfile.close()
     shutil.rmtree(download_dir)
-    os.chmod(  # ensure it is executable
-        os.path.join(version_dir,
-                     'terraform' + command_suffix),
-        os.stat(os.path.join(version_dir,
-                             'terraform' + command_suffix)).st_mode | 0o0111
-    )
+    result = version_dir / ('terraform' + command_suffix)
+    result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
 def get_available_tf_versions(include_prerelease=False):
@@ -102,70 +97,118 @@ def get_latest_tf_version(include_prerelease=False):
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def find_min_required(path):
-    """Inspect terraform files and find minimum version."""
-    found_min_required = ''
-    for filename in glob.glob(os.path.join(path, '*.tf')):
-        with open(filename, 'r') as stream:
-            tf_config = hcl.load(stream)
-            if tf_config.get('terraform', {}).get('required_version'):
-                found_min_required = tf_config.get('terraform',
-                                                   {}).get('required_version')
-                break
-
-    if found_min_required:
-        if re.match(r'^!=.+', found_min_required):
-            LOGGER.error('min required Terraform version is a negation (%s) '
-                         '- unable to determine required version',
-                         found_min_required)
-            sys.exit(1)
-        else:
-            found_min_required = re.search(r'[0-9]*\.[0-9]*(?:\.[0-9]*)?',
-                                           found_min_required).group(0)
-            LOGGER.debug("detected minimum Terraform version is %s",
-                         found_min_required)
-            return found_min_required
-    LOGGER.error('Terraform version specified as min-required, but unable to '
-                 'find a specified version requirement in this module\'s tf '
-                 'files')
-    sys.exit(1)
-
-
-def get_version_requested(path):
-    """Return string listing requested Terraform version."""
-    tf_version_path = os.path.join(path,
-                                   TF_VERSION_FILENAME)
-    if not os.path.isfile(tf_version_path):
-        LOGGER.error('Terraform install attempted and no %s file present to '
-                     'dictate the version; please create it. (e.g. write '
-                     '"0.11.13", without quotes, to the file and try again)',
-                     TF_VERSION_FILENAME)
-        sys.exit(1)
-    with open(tf_version_path, 'r') as stream:
-        ver = stream.read().rstrip()
-    return ver
-
-
 class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Terraform version management.
 
-    Designed to be compatible with https://github.com/tfutils/tfenv .
+    Designed to be compatible with https://github.com/tfutils/tfenv.
+
     """
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(TFEnvManager, self).__init__('tfenv', path)
+        super(TFEnvManager, self).__init__('terraform', 'tfenv', path)
+
+    @cached_property
+    def backend(self):
+        """Backend config of the Terraform module.
+
+        Returns:
+            Dict[str, Any]
+
+        """
+        # Terraform can only have one backend configured; this formats the
+        # data to make it easier to work with
+        return [
+            {'type': k, 'config': v}
+            for k, v in self.terraform_block.get('backend', {None: {}}).items()
+        ][0]
+
+    @cached_property
+    def terraform_block(self):
+        """Collect Terraform configuration blocks from a Terraform module.
+
+        Returns:
+            Dict[str, Any]
+
+        """
+        result = {}
+        for tf_file in self.path.glob('*.tf'):
+            tf_config = hcl.loads(tf_file.read_text())
+            result.update(tf_config.get('terraform', {}))
+        LOGGER.debug('parsed Terraform configuration: %s', json.dumps(result))
+        return result
+
+    @cached_property
+    def version_file(self):
+        """Find and return a ".terraform-version" file if one is present.
+
+        Returns:
+            Optional[Path]: Path to the Terraform version file.
+
+        """
+        for path in [self.path, self.path.parent]:
+            test_path = path / TF_VERSION_FILENAME
+            if test_path.is_file():
+                LOGGER.debug('using version file: %s', test_path)
+                return test_path
+        return None
+
+    def get_min_required(self):
+        """Get the defined minimum required version of Terraform.
+
+        Returns:
+            str: The minimum required version as defined in the module.
+
+        """
+        version = self.terraform_block.get('required_version')
+
+        if version:
+            if re.match(r'^!=.+', version):
+                LOGGER.error('min required Terraform version is a negation (%s) '
+                             '- unable to determine required version',
+                             version)
+                sys.exit(1)
+            else:
+                version = re.search(
+                    r'[0-9]*\.[0-9]*(?:\.[0-9]*)?', version
+                ).group(0)
+                LOGGER.debug("detected minimum Terraform version is %s",
+                             version)
+                return version
+        LOGGER.error('Terraform version specified as min-required, but unable to '
+                     'find a specified version requirement in this module\'s tf '
+                     'files')
+        sys.exit(1)
+
+    def get_version_from_file(self, file_path=None):
+        """Get Terraform version from a file.
+
+        Args:
+            file_path (Optional[Path]): Path to file that will be read.
+
+        """
+        file_path = file_path or self.version_file
+        if file_path and file_path.is_file():
+            return file_path.read_text().strip()
+        LOGGER.debug(
+            'file path not provided and version file could not be found'
+        )
+        return None
 
     def install(self, version_requested=None):
         """Ensure Terraform is available."""
-        versions_dir = ensure_versions_dir_exists(self.env_dir)
+        version_requested = version_requested or self.get_version_from_file()
 
         if not version_requested:
-            version_requested = get_version_requested(self.path)
+            raise ValueError(
+                'version not provided and unable to find a {} file'.format(
+                    TF_VERSION_FILENAME
+                )
+            )
 
         if re.match(r'^min-required$', version_requested):
             LOGGER.debug('tfenv: detecting minimal required version')
-            version_requested = find_min_required(self.path)
+            version_requested = self.get_min_required()
 
         if re.match(r'^latest:.*$', version_requested):
             regex = re.search(r'latest:(.*)', version_requested).group(1)
@@ -178,13 +221,11 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             include_prerelease_versions = True
             # Return early (i.e before reaching out to the internet) if the
             # matching version is already installed
-            if os.path.isdir(os.path.join(versions_dir,
-                                          version_requested)):
+            if (self.versions_dir / version_requested).is_dir():
                 LOGGER.verbose("Terraform version %s already installed; using "
                                "it...", version_requested)
-                return os.path.join(versions_dir,
-                                    version_requested,
-                                    'terraform') + self.command_suffix
+                self.current_version = version_requested
+                return str(self.bin)
 
         try:
             version = next(i
@@ -198,18 +239,15 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
         # Now that a version has been selected, skip downloading if it's
         # already been downloaded
-        if os.path.isdir(os.path.join(versions_dir,
-                                      version)):
+        if (self.versions_dir / version).is_dir():
             LOGGER.verbose("Terraform version %s already installed; using it...",
                            version)
-            return os.path.join(versions_dir,
-                                version,
-                                'terraform') + self.command_suffix
+            self.current_version = version
+            return str(self.bin)
 
         LOGGER.info("downloading and using Terraform version %s ...",
                     version)
-        download_tf_release(version, versions_dir, self.command_suffix)
+        download_tf_release(version, self.versions_dir, self.command_suffix)
         LOGGER.verbose("downloaded Terraform %s successfully", version)
-        return os.path.join(versions_dir,
-                            version,
-                            'terraform') + self.command_suffix
+        self.current_version = version
+        return str(self.bin)

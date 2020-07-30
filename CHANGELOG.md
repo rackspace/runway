@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- custom per-backend (Terraform) handling is now supported
+- Terraform remote backend has custom handling around pre-selecting a workspace, not switching workspace, and dumping parameters to a `runway-parameters.auto.tfvars.json` file (only option of variables with remote backend)
+- Terraform workspaces can be specified with the `terraform_workspace` option (mainly needed for remote backend support)
+- Terraform module parameters can now be dumped to a `auto.tfvars` using the `terraform_write_auto_tfvars` option (mainly needed for remote backend support)
 - the `runway_version` option can be used in the config to add a required Runway [version specifier](https://www.python.org/dev/peps/pep-0440/#version-specifiers)
+
+### Changed
+- env managers now use pathlib
+- env managers have some new attributes and methods for handling envs (relocated from functions)
+- the Terraform environment manager is now responsible for finding a version file instead of the Terraform module class
+- all Terraform files in a module are searched to compile a `terraform` configuration block with is available on the Terraform environment manager object
+- Terraform backend configuration is now collected and parsed into a dict that is available on the Terraform environment manager object
+- split the `run_terraform` method of the Terraform module class into multiple methods to be more easily tested
 
 ## [1.10.1] - 2020-07-20
 ### Fixed
