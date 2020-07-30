@@ -2,8 +2,9 @@
 
 .. _lookup arguments:
 
+****************
 Lookup Arguments
-^^^^^^^^^^^^^^^^
+****************
 
 Arguments can be passed to Lookups to effect how they function.
 
@@ -27,7 +28,7 @@ that all Lookups accept.
 .. _Common Lookup Arguments:
 
 Common Lookup Arguments
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 **default (Any)**
     If the Lookup is unable to find a value for the provided query, this
@@ -80,7 +81,7 @@ Common Lookup Arguments
 .. code-block:: yaml
 
   deployments:
-    - environments:
+    - parameters:
         some_variable: ${var some_value::default=my_value}
         comma_list: ${var my_list::default=undefined, transform=str}
 
