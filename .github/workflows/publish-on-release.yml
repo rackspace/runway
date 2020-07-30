@@ -1,10 +1,9 @@
-name: CI/CD
+name: Publish Release
 
 on:
-  pull_request:  # any pull request
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - published
 
 env:
   AWS_DEFAULT_REGION: us-east-1
@@ -12,89 +11,7 @@ env:
   PIPENV_VENV_IN_PROJECT: true
   PIPENV_YES: true
 
-# YAML anchors are not currently supported but are included here, commented out for support is added
-# https://github.community/t5/GitHub-Actions/Support-for-YAML-anchors/td-p/30336
-
 jobs:
-  test-python:
-    name: Python Linting & Tests
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: [2.7, 3.6, 3.7]
-    runs-on: ${{ matrix.os }}
-    env:
-      # populating AWS creds with fake values
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_ACCESS_KEY: test
-    steps:
-      - # &checkout
-        name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - # &install_python
-        name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - # &dependencies_ubuntu
-        name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install sed -y
-      - # &dependencies_windows
-        name: Install Dependencies (windows)
-        if: matrix.os == 'windows-latest'
-        run: choco install make sed
-      - # &cache_pip_ubuntu
-        name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-latest'
-        with:
-          path:  ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - # &cache_pip_windows
-        name: Pip Cache (windows)
-        uses: actions/cache@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - # &install_pip
-        name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - # &pipenv_sync_27
-        name: Setup Python Virtual Environment (2.7)
-        if: matrix.python-version == '2.7' && matrix.os != 'windows-latest'
-        run: |
-          rm -rf Pipfile.lock
-          make sync_two
-      - # &pipenv_sync_27_windows
-        name: Setup Python Virtual Environment (2.7) (windows)
-        if: matrix.python-version == '2.7' && matrix.os == 'windows-latest'
-        run: |
-          Remove-Item -Path $Env:GITHUB_WORKSPACE\Pipfile.lock -Force
-          make sync_two
-      - # &pipenv_sync
-        name: Setup Python Virtual Environment (3.x)
-        if: matrix.python-version != '2.7'
-        run: pipenv sync --dev
-      - name: Run Linters (2.7)
-        if: matrix.python-version == '2.7'
-        run: make lint_two
-      - name: Run Linters (3.x)
-        if: matrix.python-version != '2.7'
-        run: make lint
-      - name: Run Integration & Unit Tests
-        if: matrix.os != 'windows-latest'
-        # assertions assume linux so some fail when run on windows
-        run: make test
-
   build-pyinstaller-onefile:
     name: Pyinstaller "One File" Build
     strategy:
@@ -243,7 +160,6 @@ jobs:
 
   build-npm:
     name: Build npm 📦
-    if: github.ref == 'refs/heads/master'
     needs:
       - test-python
       - build-pyinstaller-onefolder
@@ -321,7 +237,6 @@ jobs:
 
   publish-npm:
     name: Publish 📦 To npm
-    if: github.ref == 'refs/heads/master'
     needs:
       - build-npm
     env:
@@ -346,15 +261,14 @@ jobs:
         with:
           name: npm-pack
           path: artifacts
-      - name: Publish Distribution 📦 to npm (dev)
+      - name: Publish Distribution 📦 to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         run: |
-          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
+          find ./artifacts -name 'onica-runway-*.*.*.tgz' -exec npm publish --access public {} +
 
   build-pypi:
     name: Build PyPi 📦
-    if: github.ref == 'refs/heads/master'
     needs:
       - test-python
     strategy:
@@ -404,7 +318,6 @@ jobs:
 
   publish-pypi:
     name: Publish 📦 To PyPI
-    if: github.ref == 'refs/heads/master'
     needs:
       - build-pypi
     runs-on: ubuntu-latest
@@ -414,15 +327,13 @@ jobs:
         with:
           name: pypi-dist
           path: dist
-      - name: Publish Distribution 📦 to Test PyPI
+      - name: Publish Distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@v1.1.0
         with:
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.pypi_password }}
 
   publish-s3:
     name: Publish 📦 To S3
-    if: github.ref == 'refs/heads/master'
     needs:
       - test-python
       - build-pyinstaller-onefile
@@ -456,3 +367,36 @@ jobs:
         run: |
           pip install "awscli~=1.18.19"
           aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read
+
+  update-urlshortener:
+    name: Update URL Shortener
+    needs:
+      - publish-s3
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+      BUCKET_NAME: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
+      BUCKET_REGION: us-west-2
+      TABLE: onica-urlshortener-prod
+      TABLE_REGION: us-east-1
+      VERSION: ${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2.0.0
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install Dependencies & Run Script
+        working-directory: .github/scripts/urlshortener
+        run: |
+          pip install wheel
+          pip install -r requirements.txt
+          python update_urls.py \
+            --bucket-name $BUCKET_NAME \
+            --bucket-region $BUCKET_REGION \
+            --table $TABLE \
+            --table-region $TABLE_REGION \
+            --version $VERSION \
+            --latest
