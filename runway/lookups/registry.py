@@ -5,7 +5,7 @@ from six import string_types
 
 from runway.util import load_object_from_string
 
-from .handlers import env, ssm, var
+from .handlers import cfn, env, ssm, var
 from .handlers.base import LookupHandler  # noqa: F401 pylint: disable=W
 
 RUNWAY_LOOKUP_HANDLERS = {}
@@ -40,6 +40,7 @@ def unregister_lookup_handler(lookup_type):
     RUNWAY_LOOKUP_HANDLERS.pop(lookup_type, None)
 
 
+register_lookup_handler(cfn.TYPE_NAME, cfn.CfnLookup)
 register_lookup_handler(env.TYPE_NAME, env.EnvLookup)
 register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
 register_lookup_handler(var.TYPE_NAME, var.VarLookup)
