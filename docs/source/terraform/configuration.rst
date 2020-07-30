@@ -23,6 +23,9 @@ Options specific to Terraform Modules.
 **terraform_backend_config (Optional[Dict[str, str]])**
   Mapping to configure Terraform backend. See :ref:`Backend <tf-backend>` for more details.
 
+  .. versionchanged:: 1.11.0
+    Added support for any *key: value*.
+
   .. rubric:: Example
   .. code-block:: yaml
 
@@ -41,6 +44,24 @@ Options specific to Terraform Modules.
 
     options:
       terraform_version: 0.11.13
+
+**terraform_write_auto_tfvars (Optional[bool])**
+  Optionally write parameters to a tfvars file instead of updating variables (*default:* ``False``).
+  This can be useful in cases where Runway may not be parsing/passing parameters as expected.
+
+  When ``True``, Runway creates a temporary ``runway-parameters.auto.tfvars.json`` file in the module directory.
+  This file contains all of the modules parameters in JSON format.
+  This file is then automatically loaded by Terraform as needed.
+  If using a remote backend, use of this file to pass variables is required as environment variables are not available from the CLI and ``-var-file`` currently cannot be used.
+  Once the module has finished processing, the file is deleted.
+
+  .. versionadded:: 1.11.0
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      terraform_write_auto_tfvars: true
 
 
 *********

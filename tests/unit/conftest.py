@@ -115,6 +115,18 @@ def patch_time(monkeypatch):
     monkeypatch.setattr('time.sleep', lambda s: None)
 
 
+@pytest.fixture
+def platform_darwin(monkeypatch):
+    """Patch platform.system to always return "Darwin"."""
+    monkeypatch.setattr('platform.system', lambda: 'Darwin')
+
+
+@pytest.fixture
+def platform_windows(monkeypatch):
+    """Patch platform.system to always return "Windows"."""
+    monkeypatch.setattr('platform.system', lambda: 'Windows')
+
+
 @pytest.fixture(scope='function')
 def patch_runway_config(request, monkeypatch, runway_config):
     """Patch Runway config and return a mock config object."""
@@ -136,7 +148,7 @@ def runway_context(request):
     env_vars = {
         'AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),
         'DEFAULT_AWS_REGION': getattr(request.module, 'AWS_REGION', 'us-east-1'),
-        'DEPLOY_ENVIRONMET': getattr(request.module, 'DEPLOY_ENVIRONMET', 'test')
+        'DEPLOY_ENVIRONMENT': getattr(request.module, 'DEPLOY_ENVIRONMENT', 'test')
     }
     creds = {
         'AWS_ACCESS_KEY_ID': 'test_access_key',

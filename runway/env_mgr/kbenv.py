@@ -10,7 +10,7 @@ import tempfile
 from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 from six.moves.urllib.error import URLError  # pylint: disable=E
 
-from . import EnvManager, ensure_versions_dir_exists, handle_bin_download_error
+from . import EnvManager, handle_bin_download_error
 from ..util import md5sum
 
 LOGGER = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ RELEASE_URI = 'https://storage.googleapis.com/kubernetes-release/release'
 def download_kb_release(version,  # noqa pylint: disable=too-many-locals,too-many-branches
                         versions_dir, kb_platform=None, arch=None):
     """Download kubectl and return path to it."""
-    version_dir = os.path.join(versions_dir, version)
+    version_dir = versions_dir / version
 
     if arch is None:
         arch = (
@@ -61,46 +61,39 @@ def download_kb_release(version,  # noqa pylint: disable=too-many-locals,too-man
                      filename, kb_hash)
         sys.exit(1)
 
-    os.mkdir(version_dir)
+    version_dir.mkdir(parents=True, exist_ok=True)
     shutil.move(os.path.join(download_dir, filename),
-                os.path.join(version_dir, filename))
+                str(version_dir / filename))
     shutil.rmtree(download_dir)
-    os.chmod(  # ensure it is executable
-        os.path.join(version_dir, filename),
-        os.stat(os.path.join(version_dir,
-                             filename)).st_mode | 0o0111
-    )
+    result = version_dir / filename
+    result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
 def get_version_requested(path):
     """Return string listing requested kubectl version."""
-    kb_version_path = os.path.join(path,
-                                   KB_VERSION_FILENAME)
-    if not os.path.isfile(kb_version_path):
+    kb_version_path = path / KB_VERSION_FILENAME
+    if not kb_version_path.is_file():
         LOGGER.error('kubectl install attempted and no %s file present to '
                      'dictate the version; please create it. (e.g. write '
                      '"1.14.0", without quotes, to the file and try again)',
                      KB_VERSION_FILENAME)
         sys.exit(1)
-    with open(kb_version_path, 'r') as stream:
-        ver = stream.read().rstrip()
-    return ver
+    return kb_version_path.read_text().strip()
 
 
 class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """kubectl version management.
 
-    Designed to be compatible with https://github.com/alexppg/kbenv .
+    Designed to be compatible with https://github.com/alexppg/kbenv.
+
     """
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(KBEnvManager, self).__init__('kbenv', path)
+        super(KBEnvManager, self).__init__('kubectl', 'kbenv', path)
 
     def install(self, version_requested=None):
         """Ensure kubectl is available."""
-        versions_dir = ensure_versions_dir_exists(self.env_dir)
-
         if not version_requested:
             version_requested = get_version_requested(self.path)
 
@@ -109,18 +102,15 @@ class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
         # Return early (i.e before reaching out to the internet) if the
         # matching version is already installed
-        if os.path.isdir(os.path.join(versions_dir,
-                                      version_requested)):
+        if (self.versions_dir / version_requested).is_dir():
             LOGGER.verbose("kubectl version %s already installed; using "
                            "it...", version_requested)
-            return os.path.join(versions_dir,
-                                version_requested,
-                                'kubectl') + self.command_suffix
+            self.current_version = version_requested
+            return str(self.bin)
 
         LOGGER.info("downloading and using kubectl version %s ...",
                     version_requested)
-        download_kb_release(version_requested, versions_dir)
+        download_kb_release(version_requested, self.versions_dir)
         LOGGER.verbose("downloaded kubectl %s successfully", version_requested)
-        return os.path.join(versions_dir,
-                            version_requested,
-                            'kubectl') + self.command_suffix
+        self.current_version = version_requested
+        return str(self.bin)
