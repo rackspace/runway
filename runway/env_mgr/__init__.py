@@ -4,17 +4,14 @@ import os
 import platform
 import sys
 
+from ..util import cached_property
+
+if sys.version_info[0] > 2:  # TODO remove after droping python 2
+    from pathlib import Path  # pylint: disable=E
+else:
+    from pathlib2 import Path  # pylint: disable=E
+
 LOGGER = logging.getLogger(__name__)
-
-
-def ensure_versions_dir_exists(env_path):
-    """Ensure versions directory is available."""
-    versions_dir = os.path.join(env_path, 'versions')
-    if not os.path.isdir(env_path):
-        os.mkdir(env_path)
-    if not os.path.isdir(versions_dir):
-        os.mkdir(versions_dir)
-    return versions_dir
 
 
 def handle_bin_download_error(exc, name):
@@ -44,31 +41,71 @@ def handle_bin_download_error(exc, name):
 
 
 class EnvManager(object):  # pylint: disable=too-few-public-methods
-    """Base environment manager class."""
+    """Base environment manager class.
 
-    def __init__(self, dir_name, path=None):
-        """Initialize class."""
-        if path is None:
-            self.path = os.getcwd()
+    Attributes:
+        bin (Optional[str]): Path to the binary of the current version.
+        current_version (Optional[str]): The current binary
+            version being used.
+        env_dir_name (str): Name of the directory within the users home
+            directory where binary versions will be stored.
+        path (Path): The current working directory.
+
+    """
+
+    def __init__(self, bin_name, dir_name, path=None):
+        """Initialize class.
+
+        Args:
+            dir_name (str): Name of the directory within the users home
+                directory where binary versions will be stored.
+            path (Optional[Path]): The current working directory.
+
+        """
+        self._bin_name = bin_name + self.command_suffix
+        self.current_version = None
+        self.env_dir_name = (
+            dir_name if platform.system() == 'Windows' else '.' + dir_name
+        )
+        if not path:
+            self.path = Path.cwd()
+        elif not isinstance(path, Path):  # convert string to Path
+            self.path = Path(path)
         else:
             self.path = path
 
+    @property
+    def bin(self):
+        """Path to the version binary.
+
+        Returns:
+            Path
+
+        """
+        return self.versions_dir / self.current_version / self._bin_name
+
+    @cached_property
+    def command_suffix(self):  # pylint: disable=no-self-use
+        """Return command suffix based on platform.system."""
         if platform.system() == 'Windows':
-            self.command_suffix = '.exe'
+            return '.exe'
+        return ''
+
+    @cached_property
+    def env_dir(self):
+        """Return the directory used to store version binaries."""
+        if platform.system() == 'Windows':
             if 'APPDATA' in os.environ:
-                self.env_dir = os.path.join(os.environ['APPDATA'],
-                                            dir_name)
-            else:
-                for i in [['AppData'], ['AppData', 'Roaming']]:
-                    if not os.path.isdir(os.path.join(os.path.expanduser('~'),
-                                                      *i)):
-                        os.mkdir(os.path.join(os.path.expanduser('~'),
-                                              *i))
-                self.env_dir = os.path.join(os.path.expanduser('~'),
-                                            'AppData',
-                                            'Roaming',
-                                            dir_name)
-        else:
-            self.command_suffix = ''
-            self.env_dir = os.path.join(os.path.expanduser('~'),
-                                        '.' + dir_name)
+                return Path(os.environ['APPDATA']) / self.env_dir_name
+            return Path.home() / 'AppData' / 'Roaming' / self.env_dir_name
+        return Path.home() / self.env_dir_name
+
+    @cached_property
+    def versions_dir(self):
+        """Return the directory used to store binary.
+
+        When first used, the existence of the directory is checked and it is
+        created if needed.
+
+        """
+        return self.env_dir / 'versions'

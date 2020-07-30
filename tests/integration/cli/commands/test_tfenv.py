@@ -37,7 +37,7 @@ def test_tfenv_install_no_version_file(cd_tmp_path, caplog):
     result = runner.invoke(cli, ['tfenv', 'install'])
     assert result.exit_code == 1
 
-    assert 'no .terraform-version file present' in caplog.messages[0]
+    assert 'unable to find a .terraform-version file' in '\n'.join(caplog.messages)
 
 
 def test_tfenv_install_version(caplog):
@@ -62,7 +62,7 @@ def test_tfenv_run_no_version_file(cd_tmp_path, caplog):
     result = runner.invoke(cli, ['tfenv', 'run', '--', '--help'])
     assert result.exit_code == 1
 
-    assert 'no .terraform-version file present' in caplog.messages[0]
+    assert 'unable to find a .terraform-version file' in '\n'.join(caplog.messages)
 
 
 def test_tfenv_run_separator(cd_tmp_path, capfd):
