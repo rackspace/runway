@@ -13,10 +13,14 @@ from botocore.stub import Stubber
 from mock import MagicMock, patch
 
 from runway._logging import LogLevels
-from runway.module.terraform import (FAILED_INIT_FILENAME, Terraform,
-                                     TerraformBackendConfig, TerraformOptions,
-                                     gen_workspace_tfvars_files,
-                                     update_env_vars_with_tf_var_values)
+from runway.module.terraform import (
+    FAILED_INIT_FILENAME,
+    Terraform,
+    TerraformBackendConfig,
+    TerraformOptions,
+    gen_workspace_tfvars_files,
+    update_env_vars_with_tf_var_values,
+)
 
 MODULE = 'runway.module.terraform'
 
