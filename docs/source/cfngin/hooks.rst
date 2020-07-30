@@ -583,8 +583,9 @@ The values for these additional arguments come from the ``args`` key of the `hoo
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
 This signifies to CFNgin whether or not to halt execution if the hook is ``required``.
-If data is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
+If ``dict`` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where ``data_key`` is the value set in the `hook definition`_.
+If ``data_key`` is not provided or the type of the returned data is not ``dict``, it will not be added to the context object.
 
 If using boto3 in a hook, use ``context.get_session()`` instead of creating a new session to ensure the correct credentials are used.
 
