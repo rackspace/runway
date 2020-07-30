@@ -45,8 +45,7 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 import json
 import logging
 from collections import namedtuple
-from typing import (TYPE_CHECKING, Any, Dict, Optional,  # pylint: disable=W
-                    Union)
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # pylint: disable=W
 
 from botocore.exceptions import ClientError
 

@@ -1,6 +1,7 @@
 """Handler for fetching outputs from fully qualified stacks."""
 # pylint: disable=arguments-differ,unused-argument
 import logging
+
 from runway.lookups.handlers.base import LookupHandler
 
 from .output import deconstruct
