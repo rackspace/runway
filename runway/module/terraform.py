@@ -673,6 +673,10 @@ class TerraformBackendConfig(ModuleOptions):
             Dict[str, str]: Resolved values from Cloudformation.
 
         """
+        LOGGER.warning(
+            'terraform_backend_cfn_outputs option has been deprecated; '
+            'use terraform_backend_config with a cfn Lookup'
+        )
         if not kwargs:
             return {}
 
@@ -703,7 +707,7 @@ class TerraformBackendConfig(ModuleOptions):
         """
         LOGGER.warning(
             'terraform_backend_ssm_params option has been deprecated; '
-            'use terraform_backend_config with an ssm lookup'
+            'use terraform_backend_config with an ssm Lookup'
         )
         return {key: client.get_parameter(Name=val, WithDecryption=True)
                      ['Parameter']['Value']  # noqa

@@ -1,7 +1,8 @@
 .. _Lookups:
 
+#######
 Lookups
-=======
+#######
 
 Runway Lookups allow the use of variables within the Runway config file. These
 variables can then be passed along to :ref:`deployments <runway-deployment>`,
@@ -48,17 +49,31 @@ expect.
 .. automodule:: runway.lookups.handlers.base
 
 
-.. _build-in-lookups:
+.. _built-in-lookups:
 
-Build-in Lookups
-^^^^^^^^^^^^^^^^
+****************
+Built-in Lookups
+****************
+
+
+.. _cfn lookup:
+.. _cfn-lookup:
+
+cfn
+===
+
+.. important::
+  The Stack must exist in CloudFormation before the module using this Lookup begins processing to successfully get a value.
+  This means that the Stack must have been deployed by another module, run before the one using this Lookup, or it must have been created external to Runway.
+
+.. automodule:: runway.lookups.handlers.cfn
 
 
 .. _env lookup:
 .. _env-lookup:
 
 env
-~~~
+===
 
 .. automodule:: runway.lookups.handlers.env
 
@@ -67,7 +82,7 @@ env
 .. _ssm-lookup:
 
 ssm
-~~~
+===
 
 .. automodule:: runway.lookups.handlers.ssm
 
@@ -76,6 +91,6 @@ ssm
 .. _var-lookup:
 
 var
-~~~
+===
 
 .. automodule:: runway.lookups.handlers.var

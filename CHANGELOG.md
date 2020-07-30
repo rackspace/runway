@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Terraform remote backend has custom handling around pre-selecting a workspace, not switching workspace, and dumping parameters to a `runway-parameters.auto.tfvars.json` file (only option of variables with remote backend)
 - Terraform workspaces can be specified with the `terraform_workspace` option (mainly needed for remote backend support)
 - Terraform module parameters can now be dumped to a `auto.tfvars` using the `terraform_write_auto_tfvars` option (mainly needed for remote backend support)
+- `cfn` Lookup usable in Runway and CFNgin config files
 - the `runway_version` option can be used in the config to add a required Runway [version specifier](https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 
 ### Changed
@@ -19,6 +20,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - all Terraform files in a module are searched to compile a `terraform` configuration block with is available on the Terraform environment manager object
 - Terraform backend configuration is now collected and parsed into a dict that is available on the Terraform environment manager object
 - split the `run_terraform` method of the Terraform module class into multiple methods to be more easily tested
+
+- `terraform_backend_cfn_outputs` option is now deprecated
+- `xref` Lookup is now deprecated
 
 ## [1.10.1] - 2020-07-20
 ### Fixed

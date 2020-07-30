@@ -20,7 +20,7 @@ limited or no effect:
 - region
 
 
-.. Example
+.. rubric:: Example
 .. code-block:: yaml
 
   deployment:

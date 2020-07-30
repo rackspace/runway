@@ -1,14 +1,19 @@
 """Handler for fetching outputs from fully qualified stacks."""
 # pylint: disable=arguments-differ,unused-argument
+import logging
 from runway.lookups.handlers.base import LookupHandler
 
 from .output import deconstruct
 
+LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "xref"
 
 
 class XrefLookup(LookupHandler):
     """Xref lookup."""
+
+    DEPRECATION_MSG = ('xref Lookup has been deprecated; '
+                       'use the cfn lookup instead')
 
     @classmethod
     def handle(cls, value, context=None, provider=None, **kwargs):
@@ -36,6 +41,7 @@ class XrefLookup(LookupHandler):
                 conf_value: ${xref fully-qualified-stack-name::SomeOutputName}
 
         """
+        LOGGER.warning(cls.DEPRECATION_MSG)
         if provider is None:
             raise ValueError('Provider is required')
 
