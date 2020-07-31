@@ -47,14 +47,6 @@ Based on the execution environment, this workflow will run different steps.
 - build & upload PyPi_ & npm_ artifacts
 - publish a development version to `Test PyPi`_ and npm_
 
-.. rubric:: Tag
-
-- Lint & test
-- build & upload Pyinstaller_ artifacts
-- build & upload PyPi_ & npm_ artifacts
-- publish a development version to `Test PyPi`_
-- publish a release to AWS S3, PyPi_, & npm_
-
 .. _npm: https://www.npmjs.com/package/@onica/runway
 .. _Pyinstaller: https://pypi.org/project/PyInstaller/
 .. _PyPi: https://pypi.org/project/runway/
@@ -106,3 +98,10 @@ Release Management
 ******************
 
 When a commit is pushed to **release** (tag is pushed, PR is merged) a release draft is created (if one does not exist) and PRs since the last tag are added following the included template. Changes are categorized based on PR labels.
+
+
+***************
+Publish Release
+***************
+
+When a GitHub **Release** is published, the final artifacts are created and published to AWS S3, PyPi_, & npm_.
