@@ -4,14 +4,15 @@ from __future__ import print_function  # TODO remove when dripping python 2
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
-from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
-                    Optional)
+from typing import TYPE_CHECKING, Any, Dict, List, Optional  # noqa pylint: disable=W
 
 import yaml as _yaml
+
+from .. import __version__
 from .._logging import PrefixAdaptor as _PrefixAdaptor
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
-from ..util import YamlDumper as _YamlDumper
 from ..util import DOC_SITE
+from ..util import YamlDumper as _YamlDumper
 from . import components, providers
 
 if TYPE_CHECKING:
@@ -42,9 +43,11 @@ class Runway(object):
         self.ctx = context
         self.deployments = config.deployments
         self.future = config.future
+        self.required_version = config.runway_version
         self.tests = config.tests
         self.ignore_git_branch = config.ignore_git_branch
         self.variables = config.variables
+        self.__assert_config_version()
         self.ctx.env.log_name()
 
     def deploy(self, deployments=None):
@@ -178,6 +181,30 @@ class Runway(object):
                          ', '.join(failed_tests))
             _sys.exit(1)
         LOGGER.success('all tests passed')
+
+    def __assert_config_version(self):
+        """Assert the config supports this version of Runway."""
+        if __version__ in self.required_version:
+            LOGGER.debug(
+                'current Runway version "%s" matches "%s" required by '
+                'this config file',
+                __version__,
+                self.required_version
+            )
+            return
+        if __version__.startswith('0.') and 'dev' in __version__:
+            LOGGER.warning(
+                'Runway is being used from a shallow clone of the repo; '
+                'config version will not be enforced as version cannot '
+                'be determined')
+            return
+        LOGGER.error(
+            'current Runway version "%s" does not match "%s" '
+            'required by this config file',
+            __version__,
+            self.required_version
+        )
+        _sys.exit(1)
 
     def __run_action(self, action, deployments):
         # type: (Optional[List[DeploymentDefinition]]) -> None

@@ -35,6 +35,7 @@ INSTALL_REQUIRES = [
     'pyhcl~=0.4',
     'gitpython',
     'importlib-metadata; python_version < "3.8"',
+    'packaging',  # component of setuptools needed for version compare
     'pyOpenSSL',  # For embedded hook & associated script usage
     'PyYAML>=4.1,<5.3',  # match awscli top-end
     'six>=1.13.0',

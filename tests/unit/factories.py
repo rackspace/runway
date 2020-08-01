@@ -7,6 +7,7 @@ import boto3
 import yaml
 from botocore.stub import Stubber
 from mock import MagicMock
+from packaging.specifiers import SpecifierSet
 from six import string_types
 
 from runway.cfngin.context import Context as CFNginContext
@@ -222,6 +223,7 @@ class MockRunwayConfig(MutableMap):
         self.future = MagicMock()
         self.tests = []
         self.ignore_git_branch = False
+        self.runway_version = SpecifierSet('>=1.10', prereleases=True)
         self.variables = MutableMap()
 
         # classmethods
