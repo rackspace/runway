@@ -17,15 +17,18 @@ from mock import MagicMock, patch
 from runway.cfngin import exceptions
 from runway.cfngin.actions.diff import DictValue
 from runway.cfngin.providers.aws import default
-from runway.cfngin.providers.aws.default import (DEFAULT_CAPABILITIES,
-                                                 MAX_TAIL_RETRIES, Provider,
-                                                 ask_for_approval,
-                                                 create_change_set,
-                                                 generate_cloudformation_args,
-                                                 output_full_changeset,
-                                                 requires_replacement,
-                                                 summarize_params_diff,
-                                                 wait_till_change_set_complete)
+from runway.cfngin.providers.aws.default import (
+    DEFAULT_CAPABILITIES,
+    MAX_TAIL_RETRIES,
+    Provider,
+    ask_for_approval,
+    create_change_set,
+    generate_cloudformation_args,
+    output_full_changeset,
+    requires_replacement,
+    summarize_params_diff,
+    wait_till_change_set_complete,
+)
 from runway.cfngin.providers.base import Template
 from runway.cfngin.session_cache import get_session
 from runway.cfngin.stack import Stack

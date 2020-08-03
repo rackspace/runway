@@ -2,14 +2,12 @@
 """Module with IAM role."""
 from __future__ import print_function
 
+import awacs.sts
+from awacs.aws import Allow, PolicyDocument, Principal, Statement
 from troposphere import Join, iam
 
-import awacs.sts
-
-from awacs.aws import Allow, PolicyDocument, Principal, Statement
-
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNString
 
 TESTING_ACCOUNT_ID = '523485371024'
 

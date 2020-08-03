@@ -2,8 +2,8 @@
 import logging
 import unittest
 
-from runway.sources.source import Source
 from runway.path import Path
+from runway.sources.source import Source
 
 LOGGER = logging.getLogger('runway')
 

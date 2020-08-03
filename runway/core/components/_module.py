@@ -2,8 +2,14 @@
 import json
 import logging
 import sys
-from typing import (TYPE_CHECKING, Any, Dict, List,  # noqa pylint: disable=W
-                    Optional, Union)
+from typing import (  # noqa pylint: disable=W
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Union,
+)
 
 import six
 import yaml
@@ -12,8 +18,12 @@ from ..._logging import PrefixAdaptor
 from ...config import FutureDefinition, VariablesDefinition
 from ...path import Path as ModulePath
 from ...runway_module_type import RunwayModuleType
-from ...util import (cached_property, change_dir, merge_dicts,
-                     merge_nested_environment_dicts)
+from ...util import (
+    cached_property,
+    change_dir,
+    merge_dicts,
+    merge_nested_environment_dicts,
+)
 from ..providers import aws
 
 if sys.version_info.major > 2:

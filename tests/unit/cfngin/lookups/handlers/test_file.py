@@ -13,9 +13,12 @@ import mock
 import yaml
 from troposphere import Base64, GenericHelperFn, Join
 
-from runway.cfngin.lookups.handlers.file import (FileLookup, json_codec,
-                                                 parameterized_codec,
-                                                 yaml_codec)
+from runway.cfngin.lookups.handlers.file import (
+    FileLookup,
+    json_codec,
+    parameterized_codec,
+    yaml_codec,
+)
 
 
 def to_template_dict(obj):

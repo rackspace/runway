@@ -1,6 +1,5 @@
 """Test ``runway docs`` command."""
 from click.testing import CliRunner
-
 from mock import patch
 
 from runway._cli import cli

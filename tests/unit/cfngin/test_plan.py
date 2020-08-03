@@ -10,10 +10,16 @@ import mock
 
 from runway.cfngin.context import Config, Context
 from runway.cfngin.dag import walk
-from runway.cfngin.exceptions import (CancelExecution, GraphError,
-                                      PersistentGraphLocked, PlanFailed)
-from runway.cfngin.lookups.registry import (register_lookup_handler,
-                                            unregister_lookup_handler)
+from runway.cfngin.exceptions import (
+    CancelExecution,
+    GraphError,
+    PersistentGraphLocked,
+    PlanFailed,
+)
+from runway.cfngin.lookups.registry import (
+    register_lookup_handler,
+    unregister_lookup_handler,
+)
 from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.stack import Stack
 from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED

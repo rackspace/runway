@@ -3,7 +3,11 @@
 import logging
 from urllib.parse import urlencode  # pylint: disable=no-name-in-module,import-error
 
-from shared import extract_and_parse_cookies, get_config, get_cookie_headers  # noqa pylint: disable=import-error
+from shared import (  # noqa pylint: disable=import-error
+    extract_and_parse_cookies,
+    get_config,
+    get_cookie_headers,
+)
 
 LOGGER = logging.getLogger(__name__)
 CONFIG = get_config()

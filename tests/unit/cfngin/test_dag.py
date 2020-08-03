@@ -3,8 +3,7 @@ import threading
 
 import pytest
 
-from runway.cfngin.dag import (DAGValidationError, ThreadedWalker,
-                               UnlimitedSemaphore)
+from runway.cfngin.dag import DAGValidationError, ThreadedWalker, UnlimitedSemaphore
 
 
 def test_add_node(empty_dag):

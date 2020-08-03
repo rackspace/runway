@@ -1,15 +1,15 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
-import logging
 import json
+import logging
 import os
 import string
 import sys
 
 import pytest
 from mock import MagicMock, patch
-from runway.util import (MutableMap, SafeHaven, argv, environ,
-                         load_object_from_string)
+
+from runway.util import MutableMap, SafeHaven, argv, environ, load_object_from_string
 
 MODULE = 'runway.util'
 VALUE = {

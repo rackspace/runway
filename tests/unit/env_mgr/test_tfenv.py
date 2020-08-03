@@ -7,9 +7,12 @@ import pytest
 import six
 from mock import MagicMock, patch
 
-from runway.env_mgr.tfenv import (TF_VERSION_FILENAME, TFEnvManager,
-                                  get_available_tf_versions,
-                                  get_latest_tf_version)
+from runway.env_mgr.tfenv import (
+    TF_VERSION_FILENAME,
+    TFEnvManager,
+    get_available_tf_versions,
+    get_latest_tf_version,
+)
 
 MODULE = 'runway.env_mgr.tfenv'
 

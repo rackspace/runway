@@ -1,10 +1,9 @@
 """Test deploying a base line static site."""
 import os
 
-from runway.util import change_dir
-
 from integration_tests.test_staticsite.test_staticsite import StaticSite
 from integration_tests.util import run_command
+from runway.util import change_dir
 
 
 class TestBasicSite(StaticSite):

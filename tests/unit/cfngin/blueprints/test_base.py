@@ -6,19 +6,31 @@ import unittest
 from mock import MagicMock, patch
 from troposphere import Base64, Ref, s3, sns
 
-from runway.cfngin.blueprints.base import (Blueprint, CFNParameter,
-                                           build_parameter, parse_user_data,
-                                           resolve_variable,
-                                           validate_allowed_values,
-                                           validate_variable_type)
+from runway.cfngin.blueprints.base import (
+    Blueprint,
+    CFNParameter,
+    build_parameter,
+    parse_user_data,
+    resolve_variable,
+    validate_allowed_values,
+    validate_variable_type,
+)
 from runway.cfngin.blueprints.variables.types import (
-    CFNCommaDelimitedList, CFNNumber, CFNString, EC2AvailabilityZoneNameList,
-    TroposphereType)
-from runway.cfngin.exceptions import (InvalidLookupCombination,
-                                      InvalidUserdataPlaceholder,
-                                      MissingVariable, UnresolvedVariable,
-                                      UnresolvedVariables, ValidatorError,
-                                      VariableTypeRequired)
+    CFNCommaDelimitedList,
+    CFNNumber,
+    CFNString,
+    EC2AvailabilityZoneNameList,
+    TroposphereType,
+)
+from runway.cfngin.exceptions import (
+    InvalidLookupCombination,
+    InvalidUserdataPlaceholder,
+    MissingVariable,
+    UnresolvedVariable,
+    UnresolvedVariables,
+    ValidatorError,
+    VariableTypeRequired,
+)
 from runway.cfngin.lookups import register_lookup_handler
 from runway.variables import Variable
 

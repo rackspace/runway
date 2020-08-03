@@ -4,7 +4,6 @@ from unittest import TestCase
 from runway.lookups.handlers.env import EnvLookup
 from runway.util import MutableMap
 
-
 CONTEXT = MutableMap(**{
     'env_vars': {
         'str_val': 'test'

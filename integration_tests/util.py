@@ -1,10 +1,12 @@
 """Utility functions."""
 import glob
-import os
 import importlib
+import os
 import shutil
 import subprocess
+
 from prettytable import PrettyTable
+
 from integration_tests.integration_test import IntegrationTest
 
 

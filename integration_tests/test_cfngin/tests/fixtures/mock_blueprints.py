@@ -9,12 +9,15 @@ from troposphere import GetAtt, Output, Ref, Sub, iam
 from troposphere.cloudformation import WaitCondition, WaitConditionHandle
 
 from runway.cfngin.blueprints.base import Blueprint
-from runway.cfngin.blueprints.variables.types import (CFNCommaDelimitedList,
-                                                      CFNNumber, CFNString,
-                                                      EC2KeyPairKeyName,
-                                                      EC2SecurityGroupId,
-                                                      EC2SubnetIdList,
-                                                      EC2VPCId)
+from runway.cfngin.blueprints.variables.types import (
+    CFNCommaDelimitedList,
+    CFNNumber,
+    CFNString,
+    EC2KeyPairKeyName,
+    EC2SecurityGroupId,
+    EC2SubnetIdList,
+    EC2VPCId,
+)
 
 
 class FunctionalTests(Blueprint):

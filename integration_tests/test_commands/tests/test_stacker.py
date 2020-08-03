@@ -1,6 +1,7 @@
 """Test deploying stacker."""
 import os
 from subprocess import check_output
+
 import boto3
 
 from integration_tests.test_commands.test_commands import Commands

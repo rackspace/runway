@@ -8,8 +8,7 @@ import pytest
 import yaml
 from mock import ANY, MagicMock, patch
 
-from runway.module.serverless import (Serverless, ServerlessOptions,
-                                      gen_sls_config_files)
+from runway.module.serverless import Serverless, ServerlessOptions, gen_sls_config_files
 
 from ..factories import MockProcess
 

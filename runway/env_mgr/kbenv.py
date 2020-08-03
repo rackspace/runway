@@ -7,11 +7,11 @@ import sys
 import tempfile
 
 # Old pylint on py2.7 incorrectly flags these
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 from six.moves.urllib.error import URLError  # pylint: disable=E
+from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
-from . import EnvManager, handle_bin_download_error
 from ..util import md5sum
+from . import EnvManager, handle_bin_download_error
 
 LOGGER = logging.getLogger(__name__)
 KB_VERSION_FILENAME = '.kubectl-version'

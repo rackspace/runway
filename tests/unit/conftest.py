@@ -11,8 +11,13 @@ import yaml
 from runway.config import Config
 from runway.core.components import DeployEnvironment
 
-from .factories import (MockCFNginContext, MockRunwayConfig, MockRunwayContext,
-                        YamlLoader, YamlLoaderDeploymet)
+from .factories import (
+    MockCFNginContext,
+    MockRunwayConfig,
+    MockRunwayContext,
+    YamlLoader,
+    YamlLoaderDeploymet,
+)
 
 if sys.version_info.major > 2:  # TODO remove after droping python 2
     from pathlib import Path  # pylint: disable=E

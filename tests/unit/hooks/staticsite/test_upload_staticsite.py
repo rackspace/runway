@@ -1,10 +1,9 @@
 """Test runway.hooks.staticsite.upload_staticsite."""
 # pylint: disable=no-self-use,unused-import,too-few-public-methods
-
 import json
-import yaml
 
 import pytest
+import yaml
 from botocore.stub import ANY
 
 from runway.hooks.staticsite.upload_staticsite import (

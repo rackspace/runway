@@ -21,13 +21,17 @@ from troposphere.awslambda import Code
 from runway.cfngin.config import Config
 from runway.cfngin.context import Context
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
-from runway.cfngin.hooks.aws_lambda import (ZIP_PERMS_MASK, _calculate_hash,
-                                            copydir, dockerized_pip,
-                                            find_requirements,
-                                            handle_requirements,
-                                            select_bucket_region,
-                                            should_use_docker,
-                                            upload_lambda_functions)
+from runway.cfngin.hooks.aws_lambda import (
+    ZIP_PERMS_MASK,
+    _calculate_hash,
+    copydir,
+    dockerized_pip,
+    find_requirements,
+    handle_requirements,
+    select_bucket_region,
+    should_use_docker,
+    upload_lambda_functions,
+)
 
 from ..factories import mock_provider
 from ..fixtures.mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID

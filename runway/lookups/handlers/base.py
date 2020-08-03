@@ -90,8 +90,14 @@ import json
 import logging
 # python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=E
-from typing import (TYPE_CHECKING, Any, Dict,  # noqa: F401 pylint: disable=W
-                    Optional, Tuple, Union)
+from typing import (  # noqa: F401 pylint: disable=W
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import yaml
 from six import string_types

@@ -6,10 +6,13 @@ import logging
 from runway._logging import PrefixAdaptor
 
 from .config import Config
-from .exceptions import (PersistentGraphCannotLock,
-                         PersistentGraphCannotUnlock,
-                         PersistentGraphLockCodeMissmatch,
-                         PersistentGraphLocked, PersistentGraphUnlocked)
+from .exceptions import (
+    PersistentGraphCannotLock,
+    PersistentGraphCannotUnlock,
+    PersistentGraphLockCodeMissmatch,
+    PersistentGraphLocked,
+    PersistentGraphUnlocked,
+)
 from .plan import Graph
 from .session_cache import get_session
 from .stack import Stack

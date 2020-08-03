@@ -1,10 +1,10 @@
 """Utility functions for S3."""
 import logging
-import tempfile
 import os
+import tempfile
 import zipfile
-import boto3
 
+import boto3
 from boto3.s3.transfer import S3Transfer
 from botocore.exceptions import ClientError
 

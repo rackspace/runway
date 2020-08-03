@@ -20,17 +20,24 @@ from hashlib import sha1
 
 from botocore import UNSIGNED
 from botocore.config import Config
-from botocore.credentials import (AssumeRoleProvider, BotoProvider,
-                                  CachedCredentialFetcher,
-                                  CanonicalNameCredentialSourcer,
-                                  ContainerProvider, CredentialProvider,
-                                  CredentialResolver,
-                                  DeferredRefreshableCredentials, EnvProvider,
-                                  InstanceMetadataFetcher,
-                                  InstanceMetadataProvider, JSONFileCache,
-                                  OriginalEC2Provider)
-from botocore.credentials import \
-    ProfileProviderBuilder as BotocoreProfileProviderBuilder
+from botocore.credentials import (
+    AssumeRoleProvider,
+    BotoProvider,
+    CachedCredentialFetcher,
+    CanonicalNameCredentialSourcer,
+    ContainerProvider,
+    CredentialProvider,
+    CredentialResolver,
+    DeferredRefreshableCredentials,
+    EnvProvider,
+    InstanceMetadataFetcher,
+    InstanceMetadataProvider,
+    JSONFileCache,
+    OriginalEC2Provider,
+)
+from botocore.credentials import (
+    ProfileProviderBuilder as BotocoreProfileProviderBuilder,
+)
 from botocore.credentials import _get_client_creator, _serialize_if_needed
 from botocore.exceptions import InvalidConfigError
 from dateutil.tz import tzutc

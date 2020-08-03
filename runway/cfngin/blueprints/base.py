@@ -9,9 +9,14 @@ from troposphere import Output, Parameter, Ref, Template
 
 from runway.variables import Variable
 
-from ..exceptions import (InvalidUserdataPlaceholder, MissingVariable,
-                          UnresolvedVariable, UnresolvedVariables,
-                          ValidatorError, VariableTypeRequired)
+from ..exceptions import (
+    InvalidUserdataPlaceholder,
+    MissingVariable,
+    UnresolvedVariable,
+    UnresolvedVariables,
+    ValidatorError,
+    VariableTypeRequired,
+)
 from ..util import read_value_from_path
 from .variables.types import CFNType, TroposphereType
 

@@ -2,7 +2,7 @@
 import os
 
 from integration_tests.integration_test import IntegrationTest
-from integration_tests.util import (import_tests, execute_tests)
+from integration_tests.util import execute_tests, import_tests
 
 
 class Commands(IntegrationTest):

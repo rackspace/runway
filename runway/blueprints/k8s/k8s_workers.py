@@ -6,17 +6,18 @@ import json
 import os
 import sys
 
-from troposphere import (
-    Base64, Equals, If, NoValue, Not, Output, Sub, autoscaling, ec2
-)
-from troposphere.policies import AutoScalingRollingUpdate, UpdatePolicy
-
 import botocore
+from troposphere import Base64, Equals, If, Not, NoValue, Output, Sub, autoscaling, ec2
+from troposphere.policies import AutoScalingRollingUpdate, UpdatePolicy
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import (
-    CFNNumber, CFNString, EC2ImageId, EC2SecurityGroupId, EC2SubnetIdList,
-    EC2VPCId
+    CFNNumber,
+    CFNString,
+    EC2ImageId,
+    EC2SecurityGroupId,
+    EC2SubnetIdList,
+    EC2VPCId,
 )
 
 

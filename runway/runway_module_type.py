@@ -1,13 +1,12 @@
 """Abstraction for the module 'type' value in a a Runway configuration."""
 # pylint: disable=unused-import
-from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
-
 import glob
 import logging
 import os
 import sys
+from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
-from .util import (load_object_from_string)
+from .util import load_object_from_string
 
 LOGGER = logging.getLogger(__name__)
 

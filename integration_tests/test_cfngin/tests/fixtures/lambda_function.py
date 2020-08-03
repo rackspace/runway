@@ -4,8 +4,19 @@ import awacs.dynamodb
 import awacs.logs
 import awacs.sts
 from awacs.aws import Allow, Policy, Principal, Statement
-from troposphere import (AccountId, Export, GetAtt, Join, Output, Partition,
-                         Ref, Region, Sub, awslambda, iam)
+from troposphere import (
+    AccountId,
+    Export,
+    GetAtt,
+    Join,
+    Output,
+    Partition,
+    Ref,
+    Region,
+    Sub,
+    awslambda,
+    iam,
+)
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNString

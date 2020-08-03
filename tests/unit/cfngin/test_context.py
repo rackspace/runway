@@ -11,11 +11,13 @@ from mock import PropertyMock, patch
 
 from runway.cfngin.config import Config, load
 from runway.cfngin.context import Context, get_fqn
-from runway.cfngin.exceptions import (PersistentGraphCannotLock,
-                                      PersistentGraphCannotUnlock,
-                                      PersistentGraphLockCodeMissmatch,
-                                      PersistentGraphLocked,
-                                      PersistentGraphUnlocked)
+from runway.cfngin.exceptions import (
+    PersistentGraphCannotLock,
+    PersistentGraphCannotUnlock,
+    PersistentGraphLockCodeMissmatch,
+    PersistentGraphLocked,
+    PersistentGraphUnlocked,
+)
 from runway.cfngin.hooks.utils import handle_hooks
 from runway.cfngin.plan import Graph, json_serial
 

@@ -1,19 +1,33 @@
 """Runway variables."""
 import logging
 import re
-from typing import (TYPE_CHECKING,  # noqa: F401 pylint: disable=W
-                    Any, Dict, Iterable, Iterator, List, Optional, Set, Type,
-                    Union, cast)
+from typing import (  # noqa: F401 pylint: disable=W
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Type,
+    Union,
+    cast,
+)
 
 from six import string_types
 
-from .cfngin.exceptions import (FailedLookup, FailedVariableLookup,
-                                InvalidLookupCombination,
-                                InvalidLookupConcatenation, UnknownLookupType,
-                                UnresolvedVariable, UnresolvedVariableValue)
+from .cfngin.exceptions import (
+    FailedLookup,
+    FailedVariableLookup,
+    InvalidLookupCombination,
+    InvalidLookupConcatenation,
+    UnknownLookupType,
+    UnresolvedVariable,
+    UnresolvedVariableValue,
+)
 from .cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
-from .lookups.handlers.base import \
-    LookupHandler  # noqa: F401 pylint: disable=unused-import
+from .lookups.handlers.base import LookupHandler  # noqa: F401 pylint: disable=W
 from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 
 # python2 supported pylint sees this is cyclic even though its only for type checking

@@ -2,14 +2,14 @@
 """Module with k8s IAM resources."""
 from __future__ import print_function
 
-from troposphere import Output, iam
-
 import awacs.autoscaling
 import awacs.sts
 from awacs.aws import Allow, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
+from troposphere import Output, iam
 
 from runway.cfngin.blueprints.base import Blueprint
+
 # from runway.cfngin.blueprints.variables.types import CFNString
 
 IAM_POLICY_ARN_PREFIX = 'arn:aws:iam::aws:policy/'

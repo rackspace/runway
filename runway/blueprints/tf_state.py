@@ -2,13 +2,10 @@
 """Module with Terraform state resources."""
 from __future__ import print_function
 
-from troposphere import (
-    Equals, If, Join, NoValue, Or, Output, dynamodb, iam, s3
-)
-
 import awacs.dynamodb
 import awacs.s3
 from awacs.aws import Allow, PolicyDocument, Statement
+from troposphere import Equals, If, Join, NoValue, Or, Output, dynamodb, iam, s3
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNString

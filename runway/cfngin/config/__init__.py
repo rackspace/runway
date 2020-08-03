@@ -10,8 +10,14 @@ import yaml
 from schematics import Model
 from schematics.exceptions import BaseError as SchematicsError
 from schematics.exceptions import UndefinedValueError, ValidationError
-from schematics.types import (BaseType, BooleanType, DictType, ListType,
-                              ModelType, StringType)
+from schematics.types import (
+    BaseType,
+    BooleanType,
+    DictType,
+    ListType,
+    ModelType,
+    StringType,
+)
 from six import text_type
 
 from runway.util import DOC_SITE

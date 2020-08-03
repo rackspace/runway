@@ -6,13 +6,21 @@ import boto3
 import mock
 
 from runway.cfngin.config import GitPackageSource
-from runway.cfngin.util import (Extractor, SourceProcessor, TarExtractor,
-                                TarGzipExtractor, ZipExtractor, camel_to_snake,
-                                cf_safe_name, get_client_region,
-                                get_s3_endpoint, merge_map,
-                                parse_cloudformation_template,
-                                s3_bucket_location_constraint,
-                                yaml_to_ordered_dict)
+from runway.cfngin.util import (
+    Extractor,
+    SourceProcessor,
+    TarExtractor,
+    TarGzipExtractor,
+    ZipExtractor,
+    camel_to_snake,
+    cf_safe_name,
+    get_client_region,
+    get_s3_endpoint,
+    merge_map,
+    parse_cloudformation_template,
+    s3_bucket_location_constraint,
+    yaml_to_ordered_dict,
+)
 
 AWS_REGIONS = ["us-east-1", "cn-north-1", "ap-northeast-1", "eu-west-1",
                "ap-southeast-1", "ap-southeast-2", "us-west-2", "us-gov-west-1",

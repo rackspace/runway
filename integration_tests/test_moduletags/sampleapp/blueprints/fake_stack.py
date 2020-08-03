@@ -2,8 +2,8 @@
 from troposphere import cloudformation as cfn
 
 # leave these as stacker
-from stacker.blueprints.base import Blueprint  # noqa pylint: disable=import-error
-from stacker.blueprints.variables.types import CFNString  # noqa pylint: disable=import-error
+from stacker.blueprints.base import Blueprint  # noqa pylint: disable=E
+from stacker.blueprints.variables.types import CFNString  # noqa pylint: disable=E
 
 
 class BlueprintClass(Blueprint):

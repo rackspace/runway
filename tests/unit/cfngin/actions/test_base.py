@@ -2,10 +2,9 @@
 # pylint: disable=no-self-use,protected-access,unused-argument
 import unittest
 
-from mock import MagicMock, PropertyMock, patch
-
 import botocore.exceptions
 from botocore.stub import ANY, Stubber
+from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin.actions.base import BaseAction
 from runway.cfngin.blueprints.base import Blueprint

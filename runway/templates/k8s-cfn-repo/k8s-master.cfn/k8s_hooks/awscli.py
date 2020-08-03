@@ -1,8 +1,9 @@
 """Execute the AWS CLI update-kubeconfig command."""
 from __future__ import print_function
+
+import logging
 import os
 import subprocess
-import logging
 import sys
 
 from runway.cfngin.lookups.handlers.output import OutputLookup

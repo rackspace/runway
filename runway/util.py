@@ -12,8 +12,14 @@ import stat
 import sys
 from contextlib import contextmanager
 from subprocess import check_call
-from typing import (Any, Dict, Iterator,  # noqa pylint: disable=unused-import
-                    List, Optional, Union)
+from typing import (  # noqa pylint: disable=unused-import
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Union,
+)
 
 import six
 import yaml

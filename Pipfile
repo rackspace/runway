@@ -34,3 +34,7 @@ moto = "~=1.3"
 py = "*"
 testfixtures = "~=4.10.0"
 setuptools-scm = "~=3.5.0"
+# v5 drops python 2 support
+isort = "<5.0.0"
+# https://github.com/microsoft/vscode-python/issues/12949
+setuptools = "<49.2"

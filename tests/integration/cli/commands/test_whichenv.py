@@ -1,5 +1,6 @@
 """Test ``runway whichenv``."""
 import logging
+
 import six
 import yaml
 from click.testing import CliRunner

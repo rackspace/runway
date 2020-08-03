@@ -3,8 +3,13 @@ import logging
 from operator import attrgetter
 
 from .. import exceptions
-from ..status import (COMPLETE, INTERRUPTED, NotSubmittedStatus,
-                      NotUpdatedStatus, SkippedStatus)
+from ..status import (
+    COMPLETE,
+    INTERRUPTED,
+    NotSubmittedStatus,
+    NotUpdatedStatus,
+    SkippedStatus,
+)
 from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from . import build
 from .base import build_walker

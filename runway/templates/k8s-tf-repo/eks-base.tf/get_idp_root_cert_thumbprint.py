@@ -1,15 +1,16 @@
 """Print thumbprint."""
 from __future__ import print_function
+
 import json
 import socket
 import sys
-# This false pylint error is only an issue on py2
-from six.moves.urllib.parse import urlparse  # pylint: disable=E
+
 import requests
 from cryptography.hazmat.primitives import serialization
 from OpenSSL import SSL
-from OpenSSL.crypto import load_certificate, FILETYPE_PEM
-
+from OpenSSL.crypto import FILETYPE_PEM, load_certificate
+# This false pylint error is only an issue on py2
+from six.moves.urllib.parse import urlparse  # pylint: disable=E
 
 JWKS_URI = requests.get(
     url=json.loads(sys.stdin.read())['url'] + '/.well-known/openid-configuration'

@@ -1,8 +1,8 @@
 """Test getting current user."""
-import os
 import json
-
+import os
 from subprocess import check_output
+
 from integration_tests.test_commands.test_commands import Commands
 
 

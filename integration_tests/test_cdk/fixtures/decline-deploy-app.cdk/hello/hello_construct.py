@@ -1,8 +1,6 @@
-from aws_cdk import (
-    aws_iam as iam,
-    aws_s3 as s3,
-    core,
-)
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_s3 as s3
+from aws_cdk import core
 
 
 class HelloConstruct(core.Construct):
@@ -16,7 +14,7 @@ class HelloConstruct(core.Construct):
         self._buckets = []
         for i in range(0, num_buckets):
             self._buckets.append(s3.Bucket(self, f"Bucket-{i}"))
-    
+
     def grant_read(self, principal: iam.IPrincipal):
         for b in self.buckets:
             b.grant_read(principal, "*")
