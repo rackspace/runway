@@ -17,9 +17,9 @@ from runway.config import (
     DeploymentDefinition,
     FutureDefinition,
     ModuleDefinition,
-    VariablesDefinition,
 )
 from runway.config import TestDefinition as ConfigTestDefinition
+from runway.config import VariablesDefinition
 from runway.util import MutableMap
 
 MODULE = 'runway.config'
