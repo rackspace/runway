@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Terraform workspaces can be specified with the `terraform_workspace` option (mainly needed for remote backend support)
 - Terraform module parameters can now be dumped to a `auto.tfvars` using the `terraform_write_auto_tfvars` option (mainly needed for remote backend support)
 - `cfn` Lookup usable in Runway and CFNgin config files
+- the `runway_version` option can be used in the config to add a required Runway [version specifier](https://www.python.org/dev/peps/pep-0440/#version-specifiers)
 
 ### Changed
 - env managers now use pathlib

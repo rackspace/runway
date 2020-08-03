@@ -60,18 +60,39 @@ Execution
 5. Push the changes to the **onicagroup/runway** remote.
    (e.g. ``git push <remote> release``)
 
-6. Create a signed tag on the *release* branch for the new version.
-   (e.g. ``git tag --sign v0.0.0``)
+6. Create a tag on the *release* branch for the new version.
+   This can be done one of two ways:
 
-7. Push the new tag to the **onicagroup/runway** remote.
-   (e.g. ``git push <remote> v0.0.0``)
+- Navigate to the **Releases** section of the repository on GitHub.
+  The should be a *Draft Release* already started that was automatically generated from PRs that were merged since the last release.
+  Editing the draft will give provide the option to create a new tag for the release.
 
-At this point, GitHub Action will begin final linting & testing before building the deployment packages & automatically publishing them to npm, PyPi, and AWS S3.
-The **CI/CD** workflow can be monitored for progress.
+- Create a signed tag on the *release* branch for the new version and push it to the **onicagroup/runway** remote
+
+.. code-block:: shell
+
+  git tag --sign v0.0.0
+  git push <remote> v0.0.0
+
+7. Navigate to the **Releases** section of the repository on GitHub and edit the *Draft Release* if you have not done so already.
+
+8. Rename the release to match the version tag and associate it with the tag that was just created.
+
+9. Edit the description of the release as needed but, there should be little to no changes required if all PRs were properly labeled.
+
+10. Mark the release as a *pre-release* if applicable (alpha, beta, release candidate, etc).
+
+11. Publish the release on GitHub.
+
+
+At this point, GitHub Action will begin building the deployment packages & automatically publishing them to npm, PyPi, and AWS S3.
+The **Publish Release** workflow can be monitored for progress.
+
+.. This is kind of optional since it has yet to be done but, it would be great to have this automated before 2.0 if possible
 
 After all the publishing steps have completed:
 
-8. Download the following artifacts from the **CI/CD** workflow:
+12. Download the following artifacts from the **Publish Release** workflow:
 
 - npm-pack
 - pyinstaller-onefile-macos-latest
@@ -79,16 +100,4 @@ After all the publishing steps have completed:
 - pyinstaller-onefile-windows-latest
 - pypi-dist
 
-9. Navigate to the **Releases** tag of the repository on GitHub.
-   The should be a *Draft Release* already started that was automatically generated from PRs that were merged since the last release.
-   Edit the draft.
-
-10. Rename the release to match the version tag and associate it with the tag that was just created.
-
-11. Edit the description of the release as needed but, there should be little to no changes required if all PRs were properly labeled.
-
-12. Attach all artifacts to the release that were previously downloaded.
-
-13. Mark the release as a *pre-release* if applicable (alpha, beta, release candidate, etc).
-
-14. Publish the release on GitHub.
+13. Attach all artifacts to the release that were previously downloaded.

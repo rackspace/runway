@@ -1,5 +1,5 @@
 """Test Runway config classes."""
-# pylint: disable=no-self-use
+# pylint: disable=no-self-use,redefined-outer-name
 import logging
 import os
 from copy import deepcopy
@@ -7,20 +7,113 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 import yaml
+from mock import MagicMock, call, patch
+from packaging.specifiers import InvalidSpecifier
 
 from runway.cfngin.exceptions import UnresolvedVariable
 # tries to test the imported class unless using "as"
-from runway.config import DeploymentDefinition, FutureDefinition, ModuleDefinition
+from runway.config import (
+    Config,
+    DeploymentDefinition,
+    FutureDefinition,
+    ModuleDefinition,
+    VariablesDefinition,
+)
 from runway.config import TestDefinition as ConfigTestDefinition
-from runway.config import VariablesDefinition
 from runway.util import MutableMap
 
+MODULE = 'runway.config'
 YAML_FIXTURES = ['config.runway.yml', 'config.runway.variables.yml']
 ENV_VARS = {
     'AWS_REGION': 'us-east-1',
     'DEPLOY_ENVIRONMENT': 'test',
     'USER': 'test'
 }
+
+
+@pytest.fixture
+def patch_config_subcomponents(monkeypatch):
+    """Patch subcomponents with Mock objects to test Config base class."""
+    mocks = {
+        'deployment': MagicMock(spec=DeploymentDefinition),
+        'future': MagicMock(spec=FutureDefinition),
+        'test': MagicMock(spec=ConfigTestDefinition),
+        'variables': MagicMock(spec=VariablesDefinition)
+    }
+    monkeypatch.setattr(MODULE + '.DeploymentDefinition', mocks['deployment'])
+    monkeypatch.setattr(MODULE + '.FutureDefinition', mocks['future'])
+    monkeypatch.setattr(MODULE + '.TestDefinition', mocks['test'])
+    monkeypatch.setattr(MODULE + '.VariablesDefinition', mocks['variables'])
+    return mocks
+
+
+class TestConfig(object):
+    """Test runway.config.Config."""
+
+    @patch(MODULE + '.SpecifierSet')
+    def test_init(self, mock_specifier, patch_config_subcomponents):
+        """Test init."""
+        mocks = patch_config_subcomponents
+        raw_config = {
+            'deployments': [{'modules': 'val'}],
+            'future': {'some_future': True},
+            'ignore_git_branch': True,
+            'runway_version': '<2.0',
+            'tests': [{'name': 'test'}],
+            'variables': {'some_var': 'val'}
+        }
+        config = Config(**raw_config)
+
+        mocks['deployment'].from_list.assert_called_once_with(
+            raw_config['deployments']
+        )
+        mocks['future'].assert_called_once_with(**raw_config['future'])
+        mocks['test'].from_list.assert_called_once_with(raw_config['tests'])
+        mocks['variables'].load.assert_called_once_with(
+            **raw_config['variables']
+        )
+        mock_specifier.assert_called_once_with(raw_config['runway_version'],
+                                               prereleases=True)
+        assert config.deployments == mocks['deployment'].from_list.return_value
+        assert config.future == mocks['future'].return_value
+        assert config.ignore_git_branch
+        assert config.runway_version == mock_specifier.return_value
+        assert config.tests == mocks['test'].from_list.return_value
+        assert config.variables == mocks['variables'].load.return_value
+
+    @patch(MODULE + '.SpecifierSet')
+    def test_init_default(self, mock_specifier, patch_config_subcomponents):
+        """Test init using default values."""
+        mocks = patch_config_subcomponents
+        deployments = [{'key': 'val'}]
+        config = Config(deployments)
+
+        mocks['deployment'].from_list.assert_called_once_with([{'key': 'val'}])
+        mocks['future'].assert_called_once_with()
+        mocks['test'].from_list.assert_called_once_with(None)
+        mocks['variables'].load.assert_called_once_with()
+        mock_specifier.assert_called_once_with('>1.10', prereleases=True)
+        assert not config.ignore_git_branch
+
+    @patch(MODULE + '.SpecifierSet')
+    def test_init_invalidspecifier(self, mock_specifier,
+                                   patch_config_subcomponents):
+        """Test init with InvalidSpecifier."""
+        mock_specifier.side_effect = InvalidSpecifier
+
+        # no retry
+        with pytest.raises(InvalidSpecifier):
+            assert Config([])
+        mock_specifier.assert_called_once_with('>1.10', prereleases=True)
+
+        # retry with exact version
+        mock_specifier.side_effect = [InvalidSpecifier, 'success']
+        config = Config([], runway_version=1.11)
+        mock_specifier.assert_has_calls([
+            call('1.11', prereleases=True),
+            call('==1.11', prereleases=True)
+        ])
+        assert config.runway_version == 'success'
 
 
 class TestDeploymentDefinition(object):
