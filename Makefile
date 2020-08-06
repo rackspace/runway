@@ -72,7 +72,7 @@ lint-pylint: ## run pylint
 # linting for python 2, requires additional disables
 lint_two: ## run all linters (python 2 only)
 	pipenv run flake8 --exclude=runway/embedded,runway/templates --ignore=D101,D403,E124,W504 runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-option-value,duplicate-code,relative-import
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-option-value,duplicate-code,method-hidden,relative-import
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
