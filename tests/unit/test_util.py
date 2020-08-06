@@ -1,15 +1,24 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
+import datetime
 import json
 import logging
 import os
 import string
 import sys
+from decimal import Decimal
 
 import pytest
 from mock import MagicMock, patch
 
-from runway.util import MutableMap, SafeHaven, argv, environ, load_object_from_string
+from runway.util import (
+    JsonEncoder,
+    MutableMap,
+    SafeHaven,
+    argv,
+    environ,
+    load_object_from_string,
+)
 
 MODULE = 'runway.util'
 VALUE = {
@@ -21,6 +30,26 @@ VALUE = {
     },
     'str_val': 'test'
 }
+
+
+class TestJsonEncoder(object):
+    """Test runway.util.JsonEncoder."""
+
+    @pytest.mark.parametrize('provided, expected', [
+        (datetime.datetime.now(), str),
+        (Decimal('1.1'), float)
+    ])
+    def test_supported_types(self, provided, expected):
+        """Test encoding of supported data types."""
+        assert isinstance(JsonEncoder().default(provided), expected)
+
+    @pytest.mark.parametrize('provided', [
+        (None)
+    ])
+    def test_unsupported_types(self, provided):
+        """Test encoding of unsupported data types."""
+        with pytest.raises(TypeError):
+            assert not JsonEncoder().default(provided)
 
 
 class TestMutableMap:

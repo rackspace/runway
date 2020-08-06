@@ -1,6 +1,7 @@
 """Utility functions."""
 from __future__ import print_function
 
+import datetime
 import hashlib
 import importlib
 import json
@@ -11,6 +12,7 @@ import re
 import stat
 import sys
 from contextlib import contextmanager
+from decimal import Decimal
 from subprocess import check_call
 from typing import (  # noqa pylint: disable=unused-import
     Any,
@@ -71,6 +73,38 @@ class cached_property(object):  # noqa pylint: disable=invalid-name,too-few-publ
 
         value = obj.__dict__[self.func.__name__] = self.func(obj)
         return value
+
+
+class JsonEncoder(json.JSONEncoder):
+    """Encode Python objects to JSON data.
+
+    This class can be used with ``json.dumps()`` to handle most data types
+    that can occur in responses from AWS.
+
+    Usage:
+        >>> json.dumps(data, cls=JsonEncoder)
+
+    """
+
+    def default(self, o):
+        # type: (Any) -> Any
+        """Encode types not supported by the default JSONEncoder.
+
+        Args:
+            o: Object to encode.
+
+        Returns:
+            JSON serializable data type.
+
+        Raises:
+            TypeError: Object type could not be encoded.
+
+        """
+        if isinstance(o, Decimal):
+            return float(o)
+        if isinstance(o, (datetime.datetime, datetime.date)):
+            return o.isoformat()
+        return super(JsonEncoder, self).default(o)
 
 
 # python2 supported pylint is unable to load six.moves correctly

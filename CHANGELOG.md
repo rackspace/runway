@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `terraform_backend_cfn_outputs` option is now deprecated
 - `xref` Lookup is now deprecated
 
+### Fixed
+- fixed TypeError when stack template from AWS contains non-JSON data type
+
 ## [1.10.1] - 2020-07-20
 ### Fixed
 - fixed an issue where AWS account alias/id validation was not using the context object with assumed credentials when running in parallel
