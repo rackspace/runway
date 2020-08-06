@@ -12,7 +12,7 @@ import yaml
 from botocore.config import Config
 from six.moves import urllib
 
-from runway.util import DOC_SITE
+from runway.util import DOC_SITE, JsonEncoder
 
 from ... import exceptions
 from ...actions.diff import DictValue, diff_parameters
@@ -1277,7 +1277,7 @@ class Provider(BaseProvider):
         if isinstance(template, str):  # handle yaml templates
             template = parse_cloudformation_template(template)
 
-        return json.dumps(template), parameters
+        return json.dumps(template, cls=JsonEncoder), parameters
 
     def get_stack_changes(self, stack, template, parameters, tags):
         """Get the changes from a ChangeSet.
