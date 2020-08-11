@@ -13,3 +13,9 @@ repos:
       - id: check-yaml
         args:
           - "--unsafe"  # needed for parsing CFN
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.3
+    hooks:
+      - id: flake8
+        exclude: ^integration_tests
