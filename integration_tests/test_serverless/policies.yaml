@@ -4,8 +4,8 @@
     - Effect: Allow
       Action:
         - 'sts:AssumeRole'
-      Resource: '*'    
+      Resource: '*'
     - Effect: Allow
       Action:
         - 's3:*'
-      Resource: '*'    
+      Resource: '*'

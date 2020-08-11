@@ -199,7 +199,7 @@ resource "aws_eks_cluster" "cluster" {
     "module.vpc.natgw_ids",  # would be better to just depend on the entire module, if it were possible
   ]
 
-  # API will timeout on initial connection attempts (i.e. when using the config_map 
+  # API will timeout on initial connection attempts (i.e. when using the config_map
   # resource below). Wait here for 2 minutes to ensure it is available.
   provisioner "local-exec" {
     command = "runway run-python sleep.py"

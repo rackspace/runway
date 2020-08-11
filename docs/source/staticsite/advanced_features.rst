@@ -80,7 +80,7 @@ See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in A
     name as the object key. This or ``content`` must be specified.
 
 **content_type (Optional[str])**
-    An explicit content type of the file. If not given, the content type will be auto detected based on the name. Only 
+    An explicit content type of the file. If not given, the content type will be auto detected based on the name. Only
     ``.json``, ``.yml``, and ``.yaml`` extentions are recognized automatically.
 
     * ``application/json`` to serialize ``content`` into JSON.

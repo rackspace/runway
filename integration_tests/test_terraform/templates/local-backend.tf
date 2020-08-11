@@ -7,7 +7,7 @@ terraform {
 
 # Variable definitions
   variable "region" {}
-  
+
   # Provider and access setup
   provider "aws" {
     version = "~> 2.0"

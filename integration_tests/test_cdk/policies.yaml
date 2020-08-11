@@ -3,7 +3,7 @@
   Statement:
     - Effect: Allow
       Action: 'cloudformation:*'
-      Resource: 
+      Resource:
         - 'arn:aws:cloudformation:*:*:stack/runway-cdk-py-sample*'
         - 'arn:aws:cloudformation:*:*:stack/CDKToolkit*'
     - Effect: Allow
