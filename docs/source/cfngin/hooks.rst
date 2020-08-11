@@ -703,4 +703,3 @@ Example Hook Class
         args:
           is_failure: False
           name: Karen
-

@@ -35,4 +35,3 @@ used with the following command.
 .. code-block:: shell
 
     $ docker run -it --rm onica/runway-quickstart
-
