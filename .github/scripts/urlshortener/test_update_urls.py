@@ -6,8 +6,8 @@ import boto3
 import pytest
 from botocore.stub import Stubber
 from click.testing import CliRunner
-
 from mypy_boto3_dynamodb.service_resource import Table
+
 from update_urls import command, handler, put_item, sanitize_version
 
 

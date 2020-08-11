@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Optional, Union
 
 import boto3
 import click
-
 from semver import VersionInfo
 
 if TYPE_CHECKING:  # only req boto3-stubs as a dev dependency

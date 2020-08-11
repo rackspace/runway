@@ -20,3 +20,8 @@ repos:
     hooks:
       - id: flake8
         exclude: ^integration_tests
+
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.3.2
+    hooks:
+      - id: isort

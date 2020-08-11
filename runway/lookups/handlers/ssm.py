@@ -39,8 +39,10 @@ from runway.lookups.handlers.base import LookupHandler
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
 if TYPE_CHECKING:
+    from runway.cfngin.context import (
+        Context as CFNginContext,  # noqa: F401 pylint: disable=W
+    )
     from runway.context import Context as RunwayContext  # noqa: F401 pylint: disable=W
-    from runway.cfngin.context import Context as CFNginContext  # noqa: F401 pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = 'ssm'
