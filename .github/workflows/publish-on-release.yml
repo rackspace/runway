@@ -161,7 +161,6 @@ jobs:
   build-npm:
     name: Build npm 📦
     needs:
-      - test-python
       - build-pyinstaller-onefolder
     env:
       NODE_VERSION: 12
@@ -269,8 +268,6 @@ jobs:
 
   build-pypi:
     name: Build PyPi 📦
-    needs:
-      - test-python
     strategy:
       fail-fast: true
       matrix:
@@ -335,7 +332,6 @@ jobs:
   publish-s3:
     name: Publish 📦 To S3
     needs:
-      - test-python
       - build-pyinstaller-onefile
     env:
       AWS_DEFAULT_REGION: us-west-2
