@@ -11,10 +11,10 @@
     "declaration": false,
     "removeComments": true,
     "strictNullChecks": true,
-    "target": "es2018", // AWS Lambda Node v10.x
+    "target": "es2018",
     "typeRoots": [
       "node_modules/@types"
-    ],
+    ]
   },
   "typedocOptions": {
     "exclude": [
