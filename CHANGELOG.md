@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.11.0] - 2020-08-11
 ### Added
 - custom per-backend (Terraform) handling is now supported
 - Terraform remote backend has custom handling around pre-selecting a workspace, not switching workspace, and dumping parameters to a `runway-parameters.auto.tfvars.json` file (only option of variables with remote backend)
@@ -910,6 +912,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
 [Unreleased]: https://github.com/onicagroup/runway/compare/v1.10.1...HEAD
+[1.11.0]: https://github.com/onicagroup/runway/compare/v1.10.1...v1.11.0
 [1.10.1]: https://github.com/onicagroup/runway/compare/v1.10.0...v1.10.1
 [1.10.0]: https://github.com/onicagroup/runway/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/onicagroup/runway/compare/v1.8.5...v1.9.0
