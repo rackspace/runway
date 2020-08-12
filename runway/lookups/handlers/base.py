@@ -388,7 +388,7 @@ class LookupHandler(object):
 
         Args:
             value: The value to be transformed into a string.
-            delimited: Used when transforming a list like object into a string
+            delimiter: Used when transforming a list like object into a string
                 to join each element together.
 
         """

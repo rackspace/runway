@@ -143,7 +143,13 @@ disable=useless-object-inheritance,
         # imports that pylint are detecting as cyclic are performed within functions
         # to avoid actually being cyclic but pylint doen't discern the difference.
         # https://github.com/PyCQA/pylint/issues/850
-        cyclic-import
+        cyclic-import,
+        # flake8 (pydocstyle) overlap
+        missing-module-docstring,
+        # flake8 (pydocstyle) overlap
+        missing-class-docstring,
+        # flake8 (pydocstyle) overlap
+        missing-function-docstring
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

@@ -13,8 +13,8 @@ def register_test_handler(test_type, handler_or_path):
     """Register a test handler.
 
     Args:
-        test_type (str): Name to register the handler under
-        handler_path (OneOf[func, str]): a function or a path to a handler
+        test_type (str): Name to register the handler under.
+        handler_or_path (OneOf[func, str]): Function or a path to a handler.
 
     """
     handler = handler_or_path
@@ -30,7 +30,7 @@ def unregister_test_handler(test_type):
     the lookup type after the test runs.
 
     Args:
-        test_type (str): Name of the lookup type to unregister
+        test_type (str): Name of the lookup type to unregister.
 
     """
     TEST_HANDLERS.pop(test_type, None)

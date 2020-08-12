@@ -292,10 +292,12 @@ class Blueprint(object):
 
         Args:
             name (str): A name for the blueprint.
-            context (:class:`runway.cfngin.context.Context`): the context the blueprint
-                is being executed under.
-            mappings (dict, optional): Cloudformation Mappings to be used in the
-                template.
+            context (:class:`runway.cfngin.context.Context`): Context
+                the blueprint is being executed under.
+            mappings (dict, optional): CloudFormation Mappings to be used
+                in the template.
+            description (str): Used to describe the resulting
+                CloudFormation template.
 
         """
         self.name = name

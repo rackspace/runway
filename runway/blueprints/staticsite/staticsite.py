@@ -41,7 +41,7 @@ IAM_ARN_PREFIX = 'arn:aws:iam::aws:policy/service-role/'
 
 
 class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
-    """Stacker blueprint for creating S3 bucket and CloudFront distribution."""
+    """CFNgin blueprint for creating S3 bucket and CloudFront distribution."""
 
     VARIABLES = {
         'AcmCertificateArn': {'type': str,
@@ -129,7 +129,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
     def create_template(self):
         # type: () -> None
-        """Create template (main function called by Stacker)."""
+        """Create template (main function called by CFNgin)."""
         self.template.set_version('2010-09-09')
         self.template.set_description('Static Website - Bucket and Distribution')
 
@@ -164,12 +164,9 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         # type: () -> List[cloudfront.LambdaFunctionAssociation]
         """Retrieve any lambda associations from the instance variables.
 
-        Keyword Args:
-            directory_index_rewrite_version (dict): The directory index rewrite lambda version
-                resource
-
         Return:
-            array: Array of lambda function association variables
+            List of Lambda Function association variables
+
         """
         variables = self.get_variables()
 
@@ -191,8 +188,9 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """Retrieve the directory index lambda associations with the added rewriter.
 
         Args:
-            lambda_associations [List(Any)]: The lambda associations
-            directory_index_rewrite_version [Any]: The directory index rewrite version
+            lambda_associations: The lambda associations.
+            directory_index_rewrite_version: The directory index rewrite version.
+
         """
         lambda_associations.append(
             cloudfront.LambdaFunctionAssociation(
@@ -211,13 +209,13 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         # type: (...) -> Dict[str, Any]
         """Retrieve the options for our CloudFront distribution.
 
-        Keyword Args:
-            bucket (dict): The bucket resource
-            oai (dict): The origin access identity resource
-            lambda_function_associations (array): The lambda function association array
+        Args:
+            bucket: The bucket resource
+            oai: The origin access identity resource.
+            lambda_function_associations: List of Lambda Function associations.
 
         Return:
-            dict: The CloudFront Distribution Options
+            The CloudFront Distribution Options.
 
         """
         variables = self.get_variables()
@@ -305,7 +303,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """Add the origin access identity resource to the template.
 
         Returns:
-            dict: The OAI resource
+            The OAI resource
 
         """
         return self.template.add_resource(
@@ -321,11 +319,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         # type: (s3.Bucket) -> s3.BucketPolicy
         """Add a policy to the bucket if CloudFront is disabled. Ensure PublicRead.
 
-        Keyword Args:
-            bucket (dict): The bucket resource to place the policy
+        Args:
+            bucket: The bucket resource to place the policy.
 
         Returns:
-            dict: The Bucket Policy Resource
+            The Bucket Policy Resource.
 
         """
         return self.template.add_resource(
@@ -353,7 +351,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """Add the bucket resource along with an output of it's name / website url.
 
         Returns:
-            dict: The bucket resource
+            The bucket resource.
 
         """
         bucket = self.template.add_resource(
@@ -397,11 +395,12 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """Given a bucket and oai resource add cloudfront access to the bucket.
 
         Keyword Args:
-            bucket (dict): A bucket resource
-            oai (dict): An Origin Access Identity resource
+            bucket: A bucket resource.
+            oai: An Origin Access Identity resource.
 
         Return:
-            dict: The CloudFront Bucket access resource
+            The CloudFront Bucket access resource.
+
         """
         return self.template.add_resource(
             s3.BucketPolicy(
@@ -422,7 +421,14 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                                   function_name=''  # type: str
                                  ):  # noqa: E124
         # type: (...) -> iam.Role
-        """Create the Lambda@Edge execution role."""
+        """Create the Lambda@Edge execution role.
+
+        Args:
+            name: Name for the Lambda Execution Role.
+            function_name: Name of the Lambda Function the Role will be
+                attached to.
+
+        """
         variables = self.get_variables()
 
         lambda_resource = Join('', [
@@ -480,10 +486,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """Add an index CloudFront directory index rewrite lambda function to the template.
 
         Keyword Args:
-            role (dict): The index rewrite role resource
+            role: The index rewrite role resource.
 
         Return:
-            dict: The CloudFront directory index rewrite lambda function resource
+            The CloudFront directory index rewrite lambda function resource.
+
         """
         variables = self.get_variables()
         code_str = ''
@@ -521,11 +528,11 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         # type: (awslambda.Function) -> awslambda.Version
         """Add a specific version to the directory index rewrite lambda.
 
-        Keyword Args:
-            directory_index_rewrite (dict): The directory index rewrite lambda resource
+        Args:
+            directory_index_rewrite (dict): The directory index rewrite lambda resource.
 
         Return:
-            dict: The CloudFront directory index rewrite version
+            dict: The CloudFront directory index rewrite version.
 
         """
         code_hash = hashlib.md5(
@@ -547,9 +554,9 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         # type: (s3.BucketPolicy, Dict[str, Any]) -> cloudfront.Distribution
         """Add the CloudFront distribution to the template / output the id and domain name.
 
-        Keyword Args:
-            bucket_policy (dict): Bucket policy to allow CloudFront access
-            cloudfront_distribution_options (dict): The distribution options
+        Args:
+            bucket_policy (dict): Bucket policy to allow CloudFront access.
+            cloudfront_distribution_options (dict): The distribution options.
 
         Return:
             dict: The CloudFront Distribution resource

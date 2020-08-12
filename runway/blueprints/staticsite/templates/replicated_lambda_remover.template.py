@@ -17,7 +17,9 @@ def handler(event,  # type: Dict
     where it will then re-request the deletion process.
 
     Args:
-        event (dict): The AWS Step Function execution event
+        event (dict): The AWS Step Function execution event.
+        _context (Any): Lambda context object.
+
     """
     arns = event.get('FunctionArns')
     self_destruct = event.get('SelfDestruct')

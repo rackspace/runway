@@ -24,7 +24,7 @@ sync: ## create a python virtual environment in the project for development
 
 # changes that need to be made inorder to sync python two (may also require deletion of the existing lock file)
 sync_two:  ## create a python virtual environment in the project for python 2 development
-	pipenv install "astroid<2.0" "pylint<2.0" --dev
+	pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" --dev
 	PIPENV_VENV_IN_PROJECT=1 pipenv install --dev
 
 sync_all: ## sync all virtual environments used by this project with their Pipfile.lock
@@ -54,7 +54,7 @@ lint: lint-isort lint-flake8 lint-pylint ## run all linters
 
 lint-flake8: ## run flake8
 	@echo "Running flake8..."
-	@pipenv run flake8 --exclude=runway/embedded,runway/templates runway
+	@pipenv run flake8 --exclude=runway/embedded,runway/templates runway --docstring-convention=all
 	@echo ""
 
 lint-isort: ## run isort

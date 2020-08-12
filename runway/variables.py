@@ -63,6 +63,7 @@ class Variable(object):
         Args:
             name: Name of the variable (directive/key).
             value: The variable itself.
+            variable_type: Type of variable (cfngin|runway).
 
         """
         self.name = name
@@ -195,6 +196,7 @@ class VariableValue(object):
 
         Args:
             input_object: The objected defined as the value of a variable.
+            variable_type: Type of variable (cfngin|runway).
 
         """
         if isinstance(input_object, list):
@@ -364,6 +366,7 @@ class VariableValueList(VariableValue, list):
 
         Args:
             input_object: The objected defined as the value of a variable.
+            variable_type: Type of variable (cfngin|runway).
 
         """
         acc = [
@@ -449,6 +452,7 @@ class VariableValueDict(VariableValue, dict):
 
         Args:
             input_object: The objected defined as the value of a variable.
+            variable_type: Type of variable (cfngin|runway).
 
         """
         acc = {
@@ -588,6 +592,8 @@ class VariableValueLookup(VariableValue):
         Args:
             lookup_name: Name of the invoked lookup
             lookup_data: Data portion of the lookup
+            handler: Lookup handler that will be use to resolve the value.
+            variable_type: Type of variable (cfngin|runway).
 
         """
         self._resolved = False
@@ -693,10 +699,16 @@ class VariableValueLookup(VariableValue):
 
     def _resolve(self, value):
         # type: (Any) -> None
-        """Set _value and _resolved from the result of resolve()."""
+        """Set _value and _resolved from the result of resolve().
+
+        Args:
+            value: Resolved value of the variable.
+
+        """
         self._value = value
         self._resolved = True
 
+    # TODO Remove during the next major release.
     def _resolve_legacy(self, context, provider):
         """Resolve legacy lookups.
 
@@ -707,9 +719,6 @@ class VariableValueLookup(VariableValue):
         when trying to pass the arguments that now get passed. That is where
         this method comes it. It can handle legacy Stacker function lookups
         and those that don't support accept more then 3 args.
-
-        TODO:
-            Remove during the next major release.
 
         """
         if isinstance(self.handler, type):

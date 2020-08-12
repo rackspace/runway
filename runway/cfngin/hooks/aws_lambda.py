@@ -59,7 +59,7 @@ def copydir(source, destination, includes, excludes=None,
         source (str): Source directory.
         destination (str): Destination directory.
         includes (List[str]): Glob patterns for files to include.
-        includes (List[str]): Glob patterns for files to exclude.
+        excludes (List[str]): Glob patterns for files to exclude.
         follow_symlinks (bool): If true, symlinks will be included in the
             resulting zip file.
 

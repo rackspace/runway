@@ -57,6 +57,7 @@ class EnvManager(object):  # pylint: disable=too-few-public-methods
         """Initialize class.
 
         Args:
+            bin_name (str): Name of the binary file (e.g. kubectl)
             dir_name (str): Name of the directory within the users home
                 directory where binary versions will be stored.
             path (Optional[Path]): The current working directory.

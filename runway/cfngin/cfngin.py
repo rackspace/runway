@@ -100,7 +100,7 @@ class CFNgin(object):
         Args:
             force (bool): Explicitly enable the action even if an environment
                 file is not found.
-            syspath (Optional[str]): Explicitly define a path to work in.
+            sys_path (Optional[str]): Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
@@ -134,7 +134,7 @@ class CFNgin(object):
         Args:
             force (bool): Explicitly enable the action even if an environment
                 file is not found.
-            syspath (Optional[str]): Explicitly define a path to work in.
+            sys_path (Optional[str]): Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
@@ -193,7 +193,7 @@ class CFNgin(object):
         Args:
             force (bool): Explicitly enable the action even if an environment
                 file is not found.
-            syspath (Optional[str]): Explicitly define a path to work in.
+            sys_path (Optional[str]): Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """

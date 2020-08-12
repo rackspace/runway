@@ -2,6 +2,7 @@
 
 Dependency pre-hook responsible for ensuring correct
 callback urls are retrieved or a temporary one is used in it's place.
+
 """
 # pylint: disable=unused-argument
 import logging
@@ -31,11 +32,12 @@ def get(context,
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
+            The provider instance.
 
     Keyword Args:
-        user_pool_id (str): The ID of the User Pool to check for a client
-        stack_name (str) The name of the stack to check against
+        user_pool_id (str): The ID of the User Pool to check for a client.
+        stack_name (str) The name of the stack to check against.
+
     """
     session = context.get_session()
     cloudformation_client = session.client('cloudformation')

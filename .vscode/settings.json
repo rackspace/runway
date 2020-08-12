@@ -89,6 +89,9 @@
         "xray"
     ],
     "files.insertFinalNewline": true,
+    "python.linting.flake8Args": [
+        "--docstring-convention=all"
+    ],
     "python.linting.flake8Enabled": true,
     "python.linting.mypyEnabled": false,
     "python.linting.pylintEnabled": true,

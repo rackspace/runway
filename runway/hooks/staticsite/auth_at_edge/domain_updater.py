@@ -31,11 +31,12 @@ def update(context,  # type: Context
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
+            The provider instance.
 
     Keyword Args:
-        user_pool_id (str): The ID of the Cognito User Pool
-        client_id (str): The ID of the Cognito User Pool Client
+        user_pool_id (str): The ID of the Cognito User Pool.
+        client_id (str): The ID of the Cognito User Pool Client.
+
     """
     session = context.get_session()
     cognito_client = session.client('cognito-idp')
@@ -90,10 +91,11 @@ def delete(context,  # type: Context # pylint: disable=unused-import
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
+            The provider instance.
 
     Keyword Args:
-        client_id (str): The ID of the Cognito User Pool Client
+        client_id (str): The ID of the Cognito User Pool Client.
+
     """
     session = context.get_session()
     cognito_client = session.client('cognito-idp')
@@ -123,7 +125,8 @@ def get_user_pool_domain(prefix, region):
     """Return a user pool domain name based on the prefix received and region.
 
     Args:
-        prefix (str): The domain prefix for the domain
-        region (str): The region in which the pool resides
+        prefix (str): The domain prefix for the domain.
+        region (str): The region in which the pool resides.
+
     """
     return '%s.auth.%s.amazoncognito.com' % (prefix, region)

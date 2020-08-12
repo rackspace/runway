@@ -157,11 +157,11 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
 
     def __fetch_remote_source(self):
         # type: () -> Union(Git, None)
-        """
-        Switch based on the retrieved source of the path.
+        """Switch based on the retrieved source of the path.
 
         Determine which remote Source type to fetch based on the source
         specified in the path variable.
+
         """
         if self.source == 'git':
             return self.git_source_class(**self.configuration).fetch()
@@ -184,14 +184,15 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         # type: (Dict[str, str]) -> Tuple[str]
         """Retrieve the relevant elements of the path variable passed.
 
-        Keyword Args:
-            module (Dict[str, str]): The module manifest or a string
-                representation of a local path to a module.
-
         Given a dictionary with a `path` parameter parse the value into
         it's specific components. The path structure is based on the
         encoding found in
         `Terraform modules <https://www.terraform.io/docs/modules/sources.html>`_.
+
+        Args:
+            module (Dict[str, str]): The module manifest or a string
+                representation of a local path to a module.
+
         """
         source = 'local'  # type: str
         uri = ''  # type: str
@@ -219,13 +220,14 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         # type: (str) -> List[str]
         """Given a string extract the uri and remaining location values.
 
-        Keyword Args:
-            uri_loc_str (str): The string that represents the uri and
-                remaining location values.
-
         Separator used is `//`. It is expected the uri will contain a
         protocol reference, so if a remote uri is used those values
         will be concatenated together.
+
+        Args:
+            uri_loc_str (str): The string that represents the uri and
+                remaining location values.
+
         """
         split_uri_location = uri_loc_str.split('//')  # type: List[str, str]
         location_string = ''  # type: str
@@ -243,12 +245,13 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         # type: (str) -> List[str]
         """Given a location string extract the location variable and the remote module options.
 
-        Keyword Args:
-            loc_opt_str (str): The string that represents the location
-                and remaining option values
-
         Seperator used is `?`. Each of the options retrieved are then
-        turned into a Dict for easy accessibility based on the `&` separator
+        turned into a Dict for easy accessibility based on the `&` separator.
+
+        Args:
+            loc_opt_str (str): The string that represents the location
+                and remaining option values.
+
         """
         split_location_options = loc_opt_str.split('?')  # type: List(str)
         location = split_location_options[0]  # type: str
@@ -266,10 +269,11 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
         # type: (str) -> Dict[str, str]
         """Convert the options string into a dict.
 
-        Keyword Args:
+        Args:
             options_str (str): The options string that will
                 be seperated into a dictionary based on the
-                `&` separator
+                `&` separator.
+
         """
         opts = options_str.split('&')  # type: List[str]
         res = {}  # Type: Dict

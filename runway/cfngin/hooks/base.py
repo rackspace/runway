@@ -237,6 +237,8 @@ class HookBuildAction(build.Action):
         Args:
             context (:class:`runway.cfngin.context.Context`): The context
                 for the current run.
+            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
+                The provider instance.
 
         """
         super(HookBuildAction, self).__init__(context)

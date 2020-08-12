@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def create_base_policy():
-    """Creates the base policy."""
+    """Create the base policy."""
     deploy_name_list = ['runway-int-test-']
     return iam.Policy(
         PolicyName='base-policy',
@@ -53,18 +53,18 @@ class IAMPolicyFinder:
     """Class that finds the corresponding policies for the given integration test."""
 
     def __init__(self, root=None):
-        """Sets the root path of integration tests."""
+        """Set the root path of integration tests."""
         self.root = root or path.join(
             BASE_PATH, "..", "..", "..", "..",
             "integration_tests")
 
     def file_path(self, test_name):
-        """Gets the policies file path for the given test."""
+        """Get the policies file path for the given test."""
         folder = "test_{}".format(test_name.lower())
         return path.join(self.root, folder, "policies.yaml")
 
     def find(self, test_name):
-        """Gets the policies for the given integration test."""
+        """Get the policies for the given integration test."""
         file_path = path.abspath(self.file_path(test_name))
         policies = []
         if path.isfile(file_path):
@@ -86,7 +86,7 @@ class IAMPolicyBuilder():
     """Utility class that builds IAM roles."""
 
     def __init__(self, policy_finder=None):
-        """Sets the policy finder."""
+        """Set the policy finder."""
         self.policy_finder = policy_finder or IAMPolicyFinder("")
 
     def build(self, test_name):
