@@ -20,15 +20,14 @@ list: ## list all targets in this Makefile
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 sync: ## create a python virtual environment in the project for development
-	PIPENV_VENV_IN_PROJECT=1 pipenv sync -d
+	PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev
+	pipenv run pre-commit install
 
 # changes that need to be made inorder to sync python two (may also require deletion of the existing lock file)
 sync_two:  ## create a python virtual environment in the project for python 2 development
-	pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" --dev
-	PIPENV_VENV_IN_PROJECT=1 pipenv install --dev
+	PIPENV_VENV_IN_PROJECT=1 pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" --dev --skip-lock
 
-sync_all: ## sync all virtual environments used by this project with their Pipfile.lock
-	PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three
+sync_all: sync ## sync all virtual environments used by this project with their Pipfile.lock
 	pushd docs && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
 	pushd integration_tests && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
 	pushd integration_test_infrastructure && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd

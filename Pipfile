@@ -12,17 +12,14 @@ importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}
 [dev-packages]
 # Lint
 isort = "<5.0.0"  # v5 drops python 2 support
-
 ## flake8
 flake8 = "~=3.8.2"
 flake8-docstrings = "~=1.5.0"
 pep8-naming = "~=0.11"
 pydocstyle = "~=5.0.2"
-
 ## Pylint
 pylint = ">=2.5.0"  # pinned to avoid "Instance of '' has no 'Bucket' member"
 astroid = ">=2.4.0"  # https://github.com/PyCQA/pylint/issues/3134
-
 # Test
 pytest = "<5.0"  # last version that supports 2.7 - allows install with 2/3
 pytest-cov = "~=2.8"
@@ -30,15 +27,12 @@ py = "*"
 mock = "~=3.0.5"
 moto = "~=1.3"
 testfixtures = "~=4.10.0"
-
 # Build
 setuptools-scm = "~=3.5.0"
 pyinstaller = "==3.5"  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
-
 # Utilities
-pre-commit = "~=2.6.0"
+pre-commit = {version = "~=2.6.0",python_version = '>="3.6"'}
 setuptools = "<49.2"  # https://github.com/microsoft/vscode-python/issues/12949
-
 # Windows only
 pywin32 = {version = "*", os_name = "== 'nt'"}
 pywin32-ctypes = {version = "*", os_name = "== 'nt'"}
