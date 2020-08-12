@@ -5,6 +5,6 @@
       "Action" : "Update:*",
       "Principal": "*",
       "Resource" : "*"
-    }  
+    }
   ]
 }

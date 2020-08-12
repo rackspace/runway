@@ -8,6 +8,7 @@ the information will be passed to the parsing agent.
 
 If a refresh token exists and it has expired (after 1 hour) do an automatic refresh
 of the credentials by redirecting the user to the refresh agent.
+
 """
 import base64
 import datetime
@@ -41,8 +42,10 @@ CONFIG = get_config()
 def handler(event, _context):
     """Handle the request passed in.
 
-    Keyword Args:
-        event (Dict[str, Any]): The Lambda Event
+    Args:
+        event (Dict[str, Any]): The Lambda Event.
+        _context (Any): Lambda context object.
+
     """
     request = event['Records'][0]['cf']['request']
     domain_name = request['headers']['host'][0]['value']
@@ -199,8 +202,9 @@ def generate_nonce():
 def random_key(length=15):
     """Generate a random key of specified length from the allowed secret characters.
 
-    Keyword Args:
-        length (int): The length of the random key
+    Args:
+        length (int): The length of the random key.
+
     """
     return ''.join(secrets.choice(SECRET_ALLOWED_CHARS) for _ in range(length))
 
@@ -212,11 +216,12 @@ def validate_jwt(jwt_token,
                 ):  # noqa: E124
     """Validate the JWT token against the Cognito JWKs.
 
-    Keyword Args:
-        jwt_token (str): The JSON Web Token to validate
-        jwks_uri (str): The URI in which to retrieve the JSON Web Keys
-        issuer (str): Issuer of the JWT
-        audience (str): Audience of the JWT
+    Args:
+        jwt_token (str): The JSON Web Token to validate.
+        jwks_uri (str): The URI in which to retrieve the JSON Web Keys.
+        issuer (str): Issuer of the JWT.
+        audience (str): Audience of the JWT.
+
     """
     token_headers = jwt.get_unverified_header(jwt_token)
     if not token_headers:
@@ -237,8 +242,9 @@ def validate_jwt(jwt_token,
 def is_rsa_signing_key(key):
     """Verify if the key specified is an RSA Public Key.
 
-    Keyword Args:
-        key (Dict): The key to filter
+    Args:
+        key (Dict): The key to filter.
+
     """
     return "rsaPublicKey" in key
 
@@ -246,9 +252,10 @@ def is_rsa_signing_key(key):
 def get_signing_key(jwks_uri, kid):
     """Retrieve the signing keys from the JWKS uri that match the key id specified.
 
-    Keyword Args:
-        jwks_uri (str): The URI in which to retrieve the JWKs
-        kid (str): Key ID of the signing key we are looking for
+    Args:
+        jwks_uri (str): The URI in which to retrieve the JWKs.
+        kid (str): Key ID of the signing key we are looking for.
+
     """
     client = JwksClient({'jwks_uri': jwks_uri})
     jwk = client.get_signing_key(kid)

@@ -27,8 +27,8 @@ if sys.version_info.major < 3:
     from backports import tempfile  # pylint: disable=E
     from pathlib2 import Path  # pylint: disable=E
 else:
-    from pathlib import Path  # pylint: disable=E
     import tempfile  # pylint: disable=E
+    from pathlib import Path  # pylint: disable=E
 
 # mask to retrieve only UNIX file permissions from the external attributes
 # field of a ZIP entry.
@@ -59,7 +59,7 @@ def copydir(source, destination, includes, excludes=None,
         source (str): Source directory.
         destination (str): Destination directory.
         includes (List[str]): Glob patterns for files to include.
-        includes (List[str]): Glob patterns for files to exclude.
+        excludes (List[str]): Glob patterns for files to exclude.
         follow_symlinks (bool): If true, symlinks will be included in the
             resulting zip file.
 

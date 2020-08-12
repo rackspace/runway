@@ -10,8 +10,9 @@ from .utils import rsa_public_key_to_pem
 def is_signing_key(key):
     """Filter to determine if this is a signing key.
 
-    Keyword Args:
-        key (Dict[str, str]): The key
+    Args:
+        key (Dict[str, str]): The key.
+
     """
     if key.get('kty', '') != 'RSA':
         return False
@@ -28,8 +29,9 @@ class JwksClient(object):
     def __init__(self, options=None):
         """Initialize.
 
-        Keyword Args:
-            options (Optional[Dict[str, str]]): Options for the client
+        Args:
+            options (Optional[Dict[str, str]]): Options for the client.
+
         """
         self.options = options
         self.logger = logging.getLogger('__file__')
@@ -58,7 +60,8 @@ class JwksClient(object):
         """Given a specific key id (kid) retrieve the signing key associated.
 
         Keyword Args:
-            kid (str): The key id of the signing key
+            kid (str): The key id of the signing key.
+
         """
         self.logger.info('Fetching signing key for %s', kid)
 
@@ -90,7 +93,8 @@ class JwksClient(object):
         """Create the JSON Web Key.
 
         Keyword Args:
-            key (dict): The Retrieved signing key
+            key (dict): The Retrieved signing key.
+
         """
         jwk = {
             'kid': key.get('kid'),

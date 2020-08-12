@@ -8,8 +8,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa pylint: disable=W
 
 if TYPE_CHECKING:
-    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
     from ....cfngin.context import Context  # pylint: disable=W
+    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,15 +28,16 @@ def update(context,  # pylint: disable=unused-argument
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
+            The provider instance.
 
     Keyword Args:
         alternate_domains (List[str]): A list of any alternate domains
-            that need to be listed with the primary distribution domain
-        redirect_path_sign_in (str): The redirect path after sign in
-        redirect_path_sign_out (str): The redirect path after sign out
+            that need to be listed with the primary distribution domain.
+        redirect_path_sign_in (str): The redirect path after sign in.
+        redirect_path_sign_out (str): The redirect path after sign out.
         oauth_scopes (List[str]): A list of all available validation
-            scopes for oauth
+            scopes for oauth.
+
     """
     session = context.get_session()
     cognito_client = session.client('cognito-idp')

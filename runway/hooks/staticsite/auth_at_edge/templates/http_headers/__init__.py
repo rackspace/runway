@@ -7,8 +7,10 @@ CONFIG = get_config()
 def handler(event, _context):
     """Handle adding the headers to the origin response.
 
-    Keyword Args:
-        event (Any): The Lambda Event
+    Args:
+        event (Any): The Lambda Event.
+        _context (Any): Lambda context object.
+
     """
     headers = CONFIG.get('http_headers')
     # Format to be CloudFront compatable

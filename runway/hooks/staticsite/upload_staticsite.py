@@ -383,7 +383,6 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
     """Sync static website extra files to S3 bucket.
 
     Args:
-
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         bucket (str): The static site bucket name.

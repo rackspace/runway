@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Sphinx config file."""
 # pylint: skip-file
 #
 # Configuration file for the Sphinx documentation builder.

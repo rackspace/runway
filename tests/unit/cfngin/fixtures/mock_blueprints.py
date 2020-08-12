@@ -183,7 +183,7 @@ class Dummy(Blueprint):
 
 
 class Dummy2(Blueprint):
-    """This blueprint allows tests of only additional resources to occur.
+    """Allows tests of only additional resources to occur.
 
     Just swap out the Dummy class for Dummy2 on the same stack.
 

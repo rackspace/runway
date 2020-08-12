@@ -129,6 +129,7 @@ class MockCFNginContext(CFNginContext):
 
         Args:
             service_name (str): The name of a service, e.g. 's3' or 'ec2'.
+            region (Optional[str]): AWS region.
 
         """
         key = '{}.{}'.format(service_name, region or self.region)
@@ -159,8 +160,8 @@ class MockProcess(object):  # pylint: disable=too-few-public-methods
 
         Args:
             returncode (int): Code that will be returned when the process exits.
-            stdout (Optional[Union[bytes, str, List[str], Tuple(str, ...)]]):
-                Content to be written accessable as stdout on the process.
+            stdout (Optional[Union[bytes, str, List[str], Tuple(str, ...)]]): Content
+                to be written accessable as stdout on the process.
             universal_newlines (bool): Use universal line endings.
 
         """
@@ -257,6 +258,7 @@ class MockRunwayContext(RunwayContext):
 
         Args:
             service_name (str): The name of a service, e.g. 's3' or 'ec2'.
+            region (Optional[str]): AWS region name.
 
         """
         key = '{}.{}'.format(service_name, region or self.env_region)

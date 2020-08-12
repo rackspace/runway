@@ -27,13 +27,14 @@ def execute(context,  # type: Context # pylint: disable=unused-argument
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
+            The provider instance.
 
     Keyword Args:
         function_arns (List[str]): The arns of all the Replicated functions to
-            delete
-        state_machine_arn (str): The ARN of the State Machine to execute
-        stack_name (str): The name of the Cleanup stack to delete
+            delete.
+        state_machine_arn (str): The ARN of the State Machine to execute.
+        stack_name (str): The name of the Cleanup stack to delete.
+
     """
     session = context.get_session()
     step_functions_client = session.client('stepfunctions')

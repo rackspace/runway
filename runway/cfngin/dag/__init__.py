@@ -464,8 +464,7 @@ class ThreadedWalker(object):  # pylint: disable=too-few-public-methods
         # execute. The thread will block executing walk_func, until all of the
         # nodes dependencies have executed.
         for node in nodes:
-            def fn(node_, deps):
-                """Function."""
+            def _fn(node_, deps):
                 if deps:
                     LOGGER.debug("%s waiting for %s to complete", node_,
                                  ", ".join(deps))
@@ -482,7 +481,7 @@ class ThreadedWalker(object):  # pylint: disable=too-few-public-methods
                     self.semaphore.release()
 
             deps = dag.all_downstreams(node)
-            threads[node] = Thread(target=fn, args=(node, deps), name=node)
+            threads[node] = Thread(target=_fn, args=(node, deps), name=node)
 
         # Start up all of the threads.
         for node in nodes:

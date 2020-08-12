@@ -27,8 +27,10 @@ CONFIG = get_config()
 def handler(event, _context):
     """Handle the authorization parsing.
 
-    Keyword Args:
-        event (Any): The Lambda Event
+    Args:
+        event (Any): The Lambda Event.
+        _context (Any): Lambda context object.
+
     """
     request = event['Records'][0]['cf']['request']
     domain_name = request['headers']['host'][0]['value']

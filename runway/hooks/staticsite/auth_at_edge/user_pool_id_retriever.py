@@ -25,11 +25,12 @@ def get(context,
         context (:class:`runway.cfngin.context.Context`): The context
             instance.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
+            The provider instance.
 
     Keyword Args:
-        user_pool_arn (str): The ARN of the supplied User pool
-        created_user_pool_id (str): The ID of the created Cognito User Pool
+        user_pool_arn (str): The ARN of the supplied User pool.
+        created_user_pool_id (str): The ID of the created Cognito User Pool.
+
     """
     context_dict = {'id': ''}
 

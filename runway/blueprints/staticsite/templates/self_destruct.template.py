@@ -14,6 +14,8 @@ def handler(event,  # type: Dict
 
     Args:
         event (dict): The AWS Step Function execution event
+        _context: Lambda context object.
+
     """
     data = event.get('SelfDestruct')
     cfn_client = boto3.client('cloudformation')

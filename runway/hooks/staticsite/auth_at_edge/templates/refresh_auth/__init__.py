@@ -18,8 +18,10 @@ CONFIG = get_config()
 def handler(event, _context):
     """Handle the authorization refresh.
 
-    Keyword Args:
-        event: The Lambda Event
+    Args:
+        event: The Lambda Event.
+        _context (Any): Lambda context object.
+
     """
     request = event['Records'][0]['cf']['request']
     domain_name = request['headers']['host'][0]['value']
@@ -121,11 +123,12 @@ def validate_refresh_request(current_nonce,
                              tokens):
     """Validate that nonce and tokens are present.
 
-    Keyword Args:
-        current_nonce (str): The current nonce code
-        original_nonce (str): The original nonce code
+    Args:
+        current_nonce (str): The current nonce code.
+        original_nonce (str): The original nonce code.
         tokens (Dict[str, str]): A dictionary of all the token_types
-            and their corresponding token values (id, auth, refresh)
+            and their corresponding token values (id, auth, refresh).
+
     """
     if not original_nonce:
         msg = "Your browser didn't send the nonce cookie along, " + \

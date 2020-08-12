@@ -2,8 +2,8 @@
 
 Described in detail in this blogpost:
 https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-how-to-use-lambdaedge-and-json-web-tokens-to-enhance-web-application-security/
-"""
 
+"""
 import logging
 from typing import Any, Dict, List, Union  # pylint: disable=unused-import
 
@@ -70,12 +70,11 @@ class AuthAtEdge(StaticSite):
         """Initialize the Blueprint.
 
         Args:
-            name (str): The name of the stack
-            context (Context): The CFNgin Context object
+            name (str): The name of the stack.
+            context (Context): The CFNgin Context object.
+            mappings (Union(None, Dict)): Blueprint mappings.
+            description (Union(None, str)): The description of the stack.
 
-        KeywordArgs:
-            mappings (Union(None, Dict)): Blueprint mappings
-            description (Union(None, str)): The description of the stack
         """
         super(AuthAtEdge, self).__init__(name, context, mappings, description)
         self.VARIABLES.update(StaticSite.VARIABLES)
@@ -182,14 +181,15 @@ class AuthAtEdge(StaticSite):
         """Create a lambda function and its version.
 
         Args:
-            title (str): The name of the function in PascalCase
+            title (str): The name of the function in PascalCase.
             description (str): Description to be displayed in the
-                lambda panel
+                lambda panel.
             handle (str): The underscore separated representation
                 of the name of the lambda. This handle is used to
                 determine the handler for the lambda as well as
                 identify the correct Code hook_data information.
-            role (IAM.Role): The Lambda Execution Role
+            role (IAM.Role): The Lambda Execution Role.
+
         """
         function = self.get_auth_at_edge_lambda(
             title,
@@ -213,14 +213,15 @@ class AuthAtEdge(StaticSite):
         """Create an Auth@Edge lambda resource.
 
         Args:
-            name (str): The name of the function in PascalCase
+            title (str): The name of the function in PascalCase.
             description (str): Description to be displayed in the
-                lambda panel
-            handle (str): The underscore separated representation
+                lambda panel.
+            handler (str): The underscore separated representation
                 of the name of the lambda. This handle is used to
                 determine the handler for the lambda as well as
                 identify the correct Code hook_data information.
-            role (IAM.Role): The Lambda Execution Role
+            role (IAM.Role): The Lambda Execution Role.
+
         """
         lamb = self.template.add_resource(
             awslambda.Function(
@@ -255,8 +256,9 @@ class AuthAtEdge(StaticSite):
         will this hash value.
 
         Args:
-            title (str): The name of the function in PascalCase
-            role (awslambda.Function): The Lambda function
+            title (str): The name of the function in PascalCase.
+            lambda_function (awslambda.Function): The Lambda function.
+
         """
         s3_key = lambda_function.properties['Code'].to_dict()['S3Key']
         code_hash = s3_key.split('.')[0].split('-')[-1]
@@ -281,11 +283,17 @@ class AuthAtEdge(StaticSite):
         """Retrieve the options for our CloudFront distribution.
 
         Keyword Args:
-            bucket (dict): The bucket resource
-            oai (dict): The origin access identity resource
+            bucket: The bucket resource.
+            oai: The origin access identity resource.
+            lambda_funcs: List of Lambda Function associations.
+            check_auth_lambda_version: Lambda Function Version to use.
+            http_headers_lambda_version: Lambda Function Version to use.
+            parse_auth_lambda_version: Lambda Function Version to use.
+            refresh_auth_lambda_version: Lambda Function Version to use.
+            sign_out_lambda_version: Lambda Function Version to use.
 
         Return:
-            dict: The CloudFront Distribution Options
+            The CloudFront Distribution Options.
 
         """
         variables = self.get_variables()
@@ -394,6 +402,7 @@ class AuthAtEdge(StaticSite):
         When custom_error_responses are defined return those, if running
         in NonSPAMode return nothing, or return the standard error responses
         for a SPA.
+
         """
         variables = self.get_variables()
         if variables['custom_error_responses']:

@@ -105,6 +105,7 @@ class ImproperlyConfigured(Exception):
             cls (Any): The class that was improperly configured.
             error (Exception): The exception that was raised when trying to
                 use cls.
+
         """
         message = "Class \"%s\" is improperly configured: %s" % (
             cls,

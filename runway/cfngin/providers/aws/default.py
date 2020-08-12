@@ -1014,6 +1014,7 @@ class Provider(BaseProvider):
         stack policy is passed in.
 
         Args:
+            fqn (str): Fully qualified name of the stack.
             stack_policy (:class:`runway.cfngin.providers.base.Template`):
                 A template object representing a stack policy.
 

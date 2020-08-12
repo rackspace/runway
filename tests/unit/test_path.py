@@ -52,10 +52,10 @@ class PathTester(unittest.TestCase):
         self.assertEqual(options, {})
 
     def test_parse_git_source_with_options_no_location(self):
-        """
-        Parsing Git source with options, no location.
+        """Parsing Git source with options, no location.
 
         Verify tuple is parsed as anticipated.
+
         """
         (source, uri, location, options) = Path.parse(
             {'path': 'git::git://github.com/onicagroup/foo/bar.git?branch=foo'}
@@ -66,10 +66,10 @@ class PathTester(unittest.TestCase):
         self.assertEqual(options, {'branch': 'foo'})
 
     def test_parse_git_source_with_multiple_options_no_location(self):
-        """
-        Parsing Git source with multiple options, no location.
+        """Parsing Git source with multiple options, no location.
 
         Verify tuple is parsed as anticipated.
+
         """
         (source, uri, location, options) = Path.parse(
             {'path': 'git::git://github.com/onicagroup/foo/bar.git?branch=foo&bar=baz'}

@@ -4,37 +4,36 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-runway = {editable = true,path = "."}
+runway = {editable = true, path = "."}
 # these don't get pulled into the lock correctly when using ^ with >=3.7
-pathlib2 = {version = ">=2.3.0",python_version = '<="3.4"'}
-importlib-resources = {version = ">=1.4",python_version = '<"3.7"'}
+pathlib2 = {version = ">=2.3.0", python_version = '<="3.4"'}
+importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}
 
 [dev-packages]
-# python3 flake8-docstrings fails with pydocstyle 4:
-# https://github.com/PyCQA/pydocstyle/issues/375
-# newer versions do not support python2:
-# https://github.com/PyCQA/pydocstyle/pull/374
-pydocstyle = "<4.0.0"
-pep8-naming = "*"
-flake8-docstrings = "*"
-flake8 = "*"
-# pylint and astroid pinned to avoid "Instance of '' has no 'Bucket' member"
-# error when using boto3. https://github.com/PyCQA/pylint/issues/3134
-pylint = ">=2.5.0"
-astroid = ">=2.4.0"
-# stuck at 3.5 till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
-pyinstaller = "==3.5"
+# Lint
+isort = "<5.0.0"  # v5 drops python 2 support
+## flake8
+flake8 = "~=3.8.2"
+flake8-docstrings = "~=1.5.0"
+pep8-naming = "~=0.11"
+pydocstyle = "~=5.0.2"
+## Pylint
+pylint = ">=2.5.0"  # pinned to avoid "Instance of '' has no 'Bucket' member"
+astroid = ">=2.4.0"  # https://github.com/PyCQA/pylint/issues/3134
+# Test
 pytest = "<5.0"  # last version that supports 2.7 - allows install with 2/3
 pytest-cov = "~=2.8"
-mock = "~=3.0.5"
-pywin32 = {version = "*",os_name = "== 'nt'"}  # windows only
-pywin32-ctypes = {version = "*",os_name = "== 'nt'"}  # windows only
-pefile = {version = "*",os_name = "== 'nt'"}  # windows only
-moto = "~=1.3"
 py = "*"
+mock = "~=3.0.5"
+moto = "~=1.3"
 testfixtures = "~=4.10.0"
+# Build
 setuptools-scm = "~=3.5.0"
-# v5 drops python 2 support
-isort = "<5.0.0"
-# https://github.com/microsoft/vscode-python/issues/12949
-setuptools = "<49.2"
+pyinstaller = "==3.5"  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
+# Utilities
+pre-commit = {version = "~=2.6.0",python_version = '>="3.6"'}
+setuptools = "<49.2"  # https://github.com/microsoft/vscode-python/issues/12949
+# Windows only
+pywin32 = {version = "*", os_name = "== 'nt'"}
+pywin32-ctypes = {version = "*", os_name = "== 'nt'"}
+pefile = {version = "*", os_name = "== 'nt'"}

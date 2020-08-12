@@ -10,8 +10,9 @@ LOGGER = logging.getLogger(__name__)
 def prepad_signed(hex_str):
     """Given a hexadecimal string prepad with 00 if not within range.
 
-    Keyword Args:
-        hex_str (string): The hexadecimal string
+    Args:
+        hex_str (string): The hexadecimal string.
+
     """
     msb = hex_str[0]
     if (msb < '0' or msb > '7'):
@@ -22,8 +23,9 @@ def prepad_signed(hex_str):
 def to_hex(number):
     """Convert an integer to appropriate hex.
 
-    Keyword Args:
-        number (int): The number to convert
+    Args:
+        number (int): The number to convert.
+
     """
     n_str = format(int(number), 'x')
     if len(n_str) % 2:
@@ -34,8 +36,9 @@ def to_hex(number):
 def encode_length_hex(number):
     """Encode the length value to a hexadecimal.
 
-    Keyword Args:
-        number (int): The number to convert
+    Args:
+        number (int): The number to convert.
+
     """
     if number <= 127:
         return to_hex(number)
@@ -47,9 +50,10 @@ def encode_length_hex(number):
 def rsa_public_key_to_pem(modulus_b64, exponent_b64):
     """Given an modulus and exponent convert an RSA public key to public PEM.
 
-    Keyword Args:
-        modulus_b64 (string): Base64 encoded modulus
-        exponent_b64 (string): Base64 encoded exponent
+    Args:
+        modulus_b64 (string): Base64 encoded modulus.
+        exponent_b64 (string): Base64 encoded exponent.
+
     """
     modulus = base64.urlsafe_b64decode(modulus_b64 + "===")
     exponent = base64.urlsafe_b64decode(exponent_b64 + "===")

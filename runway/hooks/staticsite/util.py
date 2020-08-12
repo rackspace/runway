@@ -21,6 +21,7 @@ def calculate_hash_of_files(files, root):
         files (list[str]): file names to include in the hash calculation,
             relative to ``root``.
         root (str): base directory to analyze files in.
+
     Returns:
         str: A hash of the hashes of the given files.
 

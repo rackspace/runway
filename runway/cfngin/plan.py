@@ -533,6 +533,7 @@ class Graph(object):
 
         Args:
             step_names (List[str]): Steps to filter.
+
         """
         return Graph(steps=self.steps, dag=self.dag.filter(step_names))
 

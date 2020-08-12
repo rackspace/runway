@@ -412,7 +412,7 @@ class Stack(Model):
 
 
 class Config(Model):
-    """This is the Python representation of a CFNgin config file.
+    """Python representation of a CFNgin config file.
 
     This is used internally by CFNgin to parse and validate a yaml formatted
     CFNgin configuration file, but can also be used in scripts to generate a

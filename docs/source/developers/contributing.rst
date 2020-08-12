@@ -2,6 +2,9 @@
 Contribution Requirements
 #########################
 
+Please review our :ref:`Getting Started Guide for Developers <dev-getting-started>` before working on your contribution.
+It contains information on setting up a development environment to make following some of these requirements easier.
+
 
 *******************
 Branch Requirements

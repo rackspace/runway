@@ -19,7 +19,8 @@ def add_url_scheme(url):
     """Add the scheme to an existing url.
 
     Args:
-        url (str): The current url
+        url (str): The current url.
+
     """
     if url.startswith('https://') or url.startswith('http://'):
         return url

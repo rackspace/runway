@@ -1,8 +1,8 @@
-"""
-Abstract parent class for a 'Source' type object.
+"""Abstract parent class for a 'Source' type object.
 
 Allows us to specify specific remote sourced resources for out application
 (Git, S3, ect.)
+
 """
 import logging
 import os
@@ -23,13 +23,14 @@ class Source(object):
 
     Every Source type object is expected to have a ``fetch`` method which
     will return the folder path at where the module requested resides.
+
     """
 
     def __init__(self, cache_dir='', **_):
         # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
         """Source.
 
-        Keyword Arguments:
+        Arguments:
             cache_dir (str): The directory where the given remote resource
                 should be cached
 
@@ -57,7 +58,7 @@ class Source(object):
         # type: (str) -> str
         """Sanitize a Source directory path string.
 
-        Keyword Arguments:
+        Arguments:
             uri (str): The uniform resource identifier when targetting a remote resource.
 
         """

@@ -40,7 +40,7 @@ def copy_sample(ctx, src, dest):
 
     Args:
         ctx (click.Context): Click context object.
-        str (Path): Source path.
+        src (Path): Source path.
         dest (Path): Destination path.
 
     """

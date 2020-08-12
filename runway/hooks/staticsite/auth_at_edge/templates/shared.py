@@ -1,5 +1,4 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
-
 import base64
 import json
 import logging
@@ -17,8 +16,9 @@ LOGGER = logging.getLogger(__name__)
 def get_config():
     """Retrieve the configuration variables for the Auth@Edge suite.
 
-    Lambda@Edge restricts the ability to use environment variables. This configuration
-    object is generated with hard coded values via Runway.
+    Lambda@Edge restricts the ability to use environment variables.
+    This configuration object is generated with hard coded values via Runway.
+
     """
     # This configuration will be replaced with dynamic values
     # via the lambda_config.py Runway hook. Please review
@@ -57,9 +57,10 @@ def get_config():
 def as_cloud_front_headers(headers):
     """Convert a series of headers to CloudFront compliant ones.
 
-    Keyword Args:
+    Args:
          headers (Dict[str, str]): The request/response headers in
             dictionary format.
+
     """
     res = {}
     for key, value in headers.items():
@@ -70,10 +71,11 @@ def as_cloud_front_headers(headers):
 def extract_and_parse_cookies(headers, client_id):
     """Extract and parse the Cognito cookies from the headers.
 
-    Keyword Args:
+    Args:
          headers (Dict[str, str]): The request/response headers in
             dictionary format.
-        client_id (str): The Cognito UserPool Client ID
+        client_id (str): The Cognito UserPool Client ID.
+
     """
     cookies = extract_cookies_from_headers(headers)
 
@@ -110,9 +112,10 @@ def extract_and_parse_cookies(headers, client_id):
 def extract_cookies_from_headers(headers):
     """Extract all cookies from the response headers.
 
-    Keyword Args:
+    Args:
          headers (Dict[str, Dict[str, str]]): The request/response headers in
             dictionary format.
+
     """
     if "cookie" not in headers:
         return {}
@@ -131,8 +134,9 @@ def extract_cookies_from_headers(headers):
 def decode_token(jwt):
     """Decode the JWT and load it's respective parts as JSON.
 
-    Keyword Args:
-        jwt (str): The JSON Web Token to parse/decode
+    Args:
+        jwt (str): The JSON Web Token to parse/decode.
+
     """
     token_body = jwt.split('.')[1]
     decodable_token_body = re.sub(r'\-', '+', token_body)
@@ -144,10 +148,11 @@ def decode_token(jwt):
 def with_cookie_domain(distribution_domain_name, cookie_settings):
     """Check to see if the cookie has a domain, if not then add an Amplify JS compatible one.
 
-    Keyword Args:
+    Args:
         distribution_domain_name (str): The domain name of the
-            CloudFront distribution
-        cookie_settings (str): The other settings for the cookie
+            CloudFront distribution.
+        cookie_settings (str): The other settings for the cookie.
+
     """
     try:
         cookie_settings.lower().index('domain')
@@ -167,17 +172,18 @@ def get_cookie_headers(client_id,
 
     Return as CloudFront formatted headers.
 
-    Keyword Args:
-        client_id (str): The Cognito UserPool Client ID
-        oauth_scopes (List): The scopes for oauth validation
+    Args:
+        client_id (str): The Cognito UserPool Client ID.
+        oauth_scopes (List): The scopes for oauth validation.
         tokens (Dict[str, str]): The tokens received from
-            the Cognito Request (id, access, refresh)
+            the Cognito Request (id, access, refresh).
         domain_name (str): The Domain name the cookies are
-            to be associated with
+            to be associated with.
         cookie_settings (Dict[str, str]): The various settings
-            that we would like for the various tokens
+            that we would like for the various tokens.
         expire_all_tokens (Optional[bool]): Whether to expire
-            all Cognito tokens
+            all Cognito tokens.
+
     """
     decoded_id_token = decode_token(tokens['id_token'])
     token_user_name = decoded_id_token.get('cognito:username')
@@ -271,8 +277,9 @@ def get_cookie_headers(client_id,
 def expire_cookie_filter(cookie):
     """Filter to determine if a cookie starts with 'max-age' or 'expires'.
 
-    Keyword Args:
-        cookie (str): The cookie to filter
+    Args:
+        cookie (str): The cookie to filter.
+
     """
     if cookie.lower().startswith("max-age") or cookie.lower().startswith('expires'):
         return False
@@ -282,8 +289,9 @@ def expire_cookie_filter(cookie):
 def expire_cookie(cookie):
     """Add an expiration property to a specific cookie.
 
-    Keyword Arguments:
-        cookie (str): The cookie string
+    Args:
+        cookie (str): The cookie string.
+
     """
     cookie_parts = cookie.split(';')
     mapped = [c.strip() for c in cookie_parts]
@@ -300,12 +308,13 @@ def http_post_with_retry(url, data, headers):
 
     Used for retrieving token information from Cognito
 
-    Keyword Args:
-        url (str): The URL to make the POST request to
+    Args:
+        url (str): The URL to make the POST request to.
         data (Dict[str, str]): The dictionary of data elements to
-            send with the request (urlencoded internally)
+            send with the request (urlencoded internally).
         headers (List[Dict[str, str]]): Any headers to send with
-            the POST request
+            the POST request.
+
     """
     attempts = 1
     while attempts:
@@ -335,10 +344,11 @@ def http_post_with_retry(url, data, headers):
 def create_error_html(title, message, try_again_href):
     """Create a basic error html page for exception returns.
 
-    Keyword Args:
-        title (str): The title of the page
-        message (str): Any exception message
-        try_again_href (str): URL href to try the request again
+    Args:
+        title (str): The title of the page.
+        message (str): Any exception message.
+        try_again_href (str): URL href to try the request again.
+
     """
     return "<!DOCTYPE html>" + \
            "<html lang='en'>" + \

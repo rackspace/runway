@@ -1,5 +1,4 @@
 """CFNgin prehook responsible for creation of Lambda@Edge functions."""
-
 import logging
 import os
 import re
@@ -42,21 +41,22 @@ def write(context,  # type: context.Context
     the functions.
 
     Args:
-        context (cfngin.Context): The CFNgin context
-        provider (cfngin.Provider): The CFNgin provider
+        context (cfngin.Context): The CFNgin context.
+        provider (cfngin.Provider): The CFNgin provider.
 
     Keyword Args:
-        client_id (str): The ID of the Cognito User Pool Client
-        cookie_settings (dict): The settings for our customized cookies
-        http_headers (dict): The additional headers added to our requests
-        oauth_scopes (List[str]): The validation scopes for our OAuth requests
+        client_id (str): The ID of the Cognito User Pool Client.
+        cookie_settings (dict): The settings for our customized cookies.
+        http_headers (dict): The additional headers added to our requests.
+        oauth_scopes (List[str]): The validation scopes for our OAuth requests.
         redirect_path_auth_refresh (str): The URL path for authorization refresh
-            redirect (Correlates to the refresh auth lambda)
+            redirect (Correlates to the refresh auth lambda).
         redirect_path_sign_in (str): The URL path to be redirected to after
-            sign in (Correlates to the parse auth lambda)
+            sign in (Correlates to the parse auth lambda).
         redirect_path_sign_out (str): The URL path to be redirected to after
-            sign out (Correlates to the root to be asked to resignin)
-        user_pool_id (str): The ID of the Cognito User Pool
+            sign out (Correlates to the root to be asked to resigning).
+        user_pool_id (str): The ID of the Cognito User Pool.
+
     """
     cognito_domain = context.hook_data['aae_domain_updater'].get('domain')
     config = {

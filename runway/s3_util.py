@@ -149,14 +149,16 @@ def download_and_extract_to_mkdtemp(bucket, key, session=None):
 
 
 def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
-    """
-    Generate objects in an S3 bucket.
+    """Generate objects in an S3 bucket.
 
-    :param bucket: Name of the S3 bucket.
-    :param prefix: Only fetch objects whose key starts with
-        this prefix (optional).
-    :param suffix: Only fetch objects whose keys end with
-        this suffix (optional).
+    Args:
+        bucket: Name of the S3 bucket.
+        prefix: Only fetch objects whose key starts with
+            this prefix (optional).
+        suffix: Only fetch objects whose keys end with
+            this suffix (optional).
+        session: Boto3/botocore session.
+
     """
     s3_client = _get_client(session)
     paginator = s3_client.get_paginator("list_objects_v2")
@@ -186,12 +188,14 @@ def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
 
 
 def get_matching_s3_keys(bucket, prefix="", suffix="", session=None):
-    """
-    Generate the keys in an S3 bucket.
+    """Generate the keys in an S3 bucket.
 
-    :param bucket: Name of the S3 bucket.
-    :param prefix: Only fetch keys that start with this prefix (optional).
-    :param suffix: Only fetch keys that end with this suffix (optional).
+    Args:
+        bucket: Name of the S3 bucket.
+        prefix: Only fetch keys that start with this prefix (optional).
+        suffix: Only fetch keys that end with this suffix (optional).
+        session: Boto3/botocore session.
+
     """
     for obj in get_matching_s3_objects(bucket, prefix, suffix, session):
         yield obj["Key"]

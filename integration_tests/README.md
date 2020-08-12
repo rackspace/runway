@@ -49,4 +49,3 @@ In `util.py` there are a couple of helper functions:
 Put a file called policies.yaml in the integration test folder in order to define permissions. e.g. /integration_tests/test_cdk/policies.yaml
 
 Whenever permissions are updated, the permissions stack must be redeployed with the following command from the folder '/integration_test_infrastructure/codebuild/common': pipenv run runway deploy
-

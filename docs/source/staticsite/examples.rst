@@ -18,7 +18,7 @@ Extra Files in Angular
 =========================
 By default, angular uses ``environment/environment.ts`` as its way to pass environment specific configurations into
 your application. The downside to this is that you need to build your application for each environment and lose ability
-to build once and deploy everywhere. 
+to build once and deploy everywhere.
 
 The static site ``extra_files`` option solves this problem by moving environment configuration out of angular and
 into runway. A small change to the way the application references environment config will need to be made.
@@ -112,7 +112,7 @@ development environment running.
    * Add a ``fileReplacements`` option to ``projects.<app>.architect.build.options``.
 
      .. code-block:: json
-        
+
         {
           "fileReplacements": [{
             "replace": "src/assets/config.json",
@@ -130,7 +130,7 @@ development environment running.
    **"build" Configuration**
 
    .. code-block:: json
-      
+
       {
         "configurations": {
           "local": {
@@ -145,7 +145,7 @@ development environment running.
    **"serve" Configuration**
 
    .. code-block:: json
-      
+
       {
         "configurations": {
           "local": {

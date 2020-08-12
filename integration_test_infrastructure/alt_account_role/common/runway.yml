@@ -3,7 +3,7 @@
 deployments:
   - modules:
     - ./
-    regions: 
+    regions:
       - us-east-1
     environments:
       common:

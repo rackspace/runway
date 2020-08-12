@@ -83,7 +83,7 @@ class TestRunwayModuleNpm(object):
         assert excinfo.value.code > 0  # non-zero exit code
         assert caplog.messages == [
             '"npm" not found in path or is not executable; '
-            'please ensure it is installed correctly'.format(tmp_path.name)
+            'please ensure it is installed correctly'
         ]
 
     @patch('runway.module.format_npm_command_for_logging')
@@ -159,7 +159,7 @@ class TestRunwayModuleNpm(object):
 
         assert obj.package_json_missing()
         assert [
-            'module is missing package.json'.format(tmp_path.name)
+            'module is missing package.json'
         ] == caplog.messages
 
         (tmp_path / 'package.json').touch()
