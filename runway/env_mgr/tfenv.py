@@ -16,8 +16,13 @@ import requests
 from six.moves.urllib.error import URLError  # pylint: disable=E
 from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
-from ..util import cached_property, get_hash_for_filename, sha256sum
+from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
+
+if sys.version_info >= (3, 6):
+    import hcl2
+else:
+    hcl2 = None
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = '.terraform-version'
@@ -97,6 +102,29 @@ def get_latest_tf_version(include_prerelease=False):
     return get_available_tf_versions(include_prerelease)[0]
 
 
+def load_terrafrom_module(parser, path):
+    """Load all Terraform files in a module into one dict.
+
+    Args:
+        parser (Union[hcl, hcl2]): Parser to use when loading files.
+        path (Path): Terraform module path. All Terraform files in the
+            path will be loaded.
+
+    Returns:
+        Dict[str, Any]: Combined contents of all Terraform files in a
+        single dict.
+
+    """
+    result = {}
+    LOGGER.debug(
+        'using %s parser to load module: %s', parser.__name__.upper(), path
+    )
+    for tf_file in path.glob('*.tf'):
+        tf_config = parser.loads(tf_file.read_text())
+        result = merge_dicts(result, tf_config)
+    return result
+
+
 class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Terraform version management.
 
@@ -131,12 +159,14 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             Dict[str, Any]
 
         """
-        result = {}
-        for tf_file in self.path.glob('*.tf'):
-            tf_config = hcl.loads(tf_file.read_text())
-            result.update(tf_config.get('terraform', {}))
-        LOGGER.debug('parsed Terraform configuration: %s', json.dumps(result))
-        return result
+        if hcl2:
+            try:
+                return load_terrafrom_module(hcl2, self.path)
+            except ValueError:  # this may need adjusted
+                LOGGER.warning(
+                    'failed to parse as HCL2; trying HCL', exc_info=True
+                )
+        return load_terrafrom_module(hcl, self.path)
 
     @cached_property
     def version_file(self):
