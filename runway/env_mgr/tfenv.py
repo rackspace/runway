@@ -19,10 +19,11 @@ from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
 
+# TODO remove condition and import-error when dropping python 2
 if sys.version_info >= (3, 6):
-    import hcl2
+    import hcl2  # pylint: disable=import-error
 else:
-    hcl2 = None
+    hcl2 = None  # pylint: disable=invalid-name
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = '.terraform-version'
@@ -159,7 +160,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             Dict[str, Any]
 
         """
-        if hcl2:
+        if hcl2:  # TODO remove condition when dropping python 2
             try:
                 return load_terrafrom_module(hcl2, self.path)
             except ValueError:  # this may need adjusted
