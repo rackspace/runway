@@ -178,6 +178,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             for attr, val in copy_data.items():
                 if isinstance(val, list):
                     if len(val) == 1:
+                        # pull single values out of lists
                         data[attr] = _flatten_lists(val[0])
                     else:
                         data[attr] = [_flatten_lists(v) for v in val]
