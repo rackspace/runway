@@ -23,7 +23,7 @@ from . import EnvManager, handle_bin_download_error
 if sys.version_info >= (3, 6):
     import hcl2  # pylint: disable=import-error
 else:
-    hcl2 = None  # pylint: disable=invalid-name
+    hcl2 = hcl  # pylint: disable=invalid-name
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = '.terraform-version'
