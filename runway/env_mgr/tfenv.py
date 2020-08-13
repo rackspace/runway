@@ -162,12 +162,14 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         """
         if hcl2:  # TODO remove condition when dropping python 2
             try:
-                return load_terrafrom_module(hcl2, self.path)
-            except (KeyError, ValueError):
-                LOGGER.warning(
-                    'failed to parse as HCL2; trying HCL', exc_info=True
+                return load_terrafrom_module(hcl2, self.path).get('terraform', {})
+            except Exception:  # pylint: disable=broad-except
+                # could result in any number of lark exceptions
+                LOGGER.verbose(
+                    'failed to parse as HCL2; trying HCL',
+                    exc_info=True  # useful in troubleshooting
                 )
-        return load_terrafrom_module(hcl, self.path)
+        return load_terrafrom_module(hcl, self.path).get('terraform', {})
 
     @cached_property
     def version_file(self):
