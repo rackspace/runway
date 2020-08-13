@@ -160,16 +160,48 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             Dict[str, Any]
 
         """
+        def _flatten_lists(data):
+            """Flatten HCL2 list attributes until its fixed.
+
+            python-hcl2 incorrectly turns all attributes into lists so we need
+            to flatten them so they are more similar to HCL.
+
+            https://github.com/amplify-education/python-hcl2/issues/6
+
+            Args:
+                data (Dict[str, List[Any]]): Dict with lists to flatten.
+
+            """
+            if not isinstance(data, dict):
+                return data
+            copy_data = data.copy()
+            for attr, val in copy_data.items():
+                if isinstance(val, list):
+                    if len(val) == 1:
+                        data[attr] = _flatten_lists(val[0])
+                    else:
+                        data[attr] = [_flatten_lists(v) for v in val]
+                elif isinstance(val, dict):
+                    data[attr] = _flatten_lists(val)
+            return data
+
+        result = None
         if hcl2:  # TODO remove condition when dropping python 2
             try:
-                return load_terrafrom_module(hcl2, self.path).get('terraform', {})
+                result = load_terrafrom_module(hcl2, self.path).get('terraform', {})
             except Exception:  # pylint: disable=broad-except
                 # could result in any number of lark exceptions
                 LOGGER.verbose(
                     'failed to parse as HCL2; trying HCL',
                     exc_info=True  # useful in troubleshooting
                 )
-        return load_terrafrom_module(hcl, self.path).get('terraform', {})
+        if result is None:
+            result = load_terrafrom_module(hcl, self.path).get('terraform', {})
+
+        # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.
+        if isinstance(result, list):
+            return _flatten_lists({k: v for i in result for k, v in i.items()})
+        return _flatten_lists(result)
 
     @cached_property
     def version_file(self):
