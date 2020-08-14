@@ -18,6 +18,7 @@ with codecs_open(join(THIS_DIR, 'README.md'), encoding='utf-8') as readfile:
 
 
 INSTALL_REQUIRES = [
+    'Send2Trash',
     'awacs',  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
     'awscli>=1.16.308<2.0',
