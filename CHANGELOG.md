@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - support for HCL2 using `python-hcl2` (requires Python >= 3.6)
 
+### Changed
+
+- xref CFNgin lookup now only logs once per run that it is deprecated
+
 ### Fixed
 - fixed an issue where Terraform would prompt the user when backend configurations change when deploying the same module to multiple regions/deploy environments
 - fixed an issue where AWS credentials were being improperly removed from the environment

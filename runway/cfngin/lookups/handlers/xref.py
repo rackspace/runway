@@ -9,6 +9,10 @@ from .output import deconstruct
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "xref"
 
+XREF_PRESISTENT_STATE = {
+    'has_warned': False
+}
+
 
 class XrefLookup(LookupHandler):
     """Xref lookup."""
@@ -42,7 +46,9 @@ class XrefLookup(LookupHandler):
                 conf_value: ${xref fully-qualified-stack-name::SomeOutputName}
 
         """
-        LOGGER.warning(cls.DEPRECATION_MSG)
+        if not XREF_PRESISTENT_STATE.get('has_warned'):
+            LOGGER.warning(cls.DEPRECATION_MSG)
+            XREF_PRESISTENT_STATE['has_warned'] = True
         if provider is None:
             raise ValueError('Provider is required')
 
