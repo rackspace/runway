@@ -72,6 +72,9 @@ class AssumeRole(AbstractContextManager):
 
     def restore_existing_iam_env_vars(self):
         """Restore backed up IAM environment variables."""
+        if not self.role_arn:
+            LOGGER.debug('no role was assumed; not reverting credentials')
+            return
         for k in self.ctx.current_aws_creds.keys():
             old = 'OLD_' + k
             if self.ctx.env_vars.get(old):
