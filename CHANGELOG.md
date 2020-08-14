@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - support for HCL2 using `python-hcl2` (requires Python >= 3.6)
 
-### Changes
+### Changed
 
 - xref CFNgin lookup now only logs once per run that it is deprecated
 
