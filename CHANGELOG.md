@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - xref CFNgin lookup now only logs once per run that it is deprecated
 
+### Fixed
+- fixed an issue where Terraform would prompt the user when backend configurations change when deploying the same module to multiple regions/deploy environments
+- fixed an issue where AWS credentials were being improperly removed from the environment
+
 ## [1.11.0] - 2020-08-11
 ### Added
 - custom per-backend (Terraform) handling is now supported

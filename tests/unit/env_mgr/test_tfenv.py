@@ -284,7 +284,6 @@ class TestTFEnvManager(object):
         mock_download.assert_not_called()
         assert not tfenv.current_version
 
-    @pytest.mark.wip
     @pytest.mark.skipif(sys.version_info < (3, 6),
                         reason='dependency requires >=3.6')
     @pytest.mark.parametrize('response, expected', [

@@ -1,6 +1,7 @@
 """Test runway.module.terraform."""
 # pylint: disable=no-self-use,protected-access,too-many-statements,unused-argument
 import json
+import logging
 import subprocess
 import sys
 from contextlib import contextmanager
@@ -14,7 +15,6 @@ from mock import MagicMock, patch
 
 from runway._logging import LogLevels
 from runway.module.terraform import (
-    FAILED_INIT_FILENAME,
     Terraform,
     TerraformBackendConfig,
     TerraformOptions,
@@ -56,7 +56,7 @@ def test_update_env_vars_with_tf_var_values():
     assert sorted(result) == sorted(expected)  # sorted() needed for python 2
 
 
-class TestTerraform(object):
+class TestTerraform(object):  # pylint: disable=too-many-public-methods
     """Test runway.module.terraform.Terraform."""
 
     def test_auto_tfvars(self, caplog, monkeypatch, runway_context, tmp_path):
@@ -262,27 +262,31 @@ class TestTerraform(object):
         assert obj.tf_bin == 'success'
         mock_tfenv.install.assert_called_once_with('0.12.0')
 
-    @patch(MODULE + '.send2trash')
-    def test_cleanup_failed_init(self, mock_send2trash, runway_context, tmp_path):
-        """Test cleanup_failed_init."""
+    def test_cleanup_dot_terraform(self, caplog, runway_context, tmp_path):
+        """Test cleanup_dot_terraform."""
+        caplog.set_level(logging.DEBUG, logger=MODULE)
         obj = Terraform(runway_context, tmp_path)
 
+        obj.cleanup_dot_terraform()
+        assert 'skipped cleanup' in '\n'.join(caplog.messages)
+
         dot_tf = tmp_path / '.terraform'
-        failed_init_file = dot_tf / FAILED_INIT_FILENAME
+        dot_tf_modules = dot_tf / 'modules'
+        dot_tf_modules.mkdir(parents=True)
+        (dot_tf_modules / 'some_file').touch()
+        dot_tf_plugins = dot_tf / 'plugins'
+        dot_tf_plugins.mkdir(parents=True)
+        (dot_tf_plugins / 'some_file').touch()
+        dot_tf_tfstate = dot_tf / 'terraform.tfstate'
+        dot_tf_tfstate.touch()
 
-        # dir and file don't exit
-        assert not obj.cleanup_failed_init()
-        mock_send2trash.assert_not_called()
-
-        # file doesn't exist but dir does
-        dot_tf.mkdir()
-        assert not obj.cleanup_failed_init()
-        mock_send2trash.assert_not_called()
-
-        # file exists
-        failed_init_file.touch()
-        assert not obj.cleanup_failed_init()
-        mock_send2trash.assert_called_once_with(str(dot_tf))
+        obj.cleanup_dot_terraform()
+        assert dot_tf.exists()
+        assert not dot_tf_modules.exists()
+        assert dot_tf_plugins.exists()
+        assert (dot_tf_plugins / 'some_file').exists()
+        assert not dot_tf_tfstate.exists()
+        assert 'removing some of its contents' in '\n'.join(caplog.messages)
 
     @pytest.mark.parametrize('command, args_list, expected', [
         ('init', ['-backend-config', 'bucket=name'],
@@ -535,13 +539,10 @@ class TestTerraform(object):
             logger=obj.logger
         )
 
-        dot_tf = tmp_path / '.terraform'
-        dot_tf.mkdir()
         mock_run_command.side_effect = subprocess.CalledProcessError(1, '')
         with pytest.raises(SystemExit) as excinfo:
             assert obj.terraform_init()
         assert excinfo.value.code == 1
-        assert (dot_tf / FAILED_INIT_FILENAME).is_file()
 
     @patch(MODULE + '.run_module_command')
     @patch.object(Terraform, 'gen_command')
@@ -648,6 +649,7 @@ class TestTerraform(object):
         caplog.set_level(LogLevels.DEBUG, logger=MODULE)
         monkeypatch.setattr(Terraform, 'handle_backend', MagicMock())
         monkeypatch.setattr(Terraform, 'skip', True)
+        monkeypatch.setattr(Terraform, 'cleanup_dot_terraform', MagicMock())
         monkeypatch.setattr(Terraform, 'handle_parameters', MagicMock())
         monkeypatch.setattr(Terraform, 'terraform_init', MagicMock())
         monkeypatch.setattr(Terraform, 'current_workspace', 'test')
@@ -675,6 +677,7 @@ class TestTerraform(object):
         obj = Terraform(runway_context, tmp_path)
         assert not obj[action]()
         obj.handle_backend.assert_called_once_with()
+        obj.cleanup_dot_terraform.assert_not_called()
         obj.handle_parameters.assert_not_called()
         obj.auto_tfvars.exists.assert_called_once_with()
         obj.auto_tfvars.unlink.assert_called_once_with()
@@ -684,6 +687,7 @@ class TestTerraform(object):
         obj.auto_tfvars.exists.return_value = False
         monkeypatch.setattr(obj, 'skip', False)
         assert not obj[action]()
+        obj.cleanup_dot_terraform.assert_called_once_with()
         obj.handle_parameters.assert_called_once_with()
         obj.terraform_init.assert_called_once_with()
         obj.terraform_workspace_list.assert_not_called()
