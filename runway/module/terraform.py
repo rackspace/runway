@@ -20,7 +20,6 @@ if sys.version_info[0] > 2:  # TODO remove after droping python 2
 else:
     from pathlib2 import Path  # pylint: disable=E
 
-FAILED_INIT_FILENAME = '.init_failed'
 LOGGER = logging.getLogger(__name__)
 
 
@@ -179,15 +178,33 @@ class Terraform(RunwayModule):
         )
         sys.exit(1)
 
-    def cleanup_failed_init(self):
-        """Cleanup a failed "terraform init"."""
-        test_path = self.path / '.terraform' / FAILED_INIT_FILENAME
-        if test_path.exists():
-            self.logger.info(
-                'previous init failed; deleting .terraform directory...'
+    def cleanup_dot_terraform(self):
+        """Remove .terraform excluding the plugins directly.
+
+        This step is crucial for allowing Runway to deploy to multiple regions
+        or deploy environments without promping the user for input.
+
+        The plugins directory is retained to improve performance when they
+        are used by subsequent runs.
+
+        """
+        dot_terraform = self.path / '.terraform'
+        if not dot_terraform.is_dir():
+            self.logger.debug(
+                '.terraform directory does not exist; skipped cleanup'
             )
-            send2trash(str(test_path.parent))
-            self.logger.verbose('.terraform directory deleted')
+            return
+
+        self.logger.verbose(
+            '.terraform directory exists from a previous run; '
+            'removing some of its contents'
+        )
+        for child in dot_terraform.iterdir():
+            if child.name == 'plugins' and child.is_dir():
+                self.logger.debug('directory retained: %s', child)
+                continue
+            self.logger.debug('removing: %s', child)
+            send2trash(str(child))  # TODO remove str when dropping python 2
 
     def gen_command(self, command, args_list=None):
         """Generate Terraform command."""
@@ -347,12 +364,7 @@ class Terraform(RunwayModule):
                 logger=self.logger
             )
         except subprocess.CalledProcessError as shelloutexc:
-            # An error during initialization can leave things in an inconsistent
-            # state (e.g. backend configured but no providers downloaded). Marking
-            # this with a file so it will be deleted on the next run.
-            tf_dir = self.path / '.terraform'
-            if tf_dir.is_dir():
-                (tf_dir / FAILED_INIT_FILENAME).touch()  # contents does not matter
+            # cleaner output by not letting the exception raise
             sys.exit(shelloutexc.returncode)
 
     def terraform_plan(self):
@@ -447,6 +459,7 @@ class Terraform(RunwayModule):
             self.handle_backend()
             if self.skip:
                 return
+            self.cleanup_dot_terraform()
             self.handle_parameters()
             self.logger.info('init (in progress)')
             self.terraform_init()
