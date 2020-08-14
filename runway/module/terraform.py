@@ -205,7 +205,7 @@ class Terraform(RunwayModule):
                 continue
             if child.is_dir():
                 self.logger.debug('removing directory: %s', child)
-                shutil.rmtree(child)
+                shutil.rmtree(str(child))  # TODO remove str when dropping python 2
             else:
                 self.logger.debug('removing file: %s', child)
                 child.unlink()
