@@ -2,12 +2,12 @@
 import json
 import logging
 import re
-import shutil
 import subprocess
 import sys
 
 import hcl
 import six
+from send2trash import send2trash
 
 from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
@@ -203,12 +203,8 @@ class Terraform(RunwayModule):
             if child.name == 'plugins' and child.is_dir():
                 self.logger.debug('directory retained: %s', child)
                 continue
-            if child.is_dir():
-                self.logger.debug('removing directory: %s', child)
-                shutil.rmtree(str(child))  # TODO remove str when dropping python 2
-            else:
-                self.logger.debug('removing file: %s', child)
-                child.unlink()
+            self.logger.debug('removing: %s', child)
+            send2trash(str(child))  # TODO remove str when dropping python 2
 
     def gen_command(self, command, args_list=None):
         """Generate Terraform command."""
