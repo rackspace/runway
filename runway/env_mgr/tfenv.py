@@ -16,8 +16,14 @@ import requests
 from six.moves.urllib.error import URLError  # pylint: disable=E
 from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
-from ..util import cached_property, get_hash_for_filename, sha256sum
+from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
+
+# TODO remove condition and import-error when dropping python 2
+if sys.version_info >= (3, 6):
+    import hcl2  # pylint: disable=import-error
+else:
+    hcl2 = None  # pylint: disable=invalid-name
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = '.terraform-version'
@@ -97,6 +103,29 @@ def get_latest_tf_version(include_prerelease=False):
     return get_available_tf_versions(include_prerelease)[0]
 
 
+def load_terrafrom_module(parser, path):
+    """Load all Terraform files in a module into one dict.
+
+    Args:
+        parser (Union[hcl, hcl2]): Parser to use when loading files.
+        path (Path): Terraform module path. All Terraform files in the
+            path will be loaded.
+
+    Returns:
+        Dict[str, Any]: Combined contents of all Terraform files in a
+        single dict.
+
+    """
+    result = {}
+    LOGGER.debug(
+        'using %s parser to load module: %s', parser.__name__.upper(), path
+    )
+    for tf_file in path.glob('*.tf'):
+        tf_config = parser.loads(tf_file.read_text())
+        result = merge_dicts(result, tf_config)
+    return result
+
+
 class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
     """Terraform version management.
 
@@ -131,12 +160,49 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             Dict[str, Any]
 
         """
-        result = {}
-        for tf_file in self.path.glob('*.tf'):
-            tf_config = hcl.loads(tf_file.read_text())
-            result.update(tf_config.get('terraform', {}))
-        LOGGER.debug('parsed Terraform configuration: %s', json.dumps(result))
-        return result
+        def _flatten_lists(data):
+            """Flatten HCL2 list attributes until its fixed.
+
+            python-hcl2 incorrectly turns all attributes into lists so we need
+            to flatten them so they are more similar to HCL.
+
+            https://github.com/amplify-education/python-hcl2/issues/6
+
+            Args:
+                data (Dict[str, List[Any]]): Dict with lists to flatten.
+
+            """
+            if not isinstance(data, dict):
+                return data
+            copy_data = data.copy()
+            for attr, val in copy_data.items():
+                if isinstance(val, list):
+                    if len(val) == 1:
+                        # pull single values out of lists
+                        data[attr] = _flatten_lists(val[0])
+                    else:
+                        data[attr] = [_flatten_lists(v) for v in val]
+                elif isinstance(val, dict):
+                    data[attr] = _flatten_lists(val)
+            return data
+
+        result = None
+        if hcl2:  # TODO remove condition when dropping python 2
+            try:
+                result = load_terrafrom_module(hcl2, self.path).get('terraform', {})
+            except Exception:  # pylint: disable=broad-except
+                # could result in any number of lark exceptions
+                LOGGER.verbose(
+                    'failed to parse as HCL2; trying HCL',
+                    exc_info=True  # useful in troubleshooting
+                )
+        if result is None:
+            result = load_terrafrom_module(hcl, self.path).get('terraform', {})
+
+        # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.
+        if isinstance(result, list):
+            return _flatten_lists({k: v for i in result for k, v in i.items()})
+        return _flatten_lists(result)
 
     @cached_property
     def version_file(self):

@@ -1,20 +1,55 @@
 """Test runway.env_mgr.tfenv."""
 # pylint: disable=no-self-use
 import json
+import sys
 
 import hcl
 import pytest
 import six
-from mock import MagicMock, patch
+from mock import MagicMock, call, patch
 
+from runway._logging import LogLevels
 from runway.env_mgr.tfenv import (
     TF_VERSION_FILENAME,
     TFEnvManager,
     get_available_tf_versions,
     get_latest_tf_version,
+    load_terrafrom_module,
 )
 
+# TODO remove condition and import-error when dropping python 2
+if sys.version_info >= (3, 6):
+    import hcl2  # pylint: disable=import-error
+else:
+    hcl2 = hcl  # pylint: disable=invalid-name
+
 MODULE = 'runway.env_mgr.tfenv'
+
+HCL_BACKEND_REMOTE = """
+terraform {
+  backend "remote" {
+    organization = "test"
+    workspaces {
+      prefix = "test-"
+    }
+  }
+}
+"""
+HCL_BACKEND_S3 = """
+terraform {
+  backend "s3" {
+    bucket = "name"
+  }
+}
+"""
+HCL_ATTR_LIST = """
+terraform {
+  some_attr = [
+    "val1",
+    "val2"
+  ]
+}
+"""
 
 
 @patch(MODULE + '.requests')
@@ -46,32 +81,58 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
     mock_get_available_tf_versions.assert_called_with(True)
 
 
-class TestTFEnvManager(object):
-    """Test runway.env_mgr.tfenv.TFEnvManager."""
-
-    def test_backend(self, monkeypatch, tmp_path):
-        """Test backend."""
-        monkeypatch.setattr(TFEnvManager, 'terraform_block', {
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason='dependency requires >=3.6')
+@pytest.mark.parametrize('parser, expected', [
+    (hcl, {
+        'terraform': {
             'backend': {
                 's3': {
                     'bucket': 'name'
                 }
             }
-        })
-        tfenv = TFEnvManager(tmp_path)
-        assert tfenv.backend == {
-            'type': 's3',
-            'config': {
-                'bucket': 'name'
-            }
         }
+    }),
+    (hcl2, {
+        'terraform': [{
+            'backend': [{
+                's3': {
+                    'bucket': ['name']
+                }
+            }]
+        }]
+    })
+])
+def test_load_terrafrom_module(parser, expected, tmp_path):
+    """Test runway.env_mgr.tfenv.load_terrafrom_module."""
+    tf_file = tmp_path / 'module.tf'
+    tf_file.write_text(six.u(HCL_BACKEND_S3))
 
-        del tfenv.backend
-        monkeypatch.setattr(tfenv, 'terraform_block', {})
-        assert tfenv.backend == {
-            'type': None,
-            'config': {}
-        }
+    assert load_terrafrom_module(parser, tmp_path) == expected
+
+
+class TestTFEnvManager(object):
+    """Test runway.env_mgr.tfenv.TFEnvManager."""
+
+    @pytest.mark.parametrize('response, expected', [
+        ({}, {'type': None, 'config': {}}),
+        (hcl.loads(HCL_BACKEND_S3),
+         {'type': 's3', 'config': {'bucket': 'name'}}),
+        (hcl2.loads(HCL_BACKEND_S3),
+         {'type': 's3', 'config': {'bucket': 'name'}}),
+        (hcl.loads(HCL_BACKEND_REMOTE),
+         {'type': 'remote', 'config': {'organization': 'test',
+                                       'workspaces': {'prefix': 'test-'}}}),
+        (hcl2.loads(HCL_BACKEND_REMOTE),
+         {'type': 'remote', 'config': {'organization': 'test',
+                                       'workspaces': {'prefix': 'test-'}}})
+    ])
+    @patch(MODULE + '.load_terrafrom_module')
+    def test_backend(self, mock_load_terrafrom_module, response, expected, tmp_path):
+        """Test backend."""
+        mock_load_terrafrom_module.return_value = response
+        tfenv = TFEnvManager(tmp_path)
+        assert tfenv.backend == expected
 
     def test_get_min_required(self, monkeypatch, tmp_path):
         """Test get_min_required."""
@@ -223,22 +284,45 @@ class TestTFEnvManager(object):
         mock_download.assert_not_called()
         assert not tfenv.current_version
 
-    def test_terraform_block(self, tmp_path):
+    @pytest.mark.wip
+    @pytest.mark.skipif(sys.version_info < (3, 6),
+                        reason='dependency requires >=3.6')
+    @pytest.mark.parametrize('response, expected', [
+        ([{}], {}),
+        ([hcl2.loads(HCL_BACKEND_S3)],
+         {'backend': {'s3': {'bucket': 'name'}}}),
+        ([Exception, hcl.loads(HCL_BACKEND_S3)],
+         {'backend': {'s3': {'bucket': 'name'}}}),
+        ([hcl2.loads(HCL_BACKEND_REMOTE)],
+         {'backend': {'remote': {'organization': 'test',
+                                 'workspaces': {'prefix': 'test-'}}}}),
+        ([Exception, hcl.loads(HCL_BACKEND_REMOTE)],
+         {'backend': {'remote': {'organization': 'test',
+                                 'workspaces': {'prefix': 'test-'}}}}),
+        ([hcl2.loads(HCL_ATTR_LIST)],
+         {'some_attr': ['val1', 'val2']}),
+        ([Exception, hcl.loads(HCL_ATTR_LIST)],
+         {'some_attr': ['val1', 'val2']})
+    ])
+    @patch(MODULE + '.load_terrafrom_module')
+    def test_terraform_block(self, mock_load_terrafrom_module,
+                             response, expected, caplog, tmp_path):
         """Test terraform_block."""
-        content = {
-            'terraform': {
-                'backend': {
-                    's3': {
-                        'bucket': 'name'
-                    }
-                }
-            }
-        }
-        tf_file = tmp_path / 'module.tf'
-        tf_file.write_text(six.u(hcl.dumps(content)))
+        caplog.set_level(LogLevels.VERBOSE, logger=MODULE)
+        mock_load_terrafrom_module.side_effect = response
         tfenv = TFEnvManager(tmp_path)
 
-        assert tfenv.terraform_block == content['terraform']
+        assert tfenv.terraform_block == expected
+
+        if not isinstance(response[0], dict):
+            assert 'failed to parse as HCL2; trying HCL' in '\n'.join(
+                caplog.messages
+            )
+            mock_load_terrafrom_module.assert_has_calls([
+                call(hcl2, tmp_path), call(hcl, tmp_path)
+            ])
+        else:
+            mock_load_terrafrom_module.assert_called_once_with(hcl2, tmp_path)
 
     def test_version_file(self, tmp_path):
         """Test version_file."""
