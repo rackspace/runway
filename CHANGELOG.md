@@ -5,11 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.11.1] - 2020-08-14
 ### Added
 - support for HCL2 using `python-hcl2` (requires Python >= 3.6)
 
 ### Changed
-
 - xref CFNgin lookup now only logs once per run that it is deprecated
 
 ### Fixed
@@ -921,7 +922,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.10.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.11.1...HEAD
+[1.11.1]: https://github.com/onicagroup/runway/compare/v1.10.1...v1.11.1
 [1.11.0]: https://github.com/onicagroup/runway/compare/v1.10.1...v1.11.0
 [1.10.1]: https://github.com/onicagroup/runway/compare/v1.10.0...v1.10.1
 [1.10.0]: https://github.com/onicagroup/runway/compare/v1.9.0...v1.10.0
