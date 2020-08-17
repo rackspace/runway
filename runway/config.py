@@ -49,7 +49,7 @@ class ConfigComponent(MutableMap):
 
     """
 
-    SUPPORTS_VARIABLES = ['env_vars', 'environments', 'parameters']  # type: List[str]
+    SUPPORTS_VARIABLES = ["env_vars", "environments", "parameters"]  # type: List[str]
     PRE_PROCESS_VARIABLES = []  # type: List[str]
 
     @property
@@ -63,7 +63,7 @@ class ConfigComponent(MutableMap):
         data = {}
 
         for key, val in self.__dict__.items():
-            if not key.startswith('_'):
+            if not key.startswith("_"):
                 data[key] = val
 
         for attr in self.SUPPORTS_VARIABLES:
@@ -78,8 +78,11 @@ class ConfigComponent(MutableMap):
         value = self._env_vars.value  # pylint: disable=no-member
         if isinstance(value, dict):
             return value
-        raise ValueError('{}.env_vars is of type {}; expected type '
-                         'of dict'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.env_vars is of type {}; expected type of dict".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def environments(self):
@@ -88,8 +91,11 @@ class ConfigComponent(MutableMap):
         value = self._environments.value  # pylint: disable=no-member
         if isinstance(value, dict):
             return value
-        raise ValueError('{}.environments is of type {}; expected type '
-                         'of dict'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.environments is of type {}; expected type of dict".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def parameters(self):
@@ -98,13 +104,16 @@ class ConfigComponent(MutableMap):
         value = self._parameters.value  # pylint: disable=no-member
         if isinstance(value, dict):
             return value
-        raise ValueError('{}.parameters is of type {}; expected type '
-                         'of dict'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.parameters is of type {}; expected type of dict".format(
+                self.name, type(value)
+            )
+        )
 
     def get(self, key, default=None):
         # type: (str, Any) -> Any
         """Implement evaluation of get."""
-        return getattr(self, key, getattr(self, key.replace('-', '_'), default))
+        return getattr(self, key, getattr(self, key.replace("-", "_"), default))
 
     def resolve(self, context, variables=None, pre_process=False):
         # type: ('Context', Optional[VariablesDefinition], bool) -> None
@@ -120,23 +129,23 @@ class ConfigComponent(MutableMap):
                 populated until processing has begun.
 
         """
-        logger = PrefixAdaptor(self.name, LOGGER) \
-            if hasattr(self, 'name') else LOGGER
+        logger = PrefixAdaptor(self.name, LOGGER) if hasattr(self, "name") else LOGGER
         if pre_process:
-            logger.verbose('resolving variables for pre-processing...')
+            logger.verbose("resolving variables for pre-processing...")
         else:
-            logger.verbose('resolving variables...')
-        for attr in (self.PRE_PROCESS_VARIABLES if pre_process
-                     else self.SUPPORTS_VARIABLES):
-            logger.debug('resolving %s...', attr)
-            getattr(self, '_' + attr).resolve(context, variables=variables)
+            logger.verbose("resolving variables...")
+        for attr in (
+            self.PRE_PROCESS_VARIABLES if pre_process else self.SUPPORTS_VARIABLES
+        ):
+            logger.debug("resolving %s...", attr)
+            getattr(self, "_" + attr).resolve(context, variables=variables)
 
     def __getitem__(self, key):
         # type: (str) -> Any
         """Implement evaluation of self[key]."""
         if not isinstance(key, string_types):
-            raise TypeError('indices must be a string')
-        result = getattr(self, key, getattr(self, key.replace('-', '_')))
+            raise TypeError("indices must be a string")
+        result = getattr(self, key, getattr(self, key.replace("-", "_")))
 
         if isinstance(result, Variable):
             return result.value
@@ -255,22 +264,28 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
     """
 
-    SUPPORTS_VARIABLES = ['class_path', 'env_vars', 'environments',
-                          'options', 'parameters', 'path']
+    SUPPORTS_VARIABLES = [
+        "class_path",
+        "env_vars",
+        "environments",
+        "options",
+        "parameters",
+        "path",
+    ]
 
-    def __init__(self,  # pylint: disable=too-many-arguments
-                 name,  # type: str
-                 path,  # type: str
-                 class_path=None,  # type: Optional[str]
-                 type_str=None,  # type: Optional[str]
-                 environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
-                 parameters=None,  # type: Optional[Dict[str, Any]]
-                 env_vars=None,  # type: Optional[Dict[str, Dict[str, Any]]]
-                 options=None,  # type: Optional[Dict[str, Any]]
-                 tags=None,  # type: Optional[Dict[str, str]]
-                 child_modules=None  # type: Optional[List[Union[str, Dict[str, Any]]]]
-                 # pylint only complains for python2
-                 ):  # pylint: disable=bad-continuation
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        name,  # type: str
+        path,  # type: str
+        class_path=None,  # type: Optional[str]
+        type_str=None,  # type: Optional[str]
+        environments=None,  # type: Optional[Dict[str, Dict[str, Any]]]
+        parameters=None,  # type: Optional[Dict[str, Any]]
+        env_vars=None,  # type: Optional[Dict[str, Dict[str, Any]]]
+        options=None,  # type: Optional[Dict[str, Any]]
+        tags=None,  # type: Optional[Dict[str, str]]
+        child_modules=None,  # type: Optional[List[Union[str, Dict[str, Any]]]]
+    ):
         # type: (...) -> None
         """.. Runway module definition.
 
@@ -359,15 +374,15 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
 
         """
         self.name = name
-        self._path = Variable(name + '.path', path, 'runway')
-        self._class_path = Variable(name + '.class_path', class_path, 'runway')
+        self._path = Variable(name + ".path", path, "runway")
+        self._class_path = Variable(name + ".class_path", class_path, "runway")
         self.type = type_str
-        self._environments = Variable(name + '.environments',
-                                      environments or {}, 'runway')
-        self._parameters = Variable(name + '.parameters', parameters or {},
-                                    'runway')
-        self._env_vars = Variable(name + '.env_vars', env_vars or {}, 'runway')
-        self._options = Variable(name + '.options', options or {}, 'runway')
+        self._environments = Variable(
+            name + ".environments", environments or {}, "runway"
+        )
+        self._parameters = Variable(name + ".parameters", parameters or {}, "runway")
+        self._env_vars = Variable(name + ".env_vars", env_vars or {}, "runway")
+        self._options = Variable(name + ".options", options or {}, "runway")
         self.tags = tags or {}
         self.child_modules = child_modules or []
 
@@ -380,16 +395,20 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
             return None
         if isinstance(value, str):
             return value
-        raise ValueError('{}.class_path = {} is of type {}; expected type '
-                         'of str'.format(self.name, value, type(value)))
+        raise ValueError(
+            "{}.class_path = {} is of type {}; expected type of str".format(
+                self.name, value, type(value)
+            )
+        )
 
     @property
     def menu_entry(self):
         """Return menu entry representation of this module."""
         if self.child_modules:
-            return '{name} [{children}]'.format(
+            return "{name} [{children}]".format(
                 name=self.name,
-                children=', '.join([c.menu_entry for c in self.child_modules]))
+                children=", ".join([c.menu_entry for c in self.child_modules]),
+            )
         return self.name
 
     @property
@@ -399,8 +418,11 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         value = self._options.value
         if isinstance(value, dict):
             return value
-        raise ValueError('{}.options is of type {}; expected type '
-                         'of dict'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.options is of type {}; expected type of dict".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def path(self):
@@ -409,8 +431,9 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
         value = self._path.value  # pylint: disable=no-member
         if isinstance(value, str):
             return value
-        raise ValueError('{}.path is of type {}; expected type '
-                         'of str'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.path is of type {}; expected type of str".format(self.name, type(value))
+        )
 
     @classmethod
     def from_list(cls, modules):
@@ -422,33 +445,38 @@ class ModuleDefinition(ConfigComponent):  # pylint: disable=too-many-instance-at
             if isinstance(mod, str):
                 results.append(cls(name=mod, path=mod))
                 continue
-            if mod.get('parallel'):
-                name = 'parallel_parent'
-                child_modules = ModuleDefinition.from_list(mod.pop('parallel'))
-                path = '[' + ', '.join([x.path for x in child_modules]) + ']'
+            if mod.get("parallel"):
+                name = "parallel_parent"
+                child_modules = ModuleDefinition.from_list(mod.pop("parallel"))
+                path = "[" + ", ".join([x.path for x in child_modules]) + "]"
                 if mod:
                     LOGGER.warning(
-                        'invalid keys found in parallel module config have been ignored: %s',
-                        ', '.join(mod.keys())
+                        "invalid keys found in parallel module config have been ignored: %s",
+                        ", ".join(mod.keys()),
                     )
             else:
-                name = mod.pop('name', mod['path'])
+                name = mod.pop("name", mod["path"])
                 child_modules = None
-                path = mod.pop('path')
-            results.append(cls(name,
-                               path,
-                               class_path=mod.pop('class_path', None),
-                               type_str=mod.pop('type', None),
-                               environments=mod.pop('environments', {}),
-                               env_vars=mod.pop('env_vars', {}),
-                               options=mod.pop('options', {}),
-                               parameters=mod.pop('parameters', {}),
-                               tags=mod.pop('tags', {}),
-                               child_modules=child_modules))
+                path = mod.pop("path")
+            results.append(
+                cls(
+                    name,
+                    path,
+                    class_path=mod.pop("class_path", None),
+                    type_str=mod.pop("type", None),
+                    environments=mod.pop("environments", {}),
+                    env_vars=mod.pop("env_vars", {}),
+                    options=mod.pop("options", {}),
+                    parameters=mod.pop("parameters", {}),
+                    tags=mod.pop("tags", {}),
+                    child_modules=child_modules,
+                )
+            )
             if mod:
                 LOGGER.warning(
-                    'invalid keys found in module %s have been ignored: %s',
-                    name, ', '.join(mod.keys())
+                    "invalid keys found in module %s have been ignored: %s",
+                    name,
+                    ", ".join(mod.keys()),
                 )
         return results
 
@@ -476,7 +504,7 @@ class FutureDefinition(MutableMap):
         if kwargs:
             LOGGER.warning(
                 'invalid key(s) found in "future" have been ignored: %s',
-                ', '.join(kwargs.keys())
+                ", ".join(kwargs.keys()),
             )
 
     @cached_property
@@ -504,11 +532,15 @@ class FutureDefinition(MutableMap):
         """
         if isinstance(value, bool):
             return super(FutureDefinition, self).__setattr__(key, value)
-        raise TypeError('unsupported type {} for future.{}; '
-                        'must be of type "bool"'.format(type(value), key))
+        raise TypeError(
+            'unsupported type {} for future.{}; must be of type "bool"'.format(
+                type(value), key
+            )
+        )
 
 
-class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
+class DeploymentDefinition(ConfigComponent):
     """A deployment defines modules and options that affect the modules.
 
     Deployments are processed during a ``deploy``/``destroy``/``plan``
@@ -553,11 +585,24 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
     """
 
-    SUPPORTS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
-                          'env_vars', 'environments', 'module_options',
-                          'regions', 'parallel_regions', 'parameters']
-    PRE_PROCESS_VARIABLES = ['account_alias', 'account_id', 'assume_role',
-                             'env_vars', 'regions']
+    SUPPORTS_VARIABLES = [
+        "account_alias",
+        "account_id",
+        "assume_role",
+        "env_vars",
+        "environments",
+        "module_options",
+        "regions",
+        "parallel_regions",
+        "parameters",
+    ]
+    PRE_PROCESS_VARIABLES = [
+        "account_alias",
+        "account_id",
+        "assume_role",
+        "env_vars",
+        "regions",
+    ]
 
     def __init__(self, deployment):
         # type: (Dict[str, Any]) -> None
@@ -688,83 +733,86 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
 
         """
         self._reverse = False
-        self.name = deployment.pop('name')  # type: str
+        self.name = deployment.pop("name")  # type: str
         self._account_alias = Variable(
-            self.name + '.account_alias', deployment.pop(
-                'account_alias', deployment.pop('account-alias', {})
-            ), 'runway'
+            self.name + ".account_alias",
+            deployment.pop("account_alias", deployment.pop("account-alias", {})),
+            "runway",
         )  # type: Variable
-        self._account_id = Variable(self.name + '.account_id', deployment.pop(
-            'account_id', deployment.pop('account-id', {})
-        ), 'runway')  # type: Variable
+        self._account_id = Variable(
+            self.name + ".account_id",
+            deployment.pop("account_id", deployment.pop("account-id", {})),
+            "runway",
+        )  # type: Variable
         self._assume_role = Variable(
-            self.name + '.assume_role', deployment.pop(
-                'assume_role', deployment.pop('assume-role', {})
-            ), 'runway'
+            self.name + ".assume_role",
+            deployment.pop("assume_role", deployment.pop("assume-role", {})),
+            "runway",
         )  # type: Variable
         self._environments = Variable(
-            self.name + '.environments', deployment.pop('environments', {}),
-            'runway'
+            self.name + ".environments", deployment.pop("environments", {}), "runway"
         )  # type: Variable
         self._parameters = Variable(
-            self.name + '.parameters', deployment.pop('parameters', {}),
-            'runway'
+            self.name + ".parameters", deployment.pop("parameters", {}), "runway"
         )  # type: Variable
-        self._env_vars = Variable(self.name + '.env_vars', deployment.pop(
-            'env_vars', deployment.pop('env-vars', {})
-        ), 'runway')  # type: Variable
-        if deployment.pop('current_dir', False):
+        self._env_vars = Variable(
+            self.name + ".env_vars",
+            deployment.pop("env_vars", deployment.pop("env-vars", {})),
+            "runway",
+        )  # type: Variable
+        if deployment.pop("current_dir", False):
             # Deprecated in 1.0 (late 2019). Retain for at least a major version.
-            LOGGER.warning('DEPRECATION WARNING: The "current_dir" option has '
-                           'been deprecated in favor of a "./" module '
-                           'definition. Please update your config.')
-            modules = ['.' + os.sep]
+            LOGGER.warning(
+                'DEPRECATION WARNING: The "current_dir" option has '
+                'been deprecated in favor of a "./" module '
+                "definition. Please update your config."
+            )
+            modules = ["." + os.sep]
         else:
-            if not deployment.get('modules'):
-                LOGGER.error('No modules have been defined in your Runway '
-                             'deployment.')
+            if not deployment.get("modules"):
+                LOGGER.error("No modules have been defined in your Runway deployment.")
                 sys.exit(1)
-            modules = deployment.pop('modules')
+            modules = deployment.pop("modules")
         self.modules = ModuleDefinition.from_list(
             modules
         )  # type: List[ModuleDefinition]
         self._module_options = Variable(
-            self.name + '.module_options', deployment.pop(
-                'module_options', deployment.pop('module-options', {})
-            ), 'runway'
+            self.name + ".module_options",
+            deployment.pop("module_options", deployment.pop("module-options", {})),
+            "runway",
         )  # type: Variable
 
         # should add variable resolve here to support parallel region
         # dict in the resolved variable
-        regions = deployment.pop(
-            'regions', []
-        )
+        regions = deployment.pop("regions", [])
 
-        if regions and deployment.get('parallel_regions'):
-            LOGGER.error('Found "regions" and "parallel_regions" in '
-                         'deployment "%s"; only one can be defined',
-                         self.name)
+        if regions and deployment.get("parallel_regions"):
+            LOGGER.error(
+                'Found "regions" and "parallel_regions" in '
+                'deployment "%s"; only one can be defined',
+                self.name,
+            )
             sys.exit(1)
-        if isinstance(regions, dict) and regions.get('parallel'):
+        if isinstance(regions, dict) and regions.get("parallel"):
             self._parallel_regions = Variable(
-                self.name + '.parallel_regions', regions.pop('parallel'),
-                'runway'
+                self.name + ".parallel_regions", regions.pop("parallel"), "runway"
             )  # type: Variable
-            self._regions = Variable(self.name + '.regions',
-                                     [], 'runway')  # type: Variable
+            self._regions = Variable(
+                self.name + ".regions", [], "runway"
+            )  # type: Variable
         else:
-            self._regions = Variable(self.name + '.regions',
-                                     regions, 'runway')
+            self._regions = Variable(self.name + ".regions", regions, "runway")
             self._parallel_regions = Variable(
-                self.name + '.parallel_regions',
-                deployment.pop('parallel_regions', []),
-                'runway'
+                self.name + ".parallel_regions",
+                deployment.pop("parallel_regions", []),
+                "runway",
             )
 
         if deployment:
             LOGGER.warning(
-                'invalid keys found in deployment %s have been ignored: %s',
-                self.name, ', '.join(deployment.keys())
+                "invalid keys found in deployment %s have been ignored: %s",
+                self.name,
+                ", ".join(deployment.keys()),
             )
 
     @property
@@ -774,8 +822,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         value = self._account_alias.value
         if isinstance(value, (dict, string_types)):
             return value
-        raise ValueError('{}.account_alias is of type {}; expected type '
-                         'of dict or str'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.account_alias is of type {}; expected type of dict or str".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def account_id(self):
@@ -786,8 +837,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             return value
         if isinstance(value, int):
             return str(value)
-        raise ValueError('{}.account_id is of type {}; expected type '
-                         'of dict, int, or str'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.account_id is of type {}; expected type of dict, int, or str".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def assume_role(self):
@@ -796,16 +850,19 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         value = self._assume_role.value
         if isinstance(value, (dict, string_types)):
             return value
-        raise ValueError('{}.assume_role is of type {}; expected type '
-                         'of dict or str'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.assume_role is of type {}; expected type of dict or str".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def menu_entry(self):
         """Return menu entry representation of this deployment."""
-        return '{name} - {modules} ({regions})'.format(
+        return "{name} - {modules} ({regions})".format(
             name=self.name,
-            modules=', '.join([module.name for module in self.modules]),
-            regions=', '.join(self.regions or self.parallel_regions)
+            modules=", ".join([module.name for module in self.modules]),
+            regions=", ".join(self.regions or self.parallel_regions),
         )
 
     @property
@@ -815,8 +872,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         value = self._module_options.value
         if isinstance(value, dict):
             return value
-        raise ValueError('{}.module_options is of type {}; expected type '
-                         'of dict'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.module_options is of type {}; expected type of dict".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def regions(self):
@@ -827,8 +887,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             if self._reverse:
                 return value[::-1]
             return value
-        raise ValueError('{}.regions is of type {}; expected type '
-                         'of list'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.regions is of type {}; expected type of list".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def parallel_regions(self):
@@ -837,8 +900,11 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
         value = self._parallel_regions.value
         if isinstance(value, list):
             return value
-        raise ValueError('{}.parallel_regions is of type {}; expected type '
-                         'of list'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.parallel_regions is of type {}; expected type of list".format(
+                self.name, type(value)
+            )
+        )
 
     def reverse(self):
         """Reverse the order of modules and regions."""
@@ -858,8 +924,8 @@ class DeploymentDefinition(ConfigComponent):  # pylint: disable=too-many-instanc
             return []
 
         for i, deployment in enumerate(deployments):
-            if not deployment.get('name'):
-                deployment['name'] = 'deployment_{}'.format(str(i + 1))
+            if not deployment.get("name"):
+                deployment["name"] = "deployment_{}".format(str(i + 1))
             results.append(cls(deployment))
         return results
 
@@ -885,15 +951,15 @@ class TestDefinition(ConfigComponent):
 
     """
 
-    SUPPORTS_VARIABLES = ['args', 'required']
+    SUPPORTS_VARIABLES = ["args", "required"]
 
-    def __init__(self,
-                 name,  # type: str
-                 test_type,  # type: str
-                 args=None,  # type: Optional[Dict[str, Any]]
-                 required=True  # type: bool
-                 # pylint only complains for python2
-                 ):  # pylint: disable=bad-continuation
+    def __init__(
+        self,
+        name,  # type: str
+        test_type,  # type: str
+        args=None,  # type: Optional[Dict[str, Any]]
+        required=True,  # type: bool
+    ):
         # type: (...) -> None
         """.. Runway test definitions.
 
@@ -935,8 +1001,8 @@ class TestDefinition(ConfigComponent):
         """
         self.name = name
         self.type = test_type
-        self._args = Variable(self.name + '.args', args or {}, 'runway')
-        self._required = Variable(self.name + '.required', required, 'runway')
+        self._args = Variable(self.name + ".args", args or {}, "runway")
+        self._required = Variable(self.name + ".required", required, "runway")
 
     @property
     def args(self):
@@ -945,8 +1011,11 @@ class TestDefinition(ConfigComponent):
         value = self._args.value
         if isinstance(value, dict):
             return value
-        raise ValueError('{}.args is of type {}; expected type '
-                         'of dict'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.args is of type {}; expected type of dict".format(
+                self.name, type(value)
+            )
+        )
 
     @property
     def required(self):
@@ -960,8 +1029,11 @@ class TestDefinition(ConfigComponent):
             return value
         except ValueError:
             pass
-        raise ValueError('{}.required is of type {}; expected type '
-                         'of bool'.format(self.name, type(value)))
+        raise ValueError(
+            "{}.required is of type {}; expected type of bool".format(
+                self.name, type(value)
+            )
+        )
 
     @classmethod
     def from_list(cls, tests):
@@ -973,15 +1045,21 @@ class TestDefinition(ConfigComponent):
             return []
 
         for index, test in enumerate(tests):
-            name = test.pop('name', 'test_{}'.format(index + 1))
-            results.append(cls(name, test.pop('type'),
-                               test.pop('args', {}),
-                               test.pop('required', False)))
+            name = test.pop("name", "test_{}".format(index + 1))
+            results.append(
+                cls(
+                    name,
+                    test.pop("type"),
+                    test.pop("args", {}),
+                    test.pop("required", False),
+                )
+            )
 
             if test:
                 LOGGER.warning(
-                    'invalid keys found in test %s have been ignored: %s',
-                    name, ', '.join(test.keys())
+                    "invalid keys found in test %s have been ignored: %s",
+                    name,
+                    ", ".join(test.keys()),
                 )
         return results
 
@@ -1027,7 +1105,7 @@ class VariablesDefinition(MutableMap):
 
     """
 
-    default_names = ['runway.variables.yml', 'runway.variables.yaml']
+    default_names = ["runway.variables.yml", "runway.variables.yaml"]
 
     def __init__(self, file_path=None, sys_path=None, **kwargs):
         """.. Not really needed but cleans up the docs.
@@ -1059,51 +1137,54 @@ class VariablesDefinition(MutableMap):
             TypeError: file_path or sys_path is not a string.
 
         """
-        if not (isinstance(file_path, (str, NoneType)) and
-                isinstance(file_path, (str, NoneType))):
-            raise TypeError('file_path and sys_path of VariablesDefinition '
-                            'must of be of type str but got types {} and {}'.format(
-                                type(file_path), type(sys_path)))
+        if not (
+            isinstance(file_path, (str, NoneType))
+            and isinstance(file_path, (str, NoneType))
+        ):
+            raise TypeError(
+                "file_path and sys_path of VariablesDefinition "
+                "must of be of type str but got types {} and {}".format(
+                    type(file_path), type(sys_path)
+                )
+            )
         if not sys_path:
-            LOGGER.debug('sys_path not provided; using current working '
-                         'direcotry')
+            LOGGER.debug("sys_path not provided; using current working direcotry")
             sys_path = os.getcwd()
 
         if file_path:
             result = os.path.join(sys_path, file_path)
-            LOGGER.verbose('using explicit variables file: %s',
-                           result)
+            LOGGER.verbose("using explicit variables file: %s", result)
             if os.path.isfile(result):
                 return result
-            LOGGER.error('provided variables file "%s" could not '
-                         'be found', result)
+            LOGGER.error('provided variables file "%s" could not be found', result)
             sys.exit(1)
 
         for name in cls.default_names:
             result = os.path.join(sys_path, name)
-            LOGGER.debug('looking for variables file: %s', result)
+            LOGGER.debug("looking for variables file: %s", result)
             if os.path.isfile(result):
-                LOGGER.verbose('found variables file: %s', result)
+                LOGGER.verbose("found variables file: %s", result)
                 return result
 
-        LOGGER.info('could not find %s in the current directory; '
-                    'continuing without a variables file',
-                    ' or '.join(cls.default_names))
+        LOGGER.info(
+            "could not find %s in the current directory; continuing without a variables file",
+            " or ".join(cls.default_names),
+        )
         return None
 
     @classmethod
     def load(cls, **kwargs):
         # type: (Dict[str, Any]) -> VariablesDefinition
         """Load variables."""
-        file_path = cls.find_file(file_path=kwargs.pop('file_path', None),
-                                  sys_path=kwargs.pop('sys_path', None))
+        file_path = cls.find_file(
+            file_path=kwargs.pop("file_path", None),
+            sys_path=kwargs.pop("sys_path", None),
+        )
 
         if file_path:
             variables = cls._load_from_file(file_path)
-
             for key, val in kwargs.items():
                 variables[key] = val
-
             return variables
 
         return cls(**kwargs)
@@ -1112,16 +1193,14 @@ class VariablesDefinition(MutableMap):
     def _load_from_file(cls, file_path):
         # type: (str) -> VariablesDefinition
         """Load the variables file into an object."""
-        LOGGER.debug('attempting to load variables files: %s',
-                     file_path)
+        LOGGER.debug("attempting to load variables files: %s", file_path)
         if not os.path.isfile(file_path):
-            LOGGER.error('provided variables file "%s" could not '
-                         'be found', file_path)
+            LOGGER.error('provided variables file "%s" could not be found', file_path)
             sys.exit(1)
 
         with open(file_path) as data_file:
             result = cls(**yaml.safe_load(data_file))
-            LOGGER.debug('variables file loaded')
+            LOGGER.debug("variables file loaded")
             return result
 
 
@@ -1156,17 +1235,18 @@ class Config(ConfigComponent):
 
     """
 
-    accepted_names = ['runway.yml', 'runway.yaml']
+    accepted_names = ["runway.yml", "runway.yaml"]
 
-    def __init__(self,
-                 deployments,  # type: List[Dict[str, Any]]
-                 future=None,  # type: Dict[str, bool]
-                 ignore_git_branch=False,  # type: bool
-                 runway_version=None,  # type: Optional[str]
-                 tests=None,  # type: List[Dict[str, Any]]
-                 variables=None  # type: Optional[Dict[str, Any]]
-                 # pylint only complains for python2
-                 ):  # pylint: disable=bad-continuation
+    def __init__(
+        self,
+        deployments,  # type: List[Dict[str, Any]]
+        future=None,  # type: Dict[str, bool]
+        ignore_git_branch=False,  # type: bool
+        runway_version=None,  # type: Optional[str]
+        tests=None,  # type: List[Dict[str, Any]]
+        variables=None  # type: Optional[Dict[str, Any]]
+        # pylint only complains for python2
+    ):  # pylint: disable=bad-continuation
         # type: (...) -> None
         """.. Top-level Runway config file.
 
@@ -1222,7 +1302,7 @@ class Config(ConfigComponent):
 
         """
         future = future or {}
-        runway_version = str(runway_version) if runway_version else '>1.10'
+        runway_version = str(runway_version) if runway_version else ">1.10"
         self.deployments = DeploymentDefinition.from_list(deployments)
         self.future = FutureDefinition(**future)
         self.ignore_git_branch = ignore_git_branch
@@ -1234,16 +1314,13 @@ class Config(ConfigComponent):
         try:
             self.runway_version = SpecifierSet(runway_version, prereleases=True)
         except InvalidSpecifier:
-            if any(runway_version.startswith(i)
-                   for i in ['!', '~', '<', '>', '=']):
+            if any(runway_version.startswith(i) for i in ["!", "~", "<", ">", "="]):
                 raise
             LOGGER.debug(
-                'runway_version is not a valid version specifier; '
-                'trying as an exact version', exc_info=True
+                "runway_version is not a valid version specifier; trying as an exact version",
+                exc_info=True,
             )
-            self.runway_version = SpecifierSet(
-                '==' + runway_version, prereleases=True
-            )
+            self.runway_version = SpecifierSet("==" + runway_version, prereleases=True)
 
     @classmethod
     def load_from_file(cls, config_path):
@@ -1252,31 +1329,30 @@ class Config(ConfigComponent):
         if not isinstance(config_path, Path):  # legacy support
             config_path = Path(config_path)
         if not config_path.is_file():
-            LOGGER.error("Runway config file was not found (looking for "
-                         "%s)",
-                         config_path)
+            LOGGER.error(
+                "Runway config file was not found (looking for %s)", config_path
+            )
             sys.exit(1)
 
-        LOGGER.debug('attempting to load config: %s', config_path)
+        LOGGER.debug("attempting to load config: %s", config_path)
         config_file = yaml.safe_load(config_path.read_text()) or {}
         result = Config(
-            config_file.pop('deployments'),
-            future=config_file.pop('future', {}),
+            config_file.pop("deployments"),
+            future=config_file.pop("future", {}),
             ignore_git_branch=config_file.pop(
-                'ignore_git_branch',
-                config_file.pop('ignore-git-branch', False)
+                "ignore_git_branch", config_file.pop("ignore-git-branch", False)
             ),
-            runway_version=config_file.pop('runway_version', None),
-            tests=config_file.pop('tests', []),
-            variables=config_file.pop('variables', {})
+            runway_version=config_file.pop("runway_version", None),
+            tests=config_file.pop("tests", []),
+            variables=config_file.pop("variables", {}),
         )
 
         if config_file:
             LOGGER.warning(
-                'invalid keys found in runway file have been ignored: %s',
-                ', '.join(config_file.keys())
+                "invalid keys found in runway file have been ignored: %s",
+                ", ".join(config_file.keys()),
             )
-        LOGGER.debug('config loaded')
+        LOGGER.debug("config loaded")
         return result
 
     @classmethod
@@ -1286,19 +1362,21 @@ class Config(ConfigComponent):
         if not isinstance(config_dir, Path):  # legacy support
             config_dir = Path(config_dir)
         if not config_dir:
-            LOGGER.debug('config_dir not provided; using current '
-                         'working directory')
+            LOGGER.debug("config_dir not provided; using current working directory")
             config_dir = Path.cwd()
         elif not isinstance(config_dir, Path):  # legacy support
             config_dir = Path(config_dir)
 
         for name in cls.accepted_names:
             conf_path = config_dir / name
-            LOGGER.debug('looking for variables file: %s', conf_path)
+            LOGGER.debug("looking for variables file: %s", conf_path)
             if conf_path.is_file():
-                LOGGER.verbose('found config: %s', conf_path)
+                LOGGER.verbose("found config: %s", conf_path)
                 return conf_path
 
-        LOGGER.error('Runway config file was not found. Looking for one '
-                     'of %s in %s', str(cls.accepted_names), config_dir)
+        LOGGER.error(
+            "Runway config file was not found. Looking for one of %s in %s",
+            str(cls.accepted_names),
+            config_dir,
+        )
         sys.exit(1)

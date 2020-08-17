@@ -26,7 +26,7 @@ class Source(object):
 
     """
 
-    def __init__(self, cache_dir='', **_):
+    def __init__(self, cache_dir="", **_):
         # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
         """Source.
 
@@ -62,6 +62,6 @@ class Source(object):
             uri (str): The uniform resource identifier when targetting a remote resource.
 
         """
-        for i in ['@', '/', ':']:
-            uri = uri.replace(i, '_')  # type: str
+        for i in ["@", "/", ":"]:
+            uri = uri.replace(i, "_")  # type: str
         return uri

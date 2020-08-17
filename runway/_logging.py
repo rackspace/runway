@@ -19,7 +19,7 @@ class LogLevels(IntEnum):
     @classmethod
     def has_value(cls, value):
         """Check if IntEnum has a value."""
-        return value in cls._value2member_map_   # pylint: disable=no-member
+        return value in cls._value2member_map_  # pylint: disable=no-member
 
 
 class PrefixAdaptor(logging.LoggerAdapter):
@@ -31,7 +31,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
 
     """
 
-    def __init__(self, prefix, logger, prefix_template='{prefix}:{msg}'):
+    def __init__(self, prefix, logger, prefix_template="{prefix}:{msg}"):
         """Instantiate class.
 
         Args:

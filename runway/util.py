@@ -31,16 +31,13 @@ if sys.version_info >= (3, 6):
 else:
     AbstractContextManager = object
 
-AWS_ENV_VARS = ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
-                'AWS_SESSION_TOKEN')
-DOC_SITE = 'https://docs.onica.com/projects/runway'
-EMBEDDED_LIB_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    'embedded'
-)
+AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
+DOC_SITE = "https://docs.onica.com/projects/runway"
+EMBEDDED_LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "embedded")
 
 
-class cached_property(object):  # noqa pylint: disable=invalid-name,too-few-public-methods
+# pylint: disable=invalid-name,too-few-public-methods
+class cached_property(object):  # noqa
     """Decorator for creating cached properties.
 
     A property that is only computed once per instance and then replaces itself
@@ -143,7 +140,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         """
         result = {}
         for key, val in self.__dict__.items():
-            if key.startswith('_'):
+            if key.startswith("_"):
                 continue
             if isinstance(val, MutableMap):
                 result[key] = val.data
@@ -157,7 +154,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         for _, val in self.__dict__.items():
             if isinstance(val, MutableMap):
                 val.clear_found_cache()
-        if hasattr(self, '_found_queries'):
+        if hasattr(self, "_found_queries"):
             self._found_queries.clear()
 
     def find(self, query, default=None, ignore_cache=False):
@@ -174,7 +171,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
             ignore_cache: Ignore cached value.
 
         """
-        if not hasattr(self, '_found_queries'):
+        if not hasattr(self, "_found_queries"):
             # if not created from kwargs, this attr won't exist yet
             # this is done to prevent endless recursion
             self._found_queries = MutableMap()
@@ -184,7 +181,7 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
             if cached_result:
                 return cached_result
 
-        split_query = query.split('.')
+        split_query = query.split(".")
 
         if len(split_query) == 1:
             result = self.get(split_query[0], default)
@@ -200,8 +197,9 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         nested_value = nested_value.find(split_query[1])
 
         try:
-            nested_value = self[split_query[0]].find('.'.join(split_query[1:]),
-                                                     default, ignore_cache)
+            nested_value = self[split_query[0]].find(
+                ".".join(split_query[1:]), default, ignore_cache
+            )
             if nested_value != default:
                 self._found_queries[query] = nested_value
             return nested_value
@@ -339,8 +337,9 @@ class SafeHaven(AbstractContextManager):
     """
 
     # pylint: disable=redefined-outer-name
-    def __init__(self, argv=None, environ=None, sys_modules_exclude=None,
-                 sys_path=None):
+    def __init__(
+        self, argv=None, environ=None, sys_modules_exclude=None, sys_path=None
+    ):
         """Instantiate class.
 
         Args:
@@ -359,7 +358,7 @@ class SafeHaven(AbstractContextManager):
         self.__sys_modules = {k: v for k, v in sys.modules.items()}
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
-        self.logger = logging.getLogger('runway.' + self.__class__.__name__)
+        self.logger = logging.getLogger("runway." + self.__class__.__name__)
         self.sys_modules_exclude = sys_modules_exclude or []
 
         if isinstance(argv, list):
@@ -371,7 +370,7 @@ class SafeHaven(AbstractContextManager):
 
     def reset_all(self):
         """Reset all values cached by this context manager."""
-        self.logger.debug('resetting all managed values...')
+        self.logger.debug("resetting all managed values...")
         self.reset_os_environ()
         self.reset_sys_argv()
         self.reset_sys_modules()
@@ -379,32 +378,31 @@ class SafeHaven(AbstractContextManager):
 
     def reset_os_environ(self):
         """Reset the value of os.environ."""
-        self.logger.debug('resetting os.environ: %s',
-                          json.dumps(self.__os_environ))
+        self.logger.debug("resetting os.environ: %s", json.dumps(self.__os_environ))
         os.environ.clear()
         os.environ.update(self.__os_environ)
 
     def reset_sys_argv(self):
         """Reset the value of sys.argv."""
-        self.logger.debug('resetting sys.argv: %s',
-                          json.dumps(self.__sys_argv))
+        self.logger.debug("resetting sys.argv: %s", json.dumps(self.__sys_argv))
         sys.argv = self.__sys_argv
 
     def reset_sys_modules(self):
         """Reset the value of sys.modules."""
-        self.logger.debug('resetting sys.modules...')
+        self.logger.debug("resetting sys.modules...")
         # sys.modules can be manipulated to force reloading modules but,
         # replacing it outright does not work as expected
         for module in list(sys.modules.keys()):
-            if module not in self.__sys_modules and \
-                    not any(module.startswith(n)
-                            for n in self.sys_modules_exclude):
-                self.logger.debug('removed sys.module: {"%s": "%s"}', module,
-                                  sys.modules.pop(module))
+            if module not in self.__sys_modules and not any(
+                module.startswith(n) for n in self.sys_modules_exclude
+            ):
+                self.logger.debug(
+                    'removed sys.module: {"%s": "%s"}', module, sys.modules.pop(module)
+                )
 
     def reset_sys_path(self):
         """Reset the value of sys.path."""
-        self.logger.debug('resetting sys.path: %s', json.dumps(self.__sys_path))
+        self.logger.debug("resetting sys.path: %s", json.dumps(self.__sys_path))
         sys.path = self.__sys_path
 
     def __enter__(self):
@@ -414,12 +412,12 @@ class SafeHaven(AbstractContextManager):
             SafeHaven: Instance of the context manager.
 
         """
-        self.logger.debug('entering a safe haven...')
+        self.logger.debug("entering a safe haven...")
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Exit the context manager."""
-        self.logger.debug('leaving the safe haven...')
+        self.logger.debug("leaving the safe haven...")
         self.reset_all()
 
 
@@ -475,8 +473,9 @@ def change_dir(newdir):
 
 def ensure_file_is_executable(path):
     """Exit if file is not executable."""
-    if platform.system() != 'Windows' and (
-            not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]):
+    if platform.system() != "Windows" and (
+        not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
+    ):
         print("Error: File %s is not executable" % path)
         sys.exit(1)
 
@@ -534,12 +533,13 @@ def load_object_from_string(fqcn, try_reload=False):
     """
     module_path = "__main__"
     object_name = fqcn
-    if '.' in object_name:
-        module_path, object_name = fqcn.rsplit('.', 1)
+    if "." in object_name:
+        module_path, object_name = fqcn.rsplit(".", 1)
         if (
-                try_reload and
-                sys.modules.get(module_path) and
-                module_path.split('.')[0] not in sys.builtin_module_names  # skip builtins
+            try_reload
+            and sys.modules.get(module_path)
+            and module_path.split(".")[0]
+            not in sys.builtin_module_names  # skip builtins
         ):
             # TODO remove is next major release; backport circumvents expected functionality
             #
@@ -561,7 +561,9 @@ def merge_dicts(dict1, dict2, deep_merge=True):
             return dict2
 
         for key in dict2:
-            dict1[key] = merge_dicts(dict1[key], dict2[key]) if key in dict1 else dict2[key]  # noqa pylint: disable=line-too-long
+            dict1[key] = (
+                merge_dicts(dict1[key], dict2[key]) if key in dict1 else dict2[key]
+            )
         return dict1
     dict3 = dict1.copy()
     dict3.update(dict2)
@@ -575,8 +577,7 @@ def merge_dicts(dict1, dict2, deep_merge=True):
 def extract_boto_args_from_env(env_vars):
     """Return boto3 client args dict with environment creds."""
     boto_args = {}
-    for i in ['aws_access_key_id', 'aws_secret_access_key',
-              'aws_session_token']:
+    for i in ["aws_access_key_id", "aws_secret_access_key", "aws_session_token"]:
         if env_vars.get(i.upper()):
             boto_args[i] = env_vars[i.upper()]
     return boto_args
@@ -588,7 +589,11 @@ def flatten_path_lists(env_dict, env_root=None):
         # Lists are presumed to be path components and will be turned back
         # to strings
         if isinstance(val, list):
-            env_dict[key] = os.path.join(env_root, os.path.join(*val)) if (env_root and not os.path.isabs(os.path.join(*val))) else os.path.join(*val)  # noqa pylint: disable=line-too-long
+            env_dict[key] = (
+                os.path.join(env_root, os.path.join(*val))
+                if (env_root and not os.path.isabs(os.path.join(*val)))
+                else os.path.join(*val)
+            )
     return env_dict
 
 
@@ -596,46 +601,43 @@ def merge_nested_environment_dicts(env_dicts, env_name=None, env_root=None):
     """Return single-level dictionary from dictionary of dictionaries."""
     # If the provided dictionary is just a single "level" (no nested
     # environments), it applies to all environments
-    if all(isinstance(val, (six.string_types, list))
-           for (_key, val) in env_dicts.items()):
+    if all(
+        isinstance(val, (six.string_types, list)) for (_key, val) in env_dicts.items()
+    ):
         return flatten_path_lists(env_dicts, env_root)
 
     if env_name is None:
-        if env_dicts.get('*'):
-            return flatten_path_lists(env_dicts.get('*'), env_root)
+        if env_dicts.get("*"):
+            return flatten_path_lists(env_dicts.get("*"), env_root)
         return {}
 
-    if not env_dicts.get('*') and not env_dicts.get(env_name):
+    if not env_dicts.get("*") and not env_dicts.get(env_name):
         return {}
 
-    combined_dicts = merge_dicts(env_dicts.get('*', {}),
-                                 env_dicts.get(env_name, {}))
+    combined_dicts = merge_dicts(env_dicts.get("*", {}), env_dicts.get(env_name, {}))
     return flatten_path_lists(combined_dicts, env_root)
 
 
 def find_cfn_output(key, outputs):
     """Return CFN output value."""
     for i in outputs:
-        if i['OutputKey'] == key:
-            return i['OutputValue']
+        if i["OutputKey"] == key:
+            return i["OutputValue"]
     return None
 
 
 def get_embedded_lib_path():
     """Return path of embedded libraries."""
-    return os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        'embedded'
-    )
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "embedded")
 
 
 def get_hash_for_filename(filename, hashfile_path):
     """Return hash for filename in the hashfile."""
-    filehash = ''
-    with open(hashfile_path, 'r') as stream:
+    filehash = ""
+    with open(hashfile_path, "r") as stream:
         for _cnt, line in enumerate(stream):
             if line.rstrip().endswith(filename):
-                filehash = re.match(r'^[A-Za-z0-9]*', line).group(0)
+                filehash = re.match(r"^[A-Za-z0-9]*", line).group(0)
                 break
     if filehash:
         return filehash
@@ -668,10 +670,11 @@ def fix_windows_command_list(commands):
     return commands
 
 
-def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
-                 directory,  # type: str
-                 env=None  # type: Optional[Dict[str, Union[str, int]]]
-                ):  # noqa
+def run_commands(
+    commands,  # type: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+    directory,  # type: str
+    env=None,  # type: Optional[Dict[str, Union[str, int]]]
+):
     # type: (...) -> None
     """Run list of commands."""
     if env is None:
@@ -680,18 +683,28 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
         if isinstance(step, (list, six.string_types)):
             execution_dir = directory
             raw_command = step
-        elif step.get('command'):  # dictionary
-            execution_dir = os.path.join(directory,
-                                         step.get('cwd')) if step.get('cwd') else directory  # noqa pylint: disable=line-too-long
-            raw_command = step['command']
+        elif step.get("command"):  # dictionary
+            execution_dir = (
+                os.path.join(directory, step.get("cwd"))
+                if step.get("cwd")
+                else directory
+            )
+            raw_command = step["command"]
         else:
             raise AttributeError("Invalid command step: %s" % step)
-        command_list = raw_command.split(' ') if isinstance(raw_command, six.string_types) else raw_command  # noqa pylint: disable=line-too-long
-        if platform.system().lower() == 'windows':
+        command_list = (
+            raw_command.split(" ")
+            if isinstance(raw_command, six.string_types)
+            else raw_command
+        )
+        if platform.system().lower() == "windows":
             command_list = fix_windows_command_list(command_list)
 
         with change_dir(execution_dir):
-            failed_to_find_error = "Attempted to run \"%s\" and failed to find it (are you sure it is installed and added to your PATH?)" % command_list[0]  # noqa pylint: disable=line-too-long
+            failed_to_find_error = (
+                'Attempted to run "%s" and failed to find it (are you sure it is '
+                "installed and added to your PATH?)" % command_list[0]
+            )
             if sys.version_info[0] < 3:
                 # Legacy exception version for python 2
                 try:
@@ -711,7 +724,7 @@ def run_commands(commands,  # type: List[Union[str, List[str], Dict[str, Union[s
 def md5sum(filename):
     """Return MD5 hash of file."""
     md5 = hashlib.md5()
-    with open(filename, 'rb') as stream:
+    with open(filename, "rb") as stream:
         while True:
             data = stream.read(65536)  # 64kb chunks
             if not data:
@@ -724,7 +737,7 @@ def sha256sum(filename):
     """Return SHA256 hash of file."""
     sha256 = hashlib.sha256()
     mem_view = memoryview(bytearray(128 * 1024))
-    with open(filename, 'rb', buffering=0) as stream:
+    with open(filename, "rb", buffering=0) as stream:
         for i in iter(lambda: stream.readinto(mem_view), 0):
             sha256.update(mem_view[:i])
     return sha256.hexdigest()
@@ -736,7 +749,7 @@ def strip_leading_option_delim(args):
     Using the "--" end of options syntax bypasses docopt's parsing of options.
     """
     if len(args) > 1:
-        if args[0] == '--':
+        if args[0] == "--":
             return args[1:]
     return args
 
@@ -748,10 +761,7 @@ def use_embedded_pkgs(embedded_lib_path=None):
         embedded_lib_path = get_embedded_lib_path()
 
     old_sys_path = list(sys.path)
-    sys.path.insert(
-        1,  # https://stackoverflow.com/a/10097543
-        embedded_lib_path
-    )
+    sys.path.insert(1, embedded_lib_path)  # https://stackoverflow.com/a/10097543
     try:
         yield
     finally:
@@ -760,23 +770,24 @@ def use_embedded_pkgs(embedded_lib_path=None):
 
 def which(program):
     """Mimic 'which' command behavior."""
+
     def is_exe(fpath):
         """Determine if program exists and is executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     def get_extensions():
         """Get PATHEXT if the exist, otherwise use default."""
-        exts = ['.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC']
+        exts = [".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC"]
 
-        if os.environ.get('PATHEXT', []):
-            exts = os.environ['PATHEXT']
+        if os.environ.get("PATHEXT", []):
+            exts = os.environ["PATHEXT"]
 
-        return exts.split(';')
+        return exts.split(";")
 
     fname, file_ext = os.path.splitext(program)
     fpath, fname = os.path.split(program)
 
-    if not file_ext and platform.system().lower() == 'windows':
+    if not file_ext and platform.system().lower() == "windows":
         fnames = [fname + ext for ext in get_extensions()]
     else:
         fnames = [fname]
@@ -787,7 +798,11 @@ def which(program):
             if is_exe(exe_file):
                 return exe_file
         else:
-            for path in os.environ.get('PATH').split(os.pathsep) if 'PATH' in os.environ else [os.getcwd()]:  # noqa pylint: disable=line-too-long
+            for path in (
+                os.environ.get("PATH").split(os.pathsep)
+                if "PATH" in os.environ
+                else [os.getcwd()]
+            ):
                 exe_file = os.path.join(path, i)
                 if is_exe(exe_file):
                     return exe_file

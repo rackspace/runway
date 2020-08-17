@@ -6,13 +6,10 @@ def handler(event, context):  # pylint: disable=unused-argument
     """Return Serverless Hello World."""
     body = {
         "message": "Go Serverless v1.0! Your function executed successfully!",
-        "input": event
+        "input": event,
     }
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
+    response = {"statusCode": 200, "body": json.dumps(body)}
 
     return response
 

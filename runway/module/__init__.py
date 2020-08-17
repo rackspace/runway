@@ -15,42 +15,34 @@ else:
     from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
-NPM_BIN = 'npm.cmd' if platform.system().lower() == 'windows' else 'npm'
-NPX_BIN = 'npx.cmd' if platform.system().lower() == 'windows' else 'npx'
+NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
+NPX_BIN = "npx.cmd" if platform.system().lower() == "windows" else "npx"
 
 
 def format_npm_command_for_logging(command):
     """Convert npm command list to string for display to user."""
-    if platform.system().lower() == 'windows' and (
-            command[0] == 'npx.cmd' and command[1] == '-c'):
-        return "npx.cmd -c \"%s\"" % " ".join(command[2:])
-    return ' '.join(command)
+    if platform.system().lower() == "windows" and (
+        command[0] == "npx.cmd" and command[1] == "-c"
+    ):
+        return 'npx.cmd -c "%s"' % " ".join(command[2:])
+    return " ".join(command)
 
 
 def generate_node_command(command, command_opts, path, logger=LOGGER):
     """Return node bin command list for subprocess execution."""
     if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
-        cmd_list = [NPX_BIN,
-                    '-c',
-                    "%s %s" % (command, ' '.join(command_opts))]
+        cmd_list = [NPX_BIN, "-c", "%s %s" % (command, " ".join(command_opts))]
     else:
-        logger.debug(
-            'npx not found; falling back to invoking shell script directly'
-        )
-        cmd_list = [
-            os.path.join(path,
-                         'node_modules',
-                         '.bin',
-                         command)
-        ] + command_opts
-    logger.debug('node command: %s', format_npm_command_for_logging(cmd_list))
+        logger.debug("npx not found; falling back to invoking shell script directly")
+        cmd_list = [os.path.join(path, "node_modules", ".bin", command)] + command_opts
+    logger.debug("node command: %s", format_npm_command_for_logging(cmd_list))
     return cmd_list
 
 
 def run_module_command(cmd_list, env_vars, exit_on_error=True, logger=LOGGER):
     """Shell out to provisioner command."""
-    logger.debug('running command: %s', ' '.join(cmd_list))
+    logger.debug("running command: %s", " ".join(cmd_list))
     if exit_on_error:
         try:
             subprocess.check_call(cmd_list, env=env_vars)
@@ -63,15 +55,17 @@ def run_module_command(cmd_list, env_vars, exit_on_error=True, logger=LOGGER):
 def use_npm_ci(path):
     """Return true if npm ci should be used in lieu of npm install."""
     # https://docs.npmjs.com/cli/ci#description
-    with open(os.devnull, 'w') as fnull:
-        if ((os.path.isfile(os.path.join(path,
-                                         'package-lock.json')) or
-             os.path.isfile(os.path.join(path,
-                                         'npm-shrinkwrap.json'))) and
-                subprocess.call(
-                    [NPM_BIN, 'ci', '-h'],
-                    stdout=fnull,
-                    stderr=subprocess.STDOUT) == 0):
+    with open(os.devnull, "w") as fnull:
+        if (
+            (
+                os.path.isfile(os.path.join(path, "package-lock.json"))
+                or os.path.isfile(os.path.join(path, "npm-shrinkwrap.json"))
+            )
+            and subprocess.call(
+                [NPM_BIN, "ci", "-h"], stdout=fnull, stderr=subprocess.STDOUT
+            )
+            == 0
+        ):
             return True
     return False
 
@@ -79,29 +73,30 @@ def use_npm_ci(path):
 def run_npm_install(path, options, context, logger=LOGGER):
     """Run npm install/ci."""
     # Use npm ci if available (npm v5.7+)
-    cmd = [NPM_BIN, '<place-holder>']
+    cmd = [NPM_BIN, "<place-holder>"]
     if context.no_color:
-        cmd.append('--no-color')
-    if options.get('options', {}).get('skip_npm_ci'):
+        cmd.append("--no-color")
+    if options.get("options", {}).get("skip_npm_ci"):
         logger.info("skipped npm ci/npm install")
         return
-    if context.env_vars.get('CI') and use_npm_ci(path):
+    if context.env_vars.get("CI") and use_npm_ci(path):
         logger.info("running npm ci...")
-        cmd[1] = 'ci'
+        cmd[1] = "ci"
     else:
         logger.info("running npm install...")
-        cmd[1] = 'install'
+        cmd[1] = "install"
     subprocess.check_call(cmd)
 
 
 def warn_on_boto_env_vars(env_vars):
     """Inform user if boto-specific environment variables are in use."""
     # https://github.com/serverless/serverless/issues/2151#issuecomment-255646512
-    if env_vars.get('AWS_DEFAULT_PROFILE') and not (
-            env_vars.get('AWS_PROFILE')):
-        LOGGER.warning('AWS_DEFAULT_PROFILE environment variable is set '
-                       'during use of nodejs-based module and AWS_PROFILE is '
-                       'not set -- you likely want to set AWS_PROFILE instead')
+    if env_vars.get("AWS_DEFAULT_PROFILE") and not env_vars.get("AWS_PROFILE"):
+        LOGGER.warning(
+            "AWS_DEFAULT_PROFILE environment variable is set "
+            "during use of nodejs-based module and AWS_PROFILE is "
+            "not set -- you likely want to set AWS_PROFILE instead"
+        )
 
 
 class RunwayModule(object):
@@ -123,27 +118,26 @@ class RunwayModule(object):
         self.path = str(path)
         self.options = {} if options is None else options
         if isinstance(path, Path):
-            self.name = options.get('name', path.name)
+            self.name = options.get("name", path.name)
         else:  # until we can replace path with a Path object here, handle str
-            self.name = options.get('name', Path(path).name)
+            self.name = options.get("name", Path(path).name)
 
     # the rest of these 'abstract' methods must have names which match
     #  the commands defined in `cli.py`
 
     def plan(self):
         """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError('You must implement the plan() method '
-                                  'yourself!')
+        raise NotImplementedError("You must implement the plan() method yourself!")
 
     def deploy(self):
         """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError('You must implement the deploy() method '
-                                  'yourself!')
+        raise NotImplementedError("You must implement the deploy() method yourself!")
 
     def destroy(self):
         """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError('You must implement the destroy() method '
-                                  'yourself!')
+        raise NotImplementedError(
+            "You must implement the destroy() method yourself!"
+        )
 
     def __getitem__(self, key):
         """Make the object subscriptable.
@@ -178,10 +172,10 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         del self.options  # remove the attr set by the parent class
 
         # potential future state of RunwayModule attributes in a future release
-        self._raw_path = Path(options.pop('path')) if options.get('path') else None
-        self.environments = options.pop('environments', {})
-        self.options = options.pop('options', {})
-        self.parameters = options.pop('parameters', {})
+        self._raw_path = Path(options.pop("path")) if options.get("path") else None
+        self.environments = options.pop("environments", {})
+        self.options = options.pop("options", {})
+        self.parameters = options.pop("parameters", {})
         self.path = path if isinstance(self.path, Path) else Path(self.path)
 
         for k, v in options.items():
@@ -192,9 +186,11 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
     def check_for_npm(self):
         """Ensure npm is installed and in the current path."""
-        if not which('npm'):
-            self.logger.error('"npm" not found in path or is not executable; '
-                              'please ensure it is installed correctly')
+        if not which("npm"):
+            self.logger.error(
+                '"npm" not found in path or is not executable; '
+                "please ensure it is installed correctly"
+            )
             sys.exit(1)
 
     def log_npm_command(self, command):
@@ -204,25 +200,22 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             command (List[str]): List that will be passed into a subprocess.
 
         """
-        self.logger.debug(
-            'node command: %s',
-            format_npm_command_for_logging(command)
-        )
+        self.logger.debug("node command: %s", format_npm_command_for_logging(command))
 
     def npm_install(self):
         """Run ``npm install``."""
-        cmd = [NPM_BIN, '<place-holder>']
+        cmd = [NPM_BIN, "<place-holder>"]
         if self.context.no_color:
-            cmd.append('--no-color')
-        if self.options.get('skip_npm_ci'):
+            cmd.append("--no-color")
+        if self.options.get("skip_npm_ci"):
             self.logger.info("skipped npm ci/npm install")
             return
         if self.context.is_noninteractive and use_npm_ci(str(self.path)):
             self.logger.info("running npm ci...")
-            cmd[1] = 'ci'
+            cmd[1] = "ci"
         else:
             self.logger.info("running npm install...")
-            cmd[1] = 'install'
+            cmd[1] = "install"
         subprocess.check_call(cmd)
 
     def package_json_missing(self):
@@ -232,13 +225,15 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             bool: True if the file was not found.
 
         """
-        if not (self.path / 'package.json').is_file():
-            self.logger.debug('module is missing package.json')
+        if not (self.path / "package.json").is_file():
+            self.logger.debug("module is missing package.json")
             return True
         return False
 
 
-class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
+class ModuleOptions(
+    six.moves.collections_abc.MutableMapping
+):  # pylint: disable=no-member
     """Base class for Runway module options."""
 
     @staticmethod
@@ -256,10 +251,13 @@ class ModuleOptions(six.moves.collections_abc.MutableMapping):  # pylint: disabl
         if isinstance(data, (list, type(None), six.string_types)):
             return data
         if isinstance(data, dict):
-            return {key: merge_nested_environment_dicts(value, env_name)
-                    for key, value in data.items()}
-        raise TypeError('expected type of list, NoneType, or str; '
-                        'got type %s' % type(data))
+            return {
+                key: merge_nested_environment_dicts(value, env_name)
+                for key, value in data.items()
+            }
+        raise TypeError(
+            "expected type of list, NoneType, or str; " "got type %s" % type(data)
+        )
 
     @classmethod
     def parse(cls, context, **kwargs):

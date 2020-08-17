@@ -1,1 +1,1 @@
-"""Collect all the command classes together."""
+"""Empty init for python import traversal."""
