@@ -38,6 +38,12 @@ pipenv_lock: ## update all Pipfile.lock's used by this project
 	pushd integration_tests && pipenv lock --dev && popd
 	pushd integration_test_infrastructure && pipenv lock --dev && popd
 
+pipenv-update:
+	pipenv update --dev --keep-outdated
+	pushd docs && pipenv update --dev --keep-outdated && popd
+	pushd integration_tests && pipenv update --dev --keep-outdated && popd
+	pushd integration_test_infrastructure && pipenv update --dev --keep-outdated && popd
+
 clean: ## remove generated file from the project directory
 	rm -rf build/
 	rm -rf dist/
@@ -46,10 +52,18 @@ clean: ## remove generated file from the project directory
 	rm -rf src/
 	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
+fix-black: ## automatically fix all black errors
+	@pipenv run black .
+
 fix-isort: ## automatically fix all isort errors
 	@pipenv run isort . --recursive --atomic
 
-lint: lint-isort lint-flake8 lint-pylint ## run all linters
+lint: lint-isort lint-black lint-flake8 lint-pylint ## run all linters
+
+lint-black: ## run black
+	@echo "Running black... If this failes, run 'make fix-black' to resolve."
+	@pipenv run black . --check
+	@echo ""
 
 lint-flake8: ## run flake8
 	@echo "Running flake8..."

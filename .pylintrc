@@ -149,7 +149,9 @@ disable=useless-object-inheritance,
         # flake8 (pydocstyle) overlap
         missing-class-docstring,
         # flake8 (pydocstyle) overlap
-        missing-function-docstring
+        missing-function-docstring,
+        # needed for black formatting
+        bad-continuation,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
