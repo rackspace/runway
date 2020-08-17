@@ -1,4 +1,14 @@
 {
+    "[python]": {
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.rulers": [
+            81,
+            88,
+            98
+        ],
+        "editor.tabSize": 4
+    },
     "cSpell.words": [
         "Ansible",
         "CFNgin",
