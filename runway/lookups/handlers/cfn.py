@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "cfn"
 
-OutputQuery = namedtuple('OutputQuery', ('stack_name', 'output_name'))
+OutputQuery = namedtuple("OutputQuery", ("stack_name", "output_name"))
 
 
 class CfnLookup(LookupHandler):
@@ -86,10 +86,10 @@ class CfnLookup(LookupHandler):
 
         """
         if provider:
-            if args.get('region') and provider.region != args['region']:
-                LOGGER.debug('not using provider; requested region does not match')
+            if args.get("region") and provider.region != args["region"]:
+                LOGGER.debug("not using provider; requested region does not match")
                 return False
-            LOGGER.debug('using provider')
+            LOGGER.debug("using provider")
             return True
         return False
 
@@ -105,25 +105,23 @@ class CfnLookup(LookupHandler):
             str: Value of the requested output.
 
         """
-        LOGGER.debug('describing stack: %s', query.stack_name)
-        stack = client.describe_stacks(StackName=query.stack_name)['Stacks'][0]
+        LOGGER.debug("describing stack: %s", query.stack_name)
+        stack = client.describe_stacks(StackName=query.stack_name)["Stacks"][0]
         outputs = {
-            output['OutputKey']: output['OutputValue']
-            for output in stack.get('Outputs', [])
+            output["OutputKey"]: output["OutputValue"]
+            for output in stack.get("Outputs", [])
         }
-        LOGGER.debug(
-            '%s stack outputs: %s', stack['StackName'], json.dumps(outputs)
-        )
+        LOGGER.debug("%s stack outputs: %s", stack["StackName"], json.dumps(outputs))
         return outputs[query.output_name]
 
     @classmethod
-    def handle(cls,
-               value,  # type: str
-               context,  # type: Union['CFNginContext', 'RunwayContext']
-               provider=None,  # type: Optional['Provider']
-               **_  # type: Any
-               # TODO remove disable when droping python 2 support
-               ):  # pylint: disable=bad-continuation
+    def handle(
+        cls,
+        value,  # type: str
+        context,  # type: Union['CFNginContext', 'RunwayContext']
+        provider=None,  # type: Optional['Provider']
+        **_  # type: Any
+    ):
         # type: (...) -> Any
         """Retrieve a value from CloudFormation Stack outputs.
 
@@ -142,12 +140,10 @@ class CfnLookup(LookupHandler):
         """
         raw_query, args = cls.parse(value)
         try:
-            query = OutputQuery(*raw_query.split('.'))
+            query = OutputQuery(*raw_query.split("."))
         except TypeError:
             raise ValueError(
-                'query must be <stack-name>.<output-name>; got "{}"'.format(
-                    raw_query
-                )
+                'query must be <stack-name>.<output-name>; got "{}"'.format(raw_query)
             )
 
         try:
@@ -157,20 +153,21 @@ class CfnLookup(LookupHandler):
                 # this will only happen when used from cfngin
                 result = provider.get_output(query.stack_name, query.output_name)
             else:
-                cfn_client = context.get_session(region=args.get('region')) \
-                    .client('cloudformation')
+                cfn_client = context.get_session(region=args.get("region")).client(
+                    "cloudformation"
+                )
                 result = cls.get_stack_output(cfn_client, query)
         except (ClientError, KeyError, StackDoesNotExist) as err:
             # StackDoesNotExist is only raised by provider
-            if 'default' in args:
+            if "default" in args:
                 LOGGER.debug(
-                    'unable to resolve lookup for CloudFormation Stack '
+                    "unable to resolve lookup for CloudFormation Stack "
                     'output "%s"; using default',
                     raw_query,
-                    exc_info=True
+                    exc_info=True,
                 )
-                args.pop('load', None)  # don't load a default value
-                result = args.pop('default')
+                args.pop("load", None)  # don't load a default value
+                result = args.pop("default")
             elif isinstance(err, (ClientError, StackDoesNotExist)):
                 raise
             else:

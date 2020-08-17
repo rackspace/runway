@@ -4,8 +4,7 @@ import json
 import logging
 import sys
 import time
-# thread safe, memoize, provider builder.
-from threading import Lock
+from threading import Lock  # thread safe, memoize, provider builder.
 
 import botocore.exceptions
 import yaml
@@ -49,18 +48,13 @@ MAX_ATTEMPTS = 10
 MAX_TAIL_RETRIES = 15
 TAIL_RETRY_SLEEP = 1
 GET_EVENTS_SLEEP = 1
-DEFAULT_CAPABILITIES = ["CAPABILITY_NAMED_IAM",
-                        "CAPABILITY_AUTO_EXPAND"]
+DEFAULT_CAPABILITIES = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
 
 def get_cloudformation_client(session):
     """Get CloudFormaiton boto3 client."""
-    config = Config(
-        retries=dict(
-            max_attempts=MAX_ATTEMPTS
-        )
-    )
-    return session.client('cloudformation', config=config)
+    config = Config(retries=dict(max_attempts=MAX_ATTEMPTS))
+    return session.client("cloudformation", config=config)
 
 
 def get_output_dict(stack):
@@ -75,40 +69,42 @@ def get_output_dict(stack):
         stack.
 
     """
-    if not stack.get('Outputs'):
+    if not stack.get("Outputs"):
         return {}
     outputs = {
-        output['OutputKey']: output['OutputValue']
-        for output in stack.get('Outputs', [])
+        output["OutputKey"]: output["OutputValue"]
+        for output in stack.get("Outputs", [])
     }
-    LOGGER.debug(
-        '%s stack outputs: %s', stack['StackName'], json.dumps(outputs)
-    )
+    LOGGER.debug("%s stack outputs: %s", stack["StackName"], json.dumps(outputs))
     return outputs
 
 
-def s3_fallback(fqn, template, parameters, tags, method,
-                change_set_name=None, service_role=None):
+def s3_fallback(
+    fqn, template, parameters, tags, method, change_set_name=None, service_role=None
+):
     """Falling back to legacy stacker S3 bucket region for templates."""
-    LOGGER.warning('falling back to deprecated, legacy stacker S3 bucket '
-                   'region for templates; to learn how to correctly provide an '
-                   's3 bucket, visit %s/page/cfngin/configuration.html#s3-bucket',
-                   DOC_SITE)
+    LOGGER.warning(
+        "falling back to deprecated, legacy stacker S3 bucket "
+        "region for templates; to learn how to correctly provide an "
+        "s3 bucket, visit %s/page/cfngin/configuration.html#s3-bucket",
+        DOC_SITE,
+    )
     # extra line break on purpose to avoid status updates removing URL
     # from view
     LOGGER.warning("\n")
-    LOGGER.debug("modifying the S3 TemplateURL to point to "
-                 "us-east-1 endpoint")
+    LOGGER.debug("modifying the S3 TemplateURL to point to us-east-1 endpoint")
     template_url = template.url
     template_url_parsed = urllib.parse.urlparse(template_url)
-    template_url_parsed = template_url_parsed._replace(
-        netloc="s3.amazonaws.com")
+    template_url_parsed = template_url_parsed._replace(netloc="s3.amazonaws.com")
     template_url = urllib.parse.urlunparse(template_url_parsed)
     LOGGER.debug("using template_url: %s", template_url)
     args = generate_cloudformation_args(
-        fqn, parameters, tags, template,
+        fqn,
+        parameters,
+        tags,
+        template,
         service_role=service_role,
-        change_set_name=change_set_name
+        change_set_name=change_set_name,
     )
 
     return method(**args)
@@ -124,7 +120,7 @@ def get_change_set_name():
     And must be unique across all change sets.
 
     """
-    return 'change-set-{}'.format(int(time.time()))
+    return "change-set-{}".format(int(time.time()))
 
 
 def requires_replacement(changeset):
@@ -137,12 +133,12 @@ def requires_replacement(changeset):
         list: A list of changes that require replacement, if any.
 
     """
-    return [r for r in changeset if
-            r["ResourceChange"].get("Replacement", False) == "True"]
+    return [
+        r for r in changeset if r["ResourceChange"].get("Replacement", False) == "True"
+    ]
 
 
-def output_full_changeset(full_changeset=None, params_diff=None,
-                          answer=None, fqn=None):
+def output_full_changeset(full_changeset=None, params_diff=None, answer=None, fqn=None):
     """Optionally output full changeset.
 
     Args:
@@ -158,14 +154,14 @@ def output_full_changeset(full_changeset=None, params_diff=None,
 
     """
     if not answer:
-        answer = ui.ask('Show full change set? [y/n] ').lower()
-    if answer == 'n':
+        answer = ui.ask("Show full change set? [y/n] ").lower()
+    if answer == "n":
         return
-    if answer in ['y', 'v']:
+    if answer in ["y", "v"]:
         if fqn:
-            msg = '%s full changeset' % (fqn)
+            msg = "%s full changeset" % (fqn)
         else:
-            msg = 'Full changeset'
+            msg = "Full changeset"
         if params_diff:
             LOGGER.info(
                 "%s:\n\n%s\n%s",
@@ -175,16 +171,15 @@ def output_full_changeset(full_changeset=None, params_diff=None,
             )
         else:
             LOGGER.info(
-                "%s:\n%s",
-                msg,
-                yaml.safe_dump(full_changeset),
+                "%s:\n%s", msg, yaml.safe_dump(full_changeset),
             )
         return
     raise exceptions.CancelExecution
 
 
-def ask_for_approval(full_changeset=None, params_diff=None,
-                     include_verbose=False, fqn=None):
+def ask_for_approval(
+    full_changeset=None, params_diff=None, include_verbose=False, fqn=None
+):
     """Prompt the user for approval to execute a change set.
 
     Args:
@@ -202,24 +197,28 @@ def ask_for_approval(full_changeset=None, params_diff=None,
         CancelExecution: If approval no given.
 
     """
-    approval_options = ['y', 'n']
+    approval_options = ["y", "n"]
     if include_verbose:
-        approval_options.append('v')
+        approval_options.append("v")
 
-    approve = ui.ask("Execute the above changes? [{}] ".format(
-        '/'.join(approval_options))).lower()
+    approve = ui.ask(
+        "Execute the above changes? [{}] ".format("/".join(approval_options))
+    ).lower()
 
     if include_verbose and approve == "v":
-        output_full_changeset(full_changeset=full_changeset,
-                              params_diff=params_diff, answer=approve, fqn=fqn)
+        output_full_changeset(
+            full_changeset=full_changeset,
+            params_diff=params_diff,
+            answer=approve,
+            fqn=fqn,
+        )
         return ask_for_approval(fqn=fqn)
     if approve == "y":
         return None
     raise exceptions.CancelExecution
 
 
-def output_summary(fqn, action, changeset, params_diff,
-                   replacements_only=False):
+def output_summary(fqn, action, changeset, params_diff, replacements_only=False):
     """Log a summary of the changeset.
 
     Args:
@@ -236,30 +235,30 @@ def output_summary(fqn, action, changeset, params_diff,
     replacements = []
     changes = []
     for change in changeset:
-        resource = change['ResourceChange']
-        replacement = resource.get('Replacement') == 'True'
-        summary = '- %s %s (%s)' % (
-            resource['Action'],
-            resource['LogicalResourceId'],
-            resource['ResourceType'],
+        resource = change["ResourceChange"]
+        replacement = resource.get("Replacement") == "True"
+        summary = "- %s %s (%s)" % (
+            resource["Action"],
+            resource["LogicalResourceId"],
+            resource["ResourceType"],
         )
         if replacement:
             replacements.append(summary)
         else:
             changes.append(summary)
 
-    summary = ''
+    summary = ""
     if params_diff:
         summary += summarize_params_diff(params_diff)
     if replacements:
         if not replacements_only:
-            summary += 'Replacements:\n'
-        summary += '\n'.join(replacements)
+            summary += "Replacements:\n"
+        summary += "\n".join(replacements)
     if changes:
         if summary:
-            summary += '\n'
-        summary += 'Changes:\n%s' % ('\n'.join(changes))
-    LOGGER.info('%s %s:\n%s', fqn, action, summary)
+            summary += "\n"
+        summary += "Changes:\n%s" % ("\n".join(changes))
+    LOGGER.info("%s %s:\n%s", fqn, action, summary)
 
 
 def format_params_diff(params_diff):
@@ -269,28 +268,26 @@ def format_params_diff(params_diff):
 
 def summarize_params_diff(params_diff):
     """Summarize parameter diff."""
-    summary = ''
+    summary = ""
 
-    added_summary = [v.key for v in params_diff
-                     if v.status() is DictValue.ADDED]
+    added_summary = [v.key for v in params_diff if v.status() is DictValue.ADDED]
     if added_summary:
-        summary += 'Parameters Added: %s\n' % ', '.join(added_summary)
+        summary += "Parameters Added: %s\n" % ", ".join(added_summary)
 
-    removed_summary = [v.key for v in params_diff
-                       if v.status() is DictValue.REMOVED]
+    removed_summary = [v.key for v in params_diff if v.status() is DictValue.REMOVED]
     if removed_summary:
-        summary += 'Parameters Removed: %s\n' % ', '.join(removed_summary)
+        summary += "Parameters Removed: %s\n" % ", ".join(removed_summary)
 
-    modified_summary = [v.key for v in params_diff
-                        if v.status() is DictValue.MODIFIED]
+    modified_summary = [v.key for v in params_diff if v.status() is DictValue.MODIFIED]
     if modified_summary:
-        summary += 'Parameters Modified: %s\n' % ', '.join(modified_summary)
+        summary += "Parameters Modified: %s\n" % ", ".join(modified_summary)
 
     return summary
 
 
-def wait_till_change_set_complete(cfn_client, change_set_id, try_count=25,
-                                  sleep_time=.5, max_sleep=3):
+def wait_till_change_set_complete(
+    cfn_client, change_set_id, try_count=25, sleep_time=0.5, max_sleep=3
+):
     """Check state of a changeset, returning when it is in a complete state.
 
     Since changesets can take a little bit of time to get into a complete
@@ -316,17 +313,12 @@ def wait_till_change_set_complete(cfn_client, change_set_id, try_count=25,
     complete = False
     response = None
     for _ in range(try_count):
-        response = cfn_client.describe_change_set(
-            ChangeSetName=change_set_id,
-        )
+        response = cfn_client.describe_change_set(ChangeSetName=change_set_id,)
         complete = response["Status"] in ("FAILED", "CREATE_COMPLETE")
         if complete:
             break
         if sleep_time == max_sleep:
-            LOGGER.debug(
-                "waiting on changeset for another %s seconds",
-                sleep_time
-            )
+            LOGGER.debug("waiting on changeset for another %s seconds", sleep_time)
         time.sleep(sleep_time)
 
         # exponential backoff with max
@@ -336,51 +328,64 @@ def wait_till_change_set_complete(cfn_client, change_set_id, try_count=25,
     return response
 
 
-def create_change_set(cfn_client, fqn, template, parameters, tags,
-                      change_set_type='UPDATE', service_role=None):
+def create_change_set(
+    cfn_client,
+    fqn,
+    template,
+    parameters,
+    tags,
+    change_set_type="UPDATE",
+    service_role=None,
+):
     """Create CloudFormation change set."""
-    LOGGER.debug("attempting to create change set of type %s for stack: %s",
-                 change_set_type,
-                 fqn)
+    LOGGER.debug(
+        "attempting to create change set of type %s for stack: %s", change_set_type, fqn
+    )
     args = generate_cloudformation_args(
-        fqn, parameters, tags, template,
+        fqn,
+        parameters,
+        tags,
+        template,
         change_set_type=change_set_type,
         service_role=service_role,
-        change_set_name=get_change_set_name()
+        change_set_name=get_change_set_name(),
     )
     try:
         response = cfn_client.create_change_set(**args)
     except botocore.exceptions.ClientError as err:
-        if err.response['Error']['Message'] == ('TemplateURL must reference '
-                                                'a valid S3 object to which '
-                                                'you have access.'):
-            response = s3_fallback(fqn, template, parameters,
-                                   tags, cfn_client.create_change_set,
-                                   get_change_set_name(),
-                                   service_role)
+        if err.response["Error"]["Message"] == (
+            "TemplateURL must reference a valid S3 object to which you have access."
+        ):
+            response = s3_fallback(
+                fqn,
+                template,
+                parameters,
+                tags,
+                cfn_client.create_change_set,
+                get_change_set_name(),
+                service_role,
+            )
         else:
             raise
     change_set_id = response["Id"]
-    response = wait_till_change_set_complete(
-        cfn_client, change_set_id
-    )
+    response = wait_till_change_set_complete(cfn_client, change_set_id)
     status = response["Status"]
     if status == "FAILED":
         status_reason = response["StatusReason"]
-        if ("didn't contain changes" in response["StatusReason"] or
-                "No updates are to be performed" in response["StatusReason"]):
+        if (
+            "didn't contain changes" in response["StatusReason"]
+            or "No updates are to be performed" in status_reason
+        ):
             LOGGER.debug(
-                "%s:stack did not change; not updating and removing "
-                "changeset",
-                fqn,
+                "%s:stack did not change; not updating and removing changeset", fqn,
             )
             cfn_client.delete_change_set(ChangeSetName=change_set_id)
             raise exceptions.StackDidNotChange()
         LOGGER.warning(
             "got strange status, '%s' for changeset '%s'; not deleting for "
-            "further investigation - you will need to delete the changeset "
-            "manually",
-            status, change_set_id
+            "further investigation - you will need to delete the changeset manually",
+            status,
+            change_set_id,
         )
         raise exceptions.UnhandledChangeSetStatus(
             fqn, change_set_id, status, status_reason
@@ -388,9 +393,7 @@ def create_change_set(cfn_client, fqn, template, parameters, tags,
 
     execution_status = response["ExecutionStatus"]
     if execution_status != "AVAILABLE":
-        raise exceptions.UnableToExecuteChangeSet(fqn,
-                                                  change_set_id,
-                                                  execution_status)
+        raise exceptions.UnableToExecuteChangeSet(fqn, change_set_id, execution_status)
 
     changes = response["Changes"]
     return changes, change_set_id
@@ -416,12 +419,17 @@ def check_tags_contain(actual, expected):
     return actual_set >= expected_set
 
 
-def generate_cloudformation_args(stack_name, parameters, tags, template,
-                                 capabilities=None,
-                                 change_set_type=None,
-                                 service_role=None,
-                                 stack_policy=None,
-                                 change_set_name=None):
+def generate_cloudformation_args(
+    stack_name,
+    parameters,
+    tags,
+    template,
+    capabilities=None,
+    change_set_type=None,
+    service_role=None,
+    stack_policy=None,
+    change_set_name=None,
+):
     """Generate the args for common CloudFormation API interactions.
 
     This is used for ``create_stack``/``update_stack``/``create_change_set``
@@ -525,8 +533,9 @@ class ProviderBuilder(object):  # pylint: disable=too-few-public-methods
                 # assume provider is in provider dictionary.
                 provider = self.providers[key]
             except KeyError:
-                LOGGER.debug('missed memorized lookup (%s); creating new AWS '
-                             'provider', key)
+                LOGGER.debug(
+                    "missed memorized lookup (%s); creating new AWS provider", key
+                )
                 if not region:
                     region = self.region
                 # memoize the result for later.
@@ -558,7 +567,7 @@ class Provider(BaseProvider):
     ROLLING_BACK_STATUSES = (
         "ROLLBACK_IN_PROGRESS",
         "IMPORT_ROLLBACK_IN_PROGRESS",
-        "UPDATE_ROLLBACK_IN_PROGRESS"
+        "UPDATE_ROLLBACK_IN_PROGRESS",
     )
 
     FAILED_STATUSES = (
@@ -583,17 +592,19 @@ class Provider(BaseProvider):
         "UPDATE_ROLLBACK_COMPLETE",
     )
 
-    RECREATION_STATUSES = (
-        "CREATE_FAILED",
-        "ROLLBACK_FAILED",
-        "ROLLBACK_COMPLETE"
-    )
+    RECREATION_STATUSES = ("CREATE_FAILED", "ROLLBACK_FAILED", "ROLLBACK_COMPLETE")
 
     REVIEW_STATUS = "REVIEW_IN_PROGRESS"
 
-    def __init__(self, session, region=None, interactive=False,
-                 replacements_only=False, recreate_failed=False,
-                 service_role=None):
+    def __init__(
+        self,
+        session,
+        region=None,
+        interactive=False,
+        replacements_only=False,
+        recreate_failed=False,
+        service_role=None,
+    ):
         """Instantiate class."""
         self._outputs = {}
         self.region = region
@@ -607,18 +618,23 @@ class Provider(BaseProvider):
     def get_stack(self, stack_name, *args, **kwargs):  # pylint: disable=unused-argument
         """Get stack."""
         try:
-            return self.cloudformation.describe_stacks(
-                StackName=stack_name)['Stacks'][0]
+            return self.cloudformation.describe_stacks(StackName=stack_name)["Stacks"][
+                0
+            ]
         except botocore.exceptions.ClientError as err:
             if "does not exist" not in str(err):
                 raise
             raise exceptions.StackDoesNotExist(stack_name)
 
-    def get_stack_status(self, stack, *args, **kwargs):  # pylint: disable=unused-argument
+    def get_stack_status(  # pylint: disable=unused-argument
+        self, stack, *args, **kwargs
+    ):
         """Get stack status."""
-        return stack['StackStatus']
+        return stack["StackStatus"]
 
-    def is_stack_being_destroyed(self, stack, **kwargs):  # pylint: disable=unused-argument
+    def is_stack_being_destroyed(  # pylint: disable=unused-argument
+        self, stack, **kwargs
+    ):
         """Whether the status of the stack indicates it is 'being destroyed'."""
         return self.get_stack_status(stack) == self.DELETING_STATUS
 
@@ -650,19 +666,19 @@ class Provider(BaseProvider):
         """Whether the status of the stack indicates if 'review in progress'."""
         return self.get_stack_status(stack) == self.REVIEW_STATUS
 
-    def tail_stack(self, stack, cancel, action=None, log_func=None,
-                   retries=None):
+    def tail_stack(self, stack, cancel, action=None, log_func=None, retries=None):
         """Tail the events of a stack."""
+
         def _log_func(event):
-            template = '[%s] %s %s %s'
+            template = "[%s] %s %s %s"
             event_args = [
-                event['LogicalResourceId'],
-                event['ResourceType'],
-                event['ResourceStatus']
+                event["LogicalResourceId"],
+                event["ResourceType"],
+                event["ResourceStatus"],
             ]
-            if event.get('ResourceStatusReason'):
-                template += ' (%s)'
-                event_args.append(event['ResourceStatusReason'])
+            if event.get("ResourceStatusReason"):
+                template += " (%s)"
+                event_args.append(event["ResourceStatusReason"])
             LOGGER.verbose(template, *([stack.fqn] + event_args))
 
         log_func = log_func or _log_func
@@ -674,19 +690,18 @@ class Provider(BaseProvider):
         while True:
             attempts += 1
             try:
-                self.tail(stack.fqn, cancel=cancel, log_func=log_func,
-                          include_initial=False)
+                self.tail(
+                    stack.fqn, cancel=cancel, log_func=log_func, include_initial=False
+                )
                 break
             except botocore.exceptions.ClientError as err:
                 if "does not exist" in str(err):
                     LOGGER.debug(
-                        '%s:unable to tail stack; it does not exist',
-                        stack.fqn
+                        "%s:unable to tail stack; it does not exist", stack.fqn
                     )
-                    if action == 'destroy':
+                    if action == "destroy":
                         LOGGER.debug(
-                            '%s:stack was deleted before it could be tailed',
-                            stack.fqn
+                            "%s:stack was deleted before it could be tailed", stack.fqn
                         )
                         return
                     if attempts < retries:
@@ -699,9 +714,10 @@ class Provider(BaseProvider):
 
     @staticmethod
     def _tail_print(event):
-        print("%s %s %s" % (event['ResourceStatus'],
-                            event['ResourceType'],
-                            event['EventId']))
+        print(
+            "%s %s %s"
+            % (event["ResourceStatus"], event["ResourceType"], event["EventId"])
+        )
 
     def get_events(self, stack_name, chronological=True):
         """Get the events in batches and return in chronological order."""
@@ -713,11 +729,9 @@ class Provider(BaseProvider):
                     StackName=stack_name, NextToken=next_token
                 )
             else:
-                events = self.cloudformation.describe_stack_events(
-                    StackName=stack_name
-                )
-            event_list.append(events['StackEvents'])
-            next_token = events.get('NextToken', None)
+                events = self.cloudformation.describe_stack_events(StackName=stack_name)
+            event_list.append(events["StackEvents"])
+            next_token = events.get("NextToken", None)
             if next_token is None:
                 break
             time.sleep(GET_EVENTS_SLEEP)
@@ -729,20 +743,36 @@ class Provider(BaseProvider):
         """Process events and returns latest roll back reason."""
         # flake8/pylint fight over the indent here on python2
         # TODO remove "disable=bad-continuation" when dropping python2
-        event = next((item for item in self.get_events(stack_name, False)
-                      if item["ResourceStatus"] == "UPDATE_ROLLBACK_IN_PROGRESS"
-                      ), None)  # pylint: disable=bad-continuation
+        event = next(
+            (
+                item
+                for item in self.get_events(stack_name, False)
+                if item["ResourceStatus"] == "UPDATE_ROLLBACK_IN_PROGRESS"
+            ),
+            None,
+        )
         if event:
             reason = event["ResourceStatusReason"]
             return reason
-        event = next((item for item in self.get_events(stack_name)
-                      if item["ResourceStatus"] ==
-                      "ROLLBACK_IN_PROGRESS"), None)
+        event = next(
+            (
+                item
+                for item in self.get_events(stack_name)
+                if item["ResourceStatus"] == "ROLLBACK_IN_PROGRESS"
+            ),
+            None,
+        )
         reason = event["ResourceStatusReason"]
         return reason
 
-    def tail(self, stack_name, cancel, log_func=_tail_print, sleep_time=5,
-             include_initial=True):
+    def tail(
+        self,
+        stack_name,
+        cancel,
+        log_func=_tail_print,
+        sleep_time=5,
+        include_initial=True,
+    ):
         """Show and then tail the event log."""
         # First dump the full list of events in chronological order and keep
         # track of the events we've seen already
@@ -751,15 +781,15 @@ class Provider(BaseProvider):
         for event in initial_events:
             if include_initial:
                 log_func(event)
-            seen.add(event['EventId'])
+            seen.add(event["EventId"])
 
         # Now keep looping through and dump the new events
         while True:
             events = self.get_events(stack_name)
             for event in events:
-                if event['EventId'] not in seen:
+                if event["EventId"] not in seen:
                     log_func(event)
-                    seen.add(event['EventId'])
+                    seen.add(event["EventId"])
             if cancel.wait(sleep_time):
                 return
 
@@ -776,23 +806,31 @@ class Provider(BaseProvider):
             force_interactive (bool): Always ask for approval.
 
         """
-        action = kwargs.pop('action', 'destroy')
-        approval = kwargs.pop('approval', None)
-        force_interactive = kwargs.pop('force_interactive', False)
+        action = kwargs.pop("action", "destroy")
+        approval = kwargs.pop("approval", None)
+        force_interactive = kwargs.pop("force_interactive", False)
         fqn = self.get_stack_name(stack)
         LOGGER.debug("%s:attempting to delete stack", fqn)
 
-        if action == 'build':
-            LOGGER.info('%s:removed from the CFNgin config file; '
-                        'it is being destroyed', fqn)
+        if action == "build":
+            LOGGER.info(
+                "%s:removed from the CFNgin config file; it is being destroyed", fqn
+            )
 
         destroy_method = self.select_destroy_method(force_interactive)
-        return destroy_method(fqn=fqn, action=action,
-                              approval=approval, **kwargs)
+        return destroy_method(fqn=fqn, action=action, approval=approval, **kwargs)
 
-    def create_stack(self, fqn,  # pylint: disable=arguments-differ
-                     template, parameters, tags, force_change_set=False,
-                     stack_policy=None, termination_protection=False, **kwargs):
+    def create_stack(  # pylint: disable=arguments-differ
+        self,
+        fqn,
+        template,
+        parameters,
+        tags,
+        force_change_set=False,
+        stack_policy=None,
+        termination_protection=False,
+        **kwargs
+    ):
         """Create a new Cloudformation stack.
 
         Args:
@@ -810,45 +848,58 @@ class Provider(BaseProvider):
                 protection.
 
         """
-        LOGGER.debug("attempting to create stack %s: %s", fqn, json.dumps({
-            'parameters': parameters,
-            'tags': tags,
-            'template_url': template.url
-        }))
+        LOGGER.debug(
+            "attempting to create stack %s: %s",
+            fqn,
+            json.dumps(
+                {"parameters": parameters, "tags": tags, "template_url": template.url}
+            ),
+        )
         if not template.url:
             LOGGER.debug("no template url; uploading template directly")
         if force_change_set:
-            LOGGER.debug("force_change_set set to True; creating stack with "
-                         "changeset")
+            LOGGER.debug("force_change_set set to True; creating stack with changeset")
             _changes, change_set_id = create_change_set(
-                self.cloudformation, fqn, template, parameters, tags,
-                'CREATE', service_role=self.service_role, **kwargs
+                self.cloudformation,
+                fqn,
+                template,
+                parameters,
+                tags,
+                "CREATE",
+                service_role=self.service_role,
+                **kwargs
             )
 
-            self.cloudformation.execute_change_set(
-                ChangeSetName=change_set_id,
-            )
+            self.cloudformation.execute_change_set(ChangeSetName=change_set_id,)
             self.update_termination_protection(fqn, termination_protection)
         else:
             args = generate_cloudformation_args(
-                fqn, parameters, tags, template,
+                fqn,
+                parameters,
+                tags,
+                template,
                 service_role=self.service_role,
                 stack_policy=stack_policy,
             )
             # this arg is only valid for stack creation so its not part of
             # generate_cloudformation_args.
-            args['EnableTerminationProtection'] = termination_protection
+            args["EnableTerminationProtection"] = termination_protection
 
             try:
                 self.cloudformation.create_stack(**args)
             except botocore.exceptions.ClientError as err:
-                if err.response['Error']['Message'] == ('TemplateURL must '
-                                                        'reference a valid S3 '
-                                                        'object to which you '
-                                                        'have access.'):
-                    s3_fallback(fqn, template, parameters, tags,
-                                self.cloudformation.create_stack,
-                                self.service_role)
+                if err.response["Error"]["Message"] == (
+                    "TemplateURL must reference a valid S3 object to which you "
+                    "have access."
+                ):
+                    s3_fallback(
+                        fqn,
+                        template,
+                        parameters,
+                        tags,
+                        self.cloudformation.create_stack,
+                        self.service_role,
+                    )
                 else:
                     raise
 
@@ -901,47 +952,61 @@ class Provider(BaseProvider):
 
         if self.is_stack_in_progress(stack):
             raise exceptions.StackUpdateBadStatus(
-                stack_name, stack_status,
-                'Update already in-progress')
+                stack_name, stack_status, "Update already in-progress"
+            )
 
         if not self.is_stack_recreatable(stack):
             raise exceptions.StackUpdateBadStatus(
-                stack_name, stack_status,
-                'Unsupported state for re-creation')
+                stack_name, stack_status, "Unsupported state for re-creation"
+            )
 
         if not self.recreate_failed:
             raise exceptions.StackUpdateBadStatus(
-                stack_name, stack_status,
-                'Stack re-creation is disabled. Run CFNgin again with the '
-                '--recreate-failed option to force it to be deleted and '
-                'created from scratch.')
+                stack_name,
+                stack_status,
+                "Stack re-creation is disabled. Run CFNgin again with the "
+                "--recreate-failed option to force it to be deleted and "
+                "created from scratch.",
+            )
 
         stack_tags = self.get_stack_tags(stack)
         if not check_tags_contain(stack_tags, tags):
             raise exceptions.StackUpdateBadStatus(
-                stack_name, stack_status,
-                'Tags differ from current configuration, possibly not created '
-                'with CFNgin')
+                stack_name,
+                stack_status,
+                "Tags differ from current configuration, possibly not created "
+                "with CFNgin",
+            )
 
         if self.interactive:
             sys.stdout.write(
-                'The \"%s\" stack is in a failed state (%s).\n'
-                'It cannot be updated, but it can be deleted and re-created.\n'
-                'All its current resources will IRREVERSIBLY DESTROYED.\n'
-                'Proceed carefully!\n\n' % (stack_name, stack_status))
+                'The "%s" stack is in a failed state (%s).\n'
+                "It cannot be updated, but it can be deleted and re-created.\n"
+                "All its current resources will IRREVERSIBLY DESTROYED.\n"
+                "Proceed carefully!\n\n" % (stack_name, stack_status)
+            )
             sys.stdout.flush()
 
             ask_for_approval(include_verbose=False, fqn=stack_name)
 
-        LOGGER.warning('%s:destroying stack for re-creation', stack_name)
-        self.destroy_stack(stack, approval='y')
+        LOGGER.warning("%s:destroying stack for re-creation", stack_name)
+        self.destroy_stack(stack, approval="y")
 
         return False
 
-    def update_stack(self, fqn, template,  # pylint: disable=arguments-differ
-                     old_parameters, parameters, tags, force_interactive=False,
-                     force_change_set=False, stack_policy=None,
-                     termination_protection=False, **kwargs):
+    def update_stack(  # pylint: disable=arguments-differ
+        self,
+        fqn,
+        template,
+        old_parameters,
+        parameters,
+        tags,
+        force_interactive=False,
+        force_change_set=False,
+        stack_policy=None,
+        termination_protection=False,
+        **kwargs
+    ):
         """Update a Cloudformation stack.
 
         Args:
@@ -968,19 +1033,27 @@ class Provider(BaseProvider):
                 protection.
 
         """
-        LOGGER.debug("attempting to update stack %s: %s", fqn, json.dumps({
-            'parameters': parameters,
-            'tags': tags,
-            'template_url': template.url
-        }))
+        LOGGER.debug(
+            "attempting to update stack %s: %s",
+            fqn,
+            json.dumps(
+                {"parameters": parameters, "tags": tags, "template_url": template.url}
+            ),
+        )
         if not template.url:
             LOGGER.debug("no template url; uploading template directly")
-        update_method = self.select_update_method(force_interactive,
-                                                  force_change_set)
+        update_method = self.select_update_method(force_interactive, force_change_set)
 
         self.update_termination_protection(fqn, termination_protection)
-        return update_method(fqn, template, old_parameters, parameters,
-                             stack_policy=stack_policy, tags=tags, **kwargs)
+        return update_method(
+            fqn,
+            template,
+            old_parameters,
+            parameters,
+            stack_policy=stack_policy,
+            tags=tags,
+            **kwargs
+        )
 
     def update_termination_protection(self, fqn, termination_protection):
         """Update a Stack's termination protection if needed.
@@ -995,15 +1068,14 @@ class Provider(BaseProvider):
         """
         stack = self.get_stack(fqn)
 
-        if stack['EnableTerminationProtection'] != termination_protection:
+        if stack["EnableTerminationProtection"] != termination_protection:
             LOGGER.debug(
                 '%s:updating termination protection of stack to "%s"',
                 fqn,
-                termination_protection
+                termination_protection,
             )
             self.cloudformation.update_termination_protection(
-                EnableTerminationProtection=termination_protection,
-                StackName=fqn
+                EnableTerminationProtection=termination_protection, StackName=fqn
             )
 
     def deal_with_changeset_stack_policy(self, fqn, stack_policy):
@@ -1034,44 +1106,48 @@ class Provider(BaseProvider):
 
         """
         LOGGER.debug("%s:using interactive provider mode", fqn)
-        action = kwargs.get('action', 'destroy')
+        action = kwargs.get("action", "destroy")
 
-        approval_options = ['y', 'n']
+        approval_options = ["y", "n"]
         try:
             ui.lock()
-            approval = approval or ui.ask(
-                "Destroy {description}stack '{fqn}'{detail}? [{opts}] ".format(
-                    description='temporary ' if action == 'diff' else '',
-                    fqn=fqn,
-                    detail=' created to generate a change set'
-                    if action == 'diff' else '',
-                    opts='/'.join(approval_options)
-                )
-            ).lower()
+            approval = (
+                approval
+                or ui.ask(
+                    "Destroy {description}stack '{fqn}'{detail}? [{opts}] ".format(
+                        description="temporary " if action == "diff" else "",
+                        fqn=fqn,
+                        detail=" created to generate a change set"
+                        if action == "diff"
+                        else "",
+                        opts="/".join(approval_options),
+                    )
+                ).lower()
+            )
         finally:
             ui.unlock()
 
-        if approval != 'y':
+        if approval != "y":
             raise exceptions.CancelExecution
 
         try:
             return self.noninteractive_destroy_stack(fqn, **kwargs)
         except botocore.exceptions.ClientError as err:
-            if 'TerminationProtection' in err.response['Error']['Message']:
-                approval = ui.ask('Termination protection is enabled for '
-                                  "stack '{}'.\nWould you like to disable it "
-                                  'and try destroying the stack again? '
-                                  '[{}] '.format(
-                                      fqn,
-                                      '/'.join(approval_options)
-                                  )).lower()
-                if approval == 'y':
+            if "TerminationProtection" in err.response["Error"]["Message"]:
+                approval = ui.ask(
+                    "Termination protection is enabled for "
+                    "stack '{}'.\nWould you like to disable it "
+                    "and try destroying the stack again? "
+                    "[{}] ".format(fqn, "/".join(approval_options))
+                ).lower()
+                if approval == "y":
                     self.update_termination_protection(fqn, False)
                     return self.noninteractive_destroy_stack(fqn, **kwargs)
             raise
 
-    def interactive_update_stack(self, fqn, template, old_parameters,
-                                 parameters, stack_policy, tags):
+    def interactive_update_stack(
+        self, fqn, template, old_parameters, parameters, stack_policy, tags
+    ):
         """Update a Cloudformation stack in interactive mode.
 
         Args:
@@ -1091,20 +1167,27 @@ class Provider(BaseProvider):
         """
         LOGGER.debug("%s:using interactive provider mode", fqn)
         changes, change_set_id = create_change_set(
-            self.cloudformation, fqn, template, parameters, tags,
-            'UPDATE', service_role=self.service_role
+            self.cloudformation,
+            fqn,
+            template,
+            parameters,
+            tags,
+            "UPDATE",
+            service_role=self.service_role,
         )
         old_parameters_as_dict = self.params_as_dict(old_parameters)
         new_parameters_as_dict = self.params_as_dict(
-            [x
-             if 'ParameterValue' in x
-             else {'ParameterKey': x['ParameterKey'],
-                   'ParameterValue': old_parameters_as_dict[x['ParameterKey']]}
-             for x in parameters]
+            [
+                x
+                if "ParameterValue" in x
+                else {
+                    "ParameterKey": x["ParameterKey"],
+                    "ParameterValue": old_parameters_as_dict[x["ParameterKey"]],
+                }
+                for x in parameters
+            ]
         )
-        params_diff = diff_parameters(
-            old_parameters_as_dict,
-            new_parameters_as_dict)
+        params_diff = diff_parameters(old_parameters_as_dict, new_parameters_as_dict)
 
         action = "replacements" if self.replacements_only else "changes"
         full_changeset = changes
@@ -1114,8 +1197,13 @@ class Provider(BaseProvider):
         if changes or params_diff:
             ui.lock()
             try:
-                output_summary(fqn, action, changes, params_diff,
-                               replacements_only=self.replacements_only)
+                output_summary(
+                    fqn,
+                    action,
+                    changes,
+                    params_diff,
+                    replacements_only=self.replacements_only,
+                )
                 ask_for_approval(
                     full_changeset=full_changeset,
                     params_diff=params_diff,
@@ -1127,11 +1215,11 @@ class Provider(BaseProvider):
 
         self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
-        self.cloudformation.execute_change_set(
-            ChangeSetName=change_set_id,
-        )
+        self.cloudformation.execute_change_set(ChangeSetName=change_set_id,)
 
-    def noninteractive_destroy_stack(self, fqn, **kwargs):  # pylint: disable=unused-argument
+    def noninteractive_destroy_stack(  # pylint: disable=unused-argument
+        self, fqn, **kwargs
+    ):
         """Delete a CloudFormation stack without interaction.
 
         Args:
@@ -1145,9 +1233,9 @@ class Provider(BaseProvider):
 
         self.cloudformation.delete_stack(**args)
 
-    def noninteractive_changeset_update(self, fqn, template,
-                                        old_parameters,  # pylint: disable=unused-argument
-                                        parameters, stack_policy, tags):
+    def noninteractive_changeset_update(  # pylint: disable=unused-argument
+        self, fqn, template, old_parameters, parameters, stack_policy, tags,
+    ):
         """Update a Cloudformation stack using a change set.
 
         This is required for stacks with a defined Transform (i.e. SAM), as the
@@ -1169,15 +1257,18 @@ class Provider(BaseProvider):
         """
         LOGGER.debug("%s:using non-interactive changeset provider mode", fqn)
         _changes, change_set_id = create_change_set(
-            self.cloudformation, fqn, template, parameters, tags,
-            'UPDATE', service_role=self.service_role
+            self.cloudformation,
+            fqn,
+            template,
+            parameters,
+            tags,
+            "UPDATE",
+            service_role=self.service_role,
         )
 
         self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
-        self.cloudformation.execute_change_set(
-            ChangeSetName=change_set_id,
-        )
+        self.cloudformation.execute_change_set(ChangeSetName=change_set_id,)
 
     def select_destroy_method(self, force_interactive):
         """Select the correct destroy method for destroying a stack.
@@ -1193,9 +1284,9 @@ class Provider(BaseProvider):
             return self.interactive_destroy_stack
         return self.noninteractive_destroy_stack
 
-    def default_update_stack(self, fqn, template,
-                             old_parameters,  # pylint: disable=unused-argument
-                             parameters, tags, stack_policy=None):
+    def default_update_stack(  # pylint: disable=unused-argument
+        self, fqn, template, old_parameters, parameters, tags, stack_policy=None,
+    ):
         """Update a Cloudformation stack in default mode.
 
         Args:
@@ -1214,7 +1305,10 @@ class Provider(BaseProvider):
         """
         LOGGER.debug("%s:using default provider mode", fqn)
         args = generate_cloudformation_args(
-            fqn, parameters, tags, template,
+            fqn,
+            parameters,
+            tags,
+            template,
             service_role=self.service_role,
             stack_policy=stack_policy,
         )
@@ -1225,24 +1319,28 @@ class Provider(BaseProvider):
             if "No updates are to be performed." in str(err):
                 LOGGER.debug("%s:stack did not change; not updating", fqn)
                 raise exceptions.StackDidNotChange
-            if err.response['Error']['Message'] == ('TemplateURL must '
-                                                    'reference a valid '
-                                                    'S3 object to which '
-                                                    'you have access.'):
-                s3_fallback(fqn, template, parameters, tags,
-                            self.cloudformation.update_stack,
-                            self.service_role)
+            if err.response["Error"]["Message"] == (
+                "TemplateURL must reference a valid S3 object to which you have access."
+            ):
+                s3_fallback(
+                    fqn,
+                    template,
+                    parameters,
+                    tags,
+                    self.cloudformation.update_stack,
+                    self.service_role,
+                )
             raise
 
     @staticmethod
     def get_stack_name(stack):
         """Get stack name."""
-        return stack['StackName']
+        return stack["StackName"]
 
     @staticmethod
     def get_stack_tags(stack):
         """Get stack tags."""
-        return stack['Tags']
+        return stack["Tags"]
 
     def get_outputs(self, stack_name, *args, **kwargs):
         """Get stack outputs."""
@@ -1263,17 +1361,18 @@ class Provider(BaseProvider):
             Tuple[str, Dict[str, Any]]
 
         """
-        stack_name = stack['StackId']
+        stack_name = stack["StackId"]
 
         try:
-            template = self.cloudformation.get_template(
-                StackName=stack_name)['TemplateBody']
+            template = self.cloudformation.get_template(StackName=stack_name)[
+                "TemplateBody"
+            ]
         except botocore.exceptions.ClientError as err:
             if "does not exist" not in str(err):
                 raise
             raise exceptions.StackDoesNotExist(stack_name)
 
-        parameters = self.params_as_dict(stack.get('Parameters', []))
+        parameters = self.params_as_dict(stack.get("Parameters", []))
 
         if isinstance(template, str):  # handle yaml templates
             template = parse_cloudformation_template(template)
@@ -1301,29 +1400,35 @@ class Provider(BaseProvider):
         try:
             stack_details = self.get_stack(stack.fqn)
             # handling for orphaned changeset temp stacks
-            if self.get_stack_status(
-                    stack_details) == self.REVIEW_STATUS:
+            if self.get_stack_status(stack_details) == self.REVIEW_STATUS:
                 raise exceptions.StackDoesNotExist(stack.fqn)
-            _old_template, old_params = self.get_stack_info(
-                stack_details
-            )
+            _old_template, old_params = self.get_stack_info(stack_details)
             old_template = parse_cloudformation_template(_old_template)
-            change_type = 'UPDATE'
+            change_type = "UPDATE"
         except exceptions.StackDoesNotExist:
             old_params = {}
             old_template = {}
-            change_type = 'CREATE'
+            change_type = "CREATE"
 
         changes, change_set_id = create_change_set(
-            self.cloudformation, stack.fqn, template, parameters, tags,
-            change_type, service_role=self.service_role
+            self.cloudformation,
+            stack.fqn,
+            template,
+            parameters,
+            tags,
+            change_type,
+            service_role=self.service_role,
         )
         new_parameters_as_dict = self.params_as_dict(
-            [x
-             if 'ParameterValue' in x
-             else {'ParameterKey': x['ParameterKey'],
-                   'ParameterValue': old_params[x['ParameterKey']]}
-             for x in parameters]
+            [
+                x
+                if "ParameterValue" in x
+                else {
+                    "ParameterKey": x["ParameterKey"],
+                    "ParameterValue": old_params[x["ParameterKey"]],
+                }
+                for x in parameters
+            ]
         )
         params_diff = diff_parameters(old_params, new_parameters_as_dict)
 
@@ -1331,22 +1436,27 @@ class Provider(BaseProvider):
             ui.lock()
             try:
                 if self.interactive:
-                    output_summary(stack.fqn, 'changes', changes,
-                                   params_diff,
-                                   replacements_only=self.replacements_only)
-                    output_full_changeset(full_changeset=changes,
-                                          params_diff=params_diff,
-                                          fqn=stack.fqn)
+                    output_summary(
+                        stack.fqn,
+                        "changes",
+                        changes,
+                        params_diff,
+                        replacements_only=self.replacements_only,
+                    )
+                    output_full_changeset(
+                        full_changeset=changes, params_diff=params_diff, fqn=stack.fqn
+                    )
                 else:
-                    output_full_changeset(full_changeset=changes,
-                                          params_diff=params_diff,
-                                          answer='y', fqn=stack.fqn)
+                    output_full_changeset(
+                        full_changeset=changes,
+                        params_diff=params_diff,
+                        answer="y",
+                        fqn=stack.fqn,
+                    )
             finally:
                 ui.unlock()
 
-        self.cloudformation.delete_change_set(
-            ChangeSetName=change_set_id
-        )
+        self.cloudformation.delete_change_set(ChangeSetName=change_set_id)
 
         # ensure current stack outputs are loaded
         self.get_outputs(stack.fqn)
@@ -1354,49 +1464,56 @@ class Provider(BaseProvider):
         # infer which outputs may have changed
         refs_to_invalidate = []
         for change in changes:
-            resc_change = change.get('ResourceChange', {})
-            if resc_change.get('Type') == 'Add':
+            resc_change = change.get("ResourceChange", {})
+            if resc_change.get("Type") == "Add":
                 continue  # we don't care about anything new
             # scope of changes that can invalidate a change
-            if resc_change and (resc_change.get('Replacement') == 'True' or
-                                'Properties' in resc_change['Scope']):
-                LOGGER.debug('%s:added to invalidation list: %s',
-                             stack.fqn, resc_change['LogicalResourceId'])
-                refs_to_invalidate.append(resc_change['LogicalResourceId'])
+            if resc_change and (
+                resc_change.get("Replacement") == "True"
+                or "Properties" in resc_change["Scope"]
+            ):
+                LOGGER.debug(
+                    "%s:added to invalidation list: %s",
+                    stack.fqn,
+                    resc_change["LogicalResourceId"],
+                )
+                refs_to_invalidate.append(resc_change["LogicalResourceId"])
 
         # invalidate cached outputs with inferred changes
-        for output, props in old_template.get('Outputs', {}).items():
-            if any(r in str(props['Value']) for r in refs_to_invalidate):
+        for output, props in old_template.get("Outputs", {}).items():
+            if any(r in str(props["Value"]) for r in refs_to_invalidate):
                 self._outputs[stack.fqn].pop(output)
-                LOGGER.debug('%s:removed from the outputs: %s',
-                             output, stack.fqn)
+                LOGGER.debug("%s:removed from the outputs: %s", output, stack.fqn)
 
         # push values for new + invalidated outputs to outputs
-        for output_name, output_params in \
-                stack.blueprint.get_output_definitions().items():
+        for (
+            output_name,
+            output_params,
+        ) in stack.blueprint.get_output_definitions().items():
             if output_name not in self._outputs[stack.fqn]:
-                self._outputs[stack.fqn][output_name] = (
-                    '<inferred-change: {}.{}={}>'.format(
-                        stack.fqn, output_name,
-                        str(output_params['Value'])
-                    )
+                self._outputs[stack.fqn][
+                    output_name
+                ] = "<inferred-change: {}.{}={}>".format(
+                    stack.fqn, output_name, str(output_params["Value"])
                 )
 
         # when creating a changeset for a new stack, CFN creates a temporary
         # stack with a status of REVIEW_IN_PROGRESS. this is only removed if
         # the changeset is executed or it is manually deleted.
-        if change_type == 'CREATE':
+        if change_type == "CREATE":
             try:
                 temp_stack = self.get_stack(stack.fqn)
                 if self.is_stack_in_review(temp_stack):
-                    LOGGER.debug('removing temporary stack that is created '
-                                 'with a ChangeSet of type "CREATE"')
+                    LOGGER.debug(
+                        "removing temporary stack that is created "
+                        'with a ChangeSet of type "CREATE"'
+                    )
                     # this method is currently only used by one action so
                     # hardcoding should be fine for now.
-                    self.destroy_stack(temp_stack, action='diff')
+                    self.destroy_stack(temp_stack, action="diff")
             except exceptions.StackDoesNotExist:
                 # not an issue if the stack was already cleaned up
-                LOGGER.debug('%s:stack does not exist', stack.fqn)
+                LOGGER.debug("%s:stack does not exist", stack.fqn)
 
         return self.get_outputs(stack.fqn)
 
@@ -1405,5 +1522,5 @@ class Provider(BaseProvider):
         """Parameters as dict."""
         parameters = dict()
         for param in parameters_list:
-            parameters[param['ParameterKey']] = param['ParameterValue']
+            parameters[param["ParameterKey"]] = param["ParameterValue"]
         return parameters

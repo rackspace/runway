@@ -72,9 +72,9 @@ class EnvLookup(LookupHandler):
         """
         query, args = cls.parse(value)
 
-        result = context.env_vars.get(query, args.pop('default', ''))
+        result = context.env_vars.get(query, args.pop("default", ""))
 
-        if result != '':  # allows for False bool and NoneType results
+        if result != "":  # allows for False bool and NoneType results
             return cls.format_results(result, **args)
 
         raise ValueError('"{}" does not exist in the environment'.format(value))

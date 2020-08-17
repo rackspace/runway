@@ -21,20 +21,23 @@ def handle_bin_download_error(exc, name):
     else:
         url_error_msg = str(exc.reason)
 
-    if 'CERTIFICATE_VERIFY_FAILED' in url_error_msg:
-        LOGGER.error('Attempted to download %s but was unable to '
-                     'verify the TLS certificate on its download site.',
-                     name)
+    if "CERTIFICATE_VERIFY_FAILED" in url_error_msg:
+        LOGGER.error(
+            "Attempted to download %s but was unable to verify the TLS "
+            "certificate on its download site.",
+            name,
+        )
         LOGGER.error("Full TLS error message: %s", url_error_msg)
-        if platform.system().startswith('Darwin') and (
-                'unable to get local issuer certificate' in url_error_msg):
-            LOGGER.error("This is likely caused by your Python "
-                         "installation missing root certificates. Run "
-                         "\"/Applications/Python %s.%s/"
-                         "\"Install Certificates.command\" to fix it "
-                         "(https://stackoverflow.com/a/42334357/2547802)",
-                         sys.version_info[0],
-                         sys.version_info[1])
+        if platform.system().startswith("Darwin") and (
+            "unable to get local issuer certificate" in url_error_msg
+        ):
+            LOGGER.error(
+                "This is likely caused by your Python installation missing root certificates. "
+                'Run "/Applications/Python %s.%s/"Install Certificates.command" to fix it '
+                "(https://stackoverflow.com/a/42334357/2547802)",
+                sys.version_info[0],
+                sys.version_info[1],
+            )
         sys.exit(1)
     else:
         raise exc
@@ -66,7 +69,7 @@ class EnvManager(object):  # pylint: disable=too-few-public-methods
         self._bin_name = bin_name + self.command_suffix
         self.current_version = None
         self.env_dir_name = (
-            dir_name if platform.system() == 'Windows' else '.' + dir_name
+            dir_name if platform.system() == "Windows" else "." + dir_name
         )
         if not path:
             self.path = Path.cwd()
@@ -88,17 +91,17 @@ class EnvManager(object):  # pylint: disable=too-few-public-methods
     @cached_property
     def command_suffix(self):  # pylint: disable=no-self-use
         """Return command suffix based on platform.system."""
-        if platform.system() == 'Windows':
-            return '.exe'
-        return ''
+        if platform.system() == "Windows":
+            return ".exe"
+        return ""
 
     @cached_property
     def env_dir(self):
         """Return the directory used to store version binaries."""
-        if platform.system() == 'Windows':
-            if 'APPDATA' in os.environ:
-                return Path(os.environ['APPDATA']) / self.env_dir_name
-            return Path.home() / 'AppData' / 'Roaming' / self.env_dir_name
+        if platform.system() == "Windows":
+            if "APPDATA" in os.environ:
+                return Path(os.environ["APPDATA"]) / self.env_dir_name
+            return Path.home() / "AppData" / "Roaming" / self.env_dir_name
         return Path.home() / self.env_dir_name
 
     @cached_property
@@ -109,4 +112,4 @@ class EnvManager(object):  # pylint: disable=too-few-public-methods
         created if needed.
 
         """
-        return self.env_dir / 'versions'
+        return self.env_dir / "versions"

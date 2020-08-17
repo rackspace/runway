@@ -22,11 +22,9 @@ DEPRECATION_MSG = (
 CREDENTIAL_CACHE = {}
 
 
-def get_session(region=None,
-                profile=None,
-                access_key=None,
-                secret_key=None,
-                session_token=None):
+def get_session(
+    region=None, profile=None, access_key=None, secret_key=None, session_token=None
+):
     """Create a thread-safe boto3 session.
 
     Args:
@@ -41,25 +39,33 @@ def get_session(region=None,
 
     """
     if profile:
-        LOGGER.debug('building session using profile "%s" in region "%s"',
-                     profile, region or 'default')
+        LOGGER.debug(
+            'building session using profile "%s" in region "%s"',
+            profile,
+            region or "default",
+        )
     elif access_key:
-        LOGGER.debug('building session with Access Key "%s" in region "%s"',
-                     access_key, region or 'default')
-    elif os.environ.get('AWS_ACCESS_KEY_ID'):
+        LOGGER.debug(
+            'building session with Access Key "%s" in region "%s"',
+            access_key,
+            region or "default",
+        )
+    elif os.environ.get("AWS_ACCESS_KEY_ID"):
         # TODO raise an error so we don't need to modify os.environ for cfngin
         warnings.warn(DEPRECATION_MSG, DeprecationWarning)
         # TODO uncomment log message after we update all internal use
         # LOGGER.warning(DEPRECATION_MSG)
 
-    session = boto3.Session(aws_access_key_id=access_key,
-                            aws_secret_access_key=secret_key,
-                            aws_session_token=session_token,
-                            botocore_session=Session(),
-                            region_name=region,
-                            profile_name=profile)
-    cred_provider = session._session.get_component('credential_provider')
-    provider = cred_provider.get_provider('assume-role')
+    session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token,
+        botocore_session=Session(),
+        region_name=region,
+        profile_name=profile,
+    )
+    cred_provider = session._session.get_component("credential_provider")
+    provider = cred_provider.get_provider("assume-role")
     provider.cache = CREDENTIAL_CACHE
     provider._prompter = ui.getpass
     return session

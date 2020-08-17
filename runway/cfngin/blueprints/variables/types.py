@@ -21,8 +21,7 @@ class TroposphereType(object):
 
     """
 
-    def __init__(self, defined_type, many=False, optional=False,
-                 validate=True):
+    def __init__(self, defined_type, many=False, optional=False, validate=True):
         """Instantiate class.
 
         Args:
@@ -56,9 +55,7 @@ class TroposphereType(object):
     @property
     def resource_name(self):
         """Name of the type or resource."""
-        return (
-            getattr(self._type, 'resource_name', None) or self._type.__name__
-        )
+        return getattr(self._type, "resource_name", None) or self._type.__name__
 
     def create(self, value):
         """Create the troposphere type from the value.
@@ -78,28 +75,31 @@ class TroposphereType(object):
         if self._optional and (value is None or len(value) == 0):
             return None
 
-        if hasattr(self._type, 'resource_type'):
+        if hasattr(self._type, "resource_type"):
             # Our type is a resource, so ensure we have a dict of title to
             # parameters
             if not isinstance(value, dict):
-                raise ValueError("Resources must be specified as a dict of "
-                                 "title to parameters")
+                raise ValueError(
+                    "Resources must be specified as a dict of " "title to parameters"
+                )
             if not self._many and len(value) > 1:
-                raise ValueError("Only one resource can be provided for this "
-                                 "TroposphereType variable")
+                raise ValueError(
+                    "Only one resource can be provided for this "
+                    "TroposphereType variable"
+                )
 
-            result = [
-                self._type.from_dict(title, v) for title, v in value.items()
-            ]
+            result = [self._type.from_dict(title, v) for title, v in value.items()]
         else:
             # Our type is for properties, not a resource, so don't use
             # titles
             if self._many:
                 result = [self._type.from_dict(None, v) for v in value]
             elif not isinstance(value, dict):
-                raise ValueError("TroposphereType for a single non-resource"
-                                 "type must be specified as a dict of "
-                                 "parameters")
+                raise ValueError(
+                    "TroposphereType for a single non-resource"
+                    "type must be specified as a dict of "
+                    "parameters"
+                )
             else:
                 result = [self._type.from_dict(None, value)]
 
@@ -151,8 +151,7 @@ Route53HostedZoneId = CFNType("AWS::Route53::HostedZone::Id")
 EC2AvailabilityZoneNameList = CFNType("List<AWS::EC2::AvailabilityZone::Name>")
 EC2ImageIdList = CFNType("List<AWS::EC2::Image::Id>")
 EC2InstanceIdList = CFNType("List<AWS::EC2::Instance::Id>")
-EC2SecurityGroupGroupNameList = CFNType(
-    "List<AWS::EC2::SecurityGroup::GroupName>")
+EC2SecurityGroupGroupNameList = CFNType("List<AWS::EC2::SecurityGroup::GroupName>")
 EC2SecurityGroupIdList = CFNType("List<AWS::EC2::SecurityGroup::Id>")
 EC2SubnetIdList = CFNType("List<AWS::EC2::Subnet::Id>")
 EC2VolumeIdList = CFNType("List<AWS::EC2::Volume::Id>")
@@ -163,46 +162,61 @@ Route53HostedZoneIdList = CFNType("List<AWS::Route53::HostedZone::Id>")
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html#aws-ssm-parameter-types
 SSMParameterName = CFNType("AWS::SSM::Parameter::Name")
 SSMParameterValueString = CFNType("AWS::SSM::Parameter::Value<String>")
-SSMParameterValueStringList = CFNType(
-    "AWS::SSM::Parameter::Value<List<String>>")
+SSMParameterValueStringList = CFNType("AWS::SSM::Parameter::Value<List<String>>")
 SSMParameterValueCommaDelimitedList = CFNType(
-    "AWS::SSM::Parameter::Value<CommaDelimitedList>")
+    "AWS::SSM::Parameter::Value<CommaDelimitedList>"
+)
 # Each AWS-specific type here is repeated from the the list above
 SSMParameterValueEC2AvailabilityZoneName = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::AvailabilityZone::Name>")
-SSMParameterValueEC2ImageId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::AvailabilityZone::Name>"
+)
+SSMParameterValueEC2ImageId = CFNType("AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>")
 SSMParameterValueEC2InstanceId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Instance::Id>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::Instance::Id>"
+)
 SSMParameterValueEC2KeyPairKeyName = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::KeyPair::KeyName>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::KeyPair::KeyName>"
+)
 SSMParameterValueEC2SecurityGroupGroupName = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::GroupName>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::GroupName>"
+)
 SSMParameterValueEC2SecurityGroupId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>"
+)
 SSMParameterValueEC2SubnetId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>"
+)
 SSMParameterValueEC2VolumeId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Volume::Id>")
-SSMParameterValueEC2VPCId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>")
+    "AWS::SSM::Parameter::Value<AWS::EC2::Volume::Id>"
+)
+SSMParameterValueEC2VPCId = CFNType("AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>")
 SSMParameterValueRoute53HostedZoneId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::Route53::HostedZone::Id>")
+    "AWS::SSM::Parameter::Value<AWS::Route53::HostedZone::Id>"
+)
 SSMParameterValueEC2AvailabilityZoneNameList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::AvailabilityZone::Name>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::AvailabilityZone::Name>>"
+)
 SSMParameterValueEC2ImageIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Image::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::Image::Id>>"
+)
 SSMParameterValueEC2InstanceIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Instance::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::Instance::Id>>"
+)
 SSMParameterValueEC2SecurityGroupGroupNameList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::GroupName>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::GroupName>>"
+)
 SSMParameterValueEC2SecurityGroupIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::Id>>"
+)
 SSMParameterValueEC2SubnetIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>"
+)
 SSMParameterValueEC2VolumeIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Volume::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::Volume::Id>>"
+)
 SSMParameterValueEC2VPCIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::VPC::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::EC2::VPC::Id>>"
+)
 SSMParameterValueRoute53HostedZoneIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::Route53::HostedZone::Id>>")
+    "AWS::SSM::Parameter::Value<List<AWS::Route53::HostedZone::Id>>"
+)

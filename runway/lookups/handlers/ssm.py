@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from runway.context import Context as RunwayContext  # noqa: F401 pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
-TYPE_NAME = 'ssm'
+TYPE_NAME = "ssm"
 
 
 class SsmLookup(LookupHandler):
@@ -67,19 +67,21 @@ class SsmLookup(LookupHandler):
         """
         query, args = cls.parse(value)
 
-        session = context.get_session(region=args.get('region'))
-        client = session.client('ssm')
+        session = context.get_session(region=args.get("region"))
+        client = session.client("ssm")
 
         try:
-            response = client.get_parameter(
-                Name=query,
-                WithDecryption=True
-            )['Parameter']
-            return cls.format_results(response['Value'].split(',')
-                                      if response['Type'] == 'StringList'
-                                      else response['Value'], **args)
+            response = client.get_parameter(Name=query, WithDecryption=True)[
+                "Parameter"
+            ]
+            return cls.format_results(
+                response["Value"].split(",")
+                if response["Type"] == "StringList"
+                else response["Value"],
+                **args
+            )
         except client.exceptions.ParameterNotFound:
-            if args.get('default'):
-                args.pop('load', None)  # don't load a default value
-                return cls.format_results(args.pop('default'), **args)
+            if args.get("default"):
+                args.pop("load", None)  # don't load a default value
+                return cls.format_results(args.pop("default"), **args)
             raise

@@ -10,25 +10,21 @@ from typing import TYPE_CHECKING, Any, Dict, Optional  # pylint: disable=W
 from ....cfngin.hooks import aws_lambda
 
 if TYPE_CHECKING:
+    from runway.cfngin.context import Context  # pylint: disable=W
     from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 # The functions associated with Auth@Edge
-FUNCTIONS = [
-    'check_auth',
-    'refresh_auth',
-    'parse_auth',
-    'sign_out',
-    'http_headers'
-]
+FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_headers"]
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-def write(context,  # type: context.Context
-          provider,  # type: BaseProvider
-          **kwargs  # type: Optional[Dict[str, Any]]
-         ):  # noqa: E124
+def write(
+    context,  # type: Context
+    provider,  # type: BaseProvider
+    **kwargs  # type: Optional[Dict[str, Any]]
+):
     # type: (...) -> Dict[str, Any]
     """Writes/Uploads the configured lambdas for Auth@Edge.
 
@@ -58,24 +54,21 @@ def write(context,  # type: context.Context
         user_pool_id (str): The ID of the Cognito User Pool.
 
     """
-    cognito_domain = context.hook_data['aae_domain_updater'].get('domain')
+    cognito_domain = context.hook_data["aae_domain_updater"].get("domain")
     config = {
-        'client_id': kwargs['client_id'],
-        'cognito_auth_domain': cognito_domain,
-        'cookie_settings': kwargs['cookie_settings'],
-        'http_headers': kwargs['http_headers'],
-        'oauth_scopes': kwargs['oauth_scopes'],
-        'redirect_path_auth_refresh': kwargs['redirect_path_refresh'],
-        'redirect_path_sign_in': kwargs['redirect_path_sign_in'],
-        'redirect_path_sign_out': kwargs['redirect_path_sign_out'],
-        'user_pool_id': context.hook_data['aae_user_pool_id_retriever']['id']
+        "client_id": kwargs["client_id"],
+        "cognito_auth_domain": cognito_domain,
+        "cookie_settings": kwargs["cookie_settings"],
+        "http_headers": kwargs["http_headers"],
+        "oauth_scopes": kwargs["oauth_scopes"],
+        "redirect_path_auth_refresh": kwargs["redirect_path_refresh"],
+        "redirect_path_sign_in": kwargs["redirect_path_sign_in"],
+        "redirect_path_sign_out": kwargs["redirect_path_sign_out"],
+        "user_pool_id": context.hook_data["aae_user_pool_id_retriever"]["id"],
     }
 
     # Shared file that contains the method called for configuration data
-    path = os.path.join(
-        os.path.dirname(__file__),
-        'templates/shared.py'
-    )
+    path = os.path.join(os.path.dirname(__file__), "templates/shared.py")
     context_dict = {}
 
     with open(path) as file_:
@@ -83,17 +76,13 @@ def write(context,  # type: context.Context
         # in the shared.py template file with actual
         # calculated values
         shared = re.sub(
-            r'{.+?(})$',
-            str(config),
-            file_.read(),
-            1,
-            flags=re.DOTALL | re.MULTILINE
+            r"{.+?(})$", str(config), file_.read(), 1, flags=re.DOTALL | re.MULTILINE
         )
 
         filedir, temppath = mkstemp()
 
         # Save the file to a temp path
-        with open(temppath, 'w') as tmp:
+        with open(temppath, "w") as tmp:
             tmp.write(shared)
             config = temppath
         os.close(filedir)
@@ -106,19 +95,16 @@ def write(context,  # type: context.Context
             # Copy the template code for the specific Lambda function
             # to the temporary folder
             copy_tree(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    'templates/%s' % handler
-                ),
-                dirpath
+                os.path.join(os.path.dirname(__file__), "templates/%s" % handler),
+                dirpath,
             )
 
             # Save our dynamic configuration shared file to the
             # temporary folder
             with open(config) as shared:
                 raw = shared.read()
-                filename = 'shared.py'
-                with open('%s/%s' % (dirpath, filename), 'wb') as newfile:
+                filename = "shared.py"
+                with open("%s/%s" % (dirpath, filename), "wb") as newfile:
                     newfile.write(raw.encode())
 
             # Upload our temporary folder to our S3 bucket for
@@ -126,12 +112,8 @@ def write(context,  # type: context.Context
             lamb = aws_lambda.upload_lambda_functions(
                 context,
                 provider,
-                bucket=kwargs['bucket'],
-                functions={
-                    handler: {
-                        'path': dirpath,
-                    }
-                }
+                bucket=kwargs["bucket"],
+                functions={handler: {"path": dirpath}},
             )
 
             # Add the lambda code reference to our context_dict

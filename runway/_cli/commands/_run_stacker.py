@@ -10,12 +10,15 @@ from ...cfngin.logger import setup_logging
 from ...util import SafeHaven
 from .. import options
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('run-stacker', short_help='deprecated, bundled stacker',
-               context_settings={'ignore_unknown_options': True})
-@click.argument('args', metavar='<args>', nargs=-1, required=True)
+@click.command(
+    "run-stacker",
+    short_help="deprecated, bundled stacker",
+    context_settings={"ignore_unknown_options": True},
+)
+@click.argument("args", metavar="<args>", nargs=-1, required=True)
 @options.debug
 @options.no_color
 @options.verbose
@@ -26,10 +29,12 @@ def run_stacker(args, **_):
     Depreacted since version 1.5.0.
 
     """
-    LOGGER.warning('This command as been deprecated and will be removed in '
-                   'the next major release.')
+    LOGGER.warning(
+        "This command as been deprecated and will be removed in "
+        "the next major release."
+    )
     arg_list = list(args)
-    with SafeHaven(argv=['stacker'] + arg_list):
+    with SafeHaven(argv=["stacker"] + arg_list):
         stacker = Stacker(setup_logging=setup_logging)
         cmd = stacker.parse_args(arg_list)
         stacker.configure(cmd)

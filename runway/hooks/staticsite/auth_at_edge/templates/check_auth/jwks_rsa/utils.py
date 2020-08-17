@@ -15,8 +15,8 @@ def prepad_signed(hex_str):
 
     """
     msb = hex_str[0]
-    if (msb < '0' or msb > '7'):
-        return '00%s' % hex_str
+    if msb < "0" or msb > "7":
+        return "00%s" % hex_str
     return hex_str
 
 
@@ -27,9 +27,9 @@ def to_hex(number):
         number (int): The number to convert.
 
     """
-    n_str = format(int(number), 'x')
+    n_str = format(int(number), "x")
     if len(n_str) % 2:
-        return '0%s' % n_str
+        return "0%s" % n_str
     return n_str
 
 
@@ -65,16 +65,16 @@ def rsa_public_key_to_pem(modulus_b64, exponent_b64):
     encoded_mod_len = encode_length_hex(mod_len)
     encoded_exp_len = encode_length_hex(exp_len)
 
-    encoded_pub_key = '30'
+    encoded_pub_key = "30"
     encoded_pub_key += encode_length_hex(
         mod_len + exp_len + len(encoded_mod_len) / 2 + len(encoded_exp_len) / 2 + 2
     )
-    encoded_pub_key += '02' + encoded_mod_len + modulus_hex
-    encoded_pub_key += '02' + encoded_exp_len + exponent_hex
+    encoded_pub_key += "02" + encoded_mod_len + modulus_hex
+    encoded_pub_key += "02" + encoded_exp_len + exponent_hex
 
-    der = base64.b64encode(codecs.decode(encoded_pub_key, 'hex'))
+    der = base64.b64encode(codecs.decode(encoded_pub_key, "hex"))
 
-    pem = '-----BEGIN RSA PUBLIC KEY-----\n'
-    pem += '\n'.join(re.findall('.{1,64}', der.decode()))
-    pem += '\n-----END RSA PUBLIC KEY-----\n'
+    pem = "-----BEGIN RSA PUBLIC KEY-----\n"
+    pem += "\n".join(re.findall(".{1,64}", der.decode()))
+    pem += "\n-----END RSA PUBLIC KEY-----\n"
     return pem

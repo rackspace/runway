@@ -12,9 +12,9 @@ def handler(event, _context):
         _context (Any): Lambda context object.
 
     """
-    headers = CONFIG.get('http_headers')
+    headers = CONFIG.get("http_headers")
     # Format to be CloudFront compatable
     configured_headers = as_cloud_front_headers(headers)
-    response = event['Records'][0]['cf']['response']
-    response['headers'].update(configured_headers)
+    response = event["Records"][0]["cf"]["response"]
+    response["headers"].update(configured_headers)
     return response

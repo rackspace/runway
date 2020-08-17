@@ -18,17 +18,21 @@ class Diff(BaseCommand):
         """Add arguments."""
         super(Diff, self).add_arguments(parser)
         self._add_argument_stacks(parser)
-        parser.add_argument("--force", action="append", default=[],
-                            metavar="STACKNAME", type=str,
-                            help="If a stackname is provided to --force, it "
-                                 "will be diffed, even if it is locked in "
-                                 "the config.")
+        parser.add_argument(
+            "--force",
+            action="append",
+            default=[],
+            metavar="STACKNAME",
+            type=str,
+            help="If a stackname is provided to --force, it "
+            "will be diffed, even if it is locked in "
+            "the config.",
+        )
 
     def run(self, options):
         """Run the command."""
         super(Diff, self).run(options)
-        action = diff.Action(options.context,
-                             provider_builder=options.provider_builder)
+        action = diff.Action(options.context, provider_builder=options.provider_builder)
         action.execute()
 
     def get_context_kwargs(self, options):

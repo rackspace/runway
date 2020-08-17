@@ -15,7 +15,7 @@ from ...util import read_value_from_path
 
 TYPE_NAME = "file"
 
-_PARAMETER_PATTERN = re.compile(r'{{([::|\w]+)}}')
+_PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
 
 
 class FileLookup(LookupHandler):
@@ -149,8 +149,7 @@ class FileLookup(LookupHandler):
             codec, path = value.split(":", 1)
         except ValueError:
             raise TypeError(
-                "File value must be of the format"
-                " \"<codec>:<path>\" (got %s)" % (value)
+                'File value must be of the format "<codec>:<path>" (got %s)' % (value)
             )
 
         value = read_value_from_path(path)
@@ -177,7 +176,7 @@ def _parameterize_string(raw):
     s_index = 0
 
     for match in _PARAMETER_PATTERN.finditer(raw):
-        parts.append(raw[s_index:match.start()])
+        parts.append(raw[s_index : match.start()])
         parts.append({u"Ref": match.group(1)})
         s_index = match.end()
 
@@ -203,7 +202,7 @@ def parameterized_codec(raw, b64):
 
     """
     if isinstance(raw, bytes):
-        raw = raw.decode('utf-8')
+        raw = raw.decode("utf-8")
 
     result = _parameterize_string(raw)
 
@@ -231,10 +230,9 @@ def _parameterize_obj(obj):
 
     """
     if isinstance(obj, Mapping):
-        return dict((key, _parameterize_obj(value))
-                    for key, value in obj.items())
+        return dict((key, _parameterize_obj(value)) for key, value in obj.items())
     if isinstance(obj, bytes):
-        return _parameterize_string(obj.decode('utf8'))
+        return _parameterize_string(obj.decode("utf8"))
     if isinstance(obj, string_types):
         return _parameterize_string(obj)
     if isinstance(obj, Sequence):
@@ -264,7 +262,7 @@ def json_codec(raw, parameterized=False):
 
 CODECS = {
     "plain": lambda x: x,
-    "base64": lambda x: base64.b64encode(x.encode('utf8')).decode('utf-8'),
+    "base64": lambda x: base64.b64encode(x.encode("utf8")).decode("utf-8"),
     "parameterized": lambda x: parameterized_codec(x, False),
     "parameterized-b64": lambda x: parameterized_codec(x, True),
     "yaml": lambda x: yaml_codec(x, parameterized=False),

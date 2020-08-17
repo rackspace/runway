@@ -7,10 +7,10 @@ import click
 from ...core import Runway
 from .. import options
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('test', short_help='run tests')
+@click.command("test", short_help="run tests")
 @options.debug
 @options.deploy_environment
 @options.no_color
@@ -27,5 +27,4 @@ def test(ctx, **_):
     If any of the tests fail, the command will exit with a non-zero exit code.
 
     """
-    Runway(ctx.obj.runway_config,
-           ctx.obj.get_runway_context()).test()
+    Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).test()

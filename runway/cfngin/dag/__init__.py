@@ -32,7 +32,7 @@ class DAG(object):
         """
         graph = self.graph
         if node_name in graph:
-            raise KeyError('node %s already exists' % node_name)
+            raise KeyError("node %s already exists" % node_name)
         graph[node_name] = set()
 
     def add_node_if_not_exists(self, node_name):
@@ -59,7 +59,7 @@ class DAG(object):
         """
         graph = self.graph
         if node_name not in graph:
-            raise KeyError('node %s does not exist' % node_name)
+            raise KeyError("node %s does not exist" % node_name)
         graph.pop(node_name)
 
         for _node, edges in graph.items():
@@ -96,9 +96,9 @@ class DAG(object):
         """
         graph = self.graph
         if ind_node not in graph:
-            raise KeyError('independent node %s does not exist' % ind_node)
+            raise KeyError("independent node %s does not exist" % ind_node)
         if dep_node not in graph:
-            raise KeyError('dependent node %s does not exist' % dep_node)
+            raise KeyError("dependent node %s does not exist" % dep_node)
         test_graph = deepcopy(graph)
         test_graph[ind_node].add(dep_node)
         test_dag = DAG()
@@ -123,9 +123,7 @@ class DAG(object):
         """
         graph = self.graph
         if dep_node not in graph.get(ind_node, []):
-            raise KeyError(
-                "No edge exists between %s and %s." % (ind_node, dep_node)
-            )
+            raise KeyError("No edge exists between %s and %s." % (ind_node, dep_node))
         graph[ind_node].remove(dep_node)
 
     def transpose(self):
@@ -240,7 +238,7 @@ class DAG(object):
         """
         graph = self.graph
         if node not in graph:
-            raise KeyError('node %s is not in graph' % node)
+            raise KeyError("node %s is not in graph" % node)
         return list(graph[node])
 
     def all_downstreams(self, node):
@@ -263,9 +261,7 @@ class DAG(object):
                     nodes_seen.add(downstream_node)
                     nodes.append(downstream_node)
             i += 1
-        return [
-            node_ for node_ in self.topological_sort() if node_ in nodes_seen
-        ]
+        return [node_ for node_ in self.topological_sort() if node_ in nodes_seen]
 
     def filter(self, nodes):
         """Return a new DAG with only the given nodes and their dependencies.
@@ -320,7 +316,7 @@ class DAG(object):
             self.add_node(new_node)
         for ind_node, dep_nodes in graph_dict.items():
             if not isinstance(dep_nodes, collections.Iterable):
-                raise TypeError('%s: dict values must be lists' % ind_node)
+                raise TypeError("%s: dict values must be lists" % ind_node)
             for dep_node in dep_nodes:
                 self.add_edge(ind_node, dep_node)
 
@@ -338,8 +334,8 @@ class DAG(object):
         graph = self.graph
 
         dependent_nodes = set(
-            node for dependents
-            in graph.values() for node in dependents)
+            node for dependents in graph.values() for node in dependents
+        )
         return [node_ for node_ in graph if node_ not in dependent_nodes]
 
     def validate(self):
@@ -350,12 +346,12 @@ class DAG(object):
 
         """
         if not self.ind_nodes():
-            return (False, 'no independent nodes detected')
+            return (False, "no independent nodes detected")
         try:
             self.topological_sort()
         except ValueError as err:
             return False, str(err)
-        return True, 'valid'
+        return True, "valid"
 
     def topological_sort(self):
         """Return a topological ordering of the DAG.
@@ -393,7 +389,7 @@ class DAG(object):
 
         if len(sorted_graph) == len(graph):
             return sorted_graph
-        raise ValueError('graph is not acyclic')
+        raise ValueError("graph is not acyclic")
 
     def size(self):
         """Count of nodes in the graph."""
@@ -464,10 +460,12 @@ class ThreadedWalker(object):  # pylint: disable=too-few-public-methods
         # execute. The thread will block executing walk_func, until all of the
         # nodes dependencies have executed.
         for node in nodes:
+
             def _fn(node_, deps):
                 if deps:
-                    LOGGER.debug("%s waiting for %s to complete", node_,
-                                 ", ".join(deps))
+                    LOGGER.debug(
+                        "%s waiting for %s to complete", node_, ", ".join(deps)
+                    )
 
                 # Wait for all dependencies to complete.
                 wait_for(deps)

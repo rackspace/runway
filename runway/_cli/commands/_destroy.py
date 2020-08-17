@@ -9,10 +9,10 @@ from ...core import Runway
 from .. import options
 from ..utils import select_deployments
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('destroy', short_help='destroy things')
+@click.command("destroy", short_help="destroy things")
 @options.ci
 @options.debug
 @options.deploy_environment
@@ -38,15 +38,20 @@ def destroy(ctx, tags, **_):  # noqa: D301
 
     """
     if not ctx.obj.env.ci:
-        click.secho('[WARNING] Runway is about to be run in DESTROY mode. '
-                    '[WARNING]', bold=True, fg='red')
-        click.secho('Any/all deployment(s) selected will be irrecoverably '
-                    'DESTROYED.', bold=True, fg='red')
-        if not click.confirm('\nProceed?'):
+        click.secho(
+            "[WARNING] Runway is about to be run in DESTROY mode. " "[WARNING]",
+            bold=True,
+            fg="red",
+        )
+        click.secho(
+            "Any/all deployment(s) selected will be irrecoverably " "DESTROYED.",
+            bold=True,
+            fg="red",
+        )
+        if not click.confirm("\nProceed?"):
             ctx.exit(0)
-        click.echo('')
+        click.echo("")
     deployments = Runway.reverse_deployments(
         select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
     )
-    Runway(ctx.obj.runway_config,
-           ctx.obj.get_runway_context()).destroy(deployments)
+    Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).destroy(deployments)

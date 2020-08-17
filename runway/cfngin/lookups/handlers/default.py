@@ -37,8 +37,10 @@ class DefaultLookup(LookupHandler):
         try:
             env_var_name, default_val = value.split("::", 1)
         except ValueError:
-            raise ValueError("Invalid value for default: %s. Must be in "
-                             "<env_var>::<default value> format." % value)
+            raise ValueError(
+                "Invalid value for default: %s. Must be in "
+                "<env_var>::<default value> format." % value
+            )
 
         if env_var_name in context.environment:
             return context.environment[env_var_name]

@@ -46,8 +46,8 @@ def get_template_params(template):
     """
     params = {}
 
-    if 'Parameters' in template:
-        params = template['Parameters']
+    if "Parameters" in template:
+        params = template["Parameters"]
     return params
 
 
@@ -84,8 +84,9 @@ def resolve_variable(provided_variable, blueprint_name):
 class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
     """Blueprint class for blueprints auto-generated from raw templates."""
 
-    def __init__(self, name, context,  # pylint: disable=super-init-not-called
-                 raw_template_path, mappings=None, description=None):
+    def __init__(  # pylint: disable=super-init-not-called
+        self, name, context, raw_template_path, mappings=None, description=None,
+    ):
         """Instantiate class."""
         self.name = name
         self.context = context
@@ -142,7 +143,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             properties.
 
         """
-        return self.to_dict().get('Outputs', {})
+        return self.to_dict().get("Outputs", {})
 
     def resolve_variables(self, provided_variables):
         """Resolve the values of the blueprint variables.
@@ -161,10 +162,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         self.resolved_variables = {}
         variable_dict = dict((var.name, var) for var in provided_variables)
         for var_name, _var_def in variable_dict.items():
-            value = resolve_variable(
-                variable_dict.get(var_name),
-                self.name
-            )
+            value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
                 self.resolved_variables[var_name] = value
 
@@ -174,10 +172,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         self.resolved_variables = {}
         variable_dict = dict((var.name, var) for var in provided_variables)
         for var_name, _var_def in defined_variables.items():
-            value = resolve_variable(
-                variable_dict.get(var_name),
-                self.name
-            )
+            value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
                 self.resolved_variables[var_name] = value
 
@@ -203,20 +198,21 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         if not self._rendered:
             template_path = get_template_path(self.raw_template_path)
             if template_path:
-                with open(template_path, 'r') as template:
+                with open(template_path, "r") as template:
                     if len(os.path.splitext(template_path)) == 2 and (
-                            os.path.splitext(template_path)[1] == '.j2'):
+                        os.path.splitext(template_path)[1] == ".j2"
+                    ):
                         self._rendered = Template(template.read()).render(
                             context=self.context,
                             mappings=self.mappings,
                             name=self.name,
-                            variables=self.resolved_variables
+                            variables=self.resolved_variables,
                         )
                     else:
                         self._rendered = template.read()
             else:
                 raise InvalidConfig(
-                    'Could not find template %s' % self.raw_template_path
+                    "Could not find template %s" % self.raw_template_path
                 )
 
         return self._rendered

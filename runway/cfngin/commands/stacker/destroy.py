@@ -20,25 +20,33 @@ class Destroy(BaseCommand):
         super(Destroy, self).add_arguments(parser)
         self._add_argument_max_parallel(parser)
         self._add_argument_tail(parser)
-        parser.add_argument("-f", "--force", action="store_true",
-                            help="Whether or not you want to go through "
-                                 " with destroying the stacks")
-        parser.add_argument("--targets", "--stacks", action="append",
-                            metavar="STACKNAME", type=str,
-                            help="Only work on the stacks given. Can be "
-                                 "specified more than once. If not specified "
-                                 "then CFNgin will work on all stacks in the "
-                                 "config file.")
+        parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            help="Whether or not you want to go through with destroying the stacks",
+        )
+        parser.add_argument(
+            "--targets",
+            "--stacks",
+            action="append",
+            metavar="STACKNAME",
+            type=str,
+            help="Only work on the stacks given. Can be "
+            "specified more than once. If not specified "
+            "then CFNgin will work on all stacks in the "
+            "config file.",
+        )
 
     def run(self, options):
         """Run the command."""
         super(Destroy, self).run(options)
-        action = destroy.Action(options.context,
-                                provider_builder=options.provider_builder,
-                                cancel=cancel())
-        action.execute(concurrency=options.max_parallel,
-                       force=options.force,
-                       tail=options.tail)
+        action = destroy.Action(
+            options.context, provider_builder=options.provider_builder, cancel=cancel()
+        )
+        action.execute(
+            concurrency=options.max_parallel, force=options.force, tail=options.tail
+        )
 
     def get_context_kwargs(self, options):
         """Return a dictionary of kwargs that will be used with the Context.

@@ -135,9 +135,7 @@ class RunwayModule(object):
 
     def destroy(self):
         """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError(
-            "You must implement the destroy() method yourself!"
-        )
+        raise NotImplementedError("You must implement the destroy() method yourself!")
 
     def __getitem__(self, key):
         """Make the object subscriptable.

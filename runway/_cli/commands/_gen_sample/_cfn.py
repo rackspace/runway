@@ -1,6 +1,7 @@
 """``runway gen-sample cfn` command."""
 import logging
 import sys
+from typing import Any  # pylint: disable=W
 
 import click
 
@@ -12,22 +13,21 @@ if sys.version_info.major > 2:
 else:
     from pathlib2 import Path  # pylint: disable=E
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('cfn',
-               short_help="cfngin + cfn (sampleapp.cfn)")
+@click.command("cfn", short_help="cfngin + cfn (sampleapp.cfn)")
 @options.debug
 @options.no_color
 @options.verbose
 @click.pass_context
 def cfn(ctx, **_):
-    # type: (click.Context) -> None
+    # type: (click.Context, Any) -> None
     """Generate a sample CFNgin project using CloudFormation."""
-    src = TEMPLATES / 'cfn'
-    dest = Path.cwd() / 'sampleapp.cfn'
-    templates = dest / 'templates'
-    tf_state = templates / 'tf_state.yml'
+    src = TEMPLATES / "cfn"
+    dest = Path.cwd() / "sampleapp.cfn"
+    templates = dest / "templates"
+    tf_state = templates / "tf_state.yml"
 
     copy_sample(ctx, src, dest)
     templates.mkdir()

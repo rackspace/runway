@@ -35,12 +35,12 @@ def create_ecs_service_role(provider, context, **kwargs):
 
     """
     role_name = kwargs.get("role_name", "ecsServiceRole")
-    client = get_session(provider.region).client('iam')
+    client = get_session(provider.region).client("iam")
 
     try:
         client.create_role(
             RoleName=role_name,
-            AssumeRolePolicyDocument=get_ecs_assumerole_policy().to_json()
+            AssumeRolePolicyDocument=get_ecs_assumerole_policy().to_json(),
         )
     except ClientError as err:
         if "already exists" in str(err):
@@ -49,20 +49,25 @@ def create_ecs_service_role(provider, context, **kwargs):
             raise
 
     policy = Policy(
-        Version='2012-10-17',
+        Version="2012-10-17",
         Statement=[
             Statement(
                 Effect=Allow,
                 Resource=["*"],
-                Action=[ecs.CreateCluster, ecs.DeregisterContainerInstance,
-                        ecs.DiscoverPollEndpoint, ecs.Poll,
-                        ecs.Action("Submit*")]
+                Action=[
+                    ecs.CreateCluster,
+                    ecs.DeregisterContainerInstance,
+                    ecs.DiscoverPollEndpoint,
+                    ecs.Poll,
+                    ecs.Action("Submit*"),
+                ],
             )
-        ])
+        ],
+    )
     client.put_role_policy(
         RoleName=role_name,
         PolicyName="AmazonEC2ContainerServiceRolePolicy",
-        PolicyDocument=policy.to_json()
+        PolicyDocument=policy.to_json(),
     )
     return True
 
@@ -149,22 +154,18 @@ def ensure_server_cert_exists(provider, context, **kwargs):
             ``cert_arn``.
 
     """
-    client = get_session(provider.region).client('iam')
+    client = get_session(provider.region).client("iam")
     cert_name = kwargs["cert_name"]
     status = "unknown"
     try:
-        response = client.get_server_certificate(
-            ServerCertificateName=cert_name
-        )
+        response = client.get_server_certificate(ServerCertificateName=cert_name)
         cert_arn = _get_cert_arn_from_response(response)
         status = "exists"
         LOGGER.info("certificate exists: %s (%s)", cert_name, cert_arn)
     except ClientError:
         if kwargs.get("prompt", True):
             upload = input(
-                "Certificate '%s' wasn't found. Upload it now? (yes/no) " % (
-                    cert_name,
-                )
+                "Certificate '%s' wasn't found. Upload it now? (yes/no) " % (cert_name,)
             )
             if upload != "yes":
                 return False
@@ -176,9 +177,7 @@ def ensure_server_cert_exists(provider, context, **kwargs):
         cert_arn = _get_cert_arn_from_response(response)
         status = "uploaded"
         LOGGER.info(
-            "uploaded certificate: %s (%s)",
-            cert_name,
-            cert_arn,
+            "uploaded certificate: %s (%s)", cert_name, cert_arn,
         )
 
     return {

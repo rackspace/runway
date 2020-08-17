@@ -99,8 +99,7 @@ def get_or_create_hosted_zone(client, zone_name):
 
     reference = uuid.uuid4().hex
 
-    response = client.create_hosted_zone(Name=zone_name,
-                                         CallerReference=reference)
+    response = client.create_hosted_zone(Name=zone_name, CallerReference=reference)
 
     return parse_zone_id(response["HostedZone"]["Id"])
 
@@ -110,14 +109,26 @@ class SOARecordText(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, record_text):
         """Instantiate class."""
-        (self.nameserver, self.contact, self.serial, self.refresh,
-         self.retry, self.expire, self.min_ttl) = record_text.split()
+        (
+            self.nameserver,
+            self.contact,
+            self.serial,
+            self.refresh,
+            self.retry,
+            self.expire,
+            self.min_ttl,
+        ) = record_text.split()
 
     def __str__(self):
         """Contert an instance of this class to a string."""
         return "%s %s %s %s %s %s %s" % (
-            self.nameserver, self.contact, self.serial, self.refresh,
-            self.retry, self.expire, self.min_ttl
+            self.nameserver,
+            self.contact,
+            self.serial,
+            self.refresh,
+            self.retry,
+            self.expire,
+            self.min_ttl,
         )
 
 
@@ -145,10 +156,12 @@ def get_soa_record(client, zone_id, zone_name):
         parsed SOA record returned from AWS Route53.
 
     """
-    response = client.list_resource_record_sets(HostedZoneId=zone_id,
-                                                StartRecordName=zone_name,
-                                                StartRecordType="SOA",
-                                                MaxItems="1")
+    response = client.list_resource_record_sets(
+        HostedZoneId=zone_id,
+        StartRecordName=zone_name,
+        StartRecordType="SOA",
+        MaxItems="1",
+    )
     return SOARecord(response["ResourceRecordSets"][0])
 
 
@@ -177,8 +190,7 @@ def create_route53_zone(client, zone_name):
         return zone_id
 
     new_soa = copy.deepcopy(old_soa)
-    LOGGER.debug("updating negative caching value on zone %s to 300",
-                 zone_name)
+    LOGGER.debug("updating negative caching value on zone %s to 300", zone_name)
     new_soa.text.min_ttl = "300"
     client.change_resource_record_sets(
         HostedZoneId=zone_id,
@@ -191,15 +203,11 @@ def create_route53_zone(client, zone_name):
                         "Name": zone_name,
                         "Type": "SOA",
                         "TTL": old_soa.ttl,
-                        "ResourceRecords": [
-                            {
-                                "Value": str(new_soa.text)
-                            }
-                        ]
-                    }
+                        "ResourceRecords": [{"Value": str(new_soa.text)}],
+                    },
                 },
-            ]
-        }
+            ],
+        },
     )
     return zone_id
 
@@ -234,6 +242,7 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
         OrderedDict: Parsed YAML.
 
     """
+
     class OrderedUniqueLoader(loader):
         """Subclasses the given pyYAML `loader` class.
 
@@ -267,9 +276,11 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
         def _validate_mapping(self, node, deep=False):
             if not isinstance(node, MappingNode):
                 raise ConstructorError(
-                    None, None,
+                    None,
+                    None,
                     "expected a mapping node, but found %s" % node.id,
-                    node.start_mark)
+                    node.start_mark,
+                )
             mapping = OrderedDict()
             for key_node, value_node in node.value:
                 key = self.construct_object(key_node, deep=deep)
@@ -277,8 +288,10 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
                     hash(key)
                 except TypeError as exc:
                     raise ConstructorError(
-                        "while constructing a mapping", node.start_mark,
-                        "found unhashable key (%s)" % exc, key_node.start_mark
+                        "while constructing a mapping",
+                        node.start_mark,
+                        "found unhashable key (%s)" % exc,
+                        key_node.start_mark,
                     )
                 # prevent duplicate sibling keys for certain "keywords".
                 if key in mapping and key in self.NO_DUPE_SIBLINGS:
@@ -306,7 +319,7 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
             data.update(value)
 
     OrderedUniqueLoader.add_constructor(
-        u'tag:yaml.org,2002:map', OrderedUniqueLoader.construct_yaml_map,
+        u"tag:yaml.org,2002:map", OrderedUniqueLoader.construct_yaml_map,
     )
     return yaml.load(stream, OrderedUniqueLoader)
 
@@ -336,8 +349,11 @@ def get_config_directory():
     """
     # avoid circular import
     from .commands.stacker import Stacker  # pylint: disable=import-outside-toplevel
-    deprecation_msg = ('get_config_directory has been deprecated and will be '
-                       'removed in the next major release')
+
+    deprecation_msg = (
+        "get_config_directory has been deprecated and will be "
+        "removed in the next major release"
+    )
     warnings.warn(deprecation_msg, DeprecationWarning)
     LOGGER.warning(deprecation_msg)
     command = Stacker()
@@ -356,8 +372,8 @@ def read_value_from_path(value):
             conf_key: ${kms file://kms_value.txt}
 
     """
-    if value.startswith('file://'):
-        path = value.split('file://', 1)[1]
+    if value.startswith("file://"):
+        path = value.split("file://", 1)[1]
         if os.path.isabs(path):
             read_path = path
         else:
@@ -415,8 +431,7 @@ def s3_bucket_location_constraint(region):
     return region
 
 
-def ensure_s3_bucket(s3_client, bucket_name, bucket_region,
-                     persist_graph=False):
+def ensure_s3_bucket(s3_client, bucket_name, bucket_region, persist_graph=False):
     """Ensure an s3 bucket exists, if it does not then create it.
 
     Args:
@@ -434,23 +449,23 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region,
         s3_client.head_bucket(Bucket=bucket_name)
         if persist_graph:
             response = s3_client.get_bucket_versioning(Bucket=bucket_name)
-            state = response.get('Status', 'disabled').lower()
-            if state != 'enabled':
+            state = response.get("Status", "disabled").lower()
+            if state != "enabled":
                 LOGGER.warning(
                     'versioning is %s on bucket "%s"; it is recommended to '
-                    'enable versioning when using persistent graphs',
+                    "enable versioning when using persistent graphs",
                     state,
-                    bucket_name
+                    bucket_name,
                 )
-            if response.get('MFADelete', 'Disabled') != 'Disabled':
+            if response.get("MFADelete", "Disabled") != "Disabled":
                 LOGGER.warning(
                     'MFADelete must be disabled on bucket "%s" when using '
-                    'persistent graphs to allow for propper management of '
-                    'the graphs',
-                    bucket_name
+                    "persistent graphs to allow for propper management of "
+                    "the graphs",
+                    bucket_name,
                 )
     except botocore.exceptions.ClientError as err:
-        if err.response['Error']['Message'] == "Not Found":
+        if err.response["Error"]["Message"] == "Not Found":
             # can't use s3_client.exceptions.NoSuchBucket here.
             # it does not work if the bucket was recently deleted.
             LOGGER.debug("Creating bucket %s.", bucket_name)
@@ -462,14 +477,16 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region,
                 }
             s3_client.create_bucket(**create_args)
             if persist_graph:
-                s3_client.put_bucket_versioning(Bucket=bucket_name,
-                                                VersioningConfiguration={
-                                                    'Status': 'Enabled'
-                                                })
+                s3_client.put_bucket_versioning(
+                    Bucket=bucket_name, VersioningConfiguration={"Status": "Enabled"}
+                )
             return
-        if err.response['Error']['Message'] == "Forbidden":
-            LOGGER.exception("Access denied for bucket %s. Did you remember "
-                             "to use a globally unique name?", bucket_name)
+        if err.response["Error"]["Message"] == "Forbidden":
+            LOGGER.exception(
+                "Access denied for bucket %s. Did you remember "
+                "to use a globally unique name?",
+                bucket_name,
+            )
         else:
             LOGGER.exception('error creating bucket "%s"', bucket_name)
         raise
@@ -511,7 +528,7 @@ class Extractor(object):
     @staticmethod
     def extension():
         """Serve as placeholder; override this in subclasses."""
-        return ''
+        return ""
 
 
 class TarExtractor(Extractor):
@@ -519,13 +536,13 @@ class TarExtractor(Extractor):
 
     def extract(self, destination):
         """Extract the archive."""
-        with tarfile.open(self.archive, 'r:') as tar:
+        with tarfile.open(self.archive, "r:") as tar:
             tar.extractall(path=destination)
 
     @staticmethod
     def extension():
         """Return archive extension."""
-        return '.tar'
+        return ".tar"
 
 
 class TarGzipExtractor(Extractor):
@@ -533,13 +550,13 @@ class TarGzipExtractor(Extractor):
 
     def extract(self, destination):
         """Extract the archive."""
-        with tarfile.open(self.archive, 'r:gz') as tar:
+        with tarfile.open(self.archive, "r:gz") as tar:
             tar.extractall(path=destination)
 
     @staticmethod
     def extension():
         """Return archive extension."""
-        return '.tar.gz'
+        return ".tar.gz"
 
 
 class ZipExtractor(Extractor):
@@ -547,19 +564,19 @@ class ZipExtractor(Extractor):
 
     def extract(self, destination):
         """Extract the archive."""
-        with zipfile.ZipFile(self.archive, 'r') as zip_ref:
+        with zipfile.ZipFile(self.archive, "r") as zip_ref:
             zip_ref.extractall(destination)
 
     @staticmethod
     def extension():
         """Return archive extension."""
-        return '.zip'
+        return ".zip"
 
 
 class SourceProcessor(object):
     """Makes remote python package sources available in current environment."""
 
-    ISO8601_FORMAT = '%Y%m%dT%H%M%SZ'
+    ISO8601_FORMAT = "%Y%m%dT%H%M%SZ"
 
     def __init__(self, sources, cfngin_cache_dir=None):
         """Process a config's defined package sources.
@@ -573,7 +590,7 @@ class SourceProcessor(object):
         """
         if not cfngin_cache_dir:
             cfngin_cache_dir = os.path.expanduser("~/.runway_cache")
-        package_cache_dir = os.path.join(cfngin_cache_dir, 'packages')
+        package_cache_dir = os.path.join(cfngin_cache_dir, "packages")
         self.cfngin_cache_dir = cfngin_cache_dir
         self.package_cache_dir = package_cache_dir
         self.sources = sources
@@ -590,13 +607,13 @@ class SourceProcessor(object):
     def get_package_sources(self):
         """Make remote python packages available for local use."""
         # Checkout local modules
-        for config in self.sources.get('local', []):
+        for config in self.sources.get("local", []):
             self.fetch_local_package(config=config)
         # Checkout S3 repositories specified in config
-        for config in self.sources.get('s3', []):
+        for config in self.sources.get("s3", []):
             self.fetch_s3_package(config=config)
         # Checkout git repositories specified in config
-        for config in self.sources.get('git', []):
+        for config in self.sources.get("git", []):
             self.fetch_git_package(config=config)
 
     def fetch_local_package(self, config):
@@ -607,9 +624,9 @@ class SourceProcessor(object):
 
         """
         # Update sys.path & merge in remote configs (if necessary)
-        self.update_paths_and_config(config=config,
-                                     pkg_dir_name=config['source'],
-                                     pkg_cache_dir=os.getcwd())
+        self.update_paths_and_config(
+            config=config, pkg_dir_name=config["source"], pkg_cache_dir=os.getcwd()
+        )
 
     def fetch_s3_package(self, config):
         """Make a remote S3 archive available for local use.
@@ -618,95 +635,106 @@ class SourceProcessor(object):
             config (Dict[str, Any]): git config dictionary.
 
         """
-        extractor_map = {'.tar.gz': TarGzipExtractor,
-                         '.tar': TarExtractor,
-                         '.zip': ZipExtractor}
+        extractor_map = {
+            ".tar.gz": TarGzipExtractor,
+            ".tar": TarExtractor,
+            ".zip": ZipExtractor,
+        }
         extractor = None
         for suffix, class_ in extractor_map.items():
-            if config['key'].endswith(suffix):
+            if config["key"].endswith(suffix):
                 extractor = class_()
-                LOGGER.debug("using extractor %s for S3 object \"%s\" in "
-                             "bucket %s",
-                             class_.__name__,
-                             config['key'],
-                             config['bucket'])
+                LOGGER.debug(
+                    'using extractor %s for S3 object "%s" in bucket %s',
+                    class_.__name__,
+                    config["key"],
+                    config["bucket"],
+                )
                 dir_name = self.sanitize_uri_path(
-                    "s3-%s-%s" % (config['bucket'],
-                                  config['key'][:-len(suffix)])
+                    "s3-%s-%s" % (config["bucket"], config["key"][: -len(suffix)])
                 )
                 break
 
         if extractor is None:
             raise ValueError(
-                "Archive type could not be determined for S3 object \"%s\" "
-                "in bucket %s." % (config['key'], config['bucket'])
+                'Archive type could not be determined for S3 object "%s" '
+                "in bucket %s." % (config["key"], config["bucket"])
             )
 
         session = get_session(region=None)
         extra_s3_args = {}
-        if config.get('requester_pays', False):
-            extra_s3_args['RequestPayer'] = 'requester'
+        if config.get("requester_pays", False):
+            extra_s3_args["RequestPayer"] = "requester"
 
         # We can skip downloading the archive if it's already been cached
-        if config.get('use_latest', True):
+        if config.get("use_latest", True):
             try:
                 # LastModified should always be returned in UTC, but it doesn't
                 # hurt to explicitly convert it to UTC again just in case
-                modified_date = session.client('s3').head_object(
-                    Bucket=config['bucket'],
-                    Key=config['key'],
-                    **extra_s3_args
-                )['LastModified'].astimezone(dateutil.tz.tzutc())
+                modified_date = (
+                    session.client("s3")
+                    .head_object(
+                        Bucket=config["bucket"], Key=config["key"], **extra_s3_args
+                    )["LastModified"]
+                    .astimezone(dateutil.tz.tzutc())
+                )
             except botocore.exceptions.ClientError as client_error:
-                LOGGER.error("error checking modified date of "
-                             "s3://%s/%s : %s",
-                             config['bucket'],
-                             config['key'],
-                             client_error)
+                LOGGER.error(
+                    "error checking modified date of s3://%s/%s : %s",
+                    config["bucket"],
+                    config["key"],
+                    client_error,
+                )
                 sys.exit(1)
             dir_name += "-%s" % modified_date.strftime(self.ISO8601_FORMAT)
         cached_dir_path = os.path.join(self.package_cache_dir, dir_name)
         if not os.path.isdir(cached_dir_path):
-            LOGGER.debug("remote package s3://%s/%s does not appear to have "
-                         "been previously downloaded; starting download and "
-                         "extraction to %s",
-                         config['bucket'],
-                         config['key'],
-                         cached_dir_path)
-            tmp_dir = tempfile.mkdtemp(prefix='cfngin')
+            LOGGER.debug(
+                "remote package s3://%s/%s does not appear to have "
+                "been previously downloaded; starting download and "
+                "extraction to %s",
+                config["bucket"],
+                config["key"],
+                cached_dir_path,
+            )
+            tmp_dir = tempfile.mkdtemp(prefix="cfngin")
             tmp_package_path = os.path.join(tmp_dir, dir_name)
             try:
                 extractor.set_archive(os.path.join(tmp_dir, dir_name))
-                LOGGER.debug("starting remote package download from S3 to %s "
-                             "with extra S3 options \"%s\"",
-                             extractor.archive,
-                             str(extra_s3_args))
-                session.resource('s3').Bucket(config['bucket']).download_file(
-                    config['key'],
+                LOGGER.debug(
+                    "starting remote package download from S3 to %s "
+                    'with extra S3 options "%s"',
                     extractor.archive,
-                    ExtraArgs=extra_s3_args
+                    str(extra_s3_args),
                 )
-                LOGGER.debug("download complete; extracting downloaded "
-                             "package to %s",
-                             tmp_package_path)
+                session.resource("s3").Bucket(config["bucket"]).download_file(
+                    config["key"], extractor.archive, ExtraArgs=extra_s3_args
+                )
+                LOGGER.debug(
+                    "download complete; extracting downloaded package to %s",
+                    tmp_package_path,
+                )
                 extractor.extract(tmp_package_path)
-                LOGGER.debug("moving extracted package directory %s to the "
-                             "CFNgin cache at %s",
-                             dir_name,
-                             self.package_cache_dir)
+                LOGGER.debug(
+                    "moving extracted package directory %s to the "
+                    "CFNgin cache at %s",
+                    dir_name,
+                    self.package_cache_dir,
+                )
                 shutil.move(tmp_package_path, self.package_cache_dir)
             finally:
                 shutil.rmtree(tmp_dir)
         else:
-            LOGGER.debug("remote package s3://%s/%s appears to have "
-                         "been previously downloaded to %s; download skipped",
-                         config['bucket'],
-                         config['key'],
-                         cached_dir_path)
+            LOGGER.debug(
+                "remote package s3://%s/%s appears to have "
+                "been previously downloaded to %s; download skipped",
+                config["bucket"],
+                config["key"],
+                cached_dir_path,
+            )
 
         # Update sys.path & merge in remote configs (if necessary)
-        self.update_paths_and_config(config=config,
-                                     pkg_dir_name=dir_name)
+        self.update_paths_and_config(config=config, pkg_dir_name=dir_name)
 
     def fetch_git_package(self, config):
         """Make a remote git repository available for local use.
@@ -720,36 +748,38 @@ class SourceProcessor(object):
         from git import Repo  # pylint: disable=import-outside-toplevel
 
         ref = self.determine_git_ref(config)
-        dir_name = self.sanitize_git_path(uri=config['uri'], ref=ref)
+        dir_name = self.sanitize_git_path(uri=config["uri"], ref=ref)
         cached_dir_path = os.path.join(self.package_cache_dir, dir_name)
 
         # We can skip cloning the repo if it's already been cached
         if not os.path.isdir(cached_dir_path):
-            LOGGER.debug("remote repo %s does not appear to have been "
-                         "previously downloaded; starting clone to %s",
-                         config['uri'],
-                         cached_dir_path)
-            tmp_dir = tempfile.mkdtemp(prefix='cfngin')
+            LOGGER.debug(
+                "remote repo %s does not appear to have been "
+                "previously downloaded; starting clone to %s",
+                config["uri"],
+                cached_dir_path,
+            )
+            tmp_dir = tempfile.mkdtemp(prefix="cfngin")
             try:
                 tmp_repo_path = os.path.join(tmp_dir, dir_name)
-                with Repo.clone_from(config['uri'], tmp_repo_path) as repo:
+                with Repo.clone_from(config["uri"], tmp_repo_path) as repo:
                     repo.head.reference = ref
                     repo.head.reset(index=True, working_tree=True)
                 shutil.move(tmp_repo_path, self.package_cache_dir)
             finally:
                 shutil.rmtree(tmp_dir)
         else:
-            LOGGER.debug("remote repo %s appears to have been previously "
-                         "cloned to %s; download skipped",
-                         config['uri'],
-                         cached_dir_path)
+            LOGGER.debug(
+                "remote repo %s appears to have been previously "
+                "cloned to %s; download skipped",
+                config["uri"],
+                cached_dir_path,
+            )
 
         # Update sys.path & merge in remote configs (if necessary)
-        self.update_paths_and_config(config=config,
-                                     pkg_dir_name=dir_name)
+        self.update_paths_and_config(config=config, pkg_dir_name=dir_name)
 
-    def update_paths_and_config(self, config, pkg_dir_name,
-                                pkg_cache_dir=None):
+    def update_paths_and_config(self, config, pkg_dir_name, pkg_cache_dir=None):
         """Handle remote source defined sys.paths & configs.
 
         Args:
@@ -764,22 +794,21 @@ class SourceProcessor(object):
         cached_dir_path = os.path.join(pkg_cache_dir, pkg_dir_name)
 
         # Add the appropriate directory (or directories) to sys.path
-        if config.get('paths'):
-            for path in config['paths']:
-                path_to_append = os.path.join(cached_dir_path,
-                                              path)
-                LOGGER.debug("appending to python sys.path: %s",
-                             path_to_append)
+        if config.get("paths"):
+            for path in config["paths"]:
+                path_to_append = os.path.join(cached_dir_path, path)
+                LOGGER.debug("appending to python sys.path: %s", path_to_append)
                 sys.path.append(path_to_append)
         else:
             sys.path.append(cached_dir_path)
 
         # If the configuration defines a set of remote config yaml files to
         # include, add them to the list for merging
-        if config.get('configs'):
-            for config_filename in config['configs']:
-                self.configs_to_merge.append(os.path.join(cached_dir_path,
-                                                          config_filename))
+        if config.get("configs"):
+            for config_filename in config["configs"]:
+                self.configs_to_merge.append(
+                    os.path.join(cached_dir_path, config_filename)
+                )
 
     @staticmethod
     def git_ls_remote(uri, ref):
@@ -793,15 +822,14 @@ class SourceProcessor(object):
             str: A commit id
 
         """
-        LOGGER.debug('getting commit ID from repo: %s', ' '.join(uri))
-        ls_remote_output = subprocess.check_output(['git', 'ls-remote', uri,
-                                                    ref])
+        LOGGER.debug("getting commit ID from repo: %s", " ".join(uri))
+        ls_remote_output = subprocess.check_output(["git", "ls-remote", uri, ref])
         # incorrectly detected - https://github.com/PyCQA/pylint/issues/3045
         if b"\t" in ls_remote_output:  # pylint: disable=unsupported-membership-test
             commit_id = ls_remote_output.split(b"\t")[0]
             LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id
-        raise ValueError("Ref \"%s\" not found for repo %s." % (ref, uri))
+        raise ValueError('Ref "%s" not found for repo %s.' % (ref, uri))
 
     @staticmethod
     def determine_git_ls_remote_ref(config):
@@ -815,8 +843,8 @@ class SourceProcessor(object):
             str: A branch reference or "HEAD".
 
         """
-        if config.get('branch'):
-            ref = "refs/heads/%s" % config['branch']
+        if config.get("branch"):
+            ref = "refs/heads/%s" % config["branch"]
         else:
             ref = "HEAD"
 
@@ -835,26 +863,27 @@ class SourceProcessor(object):
         # First ensure redundant config keys aren't specified (which could
         # cause confusion as to which take precedence)
         ref_config_keys = 0
-        for i in ['commit', 'tag', 'branch']:
+        for i in ["commit", "tag", "branch"]:
             if config.get(i):
                 ref_config_keys += 1
         if ref_config_keys > 1:
-            raise ImportError("Fetching remote git sources failed: "
-                              "conflicting revisions (e.g. 'commit', 'tag', "
-                              "'branch') specified for a package source")
+            raise ImportError(
+                "Fetching remote git sources failed: "
+                "conflicting revisions (e.g. 'commit', 'tag', "
+                "'branch') specified for a package source"
+            )
 
         # Now check for a specific point in time referenced and return it if
         # present
-        if config.get('commit'):
-            ref = config['commit']
-        elif config.get('tag'):
-            ref = config['tag']
+        if config.get("commit"):
+            ref = config["commit"]
+        elif config.get("tag"):
+            ref = config["tag"]
         else:
             # Since a specific commit/tag point in time has not been specified,
             # check the remote repo for the commit id to use
             ref = self.git_ls_remote(
-                config['uri'],
-                self.determine_git_ls_remote_ref(config)
+                config["uri"], self.determine_git_ls_remote_ref(config)
             )
         if sys.version_info[0] > 2 and isinstance(ref, bytes):
             return ref.decode()
@@ -871,8 +900,8 @@ class SourceProcessor(object):
             str: Directory name for the supplied uri.
 
         """
-        for i in ['@', '/', ':']:
-            uri = uri.replace(i, '_')
+        for i in ["@", "/", ":"]:
+            uri = uri.replace(i, "_")
         return uri
 
     def sanitize_git_path(self, uri, ref=None):
@@ -886,7 +915,7 @@ class SourceProcessor(object):
             str: Directory name for the supplied uri
 
         """
-        if uri.endswith('.git'):
+        if uri.endswith(".git"):
             dir_name = uri[:-4]  # drop .git
         else:
             dir_name = uri
@@ -908,6 +937,8 @@ def stack_template_key_name(blueprint):
 
     """
     name = blueprint.name
-    return "stack_templates/%s/%s-%s.json" % (blueprint.context.get_fqn(name),
-                                              name,
-                                              blueprint.version)
+    return "stack_templates/%s/%s-%s.json" % (
+        blueprint.context.get_fqn(name),
+        name,
+        blueprint.version,
+    )

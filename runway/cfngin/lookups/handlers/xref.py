@@ -9,16 +9,13 @@ from .output import deconstruct
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "xref"
 
-XREF_PRESISTENT_STATE = {
-    'has_warned': False
-}
+XREF_PRESISTENT_STATE = {"has_warned": False}
 
 
 class XrefLookup(LookupHandler):
     """Xref lookup."""
 
-    DEPRECATION_MSG = ('xref Lookup has been deprecated; '
-                       'use the cfn lookup instead')
+    DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
 
     @classmethod
     def handle(cls, value, context=None, provider=None, **kwargs):
@@ -46,11 +43,11 @@ class XrefLookup(LookupHandler):
                 conf_value: ${xref fully-qualified-stack-name::SomeOutputName}
 
         """
-        if not XREF_PRESISTENT_STATE.get('has_warned'):
+        if not XREF_PRESISTENT_STATE.get("has_warned"):
             LOGGER.warning(cls.DEPRECATION_MSG)
-            XREF_PRESISTENT_STATE['has_warned'] = True
+            XREF_PRESISTENT_STATE["has_warned"] = True
         if provider is None:
-            raise ValueError('Provider is required')
+            raise ValueError("Provider is required")
 
         decon = deconstruct(value)
         stack_fqn = decon.stack_name

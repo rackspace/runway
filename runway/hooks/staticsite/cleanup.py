@@ -10,10 +10,11 @@ from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
 LOGGER = logging.getLogger(__name__)
 
 
-def execute(context,  # type: Context # pylint: disable=unused-argument
-            provider,  # type: BaseProvider
-            **kwargs  # type: Optional[Dict[str, Any]]
-           ):  # noqa: E124
+def execute(
+    context,  # type: Context # pylint: disable=unused-argument
+    provider,  # type: BaseProvider
+    **kwargs  # type: Optional[Dict[str, Any]]
+):
     # type: (...) -> Union[Dict[str, Any], bool]
     """Execute the cleanup process.
 
@@ -37,20 +38,22 @@ def execute(context,  # type: Context # pylint: disable=unused-argument
 
     """
     session = context.get_session()
-    step_functions_client = session.client('stepfunctions')
+    step_functions_client = session.client("stepfunctions")
 
     try:
         step_functions_client.start_execution(
-            stateMachineArn=kwargs['state_machine_arn'],
-            input=json.dumps({
-                "SelfDestruct": {
-                    "StateMachineArn": kwargs['state_machine_arn'],
-                    "StackName": kwargs['stack_name'],
-                },
-                "FunctionArns": kwargs['function_arns']
-            })
+            stateMachineArn=kwargs["state_machine_arn"],
+            input=json.dumps(
+                {
+                    "SelfDestruct": {
+                        "StateMachineArn": kwargs["state_machine_arn"],
+                        "StackName": kwargs["stack_name"],
+                    },
+                    "FunctionArns": kwargs["function_arns"],
+                }
+            ),
         )
         return True
     except Exception:  # pylint: disable=broad-except
-        LOGGER.exception('could not complete cleanup')
+        LOGGER.exception("could not complete cleanup")
         return False

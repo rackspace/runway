@@ -10,10 +10,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-def get(context,
-        provider,
-        **kwargs
-       ):  # noqa: E124
+def get(context, provider, **kwargs):
     # type: (Context, BaseProvider, Optional[Dict[str, Any]]) -> Dict
     """Retrieve the ID of the Cognito User Pool.
 
@@ -32,12 +29,12 @@ def get(context,
         created_user_pool_id (str): The ID of the created Cognito User Pool.
 
     """
-    context_dict = {'id': ''}
+    context_dict = {"id": ""}
 
     # Favor a specific arn over a created one
-    if kwargs['user_pool_arn']:
-        context_dict['id'] = kwargs['user_pool_arn'].split('/')[-1:][0]
-    elif kwargs['created_user_pool_id']:
-        context_dict['id'] = kwargs['created_user_pool_id']
+    if kwargs["user_pool_arn"]:
+        context_dict["id"] = kwargs["user_pool_arn"].split("/")[-1:][0]
+    elif kwargs["created_user_pool_id"]:
+        context_dict["id"] = kwargs["created_user_pool_id"]
 
     return context_dict

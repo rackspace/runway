@@ -10,9 +10,12 @@ from ...util import SafeHaven
 from .. import options
 
 
-@click.command('run-aws', short_help='bundled awscli',
-               context_settings={'ignore_unknown_options': True})
-@click.argument('args', metavar='<args>', nargs=-1, required=True)
+@click.command(
+    "run-aws",
+    short_help="bundled awscli",
+    context_settings={"ignore_unknown_options": True},
+)
+@click.argument("args", metavar="<args>", nargs=-1, required=True)
 @options.debug
 @options.no_color
 @options.verbose
@@ -30,8 +33,8 @@ def run_aws(ctx, args, **_):
     """
     if not ctx.obj.debug:
         # suppress awscli debug logs
-        for name, logger in logging.getLogger('awscli').manager.loggerDict.items():
-            if name.startswith('awscli.') and isinstance(logger, logging.Logger):
+        for name, logger in logging.getLogger("awscli").manager.loggerDict.items():
+            if name.startswith("awscli.") and isinstance(logger, logging.Logger):
                 logger.setLevel(logging.ERROR)
-    with SafeHaven(environ={'LC_CTYPE': 'en_US.UTF'}):
+    with SafeHaven(environ={"LC_CTYPE": "en_US.UTF"}):
         ctx.exit(create_clidriver().main(list(args)))

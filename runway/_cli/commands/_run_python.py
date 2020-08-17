@@ -13,9 +13,13 @@ else:
     from pathlib2 import Path  # pylint: disable=E
 
 
-@click.command('run-python', short_help='bundled python')
-@click.argument('filename', metavar='<filename>', required=True,
-                type=click.Path(exists=True, dir_okay=False))
+@click.command("run-python", short_help="bundled python")
+@click.argument(
+    "filename",
+    metavar="<filename>",
+    required=True,
+    type=click.Path(exists=True, dir_okay=False),
+)
 @options.debug
 @options.no_color
 @options.verbose
@@ -31,7 +35,7 @@ def run_python(filename, **_):
     """
     execglobals = globals().copy()
     # override name & file so script operates as if it were invoked directly
-    execglobals.update({'__name__': '__main__',
-                        '__file__': filename})
-    exec(Path(filename).read_text(),  # pylint: disable=exec-used
-         execglobals, execglobals)
+    execglobals.update({"__name__": "__main__", "__file__": filename})
+    exec(  # pylint: disable=exec-used
+        Path(filename).read_text(), execglobals, execglobals,
+    )

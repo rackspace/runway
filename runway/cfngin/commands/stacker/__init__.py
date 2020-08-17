@@ -24,9 +24,11 @@ class Stacker(BaseCommand):
     name = "stacker"
     subcommands = (Build, Destroy, Info, Diff, Graph)
 
-    DEPRECATION_MSG = ("Runway's Stacker CLI components have been deprecated "
-                       "and will be removed in the next major release of "
-                       "Runway")
+    DEPRECATION_MSG = (
+        "Runway's Stacker CLI components have been deprecated "
+        "and will be removed in the next major release of "
+        "Runway"
+    )
 
     def configure(self, options):
         """Configure CLI command."""
@@ -35,9 +37,7 @@ class Stacker(BaseCommand):
         session_cache.default_profile = options.profile
 
         self.config = load_config(
-            options.config.read(),
-            environment=options.environment,
-            validate=True,
+            options.config.read(), environment=options.environment, validate=True,
         )
 
         options.provider_builder = default.ProviderBuilder(
@@ -66,5 +66,6 @@ class Stacker(BaseCommand):
 
     def add_arguments(self, parser):
         """Add CLI arguments."""
-        parser.add_argument("--version", action="version",
-                            version="%%(prog)s %s" % (__version__,))
+        parser.add_argument(
+            "--version", action="version", version="%%(prog)s %s" % (__version__,)
+        )

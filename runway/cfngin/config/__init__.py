@@ -55,10 +55,12 @@ def render_parse_load(raw_config, environment=None, validate=True):
     if config.namespace is None:
         namespace = environment.get("namespace")
         if namespace:
-            LOGGER.warning('specifying namespace in the environment is '
-                           'deprecated; to learn how to specify it correctly '
-                           'visit %s/page/cfngin/configuration.html#namespace',
-                           DOC_SITE)
+            LOGGER.warning(
+                "specifying namespace in the environment is "
+                "deprecated; to learn how to specify it correctly "
+                "visit %s/page/cfngin/configuration.html#namespace",
+                DOC_SITE,
+            )
             config.namespace = namespace
 
     if validate:
@@ -94,7 +96,7 @@ def render(raw_config, environment=None):
         substituted = template.safe_substitute(**environment)
 
     if not isinstance(substituted, text_type):
-        substituted = substituted.decode('utf-8')
+        substituted = substituted.decode("utf-8")
 
     buff.write(substituted)
     buff.seek(0)
@@ -117,15 +119,20 @@ def parse(raw_config):
     # Eventually we should probably just make them OrderedDicts only.
     config_dict = yaml_to_ordered_dict(raw_config)
     if config_dict:
-        for top_level_key in ['stacks', 'pre_build', 'post_build',
-                              'pre_destroy', 'post_destroy']:
+        for top_level_key in [
+            "stacks",
+            "pre_build",
+            "post_build",
+            "pre_destroy",
+            "post_destroy",
+        ]:
             top_level_value = config_dict.get(top_level_key)
             if isinstance(top_level_value, dict):
                 tmp_list = []
                 for key, value in top_level_value.items():
                     tmp_dict = copy.deepcopy(value)
-                    if top_level_key == 'stacks':
-                        tmp_dict['name'] = key
+                    if top_level_key == "stacks":
+                        tmp_dict["name"] = key
                     tmp_list.append(tmp_dict)
                 config_dict[top_level_key] = tmp_list
 
@@ -171,8 +178,9 @@ def dump(config):
     return yaml.safe_dump(
         config.to_primitive(),
         default_flow_style=False,
-        encoding='utf-8',
-        allow_unicode=True)
+        encoding="utf-8",
+        allow_unicode=True,
+    )
 
 
 def process_remote_sources(raw_config, environment=None):
@@ -188,11 +196,12 @@ def process_remote_sources(raw_config, environment=None):
 
     """
     config = yaml.safe_load(raw_config)
-    if config and config.get('package_sources'):
+    if config and config.get("package_sources"):
         processor = SourceProcessor(
-            sources=config['package_sources'],
-            cfngin_cache_dir=config.get('cfngin_cache_dir',
-                                        config.get('stacker_cache_dir'))
+            sources=config["package_sources"],
+            cfngin_cache_dir=config.get(
+                "cfngin_cache_dir", config.get("stacker_cache_dir")
+            ),
         )
         processor.get_package_sources()
         if processor.configs_to_merge:
@@ -373,16 +382,16 @@ class Stack(Model):
         """Validate class pass."""
         if value and data["template_path"]:
             raise ValidationError(
-                "template_path cannot be present when "
-                "class_path is provided.")
+                "template_path cannot be present when class_path is provided."
+            )
         self.validate_stack_source(data)
 
     def validate_template_path(self, data, value):
         """Validate template path."""
         if value and data["class_path"]:
             raise ValidationError(
-                "class_path cannot be present when "
-                "template_path is provided.")
+                "class_path cannot be present when template_path is provided."
+            )
         self.validate_stack_source(data)
 
     @staticmethod
@@ -394,20 +403,19 @@ class Stack(Model):
             return
 
         if not (data["class_path"] or data["template_path"]):
-            raise ValidationError(
-                "class_path or template_path is required.")
+            raise ValidationError("class_path or template_path is required.")
 
     def validate_parameters(self, data, value):  # pylint: disable=no-self-use
         """Validate parameters."""
         if value:
-            stack_name = data['name']
+            stack_name = data["name"]
             raise ValidationError(
                 "DEPRECATION: Stack definition %s contains "
                 "deprecated 'parameters', rather than 'variables'. You are"
                 " required to update your config. See "
                 "https://docs.onica.com/projects/runway/en/release/cfngin/"
-                "config.html#variables for additional information."
-                % stack_name)
+                "config.html#variables for additional information." % stack_name
+            )
         return value
 
 
@@ -476,8 +484,7 @@ class Config(Model):
     cfngin_cache_dir = StringType(serialize_when_none=False)
     log_formats = DictType(StringType, serialize_when_none=False)
     lookups = DictType(StringType, serialize_when_none=False)
-    mappings = DictType(
-        DictType(DictType(StringType)), serialize_when_none=False)
+    mappings = DictType(DictType(DictType(StringType)), serialize_when_none=False)
     namespace = StringType(required=True)
     namespace_delimiter = StringType(serialize_when_none=False)
     package_sources = ModelType(PackageSources, serialize_when_none=False)
@@ -490,18 +497,25 @@ class Config(Model):
     stacker_bucket = StringType(serialize_when_none=False)
     stacker_bucket_region = StringType(serialize_when_none=False)
     stacker_cache_dir = StringType(serialize_when_none=False)
-    stacks = ListType(
-        ModelType(Stack), default=[])
+    stacks = ListType(ModelType(Stack), default=[])
     sys_path = StringType(serialize_when_none=False)
     tags = DictType(StringType, serialize_when_none=False)
-    targets = ListType(
-        ModelType(Target), serialize_when_none=False)
+    targets = ListType(ModelType(Target), serialize_when_none=False)
     template_indent = StringType(serialize_when_none=False)
 
-    def __init__(self, raw_data=None, trusted_data=None,
-                 deserialize_mapping=None, init=True, partial=True,
-                 strict=True, validate=False, app_data=None, lazy=False,
-                 **kwargs):
+    def __init__(
+        self,
+        raw_data=None,
+        trusted_data=None,
+        deserialize_mapping=None,
+        init=True,
+        partial=True,
+        strict=True,
+        validate=False,
+        app_data=None,
+        lazy=False,
+        **kwargs
+    ):
         """Extend functionality of the parent class.
 
         Manipulation here allows us to _clone_ the values of legacy stacker
@@ -510,28 +524,29 @@ class Config(Model):
 
         """
         if raw_data:  # this can be empty when running unittests
-            for field_suffix in ['bucket', 'bucket_region', 'cache_dir']:
-                cfngin_field = 'cfngin_' + field_suffix
-                stacker_field = 'stacker_' + field_suffix
+            for field_suffix in ["bucket", "bucket_region", "cache_dir"]:
+                cfngin_field = "cfngin_" + field_suffix
+                stacker_field = "stacker_" + field_suffix
                 # explicitly check for an empty string since it has specific logic.
                 # cfngin fields with a value take precedence.
-                if (
-                        not (raw_data.get(cfngin_field) or
-                             raw_data.get(cfngin_field) == '') and
-                        (raw_data.get(stacker_field) or
-                         raw_data.get(stacker_field) == '')
+                if not (
+                    raw_data.get(cfngin_field) or raw_data.get(cfngin_field) == ""
+                ) and (
+                    raw_data.get(stacker_field) or raw_data.get(stacker_field) == ""
                 ):
                     raw_data[cfngin_field] = raw_data[stacker_field]
-        super(Config, self).__init__(raw_data=raw_data,
-                                     trusted_data=trusted_data,
-                                     deserialize_mapping=deserialize_mapping,
-                                     init=init,
-                                     partial=partial,
-                                     strict=strict,
-                                     validate=validate,
-                                     app_data=app_data,
-                                     lazy=lazy,
-                                     **kwargs)
+        super(Config, self).__init__(
+            raw_data=raw_data,
+            trusted_data=trusted_data,
+            deserialize_mapping=deserialize_mapping,
+            init=init,
+            partial=partial,
+            strict=strict,
+            validate=validate,
+            app_data=app_data,
+            lazy=lazy,
+            **kwargs
+        )
 
     def _remove_excess_keys(self, data):
         excess_keys = set(data.keys())
@@ -540,8 +555,7 @@ class Config(Model):
         if not excess_keys:
             return data
 
-        LOGGER.debug('removing excess keys from config: %s',
-                     excess_keys)
+        LOGGER.debug("removing excess keys from config: %s", excess_keys)
         clean_data = data.copy()
         for key in excess_keys:
             del clean_data[key]
@@ -556,8 +570,9 @@ class Config(Model):
             # disallow excess keys in the inner models.
             raw_data = self._remove_excess_keys(raw_data)
 
-        return super(Config, self)._convert(raw_data=raw_data, context=context,
-                                            **kwargs)
+        return super(Config, self)._convert(
+            raw_data=raw_data, context=context, **kwargs
+        )
 
     def validate(self, partial=False, convert=True, app_data=None, **kwargs):
         """Validate the state of the model.
@@ -579,8 +594,7 @@ class Config(Model):
 
         """
         try:
-            return super(Config, self).validate(partial, convert, app_data,
-                                                **kwargs)
+            return super(Config, self).validate(partial, convert, app_data, **kwargs)
         except UndefinedValueError as err:
             raise exceptions.InvalidConfig([str(err)])
         except SchematicsError as err:
@@ -592,22 +606,22 @@ class Config(Model):
         If in use, show deprecation warning.
 
         """
-        msg = (
-            'stacker_bucket has been deprecated; use cfngin_bucket instead'
-        )
-        if value or value == '':
+        msg = "stacker_bucket has been deprecated; use cfngin_bucket instead"
+        if value or value == "":
             warnings.warn(msg, DeprecationWarning)
             LOGGER.warning(msg)
 
-    def validate_stacker_bucket_region(self, _data, value):  # pylint: disable=no-self-use
+    def validate_stacker_bucket_region(  # pylint: disable=no-self-use
+        self, _data, value
+    ):
         """Validate stacker_bucket_regio is not used.
 
         If in use, show deprecation warning.
 
         """
         msg = (
-            'stacker_bucket_region has been deprecated; use '
-            'cfngin_bucket_region instead'
+            "stacker_bucket_region has been deprecated; use "
+            "cfngin_bucket_region instead"
         )
         if value:
             warnings.warn(msg, DeprecationWarning)
@@ -619,10 +633,7 @@ class Config(Model):
         If in use, show deprecation warning.
 
         """
-        msg = (
-            'stacker_cache_dir has been deprecated; use '
-            'cfngin_cache_dir instead'
-        )
+        msg = "stacker_cache_dir has been deprecated; use cfngin_cache_dir instead"
         if value:
             warnings.warn(msg, DeprecationWarning)
             LOGGER.warning(msg)
@@ -636,5 +647,5 @@ class Config(Model):
                 for i, stack_name in enumerate(stack_names):
                     if stack_names.count(stack_name) != 1:
                         raise ValidationError(
-                            "Duplicate stack %s found at index %d."
-                            % (stack_name, i))
+                            "Duplicate stack %s found at index %d." % (stack_name, i)
+                        )

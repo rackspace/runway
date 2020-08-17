@@ -47,14 +47,14 @@ class DictValue(object):
         """
         output = []
         if self.status() is self.UNMODIFIED:
-            output = [self.formatter % (' ', self.key, self.old_value)]
+            output = [self.formatter % (" ", self.key, self.old_value)]
         elif self.status() is self.ADDED:
-            output.append(self.formatter % ('+', self.key, self.new_value))
+            output.append(self.formatter % ("+", self.key, self.new_value))
         elif self.status() is self.REMOVED:
-            output.append(self.formatter % ('-', self.key, self.old_value))
+            output.append(self.formatter % ("-", self.key, self.old_value))
         elif self.status() is self.MODIFIED:
-            output.append(self.formatter % ('-', self.key, self.old_value))
-            output.append(self.formatter % ('+', self.key, self.new_value))
+            output.append(self.formatter % ("-", self.key, self.old_value))
+            output.append(self.formatter % ("+", self.key, self.new_value))
         return output
 
     def status(self):
@@ -118,12 +118,14 @@ def format_params_diff(parameter_diff):
         str: A formatted string that represents a parameter diff
 
     """
-    params_output = '\n'.join([line for v in parameter_diff
-                               for line in v.changes()])
-    return """--- Old Parameters
+    params_output = "\n".join([line for v in parameter_diff for line in v.changes()])
+    return (
+        """--- Old Parameters
 +++ New Parameters
 ******************
-%s\n""" % params_output
+%s\n"""
+        % params_output
+    )
 
 
 def diff_parameters(old_params, new_params):
@@ -157,15 +159,17 @@ class Action(build.Action):
 
     """
 
-    DESCRIPTION = 'Diff stacks'
-    NAME = 'diff'
+    DESCRIPTION = "Diff stacks"
+    NAME = "diff"
 
     @property
     def _stack_action(self):
         """Run against a step."""
         return self._diff_stack
 
-    def _diff_stack(self, stack, **_kwargs):  # pylint: disable=too-many-return-statements
+    def _diff_stack(
+        self, stack, **_kwargs
+    ):  # pylint: disable=too-many-return-statements
         """Handle diffing a stack in CloudFormation vs our config."""
         if self.cancel.wait(0):
             return INTERRUPTED
@@ -189,30 +193,34 @@ class Action(build.Action):
             )
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
-            LOGGER.info('%s:no changes', stack.fqn)
+            LOGGER.info("%s:no changes", stack.fqn)
             stack.set_outputs(provider.get_outputs(stack.fqn))
         except exceptions.StackDoesNotExist:
             if self.context.persistent_graph:
-                return SkippedStatus('persistent graph: stack does not '
-                                     'exist, will be removed')
+                return SkippedStatus(
+                    "persistent graph: stack does not exist, will be removed"
+                )
             return StackDoesNotExistStatus()
         except AttributeError as err:
-            if (self.context.persistent_graph and
-                    'defined class or template path' in str(err)):
-                return SkippedStatus('persistent graph: will be destroyed')
+            if (
+                self.context.persistent_graph
+                and "defined class or template path" in str(err)
+            ):
+                return SkippedStatus("persistent graph: will be destroyed")
             raise
         return COMPLETE
 
     def run(self, **kwargs):
         """Kicks off the diffing of the stacks in the stack_definitions."""
-        plan = self._generate_plan(require_unlocked=False,
-                                   include_persistent_graph=True)
+        plan = self._generate_plan(
+            require_unlocked=False, include_persistent_graph=True
+        )
         plan.outline(logging.DEBUG)
         if plan.keys():
             LOGGER.info("diffing stacks: %s", ", ".join(plan.keys()))
         else:
-            LOGGER.warning('no stacks detected (error in config?)')
-        walker = build_walker(kwargs.get('concurrency', 0))
+            LOGGER.warning("no stacks detected (error in config?)")
+        walker = build_walker(kwargs.get("concurrency", 0))
         plan.execute(walker)
 
     def pre_run(self, **kwargs):

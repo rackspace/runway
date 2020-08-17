@@ -28,9 +28,8 @@ LOGGER = logging.getLogger(__name__)
 class CliContext(MutableMapping):
     """CLI context object."""
 
-    def __init__(self, ci=False, debug=0, deploy_environment=None,
-                 verbose=False, **_):
-        # type: (bool, int, Optional[str], Any) -> None
+    def __init__(self, ci=False, debug=0, deploy_environment=None, verbose=False, **_):
+        # type: (bool, int, Optional[str], bool, Any) -> None
         """Instantiate class.
 
         Keyword Args:
@@ -51,16 +50,16 @@ class CliContext(MutableMapping):
         """Name of the current deploy environment."""
         environ = os.environ.copy()
         # carefully update environ with values passed from the cli
-        if self.ci and 'CI' not in environ:
-            environ['CI'] = '1'
-        if self.debug and 'DEBUG' not in environ:
-            environ['DEBUG'] = str(self.debug)
-        if self.verbose and 'VERBOSE' not in environ:
-            environ['VERBOSE'] = '1'
+        if self.ci and "CI" not in environ:
+            environ["CI"] = "1"
+        if self.debug and "DEBUG" not in environ:
+            environ["DEBUG"] = str(self.debug)
+        if self.verbose and "VERBOSE" not in environ:
+            environ["VERBOSE"] = "1"
         return DeployEnvironment(
             environ=environ,
             explicit_name=self._deploy_environment,
-            root_dir=self.root_dir
+            root_dir=self.root_dir,
         )
 
     @cached_property
@@ -78,7 +77,7 @@ class CliContext(MutableMapping):
         try:
             return Config.find_config_file(config_dir=self.root_dir)
         except SystemExit:
-            LOGGER.info('trying parent directory')
+            LOGGER.info("trying parent directory")
             self.root_dir = self.root_dir.parent
             self.env.root_dir = self.root_dir
             return Config.find_config_file(config_dir=self.root_dir)
@@ -195,15 +194,15 @@ class CliContext(MutableMapping):
         # type: () -> str
         """Return string representation of the object."""
         # ignore coverage for standard implimentation
-        return 'CliContext({})'.format(self.__dict__)  # cov: ignore
+        return "CliContext({})".format(self.__dict__)  # cov: ignore
 
 
-def select_deployments(ctx,  # type: click.Context
-                       deployments,  # type: List[DeploymentDefinition]
-                       tags=None  # type: Optional[Tuple[str, ...]]
-                       # TODO remove after dropping python 2
-                       ):  # pylint: disable=bad-continuation
-    # type: (click.Context, List[DeploymentDefinition]) -> List[DeploymentDefinition]
+def select_deployments(
+    ctx,  # type: click.Context
+    deployments,  # type: List[DeploymentDefinition]
+    tags=None,  # type: Optional[Tuple[str, ...]]
+):
+    # type: (...) -> List[DeploymentDefinition]
     """Select which deployments to run.
 
     Uses tags, interactive prompts, or selects all.
@@ -222,22 +221,26 @@ def select_deployments(ctx,  # type: click.Context
         return deployments
     if len(deployments) == 1:
         choice = 1
-        LOGGER.debug('only one deployment detected; no selection necessary')
+        LOGGER.debug("only one deployment detected; no selection necessary")
     else:
-        click.secho('\nConfigured deployments\n', bold=True, underline=True)
-        click.echo(yaml.safe_dump({i + 1: d.menu_entry
-                                   for i, d in enumerate(deployments)}))
-        if ctx.command.name == 'destroy':
-            click.echo('(operating in destroy mode -- "all" will destroy all '
-                       'deployments in reverse order)\n')
+        click.secho("\nConfigured deployments\n", bold=True, underline=True)
+        click.echo(
+            yaml.safe_dump({i + 1: d.menu_entry for i, d in enumerate(deployments)})
+        )
+        if ctx.command.name == "destroy":
+            click.echo(
+                '(operating in destroy mode -- "all" will destroy all '
+                "deployments in reverse order)\n"
+            )
         choice = click.prompt(
             'Enter number of deployment to run (or "all")',
-            default='all',
+            default="all",
             show_choices=False,
-            type=click.Choice([str(n) for n in
-                               range(1, len(deployments) + 1)] + ['all'])
+            type=click.Choice(
+                [str(n) for n in range(1, len(deployments) + 1)] + ["all"]
+            ),
         )
-    if choice != 'all':
+    if choice != "all":
         deployments = [deployments[int(choice) - 1]]
         deployments[0].modules = select_modules(ctx, deployments[0].modules)
     return deployments
@@ -256,28 +259,30 @@ def select_modules(ctx, modules):
 
     """
     if len(modules) == 1:
-        LOGGER.debug('only one module detected; no selection necessary')
-        if ctx.command.name == 'destroy':
-            LOGGER.info('Only one module detected; all modules '
-                        'automatically selected for deletion.')
-            if not click.confirm('Proceed?'):
+        LOGGER.debug("only one module detected; no selection necessary")
+        if ctx.command.name == "destroy":
+            LOGGER.info(
+                "Only one module detected; all modules "
+                "automatically selected for deletion."
+            )
+            if not click.confirm("Proceed?"):
                 ctx.exit(0)
         return modules
-    click.secho('\nConfigured modules\n', bold=True, underline=True)
-    click.echo(yaml.safe_dump({i + 1: m.menu_entry
-                               for i, m in enumerate(modules)}))
-    if ctx.command.name == 'destroy':
-        click.echo('(operating in destroy mode -- "all" will destroy all '
-                   'modules in reverse order)\n')
+    click.secho("\nConfigured modules\n", bold=True, underline=True)
+    click.echo(yaml.safe_dump({i + 1: m.menu_entry for i, m in enumerate(modules)}))
+    if ctx.command.name == "destroy":
+        click.echo(
+            '(operating in destroy mode -- "all" will destroy all '
+            "modules in reverse order)\n"
+        )
     choice = click.prompt(
         'Enter number of module to run (or "all")',
-        default='all',
+        default="all",
         show_choices=False,
-        type=click.Choice([str(n) for n in
-                           range(1, len(modules) + 1)] + ['all'])
+        type=click.Choice([str(n) for n in range(1, len(modules) + 1)] + ["all"]),
     )
-    click.echo('')
-    if choice == 'all':
+    click.echo("")
+    if choice == "all":
         return modules
     modules = [modules[int(choice) - 1]]
     if modules[0].child_modules:
@@ -285,11 +290,11 @@ def select_modules(ctx, modules):
     return modules
 
 
-def select_modules_using_tags(ctx,  # type: click.Context
-                              deployments,  # type: List[DeploymentDefinition]
-                              tags  # type: Tuple[str, ...]
-                              # TODO remove after dropping python 2
-                              ):  # pylint: disable=bad-continuation
+def select_modules_using_tags(
+    ctx,  # type: click.Context
+    deployments,  # type: List[DeploymentDefinition]
+    tags,  # type: Tuple[str, ...]
+):
     # type: (...) -> List[DeploymentDefinition]
     """Select modules to run using tags.
 
@@ -307,8 +312,9 @@ def select_modules_using_tags(ctx,  # type: click.Context
         modules_to_run = []
         for module in deployment.modules:
             if module.child_modules:
-                module.child_modules = [c for c in module.child_modules
-                                        if all(t in c.tags for t in tags)]
+                module.child_modules = [
+                    c for c in module.child_modules if all(t in c.tags for t in tags)
+                ]
                 if module.child_modules:
                     modules_to_run.append(module)
             elif all(t in module.tags for t in tags):
@@ -318,5 +324,5 @@ def select_modules_using_tags(ctx,  # type: click.Context
             deployments_to_run.append(deployment)
     if deployments_to_run:
         return deployments_to_run
-    LOGGER.error('No modules found with the provided tag(s): %s', ', '.join(tags))
+    LOGGER.error("No modules found with the provided tag(s): %s", ", ".join(tags))
     return ctx.exit(1)

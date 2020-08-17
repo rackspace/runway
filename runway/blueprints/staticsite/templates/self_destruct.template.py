@@ -4,9 +4,10 @@ from typing import Any, Dict, Union  # pylint: disable=unused-import
 import boto3
 
 
-def handler(event,  # type: Dict
-            _context  # type: Dict
-           ):  # noqa: E124
+def handler(
+    event,  # type: Dict
+    _context,  # type: Dict
+):
     # type: (...) -> Union[Dict[str, Any], bool]
     """Self destruct the stack.
 
@@ -17,12 +18,12 @@ def handler(event,  # type: Dict
         _context: Lambda context object.
 
     """
-    data = event.get('SelfDestruct')
-    cfn_client = boto3.client('cloudformation')
+    data = event.get("SelfDestruct")
+    cfn_client = boto3.client("cloudformation")
 
     if not data:
         return False
 
-    deleted_stack = cfn_client.delete_stack(StackName=data.get('StackName'))
+    deleted_stack = cfn_client.delete_stack(StackName=data.get("StackName"))
 
-    return {'deleted_stack': deleted_stack}
+    return {"deleted_stack": deleted_stack}

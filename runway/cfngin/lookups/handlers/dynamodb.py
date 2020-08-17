@@ -9,7 +9,7 @@ from runway.lookups.handlers.base import LookupHandler
 from ...session_cache import get_session
 from ...util import read_value_from_path
 
-TYPE_NAME = 'dynamodb'
+TYPE_NAME = "dynamodb"
 
 
 class DynamodbLookup(LookupHandler):
@@ -35,55 +35,58 @@ class DynamodbLookup(LookupHandler):
         table_keys = None
         region = None
         table_name = None
-        if '@' in value:
-            table_info, table_keys = value.split('@', 1)
-            if ':' in table_info:
-                region, table_name = table_info.split(':', 1)
+        if "@" in value:
+            table_info, table_keys = value.split("@", 1)
+            if ":" in table_info:
+                region, table_name = table_info.split(":", 1)
             else:
                 table_name = table_info
         else:
-            raise ValueError('Please make sure to include a tablename')
+            raise ValueError("Please make sure to include a tablename")
 
         if not table_name:
-            raise ValueError('Please make sure to include a DynamoDB table '
-                             'name')
+            raise ValueError("Please make sure to include a DynamoDB table name")
 
-        table_lookup, table_keys = table_keys.split(':', 1)
+        table_lookup, table_keys = table_keys.split(":", 1)
 
-        table_keys = table_keys.split('.')
+        table_keys = table_keys.split(".")
 
         key_dict = _lookup_key_parse(table_keys)
-        new_keys = key_dict['new_keys']
-        clean_table_keys = key_dict['clean_table_keys']
+        new_keys = key_dict["new_keys"]
+        clean_table_keys = key_dict["clean_table_keys"]
 
         projection_expression = _build_projection_expression(clean_table_keys)
 
         # lookup the data from DynamoDB
-        dynamodb = get_session(region).client('dynamodb')
+        dynamodb = get_session(region).client("dynamodb")
         try:
             response = dynamodb.get_item(
                 TableName=table_name,
-                Key={
-                    table_lookup: new_keys[0]
-                },
-                ProjectionExpression=projection_expression
+                Key={table_lookup: new_keys[0]},
+                ProjectionExpression=projection_expression,
             )
         except ClientError as err:
-            if err.response['Error']['Code'] == 'ResourceNotFoundException':
+            if err.response["Error"]["Code"] == "ResourceNotFoundException":
                 raise ValueError(
-                    'Cannot find the DynamoDB table: {}'.format(table_name))
-            if err.response['Error']['Code'] == 'ValidationException':
+                    "Cannot find the DynamoDB table: {}".format(table_name)
+                )
+            if err.response["Error"]["Code"] == "ValidationException":
                 raise ValueError(
-                    'No DynamoDB record matched the partition key: '
-                    '{}'.format(table_lookup))
-            raise ValueError('The DynamoDB lookup {} had an error: '
-                             '{}'.format(value, err))
+                    "No DynamoDB record matched the partition key: {}".format(
+                        table_lookup
+                    )
+                )
+            raise ValueError(
+                "The DynamoDB lookup {} had an error: {}".format(value, err)
+            )
         # find and return the key from the dynamo data returned
-        if 'Item' in response:
-            return _get_val_from_ddb_data(response['Item'], new_keys[1:])
+        if "Item" in response:
+            return _get_val_from_ddb_data(response["Item"], new_keys[1:])
         raise ValueError(
-            'The DynamoDB record could not be found using the following '
-            'key: {}'.format(new_keys[0]))
+            "The DynamoDB record could not be found using the following key: {}".format(
+                new_keys[0]
+            )
+        )
 
 
 def _lookup_key_parse(table_keys):
@@ -102,8 +105,8 @@ def _lookup_key_parse(table_keys):
 
     """
     # we need to parse the key lookup passed in
-    regex_matcher = r'\[([^\]]+)]'
-    valid_dynamodb_datatypes = ['M', 'S', 'N', 'L']
+    regex_matcher = r"\[([^\]]+)]"
+    valid_dynamodb_datatypes = ["M", "S", "N", "L"]
     clean_table_keys = []
     new_keys = []
 
@@ -113,19 +116,21 @@ def _lookup_key_parse(table_keys):
             # the datatypes are pulled from the dynamodb docs
             if match.group(1) in valid_dynamodb_datatypes:
                 match_val = str(match.group(1))
-                key = key.replace(match.group(0), '')
+                key = key.replace(match.group(0), "")
                 new_keys.append({match_val: key})
                 clean_table_keys.append(key)
             else:
                 raise ValueError(
-                    ('CFNgin does not support looking up the datatype: {}')
-                    .format(str(match.group(1))))
+                    ("CFNgin does not support looking up the datatype: {}").format(
+                        str(match.group(1))
+                    )
+                )
         else:
-            new_keys.append({'S': key})
+            new_keys.append({"S": key})
             clean_table_keys.append(key)
     key_dict = {}
-    key_dict['new_keys'] = new_keys
-    key_dict['clean_table_keys'] = clean_table_keys
+    key_dict["new_keys"] = new_keys
+    key_dict["clean_table_keys"] = clean_table_keys
 
     return key_dict
 
@@ -140,9 +145,9 @@ def _build_projection_expression(clean_table_keys):
         str: A projection expression for the DynamoDB lookup.
 
     """
-    projection_expression = ''
+    projection_expression = ""
     for key in clean_table_keys[:-1]:
-        projection_expression += ('{},').format(key)
+        projection_expression += ("{},").format(key)
     projection_expression += clean_table_keys[-1]
     return projection_expression
 
@@ -170,10 +175,10 @@ def _get_val_from_ddb_data(data, keylist):
                 temp_dict = data[next_type]
                 data = temp_dict[key[k]]
             next_type = k
-    if next_type == 'L':
+    if next_type == "L":
         # if type is list, convert it to a list and return
         return _convert_ddb_list_to_list(data[next_type])
-    if next_type == 'N':
+    if next_type == "N":
         # TODO: handle various types of 'number' datatypes, (e.g. int, double)
         # if a number, convert to an int and return
         return int(data[next_type])

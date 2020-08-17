@@ -25,14 +25,16 @@ def get_archives_to_prune(archives, hook_data):
     """
     files_to_skip = []
 
-    for i in ['current_archive_filename', 'old_archive_filename']:
+    for i in ["current_archive_filename", "old_archive_filename"]:
         if hook_data.get(i):
             files_to_skip.append(hook_data[i])
 
-    archives.sort(key=itemgetter('LastModified'), reverse=False)  # sort from oldest to newest
+    archives.sort(  # sort from oldest to newest
+        key=itemgetter("LastModified"), reverse=False
+    )
 
     # Drop all but last 15 files
-    return [i['Key'] for i in archives[:-15] if i['Key'] not in files_to_skip]
+    return [i["Key"] for i in archives[:-15] if i["Key"] not in files_to_skip]
 
 
 def sync(context, provider, **kwargs):
@@ -46,43 +48,45 @@ def sync(context, provider, **kwargs):
 
     """
     session = context.get_session()
-    bucket_name = OutputLookup.handle(kwargs.get('bucket_output_lookup'),
-                                      provider=provider,
-                                      context=context)
-    build_context = context.hook_data['staticsite']
+    bucket_name = OutputLookup.handle(
+        kwargs.get("bucket_output_lookup"), provider=provider, context=context
+    )
+    build_context = context.hook_data["staticsite"]
     invalidate_cache = False
 
     extra_files = sync_extra_files(
         context,
         bucket_name,
-        kwargs.get('extra_files', []),
-        hash_tracking_parameter=build_context.get('hash_tracking_parameter')
+        kwargs.get("extra_files", []),
+        hash_tracking_parameter=build_context.get("hash_tracking_parameter"),
     )
 
     if extra_files:
         invalidate_cache = True
 
-    if build_context['deploy_is_current']:
-        LOGGER.info('skipped upload; latest version already deployed')
+    if build_context["deploy_is_current"]:
+        LOGGER.info("skipped upload; latest version already deployed")
     else:
         # Using the awscli for s3 syncing is incredibly suboptimal, but on
         # balance it's probably the most stable/efficient option for syncing
         # the files until https://github.com/boto/boto3/issues/358 is resolved
-        sync_args = ['s3',
-                     'sync',
-                     build_context['app_directory'],
-                     "s3://%s/" % bucket_name,
-                     '--delete']
+        sync_args = [
+            "s3",
+            "sync",
+            build_context["app_directory"],
+            "s3://%s/" % bucket_name,
+            "--delete",
+        ]
 
-        for extra_file in [f['name'] for f in kwargs.get('extra_files', [])]:
-            sync_args.extend(['--exclude', extra_file])
+        for extra_file in [f["name"] for f in kwargs.get("extra_files", [])]:
+            sync_args.extend(["--exclude", extra_file])
 
         aws.cli(sync_args)
 
         invalidate_cache = True
 
-    if kwargs.get('cf_disabled', False):
-        display_static_website_url(kwargs.get('website_url'), provider, context)
+    if kwargs.get("cf_disabled", False):
+        display_static_website_url(kwargs.get("website_url"), provider, context)
 
     elif invalidate_cache:
         distribution = get_distribution_data(context, provider, **kwargs)
@@ -90,7 +94,7 @@ def sync(context, provider, **kwargs):
 
     LOGGER.info("sync complete")
 
-    if not build_context['deploy_is_current']:
+    if not build_context["deploy_is_current"]:
         update_ssm_hash(context, session)
 
     prune_archives(context, session)
@@ -108,9 +112,9 @@ def display_static_website_url(website_url_handle, provider, context):
         context (:class:`runway.cfngin.context.Context`): context instance
 
     """
-    bucket_url = OutputLookup.handle(website_url_handle,
-                                     provider=provider,
-                                     context=context)
+    bucket_url = OutputLookup.handle(
+        website_url_handle, provider=provider, context=context
+    )
     LOGGER.info("STATIC WEBSITE URL: %s", bucket_url)
 
 
@@ -122,18 +126,20 @@ def update_ssm_hash(context, session):
         session (:class:`runway.cfngin.session.Session`): CFNgin session
 
     """
-    build_context = context.hook_data['staticsite']
+    build_context = context.hook_data["staticsite"]
 
-    if not build_context.get('hash_tracking_disabled'):
-        hash_param = build_context['hash_tracking_parameter']
-        hash_value = build_context['hash']
+    if not build_context.get("hash_tracking_disabled"):
+        hash_param = build_context["hash_tracking_parameter"]
+        hash_value = build_context["hash"]
 
-        LOGGER.info("updating SSM parameter %s with hash %s",
-                    hash_param,
-                    hash_value)
+        LOGGER.info("updating SSM parameter %s with hash %s", hash_param, hash_value)
 
-        set_ssm_value(session, hash_param, hash_value,
-                      'Hash of currently deployed static website source')
+        set_ssm_value(
+            session,
+            hash_param,
+            hash_value,
+            "Hash of currently deployed static website source",
+        )
 
     return True
 
@@ -150,21 +156,21 @@ def get_distribution_data(context, provider, **kwargs):
     """
     LOGGER.verbose("retrieved distribution data")
     return {
-        'identifier': OutputLookup.handle(
-            kwargs.get('distributionid_output_lookup'),
+        "identifier": OutputLookup.handle(
+            kwargs.get("distributionid_output_lookup"),
             provider=provider,
-            context=context
+            context=context,
         ),
-        'domain': OutputLookup.handle(
-            kwargs.get('distributiondomain_output_lookup'),
+        "domain": OutputLookup.handle(
+            kwargs.get("distributiondomain_output_lookup"),
             provider=provider,
-            context=context
+            context=context,
         ),
-        'path': kwargs.get('distribution_path', '/*')
+        "path": kwargs.get("distribution_path", "/*"),
     }
 
 
-def invalidate_distribution(session, identifier='', path='', domain='', **_):
+def invalidate_distribution(session, identifier="", path="", domain="", **_):
     """Invalidate the current distribution.
 
     Args:
@@ -174,16 +180,14 @@ def invalidate_distribution(session, identifier='', path='', domain='', **_):
         domain (string): The distribution domain.
 
     """
-    LOGGER.info("invalidating CloudFront distribution: %s (%s)",
-                identifier, domain)
-    cf_client = session.client('cloudfront')
+    LOGGER.info("invalidating CloudFront distribution: %s (%s)", identifier, domain)
+    cf_client = session.client("cloudfront")
     cf_client.create_invalidation(
         DistributionId=identifier,
         InvalidationBatch={
-            'Paths': {
-                'Quantity': 1,
-                'Items': [path]},
-            'CallerReference': str(time.time())}
+            "Paths": {"Quantity": 1, "Items": [path]},
+            "CallerReference": str(time.time()),
+        },
     )
 
     LOGGER.info("CloudFront invalidation complete")
@@ -202,26 +206,24 @@ def prune_archives(context, session):
     """
     LOGGER.info("cleaning up old site archives...")
     archives = []
-    s3_client = session.client('s3')
-    list_objects_v2_paginator = s3_client.get_paginator('list_objects_v2')
+    s3_client = session.client("s3")
+    list_objects_v2_paginator = s3_client.get_paginator("list_objects_v2")
     response_iterator = list_objects_v2_paginator.paginate(
-        Bucket=context.hook_data['staticsite']['artifact_bucket_name'],
-        Prefix=context.hook_data['staticsite']['artifact_key_prefix']
+        Bucket=context.hook_data["staticsite"]["artifact_bucket_name"],
+        Prefix=context.hook_data["staticsite"]["artifact_key_prefix"],
     )
 
     for page in response_iterator:
-        archives.extend(page.get('Contents', []))
-    archives_to_prune = get_archives_to_prune(
-        archives,
-        context.hook_data['staticsite']
-    )
+        archives.extend(page.get("Contents", []))
+    archives_to_prune = get_archives_to_prune(archives, context.hook_data["staticsite"])
 
     # Iterate in chunks of 1000 to match delete_objects limit
-    for objects in [archives_to_prune[i:i + 1000]
-                    for i in range(0, len(archives_to_prune), 1000)]:
+    for objects in [
+        archives_to_prune[i : i + 1000] for i in range(0, len(archives_to_prune), 1000)
+    ]:
         s3_client.delete_objects(
-            Bucket=context.hook_data['staticsite']['artifact_bucket_name'],
-            Delete={'Objects': [{'Key': i} for i in objects]}
+            Bucket=context.hook_data["staticsite"]["artifact_bucket_name"],
+            Delete={"Objects": [{"Key": i} for i in objects]},
         )
     return True
 
@@ -239,11 +241,11 @@ def auto_detect_content_type(filename):
     """
     _, ext = os.path.splitext(filename)
 
-    if ext == '.json':
-        return 'application/json'
+    if ext == ".json":
+        return "application/json"
 
-    if ext in ['.yml', '.yaml']:
-        return 'text/yaml'
+    if ext in [".yml", ".yaml"]:
+        return "text/yaml"
 
     return None
 
@@ -262,8 +264,8 @@ def get_content_type(extra_file):
 
     """
     return extra_file.get(
-        'content_type',
-        auto_detect_content_type(extra_file.get('name')))
+        "content_type", auto_detect_content_type(extra_file.get("name"))
+    )
 
 
 def get_content(extra_file):
@@ -277,15 +279,15 @@ def get_content(extra_file):
         str: Serialized content based on the content_type.
 
     """
-    content_type = extra_file.get('content_type')
-    content = extra_file.get('content')
+    content_type = extra_file.get("content_type")
+    content = extra_file.get("content")
 
     if content:
         if isinstance(content, (dict, list)):
-            if content_type == 'application/json':
+            if content_type == "application/json":
                 return json.dumps(content)
 
-            if content_type == 'text/yaml':
+            if content_type == "text/yaml":
                 return yaml.safe_dump(content)
 
             raise ValueError(
@@ -293,7 +295,7 @@ def get_content(extra_file):
             )
 
         if not isinstance(content, str):
-            raise TypeError('unsupported content: %s' % type(content))
+            raise TypeError("unsupported content: %s" % type(content))
 
     return content
 
@@ -317,20 +319,22 @@ def calculate_hash_of_extra_files(extra_files):
     """
     file_hash = hashlib.md5()
 
-    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file['name']):
-        file_hash.update((extra_file['name'] + "\0").encode())
+    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file["name"]):
+        file_hash.update((extra_file["name"] + "\0").encode())
 
-        if extra_file.get('content_type'):
-            file_hash.update((extra_file['content_type'] + "\0").encode())
+        if extra_file.get("content_type"):
+            file_hash.update((extra_file["content_type"] + "\0").encode())
 
-        if extra_file.get('content'):
-            LOGGER.debug('hashing content: %s', extra_file['name'])
-            file_hash.update((extra_file['content'] + "\0").encode())
+        if extra_file.get("content"):
+            LOGGER.debug("hashing content: %s", extra_file["name"])
+            file_hash.update((extra_file["content"] + "\0").encode())
 
-        if extra_file.get('file'):
-            with open(extra_file['file'], "rb") as filedes:
-                LOGGER.debug('hashing file: %s', extra_file['file'])
-                for chunk in iter(lambda: filedes.read(4096), ""):  # noqa pylint: disable=cell-var-from-loop
+        if extra_file.get("file"):
+            with open(extra_file["file"], "rb") as f:
+                LOGGER.debug("hashing file: %s", extra_file["file"])
+                for chunk in iter(
+                    lambda: f.read(4096), "",  # pylint: disable=cell-var-from-loop
+                ):
                     if not chunk:
                         break
                     file_hash.update(chunk)
@@ -350,32 +354,28 @@ def get_ssm_value(session, name):
         str: The parameter value.
 
     """
-    ssm_client = session.client('ssm')
+    ssm_client = session.client("ssm")
 
     try:
-        return ssm_client.get_parameter(Name=name)['Parameter']['Value']
+        return ssm_client.get_parameter(Name=name)["Parameter"]["Value"]
     except ssm_client.exceptions.ParameterNotFound:
         return None
 
 
-def set_ssm_value(session, name, value, description=''):
+def set_ssm_value(session, name, value, description=""):
     """Set the ssm parameter.
 
     Args:
         session (:class:`runway.cfngin.session.Session`): The CFNgin session.
         name (str): The name of the parameter.
-        value (str): The value of the paramter.
+        value (str): The value of the parameter.
         description (str): A description of the parameter.
 
     """
-    ssm_client = session.client('ssm')
+    ssm_client = session.client("ssm")
 
     ssm_client.put_parameter(
-        Name=name,
-        Description=description,
-        Value=value,
-        Type='String',
-        Overwrite=True
+        Name=name, Description=description, Value=value, Type="String", Overwrite=True
     )
 
 
@@ -390,23 +390,23 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
             that should be uploaded.
 
     """
-    LOGGER.debug('extra_files to sync: %s', json.dumps(extra_files))
+    LOGGER.debug("extra_files to sync: %s", json.dumps(extra_files))
 
     if not extra_files:
         return []
 
     session = context.get_session()
-    s3_client = session.client('s3')
+    s3_client = session.client("s3")
     uploaded = []
 
-    hash_param = kwargs.get('hash_tracking_parameter')
+    hash_param = kwargs.get("hash_tracking_parameter")
     hash_new = None
 
     # serialize content based on content type
     for extra_file in extra_files:
-        filename = extra_file.get('name')
-        extra_file['content_type'] = get_content_type(extra_file)
-        extra_file['content'] = get_content(extra_file)
+        filename = extra_file.get("name")
+        extra_file["content_type"] = get_content_type(extra_file)
+        extra_file["content"] = get_content(extra_file)
 
     # calculate a hash of the extra_files
     if hash_param:
@@ -424,30 +424,27 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
             return []
 
     for extra_file in extra_files:
-        filename = extra_file['name']
-        content_type = extra_file['content_type']
-        content = extra_file['content']
-        source = extra_file.get('file')
+        filename = extra_file["name"]
+        content_type = extra_file["content_type"]
+        content = extra_file["content"]
+        source = extra_file.get("file")
 
         if content:
-            LOGGER.info('uploading extra file: %s', filename)
+            LOGGER.info("uploading extra file: %s", filename)
 
             s3_client.put_object(
-                Bucket=bucket,
-                Key=filename,
-                Body=content,
-                ContentType=content_type
+                Bucket=bucket, Key=filename, Body=content, ContentType=content_type
             )
 
             uploaded.append(filename)
 
         if source:
-            LOGGER.info('uploading extra file: %s as %s ', source, filename)
+            LOGGER.info("uploading extra file: %s as %s ", source, filename)
 
             extra_args = None
 
             if content_type:
-                extra_args = {'ContentType': content_type}
+                extra_args = {"ContentType": content_type}
 
             s3_client.upload_file(source, bucket, filename, ExtraArgs=extra_args)
 
@@ -455,9 +452,7 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
 
     if hash_new:
         LOGGER.info(
-            "updating extra files SSM parameter %s with hash %s",
-            hash_param,
-            hash_new
+            "updating extra files SSM parameter %s with hash %s", hash_param, hash_new
         )
         set_ssm_value(session, hash_param, hash_new)
 

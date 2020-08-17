@@ -125,10 +125,7 @@ class StaticSite(RunwayModule):
             {
                 "path": "runway.hooks.cleanup_s3.purge_bucket",
                 "required": True,
-                "args": {
-                    "bucket_rxref_lookup": "%s-dependencies::%s"
-                    % (self.name, i)
-                },
+                "args": {"bucket_rxref_lookup": "%s-dependencies::%s" % (self.name, i)},
             }
             for i in ["AWSLogBucketName", "ArtifactsBucketName"]
         ]
@@ -264,8 +261,7 @@ class StaticSite(RunwayModule):
             replicated_function_vars.update(
                 {
                     "state_machine_arn": "${rxref %s-cleanup::"
-                    "ReplicatedFunctionRemoverStateMachineArn}"
-                    % (self.name),
+                    "ReplicatedFunctionRemoverStateMachineArn}" % (self.name),
                 }
             )
             pre_destroy.append(
@@ -349,9 +345,7 @@ class StaticSite(RunwayModule):
             "post_destroy": post_destroy,
         }
 
-        with open(
-            os.path.join(module_dir, "02-staticsite.yaml"), "w"
-        ) as output_stream:
+        with open(os.path.join(module_dir, "02-staticsite.yaml"), "w") as output_stream:
             yaml.dump(content, output_stream, default_flow_style=False)
         self.logger.debug(
             "created 02-staticsite.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
@@ -376,9 +370,7 @@ class StaticSite(RunwayModule):
             },
         }
 
-        with open(
-            os.path.join(module_dir, "03-cleanup.yaml"), "w"
-        ) as output_stream:
+        with open(os.path.join(module_dir, "03-cleanup.yaml"), "w") as output_stream:
             yaml.dump(content, output_stream, default_flow_style=False)
         self.logger.debug(
             "created 03-cleanup.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
@@ -548,15 +540,13 @@ class StaticSite(RunwayModule):
 
     def _get_domain_updater_variables(self):
         return {
-            "client_id_output_lookup": "%s-dependencies::AuthAtEdgeClient"
-            % self.name,
+            "client_id_output_lookup": "%s-dependencies::AuthAtEdgeClient" % self.name,
             "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
         }
 
     def _get_lambda_config_variables(self, site_stack_variables):
         return {
-            "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}"
-            % self.name,
+            "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
             "bucket": "${rxref %s-dependencies::ArtifactsBucketName}" % self.name,
             "cookie_settings": site_stack_variables["CookieSettings"],
             "http_headers": site_stack_variables["HttpHeaders"],

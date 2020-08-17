@@ -2,10 +2,12 @@
 import logging
 import sys
 
-DEBUG_FORMAT = ("[%(asctime)s] %(levelname)s %(threadName)s "
-                "%(name)s:%(lineno)d(%(funcName)s): %(message)s")
-INFO_FORMAT = ("[%(asctime)s] %(message)s")
-COLOR_FORMAT = ("[%(asctime)s] \033[%(color)sm%(message)s\033[39m")
+DEBUG_FORMAT = (
+    "[%(asctime)s] %(levelname)s %(threadName)s "
+    "%(name)s:%(lineno)d(%(funcName)s): %(message)s"
+)
+INFO_FORMAT = "[%(asctime)s] %(message)s"
+COLOR_FORMAT = "[%(asctime)s] \033[%(color)sm%(message)s\033[39m"
 
 ISO_8601 = "%Y-%m-%dT%H:%M:%S"
 
@@ -15,8 +17,8 @@ class ColorFormatter(logging.Formatter):
 
     def format(self, record):
         """Format log message."""
-        if 'color' not in record.__dict__:
-            record.__dict__['color'] = 37
+        if "color" not in record.__dict__:
+            record.__dict__["color"] = 37
         msg = super(ColorFormatter, self).format(record)
         return msg
 

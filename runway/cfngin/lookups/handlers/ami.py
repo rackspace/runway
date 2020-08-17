@@ -73,43 +73,43 @@ class AmiLookup(LookupHandler):
         else:
             region = provider.region
 
-        ec2 = get_session(region).client('ec2')
+        ec2 = get_session(region).client("ec2")
 
         values = {}
         describe_args = {}
 
         # now find any other arguments that can be filters
-        matches = re.findall(r'([0-9a-zA-z_-]+:[^\s$]+)', value)
+        matches = re.findall(r"([0-9a-zA-z_-]+:[^\s$]+)", value)
         for match in matches:
-            k, v = match.split(':', 1)
+            k, v = match.split(":", 1)
             values[k] = v
 
-        if not values.get('owners'):
+        if not values.get("owners"):
             raise Exception("'owners' value required when using ami")
-        owners = values.pop('owners').split(',')
+        owners = values.pop("owners").split(",")
         describe_args["Owners"] = owners
 
-        if not values.get('name_regex'):
+        if not values.get("name_regex"):
             raise Exception("'name_regex' value required when using ami")
-        name_regex = values.pop('name_regex')
+        name_regex = values.pop("name_regex")
 
-        if values.get('executable_users'):
-            executable_users = values.pop('executable_users').split(',')
+        if values.get("executable_users"):
+            executable_users = values.pop("executable_users").split(",")
             describe_args["ExecutableUsers"] = executable_users
 
         filters = []
         for k, v in values.items():
-            filters.append({"Name": k, "Values": v.split(',')})
+            filters.append({"Name": k, "Values": v.split(",")})
         describe_args["Filters"] = filters
 
         result = ec2.describe_images(**describe_args)
 
-        images = sorted(result['Images'],
-                        key=operator.itemgetter('CreationDate'),
-                        reverse=True)
+        images = sorted(
+            result["Images"], key=operator.itemgetter("CreationDate"), reverse=True
+        )
         for image in images:
             # sometimes we get ARI/AKI in response - these don't have a 'Name'
-            if re.match("^%s$" % name_regex, image.get('Name', '')):
-                return image['ImageId']
+            if re.match("^%s$" % name_regex, image.get("Name", "")):
+                return image["ImageId"]
 
         raise ImageNotFound(value)

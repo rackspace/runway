@@ -94,7 +94,7 @@ class BaseAction(object):
 
     """
 
-    DESCRIPTION = 'Base action'
+    DESCRIPTION = "Base action"
     NAME = None
 
     def __init__(self, context, provider_builder=None, cancel=None):
@@ -147,15 +147,12 @@ class BaseAction(object):
             operating on the given :class:`runway.cfngin.stack.Stack`.
 
         """
-        return self.provider_builder.build(region=stack.region,
-                                           profile=stack.profile)
+        return self.provider_builder.build(region=stack.region, profile=stack.profile)
 
     def ensure_cfn_bucket(self):
         """CloudFormation bucket where templates will be stored."""
         if self.bucket_name:
-            ensure_s3_bucket(self.s3_conn,
-                             self.bucket_name,
-                             self.bucket_region)
+            ensure_s3_bucket(self.s3_conn, self.bucket_name, self.bucket_region)
 
     def execute(self, **kwargs):
         """Run the action with pre and post steps."""
@@ -175,7 +172,7 @@ class BaseAction(object):
 
     def run(self, **kwargs):
         """Abstract method for running the action."""
-        raise NotImplementedError("Subclass must implement \"run\" method")
+        raise NotImplementedError('Subclass must implement "run" method')
 
     def s3_stack_push(self, blueprint, force=False):
         """Push the rendered blueprint's template to S3.
@@ -190,25 +187,27 @@ class BaseAction(object):
         key_name = stack_template_key_name(blueprint)
         template_url = self.stack_template_url(blueprint)
         try:
-            template_exists = self.s3_conn.head_object(
-                Bucket=self.bucket_name, Key=key_name) is not None
+            template_exists = (
+                self.s3_conn.head_object(Bucket=self.bucket_name, Key=key_name)
+                is not None
+            )
         except botocore.exceptions.ClientError as err:
-            if err.response['Error']['Code'] == '404':
+            if err.response["Error"]["Code"] == "404":
                 template_exists = False
             else:
                 raise
 
         if template_exists and not force:
-            LOGGER.debug("CloudFormation template already exists: %s",
-                         template_url)
+            LOGGER.debug("CloudFormation template already exists: %s", template_url)
             return template_url
-        self.s3_conn.put_object(Bucket=self.bucket_name,
-                                Key=key_name,
-                                Body=blueprint.rendered,
-                                ServerSideEncryption='AES256',
-                                ACL='bucket-owner-full-control')
-        LOGGER.debug("blueprint %s pushed to %s", blueprint.name,
-                     template_url)
+        self.s3_conn.put_object(
+            Bucket=self.bucket_name,
+            Key=key_name,
+            Body=blueprint.rendered,
+            ServerSideEncryption="AES256",
+            ACL="bucket-owner-full-control",
+        )
+        LOGGER.debug("blueprint %s pushed to %s", blueprint.name, template_url)
         return template_url
 
     def stack_template_url(self, blueprint):
@@ -222,9 +221,13 @@ class BaseAction(object):
             self.bucket_name, blueprint, get_s3_endpoint(self.s3_conn)
         )
 
-    def _generate_plan(self, tail=False, reverse=False,
-                       require_unlocked=True,
-                       include_persistent_graph=False):
+    def _generate_plan(
+        self,
+        tail=False,
+        reverse=False,
+        require_unlocked=True,
+        include_persistent_graph=False,
+    ):
         """Create a plan for this action.
 
         Args:
@@ -251,11 +254,10 @@ class BaseAction(object):
 
         steps = [
             Step(stack, fn=self._stack_action, watch_func=tail)
-            for stack in self.context.get_stacks()]
+            for stack in self.context.get_stacks()
+        ]
 
-        steps += [
-            Step(target, fn=target_fn)
-            for target in self.context.get_targets()]
+        steps += [Step(target, fn=target_fn) for target in self.context.get_targets()]
 
         graph = Graph.from_steps(steps)
 
@@ -264,7 +266,7 @@ class BaseAction(object):
                 self.context.persistent_graph.to_dict(),
                 self.context,
                 fn=self._stack_action,
-                watch_func=tail
+                watch_func=tail,
             )
             persist_graph = Graph.from_steps(persist_steps)
             graph = merge_graphs(graph, persist_graph)
@@ -274,15 +276,12 @@ class BaseAction(object):
             description=self.DESCRIPTION,
             graph=graph,
             reverse=reverse,
-            require_unlocked=require_unlocked)
+            require_unlocked=require_unlocked,
+        )
 
     def _tail_stack(self, stack, cancel, retries=0, **kwargs):
         """Tail a stack's event stream."""
         provider = self.build_provider(stack)
         return provider.tail_stack(
-            stack,
-            cancel,
-            action=self.NAME,
-            retries=retries,
-            **kwargs
+            stack, cancel, action=self.NAME, retries=retries, **kwargs
         )

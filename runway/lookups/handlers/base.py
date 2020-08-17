@@ -52,7 +52,7 @@ Common Lookup Arguments
         Loads a JSON seralizable string into a dictionary like object.
     **troposphere**
         Loads the ``properties`` of a subclass of ``troposphere.BaseAWSObject``
-        into a dictinary.
+        into a dictionary.
     **yaml**
         Loads a YAML seralizable string into a dictionary like object.
 
@@ -88,7 +88,6 @@ Common Lookup Arguments
 """
 import json
 import logging
-# python2 supported pylint is unable to load this when in a venv
 from distutils.util import strtobool  # pylint: disable=E
 from typing import (  # noqa: F401 pylint: disable=W
     TYPE_CHECKING,
@@ -133,13 +132,14 @@ class LookupHandler(object):
         return set()
 
     @classmethod
-    def format_results(cls,
-                       value,  # type: Any
-                       get=None,  # type: Optional[str]
-                       load=None,  # type: Optional[str]
-                       transform=None,  # type: Optional[str]
-                       **kwargs  # type: Any
-                       ):  # python2 only # pylint: disable=bad-continuation
+    def format_results(
+        cls,
+        value,  # type: Any
+        get=None,  # type: Optional[str]
+        load=None,  # type: Optional[str]
+        transform=None,  # type: Optional[str]
+        **kwargs  # type: Any
+    ):
         # type: (...) -> Any
         """Format results to be returned by a lookup.
 
@@ -172,12 +172,15 @@ class LookupHandler(object):
             elif isinstance(value, dict):
                 value = value.get(get)
             else:
-                raise TypeError('value must be dict type to use "get"; got '
-                                'type "{}"'.format(type(value)))
+                raise TypeError(
+                    'value must be dict type to use "get"; got type "{}"'.format(
+                        type(value)
+                    )
+                )
         if transform:
             return cls.transform(value, to_type=transform, **kwargs)
         if isinstance(value, MutableMap):
-            LOGGER.debug('returning data from MutableMap')
+            LOGGER.debug("returning data from MutableMap")
             return value.data
         return value
 
@@ -211,7 +214,7 @@ class LookupHandler(object):
         """
         raw_value = read_value_from_path(value)
 
-        colon_split = raw_value.split('::', 1)
+        colon_split = raw_value.split("::", 1)
 
         query = colon_split.pop(0)
         args = cls._parse_args(colon_split[0]) if colon_split else {}
@@ -234,9 +237,11 @@ class LookupHandler(object):
             Dict of parsed args.
 
         """
-        split_args = args.split(',')
-        return {key.strip(): value.strip() for key, value in
-                [arg.split('=', 1) for arg in split_args]}
+        split_args = args.split(",")
+        return {
+            key.strip(): value.strip()
+            for key, value in [arg.split("=", 1) for arg in split_args]
+        }
 
     @classmethod
     def load(cls, value, parser=None, **kwargs):
@@ -257,9 +262,9 @@ class LookupHandler(object):
 
         """
         mapping = {
-            'json': cls._load_json,
-            'troposphere': cls._load_troposphere,
-            'yaml': cls._load_yaml
+            "json": cls._load_json,
+            "troposphere": cls._load_troposphere,
+            "yaml": cls._load_yaml,
         }
 
         if not parser:
@@ -280,8 +285,9 @@ class LookupHandler(object):
 
         """
         if not isinstance(value, str):
-            raise TypeError('value of type "%s" must of type "str" to use '
-                            'the "load=json" argument.')
+            raise TypeError(
+                'value of type "%s" must of type "str" to use the "load=json" argument.'
+            )
         result = json.loads(value)
         if isinstance(result, dict):
             return MutableMap(**result)
@@ -301,14 +307,15 @@ class LookupHandler(object):
 
         """
         if not isinstance(value, BaseAWSObject):
-            raise TypeError('value of type "%s" must of type "troposphere.'
-                            'BaseAWSObject" to use the "load=troposphere" '
-                            'option.')
-        if hasattr(value, 'properties'):
+            raise TypeError(
+                'value of type "%s" must of type "troposphere.'
+                'BaseAWSObject" to use the "load=troposphere" option.'
+            )
+        if hasattr(value, "properties"):
             return MutableMap(**value.properties)
-        raise NotImplementedError('"load=troposphere" only supports '
-                                  'BaseAWSObject with a "properties" '
-                                  'object.')
+        raise NotImplementedError(
+            '"load=troposphere" only supports BaseAWSObject with a "properties" object.'
+        )
 
     @classmethod
     def _load_yaml(cls, value, **_):
@@ -323,15 +330,16 @@ class LookupHandler(object):
 
         """
         if not isinstance(value, str):
-            raise TypeError('value of type "%s" must of type "str" to use '
-                            'the "load=yaml" argument.')
+            raise TypeError(
+                'value of type "%s" must of type "str" to use the "load=yaml" argument.'
+            )
         result = yaml.safe_load(value)
         if isinstance(result, dict):
             return MutableMap(**result)
         return result
 
     @classmethod
-    def transform(cls, value, to_type='str', **kwargs):
+    def transform(cls, value, to_type="str", **kwargs):
         # type: (str, str, Any) -> Any
         """Transform the result of a lookup into another datatype.
 
@@ -348,10 +356,7 @@ class LookupHandler(object):
             The transformed value.
 
         """
-        mapping = {
-            'bool': cls._transform_to_bool,
-            'str': cls._transform_to_string
-        }
+        mapping = {"bool": cls._transform_to_bool, "str": cls._transform_to_string}
 
         if not to_type:
             return value
@@ -375,8 +380,11 @@ class LookupHandler(object):
             return value
         if isinstance(value, string_types):
             return bool(strtobool(value))
-        raise TypeError('Value must be a string or bool to use transform=bool. '
-                        'Got type {}.'.format(type(value)))
+        raise TypeError(
+            "Value must be a string or bool to use transform=bool. Got type {}.".format(
+                type(value)
+            )
+        )
 
     @classmethod
     def _transform_to_string(cls, value, delimiter=None, **kwargs):
@@ -393,14 +401,13 @@ class LookupHandler(object):
 
         """
         if isinstance(value, (list, set, tuple)):
-            return '{}'.format(delimiter or ',').join(value)
+            return "{}".format(delimiter or ",").join(value)
         if isinstance(value, MutableMap):
             # convert into a dict with protected attrs removed
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            return json.dumps(json.dumps(value,
-                                         indent=int(kwargs.get('indent', 0))))
+            return json.dumps(json.dumps(value, indent=int(kwargs.get("indent", 0))))
         if isinstance(value, bool):
             return json.dumps(str(value))
         return str(value)
