@@ -74,6 +74,7 @@ data_files.append(('{}/awscli/data'.format(get_distribution('awscli').location),
                    'awscli/data/'))
 data_files.extend(collect_data_files('cfnlint'))
 data_files.extend(collect_data_files('distutils'))
+data_files.extend(collect_data_files('hcl2'))
 data_files.extend(collect_data_files('pip'))
 data_files.extend(collect_data_files('wheel'))
 data_files.append(copy_metadata('runway')[0])  # support scm version
