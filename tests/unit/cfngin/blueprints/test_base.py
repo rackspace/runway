@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.blueprints.base."""
-# pylint: disable=abstract-method,protected-access,unused-argument
+# pylint: disable=abstract-method,no-self-use,protected-access,unused-argument
 import sys
 import unittest
 
@@ -37,8 +37,7 @@ from runway.variables import Variable
 from ..factories import mock_context
 
 
-def mock_lookup_handler(value, provider=None, context=None, fqn=False,
-                        **kwargs):
+def mock_lookup_handler(value, provider=None, context=None, fqn=False, **kwargs):
     """Mock lookup handler."""
     return value
 
@@ -61,6 +60,7 @@ class TestBlueprintRendering(unittest.TestCase):
 
     def test_to_json(self):
         """Test to json."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -69,13 +69,13 @@ class TestBlueprintRendering(unittest.TestCase):
                 "Param2": {"type": CFNNumber},
                 "Param3": {"type": CFNCommaDelimitedList},
                 "Param4": {"default": "foo", "type": str},
-                "Param5": {"default": 5, "type": int}
+                "Param5": {"default": 5, "type": int},
             }
 
             def create_template(self):
                 """Create template."""
-                self.template.add_version('2010-09-09')
-                self.template.add_description('TestBlueprint')
+                self.template.add_version("2010-09-09")
+                self.template.add_description("TestBlueprint")
 
         expected_json = """{
     "AWSTemplateFormatVersion": "2010-09-09",
@@ -95,8 +95,7 @@ class TestBlueprintRendering(unittest.TestCase):
     "Resources": {}
 }"""
         self.assertEqual(
-            TestBlueprint(name="test", context=mock_context()).to_json(),
-            expected_json,
+            TestBlueprint(name="test", context=mock_context()).to_json(), expected_json,
         )
 
 
@@ -115,21 +114,23 @@ class TestBaseBlueprint(unittest.TestCase):
 
             def create_template(self):
                 """Create template."""
-                self.template.add_version('2010-09-09')
-                self.template.add_description('TestBlueprint')
+                self.template.add_version("2010-09-09")
+                self.template.add_description("TestBlueprint")
                 self.add_output(output_name, output_value)
 
         blueprint = TestBlueprint(name="test", context=mock_context())
         blueprint.render_template()
-        self.assertEqual(blueprint.template.outputs[output_name].properties["Value"],
-                         output_value)
+        self.assertEqual(
+            blueprint.template.outputs[output_name].properties["Value"], output_value
+        )
 
 
-class TestVariables(unittest.TestCase):
+class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Tests for runway.cfngin.blueprints.base.Blueprint variables."""
 
     def test_defined_variables(self):
         """Test defined variables."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -139,12 +140,12 @@ class TestVariables(unittest.TestCase):
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
         self.assertEqual(
-            blueprint.defined_variables(),
-            blueprint.VARIABLES,
+            blueprint.defined_variables(), blueprint.VARIABLES,
         )
 
     def test_defined_variables_subclass(self):
         """Test defined variables subclass."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -158,8 +159,7 @@ class TestVariables(unittest.TestCase):
 
             def defined_variables(self):
                 """Return defined variables."""
-                variables = super(TestBlueprintSubclass,
-                                  self).defined_variables()
+                variables = super(TestBlueprintSubclass, self).defined_variables()
                 variables["Param2"]["default"] = 1
                 variables["Param3"] = {"default": 1, "type": int}
                 return variables
@@ -171,6 +171,7 @@ class TestVariables(unittest.TestCase):
 
     def test_get_variables_unresolved_variables(self):
         """Test get variables unresolved variables."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -180,6 +181,7 @@ class TestVariables(unittest.TestCase):
 
     def test_set_description(self):
         """Test set description."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -193,8 +195,7 @@ class TestVariables(unittest.TestCase):
 
         description = "my blueprint description"
         context = mock_context()
-        blueprint = TestBlueprint(name="test", context=context,
-                                  description=description)
+        blueprint = TestBlueprint(name="test", context=context, description=description)
         blueprint.render_template()
         self.assertEqual(description, blueprint.template.description)
 
@@ -208,10 +209,10 @@ class TestVariables(unittest.TestCase):
 
     def test_validate_variable_type_cfntype_none_value(self):
         """Test validate variable type cfntype none value."""
-        var_name = "testVar"
-        var_type = CFNString
-        provided_value = None
         with self.assertRaises(ValueError):
+            var_name = "testVar"
+            var_type = CFNString
+            provided_value = None
             validate_variable_type(var_name, var_type, provided_value)
 
     def test_validate_variable_type_matching_type(self):
@@ -227,30 +228,29 @@ class TestVariables(unittest.TestCase):
     # See: https://github.com/remind101/stacker/pull/266
     def test_strict_validate_variable_type(self):
         """Test strict validate variable type."""
-        var_name = "testVar"
-        var_type = int
-        provided_value = "1"
         with self.assertRaises(ValueError):
+            var_name = "testVar"
+            var_type = int
+            provided_value = "1"
             validate_variable_type(var_name, var_type, provided_value)
 
     def test_validate_variable_type_invalid_value(self):
         """Test validate variable type invalid value."""
-        var_name = "testVar"
-        var_type = int
-        provided_value = "abc"
         with self.assertRaises(ValueError):
+            var_name = "testVar"
+            var_type = int
+            provided_value = "abc"
             validate_variable_type(var_name, var_type, provided_value)
 
     def test_resolve_variable_no_type_on_variable_definition(self):
         """Test resolve variable no type on variable definition."""
-        var_name = "testVar"
-        var_def = {}
-        provided_variable = None
-        blueprint_name = "testBlueprint"
-
         with self.assertRaises(VariableTypeRequired):
-            resolve_variable(var_name, var_def, provided_variable,
-                             blueprint_name)
+            var_name = "testVar"
+            var_def = {}
+            provided_variable = None
+            blueprint_name = "testBlueprint"
+
+            resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
     def test_resolve_variable_no_provided_with_default(self):
         """Test resolve variable no provided with default."""
@@ -260,42 +260,38 @@ class TestVariables(unittest.TestCase):
         provided_variable = None
         blueprint_name = "testBlueprint"
 
-        value = resolve_variable(var_name, var_def, provided_variable,
-                                 blueprint_name)
+        value = resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
         self.assertEqual(default_value, value)
 
     def test_resolve_variable_no_provided_without_default(self):
         """Test resolve variable no provided without default."""
-        var_name = "testVar"
-        var_def = {"type": str}
-        provided_variable = None
-        blueprint_name = "testBlueprint"
-
         with self.assertRaises(MissingVariable):
-            resolve_variable(var_name, var_def, provided_variable,
-                             blueprint_name)
+            var_name = "testVar"
+            var_def = {"type": str}
+            provided_variable = None
+            blueprint_name = "testBlueprint"
+
+            resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
     def test_resolve_variable_provided_not_resolved(self):
         """Test resolve variable provided not resolved."""
         var_name = "testVar"
-        var_def = {"type": str}
-        provided_variable = Variable(var_name, "${mock abc}", 'cfngin')
-        blueprint_name = "testBlueprint"
-
+        provided_variable = Variable(var_name, "${mock abc}", "cfngin")
         with self.assertRaises(UnresolvedVariable):
-            resolve_variable(var_name, var_def, provided_variable,
-                             blueprint_name)
+            var_def = {"type": str}
+            blueprint_name = "testBlueprint"
+
+            resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
     def _resolve_troposphere_var(self, tpe, value, **kwargs):
         """Resolve troposphere var."""
         var_name = "testVar"
         var_def = {"type": TroposphereType(tpe, **kwargs)}
-        provided_variable = Variable(var_name, value, 'cfngin')
+        provided_variable = Variable(var_name, value, "cfngin")
         blueprint_name = "testBlueprint"
 
-        return resolve_variable(var_name, var_def, provided_variable,
-                                blueprint_name)
+        return resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
     def test_resolve_variable_troposphere_type_resource_single(self):
         """Test resolve variable troposphere type resource single."""
@@ -320,10 +316,9 @@ class TestVariables(unittest.TestCase):
         """Test resolve variable troposphere type resource many."""
         bucket_defs = {
             "FirstBucket": {"BucketName": "some-bucket"},
-            "SecondBucket": {"BucketName": "some-other-bucket"}
+            "SecondBucket": {"BucketName": "some-other-bucket"},
         }
-        buckets = self._resolve_troposphere_var(s3.Bucket, bucket_defs,
-                                                many=True)
+        buckets = self._resolve_troposphere_var(s3.Bucket, bucket_defs, many=True)
 
         for bucket in buckets:
             self.assertTrue(isinstance(bucket, s3.Bucket))
@@ -342,8 +337,9 @@ class TestVariables(unittest.TestCase):
             _stderr = sys.stderr
             sys.stderr = devnull
             with self.assertRaises(ValidatorError):
-                self._resolve_troposphere_var(s3.Bucket,
-                                              {"MyBucket": {"BucketName": 1}})
+                self._resolve_troposphere_var(
+                    s3.Bucket, {"MyBucket": {"BucketName": 1}}
+                )
             sys.stderr = _stderr
 
     def test_resolve_variable_troposphere_type_props_single(self):
@@ -358,18 +354,16 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variable_troposphere_type_props_optional(self):
         """Test resolve variable troposphere type props optional."""
-        sub = self._resolve_troposphere_var(sns.Subscription, None,
-                                            optional=True)
+        sub = self._resolve_troposphere_var(sns.Subscription, None, optional=True)
         self.assertEqual(sub, None)
 
     def test_resolve_variable_troposphere_type_props_many(self):
         """Test resolve variable troposphere type props many."""
         sub_defs = [
             {"Endpoint": "test1", "Protocol": "lambda"},
-            {"Endpoint": "test2", "Protocol": "lambda"}
+            {"Endpoint": "test2", "Protocol": "lambda"},
         ]
-        subs = self._resolve_troposphere_var(sns.Subscription, sub_defs,
-                                             many=True)
+        subs = self._resolve_troposphere_var(sns.Subscription, sub_defs, many=True)
 
         for i, sub in enumerate(subs):
             self.assertTrue(isinstance(sub, sns.Subscription))
@@ -391,39 +385,38 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variable_troposphere_type_optional_many(self):
         """Test resolve variable troposphere type optional many."""
-        res = self._resolve_troposphere_var(sns.Subscription, {},
-                                            many=True, optional=True)
+        res = self._resolve_troposphere_var(
+            sns.Subscription, {}, many=True, optional=True
+        )
         self.assertIsNone(res)
 
     def test_resolve_variable_provided_resolved(self):
         """Test resolve variable provided resolved."""
         var_name = "testVar"
         var_def = {"type": str}
-        provided_variable = Variable(var_name, "${mock 1}", 'cfngin')
+        provided_variable = Variable(var_name, "${mock 1}", "cfngin")
         provided_variable.resolve(context=MagicMock(), provider=MagicMock())
         blueprint_name = "testBlueprint"
 
-        value = resolve_variable(var_name, var_def, provided_variable,
-                                 blueprint_name)
+        value = resolve_variable(var_name, var_def, provided_variable, blueprint_name)
         self.assertEqual(value, "1")
 
     def test_resolve_variable_allowed_values(self):
         """Test resolve variable allowed values."""
         var_name = "testVar"
         var_def = {"type": str, "allowed_values": ["allowed"]}
-        provided_variable = Variable(var_name, "not_allowed", 'cfngin')
+        provided_variable = Variable(var_name, "not_allowed", "cfngin")
         blueprint_name = "testBlueprint"
         with self.assertRaises(ValueError):
-            resolve_variable(var_name, var_def, provided_variable,
-                             blueprint_name)
+            resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
-        provided_variable = Variable(var_name, "allowed", 'cfngin')
-        value = resolve_variable(var_name, var_def, provided_variable,
-                                 blueprint_name)
+        provided_variable = Variable(var_name, "allowed", "cfngin")
+        value = resolve_variable(var_name, var_def, provided_variable, blueprint_name)
         self.assertEqual(value, "allowed")
 
     def test_resolve_variable_validator_valid_value(self):
         """Test resolve variable validator valid value."""
+
         def triple_validator(value):
             if len(value) != 3:
                 raise ValueError
@@ -432,15 +425,15 @@ class TestVariables(unittest.TestCase):
         var_name = "testVar"
         var_def = {"type": list, "validator": triple_validator}
         var_value = [1, 2, 3]
-        provided_variable = Variable(var_name, var_value, 'cfngin')
+        provided_variable = Variable(var_name, var_value, "cfngin")
         blueprint_name = "testBlueprint"
 
-        value = resolve_variable(var_name, var_def, provided_variable,
-                                 blueprint_name)
+        value = resolve_variable(var_name, var_def, provided_variable, blueprint_name)
         self.assertEqual(value, var_value)
 
     def test_resolve_variable_validator_invalid_value(self):
         """Test resolve variable validator invalid value."""
+
         def triple_validator(value):
             if len(value) != 3:
                 raise ValueError("Must be a triple.")
@@ -449,18 +442,18 @@ class TestVariables(unittest.TestCase):
         var_name = "testVar"
         var_def = {"type": list, "validator": triple_validator}
         var_value = [1, 2]
-        provided_variable = Variable(var_name, var_value, 'cfngin')
+        provided_variable = Variable(var_name, var_value, "cfngin")
         blueprint_name = "testBlueprint"
 
         with self.assertRaises(ValidatorError) as result:
-            resolve_variable(var_name, var_def, provided_variable,
-                             blueprint_name)
+            resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
         exc = result.exception.exception  # The wrapped exception
         self.assertIsInstance(exc, ValueError)
 
     def test_resolve_variables(self):
         """Test resolve variables."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -471,9 +464,9 @@ class TestVariables(unittest.TestCase):
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
         variables = [
-            Variable("Param1", 1, 'cfngin'),
-            Variable("Param2", "${output other-stack::Output}", 'cfngin'),
-            Variable("Param3", 3, 'cfngin'),
+            Variable("Param1", 1, "cfngin"),
+            Variable("Param2", "${output other-stack::Output}", "cfngin"),
+            Variable("Param3", 3, "cfngin"),
         ]
 
         variables[1]._value._resolve("Test Output")
@@ -485,6 +478,7 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variables_lookup_returns_non_string(self):
         """Test resolve variables lookup returns non string."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -498,8 +492,7 @@ class TestVariables(unittest.TestCase):
 
         register_lookup_handler("custom", return_list_something)
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "${custom non-string-return-val}",
-                              'cfngin')]
+        variables = [Variable("Param1", "${custom non-string-return-val}", "cfngin")]
         for var in variables:
             var._value.resolve({}, {})
 
@@ -508,6 +501,7 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variables_lookup_returns_troposphere_obj(self):
         """Test resolve variables lookup returns troposphere obj."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -521,17 +515,18 @@ class TestVariables(unittest.TestCase):
 
         register_lookup_handler("custom", return_obj)
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "${custom non-string-return-val}",
-                              'cfngin')]
+        variables = [Variable("Param1", "${custom non-string-return-val}", "cfngin")]
         for var in variables:
             var._value.resolve({}, {})
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"].data,
-                         Base64("test").data)
+        self.assertEqual(
+            blueprint.resolved_variables["Param1"].data, Base64("test").data
+        )
 
     def test_resolve_variables_lookup_returns_non_string_invalid_combo(self):
         """Test resolve variables lookup returns non string invalid combo."""
+
         def return_list_something(*_args, **_kwargs):
             """Return list something."""
             return ["something"]
@@ -540,7 +535,7 @@ class TestVariables(unittest.TestCase):
         variable = Variable(
             "Param1",
             "${custom non-string-return-val},${output some-stack::Output}",
-            'cfngin'
+            "cfngin",
         )
         variable._value[0].resolve({}, {})
         with self.assertRaises(InvalidLookupCombination):
@@ -548,6 +543,7 @@ class TestVariables(unittest.TestCase):
 
     def test_get_variables(self):
         """Test get variables."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -557,8 +553,10 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1, 'cfngin'),
-                     Variable("Param2", "Test Output", 'cfngin')]
+        variables = [
+            Variable("Param1", 1, "cfngin"),
+            Variable("Param2", "Test Output", "cfngin"),
+        ]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertEqual(variables["Param1"], 1)
@@ -566,6 +564,7 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variables_missing_variable(self):
         """Test resolve variables missing variable."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -575,12 +574,13 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1, 'cfngin')]
+        variables = [Variable("Param1", 1, "cfngin")]
         with self.assertRaises(MissingVariable):
             blueprint.resolve_variables(variables)
 
     def test_resolve_variables_incorrect_type(self):
         """Test resolve variables incorrect type."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -589,12 +589,13 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "Something", 'cfngin')]
+        variables = [Variable("Param1", "Something", "cfngin")]
         with self.assertRaises(ValueError):
             blueprint.resolve_variables(variables)
 
     def test_get_variables_default_value(self):
         """Test get variables default value."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -604,7 +605,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param2", "Test Output", 'cfngin')]
+        variables = [Variable("Param2", "Test Output", "cfngin")]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertEqual(variables["Param1"], 1)
@@ -612,6 +613,7 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variables_convert_type(self):
         """Test resolve variables convert type."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -620,13 +622,14 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1, 'cfngin')]
+        variables = [Variable("Param1", 1, "cfngin")]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], int))
 
     def test_resolve_variables_cfn_type(self):
         """Test resolve variables cfn type."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -635,13 +638,14 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", "Value", 'cfngin')]
+        variables = [Variable("Param1", "Value", "cfngin")]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], CFNParameter))
 
     def test_resolve_variables_cfn_number(self):
         """Test resolve variables cfn number."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -650,7 +654,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1, 'cfngin')]
+        variables = [Variable("Param1", 1, "cfngin")]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], CFNParameter))
@@ -658,6 +662,7 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variables_cfn_type_list(self):
         """Test resolve variables cfn type list."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -666,7 +671,7 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", ["us-east-1", "us-west-2"], 'cfngin')]
+        variables = [Variable("Param1", ["us-east-1", "us-west-2"], "cfngin")]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertTrue(isinstance(variables["Param1"], CFNParameter))
@@ -677,6 +682,7 @@ class TestVariables(unittest.TestCase):
 
     def test_resolve_variables_cfn_type_list_invalid_value(self):
         """Test resolve variables cfn type list invalid value."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -685,13 +691,14 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", {"main": "us-east-1"}, 'cfngin')]
+        variables = [Variable("Param1", {"main": "us-east-1"}, "cfngin")]
         with self.assertRaises(ValueError):
             blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
 
     def test_get_parameter_definitions_cfn_type_list(self):
         """Test get parameter definitions cfn type list."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -703,11 +710,11 @@ class TestVariables(unittest.TestCase):
         parameters = blueprint.get_parameter_definitions()
         self.assertTrue("Param1" in parameters)
         parameter = parameters["Param1"]
-        self.assertEqual(parameter["type"],
-                         "List<AWS::EC2::AvailabilityZone::Name>")
+        self.assertEqual(parameter["type"], "List<AWS::EC2::AvailabilityZone::Name>")
 
     def test_get_parameter_definitions_cfn_type(self):
         """Test get parameter definitions cfn type."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -723,6 +730,7 @@ class TestVariables(unittest.TestCase):
 
     def test_get_required_parameter_definitions_cfn_type(self):
         """Test get required parameter definitions cfn type."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -737,6 +745,7 @@ class TestVariables(unittest.TestCase):
 
     def test_get_parameter_values(self):
         """Test get parameter values."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -746,8 +755,10 @@ class TestVariables(unittest.TestCase):
             }
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        variables = [Variable("Param1", 1, 'cfngin'),
-                     Variable("Param2", "Value", 'cfngin')]
+        variables = [
+            Variable("Param1", 1, "cfngin"),
+            Variable("Param2", "Value", "cfngin"),
+        ]
         blueprint.resolve_variables(variables)
         variables = blueprint.get_variables()
         self.assertEqual(len(variables), 2)
@@ -757,7 +768,7 @@ class TestVariables(unittest.TestCase):
 
     def test_validate_allowed_values(self):
         """Test validate allowed values."""
-        allowed_values = ['allowed']
+        allowed_values = ["allowed"]
         valid = validate_allowed_values(allowed_values, "not_allowed")
         self.assertFalse(valid)
         valid = validate_allowed_values(allowed_values, "allowed")
@@ -765,6 +776,7 @@ class TestVariables(unittest.TestCase):
 
     def test_blueprint_with_parameters_fails(self):
         """Test blueprint with parameters fails."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -788,14 +800,13 @@ class TestVariables(unittest.TestCase):
     def test_variable_exists_but_value_is_none(self):
         """Test variable exists but value is none."""
         var_name = "testVar"
-        var_def = {"type": str}
         var_value = None
-        provided_variable = Variable(var_name, var_value, 'cfngin')
-        blueprint_name = "testBlueprint"
-
+        provided_variable = Variable(var_name, var_value, "cfngin")
         with self.assertRaises(ValueError):
-            resolve_variable(var_name, var_def, provided_variable,
-                             blueprint_name)
+            var_def = {"type": str}
+            blueprint_name = "testBlueprint"
+
+            resolve_variable(var_name, var_def, provided_variable, blueprint_name)
 
 
 class TestCFNParameter(unittest.TestCase):
@@ -815,40 +826,39 @@ class TestCFNParameter(unittest.TestCase):
 
     def test_parse_user_data(self):
         """Test parse user data."""
-        expected = 'name: tom, last: taubkin and $'
-        variables = {
-            'name': 'tom',
-            'last': 'taubkin'
-        }
+        expected = "name: tom, last: taubkin and $"
+        variables = {"name": "tom", "last": "taubkin"}
 
-        raw_user_data = 'name: ${name}, last: $last and $$'
-        blueprint_name = 'test'
+        raw_user_data = "name: ${name}, last: $last and $$"
+        blueprint_name = "test"
         res = parse_user_data(variables, raw_user_data, blueprint_name)
         self.assertEqual(res, expected)
 
     def test_parse_user_data_missing_variable(self):
         """Test parse user data missing variable."""
-        variables = {
-            'name': 'tom',
-        }
-
-        raw_user_data = 'name: ${name}, last: $last and $$'
-        blueprint_name = 'test'
         with self.assertRaises(MissingVariable):
+            variables = {
+                "name": "tom",
+            }
+
+            raw_user_data = "name: ${name}, last: $last and $$"
+            blueprint_name = "test"
             parse_user_data(variables, raw_user_data, blueprint_name)
 
     def test_parse_user_data_invalid_placeholder(self):
         """Test parse user data invalid placeholder."""
-        raw_user_data = '$100'
-        blueprint_name = 'test'
         with self.assertRaises(InvalidUserdataPlaceholder):
+            raw_user_data = "$100"
+            blueprint_name = "test"
             parse_user_data({}, raw_user_data, blueprint_name)
 
-    @patch('runway.cfngin.blueprints.base.read_value_from_path',
-           return_value='contents')
-    @patch('runway.cfngin.blueprints.base.parse_user_data')
+    @patch(
+        "runway.cfngin.blueprints.base.read_value_from_path", return_value="contents"
+    )
+    @patch("runway.cfngin.blueprints.base.parse_user_data")
     def test_read_user_data(self, parse_mock, file_mock):
         """Test read user data."""
+
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
@@ -856,6 +866,6 @@ class TestCFNParameter(unittest.TestCase):
 
         blueprint = TestBlueprint(name="blueprint_name", context=MagicMock())
         blueprint.resolve_variables({})
-        blueprint.read_user_data('file://test.txt')
-        file_mock.assert_called_with('file://test.txt')
-        parse_mock.assert_called_with({}, 'contents', 'blueprint_name')
+        blueprint.read_user_data("file://test.txt")
+        file_mock.assert_called_with("file://test.txt")
+        parse_mock.assert_called_with({}, "contents", "blueprint_name")

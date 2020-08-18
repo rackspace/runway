@@ -20,7 +20,6 @@ exclude = '''
   | quickstarts
   | runway/aws_sso_botocore
   | scripts
-  | tests
 )/
 '''
 include = '\.pyi?$'

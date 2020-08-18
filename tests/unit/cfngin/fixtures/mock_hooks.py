@@ -9,4 +9,4 @@ def mock_hook(provider, context, **kwargs):
         {'result': kwargs['value']}
 
     """
-    return {'result': kwargs['value']}
+    return {"result": kwargs["value"]}

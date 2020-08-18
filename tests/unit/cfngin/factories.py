@@ -1,5 +1,5 @@
 """Factories for tests."""
-# pylint: disable=unused-argument
+# pylint: disable=no-self-use,unused-argument
 from collections import namedtuple
 
 from mock import MagicMock
@@ -10,7 +10,7 @@ from runway.cfngin.context import Context
 Lookup = namedtuple("Lookup", ("type", "input", "raw"))
 
 
-class MockThreadingEvent(object):
+class MockThreadingEvent(object):  # pylint: disable=too-few-public-methods
     """Mock thread events."""
 
     def wait(self, timeout=None):
@@ -18,7 +18,7 @@ class MockThreadingEvent(object):
         return False
 
 
-class MockProviderBuilder(object):
+class MockProviderBuilder(object):  # pylint: disable=too-few-public-methods
     """Mock provider builder."""
 
     def __init__(self, provider, region=None):
@@ -43,22 +43,17 @@ def mock_context(namespace="default", extra_config_args=None, **kwargs):
         config_args.update(extra_config_args)
     config = Config(config_args)
     if kwargs.get("environment"):
-        return Context(
-            config=config,
-            **kwargs)
-    return Context(
-        config=config,
-        environment={},
-        **kwargs)
+        return Context(config=config, **kwargs)
+    return Context(config=config, environment={}, **kwargs)
 
 
 def generate_definition(base_name, stack_id, **overrides):
     """Generate definitions."""
     definition = {
         "name": "%s.%d" % (base_name, stack_id),
-        "class_path": "tests.unit.cfngin.fixtures.mock_blueprints.%s" % (
-            base_name.upper()),
-        "requires": []
+        "class_path": "tests.unit.cfngin.fixtures.mock_blueprints.%s"
+        % (base_name.upper()),
+        "requires": [],
     }
     definition.update(overrides)
     return Stack(definition)
@@ -71,7 +66,7 @@ def mock_lookup(lookup_input, lookup_type, raw=None):
     return Lookup(type=lookup_type, input=lookup_input, raw=raw)
 
 
-class SessionStub(object):
+class SessionStub(object):  # pylint: disable=too-few-public-methods
     """Stubber class for boto3 sessions made with session_cache.get_session().
 
     This is a helper class that should be used when trying to stub out

@@ -22,21 +22,26 @@ class TestDictValueFormat(unittest.TestCase):
     def test_format(self):
         """Test format."""
         added = DictValue("k0", None, "value_0")
-        self.assertEqual(added.changes(),
-                         ['+%s = %s' % (added.key, added.new_value)])
+        self.assertEqual(added.changes(), ["+%s = %s" % (added.key, added.new_value)])
         removed = DictValue("k1", "value_1", None)
-        self.assertEqual(removed.changes(),
-                         ['-%s = %s' % (removed.key, removed.old_value)])
+        self.assertEqual(
+            removed.changes(), ["-%s = %s" % (removed.key, removed.old_value)]
+        )
         modified = DictValue("k2", "value_1", "value_2")
-        self.assertEqual(modified.changes(), [
-            '-%s = %s' % (modified.key, modified.old_value),
-            '+%s = %s' % (modified.key, modified.new_value)
-        ])
+        self.assertEqual(
+            modified.changes(),
+            [
+                "-%s = %s" % (modified.key, modified.old_value),
+                "+%s = %s" % (modified.key, modified.new_value),
+            ],
+        )
         unmodified = DictValue("k3", "value_1", "value_1")
-        self.assertEqual(unmodified.changes(), [' %s = %s' % (
-            unmodified.key, unmodified.old_value)])
-        self.assertEqual(unmodified.changes(), [' %s = %s' % (
-            unmodified.key, unmodified.new_value)])
+        self.assertEqual(
+            unmodified.changes(), [" %s = %s" % (unmodified.key, unmodified.old_value)]
+        )
+        self.assertEqual(
+            unmodified.changes(), [" %s = %s" % (unmodified.key, unmodified.new_value)]
+        )
 
 
 class TestDiffDictionary(unittest.TestCase):
@@ -79,12 +84,8 @@ class TestDiffParameters(unittest.TestCase):
 
     def test_diff_parameters_no_changes(self):
         """Test diff parameters no changes."""
-        old_params = {
-            "a": "Apple"
-        }
-        new_params = {
-            "a": "Apple"
-        }
+        old_params = {"a": "Apple"}
+        new_params = {"a": "Apple"}
 
         param_diffs = diff_parameters(old_params, new_params)
         self.assertEqual(param_diffs, [])

@@ -24,13 +24,15 @@ class MockBoto3Session(object):
 
     """
 
-    def __init__(self,
-                 clients=None,
-                 aws_access_key_id=None,
-                 aws_secret_access_key=None,
-                 aws_session_token=None,
-                 profile_name=None,
-                 region_name=None):
+    def __init__(
+        self,
+        clients=None,
+        aws_access_key_id=None,
+        aws_secret_access_key=None,
+        aws_session_token=None,
+        profile_name=None,
+        region_name=None,
+    ):
         """Instantiate class.
 
         Args:
@@ -52,8 +54,7 @@ class MockBoto3Session(object):
 
     def assert_client_called_with(self, service_name, **kwargs):
         """Assert a client was created with the provided kwargs."""
-        key = '{}.{}'.format(service_name, kwargs.get('region_name',
-                                                      self.region_name))
+        key = "{}.{}".format(service_name, kwargs.get("region_name", self.region_name))
         assert self._client_calls[key] == kwargs
 
     def client(self, service_name, **kwargs):
@@ -69,8 +70,7 @@ class MockBoto3Session(object):
             KeyError: Client was not stubbed from Context before trying to use.
 
         """
-        key = '{}.{}'.format(service_name, kwargs.get('region_name',
-                                                      self.region_name))
+        key = "{}.{}".format(service_name, kwargs.get("region_name", self.region_name))
         self._client_calls[key] = kwargs
         return self._clients[key]
 
@@ -82,9 +82,8 @@ class MockBoto3Session(object):
             region_name (Optional[str]): AWS region.
 
         """
-        key = '{}.{}'.format(service_name, region_name or self.region_name)
-        client = boto3.client(service_name,
-                              region_name=region_name or self.region_name)
+        key = "{}.{}".format(service_name, region_name or self.region_name)
+        client = boto3.client(service_name, region_name=region_name or self.region_name)
         stubber = Stubber(client)
         self._clients[key] = client
         return client, stubber
@@ -97,14 +96,16 @@ class MockBoto3Session(object):
 class MockCFNginContext(CFNginContext):
     """Subclass CFNgin context object for tests."""
 
-    def __init__(self,
-                 environment=None,
-                 boto3_credentials=None,
-                 stack_names=None,
-                 config=None,
-                 config_path=None,
-                 region='us-east-1',
-                 force_stacks=None):
+    def __init__(
+        self,
+        environment=None,
+        boto3_credentials=None,
+        stack_names=None,
+        config=None,
+        config_path=None,
+        region="us-east-1",
+        force_stacks=None,
+    ):
         """Instantiate class."""
         if not boto3_credentials:
             boto3_credentials = {}
@@ -114,15 +115,17 @@ class MockCFNginContext(CFNginContext):
 
         # used during init process
         self.__boto3_credentials = boto3_credentials
-        self.s3_stubber = self.add_stubber('s3', region=region)
+        self.s3_stubber = self.add_stubber("s3", region=region)
 
-        super(MockCFNginContext, self).__init__(environment=environment,
-                                                boto3_credentials=boto3_credentials,
-                                                stack_names=stack_names,
-                                                config=config,
-                                                config_path=config_path,
-                                                region=region,
-                                                force_stacks=force_stacks)
+        super(MockCFNginContext, self).__init__(
+            environment=environment,
+            boto3_credentials=boto3_credentials,
+            stack_names=stack_names,
+            config=config,
+            config_path=config_path,
+            region=region,
+            force_stacks=force_stacks,
+        )
 
     def add_stubber(self, service_name, region=None):
         """Add a stubber to context.
@@ -132,23 +135,21 @@ class MockCFNginContext(CFNginContext):
             region (Optional[str]): AWS region.
 
         """
-        key = '{}.{}'.format(service_name, region or self.region)
+        key = "{}.{}".format(service_name, region or self.region)
 
         self._boto3_test_client[key] = boto3.client(
-            service_name,
-            region_name=region or self.region,
-            **self.__boto3_credentials
+            service_name, region_name=region or self.region, **self.__boto3_credentials
         )
-        self._boto3_test_stubber[key] = Stubber(
-            self._boto3_test_client[key]
-        )
+        self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
 
     def get_session(self, profile=None, region=None):
         """Wrap get_session to enable stubbing."""
-        return MockBoto3Session(clients=self._boto3_test_client,
-                                profile_name=profile,
-                                region_name=region or self.region)
+        return MockBoto3Session(
+            clients=self._boto3_test_client,
+            profile_name=profile,
+            region_name=region or self.region,
+        )
 
 
 # TODO use pytest-subprocess for when dropping python 2
@@ -200,13 +201,13 @@ class MockProcess(object):  # pylint: disable=too-few-public-methods
             if not result.endswith(linesep):
                 result += linesep
             if self.text_mode:
-                result.replace('\r\n', '\n')
+                result.replace("\r\n", "\n")
 
         io_base = io.StringIO() if self.text_mode else io.BytesIO()
 
         if result:
             if sys.version_info.major < 3:
-                io_base.write(result.decode('UTF-8'))
+                io_base.write(result.decode("UTF-8"))
             else:
                 io_base.write(result)
             io_base.seek(0)  # return to the begining of the stream
@@ -224,14 +225,14 @@ class MockRunwayConfig(MutableMap):
         self.future = MagicMock()
         self.tests = []
         self.ignore_git_branch = False
-        self.runway_version = SpecifierSet('>=1.10', prereleases=True)
+        self.runway_version = SpecifierSet(">=1.10", prereleases=True)
         self.variables = MutableMap()
 
         # classmethods
-        self.find_config_file = MagicMock(name='find_config_file',
-                                          return_value='./runway.yml')
-        self.load_from_file = MagicMock(name='load_from_file',
-                                        return_value=self)
+        self.find_config_file = MagicMock(
+            name="find_config_file", return_value="./runway.yml"
+        )
+        self.load_from_file = MagicMock(name="load_from_file", return_value=self)
 
     def __call__(self, **kwargs):
         """Mock call to return self."""
@@ -245,10 +246,10 @@ class MockRunwayContext(RunwayContext):
     def __init__(self, command=None, deploy_environment=None):
         """Instantiate class."""
         if not deploy_environment:
-            deploy_environment = DeployEnvironment(environ={},
-                                                   explicit_name='test')
-        super(MockRunwayContext, self).__init__(command=command,
-                                                deploy_environment=deploy_environment)
+            deploy_environment = DeployEnvironment(environ={}, explicit_name="test")
+        super(MockRunwayContext, self).__init__(
+            command=command, deploy_environment=deploy_environment
+        )
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True
@@ -261,23 +262,23 @@ class MockRunwayContext(RunwayContext):
             region (Optional[str]): AWS region name.
 
         """
-        key = '{}.{}'.format(service_name, region or self.env_region)
+        key = "{}.{}".format(service_name, region or self.env_region)
 
         self._boto3_test_client[key] = boto3.client(
             service_name,
             region_name=region or self.env_region,
             **self.boto3_credentials
         )
-        self._boto3_test_stubber[key] = Stubber(
-            self._boto3_test_client[key]
-        )
+        self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
 
     def get_session(self, profile=None, region=None):
         """Wrap get_session to enable stubbing."""
-        return MockBoto3Session(clients=self._boto3_test_client,
-                                profile_name=profile,
-                                region_name=region or self.env_region)
+        return MockBoto3Session(
+            clients=self._boto3_test_client,
+            profile_name=profile,
+            region_name=region or self.env_region,
+        )
 
     @property
     def use_concurrent(self):
@@ -298,7 +299,7 @@ class MockRunwayContext(RunwayContext):
 class YamlLoader(object):
     """Load YAML files from a directory."""
 
-    def __init__(self, root, load_class=None, load_type='default'):
+    def __init__(self, root, load_class=None, load_type="default"):
         """Instantiate class.
 
         Args:
@@ -322,8 +323,8 @@ class YamlLoader(object):
             Dict[str, Any]: Content of the file loaded by PyYAML.
 
         """
-        if not file_name.endswith('.yml') or not file_name.endswith('.yaml'):
-            file_name += '.yml'
+        if not file_name.endswith(".yml") or not file_name.endswith(".yaml"):
+            file_name += ".yml"
         if sys.version_info.major > 2:
             content = (self.root / file_name).read_text()
         else:
@@ -341,10 +342,10 @@ class YamlLoader(object):
 
         """
         if not self.load_class:
-            raise ValueError('load_class must be set to use this method')
-        if self.load_type == 'default':
+            raise ValueError("load_class must be set to use this method")
+        if self.load_type == "default":
             return self.load_class(self.get(file_name))
-        if self.load_type == 'kwargs':
+        if self.load_type == "kwargs":
             return self.load_class(**self.get(file_name))
         raise ValueError('invalid load_type; "{}"'.format(self.load_type))
 
@@ -359,8 +360,7 @@ class YamlLoaderDeploymet(YamlLoader):
             root (Path): Root directory.
 
         """
-        super(YamlLoaderDeploymet, self).__init__(root,
-                                                  load_class=DeploymentDefinition)
+        super(YamlLoaderDeploymet, self).__init__(root, load_class=DeploymentDefinition)
 
     def load(self, file_name):
         """Load YAML file contents.

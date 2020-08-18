@@ -20,24 +20,24 @@ def test_kbenv_install(cd_tmp_path, caplog):
     For best results, remove any existing installs.
 
     """
-    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.kbenv')
-    (cd_tmp_path / '.kubectl-version').write_text(six.u('v1.14.1'))
+    caplog.set_level(logging.DEBUG, logger="runway.cli.commands.kbenv")
+    (cd_tmp_path / ".kubectl-version").write_text(six.u("v1.14.1"))
     runner = CliRunner()
-    result = runner.invoke(cli, ['kbenv', 'install'])
+    result = runner.invoke(cli, ["kbenv", "install"])
     assert result.exit_code == 0
 
-    kb_bin = Path(caplog.messages[-1].strip('kubectl path: '))
+    kb_bin = Path(caplog.messages[-1].strip("kubectl path: "))
     assert kb_bin.exists()
 
 
 def test_kbenv_install_no_version_file(cd_tmp_path, caplog):
     """Test ``runway kbenv install`` no version file."""
-    caplog.set_level(logging.ERROR, logger='runway')
+    caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()
-    result = runner.invoke(cli, ['kbenv', 'install'])
+    result = runner.invoke(cli, ["kbenv", "install"])
     assert result.exit_code == 1
 
-    assert 'no .kubectl-version file present' in caplog.messages[0]
+    assert "no .kubectl-version file present" in caplog.messages[0]
 
 
 def test_kbenv_install_version(caplog):
@@ -46,23 +46,23 @@ def test_kbenv_install_version(caplog):
     For best results, remove any existing installs.
 
     """
-    caplog.set_level(logging.DEBUG, logger='runway.cli.commands.kbenv')
+    caplog.set_level(logging.DEBUG, logger="runway.cli.commands.kbenv")
     runner = CliRunner()
-    result = runner.invoke(cli, ['kbenv', 'install', 'v1.14.0'])
+    result = runner.invoke(cli, ["kbenv", "install", "v1.14.0"])
     assert result.exit_code == 0
 
-    kb_bin = Path(caplog.messages[-1].strip('kubectl path: '))
+    kb_bin = Path(caplog.messages[-1].strip("kubectl path: "))
     assert kb_bin.exists()
 
 
 def test_kbenv_run_no_version_file(cd_tmp_path, caplog):
     """Test ``runway kbenv run -- --help`` no version file."""
-    caplog.set_level(logging.ERROR, logger='runway')
+    caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()
-    result = runner.invoke(cli, ['kbenv', 'run', '--', '--help'])
+    result = runner.invoke(cli, ["kbenv", "run", "--", "--help"])
     assert result.exit_code == 1
 
-    assert 'no .kubectl-version file present' in caplog.messages[0]
+    assert "no .kubectl-version file present" in caplog.messages[0]
 
 
 def test_kbenv_run_separator(cd_tmp_path, capfd):
@@ -74,13 +74,13 @@ def test_kbenv_run_separator(cd_tmp_path, capfd):
     pass options shared with Runway such as ``--help``.
 
     """
-    (cd_tmp_path / '.kubectl-version').write_text(six.u('v1.14.0'))
+    (cd_tmp_path / ".kubectl-version").write_text(six.u("v1.14.0"))
     runner = CliRunner()
-    result = runner.invoke(cli, ['kbenv', 'run', '--', '--help'])
+    result = runner.invoke(cli, ["kbenv", "run", "--", "--help"])
     captured = capfd.readouterr()  # capfd required for subprocess
     assert result.exit_code == 0
-    assert 'runway' not in captured.out
-    assert 'kubectl <command> --help' in captured.out
+    assert "runway" not in captured.out
+    assert "kubectl <command> --help" in captured.out
 
 
 def test_kbenv_run_version(cd_tmp_path, capfd):
@@ -89,9 +89,9 @@ def test_kbenv_run_version(cd_tmp_path, capfd):
     Parsing of bare command.
 
     """
-    (cd_tmp_path / '.kubectl-version').write_text(six.u('v1.14.0'))
+    (cd_tmp_path / ".kubectl-version").write_text(six.u("v1.14.0"))
     runner = CliRunner()
-    result = runner.invoke(cli, ['kbenv', 'run', 'version', '--client'])
+    result = runner.invoke(cli, ["kbenv", "run", "version", "--client"])
     captured = capfd.readouterr()  # capfd required for subprocess
     assert result.exit_code == 0
-    assert 'v1.14.0' in captured.out
+    assert "v1.14.0" in captured.out

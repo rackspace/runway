@@ -23,28 +23,20 @@ class TestECSHooks(unittest.TestCase):
     def test_create_single_cluster(self):
         """Test create single cluster."""
         with mock_ecs():
-            cluster = "test-cluster"
             logger = "runway.cfngin.hooks.ecs"
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
             self.assertEqual(len(response["clusterArns"]), 0)
             with LogCapture(logger) as logs:
+                cluster = "test-cluster"
                 self.assertTrue(
                     create_clusters(
-                        provider=self.provider,
-                        context=self.context,
-                        clusters=cluster,
+                        provider=self.provider, context=self.context, clusters=cluster,
                     )
                 )
 
-                logs.check(
-                    (
-                        logger,
-                        "DEBUG",
-                        "creating ECS cluster: %s" % cluster
-                    )
-                )
+                logs.check((logger, "DEBUG", "creating ECS cluster: %s" % cluster))
 
             response = client.list_clusters()
             self.assertEqual(len(response["clusterArns"]), 1)
@@ -68,13 +60,7 @@ class TestECSHooks(unittest.TestCase):
                         )
                     )
 
-                    logs.check(
-                        (
-                            logger,
-                            "DEBUG",
-                            "creating ECS cluster: %s" % cluster
-                        )
-                    )
+                    logs.check((logger, "DEBUG", "creating ECS cluster: %s" % cluster))
 
             response = client.list_clusters()
             self.assertEqual(len(response["clusterArns"]), 2)
@@ -88,17 +74,10 @@ class TestECSHooks(unittest.TestCase):
 
             self.assertEqual(len(response["clusterArns"]), 0)
             with LogCapture(logger) as logs:
-                create_clusters(
-                    provider=self.provider,
-                    context=self.context
-                )
+                create_clusters(provider=self.provider, context=self.context)
 
                 logs.check(
-                    (
-                        logger,
-                        "ERROR",
-                        "clusters argument required but not provided"
-                    )
+                    (logger, "ERROR", "clusters argument required but not provided")
                 )
 
             response = client.list_clusters()

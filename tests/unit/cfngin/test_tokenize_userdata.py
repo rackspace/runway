@@ -11,12 +11,7 @@ class TestCfTokenize(unittest.TestCase):
 
     def test_tokenize(self):
         """Test tokenize."""
-        user_data = [
-            "field0",
-            "Ref(\"SshKey\")",
-            "field1",
-            "Fn::GetAtt(\"Blah\", \"Woot\")"
-        ]
+        user_data = ["field0", 'Ref("SshKey")', "field1", 'Fn::GetAtt("Blah", "Woot")']
         user_data_dump = yaml.dump(user_data)
         parts = cf_tokenize(user_data_dump)
         self.assertIsInstance(parts[1], dict)

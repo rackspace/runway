@@ -18,14 +18,10 @@ class TestOutputHandler(unittest.TestCase):
 
     def test_output_handler(self):
         """Test output handler."""
-        stack = Stack(
-            definition=generate_definition("vpc", 1),
-            context=self.context)
-        stack.set_outputs({
-            "SomeOutput": "Test Output"})
+        stack = Stack(definition=generate_definition("vpc", 1), context=self.context)
+        stack.set_outputs({"SomeOutput": "Test Output"})
         self.context.get_stack.return_value = stack
-        value = OutputLookup.handle("stack-name::SomeOutput",
-                                    context=self.context)
+        value = OutputLookup.handle("stack-name::SomeOutput", context=self.context)
         self.assertEqual(value, "Test Output")
         self.assertEqual(self.context.get_stack.call_count, 1)
         args = self.context.get_stack.call_args
