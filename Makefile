@@ -25,7 +25,7 @@ sync: ## create a python virtual environment in the project for development
 
 # changes that need to be made inorder to sync python two (may also require deletion of the existing lock file)
 sync_two:  ## create a python virtual environment in the project for python 2 development
-	PIPENV_VENV_IN_PROJECT=1 pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" --dev --skip-lock
+	PIPENV_VENV_IN_PROJECT=1 pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" "isort[pyproject]>=4.2.5" --dev --skip-lock
 
 sync_all: sync ## sync all virtual environments used by this project with their Pipfile.lock
 	pushd docs && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
