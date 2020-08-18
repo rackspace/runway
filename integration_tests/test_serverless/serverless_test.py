@@ -95,9 +95,7 @@ class ServerlessTest(Serverless):
 
             for s3key in get_matching_s3_keys(
                 sls_bucket,
-                "serverless/{0}/{1}".format(
-                    configs["Serverless"].get("service"), env
-                ),  # noqa pylint: disable=line-too-long
+                "serverless/{0}/{1}".format(configs["Serverless"].get("service"), env),
                 os.path.basename(key) + ".zip",
                 session,
             ):

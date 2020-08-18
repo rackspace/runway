@@ -317,7 +317,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         return self.template.add_resource(
             cloudfront.CloudFrontOriginAccessIdentity(
                 "OAI",
-                CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa pylint: disable=line-too-long
+                CloudFrontOriginAccessIdentityConfig=cloudfront.CloudFrontOriginAccessIdentityConfig(  # noqa
                     Comment="CF access to website"
                 ),
             )

@@ -154,7 +154,9 @@ disable=useless-object-inheritance,
         bad-continuation,
         # with black formatting, it is difficult to avoide this with inherited
         # code or code that needs to be duplicated.
-        similarities
+        similarities,
+        # flake8 overlap
+        line-too-long
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

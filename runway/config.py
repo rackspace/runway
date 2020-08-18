@@ -1243,9 +1243,8 @@ class Config(ConfigComponent):
         ignore_git_branch=False,  # type: bool
         runway_version=None,  # type: Optional[str]
         tests=None,  # type: List[Dict[str, Any]]
-        variables=None  # type: Optional[Dict[str, Any]]
-        # pylint only complains for python2
-    ):  # pylint: disable=bad-continuation
+        variables=None,  # type: Optional[Dict[str, Any]]
+    ):
         # type: (...) -> None
         """.. Top-level Runway config file.
 

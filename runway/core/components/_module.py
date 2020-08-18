@@ -311,9 +311,8 @@ class Module(object):
         modules,  # type: List[ModuleDefinition]
         variables,  # type: VariablesDefinition
         deployment=None,  # type: Optional[DeploymentDefinition]
-        future=None  # type: Optional[FutureDefinition]
-        # TODO remove after dropping python 2
-    ):  # pylint: disable=bad-continuation
+        future=None,  # type: Optional[FutureDefinition]
+    ):
         # type: (...) -> None
         """Run a list of modules.
 

@@ -1,5 +1,5 @@
 """AMI lookup."""
-# pylint: disable=unused-argument,line-too-long,arguments-differ
+# pylint: disable=unused-argument,arguments-differ
 import operator
 import re
 
