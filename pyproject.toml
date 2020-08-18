@@ -14,7 +14,6 @@ exclude = '''
   | dist
   | docs
   | infrastructure
-  | integration_test_infrastructure
   | npm
   | quickstarts
   | runway/aws_sso_botocore
