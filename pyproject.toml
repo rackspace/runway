@@ -15,11 +15,9 @@ exclude = '''
   | docs
   | infrastructure
   | integration_test_infrastructure
-  | integration_tests
   | npm
   | quickstarts
   | runway/aws_sso_botocore
-  | scripts
 )/
 '''
 include = '\.pyi?$'

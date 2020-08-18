@@ -67,7 +67,7 @@ lint-black: ## run black
 
 lint-flake8: ## run flake8
 	@echo "Running flake8..."
-	@pipenv run flake8 --exclude=runway/embedded,runway/templates runway --docstring-convention=all
+	@pipenv run flake8 --docstring-convention=all
 	@echo ""
 
 lint-isort: ## run isort

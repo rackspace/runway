@@ -26,6 +26,5 @@ repos:
       - id: flake8
         args:
           - "--docstring-convention=all"  # TODO move to setup.cfg when dropping python 2
-        exclude: ^integration_tests
         additional_dependencies:
           - flake8-docstrings

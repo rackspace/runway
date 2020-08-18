@@ -11,20 +11,22 @@ class TestTwoRegions(Parallelism):
 
     def deploy(self):
         """Deploy provider."""
-        self.copy_fixture('sampleapp.cfn')
-        self.copy_runway('two-regions')
+        self.copy_fixture("sampleapp.cfn")
+        self.copy_runway("two-regions")
         with change_dir(self.parallelism_test_dir):
-            return run_command(['runway', 'deploy'])
+            return run_command(["runway", "deploy"])
 
     def run(self):
         """Run tests."""
         self.clean()
-        self.set_env_var('CI', '1')
-        assert self.deploy() == 0, '{}: Two regions deployed in parallel failed'.format(__name__)
+        self.set_env_var("CI", "1")
+        assert self.deploy() == 0, "{}: Two regions deployed in parallel failed".format(
+            __name__
+        )
 
     def teardown(self):
         """Teardown scaffolding."""
-        self.logger.info('Tearing down: %s', self.TEST_NAME)
+        self.logger.info("Tearing down: %s", self.TEST_NAME)
         with change_dir(self.parallelism_test_dir):
-            run_command(['runway', 'destroy'])
+            run_command(["runway", "destroy"])
         self.clean()

@@ -35,40 +35,41 @@ class IntegrationTest(object):
         self.environment = deepcopy(env_vars or os.environ)
         self.runway_config_path = None
         # roundabout way to get the file path of a subclass
-        self.working_dir = os.path.abspath(os.path.dirname(
-            sys.modules[self.__module__].__file__
-        ))
-        self.fixture_dir = os.path.join(self.working_dir, 'fixtures')
-        self.tests_dir = os.path.join(self.working_dir, 'tests')
+        self.working_dir = os.path.abspath(
+            os.path.dirname(sys.modules[self.__module__].__file__)
+        )
+        self.fixture_dir = os.path.join(self.working_dir, "fixtures")
+        self.tests_dir = os.path.join(self.working_dir, "tests")
 
     @property
     def deploy_env(self):
         """Return DEPLOY_ENVIRONMENT for the test."""
-        return self.environment.get('DEPLOY_ENVIRONMENT')
+        return self.environment.get("DEPLOY_ENVIRONMENT")
 
     @deploy_env.setter
     def deploy_env(self, value):
         """Set the DEPLOY_ENVIRONMENT value."""
         self.logger.info('Setting "DEPLOY_ENVIRONMENT" to "%s"', value)
-        self.environment['DEPLOY_ENVIRONMENT'] = value
+        self.environment["DEPLOY_ENVIRONMENT"] = value
 
     @property
     def region(self):
         """Return the region set for the test environment."""
-        return self.environment.get('AWS_DEFAULT_REGION',
-                                    self.environment.get('AWS_REGION',
-                                                         'us-east-1'))
+        return self.environment.get(
+            "AWS_DEFAULT_REGION", self.environment.get("AWS_REGION", "us-east-1")
+        )
 
     @region.setter
     def region(self, value):
         """Set the value of region."""
-        self.environment['AWS_DEFAULT_REGION'] = value
-        self.environment['AWS_REGION'] = value
+        self.environment["AWS_DEFAULT_REGION"] = value
+        self.environment["AWS_REGION"] = value
 
     def copy_fixtures(self):
         """Copy fixtures to the root of the tests dir."""
-        self.logger.info('Fixtures defined for tests: %s',
-                         str(self.REQUIRED_FIXTURE_FILES))
+        self.logger.info(
+            "Fixtures defined for tests: %s", str(self.REQUIRED_FIXTURE_FILES)
+        )
         for fixture in self.REQUIRED_FIXTURE_FILES:
             src = os.path.join(self.fixture_dir, fixture)
             dest = os.path.join(self.working_dir, fixture)
@@ -84,15 +85,14 @@ class IntegrationTest(object):
             try:
                 send2trash(fixture_path)
             except OSError as err:
-                if err.errno == errno.ENOENT or 'not found' in str(err):
+                if err.errno == errno.ENOENT or "not found" in str(err):
                     continue
                 raise
 
     def parse_config(self, path):
         """Read and parse yml."""
         if not os.path.isfile(path):
-            self.logger.error("Config file was not found (looking for \"%s\")",
-                              path)
+            self.logger.error('Config file was not found (looking for "%s")', path)
         with open(path) as data_file:
             return yaml.safe_load(data_file)
 
@@ -113,17 +113,20 @@ class IntegrationTest(object):
             of the process.
 
         """
-        cmd = ['runway', action]
+        cmd = ["runway", action]
         if tags:
             for tag in tags:
-                cmd.extend(['--tag', tag])
+                cmd.extend(["--tag", tag])
         cmd.extend(args)
-        self.logger.info('Running command: %s', str(cmd))
+        self.logger.info("Running command: %s", str(cmd))
         with change_dir(self.working_dir):
-            cmd_process = subprocess.Popen(cmd, env=env_vars or self.environment,
-                                           stdout=subprocess.PIPE,
-                                           stderr=subprocess.PIPE,
-                                           universal_newlines=True)
+            cmd_process = subprocess.Popen(
+                cmd,
+                env=env_vars or self.environment,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
             stdout, stderr = cmd_process.communicate(timeout=timeout)
             print(stderr)
         return cmd_process.returncode, stdout, stderr
@@ -134,23 +137,23 @@ class IntegrationTest(object):
             self.deploy_env = env
 
     def set_env_var(self, var_name, var):
-        """Set an environment variable"""
+        """Set an environment variable."""
         self.logger.info('Setting "%s" to "%s"', var_name, var)
         if not isinstance(var, dict):
-            env = {}
-            env[var_name] = var
+            env = {var_name: var}
         self.environment.update(env)
 
     def unset_env_var(self, var):
+        """Unset environment variable."""
         self.logger.info('Unsetting "%s" Environment Variable', var)
         del self.environment[var]
 
     def run(self):
         """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError('You must implement the run() method '
-                                  'yourself!')
+        raise NotImplementedError("You must implement the run() method " "yourself!")
 
     def teardown(self):
         """Implement dummy method (set in consuming classes)."""
-        raise NotImplementedError('You must implement the teardown() method '
-                                  'yourself!')
+        raise NotImplementedError(
+            "You must implement the teardown() method " "yourself!"
+        )

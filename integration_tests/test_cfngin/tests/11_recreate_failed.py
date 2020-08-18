@@ -8,7 +8,7 @@ from send2trash import send2trash
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
 
-FILE_BASENAME = '.'.join(basename(__file__).split('.')[:-1])
+FILE_BASENAME = ".".join(basename(__file__).split(".")[:-1])
 
 
 class TestRecreateFailed(Cfngin):
@@ -21,18 +21,17 @@ class TestRecreateFailed(Cfngin):
 
     """
 
-    REQUIRED_FIXTURE_FILES = [FILE_BASENAME + '.1.yaml',
-                              FILE_BASENAME + '.2.yaml']
+    REQUIRED_FIXTURE_FILES = [FILE_BASENAME + ".1.yaml", FILE_BASENAME + ".2.yaml"]
     TEST_NAME = __name__
 
     def _deploy_bad(self):
         """Deploy failing config."""
-        code, _stdout, stderr = self.runway_cmd('deploy')
-        assert code != 0, 'exit code should be non-zero since one config failed'
+        code, _stdout, stderr = self.runway_cmd("deploy")
+        assert code != 0, "exit code should be non-zero since one config failed"
         expected_lines = [
-            'recreate-failed:submitted (creating new stack)',
-            'recreate-failed:submitted (rolling back new stack)',
-            'The following steps failed: recreate-failed'
+            "recreate-failed:submitted (creating new stack)",
+            "recreate-failed:submitted (rolling back new stack)",
+            "The following steps failed: recreate-failed",
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -40,13 +39,13 @@ class TestRecreateFailed(Cfngin):
     def _deploy_good(self):
         """Deploy good config."""
         # get rid of the bad config so the good one can run
-        send2trash(os.path.join(self.working_dir, FILE_BASENAME + '.1.yaml'))
-        code, _stdout, stderr = self.runway_cmd('deploy')
-        assert code == 0, 'exit code should be zero'
+        send2trash(os.path.join(self.working_dir, FILE_BASENAME + ".1.yaml"))
+        code, _stdout, stderr = self.runway_cmd("deploy")
+        assert code == 0, "exit code should be zero"
         expected_lines = [
-            'recreate-failed:submitted (destroying stack for re-creation)',
-            'recreate-failed:submitted (creating new stack)',
-            'recreate-failed:complete (creating new stack)'
+            "recreate-failed:submitted (destroying stack for re-creation)",
+            "recreate-failed:submitted (creating new stack)",
+            "recreate-failed:complete (creating new stack)",
         ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
@@ -59,5 +58,5 @@ class TestRecreateFailed(Cfngin):
 
     def teardown(self):
         """Teardown any created resources and delete files."""
-        self.runway_cmd('destroy')
+        self.runway_cmd("destroy")
         self.cleanup_fixtures()
