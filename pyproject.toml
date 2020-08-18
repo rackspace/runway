@@ -21,7 +21,7 @@ line-length = 88
 target-version = ['py27', 'py36', 'py37', 'py38']
 
 
-[tool.coverage.report]  # TODO update install to "coverage[toml]" to use
+[tool.coverage.report]
 exclude_lines = [
     "cov: ignore",  # standard exclude comment
     "if TYPE_CHECKING:",  # excluded blocks
@@ -35,7 +35,7 @@ exclude_lines = [
 ]
 
 
-[tool.coverage.run]  # TODO update install to "coverage[toml]" to use
+[tool.coverage.run]
 concurrency = [
     "multiprocess",
     "thread",
