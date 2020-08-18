@@ -12,8 +12,8 @@ from distutils.version import LooseVersion  # noqa pylint: disable=E
 
 import hcl
 import requests
-from six.moves.urllib.error import URLError  # pylint: disable=E  # python 2 only
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E  # python 2 only
+from six.moves.urllib.error import URLError  # pylint: disable=E
+from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
 from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error

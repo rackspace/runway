@@ -41,9 +41,9 @@ class JwksClient(object):
         self.logger.info("Fetching keys from %s", self.options.get("jwks_uri"))
 
         try:
-            request = urllib.request.urlopen(
+            request = urllib.request.urlopen(  # pylint: disable=no-member
                 self.options.get("jwks_uri")
-            )  # noqa pylint: disable=no-member
+            )
             data = json.loads(
                 request.read().decode(request.info().get_param("charset") or "utf-8")
             )
