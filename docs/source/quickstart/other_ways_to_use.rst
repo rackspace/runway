@@ -30,7 +30,3 @@ Docker
 Docker users can build their own Docker image to run a local Runway
 container or modify this `Dockerfile`_ to build a Runway image to suit specific
 needs.
-
-.. code-block:: shell
-
-    $ docker run -it --rm onica/runway-quickstart
