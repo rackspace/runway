@@ -15,10 +15,8 @@ RUN set -xe && \
   rm -rf /var/lib/apt/lists/* && \
   update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10 && \
   npm install npm@latest -g && \
-  curl -o tf.zip https://releases.hashicorp.com/terraform/0.11.7/terraform_0.11.7_linux_amd64.zip && \
-  unzip tf.zip && \
-  mv terraform /usr/local/bin/ && \
-  pip install ply && \
-  pip install pipenv runway
+  curl -L oni.ca/runway/latest/linux -o runway && \
+  chmod +x runway && \
+  mv runway /usr/local/bin
 
 CMD ["bash"]
