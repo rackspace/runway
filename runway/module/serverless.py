@@ -26,18 +26,12 @@ LOGGER = logging.getLogger(__name__)
 def gen_sls_config_files(stage, region):
     """Generate possible SLS config files names."""
     names = []
-    for ext in ['yml', 'json']:
+    for ext in ["yml", "json"]:
         # Give preference to explicit stage-region files
-        names.append(
-            os.path.join('env',
-                         "%s-%s.%s" % (stage, region, ext))
-        )
+        names.append(os.path.join("env", "%s-%s.%s" % (stage, region, ext)))
         names.append("config-%s-%s.%s" % (stage, region, ext))
         # Fallback to stage name only
-        names.append(
-            os.path.join('env',
-                         "%s.%s" % (stage, ext))
-        )
+        names.append(os.path.join("env", "%s.%s" % (stage, ext)))
         names.append("config-%s.%s" % (stage, ext))
     return names
 
@@ -45,30 +39,32 @@ def gen_sls_config_files(stage, region):
 def run_sls_print(sls_opts, env_vars, path):
     """Run sls print command."""
     sls_info_opts = list(sls_opts)
-    sls_info_opts[0] = 'print'
-    sls_info_opts.extend(['--format', 'yaml'])
-    sls_info_cmd = generate_node_command(command='sls',
-                                         command_opts=sls_info_opts,
-                                         path=path)
-    return yaml.safe_load(subprocess.check_output(sls_info_cmd,
-                                                  env=env_vars))
+    sls_info_opts[0] = "print"
+    sls_info_opts.extend(["--format", "yaml"])
+    sls_info_cmd = generate_node_command(
+        command="sls", command_opts=sls_info_opts, path=path
+    )
+    return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
 
 
 def get_src_hash(sls_config, path):
     """Get hash(es) of serverless source."""
-    funcs = sls_config['functions']
+    funcs = sls_config["functions"]
 
-    if sls_config.get('package', {}).get('individually'):
-        hashes = {key: get_hash_of_files(os.path.join(path,
-                                                      os.path.dirname(funcs[key].get('handler'))))
-                  for key in funcs.keys()}
+    if sls_config.get("package", {}).get("individually"):
+        hashes = {
+            key: get_hash_of_files(
+                os.path.join(path, os.path.dirname(funcs[key].get("handler")))
+            )
+            for key in funcs.keys()
+        }
     else:
         directories = []
         for (key, value) in funcs.items():
-            func_path = {'path': os.path.dirname(value.get('handler'))}
+            func_path = {"path": os.path.dirname(value.get("handler"))}
             if func_path not in directories:
                 directories.append(func_path)
-        hashes = {sls_config['service']: get_hash_of_files(path, directories)}
+        hashes = {sls_config["service"]: get_hash_of_files(path, directories)}
 
     return hashes
 
@@ -86,49 +82,49 @@ def deploy_package(sls_opts, bucketname, context, path, logger=LOGGER):
 
     """
     package_dir = tempfile.mkdtemp()
-    logger.debug('package directory: %s', package_dir)
+    logger.debug("package directory: %s", package_dir)
 
     ensure_bucket_exists(bucketname, context.env.aws_region)
     sls_config = run_sls_print(sls_opts, context.env.vars, path)
     hashes = get_src_hash(sls_config, path)
 
-    sls_opts[0] = 'package'
-    sls_opts.extend(['--package', package_dir])
-    sls_package_cmd = generate_node_command(command='sls',
-                                            command_opts=sls_opts,
-                                            path=path)
+    sls_opts[0] = "package"
+    sls_opts.extend(["--package", package_dir])
+    sls_package_cmd = generate_node_command(
+        command="sls", command_opts=sls_opts, path=path
+    )
 
-    logger.info('package %s (in progress)', os.path.basename(path))
-    run_module_command(cmd_list=sls_package_cmd,
-                       env_vars=context.env.vars,
-                       logger=logger)
-    logger.info('package %s (complete)', os.path.basename(path))
+    logger.info("package %s (in progress)", os.path.basename(path))
+    run_module_command(
+        cmd_list=sls_package_cmd, env_vars=context.env.vars, logger=logger
+    )
+    logger.info("package %s (complete)", os.path.basename(path))
 
     for key in hashes.keys():
         hash_zip = hashes[key] + ".zip"
         func_zip = os.path.basename(key) + ".zip"
         if does_s3_object_exist(bucketname, hash_zip):
-            logger.info('found existing package for %s', key)
+            logger.info("found existing package for %s", key)
             download(bucketname, hash_zip, os.path.join(package_dir, func_zip))
         else:
-            logger.info('no existing package found for %s', key)
+            logger.info("no existing package found for %s", key)
             zip_name = os.path.join(package_dir, func_zip)
             upload(bucketname, hash_zip, zip_name)
 
-    sls_opts[0] = 'deploy'
+    sls_opts[0] = "deploy"
     # --package must be provided to "deploy" as a relative path to support
     # serverless@<1.70.0. the fix to support absolute path was implimented
     # somewhere between 1.60.0 and 1.70.0.
     sls_opts[-1] = os.path.relpath(package_dir)
-    sls_deploy_cmd = generate_node_command(command='sls',
-                                           command_opts=sls_opts,
-                                           path=path)
+    sls_deploy_cmd = generate_node_command(
+        command="sls", command_opts=sls_opts, path=path
+    )
 
-    logger.info('deploy (in progress)')
-    run_module_command(cmd_list=sls_deploy_cmd,
-                       env_vars=context.env.vars,
-                       logger=logger)
-    logger.info('deploy (complete)')
+    logger.info("deploy (in progress)")
+    run_module_command(
+        cmd_list=sls_deploy_cmd, env_vars=context.env.vars, logger=logger
+    )
+    logger.info("deploy (complete)")
 
     shutil.rmtree(package_dir)
 
@@ -151,10 +147,9 @@ class Serverless(RunwayModuleNpm):
         super(Serverless, self).__init__(context, path, options.copy())
         self.logger = PrefixAdaptor(self.name, LOGGER)
         try:
-            self.options = ServerlessOptions.parse(**options.get('options',
-                                                                 {}))
+            self.options = ServerlessOptions.parse(**options.get("options", {}))
         except ValueError:
-            self.logger.exception('error encountered while parsing options')
+            self.logger.exception("error encountered while parsing options")
             sys.exit(1)
         self.region = self.context.env.aws_region
         self.stage = self.context.env.name
@@ -167,10 +162,9 @@ class Serverless(RunwayModuleNpm):
             List[str]
 
         """
-        result = ['--region', self.region,
-                  '--stage', self.stage]
-        if 'DEBUG' in self.context.env.vars:
-            result.append('--verbose')
+        result = ["--region", self.region, "--stage", self.stage]
+        if "DEBUG" in self.context.env.vars:
+            result.append("--verbose")
         return result
 
     @cached_property
@@ -199,14 +193,14 @@ class Serverless(RunwayModuleNpm):
             if self.parameters or self.environments or self.env_file:
                 return False
             self.logger.info(
-                'skipped; config file for this stage/region not found'
-                ' -- looking for one of: %s',
-                ', '.join(gen_sls_config_files(self.stage, self.region))
+                "skipped; config file for this stage/region not found"
+                " -- looking for one of: %s",
+                ", ".join(gen_sls_config_files(self.stage, self.region)),
             )
         else:
             self.logger.info(
                 'skipped; package.json with "serverless" in devDependencies'
-                ' is required for this module type'
+                " is required for this module type"
             )
         return True
 
@@ -219,34 +213,34 @@ class Serverless(RunwayModuleNpm):
 
         """
         self.npm_install()  # doing this here for a cleaner log
-        self.logger.info('extending Serverless config from runway.yml...')
-        final_yml = merge_dicts(self.sls_print(skip_install=True),
-                                self.options.extend_serverless_yml)
+        self.logger.info("extending Serverless config from runway.yml...")
+        final_yml = merge_dicts(
+            self.sls_print(skip_install=True), self.options.extend_serverless_yml
+        )
         # using a unique name to prevent collisions when run in parallel
-        tmp_file = self.path / '{}.tmp.serverless.yml'.format(uuid.uuid4())
+        tmp_file = self.path / "{}.tmp.serverless.yml".format(uuid.uuid4())
 
         try:
             if self.context.is_python3:
                 tmp_file.write_text(yaml.safe_dump(final_yml))
             else:  # TODO remove handling when dropping python 2 support
-                tmp_file.write_text(yaml.safe_dump(final_yml).decode('UTF-8'))
-            self.logger.debug('created temporary Serverless config: %s',
-                              tmp_file)
-            self.options.update_args('config', str(tmp_file.name))
+                tmp_file.write_text(yaml.safe_dump(final_yml).decode("UTF-8"))
+            self.logger.debug("created temporary Serverless config: %s", tmp_file)
+            self.options.update_args("config", str(tmp_file.name))
             self.logger.debug(
-                'updated options.args with temporary Serverless config: %s',
-                tmp_file.name
+                "updated options.args with temporary Serverless config: %s",
+                tmp_file.name,
             )
             func(skip_install=True)
         finally:
             try:
                 tmp_file.unlink()  # always cleanup the temp file
-                self.logger.debug('removed temporary Serverless config')
+                self.logger.debug("removed temporary Serverless config")
             except OSError:
                 self.logger.debug(
-                    'encountered an error when trying to delete the '
-                    'temporary Serverless config',
-                    exc_info=True
+                    "encountered an error when trying to delete the "
+                    "temporary Serverless config",
+                    exc_info=True,
                 )
 
     def gen_cmd(self, command, args_list=None):
@@ -265,15 +259,12 @@ class Serverless(RunwayModuleNpm):
         """
         args = [command] + self.cli_args + self.options.args
         args.extend(args_list or [])
-        if self.context.no_color and '--no-color' not in args:
-            args.append('--no-color')
-        if command not in ['remove', 'print'] and self.context.is_noninteractive:
-            args.append('--conceal')  # hide secrets from serverless output
+        if self.context.no_color and "--no-color" not in args:
+            args.append("--no-color")
+        if command not in ["remove", "print"] and self.context.is_noninteractive:
+            args.append("--conceal")  # hide secrets from serverless output
         return generate_node_command(
-            command='sls',
-            command_opts=args,
-            path=self.path,
-            logger=self.logger
+            command="sls", command_opts=args, path=self.path, logger=self.logger
         )
 
     def sls_deploy(self, skip_install=False):
@@ -290,20 +281,24 @@ class Serverless(RunwayModuleNpm):
         if self.options.promotezip:
             # TODO refactor deploy_package to be part of the class
             self.path.absolute()
-            sls_opts = ['deploy'] + self.cli_args + self.options.args
-            if self.context.no_color and '--no-color' not in sls_opts:
-                sls_opts.append('--no-color')
-            deploy_package(sls_opts,
-                           self.options.promotezip['bucketname'],
-                           self.context,
-                           str(self.path),
-                           self.logger)
+            sls_opts = ["deploy"] + self.cli_args + self.options.args
+            if self.context.no_color and "--no-color" not in sls_opts:
+                sls_opts.append("--no-color")
+            deploy_package(
+                sls_opts,
+                self.options.promotezip["bucketname"],
+                self.context,
+                str(self.path),
+                self.logger,
+            )
             return
-        self.logger.info('deploy (in progress)')
-        run_module_command(cmd_list=self.gen_cmd('deploy'),
-                           env_vars=self.context.env.vars,
-                           logger=self.logger)
-        self.logger.info('deploy (complete)')
+        self.logger.info("deploy (in progress)")
+        run_module_command(
+            cmd_list=self.gen_cmd("deploy"),
+            env_vars=self.context.env.vars,
+            logger=self.logger,
+        )
+        self.logger.info("deploy (complete)")
 
     def sls_print(self, item_path=None, skip_install=False):
         """Execute ``sls print`` command.
@@ -324,18 +319,18 @@ class Serverless(RunwayModuleNpm):
         if not skip_install:
             self.npm_install()
 
-        args = ['--format', 'yaml']
+        args = ["--format", "yaml"]
         if item_path:
-            args.extend(['--path', item_path])
-        result = yaml.safe_load(subprocess.check_output(
-            self.gen_cmd('print', args_list=args),
-            env=self.context.env.vars
-        ))
+            args.extend(["--path", item_path])
+        result = yaml.safe_load(
+            subprocess.check_output(
+                self.gen_cmd("print", args_list=args), env=self.context.env.vars
+            )
+        )
         # this could be expensive so only dump if needed
         if self.logger.getEffectiveLevel() == logging.DEBUG:
             self.logger.debug(
-                'resolved Serverless config:\n%s',
-                yaml.dump(result, Dumper=YamlDumper)
+                "resolved Serverless config:\n%s", yaml.dump(result, Dumper=YamlDumper)
             )
         return result
 
@@ -350,24 +345,26 @@ class Serverless(RunwayModuleNpm):
         if not skip_install:
             self.npm_install()
         stack_missing = False  # track output for acceptable error
-        self.logger.info('destroy (in progress)')
-        proc = subprocess.Popen(self.gen_cmd('remove'),
-                                bufsize=1,
-                                env=self.context.env.vars,
-                                stdout=subprocess.PIPE,
-                                universal_newlines=True)
+        self.logger.info("destroy (in progress)")
+        proc = subprocess.Popen(
+            self.gen_cmd("remove"),
+            bufsize=1,
+            env=self.context.env.vars,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
         with proc.stdout:  # live output
             for line in proc.stdout:
-                print(line, end='')
+                print(line, end="")
                 if re.search(r"Stack '.*' does not exist", line):
                     stack_missing = True
         if proc.wait() != 0 and not stack_missing:
             sys.exit(proc.returncode)
-        self.logger.info('destroy (complete)')
+        self.logger.info("destroy (complete)")
 
     def plan(self):
         """Entrypoint for Runway's plan action."""
-        self.logger.info('plan not currently supported for Serverless')
+        self.logger.info("plan not currently supported for Serverless")
 
     def deploy(self):
         """Entrypoint for Runway's deploy action."""
@@ -391,8 +388,7 @@ class Serverless(RunwayModuleNpm):
 class ServerlessOptions(ModuleOptions):
     """Module options for Serverless."""
 
-    def __init__(self, args, extend_serverless_yml, promotezip,
-                 skip_npm_ci=False):
+    def __init__(self, args, extend_serverless_yml, promotezip, skip_npm_ci=False):
         """Instantiate class.
 
         Keyword Args:
@@ -414,10 +410,9 @@ class ServerlessOptions(ModuleOptions):
         super(ServerlessOptions, self).__init__()
         self._arg_parser = self._create_arg_parser()
         self.extend_serverless_yml = extend_serverless_yml
-        cli_args, self._unknown_cli_args = \
-            self._arg_parser.parse_known_args(list(args)  # python 2 compatible
-                                              if isinstance(args, list)
-                                              else [])
+        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(
+            list(args) if isinstance(args, list) else []  # python 2 compatible
+        )
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
         self.promotezip = promotezip
         self.skip_npm_ci = skip_npm_ci
@@ -433,7 +428,7 @@ class ServerlessOptions(ModuleOptions):
         known_args = []
         for key, val in self._cli_args.items():
             if isinstance(val, str):
-                known_args.extend(['--%s' % key, val])
+                known_args.extend(["--%s" % key, val])
         return known_args + self._unknown_cli_args
 
     def update_args(self, key, value):
@@ -464,7 +459,7 @@ class ServerlessOptions(ModuleOptions):
 
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('-c', '--config', default=None)
+        parser.add_argument("-c", "--config", default=None)
         return parser
 
     @classmethod
@@ -493,11 +488,15 @@ class ServerlessOptions(ModuleOptions):
             ValueError: promotezip was provided but missing bucketname.
 
         """
-        promotezip = kwargs.get('promotezip', {})
-        if promotezip and not promotezip.get('bucketname'):
-            raise ValueError('"bucketname" must be provided when using '
-                             '"options.promotezip": {}'.format(promotezip))
-        return cls(args=kwargs.get('args', []),
-                   extend_serverless_yml=kwargs.get('extend_serverless_yml', {}),
-                   promotezip=promotezip,
-                   skip_npm_ci=kwargs.get('skip_npm_ci', False))
+        promotezip = kwargs.get("promotezip", {})
+        if promotezip and not promotezip.get("bucketname"):
+            raise ValueError(
+                '"bucketname" must be provided when using '
+                '"options.promotezip": {}'.format(promotezip)
+            )
+        return cls(
+            args=kwargs.get("args", []),
+            extend_serverless_yml=kwargs.get("extend_serverless_yml", {}),
+            promotezip=promotezip,
+            skip_npm_ci=kwargs.get("skip_npm_ci", False),
+        )

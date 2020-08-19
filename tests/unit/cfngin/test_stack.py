@@ -20,8 +20,7 @@ class TestStack(unittest.TestCase):
         self.config = Config({"namespace": "namespace"})
         self.context = Context(config=self.config)
         self.stack = Stack(
-            definition=generate_definition("vpc", 1),
-            context=self.context,
+            definition=generate_definition("vpc", 1), context=self.context,
         )
         register_lookup_handler("noop", lambda **kwargs: "test")
 
@@ -37,19 +36,17 @@ class TestStack(unittest.TestCase):
                     "${output fakeStack::FakeOutput}"
                 ),
                 "Var3": "${output fakeStack::FakeOutput},"
-                        "${output fakeStack2::FakeOutput}",
+                "${output fakeStack2::FakeOutput}",
             },
             requires=["fakeStack"],
         )
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(len(stack.requires), 2)
         self.assertIn(
-            "fakeStack",
-            stack.requires,
+            "fakeStack", stack.requires,
         )
         self.assertIn(
-            "fakeStack2",
-            stack.requires,
+            "fakeStack2", stack.requires,
         )
 
     def test_stack_requires_circular_ref(self):
@@ -57,9 +54,7 @@ class TestStack(unittest.TestCase):
         definition = generate_definition(
             base_name="vpc",
             stack_id=1,
-            variables={
-                "Var1": "${output vpc.1::FakeOutput}",
-            },
+            variables={"Var1": "${output vpc.1::FakeOutput}"},
         )
         stack = Stack(definition=definition, context=self.context)
         with self.assertRaises(ValueError):
@@ -70,9 +65,7 @@ class TestStack(unittest.TestCase):
         definition = generate_definition(
             base_name="vpc",
             stack_id=1,
-            variables={
-                "Param1": "${output fakeStack::FakeOutput}",
-            },
+            variables={"Param1": "${output fakeStack::FakeOutput}"},
         )
         stack = Stack(definition=definition, context=self.context)
         # pylint: disable=protected-access
@@ -87,10 +80,7 @@ class TestStack(unittest.TestCase):
     def test_stack_tags_default(self):
         """Test stack tags default."""
         self.config.tags = {"environment": "prod"}
-        definition = generate_definition(
-            base_name="vpc",
-            stack_id=1
-        )
+        definition = generate_definition(base_name="vpc", stack_id=1)
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "prod"})
 
@@ -98,9 +88,7 @@ class TestStack(unittest.TestCase):
         """Test stack tags override."""
         self.config.tags = {"environment": "prod"}
         definition = generate_definition(
-            base_name="vpc",
-            stack_id=1,
-            tags={"environment": "stage"}
+            base_name="vpc", stack_id=1, tags={"environment": "stage"}
         )
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "stage"})
@@ -109,13 +97,11 @@ class TestStack(unittest.TestCase):
         """Test stack tags extra."""
         self.config.tags = {"environment": "prod"}
         definition = generate_definition(
-            base_name="vpc",
-            stack_id=1,
-            tags={"app": "graph"}
+            base_name="vpc", stack_id=1, tags={"app": "graph"}
         )
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "prod", "app": "graph"})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

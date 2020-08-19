@@ -45,7 +45,7 @@ class UI(object):
 
         """
         self.lock()
-        logger = kwargs.pop('logger', LOGGER)
+        logger = kwargs.pop("logger", LOGGER)
         try:
             return logger.log(lvl, msg, *args, **kwargs)
         finally:

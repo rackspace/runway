@@ -9,9 +9,12 @@ from runway.env_mgr.tfenv import TFEnvManager
 
 if __name__ == "__main__":
     # No immediate plans to remove. Not to be done prior to 2.0
-    print('DEPRECATION NOTICE: the "tfenv-runway" command has been deprecated '
-          'in favor of "runway tfenv"', file=sys.stderr)
-    if len(sys.argv) in [2, 3] and sys.argv[1] == 'install':
+    print(
+        'DEPRECATION NOTICE: the "tfenv-runway" command has been deprecated '
+        'in favor of "runway tfenv"',
+        file=sys.stderr,
+    )
+    if len(sys.argv) in [2, 3] and sys.argv[1] == "install":
         if len(sys.argv) == 3:
             TFEnvManager().install(sys.argv[2])
         else:

@@ -23,21 +23,23 @@ def pytest_ignore_collect(path, config):  # pylint: disable=unused-argument
 @pytest.fixture
 def configs():
     """Path to Runway config fixtures."""
-    return TEST_ROOT.parent / 'fixtures' / 'configs'
+    return TEST_ROOT.parent / "fixtures" / "configs"
 
 
 @pytest.fixture
 def cp_config(configs):
     """Copy a config file."""
+
     def copy_config(config_name, dest_path):
         """Copy a config file by name to a destination directory.
 
         The resulting config will be named runway.yml.
 
         """
-        runway_yml = dest_path / 'runway.yml'
-        if not config_name.startswith('.yml'):
-            config_name += '.yml'
+        runway_yml = dest_path / "runway.yml"
+        if not config_name.startswith(".yml"):
+            config_name += ".yml"
         shutil.copy(str(configs / config_name), str(runway_yml))
         return runway_yml
+
     return copy_config

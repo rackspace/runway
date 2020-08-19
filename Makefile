@@ -25,7 +25,7 @@ sync: ## create a python virtual environment in the project for development
 
 # changes that need to be made inorder to sync python two (may also require deletion of the existing lock file)
 sync_two:  ## create a python virtual environment in the project for python 2 development
-	PIPENV_VENV_IN_PROJECT=1 pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" --dev --skip-lock
+	PIPENV_VENV_IN_PROJECT=1 pipenv install "astroid<2.0" "pylint<2.0" "pydocstyle<4.0.0" "isort[pyproject]>=4.2.5" --dev --skip-lock
 
 sync_all: sync ## sync all virtual environments used by this project with their Pipfile.lock
 	pushd docs && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
@@ -38,6 +38,12 @@ pipenv_lock: ## update all Pipfile.lock's used by this project
 	pushd integration_tests && pipenv lock --dev && popd
 	pushd integration_test_infrastructure && pipenv lock --dev && popd
 
+pipenv-update:
+	pipenv update --dev --keep-outdated
+	pushd docs && pipenv update --dev --keep-outdated && popd
+	pushd integration_tests && pipenv update --dev --keep-outdated && popd
+	pushd integration_test_infrastructure && pipenv update --dev --keep-outdated && popd
+
 clean: ## remove generated file from the project directory
 	rm -rf build/
 	rm -rf dist/
@@ -46,14 +52,22 @@ clean: ## remove generated file from the project directory
 	rm -rf src/
 	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
+fix-black: ## automatically fix all black errors
+	@pipenv run black .
+
 fix-isort: ## automatically fix all isort errors
 	@pipenv run isort . --recursive --atomic
 
-lint: lint-isort lint-flake8 lint-pylint ## run all linters
+lint: lint-isort lint-black lint-flake8 lint-pylint ## run all linters
+
+lint-black: ## run black
+	@echo "Running black... If this failes, run 'make fix-black' to resolve."
+	@pipenv run black . --check
+	@echo ""
 
 lint-flake8: ## run flake8
 	@echo "Running flake8..."
-	@pipenv run flake8 --exclude=runway/embedded,runway/templates runway --docstring-convention=all
+	@pipenv run flake8 --docstring-convention=all
 	@echo ""
 
 lint-isort: ## run isort
@@ -62,16 +76,14 @@ lint-isort: ## run isort
 	@echo ""
 
 lint-pylint: ## run pylint
-	@echo "Running pylint (excluding blueprints & template)..."
+	@echo "Running pylint..."
 	@find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc
-	@echo "Running pylint (--disable=duplicate-code)..."
-	@find runway/blueprints -name '*.py' | xargs pipenv run pylint --disable=duplicate-code
 	@echo ""
 
 # linting for python 2, requires additional disables
 lint_two: ## run all linters (python 2 only)
-	pipenv run flake8 --exclude=runway/embedded,runway/templates --ignore=D101,D403,E124,W504 runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-option-value,duplicate-code,method-hidden,relative-import
+	pipenv run flake8 --config=setup.cfg --exclude=runway/embedded,runway/templates --extend-ignore=D101,D202,D403,E124,E203,W504 runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-option-value,method-hidden,relative-import
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."

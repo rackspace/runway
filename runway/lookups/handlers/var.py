@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
 
 LOGGER = logging.getLogger(__name__)
-TYPE_NAME = 'var'
+TYPE_NAME = "var"
 
 
 class VarLookup(LookupHandler):
@@ -70,13 +70,11 @@ class VarLookup(LookupHandler):
 
         """
         query, args = cls.parse(value)
-        variables = kwargs['variables']
+        variables = kwargs["variables"]
 
-        result = variables.find(query, default=args.pop('default', ''))
+        result = variables.find(query, default=args.pop("default", ""))
 
-        if result != '':  # allows for False bool and NoneType results
+        if result != "":  # allows for False bool and NoneType results
             return cls.format_results(result, **args)
 
-        raise ValueError(
-            '"{}" does not exist in the variable definition'.format(query)
-        )
+        raise ValueError('"{}" does not exist in the variable definition'.format(query))

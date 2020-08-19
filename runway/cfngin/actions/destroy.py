@@ -27,8 +27,8 @@ class Action(BaseAction):
 
     """
 
-    DESCRIPTION = 'Destroy stacks'
-    NAME = 'destroy'
+    DESCRIPTION = "Destroy stacks"
+    NAME = "destroy"
 
     @property
     def _stack_action(self):
@@ -70,39 +70,41 @@ class Action(BaseAction):
     def pre_run(self, **kwargs):
         """Any steps that need to be taken prior to running the action."""
         pre_destroy = self.context.config.pre_destroy
-        if not kwargs.get('outline') and pre_destroy:
+        if not kwargs.get("outline") and pre_destroy:
             handle_hooks(
                 stage="pre_destroy",
                 hooks=pre_destroy,
                 provider=self.provider,
-                context=self.context)
+                context=self.context,
+            )
 
     def run(self, **kwargs):
         """Kicks off the destruction of the stacks in the stack_definitions."""
-        plan = self._generate_plan(tail=kwargs.get('tail'), reverse=True,
-                                   include_persistent_graph=True)
+        plan = self._generate_plan(
+            tail=kwargs.get("tail"), reverse=True, include_persistent_graph=True
+        )
         if not plan.keys():
-            LOGGER.warning('no stacks detected (error in config?)')
-        if kwargs.get('force', False):
+            LOGGER.warning("no stacks detected (error in config?)")
+        if kwargs.get("force", False):
             # need to generate a new plan to log since the outline sets the
             # steps to COMPLETE in order to log them
             plan.outline(logging.DEBUG)
             self.context.lock_persistent_graph(plan.lock_code)
-            walker = build_walker(kwargs.get('concurrency', 0))
+            walker = build_walker(kwargs.get("concurrency", 0))
             try:
                 plan.execute(walker)
             finally:
                 self.context.unlock_persistent_graph(plan.lock_code)
         else:
-            plan.outline(message="To execute this plan, run with "
-                                 "\"--force\" flag.")
+            plan.outline(message='To execute this plan, run with --force" flag.')
 
     def post_run(self, **kwargs):
         """Any steps that need to be taken after running the action."""
         post_destroy = self.context.config.post_destroy
-        if not kwargs.get('outline') and post_destroy:
+        if not kwargs.get("outline") and post_destroy:
             handle_hooks(
                 stage="post_destroy",
                 hooks=post_destroy,
                 provider=self.provider,
-                context=self.context)
+                context=self.context,
+            )

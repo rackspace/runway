@@ -18,7 +18,9 @@ from botocore.compat import six
 from yaml.resolver import ScalarNode, SequenceNode
 
 
-def intrinsics_multi_constructor(loader, tag_prefix, node):  # pylint: disable=unused-argument
+def intrinsics_multi_constructor(  # pylint: disable=unused-argument
+    loader, tag_prefix, node
+):
     """YAML constructor to parse CloudFormation intrinsics.
 
     This will return a dictionary with key being the intrinsic name
@@ -68,6 +70,5 @@ def yaml_parse(yamlstr):
         # json parser.
         return json.loads(yamlstr)
     except ValueError:
-        yaml.SafeLoader.add_multi_constructor(
-            "!", intrinsics_multi_constructor)
+        yaml.SafeLoader.add_multi_constructor("!", intrinsics_multi_constructor)
         return yaml.safe_load(yamlstr)

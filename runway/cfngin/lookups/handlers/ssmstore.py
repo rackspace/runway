@@ -15,8 +15,7 @@ TYPE_NAME = "ssmstore"
 class SsmstoreLookup(LookupHandler):
     """AWS SSM Parameter Store lookup."""
 
-    DEPRECATION_MSG = ('ssmstore lookup has been deprecated; '
-                       'use the ssm lookup instead')
+    DEPRECATION_MSG = "ssmstore lookup has been deprecated; use the ssm lookup instead"
 
     @classmethod
     def handle(cls, value, context=None, provider=None, **kwargs):
@@ -67,14 +66,10 @@ class SsmstoreLookup(LookupHandler):
             region, value = value.split("@", 1)
 
         client = get_session(region).client("ssm")
-        response = client.get_parameters(
-            Names=[
-                value,
-            ],
-            WithDecryption=True
-        )
-        if 'Parameters' in response:
-            return str(response['Parameters'][0]['Value'])
+        response = client.get_parameters(Names=[value], WithDecryption=True)
+        if "Parameters" in response:
+            return str(response["Parameters"][0]["Value"])
 
-        raise ValueError('SSMKey "{}" does not exist in region {}'.format(
-            value, region))
+        raise ValueError(
+            'SSMKey "{}" does not exist in region {}'.format(value, region)
+        )

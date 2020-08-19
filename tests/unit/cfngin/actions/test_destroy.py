@@ -31,8 +31,7 @@ class TestDestroyAction(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.context = self._get_context()
-        self.action = destroy.Action(self.context,
-                                     cancel=MockThreadingEvent())
+        self.action = destroy.Action(self.context, cancel=MockThreadingEvent())
 
     def _get_context(self, extra_config_args=None, **kwargs):
         """Get context."""
@@ -44,7 +43,7 @@ class TestDestroyAction(unittest.TestCase):
                 {"name": "instance", "requires": ["vpc", "bastion"]},
                 {"name": "db", "requires": ["instance", "vpc", "bastion"]},
                 {"name": "other", "requires": ["db"]},
-            ]
+            ],
         }
         if extra_config_args:
             config.update(extra_config_args)
@@ -55,29 +54,24 @@ class TestDestroyAction(unittest.TestCase):
         plan = self.action._generate_plan(reverse=True)
         self.assertEqual(
             {
-                'vpc': set(
-                    ['db', 'instance', 'bastion']),
-                'other': set([]),
-                'bastion': set(
-                    ['instance', 'db']),
-                'instance': set(
-                    ['db']),
-                'db': set(
-                    ['other'])},
-            plan.graph.to_dict()
+                "vpc": set(["db", "instance", "bastion"]),
+                "other": set([]),
+                "bastion": set(["instance", "db"]),
+                "instance": set(["db"]),
+                "db": set(["other"]),
+            },
+            plan.graph.to_dict(),
         )
 
     def test_only_execute_plan_when_forced(self):
         """Test only execute plan when forced."""
-        with patch.object(self.action, "_generate_plan") as \
-                mock_generate_plan:
+        with patch.object(self.action, "_generate_plan") as mock_generate_plan:
             self.action.run(force=False)
             self.assertEqual(mock_generate_plan().execute.call_count, 0)
 
     def test_execute_plan_when_forced(self):
         """Test execute plan when forced."""
-        with patch.object(self.action, "_generate_plan") as \
-                mock_generate_plan:
+        with patch.object(self.action, "_generate_plan") as mock_generate_plan:
             self.action.run(force=True)
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
 
@@ -136,22 +130,25 @@ class TestDestroyAction(unittest.TestCase):
         step._run_once()
         self.assertEqual(step.status, COMPLETE)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
-           new_callable=PropertyMock)
-    @patch('runway.cfngin.context.Context.lock_persistent_graph',
-           new_callable=MagicMock)
-    @patch('runway.cfngin.context.Context.unlock_persistent_graph',
-           new_callable=MagicMock)
-    @patch('runway.cfngin.plan.Plan.execute', new_callable=MagicMock)
-    def test_run_persist(self, mock_execute, mock_unlock, mock_lock,
-                         mock_graph_tags):
+    @patch(
+        "runway.cfngin.context.Context._persistent_graph_tags",
+        new_callable=PropertyMock,
+    )
+    @patch(
+        "runway.cfngin.context.Context.lock_persistent_graph", new_callable=MagicMock
+    )
+    @patch(
+        "runway.cfngin.context.Context.unlock_persistent_graph", new_callable=MagicMock
+    )
+    @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
+    def test_run_persist(self, mock_execute, mock_unlock, mock_lock, mock_graph_tags):
         """Test run persist."""
         mock_graph_tags.return_value = {}
         context = self._get_context(
-            extra_config_args={'persistent_graph_key': 'test.json'}
+            extra_config_args={"persistent_graph_key": "test.json"}
         )
         context._persistent_graph = Graph.from_steps(
-            [Step.from_stack_name('removed', context)]
+            [Step.from_stack_name("removed", context)]
         )
         destroy_action = destroy.Action(context=context)
         destroy_action.run(force=True)

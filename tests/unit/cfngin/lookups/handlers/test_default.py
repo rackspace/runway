@@ -14,31 +14,27 @@ class TestDefaultLookup(unittest.TestCase):
         """Run before tests."""
         self.provider = MagicMock()
         self.context = Context(
-            environment={
-                'namespace': 'test',
-                'env_var': 'val_in_env'}
+            environment={"namespace": "test", "env_var": "val_in_env"}
         )
 
     def test_env_var_present(self):
         """Test env var present."""
         lookup_val = "env_var::fallback"
-        value = DefaultLookup.handle(lookup_val,
-                                     provider=self.provider,
-                                     context=self.context)
-        assert value == 'val_in_env'
+        value = DefaultLookup.handle(
+            lookup_val, provider=self.provider, context=self.context
+        )
+        assert value == "val_in_env"
 
     def test_env_var_missing(self):
         """Test env var missing."""
         lookup_val = "bad_env_var::fallback"
-        value = DefaultLookup.handle(lookup_val,
-                                     provider=self.provider,
-                                     context=self.context)
-        assert value == 'fallback'
+        value = DefaultLookup.handle(
+            lookup_val, provider=self.provider, context=self.context
+        )
+        assert value == "fallback"
 
     def test_invalid_value(self):
         """Test invalid value."""
-        value = "env_var:fallback"
         with self.assertRaises(ValueError):
-            DefaultLookup.handle(value,
-                                 provider=self.provider,
-                                 context=self.context)
+            value = "env_var:fallback"
+            DefaultLookup.handle(value, provider=self.provider, context=self.context)

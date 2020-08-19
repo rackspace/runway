@@ -18,19 +18,19 @@ from ._static_react import static_react
 from ._tf import tf
 
 __all__ = [
-    'cdk_csharp',
-    'cdk_py',
-    'cdk_tsc',
-    'cfn',
-    'cfngin',
-    'k8s_cfn_repo',
-    'k8s_tf_repo',
-    'sls_py',
-    'sls_tsc',
-    'stacker',
-    'static_angular',
-    'static_react',
-    'tf'
+    "cdk_csharp",
+    "cdk_py",
+    "cdk_tsc",
+    "cfn",
+    "cfngin",
+    "k8s_cfn_repo",
+    "k8s_tf_repo",
+    "sls_py",
+    "sls_tsc",
+    "stacker",
+    "static_angular",
+    "static_react",
+    "tf",
 ]
 
 COMMANDS = [
@@ -46,11 +46,11 @@ COMMANDS = [
     stacker,
     static_angular,
     static_react,
-    tf
+    tf,
 ]
 
 
-@click.group('gen-sample', short_help='generate sample module/project')
+@click.group("gen-sample", short_help="generate sample module/project")
 @options.debug
 @options.no_color
 @options.verbose

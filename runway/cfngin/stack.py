@@ -25,7 +25,7 @@ def _initialize_variables(stack_def, variables=None):
     """
     variables = variables or stack_def.variables or {}
     variable_values = deepcopy(variables)
-    return [Variable(k, v, 'cfngin') for k, v in variable_values.items()]
+    return [Variable(k, v, "cfngin") for k, v in variable_values.items()]
 
 
 class Stack(object):
@@ -55,8 +55,17 @@ class Stack(object):
 
     """
 
-    def __init__(self, definition, context, variables=None, mappings=None,
-                 locked=False, force=False, enabled=True, protected=False):
+    def __init__(
+        self,
+        definition,
+        context,
+        variables=None,
+        mappings=None,
+        locked=False,
+        force=False,
+        enabled=True,
+        protected=False,
+    ):
         """Instantiate class.
 
         Args:
@@ -117,9 +126,9 @@ class Stack(object):
         for variable in self.variables:
             deps = variable.dependencies
             if self.name in deps:
-                message = (
-                    "Variable %s in stack %s has a circular reference"
-                ) % (variable.name, self.name)
+                message = "Variable {} in stack {} has a circular reference".format(
+                    variable.name, self.name,
+                )
                 raise ValueError(message)
             requires.update(deps)
         return requires
@@ -145,15 +154,18 @@ class Stack(object):
                 class_path = self.definition.class_path
                 blueprint_class = load_object_from_string(class_path)
                 if not hasattr(blueprint_class, "rendered"):
-                    raise AttributeError("Stack class %s does not have a "
-                                         "\"rendered\" "
-                                         "attribute." % (class_path,))
+                    raise AttributeError(
+                        'Stack class {} does not have a "rendered" attribute.'.format(
+                            class_path
+                        )
+                    )
             elif self.definition.template_path:
                 blueprint_class = RawTemplateBlueprint
                 kwargs["raw_template_path"] = self.definition.template_path
             else:
-                raise AttributeError("Stack does not have a defined class or "
-                                     "template path.")
+                raise AttributeError(
+                    "Stack does not have a defined class or " "template path."
+                )
 
             self._blueprint = blueprint_class(
                 name=self.name,

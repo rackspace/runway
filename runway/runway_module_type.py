@@ -11,8 +11,7 @@ from .util import load_object_from_string
 LOGGER = logging.getLogger(__name__)
 
 
-# noqa pylint: disable=too-few-public-methods
-class RunwayModuleType(object):
+class RunwayModuleType(object):  # noqa pylint: disable=too-few-public-methods
     """Runway configuration ``type`` settings object.
 
     The ``type`` property of a Runway configuration can be
@@ -51,26 +50,26 @@ class RunwayModuleType(object):
     """
 
     EXTENSION_MAP = {
-        'sls': 'runway.module.serverless.Serverless',
-        'tf': 'runway.module.terraform.Terraform',
-        'cdk': 'runway.module.cdk.CloudDevelopmentKit',
-        'k8s': 'runway.module.k8s.K8s',
-        'cfn': 'runway.module.cloudformation.CloudFormation',
-        'web': 'runway.module.staticsite.StaticSite'
+        "sls": "runway.module.serverless.Serverless",
+        "tf": "runway.module.terraform.Terraform",
+        "cdk": "runway.module.cdk.CloudDevelopmentKit",
+        "k8s": "runway.module.k8s.K8s",
+        "cfn": "runway.module.cloudformation.CloudFormation",
+        "web": "runway.module.staticsite.StaticSite",
     }
 
     TYPE_MAP = {
-        'serverless': EXTENSION_MAP.get('sls'),
-        'terraform': EXTENSION_MAP.get('tf'),
-        'cdk': EXTENSION_MAP.get('cdk'),
-        'kubernetes': EXTENSION_MAP.get('k8s'),
-        'cloudformation': EXTENSION_MAP.get('cfn'),
-        'static': EXTENSION_MAP.get('web'),
+        "serverless": EXTENSION_MAP.get("sls"),
+        "terraform": EXTENSION_MAP.get("tf"),
+        "cdk": EXTENSION_MAP.get("cdk"),
+        "kubernetes": EXTENSION_MAP.get("k8s"),
+        "cloudformation": EXTENSION_MAP.get("cfn"),
+        "static": EXTENSION_MAP.get("web"),
     }
 
     def __init__(self, path, class_path=None, type_str=None):
         # type: (str, Optional[str], Optional[str]) -> RunwayModuleType
-        """Initialization of the Module Type Configuration.  # noqa
+        """Instantiate class.
 
         Keyword Args:
             path (str): The required path to the module
@@ -78,6 +77,7 @@ class RunwayModuleType(object):
                 the autodetected one.
             type_str (Optional[str]): An explicit type to assign to
                 the RunwayModuleType
+
         """
         self.path = path
         self.class_path = class_path
@@ -92,23 +92,28 @@ class RunwayModuleType(object):
 
         """
         if self.class_path:
-            LOGGER.debug('module class "%s" determined from explicit '
-                         'definition', self.class_path)
+            LOGGER.debug(
+                'module class "%s" determined from explicit definition',
+                self.class_path,
+            )
         else:
             self._set_class_path_based_on_extension()
 
         if not self.class_path and self.type_str:
             self.class_path = self.TYPE_MAP.get(self.type_str, None)
             if self.class_path:
-                LOGGER.debug('module class "%s" determined from explicit type',
-                             self.class_path)
+                LOGGER.debug(
+                    'module class "%s" determined from explicit type', self.class_path
+                )
 
         if not self.class_path:
             self._set_class_path_based_on_autodetection()
 
         if not self.class_path:
-            LOGGER.error('module class could not be determined from '
-                         'path "%s"', os.path.basename(self.path))
+            LOGGER.error(
+                'module class could not be determined from path "%s"',
+                os.path.basename(self.path),
+            )
             sys.exit(1)
 
         return load_object_from_string(self.class_path)
@@ -117,35 +122,40 @@ class RunwayModuleType(object):
         # type() -> void
         """Based on the directory suffix set the class_path."""
         basename = os.path.basename(self.path)
-        basename_split = basename.split('.')
+        basename_split = basename.split(".")
         extension = basename_split[len(basename_split) - 1]
         self.class_path = self.EXTENSION_MAP.get(extension, None)
         if self.class_path:
-            LOGGER.debug('module class "%s" determined from path '
-                         'extension "%s"', self.class_path, extension)
+            LOGGER.debug(
+                'module class "%s" determined from path extension "%s"',
+                self.class_path,
+                extension,
+            )
 
     def _set_class_path_based_on_autodetection(self):
         # type() -> void
         """Based on the files detected in the base path set the class_path."""
         if any(
-                self._is_file(sls) for sls in [
-                    'serverless.js', 'serverless.ts', 'serverless.yml'
-                ]
-        ) and self._is_file('package.json'):
-            self.class_path = self.TYPE_MAP.get('serverless', None)
-        elif self._has_glob('*.tf'):
-            self.class_path = self.TYPE_MAP.get('terraform', None)
-        elif self._is_file('cdk.json') and self._is_file('package.json'):
-            self.class_path = self.TYPE_MAP.get('cdk', None)
-        elif self._is_dir('overlays') and self._find_kustomize_files():
-            self.class_path = self.TYPE_MAP.get('kubernetes', None)
-        elif self._has_glob('*.env') \
-            or self._has_glob('*.yaml') \
-                or self._has_glob('*.yml'):
-            self.class_path = self.TYPE_MAP.get('cloudformation', None)
+            self._is_file(sls)
+            for sls in ["serverless.js", "serverless.ts", "serverless.yml"]
+        ) and self._is_file("package.json"):
+            self.class_path = self.TYPE_MAP.get("serverless", None)
+        elif self._has_glob("*.tf"):
+            self.class_path = self.TYPE_MAP.get("terraform", None)
+        elif self._is_file("cdk.json") and self._is_file("package.json"):
+            self.class_path = self.TYPE_MAP.get("cdk", None)
+        elif self._is_dir("overlays") and self._find_kustomize_files():
+            self.class_path = self.TYPE_MAP.get("kubernetes", None)
+        elif (
+            self._has_glob("*.env")
+            or self._has_glob("*.yaml")
+            or self._has_glob("*.yml")
+        ):
+            self.class_path = self.TYPE_MAP.get("cloudformation", None)
         if self.class_path:
-            LOGGER.debug('module class "%s" determined from autodetection',
-                         self.class_path)
+            LOGGER.debug(
+                'module class "%s" determined from autodetection', self.class_path
+            )
 
     def _is_file(self, file_name):
         # type(str) -> boolean
@@ -196,6 +206,6 @@ class RunwayModuleType(object):
         """
         for _root, _dirnames, filenames in os.walk(self.path):
             for filename in filenames:
-                if filename == 'kustomization.yaml':
+                if filename == "kustomization.yaml":
                     return True
         return False

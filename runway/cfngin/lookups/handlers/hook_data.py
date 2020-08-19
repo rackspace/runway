@@ -17,8 +17,8 @@ class HookDataLookup(LookupHandler):
 
     DEPRECATION_MSG = (
         'lookup query syntax "<hook_name>::<key>" has been deprecated; to '
-        'learn how to use the new lookup query syntax visit '
-        '{}/page/lookups.html'.format(DOC_SITE)
+        "learn how to use the new lookup query syntax visit "
+        "{}/page/lookups.html".format(DOC_SITE)
     )
 
     @classmethod
@@ -35,7 +35,7 @@ class HookDataLookup(LookupHandler):
         hook_name, key = value.split("::")
         warnings.warn(cls.DEPRECATION_MSG, DeprecationWarning)
         LOGGER.warning(cls.DEPRECATION_MSG)
-        return '{}.{}'.format(hook_name, key), {}
+        return "{}.{}".format(hook_name, key), {}
 
     @classmethod
     def handle(cls, value, context=None, provider=None, **kwargs):
@@ -56,20 +56,22 @@ class HookDataLookup(LookupHandler):
         hook_data = MutableMap(**context.hook_data)
 
         # TODO use context.hook_data directly in next major release
-        result = hook_data.find(query, args.get('default'))
+        result = hook_data.find(query, args.get("default"))
 
-        if isinstance(result, BaseAWSObject) and \
-                args.get('get') and \
-                not args.get('load'):
-            args['load'] = 'troposphere'
+        if (
+            isinstance(result, BaseAWSObject)
+            and args.get("get")
+            and not args.get("load")
+        ):
+            args["load"] = "troposphere"
 
         if not result:
             raise ValueError('Could not find a value for "%s"' % value)
 
-        if result == args.get('default'):
+        if result == args.get("default"):
             # assume default value has already been processed so no need to
             # use these
-            args.pop('load', None)
-            args.pop('get', None)
+            args.pop("load", None)
+            args.pop("get", None)
 
         return cls.format_results(result, **args)

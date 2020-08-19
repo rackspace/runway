@@ -30,8 +30,8 @@ class Context(object):
                 deploy environment.
 
         """
-        self.command = kwargs.pop('command', None)
-        self.env = kwargs.pop('deploy_environment', DeployEnvironment())
+        self.command = kwargs.pop("command", None)
+        self.env = kwargs.pop("deploy_environment", DeployEnvironment())
         self.debug = self.env.debug
         # TODO remove after IaC tools support AWS SSO
         self.__inject_profile_credentials()
@@ -39,8 +39,7 @@ class Context(object):
     @property
     def boto3_credentials(self):
         """Return a dict of boto3 credentials."""
-        return {key.lower(): value
-                for key, value in self.current_aws_creds.items()}
+        return {key.lower(): value for key, value in self.current_aws_creds.items()}
 
     @property
     def current_aws_creds(self):
@@ -90,7 +89,7 @@ class Context(object):
             bool
 
         """
-        colorize = self.env.vars.get('RUNWAY_COLORIZE')  # explicitly enable/disable
+        colorize = self.env.vars.get("RUNWAY_COLORIZE")  # explicitly enable/disable
         try:
             if isinstance(colorize, bool):  # catch False
                 return not colorize
@@ -158,8 +157,8 @@ class Context(object):
         if self.is_noninteractive:
             if self.is_python3:
                 return True
-            LOGGER.warning('Parallel execution disabled; Python 3+ is required')
-        LOGGER.warning('Parallel execution disabled; not running in CI mode')
+            LOGGER.warning("Parallel execution disabled; Python 3+ is required")
+        LOGGER.warning("Parallel execution disabled; not running in CI mode")
         return False
 
     def copy(self):
@@ -170,9 +169,8 @@ class Context(object):
             Context: New instance with the same contents.
 
         """
-        LOGGER.debug('creating a copy of Runway context...')
-        return self.__class__(command=self.command,
-                              deploy_environment=self.env.copy())
+        LOGGER.debug("creating a copy of Runway context...")
+        return self.__class__(command=self.command, deploy_environment=self.env.copy())
 
     def echo_detected_environment(self):
         # type: () -> None
@@ -194,17 +192,19 @@ class Context(object):
         # save to var so its not calculated multiple times
         creds = self.boto3_credentials
         if profile:
-            LOGGER.verbose('creating AWS session using profile "%s"...',
-                           profile)
-            kwargs['profile'] = profile
+            LOGGER.verbose('creating AWS session using profile "%s"...', profile)
+            kwargs["profile"] = profile
         elif creds:
-            LOGGER.verbose('creating AWS session using credentials from '
-                           'the environment...')
-            kwargs.update({
-                'access_key': creds.get('aws_access_key_id'),
-                'secret_key': creds.get('aws_secret_access_key'),
-                'session_token': creds.get('aws_session_token')
-            })
+            LOGGER.verbose(
+                "creating AWS session using credentials from the environment..."
+            )
+            kwargs.update(
+                {
+                    "access_key": creds.get("aws_access_key_id"),
+                    "secret_key": creds.get("aws_secret_access_key"),
+                    "session_token": creds.get("aws_session_token"),
+                }
+            )
         return get_session(region=region or self.env.aws_region, **kwargs)
 
     # TODO remove after IaC tools support AWS SSO
@@ -218,11 +218,13 @@ class Context(object):
         if self.current_aws_creds or not self.env.aws_profile:
             return
 
-        creds = self.get_session(profile=self.env.aws_profile) \
-            .get_credentials() \
+        creds = (
+            self.get_session(profile=self.env.aws_profile)
+            .get_credentials()
             .get_frozen_credentials()
+        )
 
-        self.env.vars['AWS_ACCESS_KEY_ID'] = creds.access_key
-        self.env.vars['AWS_SECRET_ACCESS_KEY'] = creds.secret_key
+        self.env.vars["AWS_ACCESS_KEY_ID"] = creds.access_key
+        self.env.vars["AWS_SECRET_ACCESS_KEY"] = creds.secret_key
         if creds.token:
-            self.env.vars['AWS_SESSION_TOKEN'] = creds.token
+            self.env.vars["AWS_SESSION_TOKEN"] = creds.token

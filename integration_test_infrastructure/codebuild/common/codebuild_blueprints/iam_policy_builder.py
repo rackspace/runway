@@ -14,38 +14,40 @@ LOGGER = logging.getLogger(__name__)
 
 def create_base_policy():
     """Create the base policy."""
-    deploy_name_list = ['runway-int-test-']
+    deploy_name_list = ["runway-int-test-"]
     return iam.Policy(
-        PolicyName='base-policy',
+        PolicyName="base-policy",
         PolicyDocument=PolicyDocument(
-            Version='2012-10-17',
+            Version="2012-10-17",
             Statement=[
                 Statement(
                     Action=[
                         awacs.logs.CreateLogGroup,
                         awacs.logs.CreateLogStream,
-                        awacs.logs.PutLogEvents
+                        awacs.logs.PutLogEvents,
                     ],
                     Effect=Allow,
                     Resource=[
                         Join(
-                            '',
+                            "",
                             [
-                                'arn:',
+                                "arn:",
                                 Partition,
-                                ':logs:',
+                                ":logs:",
                                 Region,
-                                ':',
+                                ":",
                                 AccountId,
-                                ':log-group:/aws/codebuild/'
-                            ] + deploy_name_list + [
-                                '*'
-                            ] + x
-                        ) for x in [[':*'], [':*/*']]
-                    ]
+                                ":log-group:/aws/codebuild/",
+                            ]
+                            + deploy_name_list
+                            + ["*"]
+                            + x,
+                        )
+                        for x in [[":*"], [":*/*"]]
+                    ],
                 )
-            ]
-        )
+            ],
+        ),
     )
 
 
@@ -55,8 +57,8 @@ class IAMPolicyFinder:
     def __init__(self, root=None):
         """Set the root path of integration tests."""
         self.root = root or path.join(
-            BASE_PATH, "..", "..", "..", "..",
-            "integration_tests")
+            BASE_PATH, "..", "..", "..", "..", "integration_tests"
+        )
 
     def file_path(self, test_name):
         """Get the policies file path for the given test."""
@@ -68,21 +70,19 @@ class IAMPolicyFinder:
         file_path = path.abspath(self.file_path(test_name))
         policies = []
         if path.isfile(file_path):
-            with open(file_path, 'r') as stream:
+            with open(file_path, "r") as stream:
                 entries = yaml.safe_load(stream)
                 for entry in entries:
                     policy = iam.Policy(
-                        PolicyName='inline-policy',
-                        PolicyDocument=entry
+                        PolicyName="inline-policy", PolicyDocument=entry
                     )
                     policies.append(policy)
         else:
-            LOGGER.warning('policies.yaml not found for %s at %s', test_name,
-                           file_path)
+            LOGGER.warning("policies.yaml not found for %s at %s", test_name, file_path)
         return policies
 
 
-class IAMPolicyBuilder():
+class IAMPolicyBuilder:
     """Utility class that builds IAM roles."""
 
     def __init__(self, policy_finder=None):

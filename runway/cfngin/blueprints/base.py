@@ -32,7 +32,7 @@ PARAMETER_PROPERTIES = {
     "min_length": "MinLength",
     "max_value": "MaxValue",
     "min_value": "MinValue",
-    "constraint_description": "ConstraintDescription"
+    "constraint_description": "ConstraintDescription",
 }
 
 
@@ -54,21 +54,24 @@ class CFNParameter(object):
             if isinstance(value, acceptable_type):
                 acceptable = True
                 if acceptable_type == bool:
-                    LOGGER.debug("converting parameter %s boolean '%s' "
-                                 "to string", name, value)
+                    LOGGER.debug(
+                        "converting parameter %s boolean '%s' to string", name, value
+                    )
                     value = str(value).lower()
                     break
 
                 if acceptable_type == int:
-                    LOGGER.debug("converting parameter %s integer '%s' "
-                                 "to string", name, value)
+                    LOGGER.debug(
+                        "converting parameter %s integer '%s' to string", name, value
+                    )
                     value = str(value)
                     break
 
         if not acceptable:
             raise ValueError(
-                "CFNParameter (%s) value must be one of %s got: %s" % (
-                    name, "str, int, bool, or list", value))
+                "CFNParameter (%s) value must be one of %s got: %s"
+                % (name, "str, int, bool, or list", value)
+            )
 
         self.name = name
         self.value = value
@@ -311,14 +314,15 @@ class Blueprint(object):
         self._version = None
 
         if hasattr(self, "PARAMETERS") or hasattr(self, "LOCAL_PARAMETERS"):
-            raise AttributeError("DEPRECATION WARNING: Blueprint %s uses "
-                                 "deprecated PARAMETERS or "
-                                 "LOCAL_PARAMETERS, rather than VARIABLES. "
-                                 "Please update your blueprints. See "
-                                 "https://docs.onica.com/projects/runway"
-                                 "/en/release/cfngin/blueprints."
-                                 "html#variables for additional information."
-                                 % name)
+            raise AttributeError(
+                "DEPRECATION WARNING: Blueprint %s uses "
+                "deprecated PARAMETERS or "
+                "LOCAL_PARAMETERS, rather than VARIABLES. "
+                "Please update your blueprints. See "
+                "https://docs.onica.com/projects/runway"
+                "/en/release/cfngin/blueprints."
+                "html#variables for additional information." % name
+            )
 
     def get_parameter_definitions(self):
         """Get the parameter definitions to submit to CloudFormation.
@@ -350,8 +354,7 @@ class Blueprint(object):
             output properties.
 
         """
-        return {k: output.to_dict() for k, output in
-                self.template.outputs.items()}
+        return {k: output.to_dict() for k, output in self.template.outputs.items()}
 
     def get_required_parameter_definitions(self):
         """Return all template parameters that do not have a default value.
@@ -461,10 +464,7 @@ class Blueprint(object):
         variable_dict = dict((var.name, var) for var in provided_variables)
         for var_name, var_def in defined_variables.items():
             value = resolve_variable(
-                var_name,
-                var_def,
-                variable_dict.get(var_name),
-                self.name
+                var_name, var_def, variable_dict.get(var_name), self.name
             )
             self.resolved_variables[var_name] = value
 
@@ -508,14 +508,13 @@ class Blueprint(object):
         variables_to_resolve = []
         if variables:
             for key, value in variables.items():
-                variables_to_resolve.append(Variable(key, value, 'cfngin'))
+                variables_to_resolve.append(Variable(key, value, "cfngin"))
         for k in self.get_parameter_definitions():
             if not variables or k not in variables:
                 # The provided value for a CFN parameter has no effect in this
                 # context (generating the CFN template), so any string can be
                 # provided for its value - just needs to be something
-                variables_to_resolve.append(Variable(k, 'unused_value',
-                                                     'cfngin'))
+                variables_to_resolve.append(Variable(k, "unused_value", "cfngin"))
         self.resolve_variables(variables_to_resolve)
 
         return self.render_template()[1]

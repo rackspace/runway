@@ -3,13 +3,14 @@ import sys
 import os
 
 # need to manipulate the path a bit since this exists inside the package
-PACKAGE_PARENT = '..'
-SCRIPT_DIR = os.path.dirname(os.path.realpath(
-    os.path.join(os.getcwd(), os.path.expanduser(__file__))
-))
+PACKAGE_PARENT = ".."
+SCRIPT_DIR = os.path.dirname(
+    os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__)))
+)
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
-from integration_tests.runner import Runner  # noqa pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position
+from integration_tests.runner import Runner  # noqa
 
 
 if __name__ == "__main__":

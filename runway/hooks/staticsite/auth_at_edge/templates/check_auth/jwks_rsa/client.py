@@ -14,13 +14,13 @@ def is_signing_key(key):
         key (Dict[str, str]): The key.
 
     """
-    if key.get('kty', '') != 'RSA':
+    if key.get("kty", "") != "RSA":
         return False
-    if not key.get('kid', None):
+    if not key.get("kid", None):
         return False
-    if key.get('use', '') != 'sig':
+    if key.get("use", "") != "sig":
         return False
-    return key.get('x5c') or (key.get('n') and key.get('e'))
+    return key.get("x5c") or (key.get("n") and key.get("e"))
 
 
 class JwksClient(object):
@@ -34,25 +34,24 @@ class JwksClient(object):
 
         """
         self.options = options
-        self.logger = logging.getLogger('__file__')
+        self.logger = logging.getLogger("__file__")
 
     def get_keys(self):
         """Retrieve the keys from the JWKS endpoint."""
-        self.logger.info('Fetching keys from %s', self.options.get('jwks_uri'))
+        self.logger.info("Fetching keys from %s", self.options.get("jwks_uri"))
 
         try:
-            request = urllib.request.urlopen(self.options.get('jwks_uri'))  # noqa pylint: disable=no-member
-            data = json.loads(
-                request.read().decode(
-                    request.info().get_param('charset') or 'utf-8'
-                )
+            request = urllib.request.urlopen(  # pylint: disable=no-member
+                self.options.get("jwks_uri")
             )
-            keys = data['keys']
+            data = json.loads(
+                request.read().decode(request.info().get_param("charset") or "utf-8")
+            )
+            keys = data["keys"]
             self.logger.info("Keys: %s", keys)
             return keys
-        # pylint: disable=broad-except
-        except Exception as err:
-            self.logger.info('Failure: ConnectionError')
+        except Exception as err:  # pylint: disable=broad-except
+            self.logger.info("Failure: ConnectionError")
             self.logger.info(err)
             return {}
 
@@ -63,21 +62,21 @@ class JwksClient(object):
             kid (str): The key id of the signing key.
 
         """
-        self.logger.info('Fetching signing key for %s', kid)
+        self.logger.info("Fetching signing key for %s", kid)
 
         keys = self.get_signing_keys()
         try:
-            key = next(x for x in keys if x.get('kid') == kid)
+            key = next(x for x in keys if x.get("kid") == kid)
             return key
         except StopIteration:
-            raise Exception('Was not able to locate a key with kid %s' % kid)
+            raise Exception("Was not able to locate a key with kid %s" % kid)
 
     def get_signing_keys(self):
         """Given a set of keys find all that are signing keys."""
         keys = self.get_keys()
 
         if not keys:
-            raise Exception('The JWKS endpoint did not contain any keys')
+            raise Exception("The JWKS endpoint did not contain any keys")
 
         jwks = []
         for key in filter(is_signing_key, keys):
@@ -96,23 +95,17 @@ class JwksClient(object):
             key (dict): The Retrieved signing key.
 
         """
-        jwk = {
-            'kid': key.get('kid'),
-            'nbf': key.get('nbf')
-        }
+        jwk = {"kid": key.get("kid"), "nbf": key.get("nbf")}
 
-        if key.get('x5c'):
+        if key.get("x5c"):
             # @TODO: Support certificate chains. Review library here:
             # https://github.com/auth0/node-jwks-rsa/blob/master/src/JwksClient.js#L87
-            self.logger.info('X5C')
+            self.logger.info("X5C")
         else:
             try:
-                jwk['rsaPublicKey'] = rsa_public_key_to_pem(
-                    key.get('n'),
-                    key.get('e')
-                )
+                jwk["rsaPublicKey"] = rsa_public_key_to_pem(key.get("n"), key.get("e"))
             # pylint: disable=broad-except
             except Exception as err:
                 self.logger.error(err)
-                jwk['rsaPublicKey'] = None
+                jwk["rsaPublicKey"] = None
         return jwk

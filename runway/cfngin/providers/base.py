@@ -4,8 +4,7 @@
 
 def not_implemented(method):
     """Wrap NotImplimentedError with a formatted message."""
-    raise NotImplementedError("Provider does not support '%s' "
-                              "method." % method)
+    raise NotImplementedError("Provider does not support '%s' method." % method)
 
 
 class BaseProviderBuilder(object):

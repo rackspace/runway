@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.hooks.command."""
+# pylint: disable=no-self-use
 import os
 import unittest
 from subprocess import PIPE
@@ -15,7 +16,7 @@ from ..factories import mock_provider
 class MockProcess(object):
     """Mock process."""
 
-    def __init__(self, returncode=0, stdout='', stderr=''):
+    def __init__(self, returncode=0, stdout="", stderr=""):
         """Instantiate class."""
         self.returncode = returncode
         self.stdout = stdout
@@ -42,18 +43,19 @@ class TestCommandHook(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.context = Context(
-            config=Config({'namespace': 'test', 'stacker_bucket': 'test'}))
+            config=Config({"namespace": "test", "stacker_bucket": "test"})
+        )
         self.provider = mock_provider(region="us-east-1")
 
         self.mock_process = MockProcess()
-        self.popen_mock = \
-            mock.patch('runway.cfngin.hooks.command.Popen',
-                       return_value=self.mock_process).start()
+        self.popen_mock = mock.patch(
+            "runway.cfngin.hooks.command.Popen", return_value=self.mock_process
+        ).start()
 
         self.devnull = mock.Mock()
-        self.devnull_mock = \
-            mock.patch('runway.cfngin.hooks.command._devnull',
-                       return_value=self.devnull).start()
+        self.devnull_mock = mock.patch(
+            "runway.cfngin.hooks.command._devnull", return_value=self.devnull
+        ).start()
 
     def tearDown(self):
         """Run after tests."""
@@ -63,8 +65,8 @@ class TestCommandHook(unittest.TestCase):
     def run_hook(self, **kwargs):
         """Run hook."""
         real_kwargs = {
-            'context': self.context,
-            'provider': self.provider,
+            "context": self.context,
+            "provider": self.provider,
         }
         real_kwargs.update(kwargs)
 
@@ -76,12 +78,12 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        results = self.run_hook(command=['foo'])
+        results = self.run_hook(command=["foo"])
 
-        self.assertEqual(
-            results, {'returncode': 0, 'stdout': None, 'stderr': None})
+        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=self.devnull, stdout=None, stderr=None, env=None)
+            ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
+        )
 
     def test_command_fail(self):
         """Test command fail."""
@@ -89,11 +91,12 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        results = self.run_hook(command=['foo'])
+        results = self.run_hook(command=["foo"])
 
         self.assertEqual(results, None)
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=self.devnull, stdout=None, stderr=None, env=None)
+            ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
+        )
 
     def test_command_ignore_status(self):
         """Test command ignore status."""
@@ -101,12 +104,12 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        results = self.run_hook(command=['foo'], ignore_status=True)
+        results = self.run_hook(command=["foo"], ignore_status=True)
 
-        self.assertEqual(
-            results, {'returncode': 1, 'stdout': None, 'stderr': None})
+        self.assertEqual(results, {"returncode": 1, "stdout": None, "stderr": None})
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=self.devnull, stdout=None, stderr=None, env=None)
+            ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
+        )
 
     def test_command_quiet(self):
         """Test command quiet."""
@@ -114,13 +117,16 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        results = self.run_hook(command=['foo'], quiet=True)
-        self.assertEqual(
-            results, {'returncode': 0, 'stdout': None, 'stderr': None})
+        results = self.run_hook(command=["foo"], quiet=True)
+        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
 
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=self.devnull, stdout=self.devnull,
-            stderr=self.devnull, env=None)
+            ["foo"],
+            stdin=self.devnull,
+            stdout=self.devnull,
+            stderr=self.devnull,
+            env=None,
+        )
 
     def test_command_interactive(self):
         """Test command interactive."""
@@ -128,12 +134,12 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        results = self.run_hook(command=['foo'], interactive=True)
-        self.assertEqual(
-            results, {'returncode': 0, 'stdout': None, 'stderr': None})
+        results = self.run_hook(command=["foo"], interactive=True)
+        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
 
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=None, stdout=None, stderr=None, env=None)
+            ["foo"], stdin=None, stdout=None, stderr=None, env=None
+        )
 
     def test_command_input(self):
         """Test command input."""
@@ -141,26 +147,28 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        results = self.run_hook(command=['foo'], stdin='hello world')
-        self.assertEqual(
-            results, {'returncode': 0, 'stdout': None, 'stderr': None})
+        results = self.run_hook(command=["foo"], stdin="hello world")
+        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
 
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=PIPE, stdout=None, stderr=None, env=None)
-        self.assertEqual(self.mock_process.stdin, 'hello world')
+            ["foo"], stdin=PIPE, stdout=None, stderr=None, env=None
+        )
+        self.assertEqual(self.mock_process.stdin, "hello world")
 
     def test_command_capture(self):
         """Test command capture."""
         self.mock_process.returncode = 0
-        self.mock_process.stdout = 'hello'
-        self.mock_process.stderr = 'world'
+        self.mock_process.stdout = "hello"
+        self.mock_process.stderr = "world"
 
-        results = self.run_hook(command=['foo'], capture=True)
+        results = self.run_hook(command=["foo"], capture=True)
         self.assertEqual(
-            results, {'returncode': 0, 'stdout': 'hello', 'stderr': 'world'})
+            results, {"returncode": 0, "stdout": "hello", "stderr": "world"}
+        )
 
         self.popen_mock.assert_called_once_with(
-            ['foo'], stdin=self.devnull, stdout=PIPE, stderr=PIPE, env=None)
+            ["foo"], stdin=self.devnull, stdout=PIPE, stderr=PIPE, env=None
+        )
 
     def test_command_env(self):
         """Test command env."""
@@ -168,12 +176,14 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        with mock.patch.dict(os.environ, {'foo': 'bar'}, clear=True):
-            results = self.run_hook(command=['foo'], env={'hello': 'world'})
+        with mock.patch.dict(os.environ, {"foo": "bar"}, clear=True):
+            results = self.run_hook(command=["foo"], env={"hello": "world"})
 
-            self.assertEqual(results, {'returncode': 0,
-                                       'stdout': None,
-                                       'stderr': None})
+            self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
             self.popen_mock.assert_called_once_with(
-                ['foo'], stdin=self.devnull, stdout=None, stderr=None,
-                env={'hello': 'world', 'foo': 'bar'})
+                ["foo"],
+                stdin=self.devnull,
+                stdout=None,
+                stderr=None,
+                env={"hello": "world", "foo": "bar"},
+            )

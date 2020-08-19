@@ -6,7 +6,6 @@ import os
 import stat
 import subprocess
 import sys
-# https://github.com/PyCQA/pylint/issues/2955
 from distutils.util import strtobool  # pylint: disable=E
 from io import BytesIO as StringIO
 from shutil import copyfile
@@ -42,15 +41,14 @@ SUPPORTED_RUNTIMES = [
     # However, the Python 2.7 runtime is still supported and is not scheduled
     # to be deprecated at this time.
     # https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html
-    'python2.7',
-    'python3.6',
-    'python3.7',
-    'python3.8'
+    "python2.7",
+    "python3.6",
+    "python3.7",
+    "python3.8",
 ]
 
 
-def copydir(source, destination, includes, excludes=None,
-            follow_symlinks=False):
+def copydir(source, destination, includes, excludes=None, follow_symlinks=False):
     """Extend the functionality of shutil.
 
     Correctly copies files and directories in a source directory.
@@ -71,15 +69,14 @@ def copydir(source, destination, includes, excludes=None,
         parent = os.path.dirname(dir_name)
         if not os.path.isdir(parent):
             _mkdir(parent)
-        LOGGER.debug('creating directory: %s', dir_name)
+        LOGGER.debug("creating directory: %s", dir_name)
         os.mkdir(dir_name)
 
     for file_name in files:
         src = os.path.join(source, file_name)
         dest = os.path.join(destination, file_name)
         try:
-            LOGGER.debug('copying file "%s" to "%s"',
-                         src, dest)
+            LOGGER.debug('copying file "%s" to "%s"', src, dest)
             copyfile(src, dest)
         # python2 raises an IOError here
         except (IOError, OSError):
@@ -100,9 +97,7 @@ def find_requirements(root):
     """
     findings = {}
 
-    for file_name in ['requirements.txt',
-                      'Pipfile',
-                      'Pipfile.lock']:
+    for file_name in ["requirements.txt", "Pipfile", "Pipfile.lock"]:
         findings[file_name] = os.path.isfile(os.path.join(root, file_name))
 
     if not sum(findings.values()):
@@ -125,8 +120,7 @@ def should_use_docker(dockerize_pip=None):
         return dockerize_pip
 
     if isinstance(dockerize_pip, str):
-        if dockerize_pip == 'non-linux' and \
-                not sys.platform.startswith('linux'):
+        if dockerize_pip == "non-linux" and not sys.platform.startswith("linux"):
             return True
         try:
             return strtobool(dockerize_pip)
@@ -157,9 +151,9 @@ def _zip_files(files, root):
         # if file list is a generator, save the contents so it can be reused
         # since generators are empty after the first iteration and cannot be
         # rewound.
-        LOGGER.debug('converting file generater to list for reuse...')
+        LOGGER.debug("converting file generater to list for reuse...")
         files = list(files)
-    with ZipFile(zip_data, 'w', ZIP_DEFLATED) as zip_file:
+    with ZipFile(zip_data, "w", ZIP_DEFLATED) as zip_file:
         for file_name in files:
             zip_file.write(os.path.join(root, file_name), file_name)
 
@@ -173,10 +167,11 @@ def _zip_files(files, root):
                 new_perms = 0o644
 
             if new_perms != perms:
-                LOGGER.debug("fixing perms: %s: %o => %o",
-                             zip_entry.filename, perms, new_perms)
-                new_attr = (
-                    (zip_entry.external_attr & ~ZIP_PERMS_MASK) | (new_perms << 16)
+                LOGGER.debug(
+                    "fixing perms: %s: %o => %o", zip_entry.filename, perms, new_perms
+                )
+                new_attr = (zip_entry.external_attr & ~ZIP_PERMS_MASK) | (
+                    new_perms << 16
                 )
                 zip_entry.external_attr = new_attr
 
@@ -239,8 +234,7 @@ def _find_files(root, includes, excludes=None, follow_symlinks=False):
     """
     root = os.path.abspath(root)
     file_set = formic.FileSet(
-        directory=root, include=includes,
-        exclude=excludes, symlinks=follow_symlinks,
+        directory=root, include=includes, exclude=excludes, symlinks=follow_symlinks,
     )
 
     for filename in file_set.qualified_files(absolute=False):
@@ -267,24 +261,31 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
         RuntimeError: when the generated archive would be empty.
 
     """
-    LOGGER.info('base directory: %s', root)
+    LOGGER.info("base directory: %s", root)
 
     files = list(_find_files(root, includes, excludes, follow_symlinks))
     if not files:
-        raise RuntimeError('Empty list of files for Lambda payload. Check '
-                           'your include/exclude options for errors.')
+        raise RuntimeError(
+            "Empty list of files for Lambda payload. Check "
+            "your include/exclude options for errors."
+        )
 
-    LOGGER.info('adding %d files:', len(files))
+    LOGGER.info("adding %d files:", len(files))
 
     for file_name in files:
-        LOGGER.debug(' + %s', file_name)
+        LOGGER.debug(" + %s", file_name)
 
     return _zip_files(files, root)
 
 
-def handle_requirements(package_root, dest_path, requirements,
-                        pipenv_timeout=300, python_path=None,
-                        use_pipenv=False):
+def handle_requirements(
+    package_root,
+    dest_path,
+    requirements,
+    pipenv_timeout=300,
+    python_path=None,
+    use_pipenv=False,
+):
     """Use the correct requirements file.
 
     Args:
@@ -309,22 +310,28 @@ def handle_requirements(package_root, dest_path, requirements,
 
     """
     if use_pipenv:
-        LOGGER.info('explicitly using pipenv')
-        return _handle_use_pipenv(package_root=package_root,
-                                  dest_path=dest_path, python_path=python_path,
-                                  timeout=pipenv_timeout)
-    if requirements['requirements.txt']:
-        LOGGER.info('using requirements.txt for dependencies')
-        return os.path.join(dest_path, 'requirements.txt')
-    if requirements['Pipfile'] or requirements['Pipfile.lock']:
-        LOGGER.info('using pipenv for dependencies')
-        return _handle_use_pipenv(package_root=package_root,
-                                  dest_path=dest_path, python_path=python_path,
-                                  timeout=pipenv_timeout)
+        LOGGER.info("explicitly using pipenv")
+        return _handle_use_pipenv(
+            package_root=package_root,
+            dest_path=dest_path,
+            python_path=python_path,
+            timeout=pipenv_timeout,
+        )
+    if requirements["requirements.txt"]:
+        LOGGER.info("using requirements.txt for dependencies")
+        return os.path.join(dest_path, "requirements.txt")
+    if requirements["Pipfile"] or requirements["Pipfile.lock"]:
+        LOGGER.info("using pipenv for dependencies")
+        return _handle_use_pipenv(
+            package_root=package_root,
+            dest_path=dest_path,
+            python_path=python_path,
+            timeout=pipenv_timeout,
+        )
     # This point should never be reached under normal operation since a
     # requirements file of some sort must have been found in another step
     # of the process but just in case it does happen, raise an error.
-    raise NotImplementedError('Unable to handle missing requirements file.')
+    raise NotImplementedError("Unable to handle missing requirements file.")
 
 
 def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
@@ -341,19 +348,19 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
         PipenvError: Non-zero exit code returned by pipenv process.
 
     """
-    if getattr(sys, 'frozen', False):
-        LOGGER.error('pipenv can only be used with python installed from PyPi')
+    if getattr(sys, "frozen", False):
+        LOGGER.error("pipenv can only be used with python installed from PyPi")
         sys.exit(1)
-    LOGGER.info('creating requirements.txt from Pipfile...')
-    req_path = os.path.join(dest_path, 'requirements.txt')
-    cmd = ['pipenv', 'lock', '--requirements', '--keep-outdated']
+    LOGGER.info("creating requirements.txt from Pipfile...")
+    req_path = os.path.join(dest_path, "requirements.txt")
+    cmd = ["pipenv", "lock", "--requirements", "--keep-outdated"]
     if python_path:
         cmd.insert(0, python_path)
-        cmd.insert(1, '-m')
-    with open(req_path, 'w') as requirements:
-        pipenv_process = subprocess.Popen(cmd, cwd=package_root,
-                                          stdout=requirements,
-                                          stderr=subprocess.PIPE)
+        cmd.insert(1, "-m")
+    with open(req_path, "w") as requirements:
+        pipenv_process = subprocess.Popen(
+            cmd, cwd=package_root, stdout=requirements, stderr=subprocess.PIPE
+        )
         if int(sys.version[0]) > 2:
             # TODO remove pylint disable when dropping python2
             # pylint: disable=unexpected-keyword-arg
@@ -363,14 +370,16 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
         if pipenv_process.returncode == 0:
             return req_path
         if int(sys.version[0]) > 2:
-            stderr = stderr.decode('UTF-8')
-        LOGGER.error('"%s" failed with the following '
-                     'output:\n%s', ' '.join(cmd), stderr)
+            stderr = stderr.decode("UTF-8")
+        LOGGER.error(
+            '"%s" failed with the following output:\n%s', " ".join(cmd), stderr
+        )
         raise PipenvError
 
 
-def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
-                   docker_image=None, **_kwargs):
+def dockerized_pip(
+    work_dir, client=None, runtime=None, docker_file=None, docker_image=None, **_kwargs
+):
     """Run pip with docker.
 
     Args:
@@ -397,8 +406,8 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
         # exactly one of these is needed. converting to bool will give us a
         # 'False' (0) for 'None' and 'True' (1) for anything else.
         raise InvalidDockerizePipConfiguration(
-            'exactly only one of [docker_file, docker_file, runtime] must be '
-            'provided'
+            "exactly only one of [docker_file, docker_file, runtime] must be "
+            "provided"
         )
 
     if not client:
@@ -407,58 +416,56 @@ def dockerized_pip(work_dir, client=None, runtime=None, docker_file=None,
     if docker_file:
         if not os.path.isfile(docker_file):
             raise ValueError('could not find docker_file "%s"' % docker_file)
-        LOGGER.info('building docker image from "%s"',
-                    docker_file)
+        LOGGER.info('building docker image from "%s"', docker_file)
         response = client.images.build(
             path=os.path.dirname(docker_file),
             dockerfile=os.path.basename(docker_file),
-            forcerm=True
+            forcerm=True,
         )
         # the response can be either a tuple of (Image, Generator[Dict[str, str]])
         # or just Image depending on API version.
         if isinstance(response, tuple):
             docker_image = response[0].id
             for log_msg in response[1]:
-                if log_msg.get('stream'):
-                    LOGGER.info(log_msg['stream'].strip('\n'))
+                if log_msg.get("stream"):
+                    LOGGER.info(log_msg["stream"].strip("\n"))
         else:
             docker_image = response.id
         LOGGER.info('docker image "%s" created', docker_image)
     if runtime:
         if runtime not in SUPPORTED_RUNTIMES:
-            raise ValueError('invalid runtime "{}" must be one of {}'.format(
-                runtime, str(SUPPORTED_RUNTIMES)
-            ))
-        docker_image = 'lambci/lambda:build-%s' % runtime
-        LOGGER.debug('selected docker image "%s" based on provided runtime',
-                     docker_image)
+            raise ValueError(
+                'invalid runtime "{}" must be one of {}'.format(
+                    runtime, str(SUPPORTED_RUNTIMES)
+                )
+            )
+        docker_image = "lambci/lambda:build-%s" % runtime
+        LOGGER.debug(
+            'selected docker image "%s" based on provided runtime', docker_image
+        )
 
-    if sys.platform.lower() == 'win32':
-        LOGGER.debug('formatted docker mount path for Windows')
-        work_dir = work_dir.replace('\\', '/')
+    if sys.platform.lower() == "win32":
+        LOGGER.debug("formatted docker mount path for Windows")
+        work_dir = work_dir.replace("\\", "/")
 
-    work_dir_mount = docker.types.Mount(target='/var/task',
-                                        source=work_dir,
-                                        type='bind')
-    pip_cmd = (
-        'python -m pip install -t /var/task -r /var/task/requirements.txt'
+    work_dir_mount = docker.types.Mount(
+        target="/var/task", source=work_dir, type="bind"
     )
+    pip_cmd = "python -m pip install -t /var/task -r /var/task/requirements.txt"
 
-    LOGGER.info('using docker image "%s" to build deployment '
-                'package...', docker_image)
+    LOGGER.info('using docker image "%s" to build deployment package...', docker_image)
 
-    container = client.containers.run(image=docker_image,
-                                      command=['/bin/sh', '-c', pip_cmd],
-                                      auto_remove=True,
-                                      detach=True,
-                                      mounts=[work_dir_mount])
+    container = client.containers.run(
+        image=docker_image,
+        command=["/bin/sh", "-c", pip_cmd],
+        auto_remove=True,
+        detach=True,
+        mounts=[work_dir_mount],
+    )
 
     # 'stream' creates a blocking generator that allows for real-time logs.
     # this loop ends when the container 'auto_remove's itself.
-    for log in container.logs(stdout=True,
-                              stderr=True,
-                              stream=True,
-                              tail=0):
+    for log in container.logs(stdout=True, stderr=True, stream=True, tail=0):
         # without strip there are a bunch blank lines in the output
         LOGGER.info(log.decode().strip())
 
@@ -483,24 +490,34 @@ def _pip_has_no_color_option(python_path):
     """
     try:
         pip_version_string = subprocess.check_output(
-            [python_path,
-             '-c',
-             'from __future__ import print_function;'
-             'import pip;'
-             'print(pip.__version__)']
+            [
+                python_path,
+                "-c",
+                "from __future__ import print_function;"
+                "import pip;"
+                "print(pip.__version__)",
+            ]
         )
         if sys.version_info[0] > 2 and isinstance(pip_version_string, bytes):
             pip_version_string = pip_version_string.decode()
-        if int(pip_version_string.split('.')[0]) > 10:
+        if int(pip_version_string.split(".")[0]) > 10:
             return True
     except (AttributeError, ValueError, subprocess.CalledProcessError):
-        LOGGER.debug('error checking pip version; assuming it to be pre-v10')
+        LOGGER.debug("error checking pip version; assuming it to be pre-v10")
     return False
 
 
-def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
-                 follow_symlinks=False, python_path=None,
-                 requirements_files=None, use_pipenv=False, **kwargs):
+def _zip_package(
+    package_root,
+    includes,
+    excludes=None,
+    dockerize_pip=False,
+    follow_symlinks=False,
+    python_path=None,
+    requirements_files=None,
+    use_pipenv=False,
+    **kwargs
+):
     """Create zip file in memory with package dependencies.
 
     Args:
@@ -528,59 +545,70 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
         calculated hash of all the files
 
     """
-    kwargs.setdefault('pipenv_timeout', 300)
+    kwargs.setdefault("pipenv_timeout", 300)
 
-    temp_root = os.path.join(os.path.expanduser('~'), '.runway_cache')
+    temp_root = os.path.join(os.path.expanduser("~"), ".runway_cache")
     if not os.path.isdir(temp_root):
         os.makedirs(temp_root)
 
     # exclude potential virtual environments in the package
-    excludes.append('.venv/')
+    excludes.append(".venv/")
 
-    with tempfile.TemporaryDirectory(prefix='cfngin',
-                                     dir=temp_root) as tmpdir:
-        tmp_req = os.path.join(tmpdir, 'requirements.txt')
+    with tempfile.TemporaryDirectory(prefix="cfngin", dir=temp_root) as tmpdir:
+        tmp_req = os.path.join(tmpdir, "requirements.txt")
         copydir(package_root, tmpdir, includes, excludes, follow_symlinks)
-        tmp_req = handle_requirements(package_root=package_root,
-                                      dest_path=tmpdir,
-                                      requirements=requirements_files,
-                                      python_path=python_path,
-                                      use_pipenv=use_pipenv,
-                                      pipenv_timeout=kwargs['pipenv_timeout'])
+        tmp_req = handle_requirements(
+            package_root=package_root,
+            dest_path=tmpdir,
+            requirements=requirements_files,
+            python_path=python_path,
+            use_pipenv=use_pipenv,
+            pipenv_timeout=kwargs["pipenv_timeout"],
+        )
 
         if should_use_docker(dockerize_pip):
             dockerized_pip(tmpdir, **kwargs)
         else:
-            tmp_script = Path(tmpdir) / '__runway_run_pip_install.py'
-            pip_cmd = [python_path or sys.executable, '-m',
-                       'pip', 'install',
-                       '--target', tmpdir,
-                       '--requirement', tmp_req,
-                       '--no-color']
+            tmp_script = Path(tmpdir) / "__runway_run_pip_install.py"
+            pip_cmd = [
+                python_path or sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--target",
+                tmpdir,
+                "--requirement",
+                tmp_req,
+                "--no-color",
+            ]
 
             # Pyinstaller build or explicit python path
-            if getattr(sys, 'frozen', False) and not python_path:
-                script_contents = os.linesep.join([
-                    'import runpy',
-                    'from runway.util import argv',
-                    'with argv(*{}):'.format(json.dumps(pip_cmd[2:])),
-                    '   runpy.run_module("pip", run_name="__main__")\n'
-                ])
+            if getattr(sys, "frozen", False) and not python_path:
+                script_contents = os.linesep.join(
+                    [
+                        "import runpy",
+                        "from runway.util import argv",
+                        "with argv(*{}):".format(json.dumps(pip_cmd[2:])),
+                        '   runpy.run_module("pip", run_name="__main__")\n',
+                    ]
+                )
                 # TODO remove python 2 logic when dropping python 2
-                tmp_script.write_text(script_contents
-                                      if sys.version_info.major > 2
-                                      else script_contents.decode('UTF-8'))
-                cmd = [sys.executable, 'run-python', str(tmp_script)]
+                tmp_script.write_text(
+                    script_contents
+                    if sys.version_info.major > 2
+                    else script_contents.decode("UTF-8")
+                )
+                cmd = [sys.executable, "run-python", str(tmp_script)]
             else:
                 if not _pip_has_no_color_option(pip_cmd[0]):
-                    pip_cmd.remove('--no-color')
+                    pip_cmd.remove("--no-color")
                 cmd = pip_cmd
 
             LOGGER.info(
-                'The following output from pip may include incompatibility errors. '
-                'These can generally be ignored (pip will erroneously warn '
-                'about conflicts between the packages in your Lambda zip and '
-                'your host system).'
+                "The following output from pip may include incompatibility errors. "
+                "These can generally be ignored (pip will erroneously warn "
+                "about conflicts between the packages in your Lambda zip and "
+                "your host system)."
             )
 
             try:
@@ -591,7 +619,7 @@ def _zip_package(package_root, includes, excludes=None, dockerize_pip=False,
                 if tmp_script.is_file():
                     tmp_script.unlink()
 
-        req_files = _find_files(tmpdir, includes='**', follow_symlinks=False)
+        req_files = _find_files(tmpdir, includes="**", follow_symlinks=False)
         return _zip_files(req_files, tmpdir)
 
 
@@ -615,13 +643,12 @@ def _head_object(s3_conn, bucket, key):
     try:
         return s3_conn.head_object(Bucket=bucket, Key=key)
     except botocore.exceptions.ClientError as err:
-        if err.response['Error']['Code'] == '404':
+        if err.response["Error"]["Code"] == "404":
             return None
         raise
 
 
-def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash,
-                 payload_acl):
+def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash, payload_acl):
     """Upload a ZIP file to S3 for use by Lambda.
 
     The key used for the upload will be unique based on the checksum of the
@@ -649,16 +676,20 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash,
             through.
 
     """
-    LOGGER.debug('ZIP hash: %s', content_hash)
-    key = '{}lambda-{}-{}.zip'.format(prefix, name, content_hash)
+    LOGGER.debug("ZIP hash: %s", content_hash)
+    key = "{}lambda-{}-{}.zip".format(prefix, name, content_hash)
 
     if _head_object(s3_conn, bucket, key):
-        LOGGER.info('object already exists; not uploading: %s', key)
+        LOGGER.info("object already exists; not uploading: %s", key)
     else:
-        LOGGER.info('uploading object: %s', key)
-        s3_conn.put_object(Bucket=bucket, Key=key, Body=contents,
-                           ContentType='application/zip',
-                           ACL=payload_acl)
+        LOGGER.info("uploading object: %s", key)
+        s3_conn.put_object(
+            Bucket=bucket,
+            Key=key,
+            Body=contents,
+            ContentType="application/zip",
+            ACL=payload_acl,
+        )
 
     return Code(S3Bucket=bucket, S3Key=key)
 
@@ -695,12 +726,15 @@ def _check_pattern_list(patterns, key, default=None):
         if all(isinstance(p, string_types) for p in patterns):
             return patterns
 
-    raise ValueError("Invalid file patterns in key '{}': must be a string or "
-                     'list of strings'.format(key))
+    raise ValueError(
+        "Invalid file patterns in key '{}': must be a string or "
+        "list of strings".format(key)
+    )
 
 
-def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
-                     payload_acl, sys_path):
+def _upload_function(
+    s3_conn, bucket, prefix, name, options, follow_symlinks, payload_acl, sys_path
+):
     """Build a Lambda payload from user configuration and uploads it to S3.
 
     Args:
@@ -738,18 +772,16 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
 
     """
     try:
-        root = os.path.expanduser(options['path'])
+        root = os.path.expanduser(options["path"])
     except KeyError as err:
         raise ValueError(
-            "missing required property '{}' in function '{}'".format(
-                err.args[0], name))
+            "missing required property '{}' in function '{}'".format(err.args[0], name)
+        )
 
-    includes = _check_pattern_list(options.get('include'), 'include',
-                                   default=['**'])
-    excludes = _check_pattern_list(options.get('exclude'), 'exclude',
-                                   default=[])
+    includes = _check_pattern_list(options.get("include"), "include", default=["**"])
+    excludes = _check_pattern_list(options.get("exclude"), "exclude", default=[])
 
-    LOGGER.debug('processing function: %s', name)
+    LOGGER.debug("processing function: %s", name)
 
     # os.path.join will ignore other parameters if the right-most one is an
     # absolute path, which is exactly what we want.
@@ -766,17 +798,18 @@ def _upload_function(s3_conn, bucket, prefix, name, options, follow_symlinks,
             **options
         )
     else:
-        zip_contents, content_hash = _zip_from_file_patterns(root,
-                                                             includes,
-                                                             excludes,
-                                                             follow_symlinks)
+        zip_contents, content_hash = _zip_from_file_patterns(
+            root, includes, excludes, follow_symlinks
+        )
 
-    return _upload_code(s3_conn, bucket, prefix, name, zip_contents,
-                        content_hash, payload_acl)
+    return _upload_code(
+        s3_conn, bucket, prefix, name, zip_contents, content_hash, payload_acl
+    )
 
 
-def select_bucket_region(custom_bucket, hook_region, cfngin_bucket_region,
-                         provider_region):
+def select_bucket_region(
+    custom_bucket, hook_region, cfngin_bucket_region, provider_region
+):
     """Return the appropriate region to use when uploading functions.
 
     Select the appropriate region for the bucket where lambdas are uploaded in.
@@ -968,51 +1001,58 @@ def upload_lambda_functions(context, provider, **kwargs):
     """
     # TODO add better handling for misconfiguration (e.g. forgetting function names)
     # TODO support defining dockerize_pip options at the top level of args
-    custom_bucket = kwargs.get('bucket')
+    custom_bucket = kwargs.get("bucket")
     if not custom_bucket:
         bucket_name = context.bucket_name
-        LOGGER.info("using default bucket from CFNgin: %s",
-                    bucket_name)
+        LOGGER.info("using default bucket from CFNgin: %s", bucket_name)
     else:
         bucket_name = custom_bucket
         LOGGER.info("using custom bucket: %s", bucket_name)
 
     custom_bucket_region = kwargs.get("bucket_region")
     if not custom_bucket and custom_bucket_region:
-        raise ValueError("Cannot specify `bucket_region` without specifying "
-                         "`bucket`.")
+        raise ValueError("Cannot specify `bucket_region` without specifying `bucket`.")
 
     bucket_region = select_bucket_region(
         custom_bucket,
         custom_bucket_region,
         context.config.cfngin_bucket_region,
-        provider.region
+        provider.region,
     )
 
     # Check if we should walk / follow symlinks
-    follow_symlinks = kwargs.get('follow_symlinks', False)
+    follow_symlinks = kwargs.get("follow_symlinks", False)
     if not isinstance(follow_symlinks, bool):
-        raise ValueError('follow_symlinks option must be a boolean')
+        raise ValueError("follow_symlinks option must be a boolean")
 
     # Check for S3 object acl. Valid values from:
     # https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
-    payload_acl = kwargs.get('payload_acl', 'private')
+    payload_acl = kwargs.get("payload_acl", "private")
 
     # Always use the global client for s3
     session = get_session(bucket_region)
-    s3_client = session.client('s3')
+    s3_client = session.client("s3")
 
     ensure_s3_bucket(s3_client, bucket_name, bucket_region)
 
-    prefix = kwargs.get('prefix', '')
+    prefix = kwargs.get("prefix", "")
 
     results = {}
-    for name, options in kwargs['functions'].items():
-        sys_path = (os.path.dirname(context.config_path)
-                    if os.path.isfile(context.config_path)
-                    else context.config_path)
-        results[name] = _upload_function(s3_client, bucket_name, prefix, name,
-                                         options, follow_symlinks, payload_acl,
-                                         sys_path)
+    for name, options in kwargs["functions"].items():
+        sys_path = (
+            os.path.dirname(context.config_path)
+            if os.path.isfile(context.config_path)
+            else context.config_path
+        )
+        results[name] = _upload_function(
+            s3_client,
+            bucket_name,
+            prefix,
+            name,
+            options,
+            follow_symlinks,
+            payload_acl,
+            sys_path,
+        )
 
     return results

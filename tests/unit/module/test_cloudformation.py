@@ -16,44 +16,36 @@ class TestCloudFormation(object):
     def generic_options(self):
         """Return generic module options."""
         return {
-            'environment': True,
-            'parameters': MutableMap(**{
-                'test_key': 'test-value'
-            })
+            "environment": True,
+            "parameters": MutableMap(**{"test_key": "test-value"}),
         }
 
     @staticmethod
-    def get_context(name='test', region='us-east-1'):
+    def get_context(name="test", region="us-east-1"):
         """Create a basic Runway context object."""
-        context = MockRunwayContext(deploy_environment=DeployEnvironment(
-            explicit_name=name
-        ))
+        context = MockRunwayContext(
+            deploy_environment=DeployEnvironment(explicit_name=name)
+        )
         context.env.aws_region = region
         return context
 
-    @patch('runway.cfngin.CFNgin.deploy')
+    @patch("runway.cfngin.CFNgin.deploy")
     def test_deploy(self, mock_action, tmp_path):
         """Test deploy."""
-        module = CloudFormation(self.get_context(),
-                                str(tmp_path),
-                                self.generic_options)
+        module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
         module.deploy()
         mock_action.assert_called_once()
 
-    @patch('runway.cfngin.CFNgin.destroy')
+    @patch("runway.cfngin.CFNgin.destroy")
     def test_destroy(self, mock_action, tmp_path):
         """Test destroy."""
-        module = CloudFormation(self.get_context(),
-                                str(tmp_path),
-                                self.generic_options)
+        module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
         module.destroy()
         mock_action.assert_called_once()
 
-    @patch('runway.cfngin.CFNgin.plan')
+    @patch("runway.cfngin.CFNgin.plan")
     def test_plan(self, mock_action, tmp_path):
         """Test plan."""
-        module = CloudFormation(self.get_context(),
-                                str(tmp_path),
-                                self.generic_options)
+        module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
         module.plan()
         mock_action.assert_called_once()

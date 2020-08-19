@@ -8,13 +8,12 @@ LOGGER = logging.getLogger(__name__)
 
 def delete_param(context, provider, **kwargs):
     """Delete SSM parameter."""
-    parameter_name = kwargs.get('parameter_name')
+    parameter_name = kwargs.get("parameter_name")
     if not parameter_name:
-        raise ValueError('Must specify `parameter_name` for delete_param '
-                         'hook.')
+        raise ValueError("Must specify `parameter_name` for delete_param hook.")
 
     session = context.get_session()
-    ssm_client = session.client('ssm')
+    ssm_client = session.client("ssm")
 
     try:
         ssm_client.delete_parameter(Name=parameter_name)

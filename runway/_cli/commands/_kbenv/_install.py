@@ -8,11 +8,11 @@ import click
 from ....env_mgr.kbenv import KBEnvManager
 from ... import options
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('install', short_help='install kubectl')
-@click.argument('version', metavar='[<version>]', required=False)
+@click.command("install", short_help="install kubectl")
+@click.argument("version", metavar="[<version>]", required=False)
 @options.debug
 @options.no_color
 @options.verbose
@@ -27,5 +27,4 @@ def install(version, **_):
     Compatible with https://github.com/alexppg/kbenv.
 
     """
-    LOGGER.debug('kubectl path: %s',
-                 KBEnvManager().install(version_requested=version))
+    LOGGER.debug("kubectl path: %s", KBEnvManager().install(version_requested=version))

@@ -2,6 +2,7 @@
 
 Responsible for updating the User Pool Client with the generated
 distribution url + callback url paths.
+
 """
 # pylint: disable=unused-argument
 import logging
@@ -14,10 +15,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-def update(context,  # pylint: disable=unused-argument
-           provider,
-           **kwargs
-          ):  # noqa: E124
+def update(context, provider, **kwargs):
     # type: (Context, BaseProvider, Optional[Dict[str, Any]]) -> bool
     """Update the callback urls for the User Pool Client.
 
@@ -40,33 +38,35 @@ def update(context,  # pylint: disable=unused-argument
 
     """
     session = context.get_session()
-    cognito_client = session.client('cognito-idp')
+    cognito_client = session.client("cognito-idp")
 
     # Combine alternate domains with main distribution
-    redirect_domains = kwargs['alternate_domains'] + ['https://' + kwargs['distribution_domain']]
+    redirect_domains = kwargs["alternate_domains"] + [
+        "https://" + kwargs["distribution_domain"]
+    ]
 
     # Create a list of all domains with their redirect paths
     redirect_uris_sign_in = [
-        "%s%s" % (domain, kwargs['redirect_path_sign_in'])
+        "%s%s" % (domain, kwargs["redirect_path_sign_in"])
         for domain in redirect_domains
     ]
     redirect_uris_sign_out = [
-        "%s%s" % (domain, kwargs['redirect_path_sign_out'])
+        "%s%s" % (domain, kwargs["redirect_path_sign_out"])
         for domain in redirect_domains
     ]
     # Update the user pool client
     try:
         cognito_client.update_user_pool_client(
-            AllowedOAuthScopes=kwargs['oauth_scopes'],
-            AllowedOAuthFlows=['code'],
-            SupportedIdentityProviders=kwargs['supported_identity_providers'],
+            AllowedOAuthScopes=kwargs["oauth_scopes"],
+            AllowedOAuthFlows=["code"],
+            SupportedIdentityProviders=kwargs["supported_identity_providers"],
             AllowedOAuthFlowsUserPoolClient=True,
-            ClientId=kwargs['client_id'],
+            ClientId=kwargs["client_id"],
             CallbackURLs=redirect_uris_sign_in,
             LogoutURLs=redirect_uris_sign_out,
-            UserPoolId=context.hook_data['aae_user_pool_id_retriever']['id'],
+            UserPoolId=context.hook_data["aae_user_pool_id_retriever"]["id"],
         )
         return True
     except Exception:  # pylint: disable=broad-except
-        LOGGER.exception('unable to update user pool client callback urls')
+        LOGGER.exception("unable to update user pool client callback urls")
         return False

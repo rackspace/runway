@@ -12,11 +12,15 @@ class TestStacker(unittest.TestCase):
         """Test stacker build parse args."""
         stacker = Stacker()
         args = stacker.parse_args(
-            ["build",
-             "-r", "us-west-2",
-             "-e", "namespace=test.override",
-             "tests/unit/cfngin/fixtures/basic.env",
-             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+            [
+                "build",
+                "-r",
+                "us-west-2",
+                "-e",
+                "namespace=test.override",
+                "tests/unit/cfngin/fixtures/basic.env",
+                "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
+            ]
         )
         self.assertEqual(args.region, "us-west-2")
         self.assertFalse(args.outline)
@@ -27,10 +31,13 @@ class TestStacker(unittest.TestCase):
         """Test stacker build parse args region from env."""
         stacker = Stacker()
         args = stacker.parse_args(
-            ["build",
-             "-e", "namespace=test.override",
-             "tests/unit/cfngin/fixtures/basic.env",
-             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+            [
+                "build",
+                "-e",
+                "namespace=test.override",
+                "tests/unit/cfngin/fixtures/basic.env",
+                "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
+            ]
         )
         self.assertEqual(args.region, None)
 
@@ -38,10 +45,13 @@ class TestStacker(unittest.TestCase):
         """Test stacker build context passed to blueprint."""
         stacker = Stacker()
         args = stacker.parse_args(
-            ["build",
-             "-r", "us-west-2",
-             "tests/unit/cfngin/fixtures/basic.env",
-             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+            [
+                "build",
+                "-r",
+                "us-west-2",
+                "tests/unit/cfngin/fixtures/basic.env",
+                "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
+            ]
         )
         stacker.configure(args)
         stacks_dict = args.context.get_stacks_dict()
@@ -59,10 +69,13 @@ class TestStacker(unittest.TestCase):
         """Test stacker blueprint property access does not reset blueprint."""
         stacker = Stacker()
         args = stacker.parse_args(
-            ["build",
-             "-r", "us-west-2",
-             "tests/unit/cfngin/fixtures/basic.env",
-             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml"]
+            [
+                "build",
+                "-r",
+                "us-west-2",
+                "tests/unit/cfngin/fixtures/basic.env",
+                "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
+            ]
         )
         stacker.configure(args)
         stacks_dict = args.context.get_stacks_dict()
@@ -74,12 +87,17 @@ class TestStacker(unittest.TestCase):
         """Test stacker build context stack names specified."""
         stacker = Stacker()
         args = stacker.parse_args(
-            ["build",
-             "-r", "us-west-2",
-             "tests/unit/cfngin/fixtures/basic.env",
-             "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
-             "--stacks", "vpc",
-             "--stacks", "bastion"]
+            [
+                "build",
+                "-r",
+                "us-west-2",
+                "tests/unit/cfngin/fixtures/basic.env",
+                "tests/unit/cfngin/fixtures/vpc-bastion-db-web.yaml",
+                "--stacks",
+                "vpc",
+                "--stacks",
+                "bastion",
+            ]
         )
         stacker.configure(args)
         stacks = args.context.get_stacks()
@@ -89,10 +107,13 @@ class TestStacker(unittest.TestCase):
         """Test stacker build fail when parameters in stack def."""
         stacker = Stacker()
         args = stacker.parse_args(
-            ["build",
-             "-r", "us-west-2",
-             "tests/unit/cfngin/fixtures/basic.env",
-             "tests/unit/cfngin/fixtures/vpc-bastion-db-web-pre-1.0.yaml"]
+            [
+                "build",
+                "-r",
+                "us-west-2",
+                "tests/unit/cfngin/fixtures/basic.env",
+                "tests/unit/cfngin/fixtures/vpc-bastion-db-web-pre-1.0.yaml",
+            ]
         )
         with self.assertRaises(InvalidConfig):
             stacker.configure(args)
@@ -102,15 +123,17 @@ class TestStacker(unittest.TestCase):
         stacker = Stacker()
         args = stacker.parse_args(
             [
-                "build", "-r", "us-west-2",
+                "build",
+                "-r",
+                "us-west-2",
                 "tests/unit/cfngin/fixtures/not-basic.env",
-                "tests/unit/cfngin/fixtures/vpc-custom-log-format-info.yaml"
+                "tests/unit/cfngin/fixtures/vpc-custom-log-format-info.yaml",
             ]
         )
         stacker.configure(args)
         self.assertEqual(
             stacker.config.log_formats["info"],
-            '[%(asctime)s] test custom log format - %(message)s'
+            "[%(asctime)s] test custom log format - %(message)s",
         )
         # for some reason, pylint does not see DictType.get as valid
         self.assertIsNone(
@@ -121,5 +144,5 @@ class TestStacker(unittest.TestCase):
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

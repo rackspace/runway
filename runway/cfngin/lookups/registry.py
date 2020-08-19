@@ -25,7 +25,7 @@ def register_lookup_handler(lookup_type, handler_or_path):
 
     """
     handler = handler_or_path
-    LOGGER.debug('registering CFNgin lookup: %s=%s', lookup_type, handler_or_path)
+    LOGGER.debug("registering CFNgin lookup: %s=%s", lookup_type, handler_or_path)
     if isinstance(handler_or_path, string_types):
         handler = load_object_from_string(handler_or_path)
     CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
@@ -33,9 +33,9 @@ def register_lookup_handler(lookup_type, handler_or_path):
         # Hander is a not a new-style handler
         LOGGER.warning(
             'lookup "%s" uses a deprecated format; to learn how to write '
-            'lookups visit %s/page/cfngin/lookups.html#writing-a-custom-lookup',
+            "lookups visit %s/page/cfngin/lookups.html#writing-a-custom-lookup",
             lookup_type,
-            DOC_SITE
+            DOC_SITE,
         )
 
 
@@ -74,9 +74,7 @@ def resolve_lookups(variable, context, provider):
             raise UnknownLookupType(lookup)
         try:
             resolved_lookups[lookup] = handler(
-                value=lookup.input,
-                context=context,
-                provider=provider,
+                value=lookup.input, context=context, provider=provider,
             )
         except Exception as err:
             raise FailedVariableLookup(variable.name, lookup, err)

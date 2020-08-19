@@ -29,7 +29,7 @@ class OutputLookup(LookupHandler):
 
         """
         if context is None:
-            raise ValueError('Context is required')
+            raise ValueError("Context is required")
 
         decon = deconstruct(value)
         stack = context.get_stack(decon.stack_name)
@@ -49,7 +49,7 @@ class OutputLookup(LookupHandler):
 
         """
         # try to get the stack name
-        stack_name = ''
+        stack_name = ""
         for data_item in lookup_data:
             if not data_item.resolved:
                 # We encountered an unresolved substitution.
@@ -58,9 +58,9 @@ class OutputLookup(LookupHandler):
                 # Stop here
                 return set()
             stack_name = stack_name + data_item.value
-            match = re.search(r'::', stack_name)
+            match = re.search(r"::", stack_name)
             if match:
-                stack_name = stack_name[0:match.start()]
+                stack_name = stack_name[0 : match.start()]
                 return {stack_name}
             # else: try to append the next item
 
@@ -74,7 +74,8 @@ def deconstruct(value):
     try:
         stack_name, output_name = value.split("::")
     except ValueError:
-        raise ValueError("output handler requires syntax "
-                         "of <stack>::<output>.  Got: %s" % value)
+        raise ValueError(
+            "output handler requires syntax of <stack>::<output>. Got: %s" % value
+        )
 
     return Output(stack_name, output_name)

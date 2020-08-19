@@ -7,10 +7,10 @@ import click
 from .. import options
 from ._test import test
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('preflight', short_help='alias of test')
+@click.command("preflight", short_help="alias of test")
 @options.debug
 @options.deploy_environment
 @options.no_color
@@ -18,5 +18,5 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 @click.pass_context
 def preflight(ctx, **kwargs):
     """Alias of "runway test"."""
-    LOGGER.verbose('forwarding to test...')
+    LOGGER.verbose("forwarding to test...")
     ctx.forward(test, **kwargs)

@@ -53,10 +53,11 @@ def merge_graphs(graph1, graph2):
         :class:`Graph`: A combined graph.
 
     """
-    merged_graph_dict = merge_map(graph1.to_dict().copy(),
-                                  graph2.to_dict())
-    steps = [graph1.steps.get(name, graph2.steps.get(name))
-             for name in merged_graph_dict.keys()]
+    merged_graph_dict = merge_map(graph1.to_dict().copy(), graph2.to_dict())
+    steps = [
+        graph1.steps.get(name, graph2.steps.get(name))
+        for name in merged_graph_dict.keys()
+    ]
     return Graph.from_steps(steps)
 
 
@@ -108,8 +109,7 @@ class Step(object):
         watcher = None
         if self.watch_func:
             watcher = threading.Thread(
-                target=self.watch_func,
-                args=(self.stack, stop_watcher)
+                target=self.watch_func, args=(self.stack, stop_watcher)
             )
             watcher.start()
 
@@ -132,7 +132,7 @@ class Step(object):
         try:
             status = self.fn(self.stack, status=self.status)
         except CancelExecution:
-            status = SkippedStatus('canceled execution')
+            status = SkippedStatus("canceled execution")
         except Exception as err:  # pylint: disable=broad-except
             LOGGER.exception(err)
             status = FailedStatus(reason=str(err))
@@ -242,8 +242,7 @@ class Step(object):
 
         """
         if status is not self.status:
-            LOGGER.debug("setting %s state to %s...", self.stack.name,
-                         status.name)
+            LOGGER.debug("setting %s state to %s...", self.stack.name, status.name)
             self.status = status
             self.last_updated = time.time()
             if self.stack.logging:
@@ -276,8 +275,9 @@ class Step(object):
         self.set_status(SUBMITTED)
 
     @classmethod
-    def from_stack_name(cls, stack_name, context, requires=None, fn=None,
-                        watch_func=None):
+    def from_stack_name(
+        cls, stack_name, context, requires=None, fn=None, watch_func=None
+    ):
         """Create a step using only a stack name.
 
         Args:
@@ -299,14 +299,12 @@ class Step(object):
         from runway.cfngin.config import Stack as StackConfig
         from runway.cfngin.stack import Stack
 
-        stack_def = StackConfig({'name': stack_name,
-                                 'requires': requires or []})
+        stack_def = StackConfig({"name": stack_name, "requires": requires or []})
         stack = Stack(stack_def, context)
         return cls(stack, fn=fn, watch_func=watch_func)
 
     @classmethod
-    def from_persistent_graph(cls, graph_dict, context, fn=None,
-                              watch_func=None):
+    def from_persistent_graph(cls, graph_dict, context, fn=None, watch_func=None):
         """Create a steps for a persistent graph dict.
 
         Args:
@@ -327,8 +325,7 @@ class Step(object):
         steps = []
 
         for name, requires in graph_dict.items():
-            steps.append(cls.from_stack_name(name, context, requires,
-                                             fn, watch_func))
+            steps.append(cls.from_stack_name(name, context, requires, fn, watch_func))
         return steps
 
     def __repr__(self):
@@ -404,8 +401,9 @@ class Graph(object):
             for parent in step.required_by:
                 self.connect(parent, step.name)
 
-    def add_step_if_not_exists(self, step, add_dependencies=False,
-                               add_dependants=False):
+    def add_step_if_not_exists(
+        self, step, add_dependencies=False, add_dependants=False
+    ):
         """Try to add a step to the graph.
 
         Can be used when failure to add is acceptable.
@@ -504,6 +502,7 @@ class Graph(object):
                 :class:`Step` as the only argument for each step of the plan.
 
         """
+
         def fn(step_name):
             """Get a step by step name and execute the ``walk_func`` on it.
 
@@ -613,8 +612,9 @@ class Plan(object):
 
     """
 
-    def __init__(self, description, graph, context=None,
-                 reverse=False, require_unlocked=True):
+    def __init__(
+        self, description, graph, context=None, reverse=False, require_unlocked=True
+    ):
         """Initialize class.
 
         Args:
@@ -663,11 +663,11 @@ class Plan(object):
 
         """
         steps = 1
-        LOGGER.log(level, "plan \"%s\":", self.description)
+        LOGGER.log(level, 'plan "%s":', self.description)
         for step in self.steps:
             LOGGER.log(
                 level,
-                "  - step: %s: target: \"%s\", action: \"%s\"",
+                '  - step: %s: target: "%s", action: "%s"',
                 steps,
                 step.name,
                 step.fn.__name__,
@@ -688,7 +688,7 @@ class Plan(object):
                 Provider to use when resolving the blueprints.
 
         """
-        LOGGER.info("dumping \"%s\"...", self.description)
+        LOGGER.info('dumping "%s"...', self.description)
         directory = os.path.expanduser(directory)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -696,8 +696,7 @@ class Plan(object):
         def walk_func(step):
             """Walk function."""
             step.stack.resolve(
-                context=context,
-                provider=provider,
+                context=context, provider=provider,
             )
             blueprint = step.stack.blueprint
             filename = stack_template_key_name(blueprint)
@@ -707,7 +706,7 @@ class Plan(object):
             if not os.path.exists(blueprint_dir):
                 os.makedirs(blueprint_dir)
 
-            LOGGER.info("writing stack \"%s\" -> %s", step.name, path)
+            LOGGER.info('writing stack "%s" -> %s', step.name, path)
             with open(path, "w") as _file:
                 _file.write(blueprint.rendered)
 
@@ -740,6 +739,7 @@ class Plan(object):
                 :class:`runway.cfngin.dag.DAG` to walk the graph.
 
         """
+
         def walk_func(step):
             """Execute a :class:`Step` wile walking the graph.
 
@@ -765,20 +765,20 @@ class Plan(object):
             if not self.context or not self.context.persistent_graph:
                 return result
 
-            if (step.completed or
-                    (step.skipped and
-                     step.status.reason == ('does not exist in '
-                                            'cloudformation'))):
-                if step.fn.__name__ == '_destroy_stack':
+            if step.completed or (
+                step.skipped
+                and step.status.reason == ("does not exist in cloudformation")
+            ):
+                if step.fn.__name__ == "_destroy_stack":
                     self.context.persistent_graph.pop(step)
-                    LOGGER.debug("removed step '%s' from the persistent graph",
-                                 step.name)
-                elif step.fn.__name__ == '_launch_stack':
+                    LOGGER.debug(
+                        "removed step '%s' from the persistent graph", step.name
+                    )
+                elif step.fn.__name__ == "_launch_stack":
                     self.context.persistent_graph.add_step_if_not_exists(
                         step, add_dependencies=True, add_dependants=True
                     )
-                    LOGGER.debug("added step '%s' to the persistent graph",
-                                 step.name)
+                    LOGGER.debug("added step '%s' to the persistent graph", step.name)
                 else:
                     return result
                 self.context.put_persistent_graph(self.lock_code)

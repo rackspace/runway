@@ -22,20 +22,20 @@ from runway.cfngin.hooks.utils import handle_hooks
 from runway.cfngin.plan import Graph, json_serial
 
 BOTO3_CREDENTIALS = {
-    'aws_access_key_id': 'foo',
-    'aws_secret_access_key': 'bar',
-    'aws_session_token': 'foobar'
+    "aws_access_key_id": "foo",
+    "aws_secret_access_key": "bar",
+    "aws_session_token": "foobar",
 }
 GET_SESSION_CALL = {
-    'access_key': BOTO3_CREDENTIALS['aws_access_key_id'],
-    'secret_key': BOTO3_CREDENTIALS['aws_secret_access_key'],
-    'session_token': BOTO3_CREDENTIALS['aws_session_token']
+    "access_key": BOTO3_CREDENTIALS["aws_access_key_id"],
+    "secret_key": BOTO3_CREDENTIALS["aws_secret_access_key"],
+    "session_token": BOTO3_CREDENTIALS["aws_session_token"],
 }
 
 
 def gen_tagset(tags):
     """Create TagSet value from a dict."""
-    return [{'Key': key, 'Value': value} for key, value in tags.items()]
+    return [{"Key": key, "Value": value} for key, value in tags.items()]
 
 
 def gen_s3_object_content(content):
@@ -52,8 +52,7 @@ def gen_s3_object_content(content):
     if isinstance(content, dict):
         content = json.dumps(content, default=json_serial)
     encoded_content = content.encode()
-    return StreamingBody(io.BytesIO(encoded_content),
-                         len(encoded_content))
+    return StreamingBody(io.BytesIO(encoded_content), len(encoded_content))
 
 
 class TestContext(unittest.TestCase):
@@ -61,30 +60,28 @@ class TestContext(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.config = Config({
-            "namespace": "namespace",
-            "stacks": [
-                {"name": "stack1"}, {"name": "stack2"}]})
+        self.config = Config(
+            {
+                "namespace": "namespace",
+                "stacks": [{"name": "stack1"}, {"name": "stack2"}],
+            }
+        )
         self.persist_graph_raw_config = {
-            'namespace': 'test',
-            'cfngin_bucket': 'cfngin-test',
-            'cfngin_bucket_region': 'us-east-1',
-            'persistent_graph_key': 'test.json',
-            'stacks': [
-                {'name': 'stack1'}, {'name': 'stack2', 'requires': ['stack1']}]
+            "namespace": "test",
+            "cfngin_bucket": "cfngin-test",
+            "cfngin_bucket_region": "us-east-1",
+            "persistent_graph_key": "test.json",
+            "stacks": [{"name": "stack1"}, {"name": "stack2", "requires": ["stack1"]}],
         }
         self.persist_graph_config = Config(self.persist_graph_raw_config)
 
     def test_attributes(self):
         """Test class attributes."""
-        context = Context(
-            config=Config({}),
-            region='us-east-1'
-        )
+        context = Context(config=Config({}), region="us-east-1")
 
         assert isinstance(context.config, Config)
-        assert context.config_path == './'
-        assert context.bucket_region == 'us-east-1'
+        assert context.config_path == "./"
+        assert context.bucket_region == "us-east-1"
         assert not context.environment  # TODO check value
         assert isinstance(context.force_stacks, list)
         assert isinstance(context.hook_data, dict)
@@ -93,10 +90,7 @@ class TestContext(unittest.TestCase):
 
     def test_context_optional_keys_set(self):
         """Test context optional keys set."""
-        context = Context(
-            config=Config({}),
-            stack_names=["stack"],
-        )
+        context = Context(config=Config({}), stack_names=["stack"],)
         self.assertEqual(context.mappings, {})
         self.assertEqual(context.stack_names, ["stack"])
 
@@ -172,8 +166,7 @@ class TestContext(unittest.TestCase):
         context = Context(config=Config({"namespace": None}))
         self.assertEqual(context.bucket_name, None)
 
-        context = Context(
-            config=Config({"namespace": None, "cfngin_bucket": ""}))
+        context = Context(config=Config({"namespace": None, "cfngin_bucket": ""}))
         self.assertEqual(context.bucket_name, None)
 
     def test_context_namespace_delimiter_is_overridden_and_not_none(self):
@@ -202,37 +195,37 @@ class TestContext(unittest.TestCase):
         context = Context(config=config)
         self.assertEqual(context.tags, {"cfngin_namespace": "test"})
 
-    @patch('runway.cfngin.context.get_session')
+    @patch("runway.cfngin.context.get_session")
     def test_get_session(self, mock_get_session):
         """Test get_session."""
         creds = BOTO3_CREDENTIALS.copy()
-        context = Context(boto3_credentials=creds,
-                          region='us-east-1')
+        context = Context(boto3_credentials=creds, region="us-east-1")
 
         context.get_session()
-        mock_get_session.assert_called_with(region='us-east-1',
-                                            **GET_SESSION_CALL)
+        mock_get_session.assert_called_with(region="us-east-1", **GET_SESSION_CALL)
 
-        context.get_session(region='us-west-2')
-        mock_get_session.assert_called_with(region='us-west-2',
-                                            **GET_SESSION_CALL)
+        context.get_session(region="us-west-2")
+        mock_get_session.assert_called_with(region="us-west-2", **GET_SESSION_CALL)
 
-        context.get_session(profile='user')
-        mock_get_session.assert_called_with(region='us-east-1',
-                                            profile='user')
+        context.get_session(profile="user")
+        mock_get_session.assert_called_with(region="us-east-1", profile="user")
 
     def test_hook_with_sys_path(self):
         """Test hook with sys path."""
-        config = Config({
-            "namespace": "test",
-            "sys_path": "./tests/unit/cfngin",
-            "pre_build": [
-                {
-                    "data_key": "myHook",
-                    "path": "fixtures.mock_hooks.mock_hook",
-                    "required": True,
-                    "args": {
-                        "value": "mockResult"}}]})
+        config = Config(
+            {
+                "namespace": "test",
+                "sys_path": "./tests/unit/cfngin",
+                "pre_build": [
+                    {
+                        "data_key": "myHook",
+                        "path": "fixtures.mock_hooks.mock_hook",
+                        "required": True,
+                        "args": {"value": "mockResult"},
+                    }
+                ],
+            }
+        )
         load(config)
         context = Context(config=config)
         stage = "pre_build"
@@ -242,22 +235,16 @@ class TestContext(unittest.TestCase):
     def test_persistent_graph_location(self):
         """Test persistent graph location."""
         context = Context(config=self.persist_graph_config)
-        expected = {
-            'Bucket': 'cfngin-test',
-            'Key': 'persistent_graphs/test/test.json'
-        }
+        expected = {"Bucket": "cfngin-test", "Key": "persistent_graphs/test/test.json"}
         self.assertEqual(expected, context.persistent_graph_location)
 
     def test_persistent_graph_location_no_json(self):
         """'.json' appended to the key if it does not exist."""
         cp_config = self.persist_graph_raw_config.copy()
-        cp_config['persistent_graph_key'] = 'test'
+        cp_config["persistent_graph_key"] = "test"
 
         context = Context(config=Config(cp_config))
-        expected = {
-            'Bucket': 'cfngin-test',
-            'Key': 'persistent_graphs/test/test.json'
-        }
+        expected = {"Bucket": "cfngin-test", "Key": "persistent_graphs/test/test.json"}
         self.assertEqual(expected, context.persistent_graph_location)
 
     def test_persistent_graph_location_no_key(self):
@@ -268,13 +255,15 @@ class TestContext(unittest.TestCase):
     def test_persistent_graph_location_no_bucket(self):
         """Return an empty dict if key is set but no bucket name."""
         cp_config = self.persist_graph_raw_config.copy()
-        cp_config['cfngin_bucket'] = ''
+        cp_config["cfngin_bucket"] = ""
 
         context = Context(config=Config(cp_config))
         self.assertEqual({}, context.persistent_graph_location)
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
-           new_callable=PropertyMock)
+    @patch(
+        "runway.cfngin.context.Context._persistent_graph_tags",
+        new_callable=PropertyMock,
+    )
     def test_persistent_graph_lock_code_disabled(self, mock_prop):
         """Return 'None' when not used."""
         mock_prop.return_value = None
@@ -286,11 +275,13 @@ class TestContext(unittest.TestCase):
         """Return the value of the lock tag when it exists."""
         context = Context(config=self.persist_graph_config)
         stubber = Stubber(context.s3_conn)
-        code = '0000'
+        code = "0000"
 
-        stubber.add_response('get_object_tagging', {
-            'TagSet': gen_tagset({context._persistent_graph_lock_tag: code})
-        }, context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging",
+            {"TagSet": gen_tagset({context._persistent_graph_lock_tag: code})},
+            context.persistent_graph_location,
+        )
 
         with stubber:
             self.assertIsNone(context._persistent_graph_lock_code)
@@ -303,8 +294,9 @@ class TestContext(unittest.TestCase):
         context = Context(config=self.persist_graph_config)
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('get_object_tagging', {'TagSet': []},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging", {"TagSet": []}, context.persistent_graph_location
+        )
 
         with stubber:
             self.assertIsNone(context.persistent_graph_lock_code)
@@ -317,8 +309,10 @@ class TestContext(unittest.TestCase):
         stubber = Stubber(context.s3_conn)
 
         stubber.add_client_error(
-            'get_object_tagging', 'NoSuchKey',
-            expected_params=context.persistent_graph_location)
+            "get_object_tagging",
+            "NoSuchKey",
+            expected_params=context.persistent_graph_location,
+        )
 
         with stubber:
             self.assertIsNone(context.persistent_graph_lock_code)
@@ -330,23 +324,21 @@ class TestContext(unittest.TestCase):
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         stubber = Stubber(context.s3_conn)
-        expected_params = {'ResponseContentType': 'application/json'}
+        expected_params = {"ResponseContentType": "application/json"}
         expected_params.update(context.persistent_graph_location)
-        expected_content = {
-            'stack1': set(),
-            'stack2': set(['stack1'])
-        }
+        expected_content = {"stack1": set(), "stack2": set(["stack1"])}
 
-        stubber.add_response('get_object',
-                             {'Body': gen_s3_object_content(expected_content)},
-                             expected_params)
+        stubber.add_response(
+            "get_object",
+            {"Body": gen_s3_object_content(expected_content)},
+            expected_params,
+        )
 
         with stubber:
             self.assertIsNone(context._persistent_graph)
             self.assertIsInstance(context.persistent_graph, Graph)
             self.assertIsInstance(context._persistent_graph, Graph)
-            self.assertEqual(expected_content,
-                             context.persistent_graph.to_dict())
+            self.assertEqual(expected_content, context.persistent_graph.to_dict())
             stubber.assert_no_pending_responses()
 
     def test_persistent_graph_no_object(self):
@@ -354,17 +346,20 @@ class TestContext(unittest.TestCase):
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         stubber = Stubber(context.s3_conn)
-        expected_get_params = {'ResponseContentType': 'application/json'}
+        expected_get_params = {"ResponseContentType": "application/json"}
         expected_get_params.update(context.persistent_graph_location)
-        expected_put_params = {'Body': '{}',
-                               'ServerSideEncryption': 'AES256',
-                               'ACL': 'bucket-owner-full-control',
-                               'ContentType': 'application/json'}
+        expected_put_params = {
+            "Body": "{}",
+            "ServerSideEncryption": "AES256",
+            "ACL": "bucket-owner-full-control",
+            "ContentType": "application/json",
+        }
         expected_put_params.update(context.persistent_graph_location)
 
-        stubber.add_client_error('get_object', 'NoSuchKey',
-                                 expected_params=expected_get_params)
-        stubber.add_response('put_object', {}, expected_put_params)
+        stubber.add_client_error(
+            "get_object", "NoSuchKey", expected_params=expected_get_params
+        )
+        stubber.add_response("put_object", {}, expected_put_params)
 
         with stubber:
             self.assertIsNone(context._persistent_graph)
@@ -381,19 +376,22 @@ class TestContext(unittest.TestCase):
 
     def test_lock_persistent_graph(self):
         """Return 'None' when lock is successful."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
-        expected_params = {'Tagging': {
-            'TagSet': gen_tagset({context._persistent_graph_lock_tag: code})
-        }}
+        expected_params = {
+            "Tagging": {
+                "TagSet": gen_tagset({context._persistent_graph_lock_tag: code})
+            }
+        }
         expected_params.update(context.persistent_graph_location)
 
-        stubber.add_response('get_object_tagging', {'TagSet': []},
-                             context.persistent_graph_location)
-        stubber.add_response('put_object_tagging', {}, expected_params)
+        stubber.add_response(
+            "get_object_tagging", {"TagSet": []}, context.persistent_graph_location
+        )
+        stubber.add_response("put_object_tagging", {}, expected_params)
 
         with stubber:
             self.assertIsNone(context.lock_persistent_graph(code))
@@ -401,21 +399,23 @@ class TestContext(unittest.TestCase):
 
     def test_lock_persistent_graph_locked(self):
         """Error raised when when object is locked."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
-        expected_params = {'Tagging': {
-            'TagSet': gen_tagset({context._persistent_graph_lock_tag: code})
-        }}
+        expected_params = {
+            "Tagging": {
+                "TagSet": gen_tagset({context._persistent_graph_lock_tag: code})
+            }
+        }
         expected_params.update(context.persistent_graph_location)
 
-        stubber.add_response('get_object_tagging',
-                             {'TagSet': gen_tagset(
-                                 {context._persistent_graph_lock_tag: '1111'}
-                             )},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging",
+            {"TagSet": gen_tagset({context._persistent_graph_lock_tag: "1111"})},
+            context.persistent_graph_location,
+        )
 
         with stubber:
             with self.assertRaises(PersistentGraphLocked):
@@ -424,22 +424,26 @@ class TestContext(unittest.TestCase):
 
     def test_lock_persistent_graph_no_object(self):
         """Error raised when when there is no object to lock."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
-        expected_params = {'Tagging': {
-            'TagSet': gen_tagset({context._persistent_graph_lock_tag: code})
-        }}
+        expected_params = {
+            "Tagging": {
+                "TagSet": gen_tagset({context._persistent_graph_lock_tag: code})
+            }
+        }
         expected_params.update(context.persistent_graph_location)
 
         stubber.add_client_error(
-            'get_object_tagging', 'NoSuchKey',
-            expected_params=context.persistent_graph_location
+            "get_object_tagging",
+            "NoSuchKey",
+            expected_params=context.persistent_graph_location,
         )
-        stubber.add_client_error('put_object_tagging', 'NoSuchKey',
-                                 expected_params=expected_params)
+        stubber.add_client_error(
+            "put_object_tagging", "NoSuchKey", expected_params=expected_params
+        )
 
         with stubber:
             with self.assertRaises(PersistentGraphCannotLock):
@@ -448,30 +452,27 @@ class TestContext(unittest.TestCase):
 
     def test_put_persistent_graph(self):
         """Return 'None' when put is successful."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
-        graph_dict = {
-            'stack1': [],
-            'stack2': ['stack1']
-        }
+        graph_dict = {"stack1": [], "stack2": ["stack1"]}
         context._persistent_graph = Graph.from_dict(graph_dict, context)
         stubber = Stubber(context.s3_conn)
-        expected_params = {'Body': json.dumps(graph_dict, indent=4),
-                           'ServerSideEncryption': 'AES256',
-                           'ACL': 'bucket-owner-full-control',
-                           'ContentType': 'application/json',
-                           'Tagging': '{}={}'.format(
-                               context._persistent_graph_lock_tag,
-                               code)}
+        expected_params = {
+            "Body": json.dumps(graph_dict, indent=4),
+            "ServerSideEncryption": "AES256",
+            "ACL": "bucket-owner-full-control",
+            "ContentType": "application/json",
+            "Tagging": "{}={}".format(context._persistent_graph_lock_tag, code),
+        }
         expected_params.update(context.persistent_graph_location)
 
-        stubber.add_response('get_object_tagging',
-                             {'TagSet': gen_tagset(
-                                 {context._persistent_graph_lock_tag: code}
-                             )},
-                             context.persistent_graph_location)
-        stubber.add_response('put_object', {}, expected_params)
+        stubber.add_response(
+            "get_object_tagging",
+            {"TagSet": gen_tagset({context._persistent_graph_lock_tag: code})},
+            context.persistent_graph_location,
+        )
+        stubber.add_response("put_object", {}, expected_params)
 
         with stubber:
             self.assertIsNone(context.put_persistent_graph(code))
@@ -481,30 +482,31 @@ class TestContext(unittest.TestCase):
         """Error raised when trying to update an unlocked object."""
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
-        context._persistent_graph = Graph.from_dict({'stack1': []}, context)
+        context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('get_object_tagging', {'TagSet': []},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging", {"TagSet": []}, context.persistent_graph_location
+        )
 
         with stubber:
             with self.assertRaises(PersistentGraphUnlocked):
-                context.put_persistent_graph('')
+                context.put_persistent_graph("")
             stubber.assert_no_pending_responses()
 
     def test_put_persistent_graph_code_missmatch(self):
         """Error raised when provided lock code does not match object."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
-        context._persistent_graph = Graph.from_dict({'stack1': []}, context)
+        context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('get_object_tagging',
-                             {'TagSet': gen_tagset(
-                                 {context._persistent_graph_lock_tag: '1111'}
-                             )},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging",
+            {"TagSet": gen_tagset({context._persistent_graph_lock_tag: "1111"})},
+            context.persistent_graph_location,
+        )
 
         with stubber:
             with self.assertRaises(PersistentGraphLockCodeMissmatch):
@@ -513,22 +515,23 @@ class TestContext(unittest.TestCase):
 
     def test_put_persistent_graph_empty(self):
         """Object deleted when persistent graph is empty."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('delete_object', {},
-                             context.persistent_graph_location)
+        stubber.add_response("delete_object", {}, context.persistent_graph_location)
 
         with stubber:
             self.assertFalse(context.persistent_graph.to_dict())
             self.assertIsNone(context.put_persistent_graph(code))
             stubber.assert_no_pending_responses()
 
-    @patch('runway.cfngin.context.Context._persistent_graph_tags',
-           new_callable=PropertyMock)
+    @patch(
+        "runway.cfngin.context.Context._persistent_graph_tags",
+        new_callable=PropertyMock,
+    )
     def test_persistent_graph_locked(self, mock_prop):
         """Return 'True' or 'False' based on code property."""
         mock_prop.return_value = {}
@@ -553,11 +556,7 @@ class TestContext(unittest.TestCase):
         stubber = Stubber(context.s3_conn)
 
         stubber.add_response(
-            "head_bucket",
-            service_response={},
-            expected_params={
-                "Bucket": ANY,
-            }
+            "head_bucket", service_response={}, expected_params={"Bucket": ANY}
         )
 
         with stubber:
@@ -568,7 +567,7 @@ class TestContext(unittest.TestCase):
 
     def test_s3_bucket_does_not_exist_us_east(self):
         """Create S3 bucket when it does not exist."""
-        context = Context(config=self.config, region='us-east-1')
+        context = Context(config=self.config, region="us-east-1")
         stubber = Stubber(context.s3_conn)
 
         stubber.add_client_error(
@@ -578,11 +577,7 @@ class TestContext(unittest.TestCase):
             http_status_code=404,
         )
         stubber.add_response(
-            "create_bucket",
-            service_response={},
-            expected_params={
-                "Bucket": ANY,
-            }
+            "create_bucket", service_response={}, expected_params={"Bucket": ANY}
         )
 
         with stubber:
@@ -593,7 +588,7 @@ class TestContext(unittest.TestCase):
 
     def test_s3_bucket_does_not_exist_us_west(self):
         """Create S3 bucket with loc constraints when it does not exist."""
-        region = 'us-west-1'
+        region = "us-west-1"
         context = Context(config=self.config, region=region)
         stubber = Stubber(context.s3_conn)
 
@@ -608,10 +603,8 @@ class TestContext(unittest.TestCase):
             service_response={},
             expected_params={
                 "Bucket": ANY,
-                "CreateBucketConfiguration": {
-                    "LocationConstraint": region,
-                }
-            }
+                "CreateBucketConfiguration": {"LocationConstraint": region},
+            },
         )
 
         with stubber:
@@ -639,19 +632,20 @@ class TestContext(unittest.TestCase):
 
     def test_unlock_persistent_graph(self):
         """Return 'True' when delete tag is successful."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
-        context._persistent_graph = Graph.from_dict({'stack1': []}, context)
+        context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('get_object_tagging',
-                             {'TagSet': gen_tagset(
-                                 {context._persistent_graph_lock_tag: code}
-                             )},
-                             context.persistent_graph_location)
-        stubber.add_response('delete_object_tagging', {},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging",
+            {"TagSet": gen_tagset({context._persistent_graph_lock_tag: code})},
+            context.persistent_graph_location,
+        )
+        stubber.add_response(
+            "delete_object_tagging", {}, context.persistent_graph_location
+        )
 
         with stubber:
             self.assertTrue(context.unlock_persistent_graph(code))
@@ -659,15 +653,15 @@ class TestContext(unittest.TestCase):
 
     def test_unlock_persistent_graph_not_locked(self):
         """Error raised when object is not locked."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
-        context._persistent_graph = Graph.from_dict({'stack1': []}, context)
+        context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('get_object_tagging',
-                             {'TagSet': []},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging", {"TagSet": []}, context.persistent_graph_location
+        )
 
         with stubber:
             with self.assertRaises(PersistentGraphCannotUnlock):
@@ -676,17 +670,17 @@ class TestContext(unittest.TestCase):
 
     def test_unlock_persistent_graph_code_missmatch(self):
         """Error raised when local code does not match object."""
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
-        context._persistent_graph = Graph.from_dict({'stack1': []}, context)
+        context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         stubber = Stubber(context.s3_conn)
 
-        stubber.add_response('get_object_tagging',
-                             {'TagSet': gen_tagset(
-                                 {context._persistent_graph_lock_tag: '1111'}
-                             )},
-                             context.persistent_graph_location)
+        stubber.add_response(
+            "get_object_tagging",
+            {"TagSet": gen_tagset({context._persistent_graph_lock_tag: "1111"})},
+            context.persistent_graph_location,
+        )
 
         with stubber:
             with self.assertRaises(PersistentGraphCannotUnlock):
@@ -699,17 +693,16 @@ class TestContext(unittest.TestCase):
         This can occur if the object is deleted by 'put_persistent_graph'.
 
         """
-        code = '0000'
+        code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
         expected_params = context.persistent_graph_location.copy()
-        expected_params.update({'ResponseContentType': 'application/json'})
+        expected_params.update({"ResponseContentType": "application/json"})
 
         stubber.add_client_error(
-            'get_object', 'NoSuchKey',
-            expected_params=expected_params
+            "get_object", "NoSuchKey", expected_params=expected_params
         )
 
         with stubber:
@@ -724,25 +717,25 @@ class TestFunctions(unittest.TestCase):
         """Test get fqn redundant base."""
         base = "woot"
         name = "woot-blah"
-        self.assertEqual(get_fqn(base, '-', name), name)
-        self.assertEqual(get_fqn(base, '', name), name)
-        self.assertEqual(get_fqn(base, '_', name), "woot_woot-blah")
+        self.assertEqual(get_fqn(base, "-", name), name)
+        self.assertEqual(get_fqn(base, "", name), name)
+        self.assertEqual(get_fqn(base, "_", name), "woot_woot-blah")
 
     def test_get_fqn_only_base(self):
         """Test get fqn only base."""
         base = "woot"
-        self.assertEqual(get_fqn(base, '-'), base)
-        self.assertEqual(get_fqn(base, ''), base)
-        self.assertEqual(get_fqn(base, '_'), base)
+        self.assertEqual(get_fqn(base, "-"), base)
+        self.assertEqual(get_fqn(base, ""), base)
+        self.assertEqual(get_fqn(base, "_"), base)
 
     def test_get_fqn_full(self):
         """Test get fqn full."""
         base = "woot"
         name = "blah"
-        self.assertEqual(get_fqn(base, '-', name), "%s-%s" % (base, name))
-        self.assertEqual(get_fqn(base, '', name), "%s%s" % (base, name))
-        self.assertEqual(get_fqn(base, '_', name), "%s_%s" % (base, name))
+        self.assertEqual(get_fqn(base, "-", name), "%s-%s" % (base, name))
+        self.assertEqual(get_fqn(base, "", name), "%s%s" % (base, name))
+        self.assertEqual(get_fqn(base, "_", name), "%s_%s" % (base, name))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

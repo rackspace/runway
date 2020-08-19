@@ -9,8 +9,11 @@ from runway.cfngin.logger import setup_logging
 
 if __name__ == "__main__":
     # No immediate plans to remove. Not to be done prior to 2.0
-    print('DEPRECATION NOTICE: the "stacker-runway" command has been '
-          'deprecated in favor of "runway run-stacker"', file=sys.stderr)
+    print(
+        'DEPRECATION NOTICE: the "stacker-runway" command has been '
+        'deprecated in favor of "runway run-stacker"',
+        file=sys.stderr,
+    )
 
     stacker = Stacker(setup_logging=setup_logging)
     args = stacker.parse_args()

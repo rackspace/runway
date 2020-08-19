@@ -10,12 +10,21 @@ LOGGER = logging.getLogger(__name__)
 
 
 def _devnull():
-    return open(os.devnull, 'wb')
+    return open(os.devnull, "wb")
 
 
-def run_command(provider, context, command, capture=False, interactive=False,
-                ignore_status=False, quiet=False, stdin=None, env=None,
-                **kwargs):
+def run_command(
+    provider,
+    context,
+    command,
+    capture=False,
+    interactive=False,
+    ignore_status=False,
+    quiet=False,
+    stdin=None,
+    env=None,
+    **kwargs
+):
     """Run a custom command as a hook.
 
     Args:
@@ -76,8 +85,9 @@ def run_command(provider, context, command, capture=False, interactive=False,
     """
     if quiet and capture:
         raise ImproperlyConfigured(
-            __name__ + '.run_command',
-            'Cannot enable `quiet` and `capture` options simultaneously')
+            __name__ + ".run_command",
+            "Cannot enable `quiet` and `capture` options simultaneously",
+        )
 
     if quiet:
         out_err_type = _devnull()
@@ -98,27 +108,28 @@ def run_command(provider, context, command, capture=False, interactive=False,
         full_env.update(env)
         env = full_env
 
-    LOGGER.info('running command: %s', command)
+    LOGGER.info("running command: %s", command)
 
-    proc = Popen(command, stdin=in_type, stdout=out_err_type,
-                 stderr=out_err_type, env=env, **kwargs)
+    proc = Popen(
+        command,
+        stdin=in_type,
+        stdout=out_err_type,
+        stderr=out_err_type,
+        env=env,
+        **kwargs
+    )
     try:
         out, err = proc.communicate(stdin)
         status = proc.wait()
 
         if status == 0 or ignore_status:
-            return {
-                'returncode': proc.returncode,
-                'stdout': out,
-                'stderr': err
-            }
+            return {"returncode": proc.returncode, "stdout": out, "stderr": err}
 
         # Don't print the command line again if we already did earlier
         if LOGGER.isEnabledFor(logging.INFO):
-            LOGGER.warning('command failed with returncode %d', status)
+            LOGGER.warning("command failed with returncode %d", status)
         else:
-            LOGGER.warning('command failed with returncode %d: %s', status,
-                           command)
+            LOGGER.warning("command failed with returncode %d: %s", status, command)
 
         return None
     finally:

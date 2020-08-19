@@ -1,0 +1,81 @@
+[tool.black]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.demo
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+  | npm
+  | quickstarts
+  | runway/aws_sso_botocore
+)/
+'''
+include = '\.pyi?$'
+line-length = 88
+target-version = ['py27', 'py36', 'py37', 'py38']
+
+
+[tool.coverage.report]
+exclude_lines = [
+    "cov: ignore",  # standard exclude comment
+    "if TYPE_CHECKING:",  # excluded blocks
+    "if __name__ == .__main__.:",
+    "raise AssertionError",  # defensive exceptions
+    "raise NotImplimentedError",
+    "if self.context.is_python3:",
+    "if not self.context.is_python3:",
+    "from pathlib import Path",
+    "from pathlib2 import Path",
+]
+
+
+[tool.coverage.run]
+concurrency = [
+    "multiprocess",
+    "thread",
+]
+omit = ["*/runway/aws_sso_botocore/*"]  # TODO remove native support is added to botocore
+
+
+[tool.isort]
+force_grid_wrap = 0
+include_trailing_comma = true
+# TODO remove runway from known first party when isort>=5 can be used in the repo
+known_first_party = ["runway"]
+known_local_folder = [
+    "jwks_rsa",
+    "shared",
+    "update_urls",
+]
+known_third_party = [  # most of these exist in integration_tests/ only
+    "jose",  # not correctly identified by isort<5
+    "pexpect",
+    "prettytable",
+    "mypy_boto3_dynamodb",  # not correctly identified by isort<5
+    "semver",  # not correctly identified by isort<5
+    "send2trash",
+]
+line_length = 88
+multi_line_output = 3
+skip = [
+    ".demo",
+    ".eggs",
+    ".git",
+    ".mypy_cache",
+    ".runway",
+    ".runway_cache",
+    ".venv",
+    "_build",
+    "build",
+    "dist",
+    "integration_tests",
+    "node_modules",
+    "venv",
+]
+use_parentheses = true

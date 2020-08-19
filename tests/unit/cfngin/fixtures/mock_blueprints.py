@@ -27,12 +27,14 @@ class FunctionalTests(Blueprint):
         "StackerNamespace": {
             "type": CFNString,
             "description": "The stacker namespace that the tests will use. "
-                           "Access to cloudformation will be restricted to "
-                           "only allow access to stacks with this prefix."},
+            "Access to cloudformation will be restricted to "
+            "only allow access to stacks with this prefix.",
+        },
         "StackerBucket": {
             "type": CFNString,
             "description": "The name of the bucket that the tests will use "
-                           "for uploading templates."}
+            "for uploading templates.",
+        },
     }
 
     def create_template(self):
@@ -42,8 +44,8 @@ class FunctionalTests(Blueprint):
         bucket_arn = Sub("arn:aws:s3:::${StackerBucket}*")
         objects_arn = Sub("arn:aws:s3:::${StackerBucket}*/*")
         cloudformation_scope = Sub(
-            "arn:aws:cloudformation:*:${AWS::AccountId}:"
-            "stack/${StackerNamespace}-*")
+            "arn:aws:cloudformation:*:${AWS::AccountId}:" "stack/${StackerNamespace}-*"
+        )
         changeset_scope = "*"
 
         # This represents the precise IAM permissions that stacker itself
@@ -55,7 +57,7 @@ class FunctionalTests(Blueprint):
                     Statement(
                         Effect="Allow",
                         Resource=["*"],
-                        Action=[awacs.s3.ListAllMyBuckets]
+                        Action=[awacs.s3.ListAllMyBuckets],
                     ),
                     Statement(
                         Effect="Allow",
@@ -65,7 +67,7 @@ class FunctionalTests(Blueprint):
                             awacs.s3.GetBucketLocation,
                             awacs.s3.CreateBucket,
                             awacs.s3.DeleteBucket,
-                        ]
+                        ],
                     ),
                     Statement(
                         Effect="Allow",
@@ -75,14 +77,12 @@ class FunctionalTests(Blueprint):
                             awacs.s3.GetObjectAcl,
                             awacs.s3.PutObject,
                             awacs.s3.PutObjectAcl,
-                        ]
+                        ],
                     ),
                     Statement(
                         Effect="Allow",
                         Resource=[objects_arn],
-                        Action=[
-                            awacs.s3.DeleteObject,
-                        ]
+                        Action=[awacs.s3.DeleteObject],
                     ),
                     Statement(
                         Effect="Allow",
@@ -91,12 +91,12 @@ class FunctionalTests(Blueprint):
                             awacs.cloudformation.DescribeChangeSet,
                             awacs.cloudformation.ExecuteChangeSet,
                             awacs.cloudformation.DeleteChangeSet,
-                        ]
+                        ],
                     ),
                     Statement(
                         Effect="Deny",
                         Resource=[Ref("AWS::StackId")],
-                        Action=[awacs.cloudformation.Action("*")]
+                        Action=[awacs.cloudformation.Action("*")],
                     ),
                     Statement(
                         Effect="Allow",
@@ -110,11 +110,11 @@ class FunctionalTests(Blueprint):
                             awacs.cloudformation.UpdateStack,
                             awacs.cloudformation.SetStackPolicy,
                             awacs.cloudformation.DescribeStacks,
-                            awacs.cloudformation.DescribeStackEvents
-                        ]
-                    )
+                            awacs.cloudformation.DescribeStackEvents,
+                        ],
+                    ),
                 ]
-            )
+            ),
         )
 
         principal = AWSPrincipal(Ref("AWS::AccountId"))
@@ -125,11 +125,14 @@ class FunctionalTests(Blueprint):
                     Statement=[
                         Statement(
                             Effect="Allow",
-                            Action=[
-                                awacs.sts.AssumeRole],
-                            Principal=principal)]),
-                Policies=[
-                    stacker_policy]))
+                            Action=[awacs.sts.AssumeRole],
+                            Principal=principal,
+                        )
+                    ]
+                ),
+                Policies=[stacker_policy],
+            )
+        )
 
         assumerole_policy = iam.Policy(
             PolicyName="AssumeRole",
@@ -138,42 +141,34 @@ class FunctionalTests(Blueprint):
                     Statement(
                         Effect="Allow",
                         Resource=[GetAtt(role, "Arn")],
-                        Action=[
-                            awacs.sts.AssumeRole])]))
+                        Action=[awacs.sts.AssumeRole],
+                    )
+                ]
+            ),
+        )
 
         user = template.add_resource(
-            iam.User(
-                "FunctionalTestUser",
-                Policies=[
-                    stacker_policy,
-                    assumerole_policy]))
+            iam.User("FunctionalTestUser", Policies=[stacker_policy, assumerole_policy])
+        )
 
         key = template.add_resource(
-            iam.AccessKey(
-                "FunctionalTestKey",
-                Serial=1,
-                UserName=Ref(user)))
+            iam.AccessKey("FunctionalTestKey", Serial=1, UserName=Ref(user))
+        )
 
         template.add_output(Output("User", Value=Ref(user)))
         template.add_output(Output("AccessKeyId", Value=Ref(key)))
         template.add_output(
             Output(
-                "SecretAccessKey",
-                Value=GetAtt("FunctionalTestKey", "SecretAccessKey")))
-        template.add_output(
-            Output(
-                "FunctionalTestRole",
-                Value=GetAtt(role, "Arn")))
+                "SecretAccessKey", Value=GetAtt("FunctionalTestKey", "SecretAccessKey")
+            )
+        )
+        template.add_output(Output("FunctionalTestRole", Value=GetAtt(role, "Arn")))
 
 
 class Dummy(Blueprint):
     """Dummy blueprint."""
 
-    VARIABLES = {
-        "StringVariable": {
-            "type": str,
-            "default": ""}
-    }
+    VARIABLES = {"StringVariable": {"type": str, "default": ""}}
 
     def create_template(self):
         """Create template."""
@@ -189,11 +184,7 @@ class Dummy2(Blueprint):
 
     """
 
-    VARIABLES = {
-        "StringVariable": {
-            "type": str,
-            "default": ""}
-    }
+    VARIABLES = {"StringVariable": {"type": str, "default": ""}}
 
     def create_template(self):
         """Create template."""
@@ -220,13 +211,12 @@ class LongRunningDummy(Blueprint):
         "BreakLast": {
             "type": bool,
             "description": "Whether or not to break the last WaitCondition "
-                           "by creating an invalid WaitConditionHandle.",
+            "by creating an invalid WaitConditionHandle.",
             "default": True,
         },
         "OutputValue": {
             "type": str,
-            "description": "The value to put in an output to allow for "
-                           "updates.",
+            "description": "The value to put in an output to allow for " "updates.",
             "default": "DefaultOutput",
         },
     }
@@ -257,7 +247,7 @@ class LongRunningDummy(Blueprint):
                     Handle=wch.Ref(),
                     # Timeout is made deliberately large so CF rejects it
                     Timeout=2 ** 32,
-                    Count=0
+                    Count=0,
                 )
             )
 
@@ -270,22 +260,21 @@ class Broken(Blueprint):
 
     """
 
-    VARIABLES = {
-        "StringVariable": {
-            "type": str,
-            "default": ""}
-    }
+    VARIABLES = {"StringVariable": {"type": str, "default": ""}}
 
     def create_template(self):
         """Create template."""
         template = self.template
         template.add_resource(WaitConditionHandle("BrokenDummy"))
-        template.add_resource(WaitCondition(
-            "BrokenWaitCondition",
-            Handle=Ref("BrokenDummy"),
-            # Timeout is made deliberately large so CF rejects it
-            Timeout=2 ** 32,
-            Count=0))
+        template.add_resource(
+            WaitCondition(
+                "BrokenWaitCondition",
+                Handle=Ref("BrokenDummy"),
+                # Timeout is made deliberately large so CF rejects it
+                Timeout=2 ** 32,
+                Count=0,
+            )
+        )
         template.add_output(Output("DummyId", Value="dummy-1234"))
 
 
@@ -293,47 +282,52 @@ class VPC(Blueprint):
     """VPC blueprint."""
 
     VARIABLES = {
-        "AZCount": {
-            "type": int,
-            "default": 2,
-        },
+        "AZCount": {"type": int, "default": 2},
         "PrivateSubnets": {
             "type": CFNCommaDelimitedList,
             "description": "Comma separated list of subnets to use for "
-                           "non-public hosts. NOTE: Must have as many subnets "
-                           "as AZCount"},
+            "non-public hosts. NOTE: Must have as many subnets "
+            "as AZCount",
+        },
         "PublicSubnets": {
             "type": CFNCommaDelimitedList,
             "description": "Comma separated list of subnets to use for "
-                           "public hosts. NOTE: Must have as many subnets "
-                           "as AZCount"},
+            "public hosts. NOTE: Must have as many subnets "
+            "as AZCount",
+        },
         "InstanceType": {
             "type": CFNString,
             "description": "NAT EC2 instance type.",
-            "default": "m3.medium"},
+            "default": "m3.medium",
+        },
         "BaseDomain": {
             "type": CFNString,
             "default": "",
-            "description": "Base domain for the stack."},
+            "description": "Base domain for the stack.",
+        },
         "InternalDomain": {
             "type": CFNString,
             "default": "",
-            "description": "Internal domain name, if you have one."},
+            "description": "Internal domain name, if you have one.",
+        },
         "CidrBlock": {
             "type": CFNString,
             "description": "Base CIDR block for subnets.",
-            "default": "10.128.0.0/16"},
+            "default": "10.128.0.0/16",
+        },
         "ImageName": {
             "type": CFNString,
             "description": "The image name to use from the AMIMap (usually "
-                           "found in the config file.)",
-            "default": "NAT"},
+            "found in the config file.)",
+            "default": "NAT",
+        },
         "UseNatGateway": {
             "type": CFNString,
             "allowed_values": ["true", "false"],
             "description": "If set to true, will configure a NAT Gateway"
-                           "instead of NAT instances.",
-            "default": "false"},
+            "instead of NAT instances.",
+            "default": "false",
+        },
     }
 
     def create_template(self):
@@ -348,11 +342,13 @@ class DiffTester(Blueprint):
         "InstanceType": {
             "type": CFNString,
             "description": "NAT EC2 instance type.",
-            "default": "m3.medium"},
+            "default": "m3.medium",
+        },
         "WaitConditionCount": {
             "type": int,
             "description": "Number of WaitConditionHandle resources "
-                           "to add to the template"}
+            "to add to the template",
+        },
     }
 
     def create_template(self):
@@ -366,35 +362,48 @@ class Bastion(Blueprint):
 
     VARIABLES = {
         "VpcId": {"type": EC2VPCId, "description": "Vpc Id"},
-        "DefaultSG": {"type": EC2SecurityGroupId,
-                      "description": "Top level security group."},
-        "PublicSubnets": {"type": EC2SubnetIdList,
-                          "description": "Subnets to deploy public "
-                                         "instances in."},
-        "PrivateSubnets": {"type": EC2SubnetIdList,
-                           "description": "Subnets to deploy private "
-                                          "instances in."},
-        "AvailabilityZones": {"type": CFNCommaDelimitedList,
-                              "description": "Availability Zones to deploy "
-                                             "instances in."},
-        "InstanceType": {"type": CFNString,
-                         "description": "EC2 Instance Type",
-                         "default": "m3.medium"},
-        "MinSize": {"type": CFNNumber,
-                    "description": "Minimum # of instances.",
-                    "default": "1"},
-        "MaxSize": {"type": CFNNumber,
-                    "description": "Maximum # of instances.",
-                    "default": "5"},
+        "DefaultSG": {
+            "type": EC2SecurityGroupId,
+            "description": "Top level security group.",
+        },
+        "PublicSubnets": {
+            "type": EC2SubnetIdList,
+            "description": "Subnets to deploy public " "instances in.",
+        },
+        "PrivateSubnets": {
+            "type": EC2SubnetIdList,
+            "description": "Subnets to deploy private " "instances in.",
+        },
+        "AvailabilityZones": {
+            "type": CFNCommaDelimitedList,
+            "description": "Availability Zones to deploy " "instances in.",
+        },
+        "InstanceType": {
+            "type": CFNString,
+            "description": "EC2 Instance Type",
+            "default": "m3.medium",
+        },
+        "MinSize": {
+            "type": CFNNumber,
+            "description": "Minimum # of instances.",
+            "default": "1",
+        },
+        "MaxSize": {
+            "type": CFNNumber,
+            "description": "Maximum # of instances.",
+            "default": "5",
+        },
         "SshKeyName": {"type": EC2KeyPairKeyName},
         "OfficeNetwork": {
             "type": CFNString,
-            "description": "CIDR block allowed to connect to bastion hosts."},
+            "description": "CIDR block allowed to connect to bastion hosts.",
+        },
         "ImageName": {
             "type": CFNString,
             "description": "The image name to use from the AMIMap (usually "
-                           "found in the config file.)",
-            "default": "bastion"},
+            "found in the config file.)",
+            "default": "bastion",
+        },
     }
 
     def create_template(self):
@@ -407,35 +416,48 @@ class PreOneOhBastion(Blueprint):
 
     PARAMETERS = {
         "VpcId": {"type": "AWS::EC2::VPC::Id", "description": "Vpc Id"},
-        "DefaultSG": {"type": "AWS::EC2::SecurityGroup::Id",
-                      "description": "Top level security group."},
-        "PublicSubnets": {"type": "List<AWS::EC2::Subnet::Id>",
-                          "description": "Subnets to deploy public "
-                                         "instances in."},
-        "PrivateSubnets": {"type": "List<AWS::EC2::Subnet::Id>",
-                           "description": "Subnets to deploy private "
-                                          "instances in."},
-        "AvailabilityZones": {"type": "CommaDelimitedList",
-                              "description": "Availability Zones to deploy "
-                                             "instances in."},
-        "InstanceType": {"type": "String",
-                         "description": "EC2 Instance Type",
-                         "default": "m3.medium"},
-        "MinSize": {"type": "Number",
-                    "description": "Minimum # of instances.",
-                    "default": "1"},
-        "MaxSize": {"type": "Number",
-                    "description": "Maximum # of instances.",
-                    "default": "5"},
+        "DefaultSG": {
+            "type": "AWS::EC2::SecurityGroup::Id",
+            "description": "Top level security group.",
+        },
+        "PublicSubnets": {
+            "type": "List<AWS::EC2::Subnet::Id>",
+            "description": "Subnets to deploy public " "instances in.",
+        },
+        "PrivateSubnets": {
+            "type": "List<AWS::EC2::Subnet::Id>",
+            "description": "Subnets to deploy private " "instances in.",
+        },
+        "AvailabilityZones": {
+            "type": "CommaDelimitedList",
+            "description": "Availability Zones to deploy " "instances in.",
+        },
+        "InstanceType": {
+            "type": "String",
+            "description": "EC2 Instance Type",
+            "default": "m3.medium",
+        },
+        "MinSize": {
+            "type": "Number",
+            "description": "Minimum # of instances.",
+            "default": "1",
+        },
+        "MaxSize": {
+            "type": "Number",
+            "description": "Maximum # of instances.",
+            "default": "5",
+        },
         "SshKeyName": {"type": "AWS::EC2::KeyPair::KeyName"},
         "OfficeNetwork": {
             "type": "String",
-            "description": "CIDR block allowed to connect to bastion hosts."},
+            "description": "CIDR block allowed to connect to bastion hosts.",
+        },
         "ImageName": {
             "type": "String",
             "description": "The image name to use from the AMIMap (usually "
-                           "found in the config file.)",
-            "default": "bastion"},
+            "found in the config file.)",
+            "default": "bastion",
+        },
     }
 
     def create_template(self):

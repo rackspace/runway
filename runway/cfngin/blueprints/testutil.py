@@ -14,13 +14,8 @@ from ..context import Context
 
 def diff(first, second):
     """Human readable differ."""
-    return '\n'.join(
-        list(
-            difflib.Differ().compare(
-                first.splitlines(),
-                second.splitlines()
-            )
-        )
+    return "\n".join(
+        list(difflib.Differ().compare(first.splitlines(), second.splitlines()))
     )
 
 
@@ -29,7 +24,9 @@ class BlueprintTestCase(unittest.TestCase):
 
     OUTPUT_PATH = "tests/fixtures/blueprints"
 
-    def assertRenderedBlueprint(self, blueprint):  # noqa: N802 pylint: disable=invalid-name
+    def assertRenderedBlueprint(  # noqa: N802 pylint: disable=invalid-name
+        self, blueprint
+    ):
         """Test that the rendered blueprint json matches the expected result.
 
         Result files are to be stored in the repo as
@@ -48,8 +45,9 @@ class BlueprintTestCase(unittest.TestCase):
             expected_dict = json.loads(expected_output_file.read())
             expected_text = json.dumps(expected_dict, indent=4, sort_keys=True)
 
-        self.assertEqual(rendered_dict, expected_dict,
-                         diff(rendered_text, expected_text))
+        self.assertEqual(
+            rendered_dict, expected_dict, diff(rendered_text, expected_text)
+        )
 
 
 class YamlDirTestGenerator(object):
@@ -98,8 +96,7 @@ class YamlDirTestGenerator(object):
 
     def __init__(self):
         """Instantiate class."""
-        self.classdir = os.path.relpath(
-            self.__class__.__module__.replace('.', '/'))
+        self.classdir = os.path.relpath(self.__class__.__module__.replace(".", "/"))
         if not os.path.isdir(self.classdir):
             self.classdir = os.path.dirname(self.classdir)
 
@@ -112,12 +109,12 @@ class YamlDirTestGenerator(object):
     @property
     def yaml_dirs(self):
         """Yaml directories."""
-        return ['.']
+        return ["."]
 
     @property
     def yaml_filename(self):
         """Yaml filename."""
-        return 'test_*.yaml'
+        return "test_*.yaml"
 
     # pylint incorrectly detects this
     def test_generator(self):  # pylint: disable=no-self-use
@@ -126,13 +123,15 @@ class YamlDirTestGenerator(object):
         configs = []
         for directory in self.yaml_dirs:
             configs.extend(
-                glob('%s/%s/%s' % (self.classdir, directory,
-                                   self.yaml_filename)))
+                glob("%s/%s/%s" % (self.classdir, directory, self.yaml_filename))
+            )
 
         class ConfigTest(self.base_class):
             """Config test."""
 
-            def __init__(self, config, stack, filepath):  # pylint: disable=super-init-not-called
+            def __init__(  # pylint: disable=super-init-not-called
+                self, config, stack, filepath
+            ):
                 """Instantiate class."""
                 self.config = config
                 self.stack = stack
@@ -145,22 +144,25 @@ class YamlDirTestGenerator(object):
                 try:
                     ctx = self.context
                 except AttributeError:
-                    ctx = Context(config=self.config,
-                                  environment={'environment': 'test'})
+                    ctx = Context(
+                        config=self.config, environment={"environment": "test"}
+                    )
 
                 configvars = self.stack.variables or {}
-                variables = [Variable(k, v, 'cfngin')
-                             for k, v in configvars.iteritems()]
+                variables = [
+                    Variable(k, v, "cfngin") for k, v in configvars.iteritems()
+                ]
 
-                blueprint_class = load_object_from_string(
-                    self.stack.class_path)
+                blueprint_class = load_object_from_string(self.stack.class_path)
                 blueprint = blueprint_class(self.stack.name, ctx)
                 blueprint.resolve_variables(variables or [])
                 blueprint.setup_parameters()
                 blueprint.create_template()
                 self.assertRenderedBlueprint(blueprint)
 
-            def assertEqual(self, first, second, msg=None):  # noqa pylint: disable=invalid-name
+            def assertEqual(  # noqa pylint: disable=invalid-name
+                self, first, second, msg=None
+            ):
                 """Test that first and second are equal.
 
                 If the values do not compare equal, the test will fail.

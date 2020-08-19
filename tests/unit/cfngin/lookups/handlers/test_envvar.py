@@ -10,9 +10,9 @@ class TestEnvVarHandler(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.testkey = 'STACKER_ENVVAR_TESTCASE'
-        self.invalidtestkey = 'STACKER_INVALID_ENVVAR_TESTCASE'
-        self.testval = 'TestVal'
+        self.testkey = "STACKER_ENVVAR_TESTCASE"
+        self.invalidtestkey = "STACKER_INVALID_ENVVAR_TESTCASE"
+        self.testval = "TestVal"
         os.environ[self.testkey] = self.testval
 
     def test_valid_envvar(self):

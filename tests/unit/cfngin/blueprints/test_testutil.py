@@ -15,7 +15,7 @@ class Repositories(Blueprint):
     VARIABLES = {
         "Repositories": {
             "type": list,
-            "description": "A list of repository names to create."
+            "description": "A list of repository names to create.",
         }
     }
 
@@ -26,10 +26,7 @@ class Repositories(Blueprint):
 
         for repo in variables["Repositories"]:
             template.add_resource(
-                ecr.Repository(
-                    "%sRepository" % repo,
-                    RepositoryName=repo,
-                )
+                ecr.Repository("%sRepository" % repo, RepositoryName=repo,)
             )
 
 
@@ -40,25 +37,25 @@ class TestRepositories(BlueprintTestCase):
 
     def test_create_template_passes(self):
         """Test create template passes."""
-        ctx = Context({'namespace': 'test'})
-        blueprint = Repositories('test_repo', ctx)
-        blueprint.resolve_variables([
-            Variable('Repositories', ["repo1", "repo2"], 'cfngin')
-        ])
+        ctx = Context({"namespace": "test"})
+        blueprint = Repositories("test_repo", ctx)
+        blueprint.resolve_variables(
+            [Variable("Repositories", ["repo1", "repo2"], "cfngin")]
+        )
         blueprint.create_template()
         self.assertRenderedBlueprint(blueprint)
 
     def test_create_template_fails(self):
         """Test create template fails."""
-        ctx = Context({'namespace': 'test'})
-        blueprint = Repositories('test_repo', ctx)
-        blueprint.resolve_variables([
-            Variable('Repositories', ["repo1", "repo2", "repo3"], 'cfngin')
-        ])
+        ctx = Context({"namespace": "test"})
+        blueprint = Repositories("test_repo", ctx)
+        blueprint.resolve_variables(
+            [Variable("Repositories", ["repo1", "repo2", "repo3"], "cfngin")]
+        )
         blueprint.create_template()
         with self.assertRaises(AssertionError):
             self.assertRenderedBlueprint(blueprint)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

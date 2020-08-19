@@ -37,9 +37,9 @@ class RxrefLookup(LookupHandler):
 
         """
         if provider is None:
-            raise ValueError('Provider is required')
+            raise ValueError("Provider is required")
         if context is None:
-            raise ValueError('Context is required')
+            raise ValueError("Context is required")
 
         decon = deconstruct(value)
         stack_fqn = context.get_fqn(decon.stack_name)

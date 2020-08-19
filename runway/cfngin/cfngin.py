@@ -16,7 +16,7 @@ from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
 
 # explicitly name logger so its not redundant
-LOGGER = logging.getLogger('runway.cfngin')
+LOGGER = logging.getLogger("runway.cfngin")
 
 
 class CFNgin(object):
@@ -43,8 +43,8 @@ class CFNgin(object):
 
     """
 
-    EXCLUDE_REGEX = r'runway(\..*)?\.(yml|yaml)'
-    EXCLUDE_LIST = ['buildspec.yml', 'docker-compose.yml']
+    EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
+    EXCLUDE_LIST = ["buildspec.yml", "docker-compose.yml"]
 
     def __init__(self, ctx, parameters=None, sys_path=None):
         """Instantiate class.
@@ -68,7 +68,7 @@ class CFNgin(object):
         self.parameters.update(self.env_file)
 
         if parameters:
-            LOGGER.debug('adding Runway parameters to CFNgin parameters')
+            LOGGER.debug("adding Runway parameters to CFNgin parameters")
             self.parameters.update(parameters)
 
         self._inject_common_parameters()
@@ -82,15 +82,16 @@ class CFNgin(object):
 
         """
         result = {}
-        supported_names = ['{}.env'.format(self.__ctx.env_name),
-                           '{}-{}.env'.format(self.__ctx.env_name,
-                                              self.region)]
+        supported_names = [
+            "{}.env".format(self.__ctx.env_name),
+            "{}-{}.env".format(self.__ctx.env_name, self.region),
+        ]
         for _, file_name in enumerate(supported_names):
             file_path = os.path.join(self.sys_path, file_name)
             if os.path.isfile(file_path):
-                LOGGER.info('found environment file: %s', file_path)
+                LOGGER.info("found environment file: %s", file_path)
                 self._env_file_name = file_path
-                with open(file_path, 'r') as file_:
+                with open(file_path, "r") as file_:
                     result.update(parse_environment(file_.read()))
         return MutableMap(**result)
 
@@ -110,23 +111,25 @@ class CFNgin(object):
             sys_path = self.sys_path
         config_file_names = self.find_config_files(sys_path=sys_path)
 
-        with SafeHaven(environ=self.__ctx.env_vars,
-                       sys_modules_exclude=['awacs', 'troposphere']):
+        with SafeHaven(
+            environ=self.__ctx.env_vars, sys_modules_exclude=["awacs", "troposphere"]
+        ):
             for config_name in config_file_names:
                 logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
-                logger.notice('deploy (in progress)')
-                with SafeHaven(argv=['stacker', 'build', config_name],
-                               sys_modules_exclude=['awacs', 'troposphere']):
+                logger.notice("deploy (in progress)")
+                with SafeHaven(
+                    argv=["stacker", "build", config_name],
+                    sys_modules_exclude=["awacs", "troposphere"],
+                ):
                     ctx = self.load(config_name)
                     action = build.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
                             ctx.config.service_role
-                        )
+                        ),
                     )
-                    action.execute(concurrency=self.concurrency,
-                                   tail=self.tail)
-                logger.success('deploy (complete)')
+                    action.execute(concurrency=self.concurrency, tail=self.tail)
+                logger.success("deploy (complete)")
 
     def destroy(self, force=False, sys_path=None):
         """Run the CFNgin destroy action.
@@ -149,19 +152,19 @@ class CFNgin(object):
         with SafeHaven(environ=self.__ctx.env_vars):
             for config_name in config_file_names:
                 logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
-                logger.notice('destroy (in progress)')
-                with SafeHaven(argv=['stacker', 'destroy', config_name]):
+                logger.notice("destroy (in progress)")
+                with SafeHaven(argv=["stacker", "destroy", config_name]):
                     ctx = self.load(config_name)
                     action = destroy.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
                             ctx.config.service_role
-                        )
+                        ),
                     )
-                    action.execute(concurrency=self.concurrency,
-                                   force=True,
-                                   tail=self.tail)
-                logger.success('destroy (complete)')
+                    action.execute(
+                        concurrency=self.concurrency, force=True, tail=self.tail
+                    )
+                logger.success("destroy (complete)")
 
     def load(self, config_path):
         """Load a CFNgin config into a context object.
@@ -173,17 +176,20 @@ class CFNgin(object):
             :class:`runway.cfngin.context.Context`
 
         """
-        LOGGER.debug('loading CFNgin config: %s', os.path.basename(config_path))
+        LOGGER.debug("loading CFNgin config: %s", os.path.basename(config_path))
         try:
             config = self._get_config(config_path)
             return self._get_context(config, config_path)
         except ConstructorError as err:
-            if err.problem.startswith('could not determine a constructor '
-                                      'for the tag \'!'):
-                LOGGER.error('"%s" is located in the module\'s root directory '
-                             'and appears to be a CloudFormation template; '
-                             'please move CloudFormation templates to a '
-                             'subdirectory', config_path)
+            if err.problem.startswith(
+                "could not determine a constructor " "for the tag '!"
+            ):
+                LOGGER.error(
+                    '"%s" is located in the module\'s root directory '
+                    "and appears to be a CloudFormation template; "
+                    "please move CloudFormation templates to a subdirectory",
+                    config_path,
+                )
                 sys.exit(1)
             raise
 
@@ -205,17 +211,17 @@ class CFNgin(object):
         with SafeHaven(environ=self.__ctx.env_vars):
             for config_name in config_file_names:
                 logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
-                logger.notice('plan (in progress)')
-                with SafeHaven(argv=['stacker', 'diff', config_name]):
+                logger.notice("plan (in progress)")
+                with SafeHaven(argv=["stacker", "diff", config_name]):
                     ctx = self.load(config_name)
                     action = diff.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
                             ctx.config.service_role
-                        )
+                        ),
                     )
                     action.execute()
-                logger.success('plan (complete)')
+                logger.success("plan (complete)")
 
     def should_skip(self, force=False):
         """Determine if action should be taken or not.
@@ -230,7 +236,7 @@ class CFNgin(object):
         """
         if force or self.env_file:
             return False
-        LOGGER.info('skipped; no parameters and environment file not found')
+        LOGGER.info("skipped; no parameters and environment file not found")
         return True
 
     def _get_config(self, file_path, validate=True):
@@ -244,7 +250,7 @@ class CFNgin(object):
             :class:`runway.cfngin.config.Config`
 
         """
-        with open(file_path, 'r') as file_:
+        with open(file_path, "r") as file_:
             raw_config = file_.read()
         return load_config(raw_config, self.parameters, validate)
 
@@ -266,7 +272,7 @@ class CFNgin(object):
             environment=self.parameters,
             force_stacks=[],  # placeholder
             region=self.region,
-            stack_names=[]  # placeholder
+            stack_names=[],  # placeholder
         )
 
     def _get_provider_builder(self, service_role=None):
@@ -280,14 +286,14 @@ class CFNgin(object):
 
         """
         if self.interactive:
-            LOGGER.verbose('using interactive AWS provider mode')
+            LOGGER.verbose("using interactive AWS provider mode")
         else:
-            LOGGER.verbose('using default AWS provider mode')
+            LOGGER.verbose("using default AWS provider mode")
         return ProviderBuilder(
             interactive=self.interactive,
             recreate_failed=self.recreate_failed,
             region=self.region,
-            service_role=service_role
+            service_role=service_role,
         )
 
     def _inject_common_parameters(self):
@@ -309,10 +315,10 @@ class CFNgin(object):
             the current region being deployed to.
 
         """
-        if not self.parameters.get('environment'):
-            self.parameters['environment'] = self.__ctx.env_name
-        if not self.parameters.get('region'):
-            self.parameters['region'] = self.region
+        if not self.parameters.get("environment"):
+            self.parameters["environment"] = self.__ctx.env_name
+        if not self.parameters.get("region"):
+            self.parameters["region"] = self.region
 
     @classmethod
     def find_config_files(cls, exclude=None, sys_path=None):
@@ -338,13 +344,14 @@ class CFNgin(object):
         exclude.extend(cls.EXCLUDE_LIST)
         for root, _dirs, files in os.walk(sys_path):
             for name in files:
-                if re.match(cls.EXCLUDE_REGEX, name) or (name in exclude or
-                                                         name.startswith('.')):
+                if re.match(cls.EXCLUDE_REGEX, name) or (
+                    name in exclude or name.startswith(".")
+                ):
                     # Hidden files (e.g. .gitlab-ci.yml), Runway configs,
                     # and docker-compose files definitely aren't stacker
                     # config files
                     continue
-                if os.path.splitext(name)[-1] in ['.yaml', '.yml']:
+                if os.path.splitext(name)[-1] in [".yaml", ".yml"]:
                     result.append(os.path.join(root, name))
             break  # only need top level files
         result.sort()

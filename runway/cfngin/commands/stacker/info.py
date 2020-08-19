@@ -17,8 +17,7 @@ class Info(BaseCommand):
     def run(self, options):
         """Run the command."""
         super(Info, self).run(options)
-        action = info.Action(options.context,
-                             provider_builder=options.provider_builder)
+        action = info.Action(options.context, provider_builder=options.provider_builder)
 
         action.execute()
 

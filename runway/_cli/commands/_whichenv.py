@@ -7,10 +7,10 @@ import click
 from ...util import SafeHaven
 from .. import options
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('whichenv', short_help='current deploy environment')
+@click.command("whichenv", short_help="current deploy environment")
 @options.debug
 @options.no_color
 @options.verbose
@@ -28,6 +28,6 @@ def whichenv(ctx, **_):  # noqa: D301
 
     """
     if not (ctx.obj.debug or ctx.obj.verbose):
-        logging.getLogger('runway').setLevel(logging.ERROR)  # suppress warnings
-    with SafeHaven(environ={'CI': '1'}):  # prevent prompts
+        logging.getLogger("runway").setLevel(logging.ERROR)  # suppress warnings
+    with SafeHaven(environ={"CI": "1"}):  # prevent prompts
         click.echo(ctx.obj.env.name)

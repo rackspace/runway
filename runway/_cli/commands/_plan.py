@@ -9,10 +9,10 @@ from ...core import Runway
 from .. import options
 from ..utils import select_deployments
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('plan', short_help='plan things')
+@click.command("plan", short_help="plan things")
 @options.ci
 @options.debug
 @options.deploy_environment
@@ -23,7 +23,5 @@ LOGGER = logging.getLogger(__name__.replace('._', '.'))
 def plan(ctx, tags, **_):
     # type: (click.Context, Tuple[str, ...], Any) -> None
     """Determine what infrastructure changes will occur during the next deploy."""
-    deployments = select_deployments(ctx, ctx.obj.runway_config.deployments,
-                                     tags)
-    Runway(ctx.obj.runway_config,
-           ctx.obj.get_runway_context()).plan(deployments)
+    deployments = select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
+    Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).plan(deployments)

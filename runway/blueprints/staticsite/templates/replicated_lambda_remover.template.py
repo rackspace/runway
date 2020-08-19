@@ -4,9 +4,10 @@ from typing import Any, Dict  # pylint: disable=unused-import
 import boto3
 
 
-def handler(event,  # type: Dict
-            _context  # type: Dict
-           ):  # noqa: E124
+def handler(
+    event,  # type: Dict
+    _context,  # type: Dict
+):
     # type: (...) -> Dict[str, Any]
     """State Machine step to attempt deletion of replicated Lambdas.
 
@@ -21,17 +22,17 @@ def handler(event,  # type: Dict
         _context (Any): Lambda context object.
 
     """
-    arns = event.get('FunctionArns')
-    self_destruct = event.get('SelfDestruct')
-    lambda_client = boto3.client('lambda')
+    arns = event.get("FunctionArns")
+    self_destruct = event.get("SelfDestruct")
+    lambda_client = boto3.client("lambda")
 
     # End early if we don't have any arns
     if not arns:
         return {
-            'SelfDestruct': self_destruct,
-            'FunctionArns': arns,
-            'deleted': True,
-            'status': 'No Arns To Delete'
+            "SelfDestruct": self_destruct,
+            "FunctionArns": arns,
+            "deleted": True,
+            "status": "No Arns To Delete",
         }
 
     deletions = []
@@ -40,19 +41,17 @@ def handler(event,  # type: Dict
         # Loop through all arns passed in
         for arn in arns:
             try:
-                deletions.append(
-                    lambda_client.delete_function(FunctionName=arn)
-                )
+                deletions.append(lambda_client.delete_function(FunctionName=arn))
             # If we can't find the resource then move to the next
             except lambda_client.ResourceNotFoundException:
                 continue
 
         return {
-            'SelfDestruct': self_destruct,
-            'FunctionArns': arns,
-            'deleted': True,
-            'deletions': deletions,
-            'status': 'Delete Successful'
+            "SelfDestruct": self_destruct,
+            "FunctionArns": arns,
+            "deleted": True,
+            "deletions": deletions,
+            "status": "Delete Successful",
         }
     # Something went wrong, more than likely the Replicated Function is
     # not currently able to be deleted.
@@ -60,9 +59,9 @@ def handler(event,  # type: Dict
     # Try again
     except Exception:  # pylint: disable=broad-except
         return {
-            'SelfDestruct': self_destruct,
-            'FunctionArns': arns,
-            'deleted': False,
-            'deletions': deletions,
-            'status': 'Delete Failed'
+            "SelfDestruct": self_destruct,
+            "FunctionArns": arns,
+            "deleted": False,
+            "deletions": deletions,
+            "status": "Delete Failed",
         }

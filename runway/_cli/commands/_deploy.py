@@ -9,10 +9,10 @@ from ...core import Runway
 from .. import options
 from ..utils import select_deployments
 
-LOGGER = logging.getLogger(__name__.replace('._', '.'))
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command('deploy', short_help='deploy things')
+@click.command("deploy", short_help="deploy things")
 @options.ci
 @options.debug
 @options.deploy_environment
@@ -37,7 +37,5 @@ def deploy(ctx, tags, **_):  # noqa: D301
     3. Deploys selected in the order defined.
 
     """
-    deployments = select_deployments(ctx, ctx.obj.runway_config.deployments,
-                                     tags)
-    Runway(ctx.obj.runway_config,
-           ctx.obj.get_runway_context()).deploy(deployments)
+    deployments = select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
+    Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).deploy(deployments)

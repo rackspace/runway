@@ -16,24 +16,25 @@ class Runner(object):
 
         Args:
             test_to_run: Name of a test to run.
-            package: Used as the anchor for relative imports
+            use_abs: Use absolute path when importing tests.
 
         """
         self._use_abs = use_abs
         self._tests_imported = False
-        if os.environ.get('DEBUG'):
+        if os.environ.get("DEBUG"):
             logging.basicConfig(level=logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger('testsuite')
+        self.logger = logging.getLogger("testsuite")
         self.working_dir = os.path.abspath(os.path.dirname(__file__))
         if test_to_run:
-            self.test_to_run = 'test_{0}/test_{0}'.format(test_to_run)
+            self.test_to_run = "test_{0}/test_{0}".format(test_to_run)
         else:
-            self.test_to_run = 'test_*/test_*'
+            self.test_to_run = "test_*/test_*"
 
     @property
     def available_tests(self):
+        """List of all available tests."""
         if not self._tests_imported:
             import_tests(self.logger, self.working_dir, self.test_to_run, self._use_abs)
             self._tests_imported = True
@@ -41,12 +42,13 @@ class Runner(object):
 
     def run_tests(self):
         """Run all integration tests."""
-        return execute_tests([test(self.logger) for test in self.available_tests],
-                             self.logger)
+        return execute_tests(
+            [test(self.logger) for test in self.available_tests], self.logger
+        )
 
     def main(self):
         """Import and run tests."""
         errs = self.run_tests()
         if errs > 0:
-            self.logger.error('Tests failed; Check logs.')
+            self.logger.error("Tests failed; Check logs.")
         return 1 if errs > 0 else 0

@@ -39,7 +39,7 @@ def dot_format(out, graph, name="digraph"):
     out.write("digraph %s {\n" % name)
     for step, deps in each_step(graph):
         for dep in deps:
-            out.write("  \"%s\" -> \"%s\";\n" % (step, dep))
+            out.write('  "%s" -> "%s";\n' % (step, dep))
 
     out.write("}\n")
 
@@ -70,8 +70,8 @@ FORMATTERS = {
 class Action(BaseAction):
     """Responsible for outputing a graph for the current CFNgin config."""
 
-    DESCRIPTION = 'Print graph'
-    NAME = 'graph'
+    DESCRIPTION = "Print graph"
+    NAME = "graph"
 
     @property
     def _stack_action(self):
@@ -80,17 +80,18 @@ class Action(BaseAction):
 
     def run(self, **kwargs):
         """Generate the underlying graph and prints it."""
-        graph = self._generate_plan(require_unlocked=False,
-                                    include_persistent_graph=True).graph
+        graph = self._generate_plan(
+            require_unlocked=False, include_persistent_graph=True
+        ).graph
         if self.context.persistent_graph:
             graph = merge_graphs(self.context.persistent_graph, graph)
-        if kwargs.get('reduce'):
+        if kwargs.get("reduce"):
             # This will performa a transitive reduction on the underlying
             # graph, producing less edges. Mostly useful for the "dot" format,
             # when converting to PNG, so it creates a prettier/cleaner
             # dependency graph.
             graph.transitive_reduction()
 
-        fn = FORMATTERS[kwargs.get('format')]
+        fn = FORMATTERS[kwargs.get("format")]
         fn(sys.stdout, graph)
         sys.stdout.flush()
