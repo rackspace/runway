@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.11.3] - 2020-08-19
 ### Fixed
 - fixed an issue where `npx runway` (installed from npm) would not work on Windows if there was a space in the path
 
@@ -928,9 +930,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.11.2...HEAD
-[1.11.2]: https://github.com/onicagroup/runway/compare/v1.10.1...v1.11.2
-[1.11.1]: https://github.com/onicagroup/runway/compare/v1.10.1...v1.11.1
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.11.3...HEAD
+[1.11.3]: https://github.com/onicagroup/runway/compare/v1.11.2...v1.11.3
+[1.11.2]: https://github.com/onicagroup/runway/compare/v1.11.1...v1.11.2
+[1.11.1]: https://github.com/onicagroup/runway/compare/v1.11.1...v1.11.1
 [1.11.0]: https://github.com/onicagroup/runway/compare/v1.10.1...v1.11.0
 [1.10.1]: https://github.com/onicagroup/runway/compare/v1.10.0...v1.10.1
 [1.10.0]: https://github.com/onicagroup/runway/compare/v1.9.0...v1.10.0
