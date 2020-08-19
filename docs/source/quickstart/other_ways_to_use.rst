@@ -29,7 +29,7 @@ Docker users can build their own Docker image to run a local Runway
 container or modify this `Dockerfile`_ to build a Runway image to suit specific
 needs.
 
-We have also provide a pre-build Docker image on `Docker Hub`_ that can be
+We have also provide a pre-built Docker image on `Docker Hub`_ that can be
 used with the following command.
 
 .. code-block:: shell
