@@ -31,7 +31,7 @@ jobs:
     steps:
       - # &checkout
         name: Checkout Repo
-        uses: actions/checkout@v2.0.0
+        uses: actions/checkout@v2.3.2
       - # &install_python
         name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -106,11 +106,10 @@ jobs:
     env:
       OS_NAME: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -179,11 +178,10 @@ jobs:
     env:
       OS_NAME: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -381,11 +379,10 @@ jobs:
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
