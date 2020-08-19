@@ -31,7 +31,7 @@ jobs:
     steps:
       - # &checkout
         name: Checkout Repo
-        uses: actions/checkout@v2.0.0
+        uses: actions/checkout@v2.3.2
       - # &install_python
         name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -106,11 +106,10 @@ jobs:
     env:
       OS_NAME: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -179,11 +178,10 @@ jobs:
     env:
       OS_NAME: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
@@ -251,23 +249,28 @@ jobs:
       NODE_VERSION: 12
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
-      # - *install_python
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
+      - id: check_distance
+        name: Ensure Commit Is Not Tagged
+        continue-on-error: true
+        run: bash ./check_distance_from_tag.sh
+        working-directory: .github/scripts/cicd
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        if: steps.check_distance.outcome == 'success'
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
+        if: steps.check_distance.outcome == 'success'
         uses: actions/setup-node@v1.4.1
         with:
           always-auth: true
@@ -275,8 +278,8 @@ jobs:
           registry-url: https://registry.npmjs.org
           scope: '@onica'
       - name: Install Dependencies (ubuntu)
+        if: steps.check_distance.outcome == 'success'
         run: sudo apt-get update && sudo apt-get install sed tree -y
-      # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-latest'
@@ -286,34 +289,45 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
       - name: Install Global Python Packages
+        if: steps.check_distance.outcome == 'success'
         run: |
           python -m pip install --upgrade pip setuptools
           pip install "setuptools-scm~=3.5.0" wheel
       - name: Download Artifacts (macOS)
+        if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v1.0.0
         with:
           name: pyinstaller-onefolder-macos-latest
           path: artifacts
       - name: Download Artifacts (ubuntu)
+        if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v1.0.0
         with:
           name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
+        if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v1.0.0
         with:
           name: pyinstaller-onefolder-windows-latest
           path: artifacts
       - name: List Artifacts
+        if: steps.check_distance.outcome == 'success'
         run: tree artifacts/
       - name: npm Prep
+        if: steps.check_distance.outcome == 'success'
         run: make npm_prep
       - name: npm pack
+        if: steps.check_distance.outcome == 'success'
         run: |
           npm pack
           rm -rf artifacts && mkdir -p artifacts
           find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
+      - name: Skipped Publishing
+        if: steps.check_distance.outcome == 'failure'
+        run: echo "A pre-production version was not published because the current commit is tagged for release."
       - name: Upload Artifacts
+        if: steps.check_distance.outcome == 'success'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: npm-pack
@@ -330,7 +344,7 @@ jobs:
       NPM_PACKAGE_NAME: '@onica/runway'
       NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: [3.7]
@@ -342,15 +356,21 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
       - name: Download Artifact
+        id: download-npm-pack
+        continue-on-error: true
         uses: actions/download-artifact@v1.0.0
         with:
           name: npm-pack
           path: artifacts
       - name: Publish Distribution 📦 to npm (dev)
+        if: steps.download-npm-pack.outcome == 'success'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         run: |
           find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
+      - name: Artifact Does Not Exist
+        if: steps.download-npm-pack.outcome == 'failure'
+        run: echo "Artifact npm-pack was not produced from the build step"
 
   build-pypi:
     name: Build PyPi 📦
@@ -364,11 +384,10 @@ jobs:
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
-      # - *checkout
-      - name: Checkout Repo
-        uses: actions/checkout@v2.0.0
-      - name: git unshallow
-        run: git fetch --prune --unshallow
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
