@@ -249,7 +249,7 @@ jobs:
       NODE_VERSION: 12
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: [3.7]
@@ -325,10 +325,9 @@ jobs:
           find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
       - name: Skipped Publishing
         if: steps.check_distance.outcome == 'failure'
-        run: |
-          mkdir -p artifacts
-          echo "A pre-production version was not published because the current commit is tagged for release."
+        run: echo "A pre-production version was not published because the current commit is tagged for release."
       - name: Upload Artifacts
+        if: steps.check_distance.outcome == 'success'
         uses: actions/upload-artifact@v1.0.0
         with:
           name: npm-pack
@@ -345,7 +344,7 @@ jobs:
       NPM_PACKAGE_NAME: '@onica/runway'
       NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: [3.7]
@@ -357,15 +356,21 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
       - name: Download Artifact
+        id: download-npm-pack
+        continue-on-error: true
         uses: actions/download-artifact@v1.0.0
         with:
           name: npm-pack
           path: artifacts
       - name: Publish Distribution 📦 to npm (dev)
+        if: steps.download-npm-pack.outcome == 'success'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         run: |
           find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
+      - name: Artifact Does Not Exist
+        if: steps.download-npm-pack.outcome == 'failure'
+        run: echo "Artifact npm-pack was not produced from the build step"
 
   build-pypi:
     name: Build PyPi 📦
