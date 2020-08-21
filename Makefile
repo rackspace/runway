@@ -61,7 +61,7 @@ fix-isort: ## automatically fix all isort errors
 lint: lint-isort lint-black lint-flake8 lint-pylint ## run all linters
 
 lint-black: ## run black
-	@echo "Running black... If this failes, run 'make fix-black' to resolve."
+	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@pipenv run black . --check
 	@echo ""
 
