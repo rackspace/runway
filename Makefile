@@ -72,7 +72,7 @@ lint-flake8: ## run flake8
 
 lint-isort: ## run isort
 	@echo "Running isort... If this fails, run 'make fix-isort' to resolve."
-	@pipenv run isort . --recursive --check-only
+	@pipenv run isort . --check-only
 	@echo ""
 
 lint-pylint: ## run pylint
