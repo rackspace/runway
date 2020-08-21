@@ -150,13 +150,15 @@ disable=useless-object-inheritance,
         missing-class-docstring,
         # flake8 (pydocstyle) overlap
         missing-function-docstring,
-        # needed for black formatting
-        bad-continuation,
         # with black formatting, it is difficult to avoide this with inherited
         # code or code that needs to be duplicated.
         similarities,
         # flake8 overlap
-        line-too-long
+        line-too-long,
+        # TODO remove & resolve when dropping python 2
+        super-with-arguments,
+        # TODO remove & resolve when dropping python 2
+        raise-missing-from
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -469,13 +471,6 @@ max-line-length=100
 
 # Maximum number of lines in a module
 max-module-lines=1000
-
-# List of optional constructs for which whitespace checking is disabled. `dict-
-# separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.
-# `trailing-comma` allows a space between comma and closing bracket: (a, ).
-# `empty-line` allows space-only lines.
-no-space-check=trailing-comma,
-               dict-separator
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.
