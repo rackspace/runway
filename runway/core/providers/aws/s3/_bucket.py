@@ -43,10 +43,10 @@ class Bucket(object):
         return self.__ctx.get_session(region=self._region).client("s3")
 
     @cached_property
-    def forbiden(self):
+    def forbidden(self):
         # type: () -> bool
-        """Check whether access to the bucket is forbiden."""
-        return self.head.metadata.forbiden
+        """Check whether access to the bucket is forbidden."""
+        return self.head.metadata.forbidden
 
     @cached_property
     def head(self):
@@ -79,7 +79,7 @@ class Bucket(object):
         # type: (Any) -> Dict[str, Any]
         """Create an S3 Bucket if it does not already exist.
 
-        Bucket creation will be skipped if it already exists or access is forbiden.
+        Bucket creation will be skipped if it already exists or access is forbidden.
 
         Keyword arguments are passed directly to the boto3 method.
 
@@ -87,11 +87,11 @@ class Bucket(object):
             boto3 response.
 
         """
-        if self.forbiden or not self.not_found:
+        if self.forbidden or not self.not_found:
             LOGGER.debug(
                 'skipped creating bucket "%s": %s',
                 self.name,
-                "access denied" if self.forbiden else "bucket already exists",
+                "access denied" if self.forbidden else "bucket already exists",
             )
             return {}
         kwargs["Bucket"] = self.name

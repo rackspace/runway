@@ -71,9 +71,9 @@ class ResponseMetadata(object):
         self.retry_attempts = kwargs.get("RetryAttempts", 0)
 
     @cached_property
-    def forbiden(self):
+    def forbidden(self):
         # type: () -> bool
-        """Whether the response returned 403 (Forbiden)."""
+        """Whether the response returned 403 (forbidden)."""
         return self.http_status_code == HTTPStatus.FORBIDDEN
 
     @cached_property
