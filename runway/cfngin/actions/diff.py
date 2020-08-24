@@ -3,6 +3,8 @@ import logging
 import sys
 from operator import attrgetter
 
+from botocore.exceptions import ClientError
+
 from ...core.providers.aws.s3 import Bucket
 from .. import exceptions
 from ..status import (
@@ -209,6 +211,18 @@ class Action(build.Action):
                 and "defined class or template path" in str(err)
             ):
                 return SkippedStatus("persistent graph: will be destroyed")
+            raise
+        except ClientError as err:
+            if (
+                err.response["Error"]["Code"] == "ValidationError"
+                and "length less than or equal to" in err.response["Error"]["Message"]
+            ):
+                LOGGER.error(
+                    "%s:template is too large to provide directly to the API; "
+                    "S3 must be used",
+                    stack.name,
+                )
+                return SkippedStatus("cfngin_bucket: existing bucket required")
             raise
         return COMPLETE
 
