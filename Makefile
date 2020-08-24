@@ -61,7 +61,7 @@ fix-isort: ## automatically fix all isort errors
 lint: lint-isort lint-black lint-flake8 lint-pylint ## run all linters
 
 lint-black: ## run black
-	@echo "Running black... If this failes, run 'make fix-black' to resolve."
+	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@pipenv run black . --check
 	@echo ""
 
@@ -72,7 +72,7 @@ lint-flake8: ## run flake8
 
 lint-isort: ## run isort
 	@echo "Running isort... If this fails, run 'make fix-isort' to resolve."
-	@pipenv run isort . --recursive --check-only
+	@pipenv run isort . --check-only
 	@echo ""
 
 lint-pylint: ## run pylint
@@ -83,7 +83,7 @@ lint-pylint: ## run pylint
 # linting for python 2, requires additional disables
 lint_two: ## run all linters (python 2 only)
 	pipenv run flake8 --config=setup.cfg --exclude=runway/embedded,runway/templates --extend-ignore=D101,D202,D403,E124,E203,W504 runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-option-value,method-hidden,relative-import
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-continuation,bad-option-value,bad-whitespace,method-hidden,relative-import
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
