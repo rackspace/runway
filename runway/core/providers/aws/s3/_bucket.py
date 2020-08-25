@@ -1,7 +1,7 @@
 """AWS S3 bucket."""
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # pylint: disable=W
 
 from botocore.exceptions import ClientError
 
@@ -9,8 +9,8 @@ from .....util import cached_property
 from .._response import BaseResponse
 
 if TYPE_CHECKING:
-    from .....cfngin.context import Context as CFNginContext
-    from .....context import Context as RunwayContext
+    from .....cfngin.context import Context as CFNginContext  # pylint: disable=W
+    from .....context import Context as RunwayContext  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

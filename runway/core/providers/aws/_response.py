@@ -1,7 +1,8 @@
 """Base class for AWS responses."""
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union  # pylint: disable=W
 
-from ....util import HTTPStatus, cached_property
+from ....http_backport import HTTPStatus
+from ....util import cached_property
 
 
 class ResponseError(object):  # pylint: disable=too-few-public-methods
