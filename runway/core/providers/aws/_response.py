@@ -2,7 +2,6 @@
 from typing import Any, Dict, Union  # pylint: disable=W
 
 from ....http_backport import HTTPStatus
-from ....util import cached_property
 
 
 class ResponseError(object):  # pylint: disable=too-few-public-methods
@@ -71,13 +70,13 @@ class ResponseMetadata(object):
         self.request_id = kwargs.get("RequestId")
         self.retry_attempts = kwargs.get("RetryAttempts", 0)
 
-    @cached_property
+    @property
     def forbidden(self):
         # type: () -> bool
         """Whether the response returned 403 (forbidden)."""
         return self.http_status_code == HTTPStatus.FORBIDDEN
 
-    @cached_property
+    @property
     def not_found(self):
         # type: () -> bool
         """Whether the response returned 404 (Not Found)."""
