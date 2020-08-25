@@ -42,6 +42,16 @@ class Bucket(object):
         """Create or reuse a boto3 client."""
         return self.__ctx.get_session(region=self._region).client("s3")
 
+    @property
+    def exists(self):
+        # type: () -> bool
+        """Check whether the bucket exists.
+
+        Opposite of not_found.
+
+        """
+        return not self.not_found
+
     @cached_property
     def forbidden(self):
         # type: () -> bool
@@ -87,7 +97,7 @@ class Bucket(object):
             boto3 response.
 
         """
-        if self.forbidden or not self.not_found:
+        if self.forbidden or self.exists:
             LOGGER.debug(
                 'skipped creating bucket "%s": %s',
                 self.name,
@@ -102,6 +112,7 @@ class Bucket(object):
             )
         LOGGER.debug("creating bucket: %s", json.dumps(kwargs))
         del self.not_found  # clear cached value
+        del self.forbidden  # clear cached value
         del self.head  # clear cached value
         return self.client.create_bucket(**kwargs)
 
