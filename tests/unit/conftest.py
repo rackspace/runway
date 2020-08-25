@@ -8,8 +8,10 @@ from typing import Dict
 import pytest
 import yaml
 
-from runway.config import Config
-from runway.core.components import DeployEnvironment
+# TODO fix runway import issues caused when importing config - will req v2 changes
+# from runway.config import Config
+# from runway.core.components import DeployEnvironment
+import runway
 
 from .factories import (
     MockCFNginContext,
@@ -78,7 +80,9 @@ def fixture_dir():
 def fx_config():
     """Return YAML loader for config fixtures."""
     return YamlLoader(
-        TEST_ROOT.parent / "fixtures" / "configs", load_class=Config, load_type="kwargs"
+        TEST_ROOT.parent / "fixtures" / "configs",
+        load_class=runway.config.Config,
+        load_type="kwargs",
     )
 
 
@@ -165,5 +169,7 @@ def runway_context(request):
     env_vars.update(getattr(request.module, "ENV_VARS", {}))
     return MockRunwayContext(
         command="test",
-        deploy_environment=DeployEnvironment(environ=env_vars, explicit_name="test"),
+        deploy_environment=runway.core.components.DeployEnvironment(
+            environ=env_vars, explicit_name="test"
+        ),
     )
