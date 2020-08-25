@@ -29,7 +29,7 @@ class HTTPStatus(IntEnum):  # TODO replace with http.HTTPStatus when dropping py
     def __new__(cls, value, phrase, description=""):
         """Create new instance in a customized way."""
         obj = int.__new__(cls, value)
-        obj._value_ = value
+        obj._value_ = value  # pylint: disable=protected-access
 
         obj.phrase = phrase
         obj.description = description
