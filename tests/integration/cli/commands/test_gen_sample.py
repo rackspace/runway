@@ -208,7 +208,6 @@ def test_k8s_tf_repo(cd_tmp_path, caplog):
 
     files = [
         "eks-base.tf/.terraform-version",
-        "eks-base.tf/get_idp_root_cert_thumbprint.py",
         "eks-base.tf/main.tf",
         "eks-base.tf/sleep.py",
         "gen-kubeconfig.cfn/k8s_hooks/__init__.py",
