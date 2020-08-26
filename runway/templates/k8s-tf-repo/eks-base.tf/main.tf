@@ -14,10 +14,10 @@ variable "az-count" { default = 3 }
 # Provider and access setup
 provider "aws" {
   version = "~> 2.43"
-  region = "${var.region}"
+  region = var.region
 }
-provider "external" {
-  version = "~> 1.2"
+provider "tls" {
+  version = "~> 2.2.0"
 }
 
 # Data and resources
@@ -52,13 +52,11 @@ module "vpc" {
 
   enable_nat_gateway = true
 
-  tags = "${
-    map(
-     "kubernetes.io/cluster/${local.cluster_name}", "shared",
-     "Environment", "${terraform.workspace}",
-     "Terraform", "true"
-    )
-  }"
+  tags = {
+     "kubernetes.io/cluster/${local.cluster_name}" = "shared",
+     "Environment" = "${terraform.workspace}",
+     "Terraform" = "true"
+  }
 }
 
 data "aws_iam_policy_document" "cluster-assume-role-policy" {
@@ -74,21 +72,21 @@ data "aws_iam_policy_document" "cluster-assume-role-policy" {
 resource "aws_iam_role" "cluster" {
   name_prefix = "eks-cluster-"
 
-  assume_role_policy = "${data.aws_iam_policy_document.cluster-assume-role-policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.cluster-assume-role-policy.json
 }
 resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = "${aws_iam_role.cluster.name}"
+  role       = aws_iam_role.cluster.name
 }
 resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = "${aws_iam_role.cluster.name}"
+  role       = aws_iam_role.cluster.name
 }
 
 resource "aws_security_group" "cluster" {
   name_prefix = "eks-cluster-"
   description = "Cluster communication with worker nodes"
-  vpc_id = "${module.vpc.vpc_id}"
+  vpc_id = module.vpc.vpc_id
 
   egress {
     from_port = 0
@@ -111,19 +109,19 @@ data "aws_iam_policy_document" "node-assume-role-policy" {
 resource "aws_iam_role" "node" {
   name_prefix = "eks-node-"
 
-  assume_role_policy = "${data.aws_iam_policy_document.node-assume-role-policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.node-assume-role-policy.json
 }
 resource "aws_iam_role_policy_attachment" "node-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role = "${aws_iam_role.node.name}"
+  role = aws_iam_role.node.name
 }
 resource "aws_iam_role_policy_attachment" "node-AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role = "${aws_iam_role.node.name}"
+  role = aws_iam_role.node.name
 }
 resource "aws_iam_role_policy_attachment" "node-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role = "${aws_iam_role.node.name}"
+  role = aws_iam_role.node.name
 }
 # SSM agent not shipped ootb
 # resource "aws_iam_role_policy_attachment" "node-AmazonSSMManagedInstanceCore" {
@@ -131,13 +129,13 @@ resource "aws_iam_role_policy_attachment" "node-AmazonEC2ContainerRegistryReadOn
 #   role = "${aws_iam_role.node.name}"
 # }
 resource "aws_iam_instance_profile" "node" {
-  role = "${aws_iam_role.node.name}"
+  role = aws_iam_role.node.name
 }
 
 resource "aws_security_group" "node" {
   name_prefix = "eks-node-"
   description = "Security group for all nodes in the cluster"
-  vpc_id = "${module.vpc.vpc_id}"
+  vpc_id = module.vpc.vpc_id
 
   egress {
     from_port = 0
@@ -146,18 +144,16 @@ resource "aws_security_group" "node" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${
-    map(
-     "kubernetes.io/cluster/${local.cluster_name}", "owned",
-    )
-  }"
+  tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "owned"
+  }
 }
 resource "aws_security_group_rule" "node-ingress-self" {
   description = "Allow node to communicate with each other"
   from_port = 0
   protocol = "-1"
-  security_group_id = "${aws_security_group.node.id}"
-  source_security_group_id = "${aws_security_group.node.id}"
+  security_group_id = aws_security_group.node.id
+  source_security_group_id = aws_security_group.node.id
   to_port = 65535
   type = "ingress"
 }
@@ -166,8 +162,8 @@ resource "aws_security_group_rule" "node-ingress-cluster" {
   description = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
   from_port = 1025
   protocol = "tcp"
-  security_group_id = "${aws_security_group.node.id}"
-  source_security_group_id = "${aws_security_group.cluster.id}"
+  security_group_id = aws_security_group.node.id
+  source_security_group_id = aws_security_group.cluster.id
   to_port = 65535
   type = "ingress"
 }
@@ -175,19 +171,19 @@ resource "aws_security_group_rule" "cluster-ingress-node-https" {
   description = "Allow pods to communicate with the cluster API Server"
   from_port = 443
   protocol = "tcp"
-  security_group_id = "${aws_security_group.cluster.id}"
-  source_security_group_id = "${aws_security_group.node.id}"
+  security_group_id = aws_security_group.cluster.id
+  source_security_group_id = aws_security_group.node.id
   to_port = 443
   type = "ingress"
 }
 
 resource "aws_eks_cluster" "cluster" {
-  name = "${local.cluster_name}"
-  role_arn = "${aws_iam_role.cluster.arn}"
+  name = local.cluster_name
+  role_arn = aws_iam_role.cluster.arn
 
   vpc_config {
-    security_group_ids = ["${aws_security_group.cluster.id}"]
-    subnet_ids = "${module.vpc.private_subnets[*]}"
+    security_group_ids = [aws_security_group.cluster.id]
+    subnet_ids = module.vpc.private_subnets[*]
   }
 
   # version doesn't need to be specified until it's time to upgrade
@@ -211,9 +207,9 @@ data "aws_eks_cluster_auth" "cluster_auth" {
 }
 
 provider "kubernetes" {
-  host = "${aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(aws_eks_cluster.cluster.certificate_authority.0.data)}"
-  token = "${data.aws_eks_cluster_auth.cluster_auth.token}"
+  host = aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.cluster.certificate_authority[0].data)
+  token = data.aws_eks_cluster_auth.cluster_auth.token
   load_config_file = false
   # Pinned back from 1.11 pending resolution of:
   # https://github.com/terraform-providers/terraform-provider-kubernetes/issues/759
@@ -262,29 +258,22 @@ resource "aws_eks_node_group" "node" {
   ]
 }
 
-# Need an external script for this for now
-# https://github.com/terraform-providers/terraform-provider-aws/issues/10104
-# https://github.com/terraform-providers/terraform-provider-tls/issues/52
-data "external" "cluster-cert-thumbprint" {
-  program = ["runway", "run-python", "get_idp_root_cert_thumbprint.py"]
-
-  query = {
-    url = "${aws_eks_cluster.cluster.identity.0.oidc.0.issuer}"
-  }
+data "tls_certificate" "cluster-cert-thumbprint" {
+  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 }
 resource "aws_iam_openid_connect_provider" "cluster" {
   client_id_list = ["sts.amazonaws.com"]
-  thumbprint_list = ["${data.external.cluster-cert-thumbprint.result.thumbprint}"]
-  url = "${aws_eks_cluster.cluster.identity.0.oidc.0.issuer}"
+  thumbprint_list = [data.tls_certificate.cluster-cert-thumbprint.certificates[0].sha1_fingerprint]
+  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 }
 
 resource "aws_ssm_parameter" "oidc_iam_provider_cluster_url" {
   name = "/${local.cluster_name}/oidc-iam-provider-cluster-url"
   type = "String"
-  value = "${aws_iam_openid_connect_provider.cluster.url}"
+  value = aws_iam_openid_connect_provider.cluster.url
 }
 resource "aws_ssm_parameter" "oidc_iam_provider_cluster_arn" {
   name = "/${local.cluster_name}/oidc-iam-provider-cluster-arn"
   type = "String"
-  value = "${aws_iam_openid_connect_provider.cluster.arn}"
+  value = aws_iam_openid_connect_provider.cluster.arn
 }

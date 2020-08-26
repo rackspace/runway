@@ -1,5 +1,5 @@
 namespace: ${namespace}
-stacker_bucket: ""  # not uploading any CFN templates
+cfngin_bucket: ""  # not uploading any CFN templates
 sys_path: ./
 
 pre_build:
