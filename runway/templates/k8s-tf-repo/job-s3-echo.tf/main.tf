@@ -11,7 +11,7 @@ variable "region" {}
 # Provider and access setup
 provider "aws" {
   version = "~> 2.43"
-  region = "${var.region}"
+  region = var.region
 }
 
 # Data and resources
@@ -32,9 +32,9 @@ data "aws_eks_cluster_auth" "cluster_auth" {
 }
 
 provider "kubernetes" {
-  host = "${data.aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
-  token = "${data.aws_eks_cluster_auth.cluster_auth.token}"
+  host = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token = data.aws_eks_cluster_auth.cluster_auth.token
   load_config_file = false
   # Pinned back from 1.11 pending resolution of:
   # https://github.com/terraform-providers/terraform-provider-kubernetes/issues/759
@@ -73,7 +73,7 @@ data "aws_iam_policy_document" "service_account_assume_role_policy" {
 }
 resource "aws_iam_role" "service_account" {
   name_prefix = "eks-${local.sa_name}-"
-  assume_role_policy = "${data.aws_iam_policy_document.service_account_assume_role_policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.service_account_assume_role_policy.json
 }
 data "aws_iam_policy_document" "service_account" {
 
@@ -94,19 +94,17 @@ data "aws_iam_policy_document" "service_account" {
   }
 }
 resource "aws_iam_role_policy" "service_account" {
-  role = "${aws_iam_role.service_account.id}"
+  role = aws_iam_role.service_account.id
 
-  policy = "${data.aws_iam_policy_document.service_account.json}"
+  policy = data.aws_iam_policy_document.service_account.json
 }
 
 resource "kubernetes_service_account" "service_account" {
   metadata {
-    name = "${local.sa_name}"
-    annotations = "${
-      map(
-       "eks.amazonaws.com/role-arn", "${aws_iam_role.service_account.arn}"
-      )
-    }"
+    name = local.sa_name
+    annotations = {
+        "eks.amazonaws.com/role-arn" = aws_iam_role.service_account.arn
+    }
   }
   depends_on = [
     "aws_iam_role_policy.service_account",
@@ -119,13 +117,13 @@ resource "kubernetes_service_account" "service_account" {
 
 resource "kubernetes_job" "job" {
   metadata {
-    name = "${local.job_name}"
+    name = local.job_name
   }
   spec {
     template {
       metadata {}
       spec {
-        service_account_name = "${kubernetes_service_account.service_account.metadata.0.name}"
+        service_account_name = kubernetes_service_account.service_account.metadata[0].name
         container {
           name    = "main"
           image   = "amazonlinux:2018.03"
@@ -136,11 +134,11 @@ resource "kubernetes_job" "job" {
           ]
           env {
             name  = "AWS_DEFAULT_REGION"
-            value = "${var.region}"
+            value = var.region
           }
           env {
             name  = "BUCKET_NAME"
-            value = "${aws_s3_bucket.bucket.id}"
+            value = aws_s3_bucket.bucket.id
           }
           env {
             name  = "ENABLE_IRP"
@@ -148,14 +146,14 @@ resource "kubernetes_job" "job" {
           }
           volume_mount {
             mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
-            name = "${kubernetes_service_account.service_account.default_secret_name}"
+            name = kubernetes_service_account.service_account.default_secret_name
             read_only = true
           }
         }
         volume {
-          name = "${kubernetes_service_account.service_account.default_secret_name}"
+          name = kubernetes_service_account.service_account.default_secret_name
           secret {
-            secret_name = "${kubernetes_service_account.service_account.default_secret_name}"
+            secret_name = kubernetes_service_account.service_account.default_secret_name
           }
         }
         restart_policy = "Never"
