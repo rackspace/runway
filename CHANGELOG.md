@@ -5,12 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `http` backport for python < 3.5
+
 ### Changed
 - updated the `k8s-tf-repo` sample
   - Runway config now uses modern syntax
   - fixed tflint issues
   - Terraform files are now able to be parsed by `python-hcl2` (eks-base.tf was failing both parsers)
   - replace the custom script with tls provider to get EKS cluster `sha1_fingerprint`
+- when running `runway plan`, CFNgin modules will now skip using a `cfngin_bucket` if it does not exist
+  - logs that it will be created during the next `deploy`
+  - continues without planning the stack if the template is too large to be used through the API, requiring an existing `cfngin_bucket`
 
 ## [1.11.3] - 2020-08-19
 ### Fixed
