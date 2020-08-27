@@ -299,7 +299,7 @@ jobs:
           python -m pip install --upgrade pip setuptools
           pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
       # - *pipenv_sync
-      - name: Setup Python Virtual Environment (3.x)
+      - name: Setup Python Virtual Environment
         run: pipenv sync --dev
       - name: Run Build
         run: make build
