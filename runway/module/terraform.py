@@ -4,6 +4,7 @@ import logging
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 import hcl
 import six
@@ -14,11 +15,6 @@ from ..cfngin.lookups.handlers.output import deconstruct
 from ..env_mgr.tfenv import TFEnvManager
 from ..util import DOC_SITE, cached_property, find_cfn_output, which
 from . import ModuleOptions, RunwayModule, run_module_command
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
 
@@ -207,7 +203,7 @@ class Terraform(RunwayModule):
                 self.logger.debug("directory retained: %s", child)
                 continue
             self.logger.debug("removing: %s", child)
-            send2trash(str(child))  # TODO remove str when dropping python 2
+            send2trash(str(child))  # does not support Path objects
 
     def gen_command(self, command, args_list=None):
         """Generate Terraform command."""

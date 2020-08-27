@@ -11,7 +11,7 @@ import platform
 import re
 import stat
 import sys
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from decimal import Decimal
 from subprocess import check_call
 from typing import (  # noqa pylint: disable=unused-import
@@ -25,11 +25,6 @@ from typing import (  # noqa pylint: disable=unused-import
 
 import six
 import yaml
-
-if sys.version_info >= (3, 6):
-    from contextlib import AbstractContextManager  # pylint: disable=E
-else:
-    AbstractContextManager = object
 
 AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
 DOC_SITE = "https://docs.onica.com/projects/runway"
@@ -447,8 +442,7 @@ class YamlDumper(yaml.Dumper):
 def argv(*args):
     # type: (str) -> None
     """Context manager for temporarily changing sys.argv."""
-    # passing to list() creates a new instance
-    original_argv = list(sys.argv)  # TODO use .copy() after dropping python 2
+    original_argv = sys.argv.copy()
     try:
         sys.argv = list(args)  # convert tuple to list
         yield
@@ -541,11 +535,7 @@ def load_object_from_string(fqcn, try_reload=False):
             and module_path.split(".")[0]
             not in sys.builtin_module_names  # skip builtins
         ):
-            # TODO remove is next major release; backport circumvents expected functionality
-            #
-            # pylint<2.3.1 incorrectly identifies this
-            # pylint: disable=too-many-function-args
-            six.moves.reload_module(sys.modules[module_path])
+            importlib.reload(sys.modules[module_path])
         else:
             importlib.import_module(module_path)
     return getattr(sys.modules[module_path], object_name)

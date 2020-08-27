@@ -29,23 +29,18 @@ class UI(object):
         """Obtain an exclusive lock on the UI for the current thread."""
         return self._lock.acquire()
 
-    # TODO uncomment signature when dropping python 2
-    # def log(self, lvl, msg, *args, logger=LOGGER, **kwargs):
-    def log(self, lvl, msg, *args, **kwargs):
+    def log(self, lvl, msg, *args, logger=LOGGER, **kwargs):
         """Log the message if the current thread owns the underlying lock.
 
         Args:
             lvl (int): Log level.
             msg (Union[str, Exception]): String template or exception to use
                 for the log record.
-
-        Keyword Args:
             logger (Union[logging.LoggerAdaptor, logging.Logger]): Specific
                 logger to log to.
 
         """
         self.lock()
-        logger = kwargs.pop("logger", LOGGER)
         try:
             return logger.log(lvl, msg, *args, **kwargs)
         finally:
@@ -55,20 +50,17 @@ class UI(object):
         """Release the lock on the UI."""
         return self._lock.release()
 
-    # TODO uncomment signature when dropping python 2
-    # def info(self, msg, *args, logger=LOGGER, **kwargs):
-    def info(self, msg, *args, **kwargs):
+    def info(self, msg, *args, logger=LOGGER, **kwargs):
         """Log the line if the current thread owns the underlying lock.
 
         Args:
             msg (Union[str, Exception]): String template or exception to use
                 for the log record.
-
-        Keyword Args:
             logger (Union[logging.LoggerAdaptor, logging.Logger]): Specific
                 logger to log to.
 
         """
+        kwargs["logger"] = logger
         self.log(logging.INFO, msg, *args, **kwargs)
 
     def ask(self, message):

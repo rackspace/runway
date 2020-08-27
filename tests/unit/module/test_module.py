@@ -3,16 +3,12 @@
 import logging
 import sys
 from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
 from mock import MagicMock, call, patch
 
 from runway.module import NPM_BIN, ModuleOptions, RunwayModuleNpm
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 @contextmanager

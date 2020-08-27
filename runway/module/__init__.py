@@ -4,15 +4,11 @@ import os
 import platform
 import subprocess
 import sys
+from pathlib import Path
 
 import six
 
 from ..util import merge_nested_environment_dicts, which
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
 NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"

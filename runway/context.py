@@ -2,6 +2,7 @@
 import logging
 import sys
 from distutils.util import strtobool  # pylint: disable=E
+from typing import Optional
 
 from six import string_types
 
@@ -15,23 +16,22 @@ LOGGER = logging.getLogger(__name__)
 class Context(object):
     """Runway execution context."""
 
-    # TODO implement propper keyword-only args when dropping python 2
-    # def __init__(self,
-    #              *: Any,
-    #              command: Optional[str] = None,
-    #              deploy_environment: Optional[DeployEnvironment] = None
-    #              ) -> None:
-    def __init__(self, _=None, **kwargs):
+    def __init__(
+        self,
+        *,
+        command: Optional[str] = None,
+        deploy_environment: Optional[DeployEnvironment] = None
+    ) -> None:
         """Instantiate class.
 
-        Keywork Arguments:
+        Args:
             command (Optional[str]): Runway command/action being run.
             deploy_environment (Optional[DeployEnvironment]): Current
                 deploy environment.
 
         """
-        self.command = kwargs.pop("command", None)
-        self.env = kwargs.pop("deploy_environment", DeployEnvironment())
+        self.command = command
+        self.env = deploy_environment or DeployEnvironment()
         self.debug = self.env.debug
         # TODO remove after IaC tools support AWS SSO
         self.__inject_profile_credentials()

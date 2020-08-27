@@ -1,10 +1,8 @@
 """Core Runway API."""
-from __future__ import print_function  # TODO remove when dripping python 2
-
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional  # noqa pylint: disable=W
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import yaml as _yaml
 

@@ -221,10 +221,7 @@ class Serverless(RunwayModuleNpm):
         tmp_file = self.path / "{}.tmp.serverless.yml".format(uuid.uuid4())
 
         try:
-            if self.context.is_python3:
-                tmp_file.write_text(yaml.safe_dump(final_yml))
-            else:  # TODO remove handling when dropping python 2 support
-                tmp_file.write_text(yaml.safe_dump(final_yml).decode("UTF-8"))
+            tmp_file.write_text(yaml.safe_dump(final_yml))
             self.logger.debug("created temporary Serverless config: %s", tmp_file)
             self.options.update_args("config", str(tmp_file.name))
             self.logger.debug(

@@ -1,14 +1,9 @@
 """Pytest configuration, fixtures, and plugins."""
 # pylint: disable=redefined-outer-name
 import shutil
-import sys
+from pathlib import Path
 
 import pytest
-
-if sys.version_info.major > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 TEST_ROOT = Path(__file__).parent
 

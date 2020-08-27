@@ -592,12 +592,7 @@ def _zip_package(
                         '   runpy.run_module("pip", run_name="__main__")\n',
                     ]
                 )
-                # TODO remove python 2 logic when dropping python 2
-                tmp_script.write_text(
-                    script_contents
-                    if sys.version_info.major > 2
-                    else script_contents.decode("UTF-8")
-                )
+                tmp_script.write_text(script_contents)
                 cmd = [sys.executable, "run-python", str(tmp_script)]
             else:
                 if not _pip_has_no_color_option(pip_cmd[0]):

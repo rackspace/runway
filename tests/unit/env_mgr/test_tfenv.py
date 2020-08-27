@@ -4,6 +4,7 @@ import json
 import sys
 
 import hcl
+import hcl2
 import pytest
 import six
 from mock import MagicMock, call, patch
@@ -16,12 +17,6 @@ from runway.env_mgr.tfenv import (
     get_latest_tf_version,
     load_terrafrom_module,
 )
-
-# TODO remove condition and import-error when dropping python 2
-if sys.version_info >= (3, 6):
-    import hcl2  # pylint: disable=import-error
-else:
-    hcl2 = hcl  # pylint: disable=invalid-name
 
 MODULE = "runway.env_mgr.tfenv"
 
