@@ -32,7 +32,5 @@ repos:
     rev: 3.8.3
     hooks:
       - id: flake8
-        args:
-          - "--docstring-convention=all"  # TODO move to setup.cfg when dropping python 2
         additional_dependencies:
           - flake8-docstrings
