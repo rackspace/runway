@@ -203,7 +203,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         if self.options.get("skip_npm_ci"):
             self.logger.info("skipped npm ci/npm install")
             return
-        if self.context.is_noninteractive and use_npm_ci(str(self.path)):
+        if self.context.is_noninteractive and use_npm_ci(self.path):
             self.logger.info("running npm ci...")
             cmd[1] = "ci"
         else:

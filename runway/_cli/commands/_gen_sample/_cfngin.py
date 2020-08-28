@@ -30,9 +30,7 @@ def cfngin(ctx, **_):
 
     blueprints.mkdir()
     LOGGER.debug('copying blueprint from "%s" to "%s"', src_blueprints, blueprints)
-    shutil.copyfile(
-        str(src_blueprints / "__init__.py"), str(blueprints / "__init__.py")
-    )
-    shutil.copyfile(str(src_blueprints / "tf_state.py"), str(tf_state))
+    shutil.copyfile(src_blueprints / "__init__.py", blueprints / "__init__.py")
+    shutil.copyfile(src_blueprints / "tf_state.py", tf_state)
     tf_state.chmod(tf_state.stat().st_mode | 0o0111)
     LOGGER.success("Sample CFNgin module created at %s", dest)

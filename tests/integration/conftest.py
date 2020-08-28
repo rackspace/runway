@@ -34,7 +34,7 @@ def cp_config(configs):
         runway_yml = dest_path / "runway.yml"
         if not config_name.startswith(".yml"):
             config_name += ".yml"
-        shutil.copy(str(configs / config_name), str(runway_yml))
+        shutil.copy(configs / config_name, runway_yml)
         return runway_yml
 
     return copy_config

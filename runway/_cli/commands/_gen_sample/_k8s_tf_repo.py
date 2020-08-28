@@ -27,7 +27,7 @@ def k8s_tf_repo(ctx, **_):
 
     copy_sample(ctx, src, dest)
     LOGGER.debug('copying "%s" to "%s"', src_awscli, dest_awscli)
-    shutil.copyfile(str(src_awscli), str(dest_awscli))
+    shutil.copyfile(src_awscli, dest_awscli)
     convert_gitignore(dest / "_gitignore")
 
     tfstate_dir = dest / "tfstate.cfn/templates"

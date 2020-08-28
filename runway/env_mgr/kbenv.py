@@ -60,7 +60,7 @@ def download_kb_release(  # noqa pylint: disable=too-many-locals,too-many-branch
         sys.exit(1)
 
     version_dir.mkdir(parents=True, exist_ok=True)
-    shutil.move(os.path.join(download_dir, filename), str(version_dir / filename))
+    shutil.move(os.path.join(download_dir, filename), version_dir / filename)
     shutil.rmtree(download_dir)
     result = version_dir / filename
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable

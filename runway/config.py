@@ -1359,7 +1359,7 @@ class Config(ConfigComponent):
 
         LOGGER.error(
             "Runway config file was not found. Looking for one of %s in %s",
-            str(cls.accepted_names),
+            cls.accepted_names,
             config_dir,
         )
         sys.exit(1)

@@ -42,7 +42,7 @@ def copy_sample(ctx, src, dest):
         LOGGER.error("Directory %s already exists!", dest)
         ctx.exit(1)
     LOGGER.debug('copying "%s" to "%s"', src, dest)
-    shutil.copytree(str(src), str(dest))
+    shutil.copytree(src, dest)
 
 
 def write_tfstate_template(dest):
