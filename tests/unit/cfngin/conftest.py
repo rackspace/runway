@@ -2,17 +2,9 @@
 import os
 from pathlib import Path
 
-import py
 import pytest
 
 from runway.cfngin.dag import DAG
-
-
-@pytest.fixture(scope="package")
-def cfngin_fixture_dir():
-    """Path to the fixture directory."""
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
-    return py.path.local(path)  # pylint: disable=no-member
 
 
 @pytest.fixture(scope="package")
