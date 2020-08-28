@@ -1,7 +1,4 @@
 """Test classes."""
-import io
-import os
-
 import boto3
 import yaml
 from botocore.stub import Stubber
@@ -148,65 +145,6 @@ class MockCFNginContext(CFNginContext):
             profile_name=profile,
             region_name=region or self.region,
         )
-
-
-# TODO use pytest-subprocess for when dropping python 2
-class MockProcess(object):  # pylint: disable=too-few-public-methods
-    """Instances of this class are the return_value of patched subprocess.Popen."""
-
-    def __init__(self, returncode=0, stdout=None, universal_newlines=True):
-        """Instantiate class.
-
-        Args:
-            returncode (int): Code that will be returned when the process exits.
-            stdout (Optional[Union[bytes, str, List[str], Tuple(str, ...)]]): Content
-                to be written accessable as stdout on the process.
-            universal_newlines (bool): Use universal line endings.
-
-        """
-        self.returncode = returncode
-        self.text_mode = bool(universal_newlines)
-        self.stdout = self._prepare_buffer(stdout)
-
-        self._wait = MagicMock(return_value=self.returncode)
-
-    @property
-    def wait(self):
-        """Mock wait method as a property to call the stored MagicMock."""
-        return self._wait
-
-    def _prepare_buffer(self, data):
-        """Prepare buffer for stdout/stderr.
-
-        Args:
-            data (Optional[Union[bytes, str, List[str], Tuple(str, ...)]]):
-                Content to be written accessable as stdout on the process.
-
-        Returns:
-            Union[BytesIO, StringIO]
-
-        """
-        result = None
-        linesep = os.linesep
-
-        if isinstance(data, (list, tuple)):
-            result = linesep.join(data)
-
-        if isinstance(data, str):
-            result = data
-
-        if result:
-            if not result.endswith(linesep):
-                result += linesep
-            if self.text_mode:
-                result.replace("\r\n", "\n")
-
-        io_base = io.StringIO() if self.text_mode else io.BytesIO()
-
-        if result:
-            io_base.write(result)
-            io_base.seek(0)  # return to the begining of the stream
-        return io_base
 
 
 class MockRunwayConfig(MutableMap):

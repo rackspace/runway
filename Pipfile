@@ -22,6 +22,7 @@ pydocstyle = "~=5.0.2"
 # Test
 coverage = {extras = ["toml"], version = "~=5.2.1"}
 pytest = "~=6.0.1"
+pytest-subprocess = "~=1.0.0"
 pytest-cov = "~=2.10.1"
 mock = "~=4.0.2"
 moto = "~=1.3"

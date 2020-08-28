@@ -1130,6 +1130,14 @@
             "index": "pypi",
             "version": "==2.10.1"
         },
+        "pytest-subprocess": {
+            "hashes": [
+                "sha256:aa657f848d5fe5c15bd36b7f17309e5670582f2f1e2c72700574e3b6ffbb8deb",
+                "sha256:af5a87ad5894bae12c6a9b93cf32df58a25ec288c0581d100baa822976673a4a"
+            ],
+            "index": "pypi",
+            "version": "==1.0.0"
+        },
         "python-dateutil": {
             "hashes": [
                 "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c",
