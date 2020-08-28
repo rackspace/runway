@@ -4,15 +4,8 @@ import logging
 import os
 import sys
 from distutils.util import strtobool  # pylint: disable=E
-from typing import (  # pylint: disable=unused-import
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Union,
-)
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
@@ -22,15 +15,8 @@ from ._logging import PrefixAdaptor
 from .util import MutableMap, cached_property
 from .variables import Variable
 
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
-
-# python2 supported pylint sees this is cyclic even though its only for type checking
-# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from .context import Context  # noqa: F401 pylint: disable=unused-import
+    from .context import Context
 
 LOGGER = logging.getLogger(__name__)
 NoneType = type(None)

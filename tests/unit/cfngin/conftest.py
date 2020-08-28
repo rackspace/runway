@@ -1,16 +1,11 @@
 """Pytest fixtures and plugins."""
 import os
-import sys
+from pathlib import Path
 
 import py
 import pytest
 
 from runway.cfngin.dag import DAG
-
-if sys.version_info[0] > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 @pytest.fixture(scope="package")

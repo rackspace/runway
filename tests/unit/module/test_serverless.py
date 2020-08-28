@@ -2,7 +2,6 @@
 # pylint: disable=no-self-use,unused-argument
 import logging
 import subprocess
-import sys
 
 import pytest
 import yaml
@@ -170,10 +169,7 @@ class TestServerless(object):
 
         caplog.clear()
         monkeypatch.setattr(
-            "{}.Path.unlink".format(
-                "pathlib" if sys.version_info.major == 3 else "pathlib2"
-            ),
-            MagicMock(side_effect=OSError("test OSError")),
+            "pathlib.Path.unlink", MagicMock(side_effect=OSError("test OSError"))
         )
         assert not obj.extend_serverless_yml(mock_func)
         assert (

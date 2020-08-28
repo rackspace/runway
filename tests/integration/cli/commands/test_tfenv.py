@@ -1,17 +1,12 @@
 """Test ``runway tfenv`` command."""
 # pylint: disable=unused-argument
 import logging
-import sys
+from pathlib import Path
 
 import six
 from click.testing import CliRunner
 
 from runway._cli import cli
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 def test_tfenv_install(cd_tmp_path, caplog):

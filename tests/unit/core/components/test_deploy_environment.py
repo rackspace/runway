@@ -2,18 +2,13 @@
 # pylint: disable=no-self-use,protected-access
 import logging
 import os
-import sys
+from pathlib import Path
 
 import pytest
 from git.exc import InvalidGitRepositoryError
 from mock import MagicMock, patch
 
 from runway.core.components import DeployEnvironment
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 MODULE = "runway.core.components._deploy_environment"
 

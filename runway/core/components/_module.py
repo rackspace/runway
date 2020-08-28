@@ -1,15 +1,10 @@
 """Runway module object."""
+import concurrent.futures
 import json
 import logging
 import sys
-from typing import (  # noqa pylint: disable=W
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Union,
-)
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import six
 import yaml
@@ -26,15 +21,9 @@ from ...util import (
 )
 from ..providers import aws
 
-if sys.version_info.major > 2:
-    import concurrent.futures
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
-
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition, ModuleDefinition  # pylint: disable=W
-    from ...context import Context  # pylint: disable=W
+    from ...config import DeploymentDefinition, ModuleDefinition
+    from ...context import Context
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

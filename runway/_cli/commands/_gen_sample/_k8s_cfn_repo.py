@@ -1,7 +1,7 @@
 """``runway gen-sample k8s-cfn`` command."""
 import logging
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
 import six
@@ -13,11 +13,6 @@ from ....blueprints.k8s.k8s_workers import NodeGroup
 from ....cfngin.context import Context as CFNginContext
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

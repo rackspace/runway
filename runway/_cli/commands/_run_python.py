@@ -1,16 +1,11 @@
 """``runway run-aws`` command."""
 # docs: file://./../../../docs/source/commands.rst
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
 
 from .. import options
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 @click.command("run-python", short_help="bundled python")

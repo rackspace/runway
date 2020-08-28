@@ -6,8 +6,10 @@ import os
 import stat
 import subprocess
 import sys
+import tempfile
 from distutils.util import strtobool  # pylint: disable=E
 from io import BytesIO as StringIO
+from pathlib import Path
 from shutil import copyfile
 from types import GeneratorType
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -21,13 +23,6 @@ from troposphere.awslambda import Code
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..session_cache import get_session
 from ..util import ensure_s3_bucket
-
-if sys.version_info.major < 3:
-    from backports import tempfile  # pylint: disable=E
-    from pathlib2 import Path  # pylint: disable=E
-else:
-    import tempfile  # pylint: disable=E
-    from pathlib import Path  # pylint: disable=E
 
 # mask to retrieve only UNIX file permissions from the external attributes
 # field of a ZIP entry.

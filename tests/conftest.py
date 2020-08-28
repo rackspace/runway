@@ -1,13 +1,8 @@
 """Pytest configuration, fixtures, and plugins."""
 import os
-import sys
+from pathlib import Path
 
 import pytest
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 def pytest_addoption(parser):
