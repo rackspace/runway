@@ -44,7 +44,6 @@ INSTALL_REQUIRES = [
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
     "urllib3>=1.20,<1.25",
-    "zipp",
     # inherited from stacker 1.7.0 requirements
     "jinja2>=2.7,<3.0",
     "schematics>=2.0.1,<2.1.0",
