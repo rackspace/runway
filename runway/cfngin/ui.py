@@ -3,8 +3,6 @@ import logging
 import threading
 from getpass import getpass
 
-from six.moves import input
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -66,7 +64,7 @@ class UI(object):
     def ask(self, message):
         """Collect input from a user in a multithreaded environment.
 
-        This wraps the built-in raw_input function to ensure that only 1
+        This wraps the built-in input function to ensure that only 1
         thread is asking for input from the user at a give time. Any process
         that tries to log output to the terminal will be blocked while the
         user is being prompted.

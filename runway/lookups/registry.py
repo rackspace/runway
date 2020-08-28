@@ -1,8 +1,6 @@
 """Register test handlers."""
 from typing import Type, Union  # pylint: disable=unused-import
 
-from six import string_types
-
 from runway.util import load_object_from_string
 
 from .handlers import cfn, env, ssm, var
@@ -21,7 +19,7 @@ def register_lookup_handler(lookup_type, handler_or_path):
 
     """
     handler = handler_or_path
-    if isinstance(handler_or_path, string_types):
+    if isinstance(handler_or_path, str):
         handler = load_object_from_string(handler_or_path)
     RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
 

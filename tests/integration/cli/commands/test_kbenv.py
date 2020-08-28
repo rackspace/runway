@@ -3,7 +3,6 @@
 import logging
 from pathlib import Path
 
-import six
 from click.testing import CliRunner
 
 from runway._cli import cli
@@ -16,7 +15,7 @@ def test_kbenv_install(cd_tmp_path, caplog):
 
     """
     caplog.set_level(logging.DEBUG, logger="runway.cli.commands.kbenv")
-    (cd_tmp_path / ".kubectl-version").write_text(six.u("v1.14.1"))
+    (cd_tmp_path / ".kubectl-version").write_text("v1.14.1")
     runner = CliRunner()
     result = runner.invoke(cli, ["kbenv", "install"])
     assert result.exit_code == 0
@@ -69,7 +68,7 @@ def test_kbenv_run_separator(cd_tmp_path, capfd):
     pass options shared with Runway such as ``--help``.
 
     """
-    (cd_tmp_path / ".kubectl-version").write_text(six.u("v1.14.0"))
+    (cd_tmp_path / ".kubectl-version").write_text("v1.14.0")
     runner = CliRunner()
     result = runner.invoke(cli, ["kbenv", "run", "--", "--help"])
     captured = capfd.readouterr()  # capfd required for subprocess
@@ -84,7 +83,7 @@ def test_kbenv_run_version(cd_tmp_path, capfd):
     Parsing of bare command.
 
     """
-    (cd_tmp_path / ".kubectl-version").write_text(six.u("v1.14.0"))
+    (cd_tmp_path / ".kubectl-version").write_text("v1.14.0")
     runner = CliRunner()
     result = runner.invoke(cli, ["kbenv", "run", "version", "--client"])
     captured = capfd.readouterr()  # capfd required for subprocess

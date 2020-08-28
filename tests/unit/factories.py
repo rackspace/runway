@@ -8,7 +8,6 @@ import yaml
 from botocore.stub import Stubber
 from mock import MagicMock
 from packaging.specifiers import SpecifierSet
-from six import string_types
 
 from runway.cfngin.context import Context as CFNginContext
 from runway.config import DeploymentDefinition
@@ -194,7 +193,7 @@ class MockProcess(object):  # pylint: disable=too-few-public-methods
         if isinstance(data, (list, tuple)):
             result = linesep.join(data)
 
-        if isinstance(data, string_types):
+        if isinstance(data, str):
             result = data
 
         if result:

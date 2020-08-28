@@ -18,7 +18,6 @@ from schematics.types import (
     ModelType,
     StringType,
 )
-from six import text_type
 
 from runway.util import DOC_SITE
 
@@ -95,7 +94,7 @@ def render(raw_config, environment=None):
         # needs to pass a Dict for correct error handling by the built-in
         substituted = template.safe_substitute(**environment)
 
-    if not isinstance(substituted, text_type):
+    if not isinstance(substituted, str):
         substituted = substituted.decode("utf-8")
 
     buff.write(substituted)

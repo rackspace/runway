@@ -15,8 +15,6 @@ from typing import (  # noqa: F401 pylint: disable=W
     cast,
 )
 
-from six import string_types
-
 from .cfngin.exceptions import (
     FailedLookup,
     FailedVariableLookup,
@@ -204,7 +202,7 @@ class VariableValue(object):
             return VariableValueList.parse(input_object, variable_type)
         if isinstance(input_object, dict):
             return VariableValueDict.parse(input_object, variable_type)
-        if not isinstance(input_object, string_types):
+        if not isinstance(input_object, str):
             return VariableValueLiteral(input_object)
 
         tokens = VariableValueConcatenation(
@@ -519,7 +517,7 @@ class VariableValueConcatenation(VariableValue, list):
         values = []  # type: List[str]
         for value in self:
             resolved_value = value.value
-            if not isinstance(resolved_value, string_types):
+            if not isinstance(resolved_value, str):
                 raise InvalidLookupConcatenation(value, self)
             values.append(resolved_value)
         return "".join(values)
@@ -573,7 +571,7 @@ class VariableValueLookup(VariableValue):
 
         self.lookup_name = lookup_name
 
-        if isinstance(lookup_data, string_types):
+        if isinstance(lookup_data, str):
             lookup_data = VariableValueLiteral(lookup_data)
         self.lookup_data = lookup_data
 

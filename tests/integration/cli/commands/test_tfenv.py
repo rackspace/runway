@@ -3,7 +3,6 @@
 import logging
 from pathlib import Path
 
-import six
 from click.testing import CliRunner
 
 from runway._cli import cli
@@ -16,7 +15,7 @@ def test_tfenv_install(cd_tmp_path, caplog):
 
     """
     caplog.set_level(logging.DEBUG, logger="runway.cli.commands.tfenv")
-    (cd_tmp_path / ".terraform-version").write_text(six.u("0.12.0"))
+    (cd_tmp_path / ".terraform-version").write_text("0.12.0")
     runner = CliRunner()
     result = runner.invoke(cli, ["tfenv", "install"])
     assert result.exit_code == 0
@@ -69,7 +68,7 @@ def test_tfenv_run_separator(cd_tmp_path, capfd):
     pass options shared with Runway such as ``--help``.
 
     """
-    (cd_tmp_path / ".terraform-version").write_text(six.u("0.12.0"))
+    (cd_tmp_path / ".terraform-version").write_text("0.12.0")
     runner = CliRunner()
     result = runner.invoke(cli, ["tfenv", "run", "--", "--help"])
     captured = capfd.readouterr()  # capfd required for subprocess
@@ -85,7 +84,7 @@ def test_tfenv_run_version(cd_tmp_path, capfd):
 
     """
     version = "0.12.0"
-    (cd_tmp_path / ".terraform-version").write_text(six.u(version))
+    (cd_tmp_path / ".terraform-version").write_text(version)
     runner = CliRunner()
     result = runner.invoke(cli, ["tfenv", "run", "--version"])
     captured = capfd.readouterr()  # capfd required for subprocess

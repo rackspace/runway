@@ -3,9 +3,7 @@ import argparse
 import logging
 import signal
 import threading
-
-# pylint false positive
-from six.moves.collections_abc import Mapping  # pylint: disable=E
+from collections.abc import Mapping
 
 from ...environment import parse_environment
 

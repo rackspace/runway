@@ -1,12 +1,12 @@
 """CLI utils."""
 import logging
 import os
+from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any, Iterator, List, Optional, Tuple
 
 import click
 import yaml
-from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
 from ..config import Config, DeploymentDefinition, ModuleDefinition
 from ..context import Context as RunwayContext

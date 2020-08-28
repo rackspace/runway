@@ -6,7 +6,6 @@ import sys
 import hcl
 import hcl2
 import pytest
-import six
 from mock import MagicMock, call, patch
 
 from runway._logging import LogLevels
@@ -80,7 +79,7 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
 def test_load_terrafrom_module(parser, expected, tmp_path):
     """Test runway.env_mgr.tfenv.load_terrafrom_module."""
     tf_file = tmp_path / "module.tf"
-    tf_file.write_text(six.u(HCL_BACKEND_S3))
+    tf_file.write_text(HCL_BACKEND_S3)
 
     assert load_terrafrom_module(parser, tmp_path) == expected
 
@@ -150,12 +149,12 @@ class TestTFEnvManager(object):
 
         # path provided
         version_file = tmp_path / ".version"
-        version_file.write_text(six.u("0.11.5"))
+        version_file.write_text("0.11.5")
         assert tfenv.get_version_from_file(version_file) == "0.11.5"
 
         # path not provided; use version file
         version_file = tmp_path / TF_VERSION_FILENAME
-        version_file.write_text(six.u("0.12.0"))
+        version_file.write_text("0.12.0")
         assert tfenv.get_version_from_file(version_file) == "0.12.0"
 
     @patch(MODULE + ".get_available_tf_versions")

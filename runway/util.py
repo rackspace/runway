@@ -11,6 +11,7 @@ import platform
 import re
 import stat
 import sys
+from collections.abc import MutableMapping
 from contextlib import AbstractContextManager, contextmanager
 from decimal import Decimal
 from subprocess import check_call
@@ -23,7 +24,6 @@ from typing import (  # noqa pylint: disable=unused-import
     Union,
 )
 
-import six
 import yaml
 
 AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
@@ -99,8 +99,7 @@ class JsonEncoder(json.JSONEncoder):
         return super(JsonEncoder, self).default(o)
 
 
-# python2 supported pylint is unable to load six.moves correctly
-class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
+class MutableMap(MutableMapping):
     """Base class for mutable map objects."""
 
     def __init__(self, **kwargs):
@@ -591,9 +590,7 @@ def merge_nested_environment_dicts(env_dicts, env_name=None, env_root=None):
     """Return single-level dictionary from dictionary of dictionaries."""
     # If the provided dictionary is just a single "level" (no nested
     # environments), it applies to all environments
-    if all(
-        isinstance(val, (six.string_types, list)) for (_key, val) in env_dicts.items()
-    ):
+    if all(isinstance(val, (str, list)) for (_key, val) in env_dicts.items()):
         return flatten_path_lists(env_dicts, env_root)
 
     if env_name is None:
@@ -670,7 +667,7 @@ def run_commands(
     if env is None:
         env = os.environ.copy()
     for step in commands:
-        if isinstance(step, (list, six.string_types)):
+        if isinstance(step, (list, str)):
             execution_dir = directory
             raw_command = step
         elif step.get("command"):  # dictionary
@@ -683,9 +680,7 @@ def run_commands(
         else:
             raise AttributeError("Invalid command step: %s" % step)
         command_list = (
-            raw_command.split(" ")
-            if isinstance(raw_command, six.string_types)
-            else raw_command
+            raw_command.split(" ") if isinstance(raw_command, str) else raw_command
         )
         if platform.system().lower() == "windows":
             command_list = fix_windows_command_list(command_list)

@@ -4,8 +4,6 @@ import sys
 from distutils.util import strtobool  # pylint: disable=E
 from typing import Optional
 
-from six import string_types
-
 from .cfngin.session_cache import get_session
 from .core.components import DeployEnvironment
 from .util import cached_property
@@ -93,7 +91,7 @@ class Context(object):
         try:
             if isinstance(colorize, bool):  # catch False
                 return not colorize
-            if colorize and isinstance(colorize, string_types):
+            if colorize and isinstance(colorize, str):
                 return not strtobool(colorize)
         except ValueError:
             pass  # likely invalid RUNWAY_COLORIZE value

@@ -10,8 +10,6 @@ from typing import (  # noqa pylint: disable=W
     Union,
 )
 
-import six
-
 from ..._logging import PrefixAdaptor
 from ...cfngin.exceptions import UnresolvedVariable
 from ...config import FutureDefinition, VariablesDefinition
@@ -68,7 +66,7 @@ class Deployment(object):
             Optional[str]: Expected AWS account alias for the current context.
 
         """
-        if isinstance(self.definition.account_alias, six.string_types):
+        if isinstance(self.definition.account_alias, str):
             return self.definition.account_alias
         if isinstance(self.definition.account_alias, dict):
             return self.definition.account_alias.get(self.ctx.env.name)
@@ -83,7 +81,7 @@ class Deployment(object):
             Optional[str]: Expected AWS account ID for the current context.
 
         """
-        if isinstance(self.definition.account_id, (int, six.string_types)):
+        if isinstance(self.definition.account_id, (int, str)):
             return str(self.definition.account_id)
         if isinstance(self.definition.account_id, dict):
             result = self.definition.account_id.get(self.ctx.env.name)

@@ -17,7 +17,6 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import botocore
 import docker
 import formic
-from six import string_types
 from troposphere.awslambda import Code
 
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
@@ -709,11 +708,11 @@ def _check_pattern_list(patterns, key, default=None):
     if not patterns:
         return default
 
-    if isinstance(patterns, string_types):
+    if isinstance(patterns, str):
         return [patterns]
 
     if isinstance(patterns, list):
-        if all(isinstance(p, string_types) for p in patterns):
+        if all(isinstance(p, str) for p in patterns):
             return patterns
 
     raise ValueError(

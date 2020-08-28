@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-import six
 import yaml
 
 from ..._logging import PrefixAdaptor
@@ -383,7 +382,7 @@ def validate_environment(context, env_def, logger=None, strict=False):
     ]
     result = False
 
-    if isinstance(env_def, (int, six.string_types)):
+    if isinstance(env_def, (int, str)):
         logger.debug('checking if "%s" in %s', env_def, accepted_values)
         result = env_def in accepted_values
     elif isinstance(env_def, list):

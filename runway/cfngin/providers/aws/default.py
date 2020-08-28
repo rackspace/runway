@@ -4,12 +4,12 @@ import json
 import logging
 import sys
 import time
+import urllib
 from threading import Lock  # thread safe, memoize, provider builder.
 
 import botocore.exceptions
 import yaml
 from botocore.config import Config
-from six.moves import urllib
 
 from runway.util import DOC_SITE, JsonEncoder
 

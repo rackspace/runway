@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
-from six import string_types
 
 from ._logging import PrefixAdaptor
 from .util import MutableMap, cached_property
@@ -128,7 +127,7 @@ class ConfigComponent(MutableMap):
     def __getitem__(self, key):
         # type: (str) -> Any
         """Implement evaluation of self[key]."""
-        if not isinstance(key, string_types):
+        if not isinstance(key, str):
             raise TypeError("indices must be a string")
         result = getattr(self, key, getattr(self, key.replace("-", "_")))
 
@@ -805,7 +804,7 @@ class DeploymentDefinition(ConfigComponent):
         # type: () -> Union[Dict[Any, Any], str]
         """Access the value of an attribute that supports variables."""
         value = self._account_alias.value
-        if isinstance(value, (dict, string_types)):
+        if isinstance(value, (dict, str)):
             return value
         raise ValueError(
             "{}.account_alias is of type {}; expected type of dict or str".format(
@@ -818,7 +817,7 @@ class DeploymentDefinition(ConfigComponent):
         # type: () -> Union[Dict[Any, Any], str]
         """Access the value of an attribute that supports variables."""
         value = self._account_id.value
-        if isinstance(value, (dict, string_types)):
+        if isinstance(value, (dict, str)):
             return value
         if isinstance(value, int):
             return str(value)
@@ -833,7 +832,7 @@ class DeploymentDefinition(ConfigComponent):
         # type: () -> Union[Dict[Any, Any], str]
         """Access the value of an attribute that supports variables."""
         value = self._assume_role.value
-        if isinstance(value, (dict, string_types)):
+        if isinstance(value, (dict, str)):
             return value
         raise ValueError(
             "{}.assume_role is of type {}; expected type of dict or str".format(

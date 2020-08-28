@@ -9,7 +9,6 @@ from datetime import datetime
 
 import boto3
 import pytest
-import six
 from botocore.stub import Stubber
 from mock import MagicMock, patch
 
@@ -851,7 +850,7 @@ class TestTerraformBackendConfig(object):
     def test_get_full_configuration(self, runway_context, tmp_path):
         """Test get_full_configuration."""
         config_file = tmp_path / "backend.hcl"
-        config_file.write_text(six.u('key2 = "val2"'))
+        config_file.write_text('key2 = "val2"')
         backend = TerraformBackendConfig(runway_context, **{"key1": "val1"})
         assert backend.get_full_configuration() == {"key1": "val1"}
         backend.config_file = config_file

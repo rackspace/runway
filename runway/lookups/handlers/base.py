@@ -99,7 +99,6 @@ from typing import (  # noqa: F401 pylint: disable=W
 )
 
 import yaml
-from six import string_types
 from troposphere import BaseAWSObject
 
 from runway.cfngin.util import read_value_from_path
@@ -378,7 +377,7 @@ class LookupHandler(object):
         """
         if isinstance(value, bool):
             return value
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             return bool(strtobool(value))
         raise TypeError(
             "Value must be a string or bool to use transform=bool. Got type {}.".format(

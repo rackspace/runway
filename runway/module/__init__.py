@@ -4,9 +4,8 @@ import os
 import platform
 import subprocess
 import sys
+from collections.abc import MutableMapping
 from pathlib import Path
-
-import six
 
 from ..util import merge_nested_environment_dicts, which
 
@@ -225,9 +224,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         return False
 
 
-class ModuleOptions(
-    six.moves.collections_abc.MutableMapping
-):  # pylint: disable=no-member
+class ModuleOptions(MutableMapping):
     """Base class for Runway module options."""
 
     @staticmethod
@@ -242,7 +239,7 @@ class ModuleOptions(
             Any
 
         """
-        if isinstance(data, (list, type(None), six.string_types)):
+        if isinstance(data, (list, type(None), str)):
             return data
         if isinstance(data, dict):
             return {

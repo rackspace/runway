@@ -3,10 +3,9 @@
 import base64
 import json
 import re
+from collections.abc import Mapping, Sequence
 
 import yaml
-from six import string_types
-from six.moves.collections_abc import Mapping, Sequence  # pylint: disable=E
 from troposphere import Base64, GenericHelperFn
 
 from runway.lookups.handlers.base import LookupHandler
@@ -233,7 +232,7 @@ def _parameterize_obj(obj):
         return dict((key, _parameterize_obj(value)) for key, value in obj.items())
     if isinstance(obj, bytes):
         return _parameterize_string(obj.decode("utf8"))
-    if isinstance(obj, string_types):
+    if isinstance(obj, str):
         return _parameterize_string(obj)
     if isinstance(obj, Sequence):
         return list(_parameterize_obj(item) for item in obj)

@@ -1,10 +1,7 @@
 """Runway configuration 'path' settings."""
-# pylint: disable=unused-import
 import logging
 import os
-from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
-
-import six
+from typing import Dict, List, Optional, Tuple, Union
 
 from .sources.git import Git
 
@@ -130,7 +127,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
             `Git`_
 
         """
-        if isinstance(module, six.string_types):
+        if isinstance(module, str):
             module = {"path": module}  # type: Dict[str, str]
 
         self.git_source_class = git_source_class  # type: Git

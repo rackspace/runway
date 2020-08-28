@@ -4,7 +4,6 @@ import logging
 import sys
 
 import pytest
-import six
 import yaml
 from mock import MagicMock, call, patch
 
@@ -107,7 +106,7 @@ class TestModule(object):
             "options": {"local-opt": "local-opt-val"},
             "parameters": {"local-param": "local-param-val"},
         }
-        (mod_dir / "runway.module.yml").write_text(six.u(yaml.safe_dump(opts)))
+        (mod_dir / "runway.module.yml").write_text(yaml.safe_dump(opts))
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("simple_env_vars_map").modules[0],

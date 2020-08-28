@@ -5,10 +5,8 @@ import platform
 import shutil
 import sys
 import tempfile
-
-# Old pylint on py2.7 incorrectly flags these
-from six.moves.urllib.error import URLError  # pylint: disable=E
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E
+from urllib.error import URLError
+from urllib.request import urlretrieve
 
 from ..util import md5sum
 from . import EnvManager, handle_bin_download_error

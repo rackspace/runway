@@ -5,7 +5,6 @@ import logging
 import os
 import shutil
 
-import six
 import yaml
 
 LOGGER = logging.getLogger(__name__)
@@ -76,7 +75,7 @@ def create_runway_environments(provider, context, **kwargs):
 
     for deployment in runway_config.get("deployments", []):
         for module in deployment.get("modules", []):
-            if isinstance(module, six.string_types):
+            if isinstance(module, str):
                 path = module
             else:
                 path = module.get("path")
