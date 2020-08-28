@@ -8,7 +8,7 @@ import shutil
 import sys
 import tempfile
 import zipfile
-from distutils.version import LooseVersion  # noqa pylint: disable=E
+from distutils.version import LooseVersion
 from urllib.error import URLError
 from urllib.request import urlretrieve
 

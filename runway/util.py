@@ -15,14 +15,7 @@ from collections.abc import MutableMapping
 from contextlib import AbstractContextManager, contextmanager
 from decimal import Decimal
 from subprocess import check_call
-from typing import (  # noqa pylint: disable=unused-import
-    Any,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Union,
-)
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 import yaml
 
@@ -690,20 +683,11 @@ def run_commands(
                 'Attempted to run "%s" and failed to find it (are you sure it is '
                 "installed and added to your PATH?)" % command_list[0]
             )
-            if sys.version_info[0] < 3:
-                # Legacy exception version for python 2
-                try:
-                    check_call(command_list, env=env)
-                except OSError:
-                    print(failed_to_find_error, file=sys.stderr)
-                    sys.exit(1)
-            else:
-                try:
-                    check_call(command_list, env=env)
-                # The noqa/pylint overrides can be dropped alongside python 2
-                except FileNotFoundError:  # noqa pylint: disable=undefined-variable
-                    print(failed_to_find_error, file=sys.stderr)
-                    sys.exit(1)
+            try:
+                check_call(command_list, env=env)
+            except FileNotFoundError:
+                print(failed_to_find_error, file=sys.stderr)
+                sys.exit(1)
 
 
 def md5sum(filename):

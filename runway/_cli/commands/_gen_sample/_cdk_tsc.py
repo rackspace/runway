@@ -1,6 +1,6 @@
 """``runway gen-sample cdk-tsc`` command."""
 import logging
-from pathlib import Path  # pylint: disable=E
+from pathlib import Path
 from typing import Any
 
 import click

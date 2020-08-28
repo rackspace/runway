@@ -6,7 +6,7 @@ Allows us to specify specific remote sourced resources for out application
 """
 import logging
 import os
-from typing import Dict, Optional, Union  # noqa pylint: disable=W
+from typing import Any
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class Source(object):
     """
 
     def __init__(self, cache_dir="", **_):
-        # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
+        # type: (str, Any) -> None
         """Source.
 
         Arguments:

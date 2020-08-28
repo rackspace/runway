@@ -1,5 +1,5 @@
 """Test runway.lookups.handlers.ssm."""
-# pylint: disable=no-self-use,unused-import
+# pylint: disable=no-self-use
 import json
 from datetime import datetime
 

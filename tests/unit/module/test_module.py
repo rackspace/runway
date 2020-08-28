@@ -1,7 +1,6 @@
 """Test runway.module.__init__."""
 # pylint: disable=no-self-use,unused-argument
 import logging
-import sys
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -175,10 +174,6 @@ class TestModuleOptions(object):
             (100, None, None, pytest.raises(TypeError)),
             (100, "env", None, pytest.raises(TypeError)),
         ],
-    )
-    @pytest.mark.skipif(
-        sys.version_info.major < 3,
-        reason="python 2 does not handle unbound functions " "being patched in",
     )
     def test_merge_nested_env_dicts(self, monkeypatch, data, env, expected, exception):
         """Test merge_nested_env_dicts."""

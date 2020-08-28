@@ -52,7 +52,7 @@ fix-black: ## automatically fix all black errors
 	@pipenv run black .
 
 fix-isort: ## automatically fix all isort errors
-	@pipenv run isort . --recursive --atomic
+	@pipenv run isort .
 
 lint: lint-isort lint-black lint-flake8 lint-pylint ## run all linters
 

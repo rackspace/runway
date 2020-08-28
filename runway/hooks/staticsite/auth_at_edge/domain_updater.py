@@ -1,17 +1,11 @@
 """User Pool Client Domain Updater."""
 # pylint: disable=unused-argument
 import logging
-from typing import (  # pylint: disable=unused-import
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Optional,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context  # pylint: disable=W
-    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 

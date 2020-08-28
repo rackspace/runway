@@ -885,7 +885,7 @@ class SourceProcessor(object):
             ref = self.git_ls_remote(
                 config["uri"], self.determine_git_ls_remote_ref(config)
             )
-        if sys.version_info[0] > 2 and isinstance(ref, bytes):
+        if isinstance(ref, bytes):
             return ref.decode()
         return ref
 

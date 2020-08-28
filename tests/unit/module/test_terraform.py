@@ -3,7 +3,6 @@
 import json
 import logging
 import subprocess
-import sys
 from contextlib import contextmanager
 from datetime import datetime
 
@@ -782,20 +781,10 @@ class TestTerraformOptions(object):
         """Test parse."""
         mock_backend.return_value = "successfully parsed backend"
 
-        if sys.version_info.major < 3:  # python 2 support
-
-            @staticmethod
-            def assert_resolve_version_kwargs(context, terraform_version=None, **_):
-                """Assert args passed to the method during parse."""
-                assert config.get("terraform_version") == terraform_version
-                return "successfully resolved version"
-
-        else:
-
-            def assert_resolve_version_kwargs(context, terraform_version=None, **_):
-                """Assert args passed to the method during parse."""
-                assert config.get("terraform_version") == terraform_version
-                return "successfully resolved version"
+        def assert_resolve_version_kwargs(context, terraform_version=None, **_):
+            """Assert args passed to the method during parse."""
+            assert config.get("terraform_version") == terraform_version
+            return "successfully resolved version"
 
         monkeypatch.setattr(
             TerraformOptions, "resolve_version", assert_resolve_version_kwargs
@@ -856,7 +845,6 @@ class TestTerraformBackendConfig(object):
         backend.config_file = config_file
         assert backend.get_full_configuration() == {"key1": "val1", "key2": "val2"}
 
-    @pytest.mark.skipif(sys.version_info.major < 3, reason="python 2 dict is unordered")
     @pytest.mark.parametrize(
         "input_data, expected_items",
         [
@@ -957,10 +945,6 @@ class TestTerraformBackendConfig(object):
             ),
             ({}, {}, {}),
         ],
-    )
-    @pytest.mark.skipif(
-        sys.version_info.major < 3,
-        reason="python 2 dict handling prevents this from " "reliably passing",
     )
     def test_resolve_ssm_params(self, caplog, kwargs, parameters, expected):
         """Test resolve_ssm_params."""
@@ -1182,46 +1166,22 @@ class TestTerraformBackendConfig(object):
         runway_context.add_stubber("cloudformation", expected_region)
         runway_context.add_stubber("ssm", expected_region)
 
-        if sys.version_info.major < 3:  # python 2 support
+        def assert_cfn_kwargs(client, **kwargs):
+            """Assert args passed to the method during parse."""
+            assert kwargs == config.get("terraform_backend_cfn_outputs")
+            return kwargs
 
-            @staticmethod
-            def assert_cfn_kwargs(client, **kwargs):
-                """Assert args passed to the method during parse."""
-                assert kwargs == config.get("terraform_backend_cfn_outputs")
-                return kwargs
+        def assert_ssm_kwargs(client, **kwargs):
+            """Assert args passed to the method during parse."""
+            assert kwargs == config.get("terraform_backend_ssm_params")
+            return kwargs
 
-            @staticmethod
-            def assert_ssm_kwargs(client, **kwargs):
-                """Assert args passed to the method during parse."""
-                assert kwargs == config.get("terraform_backend_ssm_params")
-                return kwargs
-
-            @classmethod
-            def assert_get_backend_file_args(_, path, env_name, env_region):
-                """Assert args passed to the method during parse."""
-                assert path == "./"
-                assert env_name == "test"
-                assert env_region == "us-east-1"
-                return "success"
-
-        else:
-
-            def assert_cfn_kwargs(client, **kwargs):
-                """Assert args passed to the method during parse."""
-                assert kwargs == config.get("terraform_backend_cfn_outputs")
-                return kwargs
-
-            def assert_ssm_kwargs(client, **kwargs):
-                """Assert args passed to the method during parse."""
-                assert kwargs == config.get("terraform_backend_ssm_params")
-                return kwargs
-
-            def assert_get_backend_file_args(path, env_name, env_region):
-                """Assert args passed to the method during parse."""
-                assert path == "./"
-                assert env_name == "test"
-                assert env_region == "us-east-1"
-                return "success"
+        def assert_get_backend_file_args(path, env_name, env_region):
+            """Assert args passed to the method during parse."""
+            assert path == "./"
+            assert env_name == "test"
+            assert env_region == "us-east-1"
+            return "success"
 
         monkeypatch.setattr(
             TerraformBackendConfig, "resolve_cfn_outputs", assert_cfn_kwargs

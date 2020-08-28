@@ -2,7 +2,7 @@
 import argparse
 import logging
 import os
-from typing import Any, Dict  # pylint: disable=W
+from typing import Any, Dict
 
 import click
 

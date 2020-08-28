@@ -1,5 +1,5 @@
 """Replicated Lambda Remover State Machine."""
-from typing import Any, Dict  # pylint: disable=unused-import
+from typing import Any, Dict
 
 import boto3
 

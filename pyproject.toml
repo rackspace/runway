@@ -28,8 +28,6 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise AssertionError",  # defensive exceptions
     "raise NotImplimentedError",
-    "if self.context.is_python3:",
-    "if not self.context.is_python3:",
     "from pathlib import Path",
 ]
 

@@ -1,7 +1,7 @@
 """Runway context module."""
 import logging
 import sys
-from distutils.util import strtobool  # pylint: disable=E
+from distutils.util import strtobool
 from typing import Optional
 
 from .cfngin.session_cache import get_session
@@ -125,19 +125,6 @@ class Context(object):
         return self.env.ci
 
     @property
-    def is_python3(self):
-        # type: () -> bool
-        """Wether running in Python 3 or not.
-
-        Used for Python compatability decisions.
-
-        Returns:
-            bool
-
-        """
-        return sys.version_info.major > 2
-
-    @property
     def use_concurrent(self):
         # type: () -> bool
         """Wether to use concurrent.futures or not.
@@ -153,9 +140,7 @@ class Context(object):
 
         """
         if self.is_noninteractive:
-            if self.is_python3:
-                return True
-            LOGGER.warning("Parallel execution disabled; Python 3+ is required")
+            return True
         LOGGER.warning("Parallel execution disabled; not running in CI mode")
         return False
 

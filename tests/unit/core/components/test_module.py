@@ -1,7 +1,6 @@
 """Test runway.core.components._module."""
 # pylint: disable=no-self-use,protected-access
 import logging
-import sys
 
 import pytest
 import yaml
@@ -241,7 +240,6 @@ class TestModule(object):
         mock_run.assert_called_once_with("deploy")
 
     @patch(MODULE + ".concurrent.futures")
-    @pytest.mark.skipif(sys.version_info.major < 3, reason="only supported by python 3")
     def test_deploy_async(
         self, mock_futures, caplog, fx_deployments, monkeypatch, runway_context
     ):

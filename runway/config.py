@@ -3,7 +3,7 @@
 import logging
 import os
 import sys
-from distutils.util import strtobool  # pylint: disable=E
+from distutils.util import strtobool
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 

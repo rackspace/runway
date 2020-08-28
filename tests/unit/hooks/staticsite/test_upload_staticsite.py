@@ -1,5 +1,5 @@
 """Test runway.hooks.staticsite.upload_staticsite."""
-# pylint: disable=no-self-use,unused-import,too-few-public-methods
+# pylint: disable=no-self-use,too-few-public-methods
 import json
 
 import pytest

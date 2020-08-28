@@ -1,10 +1,10 @@
 """AWS account."""
-from typing import TYPE_CHECKING, List  # pylint: disable=W
+from typing import TYPE_CHECKING, List
 
 from ....util import cached_property
 
 if TYPE_CHECKING:
-    from ....context import Context  # pylint: disable=W
+    from ....context import Context
 
 
 class AccountDetails(object):

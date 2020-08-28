@@ -1,7 +1,6 @@
 """Test classes."""
 import io
 import os
-import sys
 
 import boto3
 import yaml
@@ -205,10 +204,7 @@ class MockProcess(object):  # pylint: disable=too-few-public-methods
         io_base = io.StringIO() if self.text_mode else io.BytesIO()
 
         if result:
-            if sys.version_info.major < 3:
-                io_base.write(result.decode("UTF-8"))
-            else:
-                io_base.write(result)
+            io_base.write(result)
             io_base.seek(0)  # return to the begining of the stream
         return io_base
 
@@ -324,10 +320,7 @@ class YamlLoader(object):
         """
         if not file_name.endswith(".yml") or not file_name.endswith(".yaml"):
             file_name += ".yml"
-        if sys.version_info.major > 2:
-            content = (self.root / file_name).read_text()
-        else:
-            content = (self.root / file_name).read_text().decode()
+        content = (self.root / file_name).read_text()
         return yaml.safe_load(content)
 
     def load(self, file_name):

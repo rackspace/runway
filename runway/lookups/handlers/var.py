@@ -34,14 +34,12 @@ limited or no effect:
 """
 # pylint: disable=arguments-differ
 import logging
-from typing import TYPE_CHECKING, Any  # pylint: disable=unused-import
+from typing import TYPE_CHECKING, Any
 
 from .base import LookupHandler
 
-# python2 supported pylint sees this is cyclic even though its only for type checking
-# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from ...context import Context  # noqa: F401 pylint: disable=unused-import
+    from ...context import Context
 
 
 LOGGER = logging.getLogger(__name__)

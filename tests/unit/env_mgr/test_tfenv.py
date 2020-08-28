@@ -1,7 +1,6 @@
 """Test runway.env_mgr.tfenv."""
 # pylint: disable=no-self-use
 import json
-import sys
 
 import hcl
 import hcl2
@@ -68,7 +67,6 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
     mock_get_available_tf_versions.assert_called_with(True)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="dependency requires >=3.6")
 @pytest.mark.parametrize(
     "parser, expected",
     [
@@ -273,7 +271,6 @@ class TestTFEnvManager(object):
         mock_download.assert_not_called()
         assert not tfenv.current_version
 
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="dependency requires >=3.6")
     @pytest.mark.parametrize(
         "response, expected",
         [

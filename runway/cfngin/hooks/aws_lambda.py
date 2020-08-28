@@ -7,7 +7,7 @@ import stat
 import subprocess
 import sys
 import tempfile
-from distutils.util import strtobool  # pylint: disable=E
+from distutils.util import strtobool
 from io import BytesIO as StringIO
 from pathlib import Path
 from shutil import copyfile
@@ -492,7 +492,7 @@ def _pip_has_no_color_option(python_path):
                 "print(pip.__version__)",
             ]
         )
-        if sys.version_info[0] > 2 and isinstance(pip_version_string, bytes):
+        if isinstance(pip_version_string, bytes):
             pip_version_string = pip_version_string.decode()
         if int(pip_version_string.split(".")[0]) > 10:
             return True

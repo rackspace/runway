@@ -1,10 +1,10 @@
 """Register test handlers."""
-from typing import Type, Union  # pylint: disable=unused-import
+from typing import Type, Union
 
 from runway.util import load_object_from_string
 
 from .handlers import cfn, env, ssm, var
-from .handlers.base import LookupHandler  # noqa: F401 pylint: disable=W
+from .handlers.base import LookupHandler
 
 RUNWAY_LOOKUP_HANDLERS = {}
 

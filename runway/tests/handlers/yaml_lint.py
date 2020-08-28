@@ -4,7 +4,7 @@ import glob
 import logging
 import os
 import runpy
-from typing import Any, Dict, List  # pylint: disable=unused-import
+from typing import Any, Dict, List
 
 from ...tests.handlers.base import TestHandler
 from ...util import argv

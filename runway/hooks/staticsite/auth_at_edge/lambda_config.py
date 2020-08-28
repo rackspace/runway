@@ -3,15 +3,15 @@ import logging
 import os
 import re
 import tempfile
-from distutils.dir_util import copy_tree  # pylint: disable=E
+from distutils.dir_util import copy_tree
 from tempfile import mkstemp
-from typing import TYPE_CHECKING, Any, Dict, Optional  # pylint: disable=W
+from typing import TYPE_CHECKING, Any, Dict
 
 from ....cfngin.hooks import aws_lambda
 
 if TYPE_CHECKING:
-    from runway.cfngin.context import Context  # pylint: disable=W
-    from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
+    from runway.cfngin.context import Context
+    from runway.cfngin.providers.base import BaseProvider
 
 # The functions associated with Auth@Edge
 FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_headers"]
@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__)
 def write(
     context,  # type: Context
     provider,  # type: BaseProvider
-    **kwargs  # type: Optional[Dict[str, Any]]
+    **kwargs  # type: Any
 ):
     # type: (...) -> Dict[str, Any]
     """Writes/Uploads the configured lambdas for Auth@Edge.

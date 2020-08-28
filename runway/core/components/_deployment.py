@@ -1,14 +1,8 @@
 """Runway deployment object."""
+import concurrent.futures
 import logging
 import sys
-from typing import (  # noqa pylint: disable=W
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ..._logging import PrefixAdaptor
 from ...cfngin.exceptions import UnresolvedVariable
@@ -17,12 +11,9 @@ from ...util import cached_property, merge_dicts, merge_nested_environment_dicts
 from ..providers import aws
 from ._module import Module
 
-if sys.version_info.major > 2:
-    import concurrent.futures
-
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition  # pylint: disable=W
-    from ...context import Context  # pylint: disable=W
+    from ...config import DeploymentDefinition
+    from ...context import Context
 
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))

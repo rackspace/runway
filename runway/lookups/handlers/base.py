@@ -88,15 +88,8 @@ Common Lookup Arguments
 """
 import json
 import logging
-from distutils.util import strtobool  # pylint: disable=E
-from typing import (  # noqa: F401 pylint: disable=W
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Optional,
-    Tuple,
-    Union,
-)
+from distutils.util import strtobool
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import yaml
 from troposphere import BaseAWSObject
@@ -104,10 +97,8 @@ from troposphere import BaseAWSObject
 from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
 
-# python2 supported pylint sees this is cyclic even though its only for type checking
-# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from ...context import Context  # noqa: F401 pylint: disable=unused-import
+    from ...context import Context
 
 LOGGER = logging.getLogger(__name__)
 
