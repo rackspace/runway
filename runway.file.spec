@@ -5,7 +5,6 @@ This file should be considered a python file and linted as such.
 """
 # pylint: disable=undefined-variable,wrong-import-order,invalid-name
 # pylint: disable=wrong-import-position,import-self
-import inspect
 import os
 import pkgutil
 from pkg_resources import get_distribution, get_entry_info
@@ -16,11 +15,7 @@ from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 # can be removed once we can upgrade virtualenv and pyinstaller
 import distutils
 
-print(inspect.getfile(distutils))
-print(inspect.getsourcefile(distutils))
-print(distutils.__dict__)
-
-if distutils.distutils_path.endswith("__init__.py"):
+if getattr(distutils, "distutils_path", "").endswith("__init__.py"):
     distutils.distutils_path = os.path.dirname(distutils.distutils_path)
 
 CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)), "runway")  # noqa

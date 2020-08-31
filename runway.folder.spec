@@ -15,7 +15,7 @@ from PyInstaller.utils.hooks import collect_data_files, copy_metadata
 # can be removed once we can upgrade virtualenv and pyinstaller
 import distutils
 
-if distutils.distutils_path.endswith("__init__.py"):
+if getattr(distutils, "distutils_path", "").endswith("__init__.py"):
     distutils.distutils_path = os.path.dirname(distutils.distutils_path)
 
 CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)), "runway")  # noqa
