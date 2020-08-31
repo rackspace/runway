@@ -10,9 +10,8 @@ importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}  # req of c
 
 [dev-packages]
 # Format
-black = "==20.8b1"  # since its pre-release, it has to be pinned this way for pipenv to install it
+black = "==19.10b0"  # since its pre-release, it has to be pinned this way for pipenv to install it
 typed-ast = "~=1.4.1"  # curent usable version of pipenv incorrectly lock this to excludes >= 3.8
-dataclasses = {version = ">=0.6", python_version = '<"3.7"'}  # not locked correctly (>=3.7 )
 # Lint
 isort = "~=5.4.2"
 pylint = "~=2.6.0"
