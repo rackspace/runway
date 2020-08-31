@@ -10,7 +10,7 @@ importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}  # req of c
 
 [dev-packages]
 # Format
-black = "==19.10b0"  # since its pre-release, it has to be pinned this way for pipenv to install it
+black = "==20.8b1"  # since its pre-release, it has to be pinned this way for pipenv to install it
 # Lint
 isort = "~=5.4.2"
 pylint = "~=2.6.0"
