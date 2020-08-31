@@ -30,7 +30,6 @@ moto = "~=1.3"
 testfixtures = "~=4.10.0"
 # Build
 setuptools-scm = "~=3.5.0"
-pyinstaller = "==3.5"  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
 # Utilities
 pre-commit = {version = "~=2.6.0", python_version = '>="3.6"'}
 setuptools = "<49.2"  # https://github.com/microsoft/vscode-python/issues/12949
