@@ -26,6 +26,7 @@ pipenv run python setup.py sdist
 pipenv run pip install .
 rm -rf dist/runway-$RUNWAY_VERSION.tar.gz
 mkdir -p artifacts/$RUNWAY_VERSION/$LOCAL_OS_NAME
+pipenv run pip show setuptools
 pipenv run pyinstaller --noconfirm --clean runway.$1.spec
 
 if [ "$1" == 'file' ]; then
