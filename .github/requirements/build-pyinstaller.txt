@@ -1,0 +1,4 @@
+-i https://pypi.org/simple
+virtualenv==16.7.9  # stuck due to pyinstaller
+pipenv==2018.11.26  # stuck due to pyinstaller
+pyinstaller==3.5  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
