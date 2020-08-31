@@ -1,0 +1,6 @@
+# global requirements that can apply to all steps
+-i https://pypi.org/simple
+setuptools_scm~=4.1.2
+virtualenv==16.7.9  # stuck due to pyinstaller
+pipenv==2018.11.26  # stuck due to pyinstaller
+wheel

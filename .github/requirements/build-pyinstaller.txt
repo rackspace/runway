@@ -1,0 +1,3 @@
+-i https://pypi.org/simple
+pyinstaller==3.5  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
+setuptools<49.2 # replaces stdlib.distutils with it's own breaking ^ version of pyinstaller
