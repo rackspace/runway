@@ -67,15 +67,15 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      # - *install_pip
       - name: Install Global Python Packages
+        working-directory: .github/requirements
         run: |
           python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      # - *pipenv_sync
-      - name: Setup Python Virtual Environment (3.x)
-        if: matrix.python-version != '2.7'
-        run: pipenv sync --dev
+          pip install -r requirements.txt
+      - name: Setup Python Virtual Environment
+        # our version of pipenv does not respect versions in a requirements file
+        # to we have to use pip within a venv to process it correctly
+        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
       - name: Run Build
         run: make build_pyinstaller_file
       - name: Upload Artifacts
@@ -139,15 +139,15 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      # - *install_pip
       - name: Install Global Python Packages
+        working-directory: .github/requirements
         run: |
           python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      # - *pipenv_sync
-      - name: Setup Python Virtual Environment (3.x)
-        if: matrix.python-version != '2.7'
-        run: pipenv sync --dev
+          pip install -r requirements.txt
+      - name: Setup Python Virtual Environment
+        # our version of pipenv does not respect versions in a requirements file
+        # to we have to use pip within a venv to process it correctly
+        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
       - name: Run Build
         run: make build_pyinstaller_folder
       - name: Upload Artifacts
