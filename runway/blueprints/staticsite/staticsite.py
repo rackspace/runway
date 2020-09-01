@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Module with static website bucket and CloudFront distribution."""
-from __future__ import print_function
-
 import hashlib
 import logging
 import os

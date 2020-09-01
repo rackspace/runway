@@ -30,7 +30,6 @@ INSTALL_REQUIRES = [
     "coloredlogs",
     "docker",
     "requests",
-    "future",
     "pyhcl~=0.4",  # does not support HCL2, possibly move to extras_require in the future
     "python-hcl2>=0.3.0,<1.0.0",
     "gitpython",

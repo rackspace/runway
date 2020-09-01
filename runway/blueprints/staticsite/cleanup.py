@@ -4,8 +4,6 @@
 Responsible for cleaning up the remaining orphaned resources created
 by the primary stack.
 """
-from __future__ import print_function
-
 import json
 import logging
 import os

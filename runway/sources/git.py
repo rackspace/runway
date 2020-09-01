@@ -1,6 +1,4 @@
-"""'Git' type Path Source."""
-from __future__ import absolute_import
-
+"""'Git type Path Source."""
 import logging
 import os
 import shutil

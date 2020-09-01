@@ -1,6 +1,4 @@
 """Runner for integration tests."""
-from __future__ import print_function
-
 import logging
 import os
 

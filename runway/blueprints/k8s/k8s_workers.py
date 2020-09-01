@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Module with k8s nodegroup."""
-from __future__ import print_function
-
 import json
 import os
 
