@@ -356,8 +356,6 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
             cmd, cwd=package_root, stdout=requirements, stderr=subprocess.PIPE
         )
         if int(sys.version[0]) > 2:
-            # TODO remove pylint disable when dropping python2
-            # pylint: disable=unexpected-keyword-arg
             _stdout, stderr = pipenv_process.communicate(timeout=timeout)
         else:
             _stdout, stderr = pipenv_process.communicate()

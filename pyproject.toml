@@ -158,6 +158,7 @@ ignored-classes = [
     "runway.config.ConfigComponent",
     "runway.util.MutableMap"
 ]
+ignored-modules = ["distutils"]
 
 
 [tool.pytest.ini_options]

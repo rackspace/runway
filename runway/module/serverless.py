@@ -406,7 +406,7 @@ class ServerlessOptions(ModuleOptions):
         self._arg_parser = self._create_arg_parser()
         self.extend_serverless_yml = extend_serverless_yml
         cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(
-            list(args) if isinstance(args, list) else []  # python 2 compatible
+            list(args) if isinstance(args, list) else []
         )
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
         self.promotezip = promotezip

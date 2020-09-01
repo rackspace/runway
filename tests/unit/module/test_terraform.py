@@ -53,7 +53,7 @@ def test_update_env_vars_with_tf_var_values():
         "TF_VAR_map": '{ one = "two", three = "four" }',
     }
 
-    assert sorted(result) == sorted(expected)  # sorted() needed for python 2
+    assert result == expected
 
 
 class TestTerraform(object):  # pylint: disable=too-many-public-methods
@@ -948,7 +948,6 @@ class TestTerraformBackendConfig(object):
     )
     def test_resolve_ssm_params(self, caplog, kwargs, parameters, expected):
         """Test resolve_ssm_params."""
-        # this test is not compatable with python 2 due to how it handles dicts
         caplog.set_level("WARNING")
 
         client = boto3.client("ssm")
