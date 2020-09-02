@@ -82,7 +82,7 @@ def test_load_terrafrom_module(parser, expected, tmp_path):
     assert load_terrafrom_module(parser, tmp_path) == expected
 
 
-class TestTFEnvManager(object):
+class TestTFEnvManager:
     """Test runway.env_mgr.tfenv.TFEnvManager."""
 
     @pytest.mark.parametrize(

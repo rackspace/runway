@@ -2,7 +2,7 @@
 import operator
 
 
-class Status(object):
+class Status:
     """CFNgin status base class.
 
     Attributes:

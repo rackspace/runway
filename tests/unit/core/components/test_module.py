@@ -13,7 +13,7 @@ from runway.core.components._module import validate_environment
 MODULE = "runway.core.components._module"
 
 
-class TestModule(object):
+class TestModule:
     """Test runway.core.components._module.Module."""
 
     def test_init(self):

@@ -32,7 +32,7 @@ def get_parameter_request(name, decrypt=True):
     return {"Name": name, "WithDecryption": decrypt}
 
 
-class TestSsmLookup(object):
+class TestSsmLookup:
     """Test runway.lookups.handlers.ssm.SsmLookup."""
 
     def test_basic(self, cfngin_context, runway_context):

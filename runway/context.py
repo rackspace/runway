@@ -11,7 +11,7 @@ from .util import cached_property
 LOGGER = logging.getLogger(__name__)
 
 
-class Context(object):
+class Context:
     """Runway execution context."""
 
     def __init__(

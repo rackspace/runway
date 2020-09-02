@@ -36,7 +36,7 @@ def handle_bin_download_error(exc, name):
         raise exc
 
 
-class EnvManager(object):  # pylint: disable=too-few-public-methods
+class EnvManager:  # pylint: disable=too-few-public-methods
     """Base environment manager class.
 
     Attributes:

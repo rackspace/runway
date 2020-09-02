@@ -11,7 +11,7 @@ def get_raw_input(message):
     return input(message)
 
 
-class UI(object):
+class UI:
     """Used internally from terminal output in a multithreaded environment.
 
     Ensures that two threads don't write over each other while asking a user

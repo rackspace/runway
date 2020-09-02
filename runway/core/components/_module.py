@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class Module(object):
+class Module:
     """Runway module."""
 
     def __init__(

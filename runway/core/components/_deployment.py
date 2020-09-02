@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class Deployment(object):
+class Deployment:
     """Runway deployment."""
 
     def __init__(

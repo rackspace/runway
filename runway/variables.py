@@ -48,7 +48,7 @@ def resolve_variables(variables, context, provider):
         variable.resolve(context=context, provider=provider)
 
 
-class Variable(object):
+class Variable:
     """Represents a variable provided to a Runway directive."""
 
     def __init__(self, name, value, variable_type="cfngin"):
@@ -132,7 +132,7 @@ class Variable(object):
         return "Variable<{}={}>".format(self.name, self._raw_value)
 
 
-class VariableValue(object):
+class VariableValue:
     """Syntax tree base class to parse variable values."""
 
     @property

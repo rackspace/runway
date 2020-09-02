@@ -103,7 +103,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class LookupHandler(object):
+class LookupHandler:
     """Base class for lookup handlers."""
 
     @classmethod

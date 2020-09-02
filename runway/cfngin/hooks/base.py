@@ -14,7 +14,7 @@ from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 LOGGER = logging.getLogger(__name__)
 
 
-class Hook(object):
+class Hook:
     """Base class for hooks.
 
     Not all hooks need to be classes and not all classes need to be hooks.

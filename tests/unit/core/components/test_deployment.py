@@ -12,7 +12,7 @@ from runway.core.components import Deployment
 MODULE = "runway.core.components._deployment"
 
 
-class TestDeployment(object):
+class TestDeployment:
     """Test runway.core.components.deployment.Deployment."""
 
     def test_init(self, fx_deployments, monkeypatch, runway_context):

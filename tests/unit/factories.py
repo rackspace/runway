@@ -12,7 +12,7 @@ from runway.core.components import DeployEnvironment
 from runway.util import MutableMap
 
 
-class MockBoto3Session(object):
+class MockBoto3Session:
     """Mock class that acts like a boto3.session.
 
     Must be preloaded with stubbers.
@@ -229,7 +229,7 @@ class MockRunwayContext(RunwayContext):
         self._use_concurrent = value
 
 
-class YamlLoader(object):
+class YamlLoader:
     """Load YAML files from a directory."""
 
     def __init__(self, root, load_class=None, load_type="default"):

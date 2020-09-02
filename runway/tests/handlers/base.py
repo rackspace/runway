@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, List
 
 
-class TestHandler(object):
+class TestHandler:
     """Base class for test handlers."""
 
     @classmethod

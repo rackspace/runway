@@ -147,7 +147,6 @@ disable = [
     "missing-module-docstring",  # flake8 (pydocstyle) overlap
     "similarities",  # black overcomplicates this
     # TODO fix these - python 3 only code
-    "useless-object-inheritance",
     "raise-missing-from",
     "super-with-arguments",
 ]

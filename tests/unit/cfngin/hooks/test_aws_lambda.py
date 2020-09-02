@@ -571,7 +571,7 @@ class TestLambdaHooks(unittest.TestCase):
         )
 
 
-class TestDockerizePip(object):
+class TestDockerizePip:
     """Test dockerize_pip."""
 
     command = [
@@ -694,7 +694,7 @@ class TestDockerizePip(object):
         assert "node" in str(excinfo.value)
 
 
-class TestHandleRequirements(object):
+class TestHandleRequirements:
     """Test handle_requirements."""
 
     PIPFILE = "\n".join(
@@ -792,7 +792,7 @@ class TestHandleRequirements(object):
                 )
 
 
-class TestShouldUseDocker(object):
+class TestShouldUseDocker:
     """Test should_use_docker."""
 
     def test_bool_true(self):

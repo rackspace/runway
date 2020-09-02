@@ -42,7 +42,7 @@ def patch_config_subcomponents(monkeypatch):
     return mocks
 
 
-class TestConfig(object):
+class TestConfig:
     """Test runway.config.Config."""
 
     @patch(MODULE + ".SpecifierSet")
@@ -106,7 +106,7 @@ class TestConfig(object):
         assert config.runway_version == "success"
 
 
-class TestDeploymentDefinition(object):
+class TestDeploymentDefinition:
     """Test DeploymentDefinition."""
 
     ATTRS = [
@@ -183,7 +183,7 @@ class TestDeploymentDefinition(object):
         assert not deployment.parallel_regions, "not set in test config, should be None"
 
 
-class TestFutureDefinition(object):
+class TestFutureDefinition:
     """Test FutureDefinition."""
 
     def test_init(self, caplog):
@@ -213,7 +213,7 @@ class TestFutureDefinition(object):
         assert FutureDefinition(**config).enabled == expected
 
 
-class TestModuleDefinition(object):
+class TestModuleDefinition:
     """Test ModuleDefinition."""
 
     ATTRS = [
@@ -259,7 +259,7 @@ class TestModuleDefinition(object):
         assert module.tags == {}
 
 
-class TestTestDefinition(object):
+class TestTestDefinition:
     """Test TestDefinition."""
 
     ATTRS = ["_args", "name", "_required", "type"]
@@ -289,7 +289,7 @@ class TestTestDefinition(object):
         assert test.type == "script"
 
 
-class TestVariablesDefinition(object):
+class TestVariablesDefinition:
     """Test VariablesDefinition."""
 
     def test_load(self, yaml_fixtures):

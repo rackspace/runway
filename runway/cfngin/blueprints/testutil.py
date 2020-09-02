@@ -50,7 +50,7 @@ class BlueprintTestCase(unittest.TestCase):
         )
 
 
-class YamlDirTestGenerator(object):
+class YamlDirTestGenerator:
     """Generate blueprint tests from yaml config files.
 
     This class creates blueprint tests from yaml files with a syntax similar

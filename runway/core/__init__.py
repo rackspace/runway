@@ -22,7 +22,7 @@ LOGGER = _logging.getLogger(__name__)
 __all__ = ["Runway", "components", "providers"]
 
 
-class Runway(object):
+class Runway:
     """Runway's core functionality."""
 
     def __init__(self, config, context):

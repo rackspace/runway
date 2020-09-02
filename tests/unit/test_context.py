@@ -17,7 +17,7 @@ TEST_CREDENTIALS = {
 }
 
 
-class TestContext(object):
+class TestContext:
     """Test Context class."""
 
     def test_boto3_credentials(self, monkeypatch):

@@ -94,7 +94,7 @@ def warn_on_boto_env_vars(env_vars):
         )
 
 
-class RunwayModule(object):
+class RunwayModule:
     """Base class for Runway modules."""
 
     def __init__(self, context, path, options=None):

@@ -20,7 +20,7 @@ except ImportError:  # cov: ignore
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class DeployEnvironment(object):
+class DeployEnvironment:
     """Runway deploy environment."""
 
     def __init__(

@@ -56,7 +56,7 @@ def test_update_env_vars_with_tf_var_values():
     assert result == expected
 
 
-class TestTerraform(object):  # pylint: disable=too-many-public-methods
+class TestTerraform:  # pylint: disable=too-many-public-methods
     """Test runway.module.terraform.Terraform."""
 
     def test_auto_tfvars(self, caplog, monkeypatch, runway_context, tmp_path):
@@ -685,7 +685,7 @@ class TestTerraform(object):  # pylint: disable=too-many-public-methods
         obj.terraform_workspace_new.assert_called_once_with("test")
 
 
-class TestTerraformOptions(object):
+class TestTerraformOptions:
     """Test runway.module.terraform.TerraformOptions."""
 
     @pytest.mark.parametrize(
@@ -833,7 +833,7 @@ class TestTerraformOptions(object):
             )
 
 
-class TestTerraformBackendConfig(object):
+class TestTerraformBackendConfig:
     """Test runway.module.terraform.TerraformBackendConfig."""
 
     def test_get_full_configuration(self, runway_context, tmp_path):

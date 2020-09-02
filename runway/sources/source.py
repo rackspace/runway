@@ -11,7 +11,7 @@ from typing import Any
 LOGGER = logging.getLogger(__name__)
 
 
-class Source(object):
+class Source:
     """Abstract parent class for a 'Source' type object.
 
     The Source parent class allows us to specify remote resources

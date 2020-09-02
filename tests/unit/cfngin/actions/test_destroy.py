@@ -13,7 +13,7 @@ from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
 
-class MockStack(object):  # pylint: disable=too-few-public-methods
+class MockStack:  # pylint: disable=too-few-public-methods
     """Mock our local CFNgin stack and an AWS provider stack."""
 
     def __init__(self, name, tags=None, **kwargs):

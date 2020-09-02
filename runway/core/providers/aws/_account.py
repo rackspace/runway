@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from ....context import Context
 
 
-class AccountDetails(object):
+class AccountDetails:
     """AWS account details."""
 
     def __init__(self, context):

@@ -10,7 +10,7 @@ from .util import load_object_from_string
 LOGGER = logging.getLogger(__name__)
 
 
-class RunwayModuleType(object):  # noqa pylint: disable=too-few-public-methods
+class RunwayModuleType:  # noqa pylint: disable=too-few-public-methods
     """Runway configuration ``type`` settings object.
 
     The ``type`` property of a Runway configuration can be

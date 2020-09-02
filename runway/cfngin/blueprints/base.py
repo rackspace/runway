@@ -35,7 +35,7 @@ PARAMETER_PROPERTIES = {
 }
 
 
-class CFNParameter(object):
+class CFNParameter:
     """Wrapper around a value to indicate a CloudFormation Parameter."""
 
     def __init__(self, name, value):
@@ -286,7 +286,7 @@ def parse_user_data(variables, raw_user_data, blueprint_name):
     return res
 
 
-class Blueprint(object):
+class Blueprint:
     """Base implementation for rendering a troposphere template."""
 
     def __init__(self, name, context, mappings=None, description=None):

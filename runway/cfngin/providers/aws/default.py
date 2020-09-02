@@ -514,7 +514,7 @@ def generate_stack_policy_args(stack_policy=None):
     return args
 
 
-class ProviderBuilder(object):  # pylint: disable=too-few-public-methods
+class ProviderBuilder:  # pylint: disable=too-few-public-methods
     """Implements a Memorized ProviderBuilder for the AWS provider."""
 
     def __init__(self, region=None, **kwargs):

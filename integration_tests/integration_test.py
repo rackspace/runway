@@ -12,7 +12,7 @@ from send2trash import send2trash
 from runway.util import change_dir
 
 
-class IntegrationTest(object):
+class IntegrationTest:
     """Base class for Integration Tests.
 
     Attributes:

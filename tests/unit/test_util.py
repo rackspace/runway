@@ -30,7 +30,7 @@ VALUE = {
 }
 
 
-class TestJsonEncoder(object):
+class TestJsonEncoder:
     """Test runway.util.JsonEncoder."""
 
     @pytest.mark.parametrize(
@@ -117,7 +117,7 @@ class TestMutableMap:
         ), "default should be ignored"
 
 
-class TestSafeHaven(object):
+class TestSafeHaven:
     """Test SafeHaven context manager."""
 
     TEST_PARAMS = [

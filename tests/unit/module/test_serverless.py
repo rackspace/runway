@@ -10,7 +10,7 @@ from runway.module.serverless import Serverless, ServerlessOptions, gen_sls_conf
 
 
 @pytest.mark.usefixtures("patch_module_npm")
-class TestServerless(object):
+class TestServerless:
     """Test runway.module.serverless.Serverless."""
 
     def test_cli_args(self, runway_context):
@@ -392,7 +392,7 @@ class TestServerless(object):
             assert not obj.sls_remove()
 
 
-class TestServerlessOptions(object):
+class TestServerlessOptions:
     """Test runway.module.serverless.ServerlessOptions."""
 
     @pytest.mark.parametrize(

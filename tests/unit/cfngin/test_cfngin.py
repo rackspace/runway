@@ -35,7 +35,7 @@ def patch_safehaven(monkeypatch):
     return mock_haven
 
 
-class TestCFNgin(object):
+class TestCFNgin:
     """Test runway.cfngin.CFNgin."""
 
     @staticmethod

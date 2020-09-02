@@ -35,7 +35,7 @@ LOG_LEVEL_STYLES = {
 }
 
 
-class LogSettings(object):
+class LogSettings:
     """CLI log settings."""
 
     ENV = {

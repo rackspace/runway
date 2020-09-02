@@ -61,7 +61,7 @@ def merge_graphs(graph1, graph2):
     return Graph.from_steps(steps)
 
 
-class Step(object):
+class Step:
     """State machine for executing generic actions related to stacks.
 
     Attributes:
@@ -337,7 +337,7 @@ class Step(object):
         return self.stack.name
 
 
-class Graph(object):
+class Graph:
     """Graph represents a graph of steps.
 
     The :class:`Graph` helps organize the steps needed to execute a particular
@@ -598,7 +598,7 @@ class Graph(object):
         return self.dumps()
 
 
-class Plan(object):
+class Plan:
     """A convenience class for working on a Graph.
 
     Attributes:

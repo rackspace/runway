@@ -19,7 +19,7 @@ TEST_CREDENTIALS = {
 }
 
 
-class TestDeployEnvironment(object):
+class TestDeployEnvironment:
     """Test runway.core.components.DeployEnvironment."""
 
     def test_init(self, cd_tmp_path):

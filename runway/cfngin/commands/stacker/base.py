@@ -73,7 +73,7 @@ def environment_file(input_file):
         return parse_environment(file_.read())
 
 
-class BaseCommand(object):
+class BaseCommand:
     """Base class for all CFNgin subcommands.
 
     The way argparse handles common arguments that should be passed to the

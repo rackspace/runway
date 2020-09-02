@@ -16,7 +16,7 @@ def does_not_raise():
     yield
 
 
-class TestRunwayModuleNpm(object):
+class TestRunwayModuleNpm:
     """Test runway.module.RunwayModuleNpm."""
 
     @patch("runway.module.which")
@@ -157,7 +157,7 @@ class TestRunwayModuleNpm(object):
         assert not obj.package_json_missing()
 
 
-class TestModuleOptions(object):
+class TestModuleOptions:
     """Test runway.module.ModuleOptions."""
 
     @pytest.mark.parametrize(
