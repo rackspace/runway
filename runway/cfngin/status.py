@@ -2,7 +2,7 @@
 import operator
 
 
-class Status(object):
+class Status:
     """CFNgin status base class.
 
     Attributes:
@@ -108,7 +108,7 @@ class CompleteStatus(Status):  # pylint: disable=too-few-public-methods
             reason (Optional[str]): Reason for the status.
 
         """
-        super(CompleteStatus, self).__init__("complete", 2, reason)
+        super().__init__("complete", 2, reason)
 
 
 class FailedStatus(Status):  # pylint: disable=too-few-public-methods
@@ -121,7 +121,7 @@ class FailedStatus(Status):  # pylint: disable=too-few-public-methods
             reason (Optional[str]): Reason for the status.
 
         """
-        super(FailedStatus, self).__init__("failed", 4, reason)
+        super().__init__("failed", 4, reason)
 
 
 class PendingStatus(Status):  # pylint: disable=too-few-public-methods
@@ -134,7 +134,7 @@ class PendingStatus(Status):  # pylint: disable=too-few-public-methods
             reason (Optional[str]): Reason for the status.
 
         """
-        super(PendingStatus, self).__init__("pending", 0, reason)
+        super().__init__("pending", 0, reason)
 
 
 class SkippedStatus(Status):  # pylint: disable=too-few-public-methods
@@ -147,7 +147,7 @@ class SkippedStatus(Status):  # pylint: disable=too-few-public-methods
             reason (Optional[str]): Reason for the status.
 
         """
-        super(SkippedStatus, self).__init__("skipped", 3, reason)
+        super().__init__("skipped", 3, reason)
 
 
 class SubmittedStatus(Status):  # pylint: disable=too-few-public-methods
@@ -160,7 +160,7 @@ class SubmittedStatus(Status):  # pylint: disable=too-few-public-methods
             reason (Optional[str]): Reason for the status.
 
         """
-        super(SubmittedStatus, self).__init__("submitted", 1, reason)
+        super().__init__("submitted", 1, reason)
 
 
 class DidNotChangeStatus(SkippedStatus):  # pylint: disable=too-few-public-methods

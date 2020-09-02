@@ -1,13 +1,10 @@
-"""'Git' type Path Source."""
-from __future__ import absolute_import
-
+"""'Git type Path Source."""
 import logging
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
-from typing import Dict, List, Optional, Union  # noqa pylint: disable=W
+from typing import Any, Dict, List, Optional
 
 from .source import Source
 
@@ -22,18 +19,17 @@ class Git(Source):
 
     """
 
-    # Added for documentation purposes
     def __init__(self, uri="", location="", options=None, **kwargs):
-        # type(Dict[str, Union[str, Dict[str, str]]]) -> Source
+        # type: (str, str, Optional[Dict[str, str]], Any) -> None
         """Git Path Source.
 
         Keyword Args:
             uri (str): The uniform resource identifier that targets the remote git
                 repository
-            location (string): The relative location to the root of the
+            location (str): The relative location to the root of the
                 repository where the module resides. Leaving this as an empty
                 string, ``/``, or ``./`` will have runway look in the root folder.
-            options (Union(None, Dict[str, str])): A reference can be passed along via the
+            options (Optional[Dict[str, str]]): A reference can be passed along via the
                 options so that a specific version of the repository is cloned.
                 **commit**, **tag**, **branch**  are all valid keys with
                 respective output
@@ -46,7 +42,7 @@ class Git(Source):
         if not self.options:
             self.options = {}
 
-        super(Git, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def fetch(self):
         # type: () -> str
@@ -124,7 +120,7 @@ class Git(Source):
             ref = self.__git_ls_remote(
                 self.__determine_git_ls_remote_ref()
             )  # ty pe: str
-        if sys.version_info[0] > 2 and isinstance(ref, bytes):
+        if isinstance(ref, bytes):
             return ref.decode()
         return ref
 

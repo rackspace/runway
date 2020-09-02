@@ -1,10 +1,4 @@
-# encoding: utf-8
-"""Tests for runway.cfngin.lookups.handlers.file.
-
-.. note: ``encoding: utf-8`` is required for python2 support due to a character
-         in a string in ``test_yaml_codec_raw``.
-
-"""
+"""Tests for runway.cfngin.lookups.handlers.file."""
 # pylint: disable=no-self-use
 import base64
 import json

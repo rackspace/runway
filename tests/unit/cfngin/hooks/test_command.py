@@ -13,7 +13,7 @@ from runway.cfngin.hooks.command import run_command
 from ..factories import mock_provider
 
 
-class MockProcess(object):
+class MockProcess:
     """Mock process."""
 
     def __init__(self, returncode=0, stdout="", stderr=""):

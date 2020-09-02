@@ -39,7 +39,7 @@ ECR_REPO_FQN_TEMPLATE = (
 )
 
 
-class BaseModel(object):
+class BaseModel:
     """Base model."""
 
     def dict(self):  # type: () -> Dict[str, Any]

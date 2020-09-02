@@ -3,7 +3,7 @@
 from runway.core.providers.aws import AccountDetails
 
 
-class TestAccountDetails(object):
+class TestAccountDetails:
     """Test runway.core.providers.aws._account.AccountDetails."""
 
     def test_aliases(self, runway_context):

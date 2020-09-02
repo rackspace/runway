@@ -30,7 +30,7 @@ VALUE = {
 }
 
 
-class TestJsonEncoder(object):
+class TestJsonEncoder:
     """Test runway.util.JsonEncoder."""
 
     @pytest.mark.parametrize(
@@ -117,7 +117,7 @@ class TestMutableMap:
         ), "default should be ignored"
 
 
-class TestSafeHaven(object):
+class TestSafeHaven:
     """Test SafeHaven context manager."""
 
     TEST_PARAMS = [
@@ -317,10 +317,10 @@ def test_load_object_from_string():
         assert load_object_from_string(obj_path, try_reload=True) == "us-west-2"
 
 
-@patch("runway.util.six")
-def test_load_object_from_string_reload_conditions(mock_six):
+def test_load_object_from_string_reload_conditions(monkeypatch):
     """Test load_object_from_string reload conditions."""
-    mock_six.moves.reload_module.return_value = MagicMock()
+    mock_reload = MagicMock()
+    monkeypatch.setattr("runway.util.importlib.reload", mock_reload)
     builtin_test = "sys.version_info"
     mock_hook = "tests.unit.fixtures.mock_hooks.GLOBAL_VALUE"
 
@@ -330,13 +330,13 @@ def test_load_object_from_string_reload_conditions(mock_six):
         pass
 
     load_object_from_string(builtin_test, try_reload=False)
-    mock_six.moves.reload_module.assert_not_called()
+    mock_reload.assert_not_called()
 
     load_object_from_string(builtin_test, try_reload=True)
-    mock_six.moves.reload_module.assert_not_called()
+    mock_reload.assert_not_called()
 
     load_object_from_string(mock_hook, try_reload=True)
-    mock_six.moves.reload_module.assert_not_called()
+    mock_reload.assert_not_called()
 
     load_object_from_string(mock_hook, try_reload=True)
-    mock_six.moves.reload_module.assert_called_once()
+    mock_reload.assert_called_once()

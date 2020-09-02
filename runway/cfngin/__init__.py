@@ -1,5 +1,5 @@
 """Import modules."""
-from .cfngin import CFNgin  # noqa: F401
+from .cfngin import CFNgin
 
 __all__ = ["CFNgin"]
 

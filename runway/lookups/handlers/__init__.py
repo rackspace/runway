@@ -1,6 +1,4 @@
 """Import classes."""
-from . import cfn  # noqa: F401
-from . import ecr  # noqa: F401
-from . import env  # noqa: F401
-from . import ssm  # noqa: F401
-from . import var  # noqa: F401
+from . import cfn, ecr, env, ssm, var
+
+__all__ = ["cfn", "ecr", "env", "ssm", "var"]

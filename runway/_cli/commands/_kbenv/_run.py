@@ -2,7 +2,7 @@
 # docs: file://./../../../../docs/source/commands.rst
 import logging
 import subprocess
-from typing import Any, Tuple  # noqa pylint: disable=unused-import
+from typing import Any, Tuple
 
 import click
 

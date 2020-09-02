@@ -84,7 +84,7 @@ def rsa_public_key_to_pem(modulus_b64, exponent_b64):
     return pem
 
 
-class JwksClient(object):
+class JwksClient:
     """Client responsible for retrieval of JWKS signing keys."""
 
     def __init__(self, options=None):
