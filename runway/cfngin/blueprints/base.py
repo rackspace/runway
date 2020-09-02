@@ -4,7 +4,6 @@ import hashlib
 import logging
 import string
 
-from six import string_types
 from troposphere import Output, Parameter, Ref, Template
 
 from runway.variables import Variable
@@ -36,7 +35,7 @@ PARAMETER_PROPERTIES = {
 }
 
 
-class CFNParameter(object):
+class CFNParameter:
     """Wrapper around a value to indicate a CloudFormation Parameter."""
 
     def __init__(self, name, value):
@@ -48,7 +47,7 @@ class CFNParameter(object):
                 Parameter.
 
         """
-        acceptable_types = [string_types, bool, list, int]
+        acceptable_types = [str, bool, list, int]
         acceptable = False
         for acceptable_type in acceptable_types:
             if isinstance(value, acceptable_type):
@@ -287,7 +286,7 @@ def parse_user_data(variables, raw_user_data, blueprint_name):
     return res
 
 
-class Blueprint(object):
+class Blueprint:
     """Base implementation for rendering a troposphere template."""
 
     def __init__(self, name, context, mappings=None, description=None):

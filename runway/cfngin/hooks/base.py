@@ -1,7 +1,7 @@
 """Base class for CFNgin hooks."""
 import logging
+from collections import UserDict
 
-from six.moves import UserDict
 from troposphere import Tags
 
 from runway.util import MutableMap
@@ -14,7 +14,7 @@ from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 LOGGER = logging.getLogger(__name__)
 
 
-class Hook(object):
+class Hook:
     """Base class for hooks.
 
     Not all hooks need to be classes and not all classes need to be hooks.
@@ -240,7 +240,7 @@ class HookBuildAction(build.Action):
                 The provider instance.
 
         """
-        super(HookBuildAction, self).__init__(context)
+        super().__init__(context)
         self._provider = provider
 
     @property
@@ -267,8 +267,7 @@ class HookDestroyAction(HookBuildAction):
         return self._destroy_stack(**kwargs)
 
 
-# TODO remove multiple inheritance when droping python 2 support
-class HookStackDefinition(UserDict, object):
+class HookStackDefinition(UserDict):
     """Stack definition for use in hooks to avoid cyclic imports."""
 
     def __init__(self, name, **kwargs):
@@ -292,7 +291,7 @@ class HookStackDefinition(UserDict, object):
             "variables": None,
         }
         values.update(kwargs)
-        super(HookStackDefinition, self).__init__(**values)
+        super().__init__(**values)
 
     def __getattr__(self, key):
         """Implement dot notation."""

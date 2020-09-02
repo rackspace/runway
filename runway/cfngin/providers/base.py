@@ -7,7 +7,7 @@ def not_implemented(method):
     raise NotImplementedError("Provider does not support '%s' method." % method)
 
 
-class BaseProviderBuilder(object):
+class BaseProviderBuilder:
     """ProviderBuilder base class."""
 
     def build(self, region=None):
@@ -15,7 +15,7 @@ class BaseProviderBuilder(object):
         not_implemented("build")
 
 
-class BaseProvider(object):
+class BaseProvider:
     """Provider base class."""
 
     def get_stack(self, stack_name, *args, **kwargs):
@@ -47,7 +47,7 @@ class BaseProvider(object):
         return self.get_outputs(stack)[output]
 
 
-class Template(object):
+class Template:
     """CloudFormation stack template, which could be optionally uploaded to s3.
 
     Presence of the url attribute indicates that the template was uploaded to

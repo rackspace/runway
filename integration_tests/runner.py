@@ -1,6 +1,4 @@
 """Runner for integration tests."""
-from __future__ import print_function
-
 import logging
 import os
 
@@ -8,7 +6,7 @@ from .integration_test import IntegrationTest
 from .util import execute_tests, import_tests
 
 
-class Runner(object):
+class Runner:
     """Runner for all integration tests."""
 
     def __init__(self, test_to_run=None, use_abs=False):

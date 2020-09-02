@@ -12,7 +12,7 @@ from send2trash import send2trash
 from runway.util import change_dir
 
 
-class IntegrationTest(object):
+class IntegrationTest:
     """Base class for Integration Tests.
 
     Attributes:
@@ -67,9 +67,7 @@ class IntegrationTest(object):
 
     def copy_fixtures(self):
         """Copy fixtures to the root of the tests dir."""
-        self.logger.info(
-            "Fixtures defined for tests: %s", str(self.REQUIRED_FIXTURE_FILES)
-        )
+        self.logger.info("Fixtures defined for tests: %s", self.REQUIRED_FIXTURE_FILES)
         for fixture in self.REQUIRED_FIXTURE_FILES:
             src = os.path.join(self.fixture_dir, fixture)
             dest = os.path.join(self.working_dir, fixture)
@@ -118,7 +116,7 @@ class IntegrationTest(object):
             for tag in tags:
                 cmd.extend(["--tag", tag])
         cmd.extend(args)
-        self.logger.info("Running command: %s", str(cmd))
+        self.logger.info("Running command: %s", cmd)
         with change_dir(self.working_dir):
             cmd_process = subprocess.Popen(
                 cmd,

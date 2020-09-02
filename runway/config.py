@@ -3,34 +3,19 @@
 import logging
 import os
 import sys
-from distutils.util import strtobool  # pylint: disable=E
-from typing import (  # pylint: disable=unused-import
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Union,
-)
+from distutils.util import strtobool
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
-from six import string_types
 
 from ._logging import PrefixAdaptor
 from .util import MutableMap, cached_property
 from .variables import Variable
 
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
-
-# python2 supported pylint sees this is cyclic even though its only for type checking
-# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from .context import Context  # noqa: F401 pylint: disable=unused-import
+    from .context import Context
 
 LOGGER = logging.getLogger(__name__)
 NoneType = type(None)
@@ -142,7 +127,7 @@ class ConfigComponent(MutableMap):
     def __getitem__(self, key):
         # type: (str) -> Any
         """Implement evaluation of self[key]."""
-        if not isinstance(key, string_types):
+        if not isinstance(key, str):
             raise TypeError("indices must be a string")
         result = getattr(self, key, getattr(self, key.replace("-", "_")))
 
@@ -530,7 +515,7 @@ class FutureDefinition(MutableMap):
 
         """
         if isinstance(value, bool):
-            return super(FutureDefinition, self).__setattr__(key, value)
+            return super().__setattr__(key, value)
         raise TypeError(
             'unsupported type {} for future.{}; must be of type "bool"'.format(
                 type(value), key
@@ -819,7 +804,7 @@ class DeploymentDefinition(ConfigComponent):
         # type: () -> Union[Dict[Any, Any], str]
         """Access the value of an attribute that supports variables."""
         value = self._account_alias.value
-        if isinstance(value, (dict, string_types)):
+        if isinstance(value, (dict, str)):
             return value
         raise ValueError(
             "{}.account_alias is of type {}; expected type of dict or str".format(
@@ -832,7 +817,7 @@ class DeploymentDefinition(ConfigComponent):
         # type: () -> Union[Dict[Any, Any], str]
         """Access the value of an attribute that supports variables."""
         value = self._account_id.value
-        if isinstance(value, (dict, string_types)):
+        if isinstance(value, (dict, str)):
             return value
         if isinstance(value, int):
             return str(value)
@@ -847,7 +832,7 @@ class DeploymentDefinition(ConfigComponent):
         # type: () -> Union[Dict[Any, Any], str]
         """Access the value of an attribute that supports variables."""
         value = self._assume_role.value
-        if isinstance(value, (dict, string_types)):
+        if isinstance(value, (dict, str)):
             return value
         raise ValueError(
             "{}.assume_role is of type {}; expected type of dict or str".format(
@@ -1117,7 +1102,7 @@ class VariablesDefinition(MutableMap):
         """
         self._file_path = file_path
         self._sys_path = sys_path
-        super(VariablesDefinition, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def find_file(cls, file_path=None, sys_path=None):
@@ -1374,7 +1359,7 @@ class Config(ConfigComponent):
 
         LOGGER.error(
             "Runway config file was not found. Looking for one of %s in %s",
-            str(cls.accepted_names),
+            cls.accepted_names,
             config_dir,
         )
         sys.exit(1)

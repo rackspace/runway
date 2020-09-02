@@ -9,7 +9,7 @@ from runway.lookups.handlers.base import LookupHandler
 from runway.util import MutableMap
 
 
-class TestLookupHandler(object):
+class TestLookupHandler:
     """Tests for LookupHandler."""
 
     def test_abstract_handle(self):

@@ -19,7 +19,7 @@ class ColorFormatter(logging.Formatter):
         """Format log message."""
         if "color" not in record.__dict__:
             record.__dict__["color"] = 37
-        msg = super(ColorFormatter, self).format(record)
+        msg = super().format(record)
         return msg
 
 

@@ -1,18 +1,12 @@
 """``runway init`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
-import six
 
 from .. import options
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 RUNWAY_YML = """---
@@ -44,8 +38,7 @@ def init(ctx, **_):
         )
         ctx.exit(1)
 
-    # TODO remove use of six when dropping python 2
-    runway_yml.write_text(six.u(RUNWAY_YML))
+    runway_yml.write_text(RUNWAY_YML)
     LOGGER.success("runway.yml generated")
     LOGGER.notice(
         "See addition getting started information at "

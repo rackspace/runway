@@ -8,7 +8,7 @@ CONTEXT = MutableMap(**{"env_vars": VALUES})
 VARIABLES = MutableMap(**VALUES)
 
 
-class TestCommonLookupFunctionality(object):
+class TestCommonLookupFunctionality:
     """Test common lookup functionally.
 
     All lookup handles should be able to pass these tests. Handling must

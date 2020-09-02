@@ -1,8 +1,6 @@
 """Test runway.module.serverless."""
 # pylint: disable=no-self-use,unused-argument
 import logging
-import subprocess
-import sys
 
 import pytest
 import yaml
@@ -10,11 +8,9 @@ from mock import ANY, MagicMock, patch
 
 from runway.module.serverless import Serverless, ServerlessOptions, gen_sls_config_files
 
-from ..factories import MockProcess
-
 
 @pytest.mark.usefixtures("patch_module_npm")
-class TestServerless(object):
+class TestServerless:
     """Test runway.module.serverless.Serverless."""
 
     def test_cli_args(self, runway_context):
@@ -170,10 +166,7 @@ class TestServerless(object):
 
         caplog.clear()
         monkeypatch.setattr(
-            "{}.Path.unlink".format(
-                "pathlib" if sys.version_info.major == 3 else "pathlib2"
-            ),
-            MagicMock(side_effect=OSError("test OSError")),
+            "pathlib.Path.unlink", MagicMock(side_effect=OSError("test OSError"))
         )
         assert not obj.extend_serverless_yml(mock_func)
         assert (
@@ -366,11 +359,10 @@ class TestServerless(object):
             "print", args_list=["--format", "yaml", "--path", "something.status"]
         )
 
-    def test_sls_remove(self, monkeypatch, runway_context):
+    def test_sls_remove(self, fake_process, monkeypatch, runway_context):
         """Test sls_remove."""
         # pylint: disable=no-member
-        # TODO use pytest-subprocess for when dropping python 2
-        sls_error = [
+        sls_error_01 = [
             "  Serverless Error ---------------------------------------",
             "",
             "  Stack 'test-stack' does not exist",
@@ -380,8 +372,11 @@ class TestServerless(object):
             "     Bugs:          github.com/serverless/serverless/issues",
             "     Issues:        forum.serverless.com",
         ]
-        mock_popen = MagicMock(return_value=MockProcess(returncode=0, stdout="success"))
-        monkeypatch.setattr("subprocess.Popen", mock_popen)
+        sls_error_02 = sls_error_01.copy()
+        sls_error_02[2] = "  Some other error"
+        fake_process.register_subprocess("remove", stdout="success")
+        fake_process.register_subprocess("remove", stdout=sls_error_01, returncode=1)
+        fake_process.register_subprocess("remove", stdout=sls_error_02, returncode=1)
         monkeypatch.setattr(Serverless, "gen_cmd", MagicMock(return_value=["remove"]))
         monkeypatch.setattr(Serverless, "npm_install", MagicMock())
 
@@ -389,31 +384,15 @@ class TestServerless(object):
         assert not obj.sls_remove()
         obj.npm_install.assert_called_once()
         obj.gen_cmd.assert_called_once_with("remove")
-        mock_popen.assert_called_once_with(
-            ["remove"],
-            bufsize=1,
-            env=runway_context.env_vars,
-            stdout=subprocess.PIPE,
-            universal_newlines=True,
-        )
-        mock_popen.return_value.wait.assert_called_once()
 
-        mock_popen = MagicMock(return_value=MockProcess(returncode=1, stdout=sls_error))
-
-        monkeypatch.setattr("subprocess.Popen", mock_popen)
         assert not obj.sls_remove(skip_install=True)
         obj.npm_install.assert_called_once()
-        mock_popen.return_value.wait.assert_called_once()
 
-        sls_error[2] = "  Some other error"
-        mock_popen = MagicMock(return_value=MockProcess(returncode=1, stdout=sls_error))
-        monkeypatch.setattr("subprocess.Popen", mock_popen)
         with pytest.raises(SystemExit):
             assert not obj.sls_remove()
-        mock_popen.return_value.wait.assert_called_once()
 
 
-class TestServerlessOptions(object):
+class TestServerlessOptions:
     """Test runway.module.serverless.ServerlessOptions."""
 
     @pytest.mark.parametrize(

@@ -20,7 +20,7 @@ class ImageNotFound(Exception):
         message = ("Unable to find ec2 image with search string: {}").format(
             search_string
         )
-        super(ImageNotFound, self).__init__(message)
+        super().__init__(message)
 
 
 class AmiLookup(LookupHandler):

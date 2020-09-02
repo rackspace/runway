@@ -16,7 +16,7 @@ class Diff(BaseCommand):
 
     def add_arguments(self, parser):
         """Add arguments."""
-        super(Diff, self).add_arguments(parser)
+        super().add_arguments(parser)
         self._add_argument_stacks(parser)
         parser.add_argument(
             "--force",
@@ -31,7 +31,7 @@ class Diff(BaseCommand):
 
     def run(self, options):
         """Run the command."""
-        super(Diff, self).run(options)
+        super().run(options)
         action = diff.Action(options.context, provider_builder=options.provider_builder)
         action.execute()
 
