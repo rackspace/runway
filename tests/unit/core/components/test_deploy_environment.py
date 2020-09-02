@@ -2,18 +2,13 @@
 # pylint: disable=no-self-use,protected-access
 import logging
 import os
-import sys
+from pathlib import Path
 
 import pytest
 from git.exc import InvalidGitRepositoryError
 from mock import MagicMock, patch
 
 from runway.core.components import DeployEnvironment
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 MODULE = "runway.core.components._deploy_environment"
 
@@ -24,7 +19,7 @@ TEST_CREDENTIALS = {
 }
 
 
-class TestDeployEnvironment(object):
+class TestDeployEnvironment:
     """Test runway.core.components.DeployEnvironment."""
 
     def test_init(self, cd_tmp_path):
@@ -194,30 +189,30 @@ class TestDeployEnvironment(object):
         assert obj.max_concurrent_cfngin_stacks == 5
         assert obj.vars["RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS"] == 5
 
-    @patch(MODULE + ".multiprocessing")
-    def test_max_concurrent_modules(self, mock_proc):
+    def test_max_concurrent_modules(self, monkeypatch):
         """Test max_concurrent_modules."""
-        mock_proc.cpu_count.return_value = 4
+        mock_cpu_count = MagicMock(return_value=4)
+        monkeypatch.setattr(MODULE + ".os.cpu_count", mock_cpu_count)
         obj = DeployEnvironment(environ={})
 
         assert obj.max_concurrent_modules == 4
 
-        mock_proc.cpu_count.return_value = 62
+        mock_cpu_count.return_value = 62
         assert obj.max_concurrent_modules == 61
 
         obj.max_concurrent_modules = 12
         assert obj.max_concurrent_modules == 12
         assert obj.vars["RUNWAY_MAX_CONCURRENT_MODULES"] == 12
 
-    @patch(MODULE + ".multiprocessing")
-    def test_max_concurrent_regions(self, mock_proc):
+    def test_max_concurrent_regions(self, monkeypatch):
         """Test max_concurrent_regions."""
-        mock_proc.cpu_count.return_value = 4
+        mock_cpu_count = MagicMock(return_value=4)
+        monkeypatch.setattr(MODULE + ".os.cpu_count", mock_cpu_count)
         obj = DeployEnvironment(environ={})
 
         assert obj.max_concurrent_regions == 4
 
-        mock_proc.cpu_count.return_value = 62
+        mock_cpu_count.return_value = 62
         assert obj.max_concurrent_regions == 61
 
         obj.max_concurrent_regions = 12

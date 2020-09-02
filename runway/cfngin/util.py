@@ -104,7 +104,7 @@ def get_or_create_hosted_zone(client, zone_name):
     return parse_zone_id(response["HostedZone"]["Id"])
 
 
-class SOARecordText(object):  # pylint: disable=too-few-public-methods
+class SOARecordText:  # pylint: disable=too-few-public-methods
     """Represents the actual body of an SOARecord."""
 
     def __init__(self, record_text):
@@ -132,7 +132,7 @@ class SOARecordText(object):  # pylint: disable=too-few-public-methods
         )
 
 
-class SOARecord(object):  # pylint: disable=too-few-public-methods
+class SOARecord:  # pylint: disable=too-few-public-methods
     """Represents an SOA record."""
 
     def __init__(self, record):
@@ -504,7 +504,7 @@ def parse_cloudformation_template(template):
     return yaml_parse(template)
 
 
-class Extractor(object):
+class Extractor:
     """Base class for extractors."""
 
     def __init__(self, archive=None):
@@ -573,7 +573,7 @@ class ZipExtractor(Extractor):
         return ".zip"
 
 
-class SourceProcessor(object):
+class SourceProcessor:
     """Makes remote python package sources available in current environment."""
 
     ISO8601_FORMAT = "%Y%m%dT%H%M%SZ"
@@ -885,7 +885,7 @@ class SourceProcessor(object):
             ref = self.git_ls_remote(
                 config["uri"], self.determine_git_ls_remote_ref(config)
             )
-        if sys.version_info[0] > 2 and isinstance(ref, bytes):
+        if isinstance(ref, bytes):
             return ref.decode()
         return ref
 

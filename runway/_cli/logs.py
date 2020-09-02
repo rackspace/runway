@@ -35,7 +35,7 @@ LOG_LEVEL_STYLES = {
 }
 
 
-class LogSettings(object):
+class LogSettings:
     """CLI log settings."""
 
     ENV = {
@@ -140,19 +140,16 @@ class LogSettings(object):
         return LogLevels.INFO
 
 
-# TODO implement propper keyword-only args when dropping python 2
-def setup_logging(*_, **kwargs):
+def setup_logging(*, debug=0, no_color=False, verbose=False):
     """Configure log settings for Runway CLI.
 
     Keyword Args:
         debug (int): Debug level (0-2).
+        no_color (bool): Whether to use colorized logs.
+        verbose (bool): Use verbose logging.
 
     """
-    settings = LogSettings(
-        debug=kwargs.pop("debug", 0),
-        no_color=kwargs.pop("no_color", False),
-        verbose=kwargs.pop("verbose", False),
-    )
+    settings = LogSettings(debug=debug, no_color=no_color, verbose=verbose)
 
     coloredlogs.install(settings.log_level, logger=LOGGER, **settings.coloredlogs)
     LOGGER.debug("runway log level: %s", LOGGER.getEffectiveLevel())

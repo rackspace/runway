@@ -9,7 +9,7 @@ from runway.util import MutableMap
 from ..factories import MockRunwayContext
 
 
-class TestCloudFormation(object):
+class TestCloudFormation:
     """Test runway.module.cloudformation.CloudFormation."""
 
     @property

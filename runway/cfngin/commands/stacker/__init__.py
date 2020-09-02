@@ -63,7 +63,7 @@ class Stacker(BaseCommand):
             **options.get_context_kwargs(options)
         )
 
-        super(Stacker, self).configure(options)
+        super().configure(options)
         if options.interactive:
             LOGGER.info("using interactive AWS provider mode")
         else:

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Module with k8s cluster resources."""
-from __future__ import print_function
-
 import awacs.iam
 from awacs.aws import StringLike  # pylint: disable=no-name-in-module
 from awacs.aws import Allow, Condition, PolicyDocument, Statement

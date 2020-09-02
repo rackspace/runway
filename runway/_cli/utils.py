@@ -1,26 +1,17 @@
 """CLI utils."""
 import logging
 import os
-import sys
-from typing import Any, Iterator, List, Optional, Tuple  # noqa pylint: disable=W
+from collections.abc import MutableMapping
+from pathlib import Path
+from typing import Any, Iterator, List, Optional, Tuple
 
 import click
 import yaml
-from six.moves.collections_abc import MutableMapping  # pylint: disable=E
 
-from ..config import (  # noqa pylint: disable=W
-    Config,
-    DeploymentDefinition,
-    ModuleDefinition,
-)
+from ..config import Config, DeploymentDefinition, ModuleDefinition
 from ..context import Context as RunwayContext
 from ..core.components import DeployEnvironment
 from ..util import cached_property
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
 

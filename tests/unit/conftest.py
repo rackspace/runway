@@ -2,7 +2,7 @@
 # pylint: disable=redefined-outer-name
 import logging
 import os
-import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, Dict
 
 import pytest
@@ -21,11 +21,6 @@ from .factories import (
     YamlLoaderDeploymet,
 )
 from .mock_docker.fake_api_client import make_fake_client
-
-if sys.version_info.major > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 if TYPE_CHECKING:
     from docker import DockerClient

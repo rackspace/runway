@@ -9,8 +9,10 @@ import shutil
 import stat
 import subprocess
 import sys
-from distutils.util import strtobool  # pylint: disable=E
+import tempfile
+from distutils.util import strtobool
 from io import BytesIO as StringIO
+from pathlib import Path
 from shutil import copyfile
 from types import GeneratorType
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -18,20 +20,12 @@ from zipfile import ZIP_DEFLATED, ZipFile
 # pylint import order false alerts appear to be specific to py2 on Windows
 import botocore
 import docker
-import formic  # pylint: disable=wrong-import-order
-from six import string_types  # pylint: disable=wrong-import-order
-from troposphere.awslambda import Code  # pylint: disable=wrong-import-order
+import formic
+from troposphere.awslambda import Code
 
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..session_cache import get_session
 from ..util import ensure_s3_bucket
-
-if sys.version_info.major < 3:
-    from backports import tempfile  # pylint: disable=E
-    from pathlib2 import Path  # pylint: disable=E
-else:
-    import tempfile  # pylint: disable=E
-    from pathlib import Path  # pylint: disable=E
 
 # mask to retrieve only UNIX file permissions from the external attributes
 # field of a ZIP entry.
@@ -366,8 +360,6 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
             cmd, cwd=package_root, stdout=requirements, stderr=subprocess.PIPE
         )
         if int(sys.version[0]) > 2:
-            # TODO remove pylint disable when dropping python2
-            # pylint: disable=unexpected-keyword-arg
             _stdout, stderr = pipenv_process.communicate(timeout=timeout)
         else:
             _stdout, stderr = pipenv_process.communicate()
@@ -507,7 +499,7 @@ def _pip_has_no_color_option(python_path):
                 "print(pip.__version__)",
             ]
         )
-        if sys.version_info[0] > 2 and isinstance(pip_version_string, bytes):
+        if isinstance(pip_version_string, bytes):
             pip_version_string = pip_version_string.decode()
         if int(pip_version_string.split(".")[0]) > 10:
             return True
@@ -605,12 +597,7 @@ def _zip_package(
                         '   runpy.run_module("pip", run_name="__main__")\n',
                     ]
                 )
-                # TODO remove python 2 logic when dropping python 2
-                tmp_script.write_text(
-                    script_contents
-                    if sys.version_info.major > 2
-                    else script_contents.decode("UTF-8")
-                )
+                tmp_script.write_text(script_contents)
                 cmd = [sys.executable, "run-python", str(tmp_script)]
             else:
                 if not _pip_has_no_color_option(pip_cmd[0]):
@@ -743,11 +730,11 @@ def _check_pattern_list(patterns, key, default=None):
     if not patterns:
         return default
 
-    if isinstance(patterns, string_types):
+    if isinstance(patterns, str):
         return [patterns]
 
     if isinstance(patterns, list):
-        if all(isinstance(p, string_types) for p in patterns):
+        if all(isinstance(p, str) for p in patterns):
             return patterns
 
     raise ValueError(

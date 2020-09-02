@@ -3,23 +3,16 @@ import logging
 import os
 import platform
 import sys
+from pathlib import Path
 
 from ..util import cached_property
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
 
 
 def handle_bin_download_error(exc, name):
     """Give user info about their failed download."""
-    if sys.version_info[0] == 2:
-        url_error_msg = str(exc.strerror)
-    else:
-        url_error_msg = str(exc.reason)
+    url_error_msg = str(exc.reason)
 
     if "CERTIFICATE_VERIFY_FAILED" in url_error_msg:
         LOGGER.error(
@@ -43,7 +36,7 @@ def handle_bin_download_error(exc, name):
         raise exc
 
 
-class EnvManager(object):  # pylint: disable=too-few-public-methods
+class EnvManager:  # pylint: disable=too-few-public-methods
     """Base environment manager class.
 
     Attributes:

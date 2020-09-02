@@ -6,11 +6,11 @@ distribution url + callback url paths.
 """
 # pylint: disable=unused-argument
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional  # noqa pylint: disable=W
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context  # pylint: disable=W
-    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 

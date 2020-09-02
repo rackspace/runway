@@ -209,7 +209,7 @@ class TestHooks(unittest.TestCase):
         )
 
 
-class MockHook(object):
+class MockHook:
     """Mock hook class."""
 
     def __init__(self, **kwargs):

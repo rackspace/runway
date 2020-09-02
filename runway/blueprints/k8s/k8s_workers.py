@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 """Module with k8s nodegroup."""
-from __future__ import print_function
-
 import json
 import os
-import sys
 
 import botocore
 from troposphere import Base64, Equals, If, Not, NoValue, Output, Sub, autoscaling, ec2
@@ -32,10 +29,7 @@ def get_valid_instance_types():
     )
     # This encoding needs to be explicitly called out as utf-8 on Windows
     # (or it will try cp1252 instead)
-    openkwargs = {}
-    if sys.version_info[0] > 2:
-        openkwargs["encoding"] = "utf-8"
-    with open(ec2_service_file, "r", **openkwargs) as stream:
+    with open(ec2_service_file, "r", encoding="utf-8") as stream:
         return json.load(stream)["shapes"]["InstanceType"]["enum"]
 
 

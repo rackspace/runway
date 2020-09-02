@@ -1,7 +1,7 @@
 """CFNgin target."""
 
 
-class Target(object):  # pylint: disable=too-few-public-methods
+class Target:  # pylint: disable=too-few-public-methods
     """A "target" is just a node in the graph that only specify dependencies.
 
     These can be useful as a means of logically grouping a set of stacks

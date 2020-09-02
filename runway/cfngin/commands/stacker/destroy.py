@@ -17,7 +17,7 @@ class Destroy(BaseCommand):
 
     def add_arguments(self, parser):
         """Add arguments."""
-        super(Destroy, self).add_arguments(parser)
+        super().add_arguments(parser)
         self._add_argument_max_parallel(parser)
         self._add_argument_tail(parser)
         parser.add_argument(
@@ -40,7 +40,7 @@ class Destroy(BaseCommand):
 
     def run(self, options):
         """Run the command."""
-        super(Destroy, self).run(options)
+        super().run(options)
         action = destroy.Action(
             options.context, provider_builder=options.provider_builder, cancel=cancel()
         )

@@ -11,12 +11,12 @@ class Info(BaseCommand):
 
     def add_arguments(self, parser):
         """Add arguments."""
-        super(Info, self).add_arguments(parser)
+        super().add_arguments(parser)
         self._add_argument_stacks(parser)
 
     def run(self, options):
         """Run the command."""
-        super(Info, self).run(options)
+        super().run(options)
         action = info.Action(options.context, provider_builder=options.provider_builder)
 
         action.execute()

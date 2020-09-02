@@ -45,7 +45,7 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 import json
 import logging
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # pylint: disable=W
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from botocore.exceptions import ClientError
 
@@ -53,16 +53,10 @@ from runway.cfngin.exceptions import OutputDoesNotExist, StackDoesNotExist
 
 from .base import LookupHandler
 
-# python2 supported pylint sees this is cyclic even though its only for type checking
-# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from runway.cfngin.context import (
-        Context as CFNginContext,  # noqa: F401 pylint: disable=W
-    )
-    from runway.cfngin.providers.aws.default import (
-        Provider,  # noqa: F401 pylint: disable=W
-    )
-    from runway.context import Context as RunwayContext  # noqa: F401 pylint: disable=W
+    from runway.cfngin.context import Context as CFNginContext
+    from runway.cfngin.providers.aws.default import Provider
+    from runway.context import Context as RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "cfn"

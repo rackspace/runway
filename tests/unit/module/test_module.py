@@ -1,18 +1,13 @@
 """Test runway.module.__init__."""
 # pylint: disable=no-self-use,unused-argument
 import logging
-import sys
 from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
 from mock import MagicMock, call, patch
 
 from runway.module import NPM_BIN, ModuleOptions, RunwayModuleNpm
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 @contextmanager
@@ -21,7 +16,7 @@ def does_not_raise():
     yield
 
 
-class TestRunwayModuleNpm(object):
+class TestRunwayModuleNpm:
     """Test runway.module.RunwayModuleNpm."""
 
     @patch("runway.module.which")
@@ -162,7 +157,7 @@ class TestRunwayModuleNpm(object):
         assert not obj.package_json_missing()
 
 
-class TestModuleOptions(object):
+class TestModuleOptions:
     """Test runway.module.ModuleOptions."""
 
     @pytest.mark.parametrize(
@@ -179,10 +174,6 @@ class TestModuleOptions(object):
             (100, None, None, pytest.raises(TypeError)),
             (100, "env", None, pytest.raises(TypeError)),
         ],
-    )
-    @pytest.mark.skipif(
-        sys.version_info.major < 3,
-        reason="python 2 does not handle unbound functions " "being patched in",
     )
     def test_merge_nested_env_dicts(self, monkeypatch, data, env, expected, exception):
         """Test merge_nested_env_dicts."""
