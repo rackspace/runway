@@ -1,10 +1,8 @@
 """Test runway.core.components._module."""
 # pylint: disable=no-self-use,protected-access
 import logging
-import sys
 
 import pytest
-import six
 import yaml
 from mock import MagicMock, call, patch
 
@@ -15,7 +13,7 @@ from runway.core.components._module import validate_environment
 MODULE = "runway.core.components._module"
 
 
-class TestModule(object):
+class TestModule:
     """Test runway.core.components._module.Module."""
 
     def test_init(self):
@@ -107,7 +105,7 @@ class TestModule(object):
             "options": {"local-opt": "local-opt-val"},
             "parameters": {"local-param": "local-param-val"},
         }
-        (mod_dir / "runway.module.yml").write_text(six.u(yaml.safe_dump(opts)))
+        (mod_dir / "runway.module.yml").write_text(yaml.safe_dump(opts))
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("simple_env_vars_map").modules[0],
@@ -242,7 +240,6 @@ class TestModule(object):
         mock_run.assert_called_once_with("deploy")
 
     @patch(MODULE + ".concurrent.futures")
-    @pytest.mark.skipif(sys.version_info.major < 3, reason="only supported by python 3")
     def test_deploy_async(
         self, mock_futures, caplog, fx_deployments, monkeypatch, runway_context
     ):

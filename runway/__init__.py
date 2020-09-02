@@ -12,7 +12,7 @@ from . import cfngin, variables  # noqa isort:skip
 
 if sys.version_info.minor < 8:
     # importlib.metadata is standard lib for python>=3.8, use backport
-    from importlib_metadata import PackageNotFoundError, version
+    from importlib_metadata import PackageNotFoundError, version  # pylint: disable=E
 else:
     from importlib.metadata import PackageNotFoundError, version  # pylint: disable=E
 

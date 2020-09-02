@@ -1,5 +1,5 @@
 """Self Destruction Lambda."""
-from typing import Any, Dict, Union  # pylint: disable=unused-import
+from typing import Any, Dict, Union
 
 import boto3
 

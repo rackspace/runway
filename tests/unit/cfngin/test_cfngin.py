@@ -35,7 +35,7 @@ def patch_safehaven(monkeypatch):
     return mock_haven
 
 
-class TestCFNgin(object):
+class TestCFNgin:
     """Test runway.cfngin.CFNgin."""
 
     @staticmethod
@@ -58,38 +58,32 @@ class TestCFNgin(object):
     def test_env_file(self, tmp_path):
         """Test that the correct env file is selected."""
         test_env = tmp_path / "test.env"
-        # python2 Path.write_text requires unicode
-        test_env.write_text(u"test_value: test")
+        test_env.write_text("test_value: test")
 
-        # support python < 3.6
         result = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         assert result.env_file.test_value == "test"
 
         test_us_east_1 = tmp_path / "test-us-east-1.env"
-        # python2 Path.write_text requires unicode
-        test_us_east_1.write_text(u"test_value: test-us-east-1")
+        test_us_east_1.write_text("test_value: test-us-east-1")
 
         test_us_west_2 = tmp_path / "test-us-west-2.env"
-        # python2 Path.write_text requires unicode
-        test_us_west_2.write_text(u"test_value: test-us-west-2")
+        test_us_west_2.write_text("test_value: test-us-west-2")
 
         lab_ca_central_1 = tmp_path / "lab-ca-central-1.env"
-        # python2 Path.write_text requires unicode
-        lab_ca_central_1.write_text(u"test_value: lab-ca-central-1")
+        lab_ca_central_1.write_text("test_value: lab-ca-central-1")
 
-        # support python < 3.6
         result = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
         assert result.env_file.test_value == "test-us-east-1"
 
         result = CFNgin(
             ctx=self.get_context(region="us-west-2"), sys_path=str(tmp_path)
-        )  # support python < 3.6
+        )
         assert result.env_file.test_value == "test-us-west-2"
 
         result = CFNgin(
             ctx=self.get_context(name="lab", region="ca-central-1"),
             sys_path=str(tmp_path),
-        )  # support python < 3.6
+        )
         assert result.env_file.test_value == "lab-ca-central-1"
 
     @patch("runway.cfngin.actions.build.Action")
@@ -108,7 +102,7 @@ class TestCFNgin(object):
             ctx=context,
             parameters={"test_param": "test-param-value"},
             sys_path=str(tmp_path),
-        )  # support python < 3.6
+        )
         cfngin.deploy()
 
         assert cfngin.concurrency == 0
@@ -271,8 +265,7 @@ class TestCFNgin(object):
         ]
 
         for config_path in good_config_paths + bad_config_paths:
-            # python2 Path.write_text requires unicode
-            config_path.write_text(u"")
+            config_path.write_text("")
 
         # support python < 3.6
         result = CFNgin.find_config_files(sys_path=str(tmp_path))

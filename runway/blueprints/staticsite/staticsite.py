@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 """Module with static website bucket and CloudFront distribution."""
-from __future__ import print_function
-
 import hashlib
 import logging
 import os
-from typing import Any, Dict, List, Union  # pylint: disable=unused-import
+from typing import Any, Dict, List, Union
 
 import awacs.awslambda
 import awacs.iam
@@ -15,21 +13,17 @@ import awacs.states
 import awacs.sts
 from awacs.aws import Action, Allow, Policy, PolicyDocument, Principal, Statement
 from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (  # noqa pylint: disable=unused-import
+from troposphere import (
     AccountId,
     Join,
     NoValue,
     Output,
     Partition,
-    Region,
     StackName,
-    Sub,
     awslambda,
     cloudfront,
     iam,
-    logs,
     s3,
-    stepfunctions,
 )
 
 from runway.cfngin.blueprints.base import Blueprint

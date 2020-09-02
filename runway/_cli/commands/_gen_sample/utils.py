@@ -1,18 +1,12 @@
 """Utilities for gen-sample commands."""
 import logging
 import shutil
-import sys
+from pathlib import Path
 
-import six
 from cfn_flip import to_yaml
 
 from ....blueprints.tf_state import TfState
 from ....cfngin.context import Context as CFNginContext
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 ROOT = Path(__file__).parent.parent.parent.parent
@@ -48,7 +42,7 @@ def copy_sample(ctx, src, dest):
         LOGGER.error("Directory %s already exists!", dest)
         ctx.exit(1)
     LOGGER.debug('copying "%s" to "%s"', src, dest)
-    shutil.copytree(str(src), str(dest))
+    shutil.copytree(src, dest)
 
 
 def write_tfstate_template(dest):
@@ -60,11 +54,6 @@ def write_tfstate_template(dest):
 
     """
     LOGGER.debug('writing TfState as a YAML template to "%s"', dest)
-    # TODO remove use of six.u when dripping python 2 support
     dest.write_text(
-        six.u(
-            to_yaml(
-                TfState("test", CFNginContext({"namespace": "test"}), None).to_json()
-            )
-        )
+        to_yaml(TfState("test", CFNginContext({"namespace": "test"}), None).to_json())
     )

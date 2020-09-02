@@ -12,7 +12,7 @@ class DAGValidationError(Exception):
     """Raised when DAG validation fails."""
 
 
-class DAG(object):
+class DAG:
     """Directed acyclic graph implementation."""
 
     def __init__(self):
@@ -405,7 +405,7 @@ def walk(dag, walk_func):
     return dag.walk(walk_func)
 
 
-class UnlimitedSemaphore(object):
+class UnlimitedSemaphore:
     """threading.Semaphore, but acquire always succeeds."""
 
     def acquire(self, *args):
@@ -415,7 +415,7 @@ class UnlimitedSemaphore(object):
         """Do nothing."""
 
 
-class ThreadedWalker(object):  # pylint: disable=too-few-public-methods
+class ThreadedWalker:  # pylint: disable=too-few-public-methods
     """Walk a DAG as quickly as the graph topology allows, using threads."""
 
     def __init__(self, semaphore):

@@ -1,19 +1,14 @@
 """Runway deploy environment object."""
 import json
 import logging
-import multiprocessing
 import os
 import sys
-from typing import Any, Dict, Optional, Union  # pylint: disable=W
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
 import click
 
 from ...util import AWS_ENV_VARS, cached_property
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 try:  # will raise an import error if git is not in the current path
     import git
@@ -25,21 +20,20 @@ except ImportError:  # cov: ignore
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class DeployEnvironment(object):
+class DeployEnvironment:
     """Runway deploy environment."""
 
-    # TODO implement propper keyword-only args when dropping python 2
-    # def __init__(self,
-    #              *: Any,
-    #              environ: Optional[Dict[str, str]] = None,
-    #              explicit_name: Optional[str] = None,
-    #              ignore_git_branch: bool = False,
-    #              root_dir: Optional[Path] = None
-    #              ) -> None:
-    def __init__(self, _=None, **kwargs):
+    def __init__(
+        self,
+        *,
+        environ: Optional[Dict[str, str]] = None,
+        explicit_name: Optional[str] = None,
+        ignore_git_branch: bool = False,
+        root_dir: Optional[Path] = None
+    ) -> None:
         """Instantiate class.
 
-        Keyword Args:
+        Args:
             environ (Optional[Dict[str, str]]): Environment variables.
             explicit_name (Optional[str]): Explicitly provide the deploy
                 environment name.
@@ -48,12 +42,11 @@ class DeployEnvironment(object):
             root_dir (Optional[Path]): Root directory of the project.
 
         """
-        self.__name = kwargs.pop("explicit_name", None)
-        self._ignore_git_branch = kwargs.pop("ignore_git_branch", False)
+        self.__name = explicit_name
+        self._ignore_git_branch = ignore_git_branch
         self.name_derived_from = "explicit" if self.__name else None
-        root_dir = kwargs.pop("root_dir", None)
         self.root_dir = root_dir if root_dir else Path.cwd()
-        self.vars = kwargs.pop("environ", os.environ.copy())
+        self.vars = environ or os.environ.copy()
 
     @property
     def aws_credentials(self):
@@ -219,8 +212,7 @@ class DeployEnvironment(object):
 
         if value:
             return int(value)
-        # TODO update to `os.cpu_count()` when dropping python2
-        return min(61, multiprocessing.cpu_count())
+        return min(61, os.cpu_count())
 
     @max_concurrent_modules.setter
     def max_concurrent_modules(self, value):
@@ -250,8 +242,7 @@ class DeployEnvironment(object):
 
         if value:
             return int(value)
-        # TODO update to `os.cpu_count()` when dropping python2
-        return min(61, multiprocessing.cpu_count())
+        return min(61, os.cpu_count())
 
     @max_concurrent_regions.setter
     def max_concurrent_regions(self, value):

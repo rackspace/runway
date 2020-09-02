@@ -54,7 +54,7 @@ def setup_cfn_client():
     return client, Stubber(client)
 
 
-class TestCfnLookup(object):
+class TestCfnLookup:
     """Test runway.lookups.handlers.cfn.CfnLookup."""
 
     @patch.object(CfnLookup, "format_results")

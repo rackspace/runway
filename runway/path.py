@@ -1,17 +1,14 @@
 """Runway configuration 'path' settings."""
-# pylint: disable=unused-import
 import logging
 import os
-from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
-
-import six
+from typing import Dict, List, Optional, Tuple, Union
 
 from .sources.git import Git
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Path(object):  # pylint: disable=too-many-instance-attributes
+class Path:  # pylint: disable=too-many-instance-attributes
     """Runway configuration ``path`` settings object.
 
     Path is responsible for parsing the ``path`` property of a Runway
@@ -112,7 +109,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
     """
 
     def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
-        # type: (Union(str, Dict[str, str]), str, Optional[str], Optional[Git])-> Path
+        # type: (Union(str, Dict[str, str]), str, Optional[str], Optional[Git]) -> None
         """Path Configuration.
 
         Keyword Args:
@@ -130,7 +127,7 @@ class Path(object):  # pylint: disable=too-many-instance-attributes
             `Git`_
 
         """
-        if isinstance(module, six.string_types):
+        if isinstance(module, str):
             module = {"path": module}  # type: Dict[str, str]
 
         self.git_source_class = git_source_class  # type: Git

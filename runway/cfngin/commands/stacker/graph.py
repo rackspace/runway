@@ -11,7 +11,7 @@ class Graph(BaseCommand):
 
     def add_arguments(self, parser):
         """Add arguments."""
-        super(Graph, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             "-f",
             "--format",
@@ -31,7 +31,7 @@ class Graph(BaseCommand):
 
     def run(self, options):
         """Run the command."""
-        super(Graph, self).run(options)
+        super().run(options)
         action = graph.Action(
             options.context, provider_builder=options.provider_builder
         )

@@ -1,7 +1,6 @@
 """Test ``runway run-stacker``."""
 import logging
 
-import six
 from click.testing import CliRunner
 
 from runway._cli import cli
@@ -17,8 +16,7 @@ stacks:
 def test_run_stacker_graph(cd_tmp_path):
     """Test ``runway run-stacker graph``."""
     stacks_yml = cd_tmp_path / "stacks.yml"
-    # TODO remove use of six when dropping python 2
-    stacks_yml.write_text(six.u(STACKER_CONFIG))
+    stacks_yml.write_text(STACKER_CONFIG)
     runner = CliRunner()
     result = runner.invoke(cli, ["run-stacker", "graph", stacks_yml.name])
     assert result.exit_code == 0
