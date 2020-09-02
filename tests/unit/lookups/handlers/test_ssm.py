@@ -1,5 +1,5 @@
 """Test runway.lookups.handlers.ssm."""
-# pylint: disable=no-self-use,unused-import
+# pylint: disable=no-self-use
 import json
 from datetime import datetime
 
@@ -32,7 +32,7 @@ def get_parameter_request(name, decrypt=True):
     return {"Name": name, "WithDecryption": decrypt}
 
 
-class TestSsmLookup(object):
+class TestSsmLookup:
     """Test runway.lookups.handlers.ssm.SsmLookup."""
 
     def test_basic(self, cfngin_context, runway_context):

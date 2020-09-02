@@ -43,12 +43,11 @@ class PrefixAdaptor(logging.LoggerAdapter):
                 message prefix.
 
         """
-        super(PrefixAdaptor, self).__init__(logger, {})
+        super().__init__(logger, {})
         self.prefix = prefix
         self.prefix_template = prefix_template
 
-    # TODO remove when dropping python 2
-    def getEffectiveLevel(self):  # noqa pylint: disable=invalid-name
+    def getEffectiveLevel(self):  # noqa
         # type: () -> int
         """ Get the effective level for the underlying logger.
 
@@ -57,8 +56,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
         """
         return self.logger.getEffectiveLevel()
 
-    # TODO remove when dropping python 2
-    def hasHandlers(self):  # noqa pylint: disable=invalid-name
+    def hasHandlers(self):  # noqa
         # type: () -> bool
         """See if the underlying logger has any handlers.
 
@@ -67,8 +65,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
         """
         return self.logger.hasHandlers()
 
-    # TODO remove when dropping python 2
-    def isEnabledFor(self, level):  # noqa pylint: disable=invalid-name
+    def isEnabledFor(self, level):  # noqa
         # type: (int) -> bool
         """Is this logger enabled for level 'level'?
 
@@ -100,8 +97,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
         """
         return self.prefix_template.format(prefix=self.prefix, msg=msg), kwargs
 
-    # TODO remove when dropping python 2
-    def setLevel(self, level):  # noqa pylint: disable=invalid-name
+    def setLevel(self, level):  # noqa
         # type: () -> None
         """Set the specified level on the underlying logger.
 
@@ -142,7 +138,7 @@ class RunwayLogger(logging.Logger):
             level (int): Log level.
 
         """
-        super(RunwayLogger, self).__init__(name, level)
+        super().__init__(name, level)
         logging.addLevelName(LogLevels.VERBOSE, LogLevels.VERBOSE.name)
         logging.addLevelName(LogLevels.NOTICE, LogLevels.NOTICE.name)
         logging.addLevelName(LogLevels.SUCCESS, LogLevels.SUCCESS.name)

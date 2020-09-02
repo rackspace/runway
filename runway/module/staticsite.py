@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 import tempfile
-from typing import Any, Dict  # pylint: disable=unused-import
+from typing import Any, Dict, List, Union
 
 import yaml
 
@@ -33,7 +33,7 @@ class StaticSite(RunwayModule):
 
     def __init__(self, context, path, options=None):
         """Initialize."""
-        super(StaticSite, self).__init__(context, path, options)
+        super().__init__(context, path, options)
         self.user_options = self.options.get("options", {})
         self.parameters = self.options.get("parameters")  # type: Dict[str, Any]
         self.region = self.context.env.aws_region

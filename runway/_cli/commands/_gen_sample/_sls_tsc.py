@@ -1,16 +1,11 @@
 """``runway gen-sample sls-tsc`` command."""
 import logging
-import sys
+from pathlib import Path
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

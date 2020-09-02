@@ -2,7 +2,7 @@
 # pylint: disable=redefined-outer-name
 import logging
 import os
-import sys
+from pathlib import Path
 from typing import Dict
 
 import pytest
@@ -20,11 +20,6 @@ from .factories import (
     YamlLoader,
     YamlLoaderDeploymet,
 )
-
-if sys.version_info.major > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))

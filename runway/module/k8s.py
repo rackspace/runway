@@ -4,8 +4,6 @@ import os
 import subprocess
 import sys
 
-import six
-
 from .._logging import PrefixAdaptor
 from ..env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
 from ..util import DOC_SITE, which
@@ -26,7 +24,7 @@ def gen_overlay_dirs(environment, region):
 
 def get_module_defined_k8s_ver(k8s_version_opts, env_name):
     """Return version of Terraform requested in module options."""
-    if isinstance(k8s_version_opts, six.string_types):
+    if isinstance(k8s_version_opts, str):
         return k8s_version_opts
     if k8s_version_opts.get(env_name):
         return k8s_version_opts.get(env_name)
@@ -77,7 +75,7 @@ class K8s(RunwayModule):
                 definition.
 
         """
-        super(K8s, self).__init__(context, path, options)
+        super().__init__(context, path, options)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 

@@ -5,12 +5,10 @@ import platform
 import shutil
 import sys
 import tempfile
+from urllib.error import URLError
+from urllib.request import urlretrieve
 
 import requests
-
-# Old pylint on py2.7 incorrectly flags these
-from six.moves.urllib.error import URLError  # pylint: disable=E
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
 from ..util import get_file_hash
 from . import EnvManager, handle_bin_download_error
@@ -132,7 +130,7 @@ def download_kb_release(
     verify_kb_release(kb_url, download_dir, filename)
 
     version_dir.mkdir(parents=True, exist_ok=True)
-    shutil.move(os.path.join(download_dir, filename), str(version_dir / filename))
+    shutil.move(os.path.join(download_dir, filename), version_dir / filename)
     shutil.rmtree(download_dir)
     result = version_dir / filename
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
@@ -161,7 +159,7 @@ class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(KBEnvManager, self).__init__("kubectl", "kbenv", path)
+        super().__init__("kubectl", "kbenv", path)
 
     def install(self, version_requested=None):
         """Ensure kubectl is available."""

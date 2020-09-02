@@ -3,7 +3,7 @@
 import logging
 import os
 import platform
-from typing import Any, Dict  # pylint: disable=W
+from typing import Any, Dict
 
 import click
 

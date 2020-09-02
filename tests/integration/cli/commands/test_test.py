@@ -1,7 +1,6 @@
 """Test ``runway test``."""
 import logging
 
-import six
 import yaml
 from click.testing import CliRunner
 
@@ -37,10 +36,8 @@ def test_test_invalid_type(cd_tmp_path, capfd, caplog):
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(
-            yaml.safe_dump(
-                {"deployments": [], "tests": [INVALID_TYPE.copy(), SUCCESS.copy()]}
-            )
+        yaml.safe_dump(
+            {"deployments": [], "tests": [INVALID_TYPE.copy(), SUCCESS.copy()]}
         )
     )
 
@@ -63,13 +60,11 @@ def test_test_invalid_type_required(cd_tmp_path, caplog):
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(
-            yaml.safe_dump(
-                {
-                    "deployments": [],
-                    "tests": [INVALID_TYPE_REQUIRED.copy(), SUCCESS.copy()],
-                }
-            )
+        yaml.safe_dump(
+            {
+                "deployments": [],
+                "tests": [INVALID_TYPE_REQUIRED.copy(), SUCCESS.copy()],
+            }
         )
     )
 
@@ -88,7 +83,7 @@ def test_test_not_defined(cd_tmp_path, caplog):
     """Test ``runway test`` with no tests defined."""
     caplog.set_level(logging.ERROR)
     runway_yml = cd_tmp_path / "runway.yml"
-    runway_yml.write_text(six.u(yaml.safe_dump({"deployments": []})))
+    runway_yml.write_text(yaml.safe_dump({"deployments": []}))
 
     runner = CliRunner()
     result = runner.invoke(cli, ["test"])
@@ -101,7 +96,7 @@ def test_test_single_successful(cd_tmp_path, capfd, caplog):
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(yaml.safe_dump({"deployments": [], "tests": [SUCCESS.copy()]}))
+        yaml.safe_dump({"deployments": [], "tests": [SUCCESS.copy()]})
     )
 
     runner = CliRunner()
@@ -121,9 +116,7 @@ def test_test_two_test(cd_tmp_path, capfd, caplog):
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(
-            yaml.safe_dump({"deployments": [], "tests": [FAIL.copy(), SUCCESS.copy()]})
-        )
+        yaml.safe_dump({"deployments": [], "tests": [FAIL.copy(), SUCCESS.copy()]})
     )
 
     runner = CliRunner()
@@ -146,10 +139,8 @@ def test_test_two_test_required(cd_tmp_path, capfd, caplog):
     caplog.set_level(logging.INFO)
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(
-            yaml.safe_dump(
-                {"deployments": [], "tests": [FAIL_REQUIRED.copy(), SUCCESS.copy()]}
-            )
+        yaml.safe_dump(
+            {"deployments": [], "tests": [FAIL_REQUIRED.copy(), SUCCESS.copy()]}
         )
     )
 

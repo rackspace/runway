@@ -1,11 +1,10 @@
 """Test runway.env_mgr.tfenv."""
 # pylint: disable=no-self-use
 import json
-import sys
 
 import hcl
+import hcl2
 import pytest
-import six
 from mock import MagicMock, call, patch
 
 from runway._logging import LogLevels
@@ -16,12 +15,6 @@ from runway.env_mgr.tfenv import (
     get_latest_tf_version,
     load_terrafrom_module,
 )
-
-# TODO remove condition and import-error when dropping python 2
-if sys.version_info >= (3, 6):
-    import hcl2  # pylint: disable=import-error
-else:
-    hcl2 = hcl  # pylint: disable=invalid-name
 
 MODULE = "runway.env_mgr.tfenv"
 
@@ -74,7 +67,6 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
     mock_get_available_tf_versions.assert_called_with(True)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="dependency requires >=3.6")
 @pytest.mark.parametrize(
     "parser, expected",
     [
@@ -85,12 +77,12 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
 def test_load_terrafrom_module(parser, expected, tmp_path):
     """Test runway.env_mgr.tfenv.load_terrafrom_module."""
     tf_file = tmp_path / "module.tf"
-    tf_file.write_text(six.u(HCL_BACKEND_S3))
+    tf_file.write_text(HCL_BACKEND_S3)
 
     assert load_terrafrom_module(parser, tmp_path) == expected
 
 
-class TestTFEnvManager(object):
+class TestTFEnvManager:
     """Test runway.env_mgr.tfenv.TFEnvManager."""
 
     @pytest.mark.parametrize(
@@ -155,12 +147,12 @@ class TestTFEnvManager(object):
 
         # path provided
         version_file = tmp_path / ".version"
-        version_file.write_text(six.u("0.11.5"))
+        version_file.write_text("0.11.5")
         assert tfenv.get_version_from_file(version_file) == "0.11.5"
 
         # path not provided; use version file
         version_file = tmp_path / TF_VERSION_FILENAME
-        version_file.write_text(six.u("0.12.0"))
+        version_file.write_text("0.12.0")
         assert tfenv.get_version_from_file(version_file) == "0.12.0"
 
     @patch(MODULE + ".get_available_tf_versions")
@@ -279,7 +271,6 @@ class TestTFEnvManager(object):
         mock_download.assert_not_called()
         assert not tfenv.current_version
 
-    @pytest.mark.skipif(sys.version_info < (3, 6), reason="dependency requires >=3.6")
     @pytest.mark.parametrize(
         "response, expected",
         [

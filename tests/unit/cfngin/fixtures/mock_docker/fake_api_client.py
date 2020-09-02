@@ -16,7 +16,7 @@ class CopyReturnMagicMock(mock.MagicMock):  # pylint: disable=too-many-ancestors
     """A MagicMock which deep copies every return value."""
 
     def _mock_call(self, *args, **kwargs):
-        ret = super(CopyReturnMagicMock, self)._mock_call(*args, **kwargs)
+        ret = super()._mock_call(*args, **kwargs)
         if isinstance(ret, (dict, list)):
             ret = copy.deepcopy(ret)
         return ret

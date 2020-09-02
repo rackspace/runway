@@ -1,9 +1,9 @@
 """Replicated Lambda Function cleanup warning."""
 import logging
-from typing import Any, Dict, List  # pylint: disable=unused-import
+from typing import Any, Dict, Optional, Union
 
-from runway.cfngin.context import Context  # pylint: disable=unused-import
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
+from runway.cfngin.context import Context
+from runway.cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 STACK_STATUSES_TO_IGNORE = [

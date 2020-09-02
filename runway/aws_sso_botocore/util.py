@@ -19,7 +19,7 @@ from .exceptions import SSOTokenLoadError
 LOGGER = logging.getLogger(__name__)
 
 
-class SSOTokenLoader(object):  # pylint: disable=too-few-public-methods
+class SSOTokenLoader:  # pylint: disable=too-few-public-methods
     """AWS SSO token loader."""
 
     def __init__(self, cache=None):
@@ -31,18 +31,17 @@ class SSOTokenLoader(object):  # pylint: disable=too-few-public-methods
     @staticmethod
     def _generate_cache_key(start_url):
         """Generate cache key."""
-        return hashlib.sha1(start_url.encode('utf-8')).hexdigest()
+        return hashlib.sha1(start_url.encode("utf-8")).hexdigest()
 
     def __call__(self, start_url):
         """Call instance of class directly."""
         cache_key = self._generate_cache_key(start_url)
         try:
             token = self._cache[cache_key]
-            return token['accessToken']
+            return token["accessToken"]
         except KeyError:
-            LOGGER.debug('Failed to load SSO token:', exc_info=True)
+            LOGGER.debug("Failed to load SSO token:", exc_info=True)
             error_msg = (
-                'The SSO access token has either expired or is otherwise '
-                'invalid.'
+                "The SSO access token has either expired or is otherwise invalid."
             )
             raise SSOTokenLoadError(error_msg=error_msg)
