@@ -24,7 +24,7 @@ from runway.cfngin.status import (
 COMPLETE_W_REASON = CompleteStatus("test successful")
 
 
-class TestHook(object):
+class TestHook:
     """Tests for runway.cfngin.hooks.base.Hook."""
 
     def test_attributes(self, cfngin_context):
@@ -209,7 +209,7 @@ class TestHook(object):
             hook.pre_destroy()
 
 
-class TestHookBuildAction(object):
+class TestHookBuildAction:
     """Tests for runway.cfngin.hooks.base.HookBuildAction."""
 
     def test_provider(self, cfngin_context):
@@ -234,7 +234,7 @@ class TestHookBuildAction(object):
         assert obj.run() == "success"
 
 
-class TestHookDestroyAction(object):
+class TestHookDestroyAction:
     """Tests for runway.cfngin.hooks.base.HookDestroyAction."""
 
     def test_run(self, cfngin_context, monkeypatch):
@@ -245,7 +245,7 @@ class TestHookDestroyAction(object):
         assert obj.run() == "success"
 
 
-class TestHookStackDefinition(object):
+class TestHookStackDefinition:
     """Tests for runway.cfngin.hooks.base.HookStackDefinition."""
 
     def test_getattr(self):

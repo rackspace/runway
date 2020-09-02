@@ -4,9 +4,9 @@ import logging
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 import hcl
-import six
 from send2trash import send2trash
 
 from .._logging import PrefixAdaptor
@@ -14,11 +14,6 @@ from ..cfngin.lookups.handlers.output import deconstruct
 from ..env_mgr.tfenv import TFEnvManager
 from ..util import DOC_SITE, cached_property, find_cfn_output, which
 from . import ModuleOptions, RunwayModule, run_module_command
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +64,7 @@ class Terraform(RunwayModule):
 
         """
         options = options or {}
-        super(Terraform, self).__init__(context.copy(), path, options)
+        super().__init__(context.copy(), path, options)
         del self.options  # remove the attr set by the parent class
 
         # logger needs to be created here to use the correct logger
@@ -104,7 +99,7 @@ class Terraform(RunwayModule):
                         )
             except Exception:  # pylint: disable=broad-except
                 self.logger.debug("unable to parse current version", exc_info=True)
-            file_path.write_text(six.u(json.dumps(self.parameters, indent=4)))
+            file_path.write_text(json.dumps(self.parameters, indent=4))
         return file_path
 
     @cached_property
@@ -207,7 +202,7 @@ class Terraform(RunwayModule):
                 self.logger.debug("directory retained: %s", child)
                 continue
             self.logger.debug("removing: %s", child)
-            send2trash(str(child))  # TODO remove str when dropping python 2
+            send2trash(str(child))  # does not support Path objects
 
     def gen_command(self, command, args_list=None):
         """Generate Terraform command."""
@@ -517,7 +512,7 @@ class TerraformOptions(ModuleOptions):
                 instead of updating environment variables.
 
         """
-        super(TerraformOptions, self).__init__()
+        super().__init__()
         self.args = self._parse_args(args)
         self.backend_config = backend
         self.write_auto_tfvars = write_auto_tfvars
@@ -554,7 +549,7 @@ class TerraformOptions(ModuleOptions):
     @staticmethod
     def resolve_version(context, terraform_version=None, **_):
         """Resolve terraform_version option."""
-        if not terraform_version or isinstance(terraform_version, six.string_types):
+        if not terraform_version or isinstance(terraform_version, str):
             return terraform_version
         if isinstance(terraform_version, dict):
             return terraform_version.get(context.env.name, terraform_version.get("*"))
@@ -631,7 +626,7 @@ class TerraformBackendConfig(ModuleOptions):
         https://www.terraform.io/docs/backends/types/index.html
 
         """
-        super(TerraformBackendConfig, self).__init__()
+        super().__init__()
         self.__ctx = context
         self._raw_config = kwargs
         self.config_file = config_file

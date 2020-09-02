@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class Bucket(object):
+class Bucket:
     """AWS S3 bucket."""
 
     def __init__(

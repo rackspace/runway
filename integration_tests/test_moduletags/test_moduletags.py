@@ -1,6 +1,4 @@
 """Tests for module tags."""
-from __future__ import print_function
-
 import os
 from copy import deepcopy
 

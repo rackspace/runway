@@ -8,8 +8,6 @@ https://github.com/boto/boto/pull/3143
 # pylint: disable=unused-argument
 import logging
 
-from six import string_types
-
 from ..session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
@@ -40,7 +38,7 @@ def create_clusters(provider, context, **kwargs):
         LOGGER.error("clusters argument required but not provided")
         return False
 
-    if isinstance(clusters, string_types):
+    if isinstance(clusters, str):
         clusters = [clusters]
 
     cluster_info = {}

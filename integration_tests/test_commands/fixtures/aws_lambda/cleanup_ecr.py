@@ -41,9 +41,7 @@ def handler(event, context):  # pylint: disable=unused-argument
             imageIds=[{"imageDigest": i} for i in images_to_delete],
         )
     else:
-        LOGGER.info(
-            "Less than %s images found; skipping cleanup...", str(IMAGES_TO_RETAIN)
-        )
+        LOGGER.info("Less than %s images found; skipping cleanup...", IMAGES_TO_RETAIN)
 
 
 if __name__ == "__main__":

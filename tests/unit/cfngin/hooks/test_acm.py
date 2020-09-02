@@ -120,7 +120,7 @@ def gen_stack_resource(**kwargs):
     return data
 
 
-class TestCertificate(object):
+class TestCertificate:
     """Tests for runway.cfngin.hooks.acm.Certificate."""
 
     def test_attributes(self, cfngin_context):

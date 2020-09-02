@@ -1,7 +1,7 @@
 """``runway taxi`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any  # pylint: disable=W
+from typing import Any
 
 import click
 

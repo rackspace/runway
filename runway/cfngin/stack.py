@@ -28,7 +28,7 @@ def _initialize_variables(stack_def, variables=None):
     return [Variable(k, v, "cfngin") for k, v in variable_values.items()]
 
 
-class Stack(object):
+class Stack:
     """Represents gathered information about a stack to be built/updated.
 
     Attributes:

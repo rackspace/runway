@@ -7,7 +7,7 @@ from runway.cfngin.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
 
-class TestHookDataLookup(object):
+class TestHookDataLookup:
     """Tests for runway.cfngin.lookups.handlers.hook_data.HookDataLookup."""
 
     def test_handle(self, cfngin_context):

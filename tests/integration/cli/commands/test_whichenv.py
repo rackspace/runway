@@ -1,7 +1,6 @@
 """Test ``runway whichenv``."""
 import logging
 
-import six
 import yaml
 from click.testing import CliRunner
 
@@ -13,7 +12,7 @@ def test_whichenv(caplog, cd_tmp_path):
     caplog.set_level(logging.DEBUG, logger="runway")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(yaml.safe_dump({"deployments": [], "ignore_git_branch": True}))
+        yaml.safe_dump({"deployments": [], "ignore_git_branch": True})
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["whichenv"], env={})
@@ -26,7 +25,7 @@ def test_whichenv_debug(caplog, cd_tmp_path):
     caplog.set_level(logging.DEBUG, logger="runway")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(yaml.safe_dump({"deployments": [], "ignore_git_branch": True}))
+        yaml.safe_dump({"deployments": [], "ignore_git_branch": True})
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["whichenv", "--debug"])
@@ -40,7 +39,7 @@ def test_whichenv_debug_debug(caplog, cd_tmp_path):
     caplog.set_level(logging.DEBUG, logger="runway")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(yaml.safe_dump({"deployments": [], "ignore_git_branch": True}))
+        yaml.safe_dump({"deployments": [], "ignore_git_branch": True})
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["whichenv"], env={"DEBUG": "2"})
@@ -53,7 +52,7 @@ def test_whichenv_invalid_debug_environ(cd_tmp_path):
     """Test ``runway whichenv`` with invalid debug environ."""
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        six.u(yaml.safe_dump({"deployments": [], "ignore_git_branch": True}))
+        yaml.safe_dump({"deployments": [], "ignore_git_branch": True})
     )
     runner = CliRunner()
     result = runner.invoke(cli, ["whichenv"], env={"DEBUG": "invalid"})

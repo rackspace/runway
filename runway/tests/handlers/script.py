@@ -3,7 +3,7 @@ import logging
 import subprocess
 import sys
 from subprocess import CalledProcessError
-from typing import Any, Dict  # noqa pylint: disable=W
+from typing import Any, Dict
 
 from ..._logging import PrefixAdaptor
 from ...tests.handlers.base import TestHandler

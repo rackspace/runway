@@ -1,17 +1,12 @@
 """``runway gen-sample cdk-csharp`` command."""
 import logging
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

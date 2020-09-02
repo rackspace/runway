@@ -1,17 +1,17 @@
 """Retrieve the ID of the Cognito User Pool."""
 # pylint: disable=unused-argument
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa pylint: disable=W
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context  # pylint: disable=W
-    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
 
 def get(context, provider, **kwargs):
-    # type: (Context, BaseProvider, Optional[Dict[str, Any]]) -> Dict
+    # type: (Context, BaseProvider, Any) -> Dict
     """Retrieve the ID of the Cognito User Pool.
 
     The User Pool can either be supplied via an ARN or by being generated.

@@ -1,9 +1,9 @@
 """Base module for test handlers."""
 import os
-from typing import Any, Dict, List  # noqa pylint: disable=W
+from typing import Any, Dict, List
 
 
-class TestHandler(object):
+class TestHandler:
     """Base class for test handlers."""
 
     @classmethod

@@ -1,6 +1,6 @@
 """``runway gen-sample stacker`` command."""
 import logging
-from typing import Any  # pylint: disable=W
+from typing import Any
 
 import click
 

@@ -4,10 +4,10 @@ import copy
 import os.path
 import random
 import string
-import sys
 import threading
 import unittest
 from datetime import datetime
+from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError, UnStubbedResponseError
@@ -33,11 +33,6 @@ from runway.cfngin.providers.base import Template
 from runway.cfngin.session_cache import get_session
 from runway.cfngin.stack import Stack
 from runway.util import MutableMap
-
-if sys.version_info.major < 3:
-    from pathlib2 import Path  # pylint: disable=E
-else:
-    from pathlib import Path  # pylint: disable=E
 
 
 def random_string(length=12):

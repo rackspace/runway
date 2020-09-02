@@ -1,6 +1,4 @@
 """Serverless module."""
-from __future__ import print_function
-
 import argparse
 import logging
 import os
@@ -144,7 +142,7 @@ class Serverless(RunwayModuleNpm):
 
         """
         options = options or {}
-        super(Serverless, self).__init__(context, path, options.copy())
+        super().__init__(context, path, options.copy())
         self.logger = PrefixAdaptor(self.name, LOGGER)
         try:
             self.options = ServerlessOptions.parse(**options.get("options", {}))
@@ -221,10 +219,7 @@ class Serverless(RunwayModuleNpm):
         tmp_file = self.path / "{}.tmp.serverless.yml".format(uuid.uuid4())
 
         try:
-            if self.context.is_python3:
-                tmp_file.write_text(yaml.safe_dump(final_yml))
-            else:  # TODO remove handling when dropping python 2 support
-                tmp_file.write_text(yaml.safe_dump(final_yml).decode("UTF-8"))
+            tmp_file.write_text(yaml.safe_dump(final_yml))
             self.logger.debug("created temporary Serverless config: %s", tmp_file)
             self.options.update_args("config", str(tmp_file.name))
             self.logger.debug(
@@ -407,11 +402,11 @@ class ServerlessOptions(ModuleOptions):
                 begining of each Serverless module run.
 
         """
-        super(ServerlessOptions, self).__init__()
+        super().__init__()
         self._arg_parser = self._create_arg_parser()
         self.extend_serverless_yml = extend_serverless_yml
         cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(
-            list(args) if isinstance(args, list) else []  # python 2 compatible
+            list(args) if isinstance(args, list) else []
         )
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
         self.promotezip = promotezip

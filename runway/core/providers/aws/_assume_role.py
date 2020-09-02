@@ -1,11 +1,6 @@
 """Assume an AWS IAM role."""
 import logging
-import sys
-
-if sys.version_info >= (3, 6):  # cov: ignore
-    from contextlib import AbstractContextManager  # pylint: disable=E
-else:  # cov: ignore
-    AbstractContextManager = object
+from contextlib import AbstractContextManager
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
