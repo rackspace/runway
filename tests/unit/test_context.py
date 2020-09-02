@@ -17,7 +17,7 @@ TEST_CREDENTIALS = {
 }
 
 
-class TestContext(object):
+class TestContext:
     """Test Context class."""
 
     def test_boto3_credentials(self, monkeypatch):
@@ -121,20 +121,6 @@ class TestContext(object):
         mock_env.ci = True
         assert ctx.is_noninteractive
 
-    def test_is_python3(self):
-        """Test is_python3."""
-        from runway.context import sys  # pylint: disable=import-outside-toplevel
-
-        ctx = Context()
-
-        with patch.object(sys, "version_info") as version_info:
-            version_info.major = 2
-            assert not ctx.is_python3
-
-        with patch.object(sys, "version_info") as version_info:
-            version_info.major = 3
-            assert ctx.is_python3
-
     def test_use_concurrent(self, monkeypatch):
         """Test use_concurrent."""
         mock_env = MagicMock()
@@ -144,11 +130,6 @@ class TestContext(object):
         ctx = Context(deploy_environment=mock_env)
         ctx_ci = Context(deploy_environment=mock_env_ci)
 
-        monkeypatch.setattr(Context, "is_python3", False)
-        assert not ctx.use_concurrent
-        assert not ctx_ci.use_concurrent
-
-        monkeypatch.setattr(Context, "is_python3", True)
         assert not ctx.use_concurrent
         assert ctx_ci.use_concurrent
 

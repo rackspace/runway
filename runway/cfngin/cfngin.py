@@ -19,7 +19,7 @@ from .providers.aws.default import ProviderBuilder
 LOGGER = logging.getLogger("runway.cfngin")
 
 
-class CFNgin(object):
+class CFNgin:
     """Control CFNgin.
 
     Attributes:

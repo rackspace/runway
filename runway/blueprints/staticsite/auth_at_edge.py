@@ -5,24 +5,14 @@ https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-h
 
 """
 import logging
-from typing import Any, Dict, List, Union  # pylint: disable=unused-import
+from typing import Any, Dict, List, Union
 
 import awacs.logs
 import awacs.s3
 from awacs.aws import Allow, Principal, Statement
-from troposphere import (  # noqa pylint: disable=unused-import
-    AccountId,
-    Join,
-    NoValue,
-    Output,
-    StackName,
-    awslambda,
-    cloudfront,
-    iam,
-    s3,
-)
+from troposphere import Join, Output, awslambda, cloudfront, iam, s3
 
-from runway.cfngin.context import Context  # pylint: disable=unused-import
+from runway.cfngin.context import Context
 
 from .staticsite import StaticSite
 
@@ -85,7 +75,7 @@ class AuthAtEdge(StaticSite):
             description (Union(None, str)): The description of the stack.
 
         """
-        super(AuthAtEdge, self).__init__(name, context, mappings, description)
+        super().__init__(name, context, mappings, description)
         self.VARIABLES.update(StaticSite.VARIABLES)
         self.VARIABLES.update(self.AUTH_VARIABLES)
 

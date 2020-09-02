@@ -4,12 +4,12 @@ import json
 import logging
 import sys
 import time
+import urllib
 from threading import Lock  # thread safe, memoize, provider builder.
 
 import botocore.exceptions
 import yaml
 from botocore.config import Config
-from six.moves import urllib
 
 from runway.util import DOC_SITE, JsonEncoder
 
@@ -514,7 +514,7 @@ def generate_stack_policy_args(stack_policy=None):
     return args
 
 
-class ProviderBuilder(object):  # pylint: disable=too-few-public-methods
+class ProviderBuilder:  # pylint: disable=too-few-public-methods
     """Implements a Memorized ProviderBuilder for the AWS provider."""
 
     def __init__(self, region=None, **kwargs):

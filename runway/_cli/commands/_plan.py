@@ -1,7 +1,7 @@
 """``runway plan`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any, Tuple  # pylint: disable=W
+from typing import Any, Tuple
 
 import click
 

@@ -20,13 +20,13 @@ SSHKey = namedtuple("SSHKey", "public_key private_key fingerprint")
 
 
 @pytest.fixture(scope="module")
-def ssh_key(cfngin_fixture_dir):
+def ssh_key(cfngin_fixtures):
     """Return an ssh key."""
-    base = cfngin_fixture_dir.join("keypair")
+    base = cfngin_fixtures / "keypair"
     return SSHKey(
-        private_key=base.join("id_rsa").read_binary(),
-        public_key=base.join("id_rsa.pub").read_binary(),
-        fingerprint=base.join("fingerprint").read_text("ascii").strip(),
+        private_key=(base / "id_rsa").read_bytes(),
+        public_key=(base / "id_rsa.pub").read_bytes(),
+        fingerprint=(base / "fingerprint").read_text("ascii").strip(),
     )
 
 

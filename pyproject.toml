@@ -28,10 +28,7 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise AssertionError",  # defensive exceptions
     "raise NotImplimentedError",
-    "if self.context.is_python3:",
-    "if not self.context.is_python3:",
     "from pathlib import Path",
-    "from pathlib2 import Path",
 ]
 
 
@@ -67,4 +64,115 @@ skip = [
     "integration_tests",
     "node_modules",
     "venv",
+]
+
+
+[tool.pylint.basic]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
+attr-rgx = "([a-z_][a-z0-9_]{2,30}|VARIABLES)$"
+attr-name-hint = "([a-z_][a-z0-9_]{2,30}|VARIABLES)$"
+good-names = [
+    "_",
+    "a",
+    "b",
+    "ci",
+    "db",
+    "f",
+    "fn",
+    "i",
+    "id",
+    "j",
+    "k",
+    "ok",
+    "ui",
+    "v",
+]
+
+[tool.pylint.classes]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#classes-checker
+defining-attr-methods = [
+    "__init__",
+    "__new__",
+    "setUp",
+]
+exclude-protected=[
+    "_asdict",
+    "_fields",
+    "_replace",
+    "_source",
+    "_make",
+    "_session",  # for boto3.session.Session
+    "_prompter",
+    "_client_config",  # boto3.client.Client._client_config contains info like region
+    "_endpoint",  # boto3.client.Client._endpoint contains s3 endpoint info
+    "_validate_props"  # called on troposphere resources
+]
+
+[tool.pylint.design]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#design-checker-options
+max-args = 10
+max-attributes = 20
+max-bool-expr = 5
+max-branches = 20
+max-locals = 25
+max-parents = 10
+max-public-methods = 30
+max-returns = 6
+max-statements = 50
+min-public-methods = 2
+
+[tool.pylint.format]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#format-checker
+max-line-length = 100
+max-module-lines = 1000
+
+[tool.pylint.imports]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#imports-checker
+allow-wildcard-with-all = "no"
+
+[tool.pylint.logging]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#logging-checker
+logging-format-style = "old"  # TODO update to new
+
+[tool.pylint.master]
+jobs = 0
+
+[tool.pylint.miscellaneous]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#miscellaneous-checker
+notes = ["FIXME"]
+
+[tool.pylint.message_control]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#messages-control-options
+disable = [
+    "line-too-long",  # flake8 overlap
+    "missing-class-docstring",  # flake8 (pydocstyle) overlap
+    "missing-function-docstring",  # flake8 (pydocstyle) overlap
+    "missing-module-docstring",  # flake8 (pydocstyle) overlap
+    "similarities",  # black overcomplicates this
+    # TODO fix these - python 3 only code
+    "raise-missing-from",
+]
+
+[tool.pylint.typecheck]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#typecheck-checker
+ignored-classes = [
+    "runway.config.ConfigComponent",
+    "runway.util.MutableMap"
+]
+ignored-modules = ["distutils"]
+
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov-config=pyproject.toml",
+    "--no-cov-on-fail"
+]
+minversion = 6.0
+filterwarnings = ["ignore::DeprecationWarning"]
+python_classes = ["Test*"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+testpaths = ["tests"]
+markers = [
+    "wip: isolate tests currently being worked on."
 ]

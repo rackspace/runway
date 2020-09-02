@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Module with app build pipeline."""
-from __future__ import print_function
-
 from os import path
 
 import awacs.awslambda

@@ -13,7 +13,7 @@ from runway.module.terraform import Terraform
 from runway.runway_module_type import RunwayModuleType
 
 
-class TestRunwayModuleType(object):
+class TestRunwayModuleType:
     """Test runway.runway_module_type.RunwayModuleType."""
 
     @pytest.mark.parametrize(

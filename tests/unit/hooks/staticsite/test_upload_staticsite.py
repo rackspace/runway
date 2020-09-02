@@ -1,5 +1,5 @@
 """Test runway.hooks.staticsite.upload_staticsite."""
-# pylint: disable=no-self-use,unused-import,too-few-public-methods
+# pylint: disable=no-self-use,too-few-public-methods
 import json
 
 import pytest
@@ -15,7 +15,7 @@ from runway.hooks.staticsite.upload_staticsite import (
 )
 
 
-class TestAutoDetectContentType(object):
+class TestAutoDetectContentType:
     """Test runway.hooks.staticsite.upload_staticsite.auto_detect_content_type."""
 
     @pytest.mark.parametrize(
@@ -35,7 +35,7 @@ class TestAutoDetectContentType(object):
         assert auto_detect_content_type(provided) == expected
 
 
-class TestGetContentType(object):
+class TestGetContentType:
     """Test runway.hooks.staticsite.upload_staticsite.get_content_type."""
 
     @pytest.mark.parametrize(
@@ -51,7 +51,7 @@ class TestGetContentType(object):
         assert get_content_type(provided) == expected
 
 
-class TestGetContent(object):
+class TestGetContent:
     """Test runway.hooks.staticsite.upload_staticsite.get_content."""
 
     def test_json_content(self):
@@ -83,7 +83,7 @@ class TestGetContent(object):
             get_content({"content": 123})
 
 
-class TestCalculateExtraFilesHash(object):
+class TestCalculateExtraFilesHash:
     """Test runway.hooks.staticsite.upload_staticsite.calculate_hash_of_extra_files."""
 
     @pytest.mark.parametrize(
@@ -102,7 +102,7 @@ class TestCalculateExtraFilesHash(object):
         assert calculate_hash_of_extra_files([a]) != calculate_hash_of_extra_files([b])
 
 
-class TestSyncExtraFiles(object):
+class TestSyncExtraFiles:
     """Test runway.hooks.staticsite.upload_staticsite.sync_extra_files."""
 
     def test_json_content(self, cfngin_context):

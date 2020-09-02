@@ -128,7 +128,7 @@ def _resolve_parameters(parameters, blueprint):
     return params
 
 
-class UsePreviousParameterValue(object):  # pylint: disable=too-few-public-methods
+class UsePreviousParameterValue:  # pylint: disable=too-few-public-methods
     """Class used to indicate a Parameter should use it's existing value."""
 
 

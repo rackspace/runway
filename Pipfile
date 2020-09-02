@@ -5,15 +5,15 @@ name = "pypi"
 
 [packages]
 runway = {editable = true, path = "."}
-# these don't get pulled into the lock correctly when using ^ with >=3.7
-pathlib2 = {version = ">=2.3.0", python_version = '<="3.4"'}
-importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}
+# importlib-resources doesn't get pulled into the lock correctly when used with >= 3.7
+importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}  # req of cfn-lint
 
 [dev-packages]
 # Format
-black = {version = "==19.10b0",python_version = '>="3.6"'}  # since its pre-release, it has to be pinned this way for pipenv to install it
+black = "==19.10b0"  # since its pre-release, it has to be pinned this way for pipenv to install it
+typed-ast = "~=1.4.1"  # curent usable version of pipenv incorrectly lock this to excludes >= 3.8
 # Lint
-isort = "~=5.4.2"  # v5 drops python 2 support
+isort = "~=5.4.2"
 pylint = "~=2.6.0"
 ## flake8
 flake8 = "~=3.8.2"
@@ -22,16 +22,16 @@ pep8-naming = "~=0.11"
 pydocstyle = "~=5.0.2"
 # Test
 coverage = {extras = ["toml"], version = "~=5.2.1"}
-pytest = "<5.0"  # last version that supports 2.7 - allows install with 2/3
+pytest = "~=6.0.1"
+pytest-subprocess = "~=1.0.0"
 pytest-cov = "~=2.10.1"
-py = "*"
-mock = "~=3.0.5"
+mock = "~=4.0.2"
 moto = "~=1.3"
 testfixtures = "~=4.10.0"
 # Build
 setuptools-scm = "~=3.5.0"
 # Utilities
-pre-commit = {version = "~=2.6.0", python_version = '>="3.6"'}
+pre-commit = "~=2.7.1"
 setuptools = "<49.2"  # https://github.com/microsoft/vscode-python/issues/12949
 # Windows only
 pywin32 = {version = "*", os_name = "== 'nt'"}

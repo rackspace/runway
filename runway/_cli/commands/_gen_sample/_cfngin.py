@@ -1,18 +1,13 @@
 """``runway gen-sample cfngin`` command."""
 import logging
 import shutil
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
 
 from ... import options
 from .utils import ROOT, TEMPLATES, copy_sample
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -35,9 +30,7 @@ def cfngin(ctx, **_):
 
     blueprints.mkdir()
     LOGGER.debug('copying blueprint from "%s" to "%s"', src_blueprints, blueprints)
-    shutil.copyfile(
-        str(src_blueprints / "__init__.py"), str(blueprints / "__init__.py")
-    )
-    shutil.copyfile(str(src_blueprints / "tf_state.py"), str(tf_state))
+    shutil.copyfile(src_blueprints / "__init__.py", blueprints / "__init__.py")
+    shutil.copyfile(src_blueprints / "tf_state.py", tf_state)
     tf_state.chmod(tf_state.stat().st_mode | 0o0111)
     LOGGER.success("Sample CFNgin module created at %s", dest)

@@ -2,10 +2,10 @@
 # pylint: disable=unused-argument
 import json
 import logging
-from typing import Any, Dict, Optional, Union  # pylint: disable=unused-import
+from typing import Any, Dict, Optional, Union
 
-from runway.cfngin.context import Context  # pylint: disable=unused-import
-from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
+from runway.cfngin.context import Context
+from runway.cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
