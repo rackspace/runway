@@ -1,6 +1,6 @@
 """AWS cli."""
 import logging
-from typing import List  # pylint: disable=W
+from typing import List
 
 from awscli.clidriver import create_clidriver
 

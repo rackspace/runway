@@ -1,13 +1,8 @@
 """Pytest configuration, fixtures, and plugins."""
 import os
-import sys
+from pathlib import Path
 
 import pytest
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 
 def pytest_addoption(parser):
@@ -40,8 +35,8 @@ def cd_tmp_path(tmp_path):
         Path: Temporary path object.
 
     """
-    prev_dir = os.getcwd()
-    os.chdir(str(tmp_path))
+    prev_dir = Path.cwd()
+    os.chdir(tmp_path)
     try:
         yield tmp_path
     finally:

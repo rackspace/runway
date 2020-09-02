@@ -1,6 +1,4 @@
 """Utility functions."""
-from __future__ import print_function
-
 import datetime
 import hashlib
 import importlib
@@ -11,25 +9,13 @@ import platform
 import re
 import stat
 import sys
-from contextlib import contextmanager
+from collections.abc import MutableMapping
+from contextlib import AbstractContextManager, contextmanager
 from decimal import Decimal
 from subprocess import check_call
-from typing import (  # noqa pylint: disable=unused-import
-    Any,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Union,
-)
+from typing import Any, Dict, Iterator, List, Optional, Union
 
-import six
 import yaml
-
-if sys.version_info >= (3, 6):
-    from contextlib import AbstractContextManager  # pylint: disable=E
-else:
-    AbstractContextManager = object
 
 AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
 DOC_SITE = "https://docs.onica.com/projects/runway"
@@ -37,7 +23,7 @@ EMBEDDED_LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "em
 
 
 # pylint: disable=invalid-name,too-few-public-methods
-class cached_property(object):  # noqa
+class cached_property:  # noqa
     """Decorator for creating cached properties.
 
     A property that is only computed once per instance and then replaces itself
@@ -101,11 +87,10 @@ class JsonEncoder(json.JSONEncoder):
             return float(o)
         if isinstance(o, (datetime.datetime, datetime.date)):
             return o.isoformat()
-        return super(JsonEncoder, self).default(o)
+        return super().default(o)
 
 
-# python2 supported pylint is unable to load six.moves correctly
-class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=no-member
+class MutableMap(MutableMapping):
     """Base class for mutable map objects."""
 
     def __init__(self, **kwargs):
@@ -228,8 +213,6 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         # type: () -> bool
         """Implement evaluation of 'in' conditional."""
         return value in self.data
-
-    __nonzero__ = __bool__  # python2 compatability
 
     def __getitem__(self, key):
         # type: (str) -> Any
@@ -440,15 +423,14 @@ class YamlDumper(yaml.Dumper):
 
     def increase_indent(self, flow=False, indentless=False):
         """Override parent method."""
-        return super(YamlDumper, self).increase_indent(flow, False)
+        return super().increase_indent(flow, False)
 
 
 @contextmanager
 def argv(*args):
     # type: (str) -> None
     """Context manager for temporarily changing sys.argv."""
-    # passing to list() creates a new instance
-    original_argv = list(sys.argv)  # TODO use .copy() after dropping python 2
+    original_argv = sys.argv.copy()
     try:
         sys.argv = list(args)  # convert tuple to list
         yield
@@ -541,11 +523,7 @@ def load_object_from_string(fqcn, try_reload=False):
             and module_path.split(".")[0]
             not in sys.builtin_module_names  # skip builtins
         ):
-            # TODO remove is next major release; backport circumvents expected functionality
-            #
-            # pylint<2.3.1 incorrectly identifies this
-            # pylint: disable=too-many-function-args
-            six.moves.reload_module(sys.modules[module_path])
+            importlib.reload(sys.modules[module_path])
         else:
             importlib.import_module(module_path)
     return getattr(sys.modules[module_path], object_name)
@@ -601,9 +579,7 @@ def merge_nested_environment_dicts(env_dicts, env_name=None, env_root=None):
     """Return single-level dictionary from dictionary of dictionaries."""
     # If the provided dictionary is just a single "level" (no nested
     # environments), it applies to all environments
-    if all(
-        isinstance(val, (six.string_types, list)) for (_key, val) in env_dicts.items()
-    ):
+    if all(isinstance(val, (str, list)) for (_key, val) in env_dicts.items()):
         return flatten_path_lists(env_dicts, env_root)
 
     if env_name is None:
@@ -680,7 +656,7 @@ def run_commands(
     if env is None:
         env = os.environ.copy()
     for step in commands:
-        if isinstance(step, (list, six.string_types)):
+        if isinstance(step, (list, str)):
             execution_dir = directory
             raw_command = step
         elif step.get("command"):  # dictionary
@@ -693,9 +669,7 @@ def run_commands(
         else:
             raise AttributeError("Invalid command step: %s" % step)
         command_list = (
-            raw_command.split(" ")
-            if isinstance(raw_command, six.string_types)
-            else raw_command
+            raw_command.split(" ") if isinstance(raw_command, str) else raw_command
         )
         if platform.system().lower() == "windows":
             command_list = fix_windows_command_list(command_list)
@@ -705,20 +679,11 @@ def run_commands(
                 'Attempted to run "%s" and failed to find it (are you sure it is '
                 "installed and added to your PATH?)" % command_list[0]
             )
-            if sys.version_info[0] < 3:
-                # Legacy exception version for python 2
-                try:
-                    check_call(command_list, env=env)
-                except OSError:
-                    print(failed_to_find_error, file=sys.stderr)
-                    sys.exit(1)
-            else:
-                try:
-                    check_call(command_list, env=env)
-                # The noqa/pylint overrides can be dropped alongside python 2
-                except FileNotFoundError:  # noqa pylint: disable=undefined-variable
-                    print(failed_to_find_error, file=sys.stderr)
-                    sys.exit(1)
+            try:
+                check_call(command_list, env=env)
+            except FileNotFoundError:
+                print(failed_to_find_error, file=sys.stderr)
+                sys.exit(1)
 
 
 def md5sum(filename):

@@ -1,6 +1,4 @@
 """Tests for Serverless."""
-from __future__ import print_function
-
 import os
 
 from send2trash import send2trash

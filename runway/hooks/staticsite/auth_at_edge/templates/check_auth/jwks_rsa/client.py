@@ -23,7 +23,7 @@ def is_signing_key(key):
     return key.get("x5c") or (key.get("n") and key.get("e"))
 
 
-class JwksClient(object):
+class JwksClient:
     """Client responsible for retrieval of JWKS signing keys."""
 
     def __init__(self, options=None):

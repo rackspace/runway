@@ -159,7 +159,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
 
             def defined_variables(self):
                 """Return defined variables."""
-                variables = super(TestBlueprintSubclass, self).defined_variables()
+                variables = super().defined_variables()
                 variables["Param2"]["default"] = 1
                 variables["Param3"] = {"default": 1, "type": int}
                 return variables

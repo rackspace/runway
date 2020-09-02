@@ -1,9 +1,8 @@
 """Runway context module."""
 import logging
 import sys
-from distutils.util import strtobool  # pylint: disable=E
-
-from six import string_types
+from distutils.util import strtobool
+from typing import Optional
 
 from .cfngin.session_cache import get_session
 from .core.components import DeployEnvironment
@@ -12,26 +11,25 @@ from .util import cached_property
 LOGGER = logging.getLogger(__name__)
 
 
-class Context(object):
+class Context:
     """Runway execution context."""
 
-    # TODO implement propper keyword-only args when dropping python 2
-    # def __init__(self,
-    #              *: Any,
-    #              command: Optional[str] = None,
-    #              deploy_environment: Optional[DeployEnvironment] = None
-    #              ) -> None:
-    def __init__(self, _=None, **kwargs):
+    def __init__(
+        self,
+        *,
+        command: Optional[str] = None,
+        deploy_environment: Optional[DeployEnvironment] = None
+    ) -> None:
         """Instantiate class.
 
-        Keywork Arguments:
+        Args:
             command (Optional[str]): Runway command/action being run.
             deploy_environment (Optional[DeployEnvironment]): Current
                 deploy environment.
 
         """
-        self.command = kwargs.pop("command", None)
-        self.env = kwargs.pop("deploy_environment", DeployEnvironment())
+        self.command = command
+        self.env = deploy_environment or DeployEnvironment()
         self.debug = self.env.debug
         # TODO remove after IaC tools support AWS SSO
         self.__inject_profile_credentials()
@@ -93,7 +91,7 @@ class Context(object):
         try:
             if isinstance(colorize, bool):  # catch False
                 return not colorize
-            if colorize and isinstance(colorize, string_types):
+            if colorize and isinstance(colorize, str):
                 return not strtobool(colorize)
         except ValueError:
             pass  # likely invalid RUNWAY_COLORIZE value
@@ -127,19 +125,6 @@ class Context(object):
         return self.env.ci
 
     @property
-    def is_python3(self):
-        # type: () -> bool
-        """Wether running in Python 3 or not.
-
-        Used for Python compatability decisions.
-
-        Returns:
-            bool
-
-        """
-        return sys.version_info.major > 2
-
-    @property
     def use_concurrent(self):
         # type: () -> bool
         """Wether to use concurrent.futures or not.
@@ -155,9 +140,7 @@ class Context(object):
 
         """
         if self.is_noninteractive:
-            if self.is_python3:
-                return True
-            LOGGER.warning("Parallel execution disabled; Python 3+ is required")
+            return True
         LOGGER.warning("Parallel execution disabled; not running in CI mode")
         return False
 

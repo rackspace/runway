@@ -3,9 +3,7 @@ import argparse
 import logging
 import signal
 import threading
-
-# pylint false positive
-from six.moves.collections_abc import Mapping  # pylint: disable=E
+from collections.abc import Mapping
 
 from ...environment import parse_environment
 
@@ -47,9 +45,7 @@ class KeyValueAction(argparse.Action):  # pylint: disable=too-few-public-methods
         if nargs:
             raise ValueError("nargs not allowed")
         default = default or {}
-        super(KeyValueAction, self).__init__(
-            option_strings, dest, nargs, default=default, **kwargs
-        )
+        super().__init__(option_strings, dest, nargs, default=default, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
         """Call class directly."""
@@ -75,7 +71,7 @@ def environment_file(input_file):
         return parse_environment(file_.read())
 
 
-class BaseCommand(object):
+class BaseCommand:
     """Base class for all CFNgin subcommands.
 
     The way argparse handles common arguments that should be passed to the

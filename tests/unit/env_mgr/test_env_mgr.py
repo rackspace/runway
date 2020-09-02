@@ -5,7 +5,7 @@ from mock import MagicMock
 from runway.env_mgr import EnvManager
 
 
-class TestEnvManager(object):
+class TestEnvManager:
     """Test runway.env_mgr.EnvManager."""
 
     def test_bin(self, platform_darwin, cd_tmp_path, monkeypatch):

@@ -1,7 +1,7 @@
 """Refresh authorization token for new credentials."""
 import logging
 import traceback
-from urllib.parse import parse_qs  # noqa pylint: disable=E
+from urllib.parse import parse_qs
 
 from shared import (  # noqa pylint: disable=import-error
     create_error_html,

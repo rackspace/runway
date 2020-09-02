@@ -2,18 +2,14 @@
 import logging
 import runpy
 import sys
-from typing import Any, Dict  # noqa pylint: disable=W
+from pathlib import Path
+from typing import Any, Dict
 
 import yaml
 
 from ..._logging import PrefixAdaptor
 from ...util import argv
 from .base import TestHandler
-
-if sys.version_info.major < 3:
-    from pathlib2 import Path  # pylint: disable=E
-else:
-    from pathlib import Path  # pylint: disable=E
 
 TYPE_NAME = "cfn-lint"
 LOGGER = logging.getLogger(__name__)

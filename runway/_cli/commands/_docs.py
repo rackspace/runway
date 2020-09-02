@@ -2,7 +2,7 @@
 # docs: file://./../../../docs/source/commands.rst
 import logging
 import os
-from typing import Any  # pylint: disable=W
+from typing import Any
 
 import click
 

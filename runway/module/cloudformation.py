@@ -29,7 +29,7 @@ class CloudFormation(RunwayModule):
                 definition.
 
         """
-        super(CloudFormation, self).__init__(context, path, options)
+        super().__init__(context, path, options)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 

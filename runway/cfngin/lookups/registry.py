@@ -1,8 +1,6 @@
 """CFNgin lookup registry."""
 import logging
 
-from six import string_types
-
 from runway.lookups.handlers import cfn, ssm
 from runway.util import DOC_SITE, load_object_from_string
 
@@ -26,7 +24,7 @@ def register_lookup_handler(lookup_type, handler_or_path):
     """
     handler = handler_or_path
     LOGGER.debug("registering CFNgin lookup: %s=%s", lookup_type, handler_or_path)
-    if isinstance(handler_or_path, string_types):
+    if isinstance(handler_or_path, str):
         handler = load_object_from_string(handler_or_path)
     CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
     if not isinstance(handler, type):

@@ -18,7 +18,7 @@ class ChangesetDidNotStabilize(Exception):
         self.id = change_set_id
         message = "Changeset '%s' did not reach a completed state." % (change_set_id)
 
-        super(ChangesetDidNotStabilize, self).__init__(message)
+        super().__init__(message)
 
 
 class FailedLookup(Exception):
@@ -41,7 +41,7 @@ class FailedLookup(Exception):
         """
         self.lookup = lookup
         self.error = error
-        super(FailedLookup, self).__init__("Failed lookup", *args, **kwargs)
+        super().__init__("Failed lookup", *args, **kwargs)
 
 
 class FailedVariableLookup(Exception):
@@ -67,7 +67,7 @@ class FailedVariableLookup(Exception):
         message = "Couldn't resolve lookup in variable `%s`, " % variable_name
         message += "lookup: ${%s}: " % repr(lookup)
         message += "(%s) %s" % (error.__class__, error)
-        super(FailedVariableLookup, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class GraphError(Exception):
@@ -89,7 +89,7 @@ class GraphError(Exception):
         message = "Error detected when adding '{}' as a dependency of '{}': {}".format(
             dependency, stack, str(exception),
         )
-        super(GraphError, self).__init__(message)
+        super().__init__(message)
 
 
 class ImproperlyConfigured(Exception):
@@ -105,7 +105,7 @@ class ImproperlyConfigured(Exception):
 
         """
         message = 'Class "%s" is improperly configured: %s' % (cls, error,)
-        super(ImproperlyConfigured, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class InvalidConfig(Exception):
@@ -119,7 +119,7 @@ class InvalidConfig(Exception):
                 messages that are raised to identify that a config is invalid.
 
         """
-        super(InvalidConfig, self).__init__(errors)
+        super().__init__(errors)
         self.errors = errors
 
 
@@ -134,7 +134,7 @@ class InvalidDockerizePipConfiguration(Exception):
 
         """
         self.message = msg
-        super(InvalidDockerizePipConfiguration, self).__init__(self.message)
+        super().__init__(self.message)
 
 
 class InvalidLookupCombination(Exception):
@@ -155,7 +155,7 @@ class InvalidLookupCombination(Exception):
             'Lookup: "{}" has non-string return value, must be only lookup '
             'present (not {}) in "{}"'
         ).format(str(lookup), len(lookups), value)
-        super(InvalidLookupCombination, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class InvalidLookupConcatenation(Exception):
@@ -171,7 +171,7 @@ class InvalidLookupConcatenation(Exception):
         """Instantiate class."""
         self.lookup = lookup
         self.lookups = lookups
-        super(InvalidLookupConcatenation, self).__init__("", *args, **kwargs)
+        super().__init__("", *args, **kwargs)
 
 
 class InvalidUserdataPlaceholder(Exception):
@@ -194,7 +194,7 @@ class InvalidUserdataPlaceholder(Exception):
         message = exception_message + ". "
         message += 'Could not parse userdata in blueprint "%s". ' % (blueprint_name)
         message += "Make sure to escape all $ symbols with a $$."
-        super(InvalidUserdataPlaceholder, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class MissingEnvironment(Exception):
@@ -210,7 +210,7 @@ class MissingEnvironment(Exception):
         """
         self.key = key
         message = "Environment missing key %s." % (key,)
-        super(MissingEnvironment, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class MissingParameterException(Exception):
@@ -227,7 +227,7 @@ class MissingParameterException(Exception):
         message = "Missing required cloudformation parameters: %s" % (
             ", ".join(parameters),
         )
-        super(MissingParameterException, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class MissingVariable(Exception):
@@ -245,7 +245,7 @@ class MissingVariable(Exception):
             variable_name,
             blueprint_name,
         )
-        super(MissingVariable, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class OutputDoesNotExist(Exception):
@@ -263,7 +263,7 @@ class OutputDoesNotExist(Exception):
         self.output = output
 
         message = "Output %s does not exist on stack %s" % (output, stack_name)
-        super(OutputDoesNotExist, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class PipError(Exception):
@@ -275,7 +275,7 @@ class PipError(Exception):
             "A non-zero exit code was returned when invoking "
             "pip. More information can be found in the error above."
         )
-        super(PipError, self).__init__(self.message)
+        super().__init__(self.message)
 
 
 class PipenvError(Exception):
@@ -289,7 +289,7 @@ class PipenvError(Exception):
             "Pipfile being used is valid. More information can be "
             "found in the error above."
         )
-        super(PipenvError, self).__init__(self.message)
+        super().__init__(self.message)
 
 
 class PersistentGraphCannotLock(Exception):
@@ -298,7 +298,7 @@ class PersistentGraphCannotLock(Exception):
     def __init__(self, reason):
         """Instantiate class."""
         message = "Could not lock persistent graph; %s" % reason
-        super(PersistentGraphCannotLock, self).__init__(message)
+        super().__init__(message)
 
 
 class PersistentGraphCannotUnlock(Exception):
@@ -307,7 +307,7 @@ class PersistentGraphCannotUnlock(Exception):
     def __init__(self, reason):
         """Instantiate class."""
         message = "Could not unlock persistent graph; %s" % reason
-        super(PersistentGraphCannotUnlock, self).__init__(message)
+        super().__init__(message)
 
 
 class PersistentGraphLocked(Exception):
@@ -324,7 +324,7 @@ class PersistentGraphLocked(Exception):
                 reason
                 or ("This action requires the graph to be unlocked to be executed.")
             )
-        super(PersistentGraphLocked, self).__init__(message)
+        super().__init__(message)
 
 
 class PersistentGraphLockCodeMissmatch(Exception):
@@ -341,7 +341,7 @@ class PersistentGraphLockCodeMissmatch(Exception):
             "The provided lock code '%s' does not match the S3 "
             "object lock code '%s'" % (provided_code, s3_code)
         )
-        super(PersistentGraphLockCodeMissmatch, self).__init__(message)
+        super().__init__(message)
 
 
 class PersistentGraphUnlocked(Exception):
@@ -358,7 +358,7 @@ class PersistentGraphUnlocked(Exception):
                 reason
                 or ("This action requires the graph to be locked to be executed.")
             )
-        super(PersistentGraphUnlocked, self).__init__(message)
+        super().__init__(message)
 
 
 class PlanFailed(Exception):
@@ -377,7 +377,7 @@ class PlanFailed(Exception):
         step_names = ", ".join(step.name for step in failed_steps)
         message = "The following steps failed: %s" % (step_names,)
 
-        super(PlanFailed, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class StackDidNotChange(Exception):
@@ -398,7 +398,7 @@ class StackDoesNotExist(Exception):
             'Stack: "%s" does not exist in outputs or the lookup is '
             "not available in this CFNgin run"
         ) % (stack_name,)
-        super(StackDoesNotExist, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class StackUpdateBadStatus(Exception):
@@ -420,7 +420,7 @@ class StackUpdateBadStatus(Exception):
             'Stack: "%s" cannot be updated nor re-created from state '
             "%s: %s" % (stack_name, stack_status, reason)
         )
-        super(StackUpdateBadStatus, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class StackFailed(Exception):
@@ -444,7 +444,7 @@ class StackFailed(Exception):
         message = 'Stack "{}" failed'.format(stack_name)
         if status_reason:
             message += ' with reason "{}"'.format(status_reason)
-        super(StackFailed, self).__init__(message)
+        super().__init__(message)
 
 
 class UnableToExecuteChangeSet(Exception):
@@ -468,7 +468,7 @@ class UnableToExecuteChangeSet(Exception):
             change_set_id, stack_name, execution_status,
         )
 
-        super(UnableToExecuteChangeSet, self).__init__(message)
+        super().__init__(message)
 
 
 class UnhandledChangeSetStatus(Exception):
@@ -497,7 +497,7 @@ class UnhandledChangeSetStatus(Exception):
             "'%s: %s'." % (change_set_id, stack_name, status, status_reason)
         )
 
-        super(UnhandledChangeSetStatus, self).__init__(message)
+        super().__init__(message)
 
 
 class UnknownLookupType(Exception):
@@ -517,7 +517,7 @@ class UnknownLookupType(Exception):
 
         """
         message = 'Unknown lookup type: "{}"'.format(lookup_type)
-        super(UnknownLookupType, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class UnresolvedVariable(Exception):
@@ -536,7 +536,7 @@ class UnresolvedVariable(Exception):
         message = 'Variable "{}" in blueprint "{}" hasn\'t been resolved'.format(
             variable.name, blueprint_name,
         )
-        super(UnresolvedVariable, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class UnresolvedVariableValue(Exception):
@@ -557,9 +557,7 @@ class UnresolvedVariableValue(Exception):
 
         """
         self.lookup = lookup
-        super(UnresolvedVariableValue, self).__init__(
-            "Unresolved lookup", *args, **kwargs
-        )
+        super().__init__("Unresolved lookup", *args, **kwargs)
 
 
 class UnresolvedVariables(Exception):
@@ -576,7 +574,7 @@ class UnresolvedVariables(Exception):
         message = "Blueprint: \"{}\" hasn't resolved it's variables".format(
             blueprint_name
         )
-        super(UnresolvedVariables, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
 
 
 class ValidatorError(Exception):
@@ -606,7 +604,7 @@ class ValidatorError(Exception):
                 self.exception.__class__.__name__,
                 str(self.exception),
             )
-        super(ValidatorError, self).__init__()
+        super().__init__()
 
     def __str__(self):
         """Return the exception's message when converting to a string."""
@@ -627,4 +625,4 @@ class VariableTypeRequired(Exception):
         message = 'Variable "{}" in blueprint "{}" does not have a type'.format(
             variable_name, blueprint_name,
         )
-        super(VariableTypeRequired, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)

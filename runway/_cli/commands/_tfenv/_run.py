@@ -2,7 +2,7 @@
 # docs: file://./../../../../docs/source/commands.rst
 import logging
 import subprocess
-from typing import Any, Tuple  # noqa pylint: disable=W
+from typing import Any, Tuple
 
 import click
 

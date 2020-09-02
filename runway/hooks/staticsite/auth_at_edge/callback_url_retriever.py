@@ -6,11 +6,11 @@ callback urls are retrieved or a temporary one is used in it's place.
 """
 # pylint: disable=unused-argument
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional  # pylint: disable=W
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context  # pylint: disable=W
-    from ....cfngin.providers.base import BaseProvider  # pylint: disable=W
+    from ....cfngin.context import Context
+    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 

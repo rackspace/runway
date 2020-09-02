@@ -17,7 +17,7 @@ class Build(BaseCommand):
 
     def add_arguments(self, parser):
         """Add arguments."""
-        super(Build, self).add_arguments(parser)
+        super().add_arguments(parser)
         self._add_argument_max_parallel(parser)
         self._add_argument_tail(parser)
         parser.add_argument(
@@ -57,7 +57,7 @@ class Build(BaseCommand):
 
     def run(self, options):
         """Run the command."""
-        super(Build, self).run(options)
+        super().run(options)
         action = build.Action(
             options.context, provider_builder=options.provider_builder, cancel=cancel()
         )

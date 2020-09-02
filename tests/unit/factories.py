@@ -1,14 +1,9 @@
 """Test classes."""
-import io
-import os
-import sys
-
 import boto3
 import yaml
 from botocore.stub import Stubber
 from mock import MagicMock
 from packaging.specifiers import SpecifierSet
-from six import string_types
 
 from runway.cfngin.context import Context as CFNginContext
 from runway.config import DeploymentDefinition
@@ -17,7 +12,7 @@ from runway.core.components import DeployEnvironment
 from runway.util import MutableMap
 
 
-class MockBoto3Session(object):
+class MockBoto3Session:
     """Mock class that acts like a boto3.session.
 
     Must be preloaded with stubbers.
@@ -117,7 +112,7 @@ class MockCFNginContext(CFNginContext):
         self.__boto3_credentials = boto3_credentials
         self.s3_stubber = self.add_stubber("s3", region=region)
 
-        super(MockCFNginContext, self).__init__(
+        super().__init__(
             environment=environment,
             boto3_credentials=boto3_credentials,
             stack_names=stack_names,
@@ -152,74 +147,12 @@ class MockCFNginContext(CFNginContext):
         )
 
 
-# TODO use pytest-subprocess for when dropping python 2
-class MockProcess(object):  # pylint: disable=too-few-public-methods
-    """Instances of this class are the return_value of patched subprocess.Popen."""
-
-    def __init__(self, returncode=0, stdout=None, universal_newlines=True):
-        """Instantiate class.
-
-        Args:
-            returncode (int): Code that will be returned when the process exits.
-            stdout (Optional[Union[bytes, str, List[str], Tuple(str, ...)]]): Content
-                to be written accessable as stdout on the process.
-            universal_newlines (bool): Use universal line endings.
-
-        """
-        self.returncode = returncode
-        self.text_mode = bool(universal_newlines)
-        self.stdout = self._prepare_buffer(stdout)
-
-        self._wait = MagicMock(return_value=self.returncode)
-
-    @property
-    def wait(self):
-        """Mock wait method as a property to call the stored MagicMock."""
-        return self._wait
-
-    def _prepare_buffer(self, data):
-        """Prepare buffer for stdout/stderr.
-
-        Args:
-            data (Optional[Union[bytes, str, List[str], Tuple(str, ...)]]):
-                Content to be written accessable as stdout on the process.
-
-        Returns:
-            Union[BytesIO, StringIO]
-
-        """
-        result = None
-        linesep = os.linesep
-
-        if isinstance(data, (list, tuple)):
-            result = linesep.join(data)
-
-        if isinstance(data, string_types):
-            result = data
-
-        if result:
-            if not result.endswith(linesep):
-                result += linesep
-            if self.text_mode:
-                result.replace("\r\n", "\n")
-
-        io_base = io.StringIO() if self.text_mode else io.BytesIO()
-
-        if result:
-            if sys.version_info.major < 3:
-                io_base.write(result.decode("UTF-8"))
-            else:
-                io_base.write(result)
-            io_base.seek(0)  # return to the begining of the stream
-        return io_base
-
-
 class MockRunwayConfig(MutableMap):
     """Mock Runway config object."""
 
     def __init__(self, **kwargs):
         """Instantiate class."""
-        super(MockRunwayConfig, self).__init__()
+        super().__init__()
         self._kwargs = kwargs
         self.deployments = []
         self.future = MagicMock()
@@ -247,9 +180,7 @@ class MockRunwayContext(RunwayContext):
         """Instantiate class."""
         if not deploy_environment:
             deploy_environment = DeployEnvironment(environ={}, explicit_name="test")
-        super(MockRunwayContext, self).__init__(
-            command=command, deploy_environment=deploy_environment
-        )
+        super().__init__(command=command, deploy_environment=deploy_environment)
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True
@@ -296,7 +227,7 @@ class MockRunwayContext(RunwayContext):
         self._use_concurrent = value
 
 
-class YamlLoader(object):
+class YamlLoader:
     """Load YAML files from a directory."""
 
     def __init__(self, root, load_class=None, load_type="default"):
@@ -325,10 +256,7 @@ class YamlLoader(object):
         """
         if not file_name.endswith(".yml") or not file_name.endswith(".yaml"):
             file_name += ".yml"
-        if sys.version_info.major > 2:
-            content = (self.root / file_name).read_text()
-        else:
-            content = (self.root / file_name).read_text().decode()
+        content = (self.root / file_name).read_text()
         return yaml.safe_load(content)
 
     def load(self, file_name):
@@ -360,7 +288,7 @@ class YamlLoaderDeploymet(YamlLoader):
             root (Path): Root directory.
 
         """
-        super(YamlLoaderDeploymet, self).__init__(root, load_class=DeploymentDefinition)
+        super().__init__(root, load_class=DeploymentDefinition)
 
     def load(self, file_name):
         """Load YAML file contents.

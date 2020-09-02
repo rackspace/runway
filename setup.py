@@ -22,7 +22,6 @@ INSTALL_REQUIRES = [
     "awacs",  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
     "awscli>=1.16.308<2.0",
-    'backports.tempfile; python_version < "3.2"',
     "botocore>=1.12.111",  # matching awscli/boto3 requirement
     "boto3>=1.9.111<2.0",
     "cfn_flip>=1.2.1",  # 1.2.1+ require PyYAML 4.1+
@@ -31,25 +30,19 @@ INSTALL_REQUIRES = [
     "coloredlogs",
     "docker",
     "requests",
-    "future",
     "pyhcl~=0.4",  # does not support HCL2, possibly move to extras_require in the future
-    'python-hcl2>=0.3.0,<1.0.0; python_version >= "3.6"',  # only support >=3.6
+    "python-hcl2>=0.3.0,<1.0.0",
     "gitpython",
     'importlib-metadata; python_version < "3.8"',
     "packaging",  # component of setuptools needed for version compare
     "pyOpenSSL",  # For embedded hook & associated script usage
     "PyYAML>=4.1,<5.3",  # match awscli top-end
-    "six>=1.13.0",
-    'typing;python_version<"3.5"',
     "yamllint",
     "zgitignore",  # for embedded hooks
     "troposphere>=2.4.2",
     # botocore pins its urllib3 dependency like this, so we need to do the
     # same to ensure v1.25+ isn't pulled in by pip
     "urllib3>=1.20,<1.25",
-    # dependency of importlib-metadata, dependency of pytest, cfn-lint, & others
-    # 2.0.0 drops support for python 3.5
-    "zipp~=1.0.0",
     # inherited from stacker 1.7.0 requirements
     "jinja2>=2.7,<3.0",
     "schematics>=2.0.1,<2.1.0",
@@ -71,13 +64,12 @@ setup(
         "Topic :: Utilities",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
-    python_requires=">=2.6",
+    python_requires=">=3.6",
     keywords="cli",
     packages=find_packages(exclude=("integration*", "tests*")),
     install_requires=INSTALL_REQUIRES,

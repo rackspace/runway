@@ -39,7 +39,7 @@ def get_fqn(base_fqn, delimiter, name=None):
     return delimiter.join([_f for _f in [base_fqn, name] if _f])
 
 
-class Context(object):
+class Context:
     """The context under which the current stacks are being executed.
 
     The CFNgin Context is responsible for translating the values passed in

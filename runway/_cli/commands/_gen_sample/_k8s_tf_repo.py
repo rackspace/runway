@@ -1,18 +1,13 @@
 """``runway gen-sample k8s-tf`` command."""
 import logging
 import shutil
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample, write_tfstate_template
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -32,7 +27,7 @@ def k8s_tf_repo(ctx, **_):
 
     copy_sample(ctx, src, dest)
     LOGGER.debug('copying "%s" to "%s"', src_awscli, dest_awscli)
-    shutil.copyfile(str(src_awscli), str(dest_awscli))
+    shutil.copyfile(src_awscli, dest_awscli)
     convert_gitignore(dest / "_gitignore")
 
     tfstate_dir = dest / "tfstate.cfn/templates"

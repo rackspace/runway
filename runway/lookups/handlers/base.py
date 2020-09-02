@@ -88,32 +88,22 @@ Common Lookup Arguments
 """
 import json
 import logging
-from distutils.util import strtobool  # pylint: disable=E
-from typing import (  # noqa: F401 pylint: disable=W
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Optional,
-    Tuple,
-    Union,
-)
+from distutils.util import strtobool
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import yaml
-from six import string_types
 from troposphere import BaseAWSObject
 
 from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
 
-# python2 supported pylint sees this is cyclic even though its only for type checking
-# pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from ...context import Context  # noqa: F401 pylint: disable=unused-import
+    from ...context import Context
 
 LOGGER = logging.getLogger(__name__)
 
 
-class LookupHandler(object):
+class LookupHandler:
     """Base class for lookup handlers."""
 
     @classmethod
@@ -378,7 +368,7 @@ class LookupHandler(object):
         """
         if isinstance(value, bool):
             return value
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             return bool(strtobool(value))
         raise TypeError(
             "Value must be a string or bool to use transform=bool. Got type {}.".format(
