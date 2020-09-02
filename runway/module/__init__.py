@@ -4,15 +4,10 @@ import os
 import platform
 import subprocess
 import sys
-
-import six
+from collections.abc import MutableMapping
+from pathlib import Path
 
 from ..util import merge_nested_environment_dicts, which
-
-if sys.version_info[0] > 2:  # TODO remove after droping python 2
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__)
 NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
@@ -99,7 +94,7 @@ def warn_on_boto_env_vars(env_vars):
         )
 
 
-class RunwayModule(object):
+class RunwayModule:
     """Base class for Runway modules."""
 
     def __init__(self, context, path, options=None):
@@ -166,7 +161,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
         """
         options = options or {}
-        super(RunwayModuleNpm, self).__init__(context, path, options)
+        super().__init__(context, path, options)
         del self.options  # remove the attr set by the parent class
 
         # potential future state of RunwayModule attributes in a future release
@@ -208,7 +203,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         if self.options.get("skip_npm_ci"):
             self.logger.info("skipped npm ci/npm install")
             return
-        if self.context.is_noninteractive and use_npm_ci(str(self.path)):
+        if self.context.is_noninteractive and use_npm_ci(self.path):
             self.logger.info("running npm ci...")
             cmd[1] = "ci"
         else:
@@ -229,9 +224,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         return False
 
 
-class ModuleOptions(
-    six.moves.collections_abc.MutableMapping
-):  # pylint: disable=no-member
+class ModuleOptions(MutableMapping):
     """Base class for Runway module options."""
 
     @staticmethod
@@ -246,7 +239,7 @@ class ModuleOptions(
             Any
 
         """
-        if isinstance(data, (list, type(None), six.string_types)):
+        if isinstance(data, (list, type(None), str)):
             return data
         if isinstance(data, dict):
             return {

@@ -7,7 +7,6 @@ from awacs import ecs
 from awacs.aws import Allow, Policy, Statement
 from awacs.helpers.trust import get_ecs_assumerole_policy
 from botocore.exceptions import ClientError
-from six.moves import input
 
 from ..session_cache import get_session
 from . import utils

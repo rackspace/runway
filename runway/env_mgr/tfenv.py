@@ -8,21 +8,16 @@ import shutil
 import sys
 import tempfile
 import zipfile
-from distutils.version import LooseVersion  # noqa pylint: disable=E
+from distutils.version import LooseVersion
+from urllib.error import URLError
+from urllib.request import urlretrieve
 
 import hcl
+import hcl2
 import requests
-from six.moves.urllib.error import URLError  # pylint: disable=E
-from six.moves.urllib.request import urlretrieve  # pylint: disable=E
 
 from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
-
-# TODO remove condition and import-error when dropping python 2
-if sys.version_info >= (3, 6):
-    import hcl2  # pylint: disable=import-error
-else:
-    hcl2 = None  # pylint: disable=invalid-name
 
 LOGGER = logging.getLogger(__name__)
 TF_VERSION_FILENAME = ".terraform-version"
@@ -133,7 +128,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(TFEnvManager, self).__init__("terraform", "tfenv", path)
+        super().__init__("terraform", "tfenv", path)
 
     @cached_property
     def backend(self):
@@ -185,17 +180,14 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
                     data[attr] = _flatten_lists(val)
             return data
 
-        result = None
-        if hcl2:  # TODO remove condition when dropping python 2
-            try:
-                result = load_terrafrom_module(hcl2, self.path).get("terraform", {})
-            except Exception:  # pylint: disable=broad-except
-                # could result in any number of lark exceptions
-                LOGGER.verbose(
-                    "failed to parse as HCL2; trying HCL",
-                    exc_info=True,  # useful in troubleshooting
-                )
-        if result is None:
+        try:
+            result = load_terrafrom_module(hcl2, self.path).get("terraform", {})
+        except Exception:  # pylint: disable=broad-except
+            # could result in any number of lark exceptions
+            LOGGER.verbose(
+                "failed to parse as HCL2; trying HCL",
+                exc_info=True,  # useful in troubleshooting
+            )
             result = load_terrafrom_module(hcl, self.path).get("terraform", {})
 
         # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.

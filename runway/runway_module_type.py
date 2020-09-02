@@ -1,17 +1,16 @@
 """Abstraction for the module 'type' value in a a Runway configuration."""
-# pylint: disable=unused-import
 import glob
 import logging
 import os
 import sys
-from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
+from typing import Optional
 
 from .util import load_object_from_string
 
 LOGGER = logging.getLogger(__name__)
 
 
-class RunwayModuleType(object):  # noqa pylint: disable=too-few-public-methods
+class RunwayModuleType:  # noqa pylint: disable=too-few-public-methods
     """Runway configuration ``type`` settings object.
 
     The ``type`` property of a Runway configuration can be

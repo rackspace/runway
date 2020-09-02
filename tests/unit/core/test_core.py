@@ -10,7 +10,7 @@ from runway.core import Runway
 MODULE = "runway.core"
 
 
-class TestRunway(object):
+class TestRunway:
     """Test runway.core.Runway."""
 
     def test_init(self, runway_config, runway_context):

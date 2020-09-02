@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Module with Terraform state resources."""
-from __future__ import print_function
-
 import awacs.dynamodb
 import awacs.s3
 from awacs.aws import Allow, PolicyDocument, Statement

@@ -10,7 +10,7 @@ from runway.cfngin.context import Context
 Lookup = namedtuple("Lookup", ("type", "input", "raw"))
 
 
-class MockThreadingEvent(object):  # pylint: disable=too-few-public-methods
+class MockThreadingEvent:  # pylint: disable=too-few-public-methods
     """Mock thread events."""
 
     def wait(self, timeout=None):
@@ -18,7 +18,7 @@ class MockThreadingEvent(object):  # pylint: disable=too-few-public-methods
         return False
 
 
-class MockProviderBuilder(object):  # pylint: disable=too-few-public-methods
+class MockProviderBuilder:  # pylint: disable=too-few-public-methods
     """Mock provider builder."""
 
     def __init__(self, provider, region=None):
@@ -66,7 +66,7 @@ def mock_lookup(lookup_input, lookup_type, raw=None):
     return Lookup(type=lookup_type, input=lookup_input, raw=raw)
 
 
-class SessionStub(object):  # pylint: disable=too-few-public-methods
+class SessionStub:  # pylint: disable=too-few-public-methods
     """Stubber class for boto3 sessions made with session_cache.get_session().
 
     This is a helper class that should be used when trying to stub out

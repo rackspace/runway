@@ -2,7 +2,7 @@
 # pylint: disable=invalid-name,len-as-condition
 
 
-class TroposphereType(object):
+class TroposphereType:
     """Represents a Troposphere type.
 
     :class:`Troposphere` will convert the value provided to the variable to
@@ -110,7 +110,7 @@ class TroposphereType(object):
         return result[0] if not self._many else result
 
 
-class CFNType(object):  # pylint: disable=too-few-public-methods
+class CFNType:  # pylint: disable=too-few-public-methods
     """Represents a CloudFormation Parameter Type.
 
     :class:`CFNType` can be used as the ``type`` for a Blueprint variable.

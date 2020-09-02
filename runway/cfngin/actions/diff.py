@@ -21,7 +21,7 @@ from .base import build_walker
 LOGGER = logging.getLogger(__name__)
 
 
-class DictValue(object):
+class DictValue:
     """Used to create a diff of two dictionaries."""
 
     ADDED = "ADDED"

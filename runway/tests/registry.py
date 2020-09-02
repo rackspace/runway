@@ -1,7 +1,5 @@
 """Register test handlers."""
 # modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
-from past.builtins import basestring
-
 from ..util import load_object_from_string
 from .handlers import cfn_lint, script
 from .handlers import yaml_lint as yamllint
@@ -18,7 +16,7 @@ def register_test_handler(test_type, handler_or_path):
 
     """
     handler = handler_or_path
-    if isinstance(handler_or_path, basestring):
+    if isinstance(handler_or_path, str):
         handler = load_object_from_string(handler_or_path)
     TEST_HANDLERS[test_type] = handler
 

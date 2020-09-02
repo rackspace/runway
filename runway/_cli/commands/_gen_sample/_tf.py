@@ -1,18 +1,13 @@
 """``runway gen-sample tf`` command."""
 import logging
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import Any
 
 import click
 
 from ....env_mgr.tfenv import get_latest_tf_version
 from ... import options
 from .utils import TEMPLATES, copy_sample
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

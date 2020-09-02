@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Module with static website supporting infrastructure."""
-from __future__ import print_function
-
 import logging
 
 import awacs.s3

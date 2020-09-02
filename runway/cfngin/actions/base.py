@@ -73,7 +73,7 @@ def stack_template_url(bucket_name, blueprint, endpoint):
     return "%s/%s/%s" % (endpoint, bucket_name, key_name)
 
 
-class BaseAction(object):
+class BaseAction:
     """Actions perform the actual work of each Command.
 
     Each action is tied to a :class:`runway.cfngin.commands.stacker.base.BaseCommand`,
