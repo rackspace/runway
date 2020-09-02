@@ -75,7 +75,7 @@ class AuthAtEdge(StaticSite):
             description (Union(None, str)): The description of the stack.
 
         """
-        super(AuthAtEdge, self).__init__(name, context, mappings, description)
+        super().__init__(name, context, mappings, description)
         self.VARIABLES.update(StaticSite.VARIABLES)
         self.VARIABLES.update(self.AUTH_VARIABLES)
 

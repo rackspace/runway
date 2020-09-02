@@ -148,7 +148,6 @@ disable = [
     "similarities",  # black overcomplicates this
     # TODO fix these - python 3 only code
     "raise-missing-from",
-    "super-with-arguments",
 ]
 
 [tool.pylint.typecheck]

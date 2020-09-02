@@ -65,7 +65,7 @@ class Certificate(Hook):
 
         """
         kwargs.setdefault("ttl", 300)
-        super(Certificate, self).__init__(context, provider, **kwargs)
+        super().__init__(context, provider, **kwargs)
 
         self.template_description = self.get_template_description()
         self.stack_name = self.args.get(

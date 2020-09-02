@@ -89,7 +89,7 @@ class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(KBEnvManager, self).__init__("kubectl", "kbenv", path)
+        super().__init__("kubectl", "kbenv", path)
 
     def install(self, version_requested=None):
         """Ensure kubectl is available."""

@@ -64,7 +64,7 @@ class Terraform(RunwayModule):
 
         """
         options = options or {}
-        super(Terraform, self).__init__(context.copy(), path, options)
+        super().__init__(context.copy(), path, options)
         del self.options  # remove the attr set by the parent class
 
         # logger needs to be created here to use the correct logger
@@ -512,7 +512,7 @@ class TerraformOptions(ModuleOptions):
                 instead of updating environment variables.
 
         """
-        super(TerraformOptions, self).__init__()
+        super().__init__()
         self.args = self._parse_args(args)
         self.backend_config = backend
         self.write_auto_tfvars = write_auto_tfvars
@@ -626,7 +626,7 @@ class TerraformBackendConfig(ModuleOptions):
         https://www.terraform.io/docs/backends/types/index.html
 
         """
-        super(TerraformBackendConfig, self).__init__()
+        super().__init__()
         self.__ctx = context
         self._raw_config = kwargs
         self.config_file = config_file

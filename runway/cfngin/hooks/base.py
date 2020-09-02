@@ -240,7 +240,7 @@ class HookBuildAction(build.Action):
                 The provider instance.
 
         """
-        super(HookBuildAction, self).__init__(context)
+        super().__init__(context)
         self._provider = provider
 
     @property
@@ -291,7 +291,7 @@ class HookStackDefinition(UserDict):
             "variables": None,
         }
         values.update(kwargs)
-        super(HookStackDefinition, self).__init__(**values)
+        super().__init__(**values)
 
     def __getattr__(self, key):
         """Implement dot notation."""

@@ -33,7 +33,7 @@ class StaticSite(RunwayModule):
 
     def __init__(self, context, path, options=None):
         """Initialize."""
-        super(StaticSite, self).__init__(context, path, options)
+        super().__init__(context, path, options)
         self.user_options = self.options.get("options", {})
         self.parameters = self.options.get("parameters")  # type: Dict[str, Any]
         self.region = self.context.env.aws_region

@@ -112,7 +112,7 @@ class MockCFNginContext(CFNginContext):
         self.__boto3_credentials = boto3_credentials
         self.s3_stubber = self.add_stubber("s3", region=region)
 
-        super(MockCFNginContext, self).__init__(
+        super().__init__(
             environment=environment,
             boto3_credentials=boto3_credentials,
             stack_names=stack_names,
@@ -152,7 +152,7 @@ class MockRunwayConfig(MutableMap):
 
     def __init__(self, **kwargs):
         """Instantiate class."""
-        super(MockRunwayConfig, self).__init__()
+        super().__init__()
         self._kwargs = kwargs
         self.deployments = []
         self.future = MagicMock()
@@ -180,9 +180,7 @@ class MockRunwayContext(RunwayContext):
         """Instantiate class."""
         if not deploy_environment:
             deploy_environment = DeployEnvironment(environ={}, explicit_name="test")
-        super(MockRunwayContext, self).__init__(
-            command=command, deploy_environment=deploy_environment
-        )
+        super().__init__(command=command, deploy_environment=deploy_environment)
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True
@@ -290,7 +288,7 @@ class YamlLoaderDeploymet(YamlLoader):
             root (Path): Root directory.
 
         """
-        super(YamlLoaderDeploymet, self).__init__(root, load_class=DeploymentDefinition)
+        super().__init__(root, load_class=DeploymentDefinition)
 
     def load(self, file_name):
         """Load YAML file contents.

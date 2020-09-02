@@ -42,7 +42,7 @@ class Git(Source):
         if not self.options:
             self.options = {}
 
-        super(Git, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def fetch(self):
         # type: () -> str

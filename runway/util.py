@@ -87,7 +87,7 @@ class JsonEncoder(json.JSONEncoder):
             return float(o)
         if isinstance(o, (datetime.datetime, datetime.date)):
             return o.isoformat()
-        return super(JsonEncoder, self).default(o)
+        return super().default(o)
 
 
 class MutableMap(MutableMapping):
@@ -423,7 +423,7 @@ class YamlDumper(yaml.Dumper):
 
     def increase_indent(self, flow=False, indentless=False):
         """Override parent method."""
-        return super(YamlDumper, self).increase_indent(flow, False)
+        return super().increase_indent(flow, False)
 
 
 @contextmanager

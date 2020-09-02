@@ -142,7 +142,7 @@ class Serverless(RunwayModuleNpm):
 
         """
         options = options or {}
-        super(Serverless, self).__init__(context, path, options.copy())
+        super().__init__(context, path, options.copy())
         self.logger = PrefixAdaptor(self.name, LOGGER)
         try:
             self.options = ServerlessOptions.parse(**options.get("options", {}))
@@ -402,7 +402,7 @@ class ServerlessOptions(ModuleOptions):
                 begining of each Serverless module run.
 
         """
-        super(ServerlessOptions, self).__init__()
+        super().__init__()
         self._arg_parser = self._create_arg_parser()
         self.extend_serverless_yml = extend_serverless_yml
         cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(

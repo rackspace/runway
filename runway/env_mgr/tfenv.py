@@ -128,7 +128,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
 
     def __init__(self, path=None):
         """Initialize class."""
-        super(TFEnvManager, self).__init__("terraform", "tfenv", path)
+        super().__init__("terraform", "tfenv", path)
 
     @cached_property
     def backend(self):

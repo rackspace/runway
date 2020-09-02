@@ -161,7 +161,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
         """
         options = options or {}
-        super(RunwayModuleNpm, self).__init__(context, path, options)
+        super().__init__(context, path, options)
         del self.options  # remove the attr set by the parent class
 
         # potential future state of RunwayModule attributes in a future release

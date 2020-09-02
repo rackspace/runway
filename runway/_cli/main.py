@@ -28,7 +28,7 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
         # type: (click.Context) -> Any
         """Replace invoke command to pass along args."""
         ctx.meta["global.options"] = self.__parse_global_options(ctx)
-        return super(_CliGroup, self).invoke(ctx)
+        return super().invoke(ctx)
 
     @staticmethod
     def __parse_global_options(ctx):

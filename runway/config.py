@@ -515,7 +515,7 @@ class FutureDefinition(MutableMap):
 
         """
         if isinstance(value, bool):
-            return super(FutureDefinition, self).__setattr__(key, value)
+            return super().__setattr__(key, value)
         raise TypeError(
             'unsupported type {} for future.{}; must be of type "bool"'.format(
                 type(value), key
@@ -1102,7 +1102,7 @@ class VariablesDefinition(MutableMap):
         """
         self._file_path = file_path
         self._sys_path = sys_path
-        super(VariablesDefinition, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @classmethod
     def find_file(cls, file_path=None, sys_path=None):

@@ -534,7 +534,7 @@ class Config(Model):
                     raw_data.get(stacker_field) or raw_data.get(stacker_field) == ""
                 ):
                     raw_data[cfngin_field] = raw_data[stacker_field]
-        super(Config, self).__init__(
+        super().__init__(
             raw_data=raw_data,
             trusted_data=trusted_data,
             deserialize_mapping=deserialize_mapping,
@@ -569,9 +569,7 @@ class Config(Model):
             # disallow excess keys in the inner models.
             raw_data = self._remove_excess_keys(raw_data)
 
-        return super(Config, self)._convert(
-            raw_data=raw_data, context=context, **kwargs
-        )
+        return super()._convert(raw_data=raw_data, context=context, **kwargs)
 
     def validate(self, partial=False, convert=True, app_data=None, **kwargs):
         """Validate the state of the model.
@@ -593,7 +591,7 @@ class Config(Model):
 
         """
         try:
-            return super(Config, self).validate(partial, convert, app_data, **kwargs)
+            return super().validate(partial, convert, app_data, **kwargs)
         except UndefinedValueError as err:
             raise exceptions.InvalidConfig([str(err)])
         except SchematicsError as err:
