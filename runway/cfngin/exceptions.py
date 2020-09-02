@@ -21,55 +21,6 @@ class ChangesetDidNotStabilize(Exception):
         super().__init__(message)
 
 
-class FailedLookup(Exception):
-    """Intermediary Exception to be converted to FailedVariableLookup.
-
-    Should be caught by error handling and
-    :class:`runway.cfngin.exceptions.FailedVariableLookup` raised instead to
-    construct a propper error message.
-
-    """
-
-    def __init__(self, lookup, error, *args, **kwargs):
-        """Instantiate class.
-
-        Args:
-            lookup (:class:`runway.cfngin.variables.VariableValueLookup`):
-                Attempted lookup and resulted in an exception being raised.
-            error (Exception): The exception that was raised.
-
-        """
-        self.lookup = lookup
-        self.error = error
-        super().__init__("Failed lookup", *args, **kwargs)
-
-
-class FailedVariableLookup(Exception):
-    """Lookup could not be resolved.
-
-    Raised when an exception is raised when trying to resolve a lookup.
-
-    """
-
-    def __init__(self, variable_name, lookup, error, *args, **kwargs):
-        """Instantiate class.
-
-        Args:
-            variable_name (str): Name of the variable that failed to be
-                resolved.
-            lookup (:class:`runway.cfngin.variables.VariableValueLookup`):
-                Attempted lookup and resulted in an exception being raised.
-            error (Exception): The exception that was raised.
-
-        """
-        self.lookup = lookup
-        self.error = error
-        message = "Couldn't resolve lookup in variable `%s`, " % variable_name
-        message += "lookup: ${%s}: " % repr(lookup)
-        message += "(%s) %s" % (error.__class__, error)
-        super().__init__(message, *args, **kwargs)
-
-
 class GraphError(Exception):
     """Raised when the graph is invalid (e.g. acyclic dependencies)."""
 
@@ -135,43 +86,6 @@ class InvalidDockerizePipConfiguration(Exception):
         """
         self.message = msg
         super().__init__(self.message)
-
-
-class InvalidLookupCombination(Exception):
-    """Improper use of lookups to result in a non-string return value."""
-
-    def __init__(self, lookup, lookups, value, *args, **kwargs):
-        """Instantiate class.
-
-        Args:
-            lookup (:class:`runway.cfngin.variables.VariableValueLookup`): The
-                variable lookup that was attempted but did not return a string.
-            lookups (:class:`runway.cfngin.variables.VariableValueConcatenation`):
-                The full variable concatenation the failing lookup is part of.
-            value (Any): The non-string value returned by lookup.
-
-        """
-        message = (
-            'Lookup: "{}" has non-string return value, must be only lookup '
-            'present (not {}) in "{}"'
-        ).format(str(lookup), len(lookups), value)
-        super().__init__(message, *args, **kwargs)
-
-
-class InvalidLookupConcatenation(Exception):
-    """Intermediary Exception to be converted to InvalidLookupCombination.
-
-    Should be caught by error handling and
-    :class:`runway.cfngin.exceptions.InvalidLookupCombination` raised instead
-    to construct a propper error message.
-
-    """
-
-    def __init__(self, lookup, lookups, *args, **kwargs):
-        """Instantiate class."""
-        self.lookup = lookup
-        self.lookups = lookups
-        super().__init__("", *args, **kwargs)
 
 
 class InvalidUserdataPlaceholder(Exception):
@@ -245,24 +159,6 @@ class MissingVariable(Exception):
             variable_name,
             blueprint_name,
         )
-        super().__init__(message, *args, **kwargs)
-
-
-class OutputDoesNotExist(Exception):
-    """Raised when a specific stack output does not exist."""
-
-    def __init__(self, stack_name, output, *args, **kwargs):
-        """Instantiate class.
-
-        Args:
-            stack_name (str): Name of the stack.
-            output (str): The output that does not exist.
-
-        """
-        self.stack_name = stack_name
-        self.output = output
-
-        message = "Output %s does not exist on stack %s" % (output, stack_name)
         super().__init__(message, *args, **kwargs)
 
 
@@ -500,27 +396,7 @@ class UnhandledChangeSetStatus(Exception):
         super().__init__(message)
 
 
-class UnknownLookupType(Exception):
-    """Lookup type provided does not match a registered lookup.
-
-    Example:
-        If a lookup of ``${<lookup_type> query}`` is used and ``<lookup_type>``
-        is not a registered lookup, this exception will be raised.
-
-    """
-
-    def __init__(self, lookup_type, *args, **kwargs):
-        """Instantiate class.
-
-        Args:
-            lookup_type (str): Lookup type that was used but not registered.
-
-        """
-        message = 'Unknown lookup type: "{}"'.format(lookup_type)
-        super().__init__(message, *args, **kwargs)
-
-
-class UnresolvedVariable(Exception):
+class UnresolvedBlueprintVariable(Exception):  # TODO rename for blueprints only
     """Raised when trying to use a variable before it has been resolved."""
 
     def __init__(self, blueprint_name, variable, *args, **kwargs):
@@ -539,28 +415,7 @@ class UnresolvedVariable(Exception):
         super().__init__(message, *args, **kwargs)
 
 
-class UnresolvedVariableValue(Exception):
-    """Intermediary Exception to be converted to UnresolvedVariable.
-
-    Should be caught by error handling and
-    :class:`runway.cfngin.exceptions.UnresolvedVariable` raised instead to
-    construct a propper error message.
-
-    """
-
-    def __init__(self, lookup, *args, **kwargs):
-        """Instantiate class.
-
-        Args:
-            lookup (:class:`runway.cfngin.variables.VariableValueLookup`): The
-                lookup that is not resolved.
-
-        """
-        self.lookup = lookup
-        super().__init__("Unresolved lookup", *args, **kwargs)
-
-
-class UnresolvedVariables(Exception):
+class UnresolvedBlueprintVariables(Exception):  # TODO rename for blueprints only
     """Raised when trying to use variables before they has been resolved."""
 
     def __init__(self, blueprint_name, *args, **kwargs):

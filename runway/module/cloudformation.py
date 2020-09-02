@@ -2,7 +2,7 @@
 import logging
 
 from .._logging import PrefixAdaptor
-from ..cfngin import CFNgin
+from ..cfngin.cfngin import CFNgin
 from . import RunwayModule
 
 LOGGER = logging.getLogger(__name__)
