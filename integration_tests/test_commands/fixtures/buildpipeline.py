@@ -27,9 +27,9 @@ from troposphere import (
     s3,
 )
 
-from stacker.blueprints.base import Blueprint
-from stacker.blueprints.variables.types import CFNString
-from stacker.lookups.handlers.file import parameterized_codec
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNString
+from runway.cfngin.lookups.handlers.file import parameterized_codec
 
 AWS_LAMBDA_DIR = path.join(path.dirname(path.realpath(__file__)), "aws_lambda")
 IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
@@ -452,6 +452,6 @@ class Pipeline(Blueprint):  # pylint: disable=too-few-public-methods
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
 
     print(Pipeline("test", Context({"namespace": "test"}), None).to_json())
