@@ -38,7 +38,7 @@ def test_run_stacker_version(caplog):
     runner = CliRunner()
     result = runner.invoke(cli, ["run-stacker", "--version"])
     assert result.exit_code == 0
-    assert "1.7.0" in result.output  # version is static
+    assert "0.0.0" in result.output  # version is static
     assert caplog.messages == [
         "This command as been deprecated and will be removed in "
         "the next major release."
