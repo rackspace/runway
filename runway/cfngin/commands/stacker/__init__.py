@@ -1,9 +1,6 @@
 """CFNgin commands."""
 import logging
-import sys
 import warnings
-
-from runway import cfngin, variables
 
 from ... import session_cache
 from ...config import render_parse_load as load_config
@@ -17,10 +14,6 @@ from .graph import Graph
 from .info import Info
 
 LOGGER = logging.getLogger(__name__)
-
-# TODO remove - https://github.com/onicagroup/runway/issues/293
-sys.modules["stacker"] = cfngin  # shim to remove stacker dependency
-sys.modules["stacker.variables"] = variables  # shim to support standard variables
 
 
 class Stacker(BaseCommand):
@@ -72,7 +65,5 @@ class Stacker(BaseCommand):
     def add_arguments(self, parser):
         """Add CLI arguments."""
         parser.add_argument(
-            "--version",
-            action="version",
-            version="%%(prog)s %s" % (cfngin.__version__,),
+            "--version", action="version", version="%%(prog)s %s" % ("0.0.0")
         )

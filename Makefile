@@ -1,4 +1,4 @@
-.PHONY: help list sync sync_two sync_all pipenv_lock clean fix-isort lint lint-flake8 lint-isort lint-pylint lint_two test test-integration test-unit test_shim create_tfenv_ver_file build build_pyinstaller_file build_pyinstaller_folder build_whl release npm_prep
+.PHONY: help list sync sync_two sync_all pipenv_lock clean fix-isort lint lint-flake8 lint-isort lint-pylint lint_two test test-integration test-unit create_tfenv_ver_file build build_pyinstaller_file build_pyinstaller_folder build_whl release npm_prep
 
 help: ## show this message
 	@IFS=$$'\n' ; \
@@ -91,9 +91,6 @@ test-integration: ## run integration tests only
 test-unit: ## run unit tests only
 	@echo "Running unit tests..."
 	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing
-
-test_shim: ## run a test for the stacker shim
-	bash ./.github/scripts/cicd/test_shim.sh
 
 create_tfenv_ver_file: ## create a tfenv version file using the latest version
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
