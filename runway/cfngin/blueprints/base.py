@@ -11,8 +11,8 @@ from runway.variables import Variable
 from ..exceptions import (
     InvalidUserdataPlaceholder,
     MissingVariable,
-    UnresolvedVariable,
-    UnresolvedVariables,
+    UnresolvedBlueprintVariable,
+    UnresolvedBlueprintVariables,
     ValidatorError,
     VariableTypeRequired,
 )
@@ -188,8 +188,8 @@ def resolve_variable(var_name, var_def, provided_variable, blueprint_name):
     Raises:
         MissingVariable: Raised when a variable with no default is not
             provided a value.
-        UnresolvedVariable: Raised when the provided variable is not already
-            resolved.
+        UnresolvedBlueprintVariable: Raised when the provided variable is
+            not already resolved.
         ValueError: Raised when the value is not the right type and cannot be
             cast as the correct type. Raised by
             :func:`runway.cfngin.blueprints.base.validate_variable_type`
@@ -204,7 +204,7 @@ def resolve_variable(var_name, var_def, provided_variable, blueprint_name):
 
     if provided_variable:
         if not provided_variable.resolved:
-            raise UnresolvedVariable(blueprint_name, provided_variable)
+            raise UnresolvedBlueprintVariable(blueprint_name, provided_variable)
 
         value = provided_variable.value
     else:
@@ -425,11 +425,11 @@ class Blueprint:
             Dict[str, Variable]: Variables available to the template.
 
         Raises:
-            UnresolvedVariables: If variables are unresolved.
+            UnresolvedBlueprintVariables: If variables are unresolved.
 
         """
         if self.resolved_variables is None:
-            raise UnresolvedVariables(self.name)
+            raise UnresolvedBlueprintVariables(self.name)
         return self.resolved_variables
 
     def get_cfn_parameters(self):

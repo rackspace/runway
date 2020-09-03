@@ -4,8 +4,8 @@ import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.exceptions import FailedVariableLookup, UnknownLookupType
 from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
+from runway.exceptions import FailedVariableLookup, UnknownLookupType
 from runway.variables import Variable, VariableValueLookup
 
 from ..factories import mock_context, mock_provider
@@ -69,7 +69,7 @@ class TestRegistry(unittest.TestCase):
         with self.assertRaises(FailedVariableLookup) as result:
             variable.resolve(self.ctx, self.provider)
 
-        self.assertIsInstance(result.exception.error, ValueError)
+        self.assertIsInstance(result.exception.cause.__cause__, ValueError)
 
     def test_resolve_lookups_string_failed_variable_lookup(self):
         """Test resolve lookups string failed variable lookup."""

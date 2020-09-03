@@ -10,7 +10,6 @@ import yaml
 from mock import MagicMock, call, patch
 from packaging.specifiers import InvalidSpecifier
 
-from runway.cfngin.exceptions import UnresolvedVariable
 from runway.config import (  # tries to test the imported class unless using "as"
     Config,
     DeploymentDefinition,
@@ -19,6 +18,7 @@ from runway.config import (  # tries to test the imported class unless using "as
 )
 from runway.config import TestDefinition as ConfigTestDefinition
 from runway.config import VariablesDefinition
+from runway.exceptions import UnresolvedVariable
 from runway.util import MutableMap
 
 MODULE = "runway.config"

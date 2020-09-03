@@ -6,9 +6,9 @@ from mock import MagicMock
 from troposphere import s3
 
 from runway.cfngin.blueprints.variables.types import TroposphereType
-from runway.cfngin.exceptions import UnresolvedVariable
 from runway.cfngin.lookups import register_lookup_handler
 from runway.cfngin.stack import Stack
+from runway.exceptions import UnresolvedVariable
 from runway.util import MutableMap
 from runway.variables import Variable
 
