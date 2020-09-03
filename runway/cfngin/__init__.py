@@ -1,4 +1,1 @@
-"""Import modules."""
-from .cfngin import CFNgin
-
-__all__ = ["CFNgin"]
+"""Empty init for python import traversal."""
