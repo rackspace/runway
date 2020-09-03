@@ -2,8 +2,6 @@
 import logging
 import warnings
 
-from runway.cfngin import __version__
-
 from ... import session_cache
 from ...config import render_parse_load as load_config
 from ...context import Context
@@ -67,5 +65,5 @@ class Stacker(BaseCommand):
     def add_arguments(self, parser):
         """Add CLI arguments."""
         parser.add_argument(
-            "--version", action="version", version="%%(prog)s %s" % (__version__,)
+            "--version", action="version", version="%%(prog)s %s" % ("0.0.0")
         )
