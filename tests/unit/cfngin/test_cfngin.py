@@ -5,7 +5,7 @@ import shutil
 import pytest
 from mock import MagicMock, call, patch
 
-from runway.cfngin import CFNgin
+from runway.cfngin.cfngin import CFNgin
 from runway.core.components import DeployEnvironment
 
 from ..factories import MockRunwayContext

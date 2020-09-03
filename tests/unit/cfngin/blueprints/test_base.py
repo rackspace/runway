@@ -23,15 +23,15 @@ from runway.cfngin.blueprints.variables.types import (
     TroposphereType,
 )
 from runway.cfngin.exceptions import (
-    InvalidLookupCombination,
     InvalidUserdataPlaceholder,
     MissingVariable,
-    UnresolvedVariable,
-    UnresolvedVariables,
+    UnresolvedBlueprintVariable,
+    UnresolvedBlueprintVariables,
     ValidatorError,
     VariableTypeRequired,
 )
 from runway.cfngin.lookups import register_lookup_handler
+from runway.exceptions import InvalidLookupConcatenation
 from runway.variables import Variable
 
 from ..factories import mock_context
@@ -176,7 +176,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
             """Test blueprint."""
 
         blueprint = TestBlueprint(name="test", context=MagicMock())
-        with self.assertRaises(UnresolvedVariables):
+        with self.assertRaises(UnresolvedBlueprintVariables):
             blueprint.get_variables()
 
     def test_set_description(self):
@@ -278,7 +278,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         """Test resolve variable provided not resolved."""
         var_name = "testVar"
         provided_variable = Variable(var_name, "${mock abc}", "cfngin")
-        with self.assertRaises(UnresolvedVariable):
+        with self.assertRaises(UnresolvedBlueprintVariable):
             var_def = {"type": str}
             blueprint_name = "testBlueprint"
 
@@ -538,7 +538,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
             "cfngin",
         )
         variable._value[0].resolve({}, {})
-        with self.assertRaises(InvalidLookupCombination):
+        with self.assertRaises(InvalidLookupConcatenation):
             variable.value()  # pylint: disable=not-callable
 
     def test_get_variables(self):
