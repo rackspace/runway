@@ -5,8 +5,8 @@ import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ..._logging import PrefixAdaptor
-from ...cfngin.exceptions import UnresolvedVariable
 from ...config import FutureDefinition, VariablesDefinition
+from ...exceptions import UnresolvedVariable
 from ...util import cached_property, merge_dicts, merge_nested_environment_dicts
 from ..providers import aws
 from ._module import Module

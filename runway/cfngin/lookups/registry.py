@@ -4,7 +4,7 @@ import logging
 from runway.lookups.handlers import cfn, ssm
 from runway.util import DOC_SITE, load_object_from_string
 
-from ..exceptions import FailedVariableLookup, UnknownLookupType
+from ...exceptions import FailedVariableLookup, UnknownLookupType
 from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler
 from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref
