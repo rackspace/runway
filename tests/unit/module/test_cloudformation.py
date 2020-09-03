@@ -29,21 +29,21 @@ class TestCloudFormation:
         context.env.aws_region = region
         return context
 
-    @patch("runway.cfngin.CFNgin.deploy")
+    @patch("runway.cfngin.cfngin.CFNgin.deploy")
     def test_deploy(self, mock_action, tmp_path):
         """Test deploy."""
         module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
         module.deploy()
         mock_action.assert_called_once()
 
-    @patch("runway.cfngin.CFNgin.destroy")
+    @patch("runway.cfngin.cfngin.CFNgin.destroy")
     def test_destroy(self, mock_action, tmp_path):
         """Test destroy."""
         module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
         module.destroy()
         mock_action.assert_called_once()
 
-    @patch("runway.cfngin.CFNgin.plan")
+    @patch("runway.cfngin.cfngin.CFNgin.plan")
     def test_plan(self, mock_action, tmp_path):
         """Test plan."""
         module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)

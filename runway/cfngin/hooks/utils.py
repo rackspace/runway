@@ -8,8 +8,8 @@ from types import FunctionType
 from runway.util import load_object_from_string
 from runway.variables import Variable, resolve_variables
 
+from ...exceptions import FailedVariableLookup
 from ..blueprints.base import Blueprint
-from ..exceptions import FailedVariableLookup
 
 LOGGER = logging.getLogger(__name__)
 
