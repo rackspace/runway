@@ -1,9 +1,9 @@
 """Fake resource."""
 from troposphere import cloudformation as cfn
 
-# leave these as stacker
-from stacker.blueprints.base import Blueprint  # noqa pylint: disable=E
-from stacker.blueprints.variables.types import CFNString  # noqa pylint: disable=E
+
+from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.blueprints.variables.types import CFNString
 
 
 class BlueprintClass(Blueprint):  # pylint: disable=too-few-public-methods

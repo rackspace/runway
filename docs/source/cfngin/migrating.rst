@@ -4,17 +4,11 @@
 Migrating from Stacker
 ######################
 
-.. important:: Most current uses of Runway with Stacker_ will continue to work.
-               But, for imports from Stacker_, Runway will automatically redirect them to CFNgin.
-               Because of this, you may experience errors depending on how you are consuming the Stacker_ components.
-               This "shim" will remain in place until the release of Runway 2.0.0, no sooner then 2020-12.
-
-
 **********
 Blueprints
 **********
 
-All components available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
+Most components available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
 
 .. rubric:: Example
 .. code-block:: python
