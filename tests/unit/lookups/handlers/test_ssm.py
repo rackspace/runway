@@ -6,7 +6,7 @@ from datetime import datetime
 import pytest
 import yaml
 
-from runway.cfngin.exceptions import FailedVariableLookup
+from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
 
@@ -173,5 +173,5 @@ class TestSsmLookup:
         with stubber as stub, pytest.raises(FailedVariableLookup) as err:
             var.resolve(context=runway_context)
 
-        assert "ParameterNotFound" in str(err.value)
+        assert "ParameterNotFound" in str(err.value.__cause__)
         stub.assert_no_pending_responses()

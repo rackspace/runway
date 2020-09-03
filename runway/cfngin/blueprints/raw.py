@@ -6,7 +6,7 @@ import sys
 
 from jinja2 import Template
 
-from ..exceptions import InvalidConfig, UnresolvedVariable
+from ..exceptions import InvalidConfig, UnresolvedBlueprintVariable
 from ..util import parse_cloudformation_template
 from .base import Blueprint
 
@@ -67,14 +67,14 @@ def resolve_variable(provided_variable, blueprint_name):
         object: The resolved variable string value.
 
     Raises:
-        UnresolvedVariable: Raised when the provided variable is not already
-            resolved.
+        UnresolvedBlueprintVariable: Raised when the provided variable is
+            not already resolved.
 
     """
     value = None
     if provided_variable:
         if not provided_variable.resolved:
-            raise UnresolvedVariable(blueprint_name, provided_variable)
+            raise UnresolvedBlueprintVariable(blueprint_name, provided_variable)
 
         value = provided_variable.value
 
