@@ -5,9 +5,10 @@ import logging
 import pytest
 from mock import MagicMock, PropertyMock, call, patch
 
-from runway.cfngin.exceptions import UnresolvedVariable
 from runway.config import DeploymentDefinition, FutureDefinition, VariablesDefinition
 from runway.core.components import Deployment
+from runway.exceptions import UnresolvedVariable
+from runway.variables import Variable
 
 MODULE = "runway.core.components._deployment"
 
@@ -147,7 +148,13 @@ class TestDeployment:
             DeploymentDefinition,
             "env_vars",
             PropertyMock(
-                side_effect=[UnresolvedVariable("test", MagicMock()), expected]
+                side_effect=[
+                    UnresolvedVariable(
+                        Variable("test", "something", variable_type="runway"),
+                        MagicMock(),
+                    ),
+                    expected,
+                ]
             ),
         )
         monkeypatch.setattr(

@@ -1,9 +1,9 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
-# pylint: disable=no-self-use
+# pylint: disable=no-self-use,protected-access
 import pytest
 from troposphere.awslambda import Code
 
-from runway.cfngin.exceptions import FailedVariableLookup
+from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
 
@@ -48,8 +48,10 @@ class TestHookDataLookup:
         with pytest.raises(FailedVariableLookup) as err:
             variable.resolve(cfngin_context)
 
-        assert "ValueError" in str(err.value)
-        assert 'Could not find a value for "fake_hook.bad.result"' in str(err.value)
+        assert str(err.value) == (
+            f'Could not resolve lookup "{variable._raw_value}" for variable "{variable.name}"'
+        )
+        assert "Could not find a value for" in str(err.value.__cause__)
 
     def test_troposphere(self, cfngin_context):
         """Test with troposphere object like returned from lambda hook."""
@@ -93,7 +95,10 @@ class TestHookDataLookup:
         ):
             variable.resolve(cfngin_context)
 
-        assert "ValueError" in str(err.value)
+        assert str(err.value) == (
+            f'Could not resolve lookup "{variable._raw_value}" for variable "{variable.name}"'
+        )
+        assert "Could not find a value for" in str(err.value.__cause__)
 
     def test_legacy_bad_value_hook_data(self, cfngin_context):
         """Test bad value hook data."""
@@ -106,4 +111,7 @@ class TestHookDataLookup:
         ):
             variable.resolve(cfngin_context)
 
-        assert "ValueError" in str(err.value)
+        assert str(err.value) == (
+            f'Could not resolve lookup "{variable._raw_value}" for variable "{variable.name}"'
+        )
+        assert "Could not find a value for" in str(err.value.__cause__)

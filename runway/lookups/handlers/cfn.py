@@ -49,7 +49,8 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from botocore.exceptions import ClientError
 
-from runway.cfngin.exceptions import OutputDoesNotExist, StackDoesNotExist
+from runway.cfngin.exceptions import StackDoesNotExist
+from runway.exceptions import OutputDoesNotExist
 
 from .base import LookupHandler
 
