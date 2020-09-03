@@ -50,6 +50,6 @@ class CrossAccountRole(Blueprint):
 
 
 if __name__ == "__main__":
-    from stacker.context import Context
+    from runway.cfngin.context import Context
 
     print(CrossAccountRole("test", Context({"namespace": "test"}), None).to_json())
