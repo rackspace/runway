@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `overlay_path` option for k8s modules
 
+### Fixed
+- CFN: ensure kms lookup returns a non-binary value on all python versions
+
 ## [1.11.3] - 2020-08-19
 ### Fixed
 - fixed an issue where `npx runway` (installed from npm) would not work on Windows if there was a space in the path
