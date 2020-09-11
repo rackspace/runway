@@ -75,6 +75,6 @@ class KmsLookup(LookupHandler):
 
         # decrypt and return the plain text raw value.
         decrypted = kms.decrypt(CiphertextBlob=decoded)["Plaintext"]
-        if sys.version_info[0] > 2:  # TODO remove after droping python 2
-            return decrypted.decode("UTF-8")
+        if sys.version_info[0] > 2:  # TODO remove condition after droping py2
+            return decrypted.decode()
         return decrypted
