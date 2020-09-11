@@ -19,6 +19,15 @@ Options
     options:
       kubectl_version: 1.14.5
 
+**overlay_path (Optional[str])**
+  Specify the directory containing the kustomize overlay to use.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      overlay_path: overlays/${env DEPLOY_ENVIRONMENT}-blue
+
 
 **********
 Parameters

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Terraform files are now able to be parsed by `python-hcl2` (eks-base.tf was failing both parsers)
   - replace the custom script with tls provider to get EKS cluster `sha1_fingerprint`
 
+### Added
+- `overlay_path` option for k8s modules
+
 ## [1.11.3] - 2020-08-19
 ### Fixed
 - fixed an issue where `npx runway` (installed from npm) would not work on Windows if there was a space in the path
