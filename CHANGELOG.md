@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `http` backport for python < 3.5
+
+### Changed
+- when running `runway plan`, CFNgin modules will now skip using a `cfngin_bucket` if it does not exist
+  - logs that it will be created during the next `deploy`
+  - continues without planning the stack if the template is too large to be used through the API, requiring an existing `cfngin_bucket`
+
 ### Fixed
 - fixed a python 3 compatibility issue in `runway.cfngin.blueprints.testutil.YamlDirTestGenerator`
 - fixed an issue causing static sites to be inaccessible when deployed to regions other than us-east-1

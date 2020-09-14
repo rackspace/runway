@@ -1,7 +1,11 @@
 """CFNgin diff action."""
 import logging
+import sys
 from operator import attrgetter
 
+from botocore.exceptions import ClientError
+
+from ...core.providers.aws.s3 import Bucket
 from .. import exceptions
 from ..status import (
     COMPLETE,
@@ -208,6 +212,18 @@ class Action(build.Action):
             ):
                 return SkippedStatus("persistent graph: will be destroyed")
             raise
+        except ClientError as err:
+            if (
+                err.response["Error"]["Code"] == "ValidationError"
+                and "length less than or equal to" in err.response["Error"]["Message"]
+            ):
+                LOGGER.error(
+                    "%s:template is too large to provide directly to the API; "
+                    "S3 must be used",
+                    stack.name,
+                )
+                return SkippedStatus("cfngin_bucket: existing bucket required")
+            raise
         return COMPLETE
 
     def run(self, **kwargs):
@@ -224,7 +240,24 @@ class Action(build.Action):
         plan.execute(walker)
 
     def pre_run(self, **kwargs):
-        """Do nothing."""
+        """Any steps that need to be taken prior to running the action.
+
+        Handle CFNgin bucket access denied & not existing.
+
+        """
+        if self.bucket_name:
+            bucket = Bucket(self.context, self.bucket_name, self.bucket_region)
+            if bucket.forbidden:
+                LOGGER.error("access denied for CFNgin bucket: %s", bucket.name)
+                sys.exit(1)
+            if bucket.not_found:
+                LOGGER.warning(
+                    'cfngin_bucket "%s" does not exist and will be creating '
+                    "during the next deploy",
+                    bucket.name,
+                )
+                LOGGER.verbose("proceeding without a cfngin_bucket...")
+                self.bucket_name = None
 
     def post_run(self, **kwargs):
         """Do nothing."""

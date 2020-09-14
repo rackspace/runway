@@ -1,8 +1,115 @@
 """Tests for runway.cfngin.actions.diff."""
+# pylint: disable=no-self-use,protected-access
+import logging
 import unittest
 from operator import attrgetter
 
-from runway.cfngin.actions.diff import DictValue, diff_dictionaries, diff_parameters
+import pytest
+from botocore.exceptions import ClientError
+from mock import MagicMock, patch
+
+from runway.cfngin.actions.diff import (
+    Action,
+    DictValue,
+    diff_dictionaries,
+    diff_parameters,
+)
+from runway.cfngin.providers.aws.default import Provider
+from runway.cfngin.status import SkippedStatus
+
+from ..factories import MockProviderBuilder, MockThreadingEvent
+
+MODULE = "runway.cfngin.actions.diff"
+
+
+class TestAction(object):
+    """Test runway.cfngin.actions.diff.Action."""
+
+    @pytest.mark.parametrize(
+        "bucket_name, forbidden, not_found",
+        [
+            ("test-bucket", False, True),
+            ("test-bucket", True, False),
+            (None, False, True),
+            (None, True, False),
+        ],
+    )
+    @patch(MODULE + ".Bucket", autospec=True)
+    def test_pre_run(
+        self,
+        mock_bucket_init,
+        caplog,
+        bucket_name,
+        forbidden,
+        not_found,
+        cfngin_context,
+    ):
+        """Test pre_run."""
+        caplog.set_level(logging.DEBUG, logger=MODULE)
+        mock_bucket = MagicMock()
+        mock_bucket.name = bucket_name
+        mock_bucket.forbidden = forbidden
+        mock_bucket.not_found = not_found
+        mock_bucket_init.return_value = mock_bucket
+        cfngin_context.config.cfngin_bucket = bucket_name
+
+        action = Action(cfngin_context)
+
+        if forbidden and bucket_name:
+            with pytest.raises(SystemExit) as excinfo:
+                action.pre_run()
+            assert excinfo.value.code == 1
+            assert (
+                "access denied for CFNgin bucket: %s" % bucket_name
+            ) in caplog.messages
+            return
+
+        action.pre_run()
+
+        if not_found and bucket_name:
+            assert not action.bucket_name
+            assert "proceeding without a cfngin_bucket..." in caplog.messages
+            return
+
+        assert action.bucket_name == bucket_name
+
+    @pytest.mark.wip
+    def test_diff_stack_validationerror_template_too_large(
+        self, caplog, cfngin_context, monkeypatch
+    ):
+        """Test _diff_stack ValidationError - template too large."""
+        caplog.set_level(logging.ERROR)
+
+        cfngin_context.add_stubber("cloudformation")
+        expected = SkippedStatus("cfngin_bucket: existing bucket required")
+        provider = Provider(cfngin_context.get_session())
+        mock_get_stack_changes = MagicMock(
+            side_effect=ClientError(
+                {
+                    "Error": {
+                        "Code": "ValidationError",
+                        "Message": "length less than or equal to",
+                    }
+                },
+                "create_change_set",
+            )
+        )
+        monkeypatch.setattr(provider, "get_stack_changes", mock_get_stack_changes)
+        stack = MagicMock()
+        stack.region = cfngin_context.region
+        stack.name = "test-stack"
+        stack.fqn = "test-stack"
+        stack.blueprint.rendered = "{}"
+        stack.locked = False
+        stack.status = None
+
+        result = Action(
+            context=cfngin_context,
+            provider_builder=MockProviderBuilder(provider),
+            cancel=MockThreadingEvent(),
+        )._diff_stack(stack)
+        mock_get_stack_changes.assert_called_once()
+        assert result == expected
 
 
 class TestDictValueFormat(unittest.TestCase):
