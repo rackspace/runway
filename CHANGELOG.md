@@ -5,12 +5,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.12.0] - 2020-09-11
 ### Changed
 - updated the `k8s-tf-repo` sample
   - Runway config now uses modern syntax
   - fixed tflint issues
   - Terraform files are now able to be parsed by `python-hcl2` (eks-base.tf was failing both parsers)
   - replace the custom script with tls provider to get EKS cluster `sha1_fingerprint`
+
+### Added
+- `overlay_path` option for k8s modules
+
+### Fixed
+- CFN: ensure kms lookup returns a non-binary value on all python versions
 
 ## [1.11.3] - 2020-08-19
 ### Fixed
@@ -936,7 +944,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.11.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.12.0...HEAD
+[1.12.0]: https://github.com/onicagroup/runway/compare/v1.11.3...v1.12.0
 [1.11.3]: https://github.com/onicagroup/runway/compare/v1.11.2...v1.11.3
 [1.11.2]: https://github.com/onicagroup/runway/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/onicagroup/runway/compare/v1.11.1...v1.11.1

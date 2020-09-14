@@ -919,7 +919,7 @@ def upload_lambda_functions(context, provider, **kwargs):
                 in use.
 
                 Files in this directory will be added to the payload ZIP,
-                according to the include and exclude patterns. If not
+                according to the include and exclude patterns. If no
                 patterns are provided, all files in this directory
                 (respecting default exclusions) will be used.
 
