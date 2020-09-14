@@ -372,9 +372,6 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
                     ]
                 ),
                 VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
-                WebsiteConfiguration=s3.WebsiteConfiguration(
-                    IndexDocument="index.html", ErrorDocument="error.html"
-                ),
             )
         )
         self.template.add_output(
@@ -384,6 +381,10 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         )
 
         if not self.cf_enabled:
+            # bucket cannot be configured with WebsiteConfiguration when using OAI S3Origin
+            bucket["WebsiteConfiguration"] = s3.WebsiteConfiguration(
+                IndexDocument="index.html", ErrorDocument="error.html"
+            )
             self.template.add_output(
                 Output(
                     "BucketWebsiteURL",
@@ -608,6 +609,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
             Statement(
                 Action=[awacs.s3.GetObject],
                 Effect=Allow,
+                # S3CanonicalUserId is translated to the ARN when AWS renders this
                 Principal=Principal("CanonicalUser", oai.get_att("S3CanonicalUserId")),
                 Resource=[Join("", [bucket.get_att("Arn"), "/*"])],
             )
