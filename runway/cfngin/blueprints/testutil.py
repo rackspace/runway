@@ -149,9 +149,7 @@ class YamlDirTestGenerator(object):
                     )
 
                 configvars = self.stack.variables or {}
-                variables = [
-                    Variable(k, v, "cfngin") for k, v in configvars.iteritems()
-                ]
+                variables = [Variable(k, v, "cfngin") for k, v in configvars.items()]
 
                 blueprint_class = load_object_from_string(self.stack.class_path)
                 blueprint = blueprint_class(self.stack.name, ctx)
