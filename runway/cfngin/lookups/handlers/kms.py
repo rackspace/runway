@@ -1,6 +1,7 @@
 """AWS KMS lookup."""
 # pylint: disable=arguments-differ,unused-argument
 import codecs
+import sys
 
 from runway.lookups.handlers.base import LookupHandler
 
@@ -73,4 +74,7 @@ class KmsLookup(LookupHandler):
         decoded = codecs.decode(value, "base64")
 
         # decrypt and return the plain text raw value.
-        return kms.decrypt(CiphertextBlob=decoded)["Plaintext"]
+        decrypted = kms.decrypt(CiphertextBlob=decoded)["Plaintext"]
+        if sys.version_info[0] > 2:  # TODO remove condition after droping py2
+            return decrypted.decode()
+        return decrypted

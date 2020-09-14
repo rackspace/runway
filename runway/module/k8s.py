@@ -83,15 +83,21 @@ class K8s(RunwayModule):
 
     def run_kubectl(self, command="plan"):
         """Run kubectl."""
-        kustomize_config_path = os.path.join(
-            self.path,
-            "overlays",
-            get_overlay_dir(
-                os.path.join(self.path, "overlays"),
-                self.context.env.name,
-                self.context.env.aws_region,
-            ),
-        )
+        if self.options.get("options", {}).get("overlay_path"):
+            # config path is overriden from runway
+            kustomize_config_path = os.path.join(
+                self.path, self.options.get("options", {}).get("overlay_path"),
+            )
+        else:
+            kustomize_config_path = os.path.join(
+                self.path,
+                "overlays",
+                get_overlay_dir(
+                    os.path.join(self.path, "overlays"),
+                    self.context.env.name,
+                    self.context.env.aws_region,
+                ),
+            )
         response = generate_response(
             kustomize_config_path,
             self.path,
