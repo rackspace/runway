@@ -15,21 +15,17 @@ import awacs.states
 import awacs.sts
 from awacs.aws import Action, Allow, Policy, PolicyDocument, Principal, Statement
 from awacs.helpers.trust import make_simple_assume_policy
-from troposphere import (  # noqa pylint: disable=unused-import
+from troposphere import (
     AccountId,
     Join,
     NoValue,
     Output,
     Partition,
-    Region,
     StackName,
-    Sub,
     awslambda,
     cloudfront,
     iam,
-    logs,
     s3,
-    stepfunctions,
 )
 
 from runway.cfngin.blueprints.base import Blueprint
