@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - fixed a python 3 compatibility issue in `runway.cfngin.blueprints.testutil.YamlDirTestGenerator`
-
-### Fixed
 - fixed an issue causing static sites to be inaccessible when deployed to regions other than us-east-1
 
 ## [1.12.0] - 2020-09-11
