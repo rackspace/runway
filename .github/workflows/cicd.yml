@@ -78,7 +78,7 @@ jobs:
       - name: Run Integration & Unit Tests
         if: matrix.os != 'windows-latest'
         # assertions assume linux so some fail when run on windows
-        run: make test && make test_shim
+        run: make test
 
   build-pyinstaller-onefile:
     name: Pyinstaller "One File" Build
