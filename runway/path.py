@@ -109,7 +109,7 @@ class Path:  # pylint: disable=too-many-instance-attributes
     """
 
     def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
-        # type: (Union(str, Dict[str, str]), str, Optional[str], Optional[Git]) -> None
+        # type: (Union[str, Dict[str, str]], str, Optional[str], Optional[Git]) -> None
         """Path Configuration.
 
         Keyword Args:
@@ -153,7 +153,7 @@ class Path:  # pylint: disable=too-many-instance-attributes
         return os.path.join(self.env_root, self.location)
 
     def __fetch_remote_source(self):
-        # type: () -> Union(Git, None)
+        # type: () -> Optional[Git]
         """Switch based on the retrieved source of the path.
 
         Determine which remote Source type to fetch based on the source
