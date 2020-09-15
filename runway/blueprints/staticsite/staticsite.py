@@ -229,7 +229,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
         """
         variables = self.get_variables()
 
-        if os.environ.get("AWS_REGION") == "us-east-1":
+        if os.getenv("AWS_REGION") == "us-east-1":
             # use global endpoint for us-east-1
             origin = Join(".", [bucket.ref(), "s3.amazonaws.com"])
         else:
