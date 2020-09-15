@@ -21,6 +21,7 @@ from troposphere import (
     NoValue,
     Output,
     Partition,
+    Region,
     StackName,
     awslambda,
     cloudfront,
@@ -227,11 +228,20 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         """
         variables = self.get_variables()
+
+        if os.environ.get("AWS_REGION") == "us-east-1":
+            # use global endpoint for us-east-1
+            origin = Join(".", [bucket.ref(), "s3.amazonaws.com"])
+        else:
+            # use reginal endpoint to avoid "temporary" redirect that can last over an hour
+            # https://forums.aws.amazon.com/message.jspa?messageID=677452
+            origin = Join(".", [bucket.ref(), "s3", Region, "amazonaws.com"])
+
         return {
             "Aliases": self.add_aliases(),
             "Origins": [
                 cloudfront.Origin(
-                    DomainName=Join(".", [bucket.ref(), "s3.amazonaws.com"]),
+                    DomainName=origin,
                     S3OriginConfig=cloudfront.S3OriginConfig(
                         OriginAccessIdentity=Join(
                             "", ["origin-access-identity/cloudfront/", oai.ref()]
