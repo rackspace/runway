@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- fixed an issues causing static sites in regions other than us-east-1 to redirect to the s3 object until CloudFront was able to use the global endpoint of the bucket
 
 ## [1.13.0] - 2020-09-14
 ### Added
