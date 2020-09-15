@@ -1,12 +1,12 @@
 """Test runway.core.providers.aws.s3._bucket."""
 # pylint: disable=no-self-use
 import logging
+from http import HTTPStatus
 
 from mock import MagicMock
 
 from runway.core.providers.aws import BaseResponse
 from runway.core.providers.aws.s3 import Bucket
-from runway.http_backport import HTTPStatus
 
 MODULE = "runway.core.providers.aws.s3._bucket"
 
