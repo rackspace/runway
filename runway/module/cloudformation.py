@@ -1,18 +1,11 @@
 """Cloudformation module."""
 import logging
-import sys
 
-from .. import cfngin as cfngin_module
-from .. import variables
 from .._logging import PrefixAdaptor
 from ..cfngin.cfngin import CFNgin
 from . import RunwayModule
 
 LOGGER = logging.getLogger(__name__)
-
-# TODO remove - https://github.com/onicagroup/runway/issues/293
-sys.modules["stacker"] = cfngin_module  # shim to remove stacker dependency
-sys.modules["stacker.variables"] = variables  # shim to support standard variables
 
 
 class CloudFormation(RunwayModule):
