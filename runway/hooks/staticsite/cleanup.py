@@ -2,7 +2,7 @@
 # pylint: disable=unused-argument
 import json
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 from runway.cfngin.context import Context
 from runway.cfngin.providers.base import BaseProvider
@@ -11,9 +11,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 def execute(
-    context,  # type: Context # pylint: disable=unused-argument
+    context,  # type: Context
     provider,  # type: BaseProvider
-    **kwargs  # type: Optional[Dict[str, Any]]
+    **kwargs  # type: Any
 ):
     # type: (...) -> Union[Dict[str, Any], bool]
     """Execute the cleanup process.
