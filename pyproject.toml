@@ -39,9 +39,7 @@ concurrency = [
 ]
 omit = [
     "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
-    "*/runway/http_backport.py",  # TODO remove when dropping python 2 support
 ]
-
 
 [tool.isort]
 profile = "black"

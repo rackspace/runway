@@ -1,6 +1,6 @@
 """Replicated Lambda Function cleanup warning."""
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 from runway.cfngin.context import Context
 from runway.cfngin.providers.base import BaseProvider
