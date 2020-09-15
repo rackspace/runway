@@ -1,10 +1,9 @@
 """Base class for AWS responses."""
+from http import HTTPStatus
 from typing import Any, Dict, Union  # pylint: disable=W
 
-from ....http_backport import HTTPStatus
 
-
-class ResponseError(object):  # pylint: disable=too-few-public-methods
+class ResponseError:  # pylint: disable=too-few-public-methods
     """Analyse the response from AWS S3 HeadBucket API response.
 
     Attributes:
@@ -30,10 +29,8 @@ class ResponseError(object):  # pylint: disable=too-few-public-methods
         """Implement evaluation of instances as a bool."""
         return bool(self.code or self.message)
 
-    __nonzero__ = __bool__  # python2 compatability
 
-
-class ResponseMetadata(object):
+class ResponseMetadata:
     """Analyse the response from AWS S3 HeadBucket API response.
 
     Attributes:
@@ -83,7 +80,7 @@ class ResponseMetadata(object):
         return self.http_status_code == HTTPStatus.NOT_FOUND
 
 
-class BaseResponse(object):  # pylint: disable=too-few-public-methods
+class BaseResponse:  # pylint: disable=too-few-public-methods
     """Analyse the response from AWS S3 HeadBucket API response.
 
     Attributes:
