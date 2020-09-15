@@ -1,7 +1,6 @@
 """Base class for AWS responses."""
+from http import HTTPStatus
 from typing import Any, Dict, Union  # pylint: disable=W
-
-from ....http_backport import HTTPStatus
 
 
 class ResponseError:  # pylint: disable=too-few-public-methods
@@ -29,8 +28,6 @@ class ResponseError:  # pylint: disable=too-few-public-methods
         # type: () -> bool
         """Implement evaluation of instances as a bool."""
         return bool(self.code or self.message)
-
-    __nonzero__ = __bool__  # python2 compatability
 
 
 class ResponseMetadata:
