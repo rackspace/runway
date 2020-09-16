@@ -1,6 +1,7 @@
 service: sampleapp
 
 plugins:
+  - serverless-iam-roles-per-function
   - serverless-python-requirements
 
 custom:
@@ -14,6 +15,11 @@ provider:
 functions:
   helloWorld:
     handler: hello_world.handler
+    # iamRoleStatements:
+    #   - Effect: "Allow"
+    #     Action:
+    #       - dynamodb:GetItem
+    #     Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/mytable"
 
 package:
   exclude:

@@ -27,6 +27,7 @@
     "jest": "^26.0.1",
     "prettier": "^1.19.1",
     "serverless": "^1.71.3",
+    "serverless-iam-roles-per-function": "^2.0.2",
     "serverless-webpack": "^5.2.0",
     "ts-jest": "^26.1.0",
     "ts-loader": "^5.3.3",

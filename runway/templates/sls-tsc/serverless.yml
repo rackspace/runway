@@ -1,7 +1,8 @@
 service: replaceme-myslsservice
 
 plugins:
-- serverless-webpack
+  - serverless-iam-roles-per-function
+  - serverless-webpack
 
 provider:
   name: aws
@@ -34,3 +35,8 @@ functions:
           path: hello-world
           method: get
           cors: true
+    # iamRoleStatements:
+    #   - Effect: "Allow"
+    #     Action:
+    #       - dynamodb:GetItem
+    #     Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/mytable"
