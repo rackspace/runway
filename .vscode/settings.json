@@ -82,6 +82,7 @@
         "pefile",
         "pycodestyle",
         "pycparser",
+        "pydantic",
         "pyflakes",
         "pyopenssl",
         "pypa",

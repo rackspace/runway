@@ -1,5 +1,5 @@
 namespace: ${namespace}
-stacker_bucket: ""  # not needed for these small templates
+cfngin_bucket: ""  # not needed for these small templates
 sys_path: ./
 
 stacks:

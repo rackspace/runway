@@ -41,7 +41,7 @@ def mock_context(namespace="default", extra_config_args=None, **kwargs):
     config_args = {"namespace": namespace}
     if extra_config_args:
         config_args.update(extra_config_args)
-    config = Config(config_args)
+    config = Config(**config_args)
     if kwargs.get("environment"):
         return Context(config=config, **kwargs)
     return Context(config=config, environment={}, **kwargs)
@@ -56,7 +56,7 @@ def generate_definition(base_name, stack_id, **overrides):
         "requires": [],
     }
     definition.update(overrides)
-    return Stack(definition)
+    return Stack(**definition)
 
 
 def mock_lookup(lookup_input, lookup_type, raw=None):

@@ -42,9 +42,7 @@ class TestCommandHook(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.context = Context(
-            config=Config({"namespace": "test", "stacker_bucket": "test"})
-        )
+        self.context = Context(config=Config(namespace="test", cfngin_bucket="test"))
         self.provider = mock_provider(region="us-east-1")
 
         self.mock_process = MockProcess()

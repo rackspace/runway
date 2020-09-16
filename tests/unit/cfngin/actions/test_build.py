@@ -68,7 +68,7 @@ class TestBuildAction(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.context = Context(config=Config({"namespace": "namespace"}))
+        self.context = Context(config=Config(namespace="namespace"))
         self.provider = MockProvider()
         self.build_action = build.Action(
             self.context, provider_builder=MockProviderBuilder(self.provider)
@@ -79,21 +79,26 @@ class TestBuildAction(unittest.TestCase):
         config = {
             "namespace": "namespace",
             "stacks": [
-                {"name": "vpc"},
-                {"name": "bastion", "variables": {"test": "${output vpc::something}"}},
+                {"name": "vpc", "template_path": "."},
+                {
+                    "name": "bastion",
+                    "template_path": ".",
+                    "variables": {"test": "${output vpc::something}"},
+                },
                 {
                     "name": "db",
+                    "template_path": ".",
                     "variables": {
                         "test": "${output vpc::something}",
                         "else": "${output bastion::something}",
                     },
                 },
-                {"name": "other", "variables": {}},
+                {"name": "other", "template_path": ".", "variables": {}},
             ],
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=Config(config), **kwargs)
+        return Context(config=Config(**config), **kwargs)
 
     @patch(
         "runway.cfngin.context.Context._persistent_graph_tags",

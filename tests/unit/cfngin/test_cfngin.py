@@ -115,7 +115,7 @@ class TestCFNgin:
         assert cfngin.parameters.test_param == "test-param-value"
         assert cfngin.recreate_failed
         assert cfngin.region == "us-east-1"
-        assert cfngin.sys_path == str(tmp_path)
+        assert cfngin.sys_path == tmp_path
         assert not cfngin.tail
 
         assert mock_action.call_count == 2
@@ -175,7 +175,7 @@ class TestCFNgin:
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
         # support python < 3.6
         cfngin = CFNgin(ctx=self.get_context(), sys_path=str(tmp_path))
-        result = cfngin.load(str(tmp_path / "basic.yml"))  # support python < 3.6
+        result = cfngin.load(tmp_path / "basic.yml")
 
         assert not result.bucket_name
         assert result.namespace == "test-namespace"
@@ -191,7 +191,7 @@ class TestCFNgin:
         caplog.set_level("ERROR", logger="runway.cfngin")
 
         with pytest.raises(SystemExit):
-            cfngin.load(str(cfn_template))  # support python < 3.6
+            cfngin.load(cfn_template)
 
         assert "appears to be a CloudFormation template" in caplog.text
 
@@ -268,16 +268,13 @@ class TestCFNgin:
         for config_path in good_config_paths + bad_config_paths:
             config_path.write_text("")
 
-        # support python < 3.6
-        result = CFNgin.find_config_files(sys_path=str(tmp_path))
-        expected = sorted([str(config_path) for config_path in good_config_paths])
+        result = CFNgin.find_config_files(sys_path=tmp_path)
+        expected = sorted([config_path for config_path in good_config_paths])
         assert result == expected
 
         config_01 = tmp_path / "01-config.yml"
-        result = CFNgin.find_config_files(
-            sys_path=str(config_01)  # support python < 3.6
-        )
-        assert result == [str(config_01)]  # support python < 3.6
+        result = CFNgin.find_config_files(sys_path=config_01)
+        assert result == [config_01]
 
         result = CFNgin.find_config_files()
         assert not result

@@ -100,7 +100,7 @@ class TestLambdaHooks(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.context = Context(
-            config=Config({"namespace": "test", "stacker_bucket": "test"})
+            config=Config(**{"namespace": "test", "cfngin_bucket": "test"})
         )
         self.provider = mock_provider(region="us-east-1")
 
@@ -176,7 +176,7 @@ class TestLambdaHooks(unittest.TestCase):
             results = self.run_hook(
                 functions={"MyFunction": {"path": "test"}},
                 context=Context(
-                    config=Config({"namespace": "test", "stacker_bucket": "test"}),
+                    config=Config(**{"namespace": "test", "cfngin_bucket": "test"}),
                     config_path=temp_dir.path,
                 ),
             )

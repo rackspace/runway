@@ -140,7 +140,7 @@ class TestPlan(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.count = 0
-        self.config = Config({"namespace": "namespace"})
+        self.config = Config(namespace="namespace")
         self.context = Context(config=self.config)
         register_lookup_handler("noop", lambda **kwargs: "test")
 
@@ -477,7 +477,7 @@ class TestPlan(unittest.TestCase):
 
     def test_dump(self, *args):
         """Test dump."""
-        requires = None
+        requires = []
         steps = []
 
         for i in range(5):

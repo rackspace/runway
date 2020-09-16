@@ -299,7 +299,7 @@ class Step:
         from runway.cfngin.config import Stack as StackConfig
         from runway.cfngin.stack import Stack
 
-        stack_def = StackConfig({"name": stack_name, "requires": requires or []})
+        stack_def = StackConfig.construct(name=stack_name, requires=requires or [])
         stack = Stack(stack_def, context)
         return cls(stack, fn=fn, watch_func=watch_func)
 

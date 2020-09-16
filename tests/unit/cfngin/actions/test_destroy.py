@@ -38,16 +38,24 @@ class TestDestroyAction(unittest.TestCase):
         config = {
             "namespace": "namespace",
             "stacks": [
-                {"name": "vpc"},
-                {"name": "bastion", "requires": ["vpc"]},
-                {"name": "instance", "requires": ["vpc", "bastion"]},
-                {"name": "db", "requires": ["instance", "vpc", "bastion"]},
-                {"name": "other", "requires": ["db"]},
+                {"name": "vpc", "template_path": "."},
+                {"name": "bastion", "requires": ["vpc"], "template_path": "."},
+                {
+                    "name": "instance",
+                    "requires": ["vpc", "bastion"],
+                    "template_path": ".",
+                },
+                {
+                    "name": "db",
+                    "requires": ["instance", "vpc", "bastion"],
+                    "template_path": ".",
+                },
+                {"name": "other", "requires": ["db"], "template_path": "."},
             ],
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=Config(config), **kwargs)
+        return Context(config=Config(**config), **kwargs)
 
     def test_generate_plan(self):
         """Test generate plan."""

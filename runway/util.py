@@ -210,7 +210,7 @@ class MutableMap(MutableMapping):
         return False
 
     def __contains__(self, value):
-        # type: () -> bool
+        # type: (Any) -> bool
         """Implement evaluation of 'in' conditional."""
         return value in self.data
 
@@ -225,7 +225,7 @@ class MutableMap(MutableMapping):
             The value associated with the provided key/attribute name.
 
         Raises:
-            Attribute: If attribute does not exist on this object.
+            AttributeError: If attribute does not exist on this object.
 
         Example:
             .. codeblock: python

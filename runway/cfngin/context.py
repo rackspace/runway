@@ -85,7 +85,7 @@ class Context:
         self._targets = None
         self._upload_to_s3 = None
         # TODO load the config from context instead of taking it as an arg
-        self.config = config or Config()
+        self.config = config or Config(namespace="example")
         # TODO set this value when provisioning a Config object in context
         # set to a fake location for the time being but this should be set
         # by all runtime entry points. the only time the fake value should be
@@ -277,12 +277,13 @@ class Context:
     @property
     def tags(self):
         """Return ``tags`` from config."""
-        tags = self.config.tags
-        if tags is not None:
-            return tags
-        if self.namespace:
-            return {"cfngin_namespace": self.namespace}
-        return {}
+        return (
+            self.config.tags
+            if self.config.tags is not None
+            else {"cfngin_namespace": self.namespace}
+            if self.namespace
+            else {}
+        )
 
     @property
     def template_indent(self):

@@ -51,9 +51,9 @@ class TestAction(object):
         mock_bucket.forbidden = forbidden
         mock_bucket.not_found = not_found
         mock_bucket_init.return_value = mock_bucket
-        cfngin_context.config.cfngin_bucket = bucket_name
 
         action = Action(cfngin_context)
+        action.bucket_name = bucket_name
 
         if forbidden and bucket_name:
             with pytest.raises(SystemExit) as excinfo:
@@ -73,7 +73,6 @@ class TestAction(object):
 
         assert action.bucket_name == bucket_name
 
-    @pytest.mark.wip
     def test_diff_stack_validationerror_template_too_large(
         self, caplog, cfngin_context, monkeypatch
     ):
@@ -81,6 +80,7 @@ class TestAction(object):
         caplog.set_level(logging.ERROR)
 
         cfngin_context.add_stubber("cloudformation")
+        cfngin_context.config.cfngin_bucket = ""
         expected = SkippedStatus("cfngin_bucket: existing bucket required")
         provider = Provider(cfngin_context.get_session())
         mock_get_stack_changes = MagicMock(

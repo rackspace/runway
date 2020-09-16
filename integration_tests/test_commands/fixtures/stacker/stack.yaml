@@ -1,5 +1,5 @@
 namespace: dev
-stacker_bucket: ''
+cfngin_bucket: ''
 
 stacks:
   stackerintegrationtest:

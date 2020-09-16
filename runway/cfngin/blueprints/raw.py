@@ -1,8 +1,12 @@
 """CFNgin blueprint representing raw template module."""
+from __future__ import annotations
+
 import hashlib
 import json
 import os
 import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -10,8 +14,11 @@ from ..exceptions import InvalidConfig, UnresolvedBlueprintVariable
 from ..util import parse_cloudformation_template
 from .base import Blueprint
 
+if TYPE_CHECKING:
+    from ..context import Context
 
-def get_template_path(filename):
+
+def get_template_path(file_path: Path) -> Optional[Path]:
     """Find raw template in working directory or in sys.path.
 
     template_path from config may refer to templates colocated with the Stacker
@@ -19,18 +26,18 @@ def get_template_path(filename):
     loading to find the path to the template.
 
     Args:
-        filename (str): Template filename.
+        filename (Path): Template path.
 
     Returns:
-        Optional[str]: Path to file, or None if no file found
+        Optional[Path]: Path to file, or None if no file found
 
     """
-    if os.path.isfile(filename):
-        return os.path.abspath(filename)
+    if file_path.is_file():
+        return file_path
     for i in sys.path:
-        if os.path.isfile(os.path.join(i, filename)):
-            return os.path.abspath(os.path.join(i, filename))
-
+        test_path = Path(i) / file_path.name
+        if test_path.is_file():
+            return test_path
     return None
 
 
@@ -85,8 +92,13 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
     """Blueprint class for blueprints auto-generated from raw templates."""
 
     def __init__(  # pylint: disable=super-init-not-called
-        self, name, context, raw_template_path, mappings=None, description=None,
-    ):
+        self,
+        name: str,
+        context: Context,
+        raw_template_path: Path,
+        mappings: Optional[Dict[str, Any]] = None,
+        description: Optional[str] = None,
+    ) -> None:
         """Instantiate class."""
         self.name = name
         self.context = context
