@@ -33,6 +33,7 @@ INSTALL_REQUIRES = [
     "pydantic>=1.4.0",
     "pyhcl~=0.4",  # does not support HCL2, possibly move to extras_require in the future
     "python-hcl2~=2.0",
+    "typing_extensions",  # only really needed for < 3.8 but can still be used in >= 3.8
     "gitpython",
     'importlib-metadata; python_version < "3.8"',
     "packaging",  # component of setuptools needed for version compare
