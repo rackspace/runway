@@ -366,6 +366,19 @@ Parameters
     parameters
       staticsite_user_pool_arn: arn:aws:cognito-idp:<region>:<account-id>:userpool/<pool>
 
+**staticsite_additional_redirect_domains (Optional[str])**
+  Additional domains (beyond the `staticsite_aliases` domains or the CloudFront URL if no
+  aliases are provided) that will be authorized by the :ref:`Auth@Edge` UserPool AppClient.
+  This should be represented as a comma delimited list of domains with protocols.
+
+  Requires staticsite_auth_at_edge_.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    parameters
+      staticsite_additional_redirect_domains: http://localhost:3000
+
 **staticsite_web_acl (Optional[str])**
   The ARN of a `web access control list (web ACL) <https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html>`__ to associate with the CloudFront Distribution.
 

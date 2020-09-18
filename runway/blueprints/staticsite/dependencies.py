@@ -9,6 +9,7 @@ from awacs.aws import Allow, AWSPrincipal, Policy, Statement
 from troposphere import AccountId, Join, Output, cognito, s3
 
 from runway.cfngin.blueprints.base import Blueprint
+from runway.module.staticsite import add_url_scheme
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +18,17 @@ class Dependencies(Blueprint):
     """Stacker blueprint for creating static website buckets."""
 
     VARIABLES = {
+        "Aliases": {
+            "type": list,
+            "default": [],
+            "description": "(Optional) Domain aliases for the distribution",
+        },
+        "AdditionalRedirectDomains": {
+            "type": list,
+            "default": [],
+            "description": "(Optional) AppClient callback/logout domains (in "
+            "addition to the Aliases)",
+        },
         "AuthAtEdge": {
             "type": bool,
             "default": False,
@@ -26,6 +38,10 @@ class Dependencies(Blueprint):
             "type": bool,
             "default": False,
             "description": "Whether a User Pool should be created for the project",
+        },
+        "SupportedIdentityProviders": {
+            "type": list,
+            "description": "Auth@Edge AppClient Identity Providers",
         },
         "OAuthScopes": {
             "type": list,
@@ -37,6 +53,16 @@ class Dependencies(Blueprint):
                 "aws.cognito.signin.user.admin",
             ],
             "description": "The allowed scopes for OAuth validation",
+        },
+        "RedirectPathSignIn": {
+            "type": str,
+            "default": "/parseauth",
+            "description": "Auth@Edge redirect sign in path",
+        },
+        "RedirectPathSignOut": {
+            "type": str,
+            "default": "/",
+            "description": "Auth@Edge redirect sign out path",
         },
     }
 
@@ -107,9 +133,32 @@ class Dependencies(Blueprint):
         )
 
         if variables["AuthAtEdge"]:
-            callbacks = self.context.hook_data["aae_callback_url_retriever"][
-                "callback_urls"
-            ]
+            userpool_client_params = {
+                "AllowedOAuthFlows": ["code"],
+                "AllowedOAuthScopes": variables["OAuthScopes"],
+            }
+            if variables["Aliases"]:
+                userpool_client_params["AllowedOAuthFlowsUserPoolClient"] = True
+                userpool_client_params["SupportedIdentityProviders"] = variables[
+                    "SupportedIdentityProviders"
+                ]
+                redirect_domains = [add_url_scheme(x) for x in variables["Aliases"]] + [
+                    add_url_scheme(x) for x in variables["AdditionalRedirectDomains"]
+                ]
+
+                # Create a list of all domains with their redirect paths
+                userpool_client_params["CallbackURLs"] = [
+                    "%s%s" % (domain, variables["RedirectPathSignIn"])
+                    for domain in redirect_domains
+                ]
+                userpool_client_params["LogoutURLs"] = [
+                    "%s%s" % (domain, variables["RedirectPathSignOut"])
+                    for domain in redirect_domains
+                ]
+            else:
+                userpool_client_params["CallbackURLs"] = self.context.hook_data[
+                    "aae_callback_url_retriever"
+                ]["callback_urls"]
 
             if variables["CreateUserPool"]:
                 user_pool = template.add_resource(
@@ -129,15 +178,10 @@ class Dependencies(Blueprint):
                 user_pool_id = self.context.hook_data["aae_user_pool_id_retriever"][
                     "id"
                 ]
+            userpool_client_params["UserPoolId"] = user_pool_id
 
             client = template.add_resource(
-                cognito.UserPoolClient(
-                    "AuthAtEdgeClient",
-                    AllowedOAuthFlows=["code"],
-                    CallbackURLs=callbacks,
-                    UserPoolId=user_pool_id,
-                    AllowedOAuthScopes=variables["OAuthScopes"],
-                )
+                cognito.UserPoolClient("AuthAtEdgeClient", **userpool_client_params)
             )
 
             template.add_output(

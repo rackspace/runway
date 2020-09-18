@@ -62,6 +62,7 @@ class StaticSite(RunwayModule):
                 # Auth@Edge warning about subsequent deploys
                 if (
                     self.parameters.get("staticsite_auth_at_edge", False)
+                    and not self.parameters.get("staticsite_aliases", False)
                     and self.context.is_interactive
                 ):
                     self.logger.warning(
@@ -131,20 +132,25 @@ class StaticSite(RunwayModule):
         ]
 
         if self.parameters.get("staticsite_auth_at_edge", False):
-            # Retrieve the appropriate callback urls from the User Pool Client
-            pre_build = [
-                {
-                    "path": "runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get",
-                    "required": True,
-                    "data_key": "aae_callback_url_retriever",
-                    "args": {
-                        "user_pool_arn": self.parameters.get(
-                            "staticsite_user_pool_arn", ""
-                        ),
-                        "stack_name": "${namespace}-%s-dependencies" % self.name,
-                    },
-                }
-            ]
+            if not self.parameters.get("staticsite_aliases"):
+                # Retrieve the appropriate callback urls from the User Pool Client
+                pre_build.append(
+                    {
+                        "path": "runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get",
+                        "required": True,
+                        "data_key": "aae_callback_url_retriever",
+                        "args": {
+                            "user_pool_arn": self.parameters.get(
+                                "staticsite_user_pool_arn", ""
+                            ),
+                            "aliases": self.parameters.get("staticsite_aliases", ""),
+                            "additional_callback_domains": self.parameters.get(
+                                "staticsite_additional_callback_domains", ""
+                            ),
+                            "stack_name": "${namespace}-%s-dependencies" % self.name,
+                        },
+                    }
+                )
 
             if self.parameters.get("staticsite_create_user_pool"):
                 # Retrieve the user pool id
@@ -307,17 +313,18 @@ class StaticSite(RunwayModule):
                     "args": self._get_lambda_config_variables(site_stack_variables),
                 }
             )
-            post_build.insert(
-                0,
-                {
-                    "path": "runway.hooks.staticsite.auth_at_edge.client_updater.update",
-                    "required": True,
-                    "data_key": "client_updater",
-                    "args": self._get_client_updater_variables(
-                        self.name, site_stack_variables
-                    ),
-                },
-            )
+            if not self.parameters.get("staticsite_aliases"):
+                post_build.insert(
+                    0,
+                    {
+                        "path": "runway.hooks.staticsite.auth_at_edge.client_updater.update",
+                        "required": True,
+                        "data_key": "client_updater",
+                        "args": self._get_client_updater_variables(
+                            self.name, site_stack_variables
+                        ),
+                    },
+                )
 
         if self.parameters.get("staticsite_role_boundary_arn", False):
             site_stack_variables["RoleBoundaryArn"] = self.parameters[
@@ -452,9 +459,6 @@ class StaticSite(RunwayModule):
             site_stack_variables["HttpHeaders"] = self._get_http_headers()
             site_stack_variables["CookieSettings"] = self._get_cookie_settings()
             site_stack_variables["OAuthScopes"] = self._get_oauth_scopes()
-            site_stack_variables[
-                "SupportedIdentityProviders"
-            ] = self._get_supported_identity_providers()
         else:
             # If lambda_function_associations or custom_error_responses defined,
             # add to stack config. Only if not using Auth@Edge
@@ -512,9 +516,26 @@ class StaticSite(RunwayModule):
             self._ensure_auth_at_edge_requirements()
 
             variables.update(
-                {"AuthAtEdge": self.parameters.get("staticsite_auth_at_edge", False)}
+                {
+                    "AuthAtEdge": self.parameters.get("staticsite_auth_at_edge", False),
+                    "SupportedIdentityProviders": self._get_supported_identity_providers(),
+                    "RedirectPathSignIn": "${default staticsite_redirect_path_sign_in::/parseauth}",
+                    "RedirectPathSignOut": "${default staticsite_redirect_path_sign_out::/}",
+                }
             )
 
+            if self.parameters.get("staticsite_aliases"):
+                variables.update(
+                    {"Aliases": self.parameters.get("staticsite_aliases").split(",")}
+                )
+            if self.parameters.get("staticsite_additional_redirect_domains"):
+                variables.update(
+                    {
+                        "AdditionalRedirectDomains": self.parameters.get(
+                            "staticsite_additional_redirect_domains"
+                        ).split(",")
+                    }
+                )
             if self.parameters.get("staticsite_create_user_pool", False):
                 variables.update(
                     {
