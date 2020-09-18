@@ -208,9 +208,7 @@ class Config(BaseModel):
         cls, raw_data: str, *, parameters: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Process the package sources defined in a rendered config."""
-        print(raw_data)
         config = yaml.safe_load(raw_data)
-        print(config)
         processor = SourceProcessor(
             sources=PackageSources.parse_obj(config.get("package_sources", {})),
             cache_dir=config.get("cfngin_cache_dir"),
