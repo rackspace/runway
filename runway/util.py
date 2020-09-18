@@ -552,6 +552,16 @@ def merge_dicts(dict1, dict2, deep_merge=True):
     #     return {**dict1, **dict2}
 
 
+def snake_case_to_kebab_case(value: str) -> str:
+    """Convert snake_case to kebab-case.
+
+    Args:
+        value: The string value to convert.
+
+    """
+    return value.replace("_", "-")
+
+
 def extract_boto_args_from_env(env_vars):
     """Return boto3 client args dict with environment creds."""
     boto_args = {}

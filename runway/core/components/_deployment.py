@@ -1,18 +1,24 @@
 """Runway deployment object."""
+from __future__ import annotations
+
 import concurrent.futures
 import logging
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ..._logging import PrefixAdaptor
-from ...config import FutureDefinition, VariablesDefinition
+from ...config.components.runway import RunwayVariablesDefinition
+from ...config.models.runway import (
+    RunwayFutureDefinitionModel,
+    RunwayVariablesDefinitionModel,
+)
 from ...exceptions import UnresolvedVariable
 from ...util import cached_property, merge_dicts, merge_nested_environment_dicts
 from ..providers import aws
 from ._module import Module
 
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition
+    from ...config.components.runway import RunwayDeploymentDefinition
     from ...context import Context
 
 
@@ -24,24 +30,24 @@ class Deployment:
 
     def __init__(
         self,
-        context,  # type: Context
-        definition,  # type: DeploymentDefinition
-        future=None,  # type: Optional[FutureDefinition]
-        variables=None,  # type: VariablesDefinition
-    ):
-        # type: (...) -> None
+        context: Context,
+        definition: RunwayDeploymentDefinition,
+        future: Optional[RunwayFutureDefinitionModel] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            definition (DeploymentDefinition): A single deployment definition.
-            future (Optional[FutureDefinition]): Future functionality
-                configuration.
-            variables (VariablesDefinition): Runway variables.
+            context: Runway context object.
+            definition: A single deployment definition.
+            future: Future functionality configuration.
+            variables: Runway variables.
 
         """
-        self._future = future or FutureDefinition()
-        self._variables = variables or VariablesDefinition()
+        self._future = future or RunwayFutureDefinitionModel()
+        self._variables = variables or RunwayVariablesDefinition(
+            RunwayVariablesDefinitionModel()
+        )
         self.definition = definition
         self.ctx = context
         self.name = self.definition.name
@@ -222,7 +228,7 @@ class Deployment:
         context.env.aws_region = region
 
         with aws.AssumeRole(context, **self.assume_role_config):
-            self.definition.resolve(context, self._variables)
+            self.definition.resolve(context, variables=self._variables)
             self.validate_account_credentials(context)
             Module.run_list(
                 action=action,
@@ -322,22 +328,20 @@ class Deployment:
     @classmethod
     def run_list(
         cls,
-        action,  # type: str
-        context,  # type: Context
-        deployments,  # type: List[DeploymentDefinition]
-        future,  # type: FutureDefinition
-        variables,  # type: VariablesDefinition
-    ):
-        # type: (...) -> None
+        action: str,
+        context: Context,
+        deployments: List[RunwayDeploymentDefinition],
+        future: RunwayFutureDefinitionModel,
+        variables: RunwayVariablesDefinition,
+    ) -> None:
         """Run a list of deployments.
 
         Args:
-            action (str): Name of action to run.
-            context (Context): Runway context.
-            deployments (List[DeploymentDefinition]): List of deployments to run.
-            future (FutureDefinition): Future definition.
-            variables (VariablesDefinition): Runway variables for lookup
-                resolution.
+            action: Name of action to run.
+            context: Runway context.
+            deployments: List of deployments to run.
+            future: Future definition.
+            variables: Runway variables for lookup resolution.
 
         """
         for definition in deployments:

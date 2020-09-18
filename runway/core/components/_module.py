@@ -1,4 +1,6 @@
 """Runway module object."""
+from __future__ import annotations
+
 import concurrent.futures
 import json
 import logging
@@ -9,7 +11,13 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import yaml
 
 from ..._logging import PrefixAdaptor
-from ...config import FutureDefinition, VariablesDefinition
+
+# from ...config import FutureDefinition, VariablesDefinition
+from ...config.components.runway import RunwayVariablesDefinition
+from ...config.models.runway import (
+    RunwayFutureDefinitionModel,
+    RunwayVariablesDefinitionModel,
+)
 from ...path import Path as ModulePath
 from ...runway_module_type import RunwayModuleType
 from ...util import (
@@ -21,7 +29,10 @@ from ...util import (
 from ..providers import aws
 
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition, ModuleDefinition
+    from ...config.components.runway import (
+        RunwayDeploymentDefinition,
+        RunwayModuleDefinition,
+    )
     from ...context import Context
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -32,30 +43,31 @@ class Module:
 
     def __init__(
         self,
-        context,  # type: Context
-        definition,  # type: ModuleDefinition
-        deployment=None,  # type: Optional[DeploymentDefinition]
-        future=None,  # type: Optional[FutureDefinition]
-        variables=None,  # type: Optional[VariablesDefinition]
-    ):
-        # type: (...) -> None
+        context: Context,
+        definition: RunwayModuleDefinition,
+        deployment: RunwayDeploymentDefinition = None,
+        future: RunwayFutureDefinitionModel = None,
+        variables: RunwayVariablesDefinition = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            definition (ModuleDefinition): A single module definition.
-            deployment (Optional[DeploymentDefinition]): Deployment that this
+            context: Runway context object.
+            definition: A single module definition.
+            deployment: Deployment that this
                 module is a part of.
-            future (Optional[FutureDefinition]): Future functionality
+            future: Future functionality
                 configuration.
-            variables (Optional[VariablesDefinition]): Runway variables.
+            variables: Runway variables.
 
         """
         self.__deployment = deployment
-        self.__future = future or FutureDefinition()
-        self.__variables = variables or VariablesDefinition()
+        self.__future = future or RunwayFutureDefinitionModel()
+        self.__variables = variables or RunwayVariablesDefinition(
+            RunwayVariablesDefinitionModel()
+        )
         self.ctx = context.copy()  # each module has it's own instance of context
-        definition.resolve(self.ctx, variables)
+        definition.resolve(self.ctx, variables=variables)
         self.definition = definition
         self.name = self.definition.name
         self.logger = PrefixAdaptor(self.fqn, LOGGER)
@@ -294,14 +306,13 @@ class Module:
     @classmethod
     def run_list(
         cls,
-        action,  # type: str
-        context,  # type: Context
-        modules,  # type: List[ModuleDefinition]
-        variables,  # type: VariablesDefinition
-        deployment=None,  # type: Optional[DeploymentDefinition]
-        future=None,  # type: Optional[FutureDefinition]
-    ):
-        # type: (...) -> None
+        action: str,
+        context: Context,
+        modules: List[RunwayModuleDefinition],
+        variables: RunwayVariablesDefinition,
+        deployment: RunwayDeploymentDefinition = None,
+        future: Optional[RunwayFutureDefinitionModel] = None,
+    ) -> None:
         """Run a list of modules.
 
         Args:
@@ -310,8 +321,7 @@ class Module:
             modules: List of modules to run.
             variables: Variable definition for resolving lookups in the module.
             deployment: Deployment the modules are a part of.
-            future (Optional[FutureDefinition]): Future functionality
-                configuration.
+            future: Future functionality configuration.
 
         """
         for module in modules:
