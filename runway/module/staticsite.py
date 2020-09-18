@@ -519,8 +519,12 @@ class StaticSite(RunwayModule):
                 {
                     "AuthAtEdge": self.parameters.get("staticsite_auth_at_edge", False),
                     "SupportedIdentityProviders": self._get_supported_identity_providers(),
-                    "RedirectPathSignIn": "${default staticsite_redirect_path_sign_in::/parseauth}",
-                    "RedirectPathSignOut": "${default staticsite_redirect_path_sign_out::/}",
+                    "RedirectPathSignIn": (
+                        "${default staticsite_redirect_path_sign_in::/parseauth}"
+                    ),
+                    "RedirectPathSignOut": (
+                        "${default staticsite_redirect_path_sign_out::/}"
+                    ),
                 }
             )
 
