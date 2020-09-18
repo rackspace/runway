@@ -6,7 +6,7 @@ from mock import MagicMock
 from packaging.specifiers import SpecifierSet
 
 from runway.cfngin.context import Context as CFNginContext
-from runway.config import DeploymentDefinition
+from runway.config.components.runway import RunwayDeploymentDefinition
 from runway.context import Context as RunwayContext
 from runway.core.components import DeployEnvironment
 from runway.util import MutableMap
@@ -288,7 +288,7 @@ class YamlLoaderDeploymet(YamlLoader):
             root (Path): Root directory.
 
         """
-        super().__init__(root, load_class=DeploymentDefinition)
+        super().__init__(root, load_class=RunwayDeploymentDefinition)
 
     def load(self, file_name):
         """Load YAML file contents.
@@ -297,7 +297,7 @@ class YamlLoaderDeploymet(YamlLoader):
             file_name (str): Name of the file to load.
 
         Returns:
-            DeploymentDefinition
+            RunwayDeploymentDefinition
 
         """
-        return self.load_class.from_list([self.get(file_name)])[0]
+        return self.load_class.parse_obj(self.get(file_name))

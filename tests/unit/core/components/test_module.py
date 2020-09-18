@@ -6,7 +6,7 @@ import pytest
 import yaml
 from mock import MagicMock, call, patch
 
-from runway.config import FutureDefinition
+from runway.config.models.runway import RunwayFutureDefinitionModel
 from runway.core.components import Deployment, Module
 from runway.core.components._module import validate_environment
 
@@ -27,7 +27,7 @@ class TestModule:
 
         mock_ctx.copy.assert_called_once_with()
         assert mod.ctx == mock_ctx.copy()
-        mock_def.resolve.assert_called_once_with(mock_ctx.copy(), mock_vars)
+        mock_def.resolve.assert_called_once_with(mock_ctx.copy(), variables=mock_vars)
         assert mod.name == "module-name"
 
     def test_child_modules(self, fx_deployments, runway_context):
@@ -157,7 +157,7 @@ class TestModule:
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
-            future=FutureDefinition(strict_environments=strict),
+            future=RunwayFutureDefinitionModel(strict_environments=strict),
         )
 
         result = mod.should_skip

@@ -43,13 +43,13 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     @property
     def child_modules(self) -> List[RunwayModuleDefinition]:
         """List of child modules."""
-        if self._data.child_modules and not isinstance(
-            self._data.child_modules[0], RunwayModuleDefinition
+        if self._data.parallel and not isinstance(
+            self._data.parallel[0], RunwayModuleDefinition
         ):
-            self._data.child_modules = [
-                RunwayModuleDefinition(child) for child in self._data.child_modules
+            self._data.parallel = [
+                RunwayModuleDefinition(child) for child in self._data.parallel
             ]
-        return self._data.child_modules
+        return self._data.parallel
 
     @property
     def class_path(self) -> Optional[Path]:

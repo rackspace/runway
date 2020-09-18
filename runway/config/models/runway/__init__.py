@@ -71,8 +71,10 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
     @validator("duration")
     def _validate_duration(cls, v):  # noqa: N805
         """Validate duration is within the range allowed by AWS."""
-        assert v >= 900, "duration must be greater than or equal to 900"
-        assert v <= 43_200, "duration must be less than or equal to 43,200"
+        if v < 900:
+            raise ValueError("duration must be greater than or equal to 900")
+        if v > 43_200:
+            raise ValueError("duration must be less than or equal to 43,200")
         return v
 
 
@@ -97,19 +99,19 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         allow_population_by_field_name = True
         extra = Extra.forbid
 
-    account_alias: Dict[str, str] = {}  # TODO support lookup string
-    account_id: Dict[str, str] = {}  # TODO support lookup string
-    assume_role: RunwayAssumeRoleDefinitionModel = {}  # TODO support lookup string
+    account_alias: Union[Dict[str, str], str] = {}
+    account_id: Union[Dict[str, str], str] = {}
+    assume_role: Union[str, RunwayAssumeRoleDefinitionModel] = {}
     env_vars: RunwayEnvVarsType = {}  # TODO support lookup string
     environments: RunwayEnvironmentsType = {}  # TODO support lookup string
     modules: List[RunwayModuleDefinitionModel]
     module_options: Dict[str, Any] = {}  # TODO support lookup string
-    name: Optional[str] = None
+    name: str = "unnamed_deployment"
     parallel_regions: List[str] = []  # TODO support lookup string
     parameters: Dict[str, Any] = {}  # TODO support lookup string
     regions: Union[
         RunwayDeploymentRegionDefinitionModel, List[str]
-    ]  # TODO support lookup string
+    ] = []  # TODO support lookup string
 
     @root_validator(pre=True)
     def _convert_simple_module(
@@ -169,11 +171,11 @@ class RunwayModuleDefinitionModel(ConfigProperty):
     name: str
     options: Dict[str, Any] = {}
     parameters: Dict[str, Any] = {}
-    path: Union[str, Path] = "./"  # supports variables so won't be Path to start
+    path: Optional[Union[str, Path]]  # supports variables so won't be Path to start
     tags: List[str] = []
     type: Optional[str] = None  # TODO add enum
     # needs to be last
-    child_modules: List[RunwayModuleDefinitionModel] = []  # TODO add validator
+    parallel: List[RunwayModuleDefinitionModel] = []  # TODO add validator
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
@@ -187,7 +189,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         """Validate module name."""
         if "name" in values:
             return values
-        if "child_modules" in values:
+        if "parallel" in values:
             values["name"] = "parallel_parent"
             return values
         if "path" in values:
@@ -196,14 +198,29 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         values["name"] = "undefined"
         return values
 
-    @validator("child_modules")
-    def _validate_child_modules(
-        cls, v: List[RunwayModuleDefinitionModel], values: Dict[str, Any]  # noqa: N805
-    ) -> List[RunwayModuleDefinitionModel]:
-        """Validate child_modules."""
+    @root_validator(pre=True)
+    def _validate_path(cls, values):  # noqa: N805
+        """Validate path and sets a default value if needed."""
+        if not values.get("path") and not values.get("parallel"):
+            values["path"] = Path.cwd()
+        return values
+
+    @validator("parallel", pre=True)
+    def _validate_parallel(
+        cls, v: List[Union[Dict[str, Any], str]], values: Dict[str, Any],  # noqa: N805
+    ) -> List[Dict[str, Any]]:
+        """Validate parallel."""
         if v and values.get("path"):
-            raise ValueError("only one of child_modules or path can be defined")
-        return v
+            raise ValueError("only one of parallel or path can be defined")
+        if not v:
+            return v
+        result = []
+        for mod in v:
+            if isinstance(mod, str):
+                result.append({"path": mod})
+            else:
+                result.append(mod)
+        return result
 
 
 # https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models

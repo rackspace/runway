@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from ..._logging import PrefixAdaptor
 from ...config.components.runway import RunwayVariablesDefinition
 from ...config.models.runway import (
+    RunwayAssumeRoleDefinitionModel,
     RunwayFutureDefinitionModel,
     RunwayVariablesDefinitionModel,
 )
@@ -87,56 +88,30 @@ class Deployment:
         return None
 
     @property
-    def assume_role_config(self):
-        # type: () -> Dict[str, Union[int, str]]
-        """Parse the definition to get the correct assume role configuration.
-
-        Returns:
-            Dict[str, Union[int, str]]: Assume role definition for the current
-            context.
-
-        """
+    def assume_role_config(self) -> Dict[str, Union[bool, int, str]]:
+        """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
         if not assume_role:
             self.logger.debug(
                 "assume_role not configured for deployment: %s", self.name
             )
             return {}
-        if isinstance(assume_role, dict):
-            top_level = {
-                "revert_on_exit": assume_role.get("post_deploy_env_revert", False),
-                "session_name": assume_role.get("session_name"),
-            }
-            if assume_role.get("arn"):
-                self.logger.debug(
-                    "role found in the top level dict: %s", assume_role["arn"]
-                )
-                return dict(
-                    role_arn=assume_role["arn"],
-                    duration_seconds=assume_role.get("duration"),
-                    **top_level
-                )
-            if assume_role.get(self.ctx.env.name):
-                env_assume_role = assume_role[self.ctx.env.name]
-                if isinstance(env_assume_role, dict):
-                    self.logger.debug(
-                        "role found in deploy environment dict: %s",
-                        env_assume_role["arn"],
-                    )
-                    return dict(
-                        role_arn=env_assume_role["arn"],
-                        duration_seconds=env_assume_role.get("duration"),
-                        **top_level
-                    )
-                self.logger.debug("role found for environment: %s", env_assume_role)
-                return dict(role_arn=env_assume_role, **top_level)
-            self.logger.info(
-                'skipping iam:AssumeRole; no role found for deploy environment %s"...',
-                self.ctx.env.name,
+        if isinstance(assume_role, str):
+            self.logger.debug("role found: %s", assume_role)
+            assume_role = RunwayAssumeRoleDefinitionModel(arn=assume_role)
+        elif isinstance(assume_role, dict):
+            assume_role = RunwayAssumeRoleDefinitionModel.parse_obj(assume_role)
+        if not assume_role.arn:
+            self.logger.debug(
+                "assume_role not configured for deployment: %s", self.name
             )
             return {}
-        self.logger.debug("role found: %s", assume_role)
-        return {"role_arn": assume_role, "revert_on_exit": False}
+        return {
+            "duration_seconds": assume_role.duration,
+            "revert_on_exit": assume_role.post_deploy_env_revert,
+            "role_arn": assume_role.arn,
+            "session_name": assume_role.session_name,
+        }
 
     @property
     def env_vars_config(self):

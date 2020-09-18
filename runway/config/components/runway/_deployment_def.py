@@ -1,16 +1,16 @@
 """Runway config deployment definition."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 from ....variables import Variable
+from ...models.runway import RunwayDeploymentDefinitionModel
 from ._base import ConfigComponentDefinition
 from ._module_def import RunwayModuleDefinition
 
 if TYPE_CHECKING:
     from ...models.runway import (
         RunwayAssumeRoleDefinitionModel,
-        RunwayDeploymentDefinitionModel,
         RunwayEnvironmentsType,
         RunwayEnvVarsType,
     )
@@ -84,3 +84,14 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         self._vars[var_name] = Variable(
             name=f"{self.name}.{var_name}", value=var_value, variable_type="runway"
         )
+
+    @classmethod
+    def parse_obj(
+        cls, obj: Union[Dict[str, Any], List[Any]]
+    ) -> Union[RunwayDeploymentDefinition, List[RunwayDeploymentDefinition]]:
+        """Parse a python object."""
+        if isinstance(obj, dict):
+            return cls(RunwayDeploymentDefinitionModel.parse_obj(obj))
+        if isinstance(obj, list):
+            return [cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj]
+        raise TypeError(f"{type(obj)}; expected type dict or list")

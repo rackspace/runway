@@ -47,3 +47,10 @@ class RunwayVariablesDefinition(MutableMap):
             " or ".join(self.default_names),
         )
         return {}
+
+    @classmethod
+    def parse_obj(cls, obj: Dict[str, Any]) -> RunwayVariablesDefinition:
+        """Parse a python object."""
+        if isinstance(obj, dict):
+            return cls(RunwayVariablesDefinitionModel.parse_obj(obj))
+        raise TypeError(f"{type(obj)}; expected type dict")
