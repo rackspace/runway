@@ -4,7 +4,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 from ....variables import Variable
-from ...models.runway import RunwayDeploymentDefinitionModel
+from ...models.runway import (
+    RunwayDeploymentDefinitionModel,
+    RunwayModuleDefinitionModel,
+)
 from ._base import ConfigComponentDefinition
 from ._module_def import RunwayModuleDefinition
 
@@ -38,7 +41,6 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         "env_vars",
         "regions",
     )
-    _reverse: bool = False
     _supports_vars: Tuple[str, ...] = (
         "account_alias",
         "account_id",
@@ -56,20 +58,54 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         super().__init__(data)
 
     @property
+    def menu_entry(self) -> str:
+        """Return menu entry representation of this deployment."""
+        return "{name} - {modules} ({regions})".format(
+            name=self.name,
+            modules=", ".join([module.name for module in self.modules]),
+            regions=", ".join(self.regions or self.parallel_regions),
+        )
+
+    @property
     def modules(self) -> List[RunwayModuleDefinition]:
         """List of Runway modules."""
-        if self._data.modules and not isinstance(
-            self._data.modules[0], RunwayModuleDefinition
-        ):
-            self._data.modules = [
-                RunwayModuleDefinition(module) for module in self._data.modules
-            ]
-        return self._data.modules
+        return [RunwayModuleDefinition(module) for module in self._data.modules]
+
+    @modules.setter
+    def modules(
+        self, modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]]
+    ) -> None:
+        """Set the value of the property.
+
+        Args:
+            modules: A list of modules.
+
+        Raises:
+            TypeError: The provided value does not match the required types.
+
+        """
+        if not isinstance(modules, list):
+            TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
+        sanitized = []
+        for i, mod in enumerate(modules):
+            if isinstance(mod, RunwayModuleDefinition):
+                sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
+            elif isinstance(mod, RunwayModuleDefinitionModel):
+                sanitized.append(mod)
+            else:
+                TypeError(
+                    f"{self.name}.modules[{i}] is type {type(mod)}; "
+                    "expected type RunwayModuleDefinition or RunwayModuleDefinitionModel"
+                )
+        self._data.modules = sanitized
 
     def reverse(self):
         """Reverse the order of modules and regions."""
-        self._reverse = not self._reverse
-        self.modules.reverse()
+        self._data.modules.reverse()
+        for mod in self._data.modules:
+            mod.parallel.reverse()
+        self._data.parallel_regions.reverse()
+        self._data.regions.reverse()
 
     def _register_variable(self, var_name: str, var_value: Any) -> None:
         """Register a variable.

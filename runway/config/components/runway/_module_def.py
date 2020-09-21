@@ -2,17 +2,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from ....variables import Variable
+from ...models.runway import RunwayModuleDefinitionModel
 from ._base import ConfigComponentDefinition
 
 if TYPE_CHECKING:
-    from ...models.runway import (
-        RunwayEnvironmentsType,
-        RunwayEnvVarsType,
-        RunwayModuleDefinitionModel,
-    )
+    from ...models.runway import RunwayEnvironmentsType, RunwayEnvVarsType
 
 
 class RunwayModuleDefinition(ConfigComponentDefinition):
@@ -43,18 +40,54 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     @property
     def child_modules(self) -> List[RunwayModuleDefinition]:
         """List of child modules."""
-        if self._data.parallel and not isinstance(
-            self._data.parallel[0], RunwayModuleDefinition
-        ):
-            self._data.parallel = [
-                RunwayModuleDefinition(child) for child in self._data.parallel
-            ]
-        return self._data.parallel
+        return [RunwayModuleDefinition(child) for child in self._data.parallel]
+
+    @child_modules.setter
+    def child_modules(
+        self, modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]]
+    ) -> None:
+        """Set the value of the property.
+
+        Args:
+            modules: A list of modules.
+
+        Raises:
+            TypeError: The provided value does not match the required types.
+
+        """
+        if not isinstance(modules, list):
+            TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
+        sanitized = []
+        for i, mod in enumerate(modules):
+            if isinstance(mod, RunwayModuleDefinition):
+                sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
+            elif isinstance(mod, RunwayModuleDefinitionModel):
+                sanitized.append(mod)
+            else:
+                TypeError(
+                    f"{self.name}.parallel[{i}] is type {type(mod)}; "
+                    "expected type RunwayModuleDefinition or RunwayModuleDefinitionModel"
+                )
+        self._data.parallel = sanitized
 
     @property
     def class_path(self) -> Optional[Path]:
         """Path to a class for processing the module."""
         return Path(self._data.class_path).resolve() if self._data.class_path else None
+
+    @property
+    def is_parent(self) -> bool:
+        """Assess if the modules contains child modules (e.g. run in parallel)."""
+        return bool(self._data.parallel)
+
+    @property
+    def menu_entry(self) -> str:
+        """Return menu entry representation of this module."""
+        if self.is_parent:
+            return (
+                f"{self.name} [{', '.join([c.menu_entry for c in self.child_modules])}]"
+            )
+        return self.name
 
     @property
     def path(self) -> Path:
@@ -67,6 +100,10 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     def path(self, value: Path) -> None:
         """Set the value of path."""
         self._data.path = value
+
+    def reverse(self):
+        """Reverse the order of child/parallel modules."""
+        self._data.parallel.reverse()
 
     def _register_variable(self, var_name: str, var_value: Any) -> None:
         """Register a variable.

@@ -17,13 +17,13 @@ from ..cfngin import exceptions
 from ..cfngin.lookups import register_lookup_handler
 from ..cfngin.util import SourceProcessor, merge_map
 from ..exceptions import ConfigNotFound
-from .components.runway import RunwayDeploymentDefinition, RunwayVariablesDefinition
-from .models.cfngin import Hook, PackageSources, Stack, Target
-from .models.runway import (
-    RunwayConfigDefinitionModel,
-    RunwayFutureDefinitionModel,
-    RunwayTestDefinitionModel,
+from .components.runway import (
+    RunwayDeploymentDefinition,
+    RunwayTestDefinition,
+    RunwayVariablesDefinition,
 )
+from .models.cfngin import Hook, PackageSources, Stack, Target
+from .models.runway import RunwayConfigDefinitionModel, RunwayFutureDefinitionModel
 
 if TYPE_CHECKING:
     from packaging.specifiers import SpecifierSet
@@ -376,7 +376,7 @@ class RunwayConfig(BaseConfig):
     future: RunwayFutureDefinitionModel
     ignore_git_branch: bool
     runway_version: Optional[SpecifierSet]
-    tests: List[RunwayTestDefinitionModel]
+    tests: List[RunwayTestDefinition]
     variables: RunwayVariablesDefinition
     _data: RunwayConfigDefinitionModel
 
@@ -398,7 +398,7 @@ class RunwayConfig(BaseConfig):
         self.future = self._data.future
         self.ignore_git_branch = self._data.ignore_git_branch
         self.runway_version = self._data.runway_version
-        self.tests = self._data.tests
+        self.tests = [RunwayTestDefinition(t) for t in self._data.tests]
         self.variables = RunwayVariablesDefinition(self._data.variables)
 
     @classmethod

@@ -16,6 +16,8 @@ class ValidRunwayTestTypeValues(Enum):
     """Valid build-in test types."""
 
     cfn_lint = "cfn-lint"
+    script = "script"
+    yamllint = "yamllint"
 
 
 class RunwayTestDefinitionModel(ConfigProperty):
@@ -30,6 +32,23 @@ class RunwayTestDefinitionModel(ConfigProperty):
         """Model configuration."""
 
         use_enum_values = True
+
+    def __new__(cls, **kwargs) -> RunwayTestDefinitionModel:
+        """Create a new instance of a class.
+
+        Returns:
+            Correct subclass of RunwayTestDefinition for the given data.
+
+        """
+        test_type = kwargs.get("type")
+        if cls is RunwayTestDefinitionModel:
+            if test_type == "cfn-lint":
+                return super().__new__(CfnLintRunwayTestDefinitionModel)
+            if test_type == "script":
+                return super().__new__(ScriptRunwayTestDefinitionModel)
+            if test_type == "yamllint":
+                return super.__new__(YamlLintRunwayTestDefinitionModel)
+        return super().__new__(cls)
 
 
 class CfnLintRunwayTestArgs(ConfigProperty):
