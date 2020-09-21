@@ -4,7 +4,6 @@ import json
 import logging
 import re
 import time
-import traceback
 from datetime import datetime
 from random import random
 from urllib import request  # pylint: disable=no-name-in-module
@@ -304,9 +303,8 @@ def http_post_with_retry(url, data, headers):
         except Exception as err:
             LOGGER.error("HTTP POST to %s failed (attempt %s)", url, attempts)
             LOGGER.error(err)
-            LOGGER.error(traceback.print_exc())
             if attempts >= 5:
-                break
+                raise
             if attempts >= 2:
                 # After attempting twice do some exponential backoff with jitter
                 time.sleep((25 * (pow(2, attempts) + random() * attempts)) / 1000)
