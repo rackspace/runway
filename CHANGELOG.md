@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - fixed an issues causing static sites in regions other than us-east-1 to redirect to the s3 object until CloudFront was able to use the global endpoint of the bucket
+- fixed uncaught static site auth@edge errors in refresh token handling
 
 ## [1.13.0] - 2020-09-14
 ### Added
