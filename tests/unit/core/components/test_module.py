@@ -54,7 +54,7 @@ class TestModule:
             assert isinstance(child, Module)
             # basic checks to ensure the child was setup correctly
             assert child.ctx.env.name == runway_context.env.name
-            assert child.definition == mod0.definition.child_modules[index]
+            assert child.definition.path == mod0.definition.child_modules[index].path
 
     @patch(MODULE + ".ModulePath")
     def test_path(self, mock_path, fx_deployments, runway_context):

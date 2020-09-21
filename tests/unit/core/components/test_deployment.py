@@ -3,7 +3,7 @@
 import logging
 
 import pytest
-from mock import MagicMock, PropertyMock, call, patch
+from mock import ANY, MagicMock, PropertyMock, call, patch
 
 from runway.config.components.runway import (
     RunwayDeploymentDefinition,
@@ -314,7 +314,7 @@ class TestDeployment:
             context=runway_context,
             deployment=definition,
             future=obj._future,
-            modules=definition.modules,
+            modules=ANY,  # list of module objects change
             variables=obj._variables,
         )
 
