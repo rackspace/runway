@@ -186,7 +186,7 @@ class TestRunwayDeploymentDefinitionModel:
         obj = RunwayDeploymentDefinitionModel(modules=[], regions=["us-east-1"])
         assert obj.account_alias == {}
         assert obj.account_id == {}
-        assert obj.assume_role == {}
+        assert isinstance(obj.assume_role, RunwayAssumeRoleDefinitionModel)
         assert obj.env_vars == {}
         assert obj.environments == {}
         assert obj.modules == []

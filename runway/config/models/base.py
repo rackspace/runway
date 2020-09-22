@@ -9,6 +9,12 @@ import pydantic
 class ConfigProperty(pydantic.BaseModel):
     """Base class for Runway configuration properties."""
 
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        validate_all = True
+        validate_assignment = True
+
     def get(self, key: str, default: Any = None) -> Any:
         """Implement evaluation of self.get.
 
