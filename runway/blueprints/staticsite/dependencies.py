@@ -9,6 +9,7 @@ from awacs.aws import Allow, AWSPrincipal, Policy, Statement
 from troposphere import AccountId, Join, Output, cognito, s3
 
 from runway.cfngin.blueprints.base import Blueprint
+from runway.hooks.staticsite.auth_at_edge.client_updater import get_redirect_uris
 from runway.module.staticsite import add_url_scheme
 
 LOGGER = logging.getLogger(__name__)
@@ -142,19 +143,17 @@ class Dependencies(Blueprint):
                 userpool_client_params["SupportedIdentityProviders"] = variables[
                     "SupportedIdentityProviders"
                 ]
+
                 redirect_domains = [add_url_scheme(x) for x in variables["Aliases"]] + [
                     add_url_scheme(x) for x in variables["AdditionalRedirectDomains"]
                 ]
-
-                # Create a list of all domains with their redirect paths
-                userpool_client_params["CallbackURLs"] = [
-                    "%s%s" % (domain, variables["RedirectPathSignIn"])
-                    for domain in redirect_domains
-                ]
-                userpool_client_params["LogoutURLs"] = [
-                    "%s%s" % (domain, variables["RedirectPathSignOut"])
-                    for domain in redirect_domains
-                ]
+                redirect_uris = get_redirect_uris(
+                    redirect_domains,
+                    variables["RedirectPathSignIn"],
+                    variables["RedirectPathSignOut"],
+                )
+                userpool_client_params["CallbackURLs"] = redirect_uris["sign_in"]
+                userpool_client_params["LogoutURLs"] = redirect_uris["sign_out"]
             else:
                 userpool_client_params["CallbackURLs"] = self.context.hook_data[
                     "aae_callback_url_retriever"

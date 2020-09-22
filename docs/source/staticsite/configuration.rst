@@ -370,7 +370,7 @@ Parameters
   Additional domains (beyond the `staticsite_aliases` domains or the CloudFront URL if no
   aliases are provided) that will be authorized by the :ref:`Auth@Edge` UserPool AppClient.
   This parameter typically won't be needed in production environments, but can be useful in
-  development environments to bypass Runway Auth@Edge.
+  development environments to allow bypassing Runway Auth@Edge.
 
   This should be represented as a comma delimited list of domains with protocols. Requires
   staticsite_auth_at_edge_.
