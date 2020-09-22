@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.13.1] - 2020-09-21
 ### Fixed
 - fixed an issues causing static sites in regions other than us-east-1 to redirect to the s3 object until CloudFront was able to use the global endpoint of the bucket
 - fixed uncaught static site auth@edge errors in refresh token handling
@@ -961,7 +963,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.13.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.13.1...HEAD
+[1.13.1]: https://github.com/onicagroup/runway/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/onicagroup/runway/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/onicagroup/runway/compare/v1.11.3...v1.12.0
 [1.11.3]: https://github.com/onicagroup/runway/compare/v1.11.2...v1.11.3
