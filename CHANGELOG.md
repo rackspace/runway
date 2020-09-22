@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Static Site Auth@Edge: when domain aliases are specified, the CloudFront domain will no longer be added to the list of callback URLs
+  - E.g. if `site.example.com` is provided as the site alias, logins will only work from `site.example.com` and not `d111111abcdef8.cloudfront.net`
+  - This should better match expected behavior, and has the advantage of being deterministic: the Cognito AppClient no longer has to be updated after creating the CloudFront distribution
+  - Old behavior can be preserved via the new `staticsite_additional_redirect_domains` option
+
+### Added
+- Static Site Auth@Edge: `staticsite_additional_redirect_domains` option.
 
 ## [1.13.1] - 2020-09-21
 ### Fixed

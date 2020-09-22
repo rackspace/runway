@@ -41,7 +41,7 @@ def get(context, provider, **kwargs):
     cognito_client = session.client("cognito-idp")
 
     context_dict = {}
-    context_dict["callback_urls"] = ["https://example.tmp"]
+    context_dict["callback_urls"] = ["https://example.org"]
 
     try:
         # Return the current stack if one exists
