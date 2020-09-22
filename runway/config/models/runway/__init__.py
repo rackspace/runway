@@ -10,8 +10,9 @@ import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from pydantic import BaseModel, Extra, root_validator, validator
 
-from ....util import snake_case_to_kebab_case
+from .. import utils
 from ..base import ConfigProperty
+from ..utils import RUNWAY_LOOKUP_STRING_ERROR, RUNWAY_LOOKUP_STRING_REGEX
 from ._builtin_tests import (
     CfnLintRunwayTestArgs,
     CfnLintRunwayTestDefinitionModel,
@@ -28,6 +29,8 @@ RunwayEnvironmentsType = Dict[str, Union[List[str]]]
 RunwayEnvVarsType = Dict[str, Union[Dict[str, str], str]]
 
 __all__ = [
+    "RUNWAY_LOOKUP_STRING_ERROR",
+    "RUNWAY_LOOKUP_STRING_REGEX",
     "CfnLintRunwayTestDefinitionModel",
     "CfnLintRunwayTestArgs",
     "RunwayAssumeRoleDefinitionModel",
@@ -51,42 +54,54 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
     """Model for a Runway assume role definition."""
 
     arn: Optional[str] = None
-    duration: int = 3600
+    duration: Union[int, str] = 3600
     post_deploy_env_revert: bool = False
     session_name: str = "runway"
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
-        alias_generator = snake_case_to_kebab_case
-        allow_population_by_field_name = True
         extra = Extra.forbid
 
     @validator("arn")
-    def _convert_arn_null_value(cls, v):  # noqa: N805
+    def _convert_arn_null_value(cls, v: Optional[str]) -> Optional[str]:  # noqa: N805
         """Convert a "nul" string into type(None)."""
         null_strings = ["null", "none", "undefined"]
         return None if isinstance(v, str) and v.lower() in null_strings else v
 
     @validator("duration")
-    def _validate_duration(cls, v):  # noqa: N805
+    def _validate_duration(
+        cls, v: Optional[Union[int, str]]  # noqa: N805
+    ) -> Optional[Union[int, str]]:
         """Validate duration is within the range allowed by AWS."""
+        if isinstance(v, str):
+            return v
         if v < 900:
             raise ValueError("duration must be greater than or equal to 900")
         if v > 43_200:
             raise ValueError("duration must be less than or equal to 43,200")
         return v
 
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator("duration", allow_reuse=True, pre=True)(
+        utils.validate_string_is_lookup
+    )
+
 
 class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
     """Model for a Runway deployment region definition."""
 
-    parallel: List[str]
+    parallel: Union[List[str], str]
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
         extra = Extra.forbid
+
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator("parallel", allow_reuse=True, pre=True)(
+        utils.validate_string_is_lookup
+    )
 
 
 class RunwayDeploymentDefinitionModel(ConfigProperty):
@@ -95,23 +110,19 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
-        alias_generator = snake_case_to_kebab_case
-        allow_population_by_field_name = True
         extra = Extra.forbid
 
     account_alias: Union[Dict[str, str], str] = {}
     account_id: Union[Dict[str, str], str] = {}
     assume_role: Union[str, RunwayAssumeRoleDefinitionModel] = {}
-    env_vars: RunwayEnvVarsType = {}  # TODO support lookup string
-    environments: RunwayEnvironmentsType = {}  # TODO support lookup string
+    env_vars: Union[RunwayEnvVarsType, str] = {}
+    environments: Union[RunwayEnvironmentsType, str] = {}
     modules: List[RunwayModuleDefinitionModel]
-    module_options: Dict[str, Any] = {}  # TODO support lookup string
+    module_options: Union[Dict[str, Any], str] = {}
     name: str = "unnamed_deployment"
-    parallel_regions: List[str] = []  # TODO support lookup string
-    parameters: Dict[str, Any] = {}  # TODO support lookup string
-    regions: Union[
-        RunwayDeploymentRegionDefinitionModel, List[str]
-    ] = []  # TODO support lookup string
+    parallel_regions: Union[List[str], str] = []
+    parameters: Union[Dict[str, Any], str] = {}
+    regions: Union[List[str], str] = []
 
     @root_validator(pre=True)
     def _convert_simple_module(
@@ -133,6 +144,12 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         """Validate & simplify regions."""
         raw_regions = values.get("regions", [])
         parallel_regions = values.get("parallel_regions", [])
+        if all(isinstance(i, str) for i in [raw_regions, parallel_regions]):
+            raise ValueError(
+                "unable to validate parallel_regions/regions - both are defined as strings"
+            )
+        if any(isinstance(i, str) for i in [raw_regions, parallel_regions]):
+            return values  # one is a lookup so skip the remainder of the checks
         if isinstance(raw_regions, list):
             regions = raw_regions
         else:
@@ -148,6 +165,18 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             values["parallel_regions"] = regions.parallel
         return values
 
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator(
+        "env_vars",
+        "environments",
+        "module_options",
+        "parallel_regions",
+        "parameters",
+        "regions",
+        allow_reuse=True,
+        pre=True,
+    )(utils.validate_string_is_lookup)
+
 
 class RunwayFutureDefinitionModel(ConfigProperty):
     """Model for the Runway future definition."""
@@ -157,8 +186,6 @@ class RunwayFutureDefinitionModel(ConfigProperty):
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
-        alias_generator = snake_case_to_kebab_case
-        allow_population_by_field_name = True
         extra = Extra.forbid
 
 
@@ -166,22 +193,22 @@ class RunwayModuleDefinitionModel(ConfigProperty):
     """Model for a Runway module definition."""
 
     class_path: Optional[str] = None
-    environments: RunwayEnvironmentsType = {}
-    env_vars: RunwayEnvVarsType = {}
+    env_vars: Union[RunwayEnvVarsType, str] = {}
+    environments: Union[RunwayEnvironmentsType, str] = {}
     name: str
-    options: Dict[str, Any] = {}
-    parameters: Dict[str, Any] = {}
-    path: Optional[Union[str, Path]]  # supports variables so won't be Path to start
+    options: Union[Dict[str, Any], str] = {}
+    parameters: Union[Dict[str, Any], str] = {}
+    path: Optional[
+        Union[str, Path]
+    ] = None  # supports variables so won't be Path to start
     tags: List[str] = []
     type: Optional[str] = None  # TODO add enum
     # needs to be last
-    parallel: List[RunwayModuleDefinitionModel] = []  # TODO add validator
+    parallel: List[RunwayModuleDefinitionModel] = []
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
-        alias_generator = snake_case_to_kebab_case
-        allow_population_by_field_name = True
         extra = Extra.forbid
 
     @root_validator(pre=True)
@@ -212,8 +239,6 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         """Validate parallel."""
         if v and values.get("path"):
             raise ValueError("only one of parallel or path can be defined")
-        if not v:
-            return v
         result = []
         for mod in v:
             if isinstance(mod, str):
@@ -221,6 +246,11 @@ class RunwayModuleDefinitionModel(ConfigProperty):
             else:
                 result.append(mod)
         return result
+
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator(
+        "env_vars", "environments", "options", "parameters", allow_reuse=True, pre=True,
+    )(utils.validate_string_is_lookup)
 
 
 # https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models
@@ -238,11 +268,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
 
         extra = Extra.allow
 
-    @validator("*")
-    def _convert_null_values(cls, v):  # noqa: N805
-        """Convert a "nul" string into type(None)."""
-        null_strings = ["null", "none", "undefined"]
-        return None if isinstance(v, str) and v.lower() in null_strings else v
+    _convert_null_values = validator("*", allow_reuse=True)(utils.convert_null_values)
 
 
 class RunwayConfigDefinitionModel(BaseModel):
@@ -260,13 +286,23 @@ class RunwayConfigDefinitionModel(BaseModel):
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
-        alias_generator = snake_case_to_kebab_case
-        allow_population_by_field_name = True
         arbitrary_types_allowed = True
         extra = Extra.forbid
         title = "Runway Configuration File"
         validate_all = True
         validate_assignment = True
+
+    @root_validator(pre=True)
+    def _add_deployment_names(
+        cls, values: Dict[str, Any]  # noqa: N805
+    ) -> Dict[str, Any]:
+        """Add names to deployments that are missing them."""
+        deployments = values.get("deployments", [])
+        for i, deployment in enumerate(deployments):
+            if not deployment.get("name"):
+                deployment["name"] = f"deployment_{i + 1}"
+        values["deployments"] = deployments
+        return values
 
     @validator("runway_version")
     def _convert_runway_version(
@@ -292,22 +328,7 @@ class RunwayConfigDefinitionModel(BaseModel):
                 "runway_version is not a valid version specifier; trying as an exact version",
                 exc_info=True,
             )
-            try:
-                return SpecifierSet("==" + v, prereleases=True)
-            except InvalidSpecifier:
-                raise ValueError(f"{v} is not a valid version specifier set") from None
-
-    @root_validator(pre=True)
-    def _add_deployment_names(
-        cls, values: Dict[str, Any]  # noqa: N805
-    ) -> Dict[str, Any]:
-        """Add names to deployments that are missing them."""
-        deployments = values.get("deployments", [])
-        for i, deployment in enumerate(deployments):
-            if not deployment.get("name"):
-                deployment["name"] = f"deployment_{i + 1}"
-        values["deployments"] = deployments
-        return values
+            return SpecifierSet("==" + v, prereleases=True)
 
     @classmethod
     def parse_file(cls, path: Path) -> RunwayConfigDefinitionModel:
@@ -317,7 +338,7 @@ class RunwayConfigDefinitionModel(BaseModel):
     @classmethod
     def parse_raw(cls, data: str) -> RunwayConfigDefinitionModel:
         """Parse raw data."""
-        cls.parse_obj(yaml.safe_load(data))
+        return cls.parse_obj(yaml.safe_load(data))
 
     def __getitem__(self, key: str) -> Any:
         """Implement evaluation of self[key].

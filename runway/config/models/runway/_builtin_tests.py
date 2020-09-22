@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from pydantic import Extra
+from pydantic import Extra, validator
 from typing_extensions import Literal
 
-from ....util import snake_case_to_kebab_case
+from .. import utils
 from ..base import ConfigProperty
 
 
@@ -23,9 +23,9 @@ class ValidRunwayTestTypeValues(Enum):
 class RunwayTestDefinitionModel(ConfigProperty):
     """Model for a Runway test definition."""
 
-    args: Dict[str, Any] = {}
+    args: Union[Dict[str, Any], str] = {}
     name: Optional[str] = None
-    required: bool = True
+    required: Union[bool, str] = True
     type: ValidRunwayTestTypeValues
 
     class Config:  # pylint: disable=too-few-public-methods
@@ -47,21 +47,29 @@ class RunwayTestDefinitionModel(ConfigProperty):
             if test_type == "script":
                 return super().__new__(ScriptRunwayTestDefinitionModel)
             if test_type == "yamllint":
-                return super.__new__(YamlLintRunwayTestDefinitionModel)
+                return super().__new__(YamlLintRunwayTestDefinitionModel)
         return super().__new__(cls)
+
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator(
+        "args", "required", allow_reuse=True, pre=True
+    )(utils.validate_string_is_lookup)
 
 
 class CfnLintRunwayTestArgs(ConfigProperty):
     """Model for the args of a cfn-lint test."""
 
-    cli_args: List[str] = []
+    cli_args: Union[List[str], str] = []
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
-        alias_generator = snake_case_to_kebab_case
-        allow_population_by_field_name = True
         extra = Extra.forbid
+
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator("cli_args", allow_reuse=True, pre=True)(
+        utils.validate_string_is_lookup
+    )
 
 
 class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
@@ -69,29 +77,34 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
 
     args: CfnLintRunwayTestArgs = CfnLintRunwayTestArgs()
     name: Optional[str] = "cfn-lint"
-    type: Literal["cfn-lint"]
+    type: Literal["cfn-lint"] = "cfn-lint"
 
 
 class ScriptRunwayTestArgs(ConfigProperty):
     """Model for the args of a script test."""
 
-    commands: List[str] = []
+    commands: Union[List[str], str] = []
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
         extra = Extra.forbid
 
+    # TODO add regex to schema
+    _validate_string_is_lookup = validator("commands", allow_reuse=True, pre=True)(
+        utils.validate_string_is_lookup
+    )
+
 
 class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     """Model for a script test definition."""
 
     args: ScriptRunwayTestArgs = ScriptRunwayTestArgs()
-    type: Literal["script"]
+    type: Literal["script"] = "script"
 
 
 class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     """Model for a yamllint test definition."""
 
     name: Optional[str] = "yamllint"
-    type: Literal["yamllint"]
+    type: Literal["yamllint"] = "yamllint"
