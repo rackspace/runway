@@ -43,7 +43,9 @@ class TestCommandHook(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.context = Context(
-            config=CfnginConfig(namespace="test", cfngin_bucket="test")
+            config=CfnginConfig.parse_obj(
+                {"namespace": "test", "cfngin_bucket": "test"}
+            )
         )
         self.provider = mock_provider(region="us-east-1")
 

@@ -6,20 +6,20 @@ import pytest
 from pydantic import ValidationError
 
 from runway.config.models.cfngin import (
-    GitPackageSource,
-    LocalPackageSource,
-    PackageSources,
-    S3PackageSource,
+    CfnginPackageSourcesDefinitionModel,
+    GitCfnginPackageSourceDefinitionModel,
+    LocalCfnginPackageSourceDefinitionModel,
+    S3CfnginPackageSourceDefinitionModel,
 )
 
 
-class TestGitPackageSource:
-    """Test runway.config.models.cfngin._package_sources.GitPackageSource."""
+class TestCfnginPackageSourcesDefinitionModel:
+    """Test runway.config.models.cfngin._package_sources.CfnginPackageSourcesDefinitionModel."""
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            GitPackageSource(invalid="something", uri="something")
+            CfnginPackageSourcesDefinitionModel(invalid="something")
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -27,7 +27,41 @@ class TestGitPackageSource:
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
-        obj = GitPackageSource(uri="something")
+        obj = CfnginPackageSourcesDefinitionModel()
+        assert obj.git == []
+        assert obj.local == []
+        assert obj.s3 == []
+
+    def test_fields(self) -> None:
+        """Test fields."""
+        data = {
+            "git": [{"uri": "something"}],
+            "local": [{"source": "something"}],
+            "s3": [{"bucket": "bucket", "key": "something"}],
+        }
+        obj: CfnginPackageSourcesDefinitionModel = CfnginPackageSourcesDefinitionModel.parse_obj(
+            data
+        )
+        assert isinstance(obj.git[0], GitCfnginPackageSourceDefinitionModel)
+        assert isinstance(obj.local[0], LocalCfnginPackageSourceDefinitionModel)
+        assert isinstance(obj.s3[0], S3CfnginPackageSourceDefinitionModel)
+
+
+class TestGitCfnginPackageSourceDefinitionModel:
+    """Test runway.config.models.cfngin._package_sources.GitCfnginPackageSourceDefinitionModel."""
+
+    def test_extra(self) -> None:
+        """Test extra fields."""
+        with pytest.raises(ValidationError) as excinfo:
+            GitCfnginPackageSourceDefinitionModel(invalid="something", uri="something")
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
+
+    def test_field_defaults(self) -> None:
+        """Test field default values."""
+        obj = GitCfnginPackageSourceDefinitionModel(uri="something")
         assert not obj.branch
         assert not obj.commit
         assert obj.configs == []
@@ -38,7 +72,7 @@ class TestGitPackageSource:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            GitPackageSource()
+            GitCfnginPackageSourceDefinitionModel()
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("uri",)
@@ -55,7 +89,10 @@ class TestGitPackageSource:
     def test_validate_one_ref(self, ref: Dict[str, str]) -> None:
         """Test _validate_one_ref."""
         data = {"uri": "something", ref["field"]: ref["value"]}
-        assert GitPackageSource.parse_obj(data)[ref["field"]] == ref["value"]
+        assert (
+            GitCfnginPackageSourceDefinitionModel.parse_obj(data)[ref["field"]]
+            == ref["value"]
+        )
 
     @pytest.mark.parametrize(
         "refs",
@@ -83,20 +120,22 @@ class TestGitPackageSource:
         """Test _validate_one_ref invalid values."""
         data = {"uri": "something", **{ref["field"]: ref["value"] for ref in refs}}
         with pytest.raises(ValidationError) as excinfo:
-            GitPackageSource.parse_obj(data)
+            GitCfnginPackageSourceDefinitionModel.parse_obj(data)
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("__root__",)
         assert errors[0]["msg"].startswith("only one of")
 
 
-class TestLocalPackageSource:
-    """Test runway.config.models.cfngin._package_sources.LocalPackageSource."""
+class TestLocalCfnginPackageSourceDefinitionModel:
+    """Test runway.config.models.cfngin._package_sources.LocalCfnginPackageSourceDefinitionModel."""  # noqa
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            LocalPackageSource(invalid="something", source="something")
+            LocalCfnginPackageSourceDefinitionModel(
+                invalid="something", source="something"
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -104,7 +143,7 @@ class TestLocalPackageSource:
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
-        obj = LocalPackageSource(source="something")
+        obj = LocalCfnginPackageSourceDefinitionModel(source="something")
         assert obj.configs == []
         assert obj.paths == []
         assert obj.source == "something"
@@ -112,52 +151,22 @@ class TestLocalPackageSource:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            LocalPackageSource()
+            LocalCfnginPackageSourceDefinitionModel()
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("source",)
         assert errors[0]["msg"] == "field required"
 
 
-class TestPackageSources:
-    """Test runway.config.models.cfngin._package_sources.PackageSources."""
+class TestS3CfnginPackageSourceDefinitionModel:
+    """Test runway.config.models.cfngin._package_sources.S3CfnginPackageSourceDefinitionModel."""
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            PackageSources(invalid="something")
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("invalid",)
-        assert errors[0]["msg"] == "extra fields not permitted"
-
-    def test_field_defaults(self) -> None:
-        """Test field default values."""
-        obj = PackageSources()
-        assert obj.git == []
-        assert obj.local == []
-        assert obj.s3 == []
-
-    def test_fields(self) -> None:
-        """Test fields."""
-        data = {
-            "git": [{"uri": "something"}],
-            "local": [{"source": "something"}],
-            "s3": [{"bucket": "bucket", "key": "something"}],
-        }
-        obj: PackageSources = PackageSources.parse_obj(data)
-        assert isinstance(obj.git[0], GitPackageSource)
-        assert isinstance(obj.local[0], LocalPackageSource)
-        assert isinstance(obj.s3[0], S3PackageSource)
-
-
-class TestS3PackageSource:
-    """Test runway.config.models.cfngin._package_sources.S3PackageSource."""
-
-    def test_extra(self) -> None:
-        """Test extra fields."""
-        with pytest.raises(ValidationError) as excinfo:
-            S3PackageSource(bucket="something", key="something", invalid="something")
+            S3CfnginPackageSourceDefinitionModel(
+                bucket="something", key="something", invalid="something"
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -166,7 +175,7 @@ class TestS3PackageSource:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            S3PackageSource()
+            S3CfnginPackageSourceDefinitionModel()
         errors = excinfo.value.errors()
         assert len(errors) == 2
         assert errors[0]["loc"] == ("bucket",)
@@ -176,7 +185,7 @@ class TestS3PackageSource:
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
-        obj = S3PackageSource(bucket="bucket", key="something")
+        obj = S3CfnginPackageSourceDefinitionModel(bucket="bucket", key="something")
         assert obj.bucket == "bucket"
         assert obj.configs == []
         assert obj.key == "something"

@@ -1,18 +1,113 @@
 """Test runway.config.models.cfngin.__init__."""
 # pylint: disable=no-self-use
+from pathlib import Path
+
 import pytest
+import yaml
 from pydantic import ValidationError
 
-from runway.config.models.cfngin import Hook, Stack, Target
+from runway.config.models.cfngin import (
+    CfnginConfigDefinitionModel,
+    CfnginHookDefinitionModel,
+    CfnginPackageSourcesDefinitionModel,
+    CfnginStackDefinitionModel,
+    CfnginTargetDefinitionModel,
+)
 
 
-class TestHook:
-    """Test runway.config.models.cfngin.Hook."""
+class TestCfnginConfigDefinitionModel:
+    """Test runway.config.models.cfngin.CfnginConfigDefinitionModel."""
+
+    def test_extra(self) -> None:
+        """Test extra fields."""
+        assert (
+            CfnginConfigDefinitionModel(common="something", namespace="test").namespace
+            == "test"
+        )
+
+    def test_field_defaults(self) -> None:
+        """Test field default values."""
+        obj = CfnginConfigDefinitionModel(namespace="test")
+        assert not obj.cfngin_bucket
+        assert not obj.cfngin_bucket_region
+        assert obj.cfngin_cache_dir == Path.cwd() / ".runway" / "cache"
+        assert obj.log_formats == {}
+        assert obj.lookups == {}
+        assert obj.mappings == {}
+        assert obj.namespace == "test"
+        assert obj.namespace_delimiter == "-"
+        assert obj.package_sources == CfnginPackageSourcesDefinitionModel()
+        assert not obj.persistent_graph_key
+        assert obj.post_build == []
+        assert obj.post_destroy == []
+        assert obj.pre_build == []
+        assert obj.pre_destroy == []
+        assert not obj.service_role
+        assert obj.stacks == []
+        assert not obj.sys_path
+        assert not obj.tags
+        assert obj.targets == []
+
+    def test_parse_file(self, tmp_path: Path) -> None:
+        """Test parse_file."""
+        config_yml = tmp_path / "config.yml"
+        config_yml.write_text(yaml.dump({"namespace": "test"}))
+
+        obj = CfnginConfigDefinitionModel.parse_file(config_yml)
+        assert obj.namespace == "test"
+
+    def test_resolve_path_fields(self) -> None:
+        """Test _resolve_path_fields."""
+        obj = CfnginConfigDefinitionModel(
+            namespace="test", cfngin_cache_dir="./cache", sys_path="./something",
+        )
+        assert obj.cfngin_cache_dir.is_absolute()
+        assert obj.sys_path.is_absolute()
+
+    def test_required_fields(self) -> None:
+        """Test required fields."""
+        with pytest.raises(ValidationError) as excinfo:
+            CfnginConfigDefinitionModel()
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("namespace",)
+        assert errors[0]["msg"] == "field required"
+
+    def test_validate_unique_stack_names(self) -> None:
+        """Test _validate_unique_stack_names."""
+        data = {
+            "namespace": "test",
+            "stacks": [
+                {"name": "stack0", "class_path": "stack0"},
+                {"name": "stack1", "class_path": "stack1"},
+            ],
+        }
+        assert CfnginConfigDefinitionModel.parse_obj(data)
+
+    def test_validate_unique_stack_names_invalid(self) -> None:
+        """Test _validate_unique_stack_names."""
+        with pytest.raises(ValidationError) as excinfo:
+            data = {
+                "namespace": "test",
+                "stacks": [
+                    {"name": "stack0", "class_path": "stack0"},
+                    {"name": "stack0", "class_path": "stack0"},
+                ],
+            }
+            CfnginConfigDefinitionModel.parse_obj(data)
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("stacks",)
+        assert errors[0]["msg"] == "Duplicate stack stack0 found at index 0"
+
+
+class TestCfnginHookDefinitionModel:
+    """Test runway.config.models.cfngin.CfnginHookDefinitionModel."""
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            Hook(invalid="something", path="something")
+            CfnginHookDefinitionModel(invalid="something", path="something")
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -20,7 +115,7 @@ class TestHook:
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
-        obj = Hook(path="something")
+        obj = CfnginHookDefinitionModel(path="something")
         assert obj.args == {}
         assert not obj.data_key
         assert obj.enabled
@@ -30,20 +125,22 @@ class TestHook:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            Hook()
+            CfnginHookDefinitionModel()
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("path",)
         assert errors[0]["msg"] == "field required"
 
 
-class TestStack:
-    """Test runway.config.models.cfngin.Stack."""
+class TestCfnginStackDefinitionModel:
+    """Test runway.config.models.cfngin.CfnginStackDefinitionModel."""
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            Stack(class_path="something", invalid="something", name="stack-name")
+            CfnginStackDefinitionModel(
+                class_path="something", invalid="something", name="stack-name"
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -51,7 +148,7 @@ class TestStack:
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
-        obj = Stack(class_path="something", name="stack-name")
+        obj = CfnginStackDefinitionModel(class_path="something", name="stack-name")
         assert obj.class_path == "something"
         assert not obj.description
         assert obj.enabled
@@ -73,7 +170,7 @@ class TestStack:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            Stack()
+            CfnginStackDefinitionModel()
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("__root__",)
@@ -81,7 +178,7 @@ class TestStack:
 
     def test_resolve_path_fields(self) -> None:
         """Test _resolve_path_fields."""
-        obj = Stack(
+        obj = CfnginStackDefinitionModel(
             name="test-stack",
             stack_policy_path="./policy.json",
             template_path="./template.yml",
@@ -92,7 +189,7 @@ class TestStack:
     def test_required_fields_w_class_path(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            Stack(class_path="something")
+            CfnginStackDefinitionModel(class_path="something")
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("name",)
@@ -101,7 +198,7 @@ class TestStack:
     def test_validate_class_and_template(self) -> None:
         """Test _validate_class_and_template."""
         with pytest.raises(ValidationError) as excinfo:
-            Stack(
+            CfnginStackDefinitionModel(
                 class_path="something",
                 name="stack-name",
                 template_path="./something.yml",
@@ -118,10 +215,10 @@ class TestStack:
     )
     def test_validate_class_or_template(self, enabled: bool, locked: bool) -> None:
         """Test _validate_class_or_template."""
-        assert Stack(
+        assert CfnginStackDefinitionModel(
             class_path="something", enabled=enabled, locked=locked, name="test-stack"
         )
-        assert Stack(
+        assert CfnginStackDefinitionModel(
             enabled=enabled,
             locked=locked,
             name="test-stack",
@@ -131,7 +228,7 @@ class TestStack:
     def test_validate_class_or_template_invalid(self) -> None:
         """Test _validate_class_or_template invalid."""
         with pytest.raises(ValidationError) as excinfo:
-            Stack(
+            CfnginStackDefinitionModel(
                 enabled=True, locked=False, name="stack-name",
             )
         errors = excinfo.value.errors()
@@ -140,13 +237,13 @@ class TestStack:
         assert errors[0]["msg"] == "either class_path or template_path must be defined"
 
 
-class TestTarget:
-    """Test runway.config.models.cfngin.Target."""
+class TestCfnginTargetDefinitionModel:
+    """Test runway.config.models.cfngin.CfnginTargetDefinitionModel."""
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            Target(invalid="something", name="something")
+            CfnginTargetDefinitionModel(invalid="something", name="something")
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -154,7 +251,7 @@ class TestTarget:
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
-        obj = Target(name="something")
+        obj = CfnginTargetDefinitionModel(name="something")
         assert obj.name == "something"
         assert obj.required_by == []
         assert obj.requires == []

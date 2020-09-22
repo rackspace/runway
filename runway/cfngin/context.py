@@ -85,7 +85,7 @@ class Context:
         self._targets = None
         self._upload_to_s3 = None
         # TODO load the config from context instead of taking it as an arg
-        self.config = config or CfnginConfig(namespace="example")
+        self.config = config or CfnginConfig.parse_obj({"namespace": "example"})
         # TODO set this value when provisioning a Config object in context
         # set to a fake location for the time being but this should be set
         # by all runtime entry points. the only time the fake value should be

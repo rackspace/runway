@@ -297,9 +297,11 @@ class Step:
         """
         # pylint: disable=import-outside-toplevel
         from runway.cfngin.stack import Stack
-        from runway.config.models.cfngin import Stack as StackConfig
+        from runway.config.models.cfngin import CfnginStackDefinitionModel
 
-        stack_def = StackConfig.construct(name=stack_name, requires=requires or [])
+        stack_def = CfnginStackDefinitionModel.construct(
+            name=stack_name, requires=requires or []
+        )
         stack = Stack(stack_def, context)
         return cls(stack, fn=fn, watch_func=watch_func)
 

@@ -14,7 +14,7 @@ class TestRxrefHandler(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.provider = MagicMock()
-        self.context = Context(config=CfnginConfig(namespace="ns"))
+        self.context = Context(config=CfnginConfig.parse_obj({"namespace": "ns"}))
 
     def test_rxref_handler(self):
         """Test rxref handler."""

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
-from pydantic import BaseModel, Extra, root_validator, validator
+from pydantic import Extra, root_validator, validator
 
 from .. import utils
 from ..base import ConfigProperty
@@ -271,7 +271,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
     _convert_null_values = validator("*", allow_reuse=True)(utils.convert_null_values)
 
 
-class RunwayConfigDefinitionModel(BaseModel):
+class RunwayConfigDefinitionModel(ConfigProperty):
     """Runway configuration definition model."""
 
     deployments: List[RunwayDeploymentDefinitionModel]
@@ -339,21 +339,6 @@ class RunwayConfigDefinitionModel(BaseModel):
     def parse_raw(cls, data: str) -> RunwayConfigDefinitionModel:
         """Parse raw data."""
         return cls.parse_obj(yaml.safe_load(data))
-
-    def __getitem__(self, key: str) -> Any:
-        """Implement evaluation of self[key].
-
-        Args:
-            key: Attribute name to return the value for.
-
-        Returns:
-            The value associated with the provided key/attribute name.
-
-        Raises:
-            AttributeError: If attribute does not exist on this object.
-
-        """
-        return getattr(self, key)
 
 
 # https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models

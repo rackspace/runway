@@ -5,30 +5,32 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import yaml
 from pydantic import Extra, root_validator, validator
 
 from .. import utils
 from ..base import ConfigProperty
 from ._package_sources import (
-    GitPackageSource,
-    LocalPackageSource,
-    PackageSources,
-    S3PackageSource,
+    CfnginPackageSourcesDefinitionModel,
+    GitCfnginPackageSourceDefinitionModel,
+    LocalCfnginPackageSourceDefinitionModel,
+    S3CfnginPackageSourceDefinitionModel,
 )
 
 __all__ = [
-    "GitPackageSource",
-    "Hook",
-    "LocalPackageSource",
-    "PackageSources",
-    "S3PackageSource",
-    "Stack",
-    "Target",
+    "CfnginConfigDefinitionModel",
+    "CfnginHookDefinitionModel",
+    "CfnginPackageSourcesDefinitionModel",
+    "CfnginStackDefinitionModel",
+    "CfnginTargetDefinitionModel",
+    "GitCfnginPackageSourceDefinitionModel",
+    "LocalCfnginPackageSourceDefinitionModel",
+    "S3CfnginPackageSourceDefinitionModel",
 ]
 
 
-class Hook(ConfigProperty):
-    """Hook module."""
+class CfnginHookDefinitionModel(ConfigProperty):
+    """Model for a CFNgin hook definition."""
 
     args: Dict[str, Any] = {}
     data_key: Optional[str] = None
@@ -42,8 +44,8 @@ class Hook(ConfigProperty):
         extra = Extra.forbid
 
 
-class Stack(ConfigProperty):
-    """Stack model."""
+class CfnginStackDefinitionModel(ConfigProperty):
+    """Model for a CFNgin stack definition."""
 
     class_path: Optional[str] = None
     description: Optional[str] = None
@@ -97,8 +99,8 @@ class Stack(ConfigProperty):
         return values
 
 
-class Target(ConfigProperty):
-    """Target model."""
+class CfnginTargetDefinitionModel(ConfigProperty):
+    """Model for a CFNgin target definition."""
 
     name: str
     required_by: List[str] = []
@@ -108,3 +110,54 @@ class Target(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
+
+
+class CfnginConfigDefinitionModel(ConfigProperty):
+    """Model for a CFNgin config definition."""
+
+    cfngin_bucket: Optional[str] = None
+    cfngin_bucket_region: Optional[str] = None
+    cfngin_cache_dir: Path = Path.cwd() / ".runway" / "cache"
+    log_formats: Dict[str, str] = {}  # TODO create model
+    lookups: Dict[str, str] = {}  # TODO create model
+    mappings: Dict[str, Dict[str, Dict[str, Any]]] = {}  # TODO create model
+    namespace: str
+    namespace_delimiter: str = "-"
+    package_sources: CfnginPackageSourcesDefinitionModel = CfnginPackageSourcesDefinitionModel()
+    persistent_graph_key: Optional[str] = None
+    post_build: List[CfnginHookDefinitionModel] = []
+    post_destroy: List[CfnginHookDefinitionModel] = []
+    pre_build: List[CfnginHookDefinitionModel] = []
+    pre_destroy: List[CfnginHookDefinitionModel] = []
+    service_role: Optional[str] = None
+    stacks: List[CfnginStackDefinitionModel] = []
+    sys_path: Optional[Path] = None
+    tags: Optional[Dict[str, str]] = None  # None is significant here
+    targets: List[CfnginTargetDefinitionModel] = []
+    template_indent: int = 4
+
+    _resolve_path_fields = validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
+        utils.resolve_path_field
+    )
+
+    @validator("stacks")
+    def _validate_unique_stack_names(
+        cls, stacks: List[CfnginStackDefinitionModel]  # noqa: N805
+    ) -> List[CfnginStackDefinitionModel]:
+        """Validate that each stack has a unique name."""
+        stack_names = [stack.name for stack in stacks]
+        if len(set(stack_names)) != len(stack_names):
+            for i, name in enumerate(stack_names):
+                if stack_names.count(name) != 1:
+                    raise ValueError(f"Duplicate stack {name} found at index {i}")
+        return stacks
+
+    @classmethod
+    def parse_file(cls, path: Path) -> CfnginConfigDefinitionModel:
+        """Parse a file."""
+        return cls.parse_raw(path.read_text())
+
+    @classmethod
+    def parse_raw(cls, data: str) -> CfnginConfigDefinitionModel:
+        """Parse raw data."""
+        return cls.parse_obj(yaml.safe_load(data))

@@ -141,7 +141,7 @@ class TestPlan(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.count = 0
-        self.config = CfnginConfig(namespace="namespace")
+        self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = Context(config=self.config)
         register_lookup_handler("noop", lambda **kwargs: "test")
 

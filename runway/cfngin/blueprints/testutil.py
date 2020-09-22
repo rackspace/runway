@@ -16,7 +16,7 @@ from ...config import CfnginConfig
 from ..context import Context
 
 if TYPE_CHECKING:
-    from ...config.models.cfngin import Stack
+    from ...config.models.cfngin import CfnginStackDefinitionModel
 
 
 def diff(first, second):
@@ -137,7 +137,10 @@ class YamlDirTestGenerator:
             """Config test."""
 
             def __init__(  # pylint: disable=super-init-not-called
-                self, config: CfnginConfig, stack: Stack, filepath: Path
+                self,
+                config: CfnginConfig,
+                stack: CfnginStackDefinitionModel,
+                filepath: Path,
             ) -> None:
                 """Instantiate class."""
                 self.config = config
@@ -177,7 +180,7 @@ class YamlDirTestGenerator:
 
         for config_file in configs:
             config_path = Path(config_file)
-            config = CfnginConfig.parse_file(config_path)
+            config = CfnginConfig.parse_file(file_path=config_path)
             for stack in config.stacks:
                 # Nosetests supports "test generators", which allows us to
                 # yield a callable object which will be wrapped as a test

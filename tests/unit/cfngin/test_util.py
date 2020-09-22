@@ -22,7 +22,7 @@ from runway.cfngin.util import (
     s3_bucket_location_constraint,
     yaml_to_ordered_dict,
 )
-from runway.config.models.cfngin import GitPackageSource
+from runway.config.models.cfngin import GitCfnginPackageSourceDefinitionModel
 
 AWS_REGIONS = [
     "us-east-1",
@@ -207,14 +207,14 @@ Outputs:
             )
             self.assertEqual(
                 sp.determine_git_ls_remote_ref(
-                    GitPackageSource(branch="foo", uri="test")
+                    GitCfnginPackageSourceDefinitionModel(branch="foo", uri="test")
                 ),
                 "refs/heads/foo",
             )
             for i in [{}, {"tag": "foo"}, {"commit": "1234"}]:
                 self.assertEqual(
                     sp.determine_git_ls_remote_ref(
-                        GitPackageSource(uri="git@foo", **i)
+                        GitCfnginPackageSourceDefinitionModel(uri="git@foo", **i)
                     ),
                     "HEAD",
                 )
@@ -235,11 +235,11 @@ Outputs:
             ]
             for i in bad_configs:
                 with self.assertRaises(ValidationError):
-                    sp.determine_git_ref(GitPackageSource(**i))
+                    sp.determine_git_ref(GitCfnginPackageSourceDefinitionModel(**i))
 
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitPackageSource(
+                    GitCfnginPackageSourceDefinitionModel(
                         uri="https://github.com/remind101/stacker.git",
                         branch="release-1.0",
                     )
@@ -248,13 +248,17 @@ Outputs:
             )
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitPackageSource(**{"uri": "git@foo", "commit": "1234"})
+                    GitCfnginPackageSourceDefinitionModel(
+                        **{"uri": "git@foo", "commit": "1234"}
+                    )
                 ),
                 "1234",
             )
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitPackageSource(**{"uri": "git@foo", "tag": "v1.0.0"})
+                    GitCfnginPackageSourceDefinitionModel(
+                        **{"uri": "git@foo", "tag": "v1.0.0"}
+                    )
                 ),
                 "v1.0.0",
             )

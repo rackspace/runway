@@ -56,7 +56,7 @@ class TestDestroyAction(unittest.TestCase):
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=CfnginConfig(**config), **kwargs)
+        return Context(config=CfnginConfig.parse_obj(config), **kwargs)
 
     def test_generate_plan(self):
         """Test generate plan."""

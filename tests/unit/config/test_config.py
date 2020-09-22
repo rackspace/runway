@@ -6,11 +6,13 @@ import pytest
 import yaml
 from _pytest.monkeypatch import MonkeyPatch
 from mock import MagicMock, patch
-from pydantic import ValidationError
 
 from runway.cfngin.exceptions import MissingEnvironment
 from runway.config import CfnginConfig
-from runway.config.models.cfngin import PackageSources
+from runway.config.models.cfngin import (
+    CfnginConfigDefinitionModel,
+    CfnginPackageSourcesDefinitionModel,
+)
 
 MODULE = "runway.config"
 
@@ -20,35 +22,40 @@ class TestCfnginConfig:
 
     def test_dump(self) -> None:
         """Test dump."""
-        data = {"namespace": "test"}
-        obj = CfnginConfig.parse_obj(data)
+        config = CfnginConfigDefinitionModel(namespace="test")
+        obj = CfnginConfig(config)
         assert obj.dump() == yaml.dump(
-            data, default_flow_style=False, indent=obj.template_indent
+            config.dict(exclude_unset=True), default_flow_style=False
         )
 
-    def test_field_defaults(self) -> None:
-        """Test field default values."""
-        obj = CfnginConfig(namespace="test")
-        assert not obj.cfngin_bucket
-        assert not obj.cfngin_bucket_region
-        assert obj.cfngin_cache_dir == Path.cwd() / ".runway" / "cache"
-        assert obj.log_formats == {}
-        assert obj.lookups == {}
-        assert obj.mappings == {}
-        assert obj.namespace == "test"
-        assert obj.namespace_delimiter == "-"
-        assert obj.package_sources == PackageSources()
-        assert not obj.persistent_graph_key
-        assert obj.post_build == []
-        assert obj.post_destroy == []
-        assert obj.pre_build == []
-        assert obj.pre_destroy == []
-        assert not obj.service_role
-        assert obj.stacks == []
-        assert not obj.sys_path
-        assert not obj.tags
-        assert obj.targets == []
-        assert obj.template_indent == 4
+    def test_find_config_file(self, tmp_path: Path) -> None:
+        """Test find_config_file."""
+        test_01 = tmp_path / "01-config.yaml"
+        test_01.touch()
+        test_02 = tmp_path / "02-config.yml"
+        test_02.touch()
+        test_03 = tmp_path / "03-config.yaml"
+        test_03.touch()
+        (tmp_path / "no-match").touch()
+        (tmp_path / "buildspec.yml").touch()
+        (tmp_path / "docker-compose.yml").touch()
+        (tmp_path / "runway.yml").touch()
+        (tmp_path / "runway.yaml").touch()
+        (tmp_path / "runway.module.yml").touch()
+        (tmp_path / "runway.module.yaml").touch()
+        assert CfnginConfig.find_config_file(tmp_path) == [test_01, test_02, test_03]
+
+    def test_find_config_file_file(self, tmp_path: Path) -> None:
+        """Test find_config_file with file provided as path."""
+        test = tmp_path / "config.yml"
+        test.touch()
+        assert CfnginConfig.find_config_file(test) == [test]
+
+    def test_find_config_file_no_path(self, cd_tmp_path: Path) -> None:
+        """Test find_config_file without providing a path."""
+        test = cd_tmp_path / "config.yml"
+        test.touch()
+        assert CfnginConfig.find_config_file() == [test]
 
     @patch(MODULE + ".register_lookup_handler")
     @patch(MODULE + ".sys")
@@ -59,7 +66,7 @@ class TestCfnginConfig:
         tmp_path: Path,
     ) -> None:
         """Test load."""
-        config = CfnginConfig(namespace="test")
+        config = CfnginConfig(CfnginConfigDefinitionModel(namespace="test"))
 
         config.load()
         mock_sys.path.append.assert_not_called()
@@ -74,57 +81,13 @@ class TestCfnginConfig:
         config.load()
         mock_register_lookup_handler.assert_called_once_with("custom-lookup", "path")
 
-    def test_resolve_path_fields(self) -> None:
-        """Test _resolve_path_fields."""
-        obj = CfnginConfig(
-            namespace="test", cfngin_cache_dir="./cache", sys_path="./something",
-        )
-        assert obj.cfngin_cache_dir.is_absolute()
-        assert obj.sys_path.is_absolute()
-
-    def test_required_fields(self) -> None:
-        """Test required fields."""
-        with pytest.raises(ValidationError) as excinfo:
-            CfnginConfig()
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("namespace",)
-        assert errors[0]["msg"] == "field required"
-
-    def test_validate_unique_stack_names(self) -> None:
-        """Test _validate_unique_stack_names."""
-        data = {
-            "namespace": "test",
-            "stacks": [
-                {"name": "stack0", "class_path": "stack0"},
-                {"name": "stack1", "class_path": "stack1"},
-            ],
-        }
-        assert CfnginConfig.parse_obj(data)
-
-    def test_validate_unique_stack_names_invalid(self) -> None:
-        """Test _validate_unique_stack_names."""
-        with pytest.raises(ValidationError) as excinfo:
-            data = {
-                "namespace": "test",
-                "stacks": [
-                    {"name": "stack0", "class_path": "stack0"},
-                    {"name": "stack0", "class_path": "stack0"},
-                ],
-            }
-            CfnginConfig.parse_obj(data)
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("stacks",)
-        assert errors[0]["msg"] == "Duplicate stack stack0 found at index 0"
-
     def test_parse_file(self, tmp_path: Path) -> None:
         """Test parse_file."""
         config_yml = tmp_path / "config.yml"
         data = {"namespace": "test"}
         config_yml.write_text(yaml.dump(data))
-        config = CfnginConfig.parse_file(config_yml)
-        assert config.dict(exclude_unset=True) == data
+        config = CfnginConfig.parse_file(file_path=config_yml)
+        assert config.namespace == data["namespace"]
 
     def test_parse_obj(self) -> None:
         """Test parse_obj.
@@ -148,7 +111,7 @@ class TestCfnginConfig:
             "pre_destroy": [{"path": "./"}],
             "stacks": [{"name": "test-stack", "template_path": Path.cwd().resolve()}],
         }
-        assert CfnginConfig.parse_obj(data).dict(exclude_unset=True) == expected
+        assert CfnginConfig.parse_obj(data).dump() == yaml.dump(expected)
 
     def test_parse_raw(self, monkeypatch: MonkeyPatch) -> None:
         """Test parse_raw."""
@@ -200,7 +163,7 @@ class TestCfnginConfig:
             == raw_data
         )
         mock_source_processor.assert_called_once_with(
-            sources=PackageSources(), cache_dir=None
+            sources=CfnginPackageSourcesDefinitionModel(), cache_dir=None
         )
         mock_source_processor.get_package_sources.assert_called_once_with()
         mock_render_raw_data.assert_not_called()
@@ -213,7 +176,8 @@ class TestCfnginConfig:
             == "rendered"
         )
         mock_source_processor.assert_called_with(
-            sources=PackageSources(git=[{"uri": "something"}]), cache_dir=None
+            sources=CfnginPackageSourcesDefinitionModel(git=[{"uri": "something"}]),
+            cache_dir=None,
         )
         assert mock_source_processor.call_count == 2
         expected = data.copy()
@@ -241,7 +205,3 @@ class TestCfnginConfig:
         """Test render_raw_data ignores lookups."""
         lookup_raw_data = "namespace: ${env something}"
         assert CfnginConfig.render_raw_data(lookup_raw_data) == lookup_raw_data
-
-    def test_getitem(self) -> None:
-        """Test __getitem__."""
-        assert CfnginConfig(namespace="test")["namespace"] == "test"

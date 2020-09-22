@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -252,7 +251,7 @@ class CFNgin:
             validate (bool): Validate the loaded config.
 
         """
-        return CfnginConfig.parse_file(file_path, parameters=self.parameters)
+        return CfnginConfig.parse_file(file_path=file_path, parameters=self.parameters)
 
     def _get_context(self, config: CfnginConfig, config_path: Path) -> CFNginContext:
         """Initialize a CFNgin context object.
@@ -331,25 +330,4 @@ class CFNgin:
             Paths to config files that were found.
 
         """
-        if not sys_path:
-            sys_path = Path.cwd()
-        elif sys_path.is_file():
-            return [sys_path]
-
-        exclude = exclude or []
-        result = []
-        exclude.extend(cls.EXCLUDE_LIST)
-
-        yml_files = list(sys_path.glob("*.yml"))
-        yml_files.extend(list(sys_path.glob("*.yaml")))
-
-        for f in yml_files:
-            if (
-                re.match(cls.EXCLUDE_REGEX, f.name)
-                or f.name in exclude
-                or f.name.startswith(".")
-            ):
-                continue
-            result.append(f)
-        result.sort()
-        return result
+        return CfnginConfig.find_config_file(sys_path, exclude=exclude)

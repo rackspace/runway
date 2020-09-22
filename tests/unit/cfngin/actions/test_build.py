@@ -69,7 +69,9 @@ class TestBuildAction(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.context = Context(config=CfnginConfig(namespace="namespace"))
+        self.context = Context(
+            config=CfnginConfig.parse_obj({"namespace": "namespace"})
+        )
         self.provider = MockProvider()
         self.build_action = build.Action(
             self.context, provider_builder=MockProviderBuilder(self.provider)
@@ -99,7 +101,7 @@ class TestBuildAction(unittest.TestCase):
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=CfnginConfig(**config), **kwargs)
+        return Context(config=CfnginConfig.parse_obj(config), **kwargs)
 
     @patch(
         "runway.cfngin.context.Context._persistent_graph_tags",

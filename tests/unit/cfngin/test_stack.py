@@ -17,7 +17,7 @@ class TestStack(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.sd = {"name": "test"}  # pylint: disable=invalid-name
-        self.config = CfnginConfig(namespace="namespace")
+        self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = Context(config=self.config)
         self.stack = Stack(
             definition=generate_definition("vpc", 1), context=self.context,

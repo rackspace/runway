@@ -29,10 +29,10 @@ from .session_cache import get_session
 
 if TYPE_CHECKING:
     from ..config.models.cfngin import (
-        GitPackageSource,
-        LocalPackageSource,
-        PackageSources,
-        S3PackageSource,
+        CfnginPackageSourcesDefinitionModel,
+        GitCfnginPackageSourceDefinitionModel,
+        LocalCfnginPackageSourceDefinitionModel,
+        S3CfnginPackageSourceDefinitionModel,
     )
 
 LOGGER = logging.getLogger(__name__)
@@ -591,7 +591,9 @@ class SourceProcessor:
     ISO8601_FORMAT = "%Y%m%dT%H%M%SZ"
 
     def __init__(
-        self, sources: PackageSources, cache_dir: Optional[Path] = None
+        self,
+        sources: CfnginPackageSourcesDefinitionModel,
+        cache_dir: Optional[Path] = None,
     ) -> None:
         """Process a config's defined package sources.
 
@@ -626,7 +628,9 @@ class SourceProcessor:
         for config in self.sources.git:
             self.fetch_git_package(config=config)
 
-    def fetch_local_package(self, config: LocalPackageSource) -> None:
+    def fetch_local_package(
+        self, config: LocalCfnginPackageSourceDefinitionModel
+    ) -> None:
         """Make a local path available to current CFNgin config.
 
         Args:
@@ -638,7 +642,7 @@ class SourceProcessor:
             config=config, pkg_dir_name=config.source, pkg_cache_dir=Path.cwd()
         )
 
-    def fetch_s3_package(self, config: S3PackageSource) -> None:
+    def fetch_s3_package(self, config: S3CfnginPackageSourceDefinitionModel) -> None:
         """Make a remote S3 archive available for local use.
 
         Args:
@@ -746,7 +750,7 @@ class SourceProcessor:
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(config=config, pkg_dir_name=dir_name)
 
-    def fetch_git_package(self, config: GitPackageSource) -> None:
+    def fetch_git_package(self, config: GitCfnginPackageSourceDefinitionModel) -> None:
         """Make a remote git repository available for local use.
 
         Args:
@@ -791,7 +795,11 @@ class SourceProcessor:
 
     def update_paths_and_config(
         self,
-        config: Union[GitPackageSource, LocalPackageSource, S3PackageSource],
+        config: Union[
+            GitCfnginPackageSourceDefinitionModel,
+            LocalCfnginPackageSourceDefinitionModel,
+            S3CfnginPackageSourceDefinitionModel,
+        ],
         pkg_dir_name: str,
         pkg_cache_dir: Optional[Path] = None,
     ) -> None:
@@ -844,7 +852,9 @@ class SourceProcessor:
         raise ValueError('Ref "%s" not found for repo %s.' % (ref, uri))
 
     @staticmethod
-    def determine_git_ls_remote_ref(config: GitPackageSource) -> str:
+    def determine_git_ls_remote_ref(
+        config: GitCfnginPackageSourceDefinitionModel,
+    ) -> str:
         """Determine the ref to be used with the "git ls-remote" command.
 
         Args:
@@ -856,7 +866,7 @@ class SourceProcessor:
         """
         return f"refs/heads/{config.branch}" if config.branch else "HEAD"
 
-    def determine_git_ref(self, config: GitPackageSource) -> str:
+    def determine_git_ref(self, config: GitCfnginPackageSourceDefinitionModel) -> str:
         """Determine the ref to be used for ``git checkout``.
 
         Args:

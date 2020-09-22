@@ -9,8 +9,8 @@ from pydantic import Extra, root_validator
 from ..base import ConfigProperty
 
 
-class GitPackageSource(ConfigProperty):
-    """Git package source model.
+class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
+    """Model for a git package source definition.
 
     Package source located in a git repo.
 
@@ -46,8 +46,8 @@ class GitPackageSource(ConfigProperty):
         return values
 
 
-class LocalPackageSource(ConfigProperty):
-    """Local package source model.
+class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
+    """Model for a CFNgin local package source definition.
 
     Package source located on a local disk.
 
@@ -68,8 +68,8 @@ class LocalPackageSource(ConfigProperty):
         extra = Extra.forbid
 
 
-class S3PackageSource(ConfigProperty):
-    """S3 package source model.
+class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
+    """Model for a CFNgin S3 package source definition.
 
     Package source located in AWS S3.
 
@@ -96,8 +96,8 @@ class S3PackageSource(ConfigProperty):
         extra = Extra.forbid
 
 
-class PackageSources(ConfigProperty):
-    """Package sources model.
+class CfnginPackageSourcesDefinitionModel(ConfigProperty):
+    """Model for a CFNgin package sources definition.
 
     Attributes:
         git: Package source located in a git repo.
@@ -106,9 +106,9 @@ class PackageSources(ConfigProperty):
 
     """
 
-    git: List[GitPackageSource] = []
-    local: List[LocalPackageSource] = []
-    s3: List[S3PackageSource] = []
+    git: List[GitCfnginPackageSourceDefinitionModel] = []
+    local: List[LocalCfnginPackageSourceDefinitionModel] = []
+    s3: List[S3CfnginPackageSourceDefinitionModel] = []
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""

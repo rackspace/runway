@@ -241,40 +241,8 @@ class TestCFNgin:
         del cfngin.env_file  # clear cached value and force load
         assert not cfngin.should_skip(force=True)  # does not repopulate env_file
 
-    def test_find_config_files(self, tmp_path):
+    @patch("runway.cfngin.cfngin.CfnginConfig")
+    def test_find_config_files(self, mock_config, tmp_path):
         """Test find_config_files."""
-        bad_path = tmp_path / "bad_path"
-        bad_path.mkdir()
-
-        good_config_paths = [
-            tmp_path / "_t3sT.yaml",
-            tmp_path / "_t3sT.yml",
-            tmp_path / "01-config.yaml",
-            tmp_path / "01-config.yml",
-            tmp_path / "TeSt_02.yaml",
-            tmp_path / "TeSt_02.yml",
-            tmp_path / "test.config.yaml",
-            tmp_path / "test.config.yml",
-        ]
-        bad_config_paths = [
-            tmp_path / ".anything.yaml",
-            tmp_path / ".gitlab-ci.yml",
-            tmp_path / "bitbucket-pipelines.yml",
-            tmp_path / "buildspec.yml",
-            tmp_path / "docker-compose.yml",
-            bad_path / "00-invalid.yml",
-        ]
-
-        for config_path in good_config_paths + bad_config_paths:
-            config_path.write_text("")
-
-        result = CFNgin.find_config_files(sys_path=tmp_path)
-        expected = sorted([config_path for config_path in good_config_paths])
-        assert result == expected
-
-        config_01 = tmp_path / "01-config.yml"
-        result = CFNgin.find_config_files(sys_path=config_01)
-        assert result == [config_01]
-
-        result = CFNgin.find_config_files()
-        assert not result
+        CFNgin.find_config_files(sys_path=tmp_path, exclude=["file"])
+        mock_config.find_config_file.assert_called_once_with(tmp_path, exclude=["file"])

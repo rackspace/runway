@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import re
 import sys
 from abc import abstractclassmethod
 from pathlib import Path
@@ -11,7 +12,6 @@ from string import Template
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel, validator
 
 from ..cfngin import exceptions
 from ..cfngin.lookups import register_lookup_handler
@@ -22,12 +22,18 @@ from .components.runway import (
     RunwayTestDefinition,
     RunwayVariablesDefinition,
 )
-from .models.cfngin import Hook, PackageSources, Stack, Target
+from .models.cfngin import (
+    CfnginConfigDefinitionModel,
+    CfnginHookDefinitionModel,
+    CfnginPackageSourcesDefinitionModel,
+    CfnginStackDefinitionModel,
+    CfnginTargetDefinitionModel,
+)
 from .models.runway import RunwayConfigDefinitionModel, RunwayFutureDefinitionModel
-from .models.utils import resolve_path_field
 
 if TYPE_CHECKING:
     from packaging.specifiers import SpecifierSet
+    from pydantic import BaseModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,7 +53,7 @@ class BaseConfig:
 
         """
         self._data = data.copy()
-        self.file_path = path.resolve()
+        self.file_path = path.resolve() if path else Path.cwd()
 
     def dump(
         self,
@@ -56,7 +62,7 @@ class BaseConfig:
         exclude: Optional[List[str]] = None,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
-        exclude_unset: bool = False,
+        exclude_unset: bool = True,
         include: Optional[List[str]] = None,
     ) -> str:
         """Dump model to a YAML string.
@@ -100,7 +106,11 @@ class BaseConfig:
 
     @classmethod
     def parse_file(
-        cls, *, path: Optional[Path] = None, file_path: Optional[Path], **kwargs: Any
+        cls,
+        *,
+        path: Optional[Path] = None,
+        file_path: Optional[Path] = None,
+        **kwargs: Any
     ) -> BaseConfig:
         """Parse a YAML file to create a config object.
 
@@ -134,7 +144,7 @@ class BaseConfig:
         raise NotImplementedError
 
 
-class CfnginConfig(BaseModel):
+class CfnginConfig(BaseConfig):
     """Python representation of a CFNgin config file.
 
     This is used internally by CFNgin to parse and validate a YAML formatted
@@ -183,66 +193,65 @@ class CfnginConfig(BaseModel):
 
     """
 
-    cfngin_bucket: Optional[str] = None
-    cfngin_bucket_region: Optional[str] = None
-    cfngin_cache_dir: Path = Path.cwd() / ".runway" / "cache"
-    log_formats: Dict[str, str] = {}  # TODO create model
-    lookups: Dict[str, str] = {}  # TODO create model
-    mappings: Dict[str, Dict[str, Dict[str, Any]]] = {}  # TODO create model
-    namespace: str
-    namespace_delimiter: str = "-"
-    package_sources: PackageSources = PackageSources()
-    persistent_graph_key: Optional[str] = None
-    post_build: List[Hook] = []
-    post_destroy: List[Hook] = []
-    pre_build: List[Hook] = []
-    pre_destroy: List[Hook] = []
-    service_role: Optional[str] = None
-    stacks: List[Stack] = []
-    sys_path: Optional[Path] = None
-    tags: Optional[Dict[str, str]] = None  # None is significant here
-    targets: List[Target] = []
-    template_indent: int = 4
+    EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
+    EXCLUDE_LIST = ["buildspec.yml", "docker-compose.yml"]
 
-    def dump(
-        self,
-        *,
-        by_alias: bool = False,
-        exclude: Optional[List[str]] = None,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        exclude_unset: bool = True,
-        include: Optional[List[str]] = None,
-    ) -> str:
-        """Dump model to a YAML string.
+    cfngin_bucket: Optional[str]
+    cfngin_bucket_region: Optional[str]
+    cfngin_cache_dir: Path
+    log_formats: Dict[str, str]
+    lookups: Dict[str, str]
+    mappings: Dict[str, Dict[str, Dict[str, Any]]]
+    namespace: str
+    namespace_delimiter: str
+    package_sources: CfnginPackageSourcesDefinitionModel
+    persistent_graph_key: Optional[str] = None
+    post_build: List[CfnginHookDefinitionModel]
+    post_destroy: List[CfnginHookDefinitionModel]
+    pre_build: List[CfnginHookDefinitionModel]
+    pre_destroy: List[CfnginHookDefinitionModel]
+    service_role: Optional[str]
+    stacks: List[CfnginStackDefinitionModel]
+    sys_path: Optional[Path]
+    tags: Optional[Dict[str, str]]
+    targets: List[CfnginTargetDefinitionModel]
+    template_indent: int
+
+    _data: CfnginConfigDefinitionModel
+
+    def __init__(
+        self, data: CfnginConfigDefinitionModel, *, path: Optional[Path] = None,
+    ) -> None:
+        """Instantiate class.
 
         Args:
-            by_alias: Whether field aliases should be used as keys in the
-                returned dictionary.
-            exclude: Fields to exclude from the returned dictionary.
-            exclude_defaults: Whether fields which are equal to their default
-                values (whether set or otherwise) should be excluded from
-                the returned dictionary.
-            exclude_none: Whether fields which are equal to None should be
-                excluded from the returned dictionary.
-            exclude_unset: Whether fields which were not explicitly set when
-                creating the model should be excluded from the returned
-                dictionary.
-            include: Fields to include in the returned dictionary.
+            data: The data model of the config file.
+            path: Path to the config file.
 
         """
-        return yaml.dump(
-            self.dict(
-                by_alias=by_alias,
-                exclude=exclude,
-                exclude_defaults=exclude_defaults,
-                exclude_none=exclude_none,
-                exclude_unset=exclude_unset,
-                include=include,
-            ),
-            default_flow_style=False,
-            indent=self.template_indent,
-        )
+        super().__init__(data, path=path)
+
+        # TODO abstract away more of this with component classes or change getter/setter
+        self.cfngin_bucket = self._data.cfngin_bucket
+        self.cfngin_bucket_region = self._data.cfngin_bucket_region
+        self.cfngin_cache_dir = self._data.cfngin_cache_dir
+        self.log_formats = self._data.log_formats
+        self.lookups = self._data.lookups
+        self.mappings = self._data.mappings
+        self.namespace = self._data.namespace
+        self.namespace_delimiter = self._data.namespace_delimiter
+        self.package_sources = self._data.package_sources
+        self.persistent_graph_key = self._data.persistent_graph_key
+        self.post_build = self._data.post_build
+        self.post_destroy = self._data.post_destroy
+        self.pre_build = self._data.pre_build
+        self.pre_destroy = self._data.pre_destroy
+        self.service_role = self._data.service_role
+        self.stacks = self._data.stacks
+        self.sys_path = self._data.sys_path
+        self.tags = self._data.tags
+        self.targets = self._data.targets
+        self.template_indent = self._data.template_indent
 
     def load(self) -> None:
         """Load config options into the current environment/session."""
@@ -254,32 +263,93 @@ class CfnginConfig(BaseModel):
             for key, handler in self.lookups.items():
                 register_lookup_handler(key, handler)
 
-    _resolve_path_fields = validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
-        resolve_path_field
-    )
+    @classmethod
+    def find_config_file(  # pylint: disable=arguments-differ
+        cls, path: Optional[Path] = None, *, exclude: Optional[List[str]] = None,
+    ) -> List[Path]:
+        """Find a config file in the provided path.
 
-    @validator("stacks")
-    def _validate_unique_stack_names(
-        cls, stacks: List[Stack]  # noqa: N805
-    ) -> List[Stack]:
-        """Validate that each stack has a unique name."""
-        stack_names = [stack.name for stack in stacks]
-        if len(set(stack_names)) != len(stack_names):
-            for i, name in enumerate(stack_names):
-                if stack_names.count(name) != 1:
-                    raise ValueError(f"Duplicate stack {name} found at index {i}")
-        return stacks
+        Args:
+            path: The path to search for a config file.
+            exclude: List of file names to exclude. This list is appended to
+                the global exclude list.
+
+        Raises:
+            ConfigNotFound: Could not find a config file in the provided path.
+            ValueError: More than one config file found in the provided path.
+
+        """
+        if not path:
+            path = Path.cwd()
+        elif path.is_file():
+            return [path]
+
+        exclude = exclude or []
+        result = []
+        exclude.extend(cls.EXCLUDE_LIST)
+
+        yml_files = list(path.glob("*.yml"))
+        yml_files.extend(list(path.glob("*.yaml")))
+
+        for f in yml_files:
+            if (
+                re.match(cls.EXCLUDE_REGEX, f.name)
+                or f.name in exclude
+                or f.name.startswith(".")
+            ):
+                continue
+            result.append(f)
+        result.sort()
+        return result
 
     @classmethod
-    def parse_file(
-        cls, path: Path, *, parameters: Optional[Dict[str, Any]] = None
+    def parse_file(  # pylint: disable=arguments-differ
+        cls,
+        *,
+        path: Optional[Path] = None,
+        file_path: Optional[Path] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **kwargs: Any
+    ) -> BaseConfig:
+        """Parse a YAML file to create a config object.
+
+        Args:
+            path: The path to search for a config file.
+            file_path: Exact path to a file to parse.
+            parameters: Values to use when resolving a raw config.
+
+        Raises:
+            ConfigNotFound: Provided config file was not found.
+
+        """
+        if file_path:
+            if not file_path.is_file():
+                raise ConfigNotFound(path=path)
+            return cls.parse_raw(
+                file_path.read_text(),
+                path=file_path,
+                parameters=parameters or {},
+                **kwargs
+            )
+        if path:
+            return cls.parse_file(
+                file_path=cls.find_config_file(path),
+                parameters=parameters or {},
+                **kwargs
+            )
+        raise ValueError("must provide path or file_path")
+
+    @classmethod
+    def parse_obj(
+        cls, obj: Dict[str, Any], *, path: Optional[Path] = None
     ) -> CfnginConfig:
-        """Parse a file."""
-        return cls.parse_raw(path.read_text(), parameters=parameters or {})
+        """Parse a python object.
 
-    @classmethod
-    def parse_obj(cls, obj: Dict[str, Any]) -> CfnginConfig:
-        """Parse a python object."""
+        Args:
+            obj: A python object to parse as a CFNgin config.
+            path: The path to the config file that was parsed into the object.
+
+        """
         for tlk in [
             "post_build",
             "post_destroy",
@@ -296,7 +366,7 @@ class CfnginConfig(BaseModel):
                         tmp_dict["name"] = key
                     tmp_list.append(tmp_dict)
                 obj[tlk] = tmp_list
-        return super().parse_obj(obj)
+        return cls(CfnginConfigDefinitionModel.parse_obj(obj), path=path)
 
     @classmethod
     def parse_raw(
@@ -304,9 +374,18 @@ class CfnginConfig(BaseModel):
         data: str,
         *,
         parameters: Optional[Dict[str, Any]] = None,
-        skip_package_sources: bool = False
+        path: Optional[Path] = None,
+        skip_package_sources: bool = False,
     ) -> CfnginConfig:
-        """Parse raw data."""
+        """Parse raw data.
+
+        Args:
+            data: The raw data to parse.
+            parameters: Values to use when resolving a raw config.
+            path: The path to search for a config file.
+            skip_package_sources: Skip processing package sources.
+
+        """
         if not parameters:
             parameters = {}
         pre_rendered = cls.render_raw_data(data, parameters=parameters)
@@ -315,16 +394,24 @@ class CfnginConfig(BaseModel):
         config_dict = yaml.safe_load(
             cls.process_package_sources(pre_rendered, parameters=parameters)
         )
-        return cls.parse_obj(config_dict)
+        return cls.parse_obj(config_dict, path=path)
 
     @classmethod
     def process_package_sources(
         cls, raw_data: str, *, parameters: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """Process the package sources defined in a rendered config."""
+        """Process the package sources defined in a rendered config.
+
+        Args:
+            raw_data: Raw configuration data.
+            parameters: Values to use when resolving a raw config.
+
+        """
         config = yaml.safe_load(raw_data)
         processor = SourceProcessor(
-            sources=PackageSources.parse_obj(config.get("package_sources", {})),
+            sources=CfnginPackageSourcesDefinitionModel.parse_obj(
+                config.get("package_sources", {})
+            ),
             cache_dir=config.get("cfngin_cache_dir"),
         )
         processor.get_package_sources()
@@ -339,7 +426,17 @@ class CfnginConfig(BaseModel):
     def render_raw_data(
         raw_data: str, *, parameters: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Render raw data."""
+        """Render raw data.
+
+        Args:
+            raw_data: Raw configuration data.
+            parameters: Values to use when resolving a raw config.
+
+        Raises:
+            MissingEnvironment: A value required by the config was not provided
+                in parameters.
+
+        """
         if not parameters:
             parameters = {}
         template = Template(raw_data)
@@ -350,21 +447,6 @@ class CfnginConfig(BaseModel):
         except ValueError:
             rendered = template.safe_substitute(**parameters)
         return rendered
-
-    def __getitem__(self, key: str) -> Any:
-        """Implement evaluation of self[key].
-
-        Args:
-            key: Attribute name to return the value for.
-
-        Returns:
-            The value associated with the provided key/attribute name.
-
-        Raises:
-            AttributeError: If attribute does not exist on this object.
-
-        """
-        return getattr(self, key)
 
 
 class RunwayConfig(BaseConfig):
@@ -379,6 +461,7 @@ class RunwayConfig(BaseConfig):
     runway_version: Optional[SpecifierSet]
     tests: List[RunwayTestDefinition]
     variables: RunwayVariablesDefinition
+
     _data: RunwayConfigDefinitionModel
 
     def __init__(
