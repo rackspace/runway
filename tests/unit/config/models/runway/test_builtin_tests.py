@@ -1,5 +1,7 @@
 """Test runway.config.models.runway._builtin_tests."""
 # pylint: disable=no-self-use,too-few-public-methods
+from typing import Optional
+
 import pytest
 from pydantic import ValidationError
 
@@ -16,7 +18,7 @@ from runway.config.models.runway import (
 class TestRunwayTestDefinitionModel:
     """Test runway.config.models.runway._builtin_tests.RunwayTestDefinitionModel."""
 
-    def test_init_cfnlint(self):
+    def test_init_cfnlint(self) -> None:
         """Test init cfn-lint subclass."""
         data = {"type": "cfn-lint"}
         obj = RunwayTestDefinitionModel.parse_obj(data)
@@ -26,7 +28,7 @@ class TestRunwayTestDefinitionModel:
         assert obj.name == "cfn-lint"
         assert obj.type == "cfn-lint"
 
-    def test_init_script(self):
+    def test_init_script(self) -> None:
         """Test init script subclass."""
         data = {"type": "script"}
         obj = RunwayTestDefinitionModel.parse_obj(data)
@@ -36,7 +38,7 @@ class TestRunwayTestDefinitionModel:
         assert not obj.name
         assert obj.type == "script"
 
-    def test_init_yamllint(self):
+    def test_init_yamllint(self) -> None:
         """Test init yamllint subclass."""
         data = {"type": "yamllint"}
         obj = RunwayTestDefinitionModel.parse_obj(data)
@@ -46,14 +48,14 @@ class TestRunwayTestDefinitionModel:
         assert obj.name == "yamllint"
         assert obj.type == "yamllint"
 
-    def test_invalid_type(self):
+    def test_invalid_type(self) -> None:
         """Test invalid type."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayTestDefinitionModel.parse_obj({"type": "invalid"})
         assert excinfo.value.errors()[0]["loc"] == ("type",)
 
     @pytest.mark.parametrize("required", [None, True, False])
-    def test_required(self, required):
+    def test_required(self, required: Optional[bool]) -> None:
         """Test required."""
         if isinstance(required, bool):
             obj = RunwayTestDefinitionModel(type="script", required=required)
@@ -62,7 +64,7 @@ class TestRunwayTestDefinitionModel:
             obj = RunwayTestDefinitionModel(type="script")
             assert obj.required is True
 
-    def test_string_args(self):
+    def test_string_args(self) -> None:
         """Test args defined as a string."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayTestDefinitionModel.parse_obj(
@@ -72,13 +74,13 @@ class TestRunwayTestDefinitionModel:
         assert error["loc"] == ("args",)
         assert error["msg"] == "field can only be a string if it's a lookup"
 
-    def test_string_args_lookup(self):
+    def test_string_args_lookup(self) -> None:
         """Test args defined as a lookup string."""
         data = {"args": "${var something}", "type": "yamllint"}
         obj = RunwayTestDefinitionModel.parse_obj(data)
         assert obj.args == data["args"]
 
-    def test_string_required(self):
+    def test_string_required(self) -> None:
         """Test required defined as a string."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayTestDefinitionModel.parse_obj(
@@ -88,7 +90,7 @@ class TestRunwayTestDefinitionModel:
         assert error["loc"] == ("required",)
         assert error["msg"] == "field can only be a string if it's a lookup"
 
-    def test_string_required_lookup(self):
+    def test_string_required_lookup(self) -> None:
         """Test required defined as a lookup string."""
         data = {"required": "${var something}", "type": "yamllint"}
         obj = RunwayTestDefinitionModel.parse_obj(data)
@@ -98,7 +100,7 @@ class TestRunwayTestDefinitionModel:
 class TestCfnLintRunwayTestArgs:
     """Test runway.config.models.runway._builtin_tests.CfnLintRunwayTestArgs."""
 
-    def test_cli_args_string(self):
+    def test_cli_args_string(self) -> None:
         """Test cli_args defined as a string."""
         with pytest.raises(ValidationError) as excinfo:
             CfnLintRunwayTestArgs(cli_args="something")
@@ -106,24 +108,25 @@ class TestCfnLintRunwayTestArgs:
         assert error["loc"] == ("cli_args",)
         assert error["msg"] == "field can only be a string if it's a lookup"
 
-    def test_cli_args_string_lookup(self):
+    def test_cli_args_string_lookup(self) -> None:
         """Test args defined as a lookup string."""
         data = {"cli_args": "${var something}"}
         assert CfnLintRunwayTestArgs.parse_obj(data).cli_args == data["cli_args"]
 
-    def test_extra(self):
+    def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             CfnLintRunwayTestArgs(invalid="something")
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
 
 class TestCfnLintRunwayTestDefinitionModel:
     """Test runway.config.models.runway._builtin_tests.CfnLintRunwayTestDefinitionModel."""
 
-    def test_args(self):
+    def test_args(self) -> None:
         """Test args."""
         data = {"args": {"cli_args": ["example"]}, "type": "cfn-lint"}
         obj = CfnLintRunwayTestDefinitionModel.parse_obj(data)
@@ -134,7 +137,7 @@ class TestCfnLintRunwayTestDefinitionModel:
 class TestScriptRunwayTestArgs:
     """Test runway.config.models.runway._builtin_tests.ScriptRunwayTestArgs."""
 
-    def test_commands_string(self):
+    def test_commands_string(self) -> None:
         """Test commands defined as a string."""
         with pytest.raises(ValidationError) as excinfo:
             ScriptRunwayTestArgs(commands="something")
@@ -142,24 +145,25 @@ class TestScriptRunwayTestArgs:
         assert error["loc"] == ("commands",)
         assert error["msg"] == "field can only be a string if it's a lookup"
 
-    def test_commands_string_lookup(self):
+    def test_commands_string_lookup(self) -> None:
         """Test args defined as a lookup string."""
         data = {"commands": "${var something}"}
         assert ScriptRunwayTestArgs.parse_obj(data).commands == data["commands"]
 
-    def test_extra(self):
+    def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             ScriptRunwayTestArgs(invalid="something")
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
 
 class TestScriptRunwayTestDefinitionModel:
     """Test runway.config.models.runway._builtin_tests.ScriptRunwayTestDefinitionModel."""
 
-    def test_args(self):
+    def test_args(self) -> None:
         """Test args."""
         data = {"args": {"commands": ["example"]}}
         obj = ScriptRunwayTestDefinitionModel.parse_obj(data)

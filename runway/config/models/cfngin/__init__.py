@@ -7,8 +7,9 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import Extra, root_validator, validator
 
+from .. import utils
 from ..base import ConfigProperty
-from .package_sources import (
+from ._package_sources import (
     GitPackageSource,
     LocalPackageSource,
     PackageSources,
@@ -30,10 +31,15 @@ class Hook(ConfigProperty):
     """Hook module."""
 
     args: Dict[str, Any] = {}
-    data_key: Optional[str]
+    data_key: Optional[str] = None
     enabled: bool = True
     path: str
     required: bool = True
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        extra = Extra.forbid
 
 
 class Stack(ConfigProperty):
@@ -42,7 +48,7 @@ class Stack(ConfigProperty):
     class_path: Optional[str] = None
     description: Optional[str] = None
     enabled: bool = True
-    in_progress_behavior: Optional[str] = None
+    in_progress_behavior: Optional[str] = None  # TODO use enum
     locked: bool = False
     name: str
     profile: Optional[str]  # TODO remove
@@ -62,8 +68,12 @@ class Stack(ConfigProperty):
 
         extra = Extra.forbid
 
+    _resolve_path_fields = validator(
+        "stack_policy_path", "template_path", allow_reuse=True
+    )(utils.resolve_path_field)
+
     @root_validator(pre=True)
-    def _class_and_template(
+    def _validate_class_and_template(
         cls, values: Dict[str, Any]  # noqa: N805
     ) -> Dict[str, Any]:
         """Validate class_path and template_path are not both provided."""
@@ -72,7 +82,9 @@ class Stack(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _class_or_template(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
+    def _validate_class_or_template(
+        cls, values: Dict[str, Any]  # noqa: N805
+    ) -> Dict[str, Any]:
         """Ensure that either class_path or template_path is defined."""
         # if the stack is disabled or locked, it is ok that these are missing
         required = values.get("enabled", True) and not values.get("locked", False)
@@ -84,11 +96,6 @@ class Stack(ConfigProperty):
             raise ValueError("either class_path or template_path must be defined")
         return values
 
-    @validator("stack_policy_path", "template_path")
-    def _resolve_path_fields(cls, v: Optional[Path]) -> Optional[Path]:  # noqa: N805
-        """Resolve sys_path."""
-        return v.resolve() if v else v
-
 
 class Target(ConfigProperty):
     """Target model."""
@@ -96,3 +103,8 @@ class Target(ConfigProperty):
     name: str
     required_by: List[str] = []
     requires: List[str] = []
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        extra = Extra.forbid

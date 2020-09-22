@@ -24,6 +24,7 @@ from .components.runway import (
 )
 from .models.cfngin import Hook, PackageSources, Stack, Target
 from .models.runway import RunwayConfigDefinitionModel, RunwayFutureDefinitionModel
+from .models.utils import resolve_path_field
 
 if TYPE_CHECKING:
     from packaging.specifiers import SpecifierSet
@@ -186,8 +187,8 @@ class CfnginConfig(BaseModel):
     cfngin_bucket_region: Optional[str] = None
     cfngin_cache_dir: Path = Path.cwd() / ".runway" / "cache"
     log_formats: Dict[str, str] = {}  # TODO create model
-    lookups: Optional[Dict[str, str]] = {}  # TODO create model
-    mappings: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = {}  # TODO create model
+    lookups: Dict[str, str] = {}  # TODO create model
+    mappings: Dict[str, Dict[str, Dict[str, Any]]] = {}  # TODO create model
     namespace: str
     namespace_delimiter: str = "-"
     package_sources: PackageSources = PackageSources()
@@ -199,7 +200,7 @@ class CfnginConfig(BaseModel):
     service_role: Optional[str] = None
     stacks: List[Stack] = []
     sys_path: Optional[Path] = None
-    tags: Optional[Dict[str, str]] = None
+    tags: Optional[Dict[str, str]] = None  # None is significant here
     targets: List[Target] = []
     template_indent: int = 4
 
@@ -210,7 +211,7 @@ class CfnginConfig(BaseModel):
         exclude: Optional[List[str]] = None,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
-        exclude_unset: bool = False,
+        exclude_unset: bool = True,
         include: Optional[List[str]] = None,
     ) -> str:
         """Dump model to a YAML string.
@@ -240,6 +241,7 @@ class CfnginConfig(BaseModel):
                 include=include,
             ),
             default_flow_style=False,
+            indent=self.template_indent,
         )
 
     def load(self) -> None:
@@ -252,17 +254,16 @@ class CfnginConfig(BaseModel):
             for key, handler in self.lookups.items():
                 register_lookup_handler(key, handler)
 
-    @validator("cfngin_cache_dir", "sys_path")
-    def _resolve_path_fields(cls, v: Optional[Path]) -> Optional[Path]:  # noqa: N805
-        """Resolve sys_path."""
-        return v.resolve() if v else v
+    _resolve_path_fields = validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
+        resolve_path_field
+    )
 
-    @validator("stacks", pre=True)
+    @validator("stacks")
     def _validate_unique_stack_names(
         cls, stacks: List[Stack]  # noqa: N805
     ) -> List[Stack]:
         """Validate that each stack has a unique name."""
-        stack_names = [stack.get("name") for stack in stacks]
+        stack_names = [stack.name for stack in stacks]
         if len(set(stack_names)) != len(stack_names):
             for i, name in enumerate(stack_names):
                 if stack_names.count(name) != 1:
@@ -280,11 +281,11 @@ class CfnginConfig(BaseModel):
     def parse_obj(cls, obj: Dict[str, Any]) -> CfnginConfig:
         """Parse a python object."""
         for tlk in [
-            "stacks",
-            "pre_build",
             "post_build",
-            "pre_destroy",
             "post_destroy",
+            "pre_build",
+            "pre_destroy",
+            "stacks",
         ]:
             tlv = obj.get(tlk)
             if isinstance(tlv, dict):
@@ -331,7 +332,7 @@ class CfnginConfig(BaseModel):
             for i in processor.configs_to_merge:
                 LOGGER.debug("merging in remote config: %s", i)
                 config = merge_map(yaml.safe_load(open(i)), config)
-            return cls.render_raw_data(str(config), parameters=parameters or {})
+            return cls.render_raw_data(yaml.dump(config), parameters=parameters or {})
         return raw_data
 
     @staticmethod

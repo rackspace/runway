@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
 RUNWAY_LOOKUP_STRING_ERROR = ValueError("field can only be a string if it's a lookup")
 RUNWAY_LOOKUP_STRING_REGEX = r"^\${.*}$"
@@ -12,6 +13,11 @@ def convert_null_values(v: Any) -> Any:
     """Convert a "null" string into type(None)."""
     null_strings = ["null", "none", "undefined"]
     return None if isinstance(v, str) and v.lower() in null_strings else v
+
+
+def resolve_path_field(v: Optional[Path]) -> Optional[Path]:
+    """Resolve sys_path."""
+    return v.resolve() if v else v
 
 
 def validate_string_is_lookup(v: Any) -> Any:

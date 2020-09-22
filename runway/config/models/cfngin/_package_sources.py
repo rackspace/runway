@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import root_validator
+from pydantic import Extra, root_validator
 
 from ..base import ConfigProperty
 
@@ -30,6 +30,11 @@ class GitPackageSource(ConfigProperty):
     paths: List[str] = []  # TODO try Path
     tag: Optional[str] = None
     uri: str  # TODO try a Url type
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        extra = Extra.forbid
 
     @root_validator
     def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
@@ -57,6 +62,11 @@ class LocalPackageSource(ConfigProperty):
     paths: List[str] = []  # TODO try Path
     source: str  # TODO try Path
 
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        extra = Extra.forbid
+
 
 class S3PackageSource(ConfigProperty):
     """S3 package source model.
@@ -80,6 +90,11 @@ class S3PackageSource(ConfigProperty):
     requester_pays: bool = False
     use_latest: bool = False
 
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        extra = Extra.forbid
+
 
 class PackageSources(ConfigProperty):
     """Package sources model.
@@ -94,3 +109,8 @@ class PackageSources(ConfigProperty):
     git: List[GitPackageSource] = []
     local: List[LocalPackageSource] = []
     s3: List[S3PackageSource] = []
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """Model configuration."""
+
+        extra = Extra.forbid

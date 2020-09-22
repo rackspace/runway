@@ -30,9 +30,10 @@ class TestRunwayAssumeRoleDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayAssumeRoleDefinitionModel(invalid="something")
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
     def test_field_defaults(self) -> None:
         """Test field values."""
@@ -125,10 +126,11 @@ class TestRunwayConfigDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayConfigDefinitionModel(invalid="something", regions=["us-east-1"])
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+            RunwayConfigDefinitionModel(invalid="something")
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
     def test_field_defaults(self) -> None:
         """Test filed default values."""
@@ -174,9 +176,10 @@ class TestRunwayDeploymentDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayDeploymentDefinitionModel(invalid="something", regions=["us-east-1"])
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
     def test_field_defaults(self) -> None:
         """Test field default values."""
@@ -266,9 +269,10 @@ class TestRunwayDeploymentRegionDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayDeploymentRegionDefinitionModel(invalid="something", parallel=[])
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
     def test_fields(self) -> None:
         """Test fields."""
@@ -298,9 +302,10 @@ class TestRunwayFutureDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayFutureDefinitionModel(invalid="something")
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
     def test_field_defaults(self) -> None:
         """Test field defaults."""
@@ -314,9 +319,10 @@ class TestRunwayModuleDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayModuleDefinitionModel(invalid="something")
-        error = excinfo.value.errors()[0]
-        assert error["loc"] == ("invalid",)
-        assert error["msg"] == "extra fields not permitted"
+        errors = excinfo.value.errors()
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ("invalid",)
+        assert errors[0]["msg"] == "extra fields not permitted"
 
     def test_field_defaults(self) -> None:
         """Test field defaults."""
