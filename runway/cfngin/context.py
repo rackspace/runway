@@ -5,7 +5,7 @@ import logging
 
 from runway._logging import PrefixAdaptor
 
-from .config import Config
+from ..config import CfnginConfig
 from .exceptions import (
     PersistentGraphCannotLock,
     PersistentGraphCannotUnlock,
@@ -67,7 +67,7 @@ class Context:
             stack_names (list): A list of stack_names to operate on. If not
                 passed, usually all stacks defined in the config will be
                 operated on.
-            config (:class:`runway.cfngin.config.Config`): The CFNgin
+            config (:class:`runway.config.CfnginConfig`): The CFNgin
                 configuration being operated on.
             config_path (str): Path to the config file that was provided.
             region (str): Name of an AWS region if provided as a CLI argument.
@@ -85,7 +85,7 @@ class Context:
         self._targets = None
         self._upload_to_s3 = None
         # TODO load the config from context instead of taking it as an arg
-        self.config = config or Config(namespace="example")
+        self.config = config or CfnginConfig(namespace="example")
         # TODO set this value when provisioning a Config object in context
         # set to a fake location for the time being but this should be set
         # by all runtime entry points. the only time the fake value should be

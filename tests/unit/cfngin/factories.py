@@ -4,8 +4,8 @@ from collections import namedtuple
 
 from mock import MagicMock
 
-from runway.cfngin.config import Config, Stack
 from runway.cfngin.context import Context
+from runway.config import CfnginConfig, Stack
 
 Lookup = namedtuple("Lookup", ("type", "input", "raw"))
 
@@ -41,7 +41,7 @@ def mock_context(namespace="default", extra_config_args=None, **kwargs):
     config_args = {"namespace": namespace}
     if extra_config_args:
         config_args.update(extra_config_args)
-    config = Config(**config_args)
+    config = CfnginConfig(**config_args)
     if kwargs.get("environment"):
         return Context(config=config, **kwargs)
     return Context(config=config, environment={}, **kwargs)

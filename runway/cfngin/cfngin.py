@@ -13,8 +13,8 @@ from yaml.constructor import ConstructorError
 from runway._logging import PrefixAdaptor
 from runway.util import MutableMap, SafeHaven, cached_property
 
+from ..config import CfnginConfig
 from .actions import build, destroy, diff
-from .config import Config
 from .context import Context as CFNginContext
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
@@ -244,20 +244,17 @@ class CFNgin:
         LOGGER.info("skipped; no parameters and environment file not found")
         return True
 
-    def _get_config(self, file_path: Path) -> Config:
+    def _get_config(self, file_path: Path) -> CfnginConfig:
         """Initialize a CFNgin config object from a file.
 
         Args:
             file_path (str): Path to the config file to load.
             validate (bool): Validate the loaded config.
 
-        Returns:
-            :class:`runway.cfngin.config.Config`
-
         """
-        return Config.parse_file(file_path, parameters=self.parameters)
+        return CfnginConfig.parse_file(file_path, parameters=self.parameters)
 
-    def _get_context(self, config: Config, config_path: Path) -> CFNginContext:
+    def _get_context(self, config: CfnginConfig, config_path: Path) -> CFNginContext:
         """Initialize a CFNgin context object.
 
         Args:

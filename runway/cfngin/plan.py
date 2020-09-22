@@ -296,8 +296,8 @@ class Step:
 
         """
         # pylint: disable=import-outside-toplevel
-        from runway.cfngin.config import Stack as StackConfig
         from runway.cfngin.stack import Stack
+        from runway.config.models.cfngin import Stack as StackConfig
 
         stack_def = StackConfig.construct(name=stack_name, requires=requires or [])
         stack = Stack(stack_def, context)

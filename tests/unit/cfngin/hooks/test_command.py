@@ -6,9 +6,9 @@ from subprocess import PIPE
 
 import mock
 
-from runway.cfngin.config import Config
 from runway.cfngin.context import Context
 from runway.cfngin.hooks.command import run_command
+from runway.config import CfnginConfig
 
 from ..factories import mock_provider
 
@@ -42,7 +42,9 @@ class TestCommandHook(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.context = Context(config=Config(namespace="test", cfngin_bucket="test"))
+        self.context = Context(
+            config=CfnginConfig(namespace="test", cfngin_bucket="test")
+        )
         self.provider = mock_provider(region="us-east-1")
 
         self.mock_process = MockProcess()

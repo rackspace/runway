@@ -5,8 +5,8 @@ import unittest
 
 from mock import call, patch
 
-from runway.cfngin.config import Hook
 from runway.cfngin.hooks.utils import handle_hooks
+from runway.config import Hook
 
 from ..factories import mock_context, mock_provider
 

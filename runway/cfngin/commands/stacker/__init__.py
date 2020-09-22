@@ -2,8 +2,8 @@
 import logging
 import warnings
 
+from ....config import CfnginConfig
 from ... import session_cache
-from ...config import Config
 from ...context import Context
 from ...providers.aws import default
 from .base import BaseCommand
@@ -34,7 +34,7 @@ class Stacker(BaseCommand):
         LOGGER.warning(self.DEPRECATION_MSG)
         session_cache.default_profile = options.profile
 
-        self.config = Config.parse_raw(
+        self.config = CfnginConfig.parse_raw(
             options.config.read(), parameters=options.environment
         )
         self.config.load()

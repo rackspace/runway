@@ -28,7 +28,7 @@ from .awscli_yamlhelper import yaml_parse
 from .session_cache import get_session
 
 if TYPE_CHECKING:
-    from .config.models.cfngin import (
+    from ..config.models.cfngin import (
         GitPackageSource,
         LocalPackageSource,
         PackageSources,

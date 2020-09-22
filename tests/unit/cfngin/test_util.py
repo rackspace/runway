@@ -7,7 +7,6 @@ import boto3
 import mock
 from pydantic import ValidationError
 
-from runway.cfngin.config.models.cfngin import GitPackageSource
 from runway.cfngin.util import (
     Extractor,
     SourceProcessor,
@@ -23,6 +22,7 @@ from runway.cfngin.util import (
     s3_bucket_location_constraint,
     yaml_to_ordered_dict,
 )
+from runway.config.models.cfngin import GitPackageSource
 
 AWS_REGIONS = [
     "us-east-1",

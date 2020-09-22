@@ -5,10 +5,11 @@ import unittest
 from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin.actions import destroy
-from runway.cfngin.context import Config, Context
+from runway.cfngin.context import Context
 from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.plan import Graph, Step
 from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
+from runway.config import CfnginConfig
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -55,7 +56,7 @@ class TestDestroyAction(unittest.TestCase):
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=Config(**config), **kwargs)
+        return Context(config=CfnginConfig(**config), **kwargs)
 
     def test_generate_plan(self):
         """Test generate plan."""
