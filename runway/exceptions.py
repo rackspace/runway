@@ -208,3 +208,21 @@ class UnresolvedVariableValue(Exception):
         """
         self.lookup = lookup
         super().__init__("Unresolved lookup", *args, **kwargs)
+
+
+class VariablesFileNotFound(Exception):
+    """Defined variables file could not be found."""
+
+    file_path: List[str]
+    message: str
+
+    def __init__(self, file_path: Path) -> None:
+        """Instantiate class.
+
+        Args:
+            file_path: Path where the file was expected to be found.
+
+        """
+        self.file_path = file_path
+        self.message = f"defined variables file not found at path {file_path}"
+        super().__init__(self.file_path, self.message)

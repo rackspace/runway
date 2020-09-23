@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from ....variables import Variable
 from ...models.runway import RunwayModuleDefinitionModel
-from ._base import ConfigComponentDefinition
+from .base import ConfigComponentDefinition
 
 if TYPE_CHECKING:
     from ...models.runway import RunwayEnvironmentsType, RunwayEnvVarsType
@@ -15,11 +15,13 @@ if TYPE_CHECKING:
 class RunwayModuleDefinition(ConfigComponentDefinition):
     """Runway module definition."""
 
+    class_path: Optional[str]
     environments: RunwayEnvironmentsType
     env_vars: RunwayEnvVarsType
     name: str
     options: Dict[str, Any]
     parameters: Dict[str, Any]
+    path: Optional[Union[str, Path]]
     tags: List[str]
     type: Optional[str]  # TODO add enum
 
@@ -56,7 +58,9 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
 
         """
         if not isinstance(modules, list):
-            TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
+            raise TypeError(
+                f"expected List[RunwayModuleDefinition]; got {type(modules)}"
+            )
         sanitized = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
@@ -64,16 +68,11 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
             elif isinstance(mod, RunwayModuleDefinitionModel):
                 sanitized.append(mod)
             else:
-                TypeError(
+                raise TypeError(
                     f"{self.name}.parallel[{i}] is type {type(mod)}; "
                     "expected type RunwayModuleDefinition or RunwayModuleDefinitionModel"
                 )
         self._data.parallel = sanitized
-
-    @property
-    def class_path(self) -> Optional[Path]:
-        """Path to a class for processing the module."""
-        return Path(self._data.class_path).resolve() if self._data.class_path else None
 
     @property
     def is_parent(self) -> bool:
@@ -88,18 +87,6 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
                 f"{self.name} [{', '.join([c.menu_entry for c in self.child_modules])}]"
             )
         return self.name
-
-    @property
-    def path(self) -> Path:
-        """Path to Runway module."""
-        if isinstance(self._data.path, str):
-            self._data.path = Path(self._data.path).resolve()
-        return self._data.path
-
-    @path.setter
-    def path(self, value: Path) -> None:
-        """Set the value of path."""
-        self._data.path = value
 
     def reverse(self):
         """Reverse the order of child/parallel modules."""
@@ -118,3 +105,13 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
         self._vars[var_name] = Variable(
             name=f"{self.name}.{var_name}", value=var_value, variable_type="runway"
         )
+
+    @classmethod
+    def parse_obj(cls, obj: Any) -> RunwayModuleDefinition:
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        return cls(RunwayModuleDefinitionModel.parse_obj(obj))

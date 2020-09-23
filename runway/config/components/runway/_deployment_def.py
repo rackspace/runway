@@ -1,17 +1,18 @@
 """Runway config deployment definition."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, overload
 
 from ....variables import Variable
 from ...models.runway import (
     RunwayDeploymentDefinitionModel,
     RunwayModuleDefinitionModel,
 )
-from ._base import ConfigComponentDefinition
 from ._module_def import RunwayModuleDefinition
+from .base import ConfigComponentDefinition
 
 if TYPE_CHECKING:
+    from ...models.base import ConfigProperty
     from ...models.runway import (
         RunwayAssumeRoleDefinitionModel,
         RunwayEnvironmentsType,
@@ -85,7 +86,9 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
         """
         if not isinstance(modules, list):
-            TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
+            raise TypeError(
+                f"expected List[RunwayModuleDefinition]; got {type(modules)}"
+            )
         sanitized = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
@@ -93,7 +96,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
             elif isinstance(mod, RunwayModuleDefinitionModel):
                 sanitized.append(mod)
             else:
-                TypeError(
+                raise TypeError(
                     f"{self.name}.modules[{i}] is type {type(mod)}; "
                     "expected type RunwayModuleDefinition or RunwayModuleDefinitionModel"
                 )
@@ -121,13 +124,30 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
             name=f"{self.name}.{var_name}", value=var_value, variable_type="runway"
         )
 
+    @overload
+    @classmethod
+    def parse_obj(  # noqa
+        cls, obj: Union[list, set, tuple]
+    ) -> List[RunwayDeploymentDefinition]:
+        ...  # cov: ignore
+
+    @overload
+    @classmethod
+    def parse_obj(  # noqa
+        cls, obj: Union[Dict[str, Any], ConfigProperty]
+    ) -> RunwayDeploymentDefinition:
+        ...  # cov: ignore
+
     @classmethod
     def parse_obj(
-        cls, obj: Union[Dict[str, Any], List[Any]]
+        cls, obj: Any
     ) -> Union[RunwayDeploymentDefinition, List[RunwayDeploymentDefinition]]:
-        """Parse a python object."""
-        if isinstance(obj, dict):
-            return cls(RunwayDeploymentDefinitionModel.parse_obj(obj))
-        if isinstance(obj, list):
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        if isinstance(obj, (list, set, tuple)):
             return [cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj]
-        raise TypeError(f"{type(obj)}; expected type dict or list")
+        return cls(RunwayDeploymentDefinitionModel.parse_obj(obj))

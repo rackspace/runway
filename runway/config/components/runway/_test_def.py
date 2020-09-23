@@ -13,7 +13,7 @@ from ...models.runway import (
     ValidRunwayTestTypeValues,
     YamlLintRunwayTestDefinitionModel,
 )
-from ._base import ConfigComponentDefinition
+from .base import ConfigComponentDefinition
 
 
 class RunwayTestDefinition(ConfigComponentDefinition):
@@ -66,6 +66,16 @@ class RunwayTestDefinition(ConfigComponentDefinition):
             name=f"{self.name}.{var_name}", value=var_value, variable_type="runway"
         )
 
+    @classmethod
+    def parse_obj(cls, obj: Any) -> RunwayTestDefinition:
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        return cls(RunwayTestDefinitionModel.parse_obj(obj))
+
 
 class CfnLintRunwayTestDefinition(RunwayTestDefinition):
     """Runway cfn-lint test definition."""
@@ -76,6 +86,16 @@ class CfnLintRunwayTestDefinition(RunwayTestDefinition):
     def __init__(self, data: CfnLintRunwayTestDefinitionModel) -> None:
         """Instantiate class."""
         super().__init__(data)
+
+    @classmethod
+    def parse_obj(cls, obj: Any) -> CfnLintRunwayTestDefinition:
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        return cls(CfnLintRunwayTestDefinitionModel.parse_obj(obj))
 
 
 class ScriptRunwayTestDefinition(RunwayTestDefinition):
@@ -88,6 +108,16 @@ class ScriptRunwayTestDefinition(RunwayTestDefinition):
         """Instantiate class."""
         super().__init__(data)
 
+    @classmethod
+    def parse_obj(cls, obj: Any) -> ScriptRunwayTestDefinition:
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        return cls(ScriptRunwayTestDefinitionModel.parse_obj(obj))
+
 
 class YamlLintRunwayTestDefinition(RunwayTestDefinition):
     """Runway yamllint test definition."""
@@ -95,3 +125,13 @@ class YamlLintRunwayTestDefinition(RunwayTestDefinition):
     def __init__(self, data: YamlLintRunwayTestDefinitionModel) -> None:
         """Instantiate class."""
         super().__init__(data)
+
+    @classmethod
+    def parse_obj(cls, obj: Any) -> YamlLintRunwayTestDefinition:
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        return cls(YamlLintRunwayTestDefinitionModel.parse_obj(obj))

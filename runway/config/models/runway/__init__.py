@@ -198,9 +198,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
     name: str
     options: Union[Dict[str, Any], str] = {}
     parameters: Union[Dict[str, Any], str] = {}
-    path: Optional[
-        Union[str, Path]
-    ] = None  # supports variables so won't be Path to start
+    path: Optional[Union[str, Path]] = None
     tags: List[str] = []
     type: Optional[str] = None  # TODO add enum
     # needs to be last

@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import logging
-import sys
 from typing import Any, Dict
 
 import yaml
 
+from ....exceptions import VariablesFileNotFound
 from ....util import MutableMap
 from ...models.runway import RunwayVariablesDefinitionModel
 
@@ -30,10 +30,7 @@ class RunwayVariablesDefinition(MutableMap):
         if self._file_path:
             if self._file_path.is_file():
                 return yaml.safe_load(self._file_path.read_text())
-            LOGGER.error(
-                'provided variables file "%s" could not be found', self._file_path
-            )
-            sys.exit(1)
+            raise VariablesFileNotFound(self._file_path)
 
         for name in self.default_names:
             test_path = self._sys_path / name
@@ -49,8 +46,11 @@ class RunwayVariablesDefinition(MutableMap):
         return {}
 
     @classmethod
-    def parse_obj(cls, obj: Dict[str, Any]) -> RunwayVariablesDefinition:
-        """Parse a python object."""
-        if isinstance(obj, dict):
-            return cls(RunwayVariablesDefinitionModel.parse_obj(obj))
-        raise TypeError(f"{type(obj)}; expected type dict")
+    def parse_obj(cls, obj: Any) -> RunwayVariablesDefinition:
+        """Parse a python object into this class.
+
+        Args:
+            obj: The object to parse.
+
+        """
+        return cls(RunwayVariablesDefinitionModel.parse_obj(obj))
