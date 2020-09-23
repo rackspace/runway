@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.14.0] - 2020-09-23
 ### Changed
 - Static Site Auth@Edge: when domain aliases are specified, the CloudFront domain will no longer be added to the list of callback URLs
   - E.g. if `site.example.com` is provided as the site alias, logins will only work from `site.example.com` and not `d111111abcdef8.cloudfront.net`
@@ -974,7 +976,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.13.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/onicagroup/runway/compare/v1.13.1...v1.14.0
 [1.13.1]: https://github.com/onicagroup/runway/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/onicagroup/runway/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/onicagroup/runway/compare/v1.11.3...v1.12.0
