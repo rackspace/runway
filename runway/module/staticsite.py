@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 import tempfile
-from typing import Any, Dict, List, Union  # pylint: disable=unused-import
+from typing import Any, Dict  # pylint: disable=unused-import
 
 import yaml
 
@@ -274,9 +274,7 @@ class StaticSite(RunwayModule):
                 {
                     "path": "runway.hooks.staticsite.cleanup.warn",
                     "required": False,
-                    "args": {
-                        "stack_relative_name": self.name
-                    },
+                    "args": {"stack_relative_name": self.name},
                 }
             )
 
@@ -366,8 +364,9 @@ class StaticSite(RunwayModule):
             "stacks": {
                 "%s-cleanup"
                 % self.name: {
-                    "template_path": os.path.join(tempfile.gettempdir(),
-                                                  "thisfileisnotused.yaml"),
+                    "template_path": os.path.join(
+                        tempfile.gettempdir(), "thisfileisnotused.yaml"
+                    ),
                 }
             },
         }
