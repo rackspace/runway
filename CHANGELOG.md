@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - E.g. if `site.example.com` is provided as the site alias, logins will only work from `site.example.com` and not `d111111abcdef8.cloudfront.net`
   - This should better match expected behavior, and has the advantage of being deterministic: the Cognito AppClient no longer has to be updated after creating the CloudFront distribution
   - Old behavior can be preserved via the new `staticsite_additional_redirect_domains` option
+- Static Site: Drop state machine to cleanup replicated Lambda functions
+  - Now Runway will log CLI commands that can be run to perform the cleanup once AWS allows them to be deleted
+  - After updating the previous `SITENAME-cleanup` stack will be unused and can be deleted
 
 ### Added
 - Static Site Auth@Edge: `staticsite_additional_redirect_domains` option.

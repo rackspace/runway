@@ -98,8 +98,15 @@ class StaticSite(RunwayModule):
         module_dir = self._create_module_directory()
         self._create_dependencies_yaml(module_dir)
         self._create_staticsite_yaml(module_dir)
-        # Don't destroy with the other stacks
-        if command != "destroy" and (
+
+        # Earlier Runway versions included a CFN stack with a state machine
+        # that attempted to automatically clean up the orphaned Lambda@Edge
+        # functions. This was found to be unreliable and has been removed.
+        # For a period of time (e.g. until the next major release) leaving this
+        # in to automatically delete the stack. Not a major priority to have
+        # Runway delete the old `-cleanup` stack, as the resources in it don't
+        # have any costs when unused.
+        if command == "destroy" and (
             self.parameters.get("staticsite_auth_at_edge")
             or self.parameters.get("staticsite_rewrite_index_index")
         ):
@@ -263,19 +270,13 @@ class StaticSite(RunwayModule):
         if self.parameters.get(
             "staticsite_rewrite_directory_index"
         ) or self.parameters.get("staticsite_auth_at_edge"):
-            replicated_function_vars = self._get_replicated_function_variables()
-            replicated_function_vars.update(
-                {
-                    "state_machine_arn": "${rxref %s-cleanup::"
-                    "ReplicatedFunctionRemoverStateMachineArn}" % (self.name),
-                }
-            )
             pre_destroy.append(
                 {
-                    "path": "runway.hooks.staticsite.cleanup.execute",
-                    "required": True,
-                    "data_key": "cleanup",
-                    "args": replicated_function_vars,
+                    "path": "runway.hooks.staticsite.cleanup.warn",
+                    "required": False,
+                    "args": {
+                        "stack_relative_name": self.name
+                    },
                 }
             )
 
@@ -359,20 +360,14 @@ class StaticSite(RunwayModule):
         )
 
     def _create_cleanup_yaml(self, module_dir):
-        replicated_function_vars = self._get_replicated_function_variables()
-        if self.parameters.get("staticsite_role_boundary_arn", False):
-            replicated_function_vars["RoleBoundaryArn"] = self.parameters.pop(
-                "staticsite_role_boundary_arn"
-            )
-
         content = {
             "namespace": "${namespace}",
             "cfngin_bucket": "",
             "stacks": {
                 "%s-cleanup"
                 % self.name: {
-                    "class_path": "runway.blueprints.staticsite.cleanup.Cleanup",
-                    "variables": replicated_function_vars,
+                    "template_path": os.path.join(tempfile.gettempdir(),
+                                                  "thisfileisnotused.yaml"),
                 }
             },
         }
@@ -382,32 +377,6 @@ class StaticSite(RunwayModule):
         self.logger.debug(
             "created 03-cleanup.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
         )
-
-    def _get_replicated_function_variables(self):
-        replicated_function_vars = {
-            "stack_name": "${namespace}-%s-cleanup" % self.name,
-            "function_arns": [],
-            "DisableCloudFront": self.parameters.get("staticsite_cf_disable", False),
-        }  # type: Dict[str, Union[str, List[str]]]
-
-        if self.parameters.get("staticsite_rewrite_directory_index"):
-            replicated_function_vars["function_arns"].append(
-                "${rxref %s::LambdaCFDirectoryIndexRewriteArn}" % self.name
-            )
-
-        if self.parameters.get("staticsite_auth_at_edge"):
-            for lamb in [
-                "CheckAuth",
-                "HttpHeaders",
-                "ParseAuth",
-                "RefreshAuth",
-                "SignOut",
-            ]:
-                replicated_function_vars["function_arns"].append(
-                    "${rxref %s::Lambda%sArn}" % (self.name, lamb)
-                )
-
-        return replicated_function_vars
 
     def _get_site_stack_variables(self):
         site_stack_variables = {
