@@ -1,28 +1,58 @@
-"""Replicated Function Remover."""
-# pylint: disable=unused-argument
-import json
+"""Replicated Lambda Function cleanup warning."""
 import logging
-from typing import Any, Dict, Optional, Union  # pylint: disable=unused-import
+from typing import Any, Dict, List  # pylint: disable=unused-import
 
 from runway.cfngin.context import Context  # pylint: disable=unused-import
 from runway.cfngin.providers.base import BaseProvider  # pylint: disable=W
 
 LOGGER = logging.getLogger(__name__)
+STACK_STATUSES_TO_IGNORE = [
+    "ROLLBACK_IN_PROGRESS",
+    "ROLLBACK_FAILED",
+    "ROLLBACK_COMPLETE",
+    "DELETE_IN_PROGRESS",
+    "DELETE_FAILED",
+    "DELETE_COMPLETE",
+    "IMPORT_ROLLBACK_IN_PROGRESS",
+    "IMPORT_ROLLBACK_FAILED",
+    "IMPORT_ROLLBACK_COMPLETE",
+]
 
 
-def execute(
-    context,  # type: Context # pylint: disable=unused-argument
-    provider,  # type: BaseProvider
-    **kwargs  # type: Optional[Dict[str, Any]]
+def get_replicated_function_names(
+    outputs,  # type: List[Dict[str, str]]
 ):
-    # type: (...) -> Union[Dict[str, Any], bool]
-    """Execute the cleanup process.
+    # type: (...) -> List[str]
+    """Extract replicated function names from CFN outputs."""
+    function_names = []
+    for i in [
+        "LambdaCheckAuthArn",
+        "LambdaHttpHeadersArn",
+        "LambdaParseAuthArn",
+        "LambdaRefreshAuthArn",
+        "LambdaSignOutArn",
+        "LambdaCFDirectoryIndexRewriteArn",
+    ]:
+        function_arn = next(
+            (
+                output.get("OutputValue")
+                for output in outputs
+                if output.get("OutputKey") == i
+            ),
+            None,
+        )
+        if function_arn:
+            function_names.append(function_arn.split(":")[-1])
+    return function_names
 
-    A StateMachine will be executed that stays active after the main and
-    dependency stacks have been deleted. This will keep attempting to
-    delete the Replicated functions that were created as part of the main
-    stack. Once it has deleted all the Lambdas supplied it will self
-    destruct its own stack.
+
+def warn(
+    context,  # type: Context # pylint: disable=unused-argument
+    provider,  # type: BaseProvider # pylint: disable=unused-argument
+    **kwargs  # type: Dict[str, Any]
+):
+    # type: (...) -> bool
+    """Notify the user of Lambda functions to delete.
 
     Args:
         context (:class:`runway.cfngin.context.Context`): The context
@@ -31,29 +61,48 @@ def execute(
             The provider instance.
 
     Keyword Args:
-        function_arns (List[str]): The arns of all the Replicated functions to
-            delete.
-        state_machine_arn (str): The ARN of the State Machine to execute.
-        stack_name (str): The name of the Cleanup stack to delete.
+        stack_relative_name (str): CFNgin stack name with Functions.
 
     """
+    site_stack_name = (
+        context.namespace + context.namespace_delimiter + kwargs["stack_relative_name"]
+    )
     session = context.get_session()
-    step_functions_client = session.client("stepfunctions")
-
+    cfn_client = session.client("cloudformation")
     try:
-        step_functions_client.start_execution(
-            stateMachineArn=kwargs["state_machine_arn"],
-            input=json.dumps(
-                {
-                    "SelfDestruct": {
-                        "StateMachineArn": kwargs["state_machine_arn"],
-                        "StackName": kwargs["stack_name"],
-                    },
-                    "FunctionArns": kwargs["function_arns"],
-                }
-            ),
+        describe_response = cfn_client.describe_stacks(StackName=site_stack_name)
+        stack = next(
+            x
+            for x in describe_response.get("Stacks", [])
+            if (
+                x.get("StackStatus")
+                and x.get("StackStatus") not in STACK_STATUSES_TO_IGNORE
+            )
         )
-        return True
+        functions = get_replicated_function_names(stack["Outputs"])
+        if functions:
+            runway_cmd = (
+                "runway run-aws -- lambda delete-function "
+                "--function-name $x --region %s" % context.region
+            )
+            LOGGER.warning(
+                "About to delete the Static Site stack that contains "
+                "replicated Lambda functions. These functions cannot "
+                "be deleted until AWS automatically deletes their "
+                "replicas. After some time has passed (a day is "
+                "typically sufficient), they can be manually deleted. "
+                "E.g.:"
+            )
+            LOGGER.warning("On macOS/Linux:")
+            LOGGER.warning(
+                "for x in %s; do %s; done", (" ").join(functions), runway_cmd
+            )
+            LOGGER.warning("On Windows:")
+            LOGGER.warning(
+                'Foreach ($x in "%s") { %s }', ('","').join(functions), runway_cmd
+            )
     except Exception:  # pylint: disable=broad-except
-        LOGGER.exception("could not complete cleanup")
-        return False
+        # There's no harm in continuing on in the event of an error
+        # Orphanized functions have no cost
+        pass
+    return True
