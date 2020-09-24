@@ -14,35 +14,64 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class RunwayVariablesDefinition(MutableMap):
-    """Runway variables definition."""
+    """Runway variables definition.
+
+    The existence of a previously loaded variables file (or lack there of) is
+    tracked in protected class attributes. This is done to prevent duplicate log
+    statements and improve performance by not needing to search for the file
+    each time the class is instantiated.
+
+    """
 
     default_names = ["runway.variables.yml", "runway.variables.yaml"]
 
+    # used to track persistent state on the class
+    __found_file = None  # found variables file to avoid needing to search again
+    __has_notified_missing_file = False  # tracked to only log the message once
+    __skip_load_file = False  # skip loading the file if initial attempts failed
+
     def __init__(self, data: RunwayVariablesDefinitionModel) -> None:
         """Instantiate class."""
+        # pylint: disable=protected-access
         self._file_path = data.file_path
         self._sys_path = data.sys_path
+        if (
+            self.__class__.__found_file
+            and self._file_path != self.__class__.__found_file
+        ):
+            # reset these class attributes if a new file_path is provided
+            self.__class__.__found_file = None
+            self.__class__.__skip_load_file = False
         data = RunwayVariablesDefinitionModel(**{**data.dict(), **self.__load_file()})
         super().__init__(**data.dict(exclude={"file_path", "sys_path"}))
 
     def __load_file(self) -> Dict[str, Any]:
         """Load a variables file."""
+        # pylint: disable=protected-access
+        if self.__class__.__skip_load_file:
+            return {}
+        if self.__class__.__found_file:
+            return self.__class__.__found_file
         if self._file_path:
             if self._file_path.is_file():
+                self.__class__.__found_file = self._file_path
                 return yaml.safe_load(self._file_path.read_text())
-            raise VariablesFileNotFound(self._file_path)
+            raise VariablesFileNotFound(self._file_path.absolute())
 
         for name in self.default_names:
             test_path = self._sys_path / name
             LOGGER.debug("looking for variables file: %s", test_path)
             if test_path.is_file():
                 LOGGER.verbose("found variables file: %s", test_path)
+                self.__class__.__found_file = test_path
                 return yaml.safe_load(test_path.read_text())
 
-        LOGGER.info(
-            "could not find %s in the current directory; continuing without a variables file",
-            " or ".join(self.default_names),
-        )
+        if not self.__class__.__has_notified_missing_file:
+            LOGGER.info(
+                "could not find %s in the current directory; continuing without a variables file",
+                " or ".join(self.default_names),
+            )
+            self.__class__.__has_notified_missing_file = True
         return {}
 
     @classmethod
