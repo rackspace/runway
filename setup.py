@@ -46,7 +46,6 @@ INSTALL_REQUIRES = [
     "urllib3>=1.25.4,<1.27",
     # inherited from stacker 1.7.0 requirements
     "jinja2>=2.7,<3.0",
-    "schematics>=2.0.1,<2.1.0",
     "formic2",
 ]
 

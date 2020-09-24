@@ -462,13 +462,6 @@
             ],
             "version": "==0.3.3"
         },
-        "schematics": {
-            "hashes": [
-                "sha256:d9798a9ba0e1e1f2bde4a15780baa95ed66f748fa52d22bb89893d66ad0fac55",
-                "sha256:eaecac4ae5a86faa111f16befa26510bc66dc093c52df200f3aad54459e39640"
-            ],
-            "version": "==2.0.1"
-        },
         "send2trash": {
             "hashes": [
                 "sha256:60001cc07d707fe247c94f74ca6ac0d3255aabcb930529690897ca2a39db28b2",
