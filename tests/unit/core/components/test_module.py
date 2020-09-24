@@ -69,7 +69,7 @@ class TestModule:
         mock_path.assert_called_once_with(
             mod.definition,
             str(runway_context.env.root_dir),
-            str(runway_context.env.root_dir / ".runway_cache"),
+            str(runway_context.env.root_dir / ".runway/cache"),
         )
 
     def test_payload_with_deployment(self, cd_tmp_path, fx_deployments, runway_context):

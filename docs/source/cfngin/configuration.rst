@@ -333,7 +333,7 @@ Use the ``paths`` option when subdirectories of the repo/archive/directory
 should be added to CFNgins's ``sys.path``.
 
 Cloned repos/archives will be cached between builds; the cache location defaults
-to ``~/.runway_cache`` but can be manually specified via the ``cfngin_cache_dir``
+to ``./.runway/cache`` but can be manually specified via the ``cfngin_cache_dir``
 top-level keyword.
 
 

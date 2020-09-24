@@ -101,7 +101,7 @@ class Module:
         return ModulePath(
             self.definition,
             str(self.ctx.env.root_dir),
-            str(self.ctx.env.root_dir / ".runway_cache"),
+            str(self.ctx.env.root_dir / ".runway/cache"),
         )
 
     @cached_property
