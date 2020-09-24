@@ -6,27 +6,88 @@ import pytest
 import yaml
 from _pytest.monkeypatch import MonkeyPatch
 from mock import MagicMock, patch
+from pydantic import BaseModel
 
 from runway.cfngin.exceptions import MissingEnvironment
-from runway.config import CfnginConfig
+from runway.config import BaseConfig, CfnginConfig, RunwayConfig
 from runway.config.models.cfngin import (
     CfnginConfigDefinitionModel,
     CfnginPackageSourcesDefinitionModel,
 )
+from runway.exceptions import ConfigNotFound
 
 MODULE = "runway.config"
 
 
+class ExampleModel(BaseModel):
+    """Basic model used for testing."""
+
+    name: str = "test"
+
+
+class TestBaseConfig:  # pylint: disable=too-few-public-methods
+    """Test runway.config.BaseConfig."""
+
+    def test_dump(self, monkeypatch: MonkeyPatch) -> None:
+        """Test dump."""
+        mock_dict = MagicMock(return_value={"name": "test"})
+        monkeypatch.setattr(ExampleModel, "dict", mock_dict)
+        obj = BaseConfig(ExampleModel())
+        assert obj.dump() == "name: test\n"
+        mock_dict.assert_called_once_with(
+            by_alias=False,
+            exclude=None,
+            exclude_defaults=False,
+            exclude_none=False,
+            exclude_unset=True,
+            include=None,
+        )
+
+    def test_parse_file_file_path(
+        self, monkeypatch: MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Test parse_file with file_path."""
+        mock_parse_obj = MagicMock(return_value=None)
+        monkeypatch.setattr(BaseConfig, "parse_obj", mock_parse_obj)
+        file_path = tmp_path / "test.yml"
+        file_path.write_text("name: test\n")
+        assert not BaseConfig.parse_file(file_path=file_path)
+        mock_parse_obj.assert_called_once_with({"name": "test"}, path=file_path)
+
+    def test_parse_file_file_path_missing(
+        self, monkeypatch: MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Test parse_file with file_path missing."""
+        mock_parse_obj = MagicMock(return_value=None)
+        monkeypatch.setattr(BaseConfig, "parse_obj", mock_parse_obj)
+        file_path = tmp_path / "test.yml"
+        with pytest.raises(ConfigNotFound) as excinfo:
+            BaseConfig.parse_file(file_path=file_path)
+        assert excinfo.value.path == file_path
+
+    def test_parse_file_find_config_file(
+        self, monkeypatch: MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Test parse_file with path."""
+        file_path = tmp_path / "test.yml"
+        file_path.write_text("name: test\n")
+        mock_find_config_file = MagicMock(return_value=file_path)
+        mock_parse_obj = MagicMock(return_value=None)
+        monkeypatch.setattr(BaseConfig, "find_config_file", mock_find_config_file)
+        monkeypatch.setattr(BaseConfig, "parse_obj", mock_parse_obj)
+        assert not BaseConfig.parse_file(path=tmp_path)
+        mock_find_config_file.assert_called_once_with(tmp_path)
+        mock_parse_obj.assert_called_once_with({"name": "test"}, path=file_path)
+
+    def test_parse_file_value_error(self):
+        """Test parse_file raise ValueError."""
+        with pytest.raises(ValueError) as excinfo:
+            BaseConfig.parse_file()
+        assert str(excinfo.value) == "must provide path or file_path"
+
+
 class TestCfnginConfig:
     """Test runway.config.CfnginConfig."""
-
-    def test_dump(self) -> None:
-        """Test dump."""
-        config = CfnginConfigDefinitionModel(namespace="test")
-        obj = CfnginConfig(config)
-        assert obj.dump() == yaml.dump(
-            config.dict(exclude_unset=True), default_flow_style=False
-        )
 
     def test_find_config_file(self, tmp_path: Path) -> None:
         """Test find_config_file."""
@@ -81,13 +142,54 @@ class TestCfnginConfig:
         config.load()
         mock_register_lookup_handler.assert_called_once_with("custom-lookup", "path")
 
-    def test_parse_file(self, tmp_path: Path) -> None:
-        """Test parse_file."""
+    def test_parse_file_file_path(self, tmp_path: Path) -> None:
+        """Test parse_file with file_path."""
         config_yml = tmp_path / "config.yml"
         data = {"namespace": "test"}
         config_yml.write_text(yaml.dump(data))
         config = CfnginConfig.parse_file(file_path=config_yml)
         assert config.namespace == data["namespace"]
+
+    def test_parse_file_file_path_missing(self, tmp_path: Path) -> None:
+        """Test parse_file with file_path missing."""
+        config_yml = tmp_path / "config.yml"
+        with pytest.raises(ConfigNotFound) as excinfo:
+            CfnginConfig.parse_file(file_path=config_yml)
+        assert excinfo.value.path == config_yml
+
+    def test_parse_file_find_config_file(
+        self, monkeypatch: MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Test parse_file with path."""
+        file_path = tmp_path / "test.yml"
+        file_path.write_text("name: test\n")
+        mock_find_config_file = MagicMock(return_value=[file_path])
+        mock_parse_raw = MagicMock(return_value=None)
+        monkeypatch.setattr(CfnginConfig, "find_config_file", mock_find_config_file)
+        monkeypatch.setattr(CfnginConfig, "parse_raw", mock_parse_raw)
+        assert not CfnginConfig.parse_file(path=tmp_path)
+        mock_find_config_file.assert_called_once_with(tmp_path)
+        mock_parse_raw.assert_called_once_with(
+            file_path.read_text(), path=file_path, parameters={}
+        )
+
+    def test_parse_file_find_config_file_value_error(
+        self, monkeypatch: MonkeyPatch, tmp_path: Path
+    ) -> None:
+        """Test parse_file with path raise ValueError."""
+        mock_find_config_file = MagicMock(
+            return_value=[tmp_path / "01.yml", tmp_path / "02.yml"]
+        )
+        monkeypatch.setattr(CfnginConfig, "find_config_file", mock_find_config_file)
+        with pytest.raises(ValueError) as excinfo:
+            CfnginConfig.parse_file(path=tmp_path)
+        assert str(excinfo.value).startswith("more than one")
+
+    def test_parse_file_value_error(self):
+        """Test parse_file raise ValueError."""
+        with pytest.raises(ValueError) as excinfo:
+            CfnginConfig.parse_file()
+        assert str(excinfo.value) == "must provide path or file_path"
 
     def test_parse_obj(self) -> None:
         """Test parse_obj.
@@ -205,3 +307,57 @@ class TestCfnginConfig:
         """Test render_raw_data ignores lookups."""
         lookup_raw_data = "namespace: ${env something}"
         assert CfnginConfig.render_raw_data(lookup_raw_data) == lookup_raw_data
+
+
+class TestRunwayConfig:
+    """Test runway.config.RunwayConfig."""
+
+    def test_find_config_file_yaml(self, tmp_path: Path):
+        """Test file_config_file runway.yaml."""
+        runway_yaml = tmp_path / "runway.yaml"
+        runway_yaml.touch()
+        assert RunwayConfig.find_config_file(tmp_path) == runway_yaml
+
+    def test_find_config_file_yml(self, tmp_path: Path):
+        """Test file_config_file runway.yml."""
+        runway_yml = tmp_path / "runway.yml"
+        runway_yml.touch()
+        assert RunwayConfig.find_config_file(tmp_path) == runway_yml
+
+    def test_find_config_file_ignore_variables(self, tmp_path: Path) -> None:
+        """Test file_config_file ignore variables file."""
+        runway_yaml = tmp_path / "runway.yaml"
+        runway_yaml.touch()
+        (tmp_path / "runway.variables.yaml").touch()
+        (tmp_path / "runway.variables.yml").touch()
+        assert RunwayConfig.find_config_file(tmp_path) == runway_yaml
+
+    def test_find_config_file_not_found(self, tmp_path: Path) -> None:
+        """Test file_config_file raise ConfigNotFound."""
+        with pytest.raises(ConfigNotFound) as excinfo:
+            RunwayConfig.find_config_file(tmp_path)
+        assert excinfo.value.path == tmp_path
+
+    def test_find_config_file_value_error(self, tmp_path: Path) -> None:
+        """Test file_config_file raise ValueError."""
+        (tmp_path / "runway.yaml").touch()
+        (tmp_path / "runway.yml").touch()
+        with pytest.raises(ValueError) as excinfo:
+            RunwayConfig.find_config_file(tmp_path)
+        assert str(excinfo.value).startswith("more than one")
+
+    def test_parse_obj(self, tmp_path: Path) -> None:
+        """Test parse_obj."""
+        data = {
+            "deployments": [
+                {
+                    "name": "test-deployment",
+                    "modules": ["sampleapp.cfn"],
+                    "regions": ["us-east-1"],
+                }
+            ]
+        }
+        obj = RunwayConfig.parse_obj(data)
+        assert isinstance(obj, RunwayConfig)
+        assert obj.deployments[0].name == "test-deployment"
+        assert obj.deployments[0].modules[0].name == "sampleapp.cfn"

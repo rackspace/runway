@@ -102,7 +102,7 @@ class BaseConfig:
             path: The path to search for a config file.
 
         """
-        raise NotImplementedError
+        raise NotImplementedError  # cov: ignore
 
     @classmethod
     def parse_file(
@@ -120,11 +120,12 @@ class BaseConfig:
 
         Raises:
             ConfigNotFound: Provided config file was not found.
+            ValueError: path and file_path were both excluded.
 
         """
         if file_path:
             if not file_path.is_file():
-                raise ConfigNotFound(path=path)
+                raise ConfigNotFound(path=file_path)
             return cls.parse_obj(
                 yaml.safe_load(file_path.read_text()), path=file_path, **kwargs
             )
@@ -141,7 +142,7 @@ class BaseConfig:
             path: Path to the file the object was parsed from.
 
         """
-        raise NotImplementedError
+        raise NotImplementedError  # cov: ignore
 
 
 class CfnginConfig(BaseConfig):
@@ -297,7 +298,7 @@ class CfnginConfig(BaseConfig):
                 or f.name in exclude
                 or f.name.startswith(".")
             ):
-                continue
+                continue  # cov: ignore
             result.append(f)
         result.sort()
         return result
@@ -324,7 +325,7 @@ class CfnginConfig(BaseConfig):
         """
         if file_path:
             if not file_path.is_file():
-                raise ConfigNotFound(path=path)
+                raise ConfigNotFound(path=file_path)
             return cls.parse_raw(
                 file_path.read_text(),
                 path=file_path,
@@ -332,10 +333,11 @@ class CfnginConfig(BaseConfig):
                 **kwargs
             )
         if path:
+            found = cls.find_config_file(path)
+            if len(found) > 1:
+                raise ValueError(f"more than one config files found: {found}")
             return cls.parse_file(
-                file_path=cls.find_config_file(path),
-                parameters=parameters or {},
-                **kwargs
+                file_path=found[0], parameters=parameters or {}, **kwargs
             )
         raise ValueError("must provide path or file_path")
 
@@ -475,7 +477,6 @@ class RunwayConfig(BaseConfig):
 
         """
         super().__init__(data, path=path)
-
         self.deployments = [
             RunwayDeploymentDefinition(d) for d in self._data.deployments
         ]
@@ -508,7 +509,7 @@ class RunwayConfig(BaseConfig):
         return found[0]
 
     @classmethod
-    def parse_obj(cls, obj: Any, *, path: Path) -> RunwayConfig:
+    def parse_obj(cls, obj: Any, *, path: Optional[Path] = None) -> RunwayConfig:
         """Parse a python object into a config object.
 
         Args:
