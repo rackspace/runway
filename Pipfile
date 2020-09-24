@@ -5,8 +5,6 @@ name = "pypi"
 
 [packages]
 runway = {editable = true, path = "."}
-# importlib-resources doesn't get pulled into the lock correctly when used with >= 3.7
-importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}  # req of cfn-lint
 
 [dev-packages]
 # Format
