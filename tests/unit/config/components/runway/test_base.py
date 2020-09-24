@@ -97,6 +97,13 @@ class TestConfigComponentDefinition:
         assert obj.data == data.dict()
         assert obj._vars == {}
 
+    def test_get(self) -> None:
+        """Test get."""
+        obj = SampleConfigComponentDefinition.parse_obj({"name": "test"})
+        assert obj.get("name") == "test"
+        assert not obj.get("missing")
+        assert obj.get("missing", "default") == "default"
+
     def test_getattr(self, runway_context: Context) -> None:
         """Test __getattr__."""
         data = SampleConfigProperty(
