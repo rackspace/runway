@@ -26,7 +26,9 @@ from ._builtin_tests import (
 LOGGER = logging.getLogger(__name__)
 
 RunwayEnvironmentsType = Dict[str, Union[List[str], str]]
-RunwayEnvVarsType = Union[Dict[str, Union[Dict[str, str], str]], str]
+RunwayEnvironmentsUnresolvedType = Union[Dict[str, Union[List[str], str]], str]
+RunwayEnvVarsType = Dict[str, Union[List[str], str]]
+RunwayEnvVarsUnresolvedType = Union[RunwayEnvVarsType, str]
 
 __all__ = [
     "RUNWAY_LOOKUP_STRING_ERROR",
@@ -38,7 +40,9 @@ __all__ = [
     "RunwayDeploymentRegionDefinitionModel",
     "RunwayDeploymentDefinitionModel",
     "RunwayEnvironmentsType",
+    "RunwayEnvironmentsUnresolvedType",
     "RunwayEnvVarsType",
+    "RunwayEnvVarsUnresolvedType",
     "RunwayFutureDefinitionModel",
     "RunwayModuleDefinitionModel",
     "RunwayTestDefinitionModel",
@@ -115,8 +119,8 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
     account_alias: Union[Dict[str, str], str] = {}
     account_id: Union[Dict[str, str], str] = {}
     assume_role: Union[str, RunwayAssumeRoleDefinitionModel] = {}
-    env_vars: Union[RunwayEnvVarsType, str] = {}
-    environments: Union[RunwayEnvironmentsType, str] = {}
+    env_vars: RunwayEnvVarsUnresolvedType = {}
+    environments: RunwayEnvironmentsUnresolvedType = {}
     modules: List[RunwayModuleDefinitionModel]
     module_options: Union[Dict[str, Any], str] = {}
     name: str = "unnamed_deployment"
@@ -193,8 +197,8 @@ class RunwayModuleDefinitionModel(ConfigProperty):
     """Model for a Runway module definition."""
 
     class_path: Optional[str] = None
-    env_vars: Union[RunwayEnvVarsType, str] = {}
-    environments: Union[RunwayEnvironmentsType, str] = {}
+    env_vars: RunwayEnvVarsUnresolvedType = {}
+    environments: RunwayEnvironmentsUnresolvedType = {}
     name: str
     options: Union[Dict[str, Any], str] = {}
     parameters: Union[Dict[str, Any], str] = {}

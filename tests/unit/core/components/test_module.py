@@ -97,10 +97,7 @@ class TestModule:
         mod_dir = cd_tmp_path / "sampleapp-01.cfn"
         mod_dir.mkdir()
         opts = {
-            "env_vars": {
-                "dev": {"map-var": "incorrect"},
-                "test": {"map-var": "map-val"},
-            },
+            "env_vars": {"local-var": "local-val"},
             "environments": {"test": ["us-east-1"]},
             "options": {"local-opt": "local-opt-val"},
             "parameters": {"local-param": "local-param-val"},
@@ -108,12 +105,12 @@ class TestModule:
         (mod_dir / "runway.module.yml").write_text(yaml.safe_dump(opts))
         mod = Module(
             context=runway_context,
-            definition=fx_deployments.load("simple_env_vars_map").modules[0],
+            definition=fx_deployments.load("simple_env_vars").modules[0],
         )
         result = mod.payload
 
-        assert mod.ctx.env.vars["deployment_var"] == "val"
-        assert mod.ctx.env.vars["map-var"] == opts["env_vars"]["test"]["map-var"]
+        assert mod.ctx.env.vars["module_var"] == "val"
+        assert mod.ctx.env.vars["local-var"] == opts["env_vars"]["local-var"]
         assert result["environments"] == opts["environments"]
         assert result["environment"] == opts["environments"]["test"]
         assert result["options"] == opts["options"]
@@ -122,10 +119,6 @@ class TestModule:
     @pytest.mark.parametrize(
         "env, strict, validate",
         [
-            ({"test": {"key": "val"}}, False, None),
-            ({"test": {"key": "val"}}, True, False),
-            ({"dev": {"key": "val"}}, False, None),
-            ({"dev": {"key": "val"}}, True, False),
             ({}, False, None),
             ({}, True, False),
             ({"test": "something"}, False, None),
@@ -161,19 +154,10 @@ class TestModule:
         )
 
         result = mod.should_skip
-        # assert not result
-        if isinstance(env.get("test", {}), dict) and not strict:
-            assert result is False
-            mock_validate.assert_not_called()
-            assert mod.payload["parameters"] == env.get("test", {})
-            assert mod.payload["environment"] == (True if env.get("test") else {})
-        else:
-            assert result is (
-                bool(not validate) if isinstance(validate, bool) else False
-            )
-            mock_validate.assert_called_once_with(
-                mod.ctx, env, logger=mod.logger, strict=strict
-            )
+        assert result is (bool(not validate) if isinstance(validate, bool) else False)
+        mock_validate.assert_called_once_with(
+            mod.ctx, env, logger=mod.logger, strict=strict
+        )
 
     @patch(MODULE + ".ModulePath")
     @patch(MODULE + ".RunwayModuleType")

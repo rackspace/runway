@@ -11,10 +11,9 @@ from ...config.components.runway import RunwayVariablesDefinition
 from ...config.models.runway import (
     RunwayAssumeRoleDefinitionModel,
     RunwayFutureDefinitionModel,
-    RunwayVariablesDefinitionModel,
 )
 from ...exceptions import UnresolvedVariable
-from ...util import cached_property, merge_dicts, merge_nested_environment_dicts
+from ...util import cached_property, flatten_path_lists, merge_dicts
 from ..providers import aws
 from ._module import Module
 
@@ -46,9 +45,7 @@ class Deployment:
 
         """
         self._future = future or RunwayFutureDefinitionModel()
-        self._variables = variables or RunwayVariablesDefinition(
-            RunwayVariablesDefinitionModel()
-        )
+        self._variables = variables or RunwayVariablesDefinition.parse_obj({})
         self.definition = definition
         self.ctx = context
         self.name = self.definition.name
@@ -56,12 +53,11 @@ class Deployment:
         self.__merge_env_vars()
 
     @property
-    def account_alias_config(self):
-        # type: () -> Optional[str]
+    def account_alias_config(self) -> Optional[str]:
         """Parse the definition to get the correct AWS account alias configuration.
 
         Returns:
-            Optional[str]: Expected AWS account alias for the current context.
+            Expected AWS account alias for the current context.
 
         """
         if isinstance(self.definition.account_alias, str):
@@ -71,12 +67,11 @@ class Deployment:
         return None
 
     @property
-    def account_id_config(self):
-        # type: () -> Optional[str]
+    def account_id_config(self) -> Optional[str]:
         """Parse the definition to get the correct AWS account ID configuration.
 
         Returns:
-            Optional[str]: Expected AWS account ID for the current context.
+            Expected AWS account ID for the current context.
 
         """
         if isinstance(self.definition.account_id, (int, str)):
@@ -114,8 +109,7 @@ class Deployment:
         }
 
     @property
-    def env_vars_config(self):
-        # type: () -> Dict[str, Any]
+    def env_vars_config(self) -> Dict[str, str]:
         """Parse the definition to get the correct env_vars configuration."""
         try:
             if not self.definition.env_vars:
@@ -124,15 +118,10 @@ class Deployment:
             self.definition._env_vars.resolve(  # pylint: disable=protected-access
                 self.ctx, variables=self._variables
             )
-        return merge_nested_environment_dicts(
-            self.definition.env_vars,
-            env_name=self.ctx.env.name,
-            env_root=str(self.ctx.env.root_dir),
-        )
+        return flatten_path_lists(self.definition.env_vars, str(self.ctx.env.root_dir))
 
     @cached_property
-    def regions(self):
-        # type: () -> List[str]
+    def regions(self) -> List[str]:
         """List of regions this deployment is associated with."""
         return self.definition.parallel_regions or self.definition.regions
 
@@ -254,8 +243,7 @@ class Deployment:
                 self.account_alias_config,
             )
 
-    def __merge_env_vars(self):
-        # type: () -> None
+    def __merge_env_vars(self) -> None:
         """Merge defined env_vars into context.env_vars."""
         if self.env_vars_config:
             self.logger.verbose(
@@ -266,12 +254,11 @@ class Deployment:
             )
             self.ctx.env.vars = merge_dicts(self.ctx.env.vars, self.env_vars_config)
 
-    def __async(self, action):
-        # type: (str) -> None
+    def __async(self, action: str) -> None:
         """Execute asynchronously.
 
         Args:
-            action (str): Name of action to run.
+            action: Name of action to run.
 
         """
         self.logger.info(
@@ -287,12 +274,11 @@ class Deployment:
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
-    def __sync(self, action):
-        # type: (str) -> None
+    def __sync(self, action: str) -> None:
         """Execute synchronously.
 
         Args:
-            action (str): Name of action to run.
+            action: Name of action to run.
 
         """
         self.logger.info("processing regions sequentially...")
@@ -341,14 +327,11 @@ class Deployment:
             )[action]()
             deployment.logger.success("processing deployment (complete)")
 
-    def __getitem__(self, key):
+    def __getitem__(self, name: str) -> Any:
         """Make the object subscriptable.
 
         Args:
-            key (str): Attribute to get.
-
-        Returns:
-            Any
+            name: Attribute to get.
 
         """
-        return getattr(self, key)
+        return getattr(self, name)

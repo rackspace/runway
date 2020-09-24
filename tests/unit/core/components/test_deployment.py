@@ -37,7 +37,7 @@ class TestDeployment:
 
     def test_init_args(self, fx_deployments, runway_context):
         """Test init with args."""
-        definition = fx_deployments.load("simple_env_vars_map")
+        definition = fx_deployments.load("simple_env_vars")
         future = RunwayFutureDefinitionModel(strict_environments=True)
         variables = RunwayVariablesDefinition.parse_obj({"some_key": "val"})
 
@@ -122,10 +122,6 @@ class TestDeployment:
     ):
         """Test env_vars_config unresolved."""
         expected = {"key": "val"}
-
-        monkeypatch.setattr(
-            MODULE + ".merge_nested_environment_dicts", MagicMock(return_value=expected)
-        )
         monkeypatch.setattr(
             Deployment, "_Deployment__merge_env_vars", MagicMock(return_value=None)
         )
