@@ -677,7 +677,7 @@ Example Hook Class
             """Run during the **post_deploy** stage."""
             if self.args.is_failure:
                 return None
-            return {'result': f"You are not a failure {self.args.name}."
+            return {'result': f"You are not a failure {self.args.name}."}
 
         def post_destroy(self) -> None:
             """Run during the **post_destroy** stage."""
