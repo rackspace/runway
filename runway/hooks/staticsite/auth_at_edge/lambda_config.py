@@ -68,9 +68,7 @@ def write(
     }
 
     # Shared file that contains the method called for configuration data
-    path = os.path.join(os.path.dirname(__file__),
-                        "templates",
-                        "shared.py")
+    path = os.path.join(os.path.dirname(__file__), "templates", "shared.py")
     context_dict = {}
 
     with open(path) as file_:
@@ -97,10 +95,7 @@ def write(
             # Copy the template code for the specific Lambda function
             # to the temporary folder
             copy_tree(
-                os.path.join(os.path.dirname(__file__),
-                             "templates",
-                             handler),
-                dirpath,
+                os.path.join(os.path.dirname(__file__), "templates", handler), dirpath,
             )
 
             # Save our dynamic configuration shared file to the
