@@ -25,7 +25,7 @@ from ._builtin_tests import (
 
 LOGGER = logging.getLogger(__name__)
 
-RunwayEnvironmentsType = Dict[str, Union[List[str]]]
+RunwayEnvironmentsType = Dict[str, Union[List[str], str]]
 RunwayEnvVarsType = Dict[str, Union[Dict[str, str], str]]
 
 __all__ = [
