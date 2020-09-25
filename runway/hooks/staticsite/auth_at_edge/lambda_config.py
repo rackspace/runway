@@ -112,7 +112,14 @@ def write(
                 context,
                 provider,
                 bucket=kwargs["bucket"],
-                functions={handler: {"path": dirpath}},
+                functions={
+                    handler: {
+                        "path": dirpath,
+                        "python_dontwritebytecode": True,
+                        "python_exclude_bin_dir": True,
+                        "python_exclude_setuptools_dirs": True,
+                    }
+                },
             )
 
             # Add the lambda code reference to our context_dict
