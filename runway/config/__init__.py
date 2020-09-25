@@ -352,22 +352,23 @@ class CfnginConfig(BaseConfig):
             path: The path to the config file that was parsed into the object.
 
         """
-        for tlk in [
-            "post_build",
-            "post_destroy",
-            "pre_build",
-            "pre_destroy",
-            "stacks",
-        ]:
-            tlv = obj.get(tlk)
-            if isinstance(tlv, dict):
-                tmp_list = []
-                for key, value in tlv.items():
-                    tmp_dict = copy.deepcopy(value)
-                    if tlk == "stacks":
-                        tmp_dict["name"] = key
-                    tmp_list.append(tmp_dict)
-                obj[tlk] = tmp_list
+        if obj:
+            for tlk in [
+                "post_build",
+                "post_destroy",
+                "pre_build",
+                "pre_destroy",
+                "stacks",
+            ]:
+                tlv = obj.get(tlk)
+                if isinstance(tlv, dict):
+                    tmp_list = []
+                    for key, value in tlv.items():
+                        tmp_dict = copy.deepcopy(value)
+                        if tlk == "stacks":
+                            tmp_dict["name"] = key
+                        tmp_list.append(tmp_dict)
+                    obj[tlk] = tmp_list
         return cls(CfnginConfigDefinitionModel.parse_obj(obj), path=path)
 
     @classmethod
@@ -409,7 +410,7 @@ class CfnginConfig(BaseConfig):
             parameters: Values to use when resolving a raw config.
 
         """
-        config = yaml.safe_load(raw_data)
+        config = yaml.safe_load(raw_data) or {}
         processor = SourceProcessor(
             sources=CfnginPackageSourcesDefinitionModel.parse_obj(
                 config.get("package_sources", {})
