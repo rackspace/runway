@@ -31,18 +31,24 @@ class CloudFormation(RunwayModule):
         cfngin = CFNgin(
             self.context, parameters=self.options["parameters"], sys_path=self.path
         )
-        cfngin.deploy(force=bool(self.options["parameters"]))
+        cfngin.deploy(
+            force=bool(self.options["parameters"] or self.options["environment"])
+        )
 
     def destroy(self):
         """Run stacker destroy."""
         cfngin = CFNgin(
             self.context, parameters=self.options["parameters"], sys_path=self.path
         )
-        cfngin.destroy(force=bool(self.options["parameters"]))
+        cfngin.destroy(
+            force=bool(self.options["parameters"] or self.options["environment"])
+        )
 
     def plan(self):
         """Run stacker diff."""
         cfngin = CFNgin(
             self.context, parameters=self.options["parameters"], sys_path=self.path
         )
-        cfngin.plan(force=bool(self.options["parameters"]))
+        cfngin.plan(
+            force=bool(self.options["parameters"] or self.options["environment"])
+        )

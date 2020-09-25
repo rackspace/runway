@@ -25,8 +25,8 @@ from ._builtin_tests import (
 
 LOGGER = logging.getLogger(__name__)
 
-RunwayEnvironmentsType = Dict[str, Union[List[str], str]]
-RunwayEnvironmentsUnresolvedType = Union[Dict[str, Union[List[str], str]], str]
+RunwayEnvironmentsType = Dict[str, Union[bool, List[str], str]]
+RunwayEnvironmentsUnresolvedType = Union[Dict[str, Union[bool, List[str], str]], str]
 RunwayEnvVarsType = Dict[str, Union[List[str], str]]
 RunwayEnvVarsUnresolvedType = Union[RunwayEnvVarsType, str]
 
