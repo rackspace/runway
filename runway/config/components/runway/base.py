@@ -133,8 +133,8 @@ class ConfigComponentDefinition:
         """
         if name in self._vars and not self._vars[name].resolved:
             raise UnresolvedVariable(self._vars[name])
-        if name in self._data:
-            return self._data.__getattribute__(name)
+        if name in super().__getattribute__("_data"):
+            return super().__getattribute__("_data").__getattribute__(name)
         raise AttributeError(
             f"{self.__class__.__name__} object has not attribute {name}"
         )
