@@ -3,6 +3,7 @@ import hashlib
 import json
 import logging
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -455,12 +456,17 @@ def dockerized_pip(
 
     LOGGER.info('using docker image "%s" to build deployment package...', docker_image)
 
+    docker_run_args = {}
+    if _kwargs.get("python_dontwritebytecode"):
+        docker_run_args["environment"] = "1"
+
     container = client.containers.run(
         image=docker_image,
         command=["/bin/sh", "-c", pip_cmd],
         auto_remove=True,
         detach=True,
         mounts=[work_dir_mount],
+        **docker_run_args
     )
 
     # 'stream' creates a blocking generator that allows for real-time logs.
@@ -582,6 +588,10 @@ def _zip_package(
                 "--no-color",
             ]
 
+            subprocess_args = {}
+            if kwargs.get("python_dontwritebytecode"):
+                subprocess_args["env"] = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+
             # Pyinstaller build or explicit python path
             if getattr(sys, "frozen", False) and not python_path:
                 script_contents = os.linesep.join(
@@ -612,12 +622,23 @@ def _zip_package(
             )
 
             try:
-                subprocess.check_call(cmd)
+                subprocess.check_call(cmd, **subprocess_args)
             except subprocess.CalledProcessError:
                 raise PipError
             finally:
                 if tmp_script.is_file():
                     tmp_script.unlink()
+
+        if kwargs.get("python_exclude_bin_dir") and os.path.isdir(
+            os.path.join(tmpdir, "bin")
+        ):
+            LOGGER.debug("Removing python /bin directory from Lambda files")
+            shutil.rmtree(os.path.join(tmpdir, "bin"))
+        if kwargs.get("python_exclude_setuptools_dirs"):
+            for i in os.listdir(tmpdir):
+                if i.endswith(".egg-info") or i.endswith(".dist-info"):
+                    LOGGER.debug("Removing directory %s from Lambda files", i)
+                    shutil.rmtree(os.path.join(tmpdir, i))
 
         req_files = _find_files(tmpdir, includes="**", follow_symlinks=False)
         return _zip_files(req_files, tmpdir)
