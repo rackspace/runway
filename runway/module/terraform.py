@@ -224,7 +224,7 @@ class Terraform(RunwayModule):
         """
         if not self.tfenv.backend["type"]:
             self.logger.info(
-                "unable to determine backend for module; no special handling"
+                "unable to determine backend for module; no special handling "
                 "will be applied"
             )
             return

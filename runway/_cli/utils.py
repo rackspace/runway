@@ -66,6 +66,7 @@ class CliContext(MutableMapping):
         """Runway config."""
         config = RunwayConfig.parse_file(file_path=self.runway_config_path)
         self.env.ignore_git_branch = config.ignore_git_branch
+        # self.env.root_dir = self.runway_config_path.parent
         return config
 
     @cached_property
@@ -77,7 +78,10 @@ class CliContext(MutableMapping):
 
         """
         try:
-            return RunwayConfig.find_config_file(self.root_dir)
+            path = RunwayConfig.find_config_file(self.root_dir)
+            self.root_dir = path.parent
+            self.env.root_dir = self.root_dir
+            return path
         except ConfigNotFound as err:
             LOGGER.error(err.message)
         except ValueError as err:
