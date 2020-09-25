@@ -7,15 +7,10 @@ deployments:
       options:
         promotezip:
           bucketname: runway-serverless-integration-test-multisrc-singlezip
-    environments:
-      dev:
-        namespace: dev
-        region: us-east-1
-      test:
-        namespace: test
-        region: us-east-1
+    parameters:
+      namespace: ${env DEPLOY_ENVIRONMENT}
+      region: us-east-1
     regions:
       - us-east-1
     assume_role:
-      dev: &altaccountrole arn:aws:iam::395611358874:role/runway-integration-test-role-common
-      test: *altaccountrole
+      arn: arn:aws:iam::395611358874:role/runway-integration-test-role-common
