@@ -60,6 +60,7 @@
         "jsonpatch",
         "jsonpickle",
         "jsonpointer",
+        "kube",
         "kustomization",
         "kwarg",
         "lambci",

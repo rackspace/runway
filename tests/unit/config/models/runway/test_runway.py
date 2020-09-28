@@ -113,6 +113,12 @@ class TestRunwayConfigDefinitionModel:
         assert RunwayConfigDefinitionModel(  # handle exact version
             runway_version="1.11.0"
         ).runway_version == SpecifierSet("==1.11.0", prereleases=True)
+        assert RunwayConfigDefinitionModel(  # handle SpecifierSet
+            runway_version=SpecifierSet(">1.11.0")
+        ).runway_version == SpecifierSet(">1.11.0", prereleases=True)
+        assert RunwayConfigDefinitionModel(  # handle SpecifierSet
+            runway_version=SpecifierSet(">1.11.0", prereleases=True)
+        ).runway_version == SpecifierSet(">1.11.0", prereleases=True)
 
     def test_convert_runway_version_invalid(self) -> None:
         """Test _convert_runway_version invalid specifier set."""
