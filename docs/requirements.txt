@@ -1,7 +1,7 @@
 -i https://pypi.org/simple
 alabaster==0.7.12
 attrs==19.3.0
-awacs==0.9.8
+awacs==0.9.9
 aws-sam-translator==1.26.0
 awscli==1.18.118
 babel==2.8.0
