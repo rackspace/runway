@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Union
 
@@ -50,6 +51,7 @@ __all__ = [
     "RunwayVersionField",
     "ScriptRunwayTestDefinitionModel",
     "ScriptRunwayTestArgs",
+    "ValidRunwayModuleTypeValues",
     "ValidRunwayTestTypeValues",
     "YamlLintRunwayTestDefinitionModel",
 ]
@@ -334,6 +336,17 @@ class RunwayFutureDefinitionModel(ConfigProperty):
         title = "Runway Future Definition"
 
 
+class ValidRunwayModuleTypeValues(Enum):
+    """Valid Runway module types."""
+
+    cdk = "cdk"
+    cloudformation = "cloudformation"
+    serverless = "serverless"
+    terraform = "terraform"
+    kubernetes = "kubernetes"
+    static = "static"
+
+
 class RunwayModuleDefinitionModel(ConfigProperty):
     """Model for a Runway module definition."""
 
@@ -400,7 +413,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         "This field is only used by the `--tag` CLI option.",
         examples=[["type:network", "app:sampleapp"]],
     )
-    type: Optional[str] = Field(  # TODO add enum
+    type: Optional[ValidRunwayModuleTypeValues] = Field(
         None,
         description="Explicitly specify the type of IaC contained within the directory.",
     )
@@ -422,6 +435,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
             "and any applicable options for the module type.",
         }
         title = "Runway Module Definition"
+        use_enum_values = True
 
     @root_validator(pre=True)
     def _validate_name(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
