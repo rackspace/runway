@@ -191,4 +191,4 @@ class TestS3CfnginPackageSourceDefinitionModel:
         assert obj.key == "something"
         assert obj.paths == []
         assert not obj.requester_pays
-        assert not obj.use_latest
+        assert obj.use_latest

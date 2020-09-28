@@ -2,12 +2,12 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
-from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
 from pydantic import Extra, Field, root_validator, validator
+from typing_extensions import Literal
 
 from .. import utils
 from ..base import ConfigProperty
@@ -59,26 +59,6 @@ class CfnginHookDefinitionModel(ConfigProperty):
         title = "CFNgin Hook Definition"
 
 
-class ValidCfnginStackInProgressBehaviorValues(Enum):
-    """Valid CFNgin stack in progress behaviors."""
-
-    error = "error"
-    wait = "wait"
-
-    @classmethod
-    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
-        """Mutate the field schema in place.
-
-        This is only called when output JSON schema from a model.
-
-        """
-        field_schema.update(  # cov: ignore
-            title="Stack In Progress Behavior",
-            description="The action to take when a stack's status is "
-            "CREATE_IN_PROGRESS or UPDATE_IN_PROGRESS when trying to update it.",
-        )
-
-
 class CfnginStackDefinitionModel(ConfigProperty):
     """Model for a CFNgin stack definition."""
 
@@ -93,7 +73,12 @@ class CfnginStackDefinitionModel(ConfigProperty):
         description="A description that will be applied to the stack in CloudFormation.",
     )
     enabled: bool = Field(True, description="Whether the stack will be deployed.")
-    in_progress_behavior: ValidCfnginStackInProgressBehaviorValues = "error"
+    in_progress_behavior: Optional[Literal["wait"]] = Field(
+        None,
+        title="Stack In Progress Behavior",
+        description="The action to take when a stack's status is "
+        "CREATE_IN_PROGRESS or UPDATE_IN_PROGRESS when trying to update it.",
+    )
     locked: bool = Field(False, description="Whether to limit updating of the stack.")
     name: str = Field(..., title="Stack Name", description="Name of the stack.")
     profile: Optional[str]  # TODO remove
