@@ -328,11 +328,11 @@ def validate_environment(context, env_def, logger=None, strict=False):
         context (Context): Runway context object.
         module (ModuleDefinition): Runway module definition.
         logger (Optional[logging.Logger]): Logger to log messages to.
-        strict (bool): Wether to consider the current environment missing from
+        strict (bool): Whether to consider the current environment missing from
             definition as a failure.
 
     Returns:
-        Union[bool, NoneType]: Booleon value of wether to deploy or not.
+        Union[bool, NoneType]: Booleon value of whether to deploy or not.
 
     """
     logger = logger or LOGGER
