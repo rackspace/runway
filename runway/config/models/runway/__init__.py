@@ -346,6 +346,18 @@ class ValidRunwayModuleTypeValues(Enum):
     kubernetes = "kubernetes"
     static = "static"
 
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
+        """Mutate the field schema in place.
+
+        This is only called when output JSON schema from a model.
+
+        """
+        field_schema.update(  # cov: ignore
+            title="Module Type",
+            description="Explicitly define the type of IaC contained within the directory.",
+        )
+
 
 class RunwayModuleDefinitionModel(ConfigProperty):
     """Model for a Runway module definition."""
@@ -413,10 +425,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         "This field is only used by the `--tag` CLI option.",
         examples=[["type:network", "app:sampleapp"]],
     )
-    type: Optional[ValidRunwayModuleTypeValues] = Field(
-        None,
-        description="Explicitly specify the type of IaC contained within the directory.",
-    )
+    type: Optional[ValidRunwayModuleTypeValues] = None
     # needs to be last
     parallel: List[RunwayModuleDefinitionModel] = Field(
         [],

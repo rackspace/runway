@@ -36,7 +36,7 @@ class CFNgin:
         concurrency (int): Max number of CFNgin stacks that can be deployed
             concurrently. If the value is ``0``, will be constrained based on
             the underlying graph.
-        interactive (bool): Wether or not to prompt the user before taking
+        interactive (bool): Whether or not to prompt the user before taking
             action.
         parameters (MutableMap): Combination of the parameters provided when
             initalizing the class and any environment files that are found.
@@ -44,7 +44,7 @@ class CFNgin:
             a failed state from an initial deployment when updating.
         region (str): The AWS region where CFNgin is currently being executed.
         sys_path (str): Working directory.
-        tail (bool): Wether or not to display all CloudFormation events in the
+        tail (bool): Whether or not to display all CloudFormation events in the
             terminal.
 
     """

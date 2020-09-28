@@ -60,7 +60,7 @@ class ConfigComponentDefinition:
 
         Args:
             context: Runway context object.
-            pre_process: Wether to only resolve pre-process fields.
+            pre_process: Whether to only resolve pre-process fields.
             variables: Object containing values to resolve the ``var`` lookup.
 
         """

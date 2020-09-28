@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from pydantic import Extra, root_validator
+from pydantic import Extra, Field, root_validator
 
 from ..base import ConfigProperty
 
@@ -24,17 +24,35 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
 
     """
 
-    branch: Optional[str] = None
-    commit: Optional[str] = None
-    configs: List[str] = []  # TODO try Path
-    paths: List[str] = []  # TODO try Path
-    tag: Optional[str] = None
-    uri: str  # TODO try a Url type
+    branch: Optional[str] = Field(
+        None, title="Git Branch", examples=["ENV-dev", "ENV-prod", "master"],
+    )
+    commit: Optional[str] = Field(None, title="Git Commit Hash")
+    configs: List[str] = Field(
+        [],
+        description="Array of paths relative to the root of the package source "
+        "for configuration that should be merged into the current configuration file.",
+    )
+    paths: List[str] = Field(
+        [],
+        description="Array of paths relative to the root of the package source to add to $PATH.",
+    )
+    tag: Optional[str] = Field(None, title="Git Tag", examples=["1.0.0", "v1.0.0"])
+    uri: str = Field(
+        ...,
+        title="Git Repository URI",
+        examples=["git@github.com:onicagroup/runway.git"],
+    )
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
         extra = Extra.forbid
+        schema_extra = {
+            "description": "Information about git repositories that should be included "
+            "in the processing of this configuration file."
+        }
+        title = "CFNgin Git Repository Package Source Definition"
 
     @root_validator
     def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
@@ -58,14 +76,30 @@ class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
 
     """
 
-    configs: List[str] = []  # TODO try Path
-    paths: List[str] = []  # TODO try Path
-    source: str  # TODO try Path
+    configs: List[str] = Field(
+        [],
+        description="Array of paths relative to the root of the package source "
+        "for configuration that should be merged into the current configuration file.",
+    )
+    paths: List[str] = Field(
+        [],
+        description="Array of paths relative to the root of the package source to add to $PATH.",
+    )
+    source: str = Field(
+        ...,
+        description="Path relative to the current configuration file that is the "
+        "root of the local package source.",
+    )
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
         extra = Extra.forbid
+        schema_extra = {
+            "description": "Information about local directories that should be "
+            "included in the processing of this configuration file."
+        }
+        title = "CFNgin Local Package Source Definition"
 
 
 class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
@@ -83,17 +117,37 @@ class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
 
     """
 
-    bucket: str
-    configs: List[str] = []  # TODO try Path
-    key: str
-    paths: List[str] = []  # TODO try Path
-    requester_pays: bool = False
-    use_latest: bool = False
+    bucket: str = Field(..., title="AWS S3 Bucket Name")
+    configs: List[str] = Field(
+        [],
+        description="Array of paths relative to the root of the package source "
+        "for configuration that should be merged into the current configuration file.",
+    )
+    key: str = Field(..., title="AWS S3 Object Key")
+    paths: List[str] = Field(
+        [],
+        description="Array of paths relative to the root of the package source to add to $PATH.",
+    )
+    requester_pays: bool = Field(
+        False,
+        description="Confirms that the requester knows that they will be charged "
+        "for the request.",
+    )
+    use_latest: bool = Field(
+        True,
+        description="Update the local copy if the last modified date in AWS S3 changes.",
+    )
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
         extra = Extra.forbid
+        schema_extra = {
+            "description": "Information about a AWS S3 objects that should be "
+            "downloaded, unzipped, and included in the processing of "
+            "this configuration file."
+        }
+        title = "CFNgin S3 Package Source Definition"
 
 
 class CfnginPackageSourcesDefinitionModel(ConfigProperty):
@@ -106,11 +160,34 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
 
     """
 
-    git: List[GitCfnginPackageSourceDefinitionModel] = []
-    local: List[LocalCfnginPackageSourceDefinitionModel] = []
-    s3: List[S3CfnginPackageSourceDefinitionModel] = []
+    git: List[GitCfnginPackageSourceDefinitionModel] = Field(
+        [],
+        title="CFNgin Git Repository Package Source Definitions",
+        description=GitCfnginPackageSourceDefinitionModel.Config.schema_extra[
+            "description"
+        ],
+    )
+    local: List[LocalCfnginPackageSourceDefinitionModel] = Field(
+        [],
+        title="CFNgin Local Package Source Definitions",
+        description=LocalCfnginPackageSourceDefinitionModel.Config.schema_extra[
+            "description"
+        ],
+    )
+    s3: List[S3CfnginPackageSourceDefinitionModel] = Field(
+        [],
+        title="CFNgin S3 Package Source Definitions",
+        description=S3CfnginPackageSourceDefinitionModel.Config.schema_extra[
+            "description"
+        ],
+    )
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
 
         extra = Extra.forbid
+        schema_extra = {
+            "description": "Map of additional package sources to include when "
+            "processing this configuration file."
+        }
+        title = "CFNgin Package Sources Definition"

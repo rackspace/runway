@@ -19,6 +19,17 @@ class ValidRunwayTestTypeValues(Enum):
     script = "script"
     yamllint = "yamllint"
 
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
+        """Mutate the field schema in place.
+
+        This is only called when output JSON schema from a model.
+
+        """
+        field_schema.update(  # cov: ignore
+            title="Test Type", description="The type of test to run.",
+        )
+
 
 class RunwayTestDefinitionModel(ConfigProperty):
     """Model for a Runway test definition."""
@@ -30,9 +41,9 @@ class RunwayTestDefinitionModel(ConfigProperty):
     )
     name: Optional[str] = Field(None, description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Wether the test must pass for subsequent tests to be run."
+        True, description="Whether the test must pass for subsequent tests to be run."
     )
-    type: ValidRunwayTestTypeValues = Field(..., description="The type of test to run.")
+    type: ValidRunwayTestTypeValues
 
     class Config:  # pylint: disable=too-few-public-methods
         """Model configuration."""
@@ -100,7 +111,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     )
     name: Optional[str] = Field("cfn-lint", description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Wether the test must pass for subsequent tests to be run."
+        True, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["cfn-lint"] = Field(
         "cfn-lint", description="The type of test to run."
@@ -147,7 +158,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     )
     name: Optional[str] = Field(None, description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Wether the test must pass for subsequent tests to be run."
+        True, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["script"] = Field("script", description="The type of test to run.")
 
@@ -165,7 +176,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
 
     name: Optional[str] = Field("yamllint", description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Wether the test must pass for subsequent tests to be run."
+        True, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["yamllint"] = Field(
         "yamllint", description="The type of test to run."
