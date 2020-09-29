@@ -20,7 +20,6 @@ decorator==4.4.2
 docker==4.4.0
 docutils==0.15.2
 formic2==1.0.3
-future==0.18.2
 gitdb==4.0.5
 gitpython==3.1.11
 humanfriendly==9.1
@@ -32,7 +31,6 @@ jmespath==0.10.0
 jsonpatch==1.28 ; python_version != '3.4'
 jsonpointer==2.0
 jsonschema==3.2.0
-jsx-lexer==0.0.8
 junit-xml==1.9
 lark-parser==0.10.1
 markupsafe==1.1.1
@@ -59,8 +57,8 @@ send2trash==1.5.0
 six==1.15.0
 smmap==3.0.4
 snowballstemmer==2.0.0
-sphinx-rtd-theme==0.4.2
-sphinx==2.4.4
+sphinx-rtd-theme==0.5.0
+sphinx==3.2.1
 sphinxcontrib-apidoc==0.3.0
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
