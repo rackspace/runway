@@ -41,7 +41,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
     )
     name: Optional[str] = Field(None, description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Whether the test must pass for subsequent tests to be run."
+        False, description="Whether the test must pass for subsequent tests to be run."
     )
     type: ValidRunwayTestTypeValues
 
@@ -111,7 +111,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     )
     name: Optional[str] = Field("cfn-lint", description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Whether the test must pass for subsequent tests to be run."
+        False, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["cfn-lint"] = Field(
         "cfn-lint", description="The type of test to run."
@@ -158,7 +158,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     )
     name: Optional[str] = Field(None, description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Whether the test must pass for subsequent tests to be run."
+        False, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["script"] = Field("script", description="The type of test to run.")
 
@@ -176,7 +176,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
 
     name: Optional[str] = Field("yamllint", description="Name of the test.")
     required: Union[bool, str] = Field(
-        True, description="Whether the test must pass for subsequent tests to be run."
+        False, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["yamllint"] = Field(
         "yamllint", description="The type of test to run."

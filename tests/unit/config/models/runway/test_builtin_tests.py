@@ -62,7 +62,7 @@ class TestRunwayTestDefinitionModel:
             assert obj.required is required
         else:
             obj = RunwayTestDefinitionModel(type="script")
-            assert obj.required is True
+            assert obj.required is False
 
     def test_string_args(self) -> None:
         """Test args defined as a string."""
