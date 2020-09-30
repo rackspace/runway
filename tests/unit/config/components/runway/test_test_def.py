@@ -85,7 +85,7 @@ class TestRunwayTestDefinition:
     def test_register_variable(self) -> None:
         """Test _register_variable."""
         obj = RunwayTestDefinition.parse_obj(
-            {"type": "script", "name": "test_register_variable"}
+            {"type": "script", "name": "test_register_variable", "required": True}
         )
         assert obj._vars["required"].name == "test_register_variable.required"
 
