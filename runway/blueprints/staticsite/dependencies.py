@@ -42,6 +42,7 @@ class Dependencies(Blueprint):
         },
         "SupportedIdentityProviders": {
             "type": list,
+            "default": [],
             "description": "Auth@Edge AppClient Identity Providers",
         },
         "OAuthScopes": {
