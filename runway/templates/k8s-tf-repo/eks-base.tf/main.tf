@@ -13,7 +13,7 @@ variable "az-count" { default = 3 }
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 2.43"
+  version = "~> 3.10"
   region = var.region
 }
 provider "tls" {
@@ -32,7 +32,7 @@ locals {
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.15.0"
+  version = "~> 2.55.0"
 
   name = "${local.cluster_name}"
   cidr = "${var.vpc-cidr}"
@@ -235,10 +235,16 @@ resource "kubernetes_config_map" "aws_auth_configmap" {
 YAML
   }
 }
+# In place of or in addition to IAM Roles ^, IAM users can be specified
+#     mapUsers = <<YAML
+# - userarn: arn:aws:iam::123456789012:user/guyincognito
+#   username: kubectl-access-user
+#   groups:
+#     - system:masters
+# YAML
 
 resource "aws_eks_node_group" "node" {
   cluster_name = aws_eks_cluster.cluster.name
-  node_group_name = "base"
   node_role_arn = aws_iam_role.node.arn
   subnet_ids = module.vpc.private_subnets[*]
 
@@ -246,6 +252,11 @@ resource "aws_eks_node_group" "node" {
     desired_size = 1
     max_size = 1
     min_size = 1
+  }
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [scaling_config[0].desired_size]
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
