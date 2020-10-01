@@ -2,7 +2,6 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
-import copy
 import logging
 import re
 import sys
@@ -339,23 +338,6 @@ class CfnginConfig(BaseConfig):
             path: The path to the config file that was parsed into the object.
 
         """
-        if obj:
-            for tlk in [
-                "post_build",
-                "post_destroy",
-                "pre_build",
-                "pre_destroy",
-                "stacks",
-            ]:
-                tlv = obj.get(tlk)
-                if isinstance(tlv, dict):
-                    tmp_list = []
-                    for key, value in tlv.items():
-                        tmp_dict = copy.deepcopy(value)
-                        if tlk == "stacks":
-                            tmp_dict["name"] = key
-                        tmp_list.append(tmp_dict)
-                    obj[tlk] = tmp_list
         return cls(CfnginConfigDefinitionModel.parse_obj(obj), path=path)
 
     @classmethod

@@ -2,6 +2,7 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
+import copy
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -278,6 +279,28 @@ class CfnginConfigDefinitionModel(ConfigProperty):
     _resolve_path_fields = validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
         utils.resolve_path_field
     )
+
+    @validator("post_build", "post_destroy", "pre_build", "pre_destroy", pre=True)
+    def _convert_hook_definitions(
+        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]  # noqa: N805
+    ) -> List[Dict[str, Any]]:
+        """Convert hooks defined as a dict to a list."""
+        if isinstance(v, list):
+            return v
+        return list(v.values())
+
+    @validator("stacks", pre=True)
+    def _convert_stack_definitions(
+        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]  # noqa: N805
+    ) -> List[Dict[str, Any]]:
+        """Convert stacks defined as a dict to a list."""
+        if isinstance(v, list):
+            return v
+        result = []
+        for name, stack in copy.deepcopy(v).items():
+            stack["name"] = name
+            result.append(stack)
+        return result
 
     @validator("stacks")
     def _validate_unique_stack_names(

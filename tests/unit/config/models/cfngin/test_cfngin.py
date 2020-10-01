@@ -18,6 +18,43 @@ from runway.config.models.cfngin import (
 class TestCfnginConfigDefinitionModel:
     """Test runway.config.models.cfngin.CfnginConfigDefinitionModel."""
 
+    @pytest.mark.parametrize(
+        "field", ["post_build", "post_destroy", "pre_build", "pre_destroy"],
+    )
+    def test_convert_hook_definitions(self, field) -> None:
+        """Test _convert_hook_definitions."""
+        dict_hook = {"name": {"path": "something"}}
+        list_hook = [{"path": "something"}]
+        assert (
+            CfnginConfigDefinitionModel.parse_obj(
+                {"namespace": "test", field: dict_hook}
+            ).dict(exclude_unset=True)[field]
+            == list_hook
+        )
+        assert (
+            CfnginConfigDefinitionModel.parse_obj(
+                {"namespace": "test", field: list_hook}
+            ).dict(exclude_unset=True)[field]
+            == list_hook
+        )
+
+    def test_convert_stack_definitions(self) -> None:
+        """Test _convert_stack_definitions."""
+        dict_stack = {"stack-name": {"class_path": "something"}}
+        list_stack = [{"class_path": "something", "name": "stack-name"}]
+        assert (
+            CfnginConfigDefinitionModel(namespace="test", stacks=dict_stack).dict(
+                exclude_unset=True
+            )["stacks"]
+            == list_stack
+        )
+        assert (
+            CfnginConfigDefinitionModel(namespace="test", stacks=list_stack).dict(
+                exclude_unset=True
+            )["stacks"]
+            == list_stack
+        )
+
     def test_extra(self) -> None:
         """Test extra fields."""
         assert (

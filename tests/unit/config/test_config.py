@@ -191,29 +191,13 @@ class TestCfnginConfig:
             CfnginConfig.parse_file()
         assert str(excinfo.value) == "must provide path or file_path"
 
-    def test_parse_obj(self) -> None:
-        """Test parse_obj.
-
-        This test primarily focuses on the conversion of dicts to lists.
-
-        """
-        data = {
-            "namespace": "test",
-            "post_build": {"test-hook": {"path": "./"}},
-            "post_destroy": {"test-hook": {"path": "./"}},
-            "pre_build": {"test-hook": {"path": "./"}},
-            "pre_destroy": {"test-hook": {"path": "./"}},
-            "stacks": {"test-stack": {"template_path": "./"}},
-        }
-        expected = {
-            "namespace": "test",
-            "post_build": [{"path": "./"}],
-            "post_destroy": [{"path": "./"}],
-            "pre_build": [{"path": "./"}],
-            "pre_destroy": [{"path": "./"}],
-            "stacks": [{"name": "test-stack", "template_path": Path.cwd().resolve()}],
-        }
-        assert CfnginConfig.parse_obj(data).dump() == yaml.dump(expected)
+    def test_parse_obj(self, monkeypatch: MonkeyPatch) -> None:
+        """Test parse_obj."""
+        monkeypatch.setattr(
+            MODULE + ".CfnginConfigDefinitionModel.parse_obj",
+            lambda x: CfnginConfigDefinitionModel(namespace="success"),
+        )
+        assert CfnginConfig.parse_obj({}).namespace == "success"
 
     def test_parse_raw(self, monkeypatch: MonkeyPatch) -> None:
         """Test parse_raw."""
