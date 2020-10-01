@@ -29,10 +29,6 @@ class CFNgin:
     """Control CFNgin.
 
     Attributes:
-        EXCLUDE_REGEX (str): Regex used to exclude YAML files when searching
-            for config files.
-        EXCLUDE_LIST (str): Global list of YAML file names to exclude when
-            searching for config files.
         concurrency (int): Max number of CFNgin stacks that can be deployed
             concurrently. If the value is ``0``, will be constrained based on
             the underlying graph.
@@ -48,9 +44,6 @@ class CFNgin:
             terminal.
 
     """
-
-    EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
-    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
 
     def __init__(
         self,

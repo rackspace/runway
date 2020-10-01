@@ -264,15 +264,15 @@ Deployment
 
   The following fields support lookups:
 
-  - :attr:`deployment.account_alias` *
-  - :attr:`deployment.account_id` *
-  - :attr:`deployment.assume_role` *
-  - :attr:`deployment.env_vars` *
-  - :attr:`deployment.environments`
-  - :attr:`deployment.module_options`
-  - :attr:`deployment.parallel_regions` *
-  - :attr:`deployment.parameters`
-  - :attr:`deployment.regions` *
+  - :attr:`~deployment.account_alias` *
+  - :attr:`~deployment.account_id` *
+  - :attr:`~deployment.assume_role` *
+  - :attr:`~deployment.env_vars` *
+  - :attr:`~deployment.environments`
+  - :attr:`~deployment.module_options`
+  - :attr:`~deployment.parallel_regions` *
+  - :attr:`~deployment.parameters`
+  - :attr:`~deployment.regions` *
 
 
   .. attribute:: account_alias
@@ -521,7 +521,7 @@ Deployment
 
     A list of AWS Regions to process asynchronously.
 
-    Only one of :attr:`deployment.parallel_regions` or :attr:`deployment.regions` can be defined.
+    Only one of :attr:`~deployment.parallel_regions` or :attr:`~deployment.regions` can be defined.
 
     Asynchronous deployment only takes effect when running non-interactively.
     Otherwise processing will occur synchronously.
@@ -588,9 +588,9 @@ Deployment
 
     A list of AWS Regions to process this deployment in.
 
-    Only one of :attr:`deployment.parallel_regions` or :attr:`deployment.regions` can be defined.
+    Only one of :attr:`~deployment.parallel_regions` or :attr:`~deployment.regions` can be defined.
 
-    Can be used to define asynchronous processing similar to :attr:`deployment.parallel_regions`.
+    Can be used to define asynchronous processing similar to :attr:`~deployment.parallel_regions`.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -666,7 +666,7 @@ Module
 
   Modules can be defined as a string or a mapping.
   The minimum requirement for a module is a string that is equal to the name of the module directory.
-  Providing a string is the same as providing a value for :attr:`module.path` in a mapping definition.
+  Providing a string is the same as providing a value for :attr:`~module.path` in a mapping definition.
 
   Using a mapping to define a module provides the ability to specify all the fields listed here.
 
@@ -674,12 +674,12 @@ Module
 
   The following fields support lookups:
 
-  - :attr:`module.class_path`
-  - :attr:`module.env_vars`
-  - :attr:`module.environments`
-  - :attr:`module.options`
-  - :attr:`module.parameters`
-  - :attr:`module.path`
+  - :attr:`~module.class_path`
+  - :attr:`~module.env_vars`
+  - :attr:`~module.environments`
+  - :attr:`~module.options`
+  - :attr:`~module.parameters`
+  - :attr:`~module.path`
 
   .. attribute:: class_path
     :type: Optional[str]
@@ -773,7 +773,7 @@ Module
 
     The name of the module to be displayed in logs and the interactive selection menu.
 
-    If a name is not provided, the :attr:`module.path` value is used.
+    If a name is not provided, the :attr:`~module.path` value is used.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -830,7 +830,7 @@ Module
 
     List of `module` definitions that can be executed asynchronously.
 
-    Incompatible with :attr:`module.class_path`, :attr:`module.path`, and :attr:`module.type`.
+    Incompatible with :attr:`~module.class_path`, :attr:`~module.path`, and :attr:`~module.type`.
 
     Asynchronous deployment only takes effect when running non-interactively.
     Otherwise processing will occur synchronously.
@@ -935,7 +935,7 @@ Module
 path
 ====
 
-:attr:`module.path` can either be defined as a local path relative to the Runway config file or a network accessible (remote) location.
+:attr:`~module.path` can either be defined as a local path relative to the Runway config file or a network accessible (remote) location.
 
 When the value is identified as a remote location, Runway is responsible for retrieving resources from the location and caching them locally for processing.
 This allows the remote resources to be handled automatically by Runway rather than needing to manually retrieve them or employ another mechanism to retrieve them.

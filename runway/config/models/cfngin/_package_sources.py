@@ -12,7 +12,7 @@ from ..base import ConfigProperty
 class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
     """Model for a git package source definition.
 
-    Package source located in a git repo.
+    Package source located in a git repository.
 
     Attributes:
         branch: Branch name.

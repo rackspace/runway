@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from pydantic import Extra, Field, root_validator, validator
@@ -224,16 +224,31 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         description="Key for an AWS S3 object used to track a graph of stacks "
         "between executions.",
     )
-    post_build: List[CfnginHookDefinitionModel] = Field([], title="Post Deploy Hooks")
-    post_destroy: List[CfnginHookDefinitionModel] = Field([], title="Pre Destroy Hooks")
-    pre_build: List[CfnginHookDefinitionModel] = Field([], title="Pre Deploy Hooks")
-    pre_destroy: List[CfnginHookDefinitionModel] = Field([], title="Pre Destroy Hooks")
+    post_build: Union[
+        List[CfnginHookDefinitionModel],  # final type after parsing
+        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
+    ] = Field([], title="Post Deploy Hooks")
+    post_destroy: Union[
+        List[CfnginHookDefinitionModel],  # final type after parsing
+        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
+    ] = Field([], title="Pre Destroy Hooks")
+    pre_build: Union[
+        List[CfnginHookDefinitionModel],  # final type after parsing
+        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
+    ] = Field([], title="Pre Deploy Hooks")
+    pre_destroy: Union[
+        List[CfnginHookDefinitionModel],  # final type after parsing
+        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
+    ] = Field([], title="Pre Destroy Hooks")
     service_role: Optional[str] = Field(
         None,
         title="Service Role ARN",
         description="Specify an IAM Role for CloudFormation to use.",
     )
-    stacks: List[CfnginStackDefinitionModel] = Field(
+    stacks: Union[
+        List[CfnginStackDefinitionModel],  # final type after parsing
+        Dict[str, CfnginStackDefinitionModel],  # recommended when writing config
+    ] = Field(
         [], description=CfnginStackDefinitionModel.Config.schema_extra["description"]
     )
     sys_path: Optional[Path] = Field(

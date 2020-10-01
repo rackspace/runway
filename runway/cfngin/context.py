@@ -2,6 +2,7 @@
 import collections
 import json
 import logging
+from typing import Any, Dict
 
 from runway._logging import PrefixAdaptor
 
@@ -46,6 +47,8 @@ class Context:
     via the command line and specified in the config to `Stack` objects.
 
     """
+
+    hook_data: Dict[str, Any] = {}
 
     def __init__(
         self,

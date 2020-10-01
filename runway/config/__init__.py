@@ -166,57 +166,44 @@ class CfnginConfig(BaseConfig):
 
         print dump(config)
 
-    Attributes:
-        cfngin_bucket: Bucket to use for CFNgin resources (e.g.
-            CloudFormation templates). May be an empty string.
-        cfngin_bucket_region: Explicit region to use for
-            ``cfngin_bucket``.
-        cfngin_cache_dir: Local directory to use for caching.
-        log_formats: Custom formatting for log messages.
-        lookups: Register custom lookups.
-        mappings: Mappings that will be added to all stacks.
-        namespace: Namespace to prepend to everything.
-        namespace_delimiter: Character used to separate ``namespace`` and anything
-            it prepends.
-        package_sources: Remote source locations.
-        persistent_graph_key: S3 object key were the persistent graph is stored.
-        post_build: Hooks to run after a build action.
-        post_destroy: Hooks to run after a destroy action.
-        pre_build: Hooks to run before a build action.
-        pre_destroy: Hooks to run before a destroy action.
-        service_role: IAM role for CloudFormation to use.
-        stacks: Stacks to be processed.
-        sys_path: Relative or absolute path to use as the work directory.
-        tags: Tags to apply to all resources.
-        targets: Stag grouping.
-        template_indent: Spaces to use per-indent level when outputing a template
-            to json.
-
     """
 
     EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
-    EXCLUDE_LIST = ["buildspec.yml", "docker-compose.yml"]
+    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
 
+    #: Bucket to use for CFNgin resources. (e.g. CloudFormation templates).
+    #: May be an empty string.
     cfngin_bucket: Optional[str]
+    #: Explicit region to use for :attr:`CfnginConfig.cfngin_bucket`
     cfngin_bucket_region: Optional[str]
-    cfngin_cache_dir: Path
-    log_formats: Dict[str, str]
-    lookups: Dict[str, str]
-    mappings: Dict[str, Dict[str, Dict[str, Any]]]
-    namespace: str
+    """Explicit region to use for :attr:`CfnginConfig.cfngin_bucket`"""
+    cfngin_cache_dir: Path  #: Local directory to use for caching.
+    log_formats: Dict[str, str]  #: Custom formatting for log messages.
+    lookups: Dict[str, str]  #: Register custom lookups.
+    mappings: Dict[  #: Mappings that will be added to all stacks.
+        str, Dict[str, Dict[str, Any]]
+    ]
+    namespace: str  #: Namespace to prepend to everything.
+    # Character used to separate :attr:`CfnginConfig.namespace` and anything it prepends.
     namespace_delimiter: str
-    package_sources: CfnginPackageSourcesDefinitionModel
-    persistent_graph_key: Optional[str] = None
-    post_build: List[CfnginHookDefinitionModel]
-    post_destroy: List[CfnginHookDefinitionModel]
-    pre_build: List[CfnginHookDefinitionModel]
-    pre_destroy: List[CfnginHookDefinitionModel]
-    service_role: Optional[str]
-    stacks: List[CfnginStackDefinitionModel]
-    sys_path: Optional[Path]
-    tags: Optional[Dict[str, str]]
-    targets: List[CfnginTargetDefinitionModel]
-    template_indent: int
+    package_sources: CfnginPackageSourcesDefinitionModel  #: Remote source locations.
+    persistent_graph_key: Optional[  #: S3 object key were the persistent graph is stored.
+        str
+    ] = None
+    post_build: List[CfnginHookDefinitionModel]  #: Hooks to run after a build action.
+    post_destroy: List[  #: Hooks to run after a destroy action.
+        CfnginHookDefinitionModel
+    ]
+    pre_build: List[CfnginHookDefinitionModel]  #: Hooks to run before a build action.
+    pre_destroy: List[  #: Hooks to run before a destroy action.
+        CfnginHookDefinitionModel
+    ]
+    service_role: Optional[str]  #: IAM role for CloudFormation to use.
+    stacks: List[CfnginStackDefinitionModel]  #: Stacks to be processed.
+    sys_path: Optional[Path]  #: Relative or absolute path to use as the work directory.
+    tags: Optional[Dict[str, str]]  #: Tags to apply to all resources.
+    targets: List[CfnginTargetDefinitionModel]  #: Stack grouping.
+    template_indent: int  #: Spaces to use per-indent level when outputing a template to json.
 
     _data: CfnginConfigDefinitionModel
 

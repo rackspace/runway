@@ -1,15 +1,75 @@
-.. _hook definition: configuration.html#pre-post-hooks
-.. _package_sources: configuration.html#remote-package
-.. _`Pre & Post Hooks`: configuration.html#pre-post-hooks
-.. _staticsite: ../module_configuration/staticsite.html
-.. _sys_path: configuration.html#module-paths
+.. _cfngin-hooks:
 
 #####
 Hooks
 #####
 
-A hook is a python function or class method that is executed before or after the action is taken.
-To see how to define hooks in a config file see the `Pre & Post Hooks`_ documentation.
+A :class:`~cfngin.hook` is a python function, class, or class method that is executed before or after an action is taken for the entire config.
+
+Only the following actions allow pre/post hooks:
+
+:build:
+  using fields :attr:`~cfngin.config.pre_build` and :attr:`~cfngin.config.post_build`
+:destroy:
+  using fields :attr:`~cfngin.config.pre_destroy` and :attr:`~cfngin.config.post_destroy`
+
+.. class:: cfngin.hook
+
+  When defining a hook in one of the supported fields, the follow fields can be used.
+
+  .. rubric:: Lookup Support
+
+  The following fields support lookups:
+
+  - :attr:`~cfngin.hook.args`
+
+  .. attribute:: args
+    :type: Optional[Dict[str, Any]]
+    :value: {}
+
+    A dictionary of arguments to pass to the hook.
+
+    This field supports the use of :ref:`lookups <cfngin-lookups>`.
+
+    .. important::
+      :ref:`Lookups <cfngin-lookups>` that change the order of execution, like :ref:`output <output lookup>`, can only be used in a *post* hook but hooks like :ref:`rxref <xref lookup>` are able to be used with either *pre* or *post* hooks.
+
+  .. attribute:: data_key
+    :type: Optional[str]
+
+    If set, and the hook returns data (a dictionary), the results will be stored in :attr:`Context.hook_data <runway.cfngin.context.Context.hook_data>` with the ``data_key`` as its key.
+
+  .. attribute:: enabled
+    :type: Optional[bool]
+    :value: true
+
+    Whether to execute the hook every CFNgin run.
+    This field provides the ability to execute a hook per environment when combined with a variable.
+
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      pre_build:
+        example-hook:
+          enabled: ${enable_example_hook}
+
+  .. attribute:: path
+    :type: str
+
+    Python importable path to the hook.
+
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      pre_build:
+        example-hook:
+          path: runway.cfngin.hooks.command.run_command
+
+  .. attribute:: required
+    :type: Optional[bool]
+    :value: true
+
+    Whether to stop execution if the hook fails.
 
 
 **************
@@ -31,11 +91,11 @@ acm.Certificate
 
 Manage a DNS validated certificate in AWS Certificate Manager.
 
-When used in the **pre_build** or **post_build** stage this hook will create a CloudFormation stack containing a DNS validated certificate.
+When used in the :attr:`~cfngin.config.pre_build` or :attr:`~cfngin.config.post_build` stage this hook will create a CloudFormation stack containing a DNS validated certificate.
 It will automatically create a record in Route 53 to validate the certificate and wait for the stack to complete before returning the ``CertificateArn`` as hook data.
 The CloudFormation stack also outputs the ARN of the certificate as ``CertificateArn`` so that it can be referenced from other stacks.
 
-When used in the **pre_destroy** or **post_destroy** stage this hook will delete the validation record from Route 53 then destroy the stack created during a deploy stage.
+When used in the :attr:`~cfngin.config.pre_destroy` or :attr:`~cfngin.config.post_destroy` stage this hook will delete the validation record from Route 53 then destroy the stack created during a deploy stage.
 
 If the hook fails during a deploy stage (e.g. stack rolls back or Route 53 can't be updated) all resources managed by this hook will be destroyed.
 This is done to avoid orphaning resources/record sets which would cause errors during subsequent runs.
@@ -278,7 +338,7 @@ build_staticsite.build
 
 .. rubric:: Description
 
-Build static site. Used by the staticsite_ module type.
+Build static site. Used by the :ref:`Static Site <staticsite>` module type.
 
 
 .. rubric:: Hook Path
@@ -288,7 +348,7 @@ Build static site. Used by the staticsite_ module type.
 
 .. rubric:: Args
 
-See staticsite_ module documentation for details.
+See :ref:`Static Site <staticsite>` module documentation for details.
 
 
 cleanup_s3.purge_bucket
@@ -296,7 +356,7 @@ cleanup_s3.purge_bucket
 
 .. rubric:: Description
 
-Delete objects in bucket. Primarily used as a ``pre_destroy`` hook before deleting an S3 bucket.
+Delete objects in bucket. Primarily used as a :attr:`~cfngin.config.pre_destroy` hook before deleting an S3 bucket.
 
 
 .. rubric:: Hook Path
@@ -574,17 +634,17 @@ Writing A Custom Hook
 
 A custom hook must be in an executable, importable python package or standalone file.
 The hook must be importable using your current ``sys.path``.
-This takes into account the sys_path_ defined in the config file as well as any ``paths`` of package_sources_.
+This takes into account the :attr:`~cfngin.config.sys_path` defined in the :class:`~cfngin.config` file as well as any ``paths`` of :attr:`~cfngin.config.package_sources`.
 
 The hook must accept a minimum of two arguments, ``context`` and ``provider``.
 Aside from the required arguments, it can have any number of additional arguments or use ``**kwargs`` to accept anything passed to it.
-The values for these additional arguments come from the ``args`` key of the `hook definition`_.
+The values for these additional arguments come from the ``args`` key of the hook definition.
 
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
 This signifies to CFNgin whether or not to halt execution if the hook is ``required``.
 If ``dict`` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
-It will be stored as ``context.hook_data[data_key]`` where ``data_key`` is the value set in the `hook definition`_.
+It will be stored as ``context.hook_data[data_key]`` where ``data_key`` is the value set in the hook definition.
 If ``data_key`` is not provided or the type of the returned data is not ``dict``, it will not be added to the context object.
 
 If using boto3 in a hook, use ``context.get_session()`` instead of creating a new session to ensure the correct credentials are used.
