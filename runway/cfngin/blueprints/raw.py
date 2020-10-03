@@ -4,7 +4,7 @@ import json
 import os
 import sys
 
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader
 
 from ..exceptions import InvalidConfig, UnresolvedVariable
 from ..util import parse_cloudformation_template
@@ -198,17 +198,25 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         if not self._rendered:
             template_path = get_template_path(self.raw_template_path)
             if template_path:
-                with open(template_path, "r") as template:
-                    if len(os.path.splitext(template_path)) == 2 and (
-                        os.path.splitext(template_path)[1] == ".j2"
-                    ):
-                        self._rendered = Template(template.read()).render(
+                if len(os.path.splitext(template_path)) == 2 and (
+                    os.path.splitext(template_path)[1] == ".j2"
+                ):
+                    self._rendered = (
+                        Environment(
+                            loader=FileSystemLoader(
+                                searchpath=os.path.dirname(template_path)
+                            )
+                        )
+                        .get_template(os.path.basename(template_path))
+                        .render(
                             context=self.context,
                             mappings=self.mappings,
                             name=self.name,
                             variables=self.resolved_variables,
                         )
-                    else:
+                    )
+                else:
+                    with open(template_path, "r") as template:
                         self._rendered = template.read()
             else:
                 raise InvalidConfig(
