@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.15.0] - 2020-10-03
+### Changed
+- Cloudformation Jinja2 templates: updated render process to support custom filters
+
 ## [1.14.3] - 2020-09-30
 ### Fixed
 - Static Site (non-Auth@Edge) deployment regression in v1.14
@@ -988,7 +992,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.14.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/onicagroup/runway/compare/v1.14.3...v1.15.0
 [1.14.3]: https://github.com/onicagroup/runway/compare/v1.14.2...v1.14.3
 [1.14.2]: https://github.com/onicagroup/runway/compare/v1.14.1...v1.14.2
 [1.14.1]: https://github.com/onicagroup/runway/compare/v1.14.0...v1.14.1
