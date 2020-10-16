@@ -251,7 +251,6 @@ class TestCFNgin(object):
         """Test find_config_files."""
         bad_path = tmp_path / "bad_path"
         bad_path.mkdir()
-        # tmp_path.stem
 
         good_config_paths = [
             tmp_path / "_t3sT.yaml",
@@ -266,6 +265,8 @@ class TestCFNgin(object):
         bad_config_paths = [
             tmp_path / ".anything.yaml",
             tmp_path / ".gitlab-ci.yml",
+            tmp_path / "bitbucket-pipelines.yml",
+            tmp_path / "buildspec.yml",
             tmp_path / "docker-compose.yml",
             bad_path / "00-invalid.yml",
         ]
