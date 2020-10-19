@@ -44,9 +44,7 @@ INSTALL_REQUIRES = [
     "yamllint",
     "zgitignore",  # for embedded hooks
     "troposphere>=2.4.2",
-    # botocore pins its urllib3 dependency like this, so we need to do the
-    # same to ensure v1.25+ isn't pulled in by pip
-    "urllib3>=1.20,<1.25",
+    "urllib3>=1.20,<1.26",  # match botocore 1.12 - ~1.19
     # dependency of importlib-metadata, dependency of pytest, cfn-lint, & others
     # 2.0.0 drops support for python 3.5
     "zipp~=1.0.0",
