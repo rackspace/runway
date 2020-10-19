@@ -44,7 +44,7 @@ class CFNgin(object):
     """
 
     EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
-    EXCLUDE_LIST = ["buildspec.yml", "docker-compose.yml"]
+    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
 
     def __init__(self, ctx, parameters=None, sys_path=None):
         """Instantiate class.
