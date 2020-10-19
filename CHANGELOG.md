@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.15.1] - 2020-10-19
 ### Changed
 - CFNgin will now ignore *bitbucket-pipeline.yml* when finding config files
 - *urllib3* pin broadened to `urllib3>=1.20,<1.26` to accommodate *botocore>=1.19*
@@ -995,7 +997,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.15.1...HEAD
+[1.15.1]: https://github.com/onicagroup/runway/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/onicagroup/runway/compare/v1.14.3...v1.15.0
 [1.14.3]: https://github.com/onicagroup/runway/compare/v1.14.2...v1.14.3
 [1.14.2]: https://github.com/onicagroup/runway/compare/v1.14.1...v1.14.2
