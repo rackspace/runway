@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - CFNgin will now ignore *bitbucket-pipeline.yml* when finding config files
+- *urllib3* pin broadened to `urllib3>=1.20,<1.26` to accommodate *botocore>=1.19*
 
 ## [1.15.0] - 2020-10-03
 ### Changed
