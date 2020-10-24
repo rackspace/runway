@@ -39,6 +39,7 @@ INSTALL_REQUIRES = [
     "packaging",  # component of setuptools needed for version compare
     "pyOpenSSL",  # For embedded hook & associated script usage
     "PyYAML>=4.1,<5.3",  # match awscli top-end
+    'python2-secrets;python_version<"3.6"',
     "six>=1.13.0",
     'typing;python_version<"3.5"',
     "yamllint",

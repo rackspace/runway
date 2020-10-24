@@ -82,8 +82,8 @@ lint-pylint: ## run pylint
 
 # linting for python 2, requires additional disables
 lint_two: ## run all linters (python 2 only)
-	pipenv run flake8 --config=setup.cfg --exclude=runway/embedded,runway/templates --extend-ignore=D101,D202,D403,E124,E203,W504 runway
-	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-continuation,bad-option-value,bad-whitespace,method-hidden,relative-import
+	pipenv run flake8 --config=setup.cfg --exclude=runway/embedded,runway/hooks/staticsite/auth_at_edge/templates,runway/templates --extend-ignore=D101,D202,D403,E124,E203,W504 runway
+	find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/hooks/staticsite/auth_at_edge/templates*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=.pylintrc --disable=bad-continuation,bad-option-value,bad-whitespace,method-hidden,relative-import
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."

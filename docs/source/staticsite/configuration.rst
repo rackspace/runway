@@ -89,7 +89,7 @@ Options
     options:
       source_hashing:
         enabled: true # if false, build & upload will occur on every deploy
-        parameters: /${namespace}/myparam # defaults to <namespace>-<name/path>-hash
+        parameter: /${namespace}/myparam # defaults to <namespace>-<name/path>-hash
         directories: # overrides default hash directory of top-level path setting
           - path: ./
           - path: ../common
@@ -389,3 +389,15 @@ Parameters
 
     parameters:
       staticsite_web_acl: arn:aws:waf::<account-id>:certificate/<cert>
+
+**staticsite_required_group (Optional[str])**
+  Name of Cognito User Pool group of which users must be a member to be granted access
+  to the site. Omit to allow all UserPool users to have access.
+
+  Requires staticsite_auth_at_edge_.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    parameters:
+      staticsite_required_group: AuthorizedUsers
