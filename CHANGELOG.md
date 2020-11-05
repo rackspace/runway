@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Static Site Auth@Edge: Add option to restrict access to a UserPool group
+
+### Changed
+- Static Site Auth@Edge: Better error pages
+- Static Site Auth@Edge: Enhanced security via nonce signing
 
 ## [1.15.1] - 2020-10-19
 ### Changed

@@ -1,13 +1,15 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
 import base64
+import hmac
 import json
 import logging
 import re
 import time
 from datetime import datetime
+from hashlib import sha256
 from random import random
-from urllib import request  # pylint: disable=no-name-in-module
-from urllib.parse import urlencode  # pylint: disable=no-name-in-module,import-error
+from urllib import request
+from urllib.parse import urlencode
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,10 +29,12 @@ def get_config():
         "cognito_auth_domain": "tbd",
         "cookie_settings": {},
         "http_headers": {},
+        "nonce_signing_secret": "tbd",
         "oauth_scopes": [],
         "redirect_path_auth_refresh": "tbd",
         "redirect_path_sign_in": "tbd",
         "redirect_path_sign_out": "tbd",
+        "required_group": "tbd",
         "user_pool_id": "tbd",
     }
 
@@ -62,44 +66,38 @@ def as_cloud_front_headers(headers):
     return res
 
 
-def extract_and_parse_cookies(headers, client_id):
+def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"):
     """Extract and parse the Cognito cookies from the headers.
 
     Args:
          headers (Dict[str, str]): The request/response headers in
             dictionary format.
         client_id (str): The Cognito UserPool Client ID.
+        cookie_compatibility (str): "amplify" or "elasticsearch".
 
     """
     cookies = extract_cookies_from_headers(headers)
-
     if not cookies:
         return {}
 
-    key_prefix = "CognitoIdentityServiceProvider.%s" % client_id
-    last_user_key = "%s.LastAuthUser" % key_prefix
-    token_user_name = cookies.get(last_user_key, "")
-
-    scope_key = "%s.%s.tokenScopesString" % (key_prefix, token_user_name)
-    scopes = cookies.get(scope_key, "")
-
-    id_token_key = "%s.%s.idToken" % (key_prefix, token_user_name)
-    id_token = cookies.get(id_token_key, "")
-
-    access_token_key = "%s.%s.accessToken" % (key_prefix, token_user_name)
-    access_token = cookies.get(access_token_key, "")
-
-    refresh_token_key = "%s.%s.refreshToken" % (key_prefix, token_user_name)
-    refresh_token = cookies.get(refresh_token_key, "")
+    if cookie_compatibility == "amplify":
+        cookie_names = get_amplify_cookie_names(client_id, cookies)
+    elif cookie_compatibility == "elasticsearch":
+        cookie_names = get_elasticsearch_cookie_names()
 
     return {
-        "tokenUserName": token_user_name,
-        "idToken": id_token,
-        "accessToken": access_token,
-        "refreshToken": refresh_token,
-        "scopes": scopes,
-        "nonce": cookies.get("spa-auth-edge-nonce", ""),
-        "pkce": cookies.get("spa-auth-edge-pkce", ""),
+        "token_user_name": cookies.get(cookie_names["last_user_key"])
+        if "last_user_key" in cookie_names
+        else None,
+        "id_token": cookies.get(cookie_names["id_token_key"]),
+        "access_token": cookies.get(cookie_names["access_token_key"]),
+        "refresh_token": cookies.get(cookie_names["refresh_token_key"]),
+        "scopes": cookies.get(cookie_names["scope_key"])
+        if "scope_key" in cookie_names
+        else None,
+        "nonce": cookies.get("spa-auth-edge-nonce"),
+        "nonce_hmac": cookies.get("spa-auth-edge-nonce-hmac"),
+        "pkce": cookies.get("spa-auth-edge-pkce"),
     }
 
 
@@ -156,19 +154,49 @@ def with_cookie_domain(distribution_domain_name, cookie_settings):
         return "%s; Domain=.%s" % (cookie_settings, distribution_domain_name)
 
 
-def get_cookie_headers(
+def get_amplify_cookie_names(client_id, cookies_or_username):
+    """Return mapping dict for cookie names for amplify."""
+    key_prefix = "CognitoIdentityServiceProvider.%s" % client_id
+    last_user_key = "%s.LastAuthUser" % key_prefix
+    if isinstance(cookies_or_username, str):
+        token_user_name = cookies_or_username
+    else:
+        token_user_name = cookies_or_username.get(last_user_key)
+    return {
+        "last_user_key": last_user_key,
+        "user_data_key": "%s.%s.userData" % (key_prefix, token_user_name),
+        "scope_key": "%s.%s.tokenScopesString" % (key_prefix, token_user_name),
+        "id_token_key": "%s.%s.idToken" % (key_prefix, token_user_name),
+        "access_token_key": "%s.%s.accessToken" % (key_prefix, token_user_name),
+        "refresh_token_key": "%s.%s.refreshToken" % (key_prefix, token_user_name),
+    }
+
+
+def get_elasticsearch_cookie_names():
+    """Return mapping dict for cookie names for elasticsearch."""
+    return {
+        "id_token_key": "ID-TOKEN",
+        "access_token_key": "ACCESS-TOKEN",
+        "refresh_token_key": "REFRESH-TOKEN",
+        "cognito_enabled_key": "COGNITO-ENABLED",
+    }
+
+
+def generate_cookie_headers(
+    event,
     client_id,
     oauth_scopes,
     tokens,
     domain_name,
     cookie_settings,
-    expire_all_tokens=False,
+    cookie_compatibility="amplify",
 ):
     """Retrieve all cookie headers for our request.
 
     Return as CloudFront formatted headers.
 
     Args:
+        event (str): "new_tokens" | "sign_out" | "refresh_failed".
         client_id (str): The Cognito UserPool Client ID.
         oauth_scopes (List): The scopes for oauth validation.
         tokens (Dict[str, str]): The tokens received from
@@ -177,75 +205,78 @@ def get_cookie_headers(
             to be associated with.
         cookie_settings (Dict[str, str]): The various settings
             that we would like for the various tokens.
-        expire_all_tokens (Optional[bool]): Whether to expire
-            all Cognito tokens.
+        cookie_compatibility (str): "amplify" | "elasticsearch".
 
     """
     decoded_id_token = decode_token(tokens["id_token"])
     token_user_name = decoded_id_token.get("cognito:username")
-    key_prefix = "CognitoIdentityServiceProvider.%s" % client_id
-    key_and_user_prefix = "%s.%s" % (key_prefix, token_user_name)
-    id_token_key = "%s.idToken" % key_and_user_prefix
-    access_token_key = "%s.accessToken" % key_and_user_prefix
-    refresh_token_key = "%s.refreshToken" % key_and_user_prefix
-    last_user_key = "%s.LastAuthUser" % key_prefix
-    scope_key = "%s.tokenScopesString" % key_and_user_prefix
-    scopes_string = " ".join(oauth_scopes)
-    user_data_key = "%s.userData" % key_and_user_prefix
-    user_data = {
-        "UserAttributes": [
-            {"Name": "sub", "Value": decoded_id_token.get("sub")},
-            {"Name": "email", "Value": decoded_id_token.get("email")},
-        ],
-        "Username": token_user_name,
-    }
 
-    cookies = {
-        id_token_key: "%s; %s"
-        % (
-            tokens.get("id_token"),
-            with_cookie_domain(domain_name, cookie_settings.get("idToken")),
-        ),
-        access_token_key: "%s; %s"
-        % (
-            tokens.get("access_token"),
-            with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
-        ),
-        refresh_token_key: "%s; %s"
-        % (
-            tokens.get("refresh_token"),
-            with_cookie_domain(domain_name, cookie_settings.get("refreshToken")),
-        ),
-        last_user_key: "%s; %s"
-        % (
-            token_user_name,
-            with_cookie_domain(domain_name, cookie_settings.get("idToken")),
-        ),
-        scope_key: "%s; %s"
-        % (
-            scopes_string,
-            with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
-        ),
-        user_data_key: "%s; %s"
-        % (
-            urlencode(user_data),
-            with_cookie_domain(domain_name, cookie_settings.get("idToken")),
-        ),
-        "amplify-signin-with-hostedUI": "true; %s"
-        % (with_cookie_domain(domain_name, cookie_settings.get("accessToken"))),
-    }
+    if cookie_compatibility == "amplify":
+        cookie_names = get_amplify_cookie_names(client_id, token_user_name)
+        user_data = {
+            "UserAttributes": [
+                {"Name": "sub", "Value": decoded_id_token.get("sub")},
+                {"Name": "email", "Value": decoded_id_token.get("email")},
+            ],
+            "Username": token_user_name,
+        }
 
-    if expire_all_tokens:
+        cookies = {
+            cookie_names["last_user_key"]: "%s; %s"
+            % (
+                token_user_name,
+                with_cookie_domain(domain_name, cookie_settings.get("idToken")),
+            ),
+            cookie_names["scope_key"]: "%s; %s"
+            % (
+                " ".join(oauth_scopes),
+                with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
+            ),
+            cookie_names["user_data_key"]: "%s; %s"
+            % (
+                urlencode(user_data),
+                with_cookie_domain(domain_name, cookie_settings.get("idToken")),
+            ),
+            "amplify-signin-with-hostedUI": "true; %s"
+            % (with_cookie_domain(domain_name, cookie_settings.get("accessToken"))),
+        }
+    elif cookie_compatibility == "elasticsearch":
+        cookie_names = get_elasticsearch_cookie_names()
+        cookies = {
+            cookie_names["cognito_enabled_key"]: "True; %s"
+            % with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled")),
+        }
+    cookies[cookie_names["id_token_key"]] = "%s; %s" % (
+        tokens.get("id_token"),
+        with_cookie_domain(domain_name, cookie_settings.get("idToken")),
+    )
+    cookies[cookie_names["access_token_key"]] = "%s; %s" % (
+        tokens.get("access_token"),
+        with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
+    )
+    cookies[cookie_names["refresh_token_key"]] = "%s; %s" % (
+        tokens.get("refresh_token"),
+        with_cookie_domain(domain_name, cookie_settings.get("refreshToken")),
+    )
+
+    if event == "sign_out":
         for key in cookies:
             cookies[key] = expire_cookie(cookies[key])
-    elif not tokens.get("refresh_token"):
-        cookies[refresh_token_key] = expire_cookie(cookies[refresh_token_key])
+    elif event == "refresh_failed":
+        cookies[cookie_names["refresh_token_key"]] = expire_cookie(
+            cookies[cookie_names["refresh_token_key"]]
+        )
 
-    cloud_front_headers = []
-    for key, val in cookies.items():
-        cloud_front_headers.append({"key": "set-cookie", "value": "%s=%s" % (key, val)})
+    # https://github.com/aws-samples/cloudfront-authorization-at-edge/issues/89
+    for i in ["spa-auth-edge-nonce", "spa-auth-edge-nonce-hmac", "spa-auth-edge-pkce"]:
+        if i in cookies:
+            cookies[i] = expire_cookie(cookies[i])
 
-    return cloud_front_headers
+    # Return cookies in the form of CF headers
+    return [
+        {"key": "set-cookie", "value": "%s=%s" % (key, val)}
+        for key, val in cookies.items()
+    ]
 
 
 def expire_cookie_filter(cookie):
@@ -286,7 +317,7 @@ def http_post_with_retry(url, data, headers):
         url (str): The URL to make the POST request to.
         data (Dict[str, str]): The dictionary of data elements to
             send with the request (urlencoded internally).
-        headers (List[Dict[str, str]]): Any headers to send with
+        headers (Dict[str, str]): Any headers to send with
             the POST request.
 
     """
@@ -312,13 +343,14 @@ def http_post_with_retry(url, data, headers):
             attempts += 1
 
 
-def create_error_html(title, message, try_again_href):
+def create_error_html(title, message, link_uri, link_text):
     """Create a basic error html page for exception returns.
 
     Args:
         title (str): The title of the page.
         message (str): Any exception message.
-        try_again_href (str): URL href to try the request again.
+        link_uri (str): Link url.
+        link_text (str): Link displayed text.
 
     """
     return (
@@ -330,8 +362,19 @@ def create_error_html(title, message, try_again_href):
         + "    </head>"
         + "    <body>"
         + "        <h1>%s</h1>" % title
-        + "        <p><b>ERROR:</b> %s</p>" % message
-        + "        <a href='%s'>Try again</a>" % try_again_href
+        + "        <p>%s</p>" % message
+        + "        <a href='%s'>%s</a>" % (link_uri, link_text)
         + "    </body>"
         + "</html>"
     )
+
+
+def timestamp_in_seconds():
+    """Return int of current unix time."""
+    return round(time.time())
+
+
+def sign(string_to_sign, secret, signature_length=16):
+    """Create HMAC signature for string."""
+    hashed = hmac.new(bytes(secret, "ascii"), bytes(string_to_sign, "ascii"), sha256)
+    return base64.urlsafe_b64encode(hashed.digest()).decode()[0:signature_length]

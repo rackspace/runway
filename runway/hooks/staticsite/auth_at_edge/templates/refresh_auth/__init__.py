@@ -1,13 +1,13 @@
 """Refresh authorization token for new credentials."""
 import logging
 import traceback
-from urllib.parse import parse_qs  # noqa pylint: disable=E
+from urllib.parse import parse_qs
 
 from shared import (  # noqa pylint: disable=import-error
     create_error_html,
     extract_and_parse_cookies,
+    generate_cookie_headers,
     get_config,
-    get_cookie_headers,
     http_post_with_retry,
 )
 
@@ -34,56 +34,56 @@ def handler(event, _context):
         # Add the requested uri path to the main
         redirected_from_uri += requested_uri or ""
 
-        cookies = extract_and_parse_cookies(
-            request.get("headers"), CONFIG.get("client_id")
-        )
+        cookies = extract_and_parse_cookies(request.get("headers"), CONFIG["client_id"])
+
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
         tokens = {
-            "id_token": cookies.get("idToken"),
-            "access_token": cookies.get("accessToken"),
-            "refresh_token": cookies.get("refreshToken"),
+            "id_token": cookies["id_token"],
+            "access_token": cookies["access_token"],
+            "refresh_token": cookies["refresh_token"],
         }
 
-        validate_refresh_request(current_nonce, cookies.get("nonce"), tokens)
+        validate_refresh_request(current_nonce, cookies["nonce"], tokens)
 
         try:
             # Request new tokens based on the refresh_token
             body = {
                 "grant_type": "refresh_token",
-                "client_id": CONFIG.get("client_id"),
+                "client_id": CONFIG["client_id"],
                 "refresh_token": tokens.get("refresh_token"),
             }
             res = http_post_with_retry(
-                ("https://%s/oauth2/token" % CONFIG.get("cognito_auth_domain")),
+                ("https://%s/oauth2/token" % CONFIG["cognito_auth_domain"]),
                 body,
-                {"Content-Type": "application/x-www-form-urlencoded"},
+                headers,
             )
             tokens["id_token"] = res.get("id_token")
             tokens["access_token"] = res.get("access_token")
+            cookie_headers_event_type = "new_tokens"
         except Exception as err:  # pylint: disable=broad-except
-            LOGGER.error(err)
-            # Otherwise clear the refresh token
-            tokens["refresh_token"] = ""
+            LOGGER.debug(err)
+            cookie_headers_event_type = "refresh_failed"
 
-        headers = {
-            "location": [{"key": "location", "value": redirected_from_uri}],
-            "set-cookie": get_cookie_headers(
-                CONFIG.get("client_id"),
-                CONFIG.get("oauth_scopes"),
-                tokens,
-                domain_name,
-                CONFIG.get("cookie_settings"),
-            ),
-        }
-        headers.update(CONFIG.get("cloud_front_headers"))
-
-        # Redirect the user back to their requested uri
-        # with new tokens at hand
-        return {
+        response = {
             "status": "307",
             "statusDescription": "Temporary Redirect",
-            "headers": headers,
+            "headers": {
+                "location": [{"key": "location", "value": redirected_from_uri}],
+                "set-cookie": generate_cookie_headers(
+                    cookie_headers_event_type,
+                    CONFIG.get("client_id"),
+                    CONFIG.get("oauth_scopes"),
+                    tokens,
+                    domain_name,
+                    CONFIG.get("cookie_settings"),
+                ),
+                **CONFIG.get("cloud_front_headers", {}),
+            },
         }
+        # Redirect the user back to their requested uri
+        # with new tokens at hand
+        return response
 
     # Send a basic html error response and inform the user
     # why refresh was unsuccessful
@@ -91,18 +91,23 @@ def handler(event, _context):
         LOGGER.info(err)
         LOGGER.info(traceback.print_exc())
 
-        headers = {
-            "content-type": [
-                {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
-            ]
-        }
-        headers.update(CONFIG.get("cloud_front_headers"))
-
-        return {
-            "body": create_error_html("Bad Request", err, redirected_from_uri),
+        response = {
+            "body": create_error_html(
+                "Refresh issue",
+                "Your sign-in refresh failed due to a technical issue: %s" % err,
+                redirected_from_uri,
+                "Try Again",
+            ),
             "status": "400",
-            "headers": headers,
+            "headers": {
+                "content-type": [
+                    {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
+                ],
+                **CONFIG.get("cloud_front_headers", {}),
+            },
         }
+
+        return response
 
 
 def validate_refresh_request(current_nonce, original_nonce, tokens):

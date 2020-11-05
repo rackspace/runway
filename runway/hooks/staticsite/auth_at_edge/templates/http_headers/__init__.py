@@ -13,7 +13,7 @@ def handler(event, _context):
 
     """
     headers = CONFIG.get("http_headers")
-    # Format to be CloudFront compatable
+    # Format to be CloudFront compatible
     configured_headers = as_cloud_front_headers(headers)
     response = event["Records"][0]["cf"]["response"]
     response["headers"].update(configured_headers)

@@ -218,6 +218,7 @@ class StaticSite(RunwayModule):
         hash_param = self.user_options.get("source_hashing", {}).get(
             "parameter", "${namespace}-%s-hash" % self.name
         )
+        nonce_secret_param = "${namespace}-%s-nonce-secret" % self.name
 
         build_staticsite_args = self.options.copy() or {}
         build_staticsite_args["artifact_bucket_rxref_lookup"] = (
@@ -281,8 +282,9 @@ class StaticSite(RunwayModule):
         post_destroy = [
             {
                 "path": "runway.hooks.cleanup_ssm.delete_param",
-                "args": {"parameter_name": hash_param},
+                "args": {"parameter_name": i},
             }
+            for i in [hash_param, nonce_secret_param, "%sextra" % hash_param]
         ]
 
         if self.parameters.get("staticsite_auth_at_edge", False):
@@ -309,7 +311,11 @@ class StaticSite(RunwayModule):
                     "path": "runway.hooks.staticsite.auth_at_edge.lambda_config.write",
                     "required": True,
                     "data_key": "aae_lambda_config",
-                    "args": self._get_lambda_config_variables(site_stack_variables),
+                    "args": self._get_lambda_config_variables(
+                        site_stack_variables,
+                        nonce_secret_param,
+                        self.parameters.get("staticsite_required_group"),
+                    ),
                 }
             )
             if not self.parameters.get("staticsite_aliases"):
@@ -537,16 +543,20 @@ class StaticSite(RunwayModule):
             "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
         }
 
-    def _get_lambda_config_variables(self, site_stack_variables):
+    def _get_lambda_config_variables(
+        self, site_stack_variables, nonce_secret_param, required_group=None
+    ):
         return {
             "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
             "bucket": "${rxref %s-dependencies::ArtifactsBucketName}" % self.name,
             "cookie_settings": site_stack_variables["CookieSettings"],
             "http_headers": site_stack_variables["HttpHeaders"],
+            "nonce_signing_secret_param_name": nonce_secret_param,
             "oauth_scopes": site_stack_variables["OAuthScopes"],
             "redirect_path_refresh": site_stack_variables["RedirectPathAuthRefresh"],
             "redirect_path_sign_in": site_stack_variables["RedirectPathSignIn"],
             "redirect_path_sign_out": site_stack_variables["RedirectPathSignOut"],
+            "required_group": required_group,
         }
 
     def _get_client_updater_variables(self, name, site_stack_variables):
