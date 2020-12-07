@@ -721,6 +721,18 @@ def run_commands(
                     sys.exit(1)
 
 
+def get_file_hash(filename, algorithm):
+    """Return cryptographic hash of file."""
+    file_hash = getattr(hashlib, algorithm)()
+    with open(filename, "rb") as stream:
+        while True:
+            data = stream.read(65536)  # 64kb chunks
+            if not data:
+                break
+            file_hash.update(data)
+    return file_hash.hexdigest()
+
+
 def md5sum(filename):
     """Return MD5 hash of file."""
     md5 = hashlib.md5()
