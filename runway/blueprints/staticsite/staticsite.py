@@ -388,7 +388,7 @@ class StaticSite(Blueprint):  # pylint: disable=too-few-public-methods
 
         if not self.cf_enabled:
             # bucket cannot be configured with WebsiteConfiguration when using OAI S3Origin
-            bucket["WebsiteConfiguration"] = s3.WebsiteConfiguration(
+            bucket.WebsiteConfiguration = s3.WebsiteConfiguration(
                 IndexDocument="index.html", ErrorDocument="error.html"
             )
             self.template.add_output(

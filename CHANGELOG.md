@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- fixed `TypeError` when Static Site is configured to use the S3 bucket to serve the website directly (e.g. CloudFront disabled)
+
 ## [1.16.0] - 2020-11-09
 ### Added
 - Static Site Auth@Edge: Add option to restrict access to a UserPool group
