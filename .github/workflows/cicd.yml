@@ -273,7 +273,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
         if: steps.check_distance.outcome == 'success'
-        uses: actions/setup-node@v1.4.1
+        uses: actions/setup-node@v1.4.4
         with:
           always-auth: true
           node-version: ${{ env.NODE_VERSION }}
@@ -353,7 +353,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
-        uses: actions/setup-node@v1.4.1
+        uses: actions/setup-node@v1.4.4
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
