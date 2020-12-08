@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.16.1] - 2020-12-07
 ### Fixed
 - fixed `TypeError` when Static Site is configured to use the S3 bucket to serve the website directly (e.g. CloudFront disabled)
 - Newer kubectl versions download errors (now supporting sha1/256/512 checksum verification)
@@ -1009,7 +1010,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.15.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.16.1...HEAD
+[1.16.1]: https://github.com/onicagroup/runway/compare/v1.16.0...v1.16.1
+[1.16.0]: https://github.com/onicagroup/runway/compare/v1.15.1...v1.16.0
 [1.15.1]: https://github.com/onicagroup/runway/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/onicagroup/runway/compare/v1.14.3...v1.15.0
 [1.14.3]: https://github.com/onicagroup/runway/compare/v1.14.2...v1.14.3
