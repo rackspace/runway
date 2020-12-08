@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - fixed `TypeError` when Static Site is configured to use the S3 bucket to serve the website directly (e.g. CloudFront disabled)
+- Newer kubectl versions download errors (now supporting sha1/256/512 checksum verification)
 
 ## [1.16.0] - 2020-11-09
 ### Added
