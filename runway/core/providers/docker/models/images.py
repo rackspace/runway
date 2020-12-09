@@ -114,7 +114,7 @@ class ImageCollection(_ImageCollection):  # pylint: disable=abstract-method
                     )
                     if match:
                         image_id = match.group(2)
-                        LOGGER.success(stream_msg.strip())
+                        LOGGER.info(stream_msg.strip())
                     else:
                         LOGGER.verbose(stream_msg.strip())
             else:

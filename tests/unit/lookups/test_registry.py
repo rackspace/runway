@@ -21,6 +21,7 @@ class TestCommonLookupFunctionality(object):
         """Verify default value is handled by lookups."""
         lookup_handlers = RUNWAY_LOOKUP_HANDLERS.copy()
         lookup_handlers.pop("cfn")  # requires special testing
+        lookup_handlers.pop("ecr")  # requires special testing
         lookup_handlers.pop("ssm")  # requires special testing
         for _, lookup in lookup_handlers.items():
             query = "NOT_VALID::default=default value"
@@ -32,6 +33,7 @@ class TestCommonLookupFunctionality(object):
         """Verify transform is handled by lookup."""
         lookup_handlers = RUNWAY_LOOKUP_HANDLERS.copy()
         lookup_handlers.pop("cfn")  # requires special testing
+        lookup_handlers.pop("ecr")  # requires special testing
         lookup_handlers.pop("ssm")  # requires special testing
         runway_context.env_vars.update(VALUES)
 
