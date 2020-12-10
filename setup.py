@@ -33,7 +33,7 @@ INSTALL_REQUIRES = [
     "requests",
     "future",
     "pyhcl~=0.4",  # does not support HCL2, possibly move to extras_require in the future
-    'python-hcl2>=0.3.0,<1.0.0; python_version >= "3.6"',  # only support >=3.6
+    'python-hcl2~=2.0; python_version >= "3.6"',  # only support >=3.6
     "gitpython",
     'importlib-metadata; python_version < "3.8"',
     "packaging",  # component of setuptools needed for version compare
