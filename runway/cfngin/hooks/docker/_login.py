@@ -1,8 +1,59 @@
-"""Docker login action.
+"""Docker login hook.
 
-Replicates the functionality of ``docker login`` cli command.
+Replicates the functionality of the ``docker login`` CLI command.
 
-CLI docs: https://docs.docker.com/engine/reference/commandline/login/
+This hook does not modify the Docker config file.
+The credentials/authenticated session is stored in memory and is deleted after
+processing a given CFNgin config file.
+
+This hook can be executed as a pre or post hook.
+The authenticated session carries over from pre to post and to each subsequent
+built-in Docker hook.
+
+.. rubric:: Hook Path
+
+``runway.cfngin.hooks.docker.login``
+
+.. rubric:: Args
+
+dockercfg_path (Optional[str])
+    Use a custom path for the Docker config file (``$HOME/.docker/config.json``
+    if present, otherwise ``$HOME/.dockercfg``).
+ecr (Optional[Union[bool, Dict[str, Optional[str]]]])
+    Information describing an ECR registry. This is used to construct the registry URL.
+    If providing a value for this field, do not provide a value for ``registry``.
+
+    If using a private registry, the value can simply be ``true``.
+    If using a public registry, more information is required.
+
+    account_id (Optional[str])
+        AWS account ID that owns the registry being logged into. If not provided,
+        it will be acquired automatically if needed.
+    alias (Optional[str])
+        If it is a public repository, provide the alias.
+    aws_region (Optional[str])
+        AWS region where the registry is located. If not provided, it will be acquired
+        automatically if needed.
+
+email (Optional[str])
+    The email for the registry account.
+password (str)
+    The plaintext password.
+registry (Optional[str])
+    URL to the registry (e.g. ``https://index.docker.io/v1/``).
+
+    If providing a value for this field, do not provide a value for ``ecr``.
+username (str)
+    The registry username. Defaults to ``AWS`` if supplying ``ecr``.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+    pre_build:
+      - path: runway.cfngin.hooks.docker.login
+        args:
+          ecr: true
+          password: ${ecr login-password}
 
 """
 import logging
@@ -18,14 +69,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class LoginArgs(BaseModel):
-    """Args passed to login."""
-
-    _ctx: Optional["Context"]
-    dockercfg_path: str
-    email: str
-    password: str
-    registry: str
-    username: str
+    """Args passed to the docker.login hook."""
 
     def __init__(
         self,
@@ -81,7 +125,7 @@ def login(**kwargs):  # type: (Any) -> DockerHookData
             Information describing an ECR registry.
         email (Optional[str]): The email for the registry account.
         password (str): The plaintext password.
-        registry (Optional[str]): URL to the registry (e.g.`` https://index.docker.io/v1/``)
+        registry (Optional[str]): URL to the registry (e.g. ``https://index.docker.io/v1/``)
         username (str): The registry username. Optional if supplying ``ecr``.
 
     """

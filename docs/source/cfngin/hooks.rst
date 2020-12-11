@@ -417,6 +417,33 @@ Run a custom command as a hook.
             shell: true
 
 
+.. _cfngin.hooks.docker:
+
+docker
+======
+
+docker.image.build
+------------------
+
+.. rubric:: Description
+.. automodule:: runway.cfngin.hooks.docker.image._build
+  :noindex:
+
+docker.image.push
+-----------------
+
+.. rubric:: Description
+.. automodule:: runway.cfngin.hooks.docker.image._push
+  :noindex:
+
+docker.login
+------------
+
+.. rubric:: Description
+.. automodule:: runway.cfngin.hooks.docker._login
+  :noindex:
+
+
 ecs.create_clusters
 ===================
 

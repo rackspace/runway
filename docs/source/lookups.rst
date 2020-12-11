@@ -69,6 +69,16 @@ cfn
 .. automodule:: runway.lookups.handlers.cfn
 
 
+.. _ecr lookup:
+.. _ecr-lookup:
+
+ecr
+===
+
+.. automodule:: runway.lookups.handlers.ecr
+  :noindex:
+
+
 .. _env lookup:
 .. _env-lookup:
 
