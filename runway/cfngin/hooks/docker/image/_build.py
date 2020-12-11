@@ -28,7 +28,6 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 class DockerImageBuildApiOptions(BaseModel):
     """Options for controlling Docker."""
 
-    _ctx = Optional["Context"]
     buildargs: Dict[str, Any]
     custom_context: bool = False
     extra_hosts: Optional[Dict[str, str]]
@@ -62,7 +61,7 @@ class DockerImageBuildApiOptions(BaseModel):
         target=None,  # type: Optional[str]
         timeout=None,  # type: Optional[int]
         use_config_proxy=False,  # type: bool
-        **kwargs,  # type: Any
+        **kwargs,  # type: Any  # pylint: disable=unused-argument
     ):
         # type: (...) -> None
         """Instantiate class.
@@ -91,7 +90,6 @@ class DockerImageBuildApiOptions(BaseModel):
                 being built.
 
         """
-        self._ctx = kwargs.get("context")  # type: Optional["Context"]
         self.buildargs = self._validate_dict(buildargs)
         self.custom_context = self._validate_bool(custom_context)
         self.extra_hosts = self._validate_dict(extra_hosts, optional=True)
@@ -147,7 +145,7 @@ class ImageBuildArgs(BaseModel):
         """
         docker = docker or {}
         self._ctx = context
-        self.path = self._validate_path(path or Path.cwd())
+        self.path = self._validate_path(path or Path.cwd(), must_exist=True)
         self.dockerfile = self._validate_dockerfile(self.path, dockerfile)
         self.repo = self.determine_repo(
             context=context,
@@ -158,7 +156,7 @@ class ImageBuildArgs(BaseModel):
 
         if self.repo:
             docker.setdefault("tag", self.repo)
-        self.docker = DockerImageBuildApiOptions.parse_obj(docker, context=self._ctx)
+        self.docker = DockerImageBuildApiOptions.parse_obj(docker)
 
     @classmethod
     def _validate_dockerfile(cls, path, dockerfile):

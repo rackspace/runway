@@ -35,7 +35,7 @@ ECR_REPO_FQN_TEMPLATE = (
 )
 
 
-class BaseModel:
+class BaseModel(object):
     """Base model."""
 
     def dict(self):  # type: () -> Dict[str, Any]
@@ -67,9 +67,10 @@ class BaseModel:
         if not value:
             if required:
                 raise ValueError("Dict can't be empty or NoneType")
-            if optional:
-                return None
-            return {}
+            if not isinstance(value, dict):
+                if optional:
+                    return None
+                return {}
         if isinstance(value, dict):
             return value
         return cls._validate_dict(dict(value), optional=optional, required=required)
@@ -84,16 +85,19 @@ class BaseModel:
                 return None
         if isinstance(value, int):
             return value
-        return cls._validate_int(int(value), optional=optional, required=required)
+        return cls._validate_int(int(value or 0), optional=optional, required=required)
 
     @classmethod
-    def _validate_list_str(cls, value, required=False):
-        # type: (Any, bool) -> List[str]
+    def _validate_list_str(cls, value, optional=False, required=False):
+        # type: (Any, bool, bool) -> List[str]
         """Validate a List[str] type attribute."""
         if not value:
             if required:
                 raise ValueError("List can't be empty or NoneType")
-            return []
+            if not isinstance(value, list):
+                if optional:
+                    return None
+                return []
         if isinstance(value, list):
             if all(isinstance(i, str) for i in value):
                 return value
@@ -133,7 +137,7 @@ class BaseModel:
         if not value:
             if required:
                 raise ValueError("value can't be empty or NoneType")
-            if optional:
+            if not isinstance(value, str) and optional:
                 return None
         if isinstance(value, str):
             return value
@@ -163,7 +167,7 @@ class BaseModel:
     def __eq__(self, other):
         # type: (Any) -> bool
         """Evaluate equal comparison operator."""
-        if isinstance(other, Model):
+        if isinstance(other, self.__class__):
             return self.dict() == other.dict()
         return self.dict() == other
 
@@ -177,14 +181,27 @@ class BaseModel:
             KeyError: Object does not contain a field of the name provided.
 
         """
-        try:
-            return getattr(self, name)
-        except AttributeError:
-            raise KeyError(name)
+        return getattr(self, name)
 
     def __iter__(self):  # type: () -> Generator[Tuple[str, Any], None, None]
         """Iterate object."""
         yield from self.__dict__.items()
+
+    def __ne__(self, other):  # TODO remove when dropping python 2 support
+        # type: (Any) -> bool
+        """Override the default implementation (unnecessary in Python 3)."""
+        return not self.__eq__(other)  # cov: ignore
+
+    def __setitem__(self, name, value):
+        # type: (str, Any) -> None
+        """Implement assignment to self[key].
+
+        Args:
+            name: Attribute name to associate with a value.
+            value: Value of a key/attribute.
+
+        """
+        setattr(self, name, value)
 
 
 class ElasticContainerRegistry(BaseModel):
@@ -208,7 +225,7 @@ class ElasticContainerRegistry(BaseModel):
         self.public = bool(self.alias)
 
         if not self.public:
-            if not self._ctx:
+            if not self._ctx and not (self.account_id or self.region):
                 raise ValueError("context is required to resolve values")
             if not self.region:
                 self.region = self._validate_str(
@@ -229,9 +246,6 @@ class ElasticContainerRegistry(BaseModel):
 
 class ElasticContainerRegistryRepository(BaseModel):
     """AWS Elastic Container Registry (ECR) Repository."""
-
-    PUBLIC_URI_TEMPLATE = "public.ecr.aws/{registry_alias}/"
-    URI_TEMPLATE = "{aws_account_id}.dk.ecr.{aws_region}.amazonaws.com/"
 
     def __init__(
         self,

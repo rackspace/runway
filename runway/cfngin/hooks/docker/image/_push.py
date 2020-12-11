@@ -22,22 +22,20 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 class ImagePushArgs(BaseModel):
     """Args passed to image.push."""
 
-    _ctx = Optional["Context"]
     repo: Optional[str]
     tags: List[str]
 
     def __init__(
         self,
-        context=None,  # type: Optional["Context"]
         ecr_repo=None,  # type: Optional[Dict[str, Any]]
         image=None,  # type: Optional[Image]
         repo=None,  # type: Optional[str]
         tags=None,  # type: Optional[List[str]]
+        **kwargs,  # type: Any
     ):  # type: (...) -> None
         """Instantiate class."""
-        self._ctx = context
         self.repo = self.determine_repo(
-            context=context, ecr_repo=ecr_repo, image=image, repo=repo
+            context=kwargs.get("context"), ecr_repo=ecr_repo, image=image, repo=repo
         )
         if isinstance(image, Image) and not tags:
             tags = [tag.rsplit(":", 1)[-1] for tag in image.tags]

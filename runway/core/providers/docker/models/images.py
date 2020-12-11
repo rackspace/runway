@@ -1,4 +1,8 @@
-"""Replicate the functionality of `docker image` CLI commands."""
+"""Replicate the functionality of `docker image` CLI commands.
+
+https://github.com/docker/docker-py/blob/master/docker/models/images.py
+
+"""
 import itertools
 import logging
 import re

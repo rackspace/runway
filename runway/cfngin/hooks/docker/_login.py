@@ -49,6 +49,8 @@ class LoginArgs(BaseModel):
             self.username = (
                 "AWS" if ecr else self._validate_str(username, required=True)
             )
+        else:
+            self.username = self._validate_str(username, required=True)
 
     @staticmethod
     def determine_registry(
@@ -79,7 +81,7 @@ def login(**kwargs):  # type: (Any) -> DockerHookData
             Information describing an ECR registry.
         email (Optional[str]): The email for the registry account.
         password (str): The plaintext password.
-        registry (Optional[str]): URL to the registry (e.g. https://index.docker.io/v1/``)
+        registry (Optional[str]): URL to the registry (e.g.`` https://index.docker.io/v1/``)
         username (str): The registry username. Optional if supplying ``ecr``.
 
     """

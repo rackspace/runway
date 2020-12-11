@@ -26,6 +26,7 @@ pydocstyle = "~=5.0.2"
 coverage = {extras = ["toml"],version = "~=5.2.1"}
 pytest = "<5.0"  # last version that supports 2.7 - allows install with 2/3
 pytest-cov = "~=2.10.1"
+pytest-mock = "<3.0.0"  # 3.0.0 drops support for 2.7
 py = "*"
 mock = "~=3.0.5"
 moto = "~=1.3"
