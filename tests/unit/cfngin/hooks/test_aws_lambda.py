@@ -32,9 +32,9 @@ from runway.cfngin.hooks.aws_lambda import (
     upload_lambda_functions,
 )
 
+from ...mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
+from ...mock_docker.fake_api_client import make_fake_client
 from ..factories import mock_provider
-from ..fixtures.mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
-from ..fixtures.mock_docker.fake_api_client import make_fake_client
 
 REGION = "us-east-1"
 ALL_FILES = (

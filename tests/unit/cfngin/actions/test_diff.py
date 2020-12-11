@@ -73,7 +73,6 @@ class TestAction(object):
 
         assert action.bucket_name == bucket_name
 
-    @pytest.mark.wip
     def test_diff_stack_validationerror_template_too_large(
         self, caplog, cfngin_context, monkeypatch
     ):

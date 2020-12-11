@@ -2,6 +2,7 @@
 import io
 import os
 import sys
+from typing import Optional
 
 import boto3
 import yaml
@@ -127,7 +128,11 @@ class MockCFNginContext(CFNginContext):
             force_stacks=force_stacks,
         )
 
-    def add_stubber(self, service_name, region=None):
+    def add_stubber(
+        self,
+        service_name,  # type: str
+        region=None,  # type: Optional[str]
+    ):  # type: (...) -> Stubber
         """Add a stubber to context.
 
         Args:
@@ -254,7 +259,11 @@ class MockRunwayContext(RunwayContext):
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True
 
-    def add_stubber(self, service_name, region=None):
+    def add_stubber(
+        self,
+        service_name,  # type: str
+        region=None,  # type: Optional[str]
+    ):  # type: (...) -> Stubber
         """Add a stubber to context.
 
         Args:
