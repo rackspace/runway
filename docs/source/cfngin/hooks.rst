@@ -436,6 +436,13 @@ docker.image.push
 .. automodule:: runway.cfngin.hooks.docker.image._push
   :noindex:
 
+docker.image.remove
+-----------------
+
+.. rubric:: Description
+.. automodule:: runway.cfngin.hooks.docker.image._remove
+  :noindex:
+
 docker.login
 ------------
 

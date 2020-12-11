@@ -4,7 +4,7 @@ Replicates the functionality of the ``docker image build`` CLI command.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.docker.login``
+``runway.cfngin.hooks.docker.image.build``
 
 .. rubric:: Args
 
@@ -107,7 +107,7 @@ image
             - python3.9
       - path: runway.cfngin.hooks.docker.image.push
         args:
-        image: ${hook_data docker.image}
+          image: ${hook_data docker.image}
 
 """
 import logging

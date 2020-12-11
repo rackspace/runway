@@ -1,10 +1,10 @@
-"""Docker image push hook.
+"""Docker image build hook.
 
-Replicates the functionality of the ``docker image push`` CLI command.
+Replicates the functionality of the ``docker image remove`` CLI command.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.docker.image.push``
+``runway.cfngin.hooks.docker.image.remove``
 
 .. rubric:: Args
 
@@ -26,17 +26,21 @@ ecr_repo (Optional[Dict[str, Optional[str]]])
     repo_name (str)
         The name of the repository
 
+force (bool)
+    Force removal of the image. (*default:* ``False``)
 image (Optional[Image])
     A :class:`docker.models.images.Image` object.
-    This can be retrieved from ``hook_data`` for a preceding *build* using the
-    :ref:`hook_data Lookup <hook_data lookup>`.
+    If providing an ``Image`` object from ```hook_data``, it will be removed from
+    from there as well.
 
     If providing a value for this field, do not provide a value for ``ecr_repo`` or ``repo``.
+noprune (bool)
+    Do not delete untagged parents. (*default:* ``False``)
 repo (Optional[str])
-    URI of a non Docker Hub repository where the image will be stored.
+    URI of a non Docker Hub repository where the image is stored.
     If providing one of the other repo values or ``image``, leave this value empty.
 tags (Optional[List[str]])
-    List of tags push. (*default:* ``["latest"]``)
+    List of tags delete. (*default:* ``["latest"]``)
 
 .. rubric:: Example
 .. code-block:: yaml
@@ -56,11 +60,26 @@ tags (Optional[List[str]])
       - path: runway.cfngin.hooks.docker.image.push
         args:
           image: ${hook_data docker.image}
+          tags:
+            - latest
+            - python3.9
+
+    stacks:
+      ...
+
+    post_build:
+      - path: runway.cfngin.hooks.docker.image.remove
+        args:
+          image: ${hook_data docker.image}
+          tags:
+            - latest
+            - python3.9
 
 """
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from docker.errors import ImageNotFound
 from docker.models.images import Image
 
 from .._data_models import BaseModel, ElasticContainerRegistryRepository
@@ -72,18 +91,22 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class ImagePushArgs(BaseModel):
-    """Args passed to image.push."""
+class ImageRemoveArgs(BaseModel):
+    """Args passed to image.remove."""
 
     def __init__(
         self,
         ecr_repo=None,  # type: Optional[Dict[str, Any]]
+        force=False,  # type: bool
         image=None,  # type: Optional[Image]
+        noprune=False,  # type: bool
         repo=None,  # type: Optional[str]
         tags=None,  # type: Optional[List[str]]
         **kwargs,  # type: Any
     ):  # type: (...) -> None
         """Instantiate class."""
+        self.force = force
+        self.noprune = noprune
         self.repo = self.determine_repo(
             context=kwargs.get("context"), ecr_repo=ecr_repo, image=image, repo=repo
         )
@@ -115,21 +138,29 @@ class ImagePushArgs(BaseModel):
             return ElasticContainerRegistryRepository.parse_obj(
                 ecr_repo, context=context
             ).fqn
-        return None
+        raise ValueError("a repo must be specified")
 
 
-def push(**kwargs):  # type: (...) -> DockerHookData
-    """Docker image push hook.
+def remove(**kwargs):  # type: (...) -> DockerHookData
+    """Docker image push remove.
 
     Replicates the functionality of ``docker image push`` CLI command.
 
     """
     context = kwargs.pop("context")  # type: "Context"
     kwargs.pop("provider", None)  # not needed
-    args = ImagePushArgs.parse_obj(kwargs, context=context)
+    args = ImageRemoveArgs.parse_obj(kwargs, context=context)
     docker_hook_data = DockerHookData.from_cfngin_context(context)
-    LOGGER.info("pushing image %s...", args.repo)
+    LOGGER.info("removing local image %s...", args.repo)
     for tag in args.tags:
-        docker_hook_data.client.images.push(repository=args.repo, tag=tag)
-        LOGGER.info("successfully pushed image %s:%s", args.repo, tag)
+        image = "{}:{}".format(args.repo, tag)
+        try:
+            docker_hook_data.client.images.remove(
+                image=image, force=args.force, noprune=args.noprune
+            )
+            LOGGER.info("successfully removed local image %s", image)
+        except ImageNotFound:
+            LOGGER.warning("local image %s does not exist", image)
+    if kwargs.get("image") and kwargs["image"] == docker_hook_data.image:
+        docker_hook_data.image = None  # clear out the image that was set
     return docker_hook_data.update_context(context)
