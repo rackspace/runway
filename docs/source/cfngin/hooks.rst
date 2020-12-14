@@ -451,6 +451,14 @@ docker.login
   :noindex:
 
 
+ecr.purge_repository
+====================
+
+.. rubric:: Description
+.. automodule:: runway.cfngin.hooks.ecr._purge_repository
+  :noindex:
+
+
 ecs.create_clusters
 ===================
 

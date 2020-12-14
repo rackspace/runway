@@ -35,8 +35,6 @@ MOCK_IMAGE_PROPS = {
     "tags": ["dkr.test.com/image:latest", "dkr.test.com/image:oldest"],
 }
 
-pytestmark = pytest.mark.wip
-
 
 @pytest.fixture(scope="function")
 def mock_image():  # type: () -> MagicMock
