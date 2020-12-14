@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 from mock import MagicMock
 
 from runway.cfngin.hooks.docker import login
-from runway.cfngin.hooks.docker._data_models import ElasticContainerRegistry
-from runway.cfngin.hooks.docker._hook_data import DockerHookData
 from runway.cfngin.hooks.docker._login import LoginArgs
+from runway.cfngin.hooks.docker.data_models import ElasticContainerRegistry
+from runway.cfngin.hooks.docker.hook_data import DockerHookData
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

@@ -2,11 +2,13 @@
 # pylint: disable=no-self-use,protected-access
 from typing import TYPE_CHECKING
 
-from docker.models.images import Image
 from mock import MagicMock, call
 
-from runway.cfngin.hooks.docker._data_models import ElasticContainerRegistryRepository
-from runway.cfngin.hooks.docker._hook_data import DockerHookData
+from runway.cfngin.hooks.docker.data_models import (
+    DockerImage,
+    ElasticContainerRegistryRepository,
+)
+from runway.cfngin.hooks.docker.hook_data import DockerHookData
 from runway.cfngin.hooks.docker.image import push
 from runway.cfngin.hooks.docker.image._push import ImagePushArgs
 
@@ -81,10 +83,7 @@ class TestImagePushArgs(object):
     def test_determine_repo_image(self):  # type: () -> None
         """Test determine_repo Image."""
         repo = "dkr.test.com/image"
-        tag = "latest"
-        mock_image = MagicMock(
-            spec=Image, attrs={"RepoTags": ["{}:{}".format(repo, tag)]}
-        )
+        mock_image = MagicMock(spec=DockerImage, repo=repo)
         assert (
             ImagePushArgs.determine_repo(
                 context=None, ecr_repo=True, image=mock_image, repo=None
@@ -116,9 +115,7 @@ class TestImagePushArgs(object):
         """Test init Image."""
         repo = "dkr.test.com/image"
         tags = ["latest", "oldest"]
-        mock_image = MagicMock(
-            spec=Image, tags=["{}:{}".format(repo, tag) for tag in tags]
-        )
+        mock_image = MagicMock(spec=DockerImage, repo=repo, tags=tags)
         mock_determine_repo = mocker.patch.object(
             ImagePushArgs, "determine_repo", return_value=repo
         )

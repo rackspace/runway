@@ -1,15 +1,15 @@
-"""Test runway.cfngin.hooks.docker._hook_data."""
+"""Test runway.cfngin.hooks.docker.hook_data."""
 # pylint: disable=no-self-use
 from typing import TYPE_CHECKING
 
-from runway.cfngin.hooks.docker._hook_data import DockerHookData
+from runway.cfngin.hooks.docker.hook_data import DockerHookData
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from ....factories import MockCFNginContext
 
-MODULE = "runway.cfngin.hooks.docker._hook_data"
+MODULE = "runway.cfngin.hooks.docker.hook_data"
 
 
 class TestDockerHookData(object):

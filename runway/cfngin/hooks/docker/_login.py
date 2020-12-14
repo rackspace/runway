@@ -59,8 +59,8 @@ username (str)
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-from ._data_models import BaseModel, ElasticContainerRegistry
-from ._hook_data import DockerHookData
+from .data_models import BaseModel, ElasticContainerRegistry
+from .hook_data import DockerHookData
 
 if TYPE_CHECKING:
     from ....context import Context

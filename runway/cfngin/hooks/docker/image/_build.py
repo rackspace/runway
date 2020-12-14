@@ -82,8 +82,9 @@ The following are values accessable with the :ref:`hook_data Lookup <hook_data l
 under the ``data_key`` of ``docker`` (do not specify a ``data_key`` for the hook, this
 is handled automatically).
 
-image
-    A :class:`docker.models.images.Image` object for the image that was just built.
+image (DockerImage)
+    A :class:`~runway.cfngin.hooks.docker.data_models.DockerImage` object for the
+    image that was just built.
 
     .. important::
       Each execution of this hook overwrites any previous values stored in this attribute.
@@ -114,8 +115,8 @@ import logging
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from .._data_models import BaseModel, ElasticContainerRegistryRepository
-from .._hook_data import DockerHookData
+from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryRepository
+from ..hook_data import DockerHookData
 
 if sys.version_info.major > 2:
     from pathlib import Path  # pylint: disable=E
@@ -298,5 +299,5 @@ def build(**kwargs):  # type: (...) -> DockerHookData
         image.tag(args.repo, tag=tag)
     image.reload()
     LOGGER.info("created image %s with tags %s", image.short_id, ", ".join(image.tags))
-    docker_hook_data.image = image
+    docker_hook_data.image = DockerImage(image=image)
     return docker_hook_data.update_context(context)

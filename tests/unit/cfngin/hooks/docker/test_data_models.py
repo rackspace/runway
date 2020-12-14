@@ -1,15 +1,18 @@
-"""Test runway.cfngin.hooks.docker._data_models."""
-# pylint: disable=no-self-use,protected-access
+"""Test runway.cfngin.hooks.docker.data_models."""
+# pylint: disable=no-self-use,protected-access,redefined-outer-name
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pytest
+from docker.models.images import Image
 from mock import MagicMock
 
-from runway.cfngin.hooks.docker._data_models import (
+from runway.cfngin.hooks.docker.data_models import (
     BaseModel,
+    DockerImage,
     ElasticContainerRegistry,
     ElasticContainerRegistryRepository,
 )
+from runway.util import MutableMap
 
 if TYPE_CHECKING:
     import sys  # pylint: disable=E
@@ -23,7 +26,22 @@ if TYPE_CHECKING:
     else:
         from pathlib2 import Path  # type: ignore pylint: disable=E
 
-MODULE = "runway.cfngin.hooks.docker._data_models"
+MODULE = "runway.cfngin.hooks.docker.data_models"
+MOCK_IMAGE_REPO = "dkr.test.com/image"
+MOCK_IMAGE_PROPS = {
+    "attrs": {"RepoTags": ["dkr.test.com/image:latest", "dkr.test.com/image:oldest"]},
+    "id": "acb123",
+    "short_id": "sha256:abc",
+    "tags": ["dkr.test.com/image:latest", "dkr.test.com/image:oldest"],
+}
+
+pytestmark = pytest.mark.wip
+
+
+@pytest.fixture(scope="function")
+def mock_image():  # type: () -> MagicMock
+    """Return a mock docker.models.images.Image."""
+    return MagicMock(spec=Image, **MOCK_IMAGE_PROPS)
 
 
 class SampleModel(BaseModel):
@@ -42,6 +60,40 @@ class TestBaseModel(object):
         """Test dict."""
         obj = SampleModel(key="val", _key="val")
         assert obj.dict() == {"key": "val"}
+
+    def test_find(self):  # type: () -> None
+        """Test find."""
+        obj = SampleModel(key="val")
+        assert obj.find("key") == "val"
+        assert obj.find("missing") is None
+        assert obj.find("missing", "default") == "default"
+
+    def test_find_nested(self):  # type: () -> None
+        """Test find nested value."""
+        assert (
+            SampleModel(lang=SampleModel(python="found")).find("lang.python") == "found"
+        )
+        assert (
+            SampleModel(lang=SampleModel(**{"python3.8": "found"})).find(
+                "lang.python3.8"
+            )
+            == "found"
+        )
+        assert (
+            SampleModel(lang=SampleModel(**{"python3.8": "found"})).find(
+                "lang.python3.9", "not found"
+            )
+            == "not found"
+        )
+
+    def test_find_nested_attr_key_error(self):  # type: () -> None
+        """Test find nested AttributeError/KeyError."""
+        assert (
+            SampleModel(lang={"python": {"3": "found"}}).find(
+                "lang.python.3", "default"
+            )
+            == "default"
+        )
 
     def test_get(self):  # type: () -> None
         """Test get."""
@@ -221,6 +273,41 @@ class TestBaseModel(object):
             BaseModel._validate_str(None, required=True)
         with pytest.raises(ValueError):
             BaseModel._validate_str("", required=True)
+
+
+class TestDockerImage(object):
+    """Test runway.cfngin.hooks.docker.data_models.DockerImage."""
+
+    def test_id(self, mock_image):  # type: (MagicMock) -> None
+        """Test id."""
+        obj = DockerImage(image=mock_image)
+        assert obj.id == MOCK_IMAGE_PROPS["id"]
+        obj.id = "new-id"
+        assert obj.id == "new-id"
+
+    def test_repo(self, mock_image):  # type: (MagicMock) -> None
+        """Test repo."""
+        obj = DockerImage(image=mock_image)
+        assert obj.repo == MOCK_IMAGE_REPO
+        obj.repo = "new-repo"
+        assert obj.repo == "new-repo"
+
+    def test_sort_id(self, mock_image):  # type: (MagicMock) -> None
+        """Test short_id."""
+        obj = DockerImage(image=mock_image)
+        assert obj.short_id == MOCK_IMAGE_PROPS["short_id"]
+        obj.short_id = "new-id"
+        assert obj.short_id == "new-id"
+
+    def test_tags(self, mock_image):  # type: (MagicMock) -> None
+        """Test tags."""
+        assert DockerImage(image=mock_image).tags == ["latest", "oldest"]
+
+    def test_uri(self, mock_image):  # type: (MagicMock) -> None
+        """Test URI."""
+        assert DockerImage(image=mock_image).uri == MutableMap(
+            latest=MOCK_IMAGE_REPO + ":latest", oldest=MOCK_IMAGE_REPO + ":oldest"
+        )
 
 
 class TestElasticContainerRegistry(object):

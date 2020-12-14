@@ -5,15 +5,14 @@ from ....core.providers.docker import DockerClient
 from ....util import MutableMap, cached_property
 
 if TYPE_CHECKING:
-    from docker.models.images import Image
-
     from ...context import Context
+    from .data_models import DockerImage
 
 
 class DockerHookData(MutableMap):
     """Docker hook_data object."""
 
-    image = None  # type: Optional["Image"]
+    image = None  # type: Optional["DockerImage"]
 
     @cached_property
     def client(self):  # type: () -> DockerClient

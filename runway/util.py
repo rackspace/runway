@@ -192,13 +192,17 @@ class MutableMap(six.moves.collections_abc.MutableMapping):  # pylint: disable=n
         nested_value = self.get(split_query[0])
 
         if not nested_value:
+            if self.get(query):
+                return self.get(query)
             return default
 
         nested_value = nested_value.find(split_query[1])
 
         try:
             nested_value = self[split_query[0]].find(
-                ".".join(split_query[1:]), default, ignore_cache
+                query=".".join(split_query[1:]),
+                default=default,
+                ignore_cache=ignore_cache,
             )
             if nested_value != default:
                 self._found_queries[query] = nested_value

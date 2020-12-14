@@ -28,8 +28,8 @@ ecr_repo (Optional[Dict[str, Optional[str]]])
 
 force (bool)
     Force removal of the image. (*default:* ``False``)
-image (Optional[Image])
-    A :class:`docker.models.images.Image` object.
+image (Optional[DockerImage])
+    A :class:`~runway.cfngin.hooks.docker.data_models.DockerImage` object.
     If providing an ``Image`` object from ```hook_data``, it will be removed from
     from there as well.
 
@@ -80,10 +80,9 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from docker.errors import ImageNotFound
-from docker.models.images import Image
 
-from .._data_models import BaseModel, ElasticContainerRegistryRepository
-from .._hook_data import DockerHookData
+from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryRepository
+from ..hook_data import DockerHookData
 
 if TYPE_CHECKING:
     from ....context import Context
@@ -98,7 +97,7 @@ class ImageRemoveArgs(BaseModel):
         self,
         ecr_repo=None,  # type: Optional[Dict[str, Any]]
         force=False,  # type: bool
-        image=None,  # type: Optional[Image]
+        image=None,  # type: Optional[DockerImage]
         noprune=False,  # type: bool
         repo=None,  # type: Optional[str]
         tags=None,  # type: Optional[List[str]]
@@ -110,15 +109,15 @@ class ImageRemoveArgs(BaseModel):
         self.repo = self.determine_repo(
             context=kwargs.get("context"), ecr_repo=ecr_repo, image=image, repo=repo
         )
-        if isinstance(image, Image) and not tags:
-            tags = [tag.rsplit(":", 1)[-1] for tag in image.tags]
+        if image and not tags:
+            tags = image.tags
         self.tags = self._validate_list_str(tags or ["latest"], required=True)
 
     @staticmethod
     def determine_repo(
         context=None,  # type: Optional["Context"]
         ecr_repo=None,  # type: Optional[Dict[str, Optional[str]]]
-        image=None,  # type: Optional[Image]
+        image=None,  # type: Optional[DockerImage]
         repo=None,  # type: Optional[str]
     ):  # type: (...) -> Optional[str]
         """Determine repo URI.
@@ -132,8 +131,8 @@ class ImageRemoveArgs(BaseModel):
         """
         if repo:
             return repo
-        if isinstance(image, Image):
-            return image.attrs["RepoTags"][0].rsplit(":", 1)[0]
+        if isinstance(image, DockerImage):
+            return image.repo
         if ecr_repo:
             return ElasticContainerRegistryRepository.parse_obj(
                 ecr_repo, context=context
@@ -161,6 +160,6 @@ def remove(**kwargs):  # type: (...) -> DockerHookData
             LOGGER.info("successfully removed local image %s", image)
         except ImageNotFound:
             LOGGER.warning("local image %s does not exist", image)
-    if kwargs.get("image") and kwargs["image"] == docker_hook_data.image:
+    if kwargs.get("image") and kwargs["image"].id == docker_hook_data.image.id:
         docker_hook_data.image = None  # clear out the image that was set
     return docker_hook_data.update_context(context)

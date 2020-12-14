@@ -4,11 +4,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 from docker.errors import ImageNotFound
-from docker.models.images import Image
 from mock import MagicMock, call
 
-from runway.cfngin.hooks.docker._data_models import ElasticContainerRegistryRepository
-from runway.cfngin.hooks.docker._hook_data import DockerHookData
+from runway.cfngin.hooks.docker.data_models import (
+    DockerImage,
+    ElasticContainerRegistryRepository,
+)
+from runway.cfngin.hooks.docker.hook_data import DockerHookData
 from runway.cfngin.hooks.docker.image import remove
 from runway.cfngin.hooks.docker.image._remove import ImageRemoveArgs
 
@@ -27,7 +29,9 @@ def test_remove(cfngin_context, mock_docker_client, mocker):
     """Test remove."""
     repo = "dkr.test.com/image"
     tags = ["latest", "oldest"]
-    mock_image = MagicMock(spec=Image, tags=["{}:{}".format(repo, tag) for tag in tags])
+    mock_image = MagicMock(
+        spec=DockerImage, tags=["{}:{}".format(repo, tag) for tag in tags]
+    )
     mock_image.attrs = {"RepoTags": mock_image.tags}
     args = ImageRemoveArgs(force=True, image=mock_image, tags=["latest", "oldest"])
     mocker.patch.object(ImageRemoveArgs, "parse_obj", return_value=args)
@@ -124,10 +128,7 @@ class TestImageRemoveArgs(object):
     def test_determine_repo_image(self):  # type: () -> None
         """Test determine_repo Image."""
         repo = "dkr.test.com/image"
-        tag = "latest"
-        mock_image = MagicMock(
-            spec=Image, attrs={"RepoTags": ["{}:{}".format(repo, tag)]}
-        )
+        mock_image = MagicMock(spec=DockerImage, repo=repo)
         assert (
             ImageRemoveArgs.determine_repo(
                 context=None, ecr_repo=True, image=mock_image, repo=None
@@ -162,9 +163,7 @@ class TestImageRemoveArgs(object):
         """Test init Image."""
         repo = "dkr.test.com/image"
         tags = ["latest", "oldest"]
-        mock_image = MagicMock(
-            spec=Image, tags=["{}:{}".format(repo, tag) for tag in tags]
-        )
+        mock_image = MagicMock(spec=DockerImage, repo=repo, tags=tags)
         mock_determine_repo = mocker.patch.object(
             ImageRemoveArgs, "determine_repo", return_value=repo
         )

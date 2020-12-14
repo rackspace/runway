@@ -18,6 +18,7 @@ from typing import (
 )
 
 from ....core.providers.aws import AccountDetails
+from ....util import MutableMap
 
 if sys.version_info.major > 2:
     from pathlib import Path  # pylint: disable=E
@@ -25,6 +26,8 @@ else:
     from pathlib2 import Path  # type: ignore pylint: disable=E
 
 if TYPE_CHECKING:
+    from docker.models.images import Image
+
     from ...context import Context
 
     Model = TypeVar("Model", bound="BaseModel")
@@ -41,6 +44,28 @@ class BaseModel(object):
     def dict(self):  # type: () -> Dict[str, Any]
         """Return object as a dict."""
         return {k: v for k, v in self.__iter__() if not k.startswith("_")}
+
+    def find(self, query, default=None, **kwargs):  # type: (str, Any, Any) -> Any
+        """Find a value in the object."""
+        split_query = query.split(".")
+
+        if len(split_query) == 1:
+            return self.get(split_query[0], default, **kwargs)
+
+        nested_value = self.get(split_query[0])
+
+        if not nested_value:
+            if self.get(query):
+                return self.get(query)
+            return default
+
+        try:
+            nested_value = nested_value.find(
+                query=".".join(split_query[1:]), default=default, **kwargs
+            )
+            return nested_value
+        except (AttributeError, KeyError):
+            return default
 
     def get(self, name, default=None):  # type: (str, Any) -> Any
         """Get a value or return default if it is not found.
@@ -242,6 +267,58 @@ class ElasticContainerRegistry(BaseModel):
         return self.URI_TEMPLATE.format(
             aws_account_id=self.account_id, aws_region=self.region
         )
+
+
+class DockerImage(BaseModel):
+    """Wrapper for :class:`docker.models.images.Image`."""
+
+    def __init__(self, image):  # type: (Image) -> None
+        """Instantiate class."""
+        self._repo = None  # caching
+        self.image = image
+
+    @property
+    def id(self):  # type: () -> str
+        """ID of the image."""
+        return self.image.id
+
+    @id.setter
+    def id(self, value):  # type: (str) -> None
+        """Set the ID of the image."""
+        self.image.id = value
+
+    @property
+    def repo(self):  # type: () -> str
+        """Repository URI."""
+        if not self._repo:
+            self._repo = self.image.attrs["RepoTags"][0].rsplit(":", 1)[0]
+        return self._repo
+
+    @repo.setter
+    def repo(self, value):  # type: (str) -> None
+        """Set repository URI value."""
+        self._repo = value
+
+    @property
+    def short_id(self):  # type: () -> str
+        """ID of the image truncated to 10 characters plus the ``sha256:`` prefix."""
+        return self.image.short_id
+
+    @short_id.setter
+    def short_id(self, value):  # type: (str) -> None
+        """Set the ID of the image truncated to 10 characters plus the ``sha256:`` prefix."""
+        self.image.short_id = value
+
+    @property
+    def tags(self):  # type: () -> List[str]
+        """List of image tags."""
+        self.image.reload()
+        return [uri.split(":")[-1] for uri in self.image.tags]
+
+    @property
+    def uri(self):  # type: () -> MutableMap
+        """Return a mapping of tag to image URI."""
+        return MutableMap(**{uri.split(":")[-1]: uri for uri in self.image.tags})
 
 
 class ElasticContainerRegistryRepository(BaseModel):

@@ -8,8 +8,11 @@ import pytest
 from docker.models.images import Image
 from mock import MagicMock
 
-from runway.cfngin.hooks.docker._data_models import ElasticContainerRegistryRepository
-from runway.cfngin.hooks.docker._hook_data import DockerHookData
+from runway.cfngin.hooks.docker.data_models import (
+    DockerImage,
+    ElasticContainerRegistryRepository,
+)
+from runway.cfngin.hooks.docker.hook_data import DockerHookData
 from runway.cfngin.hooks.docker.image import build
 from runway.cfngin.hooks.docker.image._build import (
     DockerImageBuildApiOptions,
@@ -60,7 +63,8 @@ def test_build(cfngin_context, mock_docker_client, mocker, tmp_path):
     )
     mock_image.tag.assert_called_once_with(None, tag="latest")
     mock_image.reload.assert_called_once()
-    assert docker_hook_data.image == mock_image
+    assert isinstance(docker_hook_data.image, DockerImage)
+    assert docker_hook_data.image.image == mock_image
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
