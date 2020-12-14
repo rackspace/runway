@@ -1,4 +1,6 @@
 """AWS Lambda hook."""  # pylint: disable=too-many-lines
+from __future__ import absolute_import  # TODO remove when dropping python 2 support
+
 import hashlib
 import json
 import logging
