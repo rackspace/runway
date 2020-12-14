@@ -57,6 +57,12 @@ tags (Optional[List[str]])
         args:
           image: ${hook_data docker.image}
 
+    stacks:
+      ecr-lambda-function:
+        class_path: blueprints.EcrFunction
+        variables:
+          ImageUri: ${hook_data docker.image.uri.latest}
+
 """
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
