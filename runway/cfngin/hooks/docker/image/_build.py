@@ -151,7 +151,7 @@ class DockerImageBuildApiOptions(BaseModel):
         target=None,  # type: Optional[str]
         timeout=None,  # type: Optional[int]
         use_config_proxy=False,  # type: bool
-        **kwargs,  # type: Any  # pylint: disable=unused-argument
+        **kwargs  # type: Any  # pylint: disable=unused-argument
     ):
         # type: (...) -> None
         """Instantiate class.

@@ -85,7 +85,7 @@ class ImagePushArgs(BaseModel):
         image=None,  # type: Optional[DockerImage]
         repo=None,  # type: Optional[str]
         tags=None,  # type: Optional[List[str]]
-        **kwargs,  # type: Any
+        **kwargs  # type: Any
     ):  # type: (...) -> None
         """Instantiate class."""
         self.repo = self.determine_repo(

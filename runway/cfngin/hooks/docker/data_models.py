@@ -30,7 +30,8 @@ if TYPE_CHECKING:
 
     from ...context import Context
 
-    Model = TypeVar("Model", bound="BaseModel")
+    # TODO remove pylint disable when dropping python 2 support
+    Model = TypeVar("Model", bound="BaseModel")  # pylint: disable=invalid-name
 
 
 ECR_REPO_FQN_TEMPLATE = (
@@ -210,7 +211,9 @@ class BaseModel(object):
 
     def __iter__(self):  # type: () -> Generator[Tuple[str, Any], None, None]
         """Iterate object."""
-        yield from self.__dict__.items()
+        # yield from self.__dict__.items()  # TODO replace with this when dropping python 2
+        for k, v in self.__dict__.items():
+            yield k, v
 
     def __ne__(self, other):  # TODO remove when dropping python 2 support
         # type: (Any) -> bool

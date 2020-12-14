@@ -22,8 +22,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:
-    from mypy_boto3_ecr.client import ECRClient
-    from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
+    from mypy_boto3_ecr.client import ECRClient  # pylint: disable=E
+    from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef  # pylint: disable=E
 
     from ...context import Context
 
@@ -82,7 +82,7 @@ def list_ecr_images(
 def purge_repository(
     context,  # type: "Context"
     repository_name,  # type: str
-    **_,  # type: Any
+    **_  # type: Any
 ):  # type: (...) -> Dict[str, str]
     """Purge all images from an ECR repository."""
     client = context.get_session().client("ecr")

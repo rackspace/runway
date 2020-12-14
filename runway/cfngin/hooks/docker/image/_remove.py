@@ -101,7 +101,7 @@ class ImageRemoveArgs(BaseModel):
         noprune=False,  # type: bool
         repo=None,  # type: Optional[str]
         tags=None,  # type: Optional[List[str]]
-        **kwargs,  # type: Any
+        **kwargs  # type: Any
     ):  # type: (...) -> None
         """Instantiate class."""
         self.force = force

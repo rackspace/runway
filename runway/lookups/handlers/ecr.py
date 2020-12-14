@@ -53,7 +53,7 @@ from runway.lookups.handlers.base import LookupHandler
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from mypy_boto3_ecr.client import ECRClient
+    from mypy_boto3_ecr.client import ECRClient  # pylint: disable=E
 
     from runway.cfngin.context import (
         Context as CFNginContext,  # noqa: F401 pylint: disable=W
