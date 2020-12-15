@@ -231,15 +231,6 @@
             "markers": "python_version < '3.8'",
             "version": "==3.3.0"
         },
-        "importlib-resources": {
-            "hashes": [
-                "sha256:7b51f0106c8ec564b1bef3d9c588bc694ce2b92125bbb6278f4f2f5b54ec3592",
-                "sha256:a3d34a8464ce1d5d7c92b0ea4e921e696d86f2aa212e684451cb1482c8d84ed5"
-            ],
-            "index": "pypi",
-            "markers": "python_version < '3.7'",
-            "version": "==3.3.0"
-        },
         "jinja2": {
             "hashes": [
                 "sha256:89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0",
@@ -520,7 +511,6 @@
                 "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108",
                 "sha256:ed5eee1974372595f9e416cc7bbeeb12335201d8081ca8a0743c954d4446e5cb"
             ],
-            "markers": "python_version < '3.8'",
             "version": "==3.4.0"
         }
     },
@@ -1405,7 +1395,6 @@
                 "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108",
                 "sha256:ed5eee1974372595f9e416cc7bbeeb12335201d8081ca8a0743c954d4446e5cb"
             ],
-            "markers": "python_version < '3.8'",
             "version": "==3.4.0"
         }
     }

@@ -1,6 +1,6 @@
 """Replicated Lambda Function cleanup warning."""
 import logging
-from typing import Any, Dict, Union
+from typing import Any, Dict, List
 
 from runway.cfngin.context import Context
 from runway.cfngin.providers.base import BaseProvider
@@ -47,11 +47,10 @@ def get_replicated_function_names(
 
 
 def warn(
-    context,  # type: Context # pylint: disable=unused-argument
-    provider,  # type: BaseProvider # pylint: disable=unused-argument
-    **kwargs  # type: Dict[str, Any]
-):
-    # type: (...) -> bool
+    context: Context,  # pylint: disable=unused-argument
+    provider: BaseProvider,  # pylint: disable=unused-argument
+    **kwargs: Any
+) -> bool:
     """Notify the user of Lambda functions to delete.
 
     Args:
