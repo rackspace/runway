@@ -78,7 +78,7 @@ tags (Optional[List[str]])
 
 .. rubric:: Returns
 
-The following are values accessable with the :ref:`hook_data Lookup <hook_data lookup>`
+The following are values accessible with the :ref:`hook_data Lookup <hook_data lookup>`
 under the ``data_key`` of ``docker`` (do not specify a ``data_key`` for the hook, this
 is handled automatically).
 
