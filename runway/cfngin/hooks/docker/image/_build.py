@@ -113,7 +113,7 @@ image (DockerImage)
 """
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union  # pylint: disable=W
 
 from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryRepository
 from ..hook_data import DockerHookData
