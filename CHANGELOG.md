@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.16.4] - 2020-12-22
 ### Fixed
+- module type was being incorrectly determined via path extension with a higher priority than the explicit module type option
 - fixed dependency conflict by bumping dependency versions of the sls-tsc sample. now using typedoc beta version to support typescript>=4.1.x.
 
 ## [1.16.3] - 2020-12-10
@@ -1020,7 +1023,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.16.3...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.16.4...HEAD
+[1.16.4]: https://github.com/onicagroup/runway/compare/v1.16.3...v1.16.4
 [1.16.3]: https://github.com/onicagroup/runway/compare/v1.16.2...v1.16.3
 [1.16.2]: https://github.com/onicagroup/runway/compare/v1.16.1...v1.16.2
 [1.16.1]: https://github.com/onicagroup/runway/compare/v1.16.0...v1.16.1
