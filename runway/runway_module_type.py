@@ -96,14 +96,19 @@ class RunwayModuleType(object):  # noqa pylint: disable=too-few-public-methods
                 'module class "%s" determined from explicit definition',
                 self.class_path,
             )
-        else:
-            self._set_class_path_based_on_extension()
 
         if not self.class_path and self.type_str:
             self.class_path = self.TYPE_MAP.get(self.type_str, None)
             if self.class_path:
                 LOGGER.debug(
                     'module class "%s" determined from explicit type', self.class_path
+                )
+
+        if not self.class_path:
+            self._set_class_path_based_on_extension()
+            if self.class_path:
+                LOGGER.debug(
+                    'module class "%s" determined from path extension', self.class_path
                 )
 
         if not self.class_path:
