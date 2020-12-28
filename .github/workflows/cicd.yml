@@ -90,6 +90,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
+      # pydantic binary causes a recursion error
+      # https://github.com/pyinstaller/pyinstaller/issues/4406
+      PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
         uses: actions/checkout@v2.3.2
@@ -162,6 +165,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
+      # pydantic binary causes a recursion error
+      # https://github.com/pyinstaller/pyinstaller/issues/4406
+      PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
         uses: actions/checkout@v2.3.2

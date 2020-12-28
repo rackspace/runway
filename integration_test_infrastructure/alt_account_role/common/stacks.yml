@@ -1,5 +1,5 @@
 namespace: ${namespace}
-stacker_bucket: ""
+cfngin_bucket: ""
 
 sys_path: ./
 

@@ -2,7 +2,6 @@
 import unittest
 
 from runway.cfngin.commands import Stacker
-from runway.cfngin.exceptions import InvalidConfig
 
 
 class TestStacker(unittest.TestCase):
@@ -102,21 +101,6 @@ class TestStacker(unittest.TestCase):
         stacker.configure(args)
         stacks = args.context.get_stacks()
         self.assertEqual(len(stacks), 2)
-
-    def test_stacker_build_fail_when_parameters_in_stack_def(self):
-        """Test stacker build fail when parameters in stack def."""
-        stacker = Stacker()
-        args = stacker.parse_args(
-            [
-                "build",
-                "-r",
-                "us-west-2",
-                "tests/unit/cfngin/fixtures/basic.env",
-                "tests/unit/cfngin/fixtures/vpc-bastion-db-web-pre-1.0.yaml",
-            ]
-        )
-        with self.assertRaises(InvalidConfig):
-            stacker.configure(args)
 
     def test_stacker_build_custom_info_log_format(self):
         """Test stacker build custom info log format."""

@@ -43,12 +43,18 @@ class TestBaseAction(unittest.TestCase):
         self.provider = Provider(self.session)
 
         self.config_no_persist = {
-            "stacks": [{"name": "stack1"}, {"name": "stack2", "requires": ["stack1"]}]
+            "stacks": [
+                {"name": "stack1", "template_path": "."},
+                {"name": "stack2", "template_path": ".", "requires": ["stack1"]},
+            ]
         }
 
         self.config_persist = {
             "persistent_graph_key": "test.json",
-            "stacks": [{"name": "stack1"}, {"name": "stack2", "requires": ["stack1"]}],
+            "stacks": [
+                {"name": "stack1", "template_path": "."},
+                {"name": "stack2", "template_path": ".", "requires": ["stack1"]},
+            ],
         }
 
     def test_ensure_cfn_bucket_exists(self):

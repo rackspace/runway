@@ -34,7 +34,7 @@ class TestHook:
         result = Hook(cfngin_context, provider, **args)
 
         assert result.args.key == "val"
-        assert result.args.tags == {}
+        assert result.args.tags.data == {"cfngin_namespace": "example"}
         assert not result.blueprint
         assert result.context == cfngin_context
         assert result.provider == provider
@@ -43,7 +43,7 @@ class TestHook:
 
     def test_tags(self, cfngin_context):
         """Test tags property."""
-        cfngin_context.config["tags"] = {"context_tag": "val"}
+        cfngin_context.config.tags = {"context_tag": "val"}
 
         hook = Hook(cfngin_context, MagicMock(), **{"tags": {"arg_tag": "val"}})
 

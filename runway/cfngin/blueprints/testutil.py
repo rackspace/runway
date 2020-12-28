@@ -1,15 +1,22 @@
 """Provides a sublass of unittest.TestCase for testing blueprints."""
+from __future__ import annotations
+
 import difflib
 import json
 import os.path
 import unittest
 from glob import glob
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 from runway.util import load_object_from_string
 from runway.variables import Variable
 
-from ..config import parse as parse_config
+from ...config import CfnginConfig
 from ..context import Context
+
+if TYPE_CHECKING:
+    from ...config.models.cfngin import CfnginStackDefinitionModel
 
 
 def diff(first, second):
@@ -130,8 +137,11 @@ class YamlDirTestGenerator:
             """Config test."""
 
             def __init__(  # pylint: disable=super-init-not-called
-                self, config, stack, filepath
-            ):
+                self,
+                config: CfnginConfig,
+                stack: CfnginStackDefinitionModel,
+                filepath: Path,
+            ) -> None:
                 """Instantiate class."""
                 self.config = config
                 self.stack = stack
@@ -169,14 +179,12 @@ class YamlDirTestGenerator:
                 assert first == second, msg
 
         for config_file in configs:
-            with open(config_file) as test:
-                config = parse_config(test.read())
-                config.validate()
-
-                for stack in config.stacks:  # pylint: disable=not-an-iterable
-                    # Nosetests supports "test generators", which allows us to
-                    # yield a callable object which will be wrapped as a test
-                    # case.
-                    #
-                    # http://nose.readthedocs.io/en/latest/writing_tests.html#test-generators
-                    yield ConfigTest(config, stack, filepath=config_file)
+            config_path = Path(config_file)
+            config = CfnginConfig.parse_file(file_path=config_path)
+            for stack in config.stacks:
+                # Nosetests supports "test generators", which allows us to
+                # yield a callable object which will be wrapped as a test
+                # case.
+                #
+                # http://nose.readthedocs.io/en/latest/writing_tests.html#test-generators
+                yield ConfigTest(config, stack, filepath=config_path)
