@@ -1,15 +1,9 @@
-# Hooks require a path.
-# If the build should stop when a hook fails, set required to true.
-# pre_build happens before the build
-# post_build happens after the build
+namespace: test
+
 pre_build:
   - path: runway.cfngin.hooks.route53.create_domain
     required: true
     enabled: true
-    # Additional args can be passed as a dict of key/value pairs
-    # args:
-    #   BaseDomain: foo
-# post_build:
 
 mappings:
   AmiMap:
@@ -23,7 +17,7 @@ mappings:
       bastion: *ubuntu1404west2
 
 vpc_parameters: &vpc_parameters
-  VpcId: vpc::VpcId # parametrs with ::'s in them refer to <stack>::<Output>
+  VpcId: vpc::VpcId # parameters with ::'s in them refer to <stack>::<Output>
   DefaultSG: vpc::DefaultSG
   PublicSubnets: vpc::PublicSubnets
   PrivateSubnets: vpc::PrivateSubnets

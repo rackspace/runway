@@ -10,7 +10,7 @@ from click.testing import CliRunner
 from mock import patch
 
 from runway._cli import cli
-from runway.config import Config
+from runway.config import RunwayConfig
 from runway.context import Context
 from runway.core import Runway
 
@@ -26,7 +26,7 @@ def test_plan(mock_runway, cd_tmp_path, cp_config):
     assert result.exit_code == 0
 
     mock_runway.assert_called_once()
-    assert isinstance(mock_runway.call_args.args[0], Config)
+    assert isinstance(mock_runway.call_args.args[0], RunwayConfig)
     assert isinstance(mock_runway.call_args.args[1], Context)
 
     inst = mock_runway.return_value

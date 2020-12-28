@@ -37,7 +37,8 @@ def handle_hooks(  # pylint: disable=too-many-statements
 
     Args:
         stage (str): The current stage (pre_run, post_run, etc).
-        hooks (List[:class:`runway.cfngin.config.Hook`]): Hooks to execute.
+        hooks (List[:class:`runway.config.models.cfngin.CfnginHookDefinitionModel`]):
+            Hooks to execute.
         provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
             instance.
         context (:class:`runway.cfngin.context.Context`): Context instance.

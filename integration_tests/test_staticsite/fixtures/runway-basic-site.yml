@@ -2,10 +2,9 @@ deployments:
   - modules:
     - path: basic-site
       type: static
-      environments:
-        dev:
-          namespace: basic-site-dev
-          staticsite_cf_disable: true
+      parameters:
+        namespace: basic-site-dev
+        staticsite_cf_disable: true
       options:
         build_output: build
     regions:

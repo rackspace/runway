@@ -2,8 +2,8 @@
 import logging
 import warnings
 
+from ....config import CfnginConfig
 from ... import session_cache
-from ...config import render_parse_load as load_config
 from ...context import Context
 from ...providers.aws import default
 from .base import BaseCommand
@@ -34,9 +34,10 @@ class Stacker(BaseCommand):
         LOGGER.warning(self.DEPRECATION_MSG)
         session_cache.default_profile = options.profile
 
-        self.config = load_config(
-            options.config.read(), environment=options.environment, validate=True,
+        self.config = CfnginConfig.parse_raw(
+            options.config.read(), parameters=options.environment
         )
+        self.config.load()
 
         options.provider_builder = default.ProviderBuilder(
             region=options.region,

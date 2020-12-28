@@ -1,4 +1,6 @@
 """Core Runway API."""
+from __future__ import annotations
+
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
@@ -14,7 +16,8 @@ from ..util import YamlDumper as _YamlDumper
 from . import components, providers
 
 if TYPE_CHECKING:
-    from ..config import Config, DeploymentDefinition
+    from ..config import RunwayConfig
+    from ..config.components.runway import RunwayDeploymentDefinition
     from ..context import Context
 
 LOGGER = _logging.getLogger(__name__)
@@ -25,8 +28,7 @@ __all__ = ["Runway", "components", "providers"]
 class Runway:
     """Runway's core functionality."""
 
-    def __init__(self, config, context):
-        # type: (Config, Context) -> None
+    def __init__(self, config: RunwayConfig, context: Context) -> None:
         """Instantiate class.
 
         Args:
@@ -45,7 +47,7 @@ class Runway:
         self.ctx.env.log_name()
 
     def deploy(self, deployments=None):
-        # type: (Optional[List[DeploymentDefinition]]) -> None
+        # type: (Optional[List[RunwayDeploymentDefinition]]) -> None
         """Deploy action.
 
         Args:
@@ -58,7 +60,7 @@ class Runway:
         )
 
     def destroy(self, deployments=None):
-        # type: (Optional[List[DeploymentDefinition]]) -> None
+        # type: (Optional[List[RunwayDeploymentDefinition]]) -> None
         """Destroy action.
 
         Args:
@@ -77,7 +79,7 @@ class Runway:
             self.reverse_deployments(self.deployments)
 
     def get_env_vars(self, deployments=None):
-        # type: (Optional[List[DeploymentDefinition]]) -> Dict[str, Any]
+        # type: (Optional[List[RunwayDeploymentDefinition]]) -> Dict[str, Any]
         """Get env_vars defined in the config.
 
         Args:
@@ -97,7 +99,7 @@ class Runway:
         return result
 
     def plan(self, deployments=None):
-        # type: (Optional[List[DeploymentDefinition]]) -> None
+        # type: (Optional[List[RunwayDeploymentDefinition]]) -> None
         """Plan action.
 
         Args:
@@ -111,7 +113,7 @@ class Runway:
 
     @staticmethod
     def reverse_deployments(deployments):
-        # type: (List[DeploymentDefinition]) -> List[DeploymentDefinition]
+        # type: (List[RunwayDeploymentDefinition]) -> List[RunwayDeploymentDefinition]
         """Reverse deployments and the modules within them.
 
         Args:
@@ -194,6 +196,9 @@ class Runway:
 
     def __assert_config_version(self):
         """Assert the config supports this version of Runway."""
+        if not self.required_version:
+            LOGGER.debug("required Runway version not specified")
+            return
         if __version__ in self.required_version:
             LOGGER.debug(
                 'current Runway version "%s" matches "%s" required by this config file',
@@ -215,7 +220,7 @@ class Runway:
         _sys.exit(1)
 
     def __run_action(self, action, deployments):
-        # type: (str, Optional[List[DeploymentDefinition]]) -> None
+        # type: (str, Optional[List[RunwayDeploymentDefinition]]) -> None
         """Run an action on a list of deployments.
 
         Args:

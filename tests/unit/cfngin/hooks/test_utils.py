@@ -5,8 +5,8 @@ import unittest
 
 from mock import call, patch
 
-from runway.cfngin.config import Hook
 from runway.cfngin.hooks.utils import handle_hooks
+from runway.config.models.cfngin import CfnginHookDefinitionModel
 
 from ..factories import mock_context, mock_provider
 
@@ -29,7 +29,9 @@ class TestHooks(unittest.TestCase):
 
     def test_missing_required_hook(self):
         """Test missing required hook."""
-        hooks = [Hook({"path": "not.a.real.path", "required": True})]
+        hooks = [
+            CfnginHookDefinitionModel(**{"path": "not.a.real.path", "required": True})
+        ]
         with self.assertRaises(ImportError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
@@ -41,13 +43,17 @@ class TestHooks(unittest.TestCase):
 
     def test_missing_non_required_hook_method(self):
         """Test missing non required hook method."""
-        hooks = [Hook({"path": "runway.cfngin.hooks.blah", "required": False})]
+        hooks = [
+            CfnginHookDefinitionModel(
+                **{"path": "runway.cfngin.hooks.blah", "required": False}
+            )
+        ]
         handle_hooks("missing", hooks, self.provider, self.context)
         self.assertTrue(HOOK_QUEUE.empty())
 
     def test_default_required_hook(self):
         """Test default required hook."""
-        hooks = [Hook({"path": "runway.cfngin.hooks.blah"})]
+        hooks = [CfnginHookDefinitionModel(**{"path": "runway.cfngin.hooks.blah"})]
         with self.assertRaises(AttributeError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
@@ -56,14 +62,14 @@ class TestHooks(unittest.TestCase):
         """Test valid hook."""
         mock_load.side_effect = [mock_hook, MockHook]
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
                     "required": True,
                 }
             ),
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.MockHook",
                     "required": True,
                 }
@@ -82,8 +88,8 @@ class TestHooks(unittest.TestCase):
     def test_valid_enabled_hook(self):
         """Test valid enabled hook."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
                     "required": True,
                     "enabled": True,
@@ -99,8 +105,8 @@ class TestHooks(unittest.TestCase):
     def test_valid_enabled_false_hook(self):
         """Test valid enabled false hook."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
                     "required": True,
                     "enabled": False,
@@ -113,8 +119,8 @@ class TestHooks(unittest.TestCase):
     def test_context_provided_to_hook(self):
         """Test context provided to hook."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.context_hook",
                     "required": True,
                 }
@@ -125,8 +131,8 @@ class TestHooks(unittest.TestCase):
     def test_hook_failure(self):
         """Test hook failure."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.fail_hook",
                     "required": True,
                 }
@@ -143,8 +149,8 @@ class TestHooks(unittest.TestCase):
         with self.assertRaises(Exception):
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.exception_hook",
                     "required": False,
                 }
@@ -156,14 +162,16 @@ class TestHooks(unittest.TestCase):
     def test_return_data_hook(self):
         """Test return data hook."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
                     "data_key": "my_hook_results",
                 }
             ),
             # Shouldn't return data
-            Hook({"path": "tests.unit.cfngin.hooks.test_utils.context_hook"}),
+            CfnginHookDefinitionModel(
+                **{"path": "tests.unit.cfngin.hooks.test_utils.context_hook"}
+            ),
         ]
         handle_hooks("result", hooks, "us-east-1", self.context)
 
@@ -174,14 +182,14 @@ class TestHooks(unittest.TestCase):
     def test_return_data_hook_duplicate_key(self):
         """Test return data hook duplicate key."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
                     "data_key": "my_hook_results",
                 }
             ),
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
                     "data_key": "my_hook_results",
                 }
@@ -194,8 +202,8 @@ class TestHooks(unittest.TestCase):
     def test_resolve_lookups_in_args(self):
         """Test the resolution of lookups in hook args."""
         hooks = [
-            Hook(
-                {
+            CfnginHookDefinitionModel(
+                **{
                     "path": "tests.unit.cfngin.hooks.test_utils.kwargs_hook",
                     "data_key": "my_hook_results",
                     "args": {"default_lookup": "${default env_var::default_value}"},

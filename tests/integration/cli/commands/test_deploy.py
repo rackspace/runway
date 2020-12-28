@@ -10,7 +10,7 @@ from click.testing import CliRunner
 from mock import patch
 
 from runway._cli import cli
-from runway.config import Config
+from runway.config import RunwayConfig
 from runway.context import Context
 from runway.core import Runway
 
@@ -18,15 +18,16 @@ MODULE = "runway._cli.commands._deploy"
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_deploy(mock_runway, cd_tmp_path, cp_config):
+def test_deploy(mock_runway, cd_tmp_path, cp_config, caplog):
     """Test deploy."""
+    caplog.set_level(logging.INFO, logger="runway")
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     result = runner.invoke(cli, ["deploy"])
     assert result.exit_code == 0
 
     mock_runway.assert_called_once()
-    assert isinstance(mock_runway.call_args.args[0], Config)
+    assert isinstance(mock_runway.call_args.args[0], RunwayConfig)
     assert isinstance(mock_runway.call_args.args[1], Context)
 
     inst = mock_runway.return_value
@@ -69,12 +70,10 @@ def test_deploy_options_tag(mock_runway, caplog, cd_tmp_path, cp_config):
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.deploy")
     cp_config("tagged_modules", cd_tmp_path)
     runner = CliRunner()
-    assert (
-        runner.invoke(
-            cli, ["deploy", "--tag", "app:test-app", "--tag", "tier:iac"]
-        ).exit_code
-        == 0
+    result0 = runner.invoke(
+        cli, ["deploy", "--tag", "app:test-app", "--tag", "tier:iac"]
     )
+    assert result0.exit_code == 0
     deployment = mock_runway.return_value.deploy.call_args.args[0][0]
     assert len(deployment.modules) == 1
     assert deployment.modules[0].name == "sampleapp-01.cfn"

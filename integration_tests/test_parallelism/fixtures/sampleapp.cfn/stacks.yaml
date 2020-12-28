@@ -1,5 +1,5 @@
 namespace: test-parallelism
-stacker_bucket: ''
+cfngin_bucket: ''
 
 sys_path: ./
 

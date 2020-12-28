@@ -1,5 +1,8 @@
 """Runway exceptions."""
-from typing import TYPE_CHECKING, Any
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, List, Optional
 
 if TYPE_CHECKING:
     from .variables import (
@@ -8,6 +11,34 @@ if TYPE_CHECKING:
         VariableValueConcatenation,
         VariableValueLookup,
     )
+
+
+class ConfigNotFound(Exception):
+    """Configuration file could not be found."""
+
+    looking_for: List[str]
+    message: str
+    path: Path
+
+    def __init__(self, *, looking_for: Optional[List[str]] = None, path: Path) -> None:
+        """Instantiate class.
+
+        Args:
+            path: Path where the config file was expected to be found.
+            looking_for: List of file names that were being looked for.
+
+        """
+        self.looking_for = looking_for or []
+        self.path = path
+
+        if looking_for:
+            self.message = (
+                f"config file not found at path {path}; "
+                f"looking for one of {looking_for}"
+            )
+        else:
+            self.message = f"config file not found at path {path}"
+        super().__init__(self.message, self.path, self.looking_for)
 
 
 class FailedLookup(Exception):
@@ -177,3 +208,21 @@ class UnresolvedVariableValue(Exception):
         """
         self.lookup = lookup
         super().__init__("Unresolved lookup", *args, **kwargs)
+
+
+class VariablesFileNotFound(Exception):
+    """Defined variables file could not be found."""
+
+    file_path: List[str]
+    message: str
+
+    def __init__(self, file_path: Path) -> None:
+        """Instantiate class.
+
+        Args:
+            file_path: Path where the file was expected to be found.
+
+        """
+        self.file_path = file_path
+        self.message = f"defined variables file not found at path {file_path}"
+        super().__init__(self.file_path, self.message)

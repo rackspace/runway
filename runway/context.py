@@ -79,7 +79,7 @@ class Context:
     @cached_property
     def no_color(self):
         # type: () -> bool
-        """Wether to explicitly disable color output.
+        """Whether to explicitly disable color output.
 
         Primarily applies to IaC being wrapped by Runway.
 
@@ -100,7 +100,7 @@ class Context:
     @property
     def is_interactive(self):
         # type: () -> bool
-        """Wether the user should be prompted or not.
+        """Whether the user should be prompted or not.
 
         Determined by the existed of ``CI`` in the environment.
 
@@ -113,7 +113,7 @@ class Context:
     @property
     def is_noninteractive(self):
         # type: () -> bool
-        """Wether the user should be prompted or not.
+        """Whether the user should be prompted or not.
 
         Determined by the existed of ``CI`` in the environment.
         Inverse of ``is_interactive`` property.
@@ -127,7 +127,7 @@ class Context:
     @property
     def use_concurrent(self):
         # type: () -> bool
-        """Wether to use concurrent.futures or not.
+        """Whether to use concurrent.futures or not.
 
         Noninteractive is required for concurrent execution to prevent weird
         user-input behavior.
