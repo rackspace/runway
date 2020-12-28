@@ -9,7 +9,6 @@ from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
 from mock import PropertyMock, patch
 
-from runway.cfngin.config import Config, load
 from runway.cfngin.context import Context, get_fqn
 from runway.cfngin.exceptions import (
     PersistentGraphCannotLock,
@@ -20,6 +19,7 @@ from runway.cfngin.exceptions import (
 )
 from runway.cfngin.hooks.utils import handle_hooks
 from runway.cfngin.plan import Graph, json_serial
+from runway.config import CfnginConfig
 
 BOTO3_CREDENTIALS = {
     "aws_access_key_id": "foo",
@@ -60,10 +60,13 @@ class TestContext(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.config = Config(
+        self.config = CfnginConfig.parse_obj(
             {
                 "namespace": "namespace",
-                "stacks": [{"name": "stack1"}, {"name": "stack2"}],
+                "stacks": [
+                    {"name": "stack1", "template_path": "."},
+                    {"name": "stack2", "template_path": "."},
+                ],
             }
         )
         self.persist_graph_raw_config = {
@@ -71,15 +74,22 @@ class TestContext(unittest.TestCase):
             "cfngin_bucket": "cfngin-test",
             "cfngin_bucket_region": "us-east-1",
             "persistent_graph_key": "test.json",
-            "stacks": [{"name": "stack1"}, {"name": "stack2", "requires": ["stack1"]}],
+            "stacks": [
+                {"name": "stack1", "template_path": "."},
+                {"name": "stack2", "template_path": ".", "requires": ["stack1"]},
+            ],
         }
-        self.persist_graph_config = Config(self.persist_graph_raw_config)
+        self.persist_graph_config = CfnginConfig.parse_obj(
+            self.persist_graph_raw_config
+        )
 
     def test_attributes(self):
         """Test class attributes."""
-        context = Context(config=Config({}), region="us-east-1")
+        context = Context(
+            config=CfnginConfig.parse_obj({"namespace": "test"}), region="us-east-1"
+        )
 
-        assert isinstance(context.config, Config)
+        assert isinstance(context.config, CfnginConfig)
         assert context.config_path == "./"
         assert context.bucket_region == "us-east-1"
         assert not context.environment  # TODO check value
@@ -90,7 +100,9 @@ class TestContext(unittest.TestCase):
 
     def test_context_optional_keys_set(self):
         """Test context optional keys set."""
-        context = Context(config=Config({}), stack_names=["stack"],)
+        context = Context(
+            config=CfnginConfig.parse_obj({"namespace": "test"}), stack_names=["stack"],
+        )
         self.assertEqual(context.mappings, {})
         self.assertEqual(context.stack_names, ["stack"])
 
@@ -115,20 +127,20 @@ class TestContext(unittest.TestCase):
 
     def test_context_get_fqn_replace_dot(self):
         """Test context get fqn replace dot."""
-        context = Context(config=Config({"namespace": "my.namespace"}))
+        context = Context(config=CfnginConfig.parse_obj({"namespace": "my.namespace"}))
         fqn = context.get_fqn()
         self.assertEqual(fqn, "my-namespace")
 
     def test_context_get_fqn_empty_namespace(self):
         """Test context get fqn empty namespace."""
-        context = Context(config=Config({"namespace": ""}))
+        context = Context(config=CfnginConfig.parse_obj({"namespace": ""}))
         fqn = context.get_fqn("vpc")
         self.assertEqual(fqn, "vpc")
         self.assertEqual(context.tags, {})
 
     def test_context_namespace(self):
         """Test context namespace."""
-        context = Context(config=Config({"namespace": "namespace"}))
+        context = Context(config=CfnginConfig.parse_obj({"namespace": "namespace"}))
         self.assertEqual(context.namespace, "namespace")
 
     def test_context_get_fqn_stack_name(self):
@@ -139,59 +151,64 @@ class TestContext(unittest.TestCase):
 
     def test_context_default_bucket_name(self):
         """Test context default bucket name."""
-        context = Context(config=Config({"namespace": "test"}))
+        context = Context(config=CfnginConfig.parse_obj({"namespace": "test"}))
         self.assertEqual(context.bucket_name, "stacker-test")
 
     def test_context_bucket_name_is_overridden_but_is_none(self):
         """Test context bucket name is overridden but is none."""
-        config = Config({"namespace": "test", "cfngin_bucket": ""})
+        config = CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": ""})
         context = Context(config=config)
         self.assertEqual(context.bucket_name, None)
 
-        config = Config({"namespace": "test", "cfngin_bucket": None})
+        config = CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": None})
         context = Context(config=config)
         self.assertEqual(context.bucket_name, "stacker-test")
 
     def test_context_bucket_name_is_overridden(self):
         """Test context bucket name is overridden."""
-        config = Config({"namespace": "test", "cfngin_bucket": "bucket123"})
+        config = CfnginConfig.parse_obj(
+            {"namespace": "test", "cfngin_bucket": "bucket123"}
+        )
         context = Context(config=config)
         self.assertEqual(context.bucket_name, "bucket123")
 
     def test_context_default_bucket_no_namespace(self):
         """Test context default bucket no namespace."""
-        context = Context(config=Config({"namespace": ""}))
+        context = Context(config=CfnginConfig.parse_obj({"namespace": ""}))
         self.assertEqual(context.bucket_name, None)
 
-        context = Context(config=Config({"namespace": None}))
-        self.assertEqual(context.bucket_name, None)
-
-        context = Context(config=Config({"namespace": None, "cfngin_bucket": ""}))
+        context = Context(
+            config=CfnginConfig.parse_obj({"namespace": "", "cfngin_bucket": ""})
+        )
         self.assertEqual(context.bucket_name, None)
 
     def test_context_namespace_delimiter_is_overridden_and_not_none(self):
         """Test context namespace delimiter is overridden and not none."""
-        config = Config({"namespace": "namespace", "namespace_delimiter": "_"})
+        config = CfnginConfig.parse_obj(
+            {"namespace": "namespace", "namespace_delimiter": "_"}
+        )
         context = Context(config=config)
         fqn = context.get_fqn("stack1")
         self.assertEqual(fqn, "namespace_stack1")
 
     def test_context_namespace_delimiter_is_overridden_and_is_empty(self):
         """Test context namespace delimiter is overridden and is empty."""
-        config = Config({"namespace": "namespace", "namespace_delimiter": ""})
+        config = CfnginConfig.parse_obj(
+            {"namespace": "namespace", "namespace_delimiter": ""}
+        )
         context = Context(config=config)
         fqn = context.get_fqn("stack1")
         self.assertEqual(fqn, "namespacestack1")
 
     def test_context_tags_with_empty_map(self):
         """Test context tags with empty map."""
-        config = Config({"namespace": "test", "tags": {}})
+        config = CfnginConfig.parse_obj({"namespace": "test", "tags": {}})
         context = Context(config=config)
         self.assertEqual(context.tags, {})
 
     def test_context_no_tags_specified(self):
         """Test context no tags specified."""
-        config = Config({"namespace": "test"})
+        config = CfnginConfig.parse_obj({"namespace": "test"})
         context = Context(config=config)
         self.assertEqual(context.tags, {"cfngin_namespace": "test"})
 
@@ -212,7 +229,7 @@ class TestContext(unittest.TestCase):
 
     def test_hook_with_sys_path(self):
         """Test hook with sys path."""
-        config = Config(
+        config = CfnginConfig.parse_obj(
             {
                 "namespace": "test",
                 "sys_path": "./tests/unit/cfngin",
@@ -226,10 +243,10 @@ class TestContext(unittest.TestCase):
                 ],
             }
         )
-        load(config)
+        config.load()
         context = Context(config=config)
         stage = "pre_build"
-        handle_hooks(stage, context.config[stage], "mock-region-1", context)
+        handle_hooks(stage, getattr(context.config, stage), "mock-region-1", context)
         self.assertEqual("mockResult", context.hook_data["myHook"]["result"])
 
     def test_persistent_graph_location(self):
@@ -243,7 +260,7 @@ class TestContext(unittest.TestCase):
         cp_config = self.persist_graph_raw_config.copy()
         cp_config["persistent_graph_key"] = "test"
 
-        context = Context(config=Config(cp_config))
+        context = Context(config=CfnginConfig.parse_obj(cp_config))
         expected = {"Bucket": "cfngin-test", "Key": "persistent_graphs/test/test.json"}
         self.assertEqual(expected, context.persistent_graph_location)
 
@@ -257,7 +274,7 @@ class TestContext(unittest.TestCase):
         cp_config = self.persist_graph_raw_config.copy()
         cp_config["cfngin_bucket"] = ""
 
-        context = Context(config=Config(cp_config))
+        context = Context(config=CfnginConfig.parse_obj(cp_config))
         self.assertEqual({}, context.persistent_graph_location)
 
     @patch(
@@ -267,7 +284,7 @@ class TestContext(unittest.TestCase):
     def test_persistent_graph_lock_code_disabled(self, mock_prop):
         """Return 'None' when not used."""
         mock_prop.return_value = None
-        context = Context(config=Config(self.config))
+        context = Context(config=self.config)
         mock_prop.assert_not_called()
         self.assertIsNone(context.persistent_graph_lock_code)
 

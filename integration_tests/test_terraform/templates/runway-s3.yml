@@ -1,10 +1,4 @@
 ---
-commonmodopts: &commonmodopts
-  terraform_backend_config:
-    region: us-east-1
-  terraform_backend_cfn_outputs:
-    bucket: testsuite-tf-state::TerraformStateBucketName
-    dynamodb_table: testsuite-tf-state::TerraformLockTableName
 
 deployments:
   - modules:
@@ -12,4 +6,7 @@ deployments:
     regions:
       - us-east-1
     module_options:
-      <<: *commonmodopts
+      terraform_backend_config:
+        bucket: ${cfn testsuite-tf-state.TerraformStateBucketName}
+        dynamodb_table: ${cfn testsuite-tf-state.TerraformLockTableName}
+        region: us-east-1

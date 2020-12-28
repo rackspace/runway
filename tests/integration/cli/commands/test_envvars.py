@@ -51,11 +51,10 @@ def test_envvars_no_config(caplog, cd_tmp_path):
     assert result.exit_code == 1
 
     template = (
-        "Runway config file was not found. Looking for one of "
-        "['runway.yml', 'runway.yaml'] in {path}"
+        "config file not found at path {path}; looking for one of "
+        "['runway.yml', 'runway.yaml']"
     )
     assert template.format(path=cd_tmp_path) in caplog.messages
-    assert template.format(path=cd_tmp_path.parent) in caplog.messages
 
 
 def test_envvars_no_env_vars(caplog, cd_tmp_path, cp_config):

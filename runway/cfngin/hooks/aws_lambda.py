@@ -87,7 +87,7 @@ def find_requirements(root):
 
     Returns:
         Optional[Dict[str, bool]]: Name of supported requirements file and
-        wether it was found. If none are found, ``None`` is returned.
+        whether it was found. If none are found, ``None`` is returned.
 
     """
     findings = {}
@@ -288,7 +288,7 @@ def handle_requirements(
         dest_path (str): Where to output the requirements file if one needs
             to be created.
         requirements (Dict[str, bool]): Map of requirement file names and
-            wether they exist.
+            whether they exist.
         pipenv_timeout (int): Seconds to wait for a subprocess to complete.
         python_path (Optional[str]): Explicit python interpreter to be used.
             Requirement file generators must be installed and executable using
@@ -532,8 +532,8 @@ def _zip_package(
         python_path (Optional[str]): Explicit python interpreter to be used.
             pipenv must be installed and executable using ``-m`` if provided.
         requirements_files (Dict[str, bool]): Map of requirement file names and
-            wether they exist.
-        use_pipenv (bool): Wether to use pipenv to export a Pipfile as
+            whether they exist.
+        use_pipenv (bool): Whether to use pipenv to export a Pipfile as
             requirements.txt.
         kwargs (Any): Advanced options for subprocess and docker. See source
             code to determine what is supported.

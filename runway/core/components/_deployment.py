@@ -1,18 +1,24 @@
 """Runway deployment object."""
+from __future__ import annotations
+
 import concurrent.futures
 import logging
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ..._logging import PrefixAdaptor
-from ...config import FutureDefinition, VariablesDefinition
+from ...config.components.runway import RunwayVariablesDefinition
+from ...config.models.runway import (
+    RunwayAssumeRoleDefinitionModel,
+    RunwayFutureDefinitionModel,
+)
 from ...exceptions import UnresolvedVariable
-from ...util import cached_property, merge_dicts, merge_nested_environment_dicts
+from ...util import cached_property, flatten_path_lists, merge_dicts
 from ..providers import aws
 from ._module import Module
 
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition
+    from ...config.components.runway import RunwayDeploymentDefinition
     from ...context import Context
 
 
@@ -24,24 +30,22 @@ class Deployment:
 
     def __init__(
         self,
-        context,  # type: Context
-        definition,  # type: DeploymentDefinition
-        future=None,  # type: Optional[FutureDefinition]
-        variables=None,  # type: VariablesDefinition
-    ):
-        # type: (...) -> None
+        context: Context,
+        definition: RunwayDeploymentDefinition,
+        future: Optional[RunwayFutureDefinitionModel] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            definition (DeploymentDefinition): A single deployment definition.
-            future (Optional[FutureDefinition]): Future functionality
-                configuration.
-            variables (VariablesDefinition): Runway variables.
+            context: Runway context object.
+            definition: A single deployment definition.
+            future: Future functionality configuration.
+            variables: Runway variables.
 
         """
-        self._future = future or FutureDefinition()
-        self._variables = variables or VariablesDefinition()
+        self._future = future or RunwayFutureDefinitionModel()
+        self._variables = variables or RunwayVariablesDefinition.parse_obj({})
         self.definition = definition
         self.ctx = context
         self.name = self.definition.name
@@ -49,12 +53,11 @@ class Deployment:
         self.__merge_env_vars()
 
     @property
-    def account_alias_config(self):
-        # type: () -> Optional[str]
+    def account_alias_config(self) -> Optional[str]:
         """Parse the definition to get the correct AWS account alias configuration.
 
         Returns:
-            Optional[str]: Expected AWS account alias for the current context.
+            Expected AWS account alias for the current context.
 
         """
         if isinstance(self.definition.account_alias, str):
@@ -64,12 +67,11 @@ class Deployment:
         return None
 
     @property
-    def account_id_config(self):
-        # type: () -> Optional[str]
+    def account_id_config(self) -> Optional[str]:
         """Parse the definition to get the correct AWS account ID configuration.
 
         Returns:
-            Optional[str]: Expected AWS account ID for the current context.
+            Expected AWS account ID for the current context.
 
         """
         if isinstance(self.definition.account_id, (int, str)):
@@ -81,60 +83,33 @@ class Deployment:
         return None
 
     @property
-    def assume_role_config(self):
-        # type: () -> Dict[str, Union[int, str]]
-        """Parse the definition to get the correct assume role configuration.
-
-        Returns:
-            Dict[str, Union[int, str]]: Assume role definition for the current
-            context.
-
-        """
+    def assume_role_config(self) -> Dict[str, Union[bool, int, str]]:
+        """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
         if not assume_role:
             self.logger.debug(
                 "assume_role not configured for deployment: %s", self.name
             )
             return {}
-        if isinstance(assume_role, dict):
-            top_level = {
-                "revert_on_exit": assume_role.get("post_deploy_env_revert", False),
-                "session_name": assume_role.get("session_name"),
-            }
-            if assume_role.get("arn"):
-                self.logger.debug(
-                    "role found in the top level dict: %s", assume_role["arn"]
-                )
-                return dict(
-                    role_arn=assume_role["arn"],
-                    duration_seconds=assume_role.get("duration"),
-                    **top_level
-                )
-            if assume_role.get(self.ctx.env.name):
-                env_assume_role = assume_role[self.ctx.env.name]
-                if isinstance(env_assume_role, dict):
-                    self.logger.debug(
-                        "role found in deploy environment dict: %s",
-                        env_assume_role["arn"],
-                    )
-                    return dict(
-                        role_arn=env_assume_role["arn"],
-                        duration_seconds=env_assume_role.get("duration"),
-                        **top_level
-                    )
-                self.logger.debug("role found for environment: %s", env_assume_role)
-                return dict(role_arn=env_assume_role, **top_level)
-            self.logger.info(
-                'skipping iam:AssumeRole; no role found for deploy environment %s"...',
-                self.ctx.env.name,
+        if isinstance(assume_role, str):
+            self.logger.debug("role found: %s", assume_role)
+            assume_role = RunwayAssumeRoleDefinitionModel(arn=assume_role)
+        elif isinstance(assume_role, dict):
+            assume_role = RunwayAssumeRoleDefinitionModel.parse_obj(assume_role)
+        if not assume_role.arn:
+            self.logger.debug(
+                "assume_role not configured for deployment: %s", self.name
             )
             return {}
-        self.logger.debug("role found: %s", assume_role)
-        return {"role_arn": assume_role, "revert_on_exit": False}
+        return {
+            "duration_seconds": assume_role.duration,
+            "revert_on_exit": assume_role.post_deploy_env_revert,
+            "role_arn": assume_role.arn,
+            "session_name": assume_role.session_name,
+        }
 
     @property
-    def env_vars_config(self):
-        # type: () -> Dict[str, Any]
+    def env_vars_config(self) -> Dict[str, str]:
         """Parse the definition to get the correct env_vars configuration."""
         try:
             if not self.definition.env_vars:
@@ -143,15 +118,10 @@ class Deployment:
             self.definition._env_vars.resolve(  # pylint: disable=protected-access
                 self.ctx, variables=self._variables
             )
-        return merge_nested_environment_dicts(
-            self.definition.env_vars,
-            env_name=self.ctx.env.name,
-            env_root=str(self.ctx.env.root_dir),
-        )
+        return flatten_path_lists(self.definition.env_vars, str(self.ctx.env.root_dir))
 
     @cached_property
-    def regions(self):
-        # type: () -> List[str]
+    def regions(self) -> List[str]:
         """List of regions this deployment is associated with."""
         return self.definition.parallel_regions or self.definition.regions
 
@@ -222,7 +192,7 @@ class Deployment:
         context.env.aws_region = region
 
         with aws.AssumeRole(context, **self.assume_role_config):
-            self.definition.resolve(context, self._variables)
+            self.definition.resolve(context, variables=self._variables)
             self.validate_account_credentials(context)
             Module.run_list(
                 action=action,
@@ -273,8 +243,7 @@ class Deployment:
                 self.account_alias_config,
             )
 
-    def __merge_env_vars(self):
-        # type: () -> None
+    def __merge_env_vars(self) -> None:
         """Merge defined env_vars into context.env_vars."""
         if self.env_vars_config:
             self.logger.verbose(
@@ -285,12 +254,11 @@ class Deployment:
             )
             self.ctx.env.vars = merge_dicts(self.ctx.env.vars, self.env_vars_config)
 
-    def __async(self, action):
-        # type: (str) -> None
+    def __async(self, action: str) -> None:
         """Execute asynchronously.
 
         Args:
-            action (str): Name of action to run.
+            action: Name of action to run.
 
         """
         self.logger.info(
@@ -306,12 +274,11 @@ class Deployment:
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
-    def __sync(self, action):
-        # type: (str) -> None
+    def __sync(self, action: str) -> None:
         """Execute synchronously.
 
         Args:
-            action (str): Name of action to run.
+            action: Name of action to run.
 
         """
         self.logger.info("processing regions sequentially...")
@@ -322,22 +289,20 @@ class Deployment:
     @classmethod
     def run_list(
         cls,
-        action,  # type: str
-        context,  # type: Context
-        deployments,  # type: List[DeploymentDefinition]
-        future,  # type: FutureDefinition
-        variables,  # type: VariablesDefinition
-    ):
-        # type: (...) -> None
+        action: str,
+        context: Context,
+        deployments: List[RunwayDeploymentDefinition],
+        future: RunwayFutureDefinitionModel,
+        variables: RunwayVariablesDefinition,
+    ) -> None:
         """Run a list of deployments.
 
         Args:
-            action (str): Name of action to run.
-            context (Context): Runway context.
-            deployments (List[DeploymentDefinition]): List of deployments to run.
-            future (FutureDefinition): Future definition.
-            variables (VariablesDefinition): Runway variables for lookup
-                resolution.
+            action: Name of action to run.
+            context: Runway context.
+            deployments: List of deployments to run.
+            future: Future definition.
+            variables: Runway variables for lookup resolution.
 
         """
         for definition in deployments:
@@ -362,14 +327,11 @@ class Deployment:
             )[action]()
             deployment.logger.success("processing deployment (complete)")
 
-    def __getitem__(self, key):
+    def __getitem__(self, name: str) -> Any:
         """Make the object subscriptable.
 
         Args:
-            key (str): Attribute to get.
-
-        Returns:
-            Any
+            name: Attribute to get.
 
         """
-        return getattr(self, key)
+        return getattr(self, name)

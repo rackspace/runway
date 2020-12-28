@@ -3,9 +3,13 @@
 import logging
 
 import pytest
-from mock import MagicMock, PropertyMock, call, patch
+from mock import ANY, MagicMock, PropertyMock, call, patch
 
-from runway.config import DeploymentDefinition, FutureDefinition, VariablesDefinition
+from runway.config.components.runway import (
+    RunwayDeploymentDefinition,
+    RunwayVariablesDefinition,
+)
+from runway.config.models.runway import RunwayFutureDefinitionModel
 from runway.core.components import Deployment
 from runway.exceptions import UnresolvedVariable
 from runway.variables import Variable
@@ -24,18 +28,18 @@ class TestDeployment:
 
         obj = Deployment(context=runway_context, definition=definition)
 
-        assert isinstance(obj._future, FutureDefinition)
-        assert isinstance(obj._variables, VariablesDefinition)
+        assert isinstance(obj._future, RunwayFutureDefinitionModel)
+        assert isinstance(obj._variables, RunwayVariablesDefinition)
         assert obj.definition == definition
         assert obj.ctx == runway_context
-        assert obj.name == "deployment_1"
+        assert obj.name == "unnamed_deployment"
         mock_merge.assert_called_once_with()
 
     def test_init_args(self, fx_deployments, runway_context):
         """Test init with args."""
-        definition = fx_deployments.load("simple_env_vars_map")
-        future = FutureDefinition(strict_environments=True)
-        variables = VariablesDefinition(some_key="val")
+        definition = fx_deployments.load("simple_env_vars")
+        future = RunwayFutureDefinitionModel(strict_environments=True)
+        variables = RunwayVariablesDefinition.parse_obj({"some_key": "val"})
 
         obj = Deployment(
             context=runway_context,
@@ -48,7 +52,7 @@ class TestDeployment:
         assert obj._variables == variables
         assert obj.definition == definition
         assert obj.ctx == runway_context
-        assert obj.name == "deployment_1"
+        assert obj.name == "unnamed_deployment"
         assert obj.ctx.env.vars["deployment_var"] == "val"
 
     @pytest.mark.parametrize(
@@ -91,61 +95,38 @@ class TestDeployment:
             (
                 "simple_assume_role",
                 {
-                    "role_arn": "arn:aws:iam::123456789012:role/test",
+                    "duration_seconds": 3600,
                     "revert_on_exit": False,
+                    "role_arn": "arn:aws:iam::123456789012:role/test",
+                    "session_name": "runway",
                 },
             ),
             (
                 "assume_role_verbose",
                 {
-                    "role_arn": "arn:aws:iam::123456789012:role/test",
+                    "duration_seconds": 900,
                     "revert_on_exit": True,
-                    "session_name": "runway-test",
-                    "duration_seconds": 300,
-                },
-            ),
-            (
-                "assume_role_env_map",
-                {
                     "role_arn": "arn:aws:iam::123456789012:role/test",
                     "session_name": "runway-test",
-                    "revert_on_exit": False,
                 },
             ),
-            (
-                "assume_role_env_map.2",
-                {
-                    "role_arn": "arn:aws:iam::123456789012:role/test",
-                    "session_name": None,
-                    "revert_on_exit": False,
-                    "duration_seconds": None,
-                },
-            ),
-            ("assume_role_env_map.3", {}),
         ],
     )
     def test_assume_role_config(self, config, expected, fx_deployments, runway_context):
         """Test assume_role_config."""
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
-        result = obj.assume_role_config
-        assert {k: result[k] for k in sorted(result)} == {
-            k: expected[k] for k in sorted(expected)
-        }
+        assert obj.assume_role_config == expected
 
     def test_env_vars_config_unresolved(
         self, fx_deployments, monkeypatch, runway_context
     ):
         """Test env_vars_config unresolved."""
         expected = {"key": "val"}
-
-        monkeypatch.setattr(
-            MODULE + ".merge_nested_environment_dicts", MagicMock(return_value=expected)
-        )
         monkeypatch.setattr(
             Deployment, "_Deployment__merge_env_vars", MagicMock(return_value=None)
         )
         monkeypatch.setattr(
-            DeploymentDefinition,
+            RunwayDeploymentDefinition,
             "env_vars",
             PropertyMock(
                 side_effect=[
@@ -156,13 +137,14 @@ class TestDeployment:
                     expected,
                 ]
             ),
+            raising=False,
         )
         monkeypatch.setattr(
-            DeploymentDefinition, "_env_vars", PropertyMock(), raising=False
+            RunwayDeploymentDefinition, "_env_vars", PropertyMock(), raising=False
         )
 
         raw_deployment = fx_deployments.get("min_required")
-        deployment = DeploymentDefinition.from_list([raw_deployment])[0]
+        deployment = RunwayDeploymentDefinition.parse_obj(raw_deployment)
         obj = Deployment(context=runway_context, definition=deployment)
 
         assert obj.env_vars_config == expected
@@ -225,7 +207,7 @@ class TestDeployment:
         )
         assert not obj.deploy()
         assert (
-            "deployment_1:processing regions in parallel... (output will be interwoven)"
+            "unnamed_deployment:processing regions in parallel... (output will be interwoven)"
             in caplog.messages
         )
         mock_futures.ProcessPoolExecutor.assert_called_once_with(
@@ -249,7 +231,9 @@ class TestDeployment:
             definition=fx_deployments.load("simple_parallel_regions"),
         )
         assert not obj.deploy()
-        assert "deployment_1:processing regions sequentially..." in caplog.messages
+        assert (
+            "unnamed_deployment:processing regions sequentially..." in caplog.messages
+        )
         mock_run.assert_has_calls(
             [call("deploy", "us-east-1"), call("deploy", "us-west-2")]
         )
@@ -294,7 +278,7 @@ class TestDeployment:
 
         if async_used:
             assert (
-                "deployment_1:processing of regions will be done in "
+                "unnamed_deployment:processing of regions will be done in "
                 "parallel during deploy/destroy" in caplog.messages
             )
         mock_async.assert_not_called()
@@ -317,7 +301,7 @@ class TestDeployment:
 
         assert runway_context.command == "deploy"
         assert runway_context.env.aws_region == "us-west-2"
-        mock_resolve.assert_called_once_with(runway_context, obj._variables)
+        mock_resolve.assert_called_once_with(runway_context, variables=obj._variables)
         mock_validate.assert_called_once_with(runway_context)
         mock_aws.AssumeRole.assert_called_once_with(runway_context)
         mock_aws.AssumeRole().__enter__.assert_called_once()
@@ -326,7 +310,7 @@ class TestDeployment:
             context=runway_context,
             deployment=definition,
             future=obj._future,
-            modules=definition.modules,
+            modules=ANY,  # list of module objects change
             variables=obj._variables,
         )
 

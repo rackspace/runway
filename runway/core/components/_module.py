@@ -1,4 +1,6 @@
 """Runway module object."""
+from __future__ import annotations
+
 import concurrent.futures
 import json
 import logging
@@ -9,19 +11,22 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 import yaml
 
 from ..._logging import PrefixAdaptor
-from ...config import FutureDefinition, VariablesDefinition
+from ...config.components.runway import RunwayVariablesDefinition
+from ...config.models.runway import (
+    RunwayEnvVarsType,
+    RunwayFutureDefinitionModel,
+    RunwayVariablesDefinitionModel,
+)
 from ...path import Path as ModulePath
 from ...runway_module_type import RunwayModuleType
-from ...util import (
-    cached_property,
-    change_dir,
-    merge_dicts,
-    merge_nested_environment_dicts,
-)
+from ...util import cached_property, change_dir, flatten_path_lists, merge_dicts
 from ..providers import aws
 
 if TYPE_CHECKING:
-    from ...config import DeploymentDefinition, ModuleDefinition
+    from ...config.components.runway import (
+        RunwayDeploymentDefinition,
+        RunwayModuleDefinition,
+    )
     from ...context import Context
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -32,30 +37,31 @@ class Module:
 
     def __init__(
         self,
-        context,  # type: Context
-        definition,  # type: ModuleDefinition
-        deployment=None,  # type: Optional[DeploymentDefinition]
-        future=None,  # type: Optional[FutureDefinition]
-        variables=None,  # type: Optional[VariablesDefinition]
-    ):
-        # type: (...) -> None
+        context: Context,
+        definition: RunwayModuleDefinition,
+        deployment: RunwayDeploymentDefinition = None,
+        future: RunwayFutureDefinitionModel = None,
+        variables: RunwayVariablesDefinition = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            definition (ModuleDefinition): A single module definition.
-            deployment (Optional[DeploymentDefinition]): Deployment that this
+            context: Runway context object.
+            definition: A single module definition.
+            deployment: Deployment that this
                 module is a part of.
-            future (Optional[FutureDefinition]): Future functionality
+            future: Future functionality
                 configuration.
-            variables (Optional[VariablesDefinition]): Runway variables.
+            variables: Runway variables.
 
         """
         self.__deployment = deployment
-        self.__future = future or FutureDefinition()
-        self.__variables = variables or VariablesDefinition()
+        self.__future = future or RunwayFutureDefinitionModel()
+        self.__variables = variables or RunwayVariablesDefinition(
+            RunwayVariablesDefinitionModel()
+        )
         self.ctx = context.copy()  # each module has it's own instance of context
-        definition.resolve(self.ctx, variables)
+        definition.resolve(self.ctx, variables=variables)
         self.definition = definition
         self.name = self.definition.name
         self.logger = PrefixAdaptor(self.fqn, LOGGER)
@@ -89,7 +95,7 @@ class Module:
         return ModulePath(
             self.definition,
             str(self.ctx.env.root_dir),
-            str(self.ctx.env.root_dir / ".runway_cache"),
+            str(self.ctx.env.root_dir / ".runway/cache"),
         )
 
     @cached_property
@@ -112,14 +118,8 @@ class Module:
         return payload
 
     @cached_property
-    def should_skip(self):
-        # type: () -> bool
+    def should_skip(self) -> bool:
         """Whether the module should be skipped by Runway."""
-        if (
-            isinstance(self.payload["environment"], dict)
-            and not self.__future.strict_environments
-        ):
-            return self.__handle_deprecated_environmet()
         is_valid = validate_environment(
             self.ctx,
             self.payload["environments"],
@@ -265,15 +265,10 @@ class Module:
             return yaml.safe_load(opts_file.read_text())
         return {}
 
-    def __merge_env_vars(self, env_vars):
-        # type: (Dict[str, Any]) -> None
+    def __merge_env_vars(self, env_vars: RunwayEnvVarsType) -> None:
         """Merge defined env_vars into context.env_vars."""
         if env_vars:
-            resolved_env_vars = merge_nested_environment_dicts(
-                env_vars,
-                env_name=self.ctx.env.name,
-                env_root=str(self.ctx.env.root_dir),
-            )
+            resolved_env_vars = flatten_path_lists(env_vars, str(self.ctx.env.root_dir))
             if resolved_env_vars:
                 self.logger.verbose(
                     "environment variable overrides are being applied to this module"
@@ -283,25 +278,16 @@ class Module:
                 )
                 self.ctx.env.vars = merge_dicts(self.ctx.env_vars, resolved_env_vars)
 
-    def __handle_deprecated_environmet(self):
-        # type: () -> None
-        """Handle deprecated environments value."""
-        self.payload["parameters"].update(self.payload["environment"])
-        if self.payload["parameters"]:
-            self.payload["environment"] = True
-        return False
-
     @classmethod
     def run_list(
         cls,
-        action,  # type: str
-        context,  # type: Context
-        modules,  # type: List[ModuleDefinition]
-        variables,  # type: VariablesDefinition
-        deployment=None,  # type: Optional[DeploymentDefinition]
-        future=None,  # type: Optional[FutureDefinition]
-    ):
-        # type: (...) -> None
+        action: str,
+        context: Context,
+        modules: List[RunwayModuleDefinition],
+        variables: RunwayVariablesDefinition,
+        deployment: RunwayDeploymentDefinition = None,
+        future: Optional[RunwayFutureDefinitionModel] = None,
+    ) -> None:
         """Run a list of modules.
 
         Args:
@@ -310,8 +296,7 @@ class Module:
             modules: List of modules to run.
             variables: Variable definition for resolving lookups in the module.
             deployment: Deployment the modules are a part of.
-            future (Optional[FutureDefinition]): Future functionality
-                configuration.
+            future: Future functionality configuration.
 
         """
         for module in modules:
@@ -343,11 +328,11 @@ def validate_environment(context, env_def, logger=None, strict=False):
         context (Context): Runway context object.
         module (ModuleDefinition): Runway module definition.
         logger (Optional[logging.Logger]): Logger to log messages to.
-        strict (bool): Wether to consider the current environment missing from
+        strict (bool): Whether to consider the current environment missing from
             definition as a failure.
 
     Returns:
-        Union[bool, NoneType]: Booleon value of wether to deploy or not.
+        Union[bool, NoneType]: Booleon value of whether to deploy or not.
 
     """
     logger = logger or LOGGER

@@ -4,8 +4,10 @@ import logging
 from typing import Any, Tuple
 
 import click
+from pydantic import ValidationError
 
 from ...core import Runway
+from ...exceptions import ConfigNotFound, VariablesFileNotFound
 from .. import options
 from ..utils import select_deployments
 
@@ -20,8 +22,9 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def destroy(ctx, tags, **_):  # noqa: D301
-    # type: (click.Context, Tuple[str, ...], Any) -> None
+def destroy(
+    ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any
+) -> None:  # noqa: D301
     """Destroy infrastructure as code.
 
     \b
@@ -51,7 +54,15 @@ def destroy(ctx, tags, **_):  # noqa: D301
         if not click.confirm("\nProceed?"):
             ctx.exit(0)
         click.echo("")
-    deployments = Runway.reverse_deployments(
-        select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
-    )
-    Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).destroy(deployments)
+    try:
+        Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).destroy(
+            Runway.reverse_deployments(
+                select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
+            )
+        )
+    except ValidationError as err:
+        LOGGER.error(err, exc_info=debug)
+        ctx.exit(1)
+    except (ConfigNotFound, VariablesFileNotFound) as err:
+        LOGGER.error(err.message, exc_info=debug)
+        ctx.exit(1)

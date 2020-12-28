@@ -17,7 +17,6 @@ from moto import mock_s3
 from testfixtures import ShouldRaise, TempDirectory, compare
 from troposphere.awslambda import Code
 
-from runway.cfngin.config import Config
 from runway.cfngin.context import Context
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
 from runway.cfngin.hooks.aws_lambda import (
@@ -31,6 +30,7 @@ from runway.cfngin.hooks.aws_lambda import (
     should_use_docker,
     upload_lambda_functions,
 )
+from runway.config import CfnginConfig
 
 from ..factories import mock_provider
 from ..fixtures.mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
@@ -100,7 +100,9 @@ class TestLambdaHooks(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.context = Context(
-            config=Config({"namespace": "test", "stacker_bucket": "test"})
+            config=CfnginConfig.parse_obj(
+                {"namespace": "test", "cfngin_bucket": "test"}
+            )
         )
         self.provider = mock_provider(region="us-east-1")
 
@@ -176,7 +178,9 @@ class TestLambdaHooks(unittest.TestCase):
             results = self.run_hook(
                 functions={"MyFunction": {"path": "test"}},
                 context=Context(
-                    config=Config({"namespace": "test", "stacker_bucket": "test"}),
+                    config=CfnginConfig.parse_obj(
+                        {"namespace": "test", "cfngin_bucket": "test"}
+                    ),
                     config_path=temp_dir.path,
                 ),
             )

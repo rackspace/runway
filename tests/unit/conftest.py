@@ -8,7 +8,7 @@ from typing import Dict
 import pytest
 import yaml
 
-from runway.config import Config
+from runway.config import RunwayConfig
 from runway.core.components import DeployEnvironment
 
 from .factories import (
@@ -74,7 +74,7 @@ def fx_config():
     """Return YAML loader for config fixtures."""
     return YamlLoader(
         TEST_ROOT.parent / "fixtures" / "configs",
-        load_class=Config,
+        load_class=RunwayConfig,
         load_type="kwargs",
     )
 

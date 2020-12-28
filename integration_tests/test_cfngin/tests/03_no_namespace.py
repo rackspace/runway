@@ -18,7 +18,11 @@ class TestNoNamespace(Cfngin):
         self.copy_fixtures()
         code, _stdout, stderr = self.runway_cmd("deploy")
         assert code != 0, "exit code should be non-zero"
-        expected_lines = ["This field is required"]
+        expected_lines = [
+            "1 validation error for CfnginConfigDefinitionModel",
+            "namespace",
+            "field required",
+        ]
         for line in expected_lines:
             assert line in stderr, f'"{line}" missing from output'
 

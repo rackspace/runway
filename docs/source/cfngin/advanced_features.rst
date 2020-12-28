@@ -11,4 +11,6 @@ Advanced features and detailed information for using Runway's CFNgin for CloudFo
    blueprints
    hooks
    lookups
+   persistent_graph
+   remote_sources
    templates

@@ -1,8 +1,5 @@
-.. _`hook_data`: configuration.html#pre-post-hooks
 .. _`aws_lambda hook`: ../apidocs/runway.cfngin.hooks.aws_lambda.html#runway.cfngin.hooks.aws_lambda.upload_lambda_functions
 .. _`aws_lambda blueprint`: https://github.com/cloudtools/stacker_blueprints/blob/master/stacker_blueprints/aws_lambda.py
-.. _package_sources: configuration.html#remote-package
-.. _sys_path: configuration.html#module-paths
 
 .. _cfngin-lookups:
 
@@ -23,8 +20,7 @@ A lookup is denoted in the config with the ``${<lookup type> <lookup
 input>}`` syntax. If ``<lookup type>`` isn't provided, CFNgin will
 fall back to use the ``output`` lookup .
 
-Lookups are only resolved within `Variables
-<terminology.html#variables>`_. They can be nested in any part of a YAML
+Lookups are only resolved within :ref:`Variables <cfngin-variables>`. They can be nested in any part of a YAML
 data structure and within another lookup itself.
 
 .. note::
@@ -541,9 +537,7 @@ Example::
 Hook Data Lookup
 ****************
 
-When using hooks, you can have the hook store results in the
-`hook_data`_ dictionary on the context by setting ``data_key`` in the hook
-config.
+When using hooks, you can have the hook store results in the :attr:`Context.hook_data <runway.cfngin.context.Context.hook_data>` dictionary on the context by setting :attr:`~cfngin.hook.data_key` in the :class:`~cfngin.hook` config.
 
 This lookup lets you look up values in that dictionary. A good example of this
 is when you use the `aws_lambda hook`_ to upload AWS Lambda code, then need to
@@ -583,7 +577,7 @@ Custom Lookup
 *************
 
 A custom lookup may be registered within the config.
-For more information see `Configuring Lookups <configuration.html#lookups>`_.
+For more information see :attr:`lookups <cfngin.lookups>`.
 
 
 Writing A Custom Lookup
@@ -591,9 +585,9 @@ Writing A Custom Lookup
 
 A custom lookup must be in an executable, importable python package or standalone file.
 The lookup must be importable using your current ``sys.path``.
-This takes into account the sys_path_ defined in the config file as well as any ``paths`` of package_sources_.
+This takes into account the :attr:`sys_path <cfngin.sys_path>` defined in the config file as well as any ``paths`` of :attr:`package_sources <cfngin.package_sources>`.
 
-The lookup must be a class, preferable with a base class of :class:`runway.lookups.handlers.base.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
+The lookup must be a class, preferable with a base class of :class:`~runway.lookups.handlers.base.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
 There must be only one lookup per file.
 The file containing the lookup class must have a ``TYPE_NAME`` global variable with a value of the name that will be used to register the lookup.
 

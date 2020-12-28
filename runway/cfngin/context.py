@@ -2,10 +2,11 @@
 import collections
 import json
 import logging
+from typing import Any, Dict
 
 from runway._logging import PrefixAdaptor
 
-from .config import Config
+from ..config import CfnginConfig
 from .exceptions import (
     PersistentGraphCannotLock,
     PersistentGraphCannotUnlock,
@@ -47,6 +48,8 @@ class Context:
 
     """
 
+    hook_data: Dict[str, Any] = {}
+
     def __init__(
         self,
         environment=None,
@@ -67,7 +70,7 @@ class Context:
             stack_names (list): A list of stack_names to operate on. If not
                 passed, usually all stacks defined in the config will be
                 operated on.
-            config (:class:`runway.cfngin.config.Config`): The CFNgin
+            config (:class:`runway.config.CfnginConfig`): The CFNgin
                 configuration being operated on.
             config_path (str): Path to the config file that was provided.
             region (str): Name of an AWS region if provided as a CLI argument.
@@ -85,7 +88,7 @@ class Context:
         self._targets = None
         self._upload_to_s3 = None
         # TODO load the config from context instead of taking it as an arg
-        self.config = config or Config()
+        self.config = config or CfnginConfig.parse_obj({"namespace": "example"})
         # TODO set this value when provisioning a Config object in context
         # set to a fake location for the time being but this should be set
         # by all runtime entry points. the only time the fake value should be
@@ -277,12 +280,13 @@ class Context:
     @property
     def tags(self):
         """Return ``tags`` from config."""
-        tags = self.config.tags
-        if tags is not None:
-            return tags
-        if self.namespace:
-            return {"cfngin_namespace": self.namespace}
-        return {}
+        return (
+            self.config.tags
+            if self.config.tags is not None
+            else {"cfngin_namespace": self.namespace}
+            if self.namespace
+            else {}
+        )
 
     @property
     def template_indent(self):

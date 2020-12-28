@@ -210,7 +210,7 @@ class MutableMap(MutableMapping):
         return False
 
     def __contains__(self, value):
-        # type: () -> bool
+        # type: (Any) -> bool
         """Implement evaluation of 'in' conditional."""
         return value in self.data
 
@@ -225,7 +225,7 @@ class MutableMap(MutableMapping):
             The value associated with the provided key/attribute name.
 
         Raises:
-            Attribute: If attribute does not exist on this object.
+            AttributeError: If attribute does not exist on this object.
 
         Example:
             .. codeblock: python
@@ -550,6 +550,16 @@ def merge_dicts(dict1, dict2, deep_merge=True):
     # (tbd if it does or doesn't deep merge, and if that is needed)
     # if sys.version_info > (3, 4):
     #     return {**dict1, **dict2}
+
+
+def snake_case_to_kebab_case(value: str) -> str:
+    """Convert snake_case to kebab-case.
+
+    Args:
+        value: The string value to convert.
+
+    """
+    return value.replace("_", "-")
 
 
 def extract_boto_args_from_env(env_vars):
