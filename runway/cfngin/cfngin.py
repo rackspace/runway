@@ -1,19 +1,25 @@
 """CFNgin entrypoint."""
+from __future__ import annotations
+
 import logging
 import os
-import re
 import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from yaml.constructor import ConstructorError
 
 from runway._logging import PrefixAdaptor
 from runway.util import MutableMap, SafeHaven, cached_property
 
+from ..config import CfnginConfig
 from .actions import build, destroy, diff
-from .config import render_parse_load as load_config
 from .context import Context as CFNginContext
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
+
+if TYPE_CHECKING:
+    from ..context import Context as RunwayContext
 
 # explicitly name logger so its not redundant
 LOGGER = logging.getLogger("runway.cfngin")
@@ -23,14 +29,10 @@ class CFNgin:
     """Control CFNgin.
 
     Attributes:
-        EXCLUDE_REGEX (str): Regex used to exclude YAML files when searching
-            for config files.
-        EXCLUDE_LIST (str): Global list of YAML file names to exclude when
-            searching for config files.
         concurrency (int): Max number of CFNgin stacks that can be deployed
             concurrently. If the value is ``0``, will be constrained based on
             the underlying graph.
-        interactive (bool): Wether or not to prompt the user before taking
+        interactive (bool): Whether or not to prompt the user before taking
             action.
         parameters (MutableMap): Combination of the parameters provided when
             initalizing the class and any environment files that are found.
@@ -38,21 +40,23 @@ class CFNgin:
             a failed state from an initial deployment when updating.
         region (str): The AWS region where CFNgin is currently being executed.
         sys_path (str): Working directory.
-        tail (bool): Wether or not to display all CloudFormation events in the
+        tail (bool): Whether or not to display all CloudFormation events in the
             terminal.
 
     """
 
-    EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
-    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
-
-    def __init__(self, ctx, parameters=None, sys_path=None):
+    def __init__(
+        self,
+        ctx: RunwayContext,
+        parameters: Optional[Dict[str, Any]] = None,
+        sys_path: Optional[Path] = Path.cwd(),
+    ) -> None:
         """Instantiate class.
 
         Args:
-            ctx (runway.context.Context): Runway context object.
-            parameters (Optional[Dict[str. Any]]): Parameters from Runway.
-            sys_path (Optional[str]): Working directory.
+            ctx: Runway context object.
+            parameters: Parameters from Runway.
+            sys_path: Working directory.
 
         """
         self.__ctx = ctx
@@ -62,7 +66,7 @@ class CFNgin:
         self.parameters = MutableMap()
         self.recreate_failed = ctx.is_noninteractive
         self.region = ctx.env_region
-        self.sys_path = sys_path or os.getcwd()
+        self.sys_path = sys_path if isinstance(sys_path, Path) else Path(sys_path)
         self.tail = bool(ctx.env.debug or ctx.env.verbose)
 
         self.parameters.update(self.env_file)
@@ -74,13 +78,8 @@ class CFNgin:
         self._inject_common_parameters()
 
     @cached_property
-    def env_file(self):
-        """Contents of a CFNgin environment file.
-
-        Returns:
-            MutableMap
-
-        """
+    def env_file(self) -> MutableMap:
+        """Contents of a CFNgin environment file."""
         result = {}
         supported_names = [
             "{}.env".format(self.__ctx.env_name),
@@ -95,13 +94,13 @@ class CFNgin:
                     result.update(parse_environment(file_.read()))
         return MutableMap(**result)
 
-    def deploy(self, force=False, sys_path=None):
+    def deploy(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
         """Run the CFNgin deploy action.
 
         Args:
-            force (bool): Explicitly enable the action even if an environment
+            force: Explicitly enable the action even if an environment
                 file is not found.
-            sys_path (Optional[str]): Explicitly define a path to work in.
+            sys_path: Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
@@ -109,19 +108,19 @@ class CFNgin:
             return
         if not sys_path:
             sys_path = self.sys_path
-        config_file_names = self.find_config_files(sys_path=sys_path)
+        config_file_paths = self.find_config_files(sys_path=sys_path)
 
         with SafeHaven(
             environ=self.__ctx.env_vars, sys_modules_exclude=["awacs", "troposphere"]
         ):
-            for config_name in config_file_names:
-                logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
+            for config_path in config_file_paths:
+                logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
                 logger.notice("deploy (in progress)")
                 with SafeHaven(
-                    argv=["stacker", "build", config_name],
+                    argv=["stacker", "build", str(config_path)],
                     sys_modules_exclude=["awacs", "troposphere"],
                 ):
-                    ctx = self.load(config_name)
+                    ctx = self.load(config_path)
                     action = build.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -131,13 +130,13 @@ class CFNgin:
                     action.execute(concurrency=self.concurrency, tail=self.tail)
                 logger.success("deploy (complete)")
 
-    def destroy(self, force=False, sys_path=None):
+    def destroy(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
         """Run the CFNgin destroy action.
 
         Args:
-            force (bool): Explicitly enable the action even if an environment
+            force: Explicitly enable the action even if an environment
                 file is not found.
-            sys_path (Optional[str]): Explicitly define a path to work in.
+            sys_path: Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
@@ -145,16 +144,16 @@ class CFNgin:
             return
         if not sys_path:
             sys_path = self.sys_path
-        config_file_names = self.find_config_files(sys_path=sys_path)
+        config_file_paths = self.find_config_files(sys_path=sys_path)
         # destroy should run in reverse to handle dependencies
-        config_file_names.reverse()
+        config_file_paths.reverse()
 
         with SafeHaven(environ=self.__ctx.env_vars):
-            for config_name in config_file_names:
-                logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
+            for config_path in config_file_paths:
+                logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("destroy (in progress)")
-                with SafeHaven(argv=["stacker", "destroy", config_name]):
-                    ctx = self.load(config_name)
+                with SafeHaven(argv=["stacker", "destroy", str(config_path)]):
+                    ctx = self.load(config_path)
                     action = destroy.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -166,19 +165,17 @@ class CFNgin:
                     )
                 logger.success("destroy (complete)")
 
-    def load(self, config_path):
+    def load(self, config_path: Path) -> CFNginContext:
         """Load a CFNgin config into a context object.
 
         Args:
-            config_path (str): Valid path to a CFNgin config file.
-
-        Returns:
-            :class:`runway.cfngin.context.Context`
+            config_path: Valid path to a CFNgin config file.
 
         """
-        LOGGER.debug("loading CFNgin config: %s", os.path.basename(config_path))
+        LOGGER.debug("loading CFNgin config: %s", config_path.name)
         try:
             config = self._get_config(config_path)
+            config.load()
             return self._get_context(config, config_path)
         except ConstructorError as err:
             if err.problem.startswith(
@@ -193,13 +190,13 @@ class CFNgin:
                 sys.exit(1)
             raise
 
-    def plan(self, force=False, sys_path=None):
+    def plan(self, force: bool = False, sys_path: Optional[Path] = None):
         """Run the CFNgin plan action.
 
         Args:
-            force (bool): Explicitly enable the action even if an environment
+            force: Explicitly enable the action even if an environment
                 file is not found.
-            sys_path (Optional[str]): Explicitly define a path to work in.
+            sys_path: Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
         """
@@ -207,13 +204,13 @@ class CFNgin:
             return
         if not sys_path:
             sys_path = self.sys_path
-        config_file_names = self.find_config_files(sys_path=sys_path)
+        config_file_paths = self.find_config_files(sys_path=sys_path)
         with SafeHaven(environ=self.__ctx.env_vars):
-            for config_name in config_file_names:
-                logger = PrefixAdaptor(os.path.basename(config_name), LOGGER)
+            for config_path in config_file_paths:
+                logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("plan (in progress)")
-                with SafeHaven(argv=["stacker", "diff", config_name]):
-                    ctx = self.load(config_name)
+                with SafeHaven(argv=["stacker", "diff", str(config_path)]):
+                    ctx = self.load(config_path)
                     action = diff.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
@@ -223,7 +220,7 @@ class CFNgin:
                     action.execute()
                 logger.success("plan (complete)")
 
-    def should_skip(self, force=False):
+    def should_skip(self, force: bool = False) -> bool:
         """Determine if action should be taken or not.
 
         Args:
@@ -239,30 +236,22 @@ class CFNgin:
         LOGGER.info("skipped; no parameters and environment file not found")
         return True
 
-    def _get_config(self, file_path, validate=True):
+    def _get_config(self, file_path: Path) -> CfnginConfig:
         """Initialize a CFNgin config object from a file.
 
         Args:
             file_path (str): Path to the config file to load.
             validate (bool): Validate the loaded config.
 
-        Returns:
-            :class:`runway.cfngin.config.Config`
-
         """
-        with open(file_path, "r") as file_:
-            raw_config = file_.read()
-        return load_config(raw_config, self.parameters, validate)
+        return CfnginConfig.parse_file(file_path=file_path, parameters=self.parameters)
 
-    def _get_context(self, config, config_path):
+    def _get_context(self, config: CfnginConfig, config_path: Path) -> CFNginContext:
         """Initialize a CFNgin context object.
 
         Args:
-            config (:class:`runway.cfngin.config.Config): CFNgin config object.
-            config_path (str): Path to the config file that was provided.
-
-        Returns:
-            :class:`runway.cfngin.context.Context`
+            config: CFNgin config object.
+            config_path: Path to the config file that was provided.
 
         """
         return CFNginContext(
@@ -275,14 +264,13 @@ class CFNgin:
             stack_names=[],  # placeholder
         )
 
-    def _get_provider_builder(self, service_role=None):
+    def _get_provider_builder(
+        self, service_role: Optional[str] = None
+    ) -> ProviderBuilder:
         """Initialize provider builder.
 
         Args:
-            service_role (Optional[str]): CloudFormation service role.
-
-        Returns:
-            ProviderBuilder
+            service_role: CloudFormation service role.
 
         """
         if self.interactive:
@@ -296,7 +284,7 @@ class CFNgin:
             service_role=service_role,
         )
 
-    def _inject_common_parameters(self):
+    def _inject_common_parameters(self) -> None:
         """Add common parameters if they don't already exist.
 
         Adding these commonly used parameters will remove the need to add
@@ -321,38 +309,18 @@ class CFNgin:
             self.parameters["region"] = self.region
 
     @classmethod
-    def find_config_files(cls, exclude=None, sys_path=None):
+    def find_config_files(
+        cls, exclude: Optional[List[str]] = None, sys_path: Optional[Path] = None
+    ) -> List[Path]:
         """Find CFNgin config files.
 
         Args:
-            exclude (Optional[List[str]]): List of file names to exclude. This
-                list is appended to the global exclude list.
-            sys_path (Optional[str]): Explicitly define a path to search for
-                config files.
+            exclude: List of file names to exclude. This list is appended to
+                the global exclude list.
+            sys_path: Explicitly define a path to search for config files.
 
         Returns:
-            List[str]: Path to config files that were found.
+            Paths to config files that were found.
 
         """
-        if not sys_path:
-            sys_path = os.getcwd()
-        elif os.path.isfile(sys_path):
-            return [sys_path]
-
-        exclude = exclude or []
-        result = []
-        exclude.extend(cls.EXCLUDE_LIST)
-        for root, _dirs, files in os.walk(sys_path):
-            for name in files:
-                if re.match(cls.EXCLUDE_REGEX, name) or (
-                    name in exclude or name.startswith(".")
-                ):
-                    # Hidden files (e.g. .gitlab-ci.yml), Runway configs,
-                    # and docker-compose files definitely aren't stacker
-                    # config files
-                    continue
-                if os.path.splitext(name)[-1] in [".yaml", ".yml"]:
-                    result.append(os.path.join(root, name))
-            break  # only need top level files
-        result.sort()
-        return result
+        return CfnginConfig.find_config_file(sys_path, exclude=exclude)

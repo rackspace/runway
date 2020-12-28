@@ -150,7 +150,7 @@ Parameters
 .. _staticsite_cf_disable:
 
 **staticsite_cf_disable (Optional[bool])**
-  Wether deployment of the CloudFront Distribution should be disabled. (*default:* ``false``)
+  Whether deployment of the CloudFront Distribution should be disabled. (*default:* ``false``)
 
   Useful for a development site as it makes it accessible via an S3 url with a much shorter launch time.
   This cannot be set to ``true`` when using :ref:`Auth@Edge`.
@@ -179,7 +179,7 @@ Parameters
 .. _staticsite_create_user_pool:
 
 **staticsite_create_user_pool (Optional[bool])**
-  Wether to create a User Pool for the :ref:`Auth@Edge` configuration.
+  Whether to create a User Pool for the :ref:`Auth@Edge` configuration.
 
   Requires staticsite_auth_at_edge_.
 
@@ -204,7 +204,7 @@ Parameters
           ResponsePagePath: /index.html
 
 **staticsite_enable_cf_logging (Optional[bool])**
-  Wether logging should be enabled for the CloudFront distribution. (*default:* ``true``)
+  Whether logging should be enabled for the CloudFront distribution. (*default:* ``true``)
 
   .. rubric:: Example
   .. code-block:: yaml
@@ -245,7 +245,7 @@ Parameters
           arn: arn:aws:lambda:<region>:<account-id>:function:<function>:<version>
 
 **staticsite_non_spa (Optional[bool])**
-  Wether this site is a single page application (*SPA*). (*default:* ``true``)
+  Whether this site is a single page application (*SPA*). (*default:* ``true``)
 
   A custom error response directing ``ErrorCode: 404`` to the primary ``/index.html`` as a ``ResponseCode: 200`` is added, allowing the *SPA* to take over error handling.
   If you are not running an *SPA*, setting this to ``true`` will prevent this custom error from being added.

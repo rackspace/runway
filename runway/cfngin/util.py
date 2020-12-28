@@ -1,4 +1,6 @@
 """CFNgin utilities."""
+from __future__ import annotations
+
 import copy
 import logging
 import os
@@ -12,6 +14,8 @@ import uuid
 import warnings
 import zipfile
 from collections import OrderedDict
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional, Union
 
 import botocore.client
 import botocore.exceptions
@@ -22,6 +26,14 @@ from yaml.nodes import MappingNode
 
 from .awscli_yamlhelper import yaml_parse
 from .session_cache import get_session
+
+if TYPE_CHECKING:
+    from ..config.models.cfngin import (
+        CfnginPackageSourcesDefinitionModel,
+        GitCfnginPackageSourceDefinitionModel,
+        LocalCfnginPackageSourceDefinitionModel,
+        S3CfnginPackageSourceDefinitionModel,
+    )
 
 LOGGER = logging.getLogger(__name__)
 
@@ -507,7 +519,7 @@ def parse_cloudformation_template(template):
 class Extractor:
     """Base class for extractors."""
 
-    def __init__(self, archive=None):
+    def __init__(self, archive: Optional[Path] = None) -> None:
         """Instantiate class.
 
         Args:
@@ -516,17 +528,17 @@ class Extractor:
         """
         self.archive = archive
 
-    def set_archive(self, dir_name):
+    def set_archive(self, dir_name: Path) -> None:
         """Update archive filename to match directory name & extension.
 
         Args:
-            dir_name (str): Archive directory name
+            dir_name: Archive directory name
 
         """
-        self.archive = dir_name + self.extension()
+        self.archive = dir_name.with_suffix(self.extension())
 
     @staticmethod
-    def extension():
+    def extension() -> str:
         """Serve as placeholder; override this in subclasses."""
         return ""
 
@@ -534,13 +546,13 @@ class Extractor:
 class TarExtractor(Extractor):
     """Extracts tar archives."""
 
-    def extract(self, destination):
+    def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:") as tar:
             tar.extractall(path=destination)
 
     @staticmethod
-    def extension():
+    def extension() -> str:
         """Return archive extension."""
         return ".tar"
 
@@ -548,13 +560,13 @@ class TarExtractor(Extractor):
 class TarGzipExtractor(Extractor):
     """Extracts compressed tar archives."""
 
-    def extract(self, destination):
+    def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:gz") as tar:
             tar.extractall(path=destination)
 
     @staticmethod
-    def extension():
+    def extension() -> str:
         """Return archive extension."""
         return ".tar.gz"
 
@@ -562,13 +574,13 @@ class TarGzipExtractor(Extractor):
 class ZipExtractor(Extractor):
     """Extracts zip archives."""
 
-    def extract(self, destination):
+    def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with zipfile.ZipFile(self.archive, "r") as zip_ref:
             zip_ref.extractall(destination)
 
     @staticmethod
-    def extension():
+    def extension() -> str:
         """Return archive extension."""
         return ".zip"
 
@@ -578,61 +590,63 @@ class SourceProcessor:
 
     ISO8601_FORMAT = "%Y%m%dT%H%M%SZ"
 
-    def __init__(self, sources, cfngin_cache_dir=None):
+    def __init__(
+        self,
+        sources: CfnginPackageSourcesDefinitionModel,
+        cache_dir: Optional[Path] = None,
+    ) -> None:
         """Process a config's defined package sources.
 
         Args:
-            sources (Dict[str, Any]): Package sources from CFNgin config
+            sources: Package sources from CFNgin config
                 dictionary.
-            cfngin_cache_dir (str): Path where remote sources will be
+            cache_dir: Path where remote sources will be
                 cached.
 
         """
-        if not cfngin_cache_dir:
-            cfngin_cache_dir = os.path.expanduser("~/.runway_cache")
-        package_cache_dir = os.path.join(cfngin_cache_dir, "packages")
-        self.cfngin_cache_dir = cfngin_cache_dir
-        self.package_cache_dir = package_cache_dir
+        if not cache_dir:
+            cache_dir = Path.cwd() / ".runway" / "cache"
+        self.cache_dir = cache_dir
+        self.package_cache_dir = cache_dir / "packages"
         self.sources = sources
         self.configs_to_merge = []
         self.create_cache_directories()
 
-    def create_cache_directories(self):
+    def create_cache_directories(self) -> True:
         """Ensure that SourceProcessor cache directories exist."""
-        if not os.path.isdir(self.package_cache_dir):
-            if not os.path.isdir(self.cfngin_cache_dir):
-                os.mkdir(self.cfngin_cache_dir)
-            os.mkdir(self.package_cache_dir)
+        self.package_cache_dir.mkdir(parents=True, exist_ok=True)
 
     def get_package_sources(self):
         """Make remote python packages available for local use."""
         # Checkout local modules
-        for config in self.sources.get("local", []):
+        for config in self.sources.local:
             self.fetch_local_package(config=config)
         # Checkout S3 repositories specified in config
-        for config in self.sources.get("s3", []):
+        for config in self.sources.s3:
             self.fetch_s3_package(config=config)
         # Checkout git repositories specified in config
-        for config in self.sources.get("git", []):
+        for config in self.sources.git:
             self.fetch_git_package(config=config)
 
-    def fetch_local_package(self, config):
+    def fetch_local_package(
+        self, config: LocalCfnginPackageSourceDefinitionModel
+    ) -> None:
         """Make a local path available to current CFNgin config.
 
         Args:
-            config (Dict[str, Any]): 'local' path config dictionary.
+            config: Package source config.
 
         """
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(
-            config=config, pkg_dir_name=config["source"], pkg_cache_dir=os.getcwd()
+            config=config, pkg_dir_name=config.source, pkg_cache_dir=Path.cwd()
         )
 
-    def fetch_s3_package(self, config):
+    def fetch_s3_package(self, config: S3CfnginPackageSourceDefinitionModel) -> None:
         """Make a remote S3 archive available for local use.
 
         Args:
-            config (Dict[str, Any]): git config dictionary.
+            config: Package source config.
 
         """
         extractor_map = {
@@ -641,74 +655,76 @@ class SourceProcessor:
             ".zip": ZipExtractor,
         }
         extractor = None
+        dir_name = ""
         for suffix, class_ in extractor_map.items():
-            if config["key"].endswith(suffix):
+            if config.key.endswith(suffix):
                 extractor = class_()
                 LOGGER.debug(
                     'using extractor %s for S3 object "%s" in bucket %s',
                     class_.__name__,
-                    config["key"],
-                    config["bucket"],
+                    config.key,
+                    config.bucket,
                 )
                 dir_name = self.sanitize_uri_path(
-                    "s3-%s-%s" % (config["bucket"], config["key"][: -len(suffix)])
+                    "s3-%s-%s" % (config.bucket, config.key[: -len(suffix)])
                 )
                 break
 
         if extractor is None:
             raise ValueError(
                 'Archive type could not be determined for S3 object "%s" '
-                "in bucket %s." % (config["key"], config["bucket"])
+                "in bucket %s." % (config.key, config.bucket)
             )
 
         session = get_session(region=None)
         extra_s3_args = {}
-        if config.get("requester_pays", False):
+        if config.requester_pays:
             extra_s3_args["RequestPayer"] = "requester"
 
         # We can skip downloading the archive if it's already been cached
-        if config.get("use_latest", True):
+        if config.use_latest:
             try:
                 # LastModified should always be returned in UTC, but it doesn't
                 # hurt to explicitly convert it to UTC again just in case
                 modified_date = (
                     session.client("s3")
-                    .head_object(
-                        Bucket=config["bucket"], Key=config["key"], **extra_s3_args
-                    )["LastModified"]
+                    .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
+                        "LastModified"
+                    ]
                     .astimezone(dateutil.tz.tzutc())
                 )
             except botocore.exceptions.ClientError as client_error:
                 LOGGER.error(
                     "error checking modified date of s3://%s/%s : %s",
-                    config["bucket"],
-                    config["key"],
+                    config.bucket,
+                    config.key,
                     client_error,
                 )
                 sys.exit(1)
             dir_name += "-%s" % modified_date.strftime(self.ISO8601_FORMAT)
-        cached_dir_path = os.path.join(self.package_cache_dir, dir_name)
-        if not os.path.isdir(cached_dir_path):
+        cached_dir_path = self.package_cache_dir / dir_name
+        if not cached_dir_path.is_dir():
             LOGGER.debug(
                 "remote package s3://%s/%s does not appear to have "
                 "been previously downloaded; starting download and "
                 "extraction to %s",
-                config["bucket"],
-                config["key"],
+                config.bucket,
+                config.key,
                 cached_dir_path,
             )
             tmp_dir = tempfile.mkdtemp(prefix="cfngin")
             tmp_package_path = os.path.join(tmp_dir, dir_name)
-            try:
-                extractor.set_archive(os.path.join(tmp_dir, dir_name))
+            with tempfile.TemporaryDirectory(prefix="runway-cfngin") as tmp_dir:
+                tmp_package_path = Path(tmp_dir) / dir_name
+                extractor.set_archive(tmp_package_path)
                 LOGGER.debug(
                     "starting remote package download from S3 to %s "
                     'with extra S3 options "%s"',
                     extractor.archive,
                     str(extra_s3_args),
                 )
-                session.resource("s3").Bucket(config["bucket"]).download_file(
-                    config["key"], extractor.archive, ExtraArgs=extra_s3_args
+                session.resource("s3").Bucket(config.bucket).download_file(
+                    config.key, str(extractor.archive), ExtraArgs=extra_s3_args
                 )
                 LOGGER.debug(
                     "download complete; extracting downloaded package to %s",
@@ -721,26 +737,24 @@ class SourceProcessor:
                     dir_name,
                     self.package_cache_dir,
                 )
-                shutil.move(tmp_package_path, self.package_cache_dir)
-            finally:
-                shutil.rmtree(tmp_dir)
+                shutil.move(str(tmp_package_path), self.package_cache_dir)
         else:
             LOGGER.debug(
                 "remote package s3://%s/%s appears to have "
                 "been previously downloaded to %s; download skipped",
-                config["bucket"],
-                config["key"],
+                config.bucket,
+                config.key,
                 cached_dir_path,
             )
 
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(config=config, pkg_dir_name=dir_name)
 
-    def fetch_git_package(self, config):
+    def fetch_git_package(self, config: GitCfnginPackageSourceDefinitionModel) -> None:
         """Make a remote git repository available for local use.
 
         Args:
-            config (Dict[str, Any]): git config dictionary.
+            config: Package source config.
 
         """
         # only loading git here when needed to avoid load errors on systems
@@ -748,21 +762,21 @@ class SourceProcessor:
         from git import Repo  # pylint: disable=import-outside-toplevel
 
         ref = self.determine_git_ref(config)
-        dir_name = self.sanitize_git_path(uri=config["uri"], ref=ref)
-        cached_dir_path = os.path.join(self.package_cache_dir, dir_name)
+        dir_name = self.sanitize_git_path(uri=config.uri, ref=ref)
+        cached_dir_path = self.package_cache_dir / dir_name
 
         # We can skip cloning the repo if it's already been cached
-        if not os.path.isdir(cached_dir_path):
+        if not cached_dir_path.is_dir():
             LOGGER.debug(
                 "remote repo %s does not appear to have been "
                 "previously downloaded; starting clone to %s",
-                config["uri"],
+                config.uri,
                 cached_dir_path,
             )
             tmp_dir = tempfile.mkdtemp(prefix="cfngin")
             try:
                 tmp_repo_path = os.path.join(tmp_dir, dir_name)
-                with Repo.clone_from(config["uri"], tmp_repo_path) as repo:
+                with Repo.clone_from(config.uri, tmp_repo_path) as repo:
                     repo.head.reference = ref
                     repo.head.reset(index=True, working_tree=True)
                 shutil.move(tmp_repo_path, self.package_cache_dir)
@@ -772,43 +786,49 @@ class SourceProcessor:
             LOGGER.debug(
                 "remote repo %s appears to have been previously "
                 "cloned to %s; download skipped",
-                config["uri"],
+                config.uri,
                 cached_dir_path,
             )
 
         # Update sys.path & merge in remote configs (if necessary)
         self.update_paths_and_config(config=config, pkg_dir_name=dir_name)
 
-    def update_paths_and_config(self, config, pkg_dir_name, pkg_cache_dir=None):
+    def update_paths_and_config(
+        self,
+        config: Union[
+            GitCfnginPackageSourceDefinitionModel,
+            LocalCfnginPackageSourceDefinitionModel,
+            S3CfnginPackageSourceDefinitionModel,
+        ],
+        pkg_dir_name: str,
+        pkg_cache_dir: Optional[Path] = None,
+    ) -> None:
         """Handle remote source defined sys.paths & configs.
 
         Args:
-            config (Dict[str, Any]): Git config dictionary.
-            pkg_dir_name (str): directory Name of the CFNgin archive.
-            pkg_cache_dir (Optional[str]): Fully qualified path to CFNgin
-                cache cache directory.
+            config: Package source config.
+            pkg_dir_name: Directory name of the CFNgin archive.
+            pkg_cache_dir: Fully qualified path to CFNgin cache cache directory.
 
         """
-        if pkg_cache_dir is None:
+        if not pkg_cache_dir:
             pkg_cache_dir = self.package_cache_dir
-        cached_dir_path = os.path.join(pkg_cache_dir, pkg_dir_name)
+        cached_dir_path = pkg_cache_dir / pkg_dir_name
 
         # Add the appropriate directory (or directories) to sys.path
-        if config.get("paths"):
-            for path in config["paths"]:
-                path_to_append = os.path.join(cached_dir_path, path)
+        if config.paths:
+            for path in config.paths:
+                path_to_append = (cached_dir_path / path).resolve()
                 LOGGER.debug("appending to python sys.path: %s", path_to_append)
-                sys.path.append(path_to_append)
+                sys.path.append(str(path_to_append))
         else:
-            sys.path.append(cached_dir_path)
+            sys.path.append(str(cached_dir_path.resolve()))
 
         # If the configuration defines a set of remote config yaml files to
         # include, add them to the list for merging
-        if config.get("configs"):
-            for config_filename in config["configs"]:
-                self.configs_to_merge.append(
-                    os.path.join(cached_dir_path, config_filename)
-                )
+        if config.configs:
+            for config_filename in config.configs:
+                self.configs_to_merge.append(cached_dir_path / config_filename)
 
     @staticmethod
     def git_ls_remote(uri, ref):
@@ -832,58 +852,37 @@ class SourceProcessor:
         raise ValueError('Ref "%s" not found for repo %s.' % (ref, uri))
 
     @staticmethod
-    def determine_git_ls_remote_ref(config):
+    def determine_git_ls_remote_ref(
+        config: GitCfnginPackageSourceDefinitionModel,
+    ) -> str:
         """Determine the ref to be used with the "git ls-remote" command.
 
         Args:
-            config (:class:`runway.cfngin.config.GitPackageSource`): Git
-                config dictionary; 'branch' key is optional.
+            config: Git package source config.
 
         Returns:
-            str: A branch reference or "HEAD".
+            A branch reference or "HEAD".
 
         """
-        if config.get("branch"):
-            ref = "refs/heads/%s" % config["branch"]
-        else:
-            ref = "HEAD"
+        return f"refs/heads/{config.branch}" if config.branch else "HEAD"
 
-        return ref
-
-    def determine_git_ref(self, config):
+    def determine_git_ref(self, config: GitCfnginPackageSourceDefinitionModel) -> str:
         """Determine the ref to be used for ``git checkout``.
 
         Args:
-            config (Dict[str, Any]): Git config dictionary.
+            config: Git package source config.
 
         Returns:
-            str: A commit id or tag name.
+            A commit id or tag name.
 
         """
-        # First ensure redundant config keys aren't specified (which could
-        # cause confusion as to which take precedence)
-        ref_config_keys = 0
-        for i in ["commit", "tag", "branch"]:
-            if config.get(i):
-                ref_config_keys += 1
-        if ref_config_keys > 1:
-            raise ImportError(
-                "Fetching remote git sources failed: "
-                "conflicting revisions (e.g. 'commit', 'tag', "
-                "'branch') specified for a package source"
-            )
-
-        # Now check for a specific point in time referenced and return it if
-        # present
-        if config.get("commit"):
-            ref = config["commit"]
-        elif config.get("tag"):
-            ref = config["tag"]
+        if config.commit:
+            ref = config.commit
+        elif config.tag:
+            ref = config.tag
         else:
-            # Since a specific commit/tag point in time has not been specified,
-            # check the remote repo for the commit id to use
-            ref = self.git_ls_remote(
-                config["uri"], self.determine_git_ls_remote_ref(config)
+            ref = self.git_ls_remote(  # get a commit id to use
+                config.uri, self.determine_git_ls_remote_ref(config)
             )
         if isinstance(ref, bytes):
             return ref.decode()

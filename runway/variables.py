@@ -1,4 +1,6 @@
 """Runway variables."""
+from __future__ import annotations
+
 import logging
 import re
 from typing import (
@@ -30,7 +32,7 @@ from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 if TYPE_CHECKING:
     from .cfngin.context import Context as CFNginContext
     from .cfngin.providers.base import BaseProvider
-    from .config import VariablesDefinition
+    from .config.components.runway import RunwayVariablesDefinition
     from .context import Context as RunwayContext
 
 
@@ -88,9 +90,9 @@ class Variable:
 
     def resolve(
         self,
-        context: Union["CFNginContext", "RunwayContext"],
-        provider: Optional["BaseProvider"] = None,
-        variables: Optional["VariablesDefinition"] = None,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
         """Resolve the variable value.
@@ -128,8 +130,8 @@ class Variable:
 
 def resolve_variables(
     variables: List[Variable],
-    context: Union["CFNginContext", "RunwayContext"],
-    provider: "BaseProvider",
+    context: Union[CFNginContext, RunwayContext],
+    provider: BaseProvider,
 ) -> None:
     """Given a list of variables, resolve all of them.
 
@@ -185,9 +187,9 @@ class VariableValue:
 
     def resolve(
         self,
-        context: Union["CFNginContext", "RunwayContext"],
-        provider: Optional["BaseProvider"] = None,
-        variables: Optional["VariablesDefinition"] = None,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
         """Resolve the variable value.
@@ -339,9 +341,9 @@ class VariableValueList(VariableValue, list):
 
     def resolve(
         self,
-        context: Union["CFNginContext", "RunwayContext"],
-        provider: Optional["BaseProvider"] = None,
-        variables: Optional["VariablesDefinition"] = None,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
         """Resolve the variable value.
@@ -414,9 +416,9 @@ class VariableValueDict(VariableValue, dict):
 
     def resolve(
         self,
-        context: Union["CFNginContext", "RunwayContext"],
-        provider: Optional["BaseProvider"] = None,
-        variables: Optional["VariablesDefinition"] = None,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
         """Resolve the variable value.
@@ -479,7 +481,7 @@ class VariableValueConcatenation(VariableValue, list):
     @property
     def simplified(
         self,
-    ) -> Union[VariableValue, "VariableValueConcatenation", VariableValueLiteral]:
+    ) -> Union[VariableValue, VariableValueConcatenation, VariableValueLiteral]:
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -533,9 +535,9 @@ class VariableValueConcatenation(VariableValue, list):
 
     def resolve(
         self,
-        context: Union["CFNginContext", "RunwayContext"],
-        provider: Optional["BaseProvider"] = None,
-        variables: Optional["VariablesDefinition"] = None,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
         """Resolve the variable value.
@@ -624,7 +626,7 @@ class VariableValueLookup(VariableValue):
         return self._resolved
 
     @property
-    def simplified(self) -> "VariableValueLookup":
+    def simplified(self) -> VariableValueLookup:
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -647,9 +649,9 @@ class VariableValueLookup(VariableValue):
 
     def resolve(
         self,
-        context: Union["CFNginContext", "RunwayContext"],
-        provider: Optional["BaseProvider"] = None,
-        variables: Optional["VariablesDefinition"] = None,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
         """Resolve the variable value.
@@ -704,9 +706,7 @@ class VariableValueLookup(VariableValue):
         self._resolved = True
 
     # TODO Remove during the next major release.
-    def _resolve_legacy(
-        self, context: "CFNginContext", provider: "BaseProvider"
-    ) -> Any:
+    def _resolve_legacy(self, context: CFNginContext, provider: BaseProvider) -> Any:
         """Resolve legacy lookups.
 
         Stacker style custom lookups only take 3 args (value, provider,

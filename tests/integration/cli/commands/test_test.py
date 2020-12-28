@@ -15,13 +15,13 @@ FAIL = {
     "name": "fail",
     "type": "script",
     "required": False,
-    "args": {"command": ["exit 1"]},
+    "args": {"commands": ["exit 1"]},
 }
 FAIL_REQUIRED = {
     "name": "fail-required",
     "type": "script",
     "required": True,
-    "args": {"command": ["exit 1"]},
+    "args": {"commands": ["exit 1"]},
 }
 INVALID_TYPE = {"name": "invalid-type", "type": "invalid", "required": False}
 INVALID_TYPE_REQUIRED = {
@@ -31,9 +31,10 @@ INVALID_TYPE_REQUIRED = {
 }
 
 
-def test_test_invalid_type(cd_tmp_path, capfd, caplog):
+# def test_test_invalid_type(cd_tmp_path, capfd, caplog):
+def test_test_invalid_type(cd_tmp_path):  # TODO update after catching error
     """Test ``runway test`` with two tests; one invalid."""
-    caplog.set_level(logging.INFO, logger="runway.core")
+    # caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
         yaml.safe_dump(
@@ -45,38 +46,17 @@ def test_test_invalid_type(cd_tmp_path, capfd, caplog):
     result = runner.invoke(cli, ["test"])
     assert result.exit_code == 1
 
-    captured = capfd.readouterr()
-    logs = "\n".join(caplog.messages)
-    assert "found 2 test(s)" in logs
-    assert "invalid-type:running test (in progress)" in logs
-    assert 'invalid-type:unable to find handler of type "invalid"' in logs
-    assert "success:running test (in progress)" in logs
-    assert "Hello world" in captured.out
-    assert "success:running test (pass)" in logs
+    assert result.exception.errors()[0]["loc"] == ("tests", 0, "type")
 
-
-def test_test_invalid_type_required(cd_tmp_path, caplog):
-    """Test ``runway test`` with two tests; one invalid required."""
-    caplog.set_level(logging.INFO, logger="runway.core")
-    runway_yml = cd_tmp_path / "runway.yml"
-    runway_yml.write_text(
-        yaml.safe_dump(
-            {
-                "deployments": [],
-                "tests": [INVALID_TYPE_REQUIRED.copy(), SUCCESS.copy()],
-            }
-        )
-    )
-
-    runner = CliRunner()
-    result = runner.invoke(cli, ["test"])
-    assert result.exit_code == 1
-
-    logs = "\n".join(caplog.messages)
-    assert "found 2 test(s)" in logs
-    assert "invalid-type-required:running test (in progress)" in logs
-    assert 'invalid-type-required:unable to find handler of type "invalid"' in logs
-    assert "success:running test (in progress)" not in logs
+    # captured = capfd.readouterr()
+    # logs = "\n".join(caplog.messages)
+    # print(captured)
+    # assert "found 2 test(s)" in logs
+    # assert "invalid-type:running test (in progress)" in logs
+    # assert 'invalid-type:unable to find handler of type "invalid"' in logs
+    # assert "success:running test (in progress)" in logs
+    # assert "Hello world" in captured.out
+    # assert "success:running test (pass)" in logs
 
 
 def test_test_not_defined(cd_tmp_path, caplog):

@@ -13,7 +13,7 @@ from runway.cfngin.actions.build import (
     _resolve_parameters,
 )
 from runway.cfngin.blueprints.variables.types import CFNString
-from runway.cfngin.context import Config, Context
+from runway.cfngin.context import Context
 from runway.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
 from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.providers.aws.default import Provider
@@ -27,6 +27,7 @@ from runway.cfngin.status import (
     SUBMITTED,
     NotSubmittedStatus,
 )
+from runway.config import CfnginConfig
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -68,7 +69,9 @@ class TestBuildAction(unittest.TestCase):
 
     def setUp(self):
         """Run before tests."""
-        self.context = Context(config=Config({"namespace": "namespace"}))
+        self.context = Context(
+            config=CfnginConfig.parse_obj({"namespace": "namespace"})
+        )
         self.provider = MockProvider()
         self.build_action = build.Action(
             self.context, provider_builder=MockProviderBuilder(self.provider)
@@ -79,21 +82,26 @@ class TestBuildAction(unittest.TestCase):
         config = {
             "namespace": "namespace",
             "stacks": [
-                {"name": "vpc"},
-                {"name": "bastion", "variables": {"test": "${output vpc::something}"}},
+                {"name": "vpc", "template_path": "."},
+                {
+                    "name": "bastion",
+                    "template_path": ".",
+                    "variables": {"test": "${output vpc::something}"},
+                },
                 {
                     "name": "db",
+                    "template_path": ".",
                     "variables": {
                         "test": "${output vpc::something}",
                         "else": "${output bastion::something}",
                     },
                 },
-                {"name": "other", "variables": {}},
+                {"name": "other", "template_path": ".", "variables": {}},
             ],
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=Config(config), **kwargs)
+        return Context(config=CfnginConfig.parse_obj(config), **kwargs)
 
     @patch(
         "runway.cfngin.context.Context._persistent_graph_tags",

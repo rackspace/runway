@@ -49,6 +49,8 @@ This will terminate execution if test fails and no further tests will be run.
 Built-in Test Types
 ===================
 
+.. _built-in-test-cfn-lint:
+
 cfn-lint
 --------
 
@@ -70,6 +72,8 @@ file in the same directory as the :ref:`Runway config file<runway-config>`.
         type: cfn-lint
 
 
+.. _built-in-test-script:
+
 script
 ------
 
@@ -89,6 +93,8 @@ Commands are passed into the test using the ``commands`` argument.
           commands:
             - echo "Hello World!"
 
+
+.. _built-in-test-yamllint:
 
 yamllint
 --------

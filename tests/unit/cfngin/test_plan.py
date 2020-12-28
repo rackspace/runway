@@ -8,7 +8,7 @@ import unittest
 
 import mock
 
-from runway.cfngin.context import Config, Context
+from runway.cfngin.context import Context
 from runway.cfngin.dag import walk
 from runway.cfngin.exceptions import (
     CancelExecution,
@@ -24,6 +24,7 @@ from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.stack import Stack
 from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
 from runway.cfngin.util import stack_template_key_name
+from runway.config import CfnginConfig
 
 from .factories import generate_definition, mock_context
 
@@ -140,7 +141,7 @@ class TestPlan(unittest.TestCase):
     def setUp(self):
         """Run before tests."""
         self.count = 0
-        self.config = Config({"namespace": "namespace"})
+        self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = Context(config=self.config)
         register_lookup_handler("noop", lambda **kwargs: "test")
 
@@ -477,7 +478,7 @@ class TestPlan(unittest.TestCase):
 
     def test_dump(self, *args):
         """Test dump."""
-        requires = None
+        requires = []
         steps = []
 
         for i in range(5):
