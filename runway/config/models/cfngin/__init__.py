@@ -124,10 +124,28 @@ class CfnginStackDefinitionModel(ConfigProperty):
         """Model configuration options."""
 
         extra = Extra.forbid
-        schema_extra = {
-            "description": "Define CloudFormation stacks using a Blueprint or Template."
-        }
         title = "CFNgin Stack Definition"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any]) -> None:
+            """Processess the schema after it has been generated.
+
+            Schema is modified in place. Return value is ignored.
+
+            """
+            schema[
+                "description"
+            ] = "Define CloudFormation stacks using a Blueprint or Template."
+            # prevents a false error when defining stacks as a dict
+            schema.get("required", ["name"]).remove("name")
+
+            # fields that can be bool or lookup
+            for prop in ["enabled", "locked", "protected", "termination_protection"]:
+                schema["properties"][prop].pop("type")
+                schema["properties"][prop]["anyOf"] = [
+                    {"type": "boolean"},
+                    {"type": "string", "pattern": utils.CFNGIN_LOOKUP_STRING_REGEX},
+                ]
 
     _resolve_path_fields = validator(
         "stack_policy_path", "template_path", allow_reuse=True
@@ -250,7 +268,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         List[CfnginStackDefinitionModel],  # final type after parsing
         Dict[str, CfnginStackDefinitionModel],  # recommended when writing config
     ] = Field(
-        [], description=CfnginStackDefinitionModel.Config.schema_extra["description"]
+        [], description="Define CloudFormation stacks using a Blueprint or Template."
     )
     sys_path: Optional[Path] = Field(
         None,

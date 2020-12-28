@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, Optional
 
+CFNGIN_LOOKUP_STRING_REGEX = r"^\${.*}$"
 RUNWAY_LOOKUP_STRING_ERROR = ValueError("field can only be a string if it's a lookup")
 RUNWAY_LOOKUP_STRING_REGEX = r"^\${.*}$"
 
