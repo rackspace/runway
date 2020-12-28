@@ -1,6 +1,9 @@
 """CLI utils."""
+from __future__ import annotations
+
 import logging
 import os
+import sys
 from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any, Iterator, List, Optional, Tuple
@@ -8,9 +11,14 @@ from typing import Any, Iterator, List, Optional, Tuple
 import click
 import yaml
 
-from ..config import Config, DeploymentDefinition, ModuleDefinition
+from ..config import RunwayConfig
+from ..config.components.runway import (
+    RunwayDeploymentDefinition,
+    RunwayModuleDefinition,
+)
 from ..context import Context as RunwayContext
 from ..core.components import DeployEnvironment
+from ..exceptions import ConfigNotFound
 from ..util import cached_property
 
 LOGGER = logging.getLogger(__name__)
@@ -54,24 +62,31 @@ class CliContext(MutableMapping):
         )
 
     @cached_property
-    def runway_config(self):
-        # type: () -> Config
+    def runway_config(self) -> RunwayConfig:
         """Runway config."""
-        config = Config.load_from_file(self.runway_config_path)
+        config = RunwayConfig.parse_file(file_path=self.runway_config_path)
         self.env.ignore_git_branch = config.ignore_git_branch
+        # self.env.root_dir = self.runway_config_path.parent
         return config
 
     @cached_property
-    def runway_config_path(self):
-        # type: () -> Path
-        """Path to the runway config file."""
+    def runway_config_path(self) -> Path:
+        """Path to the runway config file.
+
+        Raises:
+            SystemExit: Config file not found or multiple were matches were found.
+
+        """
         try:
-            return Config.find_config_file(config_dir=self.root_dir)
-        except SystemExit:
-            LOGGER.info("trying parent directory")
-            self.root_dir = self.root_dir.parent
+            path = RunwayConfig.find_config_file(self.root_dir)
+            self.root_dir = path.parent
             self.env.root_dir = self.root_dir
-            return Config.find_config_file(config_dir=self.root_dir)
+            return path
+        except ConfigNotFound as err:
+            LOGGER.error(err.message)
+        except ValueError as err:
+            LOGGER.error(err)
+        sys.exit(1)
 
     def get_runway_context(self, deploy_environment=None):
         # type: (Optional[DeployEnvironment]) -> RunwayContext
@@ -189,11 +204,10 @@ class CliContext(MutableMapping):
 
 
 def select_deployments(
-    ctx,  # type: click.Context
-    deployments,  # type: List[DeploymentDefinition]
-    tags=None,  # type: Optional[Tuple[str, ...]]
-):
-    # type: (...) -> List[DeploymentDefinition]
+    ctx: click.Context,
+    deployments: List[RunwayDeploymentDefinition],
+    tags: Optional[Tuple[str, ...]] = None,
+) -> List[RunwayDeploymentDefinition]:
     """Select which deployments to run.
 
     Uses tags, interactive prompts, or selects all.
@@ -237,8 +251,9 @@ def select_deployments(
     return deployments
 
 
-def select_modules(ctx, modules):
-    # type: (click.Context, List[ModuleDefinition]) -> List[ModuleDefinition]
+def select_modules(
+    ctx: click.Context, modules: List[RunwayModuleDefinition]
+) -> List[RunwayModuleDefinition]:
     """Interactively select which modules to run.
 
     Args:
@@ -282,11 +297,10 @@ def select_modules(ctx, modules):
 
 
 def select_modules_using_tags(
-    ctx,  # type: click.Context
-    deployments,  # type: List[DeploymentDefinition]
-    tags,  # type: Tuple[str, ...]
-):
-    # type: (...) -> List[DeploymentDefinition]
+    ctx: click.Context,
+    deployments: List[RunwayDeploymentDefinition],
+    tags: Tuple[str, ...],
+) -> List[RunwayDeploymentDefinition]:
     """Select modules to run using tags.
 
     Args:

@@ -1,6 +1,8 @@
 """Tests for runway.cfngin.blueprints.raw."""
+# pylint: disable=unused-argument
 import json
 import unittest
+from pathlib import Path
 
 from mock import MagicMock
 
@@ -9,42 +11,42 @@ from runway.cfngin.blueprints.raw import (
     get_template_params,
     get_template_path,
 )
+from runway.util import change_dir
 from runway.variables import Variable
 
 from ..factories import mock_context
 
-RAW_JSON_TEMPLATE_PATH = "tests/unit/cfngin/fixtures/cfn_template.json"
-RAW_YAML_TEMPLATE_PATH = "tests/unit/cfngin/fixtures/cfn_template.yaml"
-RAW_J2_TEMPLATE_PATH = "tests/unit/cfngin/fixtures/cfn_template.json.j2"
+RAW_JSON_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.json")
+RAW_YAML_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.yaml")
+RAW_J2_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.json.j2")
 
 
-def test_get_template_path_local_file(tmpdir):
+def test_get_template_path_local_file(tmp_path):
     """Verify get_template_path finding a file relative to CWD."""
-    template_path = tmpdir.join("cfn_template.json")
-    template_path.ensure()
+    template_path = Path("cfn_template.json")
+    (tmp_path / "cfn_template.json").touch()
 
-    with tmpdir.as_cwd():
-        result = get_template_path("cfn_template.json")
+    with change_dir(tmp_path):
+        result = get_template_path(template_path)
         assert template_path.samefile(result)
 
 
-def test_get_template_path_invalid_file(tmpdir):
+def test_get_template_path_invalid_file(cd_tmp_path):
     """Verify get_template_path with an invalid filename."""
-    with tmpdir.as_cwd():
-        assert get_template_path("cfn_template.json") is None
+    assert get_template_path(Path("cfn_template.json")) is None
 
 
-def test_get_template_path_file_in_syspath(tmpdir, monkeypatch):
+def test_get_template_path_file_in_syspath(tmp_path, monkeypatch):
     """Verify get_template_path with a file in sys.path.
 
     This ensures templates are able to be retrieved from remote packages.
 
     """
-    template_path = tmpdir.join("cfn_template.json")
-    template_path.ensure()
+    template_path = tmp_path / "cfn_template.json"
+    template_path.touch()
 
-    monkeypatch.syspath_prepend(tmpdir)
-    result = get_template_path(template_path.basename)
+    monkeypatch.syspath_prepend(tmp_path)
+    result = get_template_path(Path(template_path.name))
     assert template_path.samefile(result)
 
 

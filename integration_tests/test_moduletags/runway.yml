@@ -11,16 +11,14 @@ deployments:
     regions:
       - us-east-1
     environments:
-      dev:
-        run: true
+      dev: true
   - name: deployment_2
     modules:
       - sampleapp3
     regions:
       - us-east-1
     environments:
-      dev:
-        run: true
+      dev: true
   - name: deployment_3
     modules:
       - path: sampleapp4
@@ -32,5 +30,4 @@ deployments:
     regions:
       - us-east-1
     environments:
-      dev:
-        run: true
+      dev: true

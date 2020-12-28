@@ -30,8 +30,10 @@ INSTALL_REQUIRES = [
     "coloredlogs",
     "docker",
     "requests",
+    "pydantic>=1.4.0",
     "pyhcl~=0.4",  # does not support HCL2, possibly move to extras_require in the future
     "python-hcl2~=2.0",
+    "typing_extensions",  # only really needed for < 3.8 but can still be used in >= 3.8
     "gitpython",
     'importlib-metadata; python_version < "3.8"',
     "packaging",  # component of setuptools needed for version compare
@@ -44,7 +46,6 @@ INSTALL_REQUIRES = [
     "urllib3>=1.25.4,<1.27",
     # inherited from stacker 1.7.0 requirements
     "jinja2>=2.7,<3.0",
-    "schematics>=2.0.1,<2.1.0",
     "formic2",
 ]
 

@@ -1,11 +1,12 @@
 """Tests for runway.cfngin.util."""
 # pylint: disable=unused-argument,invalid-name
 import unittest
+from pathlib import Path
 
 import boto3
 import mock
+from pydantic import ValidationError
 
-from runway.cfngin.config import GitPackageSource
 from runway.cfngin.util import (
     Extractor,
     SourceProcessor,
@@ -21,6 +22,7 @@ from runway.cfngin.util import (
     s3_bucket_location_constraint,
     yaml_to_ordered_dict,
 )
+from runway.config.models.cfngin import GitCfnginPackageSourceDefinitionModel
 
 AWS_REGIONS = [
     "us-east-1",
@@ -174,13 +176,13 @@ Outputs:
 
     def test_extractors(self):
         """Test extractors."""
-        self.assertEqual(Extractor("test.zip").archive, "test.zip")
+        self.assertEqual(Extractor(Path("test.zip")).archive, Path("test.zip"))
         self.assertEqual(TarExtractor().extension(), ".tar")
         self.assertEqual(TarGzipExtractor().extension(), ".tar.gz")
         self.assertEqual(ZipExtractor().extension(), ".zip")
         for i in [TarExtractor(), ZipExtractor(), ZipExtractor()]:
-            i.set_archive("/tmp/foo")
-            self.assertEqual(i.archive.endswith(i.extension()), True)
+            i.set_archive(Path("/tmp/foo"))
+            self.assertEqual(i.archive.name.endswith(i.extension()), True)
 
     def test_SourceProcessor_helpers(self):  # noqa: N802
         """Test SourceProcessor helpers."""
@@ -203,14 +205,19 @@ Outputs:
                 sp.sanitize_git_path("git@github.com:foo/bar.git", "v1"),
                 "git_github.com_foo_bar-v1",
             )
-
-            for i in [GitPackageSource({"branch": "foo"}), {"branch": "foo"}]:
-                self.assertEqual(sp.determine_git_ls_remote_ref(i), "refs/heads/foo")
-            for i in [{"uri": "git@foo"}, {"tag": "foo"}, {"commit": "1234"}]:
+            self.assertEqual(
+                sp.determine_git_ls_remote_ref(
+                    GitCfnginPackageSourceDefinitionModel(branch="foo", uri="test")
+                ),
+                "refs/heads/foo",
+            )
+            for i in [{}, {"tag": "foo"}, {"commit": "1234"}]:
                 self.assertEqual(
-                    sp.determine_git_ls_remote_ref(GitPackageSource(i)), "HEAD"
+                    sp.determine_git_ls_remote_ref(
+                        GitCfnginPackageSourceDefinitionModel(uri="git@foo", **i)
+                    ),
+                    "HEAD",
                 )
-                self.assertEqual(sp.determine_git_ls_remote_ref(i), "HEAD")
 
             self.assertEqual(
                 sp.git_ls_remote(
@@ -227,39 +234,33 @@ Outputs:
                 {"uri": "x", "commit": "1234", "branch": "x"},
             ]
             for i in bad_configs:
-                with self.assertRaises(ImportError):
-                    sp.determine_git_ref(GitPackageSource(i))
-                with self.assertRaises(ImportError):
-                    sp.determine_git_ref(i)
+                with self.assertRaises(ValidationError):
+                    sp.determine_git_ref(GitCfnginPackageSourceDefinitionModel(**i))
 
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitPackageSource(
-                        {
-                            "uri": "https://github.com/remind101/" "stacker.git",
-                            "branch": "release-1.0",
-                        }
+                    GitCfnginPackageSourceDefinitionModel(
+                        uri="https://github.com/remind101/stacker.git",
+                        branch="release-1.0",
                     )
                 ),
                 "857b4834980e582874d70feef77bb064b60762d1",
             )
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitPackageSource({"uri": "git@foo", "commit": "1234"})
+                    GitCfnginPackageSourceDefinitionModel(
+                        **{"uri": "git@foo", "commit": "1234"}
+                    )
                 ),
                 "1234",
             )
             self.assertEqual(
-                sp.determine_git_ref({"uri": "git@foo", "commit": "1234"}), "1234"
-            )
-            self.assertEqual(
                 sp.determine_git_ref(
-                    GitPackageSource({"uri": "git@foo", "tag": "v1.0.0"})
+                    GitCfnginPackageSourceDefinitionModel(
+                        **{"uri": "git@foo", "tag": "v1.0.0"}
+                    )
                 ),
                 "v1.0.0",
-            )
-            self.assertEqual(
-                sp.determine_git_ref({"uri": "git@foo", "tag": "v1.0.0"}), "v1.0.0"
             )
 
 

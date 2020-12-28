@@ -6,8 +6,10 @@ import platform
 from typing import Any, Dict
 
 import click
+from pydantic import ValidationError
 
 from ...core import Runway
+from ...exceptions import ConfigNotFound, VariablesFileNotFound
 from .. import options
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -19,7 +21,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def envvars(ctx, **_):
+def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
     """Output env_vars defined in the Runway config file.
 
     OS environment variables can be set in the Runway config file for different
@@ -34,9 +36,16 @@ def envvars(ctx, **_):
 
     ctx.obj.env.ci = True
     LOGGER.verbose("forced Runway to non-interactive mode to suppress prompts")
-    env_vars = Runway(
-        ctx.obj.runway_config, ctx.obj.get_runway_context()
-    ).get_env_vars()
+    try:
+        env_vars = Runway(
+            ctx.obj.runway_config, ctx.obj.get_runway_context()
+        ).get_env_vars()
+    except ValidationError as err:
+        LOGGER.error(err, exc_info=debug)
+        ctx.exit(1)
+    except (ConfigNotFound, VariablesFileNotFound) as err:
+        LOGGER.error(err.message, exc_info=debug)
+        ctx.exit(1)
 
     if not env_vars:
         LOGGER.error("No env_vars defined in %s", ctx.obj.runway_config_path)

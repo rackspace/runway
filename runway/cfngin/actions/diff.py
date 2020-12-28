@@ -245,19 +245,20 @@ class Action(build.Action):
         Handle CFNgin bucket access denied & not existing.
 
         """
-        if self.bucket_name:
-            bucket = Bucket(self.context, self.bucket_name, self.bucket_region)
-            if bucket.forbidden:
-                LOGGER.error("access denied for CFNgin bucket: %s", bucket.name)
-                sys.exit(1)
-            if bucket.not_found:
-                LOGGER.warning(
-                    'cfngin_bucket "%s" does not exist and will be creating '
-                    "during the next deploy",
-                    bucket.name,
-                )
-                LOGGER.verbose("proceeding without a cfngin_bucket...")
-                self.bucket_name = None
+        if not self.bucket_name:
+            return
+        bucket = Bucket(self.context, self.bucket_name, self.bucket_region)
+        if bucket.forbidden:
+            LOGGER.error("access denied for CFNgin bucket: %s", bucket.name)
+            sys.exit(1)
+        if bucket.not_found:
+            LOGGER.warning(
+                'cfngin_bucket "%s" does not exist and will be creating '
+                "during the next deploy",
+                bucket.name,
+            )
+            LOGGER.verbose("proceeding without a cfngin_bucket...")
+            self.bucket_name = None
 
     def post_run(self, **kwargs):
         """Do nothing."""

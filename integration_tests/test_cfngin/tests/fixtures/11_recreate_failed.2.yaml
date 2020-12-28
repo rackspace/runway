@@ -1,6 +1,6 @@
 # good config
 namespace: ${CFNGIN_NAMESPACE}
-stacker_bucket: ''
+cfngin_bucket: ''
 sys_path: ./
 
 stacks:

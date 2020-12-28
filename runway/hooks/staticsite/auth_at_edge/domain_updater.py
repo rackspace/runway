@@ -1,7 +1,7 @@
 """User Pool Client Domain Updater."""
 # pylint: disable=unused-argument
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 if TYPE_CHECKING:
     from ....cfngin.context import Context
@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 def update(
     context,  # type: Context
     provider,  # type: BaseProvider
-    **kwargs  # type: Optional[Dict[str, Any]]
+    **kwargs  # type: Any
 ):
     # type: (...) -> Union[Dict[str, Any], bool]
     """Retrieve/Update the domain name of the specified client.
@@ -68,7 +68,7 @@ def update(
 def delete(
     context,  # type: Context
     provider,  # type: BaseProvider
-    **kwargs  # type: Optional[Dict[str, Any]]
+    **kwargs  # type: Any
 ):
     # type: (...) -> Union[Dict[str, Any], bool]
     """Delete the domain if the user pool was created by Runway.

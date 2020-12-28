@@ -1,3 +1,5 @@
+namespace: test
+
 log_formats:
   info: "[%(asctime)s] ${environment} custom log format - %(message)s"
 
