@@ -5,7 +5,6 @@ import sys
 
 from runway.lookups.handlers.base import LookupHandler
 
-from ...session_cache import get_session
 from ...util import read_value_from_path
 
 TYPE_NAME = "kms"
@@ -15,14 +14,12 @@ class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value, context, *_, **kwargs):
         r"""Decrypt the specified value with a master key in KMS.
 
         Args:
             value (str): Parameter(s) given to this lookup.
             context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
 
         ``value`` should be in the following format:
 
@@ -65,7 +62,7 @@ class KmsLookup(LookupHandler):
         if "@" in value:
             region, value = value.split("@", 1)
 
-        kms = get_session(region).client("kms")
+        kms = context.get_session(region=region).client("kms")
 
         # encode str value as an utf-8 bytestring for use with codecs.decode.
         value = value.encode("utf-8")

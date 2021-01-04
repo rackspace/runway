@@ -3,7 +3,6 @@ import logging
 import os
 
 from runway.cfngin.lookups.handlers.output import OutputLookup
-from runway.cfngin.session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,10 +15,10 @@ def assumed_role_to_principle(assumed_role_arn):
     return base_arn + assumed_role_arn.split("/")[1]
 
 
-def get_principal_arn(provider):
+def get_principal_arn(context):
     """Return ARN of current session principle."""
     # looking up caller identity
-    session = get_session(provider.region)
+    session = context.get_session()
     sts_client = session.client("sts")
     caller_identity_arn = sts_client.get_caller_identity()["Arn"]
     if caller_identity_arn.split(":")[2] == "iam" and (
@@ -48,7 +47,7 @@ def generate(provider, context, **kwargs):  # pylint: disable=W0613
     LOGGER.info("Creating auth_map at %s", filename)
     if not os.path.isdir(overlay_path):
         os.makedirs(overlay_path)
-    principal_arn = get_principal_arn(provider)
+    principal_arn = get_principal_arn(context)
     stack_name = kwargs["stack"]
     node_instancerole_arn = OutputLookup.handle(
         "%s::NodeInstanceRoleArn" % stack_name, provider=provider, context=context
