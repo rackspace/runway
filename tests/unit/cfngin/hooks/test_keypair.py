@@ -11,7 +11,7 @@ from moto import mock_ec2, mock_ssm
 
 from runway.cfngin.hooks.keypair import ensure_keypair_exists
 
-from ..factories import mock_context, mock_provider
+from ..factories import mock_context
 
 REGION = "us-east-1"
 KEY_PAIR_NAME = "FakeKey"
@@ -28,12 +28,6 @@ def ssh_key(cfngin_fixtures):
         public_key=(base / "id_rsa.pub").read_bytes(),
         fingerprint=(base / "fingerprint").read_text("ascii").strip(),
     )
-
-
-@pytest.fixture
-def provider():
-    """Mock provider."""
-    return mock_provider(region=REGION)
 
 
 @pytest.fixture
@@ -89,10 +83,9 @@ def assert_key_present(hook_result, key_name, fingerprint):
     assert key_pairs[0]["KeyFingerprint"] == fingerprint
 
 
-def test_param_validation(provider, context):
+def test_param_validation(context):
     """Test param validation."""
     result = ensure_keypair_exists(
-        provider,
         context,
         keypair=KEY_PAIR_NAME,
         ssm_parameter_name="test",
@@ -101,46 +94,45 @@ def test_param_validation(provider, context):
     assert result is False
 
 
-def test_keypair_exists(provider, context):
+def test_keypair_exists(context):
     """Test keypair exists."""
     ec2 = boto3.client("ec2")
     keypair = ec2.create_key_pair(KeyName=KEY_PAIR_NAME)
 
-    result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+    result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
     expected = dict(
         status="exists", key_name=KEY_PAIR_NAME, fingerprint=keypair["KeyFingerprint"]
     )
     assert result == expected
 
 
-def test_import_file(tmpdir, provider, context, ssh_key):
+def test_import_file(tmpdir, context, ssh_key):
     """Test import file."""
     pub_key = tmpdir.join("id_rsa.pub")
     pub_key.write(ssh_key.public_key)
 
     result = ensure_keypair_exists(
-        provider, context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
+        context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
     )
     assert_key_present(result, KEY_PAIR_NAME, ssh_key.fingerprint)
     assert result["status"] == "imported"
 
 
-def test_import_bad_key_data(tmpdir, provider, context):
+def test_import_bad_key_data(tmpdir, context):
     """Test import bad key data."""
     pub_key = tmpdir.join("id_rsa.pub")
     pub_key.write("garbage")
 
     result = ensure_keypair_exists(
-        provider, context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
+        context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
     )
     assert result is False
 
 
 @pytest.mark.parametrize("ssm_key_id", ("my-key"))
-def test_create_in_ssm(provider, context, ssh_key, ssm_key_id):
+def test_create_in_ssm(context, ssh_key, ssm_key_id):
     """Test create in ssm."""
     result = ensure_keypair_exists(
-        provider,
         context,
         keypair=KEY_PAIR_NAME,
         ssm_parameter_name="param",
@@ -163,38 +155,38 @@ def test_create_in_ssm(provider, context, ssh_key, ssm_key_id):
     assert param_details.get("KeyId") == ssm_key_id
 
 
-def test_interactive_non_terminal_input(provider, context):
+def test_interactive_non_terminal_input(context):
     """Test interactive non terminal input."""
     with mock_input(isatty=False) as _input:
-        result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+        result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
         _input.assert_not_called()
     assert result is False
 
 
-def test_interactive_retry_cancel(provider, context):
+def test_interactive_retry_cancel(context):
     """Test interactive retry cancel."""
     lines = ["garbage", "cancel"]
     with mock_input(lines) as _input:
-        result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+        result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
         assert _input.call_count == 2
 
     assert result is False
 
 
-def test_interactive_import(tmpdir, provider, context, ssh_key):
+def test_interactive_import(tmpdir, context, ssh_key):
     """."""
     key_file = tmpdir.join("id_rsa.pub")
     key_file.write(ssh_key.public_key)
 
     lines = ["import", str(key_file)]
     with mock_input(lines):
-        result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+        result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
     assert_key_present(result, KEY_PAIR_NAME, ssh_key.fingerprint)
     assert result["status"] == "imported"
 
 
-def test_interactive_create(tmpdir, provider, context, ssh_key):
+def test_interactive_create(tmpdir, context, ssh_key):
     """Test interactive create."""
     key_dir = tmpdir.join("keys")
     key_dir.ensure_dir()
@@ -202,7 +194,7 @@ def test_interactive_create(tmpdir, provider, context, ssh_key):
 
     lines = ["create", str(key_dir)]
     with mock_input(lines):
-        result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+        result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
     assert_key_present(result, KEY_PAIR_NAME, ssh_key.fingerprint)
     assert result["status"] == "created"
@@ -210,18 +202,18 @@ def test_interactive_create(tmpdir, provider, context, ssh_key):
     assert key_file.read_binary() == ssh_key.private_key
 
 
-def test_interactive_create_bad_dir(tmpdir, provider, context):
+def test_interactive_create_bad_dir(tmpdir, context):
     """Test interactive create bad dir."""
     key_dir = tmpdir.join("missing")
 
     lines = ["create", str(key_dir)]
     with mock_input(lines):
-        result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+        result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
     assert result is False
 
 
-def test_interactive_create_existing_file(tmpdir, provider, context):
+def test_interactive_create_existing_file(tmpdir, context):
     """Test interactive create existing file."""
     key_dir = tmpdir.join("keys")
     key_dir.ensure_dir()
@@ -230,6 +222,6 @@ def test_interactive_create_existing_file(tmpdir, provider, context):
 
     lines = ["create", str(key_dir)]
     with mock_input(lines):
-        result = ensure_keypair_exists(provider, context, keypair=KEY_PAIR_NAME)
+        result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
     assert result is False

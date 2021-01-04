@@ -5,7 +5,6 @@ import warnings
 
 from runway.lookups.handlers.base import LookupHandler
 
-from ...session_cache import get_session
 from ...util import read_value_from_path
 
 LOGGER = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ class SsmstoreLookup(LookupHandler):
     DEPRECATION_MSG = "ssmstore lookup has been deprecated; use the ssm lookup instead"
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value, context, *_, **kwargs):
         """Retrieve (and decrypt) a parameter from AWS SSM Parameter Store.
 
         Args:
@@ -65,7 +64,7 @@ class SsmstoreLookup(LookupHandler):
         if "@" in value:
             region, value = value.split("@", 1)
 
-        client = get_session(region).client("ssm")
+        client = context.get_session(region=region).client("ssm")
         response = client.get_parameters(Names=[value], WithDecryption=True)
         if "Parameters" in response:
             return str(response["Parameters"][0]["Value"])

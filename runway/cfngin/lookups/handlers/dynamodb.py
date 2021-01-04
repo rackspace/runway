@@ -6,7 +6,6 @@ from botocore.exceptions import ClientError
 
 from runway.lookups.handlers.base import LookupHandler
 
-from ...session_cache import get_session
 from ...util import read_value_from_path
 
 TYPE_NAME = "dynamodb"
@@ -16,15 +15,13 @@ class DynamodbLookup(LookupHandler):
     """DynamoDB lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value, context, *_, **kwargs):
         """Get a value from a DynamoDB table.
 
         Args:
             value (str): Parameter(s) given to this lookup.
                 ``[<region>:]<tablename>@<primarypartionkey>:<keyvalue>.<keyvalue>...``
             context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
 
         .. note:: The region is optional, and defaults to the environment's
                   ``AWS_DEFAULT_REGION`` if not specified.
@@ -58,7 +55,7 @@ class DynamodbLookup(LookupHandler):
         projection_expression = _build_projection_expression(clean_table_keys)
 
         # lookup the data from DynamoDB
-        dynamodb = get_session(region).client("dynamodb")
+        dynamodb = context.get_session(region=region).client("dynamodb")
         try:
             response = dynamodb.get_item(
                 TableName=table_name,

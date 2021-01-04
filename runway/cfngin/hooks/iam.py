@@ -1,5 +1,4 @@
 """AWS IAM hook."""
-# pylint: disable=unused-argument
 import copy
 import logging
 
@@ -8,20 +7,17 @@ from awacs.aws import Allow, Policy, Statement
 from awacs.helpers.trust import get_ecs_assumerole_policy
 from botocore.exceptions import ClientError
 
-from ..session_cache import get_session
 from . import utils
 
 LOGGER = logging.getLogger(__name__)
 
 
-def create_ecs_service_role(provider, context, **kwargs):
+def create_ecs_service_role(context, *_, **kwargs):
     """Create ecsServieRole, which has to be named exactly that currently.
 
     http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
             (passed in by CFNgin)
 
@@ -34,7 +30,7 @@ def create_ecs_service_role(provider, context, **kwargs):
 
     """
     role_name = kwargs.get("role_name", "ecsServiceRole")
-    client = get_session(provider.region).client("iam")
+    client = context.get_session().client("iam")
 
     try:
         client.create_role(
@@ -134,12 +130,10 @@ def _get_cert_contents(kwargs):
     return parameters
 
 
-def ensure_server_cert_exists(provider, context, **kwargs):
+def ensure_server_cert_exists(context, **kwargs):
     """Ensure server cert exists.
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
             (passed in by CFNgin)
 
@@ -153,7 +147,7 @@ def ensure_server_cert_exists(provider, context, **kwargs):
             ``cert_arn``.
 
     """
-    client = get_session(provider.region).client("iam")
+    client = context.get_session().client("iam")
     cert_name = kwargs["cert_name"]
     status = "unknown"
     try:
