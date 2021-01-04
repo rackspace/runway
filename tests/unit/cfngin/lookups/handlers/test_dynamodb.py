@@ -1,215 +1,182 @@
 """Tests for runway.cfngin.lookups.handlers.dynamodb."""
-import unittest
+# pylint: disable=no-self-use
+from __future__ import annotations
 
-import boto3
-import mock
-from botocore.stub import Stubber
+from typing import TYPE_CHECKING
+
+import pytest
 
 from runway.cfngin.lookups.handlers.dynamodb import DynamodbLookup
 
-from ...factories import SessionStub
+if TYPE_CHECKING:
+    from ....factories import MockCFNginContext
 
-
-class TestDynamoDBHandler(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.dynamodb.DynamodbLookup."""
-
-    client = boto3.client(
-        "dynamodb",
-        region_name="us-east-1",
-        # bypass the need to have these in the env
-        aws_access_key_id="testing",
-        aws_secret_access_key="testing",
-    )
-
-    def setUp(self):
-        """Run before tests."""
-        self.stubber = Stubber(self.client)
-        self.get_parameters_response = {
-            "Item": {
-                "TestMap": {
-                    "M": {
-                        "String1": {"S": "StringVal1"},
-                        "List1": {"L": [{"S": "ListVal1"}, {"S": "ListVal2"}]},
-                        "Number1": {"N": "12345"},
-                    }
-                }
+GET_ITEM_RESPONSE = {
+    "Item": {
+        "TestMap": {
+            "M": {
+                "String1": {"S": "StringVal1"},
+                "List1": {"L": [{"S": "ListVal1"}, {"S": "ListVal2"}]},
+                "Number1": {"N": "12345"},
             }
         }
+    }
+}
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_handler(self, _mock_client):
+
+class TestDynamoDBHandler:
+    """Tests for runway.cfngin.lookups.handlers.dynamodb.DynamodbLookup."""
+
+    client = None
+
+    def test_dynamodb_handler(self, cfngin_context: MockCFNginContext) -> None:
         """Test DynamoDB handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "TestTable",
             "Key": {"TestKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,String1",
         }
-        self.stubber.add_response(
-            "get_item", self.get_parameters_response, expected_params
-        )
-        with self.stubber:
-            base_lookup_key = "TestTable@TestKey:TestVal.TestMap[M].String1"
-            value = DynamodbLookup.handle(base_lookup_key)
-            base_lookup_key_valid = "StringVal1"
-            self.assertEqual(value, base_lookup_key_valid)
+        stubber.add_response("get_item", GET_ITEM_RESPONSE, expected_params)
+        with stubber:
+            assert (
+                DynamodbLookup.handle(
+                    "TestTable@TestKey:TestVal.TestMap[M].String1",
+                    context=cfngin_context,
+                )
+                == "StringVal1"
+            )
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_number_handler(self, _mock_client):
+    def test_dynamodb_number_handler(self, cfngin_context: MockCFNginContext) -> None:
         """Test DynamoDB number handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "TestTable",
             "Key": {"TestKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,Number1",
         }
-        self.stubber.add_response(
-            "get_item", self.get_parameters_response, expected_params
-        )
-        with self.stubber:
-            base_lookup_key = "TestTable@TestKey:TestVal.TestMap[M].Number1[N]"
-            value = DynamodbLookup.handle(base_lookup_key)
-            base_lookup_key_valid = 12345
-            self.assertEqual(value, base_lookup_key_valid)
+        stubber.add_response("get_item", GET_ITEM_RESPONSE, expected_params)
+        with stubber:
+            assert (
+                DynamodbLookup.handle(
+                    "TestTable@TestKey:TestVal.TestMap[M].Number1[N]",
+                    context=cfngin_context,
+                )
+                == 12345
+            )
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_list_handler(self, _mock_client):
+    def test_dynamodb_list_handler(self, cfngin_context: MockCFNginContext) -> None:
         """Test DynamoDB list handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "TestTable",
             "Key": {"TestKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,List1",
         }
-        self.stubber.add_response(
-            "get_item", self.get_parameters_response, expected_params
-        )
-        with self.stubber:
-            base_lookup_key = "TestTable@TestKey:TestVal.TestMap[M].List1[L]"
-            value = DynamodbLookup.handle(base_lookup_key)
-            base_lookup_key_valid = ["ListVal1", "ListVal2"]
-            self.assertEqual(value, base_lookup_key_valid)
+        stubber.add_response("get_item", GET_ITEM_RESPONSE, expected_params)
+        with stubber:
+            assert DynamodbLookup.handle(
+                "TestTable@TestKey:TestVal.TestMap[M].List1[L]", context=cfngin_context
+            ) == ["ListVal1", "ListVal2"]
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_empty_table_handler(self, _mock_client):
+    def test_dynamodb_empty_table_handler(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test DynamoDB empty table handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "",
             "Key": {"TestKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,String1",
         }
-        self.stubber.add_response(
-            "get_item", self.get_parameters_response, expected_params
-        )
-        with self.stubber:
-            base_lookup_key = "@TestKey:TestVal.TestMap[M].String1"
-            try:
-                DynamodbLookup.handle(base_lookup_key)
-            except ValueError as err:
-                self.assertEqual(
-                    "Please make sure to include a DynamoDB table name", str(err)
-                )
+        stubber.add_response("get_item", GET_ITEM_RESPONSE, expected_params)
+        with stubber, pytest.raises(ValueError) as excinfo:
+            DynamodbLookup.handle(
+                "@TestKey:TestVal.TestMap[M].String1", context=cfngin_context
+            )
+        assert str(excinfo.value) == "Please make sure to include a DynamoDB table name"
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_missing_table_handler(self, _mock_client):
+    def test_dynamodb_missing_table_handler(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test DynamoDB missing table handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "Key": {"TestKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,String1",
         }
-        self.stubber.add_response(
-            "get_item", self.get_parameters_response, expected_params
-        )
-        with self.stubber:
-            base_lookup_key = "TestKey:TestVal.TestMap[M].String1"
-            try:
-                DynamodbLookup.handle(base_lookup_key)
-            except ValueError as err:
-                self.assertEqual("Please make sure to include a tablename", str(err))
+        stubber.add_response("get_item", GET_ITEM_RESPONSE, expected_params)
+        with stubber, pytest.raises(ValueError) as excinfo:
+            DynamodbLookup.handle(
+                "TestKey:TestVal.TestMap[M].String1", context=cfngin_context
+            )
+        assert str(excinfo.value) == "Please make sure to include a tablename"
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_invalid_table_handler(self, _mock_client):
+    def test_dynamodb_invalid_table_handler(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test DynamoDB invalid table handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "FakeTable",
             "Key": {"TestKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,String1",
         }
         service_error_code = "ResourceNotFoundException"
-        self.stubber.add_client_error(
+        stubber.add_client_error(
             "get_item",
             service_error_code=service_error_code,
             expected_params=expected_params,
         )
-        with self.stubber:
-            base_lookup_key = "FakeTable@TestKey:TestVal.TestMap[M].String1"
-            try:
-                DynamodbLookup.handle(base_lookup_key)
-            except ValueError as err:
-                self.assertEqual("Cannot find the DynamoDB table: FakeTable", str(err))
+        with stubber, pytest.raises(ValueError) as excinfo:
+            DynamodbLookup.handle(
+                "FakeTable@TestKey:TestVal.TestMap[M].String1", context=cfngin_context
+            )
+        assert str(excinfo.value) == "Cannot find the DynamoDB table: FakeTable"
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_invalid_partition_key_handler(self, _mock_client):
+    def test_dynamodb_invalid_partition_key_handler(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test DynamoDB invalid partition key handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "TestTable",
             "Key": {"FakeKey": {"S": "TestVal"}},
             "ProjectionExpression": "TestVal,TestMap,String1",
         }
         service_error_code = "ValidationException"
-        self.stubber.add_client_error(
+        stubber.add_client_error(
             "get_item",
             service_error_code=service_error_code,
             expected_params=expected_params,
         )
 
-        with self.stubber:
-            base_lookup_key = "TestTable@FakeKey:TestVal.TestMap[M].String1"
-            try:
-                DynamodbLookup.handle(base_lookup_key)
-            except ValueError as err:
-                self.assertEqual(
-                    "No DynamoDB record matched the partition key: FakeKey", str(err)
-                )
+        with stubber, pytest.raises(ValueError) as excinfo:
+            DynamodbLookup.handle(
+                "TestTable@FakeKey:TestVal.TestMap[M].String1", context=cfngin_context
+            )
+        assert (
+            str(excinfo.value)
+            == "No DynamoDB record matched the partition key: FakeKey"
+        )
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.dynamodb.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_dynamodb_invalid_partition_val_handler(self, _mock_client):
+    def test_dynamodb_invalid_partition_val_handler(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test DynamoDB invalid partition val handler."""
+        stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
             "TableName": "TestTable",
             "Key": {"TestKey": {"S": "FakeVal"}},
             "ProjectionExpression": "FakeVal,TestMap,String1",
         }
         empty_response = {"ResponseMetadata": {}}
-        self.stubber.add_response("get_item", empty_response, expected_params)
-        with self.stubber:
-            base_lookup_key = "TestTable@TestKey:FakeVal.TestMap[M].String1"
-            try:
-                DynamodbLookup.handle(base_lookup_key)
-            except ValueError as err:
-                self.assertEqual(
-                    "The DynamoDB record could not be found using "
-                    "the following key: {'S': 'FakeVal'}",
-                    str(err),
-                )
+        stubber.add_response("get_item", empty_response, expected_params)
+        with stubber, pytest.raises(ValueError) as excinfo:
+            DynamodbLookup.handle(
+                "TestTable@TestKey:FakeVal.TestMap[M].String1", context=cfngin_context
+            )
+        assert (
+            str(excinfo.value)
+            == "The DynamoDB record could not be found using the following key: {'S': 'FakeVal'}"
+        )

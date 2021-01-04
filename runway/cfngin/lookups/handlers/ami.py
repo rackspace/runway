@@ -5,7 +5,6 @@ import re
 
 from runway.lookups.handlers.base import LookupHandler
 
-from ...session_cache import get_session
 from ...util import read_value_from_path
 
 TYPE_NAME = "ami"
@@ -27,14 +26,12 @@ class AmiLookup(LookupHandler):
     """AMI lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value, context, *_, **kwargs):
         """Fetch the most recent AMI Id using a filter.
 
         Args:
             value (str): Parameter(s) given to this lookup.
             context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
 
         Returns:
             str: Looked up value.
@@ -68,12 +65,11 @@ class AmiLookup(LookupHandler):
         """  # noqa
         value = read_value_from_path(value)
 
+        region = None
         if "@" in value:
             region, value = value.split("@", 1)
-        else:
-            region = provider.region
 
-        ec2 = get_session(region).client("ec2")
+        ec2 = context.get_session(region=region).client("ec2")
 
         values = {}
         describe_args = {}
