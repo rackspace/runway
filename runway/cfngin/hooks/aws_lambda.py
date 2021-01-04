@@ -21,7 +21,6 @@ import formic
 from troposphere.awslambda import Code
 
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
-from ..session_cache import get_session
 from ..util import ensure_s3_bucket
 
 # mask to retrieve only UNIX file permissions from the external attributes
@@ -1038,7 +1037,7 @@ def upload_lambda_functions(context, provider, **kwargs):
     payload_acl = kwargs.get("payload_acl", "private")
 
     # Always use the global client for s3
-    session = get_session(bucket_region)
+    session = context.get_session(region=bucket_region)
     s3_client = session.client("s3")
 
     ensure_s3_bucket(s3_client, bucket_name, bucket_region)

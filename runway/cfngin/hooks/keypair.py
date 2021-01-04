@@ -1,12 +1,10 @@
 """AWS EC2 keypair hook."""
-# pylint: disable=unused-argument
 import logging
 import os
 import sys
 
 from botocore.exceptions import ClientError
 
-from ..session_cache import get_session
 from ..ui import get_raw_input
 from . import utils
 
@@ -186,14 +184,12 @@ def interactive_prompt(keypair_name):
     return None, None
 
 
-def ensure_keypair_exists(provider, context, **kwargs):
+def ensure_keypair_exists(context, *_, **kwargs):
     """Ensure a specific keypair exists within AWS.
 
     If the key doesn't exist, upload it.
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
             (passed in by CFNgin)
 
@@ -239,7 +235,7 @@ def ensure_keypair_exists(provider, context, **kwargs):
         )
         return False
 
-    session = get_session(region=provider.region, profile=kwargs.get("profile"))
+    session = context.get_session(profile=kwargs.get("profile"))
     ec2 = session.client("ec2")
 
     keypair = get_existing_key_pair(ec2, keypair_name)

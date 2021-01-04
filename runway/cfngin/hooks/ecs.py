@@ -5,20 +5,15 @@ function, and will be removed once this pull request is accepted:
 https://github.com/boto/boto/pull/3143
 
 """
-# pylint: disable=unused-argument
 import logging
-
-from ..session_cache import get_session
 
 LOGGER = logging.getLogger(__name__)
 
 
-def create_clusters(provider, context, **kwargs):
+def create_clusters(context, *_, **kwargs):
     """Create ECS clusters.
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
             (passed in by CFNgin)
 
@@ -30,7 +25,7 @@ def create_clusters(provider, context, **kwargs):
         bool: Whether or not the hook succeeded.
 
     """
-    conn = get_session(provider.region).client("ecs")
+    conn = context.get_session().client("ecs")
 
     try:
         clusters = kwargs["clusters"]

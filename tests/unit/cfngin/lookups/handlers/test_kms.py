@@ -1,81 +1,47 @@
 """Tests for runway.cfngin.lookups.handlers.kms."""
-import codecs
-import sys
-import unittest
+# pylint: disable=no-self-use
+from __future__ import annotations
 
-import boto3
-from botocore.stub import Stubber
-from mock import patch
+import codecs
+from typing import TYPE_CHECKING
 
 from runway.cfngin.lookups.handlers.kms import KmsLookup
 
-from ...factories import SessionStub, mock_provider
+if TYPE_CHECKING:
+    from ....factories import MockCFNginContext
 
-REGION = "us-east-1"
+SECRET = "my secret"
 
 
-class TestKMSHandler(unittest.TestCase):
+class TestKMSHandler:
     """Tests for runway.cfngin.lookups.handlers.kms.KmsLookup."""
 
-    client = boto3.client(
-        "kms",
-        region_name=REGION,
-        # bypass the need to have these in the env
-        aws_access_key_id="testing",
-        aws_secret_access_key="testing",
-    )
-
-    def setUp(self):
-        """Run before tests."""
-        self.stubber = Stubber(self.client)
-        self.provider = mock_provider(region=REGION)
-        self.secret = "my secret"
-
-    @patch(
-        "runway.cfngin.lookups.handlers.kms.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_kms_handler(self, _mock_client):
+    def test_kms_handler(self, cfngin_context: MockCFNginContext) -> None:
         """Test kms handler."""
-        self.stubber.add_response(
+        stubber = cfngin_context.add_stubber("kms")
+        stubber.add_response(
             "decrypt",
-            # TODO: drop ternary when dropping python 2 support
-            {
-                "Plaintext": self.secret.encode()
-                if sys.version_info[0] > 2
-                else self.secret
-            },
-            {"CiphertextBlob": codecs.decode(self.secret.encode(), "base64")},
+            {"Plaintext": SECRET.encode()},
+            {"CiphertextBlob": codecs.decode(SECRET.encode(), "base64")},
         )
 
-        with self.stubber:
-            self.assertEqual(
-                self.secret,
-                KmsLookup.handle(value=self.secret, provider=self.provider),
-            )
-            self.stubber.assert_no_pending_responses()
+        with stubber:
+            assert KmsLookup.handle(SECRET, context=cfngin_context) == SECRET
+            stubber.assert_no_pending_responses()
 
-    @patch(
-        "runway.cfngin.lookups.handlers.kms.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_kms_handler_with_region(self, _mock_client):
+    def test_kms_handler_with_region(self, cfngin_context: MockCFNginContext) -> None:
         """Test kms handler with region."""
-        value = "{}@{}".format(REGION, self.secret)
+        region = "us-west-2"
+        stubber = cfngin_context.add_stubber("kms", region=region)
 
-        self.stubber.add_response(
+        stubber.add_response(
             "decrypt",
-            # TODO: drop ternary when dropping python 2 support
-            {
-                "Plaintext": self.secret.encode()
-                if sys.version_info[0] > 2
-                else self.secret
-            },
-            {"CiphertextBlob": codecs.decode(self.secret.encode(), "base64")},
+            {"Plaintext": SECRET.encode()},
+            {"CiphertextBlob": codecs.decode(SECRET.encode(), "base64")},
         )
 
-        with self.stubber:
-            self.assertEqual(
-                self.secret, KmsLookup.handle(value=value, provider=self.provider)
+        with stubber:
+            assert (
+                KmsLookup.handle(f"{region}@{SECRET}", context=cfngin_context) == SECRET
             )
-            self.stubber.assert_no_pending_responses()
+            stubber.assert_no_pending_responses()

@@ -2,18 +2,15 @@
 # pylint: disable=unused-argument
 import logging
 
-from ..session_cache import get_session
 from ..util import create_route53_zone
 
 LOGGER = logging.getLogger(__name__)
 
 
-def create_domain(provider, context, **kwargs):
+def create_domain(context, *_, **kwargs):
     """Create a domain within route53.
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
         context (:class:`runway.cfngin.context.Context`): Context instance.
             (passed in by CFNgin)
 
@@ -25,7 +22,7 @@ def create_domain(provider, context, **kwargs):
         Dict[str, str]: Dict containing ``domain`` and ``zone_id``.
 
     """
-    session = get_session(provider.region)
+    session = context.get_session()
     client = session.client("route53")
     domain = kwargs.get("domain")
     if not domain:
