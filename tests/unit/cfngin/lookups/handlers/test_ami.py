@@ -1,41 +1,27 @@
 """Tests for runway.cfngin.lookups.handlers.ami."""
-import unittest
+# pylint: disable=no-self-use
+from __future__ import annotations
 
-import boto3
-import mock
-from botocore.stub import Stubber
+from typing import TYPE_CHECKING
+
+import pytest
 
 from runway.cfngin.lookups.handlers.ami import AmiLookup, ImageNotFound
 
-from ...factories import SessionStub, mock_provider
+if TYPE_CHECKING:
+    from ....factories import MockCFNginContext
 
 REGION = "us-east-1"
 
 
-class TestAMILookup(unittest.TestCase):
+class TestAMILookup:
     """Tests for runway.cfngin.lookups.handlers.ami.ImageNotFound."""
 
-    client = boto3.client(
-        "ec2",
-        region_name=REGION,
-        # bypass the need to have these in the env
-        aws_access_key_id="testing",
-        aws_secret_access_key="testing",
-    )
-
-    def setUp(self):
-        """Run before tests."""
-        self.stubber = Stubber(self.client)
-        self.provider = mock_provider(region=REGION)
-
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.ami.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_basic_lookup_single_image(self, _mock_client):
+    def test_basic_lookup_single_image(self, cfngin_context: MockCFNginContext) -> None:
         """Test basic lookup single image."""
+        stubber = cfngin_context.add_stubber("ec2")
         image_id = "ami-fffccc111"
-        self.stubber.add_response(
+        stubber.add_response(
             "describe_images",
             {
                 "Images": [
@@ -52,20 +38,20 @@ class TestAMILookup(unittest.TestCase):
             },
         )
 
-        with self.stubber:
-            value = AmiLookup.handle(
-                value=r"owners:self name_regex:Fake\sImage\s\d", provider=self.provider
+        with stubber:
+            assert (
+                AmiLookup.handle(
+                    value=r"owners:self name_regex:Fake\sImage\s\d",
+                    context=cfngin_context,
+                )
+                == image_id
             )
-            self.assertEqual(value, image_id)
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.ami.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_basic_lookup_with_region(self, _mock_client):
+    def test_basic_lookup_with_region(self, cfngin_context: MockCFNginContext) -> None:
         """Test basic lookup with region."""
+        stubber = cfngin_context.add_stubber("ec2", region="us-west-1")
         image_id = "ami-fffccc111"
-        self.stubber.add_response(
+        stubber.add_response(
             "describe_images",
             {
                 "Images": [
@@ -82,21 +68,22 @@ class TestAMILookup(unittest.TestCase):
             },
         )
 
-        with self.stubber:
-            value = AmiLookup.handle(
-                value=r"us-west-1@owners:self name_regex:Fake\sImage\s\d",
-                provider=self.provider,
+        with stubber:
+            assert (
+                AmiLookup.handle(
+                    value=r"us-west-1@owners:self name_regex:Fake\sImage\s\d",
+                    context=cfngin_context,
+                )
+                == image_id
             )
-            self.assertEqual(value, image_id)
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.ami.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_basic_lookup_multiple_images(self, _mock_client):
+    def test_basic_lookup_multiple_images(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test basic lookup multiple images."""
+        stubber = cfngin_context.add_stubber("ec2")
         image_id = "ami-fffccc111"
-        self.stubber.add_response(
+        stubber.add_response(
             "describe_images",
             {
                 "Images": [
@@ -132,20 +119,22 @@ class TestAMILookup(unittest.TestCase):
             },
         )
 
-        with self.stubber:
-            value = AmiLookup.handle(
-                value=r"owners:self name_regex:Fake\sImage\s\d", provider=self.provider
+        with stubber:
+            assert (
+                AmiLookup.handle(
+                    value=r"owners:self name_regex:Fake\sImage\s\d",
+                    context=cfngin_context,
+                )
+                == image_id
             )
-            self.assertEqual(value, image_id)
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.ami.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_basic_lookup_multiple_images_name_match(self, _mock_client):
+    def test_basic_lookup_multiple_images_name_match(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test basic lookup multiple images name match."""
+        stubber = cfngin_context.add_stubber("ec2")
         image_id = "ami-fffccc111"
-        self.stubber.add_response(
+        stubber.add_response(
             "describe_images",
             {
                 "Images": [
@@ -171,35 +160,34 @@ class TestAMILookup(unittest.TestCase):
             },
         )
 
-        with self.stubber:
-            value = AmiLookup.handle(
-                value=r"owners:self name_regex:Fake\sImage\s\d", provider=self.provider
-            )
-            self.assertEqual(value, image_id)
-
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.ami.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_basic_lookup_no_matching_images(self, _mock_client):
-        """Test basic lookup no matching images."""
-        self.stubber.add_response("describe_images", {"Images": []})
-
-        with self.stubber:
-            with self.assertRaises(ImageNotFound):
+        with stubber:
+            assert (
                 AmiLookup.handle(
                     value=r"owners:self name_regex:Fake\sImage\s\d",
-                    provider=self.provider,
+                    context=cfngin_context,
                 )
+                == image_id
+            )
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.ami.get_session",
-        return_value=SessionStub(client),
-    )
-    def test_basic_lookup_no_matching_images_from_name(self, _mock_client):
+    def test_basic_lookup_no_matching_images(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
+        """Test basic lookup no matching images."""
+        stubber = cfngin_context.add_stubber("ec2")
+        stubber.add_response("describe_images", {"Images": []})
+
+        with stubber, pytest.raises(ImageNotFound):
+            AmiLookup.handle(
+                value=r"owners:self name_regex:Fake\sImage\s\d", context=cfngin_context
+            )
+
+    def test_basic_lookup_no_matching_images_from_name(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test basic lookup no matching images from name."""
+        stubber = cfngin_context.add_stubber("ec2")
         image_id = "ami-fffccc111"
-        self.stubber.add_response(
+        stubber.add_response(
             "describe_images",
             {
                 "Images": [
@@ -216,8 +204,7 @@ class TestAMILookup(unittest.TestCase):
             },
         )
 
-        with self.stubber:
-            with self.assertRaises(ImageNotFound):
-                AmiLookup.handle(
-                    value=r"owners:self name_regex:MyImage\s\d", provider=self.provider
-                )
+        with stubber, pytest.raises(ImageNotFound):
+            AmiLookup.handle(
+                value=r"owners:self name_regex:MyImage\s\d", context=cfngin_context
+            )
