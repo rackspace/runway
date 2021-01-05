@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - Broader dependency update for typedoc in sls-tsc sample.
+- k8s sample repos: drop AmazonEKSServicePolicy managed policy use (unnecessary for clusters created starting 2020-04-16)
 
 ## [1.16.4] - 2020-12-22
 ### Fixed

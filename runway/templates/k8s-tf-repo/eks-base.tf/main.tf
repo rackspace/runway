@@ -78,10 +78,6 @@ resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.cluster.name
 }
-resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSServicePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.cluster.name
-}
 
 resource "aws_security_group" "cluster" {
   name_prefix = "eks-cluster-"
@@ -191,7 +187,6 @@ resource "aws_eks_cluster" "cluster" {
 
   depends_on = [
     "aws_iam_role_policy_attachment.cluster-AmazonEKSClusterPolicy",
-    "aws_iam_role_policy_attachment.cluster-AmazonEKSServicePolicy",
     "module.vpc.natgw_ids",  # would be better to just depend on the entire module, if it were possible
   ]
 
@@ -211,9 +206,7 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(aws_eks_cluster.cluster.certificate_authority[0].data)
   token = data.aws_eks_cluster_auth.cluster_auth.token
   load_config_file = false
-  # Pinned back from 1.11 pending resolution of:
-  # https://github.com/terraform-providers/terraform-provider-kubernetes/issues/759
-  version = "~> 1.10.0"
+  version = "~> 1.13"
 }
 
 resource "kubernetes_config_map" "aws_auth_configmap" {
