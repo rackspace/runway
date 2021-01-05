@@ -76,10 +76,7 @@ class Cluster(Blueprint):
             iam.Role(
                 "EksServiceRole",
                 AssumeRolePolicyDocument=make_simple_assume_policy("eks.amazonaws.com"),
-                ManagedPolicyArns=[
-                    IAM_POLICY_ARN_PREFIX + i
-                    for i in ["AmazonEKSClusterPolicy", "AmazonEKSServicePolicy"]
-                ],
+                ManagedPolicyArns=[IAM_POLICY_ARN_PREFIX + "AmazonEKSClusterPolicy"],
                 Policies=[
                     iam.Policy(
                         PolicyName="EksServiceRolePolicy",
