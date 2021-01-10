@@ -33,6 +33,8 @@ You can use that arn to determine the IAM role arn for runway.yml:
         kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
 ```
 
+(to use IAM users instead, see `mapUsers` in `eks-base.tf/main.tf`)
+
 After updating the role ARN, deploy to the dev environment via:
 
 macOS/Linux:

@@ -1,24 +1,39 @@
-
+# Backend setup
 terraform {
   backend "s3" {
     key = "eks-flux.tfstate"
   }
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 2.9"
+    }
+  }
 }
 
+# Variable definitions
+variable "region" {}
+
+# Data and resources
 locals {
   cluster_name = "k8s-${terraform.workspace}"
   flux_repository = "flux-${terraform.workspace}"
   flux_namespace = "flux"
   flux_service_account = "flux"
-  flux_version = "1.15.0"
+  flux_version = "1.21.1"  # also referenced in Dockerfile
+}
+
+provider "aws" {
+  version = "~> 3.22"
+  region = var.region
 }
 
 data "aws_eks_cluster" "cluster" {
-  name = "${local.cluster_name}"
+  name = local.cluster_name
 }
 
 data "aws_eks_cluster_auth" "cluster_auth" {
-  name = "${data.aws_eks_cluster.cluster.id}"
+  name = data.aws_eks_cluster.cluster.id
 }
 
 data "aws_ssm_parameter" "oidc_iam_provider_cluster_url" {
@@ -29,25 +44,20 @@ data "aws_ssm_parameter" "oidc_iam_provider_cluster_arn" {
 }
 
 provider "kubernetes" {
-  host = "${data.aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
-  token = "${data.aws_eks_cluster_auth.cluster_auth.token}"
+  host = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  token = data.aws_eks_cluster_auth.cluster_auth.token
   load_config_file = false
-  version = "1.9"
-}
-
-provider "aws" {
-  version = "~> 2.0"
-  region  = "us-east-1"
+  version = "1.13"
 }
 
 resource "kubernetes_namespace" "flux" {
   metadata {
-    name = "${local.flux_namespace}"
+    name = local.flux_namespace
   }
 }
 resource "aws_codecommit_repository" "flux_repository" {
-  repository_name = "${local.flux_repository}"
+  repository_name = local.flux_repository
 }
 
 data "aws_iam_policy_document" "flux_policy" {
@@ -55,10 +65,34 @@ data "aws_iam_policy_document" "flux_policy" {
   statement {
     effect = "Allow"
     actions = [
-      "codecommit:*"
+      "codecommit:GitPull",
+      "codecommit:GitPush",
+      "codecommit:GetBranch",
+      "codecommit:ListBranches",
+      "codecommit:DescribeMergeConflicts",
+      "codecommit:GetMergeCommit",
+      "codecommit:GetMergeOptions",
+      "codecommit:DeleteFile",
+      "codecommit:GetBlob",
+      "codecommit:GetFile",
+      "codecommit:GetFolder",
+      "codecommit:PutFile",
+      "codecommit:BatchGetCommits",
+      "codecommit:CreateCommit",
+      "codecommit:GetCommit",
+      "codecommit:GetCommitHistory",
+      "codecommit:GetDifferences",
+      "codecommit:GetObjectIdentifier",
+      "codecommit:GetReferences",
+      "codecommit:GetTree",
+      "codecommit:BatchGetRepositories",
+      "codecommit:GetRepository",
+      "codecommit:ListTagsForResource",
+      "codecommit:TagResource",
+      "codecommit:UntagResource"
     ]
     resources = [
-      "${aws_codecommit_repository.flux_repository.arn}"
+      aws_codecommit_repository.flux_repository.arn
     ]
   }
 
@@ -76,87 +110,92 @@ data "aws_iam_policy_document" "flux_service_account_assume_role_policy" {
     }
 
     principals {
-      identifiers = ["${data.aws_ssm_parameter.oidc_iam_provider_cluster_arn.value}"]
+      identifiers = [data.aws_ssm_parameter.oidc_iam_provider_cluster_arn.value]
       type        = "Federated"
     }
   }
 }
 
 resource "aws_iam_role" "flux_service_account" {
-  name               = "${local.flux_service_account}"
-  assume_role_policy = "${data.aws_iam_policy_document.flux_service_account_assume_role_policy.json}"
+  name_prefix        = "${local.flux_service_account}-${terraform.workspace}-"
+  assume_role_policy = data.aws_iam_policy_document.flux_service_account_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy" "flux_service_account" {
-  role   = "${aws_iam_role.flux_service_account.id}"
-  policy = "${data.aws_iam_policy_document.flux_policy.json}"
+  role   = aws_iam_role.flux_service_account.id
+  policy = data.aws_iam_policy_document.flux_policy.json
 }
 
-resource "aws_ecr_repository" "flux_with_awscli" {
-  name                 = "${local.flux_repository}"
+resource "aws_ecr_repository" "flux" {
+  name                 = local.flux_repository
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
     scan_on_push = true
   }
 }
 
-resource "null_resource" "flux_image" {
-
-  depends_on = [
-    "aws_ecr_repository.flux_with_awscli",
-  ]
-
-  provisioner "local-exec" {
-    command = <<EOD
-    docker build --tag ${aws_ecr_repository.flux_with_awscli.repository_url}:${local.flux_version} ${path.module};
-    $(aws ecr get-login --no-include-email --region us-east-1);
-    docker push ${aws_ecr_repository.flux_with_awscli.repository_url}:${local.flux_version};
-    EOD
-    
-  }  
-
+data "aws_ecr_authorization_token" "flux" {
+  registry_id = aws_ecr_repository.flux.registry_id
 }
 
+provider "docker" {
+  registry_auth {
+    address  = data.aws_ecr_authorization_token.flux.proxy_endpoint
+    username = data.aws_ecr_authorization_token.flux.user_name
+    password = data.aws_ecr_authorization_token.flux.password
+  }
+}
+
+resource "docker_registry_image" "flux" {
+  name = "${aws_ecr_repository.flux.repository_url}:${local.flux_version}"
+  build {
+    context = "docker"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
 resource "kubernetes_service_account" "flux_service_account" {
   automount_service_account_token = true
   metadata {
-    name      = "${local.flux_service_account}"
-    namespace = "${local.flux_namespace}"
+    name      = local.flux_service_account
+    namespace = local.flux_namespace
     labels = {
-      app  = "${local.flux_namespace}"
-      name = "${local.flux_namespace}"
+      app  = local.flux_namespace
+      name = local.flux_namespace
     }
-    annotations = "${
-      map(
-       "eks.amazonaws.com/role-arn", "${aws_iam_role.flux_service_account.arn}"
-      )
-    }"
+    annotations = map(
+      "eks.amazonaws.com/role-arn", aws_iam_role.flux_service_account.arn
+    )
   }
   depends_on = [
-    "aws_iam_role_policy.flux_service_account",
+    aws_iam_role_policy.flux_service_account,
   ]
   provisioner "local-exec" {
     command = "runway run-python sleep.py"
-  }  
+  }
 }
 
 resource "kubernetes_config_map" "flux_git_config" {
   metadata {
     name      = "${local.flux_namespace}-git-config"
-    namespace = "${local.flux_namespace}"
+    namespace = local.flux_namespace
     labels = {
-      app  = "${local.flux_namespace}"
+      app  = local.flux_namespace
       name = "${local.flux_namespace}-git-config"
     }
   }
   data = {
-    giturl    = "${aws_codecommit_repository.flux_repository.clone_url_http}"
+    giturl    = aws_codecommit_repository.flux_repository.clone_url_http
+    # The credential line can be scoped more narrowly, like:
+    # [credential "${aws_codecommit_repository.flux_repository.clone_url_http}"]
+    # but git 2.26.2 (in the current flux images e.g. 1.21) doesn't seem to work with it
     gitconfig = <<EOF
-     [credential "${aws_codecommit_repository.flux_repository.clone_url_http}"]
-       helper = !AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token AWS_ROLE_ARN=${aws_iam_role.flux_service_account.arn} aws codecommit credential-helper $@
-       UseHttpPath = true
-    EOF
+[credential]
+	helper = !AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token AWS_ROLE_ARN=${aws_iam_role.flux_service_account.arn} aws codecommit credential-helper $@
+	UseHttpPath = true
+EOF
   }
 }
 
@@ -171,8 +210,8 @@ resource "kubernetes_cluster_role_binding" "flux" {
 
   subject {
     kind      = "ServiceAccount"
-    name      = "${local.flux_service_account}"
-    namespace = "${local.flux_namespace}"
+    name      = local.flux_service_account
+    namespace = local.flux_namespace
   }
 
   role_ref {
@@ -182,24 +221,26 @@ resource "kubernetes_cluster_role_binding" "flux" {
   }
 }
 
-resource "kubernetes_config_map" "flux_ssh_config" {
-  metadata {
-    name      = "flux-ssh-config"
-    namespace = "${local.flux_namespace}"
-  }
+# Cloning/updating git repo via https, don't need known ssh hosts
+# resource "kubernetes_config_map" "flux_ssh_config" {
+#   metadata {
+#     name      = "flux-ssh-config"
+#     namespace = local.flux_namespace
+#   }
 
-  data = {
-    known_hosts = "git-codecommit.us-east-1.amazonaws.com,52.94.226.180 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCdut7aOM5Zh16OJ+GOP75O7x5oyHKAiA1ieuySetj/hAq4VrAuZV5R2TypZJcKBaripOtTc/Sr0FOU4YvxUla40PPH8N1lbDp6Pnc4BexKsrt2kz++TqIKx5FHmUQV3mit16kxRwHey3dv030+qXBDo3WPQjm2+JLoq0XcadpnCAMCd3ChaBnDRM+51GZbuEFilpZsxUchUzl0gseC+shYOBd7TqxTlIhj/56d/YF1kq7RMZYrwBnyYdVhpLeUJCeYjyx/O6FPSezNTLiinz5jjioWZATgn+G8feL/hIsk8g+7JoIcb2muUlymdxs+8l2lS+8MXqT0q9ohT+Knhb2j\n"
-  }
-}
+#   data = {
+#     known_hosts = "myhost ssh-rsa ABCDEF123..\n"
+#   }
+# }
 
-resource "kubernetes_secret" "flux_git_deploy" {
-  metadata {
-    name      = "flux-git-deploy"
-    namespace = "${local.flux_namespace}"
-  }
-  type = "Opaque"
-}
+# Cloning/updating git repo via https, don't need ssh key
+# resource "kubernetes_secret" "flux_git_deploy" {
+#   metadata {
+#     name      = "flux-git-deploy"
+#     namespace = local.flux_namespace
+#   }
+#   type = "Opaque"
+# }
 
 resource "kubernetes_cluster_role" "flux" {
   metadata {
@@ -225,7 +266,7 @@ resource "kubernetes_cluster_role" "flux" {
 resource "kubernetes_deployment" "memcached" {
   metadata {
     name      = "memcached"
-    namespace = "${local.flux_namespace}"
+    namespace = local.flux_namespace
   }
 
   spec {
@@ -271,7 +312,7 @@ resource "kubernetes_deployment" "memcached" {
 resource "kubernetes_service" "memcached" {
   metadata {
     name      = "memcached"
-    namespace = "${local.flux_namespace}"
+    namespace = local.flux_namespace
   }
 
   spec {
@@ -287,17 +328,9 @@ resource "kubernetes_service" "memcached" {
 }
 
 resource "kubernetes_deployment" "flux" {
-
-  depends_on = [
-    "null_resource.flux_image",
-    "kubernetes_config_map.flux_git_config",
-    "kubernetes_config_map.flux_ssh_config",
-    "kubernetes_service_account.flux_service_account"
-  ]
-
   metadata {
     name      = "flux"
-    namespace = "${local.flux_namespace}"
+    namespace = local.flux_namespace
   }
 
   spec {
@@ -322,14 +355,15 @@ resource "kubernetes_deployment" "flux" {
       }
 
       spec {
-        volume {
-          name = "git-key"
+        # Cloning/updating git repo via https, don't need ssh key
+        # volume {
+        #   name = "git-key"
 
-          secret {
-            secret_name  = "flux-git-deploy"
-            default_mode = "0400"
-          }
-        }
+        #   secret {
+        #     secret_name  = kubernetes_secret.flux_git_deploy.metadata.0.name
+        #     default_mode = "0400"
+        #   }
+        # }
 
         volume {
           name = "git-keygen"
@@ -339,20 +373,21 @@ resource "kubernetes_deployment" "flux" {
           }
         }
 
-        volume {
-          name = "ssh-config"
+        # Cloning/updating git repo via https, don't need known ssh hosts
+        # volume {
+        #   name = "ssh-config"
 
-          config_map {
-            name         = "flux-ssh-config"
-            default_mode = "0644"
-          }
-        }
+        #   config_map {
+        #     name         = kubernetes_config_map.flux_ssh_config.metadata.0.name
+        #     default_mode = "0644"
+        #   }
+        # }
 
         volume {
           name = "git-config"
 
           config_map {
-            name         = "flux-git-config"
+            name         = kubernetes_config_map.flux_git_config.metadata.0.name
             default_mode = "0644"
           }
         }
@@ -361,16 +396,16 @@ resource "kubernetes_deployment" "flux" {
 
         container {
           name  = "flux"
-          image = "${aws_ecr_repository.flux_with_awscli.repository_url}:${local.flux_version}"
+          image = docker_registry_image.flux.name
           args  = [
-            "--memcached-service=", 
-            "--ssh-keygen-dir=/var/fluxd/keygen", 
-            "--git-url=$(GIT_URL)", 
-            "--git-branch=master", 
-            "--git-path=namespaces,workloads", 
-            "--git-label=flux", 
-            "--git-user=Flux", 
-            "--git-email=Flux", 
+            "--memcached-service=",
+            "--ssh-keygen-dir=/var/fluxd/keygen",
+            "--git-url=$(GIT_URL)",
+            "--git-branch=master",
+            "--git-path=namespaces,workloads",
+            "--git-label=flux",
+            "--git-user=Flux",
+            "--git-email=Flux",
             "--listen-metrics=:3031",
             "--sync-garbage-collection"]
 
@@ -384,7 +419,7 @@ resource "kubernetes_deployment" "flux" {
 
             value_from {
               config_map_key_ref {
-                name = "flux-git-config"
+                name = kubernetes_config_map.flux_git_config.metadata.0.name
                 key  = "giturl"
               }
             }
@@ -397,21 +432,23 @@ resource "kubernetes_deployment" "flux" {
             }
           }
 
-          volume_mount {
-            name       = "git-key"
-            read_only  = true
-            mount_path = "/etc/fluxd/ssh"
-          }
+          # Cloning/updating git repo via https, don't need ssh key
+          # volume_mount {
+          #   name       = "git-key"
+          #   read_only  = true
+          #   mount_path = "/etc/fluxd/ssh"
+          # }
 
           volume_mount {
             name       = "git-keygen"
             mount_path = "/var/fluxd/keygen"
           }
 
-          volume_mount {
-            name       = "ssh-config"
-            mount_path = "/root/.ssh"
-          }
+          # Cloning/updating git repo via https, don't need known ssh hosts
+          # volume_mount {
+          #   name       = "ssh-config"
+          #   mount_path = "/root/.ssh"
+          # }
 
           volume_mount {
             name       = "git-config"
@@ -454,7 +491,7 @@ resource "kubernetes_deployment" "flux" {
         restart_policy                   = "Always"
         termination_grace_period_seconds = 30
         dns_policy                       = "ClusterFirst"
-        service_account_name             = "${local.flux_service_account}"
+        service_account_name             = kubernetes_service_account.flux_service_account.metadata.0.name
       }
     }
 

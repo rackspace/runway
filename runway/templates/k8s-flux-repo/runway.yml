@@ -2,20 +2,26 @@
 deployments:
   - modules:
       - tfstate.cfn
+    parameters:
+      namespace: ${env DEPLOY_ENVIRONMENT}
+    regions:
+      - us-west-2
+  - modules:
       - eks-base.tf
+      - gen-kubeconfig.cfn  # just generating the local kubeconfig file
       - flux.tf
-    environments:
-      dev:
-        namespace: dev
-        region: us-east-1
-        kubectl-access-role-arn: YOURROLEARNHERE  
+    env_vars:
+      KUBECONFIG:
+        - .kube
+        - ${env DEPLOY_ENVIRONMENT}
+        - config
+    parameters:
+      namespace: ${env DEPLOY_ENVIRONMENT}
+      region: ${env AWS_REGION}
+      kubectl-access-role-arn: YOURROLEARNHERE
     module_options:
       terraform_backend_config:
-        dev:
-          region: us-east-1
-      terraform_backend_cfn_outputs:
-        dev:
-          bucket: dev-tf-state::TerraformStateBucketName
-          dynamodb_table: dev-tf-state::TerraformStateTableName
+        bucket: ${cfn ${env DEPLOY_ENVIRONMENT}-tf-state.TerraformStateBucketName}
+        dynamodb_table: ${cfn ${env DEPLOY_ENVIRONMENT}-tf-state.TerraformStateTableName}
     regions:
-      - us-east-1
+      - us-west-2
