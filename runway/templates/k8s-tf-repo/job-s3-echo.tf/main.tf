@@ -10,7 +10,7 @@ variable "region" {}
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 2.43"
+  version = "~> 3.22"
   region = var.region
 }
 

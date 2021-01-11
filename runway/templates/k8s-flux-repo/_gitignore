@@ -1,0 +1,8 @@
+.terraform
+terraform.tfstate.d
+.kube
+.kubeconfig
+__pycache__
+
+# Ignore any infrastructure repos coincidentally colocated here
+/flux-*

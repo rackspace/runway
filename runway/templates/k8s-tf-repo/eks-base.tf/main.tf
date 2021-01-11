@@ -13,11 +13,11 @@ variable "az-count" { default = 3 }
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 2.43"
+  version = "~> 3.22"
   region = var.region
 }
 provider "tls" {
-  version = "~> 2.2.0"
+  version = "~> 3.0"
 }
 
 # Data and resources
@@ -32,14 +32,14 @@ locals {
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.15.0"
+  version = "~> 2.64.0"
 
-  name = "${local.cluster_name}"
-  cidr = "${var.vpc-cidr}"
+  name = local.cluster_name
+  cidr = var.vpc-cidr
 
   azs = [
     for num in range(var.az-count):
-    "${data.aws_availability_zones.available.names[num]}"
+    data.aws_availability_zones.available.names[num]
   ]
   private_subnets = [
     for num in range(0, var.az-count):
@@ -54,7 +54,7 @@ module "vpc" {
 
   tags = {
      "kubernetes.io/cluster/${local.cluster_name}" = "shared",
-     "Environment" = "${terraform.workspace}",
+     "Environment" = terraform.workspace,
      "Terraform" = "true"
   }
 }
@@ -186,8 +186,8 @@ resource "aws_eks_cluster" "cluster" {
   # version = ""
 
   depends_on = [
-    "aws_iam_role_policy_attachment.cluster-AmazonEKSClusterPolicy",
-    "module.vpc.natgw_ids",  # would be better to just depend on the entire module, if it were possible
+    aws_iam_role_policy_attachment.cluster-AmazonEKSClusterPolicy,
+    module.vpc.natgw_ids,  # would be better to just depend on the entire module, if it were possible
   ]
 
   # API will timeout on initial connection attempts (i.e. when using the config_map
@@ -198,7 +198,7 @@ resource "aws_eks_cluster" "cluster" {
 }
 
 data "aws_eks_cluster_auth" "cluster_auth" {
-  name = "${aws_eks_cluster.cluster.id}"
+  name = aws_eks_cluster.cluster.id
 }
 
 provider "kubernetes" {
@@ -227,7 +227,16 @@ resource "kubernetes_config_map" "aws_auth_configmap" {
     - system:masters
 YAML
   }
+# In place of, or addition to, the IAM role ^ defined here in the system:masters group,
+# individual IAM users can be specified by adding mapUsers to the data block:
+#     mapUsers = <<YAML
+# - userarn: arn:aws:iam::123456789012:user/guy.incognito
+#   username: guy.incognito
+#   groups:
+#     - system:masters
+# YAML
 }
+
 
 resource "aws_eks_node_group" "node" {
   cluster_name = aws_eks_cluster.cluster.name

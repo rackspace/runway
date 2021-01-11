@@ -13,11 +13,12 @@ from shutil import copyfile
 from types import GeneratorType
 from zipfile import ZIP_DEFLATED, ZipFile
 
+# pylint import order false alerts appear to be specific to py2 on Windows
 import botocore
 import docker
-import formic
-from six import string_types
-from troposphere.awslambda import Code
+import formic  # pylint: disable=wrong-import-order
+from six import string_types  # pylint: disable=wrong-import-order
+from troposphere.awslambda import Code  # pylint: disable=wrong-import-order
 
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..session_cache import get_session
