@@ -5,9 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.17.0] - 2021-01-11
 ### Changed
 - Broader dependency update for typedoc in sls-tsc sample.
 - k8s sample repos: drop AmazonEKSServicePolicy managed policy use (unnecessary for clusters created starting 2020-04-16)
+
+### Added
+- Added [Flux](https://docs.fluxcd.io/) example repo (`gen-sample k8s-flux-repo`)
 
 ## [1.16.4] - 2020-12-22
 ### Fixed
