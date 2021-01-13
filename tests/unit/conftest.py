@@ -28,7 +28,7 @@ else:
     from pathlib2 import Path  # pylint: disable=E
 
 if TYPE_CHECKING:
-    from runway.core.providers.docker import DockerClient
+    from docker import DockerClient
 
 LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))

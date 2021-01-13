@@ -29,24 +29,26 @@ else:
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
-    from runway.core.providers.docker import DockerClient
-
     from .....factories import MockCFNginContext
 
 
 MODULE = "runway.cfngin.hooks.docker.image._build"
 
 
-def test_build(cfngin_context, mock_docker_client, mocker, tmp_path):
-    # type: ("MockCFNginContext", "DockerClient", "MockerFixture", Path) -> None
+def test_build(cfngin_context, mocker, tmp_path):
+    # type: ("MockCFNginContext", "MockerFixture", Path) -> None
     """Test build."""
     (tmp_path / "Dockerfile").touch()
     mock_image = MagicMock(
         spec=Image, id=FAKE_IMAGE_ID, tags=MagicMock(return_value=["latest"])
     )
+    mock_logs = [{"stream": "log message\n"}, {"not-stream": "no log"}]
+    mock_client = MagicMock(
+        images=MagicMock(build=MagicMock(return_value=(mock_image, mock_logs)))
+    )
     args = ImageBuildArgs(path=tmp_path)
     mocker.patch.object(ImageBuildArgs, "parse_obj", return_value=args)
-    mocker.patch.object(DockerHookData, "client", mock_docker_client)
+    mocker.patch.object(DockerHookData, "client", mock_client)
     docker_hook_data = DockerHookData()
     mock_from_cfngin_context = mocker.patch.object(
         DockerHookData, "from_cfngin_context", return_value=docker_hook_data
@@ -54,11 +56,10 @@ def test_build(cfngin_context, mock_docker_client, mocker, tmp_path):
     mock_update_context = mocker.patch.object(
         DockerHookData, "update_context", return_value=docker_hook_data
     )
-    docker_hook_data.client.api.inspect_image.return_value = mock_image
     cfngin_context.hook_data["docker"] = docker_hook_data
     assert build(context=cfngin_context, **args.dict()) == docker_hook_data
     mock_from_cfngin_context.assert_called_once_with(cfngin_context)
-    docker_hook_data.client.api.build.assert_called_once_with(  # pylint: disable=no-member
+    mock_client.images.build.assert_called_once_with(
         path=str(args.path), **args.docker.dict()
     )
     mock_image.tag.assert_called_once_with(None, tag="latest")

@@ -124,8 +124,6 @@ else:
     from pathlib2 import Path  # type: ignore pylint: disable=E
 
 if TYPE_CHECKING:
-    from docker.models.images import Image
-
     from ....context import Context
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -292,9 +290,12 @@ def build(**kwargs):  # type: (...) -> DockerHookData
     kwargs.pop("provider", None)  # not needed
     args = ImageBuildArgs.parse_obj(kwargs, context=context)
     docker_hook_data = DockerHookData.from_cfngin_context(context)
-    image = docker_hook_data.client.images.build(  # type: "Image"
+    image, logs = docker_hook_data.client.images.build(
         path=str(args.path), **args.docker.dict()
     )
+    for msg in logs:  # iterate through JSON log messages
+        if "stream" in msg:  # log if they contain a message
+            LOGGER.info(msg["stream"].strip())  # remove any new line characters
     for tag in args.tags:
         image.tag(args.repo, tag=tag)
     image.reload()

@@ -5,8 +5,6 @@ import copy
 import docker
 from docker.constants import DEFAULT_DOCKER_API_VERSION
 
-from runway.core.providers.docker import DockerClient
-
 from . import fake_api
 
 try:
@@ -63,6 +61,6 @@ def make_fake_api_client(overrides=None):
 
 def make_fake_client(overrides=None):
     """Return a Client with a fake APIClient."""
-    client = DockerClient()
+    client = docker.DockerClient()
     client.api = make_fake_api_client(overrides)
     return client

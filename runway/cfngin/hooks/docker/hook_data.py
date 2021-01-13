@@ -1,7 +1,8 @@
 """Docker hook_data object."""
 from typing import TYPE_CHECKING, Optional  # pylint: disable=W
 
-from ....core.providers.docker import DockerClient
+from docker import DockerClient
+
 from ....util import MutableMap, cached_property
 
 if TYPE_CHECKING:
