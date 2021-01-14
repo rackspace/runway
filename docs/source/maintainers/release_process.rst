@@ -95,8 +95,8 @@ After all the publishing steps have completed:
 12. Download the following artifacts from the **Publish Release** workflow:
 
 - npm-pack
-- pyinstaller-onefile-macos-latest
-- pyinstaller-onefile-ubuntu-latest
+- pyinstaller-onefile-macos-10.15
+- pyinstaller-onefile-ubuntu-18.04
 - pyinstaller-onefile-windows-latest
 - pypi-dist
 
