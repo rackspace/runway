@@ -4,10 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-runway = {editable = true, path = "."}
+runway = {editable = true,path = "."}
 # these don't get pulled into the lock correctly when using ^ with >=3.7
-pathlib2 = {version = ">=2.3.0", python_version = '<="3.4"'}
-importlib-resources = {version = ">=1.4", python_version = '<"3.7"'}
+pathlib2 = {version = ">=2.3.0",python_version = '<="3.4"'}
+importlib-resources = {version = ">=1.4",python_version = '<"3.7"'}
 
 [dev-packages]
 # Format
@@ -15,15 +15,18 @@ black = {version = "==19.10b0",python_version = '>="3.6"'}  # since its pre-rele
 # Lint
 isort = "~=5.4.2"  # v5 drops python 2 support
 pylint = "~=2.6.0"
+boto3-stubs = {extras = ["ecr"],version = "*"}
+mypy-boto3 = "*"
 ## flake8
 flake8 = "~=3.8.2"
 flake8-docstrings = "~=1.5.0"
 pep8-naming = "~=0.11"
 pydocstyle = "~=5.0.2"
 # Test
-coverage = {extras = ["toml"], version = "~=5.2.1"}
+coverage = {extras = ["toml"],version = "~=5.2.1"}
 pytest = "<5.0"  # last version that supports 2.7 - allows install with 2/3
 pytest-cov = "~=2.10.1"
+pytest-mock = "<3.0.0"  # 3.0.0 drops support for 2.7
 py = "*"
 mock = "~=3.0.5"
 moto = "~=1.3"
@@ -32,9 +35,9 @@ testfixtures = "~=4.10.0"
 setuptools-scm = "~=3.5.0"
 pyinstaller = "==3.5"  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
 # Utilities
-pre-commit = {version = "~=2.6.0", python_version = '>="3.6"'}
+pre-commit = {version = "~=2.6.0",python_version = '>="3.6"'}
 setuptools = "<49.2"  # https://github.com/microsoft/vscode-python/issues/12949
 # Windows only
-pywin32 = {version = "*", os_name = "== 'nt'"}
-pywin32-ctypes = {version = "*", os_name = "== 'nt'"}
-pefile = {version = "*", os_name = "== 'nt'"}
+pywin32 = {version = "*",os_name = "== 'nt'"}
+pywin32-ctypes = {version = "*",os_name = "== 'nt'"}
+pefile = {version = "*",os_name = "== 'nt'"}

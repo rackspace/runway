@@ -3,7 +3,7 @@ import logging
 
 from six import string_types
 
-from runway.lookups.handlers import cfn, ssm
+from runway.lookups.handlers import cfn, ecr, ssm
 from runway.util import DOC_SITE, load_object_from_string
 
 from ..exceptions import FailedVariableLookup, UnknownLookupType
@@ -85,6 +85,7 @@ register_lookup_handler(ami.TYPE_NAME, ami.AmiLookup)
 register_lookup_handler(cfn.TYPE_NAME, cfn.CfnLookup)
 register_lookup_handler(default.TYPE_NAME, default.DefaultLookup)
 register_lookup_handler(dynamodb.TYPE_NAME, dynamodb.DynamodbLookup)
+register_lookup_handler(ecr.TYPE_NAME, ecr.EcrLookup)
 register_lookup_handler(envvar.TYPE_NAME, envvar.EnvvarLookup)
 register_lookup_handler(file_handler.TYPE_NAME, file_handler.FileLookup)
 register_lookup_handler(hook_data.TYPE_NAME, hook_data.HookDataLookup)

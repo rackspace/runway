@@ -3,7 +3,7 @@
 import logging
 import os
 import sys
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 import pytest
 import yaml
@@ -20,11 +20,15 @@ from .factories import (
     YamlLoader,
     YamlLoaderDeploymet,
 )
+from .mock_docker.fake_api_client import make_fake_client
 
 if sys.version_info.major > 2:  # TODO remove after droping python 2
     from pathlib import Path  # pylint: disable=E
 else:
     from pathlib2 import Path  # pylint: disable=E
+
+if TYPE_CHECKING:
+    from docker import DockerClient
 
 LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -90,6 +94,12 @@ def fx_config():
 def fx_deployments():
     """Return YAML loader for deployment fixtures."""
     return YamlLoaderDeploymet(TEST_ROOT / "fixtures" / "deployments")
+
+
+@pytest.fixture(scope="function")
+def mock_docker_client():  # type: () -> "DockerClient"
+    """Create a docker client with mock API backend."""
+    return make_fake_client()
 
 
 @pytest.fixture(scope="module")

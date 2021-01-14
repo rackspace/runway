@@ -76,6 +76,7 @@ Runway's CFNgin includes the following lookup types:
 
 - `output lookup`_
 - `ami lookup`_
+- `ecr lookup`_
 - `cfn lookup`_
 - `custom lookup`_
 - `default lookup`_
@@ -97,6 +98,15 @@ cfn Lookup
   This means that it must have been deployed using another Runway module, deployed from a config that is run before the one using it, deployed manually, or deployed in the same config using ``required``/``required_by`` to specify a dependency between the Stacks.
 
 .. automodule:: runway.lookups.handlers.cfn
+  :noindex:
+
+
+**********
+ecr Lookup
+**********
+
+.. automodule:: runway.lookups.handlers.ecr
+  :noindex:
 
 
 .. _`output lookup`:
@@ -393,6 +403,7 @@ ssm
 ***
 
 .. automodule:: runway.lookups.handlers.ssm
+  :noindex:
 
 
 .. _`ssmstore lookup`:

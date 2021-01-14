@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- add `ecr` lookup to get information from either the runway or CFNgin config
+	- currently only supports a query of `login-password` which returns the same value as the awscli command `aws ecr get-login-password`
+- add `runway.cfngin.hooks.docker` to interact with docker by mimicking the functionality of the docker CLI. The following actions are currently supported
+	- `docker.login`
+		- options to simplify ECR authentication
+	- `docker.image.build`
+		- options to simplify building an image of ECR
+	- `docker.image.push`
+		- options to simplify pushing an image to ECR
+- add `runway.cfngin.hooks.ecr.purge_repository` to remove all images in an ECR repository so it can be deleted by CloudFormation
 
 ## [1.17.0] - 2021-01-11
 ### Changed

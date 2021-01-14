@@ -46,7 +46,11 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None)  # link to python docs
+    "python": ("https://docs.python.org/3", None),  # link to python docs
+    "docker": (
+        "https://docker-py.readthedocs.io/en/stable/",
+        None,
+    ),  # link to docker docs
 }
 
 # Add any paths that contain templates here, relative to this directory.
