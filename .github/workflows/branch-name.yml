@@ -8,7 +8,7 @@ on:
 jobs:
   branch-name:
     name: Enforce Branch Name
-    runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-18.04'
     steps:
       - uses: deepakputhraya/action-branch-name@v1.0.0
         with:

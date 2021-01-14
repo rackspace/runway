@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-18.04, windows-latest]
         python-version: [2.7, 3.6, 3.7]
     runs-on: ${{ matrix.os }}
     env:
@@ -41,7 +41,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - # &dependencies_ubuntu
         name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
       - # &dependencies_windows
         name: Install Dependencies (windows)
@@ -50,7 +50,7 @@ jobs:
       - # &cache_pip_ubuntu
         name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         with:
           path:  ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -102,7 +102,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-10.15, ubuntu-18.04, windows-latest]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     env:
@@ -119,7 +119,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
       # - *dependencies_windows
       - name: Install Dependencies (windows)
@@ -128,7 +128,7 @@ jobs:
       # - &cache_pip_mac
       - name: Pip Cache (macOS)
         uses: actions/cache@v1
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-10.15'
         with:
           path: ~/Library/Caches/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -137,7 +137,7 @@ jobs:
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         with:
           path:  ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -174,7 +174,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-10.15, ubuntu-18.04, windows-latest]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     env:
@@ -191,7 +191,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
       # - *dependencies_windows
       - name: Install Dependencies (windows)
@@ -200,7 +200,7 @@ jobs:
       # - *cache_pip_mac
       - name: Pip Cache (macOS)
         uses: actions/cache@v1
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-10.15'
         with:
           path: ~/Library/Caches/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -209,7 +209,7 @@ jobs:
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         with:
           path:  ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -253,7 +253,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
@@ -284,7 +284,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install sed tree -y
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         with:
           path:  ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -299,13 +299,13 @@ jobs:
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefolder-macos-latest
+          name: pyinstaller-onefolder-macos-10.15
           path: artifacts
       - name: Download Artifacts (ubuntu)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefolder-ubuntu-latest
+          name: pyinstaller-onefolder-ubuntu-18.04
           path: artifacts
       - name: Download Artifacts (windows)
         if: steps.check_distance.outcome == 'success'
@@ -348,7 +348,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
@@ -382,7 +382,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
@@ -397,12 +397,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-18.04'
         with:
           path:  ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -428,7 +428,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     needs:
       - build-pypi
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Download Distribution Artifact
         uses: actions/download-artifact@v1.0.0
@@ -452,7 +452,7 @@ jobs:
       AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: Install Python
         uses: actions/setup-python@v1
@@ -461,12 +461,12 @@ jobs:
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefile-macos-latest
+          name: pyinstaller-onefile-macos-10.15
           path: artifacts
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v1.0.0
         with:
-          name: pyinstaller-onefile-ubuntu-latest
+          name: pyinstaller-onefile-ubuntu-18.04
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v1.0.0

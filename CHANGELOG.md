@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- (binary builds) Support older glibc versions (e.g. Amazon Linux 2) by reverting Linux binary build platform to Ubuntu 18.04
+  - Also pinning macOS build environment version explicitly in an attempt to prevent similiar issues there in the future
+
 
 ## [1.18.0] - 2021-01-13
 ### Added
