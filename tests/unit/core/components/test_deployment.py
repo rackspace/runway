@@ -399,10 +399,12 @@ class TestDeployment:
     ) -> None:
         """Test run async."""
         mocker.patch(f"{MODULE}.aws")
-        mock_module = mocker.patch(f"{MODULE}.Module")
+        # ensure that mock.MagicMock is used for backported features
+        mock_module = mocker.patch(f"{MODULE}.Module", MagicMock())
         definition = fx_deployments.load("simple_parallel_regions")
         runway_context._use_concurrent = True
-        mock_resolve = mocker.patch.object(definition, "resolve")
+        # ensure that mock.MagicMock is used for backported features
+        mock_resolve = mocker.patch.object(definition, "resolve", MagicMock())
         mocker.patch.object(Deployment, "validate_account_credentials")
         obj = Deployment(context=runway_context, definition=definition)
 

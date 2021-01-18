@@ -186,7 +186,8 @@ class TestContext:
 
     def test_get_session_env_creds(self, mocker: MockerFixture) -> None:
         """Test get_session with env creds."""
-        mock_get_session = mocker.patch(f"{MODULE}.get_session")
+        # ensure that mock.MagicMock is used for backported features
+        mock_get_session = mocker.patch(f"{MODULE}.get_session", MagicMock())
         creds = {
             "aws_access_key_id": "test-key",
             "aws_secret_access_key": "test-secret",
@@ -199,6 +200,8 @@ class TestContext:
         assert obj.get_session()
         mock_get_session.assert_called_once()
         call_kwargs = mock_get_session.call_args.kwargs
+        print(call_kwargs)
+        print(type(call_kwargs))
         assert call_kwargs.pop("access_key") == creds["aws_access_key_id"]
         assert call_kwargs.pop("region") == mock_env.aws_region
         assert call_kwargs.pop("secret_key") == creds["aws_secret_access_key"]
