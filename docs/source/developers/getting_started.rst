@@ -27,3 +27,9 @@ If you used ``make sync`` or ``make sync_all`` to setup your environment, it is 
 If not, you can run ``pipenv run pre-commit install`` to to install the pre-commit hooks.
 
 You can also run ``pipenv run pre-commit run --all-files`` at any time to manually trigger these hooks.
+
+
+pyright Type Checking
+=====================
+
+This project uses pyright to perform type checking. To run type checking locally, install pyright (``make npm-install``) then run ``make lint`` or ``make lint-pyright``.

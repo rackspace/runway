@@ -4,7 +4,8 @@
   "main": "NA",
   "scripts": {
     "postinstall": "node ./postinstall.js",
-    "preuninstall": "node ./preuninstall.js"
+    "preuninstall": "node ./preuninstall.js",
+    "py-type-check": "pyright --venv-path ./"
   },
   "files": [
     "src/osx/*",
@@ -45,12 +46,19 @@
     "url": "https://github.com/onicagroup/runway/issues"
   },
   "homepage": "https://github.com/onicagroup/runway",
-  "os": ["darwin", "linux", "win32"],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
   "version": "0.0.0",
   "dependencies": {
     "tar": "^4.4.10"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "pyright": "^1.1.99"
   }
 }
