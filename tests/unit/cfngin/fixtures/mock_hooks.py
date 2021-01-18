@@ -1,12 +1,13 @@
 """Mock hook."""
 # pylint: disable=unused-argument
+from typing import Any, Dict
 
 
-def mock_hook(provider, context, **kwargs):
+def mock_hook(*, value: Any, **_: Any) -> Dict[str, Any]:
     """Mock hook.
 
     Returns:
         {'result': kwargs['value']}
 
     """
-    return {"result": kwargs["value"]}
+    return {"result": value}

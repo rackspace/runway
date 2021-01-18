@@ -22,8 +22,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.debug
 @options.no_color
 @options.verbose
-def run_stacker(args, **_):
-    # type: (Tuple[str, ...], Any) -> None
+def run_stacker(args: Tuple[str, ...], **_: Any) -> None:
     """Execute a command using the "shimmed" Stacker (aka CFNgin).
 
     Depreacted since version 1.5.0.

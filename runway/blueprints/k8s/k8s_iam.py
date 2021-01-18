@@ -8,25 +8,15 @@ from troposphere import Output, iam
 
 from runway.cfngin.blueprints.base import Blueprint
 
-# from runway.cfngin.blueprints.variables.types import CFNString
-
 IAM_POLICY_ARN_PREFIX = "arn:aws:iam::aws:policy/"
 
 
 class Iam(Blueprint):
     """Stacker blueprint for creating k8s IAM resources."""
 
-    # VARIABLES = {
-    #     'EksClusterName': {'type': CFNString,
-    #                        'description': 'Name of the Kubernetes cluster',
-    #                        'min_length': 2,
-    #                        'max_length': 40}
-    # }
-
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
-        # variables = self.get_variables()
         template.add_version("2010-09-09")
         template.add_description("Kubernetes IAM policies - V1.0.0")
 
@@ -116,4 +106,4 @@ class Iam(Blueprint):
 if __name__ == "__main__":
     from runway.cfngin.context import Context
 
-    print(Iam("test", Context({"namespace": "test"}), None).to_json())
+    print(Iam("test", Context(environment={"namespace": "test"}), None).to_json())

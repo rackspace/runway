@@ -3,6 +3,7 @@
 import os
 import unittest
 from subprocess import PIPE
+from typing import Any, List, Optional, Tuple, Union
 
 import mock
 
@@ -16,23 +17,28 @@ from ..factories import mock_provider
 class MockProcess:
     """Mock process."""
 
-    def __init__(self, returncode=0, stdout="", stderr=""):
+    def __init__(
+        self,
+        returncode: int = 0,
+        stdout: Optional[str] = "",
+        stderr: Optional[str] = "",
+    ) -> None:
         """Instantiate class."""
         self.returncode = returncode
         self.stdout = stdout
         self.stderr = stderr
         self.stdin = None
 
-    def communicate(self, stdin):
+    def communicate(self, stdin: str) -> Tuple[Optional[str], Optional[str]]:
         """Communicate with process."""
         self.stdin = stdin
         return (self.stdout, self.stderr)
 
-    def wait(self):
+    def wait(self) -> int:
         """Wait for process."""
         return self.returncode
 
-    def kill(self):
+    def kill(self) -> None:
         """Kill process."""
         return
 
@@ -40,7 +46,7 @@ class MockProcess:
 class TestCommandHook(unittest.TestCase):
     """Tests for runway.cfngin.hooks.command."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.context = Context(
             config=CfnginConfig.parse_obj(
@@ -59,22 +65,20 @@ class TestCommandHook(unittest.TestCase):
             "runway.cfngin.hooks.command._devnull", return_value=self.devnull
         ).start()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Run after tests."""
         self.devnull_mock.stop()
         self.popen_mock.stop()
 
-    def run_hook(self, **kwargs):
+    def run_hook(self, *, command: Union[str, List[str]], **kwargs: Any) -> Any:
         """Run hook."""
         real_kwargs = {
             "context": self.context,
-            "provider": self.provider,
         }
         real_kwargs.update(kwargs)
+        return run_command(command=command, **real_kwargs)
 
-        return run_command(**real_kwargs)
-
-    def test_command_ok(self):
+    def test_command_ok(self) -> None:
         """Test command ok."""
         self.mock_process.returncode = 0
         self.mock_process.stdout = None
@@ -87,7 +91,7 @@ class TestCommandHook(unittest.TestCase):
             ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
         )
 
-    def test_command_fail(self):
+    def test_command_fail(self) -> None:
         """Test command fail."""
         self.mock_process.returncode = 1
         self.mock_process.stdout = None
@@ -95,12 +99,12 @@ class TestCommandHook(unittest.TestCase):
 
         results = self.run_hook(command=["foo"])
 
-        self.assertEqual(results, None)
+        self.assertEqual(results, {})
         self.popen_mock.assert_called_once_with(
             ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
         )
 
-    def test_command_ignore_status(self):
+    def test_command_ignore_status(self) -> None:
         """Test command ignore status."""
         self.mock_process.returncode = 1
         self.mock_process.stdout = None
@@ -113,7 +117,7 @@ class TestCommandHook(unittest.TestCase):
             ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
         )
 
-    def test_command_quiet(self):
+    def test_command_quiet(self) -> None:
         """Test command quiet."""
         self.mock_process.returncode = 0
         self.mock_process.stdout = None
@@ -130,7 +134,7 @@ class TestCommandHook(unittest.TestCase):
             env=None,
         )
 
-    def test_command_interactive(self):
+    def test_command_interactive(self) -> None:
         """Test command interactive."""
         self.mock_process.returncode = 0
         self.mock_process.stdout = None
@@ -143,7 +147,7 @@ class TestCommandHook(unittest.TestCase):
             ["foo"], stdin=None, stdout=None, stderr=None, env=None
         )
 
-    def test_command_input(self):
+    def test_command_input(self) -> None:
         """Test command input."""
         self.mock_process.returncode = 0
         self.mock_process.stdout = None
@@ -157,7 +161,7 @@ class TestCommandHook(unittest.TestCase):
         )
         self.assertEqual(self.mock_process.stdin, "hello world")
 
-    def test_command_capture(self):
+    def test_command_capture(self) -> None:
         """Test command capture."""
         self.mock_process.returncode = 0
         self.mock_process.stdout = "hello"
@@ -172,7 +176,7 @@ class TestCommandHook(unittest.TestCase):
             ["foo"], stdin=self.devnull, stdout=PIPE, stderr=PIPE, env=None
         )
 
-    def test_command_env(self):
+    def test_command_env(self) -> None:
         """Test command env."""
         self.mock_process.returncode = 0
         self.mock_process.stdout = None

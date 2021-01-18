@@ -5,7 +5,7 @@ from aws_cdk import core
 from .hello_construct import HelloConstruct
 
 
-class MyStack(core.Stack):  # pylint: disable=too-few-public-methods
+class MyStack(core.Stack):
     """My stack."""
 
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:

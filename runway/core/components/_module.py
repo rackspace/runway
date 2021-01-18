@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import yaml
 
@@ -23,17 +23,22 @@ from ...util import cached_property, change_dir, flatten_path_lists, merge_dicts
 from ..providers import aws
 
 if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
     from ...config.components.runway import (
         RunwayDeploymentDefinition,
         RunwayModuleDefinition,
     )
     from ...context import Context
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 class Module:
     """Runway module."""
+
+    ctx: Context
+    logger: PrefixAdaptor
+    name: str
 
     def __init__(
         self,
@@ -67,8 +72,7 @@ class Module:
         self.logger = PrefixAdaptor(self.fqn, LOGGER)
 
     @cached_property
-    def child_modules(self):
-        # type: () -> List['Module']
+    def child_modules(self) -> List[Module]:
         """Return child modules."""
         return [
             self.__class__(
@@ -89,18 +93,16 @@ class Module:
         return "{}.{}".format(self.__deployment.name, self.name)
 
     @cached_property
-    def path(self):  # lazy load the path
-        # type: () -> ModulePath
+    def path(self) -> ModulePath:  # lazy load the path
         """Return resolve module path."""
         return ModulePath(
-            self.definition,
-            str(self.ctx.env.root_dir),
-            str(self.ctx.env.root_dir / ".runway/cache"),
+            self.definition._data,  # pylint: disable=protected-access
+            self.ctx.env.root_dir,
+            self.ctx.env.root_dir / ".runway/cache",
         )
 
     @cached_property
-    def payload(self):  # lazy load the payload
-        # type: () -> Dict[str, Any]
+    def payload(self) -> Dict[str, Any]:  # lazy load the payload
         """Return payload to be passed to module class handler class."""
         payload = {"environments": {}}
         if self.__deployment:
@@ -132,8 +134,7 @@ class Module:
         return False
 
     @cached_property
-    def type(self):
-        # type: () -> RunwayModuleType
+    def type(self) -> RunwayModuleType:
         """Determine Runway module type."""
         return RunwayModuleType(
             path=self.path.module_root,
@@ -142,13 +143,11 @@ class Module:
         )
 
     @cached_property
-    def use_async(self):
-        # type: () -> bool
+    def use_async(self) -> bool:
         """Whether to use asynchronous method."""
         return bool(self.definition.child_modules and self.ctx.use_concurrent)
 
-    def deploy(self):
-        # type: () -> None
+    def deploy(self) -> None:
         """Deploy the module.
 
         High level method for running a module.
@@ -160,8 +159,7 @@ class Module:
             return self.__async("deploy")
         return self.__sync("deploy")
 
-    def destroy(self):
-        # type: () -> None
+    def destroy(self) -> None:
         """Destroy the module.
 
         High level method for running a module.
@@ -173,8 +171,7 @@ class Module:
             return self.__async("destroy")
         return self.__sync("destroy")
 
-    def plan(self):
-        # type: () -> None
+    def plan(self) -> None:
         """Plan for the next deploy of the module.
 
         High level method for running a module.
@@ -188,8 +185,7 @@ class Module:
             )
         return self.__sync("plan")
 
-    def run(self, action):
-        # type: (str) -> None
+    def run(self, action) -> None:
         """Run a single module.
 
         Low level API access to run a module object.
@@ -220,12 +216,11 @@ class Module:
             "processing module in %s (complete)", self.ctx.env.aws_region
         )
 
-    def __async(self, action):
-        # type: (str) -> None
+    def __async(self, action: str) -> None:
         """Execute asynchronously.
 
         Args:
-            action (str): Name of action to run.
+            action: Name of action to run.
 
         """
         self.logger.info(
@@ -244,20 +239,18 @@ class Module:
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
-    def __sync(self, action):
-        # type: (str) -> None
+    def __sync(self, action: str) -> None:
         """Execute synchronously.
 
         Args:
-            action (str): Name of action to run.
+            action: Name of action to run.
 
         """
         self.logger.info("processing modules sequentially...")
         for module in self.child_modules:
             module.run(action)
 
-    def __load_opts_from_file(self):
-        # type: () -> Dict[str, Any]
+    def __load_opts_from_file(self) -> Dict[str, Any]:
         """Load module options from local file."""
         opts_file = Path(self.path.module_root) / "runway.module.yml"
         if opts_file.is_file():
@@ -308,34 +301,35 @@ class Module:
                 variables=variables,
             )[action]()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         """Make the object subscriptable.
 
         Args:
-            key (str): Attribute to get.
-
-        Returns:
-            Any
+            key: Attribute to get.
 
         """
         return getattr(self, key)
 
 
-def validate_environment(context, env_def, logger=None, strict=False):
+def validate_environment(
+    context: Context,
+    env_def: Any,
+    logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+    strict: bool = False,
+) -> Optional[bool]:
     """Check if an environment should be deployed to.
 
     Args:
-        context (Context): Runway context object.
-        module (ModuleDefinition): Runway module definition.
-        logger (Optional[logging.Logger]): Logger to log messages to.
-        strict (bool): Whether to consider the current environment missing from
+        context: Runway context object.
+        env_def: Runway module definition.
+        logger: Logger to log messages to.
+        strict: Whether to consider the current environment missing from
             definition as a failure.
 
     Returns:
-        Union[bool, NoneType]: Booleon value of whether to deploy or not.
+        Booleon value of whether to deploy or not.
 
     """
-    logger = logger or LOGGER
     if isinstance(env_def, bool) or not env_def:
         if env_def is True:
             logger.verbose("explicitly enabled")

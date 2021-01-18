@@ -5,10 +5,22 @@ from __future__ import annotations
 import logging
 import re
 import sys
-from abc import abstractclassmethod
 from pathlib import Path
 from string import Template
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import (
+    TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Dict,
+    List,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
 
@@ -36,6 +48,8 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+_BaseConfig = TypeVar("_BaseConfig", bound="BaseConfig")
+
 
 class BaseConfig:
     """Base class for configurations."""
@@ -58,11 +72,15 @@ class BaseConfig:
         self,
         *,
         by_alias: bool = False,
-        exclude: Optional[List[str]] = None,
+        exclude: Optional[
+            Union[AbstractSet[Union[int, str]], Mapping[Union[int, str]]]
+        ] = None,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
         exclude_unset: bool = True,
-        include: Optional[List[str]] = None,
+        include: Optional[
+            Union[AbstractSet[Union[int, str]], Mapping[Union[int, str]]]
+        ] = None,
     ) -> str:
         """Dump model to a YAML string.
 
@@ -93,8 +111,8 @@ class BaseConfig:
             default_flow_style=False,
         )
 
-    @abstractclassmethod
-    def find_config_file(cls, path: Path) -> Optional[Path]:  # noqa: N805
+    @classmethod
+    def find_config_file(cls, path: Path) -> Optional[Path]:
         """Find a config file in the provided path.
 
         Args:
@@ -105,12 +123,12 @@ class BaseConfig:
 
     @classmethod
     def parse_file(
-        cls,
+        cls: Type[_BaseConfig],
         *,
         path: Optional[Path] = None,
         file_path: Optional[Path] = None,
         **kwargs: Any
-    ) -> BaseConfig:
+    ) -> _BaseConfig:
         """Parse a YAML file to create a config object.
 
         Args:
@@ -122,18 +140,12 @@ class BaseConfig:
             ValueError: path and file_path were both excluded.
 
         """
-        if file_path:
-            if not file_path.is_file():
-                raise ConfigNotFound(path=file_path)
-            return cls.parse_obj(
-                yaml.safe_load(file_path.read_text()), path=file_path, **kwargs
-            )
-        if path:
-            return cls.parse_file(file_path=cls.find_config_file(path), **kwargs)
-        raise ValueError("must provide path or file_path")
+        raise NotImplementedError  # cov: ignore
 
-    @abstractclassmethod
-    def parse_obj(cls, obj: Any, *, path: Path) -> BaseConfig:  # noqa: N805
+    @classmethod
+    def parse_obj(
+        cls: Type[_BaseConfig], obj: Any, *, path: Optional[Path] = None
+    ) -> _BaseConfig:
         """Parse a python object into a config object.
 
         Args:
@@ -229,12 +241,14 @@ class CfnginConfig(BaseConfig):
         self.namespace_delimiter = self._data.namespace_delimiter
         self.package_sources = self._data.package_sources
         self.persistent_graph_key = self._data.persistent_graph_key
-        self.post_build = self._data.post_build
-        self.post_destroy = self._data.post_destroy
-        self.pre_build = self._data.pre_build
-        self.pre_destroy = self._data.pre_destroy
+        self.post_build = cast(List[CfnginHookDefinitionModel], self._data.post_build)
+        self.post_destroy = cast(
+            List[CfnginHookDefinitionModel], self._data.post_destroy
+        )
+        self.pre_build = cast(List[CfnginHookDefinitionModel], self._data.pre_build)
+        self.pre_destroy = cast(List[CfnginHookDefinitionModel], self._data.pre_destroy)
         self.service_role = self._data.service_role
-        self.stacks = self._data.stacks
+        self.stacks = cast(List[CfnginStackDefinitionModel], self._data.stacks)
         self.sys_path = self._data.sys_path
         self.tags = self._data.tags
         self.targets = self._data.targets
@@ -295,9 +309,9 @@ class CfnginConfig(BaseConfig):
         *,
         path: Optional[Path] = None,
         file_path: Optional[Path] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        parameters: Optional[MutableMapping[str, Any]] = None,
         **kwargs: Any
-    ) -> BaseConfig:
+    ) -> CfnginConfig:
         """Parse a YAML file to create a config object.
 
         Args:
@@ -328,9 +342,7 @@ class CfnginConfig(BaseConfig):
         raise ValueError("must provide path or file_path")
 
     @classmethod
-    def parse_obj(
-        cls, obj: Dict[str, Any], *, path: Optional[Path] = None
-    ) -> CfnginConfig:
+    def parse_obj(cls, obj: Any, *, path: Optional[Path] = None) -> CfnginConfig:
         """Parse a python object.
 
         Args:
@@ -345,7 +357,7 @@ class CfnginConfig(BaseConfig):
         cls,
         data: str,
         *,
-        parameters: Optional[Dict[str, Any]] = None,
+        parameters: Optional[MutableMapping[str, Any]] = None,
         path: Optional[Path] = None,
         skip_package_sources: bool = False,
     ) -> CfnginConfig:
@@ -370,8 +382,8 @@ class CfnginConfig(BaseConfig):
 
     @classmethod
     def process_package_sources(
-        cls, raw_data: str, *, parameters: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        cls, raw_data: str, *, parameters: Optional[MutableMapping[str, Any]] = None
+    ) -> str:
         """Process the package sources defined in a rendered config.
 
         Args:
@@ -396,7 +408,7 @@ class CfnginConfig(BaseConfig):
 
     @staticmethod
     def render_raw_data(
-        raw_data: str, *, parameters: Optional[Dict[str, Any]] = None
+        raw_data: str, *, parameters: Optional[MutableMapping[str, Any]] = None
     ) -> str:
         """Render raw data.
 
@@ -477,6 +489,35 @@ class RunwayConfig(BaseConfig):
         if len(found) != 1:
             raise ValueError(f"more than one config files found: {found}")
         return found[0]
+
+    @classmethod
+    def parse_file(
+        cls,
+        *,
+        path: Optional[Path] = None,
+        file_path: Optional[Path] = None,
+        **kwargs: Any
+    ) -> RunwayConfig:
+        """Parse a YAML file to create a config object.
+
+        Args:
+            path: The path to search for a config file.
+            file_path: Exact path to a file to parse.
+
+        Raises:
+            ConfigNotFound: Provided config file was not found.
+            ValueError: path and file_path were both excluded.
+
+        """
+        if file_path:
+            if not file_path.is_file():
+                raise ConfigNotFound(path=file_path)
+            return cls.parse_obj(
+                yaml.safe_load(file_path.read_text()), path=file_path, **kwargs
+            )
+        if path:
+            return cls.parse_file(file_path=cls.find_config_file(path), **kwargs)
+        raise ValueError("must provide path or file_path")
 
     @classmethod
     def parse_obj(cls, obj: Any, *, path: Optional[Path] = None) -> RunwayConfig:

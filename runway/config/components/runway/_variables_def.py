@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 import yaml
 
@@ -10,7 +10,10 @@ from ....exceptions import VariablesFileNotFound
 from ....util import MutableMap
 from ...models.runway import RunwayVariablesDefinitionModel
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 class RunwayVariablesDefinition(MutableMap):
@@ -23,7 +26,6 @@ class RunwayVariablesDefinition(MutableMap):
 
     def __init__(self, data: RunwayVariablesDefinitionModel) -> None:
         """Instantiate class."""
-        # pylint: disable=protected-access
         self._file_path = data.file_path
         self._sys_path = data.sys_path
         data = RunwayVariablesDefinitionModel(**{**data.dict(), **self.__load_file()})

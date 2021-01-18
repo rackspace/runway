@@ -1,14 +1,17 @@
 """``runway dismantle`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from .. import options
 from ._destroy import destroy
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("dismantle", short_help="alias of destroy")
@@ -19,8 +22,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def dismantle(ctx, **kwargs):
-    # type: (click.Context, Any) -> None
+def dismantle(ctx: click.Context, **kwargs: Any) -> None:
     """Alias of "runway destroy"."""
     LOGGER.verbose("forwarding to destroy...")
     ctx.forward(destroy, **kwargs)

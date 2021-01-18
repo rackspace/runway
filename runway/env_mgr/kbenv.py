@@ -1,10 +1,13 @@
 """Kubectl version management."""
+from __future__ import annotations
+
 import logging
 import os
 import platform
 import shutil
 import sys
 import tempfile
+from typing import TYPE_CHECKING, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -13,12 +16,17 @@ import requests
 from ..util import get_file_hash
 from . import EnvManager, handle_bin_download_error
 
-LOGGER = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from .._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 KB_VERSION_FILENAME = ".kubectl-version"
 RELEASE_URI = "https://storage.googleapis.com/kubernetes-release/release"
 
 
-def verify_kb_release(kb_url, download_dir, filename):
+def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
     """Compare checksum and exit if it doesn't match.
 
     Different releases provide varying checksum files. To account for this,
@@ -94,13 +102,16 @@ def verify_kb_release(kb_url, download_dir, filename):
 
 
 def download_kb_release(
-    version, versions_dir, kb_platform=None, arch=None,
-):
+    version: str,
+    versions_dir: Path,
+    kb_platform: Optional[str] = None,
+    arch: Optional[str] = None,
+) -> None:
     """Download kubectl and return path to it."""
     version_dir = versions_dir / version
 
     if arch is None:
-        arch = os.environ.get("KBENV_ARCH") if os.environ.get("KBENV_ARCH") else "amd64"
+        arch = os.getenv("KBENV_ARCH", "amd64")
 
     if not kb_platform:
         if platform.system().startswith("Darwin"):
@@ -136,7 +147,7 @@ def download_kb_release(
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
-def get_version_requested(path):
+def get_version_requested(path: Path) -> str:
     """Return string listing requested kubectl version."""
     kb_version_path = path / KB_VERSION_FILENAME
     if not kb_version_path.is_file():
@@ -150,18 +161,18 @@ def get_version_requested(path):
     return kb_version_path.read_text().strip()
 
 
-class KBEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
+class KBEnvManager(EnvManager):
     """kubectl version management.
 
     Designed to be compatible with https://github.com/alexppg/kbenv.
 
     """
 
-    def __init__(self, path=None):
+    def __init__(self, path: Optional[Path] = None) -> None:
         """Initialize class."""
         super().__init__("kubectl", "kbenv", path)
 
-    def install(self, version_requested=None):
+    def install(self, version_requested: Optional[str] = None) -> str:
         """Ensure kubectl is available."""
         if not version_requested:
             version_requested = get_version_requested(self.path)

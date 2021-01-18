@@ -1,5 +1,7 @@
 """Test runway.lookups.handlers.ecr."""
 # pylint: disable=no-self-use,too-few-public-methods,redefined-outer-name
+from __future__ import annotations
+
 import base64
 import datetime
 from typing import TYPE_CHECKING
@@ -18,21 +20,19 @@ MODULE = "runway.lookups.handlers.ecr"
 
 
 @pytest.fixture(scope="function")
-def mock_format_results(mocker):  # type: ("MockerFixture") -> "MagicMock"
+def mock_format_results(mocker: MockerFixture) -> MagicMock:
     """Mock EcrLookup.format_results."""
     return mocker.patch.object(
         EcrLookup, "format_results", return_value="EcrLookup.format_results()"
     )
 
 
-class TestEcrLookup(object):
+class TestEcrLookup:
     """Test runway.lookups.handlers.ecr.EcrLookup."""
 
     def test_get_login_password(
-        self,
-        cfngin_context,  # type: "MockCFNginContext"
-        runway_context,  # type: "MockRunwayContext"
-    ):  # type: (...) -> None
+        self, cfngin_context: MockCFNginContext, runway_context: MockRunwayContext,
+    ) -> None:
         """Test get_login_password."""
         cfngin_stubber = cfngin_context.add_stubber("ecr")
         runway_stubber = runway_context.add_stubber("ecr")
@@ -55,18 +55,26 @@ class TestEcrLookup(object):
 
         with cfngin_stubber, runway_stubber:
             assert (
-                EcrLookup.get_login_password(cfngin_context.get_session().client("ecr"))
+                EcrLookup.get_login_password(
+                    cfngin_context.get_session().client("ecr")  # type: ignore
+                )
                 == password
             )
             assert (
-                EcrLookup.get_login_password(runway_context.get_session().client("ecr"))
+                EcrLookup.get_login_password(
+                    runway_context.get_session().client("ecr")  # type: ignore
+                )
                 == password
             )
         cfngin_stubber.assert_no_pending_responses()
         runway_stubber.assert_no_pending_responses()
 
-    def test_handle_login_password(self, mock_format_results, mocker, runway_context):
-        # type: ("MagicMock", "MockerFixture", "MockRunwayContext") -> None
+    def test_handle_login_password(
+        self,
+        mock_format_results: MagicMock,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test handle login-password."""
         runway_context.add_stubber("ecr")
         mock_get_login_password = mocker.patch.object(
@@ -83,8 +91,7 @@ class TestEcrLookup(object):
             mock_get_login_password.return_value
         )
 
-    def test_handle_value_error(self, runway_context):
-        # type: ("MockRunwayContext") -> None
+    def test_handle_value_error(self, runway_context: MockRunwayContext) -> None:
         """Test handle raise ValueError."""
         runway_context.add_stubber("ecr")
         with pytest.raises(ValueError) as excinfo:

@@ -1,21 +1,18 @@
 """User Pool Client Domain Updater."""
-# pylint: disable=unused-argument
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Union
 
 if TYPE_CHECKING:
     from ....cfngin.context import Context
-    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
 
 def update(
-    context,  # type: Context
-    provider,  # type: BaseProvider
-    **kwargs  # type: Any
-):
-    # type: (...) -> Union[Dict[str, Any], bool]
+    context: Context, *, client_id: str, **_: Any,
+) -> Union[Dict[str, Any], bool]:
     """Retrieve/Update the domain name of the specified client.
 
     A domain name is required in order to make authorization and token
@@ -23,14 +20,8 @@ def update(
     we create one based on the user pool and client ids.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance.
-
-    Keyword Args:
-        user_pool_id (str): The ID of the Cognito User Pool.
-        client_id (str): The ID of the Cognito User Pool Client.
+        context: The context instance.
+        client_id: The ID of the Cognito User Pool Client.
 
     """
     session = context.get_session()
@@ -39,7 +30,6 @@ def update(
     context_dict = {}
 
     user_pool_id = context.hook_data["aae_user_pool_id_retriever"]["id"]
-    client_id = kwargs["client_id"]
     user_pool = cognito_client.describe_user_pool(UserPoolId=user_pool_id).get(
         "UserPool"
     )
@@ -66,11 +56,8 @@ def update(
 
 
 def delete(
-    context,  # type: Context
-    provider,  # type: BaseProvider
-    **kwargs  # type: Any
-):
-    # type: (...) -> Union[Dict[str, Any], bool]
+    context: Context, *, client_id: str, **_: Any,
+) -> Union[Dict[str, Any], bool]:
     """Delete the domain if the user pool was created by Runway.
 
     If a User Pool was created by Runway, and populated with a domain, that
@@ -79,21 +66,15 @@ def delete(
     deleted, or skips if not able to find one.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance.
-
-    Keyword Args:
-        client_id (str): The ID of the Cognito User Pool Client.
+        context: The context instance.
+        client_id: The ID of the Cognito User Pool Client.
 
     """
     session = context.get_session()
     cognito_client = session.client("cognito-idp")
 
     user_pool_id = context.hook_data["aae_user_pool_id_retriever"]["id"]
-    client_id = kwargs["client_id"]
-    (_, user_pool_hash) = user_pool_id.split("_")
+    _, user_pool_hash = user_pool_id.split("_")
     domain_prefix = ("%s-%s" % (user_pool_hash, client_id)).lower()
 
     try:
@@ -109,12 +90,12 @@ def delete(
         return False
 
 
-def get_user_pool_domain(prefix, region):
+def get_user_pool_domain(prefix: str, region: str) -> str:
     """Return a user pool domain name based on the prefix received and region.
 
     Args:
-        prefix (str): The domain prefix for the domain.
-        region (str): The region in which the pool resides.
+        prefix: The domain prefix for the domain.
+        region: The region in which the pool resides.
 
     """
     return "%s.auth.%s.amazoncognito.com" % (prefix, region)

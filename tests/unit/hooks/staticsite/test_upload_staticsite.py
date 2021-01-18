@@ -1,6 +1,9 @@
 """Test runway.hooks.staticsite.upload_staticsite."""
 # pylint: disable=no-self-use,too-few-public-methods
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
 import yaml
@@ -13,6 +16,9 @@ from runway.hooks.staticsite.upload_staticsite import (
     get_content_type,
     sync_extra_files,
 )
+
+if TYPE_CHECKING:
+    from ...factories import MockCFNginContext
 
 
 class TestAutoDetectContentType:
@@ -30,7 +36,9 @@ class TestAutoDetectContentType:
             (".test", None),
         ],
     )
-    def test_auto_detect_content_type(self, provided, expected):
+    def test_auto_detect_content_type(
+        self, provided: str, expected: Optional[str]
+    ) -> None:
         """Test auto_detect_content_type."""
         assert auto_detect_content_type(provided) == expected
 
@@ -46,7 +54,11 @@ class TestGetContentType:
             ({"name": "test.txt"}, None),
         ],
     )
-    def test_get_content_type(self, provided, expected):
+    def test_get_content_type(
+        self,
+        provided: Dict[str, Optional[Union[Dict[str, Any], str]]],
+        expected: Optional[str],
+    ) -> None:
         """Test get_content_type."""
         assert get_content_type(provided) == expected
 
@@ -54,7 +66,7 @@ class TestGetContentType:
 class TestGetContent:
     """Test runway.hooks.staticsite.upload_staticsite.get_content."""
 
-    def test_json_content(self):
+    def test_json_content(self) -> None:
         """Test json content is serialized."""
         content = {"a": 0}
 
@@ -63,7 +75,7 @@ class TestGetContent:
 
         assert actual == expected
 
-    def test_yaml_content(self):
+    def test_yaml_content(self) -> None:
         """Test yaml content is serialized."""
         content = {"a": 0}
 
@@ -72,15 +84,15 @@ class TestGetContent:
 
         assert actual == expected
 
-    def test_unknown_content_type(self):
+    def test_unknown_content_type(self) -> None:
         """Test content w/out content_type."""
         with pytest.raises(ValueError):
             get_content({"content": {"a": 0}})
 
-    def test_unsupported_content_type(self):
+    def test_unsupported_content_type(self) -> None:
         """Test content w/unsupported content."""
         with pytest.raises(TypeError):
-            get_content({"content": 123})
+            get_content({"content": 123})  # type: ignore
 
 
 class TestCalculateExtraFilesHash:
@@ -97,7 +109,11 @@ class TestCalculateExtraFilesHash:
             ({"name": "test", "content": "a"}, {"name": "test", "content": "b"}),
         ],
     )
-    def test_calculate_hash_of_extra_files(self, a, b):
+    def test_calculate_hash_of_extra_files(
+        self,
+        a: Dict[str, Optional[Union[Dict[str, Any], str]]],
+        b: Dict[str, Optional[Union[Dict[str, Any], str]]],
+    ) -> None:
         """Test calculate_hash_of_extra_files."""
         assert calculate_hash_of_extra_files([a]) != calculate_hash_of_extra_files([b])
 
@@ -105,7 +121,7 @@ class TestCalculateExtraFilesHash:
 class TestSyncExtraFiles:
     """Test runway.hooks.staticsite.upload_staticsite.sync_extra_files."""
 
-    def test_json_content(self, cfngin_context):
+    def test_json_content(self, cfngin_context: MockCFNginContext) -> None:
         """Test json content is put in s3."""
         s3_stub = cfngin_context.add_stubber("s3")
 
@@ -117,7 +133,7 @@ class TestSyncExtraFiles:
             {
                 "Bucket": "bucket",
                 "Key": "test.json",
-                "Body": json.dumps(content),
+                "Body": json.dumps(content).encode(),
                 "ContentType": "application/json",
             },
         )
@@ -130,7 +146,7 @@ class TestSyncExtraFiles:
             ]
             stub.assert_no_pending_responses()
 
-    def test_yaml_content(self, cfngin_context):
+    def test_yaml_content(self, cfngin_context: MockCFNginContext) -> None:
         """Test yaml content is put in s3."""
         s3_stub = cfngin_context.add_stubber("s3")
 
@@ -142,7 +158,7 @@ class TestSyncExtraFiles:
             {
                 "Bucket": "bucket",
                 "Key": "test.yaml",
-                "Body": yaml.safe_dump(content),
+                "Body": yaml.safe_dump(content).encode(),
                 "ContentType": "text/yaml",
             },
         )
@@ -155,17 +171,22 @@ class TestSyncExtraFiles:
             ]
             stub.assert_no_pending_responses()
 
-    def test_empty_content(self, cfngin_context):
+    def test_empty_content(self, cfngin_context: MockCFNginContext) -> None:
         """Test empty content is not uploaded."""
         s3_stub = cfngin_context.add_stubber("s3")
 
-        files = [{"name": "test.yaml", "content": {}}]
-
         with s3_stub as stub:
-            assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == []
+            assert (
+                sync_extra_files(
+                    cfngin_context,
+                    "bucket",
+                    extra_files=[{"name": "test.yaml", "content": {}}],
+                )
+                == []
+            )
             stub.assert_no_pending_responses()
 
-    def test_file_reference(self, cfngin_context):
+    def test_file_reference(self, cfngin_context: MockCFNginContext) -> None:
         """Test file is uploaded."""
         s3_stub = cfngin_context.add_stubber("s3")
 
@@ -183,7 +204,9 @@ class TestSyncExtraFiles:
             },
         )
 
-        files = [{"name": "test", "file": "Pipfile"}]
+        files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]] = [
+            {"name": "test", "file": "Pipfile"}
+        ]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -191,7 +214,9 @@ class TestSyncExtraFiles:
             ]
             stub.assert_no_pending_responses()
 
-    def test_file_reference_with_content_type(self, cfngin_context):
+    def test_file_reference_with_content_type(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test file is uploaded with the content type."""
         s3_stub = cfngin_context.add_stubber("s3")
 
@@ -206,7 +231,9 @@ class TestSyncExtraFiles:
             },
         )
 
-        files = [{"name": "test.json", "file": "Pipfile"}]
+        files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]] = [
+            {"name": "test.json", "file": "Pipfile"}
+        ]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -214,12 +241,15 @@ class TestSyncExtraFiles:
             ]
             stub.assert_no_pending_responses()
 
-    def test_hash_unchanged(self, cfngin_context):
+    def test_hash_unchanged(self, cfngin_context: MockCFNginContext) -> None:
         """Test upload is skipped if the has was unchanged."""
         s3_stub = cfngin_context.add_stubber("s3")
         ssm_stub = cfngin_context.add_stubber("ssm")
 
-        extra = {"name": "test", "content": "test"}
+        extra: Dict[str, Optional[Union[Dict[str, Any], str]]] = {
+            "name": "test",
+            "content": "test",
+        }
         extra_hash = calculate_hash_of_extra_files([extra])
 
         ssm_stub.add_response(
@@ -241,12 +271,16 @@ class TestSyncExtraFiles:
             s3_stub.assert_no_pending_responses()
             ssm_stub.assert_no_pending_responses()
 
-    def test_hash_updated(self, cfngin_context):
+    def test_hash_updated(self, cfngin_context: MockCFNginContext) -> None:
         """Test extra files hash is updated."""
         s3_stub = cfngin_context.add_stubber("s3")
         ssm_stub = cfngin_context.add_stubber("ssm")
 
-        extra = {"name": "test", "content": "test", "content_type": "text/plain"}
+        extra: Dict[str, Optional[Union[Dict[str, Any], str]]] = {
+            "name": "test",
+            "content": "test",
+            "content_type": "text/plain",
+        }
         extra_hash = calculate_hash_of_extra_files([extra])
 
         ssm_stub.add_response(
@@ -273,7 +307,7 @@ class TestSyncExtraFiles:
             {
                 "Bucket": "bucket",
                 "Key": "test",
-                "Body": "test",
+                "Body": "test".encode(),
                 "ContentType": "text/plain",
             },
         )

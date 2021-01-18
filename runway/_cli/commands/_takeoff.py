@@ -1,14 +1,17 @@
 """``runway takeoff`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from .. import options
 from ._deploy import deploy
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("takeoff", short_help="alias of deploy")
@@ -19,8 +22,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def takeoff(ctx, **kwargs):
-    # type: (click.Context, Any) -> None
+def takeoff(ctx: click.Context, **kwargs: Any) -> None:
     """Alias of "runway deploy"."""
     LOGGER.verbose("forwarding to deploy...")
     ctx.forward(deploy, **kwargs)

@@ -2,14 +2,17 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import ROOT, TEMPLATES, copy_sample
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("cfngin", short_help="cfngin + troposphere (sampleapp.cfn)")
@@ -17,8 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def cfngin(ctx, **_):
-    # type: (click.Context, Any) -> None
+def cfngin(ctx: click.Context, **_: Any) -> None:
     """Generate a sample CFNgin project using Blueprints."""
     src = TEMPLATES / "cfngin"
     src_blueprints = ROOT / "blueprints"

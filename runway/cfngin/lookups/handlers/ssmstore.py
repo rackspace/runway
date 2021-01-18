@@ -1,11 +1,15 @@
 """AWS SSM Parameter Store lookup."""
 # pylint: disable=arguments-differ,unused-argument
+from __future__ import annotations
+
 import logging
-import warnings
+from typing import TYPE_CHECKING, Any
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
+
+if TYPE_CHECKING:
+    from ...context import Context
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "ssmstore"
@@ -17,17 +21,12 @@ class SsmstoreLookup(LookupHandler):
     DEPRECATION_MSG = "ssmstore lookup has been deprecated; use the ssm lookup instead"
 
     @classmethod
-    def handle(cls, value, context, *_, **kwargs):
+    def handle(cls, value: str, context: Context, **_: Any) -> str:
         """Retrieve (and decrypt) a parameter from AWS SSM Parameter Store.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
-
-        Returns:
-            str: Looked up value.
+            value: Parameter(s) given to this lookup.
+            context: Context instance.
 
         ``value`` should be in the following format::
 
@@ -55,7 +54,6 @@ class SsmstoreLookup(LookupHandler):
                 conf_key: PASSWORD
 
         """
-        warnings.warn(cls.DEPRECATION_MSG, DeprecationWarning)
         LOGGER.warning(cls.DEPRECATION_MSG)
 
         value = read_value_from_path(value)

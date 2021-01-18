@@ -3,10 +3,15 @@ import threading
 
 import pytest
 
-from runway.cfngin.dag import DAGValidationError, ThreadedWalker, UnlimitedSemaphore
+from runway.cfngin.dag import (
+    DAG,
+    DAGValidationError,
+    ThreadedWalker,
+    UnlimitedSemaphore,
+)
 
 
-def test_add_node(empty_dag):
+def test_add_node(empty_dag: DAG) -> None:
     """Test add node."""
     dag = empty_dag
 
@@ -14,7 +19,7 @@ def test_add_node(empty_dag):
     assert dag.graph == {"a": set()}
 
 
-def test_transpose(basic_dag):
+def test_transpose(basic_dag: DAG) -> None:
     """Test transpose."""
     dag = basic_dag
 
@@ -27,7 +32,7 @@ def test_transpose(basic_dag):
     }
 
 
-def test_add_edge(empty_dag):
+def test_add_edge(empty_dag: DAG) -> None:
     """Test add edge."""
     dag = empty_dag
 
@@ -37,7 +42,7 @@ def test_add_edge(empty_dag):
     assert dag.graph == {"a": set("b"), "b": set()}
 
 
-def test_from_dict(empty_dag):
+def test_from_dict(empty_dag: DAG) -> None:
     """Test from dict."""
     dag = empty_dag
 
@@ -45,7 +50,7 @@ def test_from_dict(empty_dag):
     assert dag.graph == {"a": set(["b", "c"]), "b": set("d"), "c": set("d"), "d": set()}
 
 
-def test_reset_graph(empty_dag):
+def test_reset_graph(empty_dag: DAG) -> None:
     """Test reset graph."""
     dag = empty_dag
 
@@ -55,7 +60,7 @@ def test_reset_graph(empty_dag):
     assert dag.graph == {}
 
 
-def test_walk(empty_dag):
+def test_walk(empty_dag: DAG) -> None:
     """Test walk."""
     dag = empty_dag
 
@@ -69,29 +74,29 @@ def test_walk(empty_dag):
         return True
 
     dag.walk(walk_func)
-    assert nodes == ["d", "c", "b", "a"] or nodes == ["d", "b", "c", "a"]
+    assert nodes in [["d", "c", "b", "a"], ["d", "b", "c", "a"]]
 
 
-def test_ind_nodes(basic_dag):
+def test_ind_nodes(basic_dag: DAG) -> None:
     """Test ind nodes."""
     dag = basic_dag
     assert dag.ind_nodes() == ["a"]
 
 
-def test_topological_sort(empty_dag):
+def test_topological_sort(empty_dag: DAG) -> None:
     """Test topological sort."""
     dag = empty_dag
     dag.from_dict({"a": [], "b": ["a"], "c": ["b"]})
     assert dag.topological_sort() == ["c", "b", "a"]
 
 
-def test_successful_validation(basic_dag):
+def test_successful_validation(basic_dag: DAG) -> None:
     """Test successful validation."""
     dag = basic_dag
     assert dag.validate()[0] is True
 
 
-def test_failed_validation(empty_dag):
+def test_failed_validation(empty_dag: DAG) -> None:
     """Test failed validation."""
     dag = empty_dag
 
@@ -99,13 +104,13 @@ def test_failed_validation(empty_dag):
         dag.from_dict({"a": ["b"], "b": ["a"]})
 
 
-def test_downstream(basic_dag):
+def test_downstream(basic_dag: DAG) -> None:
     """Test downstream."""
     dag = basic_dag
     assert set(dag.downstream("a")) == set(["b", "c"])
 
 
-def test_all_downstreams(basic_dag):
+def test_all_downstreams(basic_dag: DAG) -> None:
     """Test all downstreams."""
     dag = basic_dag
 
@@ -114,7 +119,7 @@ def test_all_downstreams(basic_dag):
     assert dag.all_downstreams("d") == []
 
 
-def test_all_downstreams_pass_graph(empty_dag):
+def test_all_downstreams_pass_graph(empty_dag: DAG) -> None:
     """Test all downstreams pass graph."""
     dag = empty_dag
     dag.from_dict({"a": ["c"], "b": ["d"], "c": ["d"], "d": []})
@@ -123,7 +128,7 @@ def test_all_downstreams_pass_graph(empty_dag):
     assert dag.all_downstreams("d") == []
 
 
-def test_predecessors(basic_dag):
+def test_predecessors(basic_dag: DAG) -> None:
     """Test predecessors."""
     dag = basic_dag
 
@@ -133,7 +138,7 @@ def test_predecessors(basic_dag):
     assert set(dag.predecessors("d")) == set(["b", "c"])
 
 
-def test_filter(basic_dag):
+def test_filter(basic_dag: DAG) -> None:
     """Test filter."""
     dag = basic_dag
 
@@ -141,14 +146,14 @@ def test_filter(basic_dag):
     assert dag2.graph == {"b": set("d"), "c": set("d"), "d": set()}
 
 
-def test_all_leaves(basic_dag):
+def test_all_leaves(basic_dag: DAG) -> None:
     """Test all leaves."""
     dag = basic_dag
 
     assert dag.all_leaves() == ["d"]
 
 
-def test_size(basic_dag):
+def test_size(basic_dag: DAG) -> None:
     """Test size."""
     dag = basic_dag
 
@@ -157,7 +162,7 @@ def test_size(basic_dag):
     assert dag.size() == 3
 
 
-def test_transitive_reduction_no_reduction(empty_dag):
+def test_transitive_reduction_no_reduction(empty_dag: DAG) -> None:
     """Test transitive reduction no reduction."""
     dag = empty_dag
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
@@ -165,7 +170,7 @@ def test_transitive_reduction_no_reduction(empty_dag):
     assert dag.graph == {"a": set(["b", "c"]), "b": set("d"), "c": set("d"), "d": set()}
 
 
-def test_transitive_reduction(empty_dag):
+def test_transitive_reduction(empty_dag: DAG) -> None:
     """Test transitive reduction."""
     dag = empty_dag
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-G.svg
@@ -183,7 +188,7 @@ def test_transitive_reduction(empty_dag):
     }
 
 
-def test_transitive_deep_reduction(empty_dag):
+def test_transitive_deep_reduction(empty_dag: DAG) -> None:
     """Test transitive deep reduction."""
     dag = empty_dag
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-G.svg
@@ -193,7 +198,7 @@ def test_transitive_deep_reduction(empty_dag):
     assert dag.graph == {"a": set("b"), "b": set("c"), "c": set("d"), "d": set()}
 
 
-def test_threaded_walker(empty_dag):
+def test_threaded_walker(empty_dag: DAG) -> None:
     """Test threaded walker."""
     dag = empty_dag
 
@@ -212,4 +217,4 @@ def test_threaded_walker(empty_dag):
         return True
 
     walker.walk(dag, walk_func)
-    assert nodes == ["d", "c", "b", "a"] or nodes == ["d", "b", "c", "a"]
+    assert nodes in [["d", "c", "b", "a"], ["d", "b", "c", "a"]]

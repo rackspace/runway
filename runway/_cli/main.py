@@ -17,22 +17,20 @@ LOGGER = logging.getLogger("runway.cli")
 CLICK_CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=999)
 
 
-class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
+class _CliGroup(click.Group):
     """Extends the use of click.Group.
 
     This should only be used for the main application group.
 
     """
 
-    def invoke(self, ctx):
-        # type: (click.Context) -> Any
+    def invoke(self, ctx: click.Context) -> Any:
         """Replace invoke command to pass along args."""
         ctx.meta["global.options"] = self.__parse_global_options(ctx)
         return super().invoke(ctx)
 
     @staticmethod
-    def __parse_global_options(ctx):
-        # type: (click.Context) -> Dict[str, Any]
+    def __parse_global_options(ctx: click.Context) -> Dict[str, Any]:
         """Parse global options.
 
         These options are passed to subcommands but, should be parsed by the
@@ -66,8 +64,7 @@ class _CliGroup(click.Group):  # pylint: disable=too-few-public-methods
 @options.no_color
 @options.verbose
 @click.pass_context
-def cli(ctx, **_):
-    # type: (click.Context, Any) -> None
+def cli(ctx: click.Context, **_: Any) -> None:
     """Runway CLI.
 
     Full documentation available at https://docs.onica.com/projects/runway/.

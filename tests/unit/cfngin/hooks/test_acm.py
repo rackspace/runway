@@ -1,6 +1,9 @@
 """Tests for runway.cfngin.hooks.acm."""
 # pylint: disable=no-self-use,protected-access,unused-argument
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, Union, cast
 
 import boto3
 import pytest
@@ -8,6 +11,7 @@ from botocore.exceptions import ClientError
 from botocore.stub import ANY, Stubber
 from mock import MagicMock
 from troposphere.certificatemanager import Certificate as CertificateResource
+from typing_extensions import Literal
 
 from runway.cfngin.exceptions import (
     StackDoesNotExist,
@@ -17,6 +21,19 @@ from runway.cfngin.exceptions import (
 from runway.cfngin.hooks.acm import Certificate
 from runway.cfngin.status import FAILED, NO_CHANGE, SubmittedStatus
 from runway.util import MutableMap
+
+if TYPE_CHECKING:
+    from _pytest.monkeypatch import MonkeyPatch
+    from mypy_boto3_acm.type_defs import DomainValidationTypeDef, ResourceRecordTypeDef
+    from mypy_boto3_cloudformation.type_defs import StackResourceTypeDef
+    from mypy_boto3_route53.type_defs import (
+        ChangeInfoTypeDef,
+        ChangeResourceRecordSetsResponseTypeDef,
+        ChangeTypeDef,
+        ResourceRecordSetTypeDef,
+    )
+
+    from ...factories import MockCFNginContext
 
 STATUS = MutableMap(
     **{
@@ -29,21 +46,21 @@ STATUS = MutableMap(
 )
 
 
-def check_bool_is_true(val):
+def check_bool_is_true(val: Any) -> bool:
     """Check if a value is a true bool."""
     if val and isinstance(val, bool):
         return True
     raise ValueError('Value should be "True"; got {}'.format(val))
 
 
-def check_bool_is_false(val):
+def check_bool_is_false(val: Any) -> bool:
     """Check if a value is a false bool."""
     if not val and isinstance(val, bool):
         return True
     raise ValueError('Value should be "False"; got {}'.format(val))
 
 
-def gen_certificate(**kwargs):
+def gen_certificate(**kwargs: Any) -> Dict[str, Any]:
     """Generate a response to describe_certificate."""
     data = {
         "CertificateArn": kwargs.pop("CertificateArn"),
@@ -55,31 +72,36 @@ def gen_certificate(**kwargs):
     return {"Certificate": data}
 
 
-def gen_change(record_set, action="CREATE"):
+def gen_change(
+    record_set: ResourceRecordSetTypeDef,
+    action: Literal["CREATE", "DELETE", "UPSERT"] = "CREATE",
+) -> ChangeTypeDef:
     """Generate expected change."""
     return {"Action": action, "ResourceRecordSet": record_set}
 
 
-def gen_change_batch(changes=ANY, comment=ANY):
+def gen_change_batch(changes: Any = ANY, comment: Any = ANY) -> Dict[str, Any]:
     """Generate expected change batch."""
     return {"Comment": comment, "Changes": changes}
 
 
-def gen_change_resource_record_sets(**kwargs):
+def gen_change_resource_record_sets(
+    **kwargs: Any,
+) -> ChangeResourceRecordSetsResponseTypeDef:
     """Generate response for change_resource_record_sets."""
-    data = {
+    data: ChangeInfoTypeDef = {
         "Id": "placeholder_id",
         "Status": "PENDING",
         "SubmittedAt": datetime.now(),
         "Comment": "placeholder_comment",
     }
-    data.update(kwargs)
+    data.update(kwargs)  # type: ignore
     return {"ChangeInfo": data}
 
 
-def gen_domain_validation_option(**kwargs):
+def gen_domain_validation_option(**kwargs: Any) -> DomainValidationTypeDef:
     """Generate a domain validation entry."""
-    data = {
+    data: DomainValidationTypeDef = {
         "DomainName": "place_holder_domain_name",
         "ValidationStatus": "PENDING_VALIDATION",
         "ValidationDomain": "place_holder_validation_domain",
@@ -90,13 +112,19 @@ def gen_domain_validation_option(**kwargs):
         },
         "ValidationMethod": "DNS",
     }
-    data.update(kwargs)
+    data.update(kwargs)  # type: ignore
     return data
 
 
-def gen_record_set(use_resource_record=False, **kwargs):
+def gen_record_set(
+    use_resource_record: bool = False, **kwargs: Any
+) -> Union[ResourceRecordSetTypeDef, ResourceRecordTypeDef]:
     """Generate a record set."""
-    data = {"Name": "placeholder_name", "Type": "CNAME", "Value": "placeholder_value"}
+    data: Dict[str, Any] = {
+        "Name": "placeholder_name",
+        "Type": "CNAME",
+        "Value": "placeholder_value",
+    }
     if use_resource_record:
         data["ResourceRecords"] = kwargs.pop(
             "ResourceRecords", [{"Value": kwargs.pop("Value", data["Value"])}]
@@ -104,26 +132,26 @@ def gen_record_set(use_resource_record=False, **kwargs):
         del data["Value"]
 
     data.update(kwargs)
-    return data
+    return data  # type: ignore
 
 
-def gen_stack_resource(**kwargs):
+def gen_stack_resource(**kwargs: Any) -> StackResourceTypeDef:
     """Generate a response to describe_stack_resources."""
-    data = {
+    data: StackResourceTypeDef = {
         "StackName": "place_holder_stack_name",
         "LogicalResourceId": "placeholder_logical_resource_id",
         "ResourceType": "placeholder_resource_type",
         "Timestamp": datetime.now(),
         "ResourceStatus": "CREATE_IN_PROGRESS",
     }
-    data.update(kwargs)
+    data.update(kwargs)  # type: ignore
     return data
 
 
 class TestCertificate:
     """Tests for runway.cfngin.hooks.acm.Certificate."""
 
-    def test_attributes(self, cfngin_context):
+    def test_attributes(self, cfngin_context: MockCFNginContext) -> None:
         """Test attributes set during __init__."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -141,11 +169,11 @@ class TestCertificate:
         )
 
         assert result.stack_name == "stack-name"
-        assert result.properties.DomainName == "example.com"
-        assert result.properties.SubjectAlternativeNames == ["example.net"]
+        assert result.properties["DomainName"] == "example.com"
+        assert result.properties["SubjectAlternativeNames"] == ["example.net"]
         # value tested in base class; just ensure its not None
-        assert result.properties.Tags
-        assert result.properties.ValidationMethod == "DNS"
+        assert result.properties["Tags"]
+        assert result.properties["ValidationMethod"] == "DNS"
 
         # blueprint attributes
         assert result.blueprint.VARIABLES["DomainName"]
@@ -171,7 +199,7 @@ class TestCertificate:
         assert result.stack.fqn == "test-stack-name"
         assert result.stack._blueprint == result.blueprint
 
-    def test_domain_changed(self, cfngin_context):
+    def test_domain_changed(self, cfngin_context: MockCFNginContext) -> None:
         """Test for domain_changed."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -215,7 +243,9 @@ class TestCertificate:
         assert not cert.domain_changed()
         assert not cert.domain_changed()
 
-    def test_get_certificate(self, cfngin_context, patch_time):
+    def test_get_certificate(
+        self, cfngin_context: MockCFNginContext, patch_time: None
+    ) -> None:
         """Test get_certificate."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -258,8 +288,12 @@ class TestCertificate:
 
     @pytest.mark.parametrize("status", ["PENDING_VALIDATION", "SUCCESS", "FAILED"])
     def test_get_validation_record(
-        self, cfngin_context, monkeypatch, patch_time, status
-    ):
+        self,
+        cfngin_context: MockCFNginContext,
+        monkeypatch: MonkeyPatch,
+        patch_time: None,
+        status: str,
+    ) -> None:
         """Test get_validation_record."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
@@ -320,7 +354,9 @@ class TestCertificate:
             ("FAILED", "SUCCESS"),
         ],
     )
-    def test_get_validation_record_status_missmatch(self, cfngin_context, check, found):
+    def test_get_validation_record_status_missmatch(
+        self, cfngin_context: MockCFNginContext, check: str, found: str
+    ) -> None:
         """Test get get_validation_record with a missmatched record status."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
@@ -354,7 +390,9 @@ class TestCertificate:
         assert "No validations with status" in str(excinfo.value)
         acm_stubber.assert_no_pending_responses()
 
-    def test_get_validation_record_gt_one(self, cfngin_context):
+    def test_get_validation_record_gt_one(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test get get_validation_record more than one result."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
@@ -389,7 +427,7 @@ class TestCertificate:
         assert "only one option is supported" in str(excinfo.value)
         acm_stubber.assert_no_pending_responses()
 
-    def test_put_record_set(self, cfngin_context):
+    def test_put_record_set(self, cfngin_context: MockCFNginContext) -> None:
         """Test put_record."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -411,8 +449,11 @@ class TestCertificate:
                 "ChangeBatch": gen_change_batch(
                     changes=[
                         gen_change(
-                            record_set=gen_record_set(
-                                use_resource_record=True, TTL=cert.args.ttl
+                            record_set=cast(
+                                "ResourceRecordSetTypeDef",
+                                gen_record_set(
+                                    use_resource_record=True, TTL=cert.args.ttl
+                                ),
                             )
                         )
                     ]
@@ -421,10 +462,14 @@ class TestCertificate:
         )
 
         with r53_stubber:
-            assert not cert.put_record_set(gen_record_set())
+            assert not cert.put_record_set(
+                cast("ResourceRecordTypeDef", gen_record_set())
+            )
         r53_stubber.assert_no_pending_responses()
 
-    def test_remove_validation_records(self, cfngin_context, monkeypatch):
+    def test_remove_validation_records(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test remove_validation_records."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
@@ -470,10 +515,13 @@ class TestCertificate:
                     changes=[
                         gen_change(
                             action="DELETE",
-                            record_set=gen_record_set(
-                                use_resource_record=True,
-                                TTL=cert.args.ttl,
-                                **gen_domain_validation_option()["ResourceRecord"]
+                            record_set=cast(
+                                "ResourceRecordSetTypeDef",
+                                gen_record_set(
+                                    use_resource_record=True,
+                                    TTL=cert.args.ttl,
+                                    **gen_domain_validation_option()["ResourceRecord"]
+                                ),
                             ),
                         )
                     ]
@@ -489,7 +537,7 @@ class TestCertificate:
         r53_stubber.assert_no_pending_responses()
         assert str(excinfo.value) == "Must provide one of more record sets"
 
-    def test_update_record_set(self, cfngin_context):
+    def test_update_record_set(self, cfngin_context: MockCFNginContext) -> None:
         """Test update_record_set."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -512,8 +560,11 @@ class TestCertificate:
                     changes=[
                         gen_change(
                             action="UPSERT",
-                            record_set=gen_record_set(
-                                use_resource_record=True, TTL=cert.args.ttl
+                            record_set=cast(
+                                "ResourceRecordSetTypeDef",
+                                gen_record_set(
+                                    use_resource_record=True, TTL=cert.args.ttl
+                                ),
                             ),
                         )
                     ]
@@ -522,10 +573,14 @@ class TestCertificate:
         )
 
         with r53_stubber:
-            assert not cert.update_record_set(gen_record_set())
+            assert not cert.update_record_set(
+                cast("ResourceRecordTypeDef", gen_record_set())
+            )
         r53_stubber.assert_no_pending_responses()
 
-    def test_deploy(self, cfngin_context, monkeypatch):
+    def test_deploy(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test deploy."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -542,7 +597,7 @@ class TestCertificate:
             hosted_zone_id="test",
         )
         monkeypatch.setattr(cert, "domain_changed", lambda: False)
-        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.new)
+        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.new)  # type: ignore
         monkeypatch.setattr(cert, "get_certificate", lambda: cert_arn)
         monkeypatch.setattr(
             cert,
@@ -558,7 +613,9 @@ class TestCertificate:
 
         assert cert.deploy() == expected
 
-    def test_deploy_update(self, cfngin_context, monkeypatch):
+    def test_deploy_update(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test deploy update stack."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -593,7 +650,9 @@ class TestCertificate:
 
         assert cert.deploy() == expected
 
-    def test_deploy_no_change(self, cfngin_context, monkeypatch):
+    def test_deploy_no_change(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test deploy no change."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -610,12 +669,14 @@ class TestCertificate:
             hosted_zone_id="test",
         )
         monkeypatch.setattr(cert, "domain_changed", lambda: False)
-        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.no)
+        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.no)  # type: ignore
         monkeypatch.setattr(cert, "get_certificate", lambda: cert_arn)
 
         assert cert.deploy() == expected
 
-    def test_deploy_recreate(self, cfngin_context, monkeypatch):
+    def test_deploy_recreate(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ):
         """Test deploy with stack recreation."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -632,12 +693,12 @@ class TestCertificate:
             hosted_zone_id="test",
         )
         monkeypatch.setattr(cert, "domain_changed", lambda: False)
-        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.recreate)
+        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.recreate)  # type: ignore
         monkeypatch.setattr(
             cert, "get_certificate", MagicMock(side_effect=["old", cert_arn])
         )
         monkeypatch.setattr(
-            cert, "_wait_for_stack", MagicMock(side_effect=[STATUS.new, None])
+            cert, "_wait_for_stack", MagicMock(side_effect=[STATUS.new, None])  # type: ignore
         )
         monkeypatch.setattr(
             cert,
@@ -652,7 +713,9 @@ class TestCertificate:
 
         assert cert.deploy() == expected
 
-    def test_deploy_domain_changed(self, cfngin_context, monkeypatch):
+    def test_deploy_domain_changed(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test deploy domain changed."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -669,7 +732,9 @@ class TestCertificate:
 
         assert not cert.deploy()
 
-    def test_deploy_error_destroy(self, cfngin_context, monkeypatch):
+    def test_deploy_error_destroy(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test deploy with errors that result in destroy being called."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -686,7 +751,7 @@ class TestCertificate:
         )
 
         monkeypatch.setattr(cert, "domain_changed", lambda: False)
-        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.new)
+        monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.new)  # type: ignore
         monkeypatch.setattr(cert, "get_certificate", lambda: cert_arn)
         monkeypatch.setattr(
             cert,
@@ -719,7 +784,9 @@ class TestCertificate:
         )
         assert not cert.deploy()  # StackFailed
 
-    def test_deploy_error_no_destroy(self, cfngin_context, monkeypatch):
+    def test_deploy_error_no_destroy(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test deploy with errors that don't result in destroy being called."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -741,7 +808,9 @@ class TestCertificate:
 
         assert not cert.deploy()
 
-    def test_destory(self, cfngin_context, monkeypatch):
+    def test_destory(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test destory."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -766,7 +835,9 @@ class TestCertificate:
             cert.remove_validation_records.call_count == 1
         )
 
-    def test_destory_aws_errors(self, cfngin_context, monkeypatch):
+    def test_destory_aws_errors(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test destory with errors from AWS."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -797,7 +868,9 @@ class TestCertificate:
         assert cert.destroy()
         assert cert.destroy()
 
-    def test_destroy_raise_client_error(self, cfngin_context, monkeypatch):
+    def test_destroy_raise_client_error(
+        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test destory with ClientError raised."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -843,7 +916,13 @@ class TestCertificate:
             ("pre_destroy", "destroy"),
         ],
     )
-    def test_stage_methods(self, cfngin_context, monkeypatch, stage, expected):
+    def test_stage_methods(
+        self,
+        cfngin_context: MockCFNginContext,
+        monkeypatch: MonkeyPatch,
+        stage: str,
+        expected: str,
+    ) -> None:
         """Test stage methods.
 
         All of these call a different method that is being tested separately

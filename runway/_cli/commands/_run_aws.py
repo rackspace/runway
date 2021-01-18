@@ -20,8 +20,7 @@ from .. import options
 @options.no_color
 @options.verbose
 @click.pass_context
-def run_aws(ctx, args, **_):
-    # type: (click.Context, Tuple[str, ...], Any) -> None
+def run_aws(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
     """Execute awscli commands using the version bundled with Runway.
 
     This command gives access to the awscli when it might not
@@ -33,7 +32,7 @@ def run_aws(ctx, args, **_):
     """
     if not ctx.obj.debug:
         # suppress awscli debug logs
-        for name, logger in logging.getLogger("awscli").manager.loggerDict.items():
+        for name, logger in logging.getLogger("awscli").manager.loggerDict.items():  # type: ignore  # noqa
             if name.startswith("awscli.") and isinstance(logger, logging.Logger):
                 logger.setLevel(logging.ERROR)
     with SafeHaven(environ={"LC_CTYPE": "en_US.UTF"}):

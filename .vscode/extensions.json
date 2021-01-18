@@ -3,6 +3,7 @@
         "DavidAnson.vscode-markdownlint",
         "editorconfig.editorconfig",
         "littlefoxteam.vscode-python-test-adapter",
-        "ms-python.python"
+        "ms-python.python",
+        "ms-python.vscode-pylance"
     ]
 }

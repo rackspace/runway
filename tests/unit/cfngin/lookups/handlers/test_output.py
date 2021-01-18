@@ -12,11 +12,11 @@ from ...factories import generate_definition
 class TestOutputHandler(unittest.TestCase):
     """Tests for runway.cfngin.lookups.handlers.output.OutputLookup."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.context = MagicMock()
 
-    def test_output_handler(self):
+    def test_output_handler(self) -> None:
         """Test output handler."""
         stack = Stack(definition=generate_definition("vpc", 1), context=self.context)
         stack.set_outputs({"SomeOutput": "Test Output"})

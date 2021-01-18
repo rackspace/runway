@@ -1,23 +1,33 @@
 """CFNgin hook for building static website."""
-# pylint: disable=unused-argument
 # TODO move to runway.cfngin.hooks on next major release
+from __future__ import annotations
+
 import logging
 import os
 import tempfile
 import zipfile
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import boto3
-from boto3.s3.transfer import S3Transfer
+from boto3.s3.transfer import S3Transfer  # type: ignore
+from typing_extensions import TypedDict
 
 from ...cfngin.lookups.handlers.rxref import RxrefLookup
 from ...s3_util import does_s3_object_exist, download_and_extract_to_mkdtemp
 from ...util import change_dir, run_commands
 from .util import get_hash_of_files
 
+if TYPE_CHECKING:
+    from ...cfngin.context import Context
+    from ...cfngin.providers.aws.default import Provider
+
 LOGGER = logging.getLogger(__name__)
 
 
-def zip_and_upload(app_dir, bucket, key, session=None):
+def zip_and_upload(
+    app_dir: str, bucket: str, key: str, session: Optional[boto3.Session] = None
+) -> None:
     """Zip built static site and upload to S3."""
     s3_client = session.client("s3") if session else boto3.client("s3")
     transfer = S3Transfer(s3_client)
@@ -36,11 +46,29 @@ def zip_and_upload(app_dir, bucket, key, session=None):
     os.remove(temp_file)
 
 
-def build(context, provider, **kwargs):
+class OptionsArgTypeDef(TypedDict, total=False):
+    """Options argument type definition."""
+
+    build_output: str
+    build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+    name: str
+    namespace: str
+    path: str
+    pre_build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+
+
+def build(
+    context: Context,
+    provider: Provider,
+    *,
+    artifact_bucket_rxref_lookup: str,
+    options: Optional[OptionsArgTypeDef] = None,
+    **_: Any
+) -> Dict[str, Any]:
     """Build static site."""
     session = context.get_session()
-    options = kwargs.get("options", {})
-    context_dict = {
+    options = options or {}
+    context_dict: Dict[str, Any] = {
         "artifact_key_prefix": "{}-{}-".format(options["namespace"], options["name"])
     }
 
@@ -52,14 +80,14 @@ def build(context, provider, **kwargs):
         build_output = options["path"]
 
     context_dict["artifact_bucket_name"] = RxrefLookup.handle(
-        kwargs.get("artifact_bucket_rxref_lookup"), provider=provider, context=context
+        artifact_bucket_rxref_lookup, provider=provider, context=context
     )
 
     if options.get("pre_build_steps"):
         run_commands(options["pre_build_steps"], options["path"])
 
     context_dict["hash"] = get_hash_of_files(
-        root_path=options["path"],
+        root_path=Path(options["path"]),
         directories=options.get("source_hashing", {}).get("directories"),
     )
     LOGGER.debug("application hash: %s", context_dict["hash"])

@@ -22,9 +22,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def deploy(
-    ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any
-) -> None:  # noqa: D301
+def deploy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
     """Deploy infrastructure as code.
 
     \b
@@ -39,7 +37,7 @@ def deploy(
         - (non-interactive) all
     3. Deploys selected in the order defined.
 
-    """
+    """  # noqa: D301
     try:
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).deploy(
             select_deployments(ctx, ctx.obj.runway_config.deployments, tags)

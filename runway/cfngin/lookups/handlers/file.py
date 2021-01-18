@@ -4,12 +4,12 @@ import base64
 import json
 import re
 from collections.abc import Mapping, Sequence
+from typing import Any, Callable, Dict, Union
 
 import yaml
 from troposphere import Base64, GenericHelperFn
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 TYPE_NAME = "file"
@@ -21,14 +21,11 @@ class FileLookup(LookupHandler):
     """File lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value: str, **_: Any) -> Any:
         r"""Translate a filename into the file contents.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
+            value: Parameter(s) given to this lookup.
 
         Fields should use the following format::
 
@@ -150,25 +147,21 @@ class FileLookup(LookupHandler):
             raise TypeError(
                 'File value must be of the format "<codec>:<path>" (got %s)' % (value)
             )
-
-        value = read_value_from_path(path)
-
-        return CODECS[codec](value)
+        return CODECS[codec](read_value_from_path(path))
 
 
-def _parameterize_string(raw):
+def _parameterize_string(raw: str) -> GenericHelperFn:
     """Substitute placeholders in a string using CloudFormation references.
 
     Args:
-        raw (str): String to be processed. Byte strings are not
-            supported; decode them before passing them to this function.
+        raw: String to be processed. Byte strings are not supported; decode them
+        before passing them to this function.
 
     Returns:
-        str | :class:`troposphere.GenericHelperFn`: An expression with
-            placeholders from the input replaced, suitable to be passed to
-            Troposphere to be included in CloudFormation template. This will
-            be the input string without modification if no substitutions are
-            found, and a composition of CloudFormation calls otherwise.
+        An expression with placeholders from the input replaced, suitable to be
+        passed to Troposphere to be included in CloudFormation template.
+        This will be the input string without modification if no substitutions
+        are found, and a composition of CloudFormation calls otherwise.
 
     """
     parts = []
@@ -186,14 +179,12 @@ def _parameterize_string(raw):
     return GenericHelperFn({u"Fn::Join": [u"", parts]})
 
 
-def parameterized_codec(raw, b64):
+def parameterized_codec(raw: Union[bytes, str], b64: bool = False) -> Any:
     """Parameterize a string, possibly encoding it as Base64 afterwards.
 
     Args:
-        raw (Union[bytes, str]): String to be processed. Byte strings will be
-            interpreted as UTF-8.
-        b64 (bool): Whether to wrap the output in a Base64 CloudFormation
-            call.
+        raw: String to be processed. Byte strings will be interpreted as UTF-8.
+        b64: Whether to wrap the output in a Base64 CloudFormation call.
 
     Returns:
         :class:`troposphere.AWSHelperFn`: Output to be included in a
@@ -211,7 +202,7 @@ def parameterized_codec(raw, b64):
     return Base64(result.data) if b64 else result
 
 
-def _parameterize_obj(obj):
+def _parameterize_obj(obj: Any) -> Any:
     """Recursively parameterize all strings contained in an object.
 
     Parametrizes all values of a Mapping, all items of a Sequence, an
@@ -220,7 +211,7 @@ def _parameterize_obj(obj):
     Byte strings will be interpreted as UTF-8.
 
     Args:
-        obj (Any): Data to parameterize.
+        obj: Data to parameterize.
 
     Return:
         A parameterized object to be included in a CloudFormation template.
@@ -229,37 +220,37 @@ def _parameterize_obj(obj):
 
     """
     if isinstance(obj, Mapping):
-        return dict((key, _parameterize_obj(value)) for key, value in obj.items())
+        return {key: _parameterize_obj(value) for key, value in obj.items()}
     if isinstance(obj, bytes):
         return _parameterize_string(obj.decode("utf8"))
     if isinstance(obj, str):
         return _parameterize_string(obj)
     if isinstance(obj, Sequence):
-        return list(_parameterize_obj(item) for item in obj)
+        return [_parameterize_obj(item) for item in obj]
     return obj
 
 
 class SafeUnicodeLoader(yaml.SafeLoader):
     """Safe unicode loader."""
 
-    def construct_yaml_str(self, node):
+    def construct_yaml_str(self, node: Any) -> Any:
         """Construct yaml str."""
         return self.construct_scalar(node)
 
 
-def yaml_codec(raw, parameterized=False):
+def yaml_codec(raw: str, parameterized: bool = False) -> Any:
     """YAML codec."""
     data = yaml.load(raw, Loader=SafeUnicodeLoader)
     return _parameterize_obj(data) if parameterized else data
 
 
-def json_codec(raw, parameterized=False):
+def json_codec(raw: str, parameterized: bool = False) -> Any:
     """JSON codec."""
     data = json.loads(raw)
     return _parameterize_obj(data) if parameterized else data
 
 
-CODECS = {
+CODECS: Dict[str, Callable[..., Any]] = {
     "plain": lambda x: x,
     "base64": lambda x: base64.b64encode(x.encode("utf8")).decode("utf-8"),
     "parameterized": lambda x: parameterized_codec(x, False),

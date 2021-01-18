@@ -1,5 +1,7 @@
 """Test runway.cfngin.hooks.docker._login."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 from copy import deepcopy
 from typing import TYPE_CHECKING
 
@@ -11,17 +13,19 @@ from runway.cfngin.hooks.docker.data_models import ElasticContainerRegistry
 from runway.cfngin.hooks.docker.hook_data import DockerHookData
 
 if TYPE_CHECKING:
+    from docker import DockerClient
     from pytest_mock import MockerFixture
-
-    from runway.core.providers.docker import DockerClient
 
     from ....factories import MockCFNginContext
 
 MODULE = "runway.cfngin.hooks.docker._login"
 
 
-def test_login(cfngin_context, mock_docker_client, mocker):
-    # type: ("MockCFNginContext", "DockerClient", "MockerFixture") -> None
+def test_login(
+    cfngin_context: MockCFNginContext,
+    mock_docker_client: DockerClient,
+    mocker: MockerFixture,
+) -> None:
     """Test login."""
     args = LoginArgs(password="p@ssword", registry="dkr.test.com", username="test-user")
     mocker.patch.object(LoginArgs, "parse_obj", return_value=args)
@@ -41,18 +45,17 @@ def test_login(cfngin_context, mock_docker_client, mocker):
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
-class TestLoginArgs(object):
+class TestLoginArgs:
     """Test runway.cfngin.hooks.docker._login.LoginArgs."""
 
-    def test_determine_registry(self):
+    def test_determine_registry(self) -> None:
         """Test determine_registry."""
         assert (
             LoginArgs.determine_registry(context=None, ecr=True, registry="something")
             == "something"
         )
 
-    def test_determine_registry_ecr(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_determine_registry_ecr(self, mocker: MockerFixture) -> None:
         """Test determine_registry ecr."""
         registry = ElasticContainerRegistry(
             account_id="123456012", aws_region="us-east-1"
@@ -66,8 +69,7 @@ class TestLoginArgs(object):
             == registry.fqn
         )
 
-    def test_init_default(self):
-        # type: () -> None
+    def test_init_default(self) -> None:
         """Test init defalt."""
         args = {"password": "p@ssword", "username": "test-user"}
         obj = LoginArgs.parse_obj(deepcopy(args))
@@ -77,8 +79,7 @@ class TestLoginArgs(object):
         assert not obj.registry
         assert obj.username == args["username"]
 
-    def test_init_ecr(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_init_ecr(self, mocker: MockerFixture) -> None:
         """Test init ecr."""
         context = MagicMock()
         registry = ElasticContainerRegistry(
@@ -101,7 +102,7 @@ class TestLoginArgs(object):
         assert obj.registry == registry.fqn
         assert obj.username == "AWS"
 
-    def test_init_other_registry(self):  # type: () -> None
+    def test_init_other_registry(self) -> None:
         """Test init with "other" registry."""
         args = {
             "dockercfg_path": "./.docker/config.json",

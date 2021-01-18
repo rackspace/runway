@@ -1,5 +1,7 @@
 """Test runway.cfngin.hooks.docker.image._remove."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import pytest
@@ -15,17 +17,19 @@ from runway.cfngin.hooks.docker.image import remove
 from runway.cfngin.hooks.docker.image._remove import ImageRemoveArgs
 
 if TYPE_CHECKING:
+    from docker import DockerClient
     from pytest_mock import MockerFixture
-
-    from runway.core.providers.docker import DockerClient
 
     from .....factories import MockCFNginContext
 
 MODULE = "runway.cfngin.hooks.docker.image._remove"
 
 
-def test_remove(cfngin_context, mock_docker_client, mocker):
-    # type: ("MockCFNginContext", "DockerClient", "MockerFixture") -> None
+def test_remove(
+    cfngin_context: MockCFNginContext,
+    mock_docker_client: DockerClient,
+    mocker: MockerFixture,
+) -> None:
     """Test remove."""
     repo = "dkr.test.com/image"
     tags = ["latest", "oldest"]
@@ -62,8 +66,11 @@ def test_remove(cfngin_context, mock_docker_client, mocker):
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
-def test_remove_image_not_found(cfngin_context, mock_docker_client, mocker):
-    # type: ("MockCFNginContext", "DockerClient", "MockerFixture") -> None
+def test_remove_image_not_found(
+    cfngin_context: MockCFNginContext,
+    mock_docker_client: DockerClient,
+    mocker: MockerFixture,
+) -> None:
     """Test remove ImageNotFound."""
     args = ImageRemoveArgs(repo="dkr.test.com/image", tags=["latest"])
     mocker.patch.object(ImageRemoveArgs, "parse_obj", return_value=args)
@@ -89,10 +96,10 @@ def test_remove_image_not_found(cfngin_context, mock_docker_client, mocker):
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
-class TestImageRemoveArgs(object):
+class TestImageRemoveArgs:
     """Test runway.cfngin.hooks.docker.image._remove.ImageRemoveArgs."""
 
-    def test_determine_repo(self):
+    def test_determine_repo(self) -> None:
         """Test determine_repo."""
         assert (
             ImageRemoveArgs.determine_repo(
@@ -101,8 +108,7 @@ class TestImageRemoveArgs(object):
             == "something"
         )
 
-    def test_determine_repo_ecr(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_determine_repo_ecr(self, mocker: MockerFixture) -> None:
         """Test determine_repo ecr."""
         repo = ElasticContainerRegistryRepository(
             account_id="123456012", aws_region="us-east-1", repo_name="test"
@@ -125,26 +131,25 @@ class TestImageRemoveArgs(object):
             == repo.fqn
         )
 
-    def test_determine_repo_image(self):  # type: () -> None
+    def test_determine_repo_image(self) -> None:
         """Test determine_repo Image."""
         repo = "dkr.test.com/image"
         mock_image = MagicMock(spec=DockerImage, repo=repo)
         assert (
             ImageRemoveArgs.determine_repo(
-                context=None, ecr_repo=True, image=mock_image, repo=None
+                context=None, ecr_repo={"key": "val"}, image=mock_image, repo=None
             )
             == repo
         )
 
-    def test_determine_repo_none(self):  # type: () -> None
+    def test_determine_repo_none(self) -> None:
         """Test determine_repo None."""
         with pytest.raises(ValueError):
             ImageRemoveArgs.determine_repo(
                 context=None, ecr_repo={}, image=None, repo=None
             )
 
-    def test_init_default(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_init_default(self, mocker: MockerFixture) -> None:
         """Test init default values."""
         mock_determine_repo = mocker.patch.object(
             ImageRemoveArgs, "determine_repo", return_value="dkr.test.com/image"
@@ -158,8 +163,7 @@ class TestImageRemoveArgs(object):
         assert obj.repo == mock_determine_repo.return_value
         assert obj.tags == ["latest"]
 
-    def test_init_image(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_init_image(self, mocker: MockerFixture) -> None:
         """Test init Image."""
         repo = "dkr.test.com/image"
         tags = ["latest", "oldest"]

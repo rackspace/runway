@@ -1,5 +1,7 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import datetime
 import json
 import logging
@@ -7,6 +9,7 @@ import os
 import string
 import sys
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from mock import MagicMock, patch
@@ -19,6 +22,10 @@ from runway.util import (
     environ,
     load_object_from_string,
 )
+
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from _pytest.monkeypatch import MonkeyPatch
 
 MODULE = "runway.util"
 VALUE = {
@@ -36,12 +43,12 @@ class TestJsonEncoder:
     @pytest.mark.parametrize(
         "provided, expected", [(datetime.datetime.now(), str), (Decimal("1.1"), float)]
     )
-    def test_supported_types(self, provided, expected):
+    def test_supported_types(self, provided: Any, expected: type) -> None:
         """Test encoding of supported data types."""
         assert isinstance(JsonEncoder().default(provided), expected)
 
     @pytest.mark.parametrize("provided", [(None)])
-    def test_unsupported_types(self, provided):
+    def test_unsupported_types(self, provided: Any) -> None:
         """Test encoding of unsupported data types."""
         with pytest.raises(TypeError):
             assert not JsonEncoder().default(provided)
@@ -50,27 +57,23 @@ class TestJsonEncoder:
 class TestMutableMap:
     """Test for the custom MutableMap data type."""
 
-    def test_bool(self):
+    def test_bool(self) -> None:
         """Validates the bool value.
 
         Also tests setting an attr using bracket notation.
 
         """
         mute_map = MutableMap()
-
         assert not mute_map
-
         mute_map["str_val"] = "test"
-
         assert mute_map
 
-    def test_data(self):
+    def test_data(self) -> None:
         """Validate the init process and retrieving sanitized data."""
         mute_map = MutableMap(**VALUE)
-
         assert mute_map.data == VALUE
 
-    def test_delete(self):
+    def test_delete(self) -> None:
         """Validate that keys can be deleted.
 
         Uses dot and bracket notation.
@@ -79,13 +82,13 @@ class TestMutableMap:
 
         """
         mute_map = MutableMap(**VALUE)
-        del mute_map.str_val
+        del mute_map["str_val"]
         del mute_map["dict_val"]
 
         assert not mute_map.get("str_val")
         assert not mute_map.get("dict_val")
 
-    def test_find(self):
+    def test_find(self) -> None:
         """Validate the `find` method with and without `ignore_cache`.
 
         Also tests the `clear_found_cache` method and setting an attr value
@@ -96,7 +99,7 @@ class TestMutableMap:
 
         assert mute_map.find("str_val") == VALUE["str_val"]
 
-        mute_map.str_val = "new_val"
+        mute_map["str_val"] = "new_val"
 
         assert mute_map.find("str_val") == VALUE["str_val"]
         assert mute_map.find("str_val", ignore_cache=True) == "new_val"
@@ -105,7 +108,7 @@ class TestMutableMap:
 
         assert mute_map.find("str_val") == "new_val"
 
-    def test_find_default(self):
+    def test_find_default(self) -> None:
         """Validate default value functionality."""
         mute_map = MutableMap(**VALUE)
 
@@ -128,7 +131,9 @@ class TestSafeHaven:
         (["runway", "test"]),
     ]
 
-    def test_context_manager_magic(self, caplog, monkeypatch):
+    def test_context_manager_magic(
+        self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test init and the attributes it sets."""
         mock_reset_all = MagicMock()
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
@@ -145,7 +150,9 @@ class TestSafeHaven:
         ]
 
     @pytest.mark.parametrize("provided", TEST_PARAMS)
-    def test_os_environ(self, provided, caplog, monkeypatch):
+    def test_os_environ(
+        self, provided: Any, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test os.environ interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
@@ -168,7 +175,9 @@ class TestSafeHaven:
         assert os.environ == orig_val
         assert caplog.messages == expected_logs
 
-    def test_reset_all(self, caplog, monkeypatch):
+    def test_reset_all(
+        self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test reset_all."""
         mock_method = MagicMock()
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
@@ -191,7 +200,9 @@ class TestSafeHaven:
         assert caplog.messages == expected_logs
 
     @pytest.mark.parametrize("provided", TEST_PARAMS)
-    def test_sys_argv(self, provided, caplog, monkeypatch):
+    def test_sys_argv(
+        self, provided: Any, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test sys.argv interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
@@ -211,7 +222,9 @@ class TestSafeHaven:
         assert sys.argv == orig_val
         assert caplog.messages == expected_logs
 
-    def test_sys_modules(self, caplog, monkeypatch):
+    def test_sys_modules(
+        self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test sys.modules interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
@@ -229,14 +242,14 @@ class TestSafeHaven:
         assert caplog.messages[:2] == expected_logs
         assert caplog.messages[-1] == "leaving the safe haven..."
 
-    def test_sys_modules_exclude(self, monkeypatch):
+    def test_sys_modules_exclude(self, monkeypatch: MonkeyPatch) -> None:
         """Test sys.modules interations with excluded module."""
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
 
         module = "tests.unit.fixtures.mock_hooks"
 
         assert module not in sys.modules
-        with SafeHaven(sys_modules_exclude=module) as obj:
+        with SafeHaven(sys_modules_exclude=[module]) as obj:
             from .fixtures import mock_hooks  # noqa pylint: disable=E,W,C
 
             assert module in sys.modules
@@ -247,7 +260,9 @@ class TestSafeHaven:
         assert module not in sys.modules
 
     @pytest.mark.parametrize("provided", TEST_PARAMS)
-    def test_sys_path(self, provided, caplog, monkeypatch):
+    def test_sys_path(
+        self, provided: Any, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test sys.path interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
@@ -269,7 +284,7 @@ class TestSafeHaven:
 
 
 @patch.object(sys, "argv", ["runway", "deploy"])
-def test_argv():
+def test_argv() -> None:
     """Test argv."""
     orig_expected = ["runway", "deploy"]
     override = ["stacker", "build", "test.yml"]
@@ -282,7 +297,7 @@ def test_argv():
     assert sys.argv == orig_expected, "validate value returned to original"
 
 
-def test_environ():
+def test_environ() -> None:
     """Test environ."""
     orig_expected = dict(os.environ)
     override = {"TEST_PARAM": "override", "new_param": "value"}
@@ -298,7 +313,7 @@ def test_environ():
     assert os.environ == orig_expected, "validate value returned to original"
 
 
-def test_load_object_from_string():
+def test_load_object_from_string() -> None:
     """Test load object from string."""
     tests = (
         ("string.Template", string.Template),
@@ -317,7 +332,7 @@ def test_load_object_from_string():
         assert load_object_from_string(obj_path, try_reload=True) == "us-west-2"
 
 
-def test_load_object_from_string_reload_conditions(monkeypatch):
+def test_load_object_from_string_reload_conditions(monkeypatch: MonkeyPatch) -> None:
     """Test load_object_from_string reload conditions."""
     mock_reload = MagicMock()
     monkeypatch.setattr("runway.util.importlib.reload", mock_reload)

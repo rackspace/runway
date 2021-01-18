@@ -49,7 +49,7 @@ class CfnginHookDefinitionModel(ConfigProperty):
         description="Whether to continue execution if the hook results in an error.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -120,7 +120,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
         "Blueprint/CloudFormation stack. (supports lookups)",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration options."""
 
         extra = Extra.forbid
@@ -183,7 +183,7 @@ class CfnginTargetDefinitionModel(ConfigProperty):
     required_by: List[str] = []
     requires: List[str] = []
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -288,7 +288,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         "rendering/outputting CloudFormation templates.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         schema_extra = {"description": "Configuration file for Runway's CFNgin."}

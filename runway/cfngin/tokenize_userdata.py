@@ -1,18 +1,19 @@
 """Resources to tokenize userdata."""
 import re
+from typing import List
 
 from troposphere import GetAtt, Ref
 
 HELPERS = {"Ref": Ref, "Fn::GetAtt": GetAtt}
 
-SPLIT_STRING = "(" + "|".join([r"%s\([^)]+\)" % h for h in HELPERS]) + ")"
+SPLIT_STRING = "(" + "|".join(r"%s\([^)]+\)" % h for h in HELPERS) + ")"
 REPLACE_STRING = r"(?P<helper>%s)\((?P<args>['\"]?[^)]+['\"]?)+\)" % "|".join(HELPERS)
 
 SPLIT_RE = re.compile(SPLIT_STRING)
 REPLACE_RE = re.compile(REPLACE_STRING)
 
 
-def cf_tokenize(raw_userdata):
+def cf_tokenize(raw_userdata: str) -> List[str]:
     """Parse UserData for Cloudformation helper functions.
 
     http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
@@ -26,10 +27,10 @@ def cf_tokenize(raw_userdata):
     in place of those.
 
     Args:
-        raw_userdata (str): Unparsed userdata data string.
+        raw_userdata: Unparsed userdata data string.
 
     Returns:
-        List[str]: A list of string parts that is useful when used with
+        A list of string parts that is useful when used with
         :func:`troposphere.Join` and :func:`troposphere.Base64` to produce
         userdata.
 

@@ -1,7 +1,7 @@
 """CFNgin session caching."""
 import logging
 import os
-import warnings
+from typing import Optional
 
 import boto3
 
@@ -23,19 +23,23 @@ CREDENTIAL_CACHE = {}
 
 
 def get_session(
-    region=None, profile=None, access_key=None, secret_key=None, session_token=None
-):
+    region: Optional[str] = None,
+    profile: Optional[str] = None,
+    access_key: Optional[str] = None,
+    secret_key: Optional[str] = None,
+    session_token=None,
+) -> boto3.Session:
     """Create a thread-safe boto3 session.
 
     Args:
-        region (Optional[str]): The region for the session.
-        profile (Optional[str]): The profile for the session.
-        access_key (Optional[str]): AWS Access Key ID.
-        secret_key (Optional[str]): AWS secret Access Key.
-        session_token (Optional[str]): AWS session token.
+        region: The region for the session.
+        profile: The profile for the session.
+        access_key: AWS Access Key ID.
+        secret_key: AWS secret Access Key.
+        session_token: AWS session token.
 
     Returns:
-        :class:`boto3.session.Session`: A thread-safe boto3 session.
+        A thread-safe boto3 session.
 
     """
     if profile:
@@ -51,20 +55,17 @@ def get_session(
             region or "default",
         )
     elif os.environ.get("AWS_ACCESS_KEY_ID"):
-        # TODO raise an error so we don't need to modify os.environ for cfngin
-        warnings.warn(DEPRECATION_MSG, DeprecationWarning)
-        # TODO uncomment log message after we update all internal use
-        # LOGGER.warning(DEPRECATION_MSG)
+        LOGGER.warning(DEPRECATION_MSG)
 
     session = boto3.Session(
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         aws_session_token=session_token,
-        botocore_session=Session(),
+        botocore_session=Session(),  # type: ignore
         region_name=region,
         profile_name=profile,
     )
-    cred_provider = session._session.get_component("credential_provider")
+    cred_provider = session._session.get_component("credential_provider")  # type: ignore
     provider = cred_provider.get_provider("assume-role")
     provider.cache = CREDENTIAL_CACHE
     provider._prompter = ui.getpass

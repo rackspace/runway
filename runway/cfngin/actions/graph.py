@@ -1,22 +1,25 @@
 """CFNgin graph action."""
+from __future__ import annotations
+
 import json
 import logging
 import sys
+from typing import TYPE_CHECKING, Any, Iterable, List, TextIO, Tuple
 
 from ..plan import merge_graphs
 from .base import BaseAction
 
+if TYPE_CHECKING:
+    from ..plan import Graph, Step
+
 LOGGER = logging.getLogger(__name__)
 
 
-def each_step(graph):
+def each_step(graph: Graph) -> Iterable[Tuple[Step, List[Step]]]:
     """Yield each step and it's direct dependencies.
 
     Args:
-        graph (:class:`runway.cfngin.plan.Graph`): Graph to iterate over.
-
-    Yields:
-        Tuple[Step, Set(str)]
+        graph: Graph to iterate over.
 
     """
     steps = graph.topological_sort()
@@ -27,13 +30,13 @@ def each_step(graph):
         yield step, deps
 
 
-def dot_format(out, graph, name="digraph"):
+def dot_format(out: TextIO, graph: Graph, name: str = "digraph") -> None:
     """Output a graph using the graphviz "dot" format.
 
     Args:
-        out (TextIo): Where output will be written.
-        graph (:class:`runway.cfngin.plan.Graph`): Graph to be output.
-        name (str): Name of the graph.
+        out: Where output will be written.
+        graph: Graph to be output.
+        name: Name of the graph.
 
     """
     out.write("digraph %s {\n" % name)
@@ -44,18 +47,18 @@ def dot_format(out, graph, name="digraph"):
     out.write("}\n")
 
 
-def json_format(out, graph):
+def json_format(out: TextIO, graph: Graph) -> None:
     """Output the graph in a machine readable JSON format.
 
     Args:
-        out (TextIo): Where output will be written.
-        graph (:class:`runway.cfngin.plan.Graph`): Graph to be output.
+        out: Where output will be written.
+        graph: Graph to be output.
 
     """
-    steps = {}
-    for step, deps in each_step(graph):
-        steps[step.name] = {}
-        steps[step.name]["deps"] = [dep.name for dep in deps]
+    steps = {
+        step.name: {"deps": [dep.name for dep in deps]}
+        for step, deps in each_step(graph)
+    }
 
     json.dump({"steps": steps}, out, indent=4)
     out.write("\n")
@@ -74,11 +77,11 @@ class Action(BaseAction):
     NAME = "graph"
 
     @property
-    def _stack_action(self):
+    def _stack_action(self) -> None:
         """Run against a step."""
         return None
 
-    def run(self, **kwargs):
+    def run(self, **kwargs: Any) -> None:  # pylint: disable=arguments-differ
         """Generate the underlying graph and prints it."""
         graph = self._generate_plan(
             require_unlocked=False, include_persistent_graph=True
@@ -92,6 +95,6 @@ class Action(BaseAction):
             # dependency graph.
             graph.transitive_reduction()
 
-        fn = FORMATTERS[kwargs.get("format")]
+        fn = FORMATTERS[str(kwargs.get("format", "json"))]
         fn(sys.stdout, graph)
         sys.stdout.flush()

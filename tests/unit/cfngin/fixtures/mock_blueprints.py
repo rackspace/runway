@@ -1,4 +1,8 @@
 """Mock blueprints."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict
+
 import awacs
 import awacs.cloudformation
 import awacs.iam
@@ -19,11 +23,14 @@ from runway.cfngin.blueprints.variables.types import (
     EC2VPCId,
 )
 
+if TYPE_CHECKING:
+    from runway.cfngin.blueprints.type_defs import BlueprintVariable
+
 
 class FunctionalTests(Blueprint):
     """Creates a stack with an IAM user and access key for functional tests."""
 
-    VARIABLES = {
+    VARIABLES: Dict[str, BlueprintVariable] = {
         "StackerNamespace": {
             "type": CFNString,
             "description": "The stacker namespace that the tests will use. "
@@ -37,7 +44,7 @@ class FunctionalTests(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         template = self.template
 
@@ -168,9 +175,11 @@ class FunctionalTests(Blueprint):
 class Dummy(Blueprint):
     """Dummy blueprint."""
 
-    VARIABLES = {"StringVariable": {"type": str, "default": ""}}
+    VARIABLES: Dict[str, BlueprintVariable] = {
+        "StringVariable": {"type": str, "default": ""}
+    }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         self.template.add_resource(WaitConditionHandle("Dummy"))
         self.template.add_output(Output("DummyId", Value="dummy-1234"))
@@ -184,9 +193,11 @@ class Dummy2(Blueprint):
 
     """
 
-    VARIABLES = {"StringVariable": {"type": str, "default": ""}}
+    VARIABLES: Dict[str, BlueprintVariable] = {
+        "StringVariable": {"type": str, "default": ""}
+    }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         self.template.add_resource(WaitConditionHandle("Dummy"))
         self.template.add_output(Output("DummyId", Value="dummy-1234"))
@@ -202,7 +213,7 @@ class LongRunningDummy(Blueprint):
 
     """
 
-    VARIABLES = {
+    VARIABLES: Dict[str, BlueprintVariable] = {
         "Count": {
             "type": int,
             "description": "The # of WaitConditionHandles to create.",
@@ -221,7 +232,7 @@ class LongRunningDummy(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         v = self.get_variables()
         template = self.template
@@ -244,7 +255,7 @@ class LongRunningDummy(Blueprint):
             template.add_resource(
                 WaitCondition(
                     "BrokenWaitCondition",
-                    Handle=wch.Ref(),
+                    Handle=wch.Ref(),  # type: ignore
                     # Timeout is made deliberately large so CF rejects it
                     Timeout=2 ** 32,
                     Count=0,
@@ -260,9 +271,11 @@ class Broken(Blueprint):
 
     """
 
-    VARIABLES = {"StringVariable": {"type": str, "default": ""}}
+    VARIABLES: Dict[str, BlueprintVariable] = {
+        "StringVariable": {"type": str, "default": ""}
+    }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         template = self.template
         template.add_resource(WaitConditionHandle("BrokenDummy"))
@@ -281,7 +294,7 @@ class Broken(Blueprint):
 class VPC(Blueprint):
     """VPC blueprint."""
 
-    VARIABLES = {
+    VARIABLES: Dict[str, BlueprintVariable] = {
         "AZCount": {"type": int, "default": 2},
         "PrivateSubnets": {
             "type": CFNCommaDelimitedList,
@@ -330,7 +343,7 @@ class VPC(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         self.template.add_resource(WaitConditionHandle("VPC"))
 
@@ -338,7 +351,7 @@ class VPC(Blueprint):
 class DiffTester(Blueprint):
     """Diff test blueprint."""
 
-    VARIABLES = {
+    VARIABLES: Dict[str, BlueprintVariable] = {
         "InstanceType": {
             "type": CFNString,
             "description": "NAT EC2 instance type.",
@@ -360,7 +373,7 @@ class DiffTester(Blueprint):
 class Bastion(Blueprint):
     """Bastion blueprint."""
 
-    VARIABLES = {
+    VARIABLES: Dict[str, BlueprintVariable] = {
         "VpcId": {"type": EC2VPCId, "description": "Vpc Id"},
         "DefaultSG": {
             "type": EC2SecurityGroupId,
@@ -414,7 +427,7 @@ class Bastion(Blueprint):
 class PreOneOhBastion(Blueprint):
     """Used to ensure old blueprints won't be usable in 1.0."""
 
-    PARAMETERS = {
+    PARAMETERS: Dict[str, BlueprintVariable] = {
         "VpcId": {"type": "AWS::EC2::VPC::Id", "description": "Vpc Id"},
         "DefaultSG": {
             "type": "AWS::EC2::SecurityGroup::Id",
@@ -460,6 +473,6 @@ class PreOneOhBastion(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         return

@@ -75,6 +75,12 @@ lint-pylint: ## run pylint
 	@echo "Running pylint..."
 	@find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=pyproject.toml
 	@echo ""
+
+lint-pyright:
+	@echo "Running pyright..."
+	@npx pyright --venv-path ./
+	@echo ""
+
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
 	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration

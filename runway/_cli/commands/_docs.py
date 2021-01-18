@@ -2,14 +2,17 @@
 # docs: file://./../../../docs/source/commands.rst
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ...util import SafeHaven
 from .. import options
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 DOCS_URL = "https://docs.onica.com/projects/runway/"
 
@@ -18,8 +21,7 @@ DOCS_URL = "https://docs.onica.com/projects/runway/"
 @options.debug
 @options.no_color
 @options.verbose
-def docs(**_):
-    # type: (Any) -> None
+def docs(**_: Any) -> None:
     """Open the Runway documentation web site using the default web browser."""
     with SafeHaven():
         # Pyinstaller sets this var on systems to force using the internal lib

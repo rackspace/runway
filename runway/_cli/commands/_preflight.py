@@ -1,13 +1,17 @@
 """``runway preflight`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from .. import options
 from ._test import test
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("preflight", short_help="alias of test")
@@ -16,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def preflight(ctx, **kwargs):
+def preflight(ctx: click.Context, **kwargs: Any) -> None:
     """Alias of "runway test"."""
     LOGGER.verbose("forwarding to test...")
     ctx.forward(test, **kwargs)

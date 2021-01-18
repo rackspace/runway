@@ -1,14 +1,17 @@
 """Runway configuration 'path' settings."""
 import logging
 import os
-from typing import Dict, List, Optional, Tuple, Union
+import pathlib
+from typing import Dict, Tuple, Union
 
+from .config.models.runway import RunwayModuleDefinitionModel
+from .constants import DEFAULT_CACHE_DIR
 from .sources.git import Git
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Path:  # pylint: disable=too-many-instance-attributes
+class Path:
     """Runway configuration ``path`` settings object.
 
     Path is responsible for parsing the ``path`` property of a Runway
@@ -108,38 +111,34 @@ class Path:  # pylint: disable=too-many-instance-attributes
 
     """
 
-    def __init__(self, module, env_root, cache_dir=None, git_source_class=Git):
-        # type: (Union[str, Dict[str, str]], str, Optional[str], Optional[Git]) -> None
+    def __init__(
+        self,
+        module: RunwayModuleDefinitionModel,
+        env_root: pathlib.Path,
+        cache_dir: pathlib.Path = DEFAULT_CACHE_DIR,
+    ) -> None:
         """Path Configuration.
 
-        Keyword Args:
-            module (Union(str, Dict[str, str])): The module manifest or a string
-                representation of a local path to a module.
-            env_root (str):  The current environments root directory path
-                string.
-            cache_dir (Optional[str]): When a remote resource is requested it's
-                Source object requires a cache directory to store it's request.
+        Args:
+            module: The module manifest or a string representation of a local path
+                to a module.
+            env_root: The current environments root directory path string.
+            cache_dir: When a remote resource is requested it's Source object
+                requires a cache directory to store it's request.
                 This allows for an override of that default directory.
-            git_source_class (Optional[Git]): Dependency injection for the `Git`
-                type Source.
-
-        References:
-            `Git`_
 
         """
-        if isinstance(module, str):
-            module = {"path": module}  # type: Dict[str, str]
+        self.env_root = env_root
+        self.cache_dir = cache_dir
 
-        self.git_source_class = git_source_class  # type: Git
-        self.env_root = env_root  # type: str
-        self.cache_dir = cache_dir  # type: str
-        (self.source, self.uri, self.location, self.options) = self.parse(
+        self.source, self.uri, self.location, self.options = self.parse(
             module
-        )  # type: Tuple[str]
-        self.module_root = self.__get_module_root_dir()  # type: str
+            if isinstance(module, RunwayModuleDefinitionModel)
+            else RunwayModuleDefinitionModel(path=module)
+        )
+        self.module_root = self.__get_module_root_dir()
 
-    def __get_module_root_dir(self):
-        # type: () -> str
+    def __get_module_root_dir(self) -> pathlib.Path:
         """Get module root directory.
 
         Retrieve the specific path location of the module. This can be static
@@ -150,10 +149,9 @@ class Path:  # pylint: disable=too-many-instance-attributes
             return self.env_root
         if self.source != "local":
             return self.__fetch_remote_source()
-        return os.path.join(self.env_root, self.location)
+        return self.env_root / self.location
 
-    def __fetch_remote_source(self):
-        # type: () -> Optional[Git]
+    def __fetch_remote_source(self) -> pathlib.Path:
         """Switch based on the retrieved source of the path.
 
         Determine which remote Source type to fetch based on the source
@@ -161,12 +159,11 @@ class Path:  # pylint: disable=too-many-instance-attributes
 
         """
         if self.source == "git":
-            return self.git_source_class(**self.configuration).fetch()
-        return None
+            return Git(**self.configuration).fetch()
+        raise NotImplementedError(f"{self.source} is not a supported remove source")
 
     @property
-    def configuration(self):
-        # type: () -> Dict[str, str]
+    def configuration(self) -> Dict[str, Union[Dict[str, str], pathlib.Path, str]]:
         """Transform object into configuration settings for remote Sources."""
         return {
             "source": self.source,
@@ -177,8 +174,9 @@ class Path:  # pylint: disable=too-many-instance-attributes
         }
 
     @classmethod
-    def parse(cls, module):
-        # type: (Dict[str, str]) -> Tuple[str]
+    def parse(
+        cls, module: RunwayModuleDefinitionModel
+    ) -> Tuple[str, str, str, Dict[str, str]]:
         """Retrieve the relevant elements of the path variable passed.
 
         Given a dictionary with a `path` parameter parse the value into
@@ -187,36 +185,30 @@ class Path:  # pylint: disable=too-many-instance-attributes
         `Terraform modules <https://www.terraform.io/docs/modules/sources.html>`_.
 
         Args:
-            module (Dict[str, str]): The module manifest or a string
-                representation of a local path to a module.
+            module: The module manifest or a string representation of a local
+                path to a module.
 
         """
-        source = "local"  # type: str
-        uri = ""  # type: str
-        location = ""  # type: str
-        options = ""  # type: str
+        if isinstance(module.path, pathlib.Path):
+            return "local", "", module.path.name, {}
+        if not module.path:
+            return "local", "", "", {}
 
-        split_source_location = module.get("path", "").split("::")  # type: List[str]
+        split_source_location = str(module.path).split("::")
 
         # Local path
         if len(split_source_location) != 2:
-            location = split_source_location[0]  # type: str
-            options = {}  # type: Dict
-            return source, uri, location, options
+            location = split_source_location[0]
+            options = {}
+            return "local", "", location, options
 
-        source = split_source_location[0]  # type: str
-        temp_location = split_source_location[1]  # type: str
+        location, options = cls.__parse_location_and_options(split_source_location[1])
+        uri, location = cls.__parse_uri_and_location(location)
 
-        location, options = cls.__parse_location_and_options(
-            temp_location
-        )  # type: List[str]
-        uri, location = cls.__parse_uri_and_location(location)  # type: List[str]
-
-        return source, uri, location, options
+        return split_source_location[0], uri, location, options
 
     @classmethod
-    def __parse_uri_and_location(cls, uri_loc_str):
-        # type: (str) -> List[str]
+    def __parse_uri_and_location(cls, uri_loc_str: str) -> Tuple[str, str]:
         """Given a string extract the uri and remaining location values.
 
         Separator used is `//`. It is expected the uri will contain a
@@ -224,48 +216,46 @@ class Path:  # pylint: disable=too-many-instance-attributes
         will be concatenated together.
 
         Args:
-            uri_loc_str (str): The string that represents the uri and
-                remaining location values.
+            uri_loc_str: The string that represents the uri and remaining
+                location values.
 
         """
-        split_uri_location = uri_loc_str.split("//")  # type: List[str, str]
-        location_string = ""  # type: str
+        split_uri_location = uri_loc_str.split("//")
+        location_string = ""
 
         if len(split_uri_location) == 3:
-            location_string = split_uri_location[2]  # type: str
+            location_string = split_uri_location[2]
 
-        return [
+        return (
             "//".join([split_uri_location[0], split_uri_location[1]]),
             location_string,
-        ]
+        )
 
     @classmethod
-    def __parse_location_and_options(cls, loc_opt_str):
-        # type: (str) -> List[str]
+    def __parse_location_and_options(
+        cls, loc_opt_str: str
+    ) -> Tuple[str, Dict[str, str]]:
         """Given a location string extract the location variable and the remote module options.
 
         Seperator used is `?`. Each of the options retrieved are then
         turned into a Dict for easy accessibility based on the `&` separator.
 
         Args:
-            loc_opt_str (str): The string that represents the location
+            loc_opt_str: The string that represents the location
                 and remaining option values.
 
         """
-        split_location_options = loc_opt_str.split("?")  # type: List(str)
-        location = split_location_options[0]  # type: str
-        options = {}  # type: Dict
+        split_location_options = loc_opt_str.split("?")
+        location = split_location_options[0]
+        options = {}
 
         if len(split_location_options) == 2:
-            options = cls.__parse_options_dict(
-                split_location_options[1]
-            )  # type: Dict[str, str]
+            options = cls.__parse_options_dict(split_location_options[1])
 
-        return [location, options]
+        return location, options
 
     @staticmethod
-    def __parse_options_dict(options_str):
-        # type: (str) -> Dict[str, str]
+    def __parse_options_dict(options_str: str) -> Dict[str, str]:
         """Convert the options string into a dict.
 
         Args:
@@ -274,11 +264,9 @@ class Path:  # pylint: disable=too-many-instance-attributes
                 `&` separator.
 
         """
-        opts = options_str.split("&")  # type: List[str]
-        res = {}  # Type: Dict
-
+        opts = options_str.split("&")
+        res = {}
         for opt in opts:
-            key, value = opt.split("=")  # type: List[str, str]
-            res[key] = value  # type: str
-
+            key, value = opt.split("=")
+            res[key] = value
         return res

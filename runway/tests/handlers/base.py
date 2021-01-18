@@ -7,14 +7,12 @@ class TestHandler:
     """Base class for test handlers."""
 
     @classmethod
-    def handle(cls, name, args):
-        # type: (str, Dict[str, Any]) -> None
+    def handle(cls, name: str, args: Dict[str, Any]) -> None:
         """Redefine in subclass."""
         raise NotImplementedError()
 
     @staticmethod
-    def get_dirs(provided_path):
-        # type: (str) -> List[str]
+    def get_dirs(provided_path: str) -> List[str]:
         """Return list of directories."""
         repo_dirs = next(os.walk(provided_path))[1]
         if ".git" in repo_dirs:

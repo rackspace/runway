@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Module with k8s cluster resources."""
 import awacs.iam
-from awacs.aws import StringLike  # pylint: disable=no-name-in-module
+from awacs.aws import StringLike  # type: ignore  # pylint: disable=no-name-in-module
 from awacs.aws import Allow, Condition, PolicyDocument, Statement
 from awacs.helpers.trust import make_simple_assume_policy
 from troposphere import Export, Join, Output, Sub, ec2, eks, iam
@@ -37,7 +37,7 @@ class Cluster(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
         variables = self.get_variables()
@@ -161,4 +161,4 @@ class Cluster(Blueprint):
 if __name__ == "__main__":
     from runway.cfngin.context import Context
 
-    print(Cluster("test", Context({"namespace": "test"}), None).to_json())
+    print(Cluster("test", Context(environment={"namespace": "test"}), None).to_json())

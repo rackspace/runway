@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import pytest
-from _pytest.monkeypatch import MonkeyPatch
 from mock import MagicMock, call
 from pydantic import Extra
 
@@ -15,7 +14,9 @@ from runway.config.models.base import ConfigProperty
 from runway.exceptions import UnresolvedVariable
 
 if TYPE_CHECKING:
-    from runway.context import Context
+    from _pytest.monkeypatch import MonkeyPatch
+
+    from ....factories import MockRunwayContext
 
 
 class SampleConfigProperty(ConfigProperty):
@@ -25,7 +26,7 @@ class SampleConfigProperty(ConfigProperty):
     var_attr: Any = None
     var_attr_pre: Any = None
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.allow
@@ -49,7 +50,7 @@ class SampleConfigComponentDefinition(ConfigComponentDefinition):
         super().__init__(data)
 
     @property
-    def can_set(self):
+    def can_set(self) -> str:
         """Property with a setter."""
         return f"{self.name}.can_set"
 
@@ -104,7 +105,7 @@ class TestConfigComponentDefinition:
         assert not obj.get("missing")
         assert obj.get("missing", "default") == "default"
 
-    def test_getattr(self, runway_context: Context) -> None:
+    def test_getattr(self, runway_context: MockRunwayContext) -> None:
         """Test __getattr__."""
         data = SampleConfigProperty(
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
@@ -150,7 +151,7 @@ class TestConfigComponentDefinition:
         assert obj._vars["var_attr_pre"].value == "literal"
         assert obj.var_attr_pre == obj._vars["var_attr_pre"].value
 
-    def test_resolve(self, runway_context: Context) -> None:
+    def test_resolve(self, runway_context: MockRunwayContext) -> None:
         """Test resolve."""
         data = SampleConfigProperty(
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
@@ -166,7 +167,7 @@ class TestConfigComponentDefinition:
         assert obj.var_attr_pre != data.var_attr_pre
         assert obj.var_attr_pre == self.VARIABLES["key"]
 
-    def test_resolve_pre_process(self, runway_context: Context) -> None:
+    def test_resolve_pre_process(self, runway_context: MockRunwayContext) -> None:
         """Test resolve pre-process."""
         data = SampleConfigProperty(
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
@@ -196,7 +197,7 @@ class TestConfigComponentDefinition:
         """Test __setattr__ with a property."""
         obj = SampleConfigComponentDefinition.parse_obj({"name": "test"})
         with pytest.raises(AttributeError):
-            obj.no_set = "new value"
+            obj.no_set = "new value"  # type: ignore
         assert obj.can_set == "test.can_set"
         obj.can_set = "new"
         assert obj.can_set == "new.can_set"

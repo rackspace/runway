@@ -1,14 +1,25 @@
 """Test runway.core.components._module."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
 import yaml
-from mock import MagicMock, call, patch
+from mock import MagicMock, call
 
 from runway.config.models.runway import RunwayFutureDefinitionModel
 from runway.core.components import Deployment, Module
 from runway.core.components._module import validate_environment
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from _pytest.logging import LogCaptureFixture
+    from pytest_mock import MockerFixture
+
+    from ...factories import MockRunwayContext, YamlLoaderDeployment
 
 MODULE = "runway.core.components._module"
 
@@ -16,7 +27,7 @@ MODULE = "runway.core.components._module"
 class TestModule:
     """Test runway.core.components._module.Module."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test init."""
         mock_ctx = MagicMock()
         mock_def = MagicMock()
@@ -30,7 +41,9 @@ class TestModule:
         mock_def.resolve.assert_called_once_with(mock_ctx.copy(), variables=mock_vars)
         assert mod.name == "module-name"
 
-    def test_child_modules(self, fx_deployments, runway_context):
+    def test_child_modules(
+        self, fx_deployments: YamlLoaderDeployment, runway_context: MockRunwayContext
+    ) -> None:
         """Test child_modules."""
         deployment = Deployment(
             context=runway_context,
@@ -56,10 +69,14 @@ class TestModule:
             assert child.ctx.env.name == runway_context.env.name
             assert child.definition.path == mod0.definition.child_modules[index].path
 
-    @patch(MODULE + ".ModulePath")
-    def test_path(self, mock_path, fx_deployments, runway_context):
+    def test_path(
+        self,
+        mocker: MockerFixture,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test path."""
-        mock_path.return_value = "module-path"
+        mock_path = mocker.patch(f"{MODULE}.ModulePath", return_value="module-path")
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
@@ -67,12 +84,17 @@ class TestModule:
 
         assert mod.path == "module-path"
         mock_path.assert_called_once_with(
-            mod.definition,
-            str(runway_context.env.root_dir),
-            str(runway_context.env.root_dir / ".runway/cache"),
+            mod.definition._data,
+            runway_context.env.root_dir,
+            runway_context.env.root_dir / ".runway/cache",
         )
 
-    def test_payload_with_deployment(self, cd_tmp_path, fx_deployments, runway_context):
+    def test_payload_with_deployment(
+        self,
+        cd_tmp_path: Path,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test payload with deployment values."""
         runway_context.env.root_dir = cd_tmp_path
         mod_dir = cd_tmp_path / "sampleapp-01.cfn"
@@ -90,8 +112,11 @@ class TestModule:
         assert result["options"]["overlap_option"] == "module-val"
 
     def test_payload_with_local_config(
-        self, cd_tmp_path, fx_deployments, runway_context
-    ):
+        self,
+        cd_tmp_path: Path,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test payload."""
         runway_context.env.root_dir = cd_tmp_path
         mod_dir = cd_tmp_path / "sampleapp-01.cfn"
@@ -127,26 +152,26 @@ class TestModule:
             ({"test": ["something"]}, True, False),
         ],
     )
-    @patch(MODULE + ".validate_environment")
     def test_should_skip(
         self,
-        mock_validate,
-        env,
-        strict,
-        validate,
-        fx_deployments,
-        monkeypatch,
-        runway_context,
-    ):
+        env: Dict[str, Union[List[str], str]],
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        strict: bool,
+        validate: Optional[bool],
+    ) -> None:
         """Test should_skip."""
-        mock_validate.return_value = validate
+        mock_validate = mocker.patch(
+            f"{MODULE}.validate_environment", return_value=validate
+        )
         env_copy = env.copy()
         payload = {
             "environment": env_copy.get("test", {}),
             "environments": env_copy,
             "parameters": {},
         }
-        monkeypatch.setattr(Module, "payload", payload)
+        mocker.patch.object(Module, "payload", payload)
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
@@ -159,21 +184,24 @@ class TestModule:
             mod.ctx, env, logger=mod.logger, strict=strict
         )
 
-    @patch(MODULE + ".ModulePath")
-    @patch(MODULE + ".RunwayModuleType")
     def test_type(
-        self, mock_type, mock_path, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test type."""
+        mock_path = mocker.patch(f"{MODULE}.ModulePath", module_root="path")
+        mock_type = mocker.patch(f"{MODULE}.RunwayModuleType")
         mock_type.return_value = mock_type
         mock_path.module_root = "path"
-        monkeypatch.setattr(Module, "path", mock_path)
+        mocker.patch.object(Module, "path", mock_path)
 
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
         )
-        monkeypatch.setattr(mod, "payload", {})
+        mocker.patch.object(mod, "payload", {})
 
         assert mod.type == mock_type
         mock_type.assert_called_once_with(path="path", class_path=None, type_str=None)
@@ -203,19 +231,28 @@ class TestModule:
         ],
     )
     def test_use_async(
-        self, config, use_concurrent, expected, fx_deployments, runway_context
-    ):
+        self,
+        config: str,
+        expected: bool,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+        use_concurrent: bool,
+    ) -> None:
         """Test use_async."""
         obj = Module(
             context=runway_context, definition=fx_deployments.load(config).modules[0]
         )
-        obj.ctx._use_concurrent = use_concurrent
+        obj.ctx._use_concurrent = use_concurrent  # type: ignore
         assert obj.use_async == expected
 
-    def test_deploy(self, fx_deployments, monkeypatch, runway_context):
+    def test_deploy(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy."""
-        mock_run = MagicMock()
-        monkeypatch.setattr(Module, "run", mock_run)
+        mock_run = mocker.patch.object(Module, "run")
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
@@ -223,15 +260,19 @@ class TestModule:
         assert mod.deploy()
         mock_run.assert_called_once_with("deploy")
 
-    @patch(MODULE + ".concurrent.futures")
     def test_deploy_async(
-        self, mock_futures, caplog, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy async."""
         caplog.set_level(logging.INFO, logger="runway")
+        mock_futures = mocker.patch(f"{MODULE}.concurrent.futures")
         executor = MagicMock()
         mock_futures.ProcessPoolExecutor.return_value = executor
-        monkeypatch.setattr(Module, "use_async", True)
+        mocker.patch.object(Module, "use_async", True)
 
         obj = Module(
             context=runway_context,
@@ -254,12 +295,17 @@ class TestModule:
         mock_futures.wait.assert_called_once()
         assert executor.submit.return_value.result.call_count == 2
 
-    def test_deploy_sync(self, caplog, fx_deployments, monkeypatch, runway_context):
+    def test_deploy_sync(
+        self,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy sync."""
         caplog.set_level(logging.INFO, logger="runway")
-        mock_run = MagicMock()
-        monkeypatch.setattr(Module, "use_async", False)
-        monkeypatch.setattr(Module, "run", mock_run)
+        mocker.patch.object(Module, "use_async", False)
+        mock_run = mocker.patch.object(Module, "run")
 
         mod = Module(
             context=runway_context,
@@ -267,16 +313,20 @@ class TestModule:
         )
         assert not mod.deploy()
         assert "parallel_parent:processing modules sequentially..." in caplog.messages
-        mock_run.assert_has_calls([call("deploy"), call("deploy")])
+        mock_run.assert_has_calls([call("deploy"), call("deploy")])  # type: ignore
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
-    def test_destroy(self, async_used, fx_deployments, monkeypatch, runway_context):
+    def test_destroy(
+        self,
+        async_used: bool,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test destroy."""
-        mock_async = MagicMock()
-        monkeypatch.setattr(Module, "_Module__async", mock_async)
-        mock_sync = MagicMock()
-        monkeypatch.setattr(Module, "_Module__sync", mock_sync)
-        monkeypatch.setattr(Module, "use_async", async_used)
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mocker.patch.object(Module, "use_async", async_used)
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("simple_parallel_module").modules[0],
@@ -290,14 +340,16 @@ class TestModule:
             mock_async.assert_not_called()
             mock_sync.assert_called_once_with("destroy")
 
-    def test_destroy_no_children(self, fx_deployments, monkeypatch, runway_context):
+    def test_destroy_no_children(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test destroy with no child modules."""
-        mock_async = MagicMock()
-        monkeypatch.setattr(Module, "_Module__async", mock_async)
-        mock_sync = MagicMock()
-        monkeypatch.setattr(Module, "_Module__sync", mock_sync)
-        mock_run = MagicMock()
-        monkeypatch.setattr(Module, "run", mock_run)
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mock_run = mocker.patch.object(Module, "run")
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
@@ -309,15 +361,18 @@ class TestModule:
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_plan(
-        self, async_used, caplog, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        async_used: bool,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test plan."""
         caplog.set_level(logging.INFO, logger="runway")
-        mock_async = MagicMock()
-        monkeypatch.setattr(Module, "_Module__async", mock_async)
-        mock_sync = MagicMock()
-        monkeypatch.setattr(Module, "_Module__sync", mock_sync)
-        monkeypatch.setattr(Module, "use_async", async_used)
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mocker.patch.object(Module, "use_async", async_used)
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("simple_parallel_module").modules[0],
@@ -334,17 +389,19 @@ class TestModule:
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_plan_no_children(
-        self, async_used, caplog, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        async_used: bool,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test plan with no child modules."""
         caplog.set_level(logging.INFO, logger="runway")
-        mock_async = MagicMock()
-        monkeypatch.setattr(Module, "_Module__async", mock_async)
-        mock_sync = MagicMock()
-        monkeypatch.setattr(Module, "_Module__sync", mock_sync)
-        mock_run = MagicMock()
-        monkeypatch.setattr(Module, "run", mock_run)
-        monkeypatch.setattr(Module, "use_async", async_used)
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mock_run = mocker.patch.object(Module, "run")
+        mocker.patch.object(Module, "use_async", async_used)
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
@@ -354,18 +411,22 @@ class TestModule:
         mock_async.assert_not_called()
         mock_sync.assert_not_called()
 
-    @patch(MODULE + ".change_dir")
     def test_run(
-        self, mock_change_dir, fx_deployments, monkeypatch, runway_context, tmp_path
-    ):
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test run."""
+        mock_change_dir = mocker.patch(f"{MODULE}.change_dir")
         mock_type = MagicMock()
         mock_inst = MagicMock()
         mock_inst.deploy = MagicMock()
         mock_type.module_class.return_value = mock_inst
-        monkeypatch.setattr(Module, "should_skip", True)
-        monkeypatch.setattr(Module, "path", MagicMock(module_root=str(tmp_path)))
-        monkeypatch.setattr(Module, "type", mock_type)
+        mocker.patch.object(Module, "should_skip", True)
+        mocker.patch.object(Module, "path", MagicMock(module_root=tmp_path))
+        mocker.patch.object(Module, "type", mock_type)
 
         mod = Module(
             context=runway_context,
@@ -374,11 +435,11 @@ class TestModule:
         assert not mod.run("deploy")
         mock_change_dir.assert_not_called()
 
-        monkeypatch.setattr(Module, "should_skip", False)
+        mocker.patch.object(Module, "should_skip", False)
         assert not mod.run("deploy")
-        mock_change_dir.assert_called_once_with(str(tmp_path))
+        mock_change_dir.assert_called_once_with(tmp_path)
         mock_type.module_class.assert_called_once_with(
-            context=mod.ctx, path=str(tmp_path), options=mod.payload
+            context=mod.ctx, path=tmp_path, options=mod.payload
         )
         mock_inst["deploy"].assert_called_once_with()
 
@@ -387,11 +448,14 @@ class TestModule:
             assert mod.run("deploy")
         assert excinfo.value.code == 1
 
-    def test_run_list(self, fx_deployments, monkeypatch, runway_context):
+    def test_run_list(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test run_list."""
-        mock_deploy = MagicMock()
-
-        monkeypatch.setattr(Module, "deploy", mock_deploy)
+        mock_deploy = mocker.patch.object(Module, "deploy")
         assert not Module.run_list(
             action="deploy",
             context=runway_context,
@@ -503,13 +567,19 @@ class TestModule:
     ],
 )
 def test_validate_environment(
-    env_def, strict, expected, expected_logs, caplog, monkeypatch, runway_context
-):
+    caplog: LogCaptureFixture,
+    env_def: Any,
+    expected_logs: List[str],
+    expected: Optional[bool],
+    mocker: MockerFixture,
+    runway_context: MockRunwayContext,
+    strict: bool,
+) -> None:
     """Test validate_environment."""
     caplog.set_level(logging.DEBUG, logger="runway")
-    monkeypatch.setattr(
-        MODULE + ".aws",
-        MagicMock(**{"AccountDetails.return_value": MagicMock(id="123456789012")}),
+    mocker.patch(
+        f"{MODULE}.aws",
+        **{"AccountDetails.return_value": MagicMock(id="123456789012")},
     )
     assert validate_environment(runway_context, env_def, strict=strict) is expected
     # all() does not give an output that can be used for troubleshooting failures

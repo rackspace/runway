@@ -1,5 +1,7 @@
 """``runway gen-sample`` command group."""
 # docs: file://./../../../../docs/source/commands.rst
+from typing import Any
+
 import click
 
 from ... import options
@@ -57,7 +59,7 @@ COMMANDS = [
 @options.debug
 @options.no_color
 @options.verbose
-def gen_sample(**_):
+def gen_sample(**_: Any) -> None:
     """Generate a sample Runway module module/project.
 
     The sample is created in the current directory.

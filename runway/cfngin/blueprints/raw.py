@@ -6,7 +6,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -15,6 +15,7 @@ from ..util import parse_cloudformation_template
 from .base import Blueprint
 
 if TYPE_CHECKING:
+    from ...variables import Variable
     from ..context import Context
 
 
@@ -26,10 +27,10 @@ def get_template_path(file_path: Path) -> Optional[Path]:
     loading to find the path to the template.
 
     Args:
-        filename (Path): Template path.
+        filename: Template path.
 
     Returns:
-        Optional[Path]: Path to file, or None if no file found
+        Path to file, or None if no file found
 
     """
     if file_path.is_file():
@@ -41,37 +42,29 @@ def get_template_path(file_path: Path) -> Optional[Path]:
     return None
 
 
-def get_template_params(template):
+def get_template_params(template: Dict[str, Any]) -> Dict[str, Any]:
     """Parse a CFN template for defined parameters.
 
     Args:
-        template (dict): Parsed CFN template.
+        template: Parsed CFN template.
 
     Returns:
-        dict: Template parameters.
+        Template parameters.
 
     """
-    params = {}
-
-    if "Parameters" in template:
-        params = template["Parameters"]
-    return params
+    return template.get("Parameters", {})
 
 
-def resolve_variable(provided_variable, blueprint_name):
+def resolve_variable(provided_variable: Optional[Variable], blueprint_name: str) -> Any:
     """Resolve a provided variable value against the variable definition.
 
     This acts as a subset of resolve_variable logic in the base module, leaving
     out everything that doesn't apply to CFN parameters.
 
     Args:
-        provided_variable (:class:`runway.cfngin.variables.Variable`):
-            The variable value provided to the blueprint.
-        blueprint_name (str): The name of the blueprint that the variable is
+        provided_variable: The variable value provided to the blueprint.
+        blueprint_name: The name of the blueprint that the variable is
             being applied to.
-
-    Returns:
-        object: The resolved variable string value.
 
     Raises:
         UnresolvedBlueprintVariable: Raised when the provided variable is
@@ -91,6 +84,8 @@ def resolve_variable(provided_variable, blueprint_name):
 class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
     """Blueprint class for blueprints auto-generated from raw templates."""
 
+    raw_template_path: Path
+
     def __init__(  # pylint: disable=super-init-not-called
         self,
         name: str,
@@ -108,21 +103,17 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         self._rendered = None
         self._version = None
 
-    def to_json(self, variables=None):
+    def to_json(self, variables: Optional[Dict[str, Any]] = None) -> str:
         """Return the template in JSON.
 
         Args:
-            variables (dict):
-                Unused in this subclass (variables won't affect the template).
-
-        Returns:
-            str: the rendered CFN JSON template
+            variables: Unused in this subclass (variables won't affect the template).
 
         """
         # load -> dumps will produce json from json or yaml templates
         return json.dumps(self.to_dict(), sort_keys=True, indent=4)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """Return the template as a python dictionary.
 
         Returns:
@@ -131,33 +122,31 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         """
         return parse_cloudformation_template(self.rendered)
 
-    def render_template(self):
+    def render_template(self) -> Tuple[str, str]:
         """Load template and generate its md5 hash."""
         return (self.version, self.rendered)
 
-    def get_parameter_definitions(self):
+    def get_parameter_definitions(self) -> Dict[str, Any]:
         """Get the parameter definitions to submit to CloudFormation.
 
         Returns:
-            Dict[str, Any]: parameter definitions. Keys are parameter names,
-            the values are dicts containing key/values for various parameter
-            properties.
+            Parameter definitions. Keys are parameter names, the values are dicts
+            containing key/values for various parameter properties.
 
         """
         return get_template_params(self.to_dict())
 
-    def get_output_definitions(self):
+    def get_output_definitions(self) -> Dict[str, Any]:
         """Get the output definitions.
 
         Returns:
-            Dict[str, Any]: output definitions. Keys are output names, the
-            values are dicts containing key/values for various output
-            properties.
+            Output definitions. Keys are output names, the values are dicts
+            containing key/values for various output properties.
 
         """
         return self.to_dict().get("Outputs", {})
 
-    def resolve_variables(self, provided_variables):
+    def resolve_variables(self, provided_variables: List[Variable]) -> None:
         """Resolve the values of the blueprint variables.
 
         This will resolve the values of the template parameters with values
@@ -166,13 +155,12 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         and requires provided variables to render.
 
         Args:
-            provided_variables (List[:class:`runway.cfngin.variables.Variable`]):
-                List of provided variables.
+            provided_variables: List of provided variables.
 
         """
         # Pass 1 to set resolved_variables to provided variables
         self.resolved_variables = {}
-        variable_dict = dict((var.name, var) for var in provided_variables)
+        variable_dict = {var.name: var for var in provided_variables}
         for var_name, _var_def in variable_dict.items():
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
@@ -182,30 +170,29 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         # to defined variables
         defined_variables = self.get_parameter_definitions()
         self.resolved_variables = {}
-        variable_dict = dict((var.name, var) for var in provided_variables)
+        variable_dict = {var.name: var for var in provided_variables}
         for var_name, _var_def in defined_variables.items():
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
                 self.resolved_variables[var_name] = value
 
-    def get_parameter_values(self):
+    def get_parameter_values(self) -> Optional[Dict[str, Any]]:
         """Return a dictionary of variables with `type` :class:`CFNType`.
 
         Returns:
-            Dict[str, Any]: variables that need to be submitted as
-            CloudFormation Parameters. Will be a dictionary of
-            ``<parameter name>: <parameter value>``.
+            Variables that need to be submitted as CloudFormation Parameters.
+            Will be a dictionary of ``<parameter name>: <parameter value>``.
 
         """
         return self.resolved_variables
 
     @property
-    def requires_change_set(self):
+    def requires_change_set(self) -> bool:
         """Return True if the underlying template has transforms."""
         return bool("Transform" in self.to_dict())
 
     @property
-    def rendered(self):
+    def rendered(self) -> str:
         """Return (generating first if needed) rendered template."""
         if not self._rendered:
             template_path = get_template_path(self.raw_template_path)
@@ -238,7 +225,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         return self._rendered
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Return (generating first if needed) version hash."""
         if not self._version:
             self._version = hashlib.md5(self.rendered.encode()).hexdigest()[:8]

@@ -7,7 +7,7 @@ import os.path
 import unittest
 from glob import glob
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Type, cast
 
 from runway.util import load_object_from_string
 from runway.variables import Variable
@@ -17,9 +17,10 @@ from ..context import Context
 
 if TYPE_CHECKING:
     from ...config.models.cfngin import CfnginStackDefinitionModel
+    from .base import Blueprint
 
 
-def diff(first, second):
+def diff(first: str, second: str) -> str:
     """Human readable differ."""
     return "\n".join(
         list(difflib.Differ().compare(first.splitlines(), second.splitlines()))
@@ -29,10 +30,10 @@ def diff(first, second):
 class BlueprintTestCase(unittest.TestCase):
     """Extends the functionality of unittest.TestCase for testing blueprints."""
 
-    OUTPUT_PATH = "tests/fixtures/blueprints"
+    OUTPUT_PATH: str = "tests/fixtures/blueprints"
 
     def assertRenderedBlueprint(  # noqa: N802 pylint: disable=invalid-name
-        self, blueprint
+        self, blueprint: Blueprint
     ):
         """Test that the rendered blueprint json matches the expected result.
 
@@ -101,7 +102,7 @@ class YamlDirTestGenerator:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate class."""
         self.classdir = os.path.relpath(self.__class__.__module__.replace(".", "/"))
         if not os.path.isdir(self.classdir):
@@ -109,22 +110,24 @@ class YamlDirTestGenerator:
 
     # These properties can be overridden from the test generator subclass.
     @property
-    def base_class(self):
+    def base_class(self) -> Type[BlueprintTestCase]:
         """Return the baseclass."""
         return BlueprintTestCase
 
     @property
-    def yaml_dirs(self):
+    def yaml_dirs(self) -> List[str]:
         """Yaml directories."""
         return ["."]
 
     @property
-    def yaml_filename(self):
+    def yaml_filename(self) -> str:
         """Yaml filename."""
         return "test_*.yaml"
 
     # pylint incorrectly detects this
-    def test_generator(self):  # pylint: disable=no-self-use
+    def test_generator(  # pylint: disable=no-self-use
+        self,
+    ) -> Iterator[BlueprintTestCase]:
         """Test generator."""
         # Search for tests in given paths
         configs = []
@@ -133,8 +136,10 @@ class YamlDirTestGenerator:
                 glob("%s/%s/%s" % (self.classdir, directory, self.yaml_filename))
             )
 
-        class ConfigTest(self.base_class):
+        class ConfigTest(self.base_class):  # type: ignore
             """Config test."""
+
+            context: Context
 
             def __init__(  # pylint: disable=super-init-not-called
                 self,
@@ -147,7 +152,7 @@ class YamlDirTestGenerator:
                 self.stack = stack
                 self.description = "%s (%s)" % (stack.name, filepath)
 
-            def __call__(self):  # pylint: disable=arguments-differ
+            def __call__(self) -> None:  # pylint: disable=arguments-differ
                 """Run when the class instance is called directly."""
                 # Use the context property of the baseclass, if present.
                 # If not, default to a basic context.
@@ -161,7 +166,9 @@ class YamlDirTestGenerator:
                 configvars = self.stack.variables or {}
                 variables = [Variable(k, v, "cfngin") for k, v in configvars.items()]
 
-                blueprint_class = load_object_from_string(self.stack.class_path)
+                blueprint_class = load_object_from_string(
+                    cast(str, self.stack.class_path)
+                )
                 blueprint = blueprint_class(self.stack.name, ctx)
                 blueprint.resolve_variables(variables or [])
                 blueprint.setup_parameters()
@@ -169,8 +176,8 @@ class YamlDirTestGenerator:
                 self.assertRenderedBlueprint(blueprint)
 
             def assertEqual(  # noqa pylint: disable=invalid-name
-                self, first, second, msg=None
-            ):
+                self, first: Any, second: Any, msg: Optional[str] = None
+            ) -> None:
                 """Test that first and second are equal.
 
                 If the values do not compare equal, the test will fail.

@@ -1,16 +1,20 @@
 """Register test handlers."""
-from typing import Type, Union
+from __future__ import annotations
+
+from typing import Any, Callable, Dict, Type, Union
 
 from runway.util import load_object_from_string
 
 from .handlers import cfn, ecr, env, ssm, var
 from .handlers.base import LookupHandler
 
-RUNWAY_LOOKUP_HANDLERS = {}
+RUNWAY_LOOKUP_HANDLERS: Dict[str, Union[Callable[..., Any], Type[LookupHandler]]] = {}
 
 
-def register_lookup_handler(lookup_type, handler_or_path):
-    # type: (str, Union[Type[LookupHandler], str]) -> None
+def register_lookup_handler(
+    lookup_type: str,
+    handler_or_path: Union[Callable[..., Any], str, Type[LookupHandler]],
+) -> None:
     """Register a lookup handler.
 
     Args:
@@ -19,13 +23,16 @@ def register_lookup_handler(lookup_type, handler_or_path):
 
     """
     handler = handler_or_path
+
     if isinstance(handler_or_path, str):
         handler = load_object_from_string(handler_or_path)
+    else:
+        handler = handler_or_path
+
     RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
 
 
-def unregister_lookup_handler(lookup_type):
-    # type: (str) -> None
+def unregister_lookup_handler(lookup_type: str) -> None:
     """Unregister the specified test type.
 
     This is useful when testing various lookup types if you want to unregister

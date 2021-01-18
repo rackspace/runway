@@ -1,5 +1,5 @@
 """AWS Lambda hook."""  # pylint: disable=too-many-lines
-from __future__ import absolute_import  # TODO remove when dropping python 2 support
+from __future__ import annotations
 
 import hashlib
 import json
@@ -15,16 +15,40 @@ from io import BytesIO as StringIO
 from pathlib import Path
 from shutil import copyfile
 from types import GeneratorType
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 from zipfile import ZIP_DEFLATED, ZipFile
 
 # pylint import order false alerts appear to be specific to py2 on Windows
 import botocore
+import botocore.exceptions
 import docker
+import docker.types
 import formic
+from docker.models.containers import Container
 from troposphere.awslambda import Code
+from typing_extensions import Literal, TypedDict
 
+from ...constants import DOT_RUNWAY_DIR
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..util import ensure_s3_bucket
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef
+
+    from ..context import Context
+    from ..providers.aws.default import Provider
 
 # mask to retrieve only UNIX file permissions from the external attributes
 # field of a ZIP entry.
@@ -44,24 +68,50 @@ SUPPORTED_RUNTIMES = [
     "python3.8",
 ]
 
+DockerizePipArgTypeDef = Optional[
+    Union[
+        bool,
+        Literal[
+            "false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes",
+        ],
+    ]
+]
+PayloadAclTypeDef = Optional[
+    Literal[
+        "authenticated-read",
+        "aws-exec-read",
+        "bucket-owner-full-control",
+        "bucket-owner-read",
+        "private",
+        "public-read-write",
+        "public-read",
+    ]
+]
 
-def copydir(source, destination, includes, excludes=None, follow_symlinks=False):
+
+def copydir(
+    source: str,
+    destination: str,
+    includes: List[str],
+    excludes: Optional[List[str]] = None,
+    follow_symlinks: bool = False,
+) -> None:
     """Extend the functionality of shutil.
 
     Correctly copies files and directories in a source directory.
 
     Args:
-        source (str): Source directory.
-        destination (str): Destination directory.
-        includes (List[str]): Glob patterns for files to include.
-        excludes (List[str]): Glob patterns for files to exclude.
-        follow_symlinks (bool): If true, symlinks will be included in the
-            resulting zip file.
+        source: Source directory.
+        destination: Destination directory.
+        includes: Glob patterns for files to include.
+        excludes: Glob patterns for files to exclude.
+        follow_symlinks: If true, symlinks will be included in the resulting zip
+            file.
 
     """
     files = _find_files(source, includes, excludes, follow_symlinks)
 
-    def _mkdir(dir_name):
+    def _mkdir(dir_name: str) -> None:
         """Recursively create directories."""
         parent = os.path.dirname(dir_name)
         if not os.path.isdir(parent):
@@ -81,36 +131,32 @@ def copydir(source, destination, includes, excludes=None, follow_symlinks=False)
             copyfile(src, dest)
 
 
-def find_requirements(root):
+def find_requirements(root: str) -> Optional[Dict[str, bool]]:
     """Identify Python requirement files.
 
     Args:
-        root (str): Path that should be searched for files.
+        root: Path that should be searched for files.
 
     Returns:
-        Optional[Dict[str, bool]]: Name of supported requirements file and
-        whether it was found. If none are found, ``None`` is returned.
+        Name of supported requirements file and whether it was found.
+        If none are found, ``None`` is returned.
 
     """
-    findings = {}
-
-    for file_name in ["requirements.txt", "Pipfile", "Pipfile.lock"]:
-        findings[file_name] = os.path.isfile(os.path.join(root, file_name))
+    findings = {
+        file_name: os.path.isfile(os.path.join(root, file_name))
+        for file_name in ["requirements.txt", "Pipfile", "Pipfile.lock"]
+    }
 
     if not sum(findings.values()):
         return None
     return findings
 
 
-def should_use_docker(dockerize_pip=None):
+def should_use_docker(dockerize_pip: DockerizePipArgTypeDef = None) -> bool:
     """Assess if Docker should be used based on the value of args.
 
     Args:
-        dockerize_pip (Union[bool, None, str]): Value to assess if Docker
-            should be used for pip.
-
-    Returns:
-        bool
+        dockerize_pip: Value to assess if Docker should be used for pip.
 
     """
     if isinstance(dockerize_pip, bool):
@@ -126,7 +172,7 @@ def should_use_docker(dockerize_pip=None):
     return False
 
 
-def _zip_files(files, root):
+def _zip_files(files: Iterable[str], root: str) -> Tuple[bytes, str]:
     """Generate a ZIP file in-memory from a list of files.
 
     Files will be stored in the archive with relative names, and have their
@@ -134,13 +180,11 @@ def _zip_files(files, root):
     user-executable in the source filesystem).
 
     Args:
-        files (List[str]): file names to add to the archive, relative to
-            ``root``.
-        root (str): base directory to retrieve files from.
+        files: file names to add to the archive, relative to ``root``.
+        root: base directory to retrieve files from.
 
     Returns:
-        Tuple[str, str]: Content of the ZIP file as a byte string and
-        calculated hash of all the files
+        Content of the ZIP file as a byte string and calculated hash of all the files.
 
     """
     zip_data = StringIO()
@@ -158,11 +202,7 @@ def _zip_files(files, root):
         # is executable or not, choosing between modes 755 and 644 accordingly.
         for zip_entry in zip_file.filelist:
             perms = (zip_entry.external_attr & ZIP_PERMS_MASK) >> 16
-            if perms & stat.S_IXUSR != 0:
-                new_perms = 0o755
-            else:
-                new_perms = 0o644
-
+            new_perms = 0o755 if perms & stat.S_IXUSR != 0 else 0o644
             if new_perms != perms:
                 LOGGER.debug(
                     "fixing perms: %s: %o => %o", zip_entry.filename, perms, new_perms
@@ -179,16 +219,13 @@ def _zip_files(files, root):
     return contents, content_hash
 
 
-def _calculate_hash(files, root):
+def _calculate_hash(files: Iterable[str], root: str) -> str:
     """Return a hash of all of the given files at the given root.
 
     Args:
-        files (list[str]): file names to include in the hash calculation,
+        files: file names to include in the hash calculation,
             relative to ``root``.
-        root (str): base directory to analyze files in.
-
-    Returns:
-        str: A hash of the hashes of the given files.
+        root: base directory to analyze files in.
 
     """
     file_hash = hashlib.md5()
@@ -205,24 +242,27 @@ def _calculate_hash(files, root):
     return file_hash.hexdigest()
 
 
-def _find_files(root, includes, excludes=None, follow_symlinks=False):
+def _find_files(
+    root: str,
+    includes: Union[List[str], str],
+    excludes: Optional[List[str]] = None,
+    follow_symlinks: bool = False,
+) -> Iterator[str]:
     """List files inside a directory based on include and exclude rules.
 
     This is a more advanced version of `glob.glob`, that accepts multiple
     complex patterns.
 
     Args:
-        root (str): base directory to list files from.
-        includes (List[str]): inclusion patterns. Only files matching those
-            patterns will be included in the result.
-        excludes (List[str]): exclusion patterns. Files matching those
-            patterns will be excluded from the result. Exclusions take
-            precedence over inclusions.
-        follow_symlinks (bool): If true, symlinks will be included in the
-            resulting zip file
+        root: base directory to list files from.
+        includes: inclusion patterns. Only files matching those patterns will be
+            included in the result.
+        excludes: exclusion patterns. Files matching those patterns will be
+            excluded from the result. Exclusions take precedence over inclusions.
+        follow_symlinks: If true, symlinks will be included in the resulting zip file.
 
     Yields:
-        str: a file name relative to the root.
+        File names relative to the root.
 
     Note:
         Documentation for the patterns can be found at
@@ -233,23 +273,21 @@ def _find_files(root, includes, excludes=None, follow_symlinks=False):
     file_set = formic.FileSet(
         directory=root, include=includes, exclude=excludes, symlinks=follow_symlinks,
     )
-
-    for filename in file_set.qualified_files(absolute=False):
-        yield filename
+    yield from file_set.qualified_files(absolute=False)
 
 
-def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
+def _zip_from_file_patterns(
+    root: str, includes: List[str], excludes: List[str], follow_symlinks: bool
+) -> Tuple[bytes, str]:
     """Generate a ZIP file in-memory from file search patterns.
 
     Args:
-        root (str): Base directory to list files from.
-        includes (List[str]): Inclusion patterns. Only files  matching those
-            patterns will be included in the result.
-        excludes (List[str]): Exclusion patterns. Files matching those
-            patterns will be excluded from the result. Exclusions take
-            precedence over inclusions.
-        follow_symlinks (bool): If true, symlinks will be included in the
-            resulting zip file
+        root: Base directory to list files from.
+        includes: Inclusion patterns. Only files  matching those patterns will be
+            included in the result.
+        excludes: Exclusion patterns. Files matching those patterns will be
+            excluded from the result. Exclusions take precedence over inclusions.
+        follow_symlinks: If true, symlinks will be included in the resulting zip file.
 
     See Also:
         :func:`_zip_files`, :func:`_find_files`.
@@ -276,30 +314,26 @@ def _zip_from_file_patterns(root, includes, excludes, follow_symlinks):
 
 
 def handle_requirements(
-    package_root,
-    dest_path,
-    requirements,
-    pipenv_timeout=300,
-    python_path=None,
-    use_pipenv=False,
-):
+    package_root: str,
+    dest_path: str,
+    requirements: Dict[str, bool],
+    pipenv_timeout: int = 300,
+    python_path: Optional[str] = None,
+    use_pipenv: bool = False,
+) -> str:
     """Use the correct requirements file.
 
     Args:
-        package_root (str): Base directory containing a requirements file.
-        dest_path (str): Where to output the requirements file if one needs
-            to be created.
-        requirements (Dict[str, bool]): Map of requirement file names and
-            whether they exist.
-        pipenv_timeout (int): Seconds to wait for a subprocess to complete.
-        python_path (Optional[str]): Explicit python interpreter to be used.
-            Requirement file generators must be installed and executable using
-            ``-m`` if provided.
-        use_pipenv (bool): Explicitly use pipenv to export a Pipfile as
-            requirements.txt.
+        package_root: Base directory containing a requirements file.
+        dest_path: Where to output the requirements file if one needs to be created.
+        requirements: Map of requirement file names and whether they exist.
+        pipenv_timeout: Seconds to wait for a subprocess to complete.
+        python_path: Explicit python interpreter to be used. Requirement file
+            generators must be installed and executable using ``-m`` if provided.
+        use_pipenv: Explicitly use pipenv to export a Pipfile as requirements.txt.
 
     Returns:
-        str: Path to the final requirements.txt
+        Path to the final requirements.txt
 
     Raises:
         NotImplementedError: When a requirements file is not found. This
@@ -331,15 +365,20 @@ def handle_requirements(
     raise NotImplementedError("Unable to handle missing requirements file.")
 
 
-def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
+def _handle_use_pipenv(
+    package_root: str,
+    dest_path: str,
+    python_path: Optional[str] = None,
+    timeout: int = 300,
+) -> str:
     """Create requirements file from Pipfile.
 
     Args:
-        package_root (str): Base directory to generate requirements from.
-        dest_path (str): Where to output the requirements file.
-        python_path (Optional[str]): Explicit python interpreter to be used.
-            pipenv must be installed and executable using ``-m`` if provided.
-        timeout (int): Seconds to wait for process to complete.
+        package_root: Base directory to generate requirements from.
+        dest_path: Where to output the requirements file.
+        python_path: Explicit python interpreter to be used. pipenv must be
+            installed and executable using ``-m`` if provided.
+        timeout: Seconds to wait for process to complete.
 
     Raises:
         PipenvError: Non-zero exit code returned by pipenv process.
@@ -373,27 +412,26 @@ def _handle_use_pipenv(package_root, dest_path, python_path=None, timeout=300):
 
 
 def dockerized_pip(
-    work_dir, client=None, runtime=None, docker_file=None, docker_image=None, **_kwargs
-):
+    work_dir: str,
+    client: Optional[docker.DockerClient] = None,
+    runtime: Optional[str] = None,
+    docker_file: Optional[str] = None,
+    docker_image: Optional[str] = None,
+    python_dontwritebytecode: bool = False,
+    **_: Any
+) -> None:
     """Run pip with docker.
 
     Args:
-        work_dir (str): Work directory for docker.
-        client (Optional[docker.DockerClient]): Custom docker client.
-        runtime (Optional[str]): Lambda runtime. Must provide one of
-            ``runtime``, ``docker_file``, or ``docker_image``.
-        docker_file (Optional[str]): Path to a Dockerfile to build an image.
-            Must provide one of ``runtime``, ``docker_file``, or
-            ``docker_image``.
-        docker_image (Optional[str]): Local or remote docker image to use.
-            Must provide one of ``runtime``, ``docker_file``, or
-            ``docker_image``.
-        kwargs (Any): Advanced options for docker. See source code to
-            determine what is supported.
-
-    Returns:
-        Tuple[str, str]: Content of the ZIP file as a byte string and
-        calculated hash of all the files
+        work_dir: Work directory for docker.
+        client: Custom docker client.
+        runtime: Lambda runtime. Must provide one of ``runtime``,
+            ``docker_file``, or ``docker_image``.
+        docker_file: Path to a Dockerfile to build an image.
+            Must provide one of ``runtime``, ``docker_file``, or ``docker_image``.
+        docker_image: Local or remote docker image to use.
+            Must provide one of ``runtime``, ``docker_file``, or ``docker_image``.
+        python_dontwritebytecode: Don't write bytecode.
 
     """
     # TODO use kwargs to pass args to docker for advanced config
@@ -451,16 +489,19 @@ def dockerized_pip(
     LOGGER.info('using docker image "%s" to build deployment package...', docker_image)
 
     docker_run_args = {}
-    if _kwargs.get("python_dontwritebytecode"):
+    if python_dontwritebytecode:
         docker_run_args["environment"] = "1"
 
-    container = client.containers.run(
-        image=docker_image,
-        command=["/bin/sh", "-c", pip_cmd],
-        auto_remove=True,
-        detach=True,
-        mounts=[work_dir_mount],
-        **docker_run_args
+    container = cast(
+        Container,
+        client.containers.run(
+            image=docker_image,
+            command=["/bin/sh", "-c", pip_cmd],
+            auto_remove=True,
+            detach=True,
+            mounts=[work_dir_mount],
+            **docker_run_args
+        ),
     )
 
     # 'stream' creates a blocking generator that allows for real-time logs.
@@ -470,7 +511,7 @@ def dockerized_pip(
         LOGGER.info(log.decode().strip())
 
 
-def _pip_has_no_color_option(python_path):
+def _pip_has_no_color_option(python_path: str) -> bool:
     """Return boolean on whether pip is new enough to have --no-color option.
 
     pip v10 introduced this option, and it's used to minimize the effect of
@@ -508,48 +549,50 @@ def _pip_has_no_color_option(python_path):
 
 
 def _zip_package(
-    package_root,
-    includes,
-    excludes=None,
-    dockerize_pip=False,
-    follow_symlinks=False,
-    python_path=None,
-    requirements_files=None,
-    use_pipenv=False,
-    **kwargs
-):
+    package_root: str,
+    *,
+    dockerize_pip: DockerizePipArgTypeDef = False,
+    excludes: Optional[List[str]] = None,
+    follow_symlinks: bool = False,
+    includes: List[str],
+    pipenv_timeout: int = 300,
+    python_dontwritebytecode: bool = False,
+    python_exclude_bin_dir: bool = False,
+    python_exclude_setuptools_dirs: bool = False,
+    python_path: Optional[str] = None,
+    requirements_files: Dict[str, bool],
+    use_pipenv: bool = False,
+    **kwargs: Any
+) -> Tuple[bytes, str]:
     """Create zip file in memory with package dependencies.
 
     Args:
-        package_root (str): Base directory to copy files from.
-        includes (List[str]): Inclusion patterns. Only files  matching those
-            patterns will be included in the result.
-        excludes (List[str]): Exclusion patterns. Files matching those
-            patterns will be excluded from the result. Exclusions take
-            precedence over inclusions.
-        dockerize_pip (Union[bool, str]): Whether to use docker or under what
-            conditions docker will be used to run ``pip``.
-        follow_symlinks (bool): If true, symlinks will be included in the
-            resulting zip file.
-        python_path (Optional[str]): Explicit python interpreter to be used.
-            pipenv must be installed and executable using ``-m`` if provided.
-        requirements_files (Dict[str, bool]): Map of requirement file names and
-            whether they exist.
-        use_pipenv (bool): Whether to use pipenv to export a Pipfile as
-            requirements.txt.
-        kwargs (Any): Advanced options for subprocess and docker. See source
-            code to determine what is supported.
+        package_root: Base directory to copy files from.
+        dockerize_pip: Whether to use docker or under what conditions docker will
+            be used to run ``pip``.
+        excludes: Exclusion patterns. Files matching those patterns will be
+            excluded from the result. Exclusions take precedence over inclusions.
+        follow_symlinks: If true, symlinks will be included in the resulting zip file.
+        includes: Inclusion patterns. Only files  matching those patterns will be
+            included in the result.
+        pipenv_timeout: pipenv timeout in seconds.
+        python_dontwritebytecode: Done write byte code.
+        python_exclude_bin_dir: Exclude bin directory.
+        python_exclude_setuptools_dirs: Exclude setuptools directories.
+        python_path: Explicit python interpreter to be used. pipenv must be
+            installed and executable using ``-m`` if provided.
+        requirements_files: Map of requirement file names and whether they exist.
+        use_pipenv: Whether to use pipenv to export a Pipfile as requirements.txt.
 
     Returns:
-        Tuple[str, str]: Content of the ZIP file as a byte string and
-        calculated hash of all the files
+        Content of the ZIP file as a byte string and calculated hash of all the files
 
     """
     kwargs.setdefault("pipenv_timeout", 300)
 
-    temp_root = os.path.join(os.path.expanduser("~"), ".runway_cache")
-    if not os.path.isdir(temp_root):
-        os.makedirs(temp_root)
+    temp_root = DOT_RUNWAY_DIR
+    if not temp_root.is_dir():
+        temp_root.mkdir(parents=True)
 
     # exclude potential virtual environments in the package
     excludes.append(".venv/")
@@ -563,11 +606,13 @@ def _zip_package(
             requirements=requirements_files,
             python_path=python_path,
             use_pipenv=use_pipenv,
-            pipenv_timeout=kwargs["pipenv_timeout"],
+            pipenv_timeout=pipenv_timeout,
         )
 
         if should_use_docker(dockerize_pip):
-            dockerized_pip(tmpdir, **kwargs)
+            dockerized_pip(
+                tmpdir, python_dontwritebytecode=python_dontwritebytecode, **kwargs
+            )
         else:
             tmp_script = Path(tmpdir) / "__runway_run_pip_install.py"
             pip_cmd = [
@@ -583,7 +628,7 @@ def _zip_package(
             ]
 
             subprocess_args = {}
-            if kwargs.get("python_dontwritebytecode"):
+            if python_dontwritebytecode:
                 subprocess_args["env"] = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
 
             # Pyinstaller build or explicit python path
@@ -618,12 +663,10 @@ def _zip_package(
                 if tmp_script.is_file():
                     tmp_script.unlink()
 
-        if kwargs.get("python_exclude_bin_dir") and os.path.isdir(
-            os.path.join(tmpdir, "bin")
-        ):
+        if python_exclude_bin_dir and os.path.isdir(os.path.join(tmpdir, "bin")):
             LOGGER.debug("Removing python /bin directory from Lambda files")
             shutil.rmtree(os.path.join(tmpdir, "bin"))
-        if kwargs.get("python_exclude_setuptools_dirs"):
+        if python_exclude_setuptools_dirs:
             for i in os.listdir(tmpdir):
                 if i.endswith(".egg-info") or i.endswith(".dist-info"):
                     LOGGER.debug("Removing directory %s from Lambda files", i)
@@ -633,17 +676,19 @@ def _zip_package(
         return _zip_files(req_files, tmpdir)
 
 
-def _head_object(s3_conn, bucket, key):
+def _head_object(
+    s3_conn: S3Client, bucket: str, key: str
+) -> Optional[HeadObjectOutputTypeDef]:
     """Retrieve information about an object in S3 if it exists.
 
     Args:
-        s3_conn (botocore.client.S3): S3 connection to use for operations.
-        bucket (str): name of the bucket containing the key.
-        key (str): name of the key to lookup.
+        s3_conn: S3 connection to use for operations.
+        bucket: name of the bucket containing the key.
+        key: name of the key to lookup.
 
     Returns:
-        Dict[str, Any]: S3 object information, or None if the object does not
-        exist. See the AWS documentation for explanation of the contents.
+        S3 object information, or None if the object does not exist.
+        See the AWS documentation for explanation of the contents.
 
     Raises:
         botocore.exceptions.ClientError: any error from boto3 other than key
@@ -658,7 +703,15 @@ def _head_object(s3_conn, bucket, key):
         raise
 
 
-def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash, payload_acl):
+def _upload_code(
+    s3_conn: S3Client,
+    bucket: str,
+    prefix: str,
+    name: str,
+    contents: Union[bytes, str],
+    content_hash: str,
+    payload_acl: PayloadAclTypeDef,
+) -> Code:
     """Upload a ZIP file to S3 for use by Lambda.
 
     The key used for the upload will be unique based on the checksum of the
@@ -666,20 +719,18 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash, payload_
     expected contents.
 
     Args:
-        s3_conn (botocore.client.S3): S3 connection to use for operations.
-        bucket (str): name of the bucket to create.
-        prefix (str): S3 prefix to prepend to the constructed key name for
+        s3_conn: S3 connection to use for operations.
+        bucket: name of the bucket to create.
+        prefix: S3 prefix to prepend to the constructed key name for
             the uploaded file
-        name (str): desired name of the Lambda function. Will be used to
-            construct a key name for the uploaded file.
-        contents (str): byte string with the content of the file upload.
-        content_hash (str): md5 hash of the contents to be uploaded.
-        payload_acl (str): The canned S3 object ACL to be applied to the
-            uploaded payload
+        name: desired name of the Lambda function. Will be used to construct a
+            key name for the uploaded file.
+        contents: byte string with the content of the file upload.
+        content_hash: md5 hash of the contents to be uploaded.
+        payload_acl: The canned S3 object ACL to be applied to the uploaded payload.
 
     Returns:
-        troposphere.awslambda.Code: CloudFormation Lambda Code object,
-        pointing to the uploaded payload in S3.
+        CloudFormation Lambda Code object, pointing to the uploaded payload in S3.
 
     Raises:
         botocore.exceptions.ClientError: any error from boto3 is passed
@@ -696,7 +747,7 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash, payload_
         s3_conn.put_object(
             Bucket=bucket,
             Key=key,
-            Body=contents,
+            Body=contents.encode() if isinstance(contents, str) else contents,
             ContentType="application/zip",
             ACL=payload_acl,
         )
@@ -704,7 +755,11 @@ def _upload_code(s3_conn, bucket, prefix, name, contents, content_hash, payload_
     return Code(S3Bucket=bucket, S3Key=key)
 
 
-def _check_pattern_list(patterns, key, default=None):
+def _check_pattern_list(
+    patterns: Optional[Union[List[str], str]],
+    key: str,
+    default: Optional[List[str]] = None,
+) -> Optional[List[str]]:
     """Validate file search patterns from user configuration.
 
     Acceptable input is a string (which will be converted to a singleton list),
@@ -715,12 +770,10 @@ def _check_pattern_list(patterns, key, default=None):
         patterns: Input from user configuration (YAML).
         key (str): Name of the configuration key the input came from,
             used for error display purposes.
-
-    Keyword Args:
         default: Value to return in case the input is empty or unset.
 
     Returns:
-        List[str]: Validated list of patterns.
+        Validated list of patterns.
 
     Raises:
         ValueError: If the input is unacceptable.
@@ -732,9 +785,8 @@ def _check_pattern_list(patterns, key, default=None):
     if isinstance(patterns, str):
         return [patterns]
 
-    if isinstance(patterns, list):
-        if all(isinstance(p, str) for p in patterns):
-            return patterns
+    if isinstance(patterns, list) and all(isinstance(p, str) for p in patterns):
+        return patterns
 
     raise ValueError(
         "Invalid file patterns in key '{}': must be a string or "
@@ -742,38 +794,52 @@ def _check_pattern_list(patterns, key, default=None):
     )
 
 
+class _UploadFunctionOptionsTypeDef(TypedDict):
+    """Type definition for the "options" argument of _upload_function.
+
+    Attributes:
+        include: File patterns to include in the payload.
+        exclude: File patterns to exclude from the payload.
+        path: Base path to retrieve files from. If not absolute, it
+            will be interpreted as relative to the CFNgin configuration file
+            directory, then converted to an absolutepath.
+            See :func:`runway.cfngin.util.get_config_directory`.
+
+    """
+
+    exclude: Optional[List[str]]
+    include: Optional[List[str]]
+    path: str
+
+
 def _upload_function(
-    s3_conn, bucket, prefix, name, options, follow_symlinks, payload_acl, sys_path
-):
+    s3_conn: S3Client,
+    bucket: str,
+    prefix: str,
+    name: str,
+    options: _UploadFunctionOptionsTypeDef,
+    follow_symlinks: bool,
+    payload_acl: PayloadAclTypeDef,
+    sys_path: str,
+) -> Code:
     """Build a Lambda payload from user configuration and uploads it to S3.
 
     Args:
-        s3_conn (botocore.client.S3): S3 connection to use for operations.
-        bucket (str): name of the bucket to upload to.
-        prefix (str): S3 prefix to prepend to the constructed key name for
+        s3_conn: S3 connection to use for operations.
+        bucket: name of the bucket to upload to.
+        prefix: S3 prefix to prepend to the constructed key name for
             the uploaded file
-        name (str): Desired name of the Lambda function. Will be used to
+        name: Desired name of the Lambda function. Will be used to
             construct a key name for the uploaded file.
-        options (Dict[str, Any]): Configuration for how to build the payload.
-            Consists of the following keys:
-                **path**:
-                    Base path to retrieve files from (mandatory). If not
-                    absolute, it will be interpreted as relative to the CFNgin
-                    configuration file directory, then converted to an absolute
-                    path. See :func:`runway.cfngin.util.get_config_directory`.
-                **include**:
-                    File patterns to include in the payload (optional).
-                **exclude**:
-                    File patterns to exclude from the payload (optional).
-        follow_symlinks (bool): If true, symlinks will be included in the
+        options: Configuration for how to build the payload.
+        follow_symlinks: If true, symlinks will be included in the
             resulting zip file
-        payload_acl (str): The canned S3 object ACL to be applied to the
+        payload_acl: The canned S3 object ACL to be applied to the
             uploaded payload
-        sys_path (str): Path that all actions are relative to.
+        sys_path: Path that all actions are relative to.
 
     Returns:
-        troposphere.awslambda.Code: CloudFormation AWS Lambda Code object,
-        pointing to the uploaded object in S3.
+        CloudFormation AWS Lambda Code object, pointing to the uploaded object in S3.
 
     Raises:
         ValueError: If any configuration is invalid.
@@ -801,7 +867,7 @@ def _upload_function(
     if requirements_files:
         zip_contents, content_hash = _zip_package(
             root,
-            includes=includes,
+            includes=cast(List[str], includes),
             excludes=excludes,
             follow_symlinks=follow_symlinks,
             requirements_files=requirements_files,
@@ -809,7 +875,7 @@ def _upload_function(
         )
     else:
         zip_contents, content_hash = _zip_from_file_patterns(
-            root, includes, excludes, follow_symlinks
+            root, cast(List[str], includes), cast(List[str], excludes), follow_symlinks
         )
 
     return _upload_code(
@@ -818,34 +884,33 @@ def _upload_function(
 
 
 def select_bucket_region(
-    custom_bucket, hook_region, cfngin_bucket_region, provider_region
-):
+    custom_bucket: Optional[str],
+    hook_region: Optional[str],
+    cfngin_bucket_region: Optional[str],
+    provider_region: str,
+) -> str:
     """Return the appropriate region to use when uploading functions.
 
     Select the appropriate region for the bucket where lambdas are uploaded in.
 
     Args:
-        custom_bucket (Optional[str]): The custom bucket name provided by the
-            `bucket` kwarg of the aws_lambda hook, if provided.
-        hook_region (str): The contents of the `bucket_region` argument to
-            the hook.
-        cfngin_bucket_region (str): The contents of the
-            ``cfngin_bucket_region`` global setting.
-        provider_region (str): The region being used by the provider.
+        custom_bucket: The custom bucket name provided by the `bucket` kwarg of
+            the aws_lambda hook, if provided.
+        hook_region: The contents of the `bucket_region` argument to the hook.
+        cfngin_bucket_region: The contents of the ``cfngin_bucket_region`` global
+            setting.
+        provider_region: The region being used by the provider.
 
     Returns:
-        str: The appropriate region string.
+        The appropriate region string.
 
     """
     region = None
-    if custom_bucket:
-        region = hook_region
-    else:
-        region = cfngin_bucket_region
+    region = hook_region if custom_bucket else cfngin_bucket_region
     return region or provider_region
 
 
-def upload_lambda_functions(context, provider, **kwargs):
+def upload_lambda_functions(context: Context, provider: Provider, **kwargs: Any):
     """Build Lambda payloads from user configuration and upload them to S3.
 
     Constructs ZIP archives containing files matching specified patterns for
@@ -1011,15 +1076,17 @@ def upload_lambda_functions(context, provider, **kwargs):
     """
     # TODO add better handling for misconfiguration (e.g. forgetting function names)
     # TODO support defining dockerize_pip options at the top level of args
-    custom_bucket = kwargs.get("bucket")
+    custom_bucket = cast(str, kwargs.get("bucket", ""))
     if not custom_bucket:
+        if not context.bucket_name:
+            raise ValueError("hook requires bucket argument or top-level cfngin_hook")
         bucket_name = context.bucket_name
         LOGGER.info("using default bucket from CFNgin: %s", bucket_name)
     else:
         bucket_name = custom_bucket
         LOGGER.info("using custom bucket: %s", bucket_name)
 
-    custom_bucket_region = kwargs.get("bucket_region")
+    custom_bucket_region = cast(str, kwargs.get("bucket_region", ""))
     if not custom_bucket and custom_bucket_region:
         raise ValueError("Cannot specify `bucket_region` without specifying `bucket`.")
 
@@ -1027,7 +1094,7 @@ def upload_lambda_functions(context, provider, **kwargs):
         custom_bucket,
         custom_bucket_region,
         context.config.cfngin_bucket_region,
-        provider.region,
+        provider.region or "us-east-1",
     )
 
     # Check if we should walk / follow symlinks

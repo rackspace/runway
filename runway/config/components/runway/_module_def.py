@@ -46,7 +46,8 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
 
     @child_modules.setter
     def child_modules(
-        self, modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]]
+        self,
+        modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]],  # type: ignore
     ) -> None:
         """Set the value of the property.
 

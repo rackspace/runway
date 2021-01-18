@@ -1,10 +1,15 @@
 """Handler for fetching outputs from fully qualified stacks."""
-# pylint: disable=arguments-differ,unused-argument
+# pylint: disable=arguments-differ
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Optional
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
+
+if TYPE_CHECKING:
+    from ...providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "xref"
@@ -18,7 +23,7 @@ class XrefLookup(LookupHandler):
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value: str, provider: Optional[Provider] = None, **_: Any) -> str:
         """Fetch an output from the designated, fully qualified stack.
 
         The `output` handler supports fetching outputs from stacks created
@@ -28,14 +33,11 @@ class XrefLookup(LookupHandler):
         :class:`runway.cfngin.context.Context` to expand the fqn of the stack.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-                ``<stack_name>::<output_name>``
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
+            value: Parameter(s) given to this lookup. ``<stack_name>::<output_name>``
+            provider: Provider instance.
 
         Returns:
-            str: Output from the specified stack.
+            Output from the specified stack.
 
         Example:
             ::
@@ -51,5 +53,4 @@ class XrefLookup(LookupHandler):
 
         decon = deconstruct(value)
         stack_fqn = decon.stack_name
-        output = provider.get_output(stack_fqn, decon.output_name)
-        return output
+        return provider.get_output(stack_fqn, decon.output_name)
