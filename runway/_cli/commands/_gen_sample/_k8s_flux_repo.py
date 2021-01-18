@@ -1,20 +1,18 @@
 """``runway gen-sample k8s-flux-repo`` command."""
 import logging
 import shutil
-import sys
-from typing import Any  # pylint: disable=W
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample, write_tfstate_template
 
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # pylint: disable=E
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("k8s-flux-repo", short_help="k8s + flux + tf (k8s-tf-infrastructure)")
@@ -22,8 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def k8s_flux_repo(ctx, **_):
-    # type: (click.Context, Any) -> None
+def k8s_flux_repo(ctx: click.Context, **_: Any) -> None:
     """Generate a sample Kubernetes cluster with Flux CD managed via Terraform."""
     src = TEMPLATES / "k8s-flux-repo"
     dest = Path.cwd() / "k8s-tf-infrastructure"

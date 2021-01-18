@@ -1,4 +1,11 @@
 """CFNgin exceptions."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, List, Optional, Union
+
+if TYPE_CHECKING:
+    from ..variables import Variable
+    from .plan import Step
 
 
 class CancelExecution(Exception):
@@ -8,11 +15,11 @@ class CancelExecution(Exception):
 class ChangesetDidNotStabilize(Exception):
     """Raised when the applying a changeset fails."""
 
-    def __init__(self, change_set_id):
+    def __init__(self, change_set_id: str) -> None:
         """Instantiate class.
 
         Args:
-            change_set_id (str): The changeset that failed.
+            change_set_id: The changeset that failed.
 
         """
         self.id = change_set_id
@@ -24,14 +31,14 @@ class ChangesetDidNotStabilize(Exception):
 class GraphError(Exception):
     """Raised when the graph is invalid (e.g. acyclic dependencies)."""
 
-    def __init__(self, exception, stack, dependency):
+    def __init__(self, exception: Exception, stack: str, dependency: str) -> None:
         """Instantiate class.
 
         Args:
-            exception (Exception): The exception that was raised by the invalid
+            exception: The exception that was raised by the invalid
                 graph.
-            stack (str): Name of the stack causing the error.
-            dependency (str): Name of the dependency causing the error.
+            stack: Name of the stack causing the error.
+            dependency: Name of the dependency causing the error.
 
         """
         self.stack = stack
@@ -46,13 +53,12 @@ class GraphError(Exception):
 class ImproperlyConfigured(Exception):
     """Raised when a componenet is improperly configured."""
 
-    def __init__(self, cls, error, *args, **kwargs):
+    def __init__(self, cls: Any, error: Exception, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            cls (Any): The class that was improperly configured.
-            error (Exception): The exception that was raised when trying to
-                use cls.
+            cls: The class that was improperly configured.
+            error: The exception that was raised when trying to use cls.
 
         """
         message = 'Class "%s" is improperly configured: %s' % (cls, error,)
@@ -62,12 +68,12 @@ class ImproperlyConfigured(Exception):
 class InvalidConfig(Exception):
     """Provided config file is invalid."""
 
-    def __init__(self, errors):
+    def __init__(self, errors: Union[str, List[Union[Exception, str]]]) -> None:
         """Instantiate class.
 
         Args:
-            errors (Union[str, List[Union[Exception, str]]]): Errors or error
-                messages that are raised to identify that a config is invalid.
+            errors: Errors or error messages that are raised to identify that a
+                config is invalid.
 
         """
         super().__init__(errors)
@@ -77,11 +83,11 @@ class InvalidConfig(Exception):
 class InvalidDockerizePipConfiguration(Exception):
     """Raised when the provided configuration for dockerized pip is invalid."""
 
-    def __init__(self, msg):
+    def __init__(self, msg: str) -> None:
         """Instantiate class.
 
         Args:
-            msg (str): The reason for the error being raised.
+            msg: The reason for the error being raised.
 
         """
         self.message = msg
@@ -95,14 +101,15 @@ class InvalidUserdataPlaceholder(Exception):
 
     """
 
-    def __init__(self, blueprint_name, exception_message, *args, **kwargs):
+    def __init__(
+        self, blueprint_name: str, exception_message: str, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
-            blueprint_name (str): Name of the blueprint with invalid userdata
-                placeholder.
-            exception_message (str): Message from the exception that was raised
-                while parsing the userdata.
+            blueprint_name: Name of the blueprint with invalid userdata placeholder.
+            exception_message: Message from the exception that was raised while
+                parsing the userdata.
 
         """
         message = exception_message + ". "
@@ -114,12 +121,11 @@ class InvalidUserdataPlaceholder(Exception):
 class MissingEnvironment(Exception):
     """Raised when an environment lookup is used but the key doesn't exist."""
 
-    def __init__(self, key, *args, **kwargs):
+    def __init__(self, key: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            key (str): The key that was used but doesn't exist in the
-            environment.
+            key: The key that was used but doesn't exist in the environment.
 
         """
         self.key = key
@@ -130,11 +136,11 @@ class MissingEnvironment(Exception):
 class MissingParameterException(Exception):
     """Raised if a required parameter with no default is missing."""
 
-    def __init__(self, parameters, *args, **kwargs):
+    def __init__(self, parameters: List[str], *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            parameters (List[str]): A list of the parameters that are missing.
+            parameters: A list of the parameters that are missing.
 
         """
         self.parameters = parameters
@@ -147,12 +153,14 @@ class MissingParameterException(Exception):
 class MissingVariable(Exception):
     """Raised when a variable with no default is not provided a value."""
 
-    def __init__(self, blueprint_name, variable_name, *args, **kwargs):
+    def __init__(
+        self, blueprint_name: str, variable_name: str, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
-            blueprint_name (str): Name of the blueprint.
-            variable_name (str): Name of the variable missing a value.
+            blueprint_name: Name of the blueprint.
+            variable_name: Name of the variable missing a value.
 
         """
         message = 'Variable "%s" in blueprint "%s" is missing' % (
@@ -165,7 +173,7 @@ class MissingVariable(Exception):
 class PipError(Exception):
     """Raised when pip returns a non-zero exit code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate class."""
         self.message = (
             "A non-zero exit code was returned when invoking "
@@ -177,7 +185,7 @@ class PipError(Exception):
 class PipenvError(Exception):
     """Raised when pipenv returns a non-zero exit code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate class."""
         self.message = (
             "A non-zero exit code was returned when invoking "
@@ -191,7 +199,7 @@ class PipenvError(Exception):
 class PersistentGraphCannotLock(Exception):
     """Raised when the persistent graph in S3 cannot be locked."""
 
-    def __init__(self, reason):
+    def __init__(self, reason: str) -> None:
         """Instantiate class."""
         message = "Could not lock persistent graph; %s" % reason
         super().__init__(message)
@@ -200,7 +208,7 @@ class PersistentGraphCannotLock(Exception):
 class PersistentGraphCannotUnlock(Exception):
     """Raised when the persistent graph in S3 cannot be unlocked."""
 
-    def __init__(self, reason):
+    def __init__(self, reason: Union[Exception, str]) -> None:
         """Instantiate class."""
         message = "Could not unlock persistent graph; %s" % reason
         super().__init__(message)
@@ -213,7 +221,9 @@ class PersistentGraphLocked(Exception):
 
     """
 
-    def __init__(self, message=None, reason=None):
+    def __init__(
+        self, message: Optional[str] = None, reason: Optional[str] = None
+    ) -> None:
         """Instantiate class."""
         if not message:
             message = "Persistant graph is locked. {}".format(
@@ -231,7 +241,7 @@ class PersistentGraphLockCodeMissmatch(Exception):
 
     """
 
-    def __init__(self, provided_code, s3_code):
+    def __init__(self, provided_code: str, s3_code: Optional[str]) -> None:
         """Instantiate class."""
         message = (
             "The provided lock code '%s' does not match the S3 "
@@ -247,7 +257,9 @@ class PersistentGraphUnlocked(Exception):
 
     """
 
-    def __init__(self, message=None, reason=None):
+    def __init__(
+        self, message: Optional[str] = None, reason: Optional[str] = None
+    ) -> None:
         """Instantiate class."""
         if not message:
             message = "Persistant graph is unlocked. {}".format(
@@ -260,12 +272,11 @@ class PersistentGraphUnlocked(Exception):
 class PlanFailed(Exception):
     """Raised if any step of a plan fails."""
 
-    def __init__(self, failed_steps, *args, **kwargs):
+    def __init__(self, failed_steps: List[Step], *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            failed_steps (List[:class:`runway.cfngin.plan.Step`]): The steps
-                that failed.
+            failed_steps: The steps that failed.
 
         """
         self.failed_steps = failed_steps
@@ -283,11 +294,11 @@ class StackDidNotChange(Exception):
 class StackDoesNotExist(Exception):
     """Raised when a stack does not exist in AWS."""
 
-    def __init__(self, stack_name, *args, **kwargs):
+    def __init__(self, stack_name: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            stack_name (str): Name of the stack that does not exist.
+            stack_name: Name of the stack that does not exist.
 
         """
         message = (
@@ -300,13 +311,15 @@ class StackDoesNotExist(Exception):
 class StackUpdateBadStatus(Exception):
     """Raised if the state of a stack can't be handled."""
 
-    def __init__(self, stack_name, stack_status, reason, *args, **kwargs):
+    def __init__(
+        self, stack_name: str, stack_status: str, reason: str, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
-            stack_name (str): Name of the stack.
-            stack_status (str): The stack's status.
-            reason (str): The reason for the current status.
+            stack_name: Name of the stack.
+            stack_status: The stack's status.
+            reason: The reason for the current status.
 
         """
         self.stack_name = stack_name
@@ -326,12 +339,12 @@ class StackFailed(Exception):
 
     """
 
-    def __init__(self, stack_name, status_reason=None):
+    def __init__(self, stack_name: str, status_reason: Optional[str] = None) -> None:
         """Instantiate class.
 
         Args:
-            stack_name (str): Name of the stack.
-            status_reason (str): The reason for the current status.
+            stack_name: Name of the stack.
+            status_reason: The reason for the current status.
 
         """
         self.stack_name = stack_name
@@ -346,14 +359,16 @@ class StackFailed(Exception):
 class UnableToExecuteChangeSet(Exception):
     """Raised if changeset execution status is not ``AVAILABLE``."""
 
-    def __init__(self, stack_name, change_set_id, execution_status):
+    def __init__(
+        self, stack_name: str, change_set_id: str, execution_status: str
+    ) -> None:
         """Instantiate class.
 
         Args:
-            stack_name (str): Name of the stack.
-            change_set_id (str): The changeset that failed.
-            execution_status (str): The value of the changeset's
-                ``ExecutionStatus`` attribute.
+            stack_name: Name of the stack.
+            change_set_id: The changeset that failed.
+            execution_status: The value of the changeset's ``ExecutionStatus``
+                attribute.
 
         """
         self.stack_name = stack_name
@@ -374,14 +389,16 @@ class UnhandledChangeSetStatus(Exception):
 
     """
 
-    def __init__(self, stack_name, change_set_id, status, status_reason):
+    def __init__(
+        self, stack_name: str, change_set_id: str, status: str, status_reason: str
+    ) -> None:
         """Instantiate class.
 
         Args:
-            stack_name (str): Name of the stack.
-            change_set_id (str): The changeset that failed.
-            status (str): The state that could not be handled.
-            status_reason (str): Cause of the current state.
+            stack_name: Name of the stack.
+            change_set_id: The changeset that failed.
+            status: The state that could not be handled.
+            status_reason: Cause of the current state.
 
         """
         self.stack_name = stack_name
@@ -396,17 +413,18 @@ class UnhandledChangeSetStatus(Exception):
         super().__init__(message)
 
 
-class UnresolvedBlueprintVariable(Exception):  # TODO rename for blueprints only
+class UnresolvedBlueprintVariable(Exception):
     """Raised when trying to use a variable before it has been resolved."""
 
-    def __init__(self, blueprint_name, variable, *args, **kwargs):
+    def __init__(
+        self, blueprint_name: str, variable: Variable, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
-            blueprint_name (str): Name of the blueprint that tried to use
+            blueprint_name: Name of the blueprint that tried to use
                 the unresolved variables.
-            variable (:class:`runway.cfngin.variables.Variable`): The
-                unresolved variable.
+            variable: The unresolved variable.
 
         """
         message = 'Variable "{}" in blueprint "{}" hasn\'t been resolved'.format(
@@ -415,15 +433,15 @@ class UnresolvedBlueprintVariable(Exception):  # TODO rename for blueprints only
         super().__init__(message, *args, **kwargs)
 
 
-class UnresolvedBlueprintVariables(Exception):  # TODO rename for blueprints only
+class UnresolvedBlueprintVariables(Exception):
     """Raised when trying to use variables before they has been resolved."""
 
-    def __init__(self, blueprint_name, *args, **kwargs):
+    def __init__(self, blueprint_name: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            blueprint_name (str): Name of the blueprint that tried to use
-                the unresolved variables.
+            blueprint_name: Name of the blueprint that tried to use the unresolved
+                variables.
 
         """
         message = "Blueprint: \"{}\" hasn't resolved it's variables".format(
@@ -435,15 +453,20 @@ class UnresolvedBlueprintVariables(Exception):  # TODO rename for blueprints onl
 class ValidatorError(Exception):
     """Used for errors raised by custom validators of blueprint variables."""
 
-    def __init__(self, variable, validator, value, exception=None):
+    def __init__(
+        self,
+        variable: str,
+        validator: str,
+        value: str,
+        exception: Optional[Exception] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            variable (str): The variable that failed validation.
-            validator (str): The validator that was not passed.
-            value (str): The value of the variable that did not pass the
-                validator.
-            exception (Exception): The exception raised by the validator.
+            variable: The variable that failed validation.
+            validator: The validator that was not passed.
+            value: The value of the variable that did not pass the validator.
+            exception: The exception raised by the validator.
 
         """
         self.variable = variable
@@ -469,12 +492,14 @@ class ValidatorError(Exception):
 class VariableTypeRequired(Exception):
     """Raised when a variable defined in a blueprint is missing a type."""
 
-    def __init__(self, blueprint_name, variable_name, *args, **kwargs):
+    def __init__(
+        self, blueprint_name: str, variable_name: str, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
-            blueprint_name (str): Name of the blueprint.
-            variable_name (str): Name of the variable missing a type.
+            blueprint_name: Name of the blueprint.
+            variable_name: Name of the variable missing a type.
 
         """
         message = 'Variable "{}" in blueprint "{}" does not have a type'.format(

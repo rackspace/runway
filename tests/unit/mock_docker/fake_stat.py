@@ -1,6 +1,7 @@
 """Stats for fake Docker API."""
+from typing import Any, Dict
 
-OBJ = {
+OBJ: Dict[str, Any] = {
     "read": "2015-02-11T19:20:46.667237763+02:00",
     "network": {
         "rx_bytes": 567224,

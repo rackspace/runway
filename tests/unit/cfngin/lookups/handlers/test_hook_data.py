@@ -1,16 +1,23 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 from troposphere.awslambda import Code
 
 from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
+if TYPE_CHECKING:
+    from ....factories import MockCFNginContext
+
 
 class TestHookDataLookup:
     """Tests for runway.cfngin.lookups.handlers.hook_data.HookDataLookup."""
 
-    def test_handle(self, cfngin_context):
+    def test_handle(self, cfngin_context: MockCFNginContext) -> None:
         """Test handle with simple usage."""
         cfngin_context.set_hook_data("fake_hook", {"nested": {"result": "good"}})
         var_top = Variable("test", "${hook_data fake_hook}", variable_type="cfngin")
@@ -23,7 +30,7 @@ class TestHookDataLookup:
         assert var_top.value == {"nested": {"result": "good"}}
         assert var_nested.value == "good"
 
-    def test_default(self, cfngin_context):
+    def test_default(self, cfngin_context: MockCFNginContext) -> None:
         """Test handle with a default value."""
         cfngin_context.set_hook_data("fake_hook", {"nested": {"result": "good"}})
         var_top = Variable(
@@ -40,7 +47,7 @@ class TestHookDataLookup:
         assert var_top.value == "something"
         assert var_nested.value == "something"
 
-    def test_not_found(self, cfngin_context):
+    def test_not_found(self, cfngin_context: MockCFNginContext) -> None:
         """Test value not found and no default."""
         variable = Variable(
             "test", "${hook_data fake_hook.bad.result}", variable_type="cfngin"
@@ -53,7 +60,7 @@ class TestHookDataLookup:
         )
         assert "Could not find a value for" in str(err.value.__cause__)
 
-    def test_troposphere(self, cfngin_context):
+    def test_troposphere(self, cfngin_context: MockCFNginContext) -> None:
         """Test with troposphere object like returned from lambda hook."""
         bucket = "test-bucket"
         s3_key = "lambda_functions/my_function"
@@ -74,7 +81,7 @@ class TestHookDataLookup:
         assert var_bucket.value == bucket
         assert var_key.value == s3_key
 
-    def test_legacy_valid_hook_data(self, cfngin_context):
+    def test_legacy_valid_hook_data(self, cfngin_context: MockCFNginContext) -> None:
         """Test valid hook data."""
         cfngin_context.set_hook_data("fake_hook", {"result": "good"})
         variable = Variable(
@@ -84,7 +91,7 @@ class TestHookDataLookup:
             variable.resolve(cfngin_context)
         assert variable.value == "good"
 
-    def test_legacy_invalid_hook_data(self, cfngin_context):
+    def test_legacy_invalid_hook_data(self, cfngin_context: MockCFNginContext) -> None:
         """Test invalid hook data."""
         cfngin_context.set_hook_data("fake_hook", {"result": "good"})
         variable = Variable(
@@ -100,7 +107,9 @@ class TestHookDataLookup:
         )
         assert "Could not find a value for" in str(err.value.__cause__)
 
-    def test_legacy_bad_value_hook_data(self, cfngin_context):
+    def test_legacy_bad_value_hook_data(
+        self, cfngin_context: MockCFNginContext
+    ) -> None:
         """Test bad value hook data."""
         variable = Variable(
             "test", "${hook_data fake_hook::bad_key}", variable_type="cfngin"

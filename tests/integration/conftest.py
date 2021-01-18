@@ -1,14 +1,23 @@
 """Pytest configuration, fixtures, and plugins."""
 # pylint: disable=redefined-outer-name
+from __future__ import annotations
+
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable
 
 import pytest
 
+if TYPE_CHECKING:
+    from _pytest.config import Config
+
 TEST_ROOT = Path(__file__).parent
 
+CpConfigTypeDef = Callable[[str, Path], Path]
 
-def pytest_ignore_collect(path, config):  # pylint: disable=unused-argument
+
+# pylint: disable=unused-argument
+def pytest_ignore_collect(path: Any, config: Config) -> bool:
     """Determine if this directory should have its tests collected."""
     if config.option.functional:
         return True
@@ -16,16 +25,16 @@ def pytest_ignore_collect(path, config):  # pylint: disable=unused-argument
 
 
 @pytest.fixture
-def configs():
+def configs() -> Path:
     """Path to Runway config fixtures."""
     return TEST_ROOT.parent / "fixtures" / "configs"
 
 
 @pytest.fixture
-def cp_config(configs):
+def cp_config(configs: Path) -> Callable[[str, Path], Path]:
     """Copy a config file."""
 
-    def copy_config(config_name, dest_path):
+    def copy_config(config_name: str, dest_path: Path) -> Path:
         """Copy a config file by name to a destination directory.
 
         The resulting config will be named runway.yml.

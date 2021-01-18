@@ -1,9 +1,17 @@
 """Test runway.core.providers.aws._assume_role."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import logging
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from runway.core.providers.aws import AssumeRole
+
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+
+    from ....factories import MockRunwayContext
 
 NEW_CREDENTIALS = {
     "AWS_ACCESS_KEY_ID": "new_access_key_id",
@@ -14,7 +22,7 @@ ROLE_ARN = "arn:aws:iam::123456789012:role/role-name"
 ROLE_SESSION_ARN = "arn:aws:sts::123456789012:assumed-role/role-name/"
 
 
-def test_assume_role(runway_context):
+def test_assume_role(runway_context: MockRunwayContext) -> None:
     """Test AssumeRole."""
     assumed_role_user = {
         "AssumedRoleId": NEW_CREDENTIALS["AWS_ACCESS_KEY_ID"] + ":runway",
@@ -50,7 +58,7 @@ def test_assume_role(runway_context):
         assert "OLD_" + key not in runway_context.env.vars
 
 
-def test_assume_role_no_revert_on_exit(runway_context):
+def test_assume_role_no_revert_on_exit(runway_context: MockRunwayContext) -> None:
     """Test AssumeRole revert on exit."""
     assumed_role_user = {
         "AssumedRoleId": NEW_CREDENTIALS["AWS_ACCESS_KEY_ID"] + ":runway-test",
@@ -88,11 +96,16 @@ def test_assume_role_no_revert_on_exit(runway_context):
     assert runway_context.env.aws_credentials == NEW_CREDENTIALS
 
 
-def test_assume_role_no_role(caplog, runway_context):
+def test_assume_role_no_role(
+    caplog: LogCaptureFixture, runway_context: MockRunwayContext
+) -> None:
     """Test AssumeRole with no role_arn."""
     caplog.set_level(logging.DEBUG, logger="runway")
     with AssumeRole(runway_context) as result:
-        assert not result.assumed_role_user
-        assert not result.credentials
+        assert not result.assumed_role_user["AssumedRoleId"]
+        assert not result.assumed_role_user["Arn"]
+        assert not result.credentials["AccessKeyId"]
+        assert not result.credentials["SecretAccessKey"]
+        assert not result.credentials["SessionToken"]
         assert not result.role_arn
     assert "no role to assume" in caplog.messages

@@ -16,7 +16,7 @@ from runway.config.models.runway import (
 )
 
 
-class TestCfnLintRunwayTestDefinition:  # pylint: disable=too-few-public-methods
+class TestCfnLintRunwayTestDefinition:
     """Test runway.config.components.runway._test_def.CfnLintRunwayTestDefinition."""
 
     def test_parse_obj(self) -> None:
@@ -39,7 +39,7 @@ class TestRunwayTestDefinition:
     def test_new_invalid(self) -> None:
         """Test new invalid type."""
         with pytest.raises(TypeError) as excinfo:
-            RunwayTestDefinition({})
+            RunwayTestDefinition({})  # type: ignore
         assert str(excinfo.value).startswith("expected data of type")
 
     def test_new_script(self) -> None:
@@ -90,7 +90,7 @@ class TestRunwayTestDefinition:
         assert obj._vars["required"].name == "test_register_variable.required"
 
 
-class TestScriptRunwayTestDefinition:  # pylint: disable=too-few-public-methods
+class TestScriptRunwayTestDefinition:
     """Test runway.config.components.runway._test_def.ScriptRunwayTestDefinition."""
 
     def test_parse_obj(self) -> None:
@@ -100,7 +100,7 @@ class TestScriptRunwayTestDefinition:  # pylint: disable=too-few-public-methods
         )
 
 
-class TestYamlLintRunwayTestDefinition:  # pylint: disable=too-few-public-methods
+class TestYamlLintRunwayTestDefinition:
     """Test runway.config.components.runway._test_def.YamlLintRunwayTestDefinition."""
 
     def test_parse_obj(self) -> None:

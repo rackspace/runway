@@ -1,17 +1,25 @@
 """Tests for runway.cfngin.hooks.keypair."""
 # pylint: disable=redefined-outer-name
+from __future__ import annotations
+
 import sys
 from collections import namedtuple
 from contextlib import contextmanager
+from typing import TYPE_CHECKING, Iterator, Tuple
 
 import boto3
 import mock
 import pytest
 from moto import mock_ec2, mock_ssm
 
-from runway.cfngin.hooks.keypair import ensure_keypair_exists
+from runway.cfngin.hooks.keypair import KeyPairInfo, ensure_keypair_exists
 
 from ..factories import mock_context
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from runway.cfngin.context import Context
 
 REGION = "us-east-1"
 KEY_PAIR_NAME = "FakeKey"
@@ -20,7 +28,7 @@ SSHKey = namedtuple("SSHKey", "public_key private_key fingerprint")
 
 
 @pytest.fixture(scope="module")
-def ssh_key(cfngin_fixtures):
+def ssh_key(cfngin_fixtures: Path) -> SSHKey:
     """Return an ssh key."""
     base = cfngin_fixtures / "keypair"
     return SSHKey(
@@ -31,13 +39,13 @@ def ssh_key(cfngin_fixtures):
 
 
 @pytest.fixture
-def context():
+def context() -> Context:
     """Mock context."""
     return mock_context(namespace="fake")
 
 
 @pytest.fixture(autouse=True)
-def ec2(ssh_key):
+def ec2(ssh_key: SSHKey) -> Iterator[None]:
     """Mock EC2."""
     # Force moto to generate a deterministic key pair on creation.
     # Can be replaced by something more sensible when
@@ -53,14 +61,16 @@ def ec2(ssh_key):
 
 
 @pytest.fixture(autouse=True)
-def ssm():
+def ssm() -> Iterator[None]:
     """Mock SSM."""
     with mock_ssm():
         yield
 
 
 @contextmanager
-def mock_input(lines=(), isatty=True):
+def mock_input(
+    lines: Tuple[str, ...] = (), isatty: bool = True
+) -> Iterator[mock.MagicMock]:
     """Mock input."""
     with mock.patch(
         "runway.cfngin.hooks.keypair.get_raw_input", side_effect=lines
@@ -69,7 +79,9 @@ def mock_input(lines=(), isatty=True):
             yield mock_get_raw_input
 
 
-def assert_key_present(hook_result, key_name, fingerprint):
+def assert_key_present(
+    hook_result: KeyPairInfo, key_name: str, fingerprint: str
+) -> None:
     """Assert key present."""
     assert hook_result["key_name"] == key_name
     assert hook_result["fingerprint"] == fingerprint
@@ -83,7 +95,7 @@ def assert_key_present(hook_result, key_name, fingerprint):
     assert key_pairs[0]["KeyFingerprint"] == fingerprint
 
 
-def test_param_validation(context):
+def test_param_validation(context: Context) -> None:
     """Test param validation."""
     result = ensure_keypair_exists(
         context,
@@ -91,10 +103,10 @@ def test_param_validation(context):
         ssm_parameter_name="test",
         public_key_path="test",
     )
-    assert result is False
+    assert result == {}
 
 
-def test_keypair_exists(context):
+def test_keypair_exists(context: Context) -> None:
     """Test keypair exists."""
     ec2 = boto3.client("ec2")
     keypair = ec2.create_key_pair(KeyName=KEY_PAIR_NAME)
@@ -106,10 +118,10 @@ def test_keypair_exists(context):
     assert result == expected
 
 
-def test_import_file(tmpdir, context, ssh_key):
+def test_import_file(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
     """Test import file."""
-    pub_key = tmpdir.join("id_rsa.pub")
-    pub_key.write(ssh_key.public_key)
+    pub_key = tmp_path / "id_rsa.pub"
+    pub_key.write_bytes(ssh_key.public_key)
 
     result = ensure_keypair_exists(
         context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
@@ -118,19 +130,19 @@ def test_import_file(tmpdir, context, ssh_key):
     assert result["status"] == "imported"
 
 
-def test_import_bad_key_data(tmpdir, context):
+def test_import_bad_key_data(tmp_path: Path, context: Context) -> None:
     """Test import bad key data."""
-    pub_key = tmpdir.join("id_rsa.pub")
-    pub_key.write("garbage")
+    pub_key = tmp_path / "id_rsa.pub"
+    pub_key.write_text("garbage")
 
     result = ensure_keypair_exists(
         context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
     )
-    assert result is False
+    assert result == {}
 
 
-@pytest.mark.parametrize("ssm_key_id", ("my-key"))
-def test_create_in_ssm(context, ssh_key, ssm_key_id):
+@pytest.mark.parametrize("ssm_key_id", ["my-key"])
+def test_create_in_ssm(context: Context, ssh_key: SSHKey, ssm_key_id: str) -> None:
     """Test create in ssm."""
     result = ensure_keypair_exists(
         context,
@@ -155,28 +167,27 @@ def test_create_in_ssm(context, ssh_key, ssm_key_id):
     assert param_details.get("KeyId") == ssm_key_id
 
 
-def test_interactive_non_terminal_input(context):
+def test_interactive_non_terminal_input(context: Context) -> None:
     """Test interactive non terminal input."""
     with mock_input(isatty=False) as _input:
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
         _input.assert_not_called()
-    assert result is False
+    assert result == {}
 
 
-def test_interactive_retry_cancel(context):
+def test_interactive_retry_cancel(context: Context) -> None:
     """Test interactive retry cancel."""
     lines = ["garbage", "cancel"]
     with mock_input(lines) as _input:
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
         assert _input.call_count == 2
+    assert result == {}
 
-    assert result is False
 
-
-def test_interactive_import(tmpdir, context, ssh_key):
+def test_interactive_import(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
     """."""
-    key_file = tmpdir.join("id_rsa.pub")
-    key_file.write(ssh_key.public_key)
+    key_file = tmp_path / "id_rsa.pub"
+    key_file.write_bytes(ssh_key.public_key)
 
     lines = ["import", str(key_file)]
     with mock_input(lines):
@@ -186,11 +197,11 @@ def test_interactive_import(tmpdir, context, ssh_key):
     assert result["status"] == "imported"
 
 
-def test_interactive_create(tmpdir, context, ssh_key):
+def test_interactive_create(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
     """Test interactive create."""
-    key_dir = tmpdir.join("keys")
-    key_dir.ensure_dir()
-    key_file = key_dir.join("{}.pem".format(KEY_PAIR_NAME))
+    key_dir = tmp_path / "keys"
+    key_dir.mkdir(parents=True, exist_ok=True)
+    key_file = key_dir / f"{KEY_PAIR_NAME}.pem"
 
     lines = ["create", str(key_dir)]
     with mock_input(lines):
@@ -199,29 +210,29 @@ def test_interactive_create(tmpdir, context, ssh_key):
     assert_key_present(result, KEY_PAIR_NAME, ssh_key.fingerprint)
     assert result["status"] == "created"
     assert key_file.samefile(result["file_path"])
-    assert key_file.read_binary() == ssh_key.private_key
+    assert key_file.read_bytes() == ssh_key.private_key
 
 
-def test_interactive_create_bad_dir(tmpdir, context):
+def test_interactive_create_bad_dir(tmp_path: Path, context: Context) -> None:
     """Test interactive create bad dir."""
-    key_dir = tmpdir.join("missing")
+    key_dir = tmp_path / "missing"
 
     lines = ["create", str(key_dir)]
     with mock_input(lines):
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
-    assert result is False
+    assert result == {}
 
 
-def test_interactive_create_existing_file(tmpdir, context):
+def test_interactive_create_existing_file(tmp_path: Path, context: Context) -> None:
     """Test interactive create existing file."""
-    key_dir = tmpdir.join("keys")
-    key_dir.ensure_dir()
-    key_file = key_dir.join("{}.pem".format(KEY_PAIR_NAME))
-    key_file.ensure()
+    key_dir = tmp_path / "keys"
+    key_dir.mkdir(exist_ok=True, parents=True)
+    key_file = key_dir / f"{KEY_PAIR_NAME}.pem"
+    key_file.touch()
 
     lines = ["create", str(key_dir)]
     with mock_input(lines):
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
-    assert result is False
+    assert result == {}

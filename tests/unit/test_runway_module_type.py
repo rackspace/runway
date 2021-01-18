@@ -1,9 +1,13 @@
 """Test runway.runway_module_type."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, List, Type
 
 import pytest
 
+from runway.module import RunwayModule
 from runway.module.cdk import CloudDevelopmentKit
 from runway.module.cloudformation import CloudFormation
 from runway.module.k8s import K8s
@@ -11,6 +15,11 @@ from runway.module.serverless import Serverless
 from runway.module.staticsite import StaticSite
 from runway.module.terraform import Terraform
 from runway.runway_module_type import RunwayModuleType
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from _pytest.logging import LogCaptureFixture
 
 
 class TestRunwayModuleType:
@@ -30,24 +39,28 @@ class TestRunwayModuleType:
             (["any.tf", "serverless.yml"], Terraform),
         ],
     )
-    def test_autodetection(self, files, expected, cd_tmp_path):
+    def test_autodetection(
+        self, files: List[str], expected: Type[RunwayModule], cd_tmp_path: Path
+    ) -> None:
         """Test from autodetection."""
         for file_path in files:
             if file_path.endswith("/"):
                 (cd_tmp_path / file_path).mkdir()
             else:
                 (cd_tmp_path / file_path).touch()
-        result = RunwayModuleType(str(cd_tmp_path))
-        assert result.path == str(cd_tmp_path)
+        result = RunwayModuleType(cd_tmp_path)
+        assert result.path == cd_tmp_path
         assert result.class_path == expected.__module__ + "." + expected.__name__
         assert not result.type_str
         assert result.module_class.__name__ == expected.__name__
 
-    def test_autodetection_fail(self, caplog, cd_tmp_path):
+    def test_autodetection_fail(
+        self, caplog: LogCaptureFixture, cd_tmp_path: Path
+    ) -> None:
         """Test autodetection fail."""
         caplog.set_level(logging.ERROR, logger="runway")
         with pytest.raises(SystemExit) as excinfo:
-            assert not RunwayModuleType(str(cd_tmp_path))
+            assert not RunwayModuleType(cd_tmp_path)
         assert excinfo.value.code == 1
         assert (
             'module class could not be determined from path "{}"'.format(
@@ -56,12 +69,10 @@ class TestRunwayModuleType:
             in caplog.messages
         )
 
-    def test_from_class_path(self, cd_tmp_path):
+    def test_from_class_path(self, cd_tmp_path: Path) -> None:
         """Test from class_path."""
-        result = RunwayModuleType(
-            str(cd_tmp_path), class_path=CloudFormation.__module__
-        )
-        assert result.path == str(cd_tmp_path)
+        result = RunwayModuleType(cd_tmp_path, class_path=CloudFormation.__module__)
+        assert result.path == cd_tmp_path
         assert result.class_path == CloudFormation.__module__
         assert not result.type_str
         assert result.module_class.__name__ == CloudFormation.__module__
@@ -77,10 +88,12 @@ class TestRunwayModuleType:
             ("tf", Terraform),
         ],
     )
-    def test_from_extension(self, ext, expected, cd_tmp_path):
+    def test_from_extension(
+        self, ext: str, expected: Type[RunwayModule], cd_tmp_path: Path
+    ) -> None:
         """Test from path extension."""
         filename = "filename." + ext
-        result = RunwayModuleType(str(cd_tmp_path / filename))
+        result = RunwayModuleType(cd_tmp_path / filename)
         assert result.module_class == expected
 
     @pytest.mark.parametrize(
@@ -94,10 +107,12 @@ class TestRunwayModuleType:
             ("terraform", Terraform),
         ],
     )
-    def test_from_type_str(self, type_str, expected, cd_tmp_path):
+    def test_from_type_str(
+        self, type_str: str, expected: Type[RunwayModule], cd_tmp_path: Path
+    ) -> None:
         """Test from type_str."""
-        result = RunwayModuleType(str(cd_tmp_path), type_str=type_str)
-        assert result.path == str(cd_tmp_path)
+        result = RunwayModuleType(cd_tmp_path, type_str=type_str)
+        assert result.path == cd_tmp_path
         assert result.class_path == expected.__module__ + "." + expected.__name__
         assert result.type_str == type_str
         assert result.module_class == expected

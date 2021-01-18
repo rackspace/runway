@@ -1,12 +1,18 @@
 """DynamoDB lookup."""
 # pylint: disable=arguments-differ,unused-argument
+from __future__ import annotations
+
 import re
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from botocore.exceptions import ClientError
+from typing_extensions import Literal, TypedDict
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
+
+if TYPE_CHECKING:
+    from ...context import Context
 
 TYPE_NAME = "dynamodb"
 
@@ -15,13 +21,13 @@ class DynamodbLookup(LookupHandler):
     """DynamoDB lookup."""
 
     @classmethod
-    def handle(cls, value, context, *_, **kwargs):
+    def handle(cls, value: str, context: Context, *__args: Any, **__kwargs: Any) -> Any:
         """Get a value from a DynamoDB table.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
+            value: Parameter(s) given to this lookup.
                 ``[<region>:]<tablename>@<primarypartionkey>:<keyvalue>.<keyvalue>...``
-            context (:class:`runway.cfngin.context.Context`): Context instance.
+            context: Context instance.
 
         .. note:: The region is optional, and defaults to the environment's
                   ``AWS_DEFAULT_REGION`` if not specified.
@@ -32,15 +38,14 @@ class DynamodbLookup(LookupHandler):
         table_keys = None
         region = None
         table_name = None
-        if "@" in value:
-            table_info, table_keys = value.split("@", 1)
-            if ":" in table_info:
-                region, table_name = table_info.split(":", 1)
-            else:
-                table_name = table_info
-        else:
+        if "@" not in value:
             raise ValueError("Please make sure to include a tablename")
 
+        table_info, table_keys = value.split("@", 1)
+        if ":" in table_info:
+            region, table_name = table_info.split(":", 1)
+        else:
+            table_name = table_info
         if not table_name:
             raise ValueError("Please make sure to include a DynamoDB table name")
 
@@ -86,83 +91,80 @@ class DynamodbLookup(LookupHandler):
         )
 
 
-def _lookup_key_parse(table_keys):
+class ParsedLookupKey(TypedDict):
+    """Return value of _lookup_key_parse."""
+
+    clean_table_keys: List[str]
+    new_keys: List[Dict[Literal["L", "M", "N", "S"], str]]
+
+
+def _lookup_key_parse(table_keys: List[str],) -> ParsedLookupKey:
     """Return the order in which the stacks should be executed.
 
     Args:
-        dependencies (dict): a dictionary where each key should be the
-            fully qualified name of a stack whose value is an array of
-            fully qualified stack names that the stack depends on. This is
-            used to generate the order in which the stacks should be
-            executed.
+        table_keys: List of keys a table.
 
     Returns:
-        dict: includes a dict of lookup types with data types ('new_keys')
-              and a list of the lookups with without ('clean_table_keys')
+        Includes a dict of lookup types with data types ('new_keys')
+        and a list of the lookups with without ('clean_table_keys')
 
     """
     # we need to parse the key lookup passed in
     regex_matcher = r"\[([^\]]+)]"
-    valid_dynamodb_datatypes = ["M", "S", "N", "L"]
-    clean_table_keys = []
-    new_keys = []
+    valid_dynamodb_datatypes = ["L", "M", "N", "S"]
+    clean_table_keys: List[str] = []
+    new_keys: List[Dict[Literal["L", "M", "N", "S"], str]] = []
 
     for key in table_keys:
         match = re.search(regex_matcher, key)
         if match:
             # the datatypes are pulled from the dynamodb docs
-            if match.group(1) in valid_dynamodb_datatypes:
-                match_val = str(match.group(1))
-                key = key.replace(match.group(0), "")
-                new_keys.append({match_val: key})
-                clean_table_keys.append(key)
-            else:
+            if match.group(1) not in valid_dynamodb_datatypes:
                 raise ValueError(
                     ("CFNgin does not support looking up the datatype: {}").format(
                         str(match.group(1))
                     )
                 )
+            match_val = cast(Literal["L", "M", "N", "S"], match.group(1))
+            key = key.replace(match.group(0), "")
+            new_keys.append({match_val: key})
         else:
             new_keys.append({"S": key})
-            clean_table_keys.append(key)
-    key_dict = {}
-    key_dict["new_keys"] = new_keys
-    key_dict["clean_table_keys"] = clean_table_keys
-
-    return key_dict
+        clean_table_keys.append(key)
+    return {"new_keys": new_keys, "clean_table_keys": clean_table_keys}
 
 
-def _build_projection_expression(clean_table_keys):
+def _build_projection_expression(clean_table_keys: List[str]) -> str:
     """Return a projection expression for the DynamoDB lookup.
 
     Args:
-        clean_table_keys (Dict[str, Any]): Keys without the data types attached.
+        clean_table_keys: Keys without the data types attached.
 
     Returns:
         str: A projection expression for the DynamoDB lookup.
 
     """
-    projection_expression = ""
-    for key in clean_table_keys[:-1]:
-        projection_expression += ("{},").format(key)
+    projection_expression = "".join(
+        ("{},").format(key) for key in clean_table_keys[:-1]
+    )
+
     projection_expression += clean_table_keys[-1]
     return projection_expression
 
 
-def _get_val_from_ddb_data(data, keylist):
+def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]],) -> Any:
     """Return the value of the lookup.
 
     Args:
-        data (Dict[str, Any]): The raw DynamoDB data.
-        keylist(List[Dict[str, str]]): A list of keys to lookup. This must
-            include the datatype.
+        data: The raw DynamoDB data.
+        keylist: A list of keys to lookup. This must include the datatype.
 
     Returns:
-        Any: It returns the value from the DynamoDB record, and casts it
-            to a matching python datatype.
+        The value from the DynamoDB record, and casts it to a matching python
+        datatype.
 
     """
-    next_type = None
+    next_type: Optional[str] = None
     # iterate through the keylist to find the matching key/datatype
     for key in keylist:
         for k in key:
@@ -174,24 +176,23 @@ def _get_val_from_ddb_data(data, keylist):
             next_type = k
     if next_type == "L":
         # if type is list, convert it to a list and return
-        return _convert_ddb_list_to_list(data[next_type])
+        return _convert_ddb_list_to_list(data[cast(str, next_type)])
     if next_type == "N":
         # TODO: handle various types of 'number' datatypes, (e.g. int, double)
         # if a number, convert to an int and return
-        return int(data[next_type])
+        return int(data[cast(str, next_type)])
     # else, just assume its a string and return
-    return str(data[next_type])
+    return str(data[cast(str, next_type)])
 
 
-def _convert_ddb_list_to_list(conversion_list):
+def _convert_ddb_list_to_list(conversion_list: List[Dict[str, Any]]) -> List[Any]:
     """Return a python list without the DynamoDB datatypes.
 
     Args:
-        conversion_list (Dict[str, Any]): A DynamoDB list which includes the
-            datatypes.
+        conversion_list: A DynamoDB list which includes the datatypes.
 
     Returns:
-        List[Any]: Returns A sanitized list without the datatypes.
+        Returns A sanitized list without the datatypes.
 
     """
     ret_list = []

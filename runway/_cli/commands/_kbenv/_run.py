@@ -20,8 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def run(ctx, args, **_):
-    # type: (click.Context, Tuple[str, ...], Any) -> None
+def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
     """Run a kubectl command.
 
     Uses the version of kubectl specified in the ".kubectl-version" file

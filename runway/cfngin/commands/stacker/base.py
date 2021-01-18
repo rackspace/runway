@@ -37,7 +37,7 @@ def cancel():
     return cancel_event
 
 
-class KeyValueAction(argparse.Action):  # pylint: disable=too-few-public-methods
+class KeyValueAction(argparse.Action):
     """Key=value argument class for an argparse option."""
 
     def __init__(self, option_strings, dest, default=None, nargs=None, **kwargs):

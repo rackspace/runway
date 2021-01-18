@@ -7,8 +7,7 @@ from setuptools import find_packages, setup
 THIS_DIR = abspath(dirname(__file__))
 
 
-def local_scheme(version):  # pylint: disable=unused-argument
-    # type: (str) -> str
+def local_scheme(version: str) -> str:  # pylint: disable=unused-argument
     """Skip the local version (eg. +xyz) to upload to Test PyPI."""
     return ""
 
@@ -22,6 +21,7 @@ INSTALL_REQUIRES = [
     "awacs",  # for embedded hooks
     # awscli included for embedded hooks and aws subcommand
     "awscli>=1.18.196<2.0",
+    'backports.cached_property ; python_version < "3.8"',
     "botocore>=1.19.36<2.0",
     "boto3>=1.16.36<2.0",
     "cfn_flip>=1.2.1",  # 1.2.1+ require PyYAML 4.1+

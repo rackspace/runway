@@ -1,10 +1,13 @@
 """Tests for runway.cfngin.plan."""
 # pylint: disable=protected-access,unused-argument
+from __future__ import annotations
+
 import json
 import os
 import shutil
 import tempfile
 import unittest
+from typing import TYPE_CHECKING, List, Optional
 
 import mock
 
@@ -28,18 +31,21 @@ from runway.config import CfnginConfig
 
 from .factories import generate_definition, mock_context
 
+if TYPE_CHECKING:
+    from runway.cfngin.status import Status
+
 
 class TestStep(unittest.TestCase):
     """Tests for runway.cfngin.plan.Step."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         stack = mock.MagicMock()
         stack.name = "stack"
         stack.fqn = "namespace-stack"
         self.step = Step(stack=stack, fn=None)
 
-    def test_status(self):
+    def test_status(self) -> None:
         """Test status."""
         self.assertFalse(self.step.submitted)
         self.assertFalse(self.step.completed)
@@ -59,7 +65,7 @@ class TestStep(unittest.TestCase):
         self.assertNotEqual(self.step.status, False)
         self.assertNotEqual(self.step.status, "banana")
 
-    def test_from_stack_name(self):
+    def test_from_stack_name(self) -> None:
         """Return step from step name."""
         context = mock_context()
         stack_name = "test-stack"
@@ -68,7 +74,7 @@ class TestStep(unittest.TestCase):
         self.assertIsInstance(result, Step)
         self.assertEqual(stack_name, result.stack.name)
 
-    def test_from_persistent_graph(self):
+    def test_from_persistent_graph(self) -> None:
         """Return list of steps from graph dict."""
         context = mock_context()
         graph_dict = {"stack1": [], "stack2": ["stack1"]}
@@ -85,14 +91,14 @@ class TestStep(unittest.TestCase):
 class TestGraph(unittest.TestCase):
     """Tests for runway.cfngin.plan.Graph."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.context = mock_context()
         self.graph_dict = {"stack1": [], "stack2": ["stack1"]}
         self.graph_dict_expected = {"stack1": set(), "stack2": set(["stack1"])}
         self.steps = Step.from_persistent_graph(self.graph_dict, self.context)
 
-    def test_add_steps(self):
+    def test_add_steps(self) -> None:
         """Test add steps."""
         graph = Graph()
         graph.add_steps(self.steps)
@@ -101,7 +107,7 @@ class TestGraph(unittest.TestCase):
         self.assertEqual([step.name for step in self.steps], list(graph.steps.keys()))
         self.assertEqual(self.graph_dict_expected, graph.to_dict())
 
-    def test_pop(self):
+    def test_pop(self) -> None:
         """Test pop."""
         graph = Graph()
         graph.add_steps(self.steps)
@@ -111,14 +117,14 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(stack2, graph.pop(stack2))
         self.assertEqual({"stack1": set()}, graph.to_dict())
 
-    def test_dumps(self):
+    def test_dumps(self) -> None:
         """Test dumps."""
         graph = Graph()
         graph.add_steps(self.steps)
 
         self.assertEqual(json.dumps(self.graph_dict), graph.dumps())
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         """Test from dict."""
         graph = Graph.from_dict(self.graph_dict, self.context)
 
@@ -126,7 +132,7 @@ class TestGraph(unittest.TestCase):
         self.assertEqual([step.name for step in self.steps], list(graph.steps.keys()))
         self.assertEqual(self.graph_dict_expected, graph.to_dict())
 
-    def test_from_steps(self):
+    def test_from_steps(self) -> None:
         """Test from steps."""
         graph = Graph.from_steps(self.steps)
 
@@ -138,18 +144,18 @@ class TestGraph(unittest.TestCase):
 class TestPlan(unittest.TestCase):
     """Tests for runway.cfngin.plan.Plan."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.count = 0
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = Context(config=self.config)
         register_lookup_handler("noop", lambda **kwargs: "test")
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Run after tests."""
         unregister_lookup_handler("noop")
 
-    def test_plan(self):
+    def test_plan(self) -> None:
         """Test plan."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
@@ -164,7 +170,7 @@ class TestPlan(unittest.TestCase):
             plan.graph.to_dict(), {"bastion.1": set(["vpc.1"]), "vpc.1": set([])}
         )
 
-    def test_plan_reverse(self):
+    def test_plan_reverse(self) -> None:
         """Test plan reverse."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
@@ -179,7 +185,7 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(set(), result_graph_dict.get("bastion.1"))
         self.assertEqual(set(["bastion.1"]), result_graph_dict.get("vpc.1"))
 
-    def test_plan_targeted(self):
+    def test_plan_targeted(self) -> None:
         """Test plan targeted."""
         context = Context(config=self.config)
         vpc = Stack(definition=generate_definition("vpc", 1), context=context)
@@ -193,7 +199,7 @@ class TestPlan(unittest.TestCase):
 
         self.assertEqual({vpc.name: set()}, plan.graph.to_dict())
 
-    def test_execute_plan(self):
+    def test_execute_plan(self) -> None:
         """Test execute plan."""
         context = Context(config=self.config)
         context.put_persistent_graph = mock.MagicMock()
@@ -203,25 +209,25 @@ class TestPlan(unittest.TestCase):
             context=context,
         )
         removed = Stack(
-            definition=generate_definition("removed", 1, requires=[]), context=context
+            definition=generate_definition("removed", 1, requires=[]), context=context,
         )
-        context._persistent_graph = Graph.from_steps([removed])
+        context._persistent_graph = Graph.from_steps([Step(removed)])
 
         calls = []
 
-        def _launch_stack(stack, status=None):
+        def _launch_stack(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             return COMPLETE
 
-        def _destroy_stack(stack, status=None):
+        def _destroy_stack(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             return COMPLETE
 
         graph = Graph.from_steps(
             [
-                Step(removed, _destroy_stack),
-                Step(vpc, _launch_stack),
-                Step(bastion, _launch_stack),
+                Step(removed, fn=_destroy_stack),
+                Step(vpc, fn=_launch_stack),
+                Step(bastion, fn=_launch_stack),
             ]
         )
         plan = Plan(description="Test", graph=graph, context=context)
@@ -241,7 +247,7 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(set(["vpc.1"]), result_graph_dict.get("bastion.1"))
         self.assertIsNone(result_graph_dict.get("namespace-removed.1"))
 
-    def test_execute_plan_no_persist(self):
+    def test_execute_plan_no_persist(self) -> None:
         """Test execute plan with no persistent graph."""
         context = Context(config=self.config)
         context.put_persistent_graph = mock.MagicMock()
@@ -253,12 +259,12 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def _launch_stack(stack, status=None):
+        def _launch_stack(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             return COMPLETE
 
         graph = Graph.from_steps(
-            [Step(vpc, _launch_stack), Step(bastion, _launch_stack)]
+            [Step(vpc, fn=_launch_stack), Step(bastion, fn=_launch_stack)]
         )
         plan = Plan(description="Test", graph=graph, context=context)
 
@@ -267,7 +273,7 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
         context.put_persistent_graph.assert_not_called()
 
-    def test_execute_plan_locked(self):
+    def test_execute_plan_locked(self) -> None:
         """Test execute plan locked.
 
         Locked stacks still need to have their requires evaluated when
@@ -283,17 +289,17 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def fn(stack, status=None):
+        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             return COMPLETE
 
-        graph = Graph.from_steps([Step(vpc, fn), Step(bastion, fn)])
+        graph = Graph.from_steps([Step(vpc, fn=fn), Step(bastion, fn=fn)])
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
         self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
 
-    def test_execute_plan_filtered(self):
+    def test_execute_plan_filtered(self) -> None:
         """Test execute plan filtered."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         db = Stack(
@@ -307,20 +313,20 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def fn(stack, status=None):
+        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             return COMPLETE
 
         context = mock.MagicMock()
         context.persistent_graph_locked = False
         context.stack_names = ["db.1"]
-        graph = Graph.from_steps([Step(vpc, fn), Step(db, fn), Step(app, fn)])
+        graph = Graph.from_steps([Step(vpc, fn=fn), Step(db, fn=fn), Step(app, fn=fn)])
         plan = Plan(context=context, description="Test", graph=graph)
         plan.execute(walk)
 
         self.assertEqual(calls, ["namespace-vpc.1", "namespace-db.1"])
 
-    def test_execute_plan_exception(self):
+    def test_execute_plan_exception(self) -> None:
         """Test execute plan exception."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
@@ -330,14 +336,14 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def fn(stack, status=None):
+        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             if stack.name == vpc_step.name:
                 raise ValueError("Boom")
             return COMPLETE
 
-        vpc_step = Step(vpc, fn)
-        bastion_step = Step(bastion, fn)
+        vpc_step = Step(vpc, fn=fn)
+        bastion_step = Step(bastion, fn=fn)
 
         graph = Graph.from_steps([vpc_step, bastion_step])
         plan = Plan(description="Test", graph=graph)
@@ -348,7 +354,7 @@ class TestPlan(unittest.TestCase):
         self.assertEqual(calls, ["namespace-vpc.1"])
         self.assertEqual(vpc_step.status, FAILED)
 
-    def test_execute_plan_skipped(self):
+    def test_execute_plan_skipped(self) -> None:
         """Test execute plan skipped."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
@@ -358,14 +364,14 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def fn(stack, status=None):
+        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             if stack.fqn == vpc_step.name:
                 return SKIPPED
             return COMPLETE
 
-        vpc_step = Step(vpc, fn)
-        bastion_step = Step(bastion, fn)
+        vpc_step = Step(vpc, fn=fn)
+        bastion_step = Step(bastion, fn=fn)
 
         graph = Graph.from_steps([vpc_step, bastion_step])
         plan = Plan(description="Test", graph=graph)
@@ -373,7 +379,7 @@ class TestPlan(unittest.TestCase):
 
         self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
 
-    def test_execute_plan_failed(self):
+    def test_execute_plan_failed(self) -> None:
         """Test execute plan failed."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
@@ -384,15 +390,15 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def fn(stack, status=None):
+        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             if stack.name == vpc_step.name:
                 return FAILED
             return COMPLETE
 
-        vpc_step = Step(vpc, fn)
-        bastion_step = Step(bastion, fn)
-        db_step = Step(db, fn)
+        vpc_step = Step(vpc, fn=fn)
+        bastion_step = Step(bastion, fn=fn)
+        db_step = Step(db, fn=fn)
 
         graph = Graph.from_steps([vpc_step, bastion_step, db_step])
         plan = Plan(description="Test", graph=graph)
@@ -403,7 +409,7 @@ class TestPlan(unittest.TestCase):
 
         self.assertEqual(calls, ["namespace-db.1", "namespace-vpc.1"])
 
-    def test_execute_plan_cancelled(self):
+    def test_execute_plan_cancelled(self) -> None:
         """Test execute plan cancelled."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
@@ -413,14 +419,14 @@ class TestPlan(unittest.TestCase):
 
         calls = []
 
-        def fn(stack, status=None):
+        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
             if stack.fqn == vpc_step.name:
                 raise CancelExecution
             return COMPLETE
 
-        vpc_step = Step(vpc, fn)
-        bastion_step = Step(bastion, fn)
+        vpc_step = Step(vpc, fn=fn)
+        bastion_step = Step(bastion, fn=fn)
 
         graph = Graph.from_steps([vpc_step, bastion_step])
         plan = Plan(description="Test", graph=graph)
@@ -428,7 +434,7 @@ class TestPlan(unittest.TestCase):
 
         self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
 
-    def test_execute_plan_graph_locked(self):
+    def test_execute_plan_graph_locked(self) -> None:
         """Test execute plan with locked persistent graph."""
         context = Context(config=self.config)
         context._persistent_graph = Graph.from_dict({"stack1": []}, context)
@@ -439,7 +445,7 @@ class TestPlan(unittest.TestCase):
         with self.assertRaises(PersistentGraphLocked):
             plan.execute()
 
-    def test_build_graph_missing_dependency(self):
+    def test_build_graph_missing_dependency(self) -> None:
         """Test build graph missing dependency."""
         bastion = Stack(
             definition=generate_definition("bastion", 1, requires=["vpc.1"]),
@@ -447,7 +453,7 @@ class TestPlan(unittest.TestCase):
         )
 
         with self.assertRaises(GraphError) as expected:
-            Graph.from_steps([Step(bastion, None)])
+            Graph.from_steps([Step(bastion)])
         message_starts = (
             "Error detected when adding 'vpc.1' as a dependency of 'bastion.1':"
         )
@@ -455,7 +461,7 @@ class TestPlan(unittest.TestCase):
         self.assertTrue(str(expected.exception).startswith(message_starts))
         self.assertTrue(message_contains in str(expected.exception))
 
-    def test_build_graph_cyclic_dependencies(self):
+    def test_build_graph_cyclic_dependencies(self) -> None:
         """Test build graph cyclic dependencies."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         db = Stack(
@@ -468,7 +474,7 @@ class TestPlan(unittest.TestCase):
         )
 
         with self.assertRaises(GraphError) as expected:
-            Graph.from_steps([Step(vpc, None), Step(db, None), Step(app, None)])
+            Graph.from_steps([Step(vpc), Step(db), Step(app)])
         message = (
             "Error detected when adding 'db.1' "
             "as a dependency of 'app.1': graph is "
@@ -476,10 +482,10 @@ class TestPlan(unittest.TestCase):
         )
         self.assertEqual(str(expected.exception), message)
 
-    def test_dump(self, *args):
+    def test_dump(self) -> None:
         """Test dump."""
-        requires = []
-        steps = []
+        requires: List[str] = []
+        steps: List[Step] = []
 
         for i in range(5):
             overrides = {
@@ -498,18 +504,18 @@ class TestPlan(unittest.TestCase):
             )
             requires = [stack.name]
 
-            steps += [Step(stack, None)]
+            steps += [Step(stack)]
 
         graph = Graph.from_steps(steps)
         plan = Plan(description="Test", graph=graph)
 
         tmp_dir = tempfile.mkdtemp()
         try:
-            plan.dump(tmp_dir, context=self.context)
+            plan.dump(directory=tmp_dir, context=self.context)
 
             for step in plan.steps:
                 template_path = os.path.join(
-                    tmp_dir, stack_template_key_name(step.stack.blueprint)
+                    tmp_dir, stack_template_key_name(step.stack.blueprint)  # type: ignore
                 )
                 self.assertTrue(os.path.isfile(template_path))
         finally:

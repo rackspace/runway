@@ -1,8 +1,11 @@
 """Tests for runway.cfngin.blueprints.raw."""
 # pylint: disable=unused-argument
+from __future__ import annotations
+
 import json
 import unittest
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 from mock import MagicMock
 
@@ -16,27 +19,32 @@ from runway.variables import Variable
 
 from ..factories import mock_context
 
+if TYPE_CHECKING:
+    from _pytest.monkeypatch import MonkeyPatch
+
 RAW_JSON_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.json")
 RAW_YAML_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.yaml")
 RAW_J2_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.json.j2")
 
 
-def test_get_template_path_local_file(tmp_path):
+def test_get_template_path_local_file(tmp_path: Path) -> None:
     """Verify get_template_path finding a file relative to CWD."""
     template_path = Path("cfn_template.json")
     (tmp_path / "cfn_template.json").touch()
 
     with change_dir(tmp_path):
         result = get_template_path(template_path)
-        assert template_path.samefile(result)
+        assert template_path.samefile(cast(Path, result))
 
 
-def test_get_template_path_invalid_file(cd_tmp_path):
+def test_get_template_path_invalid_file(cd_tmp_path: Path) -> None:
     """Verify get_template_path with an invalid filename."""
     assert get_template_path(Path("cfn_template.json")) is None
 
 
-def test_get_template_path_file_in_syspath(tmp_path, monkeypatch):
+def test_get_template_path_file_in_syspath(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
     """Verify get_template_path with a file in sys.path.
 
     This ensures templates are able to be retrieved from remote packages.
@@ -47,10 +55,10 @@ def test_get_template_path_file_in_syspath(tmp_path, monkeypatch):
 
     monkeypatch.syspath_prepend(tmp_path)
     result = get_template_path(Path(template_path.name))
-    assert template_path.samefile(result)
+    assert template_path.samefile(cast(Path, result))
 
 
-def test_get_template_params():
+def test_get_template_params() -> None:
     """Verify get_template_params function operation."""
     template_dict = {
         "AWSTemplateFormatVersion": "2010-09-09",
@@ -72,7 +80,7 @@ def test_get_template_params():
 class TestBlueprintRendering(unittest.TestCase):
     """Test class for blueprint rendering."""
 
-    def test_to_json(self):
+    def test_to_json(self) -> None:
         """Verify to_json method operation."""
         expected_json = json.dumps(
             {
@@ -145,7 +153,7 @@ class TestBlueprintRendering(unittest.TestCase):
 class TestVariables(unittest.TestCase):
     """Test class for blueprint variable methods."""
 
-    def test_get_parameter_definitions_json(self):
+    def test_get_parameter_definitions_json(self) -> None:
         """Verify get_parameter_definitions method with json raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_JSON_TEMPLATE_PATH
@@ -159,7 +167,7 @@ class TestVariables(unittest.TestCase):
             },
         )
 
-    def test_get_parameter_definitions_yaml(self):
+    def test_get_parameter_definitions_yaml(self) -> None:
         """Verify get_parameter_definitions method with yaml raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_YAML_TEMPLATE_PATH
@@ -173,7 +181,7 @@ class TestVariables(unittest.TestCase):
             },
         )
 
-    def test_get_required_parameter_definitions_json(self,):
+    def test_get_required_parameter_definitions_json(self) -> None:
         """Verify get_required_param... method with json raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_JSON_TEMPLATE_PATH
@@ -183,7 +191,7 @@ class TestVariables(unittest.TestCase):
             {"Param1": {"Type": "String"}},
         )
 
-    def test_get_required_parameter_definitions_yaml(self,):
+    def test_get_required_parameter_definitions_yaml(self) -> None:
         """Verify get_required_param... method with yaml raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_YAML_TEMPLATE_PATH

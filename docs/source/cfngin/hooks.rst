@@ -369,15 +369,6 @@ Delete objects in bucket. Primarily used as a :attr:`~cfngin.config.pre_destroy`
 **bucket_name (str)**
     Name of the S3 bucket.
 
-**bucket_output_lookup (str)**
-    Value to pass to :class:`runway.cfngin.lookups.handlers.output.OutputLookup` to retrieve an S3 bucket name.
-
-**bucket_rxref_lookup (str)**
-    Value to pass to :class:`runway.cfngin.lookups.handlers.rxref.RxrefLookup` to retrieve an S3 bucket name.
-
-**bucket_xref_lookup (str)**
-    Value to pass to :class:`runway.cfngin.lookups.handlers.xref.XrefLookup` to retrieve an S3 bucket name.
-
 
 cleanup_ssm.delete_param
 ========================

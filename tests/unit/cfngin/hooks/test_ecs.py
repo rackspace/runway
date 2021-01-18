@@ -15,12 +15,12 @@ REGION = "us-east-1"
 class TestECSHooks(unittest.TestCase):
     """Tests for runway.cfngin.hooks.ecs."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.provider = mock_provider(region=REGION)
         self.context = mock_context(namespace="fake")
 
-    def test_create_single_cluster(self):
+    def test_create_single_cluster(self) -> None:
         """Test create single cluster."""
         with mock_ecs():
             logger = "runway.cfngin.hooks.ecs"
@@ -41,7 +41,7 @@ class TestECSHooks(unittest.TestCase):
             response = client.list_clusters()
             self.assertEqual(len(response["clusterArns"]), 1)
 
-    def test_create_multiple_clusters(self):
+    def test_create_multiple_clusters(self) -> None:
         """Test create multiple clusters."""
         with mock_ecs():
             clusters = ("test-cluster0", "test-cluster1")
@@ -65,20 +65,12 @@ class TestECSHooks(unittest.TestCase):
             response = client.list_clusters()
             self.assertEqual(len(response["clusterArns"]), 2)
 
-    def test_fail_create_cluster(self):
+    def test_fail_create_cluster(self) -> None:
         """Test fail create cluster."""
         with mock_ecs():
-            logger = "runway.cfngin.hooks.ecs"
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
             self.assertEqual(len(response["clusterArns"]), 0)
-            with LogCapture(logger) as logs:
-                create_clusters(provider=self.provider, context=self.context)
-
-                logs.check(
-                    (logger, "ERROR", "clusters argument required but not provided")
-                )
-
-            response = client.list_clusters()
-            self.assertEqual(len(response["clusterArns"]), 0)
+            with self.assertRaises(TypeError):
+                create_clusters(context=self.context)  # type: ignore pylint: disable=E

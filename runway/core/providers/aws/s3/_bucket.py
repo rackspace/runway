@@ -1,7 +1,9 @@
 """AWS S3 bucket."""
+from __future__ import annotations
+
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # pylint: disable=W
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from botocore.exceptions import ClientError
 
@@ -9,8 +11,14 @@ from .....util import cached_property
 from .._response import BaseResponse
 
 if TYPE_CHECKING:
-    from .....cfngin.context import Context as CFNginContext  # pylint: disable=W
-    from .....context import Context as RunwayContext  # pylint: disable=W
+    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.type_defs import (
+        CreateBucketOutputTypeDef,
+        GetBucketVersioningOutputTypeDef,
+    )
+
+    from .....cfngin.context import Context as CFNginContext
+    from .....context import Context as RunwayContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -20,11 +28,10 @@ class Bucket:
 
     def __init__(
         self,
-        context,  # type: Union[CFNginContext, RunwayContext]
-        name,  # type: str
-        region=None,  # type: Optional[str]
-    ):
-        # type: (...) -> None
+        context: Union[CFNginContext, RunwayContext],
+        name: str,
+        region: Optional[str] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -38,13 +45,12 @@ class Bucket:
         self.name = name
 
     @cached_property
-    def client(self):
+    def client(self) -> S3Client:
         """Create or reuse a boto3 client."""
         return self.__ctx.get_session(region=self._region).client("s3")
 
     @property
-    def exists(self):
-        # type: () -> bool
+    def exists(self) -> bool:
         """Check whether the bucket exists.
 
         Opposite of not_found.
@@ -53,14 +59,12 @@ class Bucket:
         return not self.not_found
 
     @cached_property
-    def forbidden(self):
-        # type: () -> bool
+    def forbidden(self) -> bool:
         """Check whether access to the bucket is forbidden."""
         return self.head.metadata.forbidden
 
     @cached_property
     def head(self):
-        # type: () -> BaseResponse
         """Check if a bucket exists and you have permission to access it.
 
         To use this operation, the user must have permissions to perform the
@@ -70,23 +74,21 @@ class Bucket:
 
         """
         try:
-            return BaseResponse(**self.client.head_bucket(Bucket=self.name))
+            return BaseResponse(**self.client.head_bucket(Bucket=self.name) or {})
         except ClientError as err:
             LOGGER.debug(
                 'received an error from AWS S3 when trying to head bucket "%s"',
                 self.name,
-                exc_info=bool,
+                exc_info=True,
             )
             return BaseResponse(**err.response)
 
     @cached_property
-    def not_found(self):
-        # type: () -> bool
+    def not_found(self) -> bool:
         """Check whether the bucket exists."""
         return self.head.metadata.not_found
 
-    def create(self, **kwargs):
-        # type: (Any) -> Dict[str, Any]
+    def create(self, **kwargs: Any) -> CreateBucketOutputTypeDef:
         """Create an S3 Bucket if it does not already exist.
 
         Bucket creation will be skipped if it already exists or access is forbidden.
@@ -116,8 +118,7 @@ class Bucket:
         del self.head  # clear cached value
         return self.client.create_bucket(**kwargs)
 
-    def enable_versioning(self):
-        # type: () -> None
+    def enable_versioning(self) -> None:
         """Enable versioning on the bucket if not already enabled."""
         config = self.get_versioning()
         if config.get("Status") == "Enabled":
@@ -132,8 +133,7 @@ class Bucket:
         )
         LOGGER.debug('enabled versioning for bucket "%s"', self.name)
 
-    def get_versioning(self):
-        # type: () -> Dict[str, str]
+    def get_versioning(self) -> GetBucketVersioningOutputTypeDef:
         """Get the versioning state of a bucket.
 
         To retrieve the versioning state of a bucket, you must be the bucket owner.

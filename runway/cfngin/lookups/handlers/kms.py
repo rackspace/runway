@@ -1,11 +1,15 @@
 """AWS KMS lookup."""
 # pylint: disable=arguments-differ,unused-argument
+from __future__ import annotations
+
 import codecs
-import sys
+from typing import TYPE_CHECKING, Any
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
+
+if TYPE_CHECKING:
+    from ...context import Context
 
 TYPE_NAME = "kms"
 
@@ -14,12 +18,12 @@ class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
 
     @classmethod
-    def handle(cls, value, context, *_, **kwargs):
+    def handle(cls, value: str, context: Context, **_: Any) -> str:
         r"""Decrypt the specified value with a master key in KMS.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
+            value: Parameter(s) given to this lookup.
+            context: Context instance.
 
         ``value`` should be in the following format:
 
@@ -64,14 +68,11 @@ class KmsLookup(LookupHandler):
 
         kms = context.get_session(region=region).client("kms")
 
-        # encode str value as an utf-8 bytestring for use with codecs.decode.
-        value = value.encode("utf-8")
-
         # get raw but still encrypted value from base64 version.
-        decoded = codecs.decode(value, "base64")
+        decoded = codecs.decode(value.encode(), "base64")
 
         # decrypt and return the plain text raw value.
         decrypted = kms.decrypt(CiphertextBlob=decoded)["Plaintext"]
-        if sys.version_info[0] > 2:  # TODO remove condition after droping py2
+        if isinstance(decrypted, bytes):
             return decrypted.decode()
-        return decrypted
+        return decrypted.read().decode()

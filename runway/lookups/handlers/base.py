@@ -86,10 +86,12 @@ Common Lookup Arguments
         comma_list: ${var my_list::default=undefined, transform=str}
 
 """
+from __future__ import annotations
+
 import json
 import logging
 from distutils.util import strtobool
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Union
 
 import yaml
 from troposphere import BaseAWSObject
@@ -98,7 +100,9 @@ from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ...cfngin.context import Context as CFNginContext
+    from ...context import Context as RunwayContext
+    from ...variables import VariableValue
 
 LOGGER = logging.getLogger(__name__)
 
@@ -107,16 +111,10 @@ class LookupHandler:
     """Base class for lookup handlers."""
 
     @classmethod
-    def dependencies(cls, _lookup_data):
+    def dependencies(cls, __lookup_query: VariableValue) -> Set[str]:
         """Calculate any dependencies required to perform this lookup.
 
-        Note that lookup_data may not be (completely) resolved at this time.
-
-        Args:
-            lookup_data (VariableValue): Parameter(s) given to this lookup.
-
-        Returns:
-            Set
+        Note that lookup_query may not be (completely) resolved at this time.
 
         """
         return set()
@@ -124,23 +122,21 @@ class LookupHandler:
     @classmethod
     def format_results(
         cls,
-        value,  # type: Any
-        get=None,  # type: Optional[str]
-        load=None,  # type: Optional[str]
-        transform=None,  # type: Optional[str]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> Any
+        value: Any,
+        get: Optional[str] = None,
+        load: Optional[str] = None,
+        transform: Optional[str] = None,
+        **kwargs: Any
+    ) -> Any:
         """Format results to be returned by a lookup.
 
         Args:
-            value (Any): Data collected by the Lookup.
-            get (Optional[str]): Nested value to get from a dictionary like
-                object.
-            load (Optional[str]): Parser to use to parse a formatted string
-                before the ``get`` and ``transform`` method.
-            transform (Optional[str]): Convert the final value to a different
-                data type before returning it.
+            value: Data collected by the Lookup.
+            get: Nested value to get from a dictionary like object.
+            load: Parser to use to parse a formatted string before the ``get``
+                and ``transform`` method.
+            transform: Convert the final value to a different data type before
+                returning it.
 
         Raises:
             TypeError: If ``get`` is provided but the value value is not a
@@ -175,24 +171,24 @@ class LookupHandler:
         return value
 
     @classmethod
-    def handle(cls, value, context, **kwargs):
-        # type: (str, 'Context', Any) -> Any
+    def handle(
+        cls,
+        value: str,
+        context: Union[CFNginContext, RunwayContext],
+        *__args: Any,
+        **__kwargs: Any
+    ) -> Any:
         """Perform the lookup.
 
         Args:
             value: Parameter(s) given to the lookup.
             context: The current context object.
-            provider: Optional provider to use when handling the lookup.
-
-        Returns:
-            (Any) Looked-up value.
 
         """
         raise NotImplementedError
 
     @classmethod
-    def parse(cls, value):
-        # type: (str) -> Tuple[str, Dict[str, str]]
+    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
         """Parse the value passed to a lookup in a standardized way.
 
         Args:
@@ -212,8 +208,7 @@ class LookupHandler:
         return query, args
 
     @classmethod
-    def _parse_args(cls, args):
-        # type: (str) -> Dict[str, str]
+    def _parse_args(cls, args: str) -> Dict[str, str]:
         """Convert a string into an args dict.
 
         Each arg should be seporated by  ``,``. The key and value should
@@ -234,8 +229,7 @@ class LookupHandler:
         }
 
     @classmethod
-    def load(cls, value, parser=None, **kwargs):
-        # type: (str, str, Any) -> Any
+    def load(cls, value: str, parser: Optional[str] = None, **kwargs: Any) -> Any:
         """Load a formatted string or object into a python data type.
 
         First action taken in :meth:`~LookupHandler.format_results`.
@@ -263,15 +257,11 @@ class LookupHandler:
         return mapping[parser](value, **kwargs)
 
     @classmethod
-    def _load_json(cls, value, **_):
-        # type: (str, Any) -> MutableMap
+    def _load_json(cls, value: str, **_: Any) -> MutableMap:
         """Load a JSON string into a MutableMap.
 
         Args:
             value: JSON formatted string.
-
-        Returns:
-            MutableMap
 
         """
         if not isinstance(value, str):
@@ -284,16 +274,11 @@ class LookupHandler:
         return result
 
     @classmethod
-    def _load_troposphere(cls, value, **_):
-        # type: (BaseAWSObject, Any) -> MutableMap
+    def _load_troposphere(cls, value: BaseAWSObject, **_: Any) -> MutableMap:
         """Load a Troposphere resource into a MutableMap.
 
         Args:
-            Value (troposphere.BaseAWSObject): Troposphere resource to
-                contvert to a MutableMap for parsing.
-
-        Returns:
-            MutableMap
+            value: Troposphere resource to contvert to a MutableMap for parsing.
 
         """
         if not isinstance(value, BaseAWSObject):
@@ -308,15 +293,11 @@ class LookupHandler:
         )
 
     @classmethod
-    def _load_yaml(cls, value, **_):
-        # type: (str, Any) -> MutableMap
+    def _load_yaml(cls, value: str, **_: Any) -> MutableMap:
         """Load a YAML string into a MutableMap.
 
         Args:
             value: YAML formatted string.
-
-        Returns:
-            MutableMap
 
         """
         if not isinstance(value, str):
@@ -329,8 +310,9 @@ class LookupHandler:
         return result
 
     @classmethod
-    def transform(cls, value, to_type="str", **kwargs):
-        # type: (str, str, Any) -> Any
+    def transform(
+        cls, value: Any, *, to_type: Optional[str] = "str", **kwargs: Any
+    ) -> Any:
         """Transform the result of a lookup into another datatype.
 
         Last action taken in :meth:`~LookupHandler.format_results`.
@@ -354,8 +336,7 @@ class LookupHandler:
         return mapping[to_type](value, **kwargs)  # type: ignore
 
     @classmethod
-    def _transform_to_bool(cls, value, **_):
-        # type: (Union[bool, str], Any) -> bool
+    def _transform_to_bool(cls, value: Any, **_: Any) -> bool:
         """Transform a string into a bool.
 
         Args:
@@ -377,8 +358,9 @@ class LookupHandler:
         )
 
     @classmethod
-    def _transform_to_string(cls, value, delimiter=None, **kwargs):
-        # type: (Any, str, Any) -> str
+    def _transform_to_string(
+        cls, value: Any, *, delimiter: str = ",", indent: int = 0, **_: Any
+    ) -> str:
         """Transform anything into a string.
 
         If the datatype of ``value`` is a list or similar to a list, ``join()``
@@ -388,16 +370,17 @@ class LookupHandler:
             value: The value to be transformed into a string.
             delimiter: Used when transforming a list like object into a string
                 to join each element together.
+            indent: Number of spaces to use when indenting JSON output.
 
         """
         if isinstance(value, (list, set, tuple)):
-            return "{}".format(delimiter or ",").join(value)
+            return "{}".format(delimiter).join(value)
         if isinstance(value, MutableMap):
             # convert into a dict with protected attrs removed
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            return json.dumps(json.dumps(value, indent=int(kwargs.get("indent", 0))))
+            return json.dumps(json.dumps(value, indent=int(indent)))
         if isinstance(value, bool):
             return json.dumps(str(value))
         return str(value)

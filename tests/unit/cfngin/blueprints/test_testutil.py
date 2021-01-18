@@ -19,7 +19,7 @@ class Repositories(Blueprint):
         }
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         template = self.template
         variables = self.get_variables()
@@ -35,9 +35,9 @@ class TestRepositories(BlueprintTestCase):
 
     OUTPUT_PATH = "tests/unit/fixtures/blueprints"
 
-    def test_create_template_passes(self):
+    def test_create_template_passes(self) -> None:
         """Test create template passes."""
-        ctx = Context({"namespace": "test"})
+        ctx = Context()
         blueprint = Repositories("test_repo", ctx)
         blueprint.resolve_variables(
             [Variable("Repositories", ["repo1", "repo2"], "cfngin")]
@@ -45,9 +45,9 @@ class TestRepositories(BlueprintTestCase):
         blueprint.create_template()
         self.assertRenderedBlueprint(blueprint)
 
-    def test_create_template_fails(self):
+    def test_create_template_fails(self) -> None:
         """Test create template fails."""
-        ctx = Context({"namespace": "test"})
+        ctx = Context()
         blueprint = Repositories("test_repo", ctx)
         blueprint.resolve_variables(
             [Variable("Repositories", ["repo1", "repo2", "repo3"], "cfngin")]

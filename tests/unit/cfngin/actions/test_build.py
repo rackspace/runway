@@ -1,7 +1,10 @@
 """Tests for runway.cfngin.actions.build."""
 # pylint: disable=no-self-use,protected-access,unused-argument
+from __future__ import annotations
+
 import unittest
 from collections import namedtuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from mock import MagicMock, PropertyMock, patch
 
@@ -31,10 +34,15 @@ from runway.config import CfnginConfig
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
+if TYPE_CHECKING:
+    from mypy_boto3_cloudformation.type_defs import StackTypeDef
 
-def mock_stack_parameters(parameters):
+    from runway.cfngin.status import Status
+
+
+def mock_stack_parameters(parameters: Dict[str, Any]) -> StackTypeDef:
     """Mock stack parameters."""
-    return {
+    return {  # type: ignore
         "Parameters": [
             {"ParameterKey": k, "ParameterValue": v} for k, v in parameters.items()
         ]
@@ -44,15 +52,21 @@ def mock_stack_parameters(parameters):
 class MockProvider(BaseProvider):
     """Mock provider."""
 
-    def __init__(self, *args, **kwargs):
-        """Instantiate class."""
-        self._outputs = kwargs.get("outputs", {})
+    _outputs: Dict[str, Dict[str, str]]
 
-    def set_outputs(self, outputs):
+    def __init__(
+        self, *, outputs: Optional[Dict[str, Dict[str, str]]] = None, **_: Any
+    ) -> None:
+        """Instantiate class."""
+        self._outputs = outputs or {}
+
+    def set_outputs(self, outputs: Dict[str, Dict[str, str]]) -> None:
         """Set outputs."""
         self._outputs = outputs
 
-    def get_stack(self, stack_name, *args, **kwargs):
+    def get_stack(
+        self, stack_name: str, *_args: Any, **_kwargs: Any
+    ) -> Dict[str, Union[Dict[str, str], str]]:
         """Get stack."""
         if stack_name not in self._outputs:
             raise exceptions.StackDoesNotExist(stack_name)
@@ -67,17 +81,20 @@ class MockProvider(BaseProvider):
 class TestBuildAction(unittest.TestCase):
     """Tests for runway.cfngin.actions.build.BuildAction."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.context = Context(
             config=CfnginConfig.parse_obj({"namespace": "namespace"})
         )
         self.provider = MockProvider()
         self.build_action = build.Action(
-            self.context, provider_builder=MockProviderBuilder(self.provider)
+            self.context,
+            provider_builder=MockProviderBuilder(provider=self.provider),  # type: ignore
         )
 
-    def _get_context(self, extra_config_args=None, **kwargs):
+    def _get_context(
+        self, extra_config_args: Optional[Dict[str, Any]] = None, **kwargs: Any
+    ) -> Context:
         """Get context."""
         config = {
             "namespace": "namespace",
@@ -107,7 +124,7 @@ class TestBuildAction(unittest.TestCase):
         "runway.cfngin.context.Context._persistent_graph_tags",
         new_callable=PropertyMock,
     )
-    def test_generate_plan_persist_destroy(self, mock_graph_tags):
+    def test_generate_plan_persist_destroy(self, mock_graph_tags: PropertyMock) -> None:
         """Test generate plan persist destroy."""
         mock_graph_tags.return_value = {}
         context = self._get_context(
@@ -117,7 +134,7 @@ class TestBuildAction(unittest.TestCase):
             [Step.from_stack_name("removed", context)]
         )
         build_action = build.Action(context=context)
-        plan = build_action._Action__generate_plan()
+        plan = cast(Plan, build_action._Action__generate_plan())  # type: ignore
 
         self.assertIsInstance(plan, Plan)
         self.assertEqual(build.Action.DESCRIPTION, plan.description)
@@ -136,11 +153,11 @@ class TestBuildAction(unittest.TestCase):
         self.assertEqual(build_action._launch_stack, plan.graph.steps["db"].fn)
         self.assertEqual(build_action._launch_stack, plan.graph.steps["other"].fn)
 
-    def test_handle_missing_params(self):
+    def test_handle_missing_params(self) -> None:
         """Test handle missing params."""
         existing_stack_param_dict = {"StackName": "teststack", "Address": "192.168.0.1"}
         existing_stack_params = mock_stack_parameters(existing_stack_param_dict)
-        all_params = existing_stack_param_dict.keys()
+        all_params = list(existing_stack_param_dict.keys())
         required = ["Address"]
         parameter_values = {"Address": "192.168.0.1"}
         expected_params = {
@@ -152,7 +169,7 @@ class TestBuildAction(unittest.TestCase):
         )
         self.assertEqual(sorted(result), sorted(list(expected_params.items())))
 
-    def test_missing_params_no_existing_stack(self):
+    def test_missing_params_no_existing_stack(self) -> None:
         """Test missing params no existing stack."""
         all_params = ["Address", "StackName"]
         required = ["Address"]
@@ -162,11 +179,11 @@ class TestBuildAction(unittest.TestCase):
 
         self.assertEqual(result.exception.parameters, required)
 
-    def test_existing_stack_params_does_not_override_given_params(self):
+    def test_existing_stack_params_does_not_override_given_params(self) -> None:
         """Test existing stack params does not override given params."""
         existing_stack_param_dict = {"StackName": "teststack", "Address": "192.168.0.1"}
         existing_stack_params = mock_stack_parameters(existing_stack_param_dict)
-        all_params = existing_stack_param_dict.keys()
+        all_params = list(existing_stack_param_dict.keys())
         required = ["Address"]
         parameter_values = {"Address": "10.0.0.1"}
         result = _handle_missing_parameters(
@@ -174,11 +191,11 @@ class TestBuildAction(unittest.TestCase):
         )
         self.assertEqual(sorted(result), sorted(list(parameter_values.items())))
 
-    def test_generate_plan(self):
+    def test_generate_plan(self) -> None:
         """Test generate plan."""
         context = self._get_context()
-        build_action = build.Action(context, cancel=MockThreadingEvent())
-        plan = build_action._Action__generate_plan()
+        build_action = build.Action(context, cancel=MockThreadingEvent())  # type: ignore
+        plan = cast(Plan, build_action._Action__generate_plan())  # type: ignore
         self.assertEqual(
             {
                 "db": set(["bastion", "vpc"]),
@@ -189,18 +206,18 @@ class TestBuildAction(unittest.TestCase):
             plan.graph.to_dict(),
         )
 
-    def test_does_not_execute_plan_when_outline_specified(self):
+    def test_does_not_execute_plan_when_outline_specified(self) -> None:
         """Test does not execute plan when outline specified."""
         context = self._get_context()
-        build_action = build.Action(context, cancel=MockThreadingEvent())
+        build_action = build.Action(context, cancel=MockThreadingEvent())  # type: ignore
         with patch.object(build_action, "_generate_plan") as mock_generate_plan:
             build_action.run(outline=True)
             self.assertEqual(mock_generate_plan().execute.call_count, 0)
 
-    def test_execute_plan_when_outline_not_specified(self):
+    def test_execute_plan_when_outline_not_specified(self) -> None:
         """Test execute plan when outline not specified."""
         context = self._get_context()
-        build_action = build.Action(context, cancel=MockThreadingEvent())
+        build_action = build.Action(context, cancel=MockThreadingEvent())  # type: ignore
         with patch.object(build_action, "_generate_plan") as mock_generate_plan:
             build_action.run(outline=False)
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
@@ -216,7 +233,13 @@ class TestBuildAction(unittest.TestCase):
         "runway.cfngin.context.Context.unlock_persistent_graph", new_callable=MagicMock
     )
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
-    def test_run_persist(self, mock_execute, mock_unlock, mock_lock, mock_graph_tags):
+    def test_run_persist(
+        self,
+        mock_execute: MagicMock,
+        mock_unlock: MagicMock,
+        mock_lock: MagicMock,
+        mock_graph_tags: PropertyMock,
+    ) -> None:
         """Test run persist."""
         mock_graph_tags.return_value = {}
         context = self._get_context(
@@ -233,7 +256,7 @@ class TestBuildAction(unittest.TestCase):
         mock_execute.assert_called_once()
         mock_unlock.assert_called_once()
 
-    def test_should_update(self):
+    def test_should_update(self) -> None:
         """Test should update."""
         test_scenario = namedtuple("test_scenario", ["locked", "force", "result"])
         test_scenarios = (
@@ -249,7 +272,7 @@ class TestBuildAction(unittest.TestCase):
             mock_stack.force = test.force
             self.assertEqual(build.should_update(mock_stack), test.result)
 
-    def test_should_ensure_cfn_bucket(self):
+    def test_should_ensure_cfn_bucket(self) -> None:
         """Test should ensure cfn bucket."""
         test_scenarios = [
             {"outline": False, "dump": False, "result": True},
@@ -269,7 +292,7 @@ class TestBuildAction(unittest.TestCase):
                 err.args += ("scenario", str(scenario))
                 raise
 
-    def test_should_submit(self):
+    def test_should_submit(self) -> None:
         """Test should submit."""
         test_scenario = namedtuple("test_scenario", ["enabled", "result"])
         test_scenarios = (
@@ -287,14 +310,16 @@ class TestBuildAction(unittest.TestCase):
 class TestLaunchStack(TestBuildAction):
     """Tests for runway.cfngin.actions.build.BuildAction launch stack."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.context = self._get_context()
         self.session = get_session(region=None)
         self.provider = Provider(self.session, interactive=False, recreate_failed=False)
-        provider_builder = MockProviderBuilder(self.provider)
+        provider_builder = MockProviderBuilder(provider=self.provider)
         self.build_action = build.Action(
-            self.context, provider_builder=provider_builder, cancel=MockThreadingEvent()
+            self.context,
+            provider_builder=provider_builder,
+            cancel=MockThreadingEvent(),  # type: ignore
         )
 
         self.stack = MagicMock()
@@ -305,16 +330,16 @@ class TestLaunchStack(TestBuildAction):
         self.stack.locked = False
         self.stack_status = None
 
-        plan = self.build_action._Action__generate_plan()
+        plan = cast(Plan, self.build_action._Action__generate_plan())  # type: ignore
         self.step = plan.steps[0]
         self.step.stack = self.stack
 
-        def patch_object(*args, **kwargs):
+        def patch_object(*args: Any, **kwargs: Any) -> None:
             mock_object = patch.object(*args, **kwargs)
             self.addCleanup(mock_object.stop)
             mock_object.start()
 
-        def get_stack(name, *args, **kwargs):
+        def get_stack(name: str, *_args: Any, **_kwargs: Any) -> Dict[str, Any]:
             if name != self.stack.name or not self.stack_status:
                 raise StackDoesNotExist(name)
 
@@ -325,7 +350,7 @@ class TestLaunchStack(TestBuildAction):
                 "Tags": [],
             }
 
-        def get_events(name, *args, **kwargs):
+        def get_events(name: str, *_args: Any, **_kwargs: Any) -> List[Dict[str, str]]:
             return [
                 {
                     "ResourceStatus": "ROLLBACK_IN_PROGRESS",
@@ -341,21 +366,26 @@ class TestLaunchStack(TestBuildAction):
 
         patch_object(self.build_action, "s3_stack_push")
 
-    def _advance(self, new_provider_status, expected_status, expected_reason):
+    def _advance(
+        self,
+        new_provider_status: Optional[str],
+        expected_status: Optional[Status],
+        expected_reason: str,
+    ) -> None:
         """Advance."""
         self.stack_status = new_provider_status
         status = self.step._run_once()
         self.assertEqual(status, expected_status)
         self.assertEqual(status.reason, expected_reason)
 
-    def test_launch_stack_disabled(self):
+    def test_launch_stack_disabled(self) -> None:
         """Test launch stack disabled."""
         self.assertEqual(self.step.status, PENDING)
 
         self.stack.enabled = False
         self._advance(None, NotSubmittedStatus(), "disabled")
 
-    def test_launch_stack_create(self):
+    def test_launch_stack_create(self) -> None:
         """Test launch stack create."""
         # initial status should be PENDING
         self.assertEqual(self.step.status, PENDING)
@@ -369,7 +399,7 @@ class TestLaunchStack(TestBuildAction):
         # status should become COMPLETE once the stack finishes
         self._advance("CREATE_COMPLETE", COMPLETE, "creating new stack")
 
-    def test_launch_stack_create_rollback(self):
+    def test_launch_stack_create_rollback(self) -> None:
         """Test launch stack create rollback."""
         # initial status should be PENDING
         self.assertEqual(self.step.status, PENDING)
@@ -389,7 +419,7 @@ class TestLaunchStack(TestBuildAction):
         # rollback should finish with failure
         self._advance("ROLLBACK_COMPLETE", FAILED, "rolled back new stack")
 
-    def test_launch_stack_recreate(self):
+    def test_launch_stack_recreate(self) -> None:
         """Test launch stack recreate."""
         # pylint: disable=attribute-defined-outside-init
         self.provider.recreate_failed = True
@@ -416,7 +446,7 @@ class TestLaunchStack(TestBuildAction):
         # re-creation should finish with success
         self._advance("CREATE_COMPLETE", COMPLETE, "re-creating stack")
 
-    def test_launch_stack_update_skipped(self):
+    def test_launch_stack_update_skipped(self) -> None:
         """Test launch stack update skipped."""
         # initial status should be PENDING
         self.assertEqual(self.step.status, PENDING)
@@ -425,7 +455,7 @@ class TestLaunchStack(TestBuildAction):
         self.provider.update_stack.side_effect = StackDidNotChange
         self._advance("CREATE_COMPLETE", SKIPPED, "nochange")
 
-    def test_launch_stack_update_rollback(self):
+    def test_launch_stack_update_rollback(self) -> None:
         """Test launch stack update rollback."""
         # initial status should be PENDING
         self.assertEqual(self.step.status, PENDING)
@@ -442,7 +472,7 @@ class TestLaunchStack(TestBuildAction):
         # rollback should finish with failure
         self._advance("UPDATE_ROLLBACK_COMPLETE", FAILED, "rolled back update")
 
-    def test_launch_stack_update_success(self):
+    def test_launch_stack_update_success(self) -> None:
         """Test launch stack update success."""
         # initial status should be PENDING
         self.assertEqual(self.step.status, PENDING)
@@ -460,13 +490,13 @@ class TestLaunchStack(TestBuildAction):
 class TestFunctions(unittest.TestCase):
     """Tests for runway.cfngin.actions.build module level functions."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
-        self.ctx = Context({"namespace": "test"})
+        self.ctx = Context()
         self.prov = MagicMock()
         self.blueprint = MagicMock()
 
-    def test_resolve_parameters_unused_parameter(self):
+    def test_resolve_parameters_unused_parameter(self) -> None:
         """Test resolve parameters unused parameter."""
         self.blueprint.get_parameter_definitions.return_value = {
             "a": {"type": CFNString, "description": "A"},
@@ -477,7 +507,7 @@ class TestFunctions(unittest.TestCase):
         self.assertNotIn("c", resolved_params)
         self.assertIn("a", resolved_params)
 
-    def test_resolve_parameters_none_conversion(self):
+    def test_resolve_parameters_none_conversion(self) -> None:
         """Test resolve parameters none conversion."""
         self.blueprint.get_parameter_definitions.return_value = {
             "a": {"type": CFNString, "description": "A"},
@@ -487,7 +517,7 @@ class TestFunctions(unittest.TestCase):
         resolved_params = _resolve_parameters(params, self.blueprint)
         self.assertNotIn("a", resolved_params)
 
-    def test_resolve_parameters_booleans(self):
+    def test_resolve_parameters_booleans(self) -> None:
         """Test resolve parameters booleans."""
         self.blueprint.get_parameter_definitions.return_value = {
             "a": {"type": CFNString, "description": "A"},

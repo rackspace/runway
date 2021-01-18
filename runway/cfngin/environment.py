@@ -1,14 +1,12 @@
 """CFNgin environment file parsing."""
+from typing import Any, Dict
 
 
-def parse_environment(raw_environment):
+def parse_environment(raw_environment: str) -> Dict[str, Any]:
     """Parse environment file contents.
 
     Args:
-        raw_environment (str): Environment file read into a string.
-
-    Returns:
-        Dict[str, Any]
+        raw_environment: Environment file read into a string.
 
     """
     environment = {}

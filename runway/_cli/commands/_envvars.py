@@ -3,7 +3,7 @@
 import logging
 import os
 import platform
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 import click
 from pydantic import ValidationError
@@ -12,7 +12,10 @@ from ...core import Runway
 from ...exceptions import ConfigNotFound, VariablesFileNotFound
 from .. import options
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("envvars", short_help="exportable env_vars")
@@ -54,8 +57,7 @@ def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
     print_env_vars(env_vars)
 
 
-def print_env_vars(env_vars):
-    # type: (Dict[str, Any]) -> None
+def print_env_vars(env_vars: Dict[str, Any]) -> None:
     """Print environment variables."""
     if platform.system() == "Windows":
         if os.getenv("MSYSTEM", "").startswith("MINGW"):
@@ -64,16 +66,14 @@ def print_env_vars(env_vars):
     return __print_env_vars_posix(env_vars)
 
 
-def __print_env_vars_posix(env_vars):
-    # type: (Dict[str, Any]) -> None
+def __print_env_vars_posix(env_vars: Dict[str, Any]) -> None:
     """Print environment variables for bash."""
     LOGGER.debug("using posix formating for environment variable export")
     for key, val in env_vars.items():
         click.echo('export {}="{}"'.format(key, val))
 
 
-def __print_env_vars_psh(env_vars):
-    # type: (Dict[str, Any]) -> None
+def __print_env_vars_psh(env_vars: Dict[str, Any]) -> None:
     """Print environment variables for Powershell."""
     LOGGER.debug("using powershell formating for environment variable export")
     for key, val in env_vars.items():

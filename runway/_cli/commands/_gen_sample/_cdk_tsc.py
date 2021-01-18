@@ -1,14 +1,17 @@
 """``runway gen-sample cdk-tsc`` command."""
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, copy_sample
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("cdk-tsc", short_help="cdk + tsc (sampleapp.cdk)")
@@ -16,8 +19,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def cdk_tsc(ctx, **_):
-    # type: (click.Context, Any) -> None
+def cdk_tsc(ctx: click.Context, **_: Any) -> None:
     """Generate a sample AWS CDK project using TypeScript."""
     src = TEMPLATES / "cdk-tsc"
     dest = Path.cwd() / "sampleapp.cdk"

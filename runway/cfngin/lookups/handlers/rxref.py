@@ -1,8 +1,15 @@
 """Handler for fetching outputs from a stack in the current namespace."""
 # pylint: disable=arguments-differ,unused-argument
-from runway.lookups.handlers.base import LookupHandler
+from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any, Optional
+
+from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
+
+if TYPE_CHECKING:
+    from ...context import Context
+    from ...providers.aws.default import Provider
 
 TYPE_NAME = "rxref"
 
@@ -11,7 +18,13 @@ class RxrefLookup(LookupHandler):
     """Rxref lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(
+        cls,
+        value: str,
+        context: Optional[Context] = None,
+        provider: Optional[Provider] = None,
+        **_: Any
+    ) -> str:
         """Fetch an output from the designated stack in the current namespace.
 
         The ``output`` lookup supports fetching outputs from stacks created
@@ -21,14 +34,9 @@ class RxrefLookup(LookupHandler):
         :class:`runway.cfngin.context.Context` to expand the fqn of the stack.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-                ``<stack_name>::<output_name>``
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
-
-        Returns:
-            str: Output from the specified stack.
+            value: Parameter(s) given to this lookup. `<stack_name>::<output_name>``
+            context: Context instance.
+            provider: Provider instance.
 
         Example:
             ::
@@ -43,5 +51,4 @@ class RxrefLookup(LookupHandler):
 
         decon = deconstruct(value)
         stack_fqn = context.get_fqn(decon.stack_name)
-        output = provider.get_output(stack_fqn, decon.output_name)
-        return output
+        return provider.get_output(stack_fqn, decon.output_name)

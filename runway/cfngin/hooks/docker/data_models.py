@@ -4,34 +4,30 @@ These are makeshift data models for use until Runway v2 is realeased and pydanti
 can be used.
 
 """
-import sys
+from __future__ import annotations
+
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
-    Generator,
+    ItemsView,
     List,
     Optional,
-    Tuple,
     Type,
     TypeVar,
+    cast,
 )
 
 from ....core.providers.aws import AccountDetails
 from ....util import MutableMap
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # type: ignore pylint: disable=E
 
 if TYPE_CHECKING:
     from docker.models.images import Image
 
     from ...context import Context
 
-    # TODO remove pylint disable when dropping python 2 support
-    Model = TypeVar("Model", bound="BaseModel")  # pylint: disable=invalid-name
+    Model = TypeVar("Model", bound="BaseModel")
 
 
 ECR_REPO_FQN_TEMPLATE = (
@@ -42,11 +38,15 @@ ECR_REPO_FQN_TEMPLATE = (
 class BaseModel:
     """Base model."""
 
-    def dict(self):  # type: () -> Dict[str, Any]
+    def __init__(self, *, context: Optional[Context] = None, **_kwargs: Any) -> None:
+        """Instantiate class."""
+        self._ctx = context
+
+    def dict(self) -> Dict[str, Any]:
         """Return object as a dict."""
         return {k: v for k, v in self.__iter__() if not k.startswith("_")}
 
-    def find(self, query, default=None, **kwargs):  # type: (str, Any, Any) -> Any
+    def find(self, query: str, default: Any = None, **kwargs: Any) -> Any:
         """Find a value in the object."""
         split_query = query.split(".")
 
@@ -68,7 +68,7 @@ class BaseModel:
         except (AttributeError, KeyError):
             return default
 
-    def get(self, name, default=None):  # type: (str, Any) -> Any
+    def get(self, name: str, default: Any = None) -> Any:
         """Get a value or return default if it is not found.
 
         Attr:
@@ -79,16 +79,16 @@ class BaseModel:
         return getattr(self, name, default)
 
     @staticmethod
-    def _validate_bool(value):
-        # type: (Any) -> bool
+    def _validate_bool(value: Any) -> bool:
         """Validate a bool type attribute."""
         if isinstance(value, bool):
             return value
         return bool(value)
 
     @classmethod
-    def _validate_dict(cls, value, optional=False, required=False):
-        # type: (Any, bool, bool) -> Dict[str, Any]
+    def _validate_dict(
+        cls, value: Any, optional: bool = False, required: bool = False
+    ) -> Optional[Dict[Any, Any]]:
         """Validate a Dict type attribute."""
         if not value:
             if required:
@@ -102,7 +102,9 @@ class BaseModel:
         return cls._validate_dict(dict(value), optional=optional, required=required)
 
     @classmethod
-    def _validate_int(cls, value, optional=False, required=False):
+    def _validate_int(
+        cls, value: Any, optional: bool = False, required: bool = False
+    ) -> Optional[int]:
         """Validate int type attribute."""
         if not value and value != 0:
             if required:
@@ -114,8 +116,9 @@ class BaseModel:
         return cls._validate_int(int(value or 0), optional=optional, required=required)
 
     @classmethod
-    def _validate_list_str(cls, value, optional=False, required=False):
-        # type: (Any, bool, bool) -> List[str]
+    def _validate_list_str(
+        cls, value: Any, optional: bool = False, required: bool = False
+    ) -> Optional[List[str]]:
         """Validate a List[str] type attribute."""
         if not value:
             if required:
@@ -135,8 +138,7 @@ class BaseModel:
         return cls._validate_list_str(list(value), required=required)
 
     @staticmethod
-    def _validate_path(value, must_exist=False):
-        # type: (Any, bool) -> Path
+    def _validate_path(value: Any, must_exist: bool = False) -> Path:
         """Validate a Path type attribute.
 
         Args:
@@ -157,8 +159,9 @@ class BaseModel:
         return value
 
     @classmethod
-    def _validate_str(cls, value, optional=False, required=False):
-        # type: (Any, bool, bool) -> Optional[str]
+    def _validate_str(
+        cls, value: Any, optional: bool = False, required: bool = False
+    ) -> Optional[str]:
         """Validate str type attribute."""
         if not value:
             if required:
@@ -173,11 +176,8 @@ class BaseModel:
 
     @classmethod
     def parse_obj(
-        cls,  # type: Type["Model"]
-        obj,  # type: Any
-        context=None,  # type: Optional["Context"]
-    ):
-        # type: (...) -> "Model"
+        cls: Type[Model], obj: Any, context: Optional[Context] = None
+    ) -> Model:
         """Parse object."""
         if not isinstance(obj, dict):
             try:
@@ -190,14 +190,13 @@ class BaseModel:
                 )
         return cls(context=context, **obj)
 
-    def __eq__(self, other):
-        # type: (Any) -> bool
+    def __eq__(self, other: Any) -> bool:
         """Evaluate equal comparison operator."""
         if isinstance(other, self.__class__):
             return self.dict() == other.dict()
         return self.dict() == other
 
-    def __getitem__(self, name):  # type: (str) -> Any
+    def __getitem__(self, name: str) -> bool:
         """Implement evaluation of self[name].
 
         Args:
@@ -209,19 +208,11 @@ class BaseModel:
         """
         return getattr(self, name)
 
-    def __iter__(self):  # type: () -> Generator[Tuple[str, Any], None, None]
+    def __iter__(self) -> ItemsView[str, Any]:
         """Iterate object."""
-        # yield from self.__dict__.items()  # TODO replace with this when dropping python 2
-        for k, v in self.__dict__.items():
-            yield k, v
+        yield from self.__dict__.items()
 
-    def __ne__(self, other):  # TODO remove when dropping python 2 support
-        # type: (Any) -> bool
-        """Override the default implementation (unnecessary in Python 3)."""
-        return not self.__eq__(other)  # cov: ignore
-
-    def __setitem__(self, name, value):
-        # type: (str, Any) -> None
+    def __setitem__(self, name: str, value: Any) -> None:
         """Implement assignment to self[key].
 
         Args:
@@ -240,13 +231,15 @@ class ElasticContainerRegistry(BaseModel):
 
     def __init__(
         self,
-        account_id=None,  # type: Optional[str]
-        alias=None,  # type: Optional[str]
-        aws_region=None,  # type: Optional[str]
-        **kwargs  # type: Any
-    ):  # type: (...) -> None
+        *,
+        account_id: Optional[str] = None,
+        alias: Optional[str] = None,
+        aws_region: Optional[str] = None,
+        context: Optional[Context] = None,
+        **kwargs: Any
+    ) -> None:
         """Instantiate class."""
-        self._ctx = kwargs.get("context")  # type: Optional["Context"]
+        super().__init__(context=context, **kwargs)
         self.account_id = self._validate_str(account_id, optional=True)
         self.alias = self._validate_str(alias, optional=True)
         self.region = self._validate_str(aws_region, optional=True)
@@ -260,10 +253,10 @@ class ElasticContainerRegistry(BaseModel):
                     self._ctx.region or "us-east-1", required=True
                 )
             if not self.account_id:
-                self.account_id = AccountDetails(self._ctx).id
+                self.account_id = AccountDetails(cast("Context", self._ctx)).id
 
     @property
-    def fqn(self):  # type: () -> str
+    def fqn(self) -> str:
         """Fully qualified ECR name."""
         if self.public:
             return self.PUBLIC_URI_TEMPLATE.format(registry_alias=self.alias)
@@ -275,51 +268,55 @@ class ElasticContainerRegistry(BaseModel):
 class DockerImage(BaseModel):
     """Wrapper for :class:`docker.models.images.Image`."""
 
-    def __init__(self, image):  # type: (Image) -> None
+    _repo: Optional[str]
+    image: Image
+
+    def __init__(self, *, image: Image, **kwargs: Any) -> None:
         """Instantiate class."""
-        self._repo = None  # caching
+        super().__init__(**kwargs)
+        self._repo = None
         self.image = image
 
     @property
-    def id(self):  # type: () -> str
+    def id(self) -> str:
         """ID of the image."""
-        return self.image.id
+        return cast(str, self.image.id)
 
     @id.setter
-    def id(self, value):  # type: (str) -> None
+    def id(self, value: str) -> None:
         """Set the ID of the image."""
-        self.image.id = value
+        self.image.id = value  # type: ignore
 
     @property
-    def repo(self):  # type: () -> str
+    def repo(self) -> str:
         """Repository URI."""
         if not self._repo:
             self._repo = self.image.attrs["RepoTags"][0].rsplit(":", 1)[0]
-        return self._repo
+        return cast(str, self._repo)
 
     @repo.setter
-    def repo(self, value):  # type: (str) -> None
+    def repo(self, value: str) -> None:
         """Set repository URI value."""
         self._repo = value
 
     @property
-    def short_id(self):  # type: () -> str
+    def short_id(self) -> str:
         """ID of the image truncated to 10 characters plus the ``sha256:`` prefix."""
         return self.image.short_id
 
     @short_id.setter
-    def short_id(self, value):  # type: (str) -> None
+    def short_id(self, value: str) -> None:
         """Set the ID of the image truncated to 10 characters plus the ``sha256:`` prefix."""
-        self.image.short_id = value
+        self.image.short_id = value  # type: ignore
 
     @property
-    def tags(self):  # type: () -> List[str]
+    def tags(self) -> List[str]:
         """List of image tags."""
         self.image.reload()
         return [uri.split(":")[-1] for uri in self.image.tags]
 
     @property
-    def uri(self):  # type: () -> MutableMap
+    def uri(self) -> MutableMap:
         """Return a mapping of tag to image URI."""
         return MutableMap(**{uri.split(":")[-1]: uri for uri in self.image.tags})
 
@@ -329,31 +326,35 @@ class ElasticContainerRegistryRepository(BaseModel):
 
     def __init__(
         self,
-        repo_name,  # type: str
-        account_id=None,  # type: Optional[str]
-        aws_region=None,  # type: Optional[str]
-        registry_alias=None,  # type: Optional[str]
-        **kwargs  # type: Any
-    ):  # type: (...) -> None
+        *,
+        account_id: Optional[str] = None,
+        aws_region: Optional[str] = None,
+        context: Optional[Context] = None,
+        registry_alias: Optional[str] = None,
+        repo_name: str,
+        **kwargs: Any
+    ) -> None:
         """Instantiace class.
 
         Args:
             account_id: AWS account ID.
             aws_region: AWS region.
+            context: CFNgin context object.
             registry_alias: Alias of a public ECR registry.
             repo_name: Name of the ECR repository.
 
         """
-        self.name = self._validate_str(repo_name, required=True)
+        super().__init__(context=context, **kwargs)
+        self.name = cast(str, self._validate_str(repo_name, required=True))
 
         self.registry = ElasticContainerRegistry(
             account_id=account_id,
             alias=registry_alias,
             aws_region=aws_region,
-            context=kwargs.get("context"),
+            context=context,
         )
 
     @property
-    def fqn(self):  # type: () -> str
+    def fqn(self) -> str:
         """Fully qualified ECR repo name."""
         return self.registry.fqn + self.name

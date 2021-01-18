@@ -19,6 +19,9 @@ help: ## show this message
 list: ## list all targets in this Makefile
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
+npm-install:
+	@npm install --ignore-scripts
+
 sync: ## create a python virtual environment in the project for development
 	PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev
 	pipenv run pre-commit install
@@ -54,7 +57,7 @@ fix-black: ## automatically fix all black errors
 fix-isort: ## automatically fix all isort errors
 	@pipenv run isort .
 
-lint: lint-isort lint-black lint-flake8 lint-pylint ## run all linters
+lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
@@ -75,6 +78,12 @@ lint-pylint: ## run pylint
 	@echo "Running pylint..."
 	@find runway -name '*.py' -not -path 'runway/embedded*' -not -path 'runway/templates/stacker/*' -not -path 'runway/templates/cdk-py/*' -not -path 'runway/blueprints/*' | xargs pipenv run pylint --rcfile=pyproject.toml
 	@echo ""
+
+lint-pyright:
+	@echo "Running pyright..."
+	@npm run-script py-type-check
+	@echo ""
+
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
 	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration

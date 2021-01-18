@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import logging
 import re
+from types import FunctionType
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Iterable,
     Iterator,
@@ -15,6 +17,7 @@ from typing import (
     Type,
     Union,
     cast,
+    overload,
 )
 
 from .cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
@@ -42,6 +45,10 @@ LOGGER = logging.getLogger(__name__)
 class Variable:
     """Represents a variable provided to a Runway directive."""
 
+    name: str
+
+    _raw_value: Any
+
     def __init__(self, name: str, value: Any, variable_type: str = "cfngin") -> None:
         """Initialize class.
 
@@ -54,7 +61,6 @@ class Variable:
         self.name = name
         self._raw_value = value
         self._value = VariableValue.parse(value, variable_type)
-        LOGGER.debug("initalized variable: %s", name)
 
     @property
     def dependencies(self) -> Set[str]:
@@ -131,7 +137,7 @@ class Variable:
 def resolve_variables(
     variables: List[Variable],
     context: Union[CFNginContext, RunwayContext],
-    provider: BaseProvider,
+    provider: Optional[BaseProvider] = None,
 ) -> None:
     """Given a list of variables, resolve all of them.
 
@@ -147,6 +153,9 @@ def resolve_variables(
 
 class VariableValue:
     """Syntax tree base class to parse variable values."""
+
+    _resolved: bool = False
+    _value: Any
 
     @property
     def dependencies(self) -> Set:
@@ -201,8 +210,49 @@ class VariableValue:
 
         """
 
+    def _resolve(self, value: Any) -> None:
+        """Set _value and _resolved from the result of resolve().
+
+        Args:
+            value: Resolved value of the variable.
+
+        """
+        self._value = value
+        self._resolved = True
+
+    @overload
     @classmethod
-    def parse(cls, input_object: Any, variable_type: str = "cfngin") -> Any:
+    def parse(  # noqa
+        cls, input_object: Dict[str, Any], variable_type: str = "cfngin"
+    ) -> VariableValueDict:
+        ...
+
+    @overload
+    @classmethod
+    def parse(  # noqa
+        cls, input_object: List[Any], variable_type: str = "cfngin"
+    ) -> VariableValueList:
+        ...
+
+    @overload
+    @classmethod
+    def parse(  # noqa
+        cls, input_object: str, variable_type: str = "cfngin"
+    ) -> Union[
+        VariableValueConcatenation, VariableValueLiteral, VariableValueLookup,
+    ]:
+        ...
+
+    @classmethod
+    def parse(
+        cls, input_object: Any, variable_type: str = "cfngin"
+    ) -> Union[
+        VariableValueConcatenation,
+        VariableValueDict,
+        VariableValueList,
+        VariableValueLiteral,
+        VariableValueLookup,
+    ]:
         """Parse complex variable structures using type appropriate subclasses.
 
         Args:
@@ -241,12 +291,12 @@ class VariableValue:
                     next_close = i
 
             if next_close is not None:
-                lookup_data = VariableValueConcatenation(
+                lookup_query = VariableValueConcatenation(
                     tokens[(cast(int, last_open) + len(opener) + 1) : next_close]
                 )
                 lookup = VariableValueLookup(
                     lookup_name=tokens[cast(int, last_open) + 1],
-                    lookup_data=lookup_data,
+                    lookup_query=lookup_query,
                     variable_type=variable_type,
                 )
                 tokens[last_open : (next_close + 1)] = [lookup]
@@ -255,7 +305,7 @@ class VariableValue:
 
         return tokens.simplified
 
-    def __iter__(self) -> Iterable:
+    def __iter__(self) -> Iterator[Any]:
         """How the object is iterated.
 
         Raises:
@@ -296,7 +346,7 @@ class VariableValueLiteral(VariableValue):
         """Value of the variable."""
         return self._value
 
-    def __iter__(self) -> Iterable[Any]:
+    def __iter__(self) -> Iterator[Any]:
         """How the object is iterated."""
         yield self
 
@@ -373,11 +423,11 @@ class VariableValueList(VariableValue, list):
 
     def __iter__(self) -> Iterator[Any]:
         """How the object is iterated."""
-        return list.__iter__(self)
+        yield from list.__iter__(self)
 
     def __repr__(self) -> str:
         """Return object representation."""
-        return "List[{}]".format(", ".join([repr(value) for value in self]))
+        return "List[{}]".format(", ".join(repr(value) for value in self))
 
 
 class VariableValueDict(VariableValue, dict):
@@ -450,12 +500,12 @@ class VariableValueDict(VariableValue, dict):
 
     def __iter__(self) -> Iterator[Any]:
         """How the object is iterated."""
-        return dict.__iter__(self)
+        yield from dict.__iter__(self)
 
     def __repr__(self) -> str:
         """Return object representation."""
         return "Dict[{}]".format(
-            ", ".join(["{}={}".format(k, repr(v)) for k, v in self.items()])
+            ", ".join("{}={}".format(k, repr(v)) for k, v in self.items())
         )
 
 
@@ -481,14 +531,20 @@ class VariableValueConcatenation(VariableValue, list):
     @property
     def simplified(
         self,
-    ) -> Union[VariableValue, VariableValueConcatenation, VariableValueLiteral]:
+    ) -> Union[
+        VariableValueConcatenation, VariableValueLiteral, VariableValueLookup,
+    ]:
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
         flatten nested concatenations.
 
         """
-        concat: List[VariableValue] = []
+        concat: List[
+            Union[
+                VariableValueConcatenation, VariableValueLiteral, VariableValueLookup,
+            ]
+        ] = []
         for item in self:
             if isinstance(item, VariableValueLiteral) and item.value == "":
                 pass
@@ -503,10 +559,10 @@ class VariableValueConcatenation(VariableValue, list):
 
             elif isinstance(item, VariableValueConcatenation):
                 # flatten concatenations
-                concat.extend(item.simplified)
+                concat.extend(item.simplified.__iter__())
 
             else:
-                concat.append(cast(VariableValue, item.simplified))
+                concat.append(item.simplified)
 
         if not concat:
             return VariableValueLiteral("")
@@ -551,30 +607,41 @@ class VariableValueConcatenation(VariableValue, list):
         for value in self:
             value.resolve(context, provider=provider, variables=variables, **kwargs)
 
-    def __iter__(self) -> Iterator[VariableValue]:
+    def __iter__(
+        self,
+    ) -> Iterator[
+        Union[VariableValueConcatenation, VariableValueLiteral, VariableValueLookup]
+    ]:
         """How the object is iterated."""
-        return list.__iter__(self)
+        yield from list.__iter__(self)
 
     def __repr__(self) -> str:
         """Return object representation."""
-        return "Concatenation[{}]".format(", ".join([repr(value) for value in self]))
+        return "Concatenation[{}]".format(", ".join(repr(value) for value in self))
 
 
 class VariableValueLookup(VariableValue):
     """A lookup variable value."""
 
+    handler: Union[Callable[..., Any], Type[LookupHandler]]
+    lookup_name: VariableValueLiteral
+    lookup_query: VariableValue
+
+    _resolved: bool
+    _value: Any
+
     def __init__(
         self,
         lookup_name: VariableValueLiteral,
-        lookup_data: VariableValue,
-        handler: Optional[Type[LookupHandler]] = None,
+        lookup_query: Union[str, VariableValue],
+        handler: Optional[Union[Callable[..., Any], Type[LookupHandler]]] = None,
         variable_type: str = "cfngin",
     ) -> None:
         """Initialize class.
 
         Args:
-            lookup_name: Name of the invoked lookup
-            lookup_data: Data portion of the lookup
+            lookup_name: Name of the invoked lookup.
+            lookup_query: Data portion of the lookup.
             handler: Lookup handler that will be use to resolve the value.
             variable_type: Type of variable (cfngin|runway).
 
@@ -588,23 +655,17 @@ class VariableValueLookup(VariableValue):
 
         self.lookup_name = lookup_name
 
-        if isinstance(lookup_data, str):
-            lookup_data = VariableValueLiteral(lookup_data)
-        self.lookup_data = lookup_data
+        if isinstance(lookup_query, str):
+            lookup_query = VariableValueLiteral(lookup_query)
+        self.lookup_query = lookup_query
 
         if handler is None:
-            lookup_name_resolved = lookup_name.value
+            lookup_name_resolved = cast(str, lookup_name.value)
             try:
                 if variable_type == "cfngin":
-                    handler = cast(
-                        Type[LookupHandler],
-                        CFNGIN_LOOKUP_HANDLERS[lookup_name_resolved],
-                    )
+                    handler = CFNGIN_LOOKUP_HANDLERS[lookup_name_resolved]
                 elif variable_type == "runway":
-                    handler = cast(
-                        Type[LookupHandler],
-                        RUNWAY_LOOKUP_HANDLERS[lookup_name_resolved],
-                    )
+                    handler = RUNWAY_LOOKUP_HANDLERS[lookup_name_resolved]
                 else:
                     raise ValueError(
                         'Variable type must be one of "cfngin" or "runway"'
@@ -616,8 +677,10 @@ class VariableValueLookup(VariableValue):
     @property
     def dependencies(self) -> Set[str]:
         """Stack names that this variable depends on."""
-        if isinstance(self.handler, type):
-            return self.handler.dependencies(self.lookup_data)
+        if not isinstance(self.handler, FunctionType) and hasattr(
+            self.handler, "dependencies"
+        ):
+            return self.handler.dependencies(self.lookup_query)
         return set()
 
     @property
@@ -665,20 +728,20 @@ class VariableValueLookup(VariableValue):
             FailedLookup: A lookup failed for any reason.
 
         """
-        self.lookup_data.resolve(
+        self.lookup_query.resolve(
             context, provider=provider, variables=variables, **kwargs
         )
         try:
-            if isinstance(self.handler, type):
+            if not isinstance(self.handler, FunctionType):
                 result = self.handler.handle(
-                    value=self.lookup_data.value,
+                    self.lookup_query.value,
                     context=context,
                     provider=provider,
                     variables=variables,
                     **kwargs
                 )
             else:
-                result = self._resolve_legacy(context, provider)
+                result = self._resolve_legacy(context=context, provider=provider)
             return self._resolve(result)
         except Exception as err:
             if isinstance(err, TypeError):
@@ -706,7 +769,11 @@ class VariableValueLookup(VariableValue):
         self._resolved = True
 
     # TODO Remove during the next major release.
-    def _resolve_legacy(self, context: CFNginContext, provider: BaseProvider) -> Any:
+    def _resolve_legacy(
+        self,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[BaseProvider],
+    ) -> Any:
         """Resolve legacy lookups.
 
         Stacker style custom lookups only take 3 args (value, provider,
@@ -718,24 +785,19 @@ class VariableValueLookup(VariableValue):
         and those that don't support accept more then 3 args.
 
         """
-        if isinstance(self.handler, type):
-            import warnings  # pylint: disable=import-outside-toplevel
-
-            warn_msg = (
+        if not isinstance(self.handler, FunctionType):
+            LOGGER.warning(
                 "Old style lookup in use. Please upgrade to use "
-                "the new style of Lookups that accepts "
-                '"**kwargs".'
+                'the new style of Lookups that accepts "**kwargs".'
             )
-            LOGGER.warning(warn_msg)
-            warnings.warn(warn_msg, DeprecationWarning, stacklevel=2)
             return self.handler.handle(
-                value=self.lookup_data.value, context=context, provider=provider
+                value=self.lookup_query.value, context=context, provider=provider
             )
         return self.handler(
-            value=self.lookup_data.value, context=context, provider=provider
+            value=self.lookup_query.value, context=context, provider=provider
         )
 
-    def __iter__(self) -> Iterable:
+    def __iter__(self) -> Iterator[VariableValueLookup]:
         """How the object is iterated."""
         yield self
 
@@ -743,13 +805,12 @@ class VariableValueLookup(VariableValue):
         """Return object representation."""
         if self._resolved:
             return "Lookup<{r} ({t} {d})>".format(
-                r=self._value, t=self.lookup_name, d=repr(self.lookup_data),
+                r=self._value, t=self.lookup_name, d=repr(self.lookup_query),
             )
-        return "Lookup<{t} {d}>".format(t=self.lookup_name, d=repr(self.lookup_data),)
+        return "Lookup<{t} {d}>".format(t=self.lookup_name, d=repr(self.lookup_query),)
 
     def __str__(self) -> str:
-        # type: () -> str
         """Object displayed as a string."""
         return "${{{type} {data}}}".format(
-            type=self.lookup_name.value, data=self.lookup_data.value,
+            type=self.lookup_name.value, data=self.lookup_query.value,
         )

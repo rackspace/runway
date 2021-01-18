@@ -30,6 +30,8 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 
 """
 # pylint: disable=arguments-differ
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Union
 
@@ -48,8 +50,9 @@ class SsmLookup(LookupHandler):
     """SSM Parameter Store Lookup."""
 
     @classmethod
-    def handle(cls, value, context, **_):
-        # type: (str, Union['CFNginContext', 'RunwayContext'], Any) -> Any
+    def handle(
+        cls, value: str, context: Union[CFNginContext, RunwayContext], **_: Any
+    ) -> Any:
         """Retrieve a value from SSM Parameter Store.
 
         Args:

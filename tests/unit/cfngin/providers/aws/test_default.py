@@ -1,5 +1,7 @@
 """Tests for runway.cfngin.providers.aws.default."""
 # pylint: disable=too-many-lines
+from __future__ import annotations
+
 import copy
 import os.path
 import random
@@ -8,11 +10,13 @@ import threading
 import unittest
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import boto3
 from botocore.exceptions import ClientError, UnStubbedResponseError
 from botocore.stub import Stubber
 from mock import MagicMock, patch
+from typing_extensions import Literal
 
 from runway.cfngin import exceptions
 from runway.cfngin.actions.diff import DictValue
@@ -34,27 +38,56 @@ from runway.cfngin.session_cache import get_session
 from runway.cfngin.stack import Stack
 from runway.util import MutableMap
 
+if TYPE_CHECKING:
+    from mypy_boto3_cloudformation.type_defs import (
+        ChangeTypeDef,
+        ResourceChangeTypeDef,
+        StackTypeDef,
+    )
 
-def random_string(length=12):
+    from runway.core.providers.aws.type_defs import TagSetTypeDef
+
+
+def random_string(length: int = 12) -> str:
     """Return a random string of variable length.
 
     Args:
-        length (int): The # of characters to use in the random string.
-
-    Returns:
-        str: The random string.
+        length: The # of characters to use in the random string.
 
     """
     return "".join([random.choice(string.ascii_letters) for _ in range(length)])
 
 
 def generate_describe_stacks_stack(
-    stack_name,
-    creation_time=None,
-    stack_status="CREATE_COMPLETE",
-    tags=None,
-    termination_protection=False,
-):
+    stack_name: str,
+    creation_time: Optional[datetime] = None,
+    stack_status: Literal[
+        "CREATE_IN_PROGRESS",
+        "CREATE_FAILED",
+        "CREATE_COMPLETE",
+        "ROLLBACK_IN_PROGRESS",
+        "ROLLBACK_FAILED",
+        "ROLLBACK_COMPLETE",
+        "DELETE_IN_PROGRESS",
+        "DELETE_FAILED",
+        "DELETE_COMPLETE",
+        "UPDATE_IN_PROGRESS",
+        "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
+        "UPDATE_COMPLETE",
+        "UPDATE_ROLLBACK_IN_PROGRESS",
+        "UPDATE_ROLLBACK_FAILED",
+        "UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS",
+        "UPDATE_ROLLBACK_COMPLETE",
+        "REVIEW_IN_PROGRESS",
+        "IMPORT_IN_PROGRESS",
+        "IMPORT_COMPLETE",
+        "IMPORT_ROLLBACK_IN_PROGRESS",
+        "IMPORT_ROLLBACK_FAILED",
+        "IMPORT_ROLLBACK_COMPLETE",
+    ] = "CREATE_COMPLETE",
+    tags: Optional[TagSetTypeDef] = None,
+    termination_protection: bool = False,
+) -> StackTypeDef:
     """Generate describe stacks stack."""
     tags = tags or []
     return {
@@ -67,7 +100,9 @@ def generate_describe_stacks_stack(
     }
 
 
-def generate_get_template(file_name="cfn_template.json", stages_available=None):
+def generate_get_template(
+    file_name: str = "cfn_template.json", stages_available: Optional[List[str]] = None
+) -> Dict[str, Any]:
     """Generate get template."""
     fixture_dir = os.path.join(os.path.dirname(__file__), "../../fixtures")
     with open(os.path.join(fixture_dir, file_name), "r") as _file:
@@ -77,7 +112,9 @@ def generate_get_template(file_name="cfn_template.json", stages_available=None):
         }
 
 
-def generate_stack_object(stack_name, outputs=None):
+def generate_stack_object(
+    stack_name: str, outputs: Optional[Dict[str, Any]] = None
+) -> MagicMock:
     """Generate stack object."""
     mock_stack = MagicMock(["name", "fqn", "blueprint"])
     if not outputs:
@@ -89,9 +126,9 @@ def generate_stack_object(stack_name, outputs=None):
     return mock_stack
 
 
-def generate_resource_change(replacement=True):
+def generate_resource_change(replacement: bool = True) -> ChangeTypeDef:
     """Generate resource change."""
-    resource_change = {
+    resource_change: ResourceChangeTypeDef = {
         "Action": "Modify",
         "Details": [],
         "LogicalResourceId": "Fake",
@@ -107,8 +144,11 @@ def generate_resource_change(replacement=True):
 
 
 def generate_change_set_response(
-    status, execution_status="AVAILABLE", changes=None, status_reason="FAKE"
-):
+    status: str,
+    execution_status: str = "AVAILABLE",
+    changes: Optional[List[Dict[str, Any]]] = None,
+    status_reason: str = "FAKE",
+) -> Dict[str, Any]:
     """Generate change set response."""
     return {
         "ChangeSetName": "string",
@@ -136,11 +176,11 @@ def generate_change_set_response(
 
 
 def generate_change(
-    action="Modify",
-    resource_type="EC2::Instance",
-    replacement="False",
-    requires_recreation="Never",
-):
+    action: str = "Modify",
+    resource_type: str = "EC2::Instance",
+    replacement: str = "False",
+    requires_recreation: str = "Never",
+) -> Dict[str, Any]:
     """Generate a minimal change for a changeset."""
     return {
         "Type": "Resource",
@@ -170,12 +210,12 @@ def generate_change(
 class TestMethods(unittest.TestCase):
     """Tests for runway.cfngin.providers.aws.default."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.cfn = boto3.client("cloudformation")
         self.stubber = Stubber(self.cfn)
 
-    def test_requires_replacement(self):
+    def test_requires_replacement(self) -> None:
         """Test requires replacement."""
         changeset = [
             generate_resource_change(),
@@ -187,7 +227,7 @@ class TestMethods(unittest.TestCase):
         for resource in replacement:
             self.assertEqual(resource["ResourceChange"]["Replacement"], "True")
 
-    def test_summarize_params_diff(self):
+    def test_summarize_params_diff(self) -> None:
         """Test summarize params diff."""
         unmodified_param = DictValue("ParamA", "new-param-value", "new-param-value")
         modified_param = DictValue(
@@ -231,11 +271,11 @@ class TestMethods(unittest.TestCase):
             "Parameters Removed: ParamD\n",
         )
 
-    def test_ask_for_approval(self):
+    def test_ask_for_approval(self) -> None:
         """Test ask for approval."""
         get_input_path = "runway.cfngin.ui.get_raw_input"
         with patch(get_input_path, return_value="y"):
-            self.assertIsNone(ask_for_approval([], [], None))
+            self.assertIsNone(ask_for_approval([], [], False))
 
         for v in ("n", "N", "x", "\n"):
             with patch(get_input_path, return_value=v):
@@ -251,7 +291,7 @@ class TestMethods(unittest.TestCase):
                 self.assertEqual(mock_full_changeset.call_count, 1)
             self.assertEqual(mock_get_input.call_count, 2)
 
-    def test_ask_for_approval_with_params_diff(self):
+    def test_ask_for_approval_with_params_diff(self) -> None:
         """Test ask for approval with params diff."""
         get_input_path = "runway.cfngin.ui.get_raw_input"
         params_diff = [
@@ -259,7 +299,7 @@ class TestMethods(unittest.TestCase):
             DictValue("ParamB", "param-b-old-value", "param-b-new-value-delta"),
         ]
         with patch(get_input_path, return_value="y"):
-            self.assertIsNone(ask_for_approval([], params_diff, None))
+            self.assertIsNone(ask_for_approval([], params_diff, False))
 
         for v in ("n", "N", "x", "\n"):
             with patch(get_input_path, return_value=v):
@@ -277,7 +317,9 @@ class TestMethods(unittest.TestCase):
 
     @patch("runway.cfngin.providers.aws.default.format_params_diff")
     @patch("runway.cfngin.providers.aws.default.yaml.safe_dump")
-    def test_output_full_changeset(self, mock_safe_dump, patched_format):
+    def test_output_full_changeset(
+        self, mock_safe_dump: MagicMock, patched_format: MagicMock
+    ) -> None:
         """Test output full changeset."""
         get_input_path = "runway.cfngin.ui.get_raw_input"
 
@@ -308,13 +350,16 @@ class TestMethods(unittest.TestCase):
             )
 
         output_full_changeset(
-            full_changeset=[], params_diff=["mock"], answer="y", fqn=None
+            full_changeset=[],
+            params_diff=[DictValue("mock", "", "")],
+            answer="y",
+            fqn=None,
         )
         safe_dump_counter += 1
         self.assertEqual(mock_safe_dump.call_count, safe_dump_counter)
         self.assertEqual(patched_format.call_count, 1)
 
-    def test_wait_till_change_set_complete_success(self):
+    def test_wait_till_change_set_complete_success(self) -> None:
         """Test wait till change set complete success."""
         self.stubber.add_response(
             "describe_change_set", generate_change_set_response("CREATE_COMPLETE")
@@ -328,7 +373,7 @@ class TestMethods(unittest.TestCase):
         with self.stubber:
             wait_till_change_set_complete(self.cfn, "FAKEID")
 
-    def test_wait_till_change_set_complete_failed(self):
+    def test_wait_till_change_set_complete_failed(self) -> None:
         """Test wait till change set complete failed."""
         # Need 2 responses for try_count
         for _ in range(2):
@@ -341,7 +386,7 @@ class TestMethods(unittest.TestCase):
                     self.cfn, "FAKEID", try_count=2, sleep_time=0.1
                 )
 
-    def test_create_change_set_stack_did_not_change(self):
+    def test_create_change_set_stack_did_not_change(self) -> None:
         """Test create change set stack did not change."""
         self.stubber.add_response(
             "create_change_set", {"Id": "CHANGESETID", "StackId": "STACKID"}
@@ -368,7 +413,7 @@ class TestMethods(unittest.TestCase):
                     tags=[],
                 )
 
-    def test_create_change_set_unhandled_failed_status(self):
+    def test_create_change_set_unhandled_failed_status(self) -> None:
         """Test create change set unhandled failed status."""
         self.stubber.add_response(
             "create_change_set", {"Id": "CHANGESETID", "StackId": "STACKID"}
@@ -391,7 +436,7 @@ class TestMethods(unittest.TestCase):
                     tags=[],
                 )
 
-    def test_create_change_set_bad_execution_status(self):
+    def test_create_change_set_bad_execution_status(self) -> None:
         """Test create change set bad execution status."""
         self.stubber.add_response(
             "create_change_set", {"Id": "CHANGESETID", "StackId": "STACKID"}
@@ -414,7 +459,7 @@ class TestMethods(unittest.TestCase):
                     tags=[],
                 )
 
-    def test_generate_cloudformation_args(self):
+    def test_generate_cloudformation_args(self) -> None:
         """Test generate cloudformation args."""
         stack_name = "mystack"
         template_url = "http://fake.s3url.com/blah.json"
@@ -464,14 +509,14 @@ class TestMethods(unittest.TestCase):
 class TestProviderDefaultMode(unittest.TestCase):
     """Tests for runway.cfngin.providers.aws.default default mode."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         region = "us-east-1"
         self.session = get_session(region=region)
         self.provider = Provider(self.session, region=region, recreate_failed=False)
         self.stubber = Stubber(self.provider.cloudformation)
 
-    def test_create_stack_no_changeset(self):
+    def test_create_stack_no_changeset(self) -> None:
         """Test create_stack, no changeset, template url."""
         stack_name = "fake_stack"
         template = Template(url="http://fake.template.url.com/")
@@ -494,8 +539,8 @@ class TestProviderDefaultMode(unittest.TestCase):
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")
     @patch("runway.cfngin.providers.aws.default.create_change_set")
     def test_create_stack_with_changeset(
-        self, patched_create_change_set, patched_update_term
-    ):
+        self, patched_create_change_set: MagicMock, patched_update_term: MagicMock
+    ) -> None:
         """Test create_stack, force changeset, termination protection."""
         stack_name = "fake_stack"
         template_path = Path("./tests/unit/cfngin/fixtures/cfn_template.yaml")
@@ -533,17 +578,17 @@ class TestProviderDefaultMode(unittest.TestCase):
         )
         patched_update_term.assert_called_once_with(stack_name, True)
 
-    def test_destroy_stack(self):
+    def test_destroy_stack(self) -> None:
         """Test destroy stack."""
         stack = {"StackName": "MockStack"}
 
         self.stubber.add_response("delete_stack", {}, stack)
 
         with self.stubber:
-            self.assertIsNone(self.provider.destroy_stack(stack))
+            self.assertIsNone(self.provider.destroy_stack(stack))  # type: ignore
             self.stubber.assert_no_pending_responses()
 
-    def test_get_stack_stack_does_not_exist(self):
+    def test_get_stack_stack_does_not_exist(self) -> None:
         """Test get stack stack does not exist."""
         stack_name = "MockStack"
         self.stubber.add_client_error(
@@ -557,7 +602,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             with self.stubber:
                 self.provider.get_stack(stack_name)
 
-    def test_get_stack_stack_exists(self):
+    def test_get_stack_stack_exists(self) -> None:
         """Test get stack stack exists."""
         stack_name = "MockStack"
         stack_response = {"Stacks": [generate_describe_stacks_stack(stack_name)]}
@@ -570,7 +615,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.assertEqual(response["StackName"], stack_name)
 
-    def test_select_destroy_method(self):
+    def test_select_destroy_method(self) -> None:
         """Test select destroy method."""
         for i in [
             [{"force_interactive": False}, self.provider.noninteractive_destroy_stack],
@@ -578,7 +623,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         ]:
             self.assertEqual(self.provider.select_destroy_method(**i[0]), i[1])
 
-    def test_select_update_method(self):
+    def test_select_update_method(self) -> None:
         """Test select update method."""
         for i in [
             [
@@ -600,7 +645,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         ]:
             self.assertEqual(self.provider.select_update_method(**i[0]), i[1])
 
-    def test_prepare_stack_for_update_completed(self):
+    def test_prepare_stack_for_update_completed(self) -> None:
         """Test prepare stack for update completed."""
         with self.stubber:
             stack_name = "MockStack"
@@ -610,7 +655,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
             self.assertTrue(self.provider.prepare_stack_for_update(stack, []))
 
-    def test_prepare_stack_for_update_in_progress(self):
+    def test_prepare_stack_for_update_in_progress(self) -> None:
         """Test prepare stack for update in progress."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(
@@ -623,7 +668,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
             self.assertIn("in-progress", str(raised.exception))
 
-    def test_prepare_stack_for_update_non_recreatable(self):
+    def test_prepare_stack_for_update_non_recreatable(self) -> None:
         """Test prepare stack for update non recreatable."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(
@@ -636,7 +681,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.assertIn("Unsupported state", str(raised.exception))
 
-    def test_prepare_stack_for_update_disallowed(self):
+    def test_prepare_stack_for_update_disallowed(self) -> None:
         """Test prepare stack for update disallowed."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(
@@ -651,7 +696,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         # Ensure we point out to the user how to enable re-creation
         self.assertIn("--recreate-failed", str(raised.exception))
 
-    def test_prepare_stack_for_update_bad_tags(self):
+    def test_prepare_stack_for_update_bad_tags(self) -> None:
         """Test prepare stack for update bad tags."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(
@@ -668,7 +713,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.assertIn("tags differ", str(raised.exception).lower())
 
-    def test_prepare_stack_for_update_recreate(self):
+    def test_prepare_stack_for_update_recreate(self) -> None:
         """Test prepare stack for update recreate."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(
@@ -684,7 +729,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         with self.stubber:
             self.assertFalse(self.provider.prepare_stack_for_update(stack, []))
 
-    def test_noninteractive_changeset_update_no_stack_policy(self):
+    def test_noninteractive_changeset_update_no_stack_policy(self) -> None:
         """Test noninteractive changeset update no stack policy."""
         self.stubber.add_response(
             "create_change_set", {"Id": "CHANGESETID", "StackId": "STACKID"}
@@ -710,7 +755,7 @@ class TestProviderDefaultMode(unittest.TestCase):
                 tags=[],
             )
 
-    def test_noninteractive_changeset_update_with_stack_policy(self):
+    def test_noninteractive_changeset_update_with_stack_policy(self) -> None:
         """Test noninteractive changeset update with stack policy."""
         self.stubber.add_response(
             "create_change_set", {"Id": "CHANGESETID", "StackId": "STACKID"}
@@ -736,7 +781,7 @@ class TestProviderDefaultMode(unittest.TestCase):
                 tags=[],
             )
 
-    def test_noninteractive_destroy_stack_termination_protected(self):
+    def test_noninteractive_destroy_stack_termination_protected(self) -> None:
         """Test noninteractive_destroy_stack with termination protection."""
         self.stubber.add_client_error("delete_stack")
 
@@ -745,7 +790,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.assert_no_pending_responses()
 
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
-    def test_get_stack_changes_update(self, mock_output_full_cs):
+    def test_get_stack_changes_update(self, mock_output_full_cs: MagicMock) -> None:
         """Test get stack changes update."""
         stack_name = "MockStack"
         mock_stack = generate_stack_object(stack_name)
@@ -791,7 +836,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.assertEqual(result, expected_outputs)
 
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
-    def test_get_stack_changes_create(self, mock_output_full_cs):
+    def test_get_stack_changes_create(self, mock_output_full_cs: MagicMock) -> None:
         """Test get stack changes create."""
         stack_name = "MockStack"
         mock_stack = generate_stack_object(stack_name)
@@ -852,7 +897,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             full_changeset=changes, params_diff=[], fqn=stack_name, answer="y"
         )
 
-    def test_tail_stack_retry_on_missing_stack(self):
+    def test_tail_stack_retry_on_missing_stack(self) -> None:
         """Test tail stack retry on missing stack."""
         stack_name = "SlowToCreateStack"
         stack = MagicMock(spec=Stack)
@@ -878,7 +923,7 @@ class TestProviderDefaultMode(unittest.TestCase):
                     exc.response["ResponseMetadata"]["attempt"], MAX_TAIL_RETRIES
                 )
 
-    def test_tail_stack_retry_on_missing_stack_eventual_success(self):
+    def test_tail_stack_retry_on_missing_stack_eventual_success(self) -> None:
         """Test tail stack retry on missing stack eventual success."""
         stack_name = "SlowToCreateStack"
         stack = MagicMock(spec=Stack)
@@ -937,7 +982,7 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.assertEqual(received_events[0]["EventId"], "Event1")
 
-    def test_update_termination_protection(self):
+    def test_update_termination_protection(self) -> None:
         """Test update_termination_protection."""
         stack_name = "fake-stack"
         test_cases = [
@@ -953,30 +998,30 @@ class TestProviderDefaultMode(unittest.TestCase):
                 {
                     "Stacks": [
                         generate_describe_stacks_stack(
-                            stack_name, termination_protection=test.aws
+                            stack_name, termination_protection=test["aws"]
                         )
                     ]
                 },
                 {"StackName": stack_name},
             )
-            if isinstance(test.expected, bool):
+            if isinstance(test["expected"], bool):
                 self.stubber.add_response(
                     "update_termination_protection",
                     {"StackId": stack_name},
                     {
-                        "EnableTerminationProtection": test.expected,
+                        "EnableTerminationProtection": test["expected"],
                         "StackName": stack_name,
                     },
                 )
             with self.stubber:
-                self.provider.update_termination_protection(stack_name, test.defined)
+                self.provider.update_termination_protection(stack_name, test["defined"])
             self.stubber.assert_no_pending_responses()
 
 
 class TestProviderInteractiveMode(unittest.TestCase):
     """Tests for runway.cfngin.providers.aws.default interactive mode."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         region = "us-east-1"
         self.session = get_session(region=region)
@@ -984,7 +1029,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         self.stubber = Stubber(self.provider.cloudformation)
 
     @patch("runway.cfngin.ui.get_raw_input")
-    def test_interactive_destroy_stack(self, patched_input):
+    def test_interactive_destroy_stack(self, patched_input: MagicMock) -> None:
         """Test interactive_destroy_stack."""
         stack_name = "fake-stack"
         stack = {"StackName": stack_name}
@@ -999,8 +1044,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")
     @patch("runway.cfngin.ui.get_raw_input")
     def test_interactive_destroy_stack_termination_protected(
-        self, patched_input, patched_update_term
-    ):
+        self, patched_input: MagicMock, patched_update_term: MagicMock
+    ) -> None:
         """Test interactive_destroy_stack with termination protection."""
         stack_name = "fake-stack"
         stack = {"StackName": stack_name}
@@ -1018,15 +1063,15 @@ class TestProviderInteractiveMode(unittest.TestCase):
         patched_update_term.assert_called_once_with(stack_name, False)
 
     @patch("runway.cfngin.ui.get_raw_input")
-    def test_destroy_stack_canceled(self, patched_input):
+    def test_destroy_stack_canceled(self, patched_input: MagicMock) -> None:
         """Test destroy stack canceled."""
         patched_input.return_value = "n"
 
         with self.assertRaises(exceptions.CancelExecution):
             stack = {"StackName": "MockStack"}
-            self.provider.destroy_stack(stack)
+            self.provider.destroy_stack(stack)  # type: ignore
 
-    def test_successful_init(self):
+    def test_successful_init(self) -> None:
         """Test successful init."""
         replacements = True
         provider = Provider(
@@ -1037,8 +1082,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")
     @patch("runway.cfngin.providers.aws.default.ask_for_approval")
     def test_update_stack_execute_success_no_stack_policy(
-        self, patched_approval, patched_update_term
-    ):
+        self, patched_approval: MagicMock, patched_update_term: MagicMock
+    ) -> None:
         """Test update stack execute success no stack policy."""
         stack_name = "my-fake-stack"
 
@@ -1073,8 +1118,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")
     @patch("runway.cfngin.providers.aws.default.ask_for_approval")
     def test_update_stack_execute_success_with_stack_policy(
-        self, patched_approval, patched_update_term
-    ):
+        self, patched_approval: MagicMock, patched_update_term: MagicMock
+    ) -> None:
         """Test update stack execute success with stack policy."""
         stack_name = "my-fake-stack"
 
@@ -1109,7 +1154,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         )
         patched_update_term.assert_called_once_with(stack_name, False)
 
-    def test_select_destroy_method(self):
+    def test_select_destroy_method(self) -> None:
         """Test select destroy method."""
         for i in [
             [{"force_interactive": False}, self.provider.interactive_destroy_stack],
@@ -1117,7 +1162,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         ]:
             self.assertEqual(self.provider.select_destroy_method(**i[0]), i[1])
 
-    def test_select_update_method(self):
+    def test_select_update_method(self) -> None:
         """Test select update method."""
         for i in [
             [
@@ -1142,8 +1187,8 @@ class TestProviderInteractiveMode(unittest.TestCase):
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
     @patch("runway.cfngin.providers.aws.default.output_summary")
     def test_get_stack_changes_interactive(
-        self, mock_output_summary, mock_output_full_cs
-    ):
+        self, mock_output_summary: MagicMock, mock_output_full_cs: MagicMock
+    ) -> None:
         """Test get stack changes interactive."""
         stack_name = "MockStack"
         mock_stack = generate_stack_object(stack_name)

@@ -19,7 +19,7 @@ from .exceptions import SSOTokenLoadError
 LOGGER = logging.getLogger(__name__)
 
 
-class SSOTokenLoader:  # pylint: disable=too-few-public-methods
+class SSOTokenLoader:
     """AWS SSO token loader."""
 
     def __init__(self, cache=None):

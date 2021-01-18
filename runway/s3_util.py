@@ -1,35 +1,52 @@
 """Utility functions for S3."""
+from __future__ import annotations
+
 import logging
 import os
 import tempfile
 import zipfile
+from typing import TYPE_CHECKING, Iterator, Optional, Sequence, cast
 
 import boto3
-from boto3.s3.transfer import S3Transfer
 from botocore.exceptions import ClientError
 
-LOGGER = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.service_resource import S3ServiceResource
+    from mypy_boto3_s3.type_defs import ObjectTypeDef
+
+    from ._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-def _get_client(session=None, region=None):
+def _get_client(
+    session: Optional[boto3.Session] = None, region: Optional[str] = None
+) -> S3Client:
     """Get S3 boto client."""
     return session.client("s3") if session else boto3.client("s3", region_name=region)
 
 
-def _get_resource(session=None, region=None):
+def _get_resource(
+    session: Optional[boto3.Session] = None, region: Optional[str] = None
+) -> S3ServiceResource:
     """Get S3 boto resource."""
     return (
         session.resource("s3") if session else boto3.resource("s3", region_name=region)
     )
 
 
-def purge_and_delete_bucket(bucket_name, region="us-east-1", session=None):
+def purge_and_delete_bucket(
+    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+) -> None:
     """Delete all objects and versions in bucket, then delete bucket."""
     purge_bucket(bucket_name, region, session)
     delete_bucket(bucket_name, region, session)
 
 
-def purge_bucket(bucket_name, region="us-east-1", session=None):
+def purge_bucket(
+    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+) -> None:
     """Delete all objects and versions in bucket."""
     if does_bucket_exist(bucket_name, region, session):
         s3_resource = _get_resource(session, region)
@@ -39,7 +56,9 @@ def purge_bucket(bucket_name, region="us-east-1", session=None):
         LOGGER.warning('bucket "%s" does not exist in region "%s"', bucket_name, region)
 
 
-def delete_bucket(bucket_name, region="us-east-1", session=None):
+def delete_bucket(
+    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+) -> None:
     """Delete bucket."""
     if does_bucket_exist(bucket_name, region, session):
         LOGGER.verbose('delete bucket "%s"...', bucket_name)
@@ -51,10 +70,11 @@ def delete_bucket(bucket_name, region="us-east-1", session=None):
         LOGGER.warning('bucket "%s" does not exist in region "%s"', bucket_name, region)
 
 
-def does_bucket_exist(bucket_name, region="us-east-1", session=None):
+def does_bucket_exist(
+    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+) -> bool:
     """Check if bucket exists in S3."""
     s3_resource = _get_resource(session, region)
-
     try:
         s3_resource.meta.client.head_bucket(Bucket=bucket_name)
         return True
@@ -67,9 +87,12 @@ def does_bucket_exist(bucket_name, region="us-east-1", session=None):
                 'access denied for bucket "%s" (permissions?)', bucket_name
             )
             raise
+    return False
 
 
-def ensure_bucket_exists(bucket_name, region="us-east-1", session=None):
+def ensure_bucket_exists(
+    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+) -> None:
     """Ensure S3 bucket exists."""
     if not does_bucket_exist(bucket_name, region, session):
         LOGGER.info('creating bucket "%s" (in progress)', bucket_name)
@@ -100,10 +123,14 @@ def ensure_bucket_exists(bucket_name, region="us-east-1", session=None):
         LOGGER.verbose('enabled encryption for bucket "%s"', bucket_name)
 
 
-def does_s3_object_exist(bucket, key, session=None, region="us-east-1"):
+def does_s3_object_exist(
+    bucket: str,
+    key: str,
+    session: Optional[boto3.Session] = None,
+    region: str = "us-east-1",
+) -> bool:
     """Determine if object exists on s3."""
     s3_resource = _get_resource(session, region)
-
     try:
         s3_resource.Object(bucket, key).load()
         LOGGER.debug("s3 object exists: %s/%s", bucket, key)
@@ -115,24 +142,29 @@ def does_s3_object_exist(bucket, key, session=None, region="us-east-1"):
     return True
 
 
-def upload(bucket, key, filename, session=None):
+def upload(
+    bucket: str, key: str, filename: str, session: Optional[boto3.Session] = None
+) -> None:
     """Upload file to S3 bucket."""
     s3_client = _get_client(session)
     LOGGER.info("uploading %s to s3://%s/%s...", filename, bucket, key)
     s3_client.upload_file(filename, bucket, key)
 
 
-def download(bucket, key, file_path, session=None):
+def download(
+    bucket: str, key: str, file_path: str, session: Optional[boto3.Session] = None
+) -> str:
     """Download a file from S3 to the given path."""
     s3_client = _get_client(session)
 
-    transfer = S3Transfer(s3_client)
     LOGGER.info("downloading s3://%s/%s to %s...", bucket, key, file_path)
-    transfer.download_file(bucket, key, file_path)
+    s3_client.download_file(Bucket=bucket, Key=key, Filename=file_path)
     return file_path
 
 
-def download_and_extract_to_mkdtemp(bucket, key, session=None):
+def download_and_extract_to_mkdtemp(
+    bucket: str, key: str, session: Optional[boto3.Session] = None
+) -> str:
     """Download zip archive and extract it to temporary directory."""
     filedes, temp_file = tempfile.mkstemp()
     os.close(filedes)
@@ -147,7 +179,12 @@ def download_and_extract_to_mkdtemp(bucket, key, session=None):
     return output_dir
 
 
-def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
+def get_matching_s3_objects(
+    bucket: str,
+    prefix: Sequence[str] = "",
+    suffix: str = "",
+    session: Optional[boto3.Session] = None,
+) -> Iterator[ObjectTypeDef]:
     """Generate objects in an S3 bucket.
 
     Args:
@@ -166,11 +203,7 @@ def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
 
     # We can pass the prefix directly to the S3 API.  If the user has passed
     # a tuple or list of prefixes, we go through them one by one.
-    if isinstance(prefix, str):
-        prefixes = (prefix,)
-    else:
-        prefixes = prefix
-
+    prefixes = (prefix,) if isinstance(prefix, str) else prefix
     for key_prefix in prefixes:
         kwargs["Prefix"] = key_prefix
 
@@ -181,12 +214,16 @@ def get_matching_s3_objects(bucket, prefix="", suffix="", session=None):
                 return
 
             for obj in contents:
-                key = obj["Key"]
-                if key.endswith(suffix):
+                if obj["Key"].endswith(suffix):
                     yield obj
 
 
-def get_matching_s3_keys(bucket, prefix="", suffix="", session=None):
+def get_matching_s3_keys(
+    bucket: str,
+    prefix: str = "",
+    suffix: str = "",
+    session: Optional[boto3.Session] = None,
+) -> Iterator[str]:
     """Generate the keys in an S3 bucket.
 
     Args:

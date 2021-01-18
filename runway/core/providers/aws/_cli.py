@@ -9,8 +9,7 @@ from ....util import SafeHaven
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-def cli(cmd):
-    # type: (List[str]) -> None
+def cli(cmd: List[str]) -> None:
     """Invoke AWS command.
 
     Args:

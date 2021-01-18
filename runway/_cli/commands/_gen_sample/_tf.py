@@ -1,7 +1,7 @@
 """``runway gen-sample tf`` command."""
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -9,7 +9,10 @@ from ....env_mgr.tfenv import get_latest_tf_version
 from ... import options
 from .utils import TEMPLATES, copy_sample
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("tf", short_help="tf (sampleapp.tf)")
@@ -17,8 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def tf(ctx, **_):  # pylint: disable=invalid-name
-    # type: (click.Context, Any) -> None
+def tf(ctx: click.Context, **_: Any) -> None:  # pylint: disable=invalid-name
     """Generate a sample Terraform project."""
     src = TEMPLATES / "terraform"
     dest = Path.cwd() / "sampleapp.tf"

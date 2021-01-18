@@ -1,7 +1,9 @@
 """Test runway.cfngin.hooks.docker.image._build."""
 # pylint: disable=no-self-use,protected-access
-import sys
+from __future__ import annotations
+
 from copy import deepcopy
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -21,11 +23,6 @@ from runway.cfngin.hooks.docker.image._build import (
 
 from .....mock_docker.fake_api import FAKE_IMAGE_ID
 
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # type: ignore pylint: disable=E
-
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
@@ -35,8 +32,9 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.docker.image._build"
 
 
-def test_build(cfngin_context, mocker, tmp_path):
-    # type: ("MockCFNginContext", "MockerFixture", Path) -> None
+def test_build(
+    cfngin_context: MockCFNginContext, mocker: MockerFixture, tmp_path: Path
+) -> None:
     """Test build."""
     (tmp_path / "Dockerfile").touch()
     mock_image = MagicMock(
@@ -69,10 +67,10 @@ def test_build(cfngin_context, mocker, tmp_path):
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
-class TestDockerImageBuildApiOptions(object):
+class TestDockerImageBuildApiOptions:
     """Test runway.cfngin.hooks.docker.image._build.DockerImageBuildApiOptions."""
 
-    def test_init(self):  # type: () -> None
+    def test_init(self) -> None:
         """Test init."""
         args = {
             "buildargs": {"key": "val"},
@@ -94,7 +92,7 @@ class TestDockerImageBuildApiOptions(object):
         obj = DockerImageBuildApiOptions(**deepcopy(args))
         assert obj.dict() == args
 
-    def test_init_default(self):  # type: () -> None
+    def test_init_default(self) -> None:
         """Test init default."""
         obj = DockerImageBuildApiOptions()
         assert obj.buildargs == {}
@@ -114,10 +112,10 @@ class TestDockerImageBuildApiOptions(object):
         assert obj.use_config_proxy is False
 
 
-class TestImageBuildArgs(object):
+class TestImageBuildArgs:
     """Test runway.cfngin.hooks.docker.image._build.ImageBuildArgs."""
 
-    def test_determine_repo(self):
+    def test_determine_repo(self) -> None:
         """Test determine_repo."""
         assert (
             ImageBuildArgs.determine_repo(
@@ -126,8 +124,7 @@ class TestImageBuildArgs(object):
             == "something"
         )
 
-    def test_determine_repo_ecr(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_determine_repo_ecr(self, mocker: MockerFixture) -> None:
         """Test determine_repo ecr."""
         repo = ElasticContainerRegistryRepository(
             account_id="123456012", aws_region="us-east-1", repo_name="test"
@@ -149,8 +146,7 @@ class TestImageBuildArgs(object):
             == repo.fqn
         )
 
-    def test_init(self, mocker, tmp_path):
-        # type: ("MockerFixture", Path) -> None
+    def test_init(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test init."""
         args = {
             "docker": {"pull": True},
@@ -179,8 +175,7 @@ class TestImageBuildArgs(object):
         assert isinstance(obj.docker, DockerImageBuildApiOptions)
         assert obj.docker.tag == mock_determine_repo.return_value
 
-    def test_init_default(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_init_default(self, mocker: MockerFixture) -> None:
         """Test init default values."""
         context = MagicMock()
         mock_validate_dockerfile = mocker.patch.object(
@@ -194,8 +189,7 @@ class TestImageBuildArgs(object):
         assert obj.tags == ["latest"]
         assert isinstance(obj.docker, DockerImageBuildApiOptions)
 
-    def test_validate_dockerfile(self, tmp_path):
-        # type: (Path) -> None
+    def test_validate_dockerfile(self, tmp_path: Path) -> None:
         """Test _validate_dockerfile."""
         (tmp_path / "Dockerfile").touch()
         assert (
@@ -203,15 +197,13 @@ class TestImageBuildArgs(object):
             == "./Dockerfile"
         )
 
-    def test_validate_dockerfile_does_not_exist(self, tmp_path):
-        # type: (Path) -> None
+    def test_validate_dockerfile_does_not_exist(self, tmp_path: Path) -> None:
         """Test _validate_dockerfile does not exist."""
         with pytest.raises(ValueError) as excinfo:
             ImageBuildArgs._validate_dockerfile(tmp_path, "./Dockerfile")
         assert str(excinfo.value).startswith("Dockerfile does not exist at path")
 
-    def test_validate_dockerfile_path_is_dockerfile(self, tmp_path):
-        # type: (Path) -> None
+    def test_validate_dockerfile_path_is_dockerfile(self, tmp_path: Path) -> None:
         """Test _validate_dockerfile does not exist."""
         path = tmp_path / "Dockerfile"
         path.touch()
@@ -221,8 +213,7 @@ class TestImageBuildArgs(object):
             "ImageBuildArgs.path should not reference the Dockerfile directly"
         )
 
-    def test_validate_dockerfile_path_is_zipfile(self, tmp_path):
-        # type: (Path) -> None
+    def test_validate_dockerfile_path_is_zipfile(self, tmp_path: Path) -> None:
         """Test _validate_dockerfile path is zipfile."""
         path = tmp_path / "something.zip"
         path.touch()

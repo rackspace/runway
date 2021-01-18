@@ -16,8 +16,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.debug
 @options.no_color
 @options.verbose
-def install(version, **_):
-    # type: (str, Any) -> None
+def install(version: str, **_: Any) -> None:
     """Install the specified <version> of kubectl (e.g. v1.14.0).
 
     If no version is specified, Runway will attempt to find and read a

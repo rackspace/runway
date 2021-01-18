@@ -1,14 +1,21 @@
 """Test ``runway tfenv`` command."""
 # pylint: disable=unused-argument
+from __future__ import annotations
+
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
 
 from runway._cli import cli
 
+if TYPE_CHECKING:
+    from _pytest.capture import CaptureFixture
+    from _pytest.logging import LogCaptureFixture
 
-def test_tfenv_install(cd_tmp_path, caplog):
+
+def test_tfenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway tfenv install`` reading version from a file.
 
     For best results, remove any existing installs.
@@ -24,7 +31,9 @@ def test_tfenv_install(cd_tmp_path, caplog):
     assert tf_bin.exists()
 
 
-def test_tfenv_install_no_version_file(cd_tmp_path, caplog):
+def test_tfenv_install_no_version_file(
+    cd_tmp_path: Path, caplog: LogCaptureFixture
+) -> None:
     """Test ``runway tfenv install`` no version file."""
     caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()
@@ -34,7 +43,7 @@ def test_tfenv_install_no_version_file(cd_tmp_path, caplog):
     assert "unable to find a .terraform-version file" in "\n".join(caplog.messages)
 
 
-def test_tfenv_install_version(caplog):
+def test_tfenv_install_version(caplog: LogCaptureFixture) -> None:
     """Test ``runway tfenv install <version>``.
 
     For best results, remove any existing installs.
@@ -49,7 +58,9 @@ def test_tfenv_install_version(caplog):
     assert kb_bin.exists()
 
 
-def test_tfenv_run_no_version_file(cd_tmp_path, caplog):
+def test_tfenv_run_no_version_file(
+    cd_tmp_path: Path, caplog: LogCaptureFixture
+) -> None:
     """Test ``runway tfenv run -- --help`` no version file."""
     caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()
@@ -59,7 +70,7 @@ def test_tfenv_run_no_version_file(cd_tmp_path, caplog):
     assert "unable to find a .terraform-version file" in "\n".join(caplog.messages)
 
 
-def test_tfenv_run_separator(cd_tmp_path, capfd):
+def test_tfenv_run_separator(cd_tmp_path: Path, capfd: CaptureFixture) -> None:
     """Test ``runway tfenv run -- --help``.
 
     Parsing of command using ``--`` as a seperator between options and args.
@@ -77,7 +88,7 @@ def test_tfenv_run_separator(cd_tmp_path, capfd):
     assert "terraform [-version] [-help] <command> [args]" in captured.out
 
 
-def test_tfenv_run_version(cd_tmp_path, capfd):
+def test_tfenv_run_version(cd_tmp_path: Path, capfd: CaptureFixture) -> None:
     """Test ``runway tfenv run --version``.
 
     Parsing of bare command.

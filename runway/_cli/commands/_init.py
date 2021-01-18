@@ -2,13 +2,16 @@
 # docs: file://./../../../docs/source/commands.rst
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from .. import options
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 RUNWAY_YML = """---
 # See full syntax at https://docs.onica.com/projects/runway/en/latest/
 deployments:
@@ -26,8 +29,7 @@ deployments:
 @options.no_color
 @options.verbose
 @click.pass_context
-def init(ctx, **_):
-    # type: (click.Context, Any) -> None
+def init(ctx: click.Context, **_: Any) -> None:
     """Create an example runway.yml file in the currect directory."""
     runway_yml = Path.cwd() / "runway.yml"
 

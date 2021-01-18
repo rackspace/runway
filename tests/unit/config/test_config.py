@@ -25,7 +25,7 @@ class ExampleModel(BaseModel):
     name: str = "test"
 
 
-class TestBaseConfig:  # pylint: disable=too-few-public-methods
+class TestBaseConfig:
     """Test runway.config.BaseConfig."""
 
     def test_dump(self, monkeypatch: MonkeyPatch) -> None:
@@ -42,48 +42,6 @@ class TestBaseConfig:  # pylint: disable=too-few-public-methods
             exclude_unset=True,
             include=None,
         )
-
-    def test_parse_file_file_path(
-        self, monkeypatch: MonkeyPatch, tmp_path: Path
-    ) -> None:
-        """Test parse_file with file_path."""
-        mock_parse_obj = MagicMock(return_value=None)
-        monkeypatch.setattr(BaseConfig, "parse_obj", mock_parse_obj)
-        file_path = tmp_path / "test.yml"
-        file_path.write_text("name: test\n")
-        assert not BaseConfig.parse_file(file_path=file_path)
-        mock_parse_obj.assert_called_once_with({"name": "test"}, path=file_path)
-
-    def test_parse_file_file_path_missing(
-        self, monkeypatch: MonkeyPatch, tmp_path: Path
-    ) -> None:
-        """Test parse_file with file_path missing."""
-        mock_parse_obj = MagicMock(return_value=None)
-        monkeypatch.setattr(BaseConfig, "parse_obj", mock_parse_obj)
-        file_path = tmp_path / "test.yml"
-        with pytest.raises(ConfigNotFound) as excinfo:
-            BaseConfig.parse_file(file_path=file_path)
-        assert excinfo.value.path == file_path
-
-    def test_parse_file_find_config_file(
-        self, monkeypatch: MonkeyPatch, tmp_path: Path
-    ) -> None:
-        """Test parse_file with path."""
-        file_path = tmp_path / "test.yml"
-        file_path.write_text("name: test\n")
-        mock_find_config_file = MagicMock(return_value=file_path)
-        mock_parse_obj = MagicMock(return_value=None)
-        monkeypatch.setattr(BaseConfig, "find_config_file", mock_find_config_file)
-        monkeypatch.setattr(BaseConfig, "parse_obj", mock_parse_obj)
-        assert not BaseConfig.parse_file(path=tmp_path)
-        mock_find_config_file.assert_called_once_with(tmp_path)
-        mock_parse_obj.assert_called_once_with({"name": "test"}, path=file_path)
-
-    def test_parse_file_value_error(self):
-        """Test parse_file raise ValueError."""
-        with pytest.raises(ValueError) as excinfo:
-            BaseConfig.parse_file()
-        assert str(excinfo.value) == "must provide path or file_path"
 
 
 class TestCfnginConfig:
@@ -330,7 +288,7 @@ class TestRunwayConfig:
             RunwayConfig.find_config_file(tmp_path)
         assert str(excinfo.value).startswith("more than one")
 
-    def test_parse_obj(self, tmp_path: Path) -> None:
+    def test_parse_obj(self) -> None:
         """Test parse_obj."""
         data = {
             "deployments": [
