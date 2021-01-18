@@ -19,8 +19,7 @@ class CfnLintHandler(TestHandler):
     """Lints CFN."""
 
     @classmethod
-    def handle(cls, name, args):
-        # type: (str, Dict[str, Any]) -> None
+    def handle(cls, name: str, args: Dict[str, Any]) -> None:
         """Perform the actual test.
 
         Relies on .cfnlintrc file to be located beside the Runway config file.

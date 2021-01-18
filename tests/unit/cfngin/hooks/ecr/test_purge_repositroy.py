@@ -1,5 +1,7 @@
 """Test runway.cfngin.hooks.ecr._purge_repository."""
-from typing import TYPE_CHECKING
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List
 
 import boto3
 import pytest
@@ -9,6 +11,7 @@ from runway.cfngin.hooks.ecr import purge_repository
 from runway.cfngin.hooks.ecr._purge_repository import delete_ecr_images, list_ecr_images
 
 if TYPE_CHECKING:
+    from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
     from pytest_mock import MockerFixture
 
     from ....factories import MockCFNginContext
@@ -16,11 +19,11 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.ecr._purge_repository"
 
 
-def test_delete_ecr_images():
+def test_delete_ecr_images() -> None:
     """Test delete_ecr_images."""
     client = boto3.client("ecr")
     stubber = Stubber(client)
-    image_ids = [{"imageDigest": "image0"}]
+    image_ids: List[ImageIdentifierTypeDef] = [{"imageDigest": "image0"}]
     repo_name = "test-repo"
 
     stubber.add_response(
@@ -35,11 +38,11 @@ def test_delete_ecr_images():
         )
 
 
-def test_delete_ecr_images_failures():
+def test_delete_ecr_images_failures() -> None:
     """Test delete_ecr_images with failures."""
     client = boto3.client("ecr")
     stubber = Stubber(client)
-    image_ids = [{"imageDigest": "image0"}]
+    image_ids: List[ImageIdentifierTypeDef] = [{"imageDigest": "image0"}]
     repo_name = "test-repo"
 
     stubber.add_response(
@@ -61,7 +64,7 @@ def test_delete_ecr_images_failures():
         delete_ecr_images(client, image_ids=image_ids, repository_name=repo_name)
 
 
-def test_list_ecr_images():
+def test_list_ecr_images() -> None:
     """Test list_ecr_images."""
     client = boto3.client("ecr")
     stubber = Stubber(client)
@@ -94,7 +97,7 @@ def test_list_ecr_images():
         assert {"imageDigest": "image2"} in result
 
 
-def test_list_ecr_images_repository_not_found():
+def test_list_ecr_images_repository_not_found() -> None:
     """Test list_ecr_images RepositoryNotFoundException."""
     client = boto3.client("ecr")
     stubber = Stubber(client)
@@ -105,9 +108,8 @@ def test_list_ecr_images_repository_not_found():
 
 
 def test_purge_repository(
-    cfngin_context,  # type: "MockCFNginContext"
-    mocker,  # type: "MockerFixture"
-):  # type: (...) -> None
+    cfngin_context: MockCFNginContext, mocker: MockerFixture,
+) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(
         MODULE + ".list_ecr_images", return_value=[{"imageDigest": "abc123"}]
@@ -127,9 +129,8 @@ def test_purge_repository(
 
 
 def test_purge_repository_skip(
-    cfngin_context,  # type: "MockCFNginContext"
-    mocker,  # type: "MockerFixture"
-):  # type: (...) -> None
+    cfngin_context: MockCFNginContext, mocker: MockerFixture,
+) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(MODULE + ".list_ecr_images", return_value=[])
     mock_delete_ecr_images = mocker.patch(MODULE + ".delete_ecr_images")

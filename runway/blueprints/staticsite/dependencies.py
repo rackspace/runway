@@ -6,9 +6,9 @@ import awacs.s3
 from awacs.aws import Allow, AWSPrincipal, Policy, Statement
 from troposphere import AccountId, Join, Output, cognito, s3
 
-from runway.cfngin.blueprints.base import Blueprint
-from runway.hooks.staticsite.auth_at_edge.client_updater import get_redirect_uris
-from runway.module.staticsite import add_url_scheme
+from ...cfngin.blueprints.base import Blueprint
+from ...hooks.staticsite.auth_at_edge.client_updater import get_redirect_uris
+from ...module.staticsite import add_url_scheme
 
 LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class Dependencies(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
         variables = self.get_variables()
@@ -196,4 +196,6 @@ class Dependencies(Blueprint):
 if __name__ == "__main__":
     from runway.cfngin.context import Context
 
-    print(Dependencies("test", Context({"namespace": "test"}), None).to_json())
+    print(
+        Dependencies("test", Context(environment={"namespace": "test"}), None).to_json()
+    )

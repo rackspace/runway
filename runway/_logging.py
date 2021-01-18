@@ -1,6 +1,7 @@
 """Runway logging."""
 import logging
 from enum import IntEnum
+from typing import Any, Dict, Text, Tuple, Union
 
 
 class LogLevels(IntEnum):
@@ -17,7 +18,7 @@ class LogLevels(IntEnum):
     CRITICAL = 50
 
     @classmethod
-    def has_value(cls, value):
+    def has_value(cls, value: int) -> bool:
         """Check if IntEnum has a value."""
         return value in cls._value2member_map_  # pylint: disable=no-member
 
@@ -31,14 +32,18 @@ class PrefixAdaptor(logging.LoggerAdapter):
 
     """
 
-    def __init__(self, prefix, logger, prefix_template="{prefix}:{msg}"):
+    def __init__(
+        self,
+        prefix: str,
+        logger: logging.Logger,
+        prefix_template: str = "{prefix}:{msg}",
+    ) -> None:
         """Instantiate class.
 
         Args:
-            prefix (str): Message prefix.
-            logger (logging.Logger): Logger where the prefixed messages will
-                be sent.
-            prefix_template (str): String that can be used with
+            prefix: Message prefix.
+            logger: Logger where the prefixed messages will be sent.
+            prefix_template: String that can be used with
                 ".format(prefix=<prefix>, msg=<msg>)" to produce a dynamic
                 message prefix.
 
@@ -47,58 +52,28 @@ class PrefixAdaptor(logging.LoggerAdapter):
         self.prefix = prefix
         self.prefix_template = prefix_template
 
-    def getEffectiveLevel(self):  # noqa
-        # type: () -> int
-        """ Get the effective level for the underlying logger.
-
-        Python 2 backport.
-
-        """
-        return self.logger.getEffectiveLevel()
-
-    def hasHandlers(self):  # noqa
-        # type: () -> bool
-        """See if the underlying logger has any handlers.
-
-        Python 2 backport.
-
-        """
-        return self.logger.hasHandlers()
-
-    def isEnabledFor(self, level):  # noqa
-        # type: (int) -> bool
-        """Is this logger enabled for level 'level'?
-
-        Python 2 backport.
-
-        """
-        return self.logger.isEnabledFor(level)
-
-    def notice(self, msg, *args, **kwargs):
+    def notice(self, msg: Union[Exception, str], *args: Any, **kwargs: Any) -> None:
         """Delegate a notice call to the underlying logger.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
+            msg: String template or exception to use for the log record.
 
         """
         self.log(LogLevels.NOTICE, msg, *args, **kwargs)
 
-    def process(self, msg, kwargs):
+    def process(
+        self, msg: Union[Exception, str], kwargs: Dict[str, Any]
+    ) -> Tuple[str, Dict[str, Any]]:
         """Process the message to append the prefix.
 
         Args:
-            msg (str): Message to be prefixed.
-            kwargs (Dict[str, Any]): Keyword args for the message.
-
-        Returns:
-            Tuple[str, Dict[str, Any]]
+            msg: Message to be prefixed.
+            kwargs: Keyword args for the message.
 
         """
         return self.prefix_template.format(prefix=self.prefix, msg=msg), kwargs
 
-    def setLevel(self, level):  # noqa
-        # type: () -> None
+    def setLevel(self, level: Union[int, Text]) -> None:  # noqa
         """Set the specified level on the underlying logger.
 
         Python 2 backport.
@@ -106,22 +81,20 @@ class PrefixAdaptor(logging.LoggerAdapter):
         """
         self.logger.setLevel(level)
 
-    def success(self, msg, *args, **kwargs):
+    def success(self, msg: Union[Exception, str], *args: Any, **kwargs: Any) -> None:
         """Delegate a success call to the underlying logger.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
+            msg: String template or exception to use for the log record.
 
         """
         self.log(LogLevels.SUCCESS, msg, *args, **kwargs)
 
-    def verbose(self, msg, *args, **kwargs):
+    def verbose(self, msg: Union[Exception, str], *args: Any, **kwargs: Any) -> None:
         """Delegate a verbose call to the underlying logger.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
+            msg: String template or exception to use for the log record.
 
         """
         self.log(LogLevels.VERBOSE, msg, *args, **kwargs)
@@ -130,12 +103,12 @@ class PrefixAdaptor(logging.LoggerAdapter):
 class RunwayLogger(logging.Logger):
     """Extend built-in logger with additional levels."""
 
-    def __init__(self, name, level=logging.NOTSET):
+    def __init__(self, name: str, level: Union[int, Text] = logging.NOTSET) -> None:
         """Instantiate the class.
 
         Args:
-            name (str): Logger name.
-            level (int): Log level.
+            name: Logger name.
+            level: Log level.
 
         """
         super().__init__(name, level)
@@ -143,34 +116,31 @@ class RunwayLogger(logging.Logger):
         logging.addLevelName(LogLevels.NOTICE, LogLevels.NOTICE.name)
         logging.addLevelName(LogLevels.SUCCESS, LogLevels.SUCCESS.name)
 
-    def notice(self, msg, *args, **kwargs):
+    def notice(self, msg: Union[Exception, str], *args: Any, **kwargs: Any) -> None:
         """Log 'msg % args' with severity `NOTICE`.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
+            msg: String template or exception to use for the log record.
 
         """
         if self.isEnabledFor(LogLevels.NOTICE):
             self._log(LogLevels.NOTICE, msg, args, **kwargs)
 
-    def success(self, msg, *args, **kwargs):
+    def success(self, msg: Union[Exception, str], *args: Any, **kwargs: Any) -> None:
         """Log 'msg % args' with severity `SUCCESS`.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
+            msg: String template or exception to use for the log record.
 
         """
         if self.isEnabledFor(LogLevels.SUCCESS):
             self._log(LogLevels.SUCCESS, msg, args, **kwargs)
 
-    def verbose(self, msg, *args, **kwargs):
+    def verbose(self, msg: Union[Exception, str], *args: Any, **kwargs: Any) -> None:
         """Log 'msg % args' with severity `VERBOSE`.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
+            msg: String template or exception to use for the log record.
 
         """
         if self.isEnabledFor(LogLevels.VERBOSE):

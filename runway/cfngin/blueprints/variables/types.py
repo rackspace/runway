@@ -1,8 +1,15 @@
 """CFNgin blueprint variable types."""
 # pylint: disable=invalid-name,len-as-condition
+from __future__ import annotations
+
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, overload
+
+from troposphere import BaseAWSObject
+
+_TroposphereType = TypeVar("_TroposphereType", bound=BaseAWSObject)
 
 
-class TroposphereType:
+class TroposphereType(Generic[_TroposphereType]):
     """Represents a Troposphere type.
 
     :class:`Troposphere` will convert the value provided to the variable to
@@ -21,23 +28,29 @@ class TroposphereType:
 
     """
 
-    def __init__(self, defined_type, many=False, optional=False, validate=True):
+    def __init__(
+        self,
+        defined_type: Type[_TroposphereType],
+        many: bool = False,
+        optional: bool = False,
+        validate: bool = True,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            defined_type (Any): Troposphere type
-            many (bool): Whether or not multiple resources can be constructed.
+            defined_type: Troposphere type.
+            many: Whether or not multiple resources can be constructed.
                 If the defined type is a resource, multiple resources can be
                 passed as a dictionary of dictionaries.
                 If it is a parameter class, multiple resources are passed as
                 a list.
-            optional (bool): Whether an undefined/null configured value is
-                acceptable. In that case a value of ``None`` will be passed to
-                the template, even if ``many`` is enabled.
-            validate (bool): Whether to validate the generated object on
-                creation. Should be left enabled unless the object will be
-                augmented with mandatory parameters in the template code, such
-                that it must be validated at a later point.
+            optional: Whether an undefined/null configured value is acceptable.
+                In that case a value of ``None`` will be passed to the template,
+                even if ``many`` is enabled.
+            validate: Whether to validate the generated object on creation.
+                Should be left enabled unless the object will be augmented with
+                mandatory parameters in the template code, such that it must be
+                validated at a later point.
 
         """
         self._validate_type(defined_type)
@@ -48,27 +61,40 @@ class TroposphereType:
         self._validate = validate
 
     @staticmethod
-    def _validate_type(defined_type):
+    def _validate_type(defined_type: Type[_TroposphereType]) -> None:
         if not hasattr(defined_type, "from_dict"):
             raise ValueError("Type must have `from_dict` attribute")
 
     @property
-    def resource_name(self):
+    def resource_name(self) -> str:
         """Name of the type or resource."""
-        return getattr(self._type, "resource_name", None) or self._type.__name__
+        return str(getattr(self._type, "resource_name", None) or self._type.__name__)
 
-    def create(self, value):
+    @overload
+    def create(self, value: Dict[str, Any]) -> _TroposphereType:  # noqa
+        ...
+
+    @overload
+    def create(self, value: List[Dict[str, Any]]) -> List[_TroposphereType]:  # noqa
+        ...
+
+    @overload
+    def create(self, value: None) -> None:  # noqa
+        ...
+
+    def create(
+        self, value: Union[Dict[str, Any], List[Dict[str, Any]]]
+    ) -> Optional[Union[_TroposphereType, List[_TroposphereType]]]:
         """Create the troposphere type from the value.
 
         Args:
-            value (Union[Dict[str, Any], List[Dict[str, Any]]]): A dictionary
-                or list of dictionaries (see class documentation for details)
-                to use as parameters to create the Troposphere type instance.
+            value: A dictionary or list of dictionaries (see class documentation
+                for details) to use as parameters to create the Troposphere type instance.
                 Each dictionary will be passed to the ``from_dict`` method of
                 the type.
 
         Returns:
-            Any: Returns the value converted to the troposphere type.
+            Returns the value converted to the troposphere type.
 
         """
         # Explicitly check with len such that non-sequence types throw.
@@ -80,7 +106,7 @@ class TroposphereType:
             # parameters
             if not isinstance(value, dict):
                 raise ValueError(
-                    "Resources must be specified as a dict of " "title to parameters"
+                    "Resources must be specified as a dict of title to parameters"
                 )
             if not self._many and len(value) > 1:
                 raise ValueError(
@@ -92,7 +118,7 @@ class TroposphereType:
         else:
             # Our type is for properties, not a resource, so don't use
             # titles
-            if self._many:
+            if self._many and isinstance(value, list):
                 result = [self._type.from_dict(None, v) for v in value]
             elif not isinstance(value, dict):
                 raise ValueError(
@@ -107,10 +133,11 @@ class TroposphereType:
             for v in result:
                 v._validate_props()
 
-        return result[0] if not self._many else result
+        # TODO: figure out why pyright does not like this
+        return result[0] if not self._many else result  # type: ignore
 
 
-class CFNType:  # pylint: disable=too-few-public-methods
+class CFNType:
     """Represents a CloudFormation Parameter Type.
 
     :class:`CFNType` can be used as the ``type`` for a Blueprint variable.
@@ -119,12 +146,11 @@ class CFNType:  # pylint: disable=too-few-public-methods
 
     """
 
-    def __init__(self, parameter_type):
+    def __init__(self, parameter_type: str) -> None:
         """Instantiate class.
 
         Args:
-            parameter_type (str): An AWS specific parameter type
-                (http://goo.gl/PthovJ)
+            parameter_type: An AWS specific parameter type. (http://goo.gl/PthovJ)
 
         """
         self.parameter_type = parameter_type

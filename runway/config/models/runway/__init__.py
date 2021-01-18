@@ -84,7 +84,7 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         description="An identifier for the assumed role session. (supports lookups)",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -134,7 +134,7 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         description="An array of AWS Regions to process asynchronously. (supports lookups)",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -210,7 +210,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             },
         ],
     )
-    modules: List[Union[RunwayModuleDefinitionModel, str]] = Field(
+    modules: List[RunwayModuleDefinitionModel] = Field(
         ..., description="An array of modules to process as part of a deployment."
     )
     module_options: Union[Dict[str, Any], str] = Field(
@@ -254,14 +254,28 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         + RunwayDeploymentRegionDefinitionModel.Config.schema_extra["examples"],
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
-            "description": "A collection of modules, regions, and other configurations to deploy."
-        }
         title = "Runway Deployment Definition"
+
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any]) -> None:
+            """Processess the schema after it has been generated.
+
+            Schema is modified in place. Return value is ignored.
+
+            """
+            schema[
+                "description"
+            ] = "A collection of modules, regions, and other configurations to deploy."
+            # modify schema to allow simple string or mapping definition for a module
+            module_ref = schema["properties"]["modules"]["items"].pop("$ref")
+            schema["properties"]["modules"]["items"]["anyOf"] = [
+                {"$ref": module_ref},
+                {"type": "string"},
+            ]
 
     @root_validator(pre=True)
     def _convert_simple_module(
@@ -325,7 +339,7 @@ class RunwayFutureDefinitionModel(ConfigProperty):
         "be skipped if the current environment is not defined.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -434,7 +448,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         examples=[[{"path": "sampleapp-01.cfn"}, {"path": "sampleapp-02.cfn"}]],
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -506,7 +520,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         "If not provided, the current working directory is used.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.allow
@@ -541,9 +555,7 @@ class RunwayVersionField(SpecifierSet):
         field_schema.update(type="string")  # cov: ignore
 
     @classmethod
-    def _convert_value(
-        cls, v: Optional[Union[str, SpecifierSet]]
-    ) -> RunwayVersionField:
+    def _convert_value(cls, v: Union[str, SpecifierSet]) -> RunwayVersionField:
         """Convert runway_version string into SpecifierSet with some value handling.
 
         Args:
@@ -591,7 +603,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
     )
     variables: RunwayVariablesDefinitionModel = RunwayVariablesDefinitionModel()
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid

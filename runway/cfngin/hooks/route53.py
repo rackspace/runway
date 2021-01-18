@@ -1,32 +1,35 @@
 """AWS Route 53 hook."""
-# pylint: disable=unused-argument
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from ..util import create_route53_zone
+
+if TYPE_CHECKING:
+    from ..context import Context
 
 LOGGER = logging.getLogger(__name__)
 
 
-def create_domain(context, *_, **kwargs):
+def create_domain(
+    context: Context, *, domain: Optional[str] = None, **_: Any
+) -> Dict[str, str]:
     """Create a domain within route53.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
+        context: Context instance. (passed in by CFNgin)
 
     Keyword Args:
-        domain (str): Domain name for the Route 53 hosted zone to be
-            created.
+        domain: Domain name for the Route 53 hosted zone to be created.
 
     Returns:
-        Dict[str, str]: Dict containing ``domain`` and ``zone_id``.
+        Dict containing ``domain`` and ``zone_id``.
 
     """
-    session = context.get_session()
-    client = session.client("route53")
-    domain = kwargs.get("domain")
+    client = context.get_session().client("route53")
     if not domain:
         LOGGER.error("domain argument or BaseDomain variable required but not provided")
-        return False
+        return {}
     zone_id = create_route53_zone(client, domain)
     return {"domain": domain, "zone_id": zone_id}

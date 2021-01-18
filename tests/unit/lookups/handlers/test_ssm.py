@@ -1,7 +1,10 @@
 """Test runway.lookups.handlers.ssm."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import json
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import pytest
 import yaml
@@ -9,8 +12,17 @@ import yaml
 from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
+if TYPE_CHECKING:
+    from ...factories import MockCFNginContext, MockRunwayContext
 
-def get_parameter_response(name, value, value_type="String", label=None, version=1):
+
+def get_parameter_response(
+    name: str,
+    value: str,
+    value_type: str = "String",
+    label: Optional[str] = None,
+    version: int = 1,
+) -> Dict[str, Any]:
     """Generate a mock ssm.get_parameter response."""
     selector = "{}/{}".format(name, label or version)
     return {
@@ -27,7 +39,9 @@ def get_parameter_response(name, value, value_type="String", label=None, version
     }
 
 
-def get_parameter_request(name, decrypt=True):
+def get_parameter_request(
+    name: str, decrypt: bool = True
+) -> Dict[str, Union[bool, str]]:
     """Generate the expected request paramters for ssm.get_parameter."""
     return {"Name": name, "WithDecryption": decrypt}
 
@@ -35,7 +49,9 @@ def get_parameter_request(name, decrypt=True):
 class TestSsmLookup:
     """Test runway.lookups.handlers.ssm.SsmLookup."""
 
-    def test_basic(self, cfngin_context, runway_context):
+    def test_basic(
+        self, cfngin_context: MockCFNginContext, runway_context: MockRunwayContext
+    ) -> None:
         """Test resolution of a basic lookup."""
         name = "/test/param"
         value = "test value"
@@ -61,7 +77,7 @@ class TestSsmLookup:
         cfn_stub.assert_no_pending_responses()
         rw_stub.assert_no_pending_responses()
 
-    def test_default(self, runway_context):
+    def test_default(self, runway_context: MockRunwayContext) -> None:
         """Test resolution of a default value."""
         name = "/test/param"
         value = "test value"
@@ -88,7 +104,7 @@ class TestSsmLookup:
             assert var.value == value
             stub.assert_no_pending_responses()
 
-    def test_different_region(self, runway_context):
+    def test_different_region(self, runway_context: MockRunwayContext) -> None:
         """Test Lookup in region other than that set in Context."""
         name = "/test/param"
         value = "test value"
@@ -108,7 +124,7 @@ class TestSsmLookup:
             assert var.value == value
             stub.assert_no_pending_responses()
 
-    def test_loaded_value(self, runway_context):
+    def test_loaded_value(self, runway_context: MockRunwayContext) -> None:
         """Test resolution of a JSON value."""
         name = "/test/param"
         raw_value = {
@@ -158,7 +174,7 @@ class TestSsmLookup:
                     assert var.value == test["expected"]
                     stub.assert_no_pending_responses()
 
-    def test_not_found(self, runway_context):
+    def test_not_found(self, runway_context: MockRunwayContext) -> None:
         """Test raises ParameterNotFound."""
         name = "/test/param"
         stubber = runway_context.add_stubber("ssm")

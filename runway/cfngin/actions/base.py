@@ -1,8 +1,11 @@
 """CFNgin base action."""
+from __future__ import annotations
+
 import logging
 import os
 import sys
 import threading
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import botocore.exceptions
 
@@ -11,6 +14,15 @@ from ..exceptions import PlanFailed
 from ..plan import Graph, Plan, Step, merge_graphs
 from ..status import COMPLETE
 from ..util import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
+
+    from ..blueprints.base import Blueprint
+    from ..context import Context
+    from ..providers.aws.default import Provider, ProviderBuilder
+    from ..stack import Stack
+    from ..status import Status
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 STACK_POLL_TIME = int(os.environ.get("CFNGIN_STACK_POLL_TIME", 30))
 
 
-def build_walker(concurrency):
+def build_walker(concurrency: int) -> Callable[..., Any]:
     """Return a function for waling a graph.
 
     Passed to :class:`runway.cfngin.plan.Plan` for walking the graph.
@@ -39,10 +51,10 @@ def build_walker(concurrency):
     execute a maximum of concurrency steps at any given time.
 
     Args:
-        concurrency (int): Number of threads to use while walking.
+        concurrency: Number of threads to use while walking.
 
     Returns:
-        Callable[..., Any]: Function to walk a :class:`runway.cfngin.dag.DAG`.
+        Function to walk a :class:`runway.cfngin.dag.DAG`.
 
     """
     if concurrency == 1:
@@ -55,22 +67,17 @@ def build_walker(concurrency):
     return ThreadedWalker(semaphore).walk
 
 
-def stack_template_url(bucket_name, blueprint, endpoint):
+def stack_template_url(bucket_name: str, blueprint: Blueprint, endpoint: str):
     """Produce an s3 url for a given blueprint.
 
     Args:
-        bucket_name (str): The name of the S3 bucket where the resulting
+        bucket_name: The name of the S3 bucket where the resulting
             templates are stored.
-        blueprint (:class:`runway.cfngin.blueprints.base.Blueprint`): The
-            blueprint object to create the URL to.
-        endpoint (str): The s3 endpoint used for the bucket.
-
-    Returns:
-        str: S3 URL.
+        blueprint: The blueprint object to create the URL to.
+        endpoint: The s3 endpoint used for the bucket.
 
     """
-    key_name = stack_template_key_name(blueprint)
-    return "%s/%s/%s" % (endpoint, bucket_name, key_name)
+    return f"{endpoint}/{bucket_name}/{stack_template_key_name(blueprint)}"
 
 
 class BaseAction:
@@ -81,32 +88,40 @@ class BaseAction:
     will be executed to perform that command.
 
     Attributes:
-        DESCRIPTION (str): Description used when creating a plan for an action.
-        bucket_name (str): S3 bucket used by the action.
-        bucket_region (str): AWS region where S3 bucket is located.
-        cancel (threading.Event): Cancel handler.
-        context (:class:`runway.cfngin.context.Context`): The context
-            for the current run.
-        provider_builder (Optional[BaseProviderBuilder]):
-            An object that will build a provider that will be interacted
-            with in order to perform the necessary actions.
-        s3_conn (boto3.client.Client): Boto3 S3 client.
+        DESCRIPTION: Description used when creating a plan for an action.
+        bucket_name: S3 bucket used by the action.
+        bucket_region: AWS region where S3 bucket is located.
+        cancel: Cancel handler.
+        context: The context for the current run.
+        provider_builder: An object that will build a provider that will be
+            interacted with in order to perform the necessary actions.
+        s3_conn: Boto3 S3 client.
 
     """
 
-    DESCRIPTION = "Base action"
-    NAME = None
+    DESCRIPTION: str = "Base action"
+    NAME: Optional[str] = None
 
-    def __init__(self, context, provider_builder=None, cancel=None):
+    bucket_name: Optional[str]
+    bucket_region: Optional[str]
+    cancel: threading.Event
+    context: Context
+    provider_builder: Optional[ProviderBuilder]
+    s3_conn: S3Client
+
+    def __init__(
+        self,
+        context: Context,
+        provider_builder: Optional[ProviderBuilder] = None,
+        cancel: Optional[threading.Event] = None,
+    ):
         """Instantiate class.
 
         Args:
-            context (:class:`runway.cfngin.context.Context`): The context
-                for the current run.
-            provider_builder (Optional[:class:`BaseProviderBuilder`]):
-                An object that will build a provider that will be interacted
-                with in order to perform the necessary actions.
-            cancel (threading.Event): Cancel handler.
+            context: The context for the current run.
+            provider_builder: An object that will build a provider that will be
+                interacted with in order to perform the necessary actions.
+            cancel: Cancel handler.
 
         """
         self.context = context
@@ -119,42 +134,37 @@ class BaseAction:
         self.s3_conn = self.context.s3_conn
 
     @property
-    def _stack_action(self):
+    def _stack_action(self) -> Callable[..., Any]:
         """Run against a step."""
         raise NotImplementedError
 
     @property
-    def provider(self):
+    def provider(self) -> Provider:
         """Return a generic provider using the default region.
 
         Used for running things like hooks.
 
-        Returns:
-            :class:`runway.cfngin.providers.base.BaseProvider`
-
         """
         return self.provider_builder.build()
 
-    def build_provider(self, stack):
+    def build_provider(self, stack: Stack) -> Provider:
         """Build a :class:`runway.cfngin.providers.base.BaseProvider`.
 
         Args:
-            stack (:class:`runway.cfngin.stack.Stack`): Stack the action will
-                be executed on.
+            stack: Stack the action will be executed on.
 
         Returns:
-            :class:`runway.cfngin.providers.base.BaseProvider`: Suitable for
-            operating on the given :class:`runway.cfngin.stack.Stack`.
+            Suitable for operating on the given :class:`runway.cfngin.stack.Stack`.
 
         """
         return self.provider_builder.build(region=stack.region, profile=stack.profile)
 
-    def ensure_cfn_bucket(self):
+    def ensure_cfn_bucket(self) -> None:
         """CloudFormation bucket where templates will be stored."""
         if self.bucket_name:
             ensure_s3_bucket(self.s3_conn, self.bucket_name, self.bucket_region)
 
-    def execute(self, **kwargs):
+    def execute(self, **kwargs: Any) -> None:
         """Run the action with pre and post steps."""
         try:
             self.pre_run(**kwargs)
@@ -164,26 +174,28 @@ class BaseAction:
             LOGGER.error(str(err))
             sys.exit(1)
 
-    def pre_run(self, **kwargs):
+    def pre_run(self, **_: Any) -> None:
         """Perform steps before running the action."""
 
-    def post_run(self, **kwargs):
+    def post_run(self, **_: Any) -> None:
         """Perform steps after running the action."""
 
-    def run(self, **kwargs):
+    def run(self, *_args: Any, **_kwargs: Any) -> None:
         """Abstract method for running the action."""
         raise NotImplementedError('Subclass must implement "run" method')
 
-    def s3_stack_push(self, blueprint, force=False):
+    def s3_stack_push(self, blueprint: Blueprint, force: bool = False) -> str:
         """Push the rendered blueprint's template to S3.
 
         Verifies that the template doesn't already exist in S3 before
         pushing.
 
         Returns:
-            str: URL to the template in S3.
+            URL to the template in S3.
 
         """
+        if not self.bucket_name:
+            raise ValueError("bucket_name required")
         key_name = stack_template_key_name(blueprint)
         template_url = self.stack_template_url(blueprint)
         try:
@@ -203,61 +215,54 @@ class BaseAction:
         self.s3_conn.put_object(
             Bucket=self.bucket_name,
             Key=key_name,
-            Body=blueprint.rendered,
+            Body=blueprint.rendered.encode(),
             ServerSideEncryption="AES256",
             ACL="bucket-owner-full-control",
         )
         LOGGER.debug("blueprint %s pushed to %s", blueprint.name, template_url)
         return template_url
 
-    def stack_template_url(self, blueprint):
-        """S3 URL for CloudFormation template object.
-
-        Returns:
-            str
-
-        """
+    def stack_template_url(self, blueprint: Blueprint) -> str:
+        """S3 URL for CloudFormation template object."""
+        if not self.bucket_name:
+            raise ValueError("bucket_name required")
         return stack_template_url(
             self.bucket_name, blueprint, get_s3_endpoint(self.s3_conn)
         )
 
     def _generate_plan(
         self,
-        tail=False,
-        reverse=False,
-        require_unlocked=True,
-        include_persistent_graph=False,
-    ):
+        tail: bool = False,
+        reverse: bool = False,
+        require_unlocked: bool = True,
+        include_persistent_graph: bool = False,
+    ) -> Plan:
         """Create a plan for this action.
 
         Args:
-            tail (Union[bool, Callable]): An optional function to call
-                to tail the stack progress.
-            reverse (bool): If True, execute the graph in reverse (useful for
-                destroy actions).
-            require_unlocked (bool): If the persistent graph is locked, an
-                error is raised.
-            include_persistent_graph (bool): Include the persistent graph
+            tail: Whether to tail the stack progress.
+            reverse: If True, execute the graph in reverse (useful for destroy actions).
+            require_unlocked: If the persistent graph is locked, an error is raised.
+            include_persistent_graph: Include the persistent graph
                 in the :class:`runway.cfngin.plan.Plan` (if there is one).
                 This will handle basic merging of the local and persistent
                 graphs if an action does not require more complex logic.
 
-        Returns:
-            :class:`runway.cfngin.plan.Plan`: The resulting plan object
-
         """
-        tail = self._tail_stack if tail else None
+        tail_fn = self._tail_stack if tail else None
 
-        def target_fn(*_args, **_kwargs):
+        def target_fn(*_args: Any, **_kwargs: Any) -> Status:
             """Target function."""
             return COMPLETE
 
         steps = [
-            Step(stack, fn=self._stack_action, watch_func=tail)
+            Step(stack, fn=self._stack_action, watch_func=tail_fn)
             for stack in self.context.get_stacks()
         ]
 
-        steps += [Step(target, fn=target_fn) for target in self.context.get_targets()]
+        steps.extend(
+            [Step(target, fn=target_fn) for target in self.context.get_targets()]
+        )
 
         graph = Graph.from_steps(steps)
 
@@ -266,7 +271,7 @@ class BaseAction:
                 self.context.persistent_graph.to_dict(),
                 self.context,
                 fn=self._stack_action,
-                watch_func=tail,
+                watch_func=tail_fn,
             )
             persist_graph = Graph.from_steps(persist_steps)
             graph = merge_graphs(graph, persist_graph)
@@ -279,7 +284,9 @@ class BaseAction:
             require_unlocked=require_unlocked,
         )
 
-    def _tail_stack(self, stack, cancel, retries=0, **kwargs):
+    def _tail_stack(
+        self, stack: Stack, cancel: threading.Event, retries: int = 0, **kwargs: Any
+    ) -> None:
         """Tail a stack's event stream."""
         provider = self.build_provider(stack)
         return provider.tail_stack(

@@ -1,6 +1,7 @@
 """``runway test`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
+from typing import Any
 
 import click
 
@@ -16,7 +17,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def test(ctx, **_):
+def test(ctx: click.Context, **_: Any) -> None:
     """Execute tests as defined in the Runway config.
 
     If one of the tests fail, the command will exit immediately unless

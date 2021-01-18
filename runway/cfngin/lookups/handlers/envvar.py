@@ -1,9 +1,9 @@
 """Environment variable lookup."""
 # pylint: disable=unused-argument,arguments-differ
 import os
+from typing import Any
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 TYPE_NAME = "envvar"
@@ -13,14 +13,11 @@ class EnvvarLookup(LookupHandler):
     """Environment variable lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value: str, **_: Any) -> str:
         """Retrieve an environment variable.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
+            value: Parameter(s) given to this lookup.
 
         Example:
             ::

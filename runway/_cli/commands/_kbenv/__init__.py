@@ -17,8 +17,7 @@ COMMANDS = [install, run]
 @options.debug
 @options.no_color
 @options.verbose
-def kbenv(**_):
-    # type: (Any) -> None
+def kbenv(**_: Any) -> None:
     """kubectl version management and execution.
 
     Compatible with https://github.com/alexppg/kbenv.

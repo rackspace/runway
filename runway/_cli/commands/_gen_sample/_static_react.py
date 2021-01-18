@@ -1,14 +1,17 @@
 """``runway gen-sample static-react`` command."""
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, copy_sample
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("static-react", short_help="react static site (static-react)")
@@ -16,8 +19,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def static_react(ctx, **_):
-    # type: (click.Context, Any) -> None
+def static_react(ctx: click.Context, **_: Any) -> None:
     """Generate a sample static site project using React."""
     src = TEMPLATES / "static-react"
     dest = Path.cwd() / "static-react"

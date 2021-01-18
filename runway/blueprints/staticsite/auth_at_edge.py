@@ -4,17 +4,21 @@ Described in detail in this blogpost:
 https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-how-to-use-lambdaedge-and-json-web-tokens-to-enhance-web-application-security/
 
 """
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import awacs.logs
 import awacs.s3
 from awacs.aws import Allow, Principal, Statement
 from troposphere import Join, Output, awslambda, cloudfront, iam, s3
 
-from runway.cfngin.context import Context
-
 from .staticsite import StaticSite
+
+if TYPE_CHECKING:
+    from ...cfngin.blueprints.base import BlueprintVariable
+    from ...cfngin.context import Context
 
 LOGGER = logging.getLogger("runway")
 
@@ -22,9 +26,7 @@ LOGGER = logging.getLogger("runway")
 class AuthAtEdge(StaticSite):
     """Auth@Edge Blueprint."""
 
-    IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
-
-    AUTH_VARIABLES = {
+    AUTH_VARIABLES: Dict[str, BlueprintVariable] = {
         "OAuthScopes": {"type": list, "default": [], "description": "OAuth2 Scopes"},
         "PriceClass": {
             "type": str,
@@ -55,32 +57,30 @@ class AuthAtEdge(StaticSite):
             "description": "The URL path that you can visit to sign-out.",
         },
     }
-
-    VARIABLES = {}  # type: Dict[str, Dict[str, Union[str, Any]]]
+    IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
+    VARIABLES: Dict[str, BlueprintVariable] = {}
 
     def __init__(
         self,
-        name,  # type: str
-        context,  # type: Context
-        mappings=None,  # type: Union[None, Dict]
-        description=None,  # type: Union[None, str]
-    ):
-        # type(...) -> Cleanup
+        name: str,
+        context: Context,
+        mappings: Optional[Dict[str, Dict[str, Any]]] = None,
+        description: Optional[str] = None,
+    ) -> None:
         """Initialize the Blueprint.
 
         Args:
-            name (str): The name of the stack.
-            context (Context): The CFNgin Context object.
-            mappings (Union(None, Dict)): Blueprint mappings.
-            description (Union(None, str)): The description of the stack.
+            name: A name for the blueprint.
+            context: Context the blueprint is being executed under.
+            mappings: CloudFormation Mappings to be used in the template.
+            description: Used to describe the resulting CloudFormation template.
 
         """
         super().__init__(name, context, mappings, description)
         self.VARIABLES.update(StaticSite.VARIABLES)
         self.VARIABLES.update(self.AUTH_VARIABLES)
 
-    def create_template(self):
-        # type: () -> None
+    def create_template(self) -> None:
         """Create the Blueprinted template for Auth@Edge."""
         self.template.set_version("2010-09-09")
         self.template.set_description(
@@ -89,11 +89,10 @@ class AuthAtEdge(StaticSite):
 
         # Resources
         bucket = self.add_bucket()
-        # self.add_bucket_policy(bucket)
         oai = self.add_origin_access_identity()
         bucket_policy = self.add_cloudfront_bucket_policy(bucket, oai)
         # TODO Make this available in Auth@Edge
-        lambda_function_associations = []  # type: List[str]
+        lambda_function_associations: List[cloudfront.LambdaFunctionAssociation] = []
 
         if self.directory_index_specified:
             index_rewrite = self._get_index_rewrite_role_function_and_version()
@@ -160,49 +159,37 @@ class AuthAtEdge(StaticSite):
         self.add_cloudfront_distribution(bucket_policy, distribution_options)
 
     def get_auth_at_edge_lambda_and_ver(
-        self,
-        title,  # type: str
-        description,  # type: str
-        handle,  # type: str
-        role,  # type: iam.Role
-    ):
-        # type: (...) -> Dict[str, Any]
+        self, title: str, description: str, handle: str, role: iam.Role,
+    ) -> Dict[str, Any]:
         """Create a lambda function and its version.
 
         Args:
-            title (str): The name of the function in PascalCase.
-            description (str): Description to be displayed in the
+            title: The name of the function in PascalCase.
+            description: Description to be displayed in the
                 lambda panel.
-            handle (str): The underscore separated representation
+            handle: The underscore separated representation
                 of the name of the lambda. This handle is used to
                 determine the handler for the lambda as well as
                 identify the correct Code hook_data information.
-            role (IAM.Role): The Lambda Execution Role.
+            role: The Lambda Execution Role.
 
         """
         function = self.get_auth_at_edge_lambda(title, description, handle, role)
-
         return {"function": function, "version": self.add_version(title, function)}
 
     def get_auth_at_edge_lambda(
-        self,
-        title,  # type: str
-        description,  # type: str
-        handler,  # type: str
-        role,  # type: iam.Role
-    ):
-        # type: (...) -> awslambda.Function
+        self, title: str, description: str, handler: str, role: iam.Role,
+    ) -> awslambda.Function:
         """Create an Auth@Edge lambda resource.
 
         Args:
-            title (str): The name of the function in PascalCase.
-            description (str): Description to be displayed in the
-                lambda panel.
-            handler (str): The underscore separated representation
+            title: The name of the function in PascalCase.
+            description: Description to be displayed in the lambda panel.
+            handler: The underscore separated representation
                 of the name of the lambda. This handle is used to
                 determine the handler for the lambda as well as
                 identify the correct Code hook_data information.
-            role (IAM.Role): The Lambda Execution Role.
+            role: The Lambda Execution Role.
 
         """
         lamb = self.template.add_resource(
@@ -228,11 +215,8 @@ class AuthAtEdge(StaticSite):
         return lamb
 
     def add_version(
-        self,
-        title,  # type: str
-        lambda_function,  # type: awslambda.Function
-    ):
-        # type: (...) -> awslambda.Version
+        self, title: str, lambda_function: awslambda.Function,
+    ) -> awslambda.Version:
         """Create a version association with a Lambda@Edge function.
 
         In order to ensure different versions of the function
@@ -241,8 +225,8 @@ class AuthAtEdge(StaticSite):
         will this hash value.
 
         Args:
-            title (str): The name of the function in PascalCase.
-            lambda_function (awslambda.Function): The Lambda function.
+            title: The name of the function in PascalCase.
+            lambda_function: The Lambda function.
 
         """
         s3_key = lambda_function.properties["Code"].to_dict()["S3Key"]
@@ -255,16 +239,15 @@ class AuthAtEdge(StaticSite):
 
     def get_distribution_options(
         self,
-        bucket,  # type: s3.Bucket
-        oai,  # type: cloudfront.CloudFrontOriginAccessIdentity
-        lambda_funcs,  # type: List[cloudfront.LambdaFunctionAssociation]
-        check_auth_lambda_version,  # type: awslambda.Version
-        http_headers_lambda_version,  # type: awslambda.Version
-        parse_auth_lambda_version,  # type: awslambda.Version
-        refresh_auth_lambda_version,  # type: awslambda.Version
-        sign_out_lambda_version,  # type: awslambda.Version
-    ):
-        # type: (...) -> Dict[str, Any]
+        bucket: s3.Bucket,
+        oai: cloudfront.CloudFrontOriginAccessIdentity,
+        lambda_funcs: List[cloudfront.LambdaFunctionAssociation],
+        check_auth_lambda_version: awslambda.Version,
+        http_headers_lambda_version: awslambda.Version,
+        parse_auth_lambda_version: awslambda.Version,
+        refresh_auth_lambda_version: awslambda.Version,
+        sign_out_lambda_version: awslambda.Version,
+    ) -> Dict[str, Any]:
         """Retrieve the options for our CloudFront distribution.
 
         Keyword Args:
@@ -369,7 +352,7 @@ class AuthAtEdge(StaticSite):
             "ViewerCertificate": self.add_acm_cert(),
         }
 
-    def _get_error_responses(self):
+    def _get_error_responses(self) -> List[cloudfront.CustomErrorResponse]:
         """Return error response based on site stack variables.
 
         When custom_error_responses are defined return those, if running
@@ -395,7 +378,9 @@ class AuthAtEdge(StaticSite):
             )
         ]
 
-    def _get_cloudfront_bucket_policy_statements(self, bucket, oai):
+    def _get_cloudfront_bucket_policy_statements(
+        self, bucket: s3.Bucket, oai: cloudfront.CloudFrontOriginAccessIdentity
+    ) -> List[Statement]:
         return [
             Statement(
                 Action=[awacs.s3.GetObject],

@@ -1,9 +1,13 @@
 """Replicated Lambda Function cleanup warning."""
-import logging
-from typing import Any, Dict, List
+from __future__ import annotations
 
-from runway.cfngin.context import Context
-from runway.cfngin.providers.base import BaseProvider
+import logging
+from typing import TYPE_CHECKING, Any, List
+
+if TYPE_CHECKING:
+    from mypy_boto3_cloudformation.type_defs import OutputTypeDef
+
+    from ...cfngin.context import Context
 
 LOGGER = logging.getLogger(__name__)
 STACK_STATUSES_TO_IGNORE = [
@@ -19,10 +23,7 @@ STACK_STATUSES_TO_IGNORE = [
 ]
 
 
-def get_replicated_function_names(
-    outputs,  # type: List[Dict[str, str]]
-):
-    # type: (...) -> List[str]
+def get_replicated_function_names(outputs: List[OutputTypeDef],) -> List[str]:
     """Extract replicated function names from CFN outputs."""
     function_names = []
     for i in [
@@ -46,25 +47,16 @@ def get_replicated_function_names(
     return function_names
 
 
-def warn(
-    context: Context,  # pylint: disable=unused-argument
-    provider: BaseProvider,  # pylint: disable=unused-argument
-    **kwargs: Any
-) -> bool:
+def warn(context: Context, *, stack_relative_name: str, **_: Any) -> bool:
     """Notify the user of Lambda functions to delete.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance.
-
-    Keyword Args:
+        context: The context instance.
         stack_relative_name (str): CFNgin stack name with Functions.
 
     """
     site_stack_name = (
-        context.namespace + context.namespace_delimiter + kwargs["stack_relative_name"]
+        context.namespace + context.namespace_delimiter + stack_relative_name
     )
     session = context.get_session()
     cfn_client = session.client("cloudformation")

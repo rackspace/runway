@@ -1,21 +1,34 @@
 """CFNgin stack."""
+from __future__ import annotations
+
 from copy import deepcopy
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+
+from typing_extensions import Literal
 
 from runway.util import load_object_from_string
 from runway.variables import Variable, resolve_variables
 
 from .blueprints.raw import RawTemplateBlueprint
 
+if TYPE_CHECKING:
+    from ..config.models.cfngin import CfnginStackDefinitionModel
+    from .blueprints.base import Blueprint
+    from .context import Context
+    from .providers.base import BaseProvider
 
-def _initialize_variables(stack_def, variables=None):
+
+def _initialize_variables(
+    stack_def: CfnginStackDefinitionModel, variables: Optional[Dict[str, Any]] = None
+) -> List[Variable]:
     """Convert defined variables into a list of ``Variable`` for consumption.
 
     Args:
-        stack_def (Dict[str, Any]): The stack definition being worked on.
-        variables (Dict[str, Any]): Optional, explicit variables.
+        stack_def: The stack definition being worked on.
+        variables: Optional, explicit variables.
 
     Returns:
-        List[Variable]: Contains key/value pairs of the collected variables.
+        Contains key/value pairs of the collected variables.
 
     Raises:
         AttributeError: Raised when the stack definition contains an invalid
@@ -32,54 +45,70 @@ class Stack:
     """Represents gathered information about a stack to be built/updated.
 
     Attributes:
-        definition (:class:`runway.cfngin.config.Stack`): The stack definition
-            from the config.
-        enabled (bool): Whether this stack is enabled
-        force (bool): Whether to force updates on this stack.
-        fqn (str): Fully qualified name of the stack. Combines the stack name
+        definition: The stack definition from the config.
+        enabled: Whether this stack is enabled
+        force: Whether to force updates on this stack.
+        fqn: Fully qualified name of the stack. Combines the stack name
             and current namespace.
-        in_progress_behavior (Optional[str]): The behavior for when a stack is
-            in ``CREATE_IN_PROGRESS`` or ``UPDATE_IN_PROGRESS``.
-        locked (bool): Whether or not the stack is locked.
-        logging (bool): Whether logging is enabled.
-        mappings (Optional[Dict[str, Dict[str, Any]]]): Cloudformation
-            mappings passed to the blueprint.
-        name (str): Name of the stack taken from the definition.
-        outputs (Optional[Dict[str, Any]]): CloudFormation Stack outputs
-        profile (str): Profile name from the stack definition.
-        protected (bool): Whether this stack is protected.
-        region (str): AWS region name.
-        termination_protection (bool): The state of termination protection
+        in_progress_behavior: The behavior for when a stack is in
+            ``CREATE_IN_PROGRESS`` or ``UPDATE_IN_PROGRESS``.
+        locked: Whether or not the stack is locked.
+        logging: Whether logging is enabled.
+        mappings: Cloudformation mappings passed to the blueprint.
+        name: Name of the stack taken from the definition.
+        outputs: CloudFormation Stack outputs.
+        profile: Profile name from the stack definition.
+        protected: Whether this stack is protected.
+        region: AWS region name.
+        termination_protection: The state of termination protection
             to apply to the stack.
-        variables (Optional[Dict[str, Any]]): Variables for the stack.
+        variables: Variables for the stack.
 
     """
 
+    _blueprint: Optional[Blueprint]
+    _stack_policy: Optional[str]
+
+    context: Context
+    definition: CfnginStackDefinitionModel
+    enabled: bool
+    force: bool
+    fqn: str
+    in_progress_behavior: Optional[Literal["wait"]]
+    locked: bool
+    logging: bool
+    mappings: Dict[str, Dict[str, Dict[str, Any]]]
+    name: str
+    outputs: Dict[str, Any]
+    profile: Optional[str]
+    protected: bool
+    region: Optional[str]
+    termination_protection: bool
+    variables: List[Variable]
+
     def __init__(
         self,
-        definition,
-        context,
-        variables=None,
-        mappings=None,
-        locked=False,
-        force=False,
-        enabled=True,
-        protected=False,
+        definition: CfnginStackDefinitionModel,
+        context: Context,
+        *,
+        variables: Optional[Dict[str, Any]] = None,
+        mappings: Dict[str, Dict[str, Dict[str, Any]]] = None,
+        locked: bool = False,
+        force: bool = False,
+        enabled: bool = True,
+        protected: bool = False,
     ):
         """Instantiate class.
 
         Args:
-            definition (:class:`runway.cfngin.config.Stack`): A stack
-                definition.
-            context (:class:`runway.cfngin.context.Context`): Current context
-                for building the stack.
-            variables (Optional[Dict[str, Any]]): Variables for the stack.
-            mappings (Optional[Dict[str, Dict[str, Any]]]): Cloudformation
-                mappings passed to the blueprint.
-            locked (bool): Whether or not the stack is locked.
-            force (bool): Whether to force updates on this stack.
-            enabled (bool): Whether this stack is enabled
-            protected (bool): Whether this stack is protected.
+            definition: A stack definition.
+            context: Current context for building the stack.
+            variables: Variables for the stack.
+            mappings: Cloudformation mappings passed to the blueprint.
+            locked: Whether or not the stack is locked.
+            force: Whether to force updates on this stack.
+            enabled: Whether this stack is enabled
+            protected: Whether this stack is protected.
 
         """
         self._blueprint = None
@@ -94,8 +123,8 @@ class Stack:
         self.in_progress_behavior = definition.in_progress_behavior
         self.locked = locked
         self.logging = True
-        self.mappings = mappings
-        self.outputs = None
+        self.mappings = mappings or {}
+        self.outputs = {}
         self.profile = definition.profile
         self.protected = protected
         self.region = definition.region
@@ -103,23 +132,13 @@ class Stack:
         self.variables = _initialize_variables(definition, variables)
 
     @property
-    def required_by(self):
-        """Return a list of stack names that depend on this stack.
-
-        Returns:
-            List[str]
-
-        """
-        return self.definition.required_by or []
+    def required_by(self) -> Set[str]:
+        """Return a list of stack names that depend on this stack."""
+        return set(self.definition.required_by)
 
     @property
-    def requires(self):
-        """Return a list of stack names this stack depends on.
-
-        Returns:
-            List[str]
-
-        """
+    def requires(self) -> Set[str]:
+        """Return a list of stack names this stack depends on."""
         requires = set(self.definition.requires or [])
 
         # Add any dependencies based on output lookups
@@ -134,7 +153,7 @@ class Stack:
         return requires
 
     @property
-    def stack_policy(self):
+    def stack_policy(self) -> Optional[str]:
         """Return the Stack Policy to use for this stack."""
         if not self._stack_policy:
             self._stack_policy = None
@@ -145,7 +164,7 @@ class Stack:
         return self._stack_policy
 
     @property
-    def blueprint(self):
+    def blueprint(self) -> Blueprint:
         """Return the blueprint associated with this stack."""
         if not self._blueprint:
             kwargs = {}
@@ -177,21 +196,18 @@ class Stack:
         return self._blueprint
 
     @property
-    def tags(self):
+    def tags(self) -> Dict[str, Any]:
         """Return the tags that should be set on this stack.
 
         Includes both the global tags, as well as any stack specific tags
         or overrides.
-
-        Returns:
-            Dict[str, str]: Dictionary of tags.
 
         """
         tags = self.definition.tags or {}
         return dict(self.context.tags, **tags)
 
     @property
-    def parameter_values(self):
+    def parameter_values(self) -> Dict[str, Any]:
         """Return all CloudFormation Parameters for the stack.
 
         CloudFormation Parameters can be specified via Blueprint Variables
@@ -199,59 +215,46 @@ class Stack:
         ``type``.
 
         Returns:
-            Dict[str, Any]: dictionary of
-            ``<parameter name>: <parameter value>``.
+            Dictionary of ``<parameter name>: <parameter value>``.
 
         """
         return self.blueprint.get_parameter_values()
 
     @property
-    def all_parameter_definitions(self):
-        """Return a list of all parameters in the blueprint/template.
-
-        Dict[str, Dict[str, str]]: parameter definitions. Keys are
-        parameter names, the values are dicts containing key/values
-        for various parameter properties.
-
-        """
+    def all_parameter_definitions(self) -> Dict[str, Any]:
+        """Return all parameters in the blueprint/template."""
         return self.blueprint.get_parameter_definitions()
 
     @property
-    def required_parameter_definitions(self):
-        """Return all CloudFormation Parameters without a default value.
-
-        Returns:
-            Dict[str, Dict[str, str]]: dict of required CloudFormation
-            Parameters for the blueprint. Will be a dictionary of
-            ``<parameter name>: <parameter attributes>``.
-
-        """
+    def required_parameter_definitions(self) -> Dict[str, Any]:
+        """Return all CloudFormation Parameters without a default value."""
         return self.blueprint.get_required_parameter_definitions()
 
-    def resolve(self, context, provider):
+    def resolve(
+        self, context: Context, provider: Optional[BaseProvider] = None
+    ) -> None:
         """Resolve the Stack variables.
 
         This resolves the Stack variables and then prepares the Blueprint for
         rendering by passing the resolved variables to the Blueprint.
 
         Args:
-            context (:class:`runway.cfngin.context.Context`): CFNgin context.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Subclass of the base provider.
+            context: CFNgin context.
+            provider: Subclass of the base provider.
 
         """
         resolve_variables(self.variables, context, provider)
         self.blueprint.resolve_variables(self.variables)
 
-    def set_outputs(self, outputs):
+    def set_outputs(self, outputs: Dict[str, Any]) -> None:
         """Set stack outputs to the provided value.
 
         Args:
-            outputs (Dict[str, Any]): CloudFormation Stack outputs.
+            outputs: CloudFormation Stack outputs.
 
         """
         self.outputs = outputs
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Object represented as a string."""
         return self.fqn

@@ -1,7 +1,10 @@
 """Tests for runway.cfngin.util."""
 # pylint: disable=unused-argument,invalid-name
+from __future__ import annotations
+
 import unittest
 from pathlib import Path
+from typing import Any, List
 
 import boto3
 import mock
@@ -39,7 +42,7 @@ AWS_REGIONS = [
 ]
 
 
-def mock_create_cache_directories(self, **kwargs):
+def mock_create_cache_directories(self, **kwargs: Any) -> int:
     """Mock create cache directories.
 
     Don't actually need the directories created in testing
@@ -51,13 +54,13 @@ def mock_create_cache_directories(self, **kwargs):
 class TestUtil(unittest.TestCase):
     """Tests for runway.cfngin.util."""
 
-    def test_cf_safe_name(self):
+    def test_cf_safe_name(self) -> None:
         """Test cf safe name."""
         tests = (("abc-def", "AbcDef"), ("GhI", "GhI"), ("jKlm.noP", "JKlmNoP"))
         for test in tests:
             self.assertEqual(cf_safe_name(test[0]), test[1])
 
-    def test_camel_to_snake(self):
+    def test_camel_to_snake(self) -> None:
         """Test camel to snake."""
         tests = (
             ("TestTemplate", "test_template"),
@@ -68,7 +71,7 @@ class TestUtil(unittest.TestCase):
         for test in tests:
             self.assertEqual(camel_to_snake(test[0]), test[1])
 
-    def test_merge_map(self):
+    def test_merge_map(self) -> None:
         """Test merge map."""
         tests = [
             # 2 lists of stacks defined
@@ -104,7 +107,7 @@ class TestUtil(unittest.TestCase):
         for test in tests:
             self.assertEqual(merge_map(test[0], test[1]), test[2])
 
-    def test_yaml_to_ordered_dict(self):
+    def test_yaml_to_ordered_dict(self) -> None:
         """Test yaml to ordered dict."""
         raw_config = """
         pre_build:
@@ -117,26 +120,26 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(list(config["pre_build"].keys())[0], "hook2")
         self.assertEqual(config["pre_build"]["hook2"]["path"], "foo.bar")
 
-    def test_get_client_region(self):
+    def test_get_client_region(self) -> None:
         """Test get client region."""
         regions = ["us-east-1", "us-west-1", "eu-west-1", "sa-east-1"]
         for region in regions:
             client = boto3.client("s3", region_name=region)
             self.assertEqual(get_client_region(client), region)
 
-    def test_get_s3_endpoint(self):
+    def test_get_s3_endpoint(self) -> None:
         """Test get s3 endpoint."""
         endpoint_url = "https://example.com"
         client = boto3.client("s3", region_name="us-east-1", endpoint_url=endpoint_url)
         self.assertEqual(get_s3_endpoint(client), endpoint_url)
 
-    def test_s3_bucket_location_constraint(self):
+    def test_s3_bucket_location_constraint(self) -> None:
         """Test s3 bucket location constraint."""
         tests = (("us-east-1", ""), ("us-west-1", "us-west-1"))
         for region, result in tests:
             self.assertEqual(s3_bucket_location_constraint(region), result)
 
-    def test_parse_cloudformation_template(self):
+    def test_parse_cloudformation_template(self) -> None:
         """Test parse cloudformation template."""
         template = """AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
@@ -191,7 +194,7 @@ Outputs:
             "create_cache_directories",
             new=mock_create_cache_directories,
         ):
-            sp = SourceProcessor(sources={})
+            sp = SourceProcessor(sources={})  # type: ignore
 
             self.assertEqual(
                 sp.sanitize_git_path("git@github.com:foo/bar.git"),
@@ -223,7 +226,7 @@ Outputs:
                 sp.git_ls_remote(
                     "https://github.com/remind101/stacker.git", "refs/heads/release-1.0"
                 ),
-                b"857b4834980e582874d70feef77bb064b60762d1",
+                "857b4834980e582874d70feef77bb064b60762d1",
             )
 
             bad_configs = [
@@ -275,30 +278,38 @@ class MockException(Exception):
 class TestExceptionRetries(unittest.TestCase):
     """Test exception retries."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.counter = 0
 
-    def _works_immediately(self, a, b, x=None, y=None):
+    def _works_immediately(
+        self, a: Any, b: Any, x: Any = None, y: Any = None
+    ) -> List[Any]:
         """Works immediately."""
         self.counter += 1
         return [a, b, x, y]
 
-    def _works_second_attempt(self, a, b, x=None, y=None):
+    def _works_second_attempt(
+        self, a: Any, b: Any, x: Any = None, y: Any = None
+    ) -> List[Any]:
         """Works second_attempt."""
         self.counter += 1
         if self.counter == 2:
             return [a, b, x, y]
         raise Exception("Broke.")
 
-    def _second_raises_exception2(self, a, b, x=None, y=None):
+    def _second_raises_exception2(
+        self, a: Any, b: Any, x: Any = None, y: Any = None
+    ) -> List[Any]:
         """Second raises exception2."""
         self.counter += 1
         if self.counter == 2:
             return [a, b, x, y]
         raise MockException("Broke.")
 
-    def _throws_exception2(self, a, b, x=None, y=None):
+    def _throws_exception2(
+        self, a: Any, b: Any, x: Any = None, y: Any = None
+    ) -> List[Any]:
         """Throws exception2."""
         self.counter += 1
         raise MockException("Broke.")

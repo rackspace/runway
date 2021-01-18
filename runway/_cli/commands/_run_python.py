@@ -18,8 +18,7 @@ from .. import options
 @options.debug
 @options.no_color
 @options.verbose
-def run_python(filename, **_):
-    # type: (str, Any) -> None
+def run_python(filename: str, **_: Any) -> None:
     """Execute a python script using a bundled copy of python.
 
     This command can execute actions using python without requiring python to

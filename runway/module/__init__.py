@@ -1,4 +1,6 @@
 """Runway module module."""
+from __future__ import annotations
+
 import logging
 import os
 import platform
@@ -6,15 +8,20 @@ import subprocess
 import sys
 from collections.abc import MutableMapping
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union, cast
 
 from ..util import merge_nested_environment_dicts, which
 
-LOGGER = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from .._logging import PrefixAdaptor, RunwayLogger
+    from ..context import Context
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
 NPX_BIN = "npx.cmd" if platform.system().lower() == "windows" else "npx"
 
 
-def format_npm_command_for_logging(command):
+def format_npm_command_for_logging(command: List[str]) -> str:
     """Convert npm command list to string for display to user."""
     if platform.system().lower() == "windows" and (
         command[0] == "npx.cmd" and command[1] == "-c"
@@ -23,19 +30,29 @@ def format_npm_command_for_logging(command):
     return " ".join(command)
 
 
-def generate_node_command(command, command_opts, path, logger=LOGGER):
+def generate_node_command(
+    command: str,
+    command_opts: List[str],
+    path: Path,
+    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+) -> List[str]:
     """Return node bin command list for subprocess execution."""
     if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
         cmd_list = [NPX_BIN, "-c", "%s %s" % (command, " ".join(command_opts))]
     else:
         logger.debug("npx not found; falling back to invoking shell script directly")
-        cmd_list = [os.path.join(path, "node_modules", ".bin", command)] + command_opts
+        cmd_list = [str(path / "node_modules" / ".bin" / command), *command_opts]
     logger.debug("node command: %s", format_npm_command_for_logging(cmd_list))
     return cmd_list
 
 
-def run_module_command(cmd_list, env_vars, exit_on_error=True, logger=LOGGER):
+def run_module_command(
+    cmd_list: List[str],
+    env_vars: Dict[str, str],
+    exit_on_error: bool = True,
+    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+) -> None:
     """Shell out to provisioner command."""
     logger.debug("running command: %s", " ".join(cmd_list))
     if exit_on_error:
@@ -47,14 +64,14 @@ def run_module_command(cmd_list, env_vars, exit_on_error=True, logger=LOGGER):
         subprocess.check_call(cmd_list, env=env_vars)
 
 
-def use_npm_ci(path):
+def use_npm_ci(path: Path) -> bool:
     """Return true if npm ci should be used in lieu of npm install."""
     # https://docs.npmjs.com/cli/ci#description
     with open(os.devnull, "w") as fnull:
         if (
             (
-                os.path.isfile(os.path.join(path, "package-lock.json"))
-                or os.path.isfile(os.path.join(path, "npm-shrinkwrap.json"))
+                (path / "package-lock.json").is_file()
+                or (path / "npm-shrinkwrap.json").is_file()
             )
             and subprocess.call(
                 [NPM_BIN, "ci", "-h"], stdout=fnull, stderr=subprocess.STDOUT
@@ -65,13 +82,18 @@ def use_npm_ci(path):
     return False
 
 
-def run_npm_install(path, options, context, logger=LOGGER):
+def run_npm_install(
+    path: Path,
+    options: Dict[str, Union[Dict[str, Any], str]],
+    context: Context,
+    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+) -> None:
     """Run npm install/ci."""
     # Use npm ci if available (npm v5.7+)
     cmd = [NPM_BIN, "<place-holder>"]
     if context.no_color:
         cmd.append("--no-color")
-    if options.get("options", {}).get("skip_npm_ci"):
+    if cast(Dict[str, Any], options.get("options", {})).get("skip_npm_ci"):
         logger.info("skipped npm ci/npm install")
         return
     if context.env_vars.get("CI") and use_npm_ci(path):
@@ -83,7 +105,7 @@ def run_npm_install(path, options, context, logger=LOGGER):
     subprocess.check_call(cmd)
 
 
-def warn_on_boto_env_vars(env_vars):
+def warn_on_boto_env_vars(env_vars: Dict[str, str]) -> None:
     """Inform user if boto-specific environment variables are in use."""
     # https://github.com/serverless/serverless/issues/2151#issuecomment-255646512
     if env_vars.get("AWS_DEFAULT_PROFILE") and not env_vars.get("AWS_PROFILE"):
@@ -97,25 +119,30 @@ def warn_on_boto_env_vars(env_vars):
 class RunwayModule:
     """Base class for Runway modules."""
 
-    def __init__(self, context, path, options=None):
+    context: Context
+    logger: Union[PrefixAdaptor, RunwayLogger]
+    name: str
+
+    def __init__(
+        self,
+        context: Context,
+        path: Path,
+        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            path (Union[str, Path]): Path to the module.
-            options (Dict[str, Dict[str, Any]]): Everything in the module
-                definition merged with applicable values from the deployment
-                definition.
+            context: Runway context object.
+            path: Path to the module.
+            options: Everything in the module definition merged with applicable
+                values from the deployment definition.
 
         """
         self.context = context
         self.logger = LOGGER
         self.path = str(path)
         self.options = {} if options is None else options
-        if isinstance(path, Path):
-            self.name = options.get("name", path.name)
-        else:  # until we can replace path with a Path object here, handle str
-            self.name = options.get("name", Path(path).name)
+        self.name = cast(str, self.options.get("name", path.name))
 
     # the rest of these 'abstract' methods must have names which match
     #  the commands defined in `cli.py`
@@ -132,14 +159,11 @@ class RunwayModule:
         """Implement dummy method (set in consuming classes)."""
         raise NotImplementedError("You must implement the destroy() method yourself!")
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         """Make the object subscriptable.
 
         Args:
-            key (str): Attribute to get.
-
-        Returns:
-            Any
+            key: Attribute to get.
 
         """
         return getattr(self, key)
@@ -149,15 +173,19 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
     """Base class for Runway modules that use npm."""
 
     # TODO we need a better name than "options" or pass in as kwargs
-    def __init__(self, context, path, options=None):
+    def __init__(
+        self,
+        context: Context,
+        path: Path,
+        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            path (Union[str, Path]): Path to the module.
-            options (Dict[str, Dict[str, Any]]): Everything in the module
-                definition merged with applicable values from the deployment
-                definition.
+            context: Runway context object.
+            path: Path to the module.
+            options: Everything in the module definition merged with applicable
+                values from the deployment definition.
 
         """
         options = options or {}
@@ -165,10 +193,12 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         del self.options  # remove the attr set by the parent class
 
         # potential future state of RunwayModule attributes in a future release
-        self._raw_path = Path(options.pop("path")) if options.get("path") else None
-        self.environments = options.pop("environments", {})
-        self.options = options.pop("options", {})
-        self.parameters = options.pop("parameters", {})
+        self._raw_path = (
+            Path(cast(str, options.pop("path"))) if options.get("path") else None
+        )
+        self.environments = cast(Dict[str, Any], options.pop("environments", {}))
+        self.options = cast(Dict[str, Any], options.pop("options", {}))
+        self.parameters = cast(Dict[str, Any], options.pop("parameters", {}))
         self.path = path if isinstance(self.path, Path) else Path(self.path)
 
         for k, v in options.items():
@@ -177,7 +207,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         self.check_for_npm()  # fail fast
         warn_on_boto_env_vars(self.context.env_vars)
 
-    def check_for_npm(self):
+    def check_for_npm(self) -> None:
         """Ensure npm is installed and in the current path."""
         if not which("npm"):
             self.logger.error(
@@ -186,16 +216,16 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             )
             sys.exit(1)
 
-    def log_npm_command(self, command):
+    def log_npm_command(self, command: List[str]) -> None:
         """Log an npm command that is going to be run.
 
         Args:
-            command (List[str]): List that will be passed into a subprocess.
+            command: List that will be passed into a subprocess.
 
         """
         self.logger.debug("node command: %s", format_npm_command_for_logging(command))
 
-    def npm_install(self):
+    def npm_install(self) -> None:
         """Run ``npm install``."""
         cmd = [NPM_BIN, "<place-holder>"]
         if self.context.no_color:
@@ -211,7 +241,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             cmd[1] = "install"
         subprocess.check_call(cmd)
 
-    def package_json_missing(self):
+    def package_json_missing(self) -> bool:
         """Check for the existence for a package.json file in the module.
 
         Returns:
@@ -228,15 +258,12 @@ class ModuleOptions(MutableMapping):
     """Base class for Runway module options."""
 
     @staticmethod
-    def merge_nested_env_dicts(data, env_name=None):
+    def merge_nested_env_dicts(data: Any, env_name: Optional[str] = None) -> Any:
         """Merge nested env dicts.
 
         Args:
-            data (Any): Data to try to merge.
-            env_name (Optional[str]): Current environment.
-
-        Returns:
-            Any
+            data: Data to try to merge.
+            env_name: Current environment.
 
         """
         if isinstance(data, (list, type(None), str)):
@@ -247,21 +274,20 @@ class ModuleOptions(MutableMapping):
                 for key, value in data.items()
             }
         raise TypeError(
-            "expected type of list, NoneType, or str; " "got type %s" % type(data)
+            "expected type of list, NoneType, or str; got type %s" % type(data)
         )
 
     @classmethod
-    def parse(cls, context, **kwargs):
+    def parse(cls, context: Context, **kwargs: Any) -> ModuleOptions:
         """Parse module options definition to extract usable options.
 
         Args:
-            context (Context): Runway context object.
+            context: Runway context object.
 
         """
         raise NotImplementedError
 
-    def __delitem__(self, key):
-        # type: (str) -> None
+    def __delitem__(self, key: str) -> None:
         """Implement deletion of self[key].
 
         Args:
@@ -278,7 +304,7 @@ class ModuleOptions(MutableMapping):
         """
         delattr(self, key)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         """Implement evaluation of self[key].
 
         Args:
@@ -303,7 +329,7 @@ class ModuleOptions(MutableMapping):
         except AttributeError:
             raise KeyError(key)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> Any:
         """Implement assignment to self[key].
 
         Args:
@@ -321,8 +347,7 @@ class ModuleOptions(MutableMapping):
         """
         setattr(self, key, value)
 
-    def __len__(self):
-        # type: () -> int
+    def __len__(self) -> int:
         """Implement the built-in function len().
 
         Example:
@@ -335,7 +360,7 @@ class ModuleOptions(MutableMapping):
         """
         return len(self.__dict__)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         """Return iterator object that can iterate over all attributes.
 
         Example:

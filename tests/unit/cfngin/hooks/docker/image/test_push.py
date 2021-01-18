@@ -1,5 +1,7 @@
 """Test runway.cfngin.hooks.docker.image._push."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from mock import MagicMock, call
@@ -13,17 +15,19 @@ from runway.cfngin.hooks.docker.image import push
 from runway.cfngin.hooks.docker.image._push import ImagePushArgs
 
 if TYPE_CHECKING:
+    from docker import DockerClient
     from pytest_mock import MockerFixture
-
-    from runway.core.providers.docker import DockerClient
 
     from .....factories import MockCFNginContext
 
 MODULE = "runway.cfngin.hooks.docker.image._push"
 
 
-def test_push(cfngin_context, mock_docker_client, mocker):
-    # type: ("MockCFNginContext", "DockerClient", "MockerFixture") -> None
+def test_push(
+    cfngin_context: MockCFNginContext,
+    mock_docker_client: DockerClient,
+    mocker: MockerFixture,
+) -> None:
     """Test push."""
     args = ImagePushArgs(repo="dkr.test.com/image", tags=["latest", "oldest"])
     mocker.patch.object(ImagePushArgs, "parse_obj", return_value=args)
@@ -44,10 +48,10 @@ def test_push(cfngin_context, mock_docker_client, mocker):
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
-class TestImagePushArgs(object):
+class TestImagePushArgs:
     """Test runway.cfngin.hooks.docker.image._push.ImagePushArgs."""
 
-    def test_determine_repo(self):
+    def test_determine_repo(self) -> None:
         """Test determine_repo."""
         assert (
             ImagePushArgs.determine_repo(
@@ -56,8 +60,7 @@ class TestImagePushArgs(object):
             == "something"
         )
 
-    def test_determine_repo_ecr(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_determine_repo_ecr(self, mocker: MockerFixture) -> None:
         """Test determine_repo ecr."""
         repo = ElasticContainerRegistryRepository(
             account_id="123456012", aws_region="us-east-1", repo_name="test"
@@ -80,25 +83,24 @@ class TestImagePushArgs(object):
             == repo.fqn
         )
 
-    def test_determine_repo_image(self):  # type: () -> None
+    def test_determine_repo_image(self) -> None:
         """Test determine_repo Image."""
         repo = "dkr.test.com/image"
         mock_image = MagicMock(spec=DockerImage, repo=repo)
         assert (
             ImagePushArgs.determine_repo(
-                context=None, ecr_repo=True, image=mock_image, repo=None
+                context=None, ecr_repo={"key": "val"}, image=mock_image, repo=None
             )
             == repo
         )
 
-    def test_determine_repo_none(self):  # type: () -> None
+    def test_determine_repo_none(self) -> None:
         """Test determine_repo None."""
         assert not ImagePushArgs.determine_repo(
             context=None, ecr_repo={}, image=None, repo=None
         )
 
-    def test_init_default(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_init_default(self, mocker: MockerFixture) -> None:
         """Test init default values."""
         mock_determine_repo = mocker.patch.object(
             ImagePushArgs, "determine_repo", return_value="dkr.test.com/image"
@@ -110,8 +112,7 @@ class TestImagePushArgs(object):
         assert obj.repo == mock_determine_repo.return_value
         assert obj.tags == ["latest"]
 
-    def test_init_image(self, mocker):
-        # type: ("MockerFixture") -> None
+    def test_init_image(self, mocker: MockerFixture) -> None:
         """Test init Image."""
         repo = "dkr.test.com/image"
         tags = ["latest", "oldest"]

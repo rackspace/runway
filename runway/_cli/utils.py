@@ -27,15 +27,22 @@ LOGGER = logging.getLogger(__name__)
 class CliContext(MutableMapping):
     """CLI context object."""
 
-    def __init__(self, ci=False, debug=0, deploy_environment=None, verbose=False, **_):
-        # type: (bool, int, Optional[str], bool, Any) -> None
+    def __init__(
+        self,
+        *,
+        ci: bool = False,
+        debug: int = 0,
+        deploy_environment: Optional[str] = None,
+        verbose: bool = False,
+        **_: Any
+    ) -> None:
         """Instantiate class.
 
-        Keyword Args:
-            ci (bool): Whether Runway is being run in non-interactive mode.
-            debug (int): Debug level
-            deploy_environment (str): Name of the deploy environment.
-            verbose (bool): Whether to display verbose logs.
+        Args:
+            ci: Whether Runway is being run in non-interactive mode.
+            debug: Debug level
+            deploy_environment: Name of the deploy environment.
+            verbose: Whether to display verbose logs.
 
         """
         self._deploy_environment = deploy_environment
@@ -45,7 +52,7 @@ class CliContext(MutableMapping):
         self.verbose = verbose
 
     @cached_property
-    def env(self):
+    def env(self) -> DeployEnvironment:
         """Name of the current deploy environment."""
         environ = os.environ.copy()
         # carefully update environ with values passed from the cli
@@ -88,13 +95,13 @@ class CliContext(MutableMapping):
             LOGGER.error(err)
         sys.exit(1)
 
-    def get_runway_context(self, deploy_environment=None):
-        # type: (Optional[DeployEnvironment]) -> RunwayContext
+    def get_runway_context(
+        self, deploy_environment: Optional[DeployEnvironment] = None
+    ) -> RunwayContext:
         """Get a Runway context object.
 
         Args:
-            deploy_environment (Optional[DeployEnvironment]): Object
-                representing the current deploy environment.
+            deploy_environment: Object representing the current deploy environment.
 
         Returns
             RunwayContext
@@ -102,8 +109,7 @@ class CliContext(MutableMapping):
         """
         return RunwayContext(deploy_environment=deploy_environment or self.env)
 
-    def __getitem__(self, key):
-        # type: (str) -> Any
+    def __getitem__(self, key: str) -> Any:
         """Implement evaluation of self[key].
 
         Args:
@@ -115,89 +121,42 @@ class CliContext(MutableMapping):
         Raises:
             Attribute: If attribute does not exist on this object.
 
-        Example:
-            .. codeblock: python
-
-                obj = MutableMap(**{'key': 'value'})
-                print(obj['key'])
-                # value
-
         """
         # ignore coverage for standard implimentation
         return getattr(self, key)  # cov: ignore
 
-    def __setitem__(self, key, value):
-        # type: (str, Any) -> None
+    def __setitem__(self, key: str, value: Any) -> None:
         """Implement assignment to self[key].
 
         Args:
             key: Attribute name to associate with a value.
             value: Value of a key/attribute.
 
-        Example:
-            .. codeblock: python
-
-                obj = MutableMap()
-                obj['key'] = 'value'
-                print(obj['key'])
-                # value
-
         """
         # ignore coverage for standard implimentation
         setattr(self, key, value)  # cov: ignore
 
-    def __delitem__(self, key):
-        # type: (str) -> None
+    def __delitem__(self, key: str) -> None:
         """Implement deletion of self[key].
 
         Args:
             key: Attribute name to remove from the object.
 
-        Example:
-            .. codeblock: python
-
-                obj = MutableMap(**{'key': 'value'})
-                del obj['key']
-                print(obj.__dict__)
-                # {}
-
         """
         # ignore coverage for standard implimentation
         delattr(self, key)  # cov: ignore
 
-    def __len__(self):
-        # type: () -> int
-        """Implement the built-in function len().
-
-        Example:
-            .. codeblock: python
-
-                obj = MutableMap(**{'key': 'value'})
-                print(len(obj))
-                # 1
-
-        """
+    def __len__(self) -> int:
+        """Implement the built-in function len()."""
         # ignore coverage for standard implimentation
         return len(self.__dict__)  # cov: ignore
 
-    def __iter__(self):
-        # type: () -> Iterator[Any]
-        """Return iterator object that can iterate over all attributes.
-
-        Example:
-            .. codeblock: python
-
-                obj = MutableMap(**{'key': 'value'})
-                for k, v in obj.items():
-                    print(f'{key}: {value}')
-                # key: value
-
-        """
+    def __iter__(self) -> Iterator[str]:
+        """Return iterator object that can iterate over all attributes."""
         # ignore coverage for standard implimentation
         return iter(self.__dict__)  # cov: ignore
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         """Return string representation of the object."""
         # ignore coverage for standard implimentation
         return "CliContext({})".format(self.__dict__)  # cov: ignore

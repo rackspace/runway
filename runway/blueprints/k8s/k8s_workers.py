@@ -2,6 +2,7 @@
 """Module with k8s nodegroup."""
 import json
 import os
+from typing import Any
 
 import botocore
 from troposphere import Base64, Equals, If, Not, NoValue, Output, Sub, autoscaling, ec2
@@ -18,7 +19,7 @@ from runway.cfngin.blueprints.variables.types import (
 )
 
 
-def get_valid_instance_types():
+def get_valid_instance_types() -> Any:
     """Return list of instance types."""
     ec2_service_file = os.path.join(
         os.path.dirname(botocore.__file__),
@@ -120,7 +121,7 @@ class NodeGroup(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
         variables = self.get_variables()
@@ -358,4 +359,4 @@ class NodeGroup(Blueprint):
 if __name__ == "__main__":
     from runway.cfngin.context import Context
 
-    print(NodeGroup("test", Context({"namespace": "test"}), None).to_json())
+    print(NodeGroup("test", Context(environment={"namespace": "test"}), None).to_json())

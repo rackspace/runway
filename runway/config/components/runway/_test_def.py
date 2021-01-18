@@ -1,7 +1,7 @@
 """Runway config test definition."""
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 from ....variables import Variable
 from ...models.runway import (
@@ -20,7 +20,7 @@ class RunwayTestDefinition(ConfigComponentDefinition):
     """Runway test definition."""
 
     args: Dict[str, Any]
-    name: Optional[str]
+    name: str
     required: bool
     type: ValidRunwayTestTypeValues
 

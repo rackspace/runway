@@ -1,19 +1,38 @@
 """AWS EC2 keypair hook."""
+from __future__ import annotations
+
 import logging
-import os
 import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 from botocore.exceptions import ClientError
+from typing_extensions import Literal, TypedDict
 
 from ..ui import get_raw_input
-from . import utils
+
+if TYPE_CHECKING:
+    from mypy_boto3_ec2.client import EC2Client
+    from mypy_boto3_ec2.type_defs import ImportKeyPairResultTypeDef, KeyPairTypeDef
+    from mypy_boto3_ssm.client import SSMClient
+
+    from ..context import Context
 
 LOGGER = logging.getLogger(__name__)
 
 KEYPAIR_LOG_MESSAGE = "keypair %s (%s) %s"
 
 
-def get_existing_key_pair(ec2, keypair_name):
+class KeyPairInfo(TypedDict, total=False):
+    """Value returned from get_existing_key_pair."""
+
+    file_path: Path
+    fingerprint: str
+    key_name: str
+    status: Literal["created", "exists", "imported"]
+
+
+def get_existing_key_pair(ec2: EC2Client, keypair_name: str) -> Optional[KeyPairInfo]:
     """Get existing keypair."""
     resp = ec2.describe_key_pairs()
     keypair = next(
@@ -34,7 +53,9 @@ def get_existing_key_pair(ec2, keypair_name):
     return None
 
 
-def import_key_pair(ec2, keypair_name, public_key_data):
+def import_key_pair(
+    ec2: EC2Client, keypair_name: str, public_key_data: bytes
+) -> ImportKeyPairResultTypeDef:
     """Import keypair."""
     keypair = ec2.import_key_pair(
         KeyName=keypair_name, PublicKeyMaterial=public_key_data.strip(), DryRun=False
@@ -45,25 +66,24 @@ def import_key_pair(ec2, keypair_name, public_key_data):
     return keypair
 
 
-def read_public_key_file(path):
+def read_public_key_file(path: Path) -> Optional[bytes]:
     """Read public key file."""
     try:
-        with open(utils.full_path(path), "rb") as file_:
-            data = file_.read()
-
+        data = path.read_bytes()
         if not data.startswith(b"ssh-rsa"):
             raise ValueError(
                 "Bad public key data, must be an RSA key in SSH authorized "
                 "keys format (beginning with `ssh-rsa`)"
             )
-
         return data.strip()
     except (ValueError, IOError, OSError) as err:
         LOGGER.error('failed to read public key file :%s": %s', path, str(err))
         return None
 
 
-def create_key_pair_from_public_key_file(ec2, keypair_name, public_key_path):
+def create_key_pair_from_public_key_file(
+    ec2: EC2Client, keypair_name: str, public_key_path: Path
+) -> Optional[KeyPairInfo]:
     """Create keypair from public key file."""
     public_key_data = read_public_key_file(public_key_path)
     if not public_key_data:
@@ -77,7 +97,13 @@ def create_key_pair_from_public_key_file(ec2, keypair_name, public_key_path):
     }
 
 
-def create_key_pair_in_ssm(ec2, ssm, keypair_name, parameter_name, kms_key_id=None):
+def create_key_pair_in_ssm(
+    ec2: EC2Client,
+    ssm: SSMClient,
+    keypair_name: str,
+    parameter_name: str,
+    kms_key_id: Optional[str] = None,
+) -> Optional[KeyPairInfo]:
     """Create keypair in SSM."""
     keypair = create_key_pair(ec2, keypair_name)
     try:
@@ -120,7 +146,7 @@ def create_key_pair_in_ssm(ec2, ssm, keypair_name, parameter_name, kms_key_id=No
     }
 
 
-def create_key_pair(ec2, keypair_name):
+def create_key_pair(ec2: EC2Client, keypair_name: str) -> KeyPairTypeDef:
     """Create keypair."""
     keypair = ec2.create_key_pair(KeyName=keypair_name, DryRun=False)
     LOGGER.info(
@@ -129,24 +155,23 @@ def create_key_pair(ec2, keypair_name):
     return keypair
 
 
-def create_key_pair_local(ec2, keypair_name, dest_dir):
+def create_key_pair_local(
+    ec2: EC2Client, keypair_name: str, dest_dir: Path
+) -> Optional[KeyPairInfo]:
     """Create local keypair."""
-    dest_dir = utils.full_path(dest_dir)
-    if not os.path.isdir(dest_dir):
+    dest_dir = dest_dir.resolve()
+    if not dest_dir.is_dir():
         LOGGER.error('"%s" is not a valid directory', dest_dir)
         return None
 
-    file_name = "{0}.pem".format(keypair_name)
-    key_path = os.path.join(dest_dir, file_name)
-    if os.path.isfile(key_path):
+    key_path = dest_dir / f"{keypair_name}.pem"
+    if key_path.is_file():
         # This mimics the old boto2 keypair.save error
-        LOGGER.error('"%s" already exists in directory "%s"', file_name, dest_dir)
+        LOGGER.error('"%s" already exists in directory "%s"', key_path.name, dest_dir)
         return None
 
-    # Open the file before creating the key pair to catch errors early
-    with open(key_path, "wb") as file_:
-        keypair = create_key_pair(ec2, keypair_name)
-        file_.write(keypair["KeyMaterial"].encode("ascii"))
+    keypair = create_key_pair(ec2, keypair_name)
+    key_path.write_text(keypair["KeyMaterial"], encoding="ascii")
 
     return {
         "status": "created",
@@ -156,7 +181,9 @@ def create_key_pair_local(ec2, keypair_name, dest_dir):
     }
 
 
-def interactive_prompt(keypair_name):
+def interactive_prompt(
+    keypair_name: str,
+) -> Tuple[Optional[Literal["create", "import"]], Optional[str]]:
     """Interactive prompt."""
     if not sys.stdin.isatty():
         return None, None
@@ -184,84 +211,66 @@ def interactive_prompt(keypair_name):
     return None, None
 
 
-def ensure_keypair_exists(context, *_, **kwargs):
+def ensure_keypair_exists(
+    context: Context,
+    *,
+    keypair: str,
+    public_key_path: Optional[str] = None,
+    ssm_key_id: Optional[str] = None,
+    ssm_parameter_name: Optional[str] = None,
+    **_: Any
+) -> KeyPairInfo:
     """Ensure a specific keypair exists within AWS.
 
     If the key doesn't exist, upload it.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
-
-    Keyword Args:
-        keypair (str): Name of the key pair to create
-        ssm_parameter_name (Optional[str]): Path to an SSM store parameter
-            to receive the generated private key, instead of importing it or
-            storing it locally.
-        ssm_key_id (Optional[str]): ID of a KMS key to encrypt the SSM
-            parameter with. If omitted, the default key will be used.
-        public_key_path (Optional[str]): Path to a public key file to be
-            imported instead of generating a new key. Incompatible with the
-            SSM options, as the private key will not be available for
-            storing.
-
-    Returns:
-        Union[bool, Dict[str, Optional[str]]]:  In case of failure
-        ``False``, otherwise a dict containing:
-
-        **status** (str):
-            Ene of ``exists``, ``imported`` or ``created``.
-
-        **key_name** (str):
-            Name of the key pair.
-
-        **fingerprint** (str):
-            Fingerprint of the key pair.
-
-        **file_path** (Optional[str]):
-            If a new key was created, the path to the file where the private
-            key was stored.
+        context: Context instance. (passed in by CFNgin)
+        keypair: Name of the key pair to create
+        public_key_path: Path to a public key file to be imported instead of
+            generating a new key. Incompatible with the SSM options, as the
+            private key will not be available for storing.
+        ssm_key_id: ID of a KMS key to encrypt the SSM parameter with.
+            If omitted, the default key will be used.
+        ssm_parameter_name: Path to an SSM store parameter to receive the
+            generated private key, instead of importing it or storing it locally.
 
     """
-    keypair_name = kwargs["keypair"]
-    ssm_parameter_name = kwargs.get("ssm_parameter_name")
-    ssm_key_id = kwargs.get("ssm_key_id")
-    public_key_path = kwargs.get("public_key_path")
-
     if public_key_path and ssm_parameter_name:
         LOGGER.error(
             "public_key_path and ssm_parameter_name cannot be "
             "specified at the same time"
         )
-        return False
+        return {}
 
-    session = context.get_session(profile=kwargs.get("profile"))
+    session = context.get_session()
     ec2 = session.client("ec2")
 
-    keypair = get_existing_key_pair(ec2, keypair_name)
-    if keypair:
-        return keypair
+    keypair_info = get_existing_key_pair(ec2, keypair)
+    if keypair_info:
+        return keypair_info
 
     if public_key_path:
-        keypair = create_key_pair_from_public_key_file(
-            ec2, keypair_name, public_key_path
+        keypair_info = create_key_pair_from_public_key_file(
+            ec2, keypair, Path(public_key_path)
         )
-
     elif ssm_parameter_name:
         ssm = session.client("ssm")
-        keypair = create_key_pair_in_ssm(
-            ec2, ssm, keypair_name, ssm_parameter_name, ssm_key_id
+        keypair_info = create_key_pair_in_ssm(
+            ec2, ssm, keypair, ssm_parameter_name, ssm_key_id
         )
     else:
-        action, path = interactive_prompt(keypair_name)
-        if action == "import":
-            keypair = create_key_pair_from_public_key_file(ec2, keypair_name, path)
-        elif action == "create":
-            keypair = create_key_pair_local(ec2, keypair_name, path)
+        action, path = interactive_prompt(keypair)
+        if action == "import" and path:
+            keypair_info = create_key_pair_from_public_key_file(
+                ec2, keypair, Path(path)
+            )
+        elif action == "create" and path:
+            keypair_info = create_key_pair_local(ec2, keypair, Path(path))
         else:
-            LOGGER.error("no action to find keypair")
+            LOGGER.error("no action to find keypair or path not provided")
 
-    if not keypair:
-        return False
+    if not keypair_info:
+        return {}
 
-    return keypair
+    return keypair_info

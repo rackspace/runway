@@ -1,33 +1,47 @@
 """Test runway.lookups.handlers.cfn."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import json
 import logging
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 import boto3
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
-from mock import MagicMock, patch
+from mock import MagicMock
 
 from runway.cfngin.exceptions import StackDoesNotExist
+from runway.cfngin.providers.aws.default import Provider
 from runway.exceptions import OutputDoesNotExist
 from runway.lookups.handlers.cfn import TYPE_NAME, CfnLookup, OutputQuery
 
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from mypy_boto3_cloudformation.client import CloudFormationClient
+    from pytest_mock import MockerFixture
+
+    from ...factories import MockRunwayContext
+
 
 def generate_describe_stacks_stack(
-    stack_name, outputs, creation_time=None, stack_status="CREATE_COMPLETE"
-):
+    stack_name: str,
+    outputs: Dict[str, str],
+    creation_time: Optional[datetime] = None,
+    stack_status: str = "CREATE_COMPLETE",
+) -> Dict[str, Any]:
     """Generate describe stacks stack.
 
     Args:
-        stack_name (str): Name of the stack.
-        outputs (Dict[str, str]): Dictionary to be converted to stack outputs.
+        stack_name: Name of the stack.
+        outputs: Dictionary to be converted to stack outputs.
         creation_time (Optional[datetime.datetime]): Stack creation time.
-        stack_status (str): Current stack status.
+        stack_status: Current stack status.
 
     Returns:
-        Dict[str, Any]: Mock describe stacks['Stacks'] list item.
+        Mock describe stacks['Stacks'] list item.
 
     """
     return {
@@ -44,13 +58,8 @@ def generate_describe_stacks_stack(
     }
 
 
-def setup_cfn_client():
-    """Create a CloudFormation client & Stubber.
-
-    Returns:
-        client, Stubber: CloudFormation client and Stubber.
-
-    """
+def setup_cfn_client() -> Tuple[CloudFormationClient, Stubber]:
+    """Create a CloudFormation client & Stubber."""
     client = boto3.client("cloudformation")
     return client, Stubber(client)
 
@@ -58,18 +67,18 @@ def setup_cfn_client():
 class TestCfnLookup:
     """Test runway.lookups.handlers.cfn.CfnLookup."""
 
-    @patch.object(CfnLookup, "format_results")
-    @patch.object(CfnLookup, "parse")
-    @patch.object(CfnLookup, "get_stack_output")
-    @patch.object(CfnLookup, "should_use_provider")
-    def test_handle(
-        self, mock_should_use, mock_get_stack_output, mock_parse, mock_format_results
-    ):
+    def test_handle(self, mocker: MockerFixture) -> None:
         """Test handle."""
-        mock_should_use.side_effect = [True, False]
-        mock_format_results.return_value = "success"
+        mock_format_results = mocker.patch.object(
+            CfnLookup, "format_results", return_value="success"
+        )
+        mock_get_stack_output = mocker.patch.object(
+            CfnLookup, "get_stack_output", return_value="cls.success"
+        )
+        mock_should_use = mocker.patch.object(
+            CfnLookup, "should_use_provider", side_effect=[True, False]
+        )
         mock_context = MagicMock(name="context")
-        mock_get_stack_output.return_value = "cls.success"
         mock_session = MagicMock(name="session")
         mock_context.get_session.return_value = mock_session
         mock_session.client.return_value = mock_session
@@ -81,7 +90,9 @@ class TestCfnLookup:
         region = "us-west-2"
         args = "::region={region}".format(region=region)
         value = raw_query + args
-        mock_parse.return_value = (raw_query, {"region": region})
+        mock_parse = mocker.patch.object(
+            CfnLookup, "parse", return_value=(raw_query, {"region": region})
+        )
 
         # test happy path when used from CFNgin (provider)
         assert (
@@ -112,18 +123,23 @@ class TestCfnLookup:
             (KeyError, "something"),
         ],
     )
-    @patch.object(CfnLookup, "should_use_provider")
     def test_handle_exception(
-        self, mock_should_use, exception, default, caplog, monkeypatch
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        default: Optional[str],
+        exception: Exception,
+        mocker: MockerFixture,
+    ) -> None:
         """Test handle cls.get_stack_output raise exception."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
+        mock_should_use = mocker.patch.object(
+            CfnLookup, "should_use_provider", return_value=False
+        )
         mock_context = MagicMock(name="context")
         mock_session = MagicMock(name="session")
         mock_context.get_session.return_value = mock_session
         mock_session.client.return_value = mock_session
-        mock_should_use.return_value = False
-        monkeypatch.setattr(CfnLookup, "get_stack_output", MagicMock())
+        mocker.patch.object(CfnLookup, "get_stack_output", MagicMock())
         CfnLookup.get_stack_output.side_effect = exception
 
         raw_query = "test-stack.output1"
@@ -165,13 +181,19 @@ class TestCfnLookup:
             (StackDoesNotExist("test-stack", "output1"), "something"),
         ],
     )
-    @patch.object(CfnLookup, "should_use_provider")
     def test_handle_provider_exception(
-        self, mock_should_use, exception, default, caplog
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        default: Optional[str],
+        exception: Exception,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test handle provider raise exception."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
-        mock_should_use.return_value = True
+        mock_should_use = mocker.patch.object(
+            CfnLookup, "should_use_provider", return_value=True
+        )
         mock_provider = MagicMock(region="us-east-1")
         mock_provider.get_output.side_effect = exception
         raw_query = "test-stack.output1"
@@ -180,7 +202,7 @@ class TestCfnLookup:
             assert (
                 CfnLookup.handle(
                     raw_query + "::default=" + default,
-                    context=None,
+                    context=runway_context,
                     provider=mock_provider,
                 )
                 == default
@@ -194,28 +216,28 @@ class TestCfnLookup:
             if isinstance(exception, (ClientError, StackDoesNotExist)):
                 with pytest.raises(exception.__class__):
                     assert not CfnLookup.handle(
-                        raw_query, context=None, provider=mock_provider
+                        raw_query, context=runway_context, provider=mock_provider
                     )
             else:
                 with pytest.raises(OutputDoesNotExist) as excinfo:
                     assert not CfnLookup.handle(
-                        raw_query, context=None, provider=mock_provider
+                        raw_query, context=runway_context, provider=mock_provider
                     )
                 assert excinfo.value.stack_name == "test-stack"
                 assert excinfo.value.output == "output1"
             mock_should_use.assert_called_once_with({}, mock_provider)
         mock_provider.get_output.assert_called_once_with("test-stack", "output1")
 
-    def test_handle_valueerror(self):
+    def test_handle_valueerror(self, runway_context: MockRunwayContext) -> None:
         """Test handle raising ValueError."""
         with pytest.raises(ValueError) as excinfo:
-            assert CfnLookup.handle("something", None)
+            assert CfnLookup.handle("something", runway_context)
         assert (
             str(excinfo.value)
             == 'query must be <stack-name>.<output-name>; got "something"'
         )
 
-    def test_get_stack_output(self, caplog):
+    def test_get_stack_output(self, caplog: LogCaptureFixture) -> None:
         """Test get_stack_output."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         client, stubber = setup_cfn_client()
@@ -239,7 +261,7 @@ class TestCfnLookup:
             in caplog.messages
         )
 
-    def test_get_stack_output_clienterror(self, caplog):
+    def test_get_stack_output_clienterror(self, caplog: LogCaptureFixture) -> None:
         """Test get_stack_output raising ClientError."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         client, stubber = setup_cfn_client()
@@ -259,7 +281,7 @@ class TestCfnLookup:
         stubber.assert_no_pending_responses()
         assert "describing stack: %s" % stack_name in caplog.messages
 
-    def test_get_stack_output_keyerror(self, caplog):
+    def test_get_stack_output_keyerror(self, caplog: LogCaptureFixture) -> None:
         """Test get_stack_output raising KeyError."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         client, stubber = setup_cfn_client()
@@ -285,9 +307,17 @@ class TestCfnLookup:
 
     @pytest.mark.parametrize(
         "args, provider",
-        [({}, None), ({"region": "us-west-2"}, MagicMock(region="us-east-1"))],
+        [
+            ({}, None),
+            ({"region": "us-west-2"}, MagicMock(autospec=Provider, region="us-east-1")),
+        ],
     )
-    def test_should_use_provider_falsy(self, args, provider, caplog):
+    def test_should_use_provider_falsy(
+        self,
+        args: Dict[str, Any],
+        caplog: LogCaptureFixture,
+        provider: Optional[Provider],
+    ) -> None:
         """Test should_use_provider with falsy cases."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         assert not CfnLookup.should_use_provider(args, provider)
@@ -299,22 +329,30 @@ class TestCfnLookup:
 
     @pytest.mark.parametrize(
         "args, provider",
-        [({}, MagicMock()), ({"region": "us-east-1"}, MagicMock(region="us-east-1"))],
+        [
+            ({}, MagicMock(autospec=Provider)),
+            ({"region": "us-east-1"}, MagicMock(autospec=Provider, region="us-east-1")),
+        ],
     )
-    def test_should_use_provider_truthy(self, args, provider, caplog):
+    def test_should_use_provider_truthy(
+        self,
+        args: Dict[str, Any],
+        caplog: LogCaptureFixture,
+        provider: Optional[Provider],
+    ) -> None:
         """Test should_use_provider with truthy cases."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         assert CfnLookup.should_use_provider(args, provider)
         assert "using provider" in caplog.messages
 
 
-def test_outputquery():
+def test_outputquery() -> None:
     """Test OutputQuery."""
     result = OutputQuery("stack_name", "output_name")
     assert result.stack_name == "stack_name"
     assert result.output_name == "output_name"
 
 
-def test_type_name():
+def test_type_name() -> None:
     """Test runway.lookups.handlers.cfn.TYPE_NAME."""
     assert TYPE_NAME == "cfn"

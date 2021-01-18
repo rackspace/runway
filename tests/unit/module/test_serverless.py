@@ -1,21 +1,33 @@
 """Test runway.module.serverless."""
 # pylint: disable=no-self-use,unused-argument
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 import pytest
 import yaml
-from mock import ANY, MagicMock, patch
+from mock import ANY, MagicMock
 
 from runway.module.serverless import Serverless, ServerlessOptions, gen_sls_config_files
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from _pytest.logging import LogCaptureFixture
+    from pytest_mock import MockerFixture
+    from pytest_subprocess.core import FakeProcess
+
+    from ..factories import MockRunwayContext
 
 
 @pytest.mark.usefixtures("patch_module_npm")
 class TestServerless:
     """Test runway.module.serverless.Serverless."""
 
-    def test_cli_args(self, runway_context):
+    def test_cli_args(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test cli_args."""
-        obj = Serverless(runway_context, "./tests")
+        obj = Serverless(runway_context, tmp_path)
 
         assert obj.cli_args == [
             "--region",
@@ -33,53 +45,58 @@ class TestServerless:
             "--verbose",
         ]
 
-    def test_deploy(self, monkeypatch, runway_context):
+    def test_deploy(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
         """Test deploy."""
-        # pylint: disable=no-member
-        monkeypatch.setattr(Serverless, "extend_serverless_yml", MagicMock())
-        monkeypatch.setattr(Serverless, "sls_deploy", MagicMock())
-        obj = Serverless(runway_context, "./tests")
+        mock_extend_serverless_yml = mocker.patch.object(
+            Serverless, "extend_serverless_yml"
+        )
+        mock_sls_deploy = mocker.patch.object(Serverless, "sls_deploy")
+        obj = Serverless(runway_context, tmp_path)
 
-        monkeypatch.setattr(Serverless, "skip", True)
+        mocker.patch.object(Serverless, "skip", True)
         assert not obj.deploy()
-        obj.extend_serverless_yml.assert_not_called()
-        obj.sls_deploy.assert_not_called()
+        mock_extend_serverless_yml.assert_not_called()
+        mock_sls_deploy.assert_not_called()
 
-        monkeypatch.setattr(Serverless, "skip", False)
-        monkeypatch.setattr(obj.options, "extend_serverless_yml", True)
+        mocker.patch.object(Serverless, "skip", False)
+        mocker.patch.object(obj.options, "extend_serverless_yml", True)
         assert not obj.deploy()
-        obj.extend_serverless_yml.assert_called_once_with(obj.sls_deploy)
-        obj.sls_deploy.assert_not_called()
+        mock_extend_serverless_yml.assert_called_once_with(mock_sls_deploy)
+        mock_sls_deploy.assert_not_called()
 
-        monkeypatch.setattr(obj.options, "extend_serverless_yml", False)
+        mocker.patch.object(obj.options, "extend_serverless_yml", False)
         assert not obj.deploy()
-        obj.extend_serverless_yml.assert_called_once()
-        obj.sls_deploy.assert_called_once_with()
+        mock_extend_serverless_yml.assert_called_once()
+        mock_sls_deploy.assert_called_once_with()
 
-    def test_destroy(self, monkeypatch, runway_context):
+    def test_destroy(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
         """Test destroy."""
         # pylint: disable=no-member
-        monkeypatch.setattr(Serverless, "extend_serverless_yml", MagicMock())
-        monkeypatch.setattr(Serverless, "sls_remove", MagicMock())
-        obj = Serverless(runway_context, "./tests")
+        mocker.patch.object(Serverless, "extend_serverless_yml")
+        mocker.patch.object(Serverless, "sls_remove", MagicMock())
+        obj = Serverless(runway_context, tmp_path)
 
-        monkeypatch.setattr(Serverless, "skip", True)
+        mocker.patch.object(Serverless, "skip", True)
         assert not obj.destroy()
         obj.extend_serverless_yml.assert_not_called()
         obj.sls_remove.assert_not_called()
 
-        monkeypatch.setattr(Serverless, "skip", False)
-        monkeypatch.setattr(obj.options, "extend_serverless_yml", True)
+        mocker.patch.object(Serverless, "skip", False)
+        mocker.patch.object(obj.options, "extend_serverless_yml", True)
         assert not obj.destroy()
         obj.extend_serverless_yml.assert_called_once_with(obj.sls_remove)
         obj.sls_remove.assert_not_called()
 
-        monkeypatch.setattr(obj.options, "extend_serverless_yml", False)
+        mocker.patch.object(obj.options, "extend_serverless_yml", False)
         assert not obj.destroy()
         obj.extend_serverless_yml.assert_called_once()
         obj.sls_remove.assert_called_once_with()
 
-    def test_env_file(self, runway_context, tmp_path):
+    def test_env_file(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test env_file.
 
         Testing the precedence of each path, create the files in order from
@@ -134,18 +151,22 @@ class TestServerless:
         assert obj.env_file == env_test_us_east_1_yml
         del obj.env_file
 
-    @patch("runway.module.serverless.merge_dicts")
     def test_extend_serverless_yml(
-        self, mock_merge, caplog, monkeypatch, runway_context, tmp_path
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test extend_serverless_yml."""
         # pylint: disable=no-member
+        mock_merge = mocker.patch("runway.module.serverless.merge_dicts")
         caplog.set_level(logging.DEBUG, logger="runway")
         mock_func = MagicMock()
         mock_merge.return_value = {"key": "val"}
-        monkeypatch.setattr(Serverless, "npm_install", MagicMock())
-        monkeypatch.setattr(Serverless, "sls_print", MagicMock(return_value="original"))
-        monkeypatch.setattr(ServerlessOptions, "update_args", MagicMock())
+        mocker.patch.object(Serverless, "npm_install", MagicMock())
+        mocker.patch.object(Serverless, "sls_print", MagicMock(return_value="original"))
+        mocker.patch.object(ServerlessOptions, "update_args", MagicMock())
 
         options = {"extend_serverless_yml": {"new-key": "val"}}
         obj = Serverless(runway_context, tmp_path, options={"options": options})
@@ -165,7 +186,7 @@ class TestServerless:
         ).exists(), 'should always be deleted after calling "func"'
 
         caplog.clear()
-        monkeypatch.setattr(
+        mocker.patch(
             "pathlib.Path.unlink", MagicMock(side_effect=OSError("test OSError"))
         )
         assert not obj.extend_serverless_yml(mock_func)
@@ -174,13 +195,20 @@ class TestServerless:
             "temporary Serverless config".format(tmp_path.name) in caplog.messages
         )
 
-    @patch("runway.module.serverless.generate_node_command")
     @pytest.mark.parametrize("command", [("deploy"), ("remove"), ("print")])
-    def test_gen_cmd(self, mock_cmd, command, monkeypatch, runway_context, tmp_path):
+    def test_gen_cmd(
+        self,
+        command: str,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test gen_cmd."""
         # pylint: disable=no-member
-        monkeypatch.setattr(runway_context, "no_color", False)
-        mock_cmd.return_value = ["success"]
+        mock_cmd = mocker.patch(
+            "runway.module.serverless.generate_node_command", return_value=["success"]
+        )
+        mocker.patch.object(runway_context, "no_color", False)
         obj = Serverless(
             runway_context, tmp_path, {"options": {"args": ["--config", "test"]}}
         )
@@ -202,7 +230,7 @@ class TestServerless:
         mock_cmd.reset_mock()
 
         obj.context.env_vars["CI"] = "1"
-        monkeypatch.setattr(runway_context, "no_color", True)
+        mocker.patch.object(runway_context, "no_color", True)
         expected_opts.append("--no-color")
         if command not in ["remove", "print"]:
             expected_opts.append("--conceal")
@@ -211,10 +239,15 @@ class TestServerless:
             command="sls", command_opts=expected_opts, logger=obj.logger, path=tmp_path
         )
 
-    def test_init(self, caplog, runway_context):
+    def test_init(
+        self,
+        caplog: LogCaptureFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test init and the attributes set in init."""
         caplog.set_level(logging.ERROR, logger="runway")
-        obj = Serverless(runway_context, "./tests", {"options": {"skip_npm_ci": True}})
+        obj = Serverless(runway_context, tmp_path, {"options": {"skip_npm_ci": True}})
         assert isinstance(obj.options, ServerlessOptions)
         assert obj.region == runway_context.env_region
         assert obj.stage == runway_context.env_name
@@ -222,25 +255,40 @@ class TestServerless:
         with pytest.raises(SystemExit):
             assert not Serverless(
                 runway_context,
-                "./tests",
+                tmp_path,
                 {"options": {"promotezip": {"invalid": "value"}}},
             )
-        assert ["tests:error encountered while parsing options"] == caplog.messages
+        assert [
+            f"{tmp_path.name}:error encountered while parsing options"
+        ] == caplog.messages
 
-    def test_plan(self, caplog, runway_context):
+    def test_plan(
+        self,
+        caplog: LogCaptureFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test plan."""
         caplog.set_level(logging.INFO, logger="runway")
-        obj = Serverless(runway_context, "./tests")
+        obj = Serverless(runway_context, tmp_path)
 
         assert not obj.plan()
-        assert ["tests:plan not currently supported for Serverless"] == caplog.messages
+        assert [
+            f"{tmp_path.name}:plan not currently supported for Serverless"
+        ] == caplog.messages
 
-    def test_skip(self, caplog, monkeypatch, runway_context, tmp_path):
+    def test_skip(
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test skip."""
         caplog.set_level(logging.INFO, logger="runway")
         obj = Serverless(runway_context, tmp_path)
-        monkeypatch.setattr(obj, "package_json_missing", lambda: True)
-        monkeypatch.setattr(obj, "env_file", False)
+        mocker.patch.object(obj, "package_json_missing", lambda: True)
+        mocker.patch.object(obj, "env_file", False)
 
         assert obj.skip
         assert [
@@ -249,7 +297,7 @@ class TestServerless:
         ] == caplog.messages
         caplog.clear()
 
-        monkeypatch.setattr(obj, "package_json_missing", lambda: False)
+        mocker.patch.object(obj, "package_json_missing", lambda: False)
         assert obj.skip
         assert [
             "{}:skipped; config file for this stage/region not found"
@@ -259,27 +307,27 @@ class TestServerless:
         ] == caplog.messages
         caplog.clear()
 
-        obj.environments = True
+        obj.environments = True  # type: ignore
         assert not obj.skip
-        obj.environments = False
+        obj.environments = False  # type: ignore
 
-        obj.parameters = True
+        obj.parameters = True  # type: ignore
         assert not obj.skip
-        obj.parameters = False
+        obj.parameters = False  # type: ignore
 
-        obj.env_file = True
+        obj.env_file = True  # type: ignore
         assert not obj.skip
 
-    @patch("runway.module.serverless.deploy_package")
-    @patch("runway.module.serverless.run_module_command")
     def test_sls_deploy(
-        self, mock_run, mock_deploy, monkeypatch, runway_context, tmp_path
-    ):
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+    ) -> None:
         """Test sls_deploy."""
         # pylint: disable=no-member
-        monkeypatch.setattr(runway_context, "no_color", False)
-        monkeypatch.setattr(Serverless, "gen_cmd", MagicMock(return_value=["deploy"]))
-        monkeypatch.setattr(Serverless, "npm_install", MagicMock())
+        mock_deploy = mocker.patch("runway.module.serverless.deploy_package")
+        mock_run = mocker.patch("runway.module.serverless.run_module_command")
+        mocker.patch.object(runway_context, "no_color", False)
+        mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["deploy"]))
+        mocker.patch.object(Serverless, "npm_install", MagicMock())
         obj = Serverless(
             runway_context,
             tmp_path,
@@ -308,12 +356,12 @@ class TestServerless:
             ],
             "test-bucket",
             runway_context,
-            str(tmp_path),
+            tmp_path,
             obj.logger,
         )
         mock_run.assert_called_once()
 
-        monkeypatch.setattr(runway_context, "no_color", True)
+        mocker.patch.object(runway_context, "no_color", True)
         assert not obj.sls_deploy(skip_install=True)
         mock_deploy.assert_called_with(
             [
@@ -328,19 +376,21 @@ class TestServerless:
             ],
             "test-bucket",
             runway_context,
-            str(tmp_path),
+            tmp_path,
             obj.logger,
         )
 
-    def test_sls_print(self, monkeypatch, runway_context):
+    def test_sls_print(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
         """Test sls_print."""
         # pylint: disable=no-member
         expected_dict = {"status": "success"}
         mock_check_output = MagicMock(return_value=yaml.safe_dump(expected_dict))
-        monkeypatch.setattr(Serverless, "gen_cmd", MagicMock(return_value=["print"]))
-        monkeypatch.setattr(Serverless, "npm_install", MagicMock())
-        monkeypatch.setattr("subprocess.check_output", mock_check_output)
-        obj = Serverless(runway_context, "./tests")
+        mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["print"]))
+        mocker.patch.object(Serverless, "npm_install", MagicMock())
+        mocker.patch("subprocess.check_output", mock_check_output)
+        obj = Serverless(runway_context, tmp_path)
 
         assert obj.sls_print() == expected_dict
         obj.npm_install.assert_called_once()
@@ -359,10 +409,16 @@ class TestServerless:
             "print", args_list=["--format", "yaml", "--path", "something.status"]
         )
 
-    def test_sls_remove(self, fake_process, monkeypatch, runway_context):
+    def test_sls_remove(
+        self,
+        fake_process: FakeProcess,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
         """Test sls_remove."""
         # pylint: disable=no-member
-        sls_error_01 = [
+        sls_error_01: List[Union[bytes, str]] = [
             "  Serverless Error ---------------------------------------",
             "",
             "  Stack 'test-stack' does not exist",
@@ -377,10 +433,10 @@ class TestServerless:
         fake_process.register_subprocess("remove", stdout="success")
         fake_process.register_subprocess("remove", stdout=sls_error_01, returncode=1)
         fake_process.register_subprocess("remove", stdout=sls_error_02, returncode=1)
-        monkeypatch.setattr(Serverless, "gen_cmd", MagicMock(return_value=["remove"]))
-        monkeypatch.setattr(Serverless, "npm_install", MagicMock())
+        mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["remove"]))
+        mocker.patch.object(Serverless, "npm_install", MagicMock())
 
-        obj = Serverless(runway_context, "./tests")
+        obj = Serverless(runway_context, tmp_path)
         assert not obj.sls_remove()
         obj.npm_install.assert_called_once()
         obj.gen_cmd.assert_called_once_with("remove")
@@ -407,7 +463,7 @@ class TestServerlessOptions:
             (["-u"], ["-u"]),
         ],
     )
-    def test_args(self, args, expected):
+    def test_args(self, args: List[str], expected: List[str]) -> None:
         """Test args."""
         obj = ServerlessOptions(args=args, extend_serverless_yml={}, promotezip={})
         assert obj.args == expected
@@ -450,7 +506,7 @@ class TestServerlessOptions:
             ),
         ],
     )
-    def test_parse(self, config):
+    def test_parse(self, config: Dict[str, Any]) -> None:
         """Test parse."""
         obj = ServerlessOptions.parse(**config)
 
@@ -459,12 +515,12 @@ class TestServerlessOptions:
         assert obj.promotezip == config.get("promotezip", {})
         assert obj.skip_npm_ci == config.get("skip_npm_ci", False)
 
-    def test_parse_invalid_promotezip(self):
+    def test_parse_invalid_promotezip(self) -> None:
         """Test parse with invalid promotezip value."""
         with pytest.raises(ValueError):
             assert not ServerlessOptions.parse(promotezip={"key": "value"})
 
-    def test_update_args(self):
+    def test_update_args(self) -> None:
         """Test update_args."""
         obj = ServerlessOptions(
             args=["--config", "something", "--unknown-arg", "value"],

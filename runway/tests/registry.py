@@ -1,23 +1,26 @@
 """Register test handlers."""
 # modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
-from ..util import load_object_from_string
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, Type
+
 from .handlers import cfn_lint, script
 from .handlers import yaml_lint as yamllint
 
-TEST_HANDLERS = {}
+if TYPE_CHECKING:
+    from .handlers.base import TestHandler
+
+TEST_HANDLERS: Dict[str, Type[TestHandler]] = {}
 
 
-def register_test_handler(test_type, handler_or_path):
+def register_test_handler(test_type: str, handler: Type[TestHandler]) -> None:
     """Register a test handler.
 
     Args:
-        test_type (str): Name to register the handler under.
-        handler_or_path (OneOf[func, str]): Function or a path to a handler.
+        test_type: Name to register the handler under.
+        handler: Test handler class.
 
     """
-    handler = handler_or_path
-    if isinstance(handler_or_path, str):
-        handler = load_object_from_string(handler_or_path)
     TEST_HANDLERS[test_type] = handler
 
 

@@ -1,17 +1,21 @@
 """AWS account."""
-from typing import TYPE_CHECKING, List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Union
 
 from ....util import cached_property
 
 if TYPE_CHECKING:
-    from ....context import Context
+    import boto3
+
+    from ....cfngin.context import Context as CfnginContext
+    from ....context import Context as RunwayContext
 
 
 class AccountDetails:
     """AWS account details."""
 
-    def __init__(self, context):
-        # type: (Context) -> None
+    def __init__(self, context: Union[CfnginContext, RunwayContext]) -> None:
         """Instantiate class.
 
         Args:
@@ -21,14 +25,8 @@ class AccountDetails:
         self.__ctx = context
 
     @cached_property
-    def aliases(self):
-        # type: () -> List[str]
-        """Get the aliases of the AWS account.
-
-        Returns:
-            List[str]: Account aliases.
-
-        """
+    def aliases(self) -> List[str]:
+        """Get the aliases of the AWS account."""
         # Super overkill here using pagination when an account can only
         # have a single alias, but at least this implementation should be
         # future-proof.
@@ -40,18 +38,12 @@ class AccountDetails:
         return aliases
 
     @cached_property
-    def id(self):
-        # type: () -> str
-        """Get the ID of the AWS account.
-
-        Returns:
-            str: AWS account ID.
-
-        """
+    def id(self) -> str:
+        """Get the ID of the AWS account."""
         return self.__session.client("sts").get_caller_identity()["Account"]
 
     @cached_property
-    def __session(self):
+    def __session(self) -> boto3.Session:
         """Get a cached boto3 session.
 
         Session creation was moved out of class init to improve performance

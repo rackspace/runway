@@ -15,9 +15,9 @@ class BadObject(ConfigProperty):
 
     """
 
-    name: str = ("invalid",)
+    name: str = ("invalid",)  # type: ignore
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -35,7 +35,7 @@ class GoodObject(ConfigProperty):
     dict_field: Dict[str, Any] = {}
     optional_str_field: Optional[str] = None
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -81,7 +81,7 @@ class TestConfigProperty:
         """Test Config.validate_assignment."""
         with pytest.raises(ValidationError) as excinfo:
             obj = GoodObject(name="test")
-            obj.name = ("invalid",)
+            obj.name = ("invalid",)  # type: ignore
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("name",)

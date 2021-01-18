@@ -1,5 +1,6 @@
 """CFNgin info action."""
 import logging
+from typing import Any
 
 from .. import exceptions
 from .base import BaseAction
@@ -16,7 +17,7 @@ class Action(BaseAction):  # pylint: disable=abstract-method
 
     NAME = "info"
 
-    def run(self, **kwargs):
+    def run(self, *_args: Any, **_kwargs: Any) -> None:
         """Get information on CloudFormation stacks."""
         LOGGER.info("outputs for stacks: %s", self.context.get_fqn())
         if not self.context.get_stacks():

@@ -17,8 +17,7 @@ COMMANDS = [install, run]
 @options.debug
 @options.no_color
 @options.verbose
-def tfenv(**_):
-    # type: (Any) -> None
+def tfenv(**_: Any) -> None:
     """Terraform version management and execution.
 
     Runway's built-in Terraform version management allows for long-term
