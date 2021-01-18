@@ -1,6 +1,5 @@
 """CFNgin session caching."""
 import logging
-import os
 from typing import Optional
 
 import boto3
@@ -12,10 +11,6 @@ from .ui import ui
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PROFILE = None
-DEPRECATION_MSG = (
-    '"session_cache.get_session" has been deprecated; '
-    'use the "get_session" method of the context object instead'
-)
 # A global credential cache that can be shared among boto3 sessions. This is
 # inherently threadsafe thanks to the GIL:
 # https://docs.python.org/3/glossary.html#term-global-interpreter-lock
@@ -54,8 +49,6 @@ def get_session(
             access_key,
             region or "default",
         )
-    elif os.environ.get("AWS_ACCESS_KEY_ID"):
-        LOGGER.warning(DEPRECATION_MSG)
 
     session = boto3.Session(
         aws_access_key_id=access_key,
