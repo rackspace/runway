@@ -1,18 +1,26 @@
 """Test runway.core.providers.aws._cli."""
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import pytest
-from mock import patch
 
 from runway.core.providers.aws import cli
 
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from pytest_mock import MockerFixture
 
-def test_cli(caplog):
+MODULE = "runway.core.providers.aws._cli"
+
+
+def test_cli(caplog: LogCaptureFixture, mocker: MockerFixture) -> None:
     """Test cli."""
-    with patch("awscli.clidriver.create_clidriver") as mock_clidriver:
-        caplog.set_level(logging.DEBUG, logger="runway.core.providers.aws.cli")
-        mock_clidriver.return_value = mock_clidriver
-        mock_clidriver.main.return_value = 0
+    caplog.set_level(logging.DEBUG, logger="runway.core.providers.aws.cli")
+    mock_clidriver = mocker.patch(f"{MODULE}.create_clidriver")
+    mock_clidriver.return_value = mock_clidriver
+    mock_clidriver.main.return_value = 0
 
         assert not cli(["test"])
         assert "passing command to awscli: test" in caplog.messages
@@ -20,11 +28,11 @@ def test_cli(caplog):
         mock_clidriver.main.assert_called_once_with(["test"])
 
 
-def test_cli_non_zero():
+def test_cli_non_zero(mocker: MockerFixture) -> None:
     """Test cli with non-zero exit code."""
-    with patch("awscli.clidriver.create_clidriver") as mock_clidriver:
-        mock_clidriver.return_value = mock_clidriver
-        mock_clidriver.main.return_value = 1
+    mock_clidriver = mocker.patch(f"{MODULE}.create_clidriver")
+    mock_clidriver.return_value = mock_clidriver
+    mock_clidriver.main.return_value = 1
 
         with pytest.raises(RuntimeError) as excinfo:
             assert cli(["test"])

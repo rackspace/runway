@@ -1,5 +1,8 @@
 """Test ``runway test``."""
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import yaml
 from click.testing import CliRunner
@@ -30,9 +33,17 @@ INVALID_TYPE_REQUIRED = {
     "required": True,
 }
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from _pytest.capture import CaptureFixture
+    from _pytest.logging import LogCaptureFixture
+
 
 # def test_test_invalid_type(cd_tmp_path, capfd, caplog):
-def test_test_invalid_type(cd_tmp_path):  # TODO update after catching error
+def test_test_invalid_type(
+    cd_tmp_path: Path,
+) -> None:  # TODO update after catching error
     """Test ``runway test`` with two tests; one invalid."""
     # caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
@@ -59,7 +70,7 @@ def test_test_invalid_type(cd_tmp_path):  # TODO update after catching error
     # assert "success:running test (pass)" in logs
 
 
-def test_test_not_defined(cd_tmp_path, caplog):
+def test_test_not_defined(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway test`` with no tests defined."""
     caplog.set_level(logging.ERROR)
     runway_yml = cd_tmp_path / "runway.yml"
@@ -71,7 +82,9 @@ def test_test_not_defined(cd_tmp_path, caplog):
     assert "no tests defined in runway.yml" in caplog.messages
 
 
-def test_test_single_successful(cd_tmp_path, capfd, caplog):
+def test_test_single_successful(
+    cd_tmp_path: Path, capfd: CaptureFixture, caplog: LogCaptureFixture
+) -> None:
     """Test ``runway test`` with a single, successful test."""
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
@@ -91,7 +104,9 @@ def test_test_single_successful(cd_tmp_path, capfd, caplog):
     assert "success:running test (pass)" in logs
 
 
-def test_test_two_test(cd_tmp_path, capfd, caplog):
+def test_test_two_test(
+    cd_tmp_path: Path, capfd: CaptureFixture, caplog: LogCaptureFixture
+) -> None:
     """Test ``runway test`` with two tests; one failing."""
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
@@ -114,7 +129,9 @@ def test_test_two_test(cd_tmp_path, capfd, caplog):
     assert "the following tests failed: fail" in logs
 
 
-def test_test_two_test_required(cd_tmp_path, capfd, caplog):
+def test_test_two_test_required(
+    cd_tmp_path: Path, capfd: CaptureFixture, caplog: LogCaptureFixture
+) -> None:
     """Test ``runway test`` with two tests; one failing required."""
     caplog.set_level(logging.INFO)
     runway_yml = cd_tmp_path / "runway.yml"

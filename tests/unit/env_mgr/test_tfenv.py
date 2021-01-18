@@ -1,11 +1,14 @@
 """Test runway.env_mgr.tfenv."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import hcl
 import hcl2
 import pytest
-from mock import MagicMock, call, patch
+from mock import MagicMock, call
 
 from runway._logging import LogLevels
 from runway.env_mgr.tfenv import (
@@ -15,6 +18,13 @@ from runway.env_mgr.tfenv import (
     get_latest_tf_version,
     load_terrafrom_module,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from types import ModuleType
+
+    from _pytest.logging import LogCaptureFixture
+    from pytest_mock import MockerFixture
 
 MODULE = "runway.env_mgr.tfenv"
 
@@ -45,9 +55,9 @@ terraform {
 """
 
 
-@patch(MODULE + ".requests")
-def test_get_available_tf_versions(mock_requests):
+def test_get_available_tf_versions(mocker: MockerFixture) -> None:
     """Test runway.env_mgr.tfenv.get_available_tf_versions."""
+    mock_requests = mocker.patch(f"{MODULE}.requests")
     response = {"terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}}
     mock_requests.get.return_value = MagicMock(text=json.dumps(response))
     assert get_available_tf_versions() == ["0.12.0"]
@@ -57,10 +67,11 @@ def test_get_available_tf_versions(mock_requests):
     ]
 
 
-@patch(MODULE + ".get_available_tf_versions")
-def test_get_latest_tf_version(mock_get_available_tf_versions):
+def test_get_latest_tf_version(mocker: MockerFixture) -> None:
     """Test runway.env_mgr.tfenv.get_latest_tf_version."""
-    mock_get_available_tf_versions.return_value = ["latest"]
+    mock_get_available_tf_versions = mocker.patch(
+        f"{MODULE}.get_available_tf_versions", return_value=["latest"]
+    )
     assert get_latest_tf_version() == "latest"
     mock_get_available_tf_versions.assert_called_once_with(False)
     assert get_latest_tf_version(include_prerelease=True) == "latest"
@@ -74,7 +85,9 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
         (hcl2, {"terraform": [{"backend": [{"s3": {"bucket": ["name"]}}]}]}),
     ],
 )
-def test_load_terrafrom_module(parser, expected, tmp_path):
+def test_load_terrafrom_module(
+    parser: ModuleType, expected: Dict[str, Any], tmp_path: Path
+) -> None:
     """Test runway.env_mgr.tfenv.load_terrafrom_module."""
     tf_file = tmp_path / "module.tf"
     tf_file.write_text(HCL_BACKEND_S3)
@@ -113,31 +126,36 @@ class TestTFEnvManager:
             ),
         ],
     )
-    @patch(MODULE + ".load_terrafrom_module")
-    def test_backend(self, mock_load_terrafrom_module, response, expected, tmp_path):
+    def test_backend(
+        self,
+        mocker: MockerFixture,
+        response: Dict[str, Any],
+        expected: Dict[str, Any],
+        tmp_path: Path,
+    ) -> None:
         """Test backend."""
-        mock_load_terrafrom_module.return_value = response
+        mocker.patch(f"{MODULE}.load_terrafrom_module", return_value=response)
         tfenv = TFEnvManager(tmp_path)
         assert tfenv.backend == expected
 
-    def test_get_min_required(self, monkeypatch, tmp_path):
+    def test_get_min_required(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test get_min_required."""
-        monkeypatch.setattr(TFEnvManager, "terraform_block", {})
+        mocker.patch.object(TFEnvManager, "terraform_block", {})
         tfenv = TFEnvManager(tmp_path)
 
         with pytest.raises(SystemExit) as excinfo:
             assert tfenv.get_min_required()
         assert excinfo.value.code
 
-        monkeypatch.setattr(tfenv, "terraform_block", {"required_version": "!=0.12.0"})
+        mocker.patch.object(tfenv, "terraform_block", {"required_version": "!=0.12.0"})
         with pytest.raises(SystemExit) as excinfo:
             assert tfenv.get_min_required()
         assert excinfo.value.code
 
-        monkeypatch.setattr(tfenv, "terraform_block", {"required_version": "~>0.12.0"})
+        mocker.patch.object(tfenv, "terraform_block", {"required_version": "~>0.12.0"})
         assert tfenv.get_min_required() == "0.12.0"
 
-    def test_get_version_from_file(self, tmp_path):
+    def test_get_version_from_file(self, tmp_path: Path) -> None:
         """Test get_version_from_file."""
         tfenv = TFEnvManager(tmp_path)
 
@@ -155,15 +173,14 @@ class TestTFEnvManager:
         version_file.write_text("0.12.0")
         assert tfenv.get_version_from_file(version_file) == "0.12.0"
 
-    @patch(MODULE + ".get_available_tf_versions")
-    @patch(MODULE + ".download_tf_release")
-    def test_install(
-        self, mock_download, mock_available_versions, monkeypatch, tmp_path
-    ):
+    def test_install(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install."""
-        mock_available_versions.return_value = ["0.12.0", "0.11.5"]
-        monkeypatch.setattr(TFEnvManager, "versions_dir", tmp_path)
-        monkeypatch.setattr(
+        mock_available_versions = mocker.patch(
+            f"{MODULE}.get_available_tf_versions", return_value=["0.12.0", "0.11.5"]
+        )
+        mock_download = mocker.patch(f"{MODULE}.download_tf_release")
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
+        mocker.patch.object(
             TFEnvManager, "get_version_from_file", MagicMock(return_value="0.11.5")
         )
         tfenv = TFEnvManager(tmp_path)
@@ -181,14 +198,15 @@ class TestTFEnvManager:
         )
         assert tfenv.current_version == "0.11.5"
 
-    @patch(MODULE + ".get_available_tf_versions")
-    @patch(MODULE + ".download_tf_release")
     def test_install_already_installed(
-        self, mock_download, mock_available_versions, monkeypatch, tmp_path
-    ):
+        self, mocker: MockerFixture, tmp_path: Path
+    ) -> None:
         """Test install with version already installed."""
-        mock_available_versions.return_value = ["0.12.0"]
-        monkeypatch.setattr(TFEnvManager, "versions_dir", tmp_path)
+        mock_available_versions = mocker.patch(
+            f"{MODULE}.get_available_tf_versions", return_value=["0.12.0"]
+        )
+        mock_download = mocker.patch(f"{MODULE}.download_tf_release")
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         tfenv = TFEnvManager(tmp_path)
         (tfenv.versions_dir / "0.12.0").mkdir()
 
@@ -199,14 +217,13 @@ class TestTFEnvManager:
 
         assert tfenv.install(r"0\.12\..*")  # regex does not match dir
 
-    @patch(MODULE + ".get_available_tf_versions")
-    @patch(MODULE + ".download_tf_release")
-    def test_install_latest(
-        self, mock_download, mock_available_versions, monkeypatch, tmp_path
-    ):
+    def test_install_latest(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install latest."""
-        mock_available_versions.return_value = ["0.12.0", "0.11.5"]
-        monkeypatch.setattr(TFEnvManager, "versions_dir", tmp_path)
+        mock_available_versions = mocker.patch(
+            f"{MODULE}.get_available_tf_versions", return_value=["0.12.0", "0.11.5"]
+        )
+        mock_download = mocker.patch(f"{MODULE}.download_tf_release")
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         tfenv = TFEnvManager(tmp_path)
 
         assert tfenv.install("latest")
@@ -223,15 +240,14 @@ class TestTFEnvManager:
         )
         assert tfenv.current_version == "0.11.5"
 
-    @patch(MODULE + ".get_available_tf_versions")
-    @patch(MODULE + ".download_tf_release")
-    def test_install_min_required(
-        self, mock_download, mock_available_versions, monkeypatch, tmp_path
-    ):
+    def test_install_min_required(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install min_required."""
-        mock_available_versions.return_value = ["0.12.0"]
-        monkeypatch.setattr(TFEnvManager, "versions_dir", tmp_path)
-        monkeypatch.setattr(
+        mock_available_versions = mocker.patch(
+            f"{MODULE}.get_available_tf_versions", return_value=["0.12.0"]
+        )
+        mock_download = mocker.patch(f"{MODULE}.download_tf_release")
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
+        mocker.patch.object(
             TFEnvManager, "get_min_required", MagicMock(return_value="0.12.0")
         )
         tfenv = TFEnvManager(tmp_path)
@@ -244,7 +260,7 @@ class TestTFEnvManager:
         assert tfenv.current_version == "0.12.0"
         tfenv.get_min_required.assert_called_once_with()  # pylint: disable=no-member
 
-    def test_install_no_version(self, tmp_path):
+    def test_install_no_version(self, tmp_path: Path) -> None:
         """Test install with no version available."""
         tfenv = TFEnvManager(tmp_path)
 
@@ -254,14 +270,13 @@ class TestTFEnvManager:
             "version not provided and unable to find a .terraform-version file"
         )
 
-    @patch(MODULE + ".get_available_tf_versions")
-    @patch(MODULE + ".download_tf_release")
-    def test_install_unavailable(
-        self, mock_download, mock_available_versions, monkeypatch, tmp_path
-    ):
+    def test_install_unavailable(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install."""
-        mock_available_versions.return_value = []
-        monkeypatch.setattr(TFEnvManager, "versions_dir", tmp_path)
+        mock_available_versions = mocker.patch(
+            f"{MODULE}.get_available_tf_versions", return_value=[]
+        )
+        mock_download = mocker.patch(f"{MODULE}.download_tf_release")
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         tfenv = TFEnvManager(tmp_path)
 
         with pytest.raises(SystemExit) as excinfo:
@@ -306,13 +321,19 @@ class TestTFEnvManager:
             ([Exception, hcl.loads(HCL_ATTR_LIST)], {"some_attr": ["val1", "val2"]}),
         ],
     )
-    @patch(MODULE + ".load_terrafrom_module")
     def test_terraform_block(
-        self, mock_load_terrafrom_module, response, expected, caplog, tmp_path
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        expected: Dict[str, Any],
+        mocker: MockerFixture,
+        response: List[Any],
+        tmp_path: Path,
+    ) -> None:
         """Test terraform_block."""
         caplog.set_level(LogLevels.VERBOSE, logger=MODULE)
-        mock_load_terrafrom_module.side_effect = response
+        mock_load_terrafrom_module = mocker.patch(
+            f"{MODULE}.load_terrafrom_module", side_effect=response
+        )
         tfenv = TFEnvManager(tmp_path)
 
         assert tfenv.terraform_block == expected
@@ -320,12 +341,12 @@ class TestTFEnvManager:
         if not isinstance(response[0], dict):
             assert "failed to parse as HCL2; trying HCL" in "\n".join(caplog.messages)
             mock_load_terrafrom_module.assert_has_calls(
-                [call(hcl2, tmp_path), call(hcl, tmp_path)]
+                [call(hcl2, tmp_path), call(hcl, tmp_path)]  # type: ignore
             )
         else:
             mock_load_terrafrom_module.assert_called_once_with(hcl2, tmp_path)
 
-    def test_version_file(self, tmp_path):
+    def test_version_file(self, tmp_path: Path) -> None:
         """Test version_file."""
         subdir = tmp_path / "subdir"
         subdir.mkdir()

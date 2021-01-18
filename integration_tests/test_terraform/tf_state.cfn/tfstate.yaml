@@ -10,4 +10,4 @@ stacks:
 pre_destroy:
   - path: runway.hooks.cleanup_s3.purge_bucket
     args:
-      bucket_xref_lookup: ${namespace}-tf-state::TerraformStateBucketName
+      bucket_name: ${rxref ${namespace}-tf-state::TerraformStateBucketName}

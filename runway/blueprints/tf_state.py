@@ -144,4 +144,4 @@ class TfState(Blueprint):
 if __name__ == "__main__":
     from runway.cfngin.context import Context
 
-    print(TfState("test", Context({"namespace": "test"}), None).to_json())
+    print(TfState("test", Context(environment={"namespace": "test"}), None).to_json())

@@ -1,15 +1,20 @@
 """Tests for variables."""
 # pylint: disable=protected-access,unused-argument
+from __future__ import annotations
+
+from typing import Any, cast
 from unittest import TestCase
 
 from mock import MagicMock
 from troposphere import s3
 
 from runway.cfngin.blueprints.variables.types import TroposphereType
+from runway.cfngin.context import Context as CfnginContext
 from runway.cfngin.lookups import register_lookup_handler
+from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.stack import Stack
+from runway.context import Context as RunwayContext
 from runway.exceptions import UnresolvedVariable
-from runway.util import MutableMap
 from runway.variables import Variable
 
 from .cfngin.factories import generate_definition
@@ -21,29 +26,29 @@ VALUE = {
     "dict_val": {"test": "success"},
     "list_val": ["success"],
 }
-CONTEXT = MutableMap(**{"env_vars": VALUE})
+CONTEXT = cast(RunwayContext, MagicMock(autospec=RunwayContext, env_vars=VALUE))
 
 
 class TestCfnginVariables(TestCase):
     """Tests for runway.cfngin.variables."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
-        self.provider = MagicMock()
-        self.context = MagicMock()
+        self.provider = cast(Provider, MagicMock(autospec=Provider))
+        self.context = cast(CfnginContext, MagicMock(autospec=CfnginContext))
 
-    def test_variable_replace_no_lookups(self):
+    def test_variable_replace_no_lookups(self) -> None:
         """Test variable replace no lookups."""
         var = Variable("Param1", "2")
         self.assertEqual(var.value, "2")
 
-    def test_variable_replace_simple_lookup(self):
+    def test_variable_replace_simple_lookup(self) -> None:
         """Test variable replace simple lookup."""
         var = Variable("Param1", "${output fakeStack::FakeOutput}")
         var._value._resolve("resolved")
         self.assertEqual(var.value, "resolved")
 
-    def test_variable_resolve_simple_lookup(self):
+    def test_variable_resolve_simple_lookup(self) -> None:
         """Test variable resolve simple lookup."""
         stack = Stack(definition=generate_definition("vpc", 1), context=self.context)
         stack.set_outputs({"FakeOutput": "resolved", "FakeOutput2": "resolved2"})
@@ -55,14 +60,14 @@ class TestCfnginVariables(TestCase):
         self.assertTrue(var.resolved)
         self.assertEqual(var.value, "resolved")
 
-    def test_variable_resolve_default_lookup_empty(self):
+    def test_variable_resolve_default_lookup_empty(self) -> None:
         """Test variable resolve default lookup empty."""
         var = Variable("Param1", "${default fakeStack::}")
         var.resolve(self.context, self.provider)
         self.assertTrue(var.resolved)
         self.assertEqual(var.value, "")
 
-    def test_variable_replace_multiple_lookups_string(self):
+    def test_variable_replace_multiple_lookups_string(self) -> None:
         """Test variable replace multiple lookups string."""
         var = Variable(
             "Param1",
@@ -75,7 +80,7 @@ class TestCfnginVariables(TestCase):
         var._value[3]._resolve("resolved2")
         self.assertEqual(var.value, "url://resolved@resolved2")
 
-    def test_variable_resolve_multiple_lookups_string(self):
+    def test_variable_resolve_multiple_lookups_string(self) -> None:
         """Test variable resolve multiple lookups string."""
         var = Variable(
             "Param1",
@@ -90,12 +95,12 @@ class TestCfnginVariables(TestCase):
         self.assertTrue(var.resolved)
         self.assertEqual(var.value, "url://resolved@resolved2")
 
-    def test_variable_replace_no_lookups_list(self):
+    def test_variable_replace_no_lookups_list(self) -> None:
         """Test variable replace no lookups list."""
         var = Variable("Param1", ["something", "here"])
         self.assertEqual(var.value, ["something", "here"])
 
-    def test_variable_replace_lookups_list(self):
+    def test_variable_replace_lookups_list(self) -> None:
         """Test variable replace lookups list."""
         value = [
             "something",  # 0
@@ -108,7 +113,7 @@ class TestCfnginVariables(TestCase):
         var._value[2]._resolve("resolved2")
         self.assertEqual(var.value, ["something", "resolved", "resolved2"])
 
-    def test_variable_replace_lookups_dict(self):
+    def test_variable_replace_lookups_dict(self) -> None:
         """Test variable replace lookups dict."""
         value = {
             "something": "${output fakeStack::FakeOutput}",
@@ -119,7 +124,7 @@ class TestCfnginVariables(TestCase):
         var._value["other"]._resolve("resolved2")
         self.assertEqual(var.value, {"something": "resolved", "other": "resolved2"})
 
-    def test_variable_replace_lookups_mixed(self):
+    def test_variable_replace_lookups_mixed(self) -> None:
         """Test variable replace lookups mixed."""
         value = {
             "something": ["${output fakeStack::FakeOutput}", "other"],
@@ -146,12 +151,12 @@ class TestCfnginVariables(TestCase):
             },
         )
 
-    def test_variable_resolve_nested_lookup(self):
+    def test_variable_resolve_nested_lookup(self) -> None:
         """Test variable resolve nested lookup."""
         stack = Stack(definition=generate_definition("vpc", 1), context=self.context)
         stack.set_outputs({"FakeOutput": "resolved", "FakeOutput2": "resolved2"})
 
-        def mock_handler(value, context, provider, **kwargs):
+        def mock_handler(value: str, **_: Any) -> str:
             return "looked up: {}".format(value)
 
         register_lookup_handler("lookup", mock_handler)
@@ -161,22 +166,22 @@ class TestCfnginVariables(TestCase):
         self.assertTrue(var.resolved)
         self.assertEqual(var.value, "looked up: looked up: resolved")
 
-    def test_troposphere_type_no_from_dict(self):
+    def test_troposphere_type_no_from_dict(self) -> None:
         """Test troposphere type no from dict."""
         with self.assertRaises(ValueError):
-            TroposphereType(object)
+            TroposphereType(object)  # type: ignore
 
         with self.assertRaises(ValueError):
-            TroposphereType(object, many=True)
+            TroposphereType(object, many=True)  # type: ignore
 
-    def test_troposphere_type_create(self):
+    def test_troposphere_type_create(self) -> None:
         """Test troposphere type create."""
         troposphere_type = TroposphereType(s3.Bucket)
         created = troposphere_type.create({"MyBucket": {"BucketName": "test-bucket"}})
         self.assertTrue(isinstance(created, s3.Bucket))
         self.assertTrue(created.properties["BucketName"], "test-bucket")
 
-    def test_troposphere_type_create_multiple(self):
+    def test_troposphere_type_create_multiple(self) -> None:
         """Test troposphere type create multiple."""
         troposphere_type = TroposphereType(s3.Bucket, many=True)
         created = troposphere_type.create(
@@ -191,7 +196,7 @@ class TestCfnginVariables(TestCase):
 class TestRunwayVariables(TestCase):
     """Test for variable resolution."""
 
-    def test_value_simple_str(self):
+    def test_value_simple_str(self) -> None:
         """Test value for a simple string without lookups."""
         var = Variable("test", "success")
 
@@ -202,7 +207,7 @@ class TestRunwayVariables(TestCase):
         )
         self.assertEqual(var.value, "success")
 
-    def test_value_simple_str_lookup(self):
+    def test_value_simple_str_lookup(self) -> None:
         """Test value for simple str lookup."""
         var = Variable("test", "${env test}", "runway")
 
@@ -213,7 +218,7 @@ class TestRunwayVariables(TestCase):
         self.assertTrue(var.resolved)
         self.assertEqual(var.value, VALUE["test"])
 
-    def test_value_complex_str(self):
+    def test_value_complex_str(self) -> None:
         """Multiple lookups should be usable within a single string."""
         var = Variable("test", "the ${env what} was ${env test}ful", "runway")
         var.resolve(CONTEXT)
@@ -222,49 +227,49 @@ class TestRunwayVariables(TestCase):
             var.value, "the {} was {}ful".format(VALUE["what"], VALUE["test"])
         )
 
-    def test_value_nested_str(self):
+    def test_value_nested_str(self) -> None:
         """Variable lookups should be resolvable within each other."""
         var = Variable("test", "${env ${env what}}", "runway")
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, VALUE["test"])
 
-    def test_value_lookup_in_dict(self):
+    def test_value_lookup_in_dict(self) -> None:
         """Variable lookups should be resolvable when used in a dict."""
         var = Variable("test", {"my_dict": "${env test}"}, "runway")
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, {"my_dict": VALUE["test"]})
 
-    def test_value_lookup_in_list(self):
+    def test_value_lookup_in_list(self) -> None:
         """Variable lookups should be resolvable when used in a list."""
         var = Variable("test", ["${env test}"], "runway")
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, [VALUE["test"]])
 
-    def test_value_lookup_to_bool(self):
+    def test_value_lookup_to_bool(self) -> None:
         """Variable lookups should be resolvable to a bool."""
         var = Variable("test", "${env bool_val}", "runway")
         var.resolve(CONTEXT)
 
         self.assertFalse(var.value)
 
-    def test_value_lookup_to_dict(self):
+    def test_value_lookup_to_dict(self) -> None:
         """Variable lookups should be resolvable to a dict value."""
         var = Variable("test", "${env dict_val}", "runway")
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, VALUE["dict_val"])
 
-    def test_value_lookup_to_list(self):
+    def test_value_lookup_to_list(self) -> None:
         """Variable lookups should be resolvable to a list value."""
         var = Variable("test", "${env list_val}", "runway")
         var.resolve(CONTEXT)
 
         self.assertEqual(var.value, VALUE["list_val"])
 
-    def test_value_unresolved(self):
+    def test_value_unresolved(self) -> None:
         """Should raise `UnresolvedVariable`."""
         var = Variable("test", "${env test}", "runway")
 

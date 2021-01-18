@@ -1,7 +1,4 @@
 """Import classes."""
+from . import cfn_lint, script, yaml_lint
 
-# pylint: disable = wildcard-import
-
-from .cfn_lint import *  # noqa
-from .script import *  # noqa
-from .yaml_lint import *  # noqa
+__all__ = ["cfn_lint", "script", "yaml_lint"]

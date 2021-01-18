@@ -9,12 +9,12 @@ from runway.cfngin.lookups.handlers.xref import XrefLookup
 class TestXrefHandler(unittest.TestCase):
     """Tests for runway.cfngin.lookups.handlers.xref.XrefHandler."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.provider = MagicMock()
         self.context = MagicMock()
 
-    def test_xref_handler(self):
+    def test_xref_handler(self) -> None:
         """Test xref handler."""
         self.provider.get_output.return_value = "Test Output"
         value = XrefLookup.handle(

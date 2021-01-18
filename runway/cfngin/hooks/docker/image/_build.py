@@ -111,17 +111,26 @@ image (DockerImage)
           image: ${hook_data docker.image}
 
 """
+from __future__ import annotations
+
 import logging
-import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union  # pylint: disable=W
+from pathlib import Path
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
+
+from docker.models.images import Image
 
 from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryRepository
 from ..hook_data import DockerHookData
-
-if sys.version_info.major > 2:
-    from pathlib import Path  # pylint: disable=E
-else:
-    from pathlib2 import Path  # type: ignore pylint: disable=E
 
 if TYPE_CHECKING:
     from ....context import Context
@@ -134,24 +143,24 @@ class DockerImageBuildApiOptions(BaseModel):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        buildargs=None,  # type: Optional[Dict[str, Any]]
-        custom_context=False,  # type: bool
-        extra_hosts=None,  # type: Optional[Dict[str, Any]]
-        forcerm=False,  # type: bool
-        isolation=None,  # type: Optional[str]
-        network_mode=None,  # type: Optional[str]
-        nocache=False,  # type: bool
-        platform=None,  # type: Optional[str]
-        pull=False,  # type: bool
-        rm=True,  # type: bool
-        squash=False,  # type: bool
-        tag=None,  # type: Optional[str]
-        target=None,  # type: Optional[str]
-        timeout=None,  # type: Optional[int]
-        use_config_proxy=False,  # type: bool
-        **kwargs  # type: Any  # pylint: disable=unused-argument
-    ):
-        # type: (...) -> None
+        *,
+        buildargs: Optional[Dict[str, Any]] = None,
+        custom_context: bool = False,
+        extra_hosts: Optional[Dict[str, Any]] = None,
+        forcerm: bool = False,
+        isolation: Optional[str] = None,
+        network_mode: Optional[str] = None,
+        nocache: bool = False,
+        platform: Optional[str] = None,
+        pull: bool = False,
+        rm: bool = True,  # pylint: disable=invalid-name
+        squash: bool = False,
+        tag: Optional[str] = None,
+        target: Optional[str] = None,
+        timeout: Optional[int] = None,
+        use_config_proxy: bool = False,
+        **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -178,6 +187,7 @@ class DockerImageBuildApiOptions(BaseModel):
                 being built.
 
         """
+        super().__init__(**kwargs)
         self.buildargs = self._validate_dict(buildargs)
         self.custom_context = self._validate_bool(custom_context)
         self.extra_hosts = self._validate_dict(extra_hosts, optional=True)
@@ -200,15 +210,16 @@ class ImageBuildArgs(BaseModel):
 
     def __init__(
         self,
-        context=None,  # type: Optional["Context"]
-        docker=None,  # type: Optional[Dict[str, Any]]
-        dockerfile="./Dockerfile",  # type: str
-        ecr_repo=None,  # type: Optional[Dict[str, Any]]
-        path=None,  # type: Optional[Union[Path, str]]
-        repo=None,  # type: Optional[str]
-        tags=None,  # type: Optional[List[str]]
-    ):
-        # type: (...) -> None
+        *,
+        context: Optional[Context] = None,
+        docker: Optional[Dict[str, Any]] = None,
+        dockerfile: str = "./Dockerfile",
+        ecr_repo=None,
+        path: Optional[Union[Path, str]] = None,
+        repo: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        **_: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -224,8 +235,8 @@ class ImageBuildArgs(BaseModel):
             tags: List of tags to apply to the image.
 
         """
+        super().__init__(context=context)
         docker = docker or {}
-        self._ctx = context
         self.path = self._validate_path(path or Path.cwd(), must_exist=True)
         self.dockerfile = self._validate_dockerfile(self.path, dockerfile)
         self.repo = self.determine_repo(
@@ -233,15 +244,16 @@ class ImageBuildArgs(BaseModel):
             ecr_repo=self._validate_dict(ecr_repo, optional=True),
             repo=self._validate_str(repo, optional=True),
         )
-        self.tags = self._validate_list_str(tags or ["latest"], required=True)
+        self.tags = cast(
+            List[str], self._validate_list_str(tags or ["latest"], required=True)
+        )
 
         if self.repo:
             docker.setdefault("tag", self.repo)
         self.docker = DockerImageBuildApiOptions.parse_obj(docker)
 
     @classmethod
-    def _validate_dockerfile(cls, path, dockerfile):
-        # type: (Path, str) -> None
+    def _validate_dockerfile(cls, path: Path, dockerfile: str) -> str:
         """Validate Dockerfile."""
         if path.is_file():
             if path.name.endswith("Dockerfile"):
@@ -259,10 +271,10 @@ class ImageBuildArgs(BaseModel):
 
     @staticmethod
     def determine_repo(
-        context=None,  # type: Optional["Context"]
-        ecr_repo=None,  # type: Optional[Dict[str, Optional[str]]]
-        repo=None,  # type: Optional[str]
-    ):  # type: (...) -> Optional[str]
+        context: Optional[Context] = None,
+        ecr_repo: Optional[Dict[str, Optional[str]]] = None,
+        repo: Optional[str] = None,
+    ) -> Optional[str]:
         """Determine repo URI.
 
         Args:
@@ -280,18 +292,18 @@ class ImageBuildArgs(BaseModel):
         return None
 
 
-def build(**kwargs):  # type: (...) -> DockerHookData
+def build(*, context: Context, **kwargs: Any) -> DockerHookData:
     """Docker image build hook.
 
     Replicates the functionality of ``docker image build`` CLI command.
 
     """
-    context = kwargs.pop("context")  # type: "Context"
     kwargs.pop("provider", None)  # not needed
     args = ImageBuildArgs.parse_obj(kwargs, context=context)
     docker_hook_data = DockerHookData.from_cfngin_context(context)
-    image, logs = docker_hook_data.client.images.build(
-        path=str(args.path), **args.docker.dict()
+    image, logs = cast(
+        Tuple[Image, Iterator[Dict[str, str]]],
+        docker_hook_data.client.images.build(path=str(args.path), **args.docker.dict()),
     )
     for msg in logs:  # iterate through JSON log messages
         if "stream" in msg:  # log if they contain a message

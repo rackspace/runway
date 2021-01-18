@@ -117,7 +117,7 @@ max-parents = 10
 max-public-methods = 30
 max-returns = 6
 max-statements = 50
-min-public-methods = 2
+min-public-methods = 0
 
 [tool.pylint.format]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#format-checker
@@ -133,8 +133,12 @@ allow-wildcard-with-all = "no"
 logging-format-style = "old"  # TODO update to new
 
 [tool.pylint.master]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#general-options
 extension-pkg-whitelist = [
     "pydantic",  # https://github.com/samuelcolvin/pydantic/issues/992#issuecomment-553545180
+]
+ignore-patterns = [
+    ".+py[ci]$"
 ]
 jobs = 0
 
@@ -152,7 +156,7 @@ disable = [
     "similarities",  # black overcomplicates this
     # TODO fix these - python 3 only code
     "raise-missing-from",
-    "ungrouped-imports",
+    "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
 ]
 
 [tool.pylint.typecheck]

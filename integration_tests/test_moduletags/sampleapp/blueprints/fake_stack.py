@@ -6,7 +6,7 @@ from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNString
 
 
-class BlueprintClass(Blueprint):  # pylint: disable=too-few-public-methods
+class BlueprintClass(Blueprint):
     """Extends Blueprint."""
 
     VARIABLES = {"TestVar": {"type": CFNString, "default": ""}}

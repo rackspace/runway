@@ -1,9 +1,16 @@
 """AWS CloudFormation Output lookup."""
 # pylint: disable=arguments-differ,unused-argument
+from __future__ import annotations
+
 import re
 from collections import namedtuple
+from typing import TYPE_CHECKING, Any, Optional
 
-from runway.lookups.handlers.base import LookupHandler
+from ....lookups.handlers.base import LookupHandler
+
+if TYPE_CHECKING:
+    from ....variables import VariableValue
+    from ...context import Context
 
 TYPE_NAME = "output"
 
@@ -14,18 +21,16 @@ class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value, context: Optional[Context] = None, **_: Any) -> str:
         """Fetch an output from the designated stack.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
+            value: Parameter(s) given to this lookup.
                 ``<stack_name>::<output_name>``
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
+            context: Context instance.
 
         Returns:
-            str: Output from the specified stack.
+            Output from the specified stack.
 
         """
         if context is None:
@@ -36,40 +41,40 @@ class OutputLookup(LookupHandler):
         return stack.outputs[decon.output_name]
 
     @classmethod
-    def dependencies(cls, lookup_data):
+    def dependencies(cls, lookup_query: VariableValue):
         """Calculate any dependencies required to perform this lookup.
 
-        Note that lookup_data may not be (completely) resolved at this time.
+        Note that lookup_query may not be (completely) resolved at this time.
 
         Args:
-            lookup_data (VariableValue): Parameter(s) given to this lookup.
+            lookup_query: Parameter(s) given to this lookup.
 
         Returns:
-            Set[str]: Stack names this lookup depends on.
+            Stack names this lookup depends on.
 
         """
         # try to get the stack name
         stack_name = ""
-        for data_item in lookup_data:
+        for data_item in lookup_query:
             if not data_item.resolved:
                 # We encountered an unresolved substitution.
                 # StackName is calculated dynamically based on context:
                 #  e.g. ${output ${default var::source}::name}
                 # Stop here
                 return set()
-            stack_name = stack_name + data_item.value
+            stack_name += data_item.value
             match = re.search(r"::", stack_name)
             if match:
                 stack_name = stack_name[0 : match.start()]
                 return {stack_name}
-            # else: try to append the next item
+                # else: try to append the next item
 
-        # We added all lookup_data, and still couldn't find a `::`...
+        # We added all lookup_query, and still couldn't find a `::`...
         # Probably an error...
         return set()
 
 
-def deconstruct(value):
+def deconstruct(value: str) -> Output:
     """Deconstruct the value."""
     try:
         stack_name, output_name = value.split("::")

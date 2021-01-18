@@ -1,8 +1,11 @@
 """Tests for runway.cfngin.actions.diff."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
 import logging
 import unittest
 from operator import attrgetter
+from typing import TYPE_CHECKING, Optional
 
 import pytest
 from botocore.exceptions import ClientError
@@ -19,10 +22,16 @@ from runway.cfngin.status import SkippedStatus
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from _pytest.monkeypatch import MonkeyPatch
+
+    from ...factories import MockCFNginContext
+
 MODULE = "runway.cfngin.actions.diff"
 
 
-class TestAction(object):
+class TestAction:
     """Test runway.cfngin.actions.diff.Action."""
 
     @pytest.mark.parametrize(
@@ -37,13 +46,13 @@ class TestAction(object):
     @patch(MODULE + ".Bucket", autospec=True)
     def test_pre_run(
         self,
-        mock_bucket_init,
-        caplog,
-        bucket_name,
-        forbidden,
-        not_found,
-        cfngin_context,
-    ):
+        mock_bucket_init: MagicMock,
+        caplog: LogCaptureFixture,
+        bucket_name: Optional[str],
+        forbidden: bool,
+        not_found: bool,
+        cfngin_context: MockCFNginContext,
+    ) -> None:
         """Test pre_run."""
         caplog.set_level(logging.DEBUG, logger=MODULE)
         mock_bucket = MagicMock()
@@ -74,15 +83,18 @@ class TestAction(object):
         assert action.bucket_name == bucket_name
 
     def test_diff_stack_validationerror_template_too_large(
-        self, caplog, cfngin_context, monkeypatch
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        cfngin_context: MockCFNginContext,
+        monkeypatch: MonkeyPatch,
+    ) -> None:
         """Test _diff_stack ValidationError - template too large."""
         caplog.set_level(logging.ERROR)
 
         cfngin_context.add_stubber("cloudformation")
         cfngin_context.config.cfngin_bucket = ""
         expected = SkippedStatus("cfngin_bucket: existing bucket required")
-        provider = Provider(cfngin_context.get_session())
+        provider = Provider(cfngin_context.get_session())  # type: ignore
         mock_get_stack_changes = MagicMock(
             side_effect=ClientError(
                 {
@@ -105,8 +117,8 @@ class TestAction(object):
 
         result = Action(
             context=cfngin_context,
-            provider_builder=MockProviderBuilder(provider),
-            cancel=MockThreadingEvent(),
+            provider_builder=MockProviderBuilder(provider=provider),
+            cancel=MockThreadingEvent(),  # type: ignore
         )._diff_stack(stack)
         mock_get_stack_changes.assert_called_once()
         assert result == expected
@@ -115,7 +127,7 @@ class TestAction(object):
 class TestDictValueFormat(unittest.TestCase):
     """Tests for runway.cfngin.actions.diff.DictValue."""
 
-    def test_status(self):
+    def test_status(self) -> None:
         """Test status."""
         added = DictValue("k0", None, "value_0")
         self.assertEqual(added.status(), DictValue.ADDED)
@@ -126,7 +138,7 @@ class TestDictValueFormat(unittest.TestCase):
         unmodified = DictValue("k3", "value_1", "value_1")
         self.assertEqual(unmodified.status(), DictValue.UNMODIFIED)
 
-    def test_format(self):
+    def test_format(self) -> None:
         """Test format."""
         added = DictValue("k0", None, "value_0")
         self.assertEqual(added.changes(), ["+%s = %s" % (added.key, added.new_value)])
@@ -154,7 +166,7 @@ class TestDictValueFormat(unittest.TestCase):
 class TestDiffDictionary(unittest.TestCase):
     """Tests for runway.cfngin.actions.diff.diff_dictionaries."""
 
-    def test_diff_dictionaries(self):
+    def test_diff_dictionaries(self) -> None:
         """Test diff dictionaries."""
         old_dict = {
             "a": "Apple",
@@ -167,7 +179,7 @@ class TestDiffDictionary(unittest.TestCase):
             "d": "Doug",
         }
 
-        [count, changes] = diff_dictionaries(old_dict, new_dict)
+        count, changes = diff_dictionaries(old_dict, new_dict)
         self.assertEqual(count, 3)
         expected_output = [
             DictValue("a", "Apple", "Apple"),
@@ -189,7 +201,7 @@ class TestDiffDictionary(unittest.TestCase):
 class TestDiffParameters(unittest.TestCase):
     """Tests for runway.cfngin.actions.diff.diff_parameters."""
 
-    def test_diff_parameters_no_changes(self):
+    def test_diff_parameters_no_changes(self) -> None:
         """Test diff parameters no changes."""
         old_params = {"a": "Apple"}
         new_params = {"a": "Apple"}

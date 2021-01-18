@@ -12,14 +12,14 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
+from typing import Any, Dict
 
 import yaml
-from yaml.resolver import ScalarNode, SequenceNode
 
 
 def intrinsics_multi_constructor(  # pylint: disable=unused-argument
-    loader, tag_prefix, node
-):
+    loader: yaml.Loader, tag_prefix: str, node: yaml.Node
+) -> Dict[str, Any]:
     """YAML constructor to parse CloudFormation intrinsics.
 
     This will return a dictionary with key being the intrinsic name
@@ -41,11 +41,11 @@ def intrinsics_multi_constructor(  # pylint: disable=unused-argument
         # [Resource, Attribute]. Convert shorthand to standard format
         value = node.value.split(".", 1)
 
-    elif isinstance(node, ScalarNode):
+    elif isinstance(node, yaml.ScalarNode):
         # Value of this node is scalar
         value = loader.construct_scalar(node)
 
-    elif isinstance(node, SequenceNode):
+    elif isinstance(node, yaml.SequenceNode):
         # Value of this node is an array (Ex: [1,2])
         value = loader.construct_sequence(node)
 
@@ -56,12 +56,12 @@ def intrinsics_multi_constructor(  # pylint: disable=unused-argument
     return {cfntag: value}
 
 
-def yaml_dump(dict_to_dump):
+def yaml_dump(dict_to_dump: Dict[str, Any]) -> str:
     """Dump the dictionary as a YAML document."""
     return yaml.safe_dump(dict_to_dump, default_flow_style=False)
 
 
-def yaml_parse(yamlstr):
+def yaml_parse(yamlstr: str) -> Dict[str, Any]:
     """Parse a yaml string."""
     try:
         # PyYAML doesn't support json as well as it should, so if the input

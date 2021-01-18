@@ -1,18 +1,31 @@
 """Runway context module."""
+from __future__ import annotations
+
 import logging
 import sys
 from distutils.util import strtobool
-from typing import Optional
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 from .cfngin.session_cache import get_session
 from .core.components import DeployEnvironment
+from .type_defs import Boto3CredentialsTypeDef
 from .util import cached_property
 
-LOGGER = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    import boto3
+
+    from ._logging import RunwayLogger
+    from .type_defs import EnvVarsAwsCredentials
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 class Context:
     """Runway execution context."""
+
+    command: Optional[str]
+    debug: bool
+    env: DeployEnvironment
 
     def __init__(
         self,
@@ -23,9 +36,8 @@ class Context:
         """Instantiate class.
 
         Args:
-            command (Optional[str]): Runway command/action being run.
-            deploy_environment (Optional[DeployEnvironment]): Current
-                deploy environment.
+            command: Runway command/action being run.
+            deploy_environment: Current deploy environment.
 
         """
         self.command = command
@@ -35,50 +47,44 @@ class Context:
         self.__inject_profile_credentials()
 
     @property
-    def boto3_credentials(self):
+    def boto3_credentials(self) -> Boto3CredentialsTypeDef:
         """Return a dict of boto3 credentials."""
-        return {key.lower(): value for key, value in self.current_aws_creds.items()}
+        return Boto3CredentialsTypeDef(
+            **{key.lower(): value for key, value in self.current_aws_creds.items()}
+        )
 
     @property
-    def current_aws_creds(self):
-        """AWS credentials from self.env_vars.
-
-        Returns:
-            Dict[str, str]
-
-        """
+    def current_aws_creds(self) -> EnvVarsAwsCredentials:
+        """AWS credentials from self.env_vars."""
         return self.env.aws_credentials
 
     @cached_property
-    def env_name(self):
+    def env_name(self) -> str:
         """Get name from deploy environment [DEPRECATED]."""
         return self.env.name
 
     @property
-    def env_region(self):
-        # type: () -> str
+    def env_region(self) -> str:
         """Get or set the current AWS region [DEPRECATED]."""
         return self.env.aws_region
 
     @env_region.setter
-    def env_region(self, region):
-        # type: (str) -> None
+    def env_region(self, region: str) -> None:
         """Set the AWS region [DEPRECATED]."""
         self.env.aws_region = region
 
     @property
-    def env_root(self):
+    def env_root(self) -> str:
         """Get environment root directory [DEPRECATED]."""
         return str(self.env.root_dir)
 
     @property
-    def env_vars(self):
+    def env_vars(self) -> Dict[str, str]:
         """Get environment variables [DEPRECATED]."""
         return self.env.vars
 
     @cached_property
-    def no_color(self):
-        # type: () -> bool
+    def no_color(self) -> bool:
         """Whether to explicitly disable color output.
 
         Primarily applies to IaC being wrapped by Runway.
@@ -98,8 +104,7 @@ class Context:
         return not sys.stdout.isatty()
 
     @property
-    def is_interactive(self):
-        # type: () -> bool
+    def is_interactive(self) -> bool:
         """Whether the user should be prompted or not.
 
         Determined by the existed of ``CI`` in the environment.
@@ -111,8 +116,7 @@ class Context:
         return not self.env.ci
 
     @property
-    def is_noninteractive(self):
-        # type: () -> bool
+    def is_noninteractive(self) -> bool:
         """Whether the user should be prompted or not.
 
         Determined by the existed of ``CI`` in the environment.
@@ -125,8 +129,7 @@ class Context:
         return self.env.ci
 
     @property
-    def use_concurrent(self):
-        # type: () -> bool
+    def use_concurrent(self) -> bool:
         """Whether to use concurrent.futures or not.
 
         Noninteractive is required for concurrent execution to prevent weird
@@ -135,17 +138,13 @@ class Context:
         Python 3 is required because backported futures has issues with
         ProcessPoolExecutor.
 
-        Returns:
-            bool
-
         """
         if self.is_noninteractive:
             return True
         LOGGER.warning("Parallel execution disabled; not running in CI mode")
         return False
 
-    def copy(self):
-        # type: () -> Context
+    def copy(self) -> Context:
         """Copy the contents of this object into a new instance.
 
         Returns:
@@ -155,20 +154,21 @@ class Context:
         LOGGER.debug("creating a copy of Runway context...")
         return self.__class__(command=self.command, deploy_environment=self.env.copy())
 
-    def echo_detected_environment(self):
-        # type: () -> None
+    def echo_detected_environment(self) -> None:
         """Print a helper note about how the environment was determined."""
         self.env.log_name()
 
-    def get_session(self, profile=None, region=None):
+    def get_session(
+        self, profile: Optional[str] = None, region: Optional[str] = None
+    ) -> boto3.Session:
         """Create a thread-safe boto3 session.
 
         Args:
-            profile (Optional[str]): The profile for the session.
-            region (Optional[str]): The region for the session.
+            profile: The profile for the session.
+            region: The region for the session.
 
         Returns:
-            :class:`boto3.session.Session`: A thread-safe boto3 session.
+            A thread-safe boto3 session.
 
         """
         kwargs = {}
@@ -191,7 +191,7 @@ class Context:
         return get_session(region=region or self.env.aws_region, **kwargs)
 
     # TODO remove after IaC tools support AWS SSO
-    def __inject_profile_credentials(self):  # cov: ignore
+    def __inject_profile_credentials(self) -> None:  # cov: ignore
         """Inject AWS credentials into self.env_vars if using an AWS profile.
 
         This is to enable support of AWS SSO profiles until all IaC tools that

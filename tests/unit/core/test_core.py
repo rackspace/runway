@@ -1,11 +1,21 @@
 """Test runway.core."""
 # pylint: disable=no-self-use
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import pytest
-from mock import MagicMock, call, patch
+from mock import MagicMock, call
 
 from runway.core import Runway
+
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from _pytest.monkeypatch import MonkeyPatch
+    from pytest_mock import MockerFixture
+
+    from ..factories import MockRunwayConfig, MockRunwayContext
 
 MODULE = "runway.core"
 
@@ -13,9 +23,11 @@ MODULE = "runway.core"
 class TestRunway:
     """Test runway.core.Runway."""
 
-    def test_init(self, runway_config, runway_context):
+    def test_init(
+        self, runway_config: MockRunwayConfig, runway_context: MockRunwayContext
+    ) -> None:
         """Test init default values."""
-        result = Runway(runway_config, runway_context)
+        result = Runway(runway_config, runway_context)  # type: ignore
 
         assert result.deployments == runway_config.deployments
         assert result.future == runway_config.future
@@ -25,26 +37,40 @@ class TestRunway:
         assert result.ctx == runway_context
 
     def test_init_undetermined_version(
-        self, caplog, monkeypatch, runway_config, runway_context
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        monkeypatch: MonkeyPatch,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test init with unsupported version."""
         monkeypatch.setattr(MODULE + ".__version__", "0.1.0-dev1")
         caplog.set_level(logging.WARNING, logger=MODULE)
-        assert Runway(runway_config, runway_context)
+        assert Runway(runway_config, runway_context)  # type: ignore
         assert "shallow clone of the repo" in "\n".join(caplog.messages)
 
-    def test_init_unsupported_version(self, monkeypatch, runway_config, runway_context):
+    def test_init_unsupported_version(
+        self,
+        monkeypatch: MonkeyPatch,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test init with unsupported version."""
         monkeypatch.setattr(MODULE + ".__version__", "1.3")
         with pytest.raises(SystemExit) as excinfo:
-            assert not Runway(runway_config, runway_context)
+            assert not Runway(runway_config, runway_context)  # type: ignore
         assert excinfo.value.code == 1
 
-    @patch(MODULE + ".components.Deployment")
-    def test_deploy(self, mock_deployment, runway_config, runway_context):
+    def test_deploy(
+        self,
+        mocker: MockerFixture,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy."""
+        mock_deployment = mocker.patch(f"{MODULE}.components.Deployment")
         deployments = MagicMock()
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
 
         assert not obj.deploy()
         assert runway_context.command == "deploy"
@@ -64,15 +90,18 @@ class TestRunway:
             variables=runway_config.variables,
         )
 
-    @patch.object(Runway, "reverse_deployments")
-    @patch(MODULE + ".components.Deployment")
     def test_destroy(
-        self, mock_deployment, mock_reverse, runway_config, runway_context
-    ):
+        self,
+        mocker: MockerFixture,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test destroy."""
+        mock_deployment = mocker.patch(f"{MODULE}.components.Deployment")
+        mock_reverse = mocker.patch.object(Runway, "reverse_deployments")
         mock_reverse.return_value = "reversed"
         deployments = MagicMock()
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
 
         assert not obj.destroy(deployments)
         assert runway_context.command == "destroy"
@@ -93,29 +122,42 @@ class TestRunway:
             variables=runway_config.variables,
         )
         mock_reverse.assert_has_calls(
-            [call(runway_config.deployments), call(runway_config.deployments)]
+            [  # type: ignore
+                call(runway_config.deployments),
+                call(runway_config.deployments),
+            ]
         )
 
-    @patch(MODULE + ".components.Deployment")
-    def test_get_env_vars(self, mock_deployment, runway_config, runway_context):
+    def test_get_env_vars(
+        self,
+        mocker: MockerFixture,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test get_env_vars."""
+        mock_deployment = mocker.patch(f"{MODULE}.components.Deployment")
         mock_deployment.return_value = mock_deployment
         mock_deployment.env_vars_config = {"key": "val"}
         runway_config.deployments = ["deployment_1"]
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
 
-        assert obj.get_env_vars(runway_config.deployments) == {"key": "val"}
+        assert obj.get_env_vars(runway_config.deployments) == {"key": "val"}  # type: ignore
         mock_deployment.assert_called_once_with(
             context=runway_context,
             definition="deployment_1",
             variables=runway_config.variables,
         )
 
-    @patch(MODULE + ".components.Deployment")
-    def test_plan(self, mock_deployment, runway_config, runway_context):
+    def test_plan(
+        self,
+        mocker: MockerFixture,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test plan."""
+        mock_deployment = mocker.patch(f"{MODULE}.components.Deployment")
         deployments = MagicMock()
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
 
         assert not obj.plan()
         assert runway_context.command == "plan"
@@ -135,7 +177,7 @@ class TestRunway:
             variables=runway_config.variables,
         )
 
-    def test_reverse_deployments(self):
+    def test_reverse_deployments(self) -> None:
         """Test reverse_deployments."""
         deployment_1 = MagicMock(name="deployment_1")
         deployment_2 = MagicMock(name="deployment_2")
@@ -147,7 +189,13 @@ class TestRunway:
         deployment_1.reverse.assert_called_once_with()
         deployment_2.reverse.assert_called_once_with()
 
-    def test_test(self, caplog, monkeypatch, runway_config, runway_context):
+    def test_test(
+        self,
+        caplog: LogCaptureFixture,
+        monkeypatch: MonkeyPatch,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test test."""
         caplog.set_level(logging.ERROR, logger="runway")
         test_handlers = {
@@ -161,9 +209,12 @@ class TestRunway:
             "success": MagicMock(),
         }
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
 
-        obj.tests = [MagicMock(type="success"), MagicMock(type="fail_system_exit_0")]
+        obj.tests = [  # type: ignore
+            MagicMock(type="success"),
+            MagicMock(type="fail_system_exit_0"),
+        ]
         assert not obj.test()
         assert "the following tests failed" not in "\n".join(caplog.messages)
         test_handlers["success"].handle.assert_called_with(
@@ -179,7 +230,7 @@ class TestRunway:
             runway_context, variables=runway_config.variables
         )
 
-        obj.tests = [
+        obj.tests = [  # type: ignore
             MagicMock(type="fail_system_exit_1", required=False),
             MagicMock(type="fail_system_exit_0"),
         ]
@@ -196,7 +247,7 @@ class TestRunway:
         )
         caplog.clear()
 
-        obj.tests = [
+        obj.tests = [  # type: ignore
             MagicMock(type="exception", required=True),
             MagicMock(type="success"),
         ]
@@ -214,14 +265,20 @@ class TestRunway:
         )
         assert test_handlers["success"].handle.call_count == 1
 
-    def test_test_keyerror(self, caplog, monkeypatch, runway_config, runway_context):
+    def test_test_keyerror(
+        self,
+        caplog: LogCaptureFixture,
+        monkeypatch: MonkeyPatch,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test test with handler not found."""
         caplog.set_level(logging.ERROR, logger="runway")
         test_handlers = {}
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
 
-        obj.tests = [MagicMock(type="missing", required=True)]
+        obj.tests = [MagicMock(type="missing", required=True)]  # type: ignore
         obj.tests[0].name = "test"
         with pytest.raises(SystemExit) as excinfo:
             assert obj.test()
@@ -235,10 +292,15 @@ class TestRunway:
         assert excinfo.value.code == 1
         assert "the following tests failed: test" in caplog.messages
 
-    def test_test_no_tests(self, caplog, runway_config, runway_context):
+    def test_test_no_tests(
+        self,
+        caplog: LogCaptureFixture,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test test with no tests defined."""
         caplog.set_level(logging.ERROR, logger="runway")
-        obj = Runway(runway_config, runway_context)
+        obj = Runway(runway_config, runway_context)  # type: ignore
         obj.tests = []
         with pytest.raises(SystemExit) as excinfo:
             assert obj.test()

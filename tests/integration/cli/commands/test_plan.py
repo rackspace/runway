@@ -4,7 +4,10 @@ The below tests only cover the CLI.
 Runway's core logic has been mocked out to test on separately from the CLI.
 
 """
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
 from mock import patch
@@ -14,11 +17,21 @@ from runway.config import RunwayConfig
 from runway.context import Context
 from runway.core import Runway
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from _pytest.logging import LogCaptureFixture
+    from mock import MagicMock
+
+    from ...conftest import CpConfigTypeDef
+
 MODULE = "runway._cli.commands._plan"
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan(mock_runway, cd_tmp_path, cp_config):
+def test_plan(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan."""
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
@@ -35,7 +48,9 @@ def test_plan(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_options_ci(mock_runway, cd_tmp_path, cp_config):
+def test_plan_options_ci(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan option --ci."""
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
@@ -47,7 +62,9 @@ def test_plan_options_ci(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_options_deploy_environment(mock_runway, cd_tmp_path, cp_config):
+def test_plan_options_deploy_environment(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan option -e, --deploy-environment."""
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
@@ -64,7 +81,12 @@ def test_plan_options_deploy_environment(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_options_tag(mock_runway, caplog, cd_tmp_path, cp_config):
+def test_plan_options_tag(
+    mock_runway: MagicMock,
+    caplog: LogCaptureFixture,
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+) -> None:
     """Test plan option --tag."""
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.plan")
     cp_config("tagged_modules", cd_tmp_path)
@@ -93,7 +115,9 @@ def test_plan_options_tag(mock_runway, caplog, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_select_deployment(mock_runway, cd_tmp_path, cp_config):
+def test_plan_select_deployment(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan select from two deployments."""
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
@@ -106,7 +130,9 @@ def test_plan_select_deployment(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_select_deployment_all(mock_runway, cd_tmp_path, cp_config):
+def test_plan_select_deployment_all(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan select all deployments."""
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
@@ -121,7 +147,9 @@ def test_plan_select_deployment_all(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_select_module(mock_runway, cd_tmp_path, cp_config):
+def test_plan_select_module(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan select from two modules."""
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
@@ -134,7 +162,9 @@ def test_plan_select_module(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_select_module_all(mock_runway, cd_tmp_path, cp_config):
+def test_plan_select_module_all(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan select all modules."""
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
@@ -148,7 +178,9 @@ def test_plan_select_module_all(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_select_module_child_modules(mock_runway, cd_tmp_path, cp_config):
+def test_plan_select_module_child_modules(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan select child module."""
     cp_config("simple_child_modules.1", cd_tmp_path)
     runner = CliRunner()
@@ -161,7 +193,9 @@ def test_plan_select_module_child_modules(mock_runway, cd_tmp_path, cp_config):
 
 
 @patch(MODULE + ".Runway", spec=Runway, spec_set=True)
-def test_plan_select_module_child_modules_all(mock_runway, cd_tmp_path, cp_config):
+def test_plan_select_module_child_modules_all(
+    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+) -> None:
     """Test plan select all child module."""
     cp_config("simple_child_modules.1", cd_tmp_path)
     runner = CliRunner()

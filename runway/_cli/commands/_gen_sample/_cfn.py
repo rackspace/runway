@@ -1,14 +1,17 @@
 """``runway gen-sample cfn` command."""
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, copy_sample, write_tfstate_template
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("cfn", short_help="cfngin + cfn (sampleapp.cfn)")
@@ -16,8 +19,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def cfn(ctx, **_):
-    # type: (click.Context, Any) -> None
+def cfn(ctx: click.Context, **_: Any) -> None:
     """Generate a sample CFNgin project using CloudFormation."""
     src = TEMPLATES / "cfn"
     dest = Path.cwd() / "sampleapp.cfn"

@@ -5,34 +5,38 @@ function, and will be removed once this pull request is accepted:
 https://github.com/boto/boto/pull/3143
 
 """
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Union
+
+from typing_extensions import TypedDict
+
+if TYPE_CHECKING:
+    from mypy_boto3_ecs.type_defs import CreateClusterResponseTypeDef
+
+    from ..context import Context
 
 LOGGER = logging.getLogger(__name__)
 
 
-def create_clusters(context, *_, **kwargs):
+class CreateClustersResponseTypeDef(TypedDict):
+    """Response from create_clusters."""
+
+    clusters: Dict[str, CreateClusterResponseTypeDef]
+
+
+def create_clusters(
+    context: Context, *, clusters: Union[List[str], str], **_: Any
+) -> CreateClustersResponseTypeDef:
     """Create ECS clusters.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
-
-    Keyword Args:
-        clusters (List[str]): Names of clusters to create.
-
-
-    Returns:
-        bool: Whether or not the hook succeeded.
+        context: Context instance. (passed in by CFNgin)
+        clusters: Names of clusters to create.
 
     """
     conn = context.get_session().client("ecs")
-
-    try:
-        clusters = kwargs["clusters"]
-    except KeyError:
-        LOGGER.error("clusters argument required but not provided")
-        return False
-
     if isinstance(clusters, str):
         clusters = [clusters]
 

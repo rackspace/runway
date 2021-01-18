@@ -1,5 +1,7 @@
 """Docker hook_data object."""
-from typing import TYPE_CHECKING, Optional  # pylint: disable=W
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, overload
 
 from docker import DockerClient
 
@@ -13,16 +15,24 @@ if TYPE_CHECKING:
 class DockerHookData(MutableMap):
     """Docker hook_data object."""
 
-    image = None  # type: Optional["DockerImage"]
+    image: Optional["DockerImage"] = None
 
     @cached_property
-    def client(self):  # type: () -> DockerClient
-        """Docker client."""  # pylint: disable=no-self-use
+    def client(self) -> DockerClient:  # pylint: disable=no-self-use
+        """Docker client."""
         return DockerClient.from_env()
 
+    @overload
+    def update_context(self, context: Context = ...) -> DockerHookData:  # noqa
+        ...
+
+    @overload
+    def update_context(self, context: None = ...) -> None:  # noqa
+        ...
+
     def update_context(
-        self, context=None
-    ):  # type: (Optional["Context"]) -> Optional[DockerHookData]
+        self, context: Optional[Context] = None
+    ) -> Optional[DockerHookData]:
         """Update context object with new the current DockerHookData."""
         if not context:
             return None
@@ -30,9 +40,7 @@ class DockerHookData(MutableMap):
         return self
 
     @classmethod
-    def from_cfngin_context(
-        cls, context=None
-    ):  # type: (Optional["Context"]) -> DockerHookData
+    def from_cfngin_context(cls, context: Optional[Context] = None) -> DockerHookData:
         """Get existing object or create a new one."""
         if context and "docker" in context.hook_data:
             found = context.hook_data["docker"]

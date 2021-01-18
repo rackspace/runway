@@ -56,14 +56,16 @@ username (str)
           password: ${ecr login-password}
 
 """
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 from .data_models import BaseModel, ElasticContainerRegistry
 from .hook_data import DockerHookData
 
 if TYPE_CHECKING:
-    from ....context import Context
+    from ...context import Context
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -73,46 +75,48 @@ class LoginArgs(BaseModel):
 
     def __init__(
         self,
-        password,  # type: str
-        context=None,  # type: Optional["Context"]
-        dockercfg_path=None,  # type: Optional[str]
-        ecr=None,  # type: Optional[Union[bool, Dict[str, Optional[str]]]]
-        email=None,  # type: Optional[str]
-        registry=None,  # type: Optional[str]
-        username=None,  # type: Optional[str]
-    ):  # type: (...) -> None
+        *,
+        password: str,
+        context: Optional[Context] = None,
+        dockercfg_path: Optional[str] = None,
+        ecr: Optional[Union[bool, Dict[str, Optional[str]]]] = None,
+        email: Optional[str] = None,
+        registry: Optional[str] = None,
+        username: Optional[str] = None,
+        **_: Any
+    ) -> None:
         """Instantiate class."""
-        self._ctx = context
+        super().__init__(context=context)
         self.dockercfg_path = self._validate_str(dockercfg_path, optional=True)
         self.email = self._validate_str(email, optional=True)
-        self.password = self._validate_str(password, required=True)
+        self.password = cast(str, self._validate_str(password, required=True))
         self.registry = self.determine_registry(
             context=context, ecr=ecr, registry=registry
         )
         if not username:
-            self.username = (
-                "AWS" if ecr else self._validate_str(username, required=True)
+            self.username = cast(
+                str, ("AWS" if ecr else self._validate_str(username, required=True))
             )
         else:
-            self.username = self._validate_str(username, required=True)
+            self.username = cast(str, self._validate_str(username, required=True))
 
     @staticmethod
     def determine_registry(
-        context=None,  # type: Optional["Context"]
-        ecr=None,  # type: Optional[Union[bool, Dict[str, Optional[str]]]]
-        registry=None,  # type: Optional[str]
-    ):  # type: (...) -> Optional[str]
+        context: Optional[Context] = None,
+        ecr: Optional[Union[bool, Dict[str, Optional[str]]]] = None,
+        registry: Optional[str] = None,
+    ) -> Optional[str]:
         """Determine repository URI."""
         if registry:
             return registry
         if ecr:
             return ElasticContainerRegistry.parse_obj(
-                ecr if isinstance(ecr, dict) else {}, context=context
+                ecr if isinstance(ecr, dict) else {}, context=context  # type: ignore
             ).fqn
         return None
 
 
-def login(**kwargs):  # type: (Any) -> DockerHookData
+def login(*, context: Context, **kwargs: Any) -> DockerHookData:
     """Docker login hook.
 
     Replicates the functionality of ``docker login`` cli command.
@@ -129,8 +133,7 @@ def login(**kwargs):  # type: (Any) -> DockerHookData
         username (str): The registry username. Optional if supplying ``ecr``.
 
     """
-    context = kwargs.pop("context")  # type: "Context"
-    kwargs.pop("provider", None)  # not needed
+    kwargs.pop("provider", None)
     args = LoginArgs.parse_obj(kwargs, context=context)
     docker_hook_data = DockerHookData.from_cfngin_context(context)
     docker_hook_data.client.login(**args.dict())

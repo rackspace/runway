@@ -2,14 +2,17 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample, write_tfstate_template
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("k8s-tf-repo", short_help="k8s + tf (k8s-tf-infrastructure)")
@@ -17,8 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def k8s_tf_repo(ctx, **_):
-    # type: (click.Context, Any) -> None
+def k8s_tf_repo(ctx: click.Context, **_: Any) -> None:
     """Generate a sample Terraform project using Kubernetes."""
     src = TEMPLATES / "k8s-tf-repo"
     dest = Path.cwd() / "k8s-tf-infrastructure"

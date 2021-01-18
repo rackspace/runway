@@ -5,8 +5,10 @@ Allows us to specify specific remote sourced resources for out application
 
 """
 import logging
-import os
-from typing import Any
+from pathlib import Path
+from typing import Any, Union
+
+from ..constants import DEFAULT_CACHE_DIR
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ class Source:
     The Source parent class allows us to specify remote resources
     for our application via services such as Git or S3.  A cache
     directory, as part of object's configuration, is automatically
-    created by default in the users home directory: ``~/.runway_cache``.
+    created by default: ``./.runway/cache``.
     This folder can be overridden by specifying the ``cache_dir`` property
     in the configuration passed.
 
@@ -26,42 +28,36 @@ class Source:
 
     """
 
-    def __init__(self, cache_dir="", **_):
-        # type: (str, Any) -> None
+    cache_dir: Path
+
+    def __init__(self, *, cache_dir: Union[Path, str] = DEFAULT_CACHE_DIR, **_: Any):
         """Source.
 
-        Arguments:
-            cache_dir (str): The directory where the given remote resource
-                should be cached
+        Args:
+            cache_dir: The directory where the given remote resource should be
+                cached.
 
         """
-        self.cache_dir = cache_dir
-
-        if not self.cache_dir:
-            self.cache_dir = os.path.expanduser("~/.runway_cache")  # type: str
+        self.cache_dir = cache_dir if isinstance(cache_dir, Path) else Path(cache_dir)
 
         self.__create_cache_directory()
 
-    def fetch(self):
-        # type: () -> None
+    def fetch(self) -> Path:
         """Retrieve remote source. To be implemented in each subclass."""
         raise NotImplementedError
 
-    def __create_cache_directory(self):
-        # type: () -> None
+    def __create_cache_directory(self) -> None:
         """If no cache directory exists for the remote runway modules, create one."""
-        if not os.path.isdir(self.cache_dir):
-            os.mkdir(self.cache_dir)
+        self.cache_dir.mkdir(exist_ok=True, parents=True)
 
     @staticmethod
-    def sanitize_directory_path(uri):
-        # type: (str) -> str
+    def sanitize_directory_path(uri: str) -> str:
         """Sanitize a Source directory path string.
 
         Arguments:
-            uri (str): The uniform resource identifier when targetting a remote resource.
+            uri: The uniform resource identifier when targetting a remote resource.
 
         """
         for i in ["@", "/", ":"]:
-            uri = uri.replace(i, "_")  # type: str
+            uri = uri.replace(i, "_")
         return uri

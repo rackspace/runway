@@ -15,7 +15,18 @@ import warnings
 import zipfile
 from collections import OrderedDict
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    MutableMapping,
+    Optional,
+    Type,
+    Union,
+    overload,
+)
 
 import botocore.client
 import botocore.exceptions
@@ -28,17 +39,22 @@ from .awscli_yamlhelper import yaml_parse
 from .session_cache import get_session
 
 if TYPE_CHECKING:
+    from mypy_boto3_route53.client import Route53Client
+    from mypy_boto3_route53.type_defs import ResourceRecordSetTypeDef
+    from mypy_boto3_s3.client import S3Client
+
     from ..config.models.cfngin import (
         CfnginPackageSourcesDefinitionModel,
         GitCfnginPackageSourceDefinitionModel,
         LocalCfnginPackageSourceDefinitionModel,
         S3CfnginPackageSourceDefinitionModel,
     )
+    from .blueprints.base import Blueprint
 
 LOGGER = logging.getLogger(__name__)
 
 
-def camel_to_snake(name):
+def camel_to_snake(name: str) -> str:
     """Convert CamelCase to snake_case.
 
     Args:
@@ -52,34 +68,33 @@ def camel_to_snake(name):
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", sub_str_1).lower()
 
 
-def convert_class_name(kls):
+def convert_class_name(kls: type) -> str:
     """Get a string that represents a given class.
 
     Args:
-        kls (class): The class being analyzed for its name.
+        kls: The class being analyzed for its name.
 
     Returns:
-        str: The name of the given kls.
+        The name of the given kls.
 
     """
     return camel_to_snake(kls.__name__)
 
 
-def parse_zone_id(full_zone_id):
+def parse_zone_id(full_zone_id: str) -> str:
     """Parse the returned hosted zone id and returns only the ID itself."""
     return full_zone_id.split("/")[2]
 
 
-def get_hosted_zone_by_name(client, zone_name):
+def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> Optional[str]:
     """Get the zone id of an existing zone by name.
 
     Args:
-        client (:class:`botocore.client.Route53`): The connection used to
-            interact with Route53's API.
-        zone_name (str): The name of the DNS hosted zone to create.
+        client: The connection used to interact with Route53's API.
+        zone_name: The name of the DNS hosted zone to create.
 
     Returns:
-        str: The Id of the Hosted Zone.
+        The Id of the Hosted Zone.
 
     """
     paginator = client.get_paginator("list_hosted_zones")
@@ -91,16 +106,15 @@ def get_hosted_zone_by_name(client, zone_name):
     return None
 
 
-def get_or_create_hosted_zone(client, zone_name):
+def get_or_create_hosted_zone(client: Route53Client, zone_name: str) -> str:
     """Get the Id of an existing zone, or create it.
 
     Args:
-        client (:class:`botocore.client.Route53`): The connection used to
-            interact with Route53's API.
-        zone_name (str): The name of the DNS hosted zone to create.
+        client: The connection used to interact with Route53's API.
+        zone_name: The name of the DNS hosted zone to create.
 
     Returns:
-        str: The Id of the Hosted Zone.
+        The Id of the Hosted Zone.
 
     """
     zone_id = get_hosted_zone_by_name(client, zone_name)
@@ -116,10 +130,10 @@ def get_or_create_hosted_zone(client, zone_name):
     return parse_zone_id(response["HostedZone"]["Id"])
 
 
-class SOARecordText:  # pylint: disable=too-few-public-methods
+class SOARecordText:
     """Represents the actual body of an SOARecord."""
 
-    def __init__(self, record_text):
+    def __init__(self, record_text: str) -> None:
         """Instantiate class."""
         (
             self.nameserver,
@@ -131,7 +145,7 @@ class SOARecordText:  # pylint: disable=too-few-public-methods
             self.min_ttl,
         ) = record_text.split()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Contert an instance of this class to a string."""
         return "%s %s %s %s %s %s %s" % (
             self.nameserver,
@@ -144,28 +158,26 @@ class SOARecordText:  # pylint: disable=too-few-public-methods
         )
 
 
-class SOARecord:  # pylint: disable=too-few-public-methods
+class SOARecord:
     """Represents an SOA record."""
 
-    def __init__(self, record):
+    def __init__(self, record: ResourceRecordSetTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
         self.text = SOARecordText(record["ResourceRecords"][0]["Value"])
         self.ttl = record["TTL"]
 
 
-def get_soa_record(client, zone_id, zone_name):
+def get_soa_record(client: Route53Client, zone_id: str, zone_name: str) -> SOARecord:
     """Get the SOA record for zone_name from zone_id.
 
     Args:
-        client (:class:`boto3.client.Client`): The connection used to
-            interact with Route53's API.
-        zone_id (str): The AWS Route53 zone id of the hosted zone to query.
-        zone_name (str): The name of the DNS hosted zone to create.
+        client: The connection used to interact with Route53's API.
+        zone_id: The AWS Route53 zone id of the hosted zone to query.
+        zone_name: The name of the DNS hosted zone to create.
 
     Returns:
-        :class:`runway.cfngin.util.SOARecord`: An object representing the
-        parsed SOA record returned from AWS Route53.
+        An object representing the parsed SOA record returned from AWS Route53.
 
     """
     response = client.list_resource_record_sets(
@@ -177,19 +189,17 @@ def get_soa_record(client, zone_id, zone_name):
     return SOARecord(response["ResourceRecordSets"][0])
 
 
-def create_route53_zone(client, zone_name):
+def create_route53_zone(client: Route53Client, zone_name: str) -> str:
     """Create the given zone_name if it doesn't already exists.
 
     Also sets the SOA negative caching TTL to something short (300 seconds).
 
     Args:
-        client (:class:`boto3.client.Client`): The connection used to
-            interact with Route53's API.
-        zone_name (str): The name of the DNS hosted zone to create.
+        client: The connection used to interact with Route53's API.
+        zone_name: The name of the DNS hosted zone to create.
 
     Returns:
-        str: The zone id returned from AWS for the existing, or newly
-        created zone.
+        The zone id returned from AWS for the existing, or newly created zone.
 
     """
     if not zone_name.endswith("."):
@@ -224,7 +234,36 @@ def create_route53_zone(client, zone_name):
     return zone_id
 
 
-def merge_map(a, b):
+@overload
+def merge_map(
+    dict1: MutableMapping[Any, Any],
+    dict2: MutableMapping[Any, Any],
+    deep_merge: bool = True,
+) -> MutableMapping[str, Any]:
+    """Recursively merge elements of argument b into argument a.
+
+    Primarily used for merging two dictionaries together, where dict b takes
+    precedence over dict a. If 2 lists are provided, they are concatenated.
+
+    """
+    ...
+
+
+@overload
+def merge_map(dict1: List[Any], dict2: List[Any], deep_merge: bool = True) -> List[Any]:
+    """Recursively merge elements of argument b into argument a.
+
+    Primarily used for merging two dictionaries together, where dict b takes
+    precedence over dict a. If 2 lists are provided, they are concatenated.
+
+    """
+    ...
+
+
+def merge_map(
+    a: Union[MutableMapping[Any, Any], List[Any]],
+    b: Union[MutableMapping[Any, Any], List[Any]],
+) -> Union[MutableMapping[Any, Any], List[Any]]:
     """Recursively merge elements of argument b into argument a.
 
     Primarily used for merging two dictionaries together, where dict b takes
@@ -242,20 +281,19 @@ def merge_map(a, b):
     return a
 
 
-def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
+def yaml_to_ordered_dict(
+    stream: str,
+    loader: Union[Type[yaml.Loader], Type[yaml.SafeLoader]] = yaml.SafeLoader,
+) -> OrderedDict:
     """yaml.load alternative with preserved dictionary order.
 
     Args:
-        stream (str): YAML string to load.
-        loader (:class:`yaml.loader`): PyYAML loader class. Defaults to safe
-            load.
-
-    Returns:
-        OrderedDict: Parsed YAML.
+        stream: YAML string to load.
+        loader: PyYAML loader class. Defaults to safe load.
 
     """
 
-    class OrderedUniqueLoader(loader):
+    class OrderedUniqueLoader(loader):  # type: ignore
         """Subclasses the given pyYAML `loader` class.
 
         Validates all sibling keys to insure no duplicates.
@@ -271,7 +309,7 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
         NO_DUPE_CHILDREN = ["stacks"]
 
         @staticmethod
-        def _error_mapping_on_dupe(node, node_name):
+        def _error_mapping_on_dupe(node: Any, node_name: str) -> None:
             """Check mapping node for dupe children keys."""
             if isinstance(node, MappingNode):
                 mapping = {}
@@ -285,7 +323,7 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
                         )
                     mapping[a.value] = a
 
-        def _validate_mapping(self, node, deep=False):
+        def _validate_mapping(self, node: Any, deep: bool = False) -> OrderedDict:
             if not isinstance(node, MappingNode):
                 raise ConstructorError(
                     None,
@@ -318,13 +356,13 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
                 mapping[key] = value
             return mapping
 
-        def construct_mapping(self, node, deep=False):
+        def construct_mapping(self, node: Any, deep: bool = False) -> OrderedDict:
             """Override parent method to use OrderedDict."""
             if isinstance(node, MappingNode):
                 self.flatten_mapping(node)
             return self._validate_mapping(node, deep=deep)
 
-        def construct_yaml_map(self, node):
+        def construct_yaml_map(self, node: Any) -> Iterator[OrderedDict]:
             data = OrderedDict()
             yield data
             value = self.construct_mapping(node)
@@ -336,12 +374,12 @@ def yaml_to_ordered_dict(stream, loader=yaml.SafeLoader):
     return yaml.load(stream, OrderedUniqueLoader)
 
 
-def uppercase_first_letter(string_):
+def uppercase_first_letter(string_: str) -> str:
     """Return string with first character upper case."""
     return string_[0].upper() + string_[1:]
 
 
-def cf_safe_name(name):
+def cf_safe_name(name: str) -> str:
     """Convert a name to a safe string for a CloudFormation resource.
 
     Given a string, returns a name that is safe for use as a CloudFormation
@@ -350,10 +388,10 @@ def cf_safe_name(name):
     """
     alphanumeric = r"[a-zA-Z0-9]+"
     parts = re.findall(alphanumeric, name)
-    return "".join([uppercase_first_letter(part) for part in parts])
+    return "".join(uppercase_first_letter(part) for part in parts)
 
 
-def get_config_directory():
+def get_config_directory() -> str:
     """Return the directory the config file is located in.
 
     This enables us to use relative paths in config values.
@@ -373,7 +411,7 @@ def get_config_directory():
     return os.path.dirname(namespace.config.name)
 
 
-def read_value_from_path(value):
+def read_value_from_path(value: str) -> str:
     """Enable translators to read values from files.
 
     The value can be referred to with the `file://` prefix.
@@ -396,35 +434,33 @@ def read_value_from_path(value):
     return value
 
 
-def get_client_region(client):
-    """Get the region from a :class:`boto3.client.Client` object.
+def get_client_region(client: Any) -> str:
+    """Get the region from a boto3 client.
 
     Args:
-        client (:class:`boto3.client.Client`): The client to get the region
-            from.
+        client: The client to get the region from.
 
     Returns:
-        str: AWS region string.
+        AWS region string.
 
     """
-    return client._client_config.region_name
+    return client._client_config.region_name  # type: ignore
 
 
-def get_s3_endpoint(client):
-    """Get the s3 endpoint for the given :class:`boto3.client.Client` object.
+def get_s3_endpoint(client: Any) -> str:
+    """Get the s3 endpoint for the given boto3 client.
 
     Args:
-        client (:class:`boto3.client.Client`): The client to get the endpoint
-            from.
+        client: The client to get the endpoint from.
 
     Returns:
-        str: The AWS endpoint for the client.
+        The AWS endpoint for the client.
 
     """
-    return client._endpoint.host
+    return client._endpoint.host  # type: ignore
 
 
-def s3_bucket_location_constraint(region):
+def s3_bucket_location_constraint(region: Optional[str]) -> Optional[str]:
     """Return the appropriate LocationConstraint info for a new S3 bucket.
 
     When creating a bucket in a region OTHER than us-east-1, you need to
@@ -432,10 +468,10 @@ def s3_bucket_location_constraint(region):
     This function helps you determine the right value given a given client.
 
     Args:
-        region (str): The region where the bucket will be created in.
+        region: The region where the bucket will be created in.
 
     Returns:
-        str: The string to use with the given client for creating a bucket.
+        The string to use with the given client for creating a bucket.
 
     """
     if region == "us-east-1":
@@ -443,16 +479,20 @@ def s3_bucket_location_constraint(region):
     return region
 
 
-def ensure_s3_bucket(s3_client, bucket_name, bucket_region, persist_graph=False):
+def ensure_s3_bucket(
+    s3_client: S3Client,
+    bucket_name: str,
+    bucket_region: Optional[str] = None,
+    persist_graph: bool = False,
+) -> None:
     """Ensure an s3 bucket exists, if it does not then create it.
 
     Args:
-        s3_client (:class:`botocore.client.Client`): An s3 client used to
-            verify and create the bucket.
-        bucket_name (str): The bucket being checked/created.
-        bucket_region (str, optional): The region to create the bucket in. If
-            not provided, will be determined by s3_client's region.
-        persist_graph (bool): Check bucket for recommended settings.
+        s3_client: An s3 client used to verify and create the bucket.
+        bucket_name: The bucket being checked/created.
+        bucket_region: The region to create the bucket in.
+            If not provided, will be determined by s3_client's region.
+        persist_graph: Check bucket for recommended settings.
             If creating a new bucket, it will be created with recommended
             settings.
 
@@ -481,7 +521,7 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region, persist_graph=False)
             # can't use s3_client.exceptions.NoSuchBucket here.
             # it does not work if the bucket was recently deleted.
             LOGGER.debug("Creating bucket %s.", bucket_name)
-            create_args = {"Bucket": bucket_name}
+            create_args: Dict[str, Any] = {"Bucket": bucket_name}
             location_constraint = s3_bucket_location_constraint(bucket_region)
             if location_constraint:
                 create_args["CreateBucketConfiguration"] = {
@@ -504,13 +544,13 @@ def ensure_s3_bucket(s3_client, bucket_name, bucket_region, persist_graph=False)
         raise
 
 
-def parse_cloudformation_template(template):
+def parse_cloudformation_template(template: str) -> Any:
     """Parse CFN template string.
 
     Leverages the vendored aws-cli yamlhelper to handle JSON or YAML templates.
 
     Args:
-        template (str): The template body.
+        template: The template body.
 
     """
     return yaml_parse(template)
@@ -576,8 +616,9 @@ class ZipExtractor(Extractor):
 
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
-        with zipfile.ZipFile(self.archive, "r") as zip_ref:
-            zip_ref.extractall(destination)
+        if self.archive:
+            with zipfile.ZipFile(self.archive, "r") as zip_ref:
+                zip_ref.extractall(destination)
 
     @staticmethod
     def extension() -> str:
@@ -612,11 +653,11 @@ class SourceProcessor:
         self.configs_to_merge = []
         self.create_cache_directories()
 
-    def create_cache_directories(self) -> True:
+    def create_cache_directories(self) -> None:
         """Ensure that SourceProcessor cache directories exist."""
         self.package_cache_dir.mkdir(parents=True, exist_ok=True)
 
-    def get_package_sources(self):
+    def get_package_sources(self) -> None:
         """Make remote python packages available for local use."""
         # Checkout local modules
         for config in self.sources.local:
@@ -691,7 +732,7 @@ class SourceProcessor:
                     .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
                         "LastModified"
                     ]
-                    .astimezone(dateutil.tz.tzutc())
+                    .astimezone(dateutil.tz.tzutc())  # type: ignore
                 )
             except botocore.exceptions.ClientError as client_error:
                 LOGGER.error(
@@ -831,15 +872,12 @@ class SourceProcessor:
                 self.configs_to_merge.append(cached_dir_path / config_filename)
 
     @staticmethod
-    def git_ls_remote(uri, ref):
+    def git_ls_remote(uri: str, ref: str) -> str:
         """Determine the latest commit id for a given ref.
 
         Args:
-            uri (str): Git URI.
-            ref (str): Git ref.
-
-        Returns:
-            str: A commit id
+            uri: Git URI.
+            ref: Git ref.
 
         """
         LOGGER.debug("getting commit ID from repo: %s", " ".join(uri))
@@ -848,7 +886,9 @@ class SourceProcessor:
         if b"\t" in ls_remote_output:  # pylint: disable=unsupported-membership-test
             commit_id = ls_remote_output.split(b"\t")[0]
             LOGGER.debug("matching commit id found: %s", commit_id)
-            return commit_id
+            if isinstance(commit_id, str):
+                return commit_id
+            return commit_id.decode()
         raise ValueError('Ref "%s" not found for repo %s.' % (ref, uri))
 
     @staticmethod
@@ -877,41 +917,37 @@ class SourceProcessor:
 
         """
         if config.commit:
-            ref = config.commit
-        elif config.tag:
-            ref = config.tag
-        else:
-            ref = self.git_ls_remote(  # get a commit id to use
-                config.uri, self.determine_git_ls_remote_ref(config)
-            )
-        if isinstance(ref, bytes):
-            return ref.decode()
-        return ref
+            return config.commit
+        if config.tag:
+            return config.tag
+        return self.git_ls_remote(  # get a commit id to use
+            config.uri, self.determine_git_ls_remote_ref(config)
+        )
 
     @staticmethod
-    def sanitize_uri_path(uri):
+    def sanitize_uri_path(uri: str) -> str:
         """Take a URI and converts it to a directory safe path.
 
         Args:
-            uri (str): URI (e.g. http://example.com/cats).
+            uri: URI (e.g. http://example.com/cats).
 
         Returns:
-            str: Directory name for the supplied uri.
+            Directory name for the supplied uri.
 
         """
         for i in ["@", "/", ":"]:
             uri = uri.replace(i, "_")
         return uri
 
-    def sanitize_git_path(self, uri, ref=None):
+    def sanitize_git_path(self, uri: str, ref: Optional[str] = None) -> str:
         """Take a git URI and ref and converts it to a directory safe path.
 
         Args:
-            uri (str): Git URI. (e.g. ``git@github.com:foo/bar.git``)
-            ref (Optional[str]): Git ref to be appended to the path.
+            uri: Git URI. (e.g. ``git@github.com:foo/bar.git``)
+            ref: Git ref to be appended to the path.
 
         Returns:
-            str: Directory name for the supplied uri
+            Directory name for the supplied uri
 
         """
         if uri.endswith(".git"):
@@ -924,15 +960,14 @@ class SourceProcessor:
         return dir_name
 
 
-def stack_template_key_name(blueprint):
+def stack_template_key_name(blueprint: Blueprint) -> str:
     """Given a blueprint, produce an appropriate key name.
 
     Args:
-        blueprint (:class:`runway.cfngin.blueprints.base.Blueprint`): The
-            blueprint object to create the key from.
+        blueprint: The blueprint object to create the key from.
 
     Returns:
-        str: Key name resulting from blueprint.
+        Key name resulting from blueprint.
 
     """
     name = blueprint.name

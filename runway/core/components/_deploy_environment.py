@@ -1,13 +1,16 @@
 """Runway deploy environment object."""
+from __future__ import annotations
+
 import json
 import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 
 import click
 
+from ...type_defs import EnvVarsAwsCredentials
 from ...util import AWS_ENV_VARS, cached_property
 
 try:  # will raise an import error if git is not in the current path
@@ -17,11 +20,20 @@ except ImportError:  # cov: ignore
     git = object  # pylint: disable=invalid-name
     InvalidGitRepositoryError = AttributeError
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 class DeployEnvironment:
     """Runway deploy environment."""
+
+    __name: Optional[str]
+    _ignore_git_branch: bool
+
+    name_derived_from: Optional[str]
+    root_dir: Path
 
     def __init__(
         self,
@@ -34,55 +46,50 @@ class DeployEnvironment:
         """Instantiate class.
 
         Args:
-            environ (Optional[Dict[str, str]]): Environment variables.
-            explicit_name (Optional[str]): Explicitly provide the deploy
+            environ: Environment variables.
+            explicit_name: Explicitly provide the deploy environment name.
+            ignore_git_branch: Ignore the git branch when determining the deploy
                 environment name.
-            ignore_git_branch (bool): Ignore the git branch when determining
-                the deploy environment name.
-            root_dir (Optional[Path]): Root directory of the project.
+            root_dir: Root directory of the project.
 
         """
         self.__name = explicit_name
         self._ignore_git_branch = ignore_git_branch
         self.name_derived_from = "explicit" if self.__name else None
-        self.root_dir = root_dir if root_dir else Path.cwd()
+        self.root_dir = root_dir or Path.cwd()
         self.vars = environ or os.environ.copy()
 
     @property
-    def aws_credentials(self):
-        # type: () -> Dict[str, str]
+    def aws_credentials(self) -> EnvVarsAwsCredentials:
         """Get AWS credentials from environment variables."""
-        return {
-            name: self.vars.get(name) for name in AWS_ENV_VARS if self.vars.get(name)
-        }
+        return EnvVarsAwsCredentials(
+            **{name: self.vars[name] for name in AWS_ENV_VARS if self.vars.get(name)}
+        )
 
     @property
-    def aws_profile(self):
-        # type: () -> Optional[str]
+    def aws_profile(self) -> Optional[str]:
         """Get AWS profile from environment variables."""
         return self.vars.get("AWS_PROFILE")
 
     @aws_profile.setter
-    def aws_profile(self, profile_name):
-        # type: (str) -> None
+    def aws_profile(self, profile_name: str) -> None:
         """Set AWS profile in the environment."""
         self._update_vars({"AWS_PROFILE": profile_name})
 
     @property
-    def aws_region(self):
-        # type: () -> Optional[str]
+    def aws_region(self) -> str:
         """Get AWS region from environment variables."""
-        return self.vars.get("AWS_REGION", self.vars.get("AWS_DEFAULT_REGION"))
+        return self.vars.get(
+            "AWS_REGION", self.vars.get("AWS_DEFAULT_REGION", "us-east-1")
+        )
 
     @aws_region.setter
-    def aws_region(self, region):
-        # type: (str) -> None
+    def aws_region(self, region: str) -> None:
         """Set AWS region environment variables."""
         self._update_vars({"AWS_DEFAULT_REGION": region, "AWS_REGION": region})
 
     @cached_property
-    def branch_name(self):
-        # type: () -> Optional[str]
+    def branch_name(self) -> Optional[str]:
         """Git branch name."""
         if isinstance(git, type):
             LOGGER.debug(
@@ -92,7 +99,7 @@ class DeployEnvironment:
             return None
         try:
             LOGGER.debug("getting git branch name...")
-            return git.Repo(
+            return git.Repo(  # type: ignore
                 str(self.root_dir), search_parent_directories=True
             ).active_branch.name
         except TypeError:
@@ -110,8 +117,7 @@ class DeployEnvironment:
             return None
 
     @property
-    def ci(self):
-        # type: () -> bool
+    def ci(self) -> bool:
         """Return CI status.
 
         Returns:
@@ -121,23 +127,25 @@ class DeployEnvironment:
         return "CI" in self.vars
 
     @ci.setter
-    def ci(self, value):
-        # type: (Any) -> None
+    def ci(self, value: Any) -> None:
         """Set the value of CI."""
         if value:
             self._update_vars({"CI": "1"})
         else:
             self.vars.pop("CI", None)
 
+    @ci.deleter
+    def ci(self) -> None:
+        """Delete the value of CI."""
+        self.vars.pop("CI", None)
+
     @property
-    def debug(self):
-        # type: () -> bool
+    def debug(self) -> bool:
         """Get debug setting from the environment."""
         return "DEBUG" in self.vars
 
     @debug.setter
-    def debug(self, value):
-        # type: (Any) -> None
+    def debug(self, value: Any) -> None:
         """Set the value of DEBUG."""
         if value:
             self._update_vars({"DEBUG": "1"})
@@ -145,14 +153,12 @@ class DeployEnvironment:
             self.vars.pop("DEBUG", None)
 
     @property
-    def ignore_git_branch(self):
-        # type: () -> bool
+    def ignore_git_branch(self) -> bool:
         """Whether to ignore git branch when determining name."""
         return self._ignore_git_branch
 
     @ignore_git_branch.setter
-    def ignore_git_branch(self, value):
-        # type: (bool) -> None
+    def ignore_git_branch(self, value: bool) -> None:
         """Set the value of ignore_git_branch.
 
         Cached name is deleted when changing this value.
@@ -170,8 +176,7 @@ class DeployEnvironment:
                 pass  # it's fine if it does not exist yes
 
     @property
-    def max_concurrent_cfngin_stacks(self):
-        # type: () -> int
+    def max_concurrent_cfngin_stacks(self) -> int:
         """Max number of CFNgin stacks that can be deployed concurrently.
 
         This property can be set by exporting
@@ -179,20 +184,18 @@ class DeployEnvironment:
         value will be constrained based on the underlying graph.
 
         Returns:
-            int: Value from environment variable or ``0``.
+            Value from environment variable or ``0``.
 
         """
         return int(self.vars.get("RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS", "0"))
 
     @max_concurrent_cfngin_stacks.setter
-    def max_concurrent_cfngin_stacks(self, value):
-        # type: (Union[int, str]) -> None
+    def max_concurrent_cfngin_stacks(self, value: int) -> None:
         """Set RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS."""
-        self._update_vars({"RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS": value})
+        self._update_vars({"RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS": str(value)})
 
     @property
-    def max_concurrent_modules(self):
-        # type: () -> int
+    def max_concurrent_modules(self) -> int:
         """Max number of modules that can be deployed to concurrently.
 
         This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_MODULES``.
@@ -205,24 +208,22 @@ class DeployEnvironment:
         manually setting this value. (``parallel_regions * child_modules``)
 
         Returns:
-            int: Value from environment variable or ``min(61, os.cpu_count())``
+            Value from environment variable or ``min(61, os.cpu_count())``
 
         """
         value = self.vars.get("RUNWAY_MAX_CONCURRENT_MODULES")
 
         if value:
             return int(value)
-        return min(61, os.cpu_count())
+        return min(61, os.cpu_count() or 61)
 
     @max_concurrent_modules.setter
-    def max_concurrent_modules(self, value):
-        # type: (Union[int, str])-> None
+    def max_concurrent_modules(self, value: int) -> None:
         """Set RUNWAY_MAX_CONCURRENT_MODULES."""
-        self._update_vars({"RUNWAY_MAX_CONCURRENT_MODULES": value})
+        self._update_vars({"RUNWAY_MAX_CONCURRENT_MODULES": str(value)})
 
     @property
-    def max_concurrent_regions(self):
-        # type: () -> int
+    def max_concurrent_regions(self) -> int:
         """Max number of regions that can be deployed to concurrently.
 
         This property can be set by exporting ``RUNWAY_MAX_CONCURRENT_REGIONS``.
@@ -235,24 +236,22 @@ class DeployEnvironment:
         manually setting this value. (``parallel_regions * child_modules``)
 
         Returns:
-            int: Value from environment variable or ``min(61, os.cpu_count())``
+            Value from environment variable or ``min(61, os.cpu_count())``
 
         """
         value = self.vars.get("RUNWAY_MAX_CONCURRENT_REGIONS")
 
         if value:
             return int(value)
-        return min(61, os.cpu_count())
+        return min(61, os.cpu_count() or 61)
 
     @max_concurrent_regions.setter
-    def max_concurrent_regions(self, value):
-        # type: (Union[int, str]) -> None
+    def max_concurrent_regions(self, value: int) -> None:
         """Set RUNWAY_MAX_CONCURRENT_REGIONS."""
-        self._update_vars({"RUNWAY_MAX_CONCURRENT_REGIONS": value})
+        self._update_vars({"RUNWAY_MAX_CONCURRENT_REGIONS": str(value)})
 
     @cached_property
-    def name(self):
-        # type: () -> str
+    def name(self) -> str:
         """Deploy environment name."""
         if self.__name:
             name = self.__name
@@ -268,27 +267,26 @@ class DeployEnvironment:
                 name = self.root_dir.name[4:]
             else:
                 name = self.root_dir.name
+        if not name:
+            raise ValueError("could not determine deploy environment name")
         if self.vars.get("DEPLOY_ENVIRONMENT") != name:
             self._update_vars({"DEPLOY_ENVIRONMENT": name})
         return name
 
     @property
-    def verbose(self):
-        # type: () -> bool
+    def verbose(self) -> bool:
         """Get verbose setting from the environment."""
         return "VERBOSE" in self.vars
 
     @verbose.setter
-    def verbose(self, value):
-        # type: (Any) -> None
+    def verbose(self, value: Any) -> None:
         """Set the value of VERBOSE."""
         if value:
             self._update_vars({"VERBOSE": "1"})
         else:
             self.vars.pop("VERBOSE", None)
 
-    def copy(self):
-        # type: () -> DeployEnvironment
+    def copy(self) -> DeployEnvironment:
         """Copy the contents of this object into a new instance.
 
         Returns:
@@ -305,8 +303,7 @@ class DeployEnvironment:
         obj.name_derived_from = self.name_derived_from
         return obj
 
-    def log_name(self):
-        # type: () -> None
+    def log_name(self) -> None:
         """Output name to log."""
         name = self.name  # resolve if not already resolved
         if self.name_derived_from == "explicit":
@@ -336,8 +333,7 @@ class DeployEnvironment:
                 "override via the DEPLOY_ENVIRONMENT environment variable"
             )
 
-    def _parse_branch_name(self):
-        # type: () -> str
+    def _parse_branch_name(self) -> Optional[str]:
         """Parse branch name for use as deploy environment name."""
         if self.branch_name.startswith("ENV-"):
             LOGGER.verbose(
@@ -357,8 +353,7 @@ class DeployEnvironment:
             return result
         return self.branch_name
 
-    def _update_vars(self, env_vars):
-        # type: (Dict[str, str]) -> None
+    def _update_vars(self, env_vars: Dict[str, str]) -> None:
         """Update vars and log the change.
 
         Args:

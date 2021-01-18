@@ -4,19 +4,20 @@ Dependency pre-hook responsible for ensuring correct
 callback urls are retrieved or a temporary one is used in it's place.
 
 """
-# pylint: disable=unused-argument
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
     from ....cfngin.context import Context
-    from ....cfngin.providers.base import BaseProvider
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get(context, provider, **kwargs):
-    # type: (Context, BaseProvider, Optional[Dict[str, Any]]) -> Dict
+def get(
+    context: Context, *, stack_name: str, user_pool_arn: Optional[str] = None, **_: Any
+) -> Dict[str, Any]:
     """Retrieve the callback URLs for User Pool Client Creation.
 
     When the User Pool is created a Callback URL is required. During a post
@@ -26,33 +27,24 @@ def get(context, provider, **kwargs):
     interuption of service during deploy.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance.
-
-    Keyword Args:
-        user_pool_id (str): The ID of the User Pool to check for a client.
-        stack_name (str) The name of the stack to check against.
+        context: The context instance.
+        stack_name: The name of the stack to check against.
+        user_pool_arn: The ARN of the User Pool to check for a client.
 
     """
     session = context.get_session()
     cloudformation_client = session.client("cloudformation")
     cognito_client = session.client("cognito-idp")
 
-    context_dict = {}
-    context_dict["callback_urls"] = ["https://example.org"]
-
+    context_dict = {"callback_urls": ["https://example.org"]}
     try:
         # Return the current stack if one exists
-        stack_desc = cloudformation_client.describe_stacks(
-            StackName=kwargs["stack_name"]
-        )
+        stack_desc = cloudformation_client.describe_stacks(StackName=stack_name)
         # Get the client_id from the outputs
         outputs = stack_desc["Stacks"][0]["Outputs"]
 
-        if kwargs["user_pool_arn"]:
-            user_pool_id = kwargs["user_pool_arn"].split("/")[-1:][0]
+        if user_pool_arn:
+            user_pool_id = user_pool_arn.split("/")[-1:][0]
         else:
             user_pool_id = [
                 o["OutputValue"]

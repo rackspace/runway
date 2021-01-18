@@ -1,13 +1,21 @@
 """Test ``runway init`` command."""
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import yaml
 from click.testing import CliRunner
 
 from runway._cli import cli
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_init(cd_tmp_path, caplog):
+    from _pytest.logging import LogCaptureFixture
+
+
+def test_init(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway init`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -27,7 +35,7 @@ def test_init(cd_tmp_path, caplog):
     ]
 
 
-def test_init_file_exists(cd_tmp_path, caplog):
+def test_init_file_exists(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway init`` command with existing file."""
     caplog.set_level(logging.ERROR, logger="runway.cli")
     (cd_tmp_path / "runway.yml").touch()

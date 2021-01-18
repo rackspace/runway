@@ -1,15 +1,22 @@
 """Hook utils."""
+from __future__ import annotations
+
 import collections
 import logging
 import os
 import sys
 from types import FunctionType
-
-from runway.util import load_object_from_string
-from runway.variables import Variable, resolve_variables
+from typing import TYPE_CHECKING, List
 
 from ...exceptions import FailedVariableLookup
+from ...util import load_object_from_string
+from ...variables import Variable, resolve_variables
 from ..blueprints.base import Blueprint
+
+if TYPE_CHECKING:
+    from ...config.models.cfngin import CfnginHookDefinitionModel
+    from ..context import Context
+    from ..providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,18 +24,21 @@ LOGGER = logging.getLogger(__name__)
 class BlankBlueprint(Blueprint):
     """Blueprint that can be built programatically."""
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template without raising NotImplementedError."""
 
 
-def full_path(path):
+def full_path(path: str) -> str:
     """Return full path."""
     return os.path.abspath(os.path.expanduser(path))
 
 
 # TODO split up to reduce number of statements
 def handle_hooks(  # pylint: disable=too-many-statements
-    stage, hooks, provider, context
+    stage: str,
+    hooks: List[CfnginHookDefinitionModel],
+    provider: Provider,
+    context: Context,
 ):
     """Handle pre/post_build hooks.
 
@@ -36,12 +46,10 @@ def handle_hooks(  # pylint: disable=too-many-statements
     builds the stacks.
 
     Args:
-        stage (str): The current stage (pre_run, post_run, etc).
-        hooks (List[:class:`runway.config.models.cfngin.CfnginHookDefinitionModel`]):
-            Hooks to execute.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance.
-        context (:class:`runway.cfngin.context.Context`): Context instance.
+        stage: The current stage (pre_run, post_run, etc).
+        hooks: Hooks to execute.
+        provider: Provider instance.
+        context: Context instance.
 
     """
     if not hooks:
@@ -56,11 +64,8 @@ def handle_hooks(  # pylint: disable=too-many-statements
             raise ValueError("%s hook #%d missing path." % (stage, i))
 
     LOGGER.info("executing %s hooks: %s", stage, ", ".join(hook_paths))
-    stage = stage.replace("build", "deploy")  # TODO remove after full rename
+    stage = stage.replace("build", "deploy")
     for hook in hooks:
-        data_key = hook.data_key
-        required = hook.required
-
         if not hook.enabled:
             LOGGER.debug("hook with method %s is disabled; skipping", hook.path)
             continue
@@ -69,7 +74,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
             method = load_object_from_string(hook.path, try_reload=True)
         except (AttributeError, ImportError):
             LOGGER.exception("unable to load method at %s", hook.path)
-            if required:
+            if hook.required:
                 raise
             continue
 
@@ -100,12 +105,12 @@ def handle_hooks(  # pylint: disable=too-many-statements
                 )()
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("method %s threw an exception", hook.path)
-            if required:
+            if hook.required:
                 raise
             continue
 
         if not result:
-            if required:
+            if hook.required:
                 LOGGER.error(
                     "required hook %s failed; return value: %s", hook.path, result
                 )
@@ -115,13 +120,13 @@ def handle_hooks(  # pylint: disable=too-many-statements
             )
         else:
             if isinstance(result, collections.Mapping):
-                if data_key:
+                if hook.data_key:
                     LOGGER.debug(
                         "adding result for hook %s to context in data_key %s",
                         hook.path,
-                        data_key,
+                        hook.data_key,
                     )
-                    context.set_hook_data(data_key, result)
+                    context.set_hook_data(hook.data_key, result)
                 else:
                     LOGGER.debug(
                         "hook %s returned result data but no data key set; ignoring",

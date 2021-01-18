@@ -4,12 +4,13 @@ from __future__ import annotations
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 import yaml as _yaml
 
 from .. import __version__
 from .._logging import PrefixAdaptor as _PrefixAdaptor
+from .._logging import RunwayLogger as _RunwayLogger
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
 from ..util import DOC_SITE
 from ..util import YamlDumper as _YamlDumper
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     from ..config.components.runway import RunwayDeploymentDefinition
     from ..context import Context
 
-LOGGER = _logging.getLogger(__name__)
+LOGGER = cast(_RunwayLogger, _logging.getLogger(__name__))
 
 __all__ = ["Runway", "components", "providers"]
 
@@ -46,8 +47,9 @@ class Runway:
         self.__assert_config_version()
         self.ctx.env.log_name()
 
-    def deploy(self, deployments=None):
-        # type: (Optional[List[RunwayDeploymentDefinition]]) -> None
+    def deploy(
+        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
+    ) -> None:
         """Deploy action.
 
         Args:
@@ -59,8 +61,9 @@ class Runway:
             "deploy", deployments if deployments is not None else self.deployments
         )
 
-    def destroy(self, deployments=None):
-        # type: (Optional[List[RunwayDeploymentDefinition]]) -> None
+    def destroy(
+        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
+    ) -> None:
         """Destroy action.
 
         Args:
@@ -78,8 +81,9 @@ class Runway:
             # return config attribute to original state
             self.reverse_deployments(self.deployments)
 
-    def get_env_vars(self, deployments=None):
-        # type: (Optional[List[RunwayDeploymentDefinition]]) -> Dict[str, Any]
+    def get_env_vars(
+        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
+    ) -> Dict[str, Any]:
         """Get env_vars defined in the config.
 
         Args:
@@ -98,8 +102,9 @@ class Runway:
             result.update(obj.env_vars_config)
         return result
 
-    def plan(self, deployments=None):
-        # type: (Optional[List[RunwayDeploymentDefinition]]) -> None
+    def plan(
+        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
+    ) -> None:
         """Plan action.
 
         Args:
@@ -112,8 +117,9 @@ class Runway:
         )
 
     @staticmethod
-    def reverse_deployments(deployments):
-        # type: (List[RunwayDeploymentDefinition]) -> List[RunwayDeploymentDefinition]
+    def reverse_deployments(
+        deployments: List[RunwayDeploymentDefinition],
+    ) -> List[RunwayDeploymentDefinition]:
         """Reverse deployments and the modules within them.
 
         Args:
@@ -129,7 +135,7 @@ class Runway:
             result.insert(0, deployment)
         return result
 
-    def test(self):
+    def test(self) -> None:
         """Run tests defined in the config."""
         if not self.tests:
             LOGGER.error("no tests defined in runway.yml")
@@ -219,8 +225,9 @@ class Runway:
         )
         _sys.exit(1)
 
-    def __run_action(self, action, deployments):
-        # type: (str, Optional[List[RunwayDeploymentDefinition]]) -> None
+    def __run_action(
+        self, action: str, deployments: Optional[List[RunwayDeploymentDefinition]]
+    ) -> None:
         """Run an action on a list of deployments.
 
         Args:
@@ -232,7 +239,7 @@ class Runway:
         components.Deployment.run_list(
             action=action,
             context=self.ctx,
-            deployments=deployments,
+            deployments=deployments or [],
             future=self.future,
             variables=self.variables,
         )

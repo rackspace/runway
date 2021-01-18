@@ -1,6 +1,7 @@
 """Runway CLI logging setup."""
 import logging
 import os
+from typing import Any, Dict
 
 import coloredlogs
 
@@ -44,13 +45,15 @@ class LogSettings:
         "level_styles": os.getenv("RUNWAY_LOG_LEVEL_STYLES"),
     }
 
-    def __init__(self, debug=0, no_color=False, verbose=False):
+    def __init__(
+        self, *, debug: int = 0, no_color: bool = False, verbose: bool = False
+    ):
         """Instantiate class.
 
         Args:
-            debug (int): Debug level.
-            no_color (bool): Disable color in Runway's logs.
-            verbose (bool): Whether to display verbose logs.
+            debug: Debug level.
+            no_color: Disable color in Runway's logs.
+            verbose: Whether to display verbose logs.
 
         """
         self.debug = debug
@@ -58,13 +61,8 @@ class LogSettings:
         self.verbose = verbose
 
     @property
-    def coloredlogs(self):
-        """Return settings for coloredlogs.
-
-        Returns:
-            Dict[str, Any]
-
-        """
+    def coloredlogs(self) -> Dict[str, Any]:
+        """Return settings for coloredlogs."""
         return {
             "fmt": self.fmt,
             "field_styles": self.field_styles,
@@ -72,30 +70,25 @@ class LogSettings:
         }
 
     @cached_property
-    def fmt(self):
+    def fmt(self) -> str:
         """Return log record format.
 
         If "RUNWAY_LOG_FORMAT" exists in the environment, it will be used.
 
-        Returns:
-            str
-
         """
-        if self.ENV["fmt"]:
-            return self.ENV["fmt"]
+        fmt = self.ENV["fmt"]
+        if isinstance(fmt, str):
+            return fmt
         if self.debug or self.no_color or self.verbose:
             return LOG_FORMAT_VERBOSE
         return LOG_FORMAT
 
     @cached_property
-    def field_styles(self):
+    def field_styles(self) -> Dict[str, Any]:
         """Return log field styles.
 
         If "RUNWAY_LOG_FIELD_STYLES" exists in the environment, it will be
         used to update the Runway LOG_FIELD_STYLES.
-
-        Returns:
-            Dict[str, Any]
 
         """
         if self.no_color:
@@ -107,14 +100,11 @@ class LogSettings:
         return result
 
     @cached_property
-    def level_styles(self):
+    def level_styles(self) -> Dict[str, Any]:
         """Return log level styles.
 
         If "RUNWAY_LOG_LEVEL_STYLES" exists in the environment, it will be
         used to update the Runway LOG_LEVEL_STYLES.
-
-        Returns:
-            Dict[str, Any]
 
         """
         if self.no_color:
@@ -126,13 +116,8 @@ class LogSettings:
         return result
 
     @cached_property
-    def log_level(self):
-        """Return log level to use.
-
-        Returns:
-            LogLevel
-
-        """
+    def log_level(self) -> LogLevels:
+        """Return log level to use."""
         if self.debug:
             return LogLevels.DEBUG
         if self.verbose:
@@ -140,13 +125,15 @@ class LogSettings:
         return LogLevels.INFO
 
 
-def setup_logging(*, debug=0, no_color=False, verbose=False):
+def setup_logging(
+    *, debug: int = 0, no_color: bool = False, verbose: bool = False
+) -> None:
     """Configure log settings for Runway CLI.
 
     Keyword Args:
-        debug (int): Debug level (0-2).
-        no_color (bool): Whether to use colorized logs.
-        verbose (bool): Use verbose logging.
+        debug: Debug level (0-2).
+        no_color: Whether to use colorized logs.
+        verbose: Use verbose logging.
 
     """
     settings = LogSettings(debug=debug, no_color=no_color, verbose=verbose)

@@ -7,7 +7,7 @@ from runway.cfngin.commands import Stacker
 class TestStacker(unittest.TestCase):
     """Tests for runway.cfngin.stacker.Stacker."""
 
-    def test_stacker_build_parse_args(self):
+    def test_stacker_build_parse_args(self) -> None:
         """Test stacker build parse args."""
         stacker = Stacker()
         args = stacker.parse_args(
@@ -26,7 +26,7 @@ class TestStacker(unittest.TestCase):
         # verify namespace was modified
         self.assertEqual(args.environment["namespace"], "test.override")
 
-    def test_stacker_build_parse_args_region_from_env(self):
+    def test_stacker_build_parse_args_region_from_env(self) -> None:
         """Test stacker build parse args region from env."""
         stacker = Stacker()
         args = stacker.parse_args(
@@ -40,7 +40,7 @@ class TestStacker(unittest.TestCase):
         )
         self.assertEqual(args.region, None)
 
-    def test_stacker_build_context_passed_to_blueprint(self):
+    def test_stacker_build_context_passed_to_blueprint(self) -> None:
         """Test stacker build context passed to blueprint."""
         stacker = Stacker()
         args = stacker.parse_args(
@@ -64,7 +64,7 @@ class TestStacker(unittest.TestCase):
         self.assertNotIn("AZCount", blueprint.template.parameters)
         self.assertNotIn("CidrBlock", blueprint.template.parameters)
 
-    def test_stacker_blueprint_property_access_does_not_reset_blueprint(self):
+    def test_stacker_blueprint_property_access_does_not_reset_blueprint(self) -> None:
         """Test stacker blueprint property access does not reset blueprint."""
         stacker = Stacker()
         args = stacker.parse_args(
@@ -82,7 +82,7 @@ class TestStacker(unittest.TestCase):
         bastion_stack.blueprint.render_template()
         self.assertIn("DefaultSG", bastion_stack.blueprint.template.parameters)
 
-    def test_stacker_build_context_stack_names_specified(self):
+    def test_stacker_build_context_stack_names_specified(self) -> None:
         """Test stacker build context stack names specified."""
         stacker = Stacker()
         args = stacker.parse_args(
@@ -102,7 +102,7 @@ class TestStacker(unittest.TestCase):
         stacks = args.context.get_stacks()
         self.assertEqual(len(stacks), 2)
 
-    def test_stacker_build_custom_info_log_format(self):
+    def test_stacker_build_custom_info_log_format(self) -> None:
         """Test stacker build custom info log format."""
         stacker = Stacker()
         args = stacker.parse_args(

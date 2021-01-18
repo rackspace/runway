@@ -1,9 +1,11 @@
 """Pytest fixtures and plugins."""
 # pylint: disable=redefined-outer-name
+from __future__ import annotations
+
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Dict, Iterator, cast
 
 import pytest
 import yaml
@@ -16,27 +18,30 @@ from .factories import (
     MockRunwayConfig,
     MockRunwayContext,
     YamlLoader,
-    YamlLoaderDeploymet,
+    YamlLoaderDeployment,
 )
 from .mock_docker.fake_api_client import make_fake_client
 
 if TYPE_CHECKING:
+    from _pytest.config import Config
+    from _pytest.fixtures import FixtureRequest
+    from _pytest.monkeypatch import MonkeyPatch
     from docker import DockerClient
 
 LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
 
 
-def pytest_ignore_collect(path, config):  # pylint: disable=unused-argument
+# pylint: disable=unused-argument
+def pytest_ignore_collect(path: Any, config: Config) -> bool:
     """Determine if this directory should have its tests collected."""
     if config.option.functional:
         return True
-    return config.option.integration_only
+    return cast(bool, config.option.integration_only)
 
 
 @pytest.fixture(scope="session", autouse=True)
-def aws_credentials():
-    # type: () -> Dict[str, str]
+def aws_credentials() -> Iterator[None]:
     """Handle change in https://github.com/spulec/moto/issues/1924.
 
     Ensure AWS SDK finds some (bogus) credentials in the environment and
@@ -67,14 +72,13 @@ def aws_credentials():
 
 
 @pytest.fixture(scope="package")
-def fixture_dir():
-    # type: () -> str
+def fixture_dir() -> str:
     """Path to the fixture directory."""
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), "fixtures")
 
 
 @pytest.fixture(scope="module")
-def fx_config():
+def fx_config() -> YamlLoader:
     """Return YAML loader for config fixtures."""
     return YamlLoader(
         TEST_ROOT.parent / "fixtures" / "configs",
@@ -84,19 +88,19 @@ def fx_config():
 
 
 @pytest.fixture(scope="function")
-def fx_deployments():
+def fx_deployments() -> YamlLoaderDeployment:
     """Return YAML loader for deployment fixtures."""
-    return YamlLoaderDeploymet(TEST_ROOT / "fixtures" / "deployments")
+    return YamlLoaderDeployment(TEST_ROOT / "fixtures" / "deployments")
 
 
 @pytest.fixture(scope="function")
-def mock_docker_client():  # type: () -> "DockerClient"
+def mock_docker_client() -> DockerClient:
     """Create a docker client with mock API backend."""
     return make_fake_client()
 
 
 @pytest.fixture(scope="module")
-def yaml_fixtures(request, fixture_dir):
+def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
     """Load test fixture yaml files.
 
     Uses a list of file paths within the fixture directory loaded from the
@@ -113,7 +117,7 @@ def yaml_fixtures(request, fixture_dir):
 
 
 @pytest.fixture(scope="function")
-def cfngin_context(runway_context):
+def cfngin_context(runway_context: MockRunwayContext) -> MockCFNginContext:
     """Create a mock CFNgin context object."""
     return MockCFNginContext(
         environment={},
@@ -123,25 +127,27 @@ def cfngin_context(runway_context):
 
 
 @pytest.fixture
-def patch_time(monkeypatch):
+def patch_time(monkeypatch: MonkeyPatch) -> None:
     """Patch built-in time object."""
     monkeypatch.setattr("time.sleep", lambda s: None)
 
 
 @pytest.fixture
-def platform_darwin(monkeypatch):
+def platform_darwin(monkeypatch: MonkeyPatch) -> None:
     """Patch platform.system to always return "Darwin"."""
     monkeypatch.setattr("platform.system", lambda: "Darwin")
 
 
 @pytest.fixture
-def platform_windows(monkeypatch):
+def platform_windows(monkeypatch: MonkeyPatch) -> None:
     """Patch platform.system to always return "Windows"."""
     monkeypatch.setattr("platform.system", lambda: "Windows")
 
 
 @pytest.fixture(scope="function")
-def patch_runway_config(request, monkeypatch, runway_config):
+def patch_runway_config(
+    request: FixtureRequest, monkeypatch: MonkeyPatch, runway_config: MockRunwayConfig
+) -> MockRunwayConfig:
     """Patch Runway config and return a mock config object."""
     patch_path = getattr(request.module, "PATCH_RUNWAY_CONFIG", None)
     if patch_path:
@@ -150,13 +156,13 @@ def patch_runway_config(request, monkeypatch, runway_config):
 
 
 @pytest.fixture(scope="function")
-def runway_config():
+def runway_config() -> MockRunwayConfig:
     """Create a mock runway config object."""
     return MockRunwayConfig()
 
 
 @pytest.fixture(scope="function")
-def runway_context(request):
+def runway_context(request: FixtureRequest) -> MockRunwayContext:
     """Create a mock Runway context object."""
     env_vars = {
         "AWS_REGION": getattr(request.module, "AWS_REGION", "us-east-1"),

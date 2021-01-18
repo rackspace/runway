@@ -1,6 +1,9 @@
 """AWS IAM hook."""
+from __future__ import annotations
+
 import copy
 import logging
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 from awacs import ecs
 from awacs.aws import Allow, Policy, Statement
@@ -9,27 +12,29 @@ from botocore.exceptions import ClientError
 
 from . import utils
 
+if TYPE_CHECKING:
+    from mypy_boto3_iam.type_defs import (
+        GetServerCertificateResponseTypeDef,
+        UploadServerCertificateResponseTypeDef,
+    )
+
+    from ..context import Context
+
 LOGGER = logging.getLogger(__name__)
 
 
-def create_ecs_service_role(context, *_, **kwargs):
+def create_ecs_service_role(
+    context: Context, *, role_name: str = "ecsServiceRole", **_: Any
+) -> bool:
     """Create ecsServieRole, which has to be named exactly that currently.
 
     http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
-
-    Keyword Args:
-        role_name (str): Name of the role to create.
-            (*default: ecsServiceRole*)
-
-    Returns:
-        bool: Whether or not the hook succeeded.
+        context: Context instance. (passed in by CFNgin)
+        role_name: Name of the role to create.
 
     """
-    role_name = kwargs.get("role_name", "ecsServiceRole")
     client = context.get_session().client("iam")
 
     try:
@@ -38,11 +43,8 @@ def create_ecs_service_role(context, *_, **kwargs):
             AssumeRolePolicyDocument=get_ecs_assumerole_policy().to_json(),
         )
     except ClientError as err:
-        if "already exists" in str(err):
-            pass
-        else:
+        if "already exists" not in str(err):
             raise
-
     policy = Policy(
         Version="2012-10-17",
         Statement=[
@@ -67,26 +69,28 @@ def create_ecs_service_role(context, *_, **kwargs):
     return True
 
 
-def _get_cert_arn_from_response(response):
+def _get_cert_arn_from_response(
+    response: Union[
+        GetServerCertificateResponseTypeDef, UploadServerCertificateResponseTypeDef
+    ]
+) -> str:
     result = copy.deepcopy(response)
     # GET response returns this extra key
     if "ServerCertificate" in response:
-        result = response["ServerCertificate"]
-    return result["ServerCertificateMetadata"]["Arn"]
+        return response["ServerCertificate"]["ServerCertificateMetadata"]["Arn"]
+    return result["ServerCertificateMetadata"]["Arn"]  # type: ignore
 
 
-def _get_cert_contents(kwargs):
+def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Build parameters with server cert file contents.
 
     Args:
-        kwargs (Dict[str, Any]): The keyword args passed to
-            ensure_server_cert_exists, optionally containing the paths to the
-            cert, key and chain files.
+        kwargs: The keyword args passed to ensure_server_cert_exists, optionally
+            containing the paths to the cert, key and chain files.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the appropriate parameters
-            to supply to upload_server_certificate. An empty dictionary if
-            there is a problem.
+        A dictionary containing the appropriate parameters to supply to
+        upload_server_certificate. An empty dictionary if there is a problem.
 
     """
     paths = {
@@ -130,25 +134,24 @@ def _get_cert_contents(kwargs):
     return parameters
 
 
-def ensure_server_cert_exists(context, **kwargs):
+def ensure_server_cert_exists(
+    context: Context, *, cert_name: str, prompt: bool = True, **kwargs: Any
+) -> Dict[str, str]:
     """Ensure server cert exists.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
+        context: Context instance. (passed in by CFNgin)
 
     Keyword Args:
-        cert_name (str): Name of the certificate that should exist.
-        prompt (bool): Whether to prompt to upload a certificate if one does
-            not exist. (*default:* ``True``)
+        cert_name : Name of the certificate that should exist.
+        prompt: Whether to prompt to upload a certificate if one does not exist.
+        (*default:* ``True``)
 
     Returns:
-        Dict[str, str]: Dict containing ``status``, ``cert_name``, and
-            ``cert_arn``.
+        Dict containing ``status``, ``cert_name``, and ``cert_arn``.
 
     """
     client = context.get_session().client("iam")
-    cert_name = kwargs["cert_name"]
     status = "unknown"
     try:
         response = client.get_server_certificate(ServerCertificateName=cert_name)
@@ -156,16 +159,16 @@ def ensure_server_cert_exists(context, **kwargs):
         status = "exists"
         LOGGER.info("certificate exists: %s (%s)", cert_name, cert_arn)
     except ClientError:
-        if kwargs.get("prompt", True):
+        if prompt:
             upload = input(
                 "Certificate '%s' wasn't found. Upload it now? (yes/no) " % (cert_name,)
             )
             if upload != "yes":
-                return False
+                return {}
 
         parameters = _get_cert_contents(kwargs)
         if not parameters:
-            return False
+            return {}
         response = client.upload_server_certificate(**parameters)
         cert_arn = _get_cert_arn_from_response(response)
         status = "uploaded"

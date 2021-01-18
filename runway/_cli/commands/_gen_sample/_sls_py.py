@@ -1,14 +1,17 @@
 """``runway gen-sample sls-py`` command."""
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
 
-LOGGER = logging.getLogger(__name__.replace("._", "."))
+if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("sls-py", short_help="sls + python (sampleapp.sls)")
@@ -16,8 +19,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def sls_py(ctx, **_):
-    # type: (click.Context, Any) -> None
+def sls_py(ctx: click.Context, **_: Any) -> None:
     """Generate a sample Serverless project using python."""
     src = TEMPLATES / "sls-py"
     dest = Path.cwd() / "sampleapp.sls"

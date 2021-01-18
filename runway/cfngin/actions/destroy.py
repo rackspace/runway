@@ -1,5 +1,8 @@
 """CFNgin destroy action."""
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from ..exceptions import StackDoesNotExist
 from ..hooks.utils import handle_hooks
@@ -7,6 +10,10 @@ from ..status import INTERRUPTED, PENDING, SUBMITTED, CompleteStatus
 from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from ..status import SubmittedStatus
 from .base import STACK_POLL_TIME, BaseAction, build_walker
+
+if TYPE_CHECKING:
+    from ..stack import Stack
+    from ..status import Status
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,13 +38,14 @@ class Action(BaseAction):
     NAME = "destroy"
 
     @property
-    def _stack_action(self):
+    def _stack_action(self) -> Callable[..., Status]:
         """Run against a step."""
         return self._destroy_stack
 
-    def _destroy_stack(self, stack, **kwargs):
-        old_status = kwargs.get("status")
-        wait_time = 0 if old_status is PENDING else STACK_POLL_TIME
+    def _destroy_stack(
+        self, stack: Stack, *, status: Optional[Status], **_: Any
+    ) -> Status:
+        wait_time = 0 if status is PENDING else STACK_POLL_TIME
         if self.cancel.wait(wait_time):
             return INTERRUPTED
 
@@ -50,7 +58,7 @@ class Action(BaseAction):
             # Once the stack has been destroyed, it doesn't exist. If the
             # status of the step was SUBMITTED, we know we just deleted it,
             # otherwise it should be skipped
-            if kwargs.get("status", None) == SUBMITTED:
+            if status == SUBMITTED:
                 return DESTROYED_STATUS
             return StackDoesNotExistStatus()
 
@@ -78,19 +86,21 @@ class Action(BaseAction):
                 context=self.context,
             )
 
-    def run(self, **kwargs):
+    def run(  # pylint: disable=arguments-differ
+        self, *, concurrency: int = 0, force: bool = False, tail: bool = False, **_: Any
+    ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
         plan = self._generate_plan(
-            tail=kwargs.get("tail"), reverse=True, include_persistent_graph=True
+            tail=tail, reverse=True, include_persistent_graph=True
         )
         if not plan.keys():
             LOGGER.warning("no stacks detected (error in config?)")
-        if kwargs.get("force", False):
+        if force:
             # need to generate a new plan to log since the outline sets the
             # steps to COMPLETE in order to log them
             plan.outline(logging.DEBUG)
             self.context.lock_persistent_graph(plan.lock_code)
-            walker = build_walker(kwargs.get("concurrency", 0))
+            walker = build_walker(concurrency)
             try:
                 plan.execute(walker)
             finally:
@@ -98,13 +108,14 @@ class Action(BaseAction):
         else:
             plan.outline(message='To execute this plan, run with --force" flag.')
 
-    def post_run(self, **kwargs):
+    def post_run(  # pylint: disable=arguments-differ
+        self, *, outline: bool = False, **_: Any
+    ) -> None:
         """Any steps that need to be taken after running the action."""
-        post_destroy = self.context.config.post_destroy
-        if not kwargs.get("outline") and post_destroy:
+        if not outline and self.context.config.post_destroy:
             handle_hooks(
                 stage="post_destroy",
-                hooks=post_destroy,
+                hooks=self.context.config.post_destroy,
                 provider=self.provider,
                 context=self.context,
             )

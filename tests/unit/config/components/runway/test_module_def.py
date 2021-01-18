@@ -37,17 +37,20 @@ class TestRunwayModuleDefinition:
         """Test child_modules.setter not a list."""
         obj = RunwayModuleDefinition.parse_obj({"path": "./"})
         with pytest.raises(TypeError):
-            obj.child_modules = "invalid"
+            obj.child_modules = "invalid"  # type: ignore
         with pytest.raises(TypeError):
-            obj.child_modules = {"key": "val"}
+            obj.child_modules = {"key": "val"}  # type: ignore
         with pytest.raises(TypeError):
-            obj.child_modules = None
+            obj.child_modules = None  # type: ignore
 
     def test_child_modules_setter_invalid_list_item(self) -> None:
         """Test child_modules.setter when list item is now supported."""
         with pytest.raises(TypeError):
             obj = RunwayModuleDefinition.parse_obj({"path": "./"})
-            obj.child_modules = [RunwayModuleDefinitionModel(path="./"), "invalid"]
+            obj.child_modules = [  # type: ignore
+                RunwayModuleDefinitionModel(path="./"),
+                "invalid",
+            ]
 
     @pytest.mark.parametrize(
         "data, expected",

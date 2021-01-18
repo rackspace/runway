@@ -1,20 +1,45 @@
 """CFNgin hooks for AWS Certificate Manager."""
+from __future__ import annotations
+
 import logging
 import time
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
 from troposphere.certificatemanager import Certificate as CertificateResource
+from typing_extensions import Literal
 
-from runway.util import MutableMap
-
+from ...util import MutableMap
 from ..blueprints.variables.types import CFNString
 from ..exceptions import StackDoesNotExist, StackFailed, StackUpdateBadStatus
 from ..status import NO_CHANGE, SUBMITTED
-from .base import Hook
+from .base import Hook, HookArgsBaseModel
 from .utils import BlankBlueprint
 
+if TYPE_CHECKING:
+    from mypy_boto3_acm.client import ACMClient
+    from mypy_boto3_acm.type_defs import ResourceRecordTypeDef
+    from mypy_boto3_route53.client import Route53Client
+    from mypy_boto3_route53.type_defs import ChangeTypeDef
+
+    from ..blueprints.base import Blueprint
+    from ..context import Context
+    from ..providers.aws.default import Provider
+    from ..stack import Stack
+    from ..status import Status
+
 LOGGER = logging.getLogger(__name__)
+
+
+class HookArgs(HookArgsBaseModel):
+    """Hook arguments."""
+
+    alt_names: List[str] = []
+    domain: str
+    hosted_zone_id: str
+    stack_name: Optional[str] = None
+    ttl: int = 300
 
 
 class Certificate(Hook):
@@ -54,28 +79,32 @@ class Certificate(Hook):
 
     """
 
-    def __init__(self, context, provider, **kwargs):
+    ARGS_PARSER = HookArgs
+
+    acm_client: ACMClient
+    args: HookArgs
+    blueprint: Blueprint
+    r53_client: Route53Client
+    stack: Stack
+    template_description: str
+
+    def __init__(self, context: Context, provider: Provider, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-                (passed in by CFNgin)
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance. (passed in by CFNgin)
+            context: Context instance. (passed in by CFNgin)
+            provider: Provider instance. (passed in by CFNgin)
 
         """
-        kwargs.setdefault("ttl", 300)
         super().__init__(context, provider, **kwargs)
 
         self.template_description = self.get_template_description()
-        self.stack_name = self.args.get(
-            "stack_name", kwargs["domain"].replace(".", "-")
-        )
+        self.stack_name = self.args.stack_name or self.args.domain.replace(".", "-")
 
         self.properties = MutableMap(
             **{
                 "DomainName": self.args.domain,
-                "SubjectAlternativeNames": self.args.get("alt_names", []),
+                "SubjectAlternativeNames": self.args.alt_names,
                 "Tags": self.tags,
                 "ValidationMethod": "DNS",
             }
@@ -92,7 +121,7 @@ class Certificate(Hook):
             }
         )
 
-    def _create_blueprint(self):
+    def _create_blueprint(self) -> Blueprint:
         """Create CFNgin Blueprint."""
         blueprint = BlankBlueprint(self.stack_name, self.context)
         blueprint.template.set_version("2010-09-09")
@@ -117,7 +146,7 @@ class Certificate(Hook):
         blueprint.add_output("DomainName", Ref("DomainName"))
         return blueprint
 
-    def domain_changed(self):
+    def domain_changed(self) -> bool:
         """Check to ensure domain has not changed for existing stack."""
         try:
             stack_info = self.provider.get_stack(self.stack.fqn)
@@ -150,14 +179,14 @@ class Certificate(Hook):
             )
         return False
 
-    def get_certificate(self, interval=5):
+    def get_certificate(self, interval: int = 5) -> str:
         """Get the certificate being created by a CloudFormation.
 
         Args:
-            interval (int): Number of seconds to wait between attempts.
+            interval: Number of seconds to wait between attempts.
 
         Returns:
-            str: Certificate ARN
+            Certificate ARN.
 
         """
         response = self.provider.cloudformation.describe_stack_resources(
@@ -172,19 +201,19 @@ class Certificate(Hook):
         return self.get_certificate(interval=interval)
 
     def get_validation_record(
-        self, cert_arn=None, interval=5, status="PENDING_VALIDATION"
-    ):
+        self,
+        cert_arn: Optional[str] = None,
+        *,
+        interval: int = 5,
+        status: str = "PENDING_VALIDATION"
+    ) -> ResourceRecordTypeDef:
         """Get validation record from the certificate being created.
 
         Args:
-            cert_arn (str): ARN of the certificate to validate.
-            interval (int): Number of seconds to wait between attempts.
-            status (str): Validation status to look for when finding a
-                validation record. Typically only "PENDING_VALIDATION" or
-                "SUCCESS" will be used.
-
-        Returns:
-            Dict[str, str]: A record set to be added to Route 53.
+            cert_arn: ARN of the certificate to validate.
+            interval: Number of seconds to wait between attempts.
+            status: Validation status to look for when finding a validation record.
+                Typically only "PENDING_VALIDATION" or "SUCCESS" will be used.
 
         Raises:
             ValueError: No pending or too many pending certificates.
@@ -238,11 +267,11 @@ class Certificate(Hook):
                 cert_arn=cert_arn, interval=interval, status=status
             )
 
-    def put_record_set(self, record_set):
+    def put_record_set(self, record_set: ResourceRecordTypeDef) -> None:
         """Create/update a record set on a Route 53 Hosted Zone.
 
         Args:
-            record_set (Dict[str, str]): Record set to be added to Route 53.
+            record_set: Record set to be added to Route 53.
 
         """
         LOGGER.info(
@@ -250,13 +279,15 @@ class Certificate(Hook):
         )
         self.__change_record_set("CREATE", [record_set])
 
-    def remove_validation_records(self, records=None):
+    def remove_validation_records(
+        self, records: Optional[List[ResourceRecordTypeDef]] = None
+    ) -> None:
         """Remove all record set entries used to validate an ACM Certificate.
 
         Args:
-            records (Optional[List[Dict[str, str]]]): List of validation
-                records to remove from Route 53. This can be provided in cases
-                were the certificate has been deleted during a rollback.
+            records: List of validation records to remove from Route 53.
+                This can be provided in cases were the certificate has been
+                deleted during a rollback.
 
         """
         if not records:
@@ -277,28 +308,32 @@ class Certificate(Hook):
         )
         self.__change_record_set("DELETE", records)
 
-    def update_record_set(self, record_set):
+    def update_record_set(self, record_set: ResourceRecordTypeDef) -> None:
         """Update a validation record set when the cert has not changed.
 
         Args:
-            record_set (Dict[str, str]): Record set to be updated in Route 53.
+            record_set: Record set to be updated in Route 53.
 
         """
         LOGGER.info("updating record set...")
         self.__change_record_set("UPSERT", [record_set])
 
-    def __change_record_set(self, action, record_sets):
+    def __change_record_set(
+        self,
+        action: Literal["CREATE", "DELETE", "UPSERT"],
+        record_sets: List[ResourceRecordTypeDef],
+    ) -> None:
         """Wrap boto3.client('acm').change_resource_record_sets.
 
         Args:
-            action (str): Change action. [CREATE, DELETE, UPSERT]
-            record_sets (List[Dict[str, str]]): Record sets to change.
+            action: Change action.
+            record_sets: Record sets to change.
 
         """
         if not record_sets:
             raise ValueError("Must provide one of more record sets")
 
-        changes = [
+        changes: List[ChangeTypeDef] = [
             {
                 "Action": action,
                 "ResourceRecordSet": {
@@ -319,18 +354,15 @@ class Certificate(Hook):
 
         self.r53_client.change_resource_record_sets(
             HostedZoneId=self.args.hosted_zone_id,
-            ChangeBatch={
-                "Comment": self.get_template_description(),
-                "Changes": changes,
-            },
+            ChangeBatch={"Comment": self.template_description, "Changes": changes},
         )
 
-    def deploy(self, status=None):
+    def deploy(self, status: Optional[Status] = None) -> Dict[str, str]:
         """Deploy an ACM Certificate."""
         record = None
         try:
             if self.domain_changed():
-                return None
+                return {}
 
             if not status:
                 status = self.deploy_stack()
@@ -374,7 +406,7 @@ class Certificate(Hook):
         ) as err:
             LOGGER.error(err)
             self.destroy(
-                records=[record],
+                records=[record] if record else None,
                 skip_r53=isinstance(
                     err,
                     (
@@ -386,16 +418,20 @@ class Certificate(Hook):
         except StackUpdateBadStatus as err:
             # don't try to destroy the stack when it can be in progress
             LOGGER.error(err)
-        return None
+        return {}
 
-    def destroy(self, records=None, skip_r53=False):
+    def destroy(
+        self,
+        records: Optional[List[ResourceRecordTypeDef]] = None,
+        skip_r53: bool = False,
+    ) -> bool:
         """Destroy an ACM certificate.
 
         Args:
-            records (Optional[List[Dict[str, str]]]): List of validation
-                records to remove from Route 53. This can be provided in cases
-                were the certificate has been deleted during a rollback.
-            skip_r53 (bool): Skip the removal of validation records.
+            records: List of validation records to remove from Route 53.
+                This can be provided in cases were the certificate has been
+                deleted during a rollback.
+            skip_r53: Skip the removal of validation records.
 
         """
         if not skip_r53:
@@ -424,7 +460,7 @@ class Certificate(Hook):
         self.destroy_stack(wait=True)
         return True
 
-    def post_deploy(self):
+    def post_deploy(self) -> Dict[str, str]:
         """Run during the **post_deploy** stage."""
         return self.deploy()
 

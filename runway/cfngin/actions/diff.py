@@ -1,7 +1,20 @@
 """CFNgin diff action."""
+from __future__ import annotations
+
 import logging
 import sys
 from operator import attrgetter
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Tuple,
+    TypeVar,
+    cast,
+)
 
 from botocore.exceptions import ClientError
 
@@ -18,10 +31,18 @@ from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from . import build
 from .base import build_walker
 
-LOGGER = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from ..._logging import RunwayLogger
+    from ..stack import Stack
+    from ..status import Status
+
+_NV = TypeVar("_NV")
+_OV = TypeVar("_OV")
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-class DictValue:
+class DictValue(Generic[_OV, _NV]):
     """Used to create a diff of two dictionaries."""
 
     ADDED = "ADDED"
@@ -31,22 +52,21 @@ class DictValue:
 
     formatter = "%s%s = %s"
 
-    def __init__(self, key, old_value, new_value):
+    def __init__(self, key: str, old_value: _OV, new_value: _NV) -> None:
         """Instantiate class."""
         self.key = key
         self.old_value = old_value
         self.new_value = new_value
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Compare if self is equal to another object."""
         return self.__dict__ == other.__dict__
 
-    def changes(self):
+    def changes(self) -> List[str]:
         """Return changes to represent the diff between old and new value.
 
         Returns:
-            List[str]: Representation of the change (if any) between old and
-            new value.
+            Representation of the change (if any) between old and new value.
 
         """
         output = []
@@ -61,7 +81,7 @@ class DictValue:
             output.append(self.formatter % ("+", self.key, self.new_value))
         return output
 
-    def status(self):
+    def status(self) -> str:
         """Status of changes between the old value and new value."""
         if self.old_value == self.new_value:
             return self.UNMODIFIED
@@ -72,16 +92,18 @@ class DictValue:
         return self.MODIFIED
 
 
-def diff_dictionaries(old_dict, new_dict):
+def diff_dictionaries(
+    old_dict: Dict[str, _OV], new_dict: Dict[str, _NV]
+) -> Tuple[int, List[DictValue[_OV, _NV]]]:
     """Calculate the diff two single dimension dictionaries.
 
     Args:
-        old_dict(Dict[Any, Any]): Old dictionary.
-        new_dict(Dict[Any, Any]): New dictionary.
+        old_dict: Old dictionary.
+        new_dict: New dictionary.
 
     Returns:
-        Tuple[int, List[:class:`DictValue`]]: Number of changed records and
-        the :class:`DictValue` object containing the changes.
+        Number of changed records and the :class:`DictValue` object containing
+        the changes.
 
     """
     old_set = set(old_dict)
@@ -110,19 +132,18 @@ def diff_dictionaries(old_dict, new_dict):
     return changes, output
 
 
-def format_params_diff(parameter_diff):
+def format_params_diff(parameter_diff: List[DictValue[Any, Any]]) -> str:
     """Handle the formatting of differences in parameters.
 
     Args:
-        parameter_diff (List[:class:`DictValue`]): A list of
-            :class:`DictValue` detailing the differences between two dicts
-            returned by :func:`diff_dictionaries`.
+        parameter_diff: A list of :class:`DictValue` detailing the differences
+            between two dicts returned by :func:`diff_dictionaries`.
 
     Returns:
-        str: A formatted string that represents a parameter diff
+        A formatted string that represents a parameter diff
 
     """
-    params_output = "\n".join([line for v in parameter_diff for line in v.changes()])
+    params_output = "\n".join(line for v in parameter_diff for line in v.changes())
     return (
         """--- Old Parameters
 +++ New Parameters
@@ -132,17 +153,19 @@ def format_params_diff(parameter_diff):
     )
 
 
-def diff_parameters(old_params, new_params):
+def diff_parameters(
+    old_params: Dict[str, _OV], new_params: Dict[str, _NV]
+) -> List[DictValue[_OV, _NV]]:
     """Compare the old vs. new parameters and returns a "diff".
 
     If there are no changes, we return an empty list.
 
     Args:
-        old_params(Dict[Any, Any]): old paramters
-        new_params(Dict[Any, Any]): new parameters
+        old_params: old paramters
+        new_params: new parameters
 
     Returns:
-        List[:class:`DictValue`]: A list of differences.
+        A list of differences.
 
     """
     changes, diff = diff_dictionaries(old_params, new_params)
@@ -167,13 +190,13 @@ class Action(build.Action):
     NAME = "diff"
 
     @property
-    def _stack_action(self):
+    def _stack_action(self) -> Callable[..., Status]:
         """Run against a step."""
         return self._diff_stack
 
-    def _diff_stack(
-        self, stack, **_kwargs
-    ):  # pylint: disable=too-many-return-statements
+    def _diff_stack(  # pylint: disable=too-many-return-statements
+        self, stack: Stack, **_: Any
+    ) -> Status:
         """Handle diffing a stack in CloudFormation vs our config."""
         if self.cancel.wait(0):
             return INTERRUPTED
@@ -226,7 +249,7 @@ class Action(build.Action):
             raise
         return COMPLETE
 
-    def run(self, **kwargs):
+    def run(self, *, concurrency: int = 0, **_: Any) -> None:
         """Kicks off the diffing of the stacks in the stack_definitions."""
         plan = self._generate_plan(
             require_unlocked=False, include_persistent_graph=True
@@ -236,10 +259,10 @@ class Action(build.Action):
             LOGGER.info("diffing stacks: %s", ", ".join(plan.keys()))
         else:
             LOGGER.warning("no stacks detected (error in config?)")
-        walker = build_walker(kwargs.get("concurrency", 0))
+        walker = build_walker(concurrency)
         plan.execute(walker)
 
-    def pre_run(self, **kwargs):
+    def pre_run(self, **_: Any) -> None:
         """Any steps that need to be taken prior to running the action.
 
         Handle CFNgin bucket access denied & not existing.
@@ -260,5 +283,5 @@ class Action(build.Action):
             LOGGER.verbose("proceeding without a cfngin_bucket...")
             self.bucket_name = None
 
-    def post_run(self, **kwargs):
+    def post_run(self, **_: Any) -> None:
         """Do nothing."""

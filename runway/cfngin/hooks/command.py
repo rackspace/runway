@@ -1,12 +1,22 @@
 """Command hook."""
-# pylint: disable=unused-argument
 import logging
 import os
 from subprocess import PIPE, Popen
+from typing import Any, Dict, List, Optional, Union
+
+from typing_extensions import TypedDict
 
 from ..exceptions import ImproperlyConfigured
 
 LOGGER = logging.getLogger(__name__)
+
+
+class RunCommandResponseTypeDef(TypedDict, total=False):
+    """Response from run_command."""
+
+    returncode: int
+    stderr: str
+    stdout: str
 
 
 def _devnull():
@@ -14,45 +24,36 @@ def _devnull():
 
 
 def run_command(
-    provider,
-    context,
-    command,
-    capture=False,
-    interactive=False,
-    ignore_status=False,
-    quiet=False,
-    stdin=None,
-    env=None,
-    **kwargs
-):
+    *,
+    command: Union[str, List[str]],
+    capture: bool = False,
+    interactive: bool = False,
+    ignore_status: bool = False,
+    quiet: bool = False,
+    stdin: Optional[str] = None,
+    env: Optional[Dict[str, str]] = None,
+    **kwargs: Any
+) -> RunCommandResponseTypeDef:
     """Run a custom command as a hook.
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
-
-    Keyword Args:
-        command (Union[str, List[str]]): Command(s) to run.
-        capture (bool): If enabled, capture the command's stdout and stderr,
-            and return them in the hook result. (*default:* ``False``)
-        interactive (bool): If enabled, allow the command to interact with
+        command: Command(s) to run.
+        capture: If enabled, capture the command's stdout and stderr,
+            and return them in the hook result.
+        interactive: If enabled, allow the command to interact with
             stdin. Otherwise, stdin will be set to the null device.
-            (*default:* ``False``)
-        ignore_status (bool): Don't fail the hook if the command returns a
-            non-zero status. (*default:* ``False``)
-        quiet (bool): Redirect the command's stdout and stderr to the null
-            device, silencing all output. Should not be enabled if
-            ``capture`` is also enabled. (*default:* ``False``)
-        stdin (Optional[str]): String to send to the stdin of the command.
-            Implicitly disables ``interactive``.
-        env (Optional[Dict[str, str]]): Dictionary of environment variable
-            overrides for the command context. Will be merged with the current
-            environment.
-        **kwargs (Any): Any other arguments will be forwarded to the
-            ``subprocess.Popen`` function. Interesting ones include: ``cwd``
-            and ``shell``.
+        ignore_status: Don't fail the hook if the command returns a
+            non-zero status.
+        quiet: Redirect the command's stdout and stderr to the null device,
+            silencing all output. Should not be enabled if ``capture`` is also
+            enabled.
+        stdin: String to send to the stdin of the command. Implicitly disables
+            ``interactive``.
+        env: Dictionary of environment variable overrides for the command context.
+            Will be merged with the current environment.
+
+    Additional keyword arguments passed to the function will be forwarded to the
+    ``subprocess.Popen`` function. Interesting ones include: ``cwd`` and ``shell``.
 
     Examples:
         .. code-block:: yaml
@@ -83,10 +84,14 @@ def run_command(
                     shell: true
 
     """
+    # remove unneeded args from kwargs
+    kwargs.pop("context", None)
+    kwargs.pop("provider", None)
+
     if quiet and capture:
         raise ImproperlyConfigured(
             __name__ + ".run_command",
-            "Cannot enable `quiet` and `capture` options simultaneously",
+            ValueError("Cannot enable `quiet` and `capture` options simultaneously"),
         )
 
     if quiet:
@@ -131,7 +136,9 @@ def run_command(
         else:
             LOGGER.warning("command failed with returncode %d: %s", status, command)
 
-        return None
+        return {}
+    except Exception:  # pylint: disable=broad-except
+        return {}
     finally:
         if proc.returncode is None:
             proc.kill()

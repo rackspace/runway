@@ -1,10 +1,10 @@
 """'Git type Path Source."""
 import logging
-import os
 import shutil
 import subprocess
 import tempfile
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 from .source import Source
 
@@ -19,59 +19,53 @@ class Git(Source):
 
     """
 
-    def __init__(self, uri="", location="", options=None, **kwargs):
-        # type: (str, str, Optional[Dict[str, str]], Any) -> None
+    def __init__(
+        self,
+        *,
+        location: str = "",
+        options: Optional[Dict[str, str]] = None,
+        uri: str = "",
+        **kwargs: Any
+    ) -> None:
         """Git Path Source.
 
-        Keyword Args:
-            uri (str): The uniform resource identifier that targets the remote git
-                repository
-            location (str): The relative location to the root of the
-                repository where the module resides. Leaving this as an empty
-                string, ``/``, or ``./`` will have runway look in the root folder.
-            options (Optional[Dict[str, str]]): A reference can be passed along via the
-                options so that a specific version of the repository is cloned.
-                **commit**, **tag**, **branch**  are all valid keys with
-                respective output
+        Args:
+            location: The relative location to the root of the repository where the
+                module resides. Leaving this as an empty string, ``/``, or ``./``
+                will have runway look in the root folder.
+            options: A reference can be passed along via the options so that a specific
+                version of the repository is cloned. **commit**, **tag**, **branch**
+                are all valid keys with respective output
+            uri: The uniform resource identifier that targets the remote git repository
 
         """
         self.uri = uri
         self.location = location
-        self.options = options
-
-        if not self.options:
-            self.options = {}
+        self.options = options or {}
 
         super().__init__(**kwargs)
 
-    def fetch(self):
-        # type: () -> str
+    def fetch(self) -> Path:
         """Retrieve the git repository from it's remote location."""
         from git import Repo  # pylint: disable=import-outside-toplevel
 
-        ref = self.__determine_git_ref()  # type: str
-        dir_name = "_".join([self.sanitize_git_path(self.uri), ref])  # type: str
-        cached_dir_path = os.path.join(self.cache_dir, dir_name)  # type: str
-        cached_path = ""  # type: str
+        ref = self.__determine_git_ref()
+        dir_name = "_".join([self.sanitize_git_path(self.uri), ref])
+        cached_dir_path = self.cache_dir / dir_name
 
-        if not os.path.isdir(cached_dir_path):
-            tmp_dir = tempfile.mkdtemp()
-            try:
-                tmp_repo_path = os.path.join(tmp_dir, dir_name)  # type: str
-                with Repo.clone_from(self.uri, tmp_repo_path) as repo:
-                    repo.head.reference = ref  # type: str
-                    repo.head.reset(index=True, working_tree=True)
-                shutil.move(tmp_repo_path, self.cache_dir)
-                cached_path = os.path.join(self.cache_dir, dir_name)  # type: str
-            finally:
-                shutil.rmtree(tmp_dir)
-        else:
-            cached_path = cached_dir_path  # type: str
+        if cached_dir_path.exists():
+            return cached_dir_path
 
-        return os.path.join(cached_path, self.location)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            tmp_repo_path = Path(tmpdirname) / dir_name
+            with Repo.clone_from(self.uri, str(tmp_repo_path)) as repo:
+                repo.head.reference = ref
+                repo.head.reset(index=True, working_tree=True)
+            shutil.move(str(tmp_repo_path), self.cache_dir)
 
-    def __git_ls_remote(self, ref):
-        # type: (str) -> str
+        return cached_dir_path
+
+    def __git_ls_remote(self, ref) -> str:
         """List remote repositories based on uri and ref received.
 
         Keyword Args:
@@ -80,62 +74,48 @@ class Git(Source):
         """
         cmd = ["git", "ls-remote", self.uri, ref]
         LOGGER.debug("getting commit ID from repo: %s", " ".join(cmd))
-        lsremote_output = subprocess.check_output(cmd)
-        # pylint: disable=unsupported-membership-test
-        if b"\t" in lsremote_output:
-            commit_id = lsremote_output.split(b"\t")[0]  # type List[str]
+        ls_remote_output = subprocess.check_output(cmd)
+        if b"\t" in ls_remote_output:
+            commit_id = ls_remote_output.split(b"\t")[0].decode()
             LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id
         raise ValueError('Ref "%s" not found for repo %s.' % (ref, self.uri))
 
-    def __determine_git_ls_remote_ref(self):
-        # type: () -> str
+    def __determine_git_ls_remote_ref(self) -> str:
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
-
         if self.options.get("branch"):
-            ref = "refs/heads/%s" % self.options.get("branch")  # type: str
-
+            ref = "refs/heads/%s" % self.options["branch"]
         return ref
 
-    def __determine_git_ref(self):
-        # type: () -> str
+    def __determine_git_ref(self) -> str:
         """Determine the git reference code."""
-        ref_config_keys = 0  # type: int
-
-        for i in ["commit", "tag", "branch"]:
-            if self.options.get(i):
-                ref_config_keys += 1
+        ref_config_keys = sum(
+            bool(self.options.get(i)) for i in ["commit", "tag", "branch"]
+        )
         if ref_config_keys > 1:
-            raise ImportError(
+            raise ValueError(
                 "Fetching remote git sources failed: conflicting revisions "
                 "(e.g. 'commit', 'tag', 'branch') specified for a package source"
             )
 
         if self.options.get("commit"):
-            ref = self.options.get("commit")  # type: str
-        elif self.options.get("tag"):
-            ref = self.options.get("tag")  # type: str
-        else:
-            ref = self.__git_ls_remote(
-                self.__determine_git_ls_remote_ref()
-            )  # ty pe: str
-        if isinstance(ref, bytes):
-            return ref.decode()
-        return ref
+            return self.options["commit"]
+        if self.options.get("tag"):
+            return self.options["tag"]
+        return self.__git_ls_remote(self.__determine_git_ls_remote_ref())
 
     @classmethod
-    def sanitize_git_path(cls, path):
-        # type(str) -> str
+    def sanitize_git_path(cls, path: str) -> str:
         """Sanitize the git path for folder/file assignment.
 
         Keyword Args:
-            path (str): The path string to be sanitized
+            path: The path string to be sanitized
 
         """
-        dir_name = path  # type: str
-        split = path.split("//")  # type: List[str]
-        domain = split[len(split) - 1]  # type: str
+        dir_name = path
+        split = path.split("//")
+        domain = split[len(split) - 1]
 
         if domain.endswith(".git"):
             dir_name = domain[:-4]

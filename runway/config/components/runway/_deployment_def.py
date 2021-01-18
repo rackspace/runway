@@ -63,7 +63,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         """Return menu entry representation of this deployment."""
         return "{name} - {modules} ({regions})".format(
             name=self.name,
-            modules=", ".join([module.name for module in self.modules]),
+            modules=", ".join(module.name for module in self.modules),
             regions=", ".join(self.regions or self.parallel_regions),
         )
 
@@ -73,10 +73,35 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         return [RunwayModuleDefinition(module) for module in self._data.modules]
 
     @modules.setter
-    def modules(
+    def modules(self, modules: List[RunwayModuleDefinition]) -> None:
+        """Set the value of the property.
+
+        Args:
+            modules: A list of modules.
+
+        Raises:
+            TypeError: The provided value does not match the required types.
+
+        """
+        if not all(isinstance(i, RunwayModuleDefinition) for i in modules):
+            raise TypeError("modules must be type List[RunwayModuleDefinition]")
+        self._data.modules = [
+            RunwayModuleDefinitionModel.parse_obj(mod.data) for mod in modules
+        ]
+
+    def reverse(self):
+        """Reverse the order of modules and regions."""
+        self._data.modules.reverse()
+        for mod in self._data.modules:
+            mod.parallel.reverse()
+        for prop in [self._data.parallel_regions, self._data.regions]:
+            if isinstance(prop, list):
+                prop.reverse()
+
+    def set_modules(
         self, modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]]
     ) -> None:
-        """Set the value of the property.
+        """Set the value of modules.
 
         Args:
             modules: A list of modules.
@@ -101,14 +126,6 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
                     "expected type RunwayModuleDefinition or RunwayModuleDefinitionModel"
                 )
         self._data.modules = sanitized
-
-    def reverse(self):
-        """Reverse the order of modules and regions."""
-        self._data.modules.reverse()
-        for mod in self._data.modules:
-            mod.parallel.reverse()
-        self._data.parallel_regions.reverse()
-        self._data.regions.reverse()
 
     def _register_variable(self, var_name: str, var_value: Any) -> None:
         """Register a variable.

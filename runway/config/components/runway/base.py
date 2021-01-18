@@ -3,18 +3,19 @@ from __future__ import annotations
 
 import logging
 from abc import abstractclassmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
 
 from ...._logging import PrefixAdaptor
 from ....exceptions import UnresolvedVariable
 from ....variables import Variable
 
-LOGGER = logging.getLogger(__name__)
-
 if TYPE_CHECKING:
+    from ...._logging import RunwayLogger
     from ....context import Context
     from ...models.base import ConfigProperty
     from ._variables_def import RunwayVariablesDefinition
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 class ConfigComponentDefinition:
@@ -170,7 +171,7 @@ class ConfigComponentDefinition:
         """
         prop = getattr(self.__class__, name, None)
         if isinstance(prop, property) and prop.fset:
-            prop.fset(self, value)
+            prop.fset(self, value)  # type: ignore
         elif isinstance(prop, property):
             raise AttributeError(f"setting {name} property is not supported")
         elif name.startswith("_") or name in dir(self):

@@ -44,7 +44,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         examples=["git@github.com:onicagroup/runway.git"],
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -58,7 +58,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
     def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
         """Ensure that only one ref is defined."""
         ref_keys = ["branch", "commit", "tag"]
-        count_ref_defs = sum(1 for i in ref_keys if values.get(i))
+        count_ref_defs = sum(bool(values.get(i)) for i in ref_keys)
         if count_ref_defs > 1:
             raise ValueError(f"only one of {ref_keys} can be defined")
         return values
@@ -91,7 +91,7 @@ class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
         "root of the local package source.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -138,7 +138,7 @@ class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
         description="Update the local copy if the last modified date in AWS S3 changes.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -182,7 +182,7 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
         ],
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid

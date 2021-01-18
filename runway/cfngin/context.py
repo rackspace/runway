@@ -1,8 +1,10 @@
 """CFNgin context."""
+from __future__ import annotations
+
 import collections
 import json
 import logging
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional
 
 from runway._logging import PrefixAdaptor
 
@@ -20,14 +22,17 @@ from .stack import Stack
 from .target import Target
 from .util import ensure_s3_bucket
 
+if TYPE_CHECKING:
+    import boto3
+    from mypy_boto3_s3.client import S3Client
+
+    from ..config.models.cfngin import CfnginStackDefinitionModel
+    from ..type_defs import Boto3CredentialsTypeDef
+
 LOGGER = logging.getLogger(__name__)
 
 
-DEFAULT_NAMESPACE_DELIMITER = "-"
-DEFAULT_TEMPLATE_INDENT = 4
-
-
-def get_fqn(base_fqn, delimiter, name=None):
+def get_fqn(base_fqn: str, delimiter: str, name: Optional[str] = None) -> str:
     """Return the fully qualified name of an object within this context.
 
     If the name passed already appears to be a fully qualified name, it
@@ -48,45 +53,61 @@ class Context:
 
     """
 
-    hook_data: Dict[str, Any] = {}
+    __boto3_credentials: Optional[Boto3CredentialsTypeDef]
+    _bucket_name: Optional[str]
+    _persistent_graph_lock_code: Optional[str]
+    _persistent_graph_lock_tag: str = "cfngin_lock_code"
+    _persistent_graph: Optional[Graph]
+    _s3_bucket_verified: Optional[bool]
+    _stacks: List[Stack]
+    _targets: List[Target]
+    _upload_to_s3: bool
+
+    bucket_region: Optional[str]
+    config_path: str
+    config: CfnginConfig
+    environment: MutableMapping[str, Any]
+    force_stacks: List[str]
+    hook_data: Dict[str, Any]
+    logger: PrefixAdaptor
+    region: Optional[str]
+    s3_conn: S3Client
+    stack_names: List[str]
 
     def __init__(
         self,
-        environment=None,
-        boto3_credentials=None,
-        stack_names=None,
-        config=None,
-        config_path=None,
-        region=None,
-        force_stacks=None,
+        *,
+        boto3_credentials: Optional[Boto3CredentialsTypeDef] = None,
+        environment: Optional[MutableMapping[str, Any]] = None,
+        stack_names: Optional[List[str]] = None,
+        config: Optional[CfnginConfig] = None,
+        config_path: Optional[str] = None,
+        region: Optional[str] = None,
+        force_stacks: Optional[List[str]] = None,
     ):
         """Instantiate class.
 
         Args:
-            boto3_credentials (Optional[Dict[str, str]]): Credentials to use
-                when creating a boto3 session from context.
-            environment (dict): A dictionary used to pass in information about
-                the environment. Useful for templating.
-            stack_names (list): A list of stack_names to operate on. If not
+            boto3_credentials: Credentials to use when creating a boto3 session from context.
+            environment: A dictionary used to pass in information about the environment.
+                Useful for templating.
+            stack_names: A list of stack_names to operate on. If not
                 passed, usually all stacks defined in the config will be
                 operated on.
-            config (:class:`runway.config.CfnginConfig`): The CFNgin
-                configuration being operated on.
-            config_path (str): Path to the config file that was provided.
-            region (str): Name of an AWS region if provided as a CLI argument.
-            force_stacks (list): A list of stacks to force work on. Used to
-                work on locked stacks.
+            config: The CFNgin configuration being operated on.
+            config_path: Path to the config file that was provided.
+            region: Name of an AWS region if provided as a CLI argument.
+            force_stacks: A list of stacks to force work on. Used to work on locked stacks.
 
         """
         self.__boto3_credentials = boto3_credentials
         self._bucket_name = None
-        self._persistent_graph = None
         self._persistent_graph_lock_code = None
-        self._persistent_graph_lock_tag = "cfngin_lock_code"
+        self._persistent_graph = None
         self._s3_bucket_verified = None
-        self._stacks = None
-        self._targets = None
-        self._upload_to_s3 = None
+        self._stacks = []
+        self._targets = []
+        self._upload_to_s3 = False
         # TODO load the config from context instead of taking it as an arg
         self.config = config or CfnginConfig.parse_obj({"namespace": "example"})
         # TODO set this value when provisioning a Config object in context
@@ -95,27 +116,22 @@ class Context:
         # used is during tests.
         self.config_path = config_path or "./"
         self.bucket_region = self.config.cfngin_bucket_region or region
-        self.environment = environment
+        self.environment = environment or {}
         self.force_stacks = force_stacks or []
-        self.hook_data = {}  # TODO change to MutableMap in next major release
-        self.logger = PrefixAdaptor(config_path, LOGGER)
+        self.hook_data = {}
+        self.logger = PrefixAdaptor(self.config_path, LOGGER)
         self.region = region
         self.s3_conn = self.get_session(region=self.bucket_region).client("s3")
         self.stack_names = stack_names or []
 
     @property
-    def _base_fqn(self):
+    def _base_fqn(self) -> str:
         """Return ``namespace`` sanitized for use as an S3 Bucket name."""
         return self.namespace.replace(".", "-").lower()
 
     @property
-    def _persistent_graph_tags(self):
-        """Cache of tags on the persistent graph object.
-
-        Returns:
-            Dict[str, str]
-
-        """
+    def _persistent_graph_tags(self) -> Dict[str, str]:
+        """Cache of tags on the persistent graph object."""
         try:
             return {
                 t["Key"]: t["Value"]
@@ -130,7 +146,7 @@ class Context:
             return {}
 
     @property
-    def bucket_name(self):
+    def bucket_name(self) -> Optional[str]:
         """Return ``cfngin_bucket`` from config, calculated name, or None."""
         if not self.upload_to_s3:
             return None
@@ -138,31 +154,25 @@ class Context:
         return self.config.cfngin_bucket or "stacker-%s" % (self.get_fqn(),)
 
     @property
-    def mappings(self):
+    def mappings(self) -> Dict[str, Dict[str, Dict[str, Any]]]:
         """Return ``mappings`` from config."""
         return self.config.mappings or {}
 
     @property
-    def namespace(self):
+    def namespace(self) -> str:
         """Return ``namespace`` from config."""
         return self.config.namespace
 
     @property
-    def namespace_delimiter(self):
+    def namespace_delimiter(self) -> str:
         """Return ``namespace_delimiter`` from config or default."""
-        delimiter = self.config.namespace_delimiter
-        if delimiter is not None:
-            return delimiter
-        return DEFAULT_NAMESPACE_DELIMITER
+        return self.config.namespace_delimiter
 
     @property
-    def persistent_graph(self):
+    def persistent_graph(self) -> Optional[Graph]:
         """Graph if a persistent graph is being used.
 
         Will create an "empty" object in S3 if one is not found.
-
-        Returns:
-            :class:`runway.cfngin.plan.Graph`
 
         """
         if not self._persistent_graph:
@@ -191,30 +201,25 @@ class Context:
                         "creating one now..."
                     )
                     self.s3_conn.put_object(
-                        Body=content,
+                        Body=content.encode(),
                         ServerSideEncryption="AES256",
                         ACL="bucket-owner-full-control",
                         ContentType="application/json",
                         **self.persistent_graph_location
                     )
-            self.persistent_graph = json.loads(content)
+            self.persistent_graph = Graph.from_dict(json.loads(content), self)
 
         return self._persistent_graph
 
     @persistent_graph.setter
-    def persistent_graph(self, graph_dict):
+    def persistent_graph(self, graph: Optional[Graph]) -> None:
         """Load a persistent graph dict as a :class:`runway.cfngin.plan.Graph`."""
-        self._persistent_graph = Graph.from_dict(graph_dict, self)
+        self._persistent_graph = graph
 
     @property
-    def persistent_graph_location(self):
-        """Location of the persistent graph in s3.
-
-        Returns:
-            Dict[str, str] Bucket and Key for the object in S3.
-
-        """
-        if not self.upload_to_s3 or not self.config.persistent_graph_key:
+    def persistent_graph_location(self) -> Dict[str, str]:
+        """Location of the persistent graph in s3."""
+        if not self.bucket_name or not self.config.persistent_graph_key:
             return {}
 
         return {
@@ -230,13 +235,8 @@ class Context:
         }
 
     @property
-    def persistent_graph_lock_code(self):
-        """Code used to lock the persistent graph S3 object.
-
-        Returns:
-            Optional[str]
-
-        """
+    def persistent_graph_lock_code(self) -> Optional[str]:
+        """Code used to lock the persistent graph S3 object."""
         if not self._persistent_graph_lock_code and self.persistent_graph_location:
             self._persistent_graph_lock_code = self._persistent_graph_tags.get(
                 self._persistent_graph_lock_tag
@@ -244,27 +244,17 @@ class Context:
         return self._persistent_graph_lock_code
 
     @property
-    def persistent_graph_locked(self):
-        """Check if persistent graph is locked.
-
-        Returns:
-            bool
-
-        """
+    def persistent_graph_locked(self) -> bool:
+        """Check if persistent graph is locked."""
         if not self.persistent_graph:
             return False
-        if not self.persistent_graph_lock_code:
-            return False
-        return True
+        return bool(self.persistent_graph_lock_code)
 
     @property
-    def s3_bucket_verified(self):
+    def s3_bucket_verified(self) -> bool:
         """Check CFNgin bucket exists and you have access.
 
         If the CFNgin bucket does not exist, will try to create one.
-
-        Returns:
-            bool
 
         """
         if not self._s3_bucket_verified and self.bucket_name:
@@ -275,10 +265,10 @@ class Context:
                 persist_graph=bool(self.persistent_graph_location),
             )
             self._s3_bucket_verified = True
-        return self._s3_bucket_verified
+        return bool(self._s3_bucket_verified)
 
     @property
-    def tags(self):
+    def tags(self) -> Dict[str, str]:
         """Return ``tags`` from config."""
         return (
             self.config.tags
@@ -289,21 +279,13 @@ class Context:
         )
 
     @property
-    def template_indent(self):
+    def template_indent(self) -> int:
         """Return ``template_indent`` from config or default."""
-        indent = self.config.template_indent
-        if indent is not None:
-            return int(indent)
-        return DEFAULT_TEMPLATE_INDENT
+        return self.config.template_indent
 
     @property
-    def upload_to_s3(self):
-        """Check if S3 should be used for caching/persistent graph.
-
-        Returns:
-            (bool)
-
-        """
+    def upload_to_s3(self) -> bool:
+        """Check if S3 should be used for caching/persistent graph."""
         if not self._upload_to_s3:
             # Don't upload stack templates to S3 if `cfngin_bucket` is
             # explicitly set to an empty string.
@@ -326,34 +308,31 @@ class Context:
 
         return True
 
-    def _get_stack_definitions(self):
+    def _get_stack_definitions(self) -> List[CfnginStackDefinitionModel]:
         """Return ``stacks`` from config."""
         return self.config.stacks
 
-    def get_targets(self):
-        """Return the named targets that are specified in the config.
-
-        Returns:
-            list: a list of :class:`runway.cfngin.target.Target` objects
-
-        """
+    def get_targets(self) -> List[Target]:
+        """Return the named targets that are specified in the config."""
         if not self._targets:
             targets = []
-            for target_def in self.config.targets or []:
+            for target_def in self.config.targets:
                 target = Target(target_def)
                 targets.append(target)
             self._targets = targets
         return self._targets
 
-    def get_session(self, profile=None, region=None):
+    def get_session(
+        self, profile: Optional[str] = None, region: Optional[str] = None
+    ) -> boto3.Session:
         """Create a thread-safe boto3 session.
 
         Args:
-            profile (Optional[str]): The profile for the session.
-            region (Optional[str]): The region for the session.
+            profile The profile for the session.
+            region: The region for the session.
 
         Returns:
-            :class:`boto3.session.Session`: A thread-safe boto3 session.
+            A thread-safe boto3 session.
 
         """
         kwargs = {}
@@ -369,11 +348,11 @@ class Context:
             )
         return get_session(region=region or self.region, **kwargs)
 
-    def get_stack(self, name):
+    def get_stack(self, name: str) -> Optional[Stack]:
         """Get a stack by name.
 
         Args:
-            name (str): Name of a stack to retrieve.
+            name: Name of a stack to retrieve.
 
         """
         for stack in self.get_stacks():
@@ -381,14 +360,11 @@ class Context:
                 return stack
         return None
 
-    def get_stacks(self):
+    def get_stacks(self) -> List[Stack]:
         """Get the stacks for the current action.
 
         Handles configuring the :class:`runway.cfngin.stack.Stack` objects
         that will be used in the current action.
-
-        Returns:
-            list: a list of :class:`runway.cfngin.stack.Stack` objects
 
         """
         if not self._stacks:
@@ -408,11 +384,11 @@ class Context:
             self._stacks = stacks
         return self._stacks
 
-    def get_stacks_dict(self):
+    def get_stacks_dict(self) -> Dict[str, Stack]:
         """Construct a dict of {stack.fqn: stack} for easy access to stacks."""
-        return dict((stack.fqn, stack) for stack in self.get_stacks())
+        return {stack.fqn: stack for stack in self.get_stacks()}
 
-    def get_fqn(self, name=None):
+    def get_fqn(self, name: Optional[str] = None) -> str:
         """Return the fully qualified name of an object within this context.
 
         If the name passed already appears to be a fully qualified name, it
@@ -421,11 +397,11 @@ class Context:
         """
         return get_fqn(self._base_fqn, self.namespace_delimiter, name)
 
-    def lock_persistent_graph(self, lock_code):
+    def lock_persistent_graph(self, lock_code: str) -> None:
         """Locks the persistent graph in s3.
 
         Args:
-            lock_code (str): The code that will be used to lock the S3 object.
+            lock_code: The code that will be used to lock the S3 object.
 
         Raises:
             :class:`runway.cfngin.exceptions.PersistentGraphLocked`
@@ -460,7 +436,7 @@ class Context:
         except self.s3_conn.exceptions.NoSuchKey:
             raise PersistentGraphCannotLock("s3 object does not exist")
 
-    def put_persistent_graph(self, lock_code):
+    def put_persistent_graph(self, lock_code: str) -> None:
         """Upload persistent graph to s3.
 
         Args:
@@ -490,7 +466,7 @@ class Context:
             )
 
         self.s3_conn.put_object(
-            Body=self.persistent_graph.dumps(4),
+            Body=self.persistent_graph.dumps(4).encode(),
             ServerSideEncryption="AES256",
             ACL="bucket-owner-full-control",
             ContentType="application/json",
@@ -501,13 +477,12 @@ class Context:
             "persistent graph updated:\n%s", self.persistent_graph.dumps(indent=4)
         )
 
-    def set_hook_data(self, key, data):
+    def set_hook_data(self, key: str, data: collections.Mapping) -> None:
         """Set hook data for the given key.
 
         Args:
-            key(str): The key to store the hook data in.
-            data(:class:`collections.Mapping`): A dictionary of data to store,
-                as returned from a hook.
+            key: The key to store the hook data in.
+            data: A dictionary of data to store, as returned from a hook.
 
         """
         if not isinstance(data, collections.Mapping):
@@ -524,11 +499,11 @@ class Context:
 
         self.hook_data[key] = data
 
-    def unlock_persistent_graph(self, lock_code):
+    def unlock_persistent_graph(self, lock_code: str) -> bool:
         """Unlocks the persistent graph in s3.
 
         Args:
-            lock_code (str): The code that will be used to lock the S3 object.
+            lock_code: The code that will be used to lock the S3 object.
 
         Raises:
             :class:`runway.cfngin.exceptions.PersistentGraphCannotUnlock`

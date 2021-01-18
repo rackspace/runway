@@ -32,8 +32,7 @@ class ScriptHandler(TestHandler):
     """
 
     @classmethod
-    def handle(cls, name, args):
-        # type: (str, Dict[str, Any]) -> None
+    def handle(cls, name: str, args: Dict[str, Any]) -> None:
         """Perform the actual test."""
         logger = PrefixAdaptor(name, LOGGER)
         for cmd in args["commands"]:

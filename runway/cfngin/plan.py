@@ -1,15 +1,29 @@
 """CFNgin plan, plan componenets, and functions for interacting with a plan."""
+from __future__ import annotations
+
 import json
 import logging
 import os
 import threading
 import time
 import uuid
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    OrderedDict,
+    Set,
+    Union,
+)
 
 from runway._logging import LogLevels, PrefixAdaptor
 
 from .dag import DAG, DAGValidationError, walk
 from .exceptions import CancelExecution, GraphError, PersistentGraphLocked, PlanFailed
+from .stack import Stack
 from .status import (
     COMPLETE,
     FAILED,
@@ -19,17 +33,23 @@ from .status import (
     FailedStatus,
     SkippedStatus,
 )
+from .target import Target
 from .ui import ui
 from .util import merge_map, stack_template_key_name
+
+if TYPE_CHECKING:
+    from .context import Context
+    from .providers.base import BaseProvider
+    from .status import Status
 
 LOGGER = logging.getLogger(__name__)
 
 
-def json_serial(obj):
+def json_serial(obj: Any) -> Any:
     """Serialize json.
 
     Args:
-        obj (Any): A python object.
+        obj: A python object.
 
     Example:
         json.dumps(data, default=json_serial)
@@ -40,17 +60,12 @@ def json_serial(obj):
     raise TypeError
 
 
-def merge_graphs(graph1, graph2):
+def merge_graphs(graph1: Graph, graph2: Graph) -> Graph:
     """Combine two Graphs into one, retaining steps.
 
     Args:
-        graph1 (:class:`Graph`): Graph that ``graph2`` will
-            be merged into.
-        graph2 (:class:`Graph`): Graph that will be merged
-            into ``graph1``.
-
-    Returns:
-        :class:`Graph`: A combined graph.
+        graph1: Graph that ``graph2`` will be merged into.
+        graph2: Graph that will be merged into ``graph1``.
 
     """
     merged_graph_dict = merge_map(graph1.to_dict().copy(), graph2.to_dict())
@@ -58,37 +73,45 @@ def merge_graphs(graph1, graph2):
         graph1.steps.get(name, graph2.steps.get(name))
         for name in merged_graph_dict.keys()
     ]
-    return Graph.from_steps(steps)
+    return Graph.from_steps([step for step in steps if step])
 
 
 class Step:
     """State machine for executing generic actions related to stacks.
 
     Attributes:
-        fn (Optional[Callable]): Function to run to execute the step.
+        fn: Function to run to execute the step.
             This function will be ran multiple times until the step is "done".
-        last_updated (float): Time when the step was last updated.
-        logger (logging.LoggerAdaptor): Logger for logging messages about
-            the step.
-        stack (:class:`runway.cfngin.stack.Stack`): the stack associated with
-            this step
-        status (:class:`runway.cfngin.status.Status`): The status of step.
-        watch_func (Optional[Callable]): Function that will be called to
-            "tail" the step action.
+        last_updated: Time when the step was last updated.
+        logger: Logger for logging messages about the step.
+        stack: the stack associated with this step
+        status: The status of step.
+        watch_func: Function that will be called to "tail" the step action.
 
     """
 
-    def __init__(self, stack, fn=None, watch_func=None):
+    fn: Optional[Callable[..., Any]]
+    last_updated: float
+    logger: PrefixAdaptor
+    stack: Union[Stack, Target]
+    status: Status
+    watch_func: Optional[Callable[..., Any]]
+
+    def __init__(
+        self,
+        stack: Union[Stack, Target],
+        *,
+        fn: Optional[Callable[..., Any]] = None,
+        watch_func: Optional[Callable[..., Any]] = None
+    ) -> None:
         """Instantiate class.
 
         Args:
-            stack (:class:`runway.cfngin.stack.Stack`): The stack associated
+            stack: The stack associated
                 with this step
-            fn (Optional[Callable]): Function to run to execute the step.
-                This function will be ran multiple times until the step is
-                "done".
-            watch_func (Optional[Callable]): Function that will be called to
-                "tail" the step action.
+            fn: Function to run to execute the step.
+                This function will be ran multiple times until the step is "done".
+            watch_func: Function that will be called to "tail" the step action.
 
         """
         self.stack = stack
@@ -98,13 +121,8 @@ class Step:
         self.fn = fn
         self.watch_func = watch_func
 
-    def run(self):
-        """Run this step until it has completed or been skipped.
-
-        Returns:
-            bool
-
-        """
+    def run(self) -> bool:
+        """Run this step until it has completed or been skipped."""
         stop_watcher = threading.Event()
         watcher = None
         if self.watch_func:
@@ -122,13 +140,8 @@ class Step:
                 watcher.join()
         return self.ok
 
-    def _run_once(self):
-        """Run a step exactly once.
-
-        Returns:
-            str
-
-        """
+    def _run_once(self) -> Status:
+        """Run a step exactly once."""
         try:
             status = self.fn(self.stack, status=self.status)
         except CancelExecution:
@@ -140,105 +153,63 @@ class Step:
         return status
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Name of the step.
 
         This is equal to the name of the stack it operates on.
-
-        Returns:
-            str
 
         """
         return self.stack.name
 
     @property
-    def requires(self):
-        """Return a list of step names this step depends on.
-
-        Returns:
-            List[str]
-
-        """
+    def requires(self) -> Set[str]:
+        """Return a list of step names this step depends on."""
         return self.stack.requires
 
     @property
-    def required_by(self):
-        """Return a list of step names that depend on this step.
-
-        Returns:
-            List[str]
-
-        """
+    def required_by(self) -> Set[str]:
+        """Return a list of step names that depend on this step."""
         return self.stack.required_by
 
     @property
-    def completed(self):
-        """Return True if the step is in a COMPLETE state.
-
-        Returns:
-            bool
-
-        """
+    def completed(self) -> bool:
+        """Return True if the step is in a COMPLETE state."""
         return self.status == COMPLETE
 
     @property
-    def skipped(self):
-        """Return True if the step is in a SKIPPED state.
-
-        Returns:
-            bool
-
-        """
+    def skipped(self) -> bool:
+        """Return True if the step is in a SKIPPED state."""
         return self.status == SKIPPED
 
     @property
-    def failed(self):
-        """Return True if the step is in a FAILED state.
-
-        Returns:
-            bool
-
-        """
+    def failed(self) -> bool:
+        """Return True if the step is in a FAILED state."""
         return self.status == FAILED
 
     @property
-    def done(self):
+    def done(self) -> bool:
         """Return True if the step is finished.
 
         To be ``True``, status must be either COMPLETE, SKIPPED or FAILED)
-
-        Returns:
-            bool
 
         """
         return self.completed or self.skipped or self.failed
 
     @property
-    def ok(self):
-        """Return True if the step is finished (either COMPLETE or SKIPPED).
-
-        Returns:
-            bool
-
-        """
+    def ok(self) -> bool:
+        """Return True if the step is finished (either COMPLETE or SKIPPED)."""
         return self.completed or self.skipped
 
     @property
-    def submitted(self):
-        """Return True if the step is SUBMITTED, COMPLETE, or SKIPPED.
-
-        Returns:
-            bool
-
-        """
+    def submitted(self) -> bool:
+        """Return True if the step is SUBMITTED, COMPLETE, or SKIPPED."""
         return self.status >= SUBMITTED
 
-    def set_status(self, status):
+    def set_status(self, status: Status) -> None:
         """Set the current step's status.
 
         Args:
-            status (:class:`runway.cfngin.status.Status`): The status to set the
-                step to.
+            status: The status to set the step to.
 
         """
         if status is not self.status:
@@ -248,11 +219,11 @@ class Step:
             if self.stack.logging:
                 self.log_step()
 
-    def complete(self):
+    def complete(self) -> None:
         """Shortcut for ``set_status(COMPLETE)``."""
         self.set_status(COMPLETE)
 
-    def log_step(self):
+    def log_step(self) -> None:
         """Construct a log message for a set and log it to the UI."""
         msg = self.status.name
         if self.status.reason:
@@ -266,37 +237,37 @@ class Step:
         else:
             ui.info(msg, logger=self.logger)
 
-    def skip(self):
+    def skip(self) -> None:
         """Shortcut for ``set_status(SKIPPED)``."""
         self.set_status(SKIPPED)
 
-    def submit(self):
+    def submit(self) -> None:
         """Shortcut for ``set_status(SUBMITTED)``."""
         self.set_status(SUBMITTED)
 
     @classmethod
     def from_stack_name(
-        cls, stack_name, context, requires=None, fn=None, watch_func=None
-    ):
+        cls,
+        stack_name: str,
+        context: Context,
+        requires: Optional[Union[List[str], Set[str]]] = None,
+        fn: Callable = None,
+        watch_func: Callable = None,
+    ) -> Step:
         """Create a step using only a stack name.
 
         Args:
-            stack_name (str): Name of a CloudFormation stack.
-            context (:class:`runway.cfngin.context.Context`): Context object.
-                Required to initialize a "fake" :class:`runway.cfngin.stack.Stack`.
-            requires (List[str]): Stacks that this stack depends on.
-            fn (Callable): The function to run to execute the step.
-                This function will be ran multiple times until the step
-                is "done".
-            watch_func (Callable): an optional function that will be
-                called to "tail" the step action.
-
-        Returns:
-            :class:`Step`
+            stack_name: Name of a CloudFormation stack.
+            context: Context object. Required to initialize a "fake"
+                :class:`runway.cfngin.stack.Stack`.
+            requires: Stacks that this stack depends on.
+            fn: The function to run to execute the step.
+                This function will be ran multiple times until the step is "done".
+            watch_func: an optional function that will be called to "tail" the
+                step action.
 
         """
         # pylint: disable=import-outside-toplevel
-        from runway.cfngin.stack import Stack
         from runway.config.models.cfngin import CfnginStackDefinitionModel
 
         stack_def = CfnginStackDefinitionModel.construct(
@@ -306,35 +277,36 @@ class Step:
         return cls(stack, fn=fn, watch_func=watch_func)
 
     @classmethod
-    def from_persistent_graph(cls, graph_dict, context, fn=None, watch_func=None):
+    def from_persistent_graph(
+        cls,
+        graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
+        context: Context,
+        fn: Callable = None,
+        watch_func: Callable = None,
+    ) -> List[Step]:
         """Create a steps for a persistent graph dict.
 
         Args:
-            graph_dict (Dict[str, List[str]]): A graph dict.
-            context (:class:`runway.cfngin.context.Context`): Context object.
-                Required to initialize a "fake" :class:`runway.cfngin.stack.Stack`.
-            requires (List[str]): Stacks that this stack depends on.
-            fn (Callable): The function to run to execute the step.
-                This function will be ran multiple times until the step
-                is "done".
-            watch_func (Callable): an optional function that will be
-                called to "tail" the step action.
-
-        Returns:
-            List[:class:`Step`]
+            graph_dict: A graph dict.
+            context: Context object. Required to initialize a "fake"
+                :class:`runway.cfngin.stack.Stack`.
+            requires: Stacks that this stack depends on.
+            fn: The function to run to execute the step.
+                This function will be ran multiple times until the step is "done".
+            watch_func: an optional function that will be called to "tail" the
+                step action.
 
         """
-        steps = []
+        return [
+            cls.from_stack_name(name, context, requires, fn, watch_func)
+            for name, requires in graph_dict.items()
+        ]
 
-        for name, requires in graph_dict.items():
-            steps.append(cls.from_stack_name(name, context, requires, fn, watch_func))
-        return steps
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Object represented as a string."""
         return "<CFNgin.plan.Step:%s>" % (self.stack.name,)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Object displayed as a string."""
         return self.stack.name
 
@@ -347,49 +319,46 @@ class Graph:
     initialized with a set of steps, it will first build a Directed Acyclic
     Graph from the steps and their dependencies.
 
-    Attributes:
-        dag (:class:`runway.cfngin.dag.DAG`): an optional
-            :class:`runway.cfngin.dag.DAG` object. If one is not provided, a
-            new one will be initialized.
-        steps (Dict[str, :class:`Step`]): Dict with key of step name and
-            value of :class:`Step`.
-
     Example:
-
-    >>> dag = DAG()
-    >>> a = Step("a", fn=build)
-    >>> b = Step("b", fn=build)
-    >>> dag.add_step(a)
-    >>> dag.add_step(b)
-    >>> dag.connect(a, b)
+        >>> dag = DAG()
+        >>> a = Step("a", fn=build)
+        >>> b = Step("b", fn=build)
+        >>> dag.add_step(a)
+        >>> dag.add_step(b)
+        >>> dag.connect(a, b)
 
     """
 
-    def __init__(self, steps=None, dag=None):
+    dag: DAG
+    steps: Dict[str, Step]
+
+    def __init__(
+        self, steps: Optional[Dict[str, Step]] = None, dag: Optional[DAG] = None
+    ) -> None:
         """Instantiate class.
 
         Args:
-            steps (Optional[Dict[str, :class:`Step`]]): Dict with key of step
-                name and value of :class:`Step` for steps to initialize the
-                Graph with. Note that if this is provided, a pre-configured
-                :class:`runway.cfngin.dag.DAG` that already includes these
-                steps should also be provided..
-            dag (Optional[:class:`runway.cfngin.dag.DAG`]): An optional
-                :class:`runway.cfngin.dag.DAG` object. If one is not provided,
-                a new one will be initialized.
+            steps: Dict with key of step name and value of :class:`Step` for
+                steps to initialize the Graph with. Note that if this is provided,
+                a pre-configured :class:`runway.cfngin.dag.DAG` that already
+                includes these steps should also be provided..
+            dag: An optional :class:`runway.cfngin.dag.DAG` object. If one is
+                not provided, a new one will be initialized.
 
         """
         self.steps = steps or {}
         self.dag = dag or DAG()
 
-    def add_step(self, step, add_dependencies=False, add_dependants=False):
+    def add_step(
+        self, step: Step, add_dependencies: bool = False, add_dependants: bool = False
+    ) -> None:
         """Add a step to the graph.
 
         Args:
-            step (:class:`Step`): The step to be added.
-            add_dependencies (bool): Connect steps that need to be completed
-                before this step.
-            add_dependants (bool): Connect steps that require this step.
+            step: The step to be added.
+            add_dependencies: Connect steps that need to be completed before this
+                step.
+            add_dependants: Connect steps that require this step.
 
         """
         self.steps[step.name] = step
@@ -404,17 +373,17 @@ class Graph:
                 self.connect(parent, step.name)
 
     def add_step_if_not_exists(
-        self, step, add_dependencies=False, add_dependants=False
-    ):
+        self, step: Step, add_dependencies: bool = False, add_dependants: bool = False
+    ) -> None:
         """Try to add a step to the graph.
 
         Can be used when failure to add is acceptable.
 
         Args:
-            step (:class:`Step`): The step to be added.
-            add_dependencies (bool): Connect steps that need to be completed
-                before this step.
-            add_dependants (bool): Connect steps that require this step.
+            step: The step to be added.
+            add_dependencies: Connect steps that need to be completed before this
+                step.
+            add_dependants: Connect steps that require this step.
 
         """
         if self.steps.get(step.name):
@@ -437,11 +406,11 @@ class Graph:
                 except GraphError:
                     continue
 
-    def add_steps(self, steps):
+    def add_steps(self, steps: List[Step]) -> None:
         """Add a list of steps.
 
         Args:
-            steps (List[:class:`Step`]): The step to be added.
+            steps: The step to be added.
 
         """
         for step in steps:
@@ -454,26 +423,23 @@ class Graph:
             for parent in step.required_by:
                 self.connect(parent, step.name)
 
-    def pop(self, step, default=None):
+    def pop(self, step: Step, default: Any = None) -> Any:
         """Remove a step from the graph.
 
         Args:
-            step (:class:`Step`): The step to remove from the graph.
-            default (Any): Returned if the step could not be popped
-
-        Returns:
-            Any
+            step: The step to remove from the graph.
+            default: Returned if the step could not be popped
 
         """
         self.dag.delete_node_if_exists(step.name)
         return self.steps.pop(step.name, default)
 
-    def connect(self, step, dep):
+    def connect(self, step: str, dep: str) -> None:
         """Connect a dependency to a step.
 
         Args:
-            step (str): Step name to add a dependency to.
-            dep (str): Name of dependent step.
+            step: Step name to add a dependency to.
+            dep: Name of dependent step.
 
         """
         try:
@@ -483,7 +449,7 @@ class Graph:
         except DAGValidationError as err:
             raise GraphError(err, step, dep)
 
-    def transitive_reduction(self):
+    def transitive_reduction(self) -> None:
         """Perform a transitive reduction on the underlying DAG.
 
         The transitive reduction of a graph is a graph with as few edges as
@@ -494,22 +460,25 @@ class Graph:
         """
         self.dag.transitive_reduction()
 
-    def walk(self, walker, walk_func):
+    def walk(
+        self,
+        walker: Callable[[DAG, Callable[[str], Any]], Any],
+        walk_func: Callable[[Step], Any],
+    ) -> Any:
         """Walk the steps of the graph.
 
         Args:
-            walker (Callable[[:class:`runway.cfngin.dag.DAG`], Any]): Function
-                used to walk the steps.
-            walk_func (Callable[[:class:`Step`], Any]): Function called with a
-                :class:`Step` as the only argument for each step of the plan.
+            walker: Function used to walk the steps.
+            walk_func: Function called with a :class:`Step` as the only argument
+                for each step of the plan.
 
         """
 
-        def fn(step_name):
+        def fn(step_name: str) -> Any:
             """Get a step by step name and execute the ``walk_func`` on it.
 
             Args:
-                step_name (str): Name of a step.
+                step_name: Name of a step.
 
             """
             step = self.steps[step_name]
@@ -517,11 +486,11 @@ class Graph:
 
         return walker(self.dag, fn)
 
-    def downstream(self, step_name):
+    def downstream(self, step_name: str) -> List[Step]:
         """Return the direct dependencies of the given step."""
-        return list(self.steps[dep] for dep in self.dag.downstream(step_name))
+        return [self.steps[dep] for dep in self.dag.downstream(step_name)]
 
-    def transposed(self):
+    def transposed(self) -> Graph:
         """Return a "transposed" version of this graph.
 
         Useful for walking in reverse.
@@ -529,73 +498,61 @@ class Graph:
         """
         return Graph(steps=self.steps, dag=self.dag.transpose())
 
-    def filtered(self, step_names):
+    def filtered(self, step_names: List[str]) -> Graph:
         """Return a "filtered" version of this graph.
 
         Args:
-            step_names (List[str]): Steps to filter.
+            step_names: Steps to filter.
 
         """
         return Graph(steps=self.steps, dag=self.dag.filter(step_names))
 
-    def topological_sort(self):
-        """Perform a topological sort of the underlying DAG.
-
-        Returns:
-            List[Step]
-
-        """
+    def topological_sort(self) -> List[Step]:
+        """Perform a topological sort of the underlying DAG."""
         nodes = self.dag.topological_sort()
         return [self.steps[step_name] for step_name in nodes]
 
-    def to_dict(self):
+    def to_dict(self) -> OrderedDict[str, Set[str]]:
         """Return the underlying DAG as a dictionary."""
         return self.dag.graph
 
-    def dumps(self, indent=None):
+    def dumps(self, indent: Optional[int] = None) -> str:
         """Output the graph as a json seralized string for storage.
 
         Args:
-            indent (Optional[int]): Number of spaces for each indentation.
-
-        Returns:
-            str
+            indent: Number of spaces for each indentation.
 
         """
         return json.dumps(self.to_dict(), default=json_serial, indent=indent)
 
     @classmethod
-    def from_dict(cls, graph_dict, context):
+    def from_dict(
+        cls,
+        graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
+        context: Context,
+    ) -> Graph:
         """Create a Graph from a graph dict.
 
         Args:
-            graph_dict (Dict[str, List[str]]): The dictionary used to
-                create the graph.
-            context (:class:`runway.cfngin.context.Context`): Required to init
-                stacks.
-
-        Returns:
-            :class:`Graph`
+            graph_dict: The dictionary used to create the graph.
+            context: Required to init stacks.
 
         """
         return cls.from_steps(Step.from_persistent_graph(graph_dict, context))
 
     @classmethod
-    def from_steps(cls, steps):
+    def from_steps(cls, steps: List[Step]) -> Graph:
         """Create a Graph from Steps.
 
         Args:
-            steps (List[:class:`Step`]): Steps used to create the graph.
-
-        Returns:
-            :class:`Graph`
+            steps: Steps used to create the graph.
 
         """
         graph = cls()
         graph.add_steps(steps)
         return graph
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Object displayed as a string."""
         return self.dumps()
 
@@ -604,27 +561,39 @@ class Plan:
     """A convenience class for working on a Graph.
 
     Attributes:
-        context (:class:`runway.cfngin.context.Context`): Context object.
-        description (str): Plan description.
-        graph (Graph): Graph of the plan.
-        id (str): UUID for the plan.
-        reverse (bool): The graph has been transposed for walking in reverse.
-        require_unlocked (bool): Require the persistent graph to be unlocked
-            before executing steps.
+        context: Context object.
+        description: Plan description.
+        graph: Graph of the plan.
+        id: UUID for the plan.
+        reverse: The graph has been transposed for walking in reverse.
+        require_unlocked: Require the persistent graph to be unlocked before
+            executing steps.
 
     """
 
+    context: Optional[Context]
+    description: str
+    graph: Graph
+    id: uuid.UUID
+    require_unlocked: bool
+    reverse: bool
+
     def __init__(
-        self, description, graph, context=None, reverse=False, require_unlocked=True
-    ):
+        self,
+        description: str,
+        graph: Graph,
+        context: Optional[Context] = None,
+        reverse: bool = False,
+        require_unlocked: bool = True,
+    ) -> None:
         """Initialize class.
 
         Args:
-            description (str): Description of what the plan is going to do.
-            graph (:class:`Graph`): Local graph used for the plan.
-            context (:class:`runway.cfngin.context.Context`): Context object.
-            reverse (bool): Transpose the graph for walking in reverse.
-            require_unlocked (bool): Require the persistent graph to be
+            description: Description of what the plan is going to do.
+            graph: Local graph used for the plan.
+            context: Context object.
+            reverse: Transpose the graph for walking in reverse.
+            require_unlocked: Require the persistent graph to be
                 unlocked before executing steps.
 
         """
@@ -641,32 +610,33 @@ class Plan:
             self.locked = self.context.persistent_graph_locked
 
             if self.context.stack_names:
-                nodes = []
-                for target in self.context.stack_names:
-                    if graph.steps.get(target):
-                        nodes.append(target)
+                nodes = [
+                    target
+                    for target in self.context.stack_names
+                    if graph.steps.get(target)
+                ]
+
                 graph = graph.filtered(nodes)
         else:
             self.locked = False
 
         self.graph = graph
 
-    def outline(self, level=logging.INFO, message=""):
+    def outline(self, level: int = logging.INFO, message: str = ""):
         """Print an outline of the actions the plan is going to take.
 
         The outline will represent the rough ordering of the steps that will be
         taken.
 
         Args:
-            level (Optional[int]): a valid log level that should be used to log
+            level: a valid log level that should be used to log
                 the outline
-            message (Optional[str]): a message that will be logged to
+            message: a message that will be logged to
                 the user after the outline has been logged.
 
         """
-        steps = 1
         LOGGER.log(level, 'plan "%s":', self.description)
-        for step in self.steps:
+        for steps, step in enumerate(self.steps, start=1):
             LOGGER.log(
                 level,
                 '  - step: %s: target: "%s", action: "%s"',
@@ -674,20 +644,22 @@ class Plan:
                 step.name,
                 step.fn.__name__,
             )
-            steps += 1
-
         if message:
             LOGGER.log(level, message)
 
-    def dump(self, directory, context, provider=None):
+    def dump(
+        self,
+        *,
+        directory: str,
+        context: Context,
+        provider: Optional[BaseProvider] = None
+    ) -> Any:
         """Output the rendered blueprint for all stacks in the plan.
 
         Args:
-            directory (str): Directory where files will be created.
-            context (:class:`runway.cfngin.context.Contest`): Current CFNgin
-                context.
-            provider (:class:`runway.cfngin.providers.aws.default.Provider`):
-                Provider to use when resolving the blueprints.
+            directory: Directory where files will be created.
+            context: Current CFNgin context.
+            provider: Provider to use when resolving the blueprints.
 
         """
         LOGGER.info('dumping "%s"...', self.description)
@@ -695,8 +667,10 @@ class Plan:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        def walk_func(step):
+        def walk_func(step: Step) -> bool:
             """Walk function."""
+            if isinstance(step.stack, Target):
+                raise TypeError("step contains type Target; type Stack is required")
             step.stack.resolve(
                 context=context, provider=provider,
             )
@@ -716,7 +690,7 @@ class Plan:
 
         return self.graph.walk(walk, walk_func)
 
-    def execute(self, *args, **kwargs):
+    def execute(self, *args: Any, **kwargs: Any):
         """Walk each step in the underlying graph.
 
         Raises:
@@ -733,25 +707,22 @@ class Plan:
         if failed_steps:
             raise PlanFailed(failed_steps)
 
-    def walk(self, walker):
+    def walk(self, walker: Callable[..., Any]) -> Any:
         """Walk each step in the underlying graph, in topological order.
 
         Args:
-            walker (func): a walker function to be passed to
-                :class:`runway.cfngin.dag.DAG` to walk the graph.
+            walker: a walker function to be passed to :class:`runway.cfngin.dag.DAG`
+                to walk the graph.
 
         """
 
-        def walk_func(step):
+        def walk_func(step: Step) -> bool:
             """Execute a :class:`Step` wile walking the graph.
 
             Handles updating the persistent graph if one is being used.
 
             Args:
-                step (:class:`Step`): :class:`Step` to execute.
-
-            Returns:
-                bool
+                step: :class:`Step` to execute.
 
             """
             # Before we execute the step, we need to ensure that it's
@@ -789,42 +760,22 @@ class Plan:
         return self.graph.walk(walker, walk_func)
 
     @property
-    def lock_code(self):
-        """Code to lock/unlock the persistent graph.
-
-        Returns:
-            str
-
-        """
+    def lock_code(self) -> str:
+        """Code to lock/unlock the persistent graph."""
         return str(self.id)
 
     @property
-    def steps(self):
-        """Return a list of all steps in the plan.
-
-        Returns:
-            List[:class:`Step`]
-
-        """
+    def steps(self) -> List[Step]:
+        """Return a list of all steps in the plan."""
         steps = self.graph.topological_sort()
         steps.reverse()
         return steps
 
     @property
-    def step_names(self):
-        """Return a list of all step names.
-
-        Returns:
-            List[str]
-
-        """
+    def step_names(self) -> List[str]:
+        """Return a list of all step names."""
         return [step.name for step in self.steps]
 
-    def keys(self):
-        """Return a list of all step names.
-
-        Returns:
-            List[str]
-
-        """
+    def keys(self) -> List[str]:
+        """Return a list of all step names."""
         return self.step_names

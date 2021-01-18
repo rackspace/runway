@@ -18,12 +18,14 @@ repository_name (str)
           repository_name: example-repo
 
 """
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:
-    from mypy_boto3_ecr.client import ECRClient  # pylint: disable=E
-    from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef  # pylint: disable=E
+    from mypy_boto3_ecr.client import ECRClient
+    from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
 
     from ...context import Context
 
@@ -31,10 +33,8 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 def delete_ecr_images(
-    client,  # type: ECRClient
-    image_ids,  # type: List["ImageIdentifierTypeDef"]
-    repository_name,  # type: str
-):  # type: (...) -> None
+    client: ECRClient, image_ids: List[ImageIdentifierTypeDef], repository_name: str,
+) -> None:
     """Delete images from an ECR repository."""
     response = client.batch_delete_image(
         repositoryName=repository_name, imageIds=image_ids
@@ -51,9 +51,8 @@ def delete_ecr_images(
 
 
 def list_ecr_images(
-    client,  # type: "ECRClient"
-    repository_name,  # type: str
-):  # type: (...) -> List["ImageIdentifierTypeDef"]
+    client: ECRClient, repository_name: str,
+) -> List[ImageIdentifierTypeDef]:
     """List all images in an ECR repository."""
     image_ids = []
     try:
@@ -80,10 +79,8 @@ def list_ecr_images(
 
 
 def purge_repository(
-    context,  # type: "Context"
-    repository_name,  # type: str
-    **_  # type: Any
-):  # type: (...) -> Dict[str, str]
+    context: Context, repository_name: str, **_: Any,
+) -> Dict[str, str]:
     """Purge all images from an ECR repository."""
     client = context.get_session().client("ecr")
     image_ids = list_ecr_images(client, repository_name=repository_name)

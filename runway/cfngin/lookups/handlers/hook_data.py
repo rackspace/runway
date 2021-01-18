@@ -1,12 +1,18 @@
 """Hook data lookup."""
 # pylint: disable=arguments-differ,unused-argument
+from __future__ import annotations
+
 import logging
 import warnings
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from troposphere import BaseAWSObject
 
-from runway.lookups.handlers.base import LookupHandler
-from runway.util import DOC_SITE, MutableMap  # abs to support import through shim
+from ....lookups.handlers.base import LookupHandler
+from ....util import DOC_SITE, MutableMap
+
+if TYPE_CHECKING:
+    from ...context import Context
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "hook_data"
@@ -22,7 +28,7 @@ class HookDataLookup(LookupHandler):
     )
 
     @classmethod
-    def legacy_parse(cls, value):
+    def legacy_parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
         """Retain support for legacy lookup syntax.
 
         Args:
@@ -38,14 +44,12 @@ class HookDataLookup(LookupHandler):
         return "{}.{}".format(hook_name, key), {}
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value: str, context: Optional[Context] = None, **_: Any) -> Any:
         """Return the data from ``hook_data``.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
+            value: Parameter(s) given to this lookup.
+            context: Context instance.
 
         """
         try:
