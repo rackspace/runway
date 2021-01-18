@@ -2,11 +2,12 @@
 import logging
 import threading
 from getpass import getpass
+from typing import Any, Optional, TextIO, Union
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get_raw_input(message):
+def get_raw_input(message: str) -> str:
     """Just a wrapper for :func:`input` for testing purposes."""
     return input(message)
 
@@ -19,23 +20,28 @@ class UI:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate class."""
         self._lock = threading.RLock()
 
-    def lock(self, *_args, **_kwargs):
+    def lock(self, *_args: Any, **_kwargs: Any) -> bool:
         """Obtain an exclusive lock on the UI for the current thread."""
         return self._lock.acquire()
 
-    def log(self, lvl, msg, *args, logger=LOGGER, **kwargs):
+    def log(
+        self,
+        lvl: int,
+        msg: Union[Exception, str],
+        *args: Any,
+        logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+        **kwargs: Any
+    ) -> None:
         """Log the message if the current thread owns the underlying lock.
 
         Args:
-            lvl (int): Log level.
-            msg (Union[str, Exception]): String template or exception to use
-                for the log record.
-            logger (Union[logging.LoggerAdaptor, logging.Logger]): Specific
-                logger to log to.
+            lvl: Log level.
+            msg: String template or exception to use for the log record.
+            logger: Specific logger to log to.
 
         """
         self.lock()
@@ -44,24 +50,29 @@ class UI:
         finally:
             self.unlock()
 
-    def unlock(self, *_args, **_kwargs):
+    def unlock(self, *_args: Any, **_kwargs: Any) -> None:
         """Release the lock on the UI."""
         return self._lock.release()
 
-    def info(self, msg, *args, logger=LOGGER, **kwargs):
+    def info(
+        self,
+        msg: str,
+        *args: Any,
+        logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+        **kwargs: Any
+    ) -> None:
         """Log the line if the current thread owns the underlying lock.
 
         Args:
-            msg (Union[str, Exception]): String template or exception to use
+            msg: String template or exception to use
                 for the log record.
-            logger (Union[logging.LoggerAdaptor, logging.Logger]): Specific
-                logger to log to.
+            logger: Specific logger to log to.
 
         """
         kwargs["logger"] = logger
         self.log(logging.INFO, msg, *args, **kwargs)
 
-    def ask(self, message):
+    def ask(self, message: str) -> str:
         """Collect input from a user in a multithreaded environment.
 
         This wraps the built-in input function to ensure that only 1
@@ -76,11 +87,11 @@ class UI:
         finally:
             self.unlock()
 
-    def getpass(self, *args):
+    def getpass(self, prompt: str, stream: Optional[TextIO] = None) -> str:
         """Wrap getpass to lock the UI."""
         try:
             self.lock()
-            return getpass(*args)
+            return getpass(prompt, stream)
         finally:
             self.unlock()
 

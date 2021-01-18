@@ -4,7 +4,7 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import core
 
 
-class HelloConstruct(core.Construct):  # pylint: disable=too-few-public-methods
+class HelloConstruct(core.Construct):
     """My stack."""
 
     @property

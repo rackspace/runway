@@ -1,14 +1,21 @@
 """Test runway.core.components.deploy_environment."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
 import logging
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List
 
 import pytest
 from git.exc import InvalidGitRepositoryError
-from mock import MagicMock, patch
+from mock import MagicMock
 
 from runway.core.components import DeployEnvironment
+
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from pytest_mock import MockerFixture
 
 MODULE = "runway.core.components._deploy_environment"
 
@@ -22,7 +29,7 @@ TEST_CREDENTIALS = {
 class TestDeployEnvironment:
     """Test runway.core.components.DeployEnvironment."""
 
-    def test_init(self, cd_tmp_path):
+    def test_init(self, cd_tmp_path: Path) -> None:
         """Test attributes set by init."""
         new_dir = cd_tmp_path / "new_dir"
         obj = DeployEnvironment(
@@ -36,7 +43,7 @@ class TestDeployEnvironment:
         assert obj.root_dir == new_dir
         assert obj.vars == {"key": "val"}
 
-    def test_init_defaults(self, cd_tmp_path):
+    def test_init_defaults(self, cd_tmp_path: Path) -> None:
         """Test attributes set by init default values."""
         obj = DeployEnvironment()
 
@@ -45,12 +52,12 @@ class TestDeployEnvironment:
         assert obj.root_dir == cd_tmp_path
         assert obj.vars == os.environ
 
-    def test_boto3_credentials(self):
+    def test_boto3_credentials(self) -> None:
         """Test boto3_credentials."""
         obj = DeployEnvironment(environ=TEST_CREDENTIALS)
         assert obj.aws_credentials == TEST_CREDENTIALS
 
-    def test_aws_profile(self):
+    def test_aws_profile(self) -> None:
         """Test aws_profile."""
         env_vars = {"key": "val"}
         profile_name = "something"
@@ -62,27 +69,27 @@ class TestDeployEnvironment:
         assert obj.aws_profile == profile_name
         assert obj.vars["AWS_PROFILE"] == profile_name
 
-    def test_aws_region(self):
+    def test_aws_region(self) -> None:
         """Test aws_region."""
-        env_vars = {"AWS_REGION": "us-east-1", "AWS_DEFAULT_REGION": "us-west-2"}
+        env_vars = {"AWS_REGION": "ca-central-1", "AWS_DEFAULT_REGION": "us-west-2"}
         obj = DeployEnvironment(environ=env_vars)
 
-        assert obj.aws_region == "us-east-1"
+        assert obj.aws_region == "ca-central-1"
 
         del obj.vars["AWS_REGION"]
         assert obj.aws_region == "us-west-2"
 
         del obj.vars["AWS_DEFAULT_REGION"]
-        assert not obj.aws_region
+        assert obj.aws_region == "us-east-1"
 
         obj.aws_region = "us-east-1"
         assert obj.aws_region == "us-east-1"
         assert obj.vars["AWS_REGION"] == "us-east-1"
         assert obj.vars["AWS_DEFAULT_REGION"] == "us-east-1"
 
-    @patch(MODULE + ".git")
-    def test_branch_name(self, mock_git):
+    def test_branch_name(self, mocker: MockerFixture) -> None:
         """Test branch_name."""
+        mock_git = mocker.patch(f"{MODULE}.git")
         branch_name = "test"
         mock_repo = MagicMock()
         mock_repo.active_branch.name = branch_name
@@ -94,9 +101,9 @@ class TestDeployEnvironment:
             os.getcwd(), search_parent_directories=True
         )
 
-    @patch(MODULE + ".git")
-    def test_branch_name_invalid_repo(self, mock_git):
+    def test_branch_name_invalid_repo(self, mocker: MockerFixture) -> None:
         """Test branch_name handle InvalidGitRepositoryError."""
+        mock_git = mocker.patch(f"{MODULE}.git")
         mock_git.Repo.side_effect = InvalidGitRepositoryError
 
         obj = DeployEnvironment()
@@ -105,10 +112,12 @@ class TestDeployEnvironment:
             os.getcwd(), search_parent_directories=True
         )
 
-    def test_branch_name_no_git(self, monkeypatch, caplog):
+    def test_branch_name_no_git(
+        self, mocker: MockerFixture, caplog: LogCaptureFixture
+    ) -> None:
         """Test branch_name git ImportError."""
         caplog.set_level(logging.DEBUG, logger="runway.core.components")
-        monkeypatch.setattr(MODULE + ".git", object)
+        mocker.patch(f"{MODULE}.git", object)
         obj = DeployEnvironment()
 
         assert obj.branch_name is None
@@ -117,10 +126,12 @@ class TestDeployEnvironment:
             "to read the branch name"
         ) in caplog.messages
 
-    @patch(MODULE + ".git")
-    def test_branch_name_type_error(self, mock_git, caplog):
+    def test_branch_name_type_error(
+        self, mocker: MockerFixture, caplog: LogCaptureFixture
+    ) -> None:
         """Test branch_name handle TypeError."""
         caplog.set_level(logging.WARNING, logger="runway")
+        mock_git = mocker.patch(f"{MODULE}.git")
         mock_git.Repo.side_effect = TypeError
 
         with pytest.raises(SystemExit) as excinfo:
@@ -130,7 +141,7 @@ class TestDeployEnvironment:
         assert excinfo.value.code == 1
         assert "Unable to retrieve the current git branch name!" in caplog.messages
 
-    def test_ci(self):
+    def test_ci(self) -> None:
         """Test ci."""
         obj = DeployEnvironment(environ={})
 
@@ -144,7 +155,7 @@ class TestDeployEnvironment:
         assert not obj.ci
         assert "CI" not in obj.vars
 
-    def test_debug(self):
+    def test_debug(self) -> None:
         """Test debug."""
         obj = DeployEnvironment(environ={})
 
@@ -158,14 +169,14 @@ class TestDeployEnvironment:
         assert not obj.debug
         assert "DEBUG" not in obj.vars
 
-    def test_ignore_git_branch(self):
+    def test_ignore_git_branch(self) -> None:
         """Test ignore_git_branch."""
         obj = DeployEnvironment(environ={}, explicit_name="first")
 
         assert not obj.ignore_git_branch
         assert obj.name == "first"
 
-        obj._DeployEnvironment__name = "second"
+        obj._DeployEnvironment__name = "second"  # type: ignore
         obj.ignore_git_branch = False
         assert obj.name == "first"
         assert not obj.ignore_git_branch
@@ -179,7 +190,7 @@ class TestDeployEnvironment:
         obj.ignore_git_branch = False
         assert obj.name == "second"
 
-    def test_max_concurrent_cfngin_stacks(self):
+    def test_max_concurrent_cfngin_stacks(self) -> None:
         """Test max_concurrent_cfngin_stacks."""
         obj = DeployEnvironment(environ={})
 
@@ -187,12 +198,12 @@ class TestDeployEnvironment:
 
         obj.max_concurrent_cfngin_stacks = 5
         assert obj.max_concurrent_cfngin_stacks == 5
-        assert obj.vars["RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS"] == 5
+        assert obj.vars["RUNWAY_MAX_CONCURRENT_CFNGIN_STACKS"] == "5"
 
-    def test_max_concurrent_modules(self, monkeypatch):
+    def test_max_concurrent_modules(self, mocker: MockerFixture) -> None:
         """Test max_concurrent_modules."""
         mock_cpu_count = MagicMock(return_value=4)
-        monkeypatch.setattr(MODULE + ".os.cpu_count", mock_cpu_count)
+        mocker.patch(f"{MODULE}.os.cpu_count", mock_cpu_count)
         obj = DeployEnvironment(environ={})
 
         assert obj.max_concurrent_modules == 4
@@ -202,12 +213,12 @@ class TestDeployEnvironment:
 
         obj.max_concurrent_modules = 12
         assert obj.max_concurrent_modules == 12
-        assert obj.vars["RUNWAY_MAX_CONCURRENT_MODULES"] == 12
+        assert obj.vars["RUNWAY_MAX_CONCURRENT_MODULES"] == "12"
 
-    def test_max_concurrent_regions(self, monkeypatch):
+    def test_max_concurrent_regions(self, mocker: MockerFixture) -> None:
         """Test max_concurrent_regions."""
         mock_cpu_count = MagicMock(return_value=4)
-        monkeypatch.setattr(MODULE + ".os.cpu_count", mock_cpu_count)
+        mocker.patch(f"{MODULE}.os.cpu_count", mock_cpu_count)
         obj = DeployEnvironment(environ={})
 
         assert obj.max_concurrent_regions == 4
@@ -217,19 +228,19 @@ class TestDeployEnvironment:
 
         obj.max_concurrent_regions = 12
         assert obj.max_concurrent_regions == 12
-        assert obj.vars["RUNWAY_MAX_CONCURRENT_REGIONS"] == 12
+        assert obj.vars["RUNWAY_MAX_CONCURRENT_REGIONS"] == "12"
 
-    def test_name(self):
+    def test_name(self) -> None:
         """Test name."""
         obj = DeployEnvironment(explicit_name="test")
         assert obj.name == "test"
         assert obj.name_derived_from == "explicit"
 
-        obj.name = "test2"
+        obj.name = "test2"  # type: ignore
         assert obj.name == "test2"
 
         del obj.name
-        obj.name = "test3"
+        obj.name = "test3"  # type: ignore
         assert obj.name == "test3"
 
     @pytest.mark.parametrize(
@@ -241,11 +252,13 @@ class TestDeployEnvironment:
             ("invalid", {"CI": "1"}, "invalid"),
         ],
     )
-    def test_name_from_branch(self, branch, environ, expected, monkeypatch):
+    def test_name_from_branch(
+        self, branch: str, environ: Dict[str, str], expected: str, mocker: MockerFixture
+    ) -> None:
         """Test name from branch."""
         mock_prompt = MagicMock(return_value="user_value")
-        monkeypatch.setattr(MODULE + ".click.prompt", mock_prompt)
-        monkeypatch.setattr(DeployEnvironment, "branch_name", branch)
+        mocker.patch(f"{MODULE}.click.prompt", mock_prompt)
+        mocker.patch.object(DeployEnvironment, "branch_name", branch)
         obj = DeployEnvironment(environ=environ)
         assert obj.name == expected
         if expected == "user_value":
@@ -260,14 +273,16 @@ class TestDeployEnvironment:
         "root_dir, expected",
         [(Path.cwd() / "ENV-dev", "dev"), (Path.cwd() / "common", "common")],
     )
-    def test_name_from_directory(self, root_dir, expected, monkeypatch):
+    def test_name_from_directory(
+        self, root_dir: Path, expected: str, mocker: MockerFixture
+    ) -> None:
         """Test name from directory."""
-        monkeypatch.setattr(DeployEnvironment, "branch_name", None)
+        mocker.patch.object(DeployEnvironment, "branch_name", None)
         obj = DeployEnvironment(ignore_git_branch=True, root_dir=root_dir)
         assert obj.name == expected
         assert obj.name_derived_from == "directory"
 
-    def test_verbose(self):
+    def test_verbose(self) -> None:
         """Test verbose."""
         obj = DeployEnvironment(environ={})
 
@@ -281,9 +296,9 @@ class TestDeployEnvironment:
         assert not obj.verbose
         assert "VERBOSE" not in obj.vars
 
-    def test_copy(self, monkeypatch, tmp_path):
+    def test_copy(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test copy."""
-        monkeypatch.setattr(DeployEnvironment, "name", "test")
+        mocker.patch.object(DeployEnvironment, "name", "test")
         obj = DeployEnvironment(root_dir=tmp_path)
         obj_copy = obj.copy()
 
@@ -329,10 +344,16 @@ class TestDeployEnvironment:
             ),
         ],
     )
-    def test_log_name(self, derived_from, expected, caplog, monkeypatch):
+    def test_log_name(
+        self,
+        derived_from: str,
+        expected: List[str],
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+    ) -> None:
         """Test log_name."""
         caplog.set_level(logging.INFO, logger="runway")
-        monkeypatch.setattr(DeployEnvironment, "name", "test")
+        mocker.patch.object(DeployEnvironment, "name", "test")
         obj = DeployEnvironment()
         obj.name_derived_from = derived_from
         obj.log_name()

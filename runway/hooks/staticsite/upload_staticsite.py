@@ -1,33 +1,42 @@
 """CFNgin hook for syncing static website to S3 bucket."""
 # TODO move to runway.cfngin.hooks on next major release
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
 import os
 import time
 from operator import itemgetter
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import yaml
 
-from ...cfngin.lookups.handlers.output import OutputLookup
 from ...core.providers import aws
+
+if TYPE_CHECKING:
+    from boto3.session import Session
+
+    from ...cfngin.context import Context
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get_archives_to_prune(archives, hook_data):
+def get_archives_to_prune(
+    archives: List[Dict[str, Any]], hook_data: Dict[str, Any]
+) -> List[str]:
     """Return list of keys to delete.
 
     Args:
-        archives (Dict): The full list of file archives
-        hook_data (Dict): CFNgin hook data
+        archives: The full list of file archives
+        hook_data: CFNgin hook data
 
     """
-    files_to_skip = []
-
-    for i in ["current_archive_filename", "old_archive_filename"]:
-        if hook_data.get(i):
-            files_to_skip.append(hook_data[i])
+    files_to_skip = [
+        hook_data[i]
+        for i in ["current_archive_filename", "old_archive_filename"]
+        if hook_data.get(i)
+    ]
 
     archives.sort(  # sort from oldest to newest
         key=itemgetter("LastModified"), reverse=False
@@ -37,31 +46,44 @@ def get_archives_to_prune(archives, hook_data):
     return [i["Key"] for i in archives[:-15] if i["Key"] not in files_to_skip]
 
 
-def sync(context, provider, **kwargs):
+def sync(
+    context: Context,
+    *,
+    bucket_name: str,
+    cf_disabled: bool = False,
+    distribution_domain: Optional[str] = None,
+    distribution_id: Optional[str] = None,
+    distribution_path: str = "/*",
+    extra_files: Optional[List[Dict[str, Optional[Union[Dict[str, Any], str]]]]] = None,
+    website_url: Optional[str] = None,
+    **_: Any
+) -> bool:
     """Sync static website to S3 bucket.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance.
+        context: The context instance.
+        bucket_name: S3 bucket name.
+        cf_disabled: Disable the use of CloudFront.
+        distribution_domain: Domain of the CloudFront distribution.
+        distribution_id: CloudFront distribution ID.
+        distribution_path: Path in the CloudFront distribution to invalidate.
+        extra_files: Extra files to sync to the S3 bucket.
+        website_url: S3 bucket website URL.
 
     """
+    extra_files = extra_files or []
     session = context.get_session()
-    bucket_name = OutputLookup.handle(
-        kwargs.get("bucket_output_lookup"), provider=provider, context=context
-    )
     build_context = context.hook_data["staticsite"]
     invalidate_cache = False
 
-    extra_files = sync_extra_files(
+    synced_extra_files = sync_extra_files(
         context,
         bucket_name,
-        kwargs.get("extra_files", []),
+        extra_files,
         hash_tracking_parameter=build_context.get("hash_tracking_parameter"),
     )
 
-    if extra_files:
+    if synced_extra_files:
         invalidate_cache = True
 
     if build_context["deploy_is_current"]:
@@ -78,19 +100,22 @@ def sync(context, provider, **kwargs):
             "--delete",
         ]
 
-        for extra_file in [f["name"] for f in kwargs.get("extra_files", [])]:
+        for extra_file in [f["name"] for f in extra_files]:
             sync_args.extend(["--exclude", extra_file])
 
         aws.cli(sync_args)
 
         invalidate_cache = True
 
-    if kwargs.get("cf_disabled", False):
-        display_static_website_url(kwargs.get("website_url"), provider, context)
-
+    if cf_disabled:
+        LOGGER.info("STATIC WEBSITE URL: %s", website_url)
     elif invalidate_cache:
-        distribution = get_distribution_data(context, provider, **kwargs)
-        invalidate_distribution(session, **distribution)
+        invalidate_distribution(
+            session,
+            identifier=distribution_id,
+            domain=distribution_domain,
+            path=distribution_path,
+        )
 
     LOGGER.info("sync complete")
 
@@ -102,28 +127,12 @@ def sync(context, provider, **kwargs):
     return True
 
 
-def display_static_website_url(website_url_handle, provider, context):
-    """Based on the url handle display the static website url.
-
-    Args:
-        website_url_handle (str): the Output handle for the website url
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance.
-        context (:class:`runway.cfngin.context.Context`): context instance
-
-    """
-    bucket_url = OutputLookup.handle(
-        website_url_handle, provider=provider, context=context
-    )
-    LOGGER.info("STATIC WEBSITE URL: %s", bucket_url)
-
-
-def update_ssm_hash(context, session):
+def update_ssm_hash(context: Context, session: Session) -> bool:
     """Update the SSM hash with the new tracking data.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): context instance
-        session (:class:`runway.cfngin.session.Session`): CFNgin session
+        context: Context instance.
+        session: boto3 session.
 
     """
     build_context = context.hook_data["staticsite"]
@@ -144,40 +153,16 @@ def update_ssm_hash(context, session):
     return True
 
 
-def get_distribution_data(context, provider, **kwargs):
-    """Retrieve information about the distribution.
-
-    Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-            The provider instance
-
-    """
-    LOGGER.verbose("retrieved distribution data")
-    return {
-        "identifier": OutputLookup.handle(
-            kwargs.get("distributionid_output_lookup"),
-            provider=provider,
-            context=context,
-        ),
-        "domain": OutputLookup.handle(
-            kwargs.get("distributiondomain_output_lookup"),
-            provider=provider,
-            context=context,
-        ),
-        "path": kwargs.get("distribution_path", "/*"),
-    }
-
-
-def invalidate_distribution(session, identifier="", path="", domain="", **_):
+def invalidate_distribution(
+    session: Session, *, domain="", identifier="", path="", **_
+) -> bool:
     """Invalidate the current distribution.
 
     Args:
-        session (Session): The current CFNgin session.
-        identifier (string): The distribution id.
-        path (string): The distribution path.
-        domain (string): The distribution domain.
+        session: The current CFNgin session.
+        domain: The distribution domain.
+        identifier: The distribution id.
+        path: The distribution path.
 
     """
     LOGGER.info("invalidating CloudFront distribution: %s (%s)", identifier, domain)
@@ -194,14 +179,12 @@ def invalidate_distribution(session, identifier="", path="", domain="", **_):
     return True
 
 
-def prune_archives(context, session):
+def prune_archives(context: Context, session: Session) -> bool:
     """Prune the archives from the bucket.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        session (:class:`runway.cfngin.session.Session`): The CFNgin
-            session.
+        context: The context instance.
+        session: The CFNgin session.
 
     """
     LOGGER.info("cleaning up old site archives...")
@@ -228,17 +211,19 @@ def prune_archives(context, session):
     return True
 
 
-def auto_detect_content_type(filename):
+def auto_detect_content_type(filename: Optional[str]) -> Optional[str]:
     """Auto detects the content type based on the filename.
 
     Args:
-        filename (str): A filename to use to auto detect the content type.
+        filename : A filename to use to auto detect the content type.
 
     Returns:
-        str: The content type of the file. None if the content type
-        could not be detected.
+        The content type of the file. None if the content type could not be detected.
 
     """
+    if not filename:
+        return None
+
     _, ext = os.path.splitext(filename)
 
     if ext == ".json":
@@ -250,33 +235,38 @@ def auto_detect_content_type(filename):
     return None
 
 
-def get_content_type(extra_file):
+def get_content_type(
+    extra_file: Dict[str, Optional[Union[Dict[str, Any], str]]]
+) -> Optional[str]:
     """Return the content type of the file.
 
     Args:
-        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file
-            configuration.
+        extra_file: The extra file configuration.
 
     Returns:
-        str: The content type of the extra file. If 'content_type' is
-        provided then that is returned, otherways it is auto detected
-        based on the name.
+        The content type of the extra file. If 'content_type' is provided then
+        that is returned, otherways it is auto detected based on the name.
 
     """
-    return extra_file.get(
-        "content_type", auto_detect_content_type(extra_file.get("name"))
+    return cast(
+        Optional[str],
+        extra_file.get(
+            "content_type",
+            auto_detect_content_type(cast(Optional[str], extra_file.get("name"))),
+        ),
     )
 
 
-def get_content(extra_file):
+def get_content(
+    extra_file: Dict[str, Optional[Union[Dict[str, Any], str]]]
+) -> Optional[str]:
     """Get serialized content based on content_type.
 
     Args:
-        extra_file (Dict[str, Union[str, Dict[Any]]]): The extra file
-            configuration.
+        extra_file: The extra file configuration.
 
     Returns:
-        str: Serialized content based on the content_type.
+        Serialized content based on the content_type.
 
     """
     content_type = extra_file.get("content_type")
@@ -297,10 +287,12 @@ def get_content(extra_file):
         if not isinstance(content, str):
             raise TypeError("unsupported content: %s" % type(content))
 
-    return content
+    return cast(str, content)
 
 
-def calculate_hash_of_extra_files(extra_files):
+def calculate_hash_of_extra_files(
+    extra_files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]]
+) -> str:
     """Return a hash of all of the given extra files.
 
     Adapted from stacker.hooks.aws_lambda; used according to its license:
@@ -310,16 +302,15 @@ def calculate_hash_of_extra_files(extra_files):
     name, content_type, content, and file data.
 
     Args:
-        extra_files (List[Dict[str, Union[str, Dict[Any]]]]): The list of
-            extra file configurations.
+        extra_files: The list of extra file configurations.
 
     Returns:
-        str: The hash of all the files.
+        The hash of all the files.
 
     """
     file_hash = hashlib.md5()
 
-    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file["name"]):
+    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file["name"]):  # type: ignore  # noqa
         file_hash.update((extra_file["name"] + "\0").encode())
 
         if extra_file.get("content_type"):
@@ -343,15 +334,15 @@ def calculate_hash_of_extra_files(extra_files):
     return file_hash.hexdigest()
 
 
-def get_ssm_value(session, name):
+def get_ssm_value(session: Session, name: str) -> Optional[str]:
     """Get the ssm parameter value.
 
     Args:
-        session (:class:`runway.cfngin.session.Session`): The CFNgin session.
-        name (str): The parameter name.
+        session: The boto3 session.
+        name: The parameter name.
 
     Returns:
-        str: The parameter value.
+        The parameter value.
 
     """
     ssm_client = session.client("ssm")
@@ -362,14 +353,16 @@ def get_ssm_value(session, name):
         return None
 
 
-def set_ssm_value(session, name, value, description=""):
+def set_ssm_value(
+    session: Session, name: str, value: Any, description: str = ""
+) -> None:
     """Set the ssm parameter.
 
     Args:
-        session (:class:`runway.cfngin.session.Session`): The CFNgin session.
-        name (str): The name of the parameter.
-        value (str): The value of the parameter.
-        description (str): A description of the parameter.
+        session: The boto3 session.
+        name: The name of the parameter.
+        value: The value of the parameter.
+        description: A description of the parameter.
 
     """
     ssm_client = session.client("ssm")
@@ -379,15 +372,18 @@ def set_ssm_value(session, name, value, description=""):
     )
 
 
-def sync_extra_files(context, bucket, extra_files, **kwargs):
+def sync_extra_files(
+    context: Context,
+    bucket: str,
+    extra_files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]],
+    **kwargs: Any
+) -> List[str]:
     """Sync static website extra files to S3 bucket.
 
     Args:
-        context (:class:`runway.cfngin.context.Context`): The context
-            instance.
-        bucket (str): The static site bucket name.
-        extra_files (List[Dict[str, str]]): List of files and file content
-            that should be uploaded.
+        context: The context instance.
+        bucket: The static site bucket name.
+        extra_files: List of files and file content that should be uploaded.
 
     """
     LOGGER.debug("extra_files to sync: %s", json.dumps(extra_files))
@@ -399,7 +395,7 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
     s3_client = session.client("s3")
     uploaded = []
 
-    hash_param = kwargs.get("hash_tracking_parameter")
+    hash_param = cast(str, kwargs.get("hash_tracking_parameter", ""))
     hash_new = None
 
     # serialize content based on content type
@@ -433,7 +429,10 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
             LOGGER.info("uploading extra file: %s", filename)
 
             s3_client.put_object(
-                Bucket=bucket, Key=filename, Body=content, ContentType=content_type
+                Bucket=bucket,
+                Key=cast(str, filename),
+                Body=cast(str, content).encode(),
+                ContentType=cast(str, content_type),
             )
 
             uploaded.append(filename)
@@ -446,7 +445,9 @@ def sync_extra_files(context, bucket, extra_files, **kwargs):
             if content_type:
                 extra_args = {"ContentType": content_type}
 
-            s3_client.upload_file(source, bucket, filename, ExtraArgs=extra_args)
+            s3_client.upload_file(
+                cast(str, source), bucket, cast(str, filename), ExtraArgs=extra_args
+            )
 
             uploaded.append(filename)
 

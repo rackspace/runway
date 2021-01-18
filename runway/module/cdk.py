@@ -1,8 +1,12 @@
 """CDK module."""
+from __future__ import annotations
+
 import logging
 import os
 import subprocess
 import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
 from ..util import change_dir, run_commands, which
@@ -14,10 +18,15 @@ from . import (
     warn_on_boto_env_vars,
 )
 
+if TYPE_CHECKING:
+    from ..context import Context
+
 LOGGER = logging.getLogger(__name__)
 
 
-def get_cdk_stacks(module_path, env_vars, context_opts):
+def get_cdk_stacks(
+    module_path: Path, env_vars: Dict[str, str], context_opts: List[str]
+) -> List[str]:
     """Return list of CDK stacks."""
     LOGGER.debug("listing stacks in the CDK app prior to diff...")
     result = subprocess.check_output(
@@ -36,22 +45,32 @@ def get_cdk_stacks(module_path, env_vars, context_opts):
 class CloudDevelopmentKit(RunwayModule):
     """CDK Runway Module."""
 
-    def __init__(self, context, path, options=None):
+    def __init__(
+        self,
+        context: Context,
+        path: Path,
+        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            path (Union[str, Path]): Path to the module.
-            options (Dict[str, Dict[str, Any]]): Everything in the module
-                definition merged with applicable values from the deployment
-                definition.
+            context: Runway context object.
+            path: Path to the module.
+            options: Everything in the module definition merged with applicable
+                values from the deployment definition.
 
         """
         super().__init__(context, path, options)
+        self._raw_path = (
+            Path(cast(str, options.pop("path"))) if options.get("path") else None
+        )
+        self.path = path if isinstance(self.path, Path) else Path(self.path)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
-    def run_cdk(self, command="deploy"):  # pylint: disable=too-many-branches
+    def run_cdk(  # pylint: disable=too-many-branches
+        self, command: str = "deploy"
+    ) -> Dict[str, bool]:
         """Run CDK."""
         response = {"skipped_configs": False}
         cdk_opts = [command]
@@ -76,18 +95,22 @@ class CloudDevelopmentKit(RunwayModule):
                     run_npm_install(
                         self.path, self.options, self.context, logger=self.logger
                     )
-                    if self.options.get("options", {}).get("build_steps", []):
+                    if cast(Dict[str, Any], self.options.get("options", {})).get(
+                        "build_steps", []
+                    ):
                         self.logger.info("build steps (in progress)")
                         run_commands(
-                            commands=self.options.get("options", {}).get(
-                                "build_steps", []
-                            ),
-                            directory=self.path,
+                            commands=cast(
+                                Dict[str, Any], self.options.get("options", {})
+                            ).get("build_steps", []),
+                            directory=str(self.path),
                             env=self.context.env.vars,
                         )
                         self.logger.info("build steps (complete)")
                     cdk_context_opts = []
-                    for (key, val) in self.options["parameters"].items():
+                    for key, val in cast(
+                        Dict[str, str], self.options["parameters"]
+                    ).items():
                         cdk_context_opts.extend(["-c", "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)
                     if command == "diff":
@@ -145,14 +168,14 @@ class CloudDevelopmentKit(RunwayModule):
             response["skipped_configs"] = True
         return response
 
-    def plan(self):
+    def plan(self) -> None:
         """Run cdk diff."""
         self.run_cdk(command="diff")
 
-    def deploy(self):
+    def deploy(self) -> None:
         """Run cdk deploy."""
         self.run_cdk(command="deploy")
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Run cdk destroy."""
         self.run_cdk(command="destroy")

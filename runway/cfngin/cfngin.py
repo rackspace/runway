@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from yaml.constructor import ConstructorError
 
@@ -19,37 +19,43 @@ from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
 
 if TYPE_CHECKING:
+    from .._logging import RunwayLogger
     from ..context import Context as RunwayContext
 
 # explicitly name logger so its not redundant
-LOGGER = logging.getLogger("runway.cfngin")
+LOGGER = cast("RunwayLogger", logging.getLogger("runway.cfngin"))
 
 
 class CFNgin:
     """Control CFNgin.
 
     Attributes:
-        concurrency (int): Max number of CFNgin stacks that can be deployed
-            concurrently. If the value is ``0``, will be constrained based on
-            the underlying graph.
-        interactive (bool): Whether or not to prompt the user before taking
-            action.
-        parameters (MutableMap): Combination of the parameters provided when
-            initalizing the class and any environment files that are found.
-        recreate_failed (bool): Destroy and re-create stacks that are stuck in
+        concurrency: Max number of CFNgin stacks that can be deployed concurrently.
+            If the value is ``0``, will be constrained based on the underlying graph.
+        interactive: Whether or not to prompt the user before taking action.
+        parameters: Combination of the parameters provided when initalizing the
+            class and any environment files that are found.
+        recreate_failed: Destroy and re-create stacks that are stuck in
             a failed state from an initial deployment when updating.
-        region (str): The AWS region where CFNgin is currently being executed.
-        sys_path (str): Working directory.
-        tail (bool): Whether or not to display all CloudFormation events in the
-            terminal.
+        region: The AWS region where CFNgin is currently being executed.
+        sys_path: Working directory.
+        tail: Whether or not to display all CloudFormation events in the terminal.
 
     """
+
+    concurrency: int
+    interactive: bool
+    parameters: MutableMap
+    recreate_failed: bool
+    region: str
+    sys_path: Path
+    tail: bool
 
     def __init__(
         self,
         ctx: RunwayContext,
         parameters: Optional[Dict[str, Any]] = None,
-        sys_path: Optional[Path] = Path.cwd(),
+        sys_path: Path = Path.cwd(),
     ) -> None:
         """Instantiate class.
 
@@ -66,7 +72,7 @@ class CFNgin:
         self.parameters = MutableMap()
         self.recreate_failed = ctx.is_noninteractive
         self.region = ctx.env_region
-        self.sys_path = sys_path if isinstance(sys_path, Path) else Path(sys_path)
+        self.sys_path = sys_path
         self.tail = bool(ctx.env.debug or ctx.env.verbose)
 
         self.parameters.update(self.env_file)
@@ -224,11 +230,8 @@ class CFNgin:
         """Determine if action should be taken or not.
 
         Args:
-            force (bool): If ``True``, will always return ``False`` meaning
+            force: If ``True``, will always return ``False`` meaning
                 the action should not be skipped.
-
-        Returns:
-            bool: Skip action or not.
 
         """
         if force or self.env_file:
@@ -240,8 +243,8 @@ class CFNgin:
         """Initialize a CFNgin config object from a file.
 
         Args:
-            file_path (str): Path to the config file to load.
-            validate (bool): Validate the loaded config.
+            file_path: Path to the config file to load.
+            validate: Validate the loaded config.
 
         """
         return CfnginConfig.parse_file(file_path=file_path, parameters=self.parameters)
@@ -257,7 +260,7 @@ class CFNgin:
         return CFNginContext(
             boto3_credentials=self.__ctx.boto3_credentials,
             config=config,
-            config_path=config_path,
+            config_path=str(config_path),
             environment=self.parameters,
             force_stacks=[],  # placeholder
             region=self.region,

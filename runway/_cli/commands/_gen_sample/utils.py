@@ -3,6 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 
+import click
 from cfn_flip import to_yaml
 
 from ....blueprints.tf_state import TfState
@@ -13,14 +14,14 @@ ROOT = Path(__file__).parent.parent.parent.parent
 TEMPLATES = ROOT / "templates"
 
 
-def convert_gitignore(src):
+def convert_gitignore(src: Path) -> Path:
     """Rename a gitignore template.
 
     Keyword Args:
-        src (Path): Path object for source file.
+        Path object for source file.
 
     Returns:
-        Optional[Path]: The renamed file if it was created.
+        The renamed file if it was created.
 
     """
     gitignore = src.parent / ".gitignore"
@@ -29,13 +30,13 @@ def convert_gitignore(src):
     return gitignore
 
 
-def copy_sample(ctx, src, dest):
+def copy_sample(ctx: click.Context, src: Path, dest: Path) -> None:
     """Copy a sample directory.
 
     Args:
-        ctx (click.Context): Click context object.
-        src (Path): Source path.
-        dest (Path): Destination path.
+        ctx: Click context object.
+        src: Source path.
+        dest: Destination path.
 
     """
     if dest.exists():
@@ -45,15 +46,18 @@ def copy_sample(ctx, src, dest):
     shutil.copytree(src, dest)
 
 
-def write_tfstate_template(dest):
-    # type: (Path) -> None
+def write_tfstate_template(dest: Path) -> None:
     """Write TfState blueprint as a YAML CFN template.
 
     Args:
-        dest (Path): File to be written to.
+        dest: File to be written to.
 
     """
     LOGGER.debug('writing TfState as a YAML template to "%s"', dest)
     dest.write_text(
-        to_yaml(TfState("test", CFNginContext({"namespace": "test"}), None).to_json())
+        to_yaml(
+            TfState(
+                "test", CFNginContext(environment={"namespace": "test"}), None
+            ).to_json()
+        )
     )

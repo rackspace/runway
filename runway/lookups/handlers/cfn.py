@@ -42,6 +42,8 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 
 """
 # pylint: disable=arguments-differ
+from __future__ import annotations
+
 import json
 import logging
 from collections import namedtuple
@@ -55,6 +57,8 @@ from runway.exceptions import OutputDoesNotExist
 from .base import LookupHandler
 
 if TYPE_CHECKING:
+    from mypy_boto3_cloudformation.client import CloudFormationClient
+
     from runway.cfngin.context import Context as CFNginContext
     from runway.cfngin.providers.aws.default import Provider
     from runway.context import Context as RunwayContext
@@ -69,8 +73,7 @@ class CfnLookup(LookupHandler):
     """CloudFormation Stack Output lookup."""
 
     @staticmethod
-    def should_use_provider(args, provider):
-        # type: (Dict[str, str], Optional['Provider']) -> bool
+    def should_use_provider(args: Dict[str, str], provider: Optional[Provider]) -> bool:
         """Determine if the provider should be used for the lookup.
 
         This will open happen when the lookup is used with CFNgin.
@@ -89,15 +92,12 @@ class CfnLookup(LookupHandler):
         return False
 
     @staticmethod
-    def get_stack_output(client, query):
+    def get_stack_output(client: CloudFormationClient, query: OutputQuery) -> str:
         """Get CloudFormation Stack output.
 
         Args:
             client: Boto3 CloudFormation client.
-            query (OutputQuery): What to get.
-
-        Returns:
-            str: Value of the requested output.
+            query: What to get.
 
         """
         LOGGER.debug("describing stack: %s", query.stack_name)
@@ -112,12 +112,11 @@ class CfnLookup(LookupHandler):
     @classmethod
     def handle(
         cls,
-        value,  # type: str
-        context,  # type: Union['CFNginContext', 'RunwayContext']
-        provider=None,  # type: Optional['Provider']
-        **_  # type: Any
-    ):
-        # type: (...) -> Any
+        value: str,
+        context: Union[CFNginContext, RunwayContext],
+        provider: Optional[Provider] = None,
+        **_: Any,
+    ) -> Any:
         """Retrieve a value from CloudFormation Stack outputs.
 
         Args:

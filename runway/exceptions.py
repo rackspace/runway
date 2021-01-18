@@ -133,12 +133,12 @@ class InvalidLookupConcatenation(Exception):
 class OutputDoesNotExist(Exception):
     """Raised when a specific stack output does not exist."""
 
-    def __init__(self, stack_name, output, *args, **kwargs):
+    def __init__(self, stack_name: str, output: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            stack_name (str): Name of the stack.
-            output (str): The output that does not exist.
+            stack_name: Name of the stack.
+            output: The output that does not exist.
 
         """
         self.stack_name = stack_name
@@ -213,7 +213,7 @@ class UnresolvedVariableValue(Exception):
 class VariablesFileNotFound(Exception):
     """Defined variables file could not be found."""
 
-    file_path: List[str]
+    file_path: Path
     message: str
 
     def __init__(self, file_path: Path) -> None:

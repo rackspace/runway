@@ -76,28 +76,32 @@ class TestRunwayDeploymentDefinition:
         """Test modules.setter."""
         obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
         new_modules = [
-            RunwayModuleDefinitionModel(path="./", name="test-01"),
+            RunwayModuleDefinition.parse_obj({"path": "./", "name": "test-01"}),
             RunwayModuleDefinition.parse_obj({"name": "test-02", "path": "./"}),
         ]
         obj.modules = new_modules
-        assert obj._data.modules[0] == new_modules[0]
+        assert obj._data.modules[0] == new_modules[0].data
         assert obj._data.modules[1] == new_modules[1].data
 
     def test_modules_setter_not_list(self) -> None:
         """Test modules.setter not a list."""
         obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
         with pytest.raises(TypeError):
-            obj.modules = "invalid"
+            obj.modules = "invalid"  # type: ignore
         with pytest.raises(TypeError):
-            obj.modules = {"key": "val"}
+            obj.modules = {"key": "val"}  # type: ignore
         with pytest.raises(TypeError):
-            obj.modules = None
+            obj.modules = None  # type: ignore
+        with pytest.raises(TypeError):
+            obj.modules = [  # type: ignore
+                RunwayDeploymentDefinitionModel(name="test-01", regions=["us-east-1"])
+            ]
 
     def test_models_setter_invalid_list_item(self) -> None:
         """Test modules.setter when list item is now supported."""
         with pytest.raises(TypeError):
             obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
-            obj.modules = [RunwayModuleDefinitionModel(path="./"), "invalid"]
+            obj.modules = [RunwayModuleDefinitionModel(path="./"), "invalid"]  # type: ignore
 
     def test_parse_obj(self) -> None:
         """Test parse_obj."""

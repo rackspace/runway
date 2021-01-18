@@ -1,32 +1,37 @@
 """Tests for lookup handler for var."""
-from unittest import TestCase
+# pylint: disable=no-self-use,unused-argument
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import pytest
 
 from runway.lookups.handlers.var import VarLookup
 from runway.util import MutableMap
 
+if TYPE_CHECKING:
+    from ...factories import MockRunwayContext
+
 VARIABLES = MutableMap(**{"str_val": "test", "false_val": False})
 
 
-class TestVarLookup(TestCase):
+class TestVarLookup:
     """Tests for VarLookup."""
 
-    def test_handle(self):
+    def test_handle(self, runway_context: MockRunwayContext) -> None:
         """Validate handle base functionality."""
-        query = "str_val"
-        result = VarLookup.handle(query, context=None, variables=VARIABLES)
+        assert (
+            VarLookup.handle("str_val", context=runway_context, variables=VARIABLES)
+            == "test"
+        )
 
-        self.assertEqual(result, "test")
-
-    def test_handle_false_result(self):
+    def test_handle_false_result(self, runway_context: MockRunwayContext) -> None:
         """Validate that a bool value of False can be resolved."""
-        query = "false_val"
-        result = VarLookup.handle(query, context=None, variables=VARIABLES)
+        assert not VarLookup.handle(
+            "false_val", context=runway_context, variables=VARIABLES
+        )
 
-        self.assertFalse(result)
-
-    def test_handle_not_found(self):
+    def test_handle_not_found(self, runway_context: MockRunwayContext) -> None:
         """Validate exception when lookup cannot be resolved."""
-        query = "NOT_VALID"
-
-        with self.assertRaises(ValueError):
-            VarLookup.handle(query, context=None, variables=VARIABLES)
+        with pytest.raises(ValueError):
+            VarLookup.handle("NOT_VALID", context=runway_context, variables=VARIABLES)

@@ -1,4 +1,6 @@
 """CFNgin prehook responsible for creation of Lambda@Edge functions."""
+from __future__ import annotations
+
 import logging
 import os
 import re
@@ -7,13 +9,13 @@ import shutil
 import tempfile
 from distutils.dir_util import copy_tree
 from tempfile import mkstemp
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ....cfngin.hooks import aws_lambda
 
 if TYPE_CHECKING:
-    from runway.cfngin.context import Context
-    from runway.cfngin.providers.base import BaseProvider
+    from ....cfngin.context import Context
+    from ....cfngin.providers.aws.default import Provider
 
 # The functions associated with Auth@Edge
 FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_headers"]
@@ -22,12 +24,22 @@ FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_heade
 LOGGER = logging.getLogger(__name__)
 
 
-def write(
-    context,  # type: Context
-    provider,  # type: BaseProvider
-    **kwargs  # type: Any
-):
-    # type: (...) -> Dict[str, Any]
+def write(  # pylint: disable=too-many-locals
+    context: Context,
+    *,
+    bucket: str,
+    client_id: str,
+    cookie_settings: Dict[str, Any],
+    http_headers: Dict[str, Any],
+    nonce_signing_secret_param_name: str,
+    oauth_scopes: List[str],
+    provider: Provider,
+    redirect_path_refresh: str,
+    redirect_path_sign_in: str,
+    redirect_path_sign_out: str,
+    required_group: Optional[str] = None,
+    **_: Any,
+) -> Dict[str, Any]:
     """Writes/Uploads the configured lambdas for Auth@Edge.
 
     Lambda@Edge does not have the ability to allow Environment variables
@@ -39,44 +51,41 @@ def write(
     the functions.
 
     Args:
-        context (cfngin.Context): The CFNgin context.
-        provider (cfngin.Provider): The CFNgin provider.
-
-    Keyword Args:
-        client_id (str): The ID of the Cognito User Pool Client.
-        cookie_settings (dict): The settings for our customized cookies.
-        http_headers (dict): The additional headers added to our requests.
-        nonce_signing_secret_param_name (str): SSM param name to store nonce
+        context: The CFNgin context.
+        bucket: S3 bucket name.
+        client_id: The ID of the Cognito User Pool Client.
+        cookie_settings: The settings for our customized cookies.
+        http_headers: The additional headers added to our requests.
+        nonce_signing_secret_param_name: SSM param name to store nonce
             signing secret.
-        oauth_scopes (List[str]): The validation scopes for our OAuth requests.
-        redirect_path_auth_refresh (str): The URL path for authorization refresh
+        oauth_scopes: The validation scopes for our OAuth requests.
+        provider: The CFNgin provider.
+        redirect_path_refresh: The URL path for authorization refresh
             redirect (Correlates to the refresh auth lambda).
-        redirect_path_sign_in (str): The URL path to be redirected to after
+        redirect_path_sign_in: The URL path to be redirected to after
             sign in (Correlates to the parse auth lambda).
-        redirect_path_sign_out (str): The URL path to be redirected to after
+        redirect_path_sign_out: The URL path to be redirected to after
             sign out (Correlates to the root to be asked to resigning).
-        required_group (Optional[str]): Optional User Pool group to which
-            access should be restricted.
-        user_pool_id (str): The ID of the Cognito User Pool.
+        required_group: Optional User Pool group to which access should be
+            restricted.
 
     """
     cognito_domain = context.hook_data["aae_domain_updater"].get("domain")
     config = {
-        "client_id": kwargs["client_id"],
+        "client_id": client_id,
         "cognito_auth_domain": cognito_domain,
-        "cookie_settings": kwargs["cookie_settings"],
-        "http_headers": kwargs["http_headers"],
-        "oauth_scopes": kwargs["oauth_scopes"],
-        "redirect_path_auth_refresh": kwargs["redirect_path_refresh"],
-        "redirect_path_sign_in": kwargs["redirect_path_sign_in"],
-        "redirect_path_sign_out": kwargs["redirect_path_sign_out"],
-        "required_group": kwargs.get("required_group"),
+        "cookie_settings": cookie_settings,
+        "http_headers": http_headers,
+        "oauth_scopes": oauth_scopes,
+        "redirect_path_auth_refresh": redirect_path_refresh,
+        "redirect_path_sign_in": redirect_path_sign_in,
+        "redirect_path_sign_out": redirect_path_sign_out,
+        "required_group": required_group,
         "user_pool_id": context.hook_data["aae_user_pool_id_retriever"]["id"],
+        "nonce_signing_secret": get_nonce_signing_secret(
+            nonce_signing_secret_param_name, context
+        ),
     }
-
-    config["nonce_signing_secret"] = get_nonce_signing_secret(
-        kwargs["nonce_signing_secret_param_name"], context,
-    )
 
     # Shared file that contains the method called for configuration data
     path = os.path.join(os.path.dirname(__file__), "templates", "shared.py")
@@ -128,7 +137,7 @@ def write(
             lamb = aws_lambda.upload_lambda_functions(
                 context,
                 provider,
-                bucket=kwargs["bucket"],
+                bucket=bucket,
                 functions={
                     handler: {
                         "path": dirpath,
@@ -145,11 +154,7 @@ def write(
     return context_dict
 
 
-def get_nonce_signing_secret(
-    param_name,  # type: str
-    context,  # type: Context
-):
-    # type: (...) -> str
+def get_nonce_signing_secret(param_name: str, context: Context,) -> str:
     """Retrieve signing secret, generating & storing it first if not present."""
     session = context.get_session()
     ssm_client = session.client("ssm")
@@ -167,11 +172,11 @@ def get_nonce_signing_secret(
         return secret
 
 
-def random_key(length=16):
+def random_key(length: int = 16) -> str:
     """Generate a random key of specified length from the allowed secret characters.
 
     Args:
-        length (int): The length of the random key.
+        length: The length of the random key.
 
     """
     secret_allowed_chars = (

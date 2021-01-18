@@ -1,9 +1,12 @@
 """Test runway.core.components.deployment."""
 # pylint: disable=no-self-use,protected-access
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 import pytest
-from mock import ANY, MagicMock, PropertyMock, call, patch
+from mock import ANY, MagicMock, PropertyMock, call
 
 from runway.config.components.runway import (
     RunwayDeploymentDefinition,
@@ -14,17 +17,28 @@ from runway.core.components import Deployment
 from runway.exceptions import UnresolvedVariable
 from runway.variables import Variable
 
+if TYPE_CHECKING:
+    from _pytest.logging import LogCaptureFixture
+    from pytest_mock import MockerFixture
+
+    from ...factories import MockRunwayContext, YamlLoaderDeployment
+
 MODULE = "runway.core.components._deployment"
 
 
 class TestDeployment:
     """Test runway.core.components.deployment.Deployment."""
 
-    def test_init(self, fx_deployments, monkeypatch, runway_context):
+    def test_init(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test init."""
         definition = fx_deployments.load("min_required")
         mock_merge = MagicMock()
-        monkeypatch.setattr(Deployment, "_Deployment__merge_env_vars", mock_merge)
+        mocker.patch.object(Deployment, "_Deployment__merge_env_vars", mock_merge)
 
         obj = Deployment(context=runway_context, definition=definition)
 
@@ -35,7 +49,9 @@ class TestDeployment:
         assert obj.name == "unnamed_deployment"
         mock_merge.assert_called_once_with()
 
-    def test_init_args(self, fx_deployments, runway_context):
+    def test_init_args(
+        self, fx_deployments: YamlLoaderDeployment, runway_context: MockRunwayContext,
+    ) -> None:
         """Test init with args."""
         definition = fx_deployments.load("simple_env_vars")
         future = RunwayFutureDefinitionModel(strict_environments=True)
@@ -64,13 +80,19 @@ class TestDeployment:
         ],
     )
     def test_account_alias_config(
-        self, config, expected, fx_deployments, runway_context
-    ):
+        self,
+        config: str,
+        expected: Optional[str],
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test account_alias_config."""
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
         assert obj.account_alias_config == expected
 
-    def test_account_alias_config_none(self, runway_context):
+    def test_account_alias_config_none(
+        self, runway_context: MockRunwayContext,
+    ) -> None:
         """Test account_alias_config with incompatible type."""
         obj = Deployment(context=runway_context, definition=MagicMock())
         assert obj.account_alias_config is None
@@ -83,7 +105,13 @@ class TestDeployment:
             ("validate_account_map", "123456789012"),
         ],
     )
-    def test_account_id_config(self, config, expected, fx_deployments, runway_context):
+    def test_account_id_config(
+        self,
+        config: str,
+        expected: Optional[str],
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test account_id_config."""
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
         assert obj.account_id_config == expected
@@ -112,20 +140,29 @@ class TestDeployment:
             ),
         ],
     )
-    def test_assume_role_config(self, config, expected, fx_deployments, runway_context):
+    def test_assume_role_config(
+        self,
+        config: str,
+        expected: Dict[str, Any],
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test assume_role_config."""
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
         assert obj.assume_role_config == expected
 
     def test_env_vars_config_unresolved(
-        self, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test env_vars_config unresolved."""
         expected = {"key": "val"}
-        monkeypatch.setattr(
+        mocker.patch.object(
             Deployment, "_Deployment__merge_env_vars", MagicMock(return_value=None)
         )
-        monkeypatch.setattr(
+        mocker.patch.object(
             RunwayDeploymentDefinition,
             "env_vars",
             PropertyMock(
@@ -137,13 +174,15 @@ class TestDeployment:
                     expected,
                 ]
             ),
-            raising=False,
+            create=True,
         )
-        monkeypatch.setattr(
-            RunwayDeploymentDefinition, "_env_vars", PropertyMock(), raising=False
+        mocker.patch.object(
+            RunwayDeploymentDefinition, "_env_vars", PropertyMock(), create=True
         )
 
-        raw_deployment = fx_deployments.get("min_required")
+        raw_deployment: Dict[str, Any] = cast(
+            Dict[str, Any], fx_deployments.get("min_required")
+        )
         deployment = RunwayDeploymentDefinition.parse_obj(raw_deployment)
         obj = Deployment(context=runway_context, definition=deployment)
 
@@ -159,7 +198,13 @@ class TestDeployment:
             ("simple_parallel_regions.2", ["us-east-1", "us-west-2"]),
         ],
     )
-    def test_regions(self, config, expected, fx_deployments, runway_context):
+    def test_regions(
+        self,
+        config: str,
+        expected: List[str],
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test regions."""
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
         assert obj.regions == expected
@@ -174,32 +219,46 @@ class TestDeployment:
         ],
     )
     def test_use_async(
-        self, config, use_concurrent, expected, fx_deployments, runway_context
-    ):
+        self,
+        config: str,
+        expected: bool,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+        use_concurrent: bool,
+    ) -> None:
         """Test use_async."""
         runway_context._use_concurrent = use_concurrent
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
         assert obj.use_async == expected
 
-    def test_deploy(self, fx_deployments, monkeypatch, runway_context):
+    def test_deploy(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy."""
         mock_run = MagicMock()
-        monkeypatch.setattr(Deployment, "run", mock_run)
+        mocker.patch.object(Deployment, "run", mock_run)
         obj = Deployment(
             context=runway_context, definition=fx_deployments.load("min_required")
         )
         assert not obj.deploy()
         mock_run.assert_called_once_with("deploy", "us-east-1")
 
-    @patch(MODULE + ".concurrent.futures")
     def test_deploy_async(
-        self, mock_futures, caplog, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy async."""
         caplog.set_level(logging.INFO, logger="runway")
+        mock_futures = mocker.patch(f"{MODULE}.concurrent.futures")
         executor = MagicMock()
         mock_futures.ProcessPoolExecutor.return_value = executor
-        monkeypatch.setattr(Deployment, "use_async", True)
+        mocker.patch.object(Deployment, "use_async", True)
 
         obj = Deployment(
             context=runway_context,
@@ -219,12 +278,18 @@ class TestDeployment:
         mock_futures.wait.assert_called_once()
         assert executor.submit.return_value.result.call_count == 2
 
-    def test_deploy_sync(self, caplog, fx_deployments, monkeypatch, runway_context):
+    def test_deploy_sync(
+        self,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test deploy sync."""
         caplog.set_level(logging.INFO, logger="runway")
         mock_run = MagicMock()
-        monkeypatch.setattr(Deployment, "use_async", False)
-        monkeypatch.setattr(Deployment, "run", mock_run)
+        mocker.patch.object(Deployment, "use_async", False)
+        mocker.patch.object(Deployment, "run", mock_run)
 
         obj = Deployment(
             context=runway_context,
@@ -239,12 +304,18 @@ class TestDeployment:
         )
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
-    def test_destroy(self, async_used, fx_deployments, monkeypatch, runway_context):
+    def test_destroy(
+        self,
+        async_used: bool,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test destroy."""
         mock_async = MagicMock()
-        monkeypatch.setattr(Deployment, "_Deployment__async", mock_async)
+        mocker.patch.object(Deployment, "_Deployment__async", mock_async)
         mock_sync = MagicMock()
-        monkeypatch.setattr(Deployment, "_Deployment__sync", mock_sync)
+        mocker.patch.object(Deployment, "_Deployment__sync", mock_sync)
         runway_context._use_concurrent = async_used
         obj = Deployment(
             context=runway_context,
@@ -261,14 +332,19 @@ class TestDeployment:
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_plan(
-        self, async_used, caplog, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        async_used: bool,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test plan."""
         caplog.set_level(logging.INFO, logger="runway")
         mock_async = MagicMock()
-        monkeypatch.setattr(Deployment, "_Deployment__async", mock_async)
+        mocker.patch.object(Deployment, "_Deployment__async", mock_async)
         mock_sync = MagicMock()
-        monkeypatch.setattr(Deployment, "_Deployment__sync", mock_sync)
+        mocker.patch.object(Deployment, "_Deployment__sync", mock_sync)
         runway_context._use_concurrent = async_used
         obj = Deployment(
             context=runway_context,
@@ -284,17 +360,18 @@ class TestDeployment:
         mock_async.assert_not_called()
         mock_sync.assert_called_once_with("plan")
 
-    @patch(MODULE + ".aws")
-    @patch(MODULE + ".Module")
     def test_run(
-        self, mock_module, mock_aws, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test run."""
-        mock_resolve = MagicMock()
-        mock_validate = MagicMock()
+        mock_aws = mocker.patch(f"{MODULE}.aws")
+        mock_module = mocker.patch(f"{MODULE}.Module")
         definition = fx_deployments.load("min_required")
-        monkeypatch.setattr(definition, "resolve", mock_resolve)
-        monkeypatch.setattr(Deployment, "validate_account_credentials", mock_validate)
+        mock_resolve = mocker.patch.object(definition, "resolve")
+        mock_validate = mocker.patch.object(Deployment, "validate_account_credentials")
         obj = Deployment(context=runway_context, definition=definition)
 
         assert not obj.run("deploy", "us-west-2")
@@ -314,17 +391,21 @@ class TestDeployment:
             variables=obj._variables,
         )
 
-    @patch(MODULE + ".aws")
-    @patch(MODULE + ".Module")
     def test_run_async(
-        self, mock_module, _mock_aws, fx_deployments, monkeypatch, runway_context
-    ):
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test run async."""
-        mock_resolve = MagicMock()
+        mocker.patch(f"{MODULE}.aws")
+        # ensure that mock.MagicMock is used for backported features
+        mock_module = mocker.patch(f"{MODULE}.Module", MagicMock())
         definition = fx_deployments.load("simple_parallel_regions")
         runway_context._use_concurrent = True
-        monkeypatch.setattr(definition, "resolve", mock_resolve)
-        monkeypatch.setattr(Deployment, "validate_account_credentials", MagicMock())
+        # ensure that mock.MagicMock is used for backported features
+        mock_resolve = mocker.patch.object(definition, "resolve", MagicMock())
+        mocker.patch.object(Deployment, "validate_account_credentials")
         obj = Deployment(context=runway_context, definition=definition)
 
         assert not obj.run("destroy", "us-west-2")
@@ -338,12 +419,16 @@ class TestDeployment:
         )
         assert mock_module.run_list.call_args.kwargs["context"] == new_ctx
 
-    @patch(MODULE + ".aws")
     def test_validate_account_credentials(
-        self, mock_aws, caplog, fx_deployments, runway_context
-    ):
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
         """Test validate_account_credentials."""
         caplog.set_level(logging.INFO, logger="runway")
+        mock_aws = mocker.patch(f"{MODULE}.aws")
         obj = Deployment(
             context=runway_context, definition=fx_deployments.load("validate_account")
         )
@@ -379,7 +464,9 @@ class TestDeployment:
         assert "verified current AWS account alias matches required alias" in logs
 
     @pytest.mark.parametrize("action", [("deploy"), ("destroy")])
-    def test_run_list(self, action, monkeypatch, runway_context):
+    def test_run_list(
+        self, action: str, mocker: MockerFixture, runway_context: MockRunwayContext
+    ) -> None:
         """Test run_list."""
         dep0 = MagicMock()
         dep0.modules = ["module"]
@@ -388,14 +475,14 @@ class TestDeployment:
         deployments = [dep0, dep1]
 
         mock_action = MagicMock()
-        monkeypatch.setattr(Deployment, action, mock_action)
+        mocker.patch.object(Deployment, action, mock_action)
         mock_vars = MagicMock()
 
         assert not Deployment.run_list(
             action=action,
             context=runway_context,
-            deployments=deployments,
-            future=None,
+            deployments=deployments,  # type: ignore
+            future=None,  # type: ignore
             variables=mock_vars,
         )
         dep0.resolve.assert_called_once_with(

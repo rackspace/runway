@@ -1,11 +1,17 @@
 """Pytest configuration, fixtures, and plugins."""
+from __future__ import annotations
+
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING, Iterator
 
 import pytest
 
+if TYPE_CHECKING:
+    from _pytest.config.argparsing import Parser
 
-def pytest_addoption(parser):
+
+def pytest_addoption(parser: Parser) -> None:
     """Add pytest CLI options."""
     parser.addoption(
         "--functional",
@@ -28,7 +34,7 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="function")
-def cd_tmp_path(tmp_path):
+def cd_tmp_path(tmp_path: Path) -> Iterator[Path]:
     """Change directory to a temporary path.
 
     Returns:
@@ -44,14 +50,13 @@ def cd_tmp_path(tmp_path):
 
 
 @pytest.fixture(scope="function")
-def root_dir():
+def root_dir() -> Path:
     """Return a path object to the root directory."""
     return Path(__file__).parent.parent
 
 
 @pytest.fixture(scope="session", autouse=True)
-def sanitize_environment():
-    # type: () -> None
+def sanitize_environment() -> None:
     """Remove variables from the environment that could interfere with tests."""
     env_vars = [
         "CI",

@@ -1,13 +1,16 @@
 """Tests for runway.cfngin.context."""
 # pylint: disable=no-self-use,protected-access,too-many-public-methods
+from __future__ import annotations
+
 import io
 import json
 import unittest
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 from botocore.exceptions import ClientError
 from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
-from mock import PropertyMock, patch
+from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin.context import Context, get_fqn
 from runway.cfngin.exceptions import (
@@ -19,9 +22,14 @@ from runway.cfngin.exceptions import (
 )
 from runway.cfngin.hooks.utils import handle_hooks
 from runway.cfngin.plan import Graph, json_serial
+from runway.cfngin.providers.aws.default import Provider
 from runway.config import CfnginConfig
 
-BOTO3_CREDENTIALS = {
+if TYPE_CHECKING:
+    from runway.core.providers.aws.type_defs import TagSetTypeDef
+    from runway.type_defs import Boto3CredentialsTypeDef
+
+BOTO3_CREDENTIALS: Boto3CredentialsTypeDef = {
     "aws_access_key_id": "foo",
     "aws_secret_access_key": "bar",
     "aws_session_token": "foobar",
@@ -33,20 +41,16 @@ GET_SESSION_CALL = {
 }
 
 
-def gen_tagset(tags):
+def gen_tagset(tags: Dict[str, str]) -> TagSetTypeDef:
     """Create TagSet value from a dict."""
     return [{"Key": key, "Value": value} for key, value in tags.items()]
 
 
-def gen_s3_object_content(content):
+def gen_s3_object_content(content: Union[Dict[str, Any], str]) -> StreamingBody:
     """Convert a string or dict to S3 object body.
 
     Args:
-        content (Union[str, Dict[str, Any]]): S3 object body
-
-    Returns:
-        botocore.response.StreamingBody Used in the Body of a
-            s3.get_object response.
+        content: S3 object body.
 
     """
     if isinstance(content, dict):
@@ -58,7 +62,7 @@ def gen_s3_object_content(content):
 class TestContext(unittest.TestCase):
     """Tests for runway.cfngin.context.Context."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.config = CfnginConfig.parse_obj(
             {
@@ -83,7 +87,7 @@ class TestContext(unittest.TestCase):
             self.persist_graph_raw_config
         )
 
-    def test_attributes(self):
+    def test_attributes(self) -> None:
         """Test class attributes."""
         context = Context(
             config=CfnginConfig.parse_obj({"namespace": "test"}), region="us-east-1"
@@ -98,7 +102,7 @@ class TestContext(unittest.TestCase):
         assert context.s3_conn  # TODO check value
         assert isinstance(context.stack_names, list)
 
-    def test_context_optional_keys_set(self):
+    def test_context_optional_keys_set(self) -> None:
         """Test context optional keys set."""
         context = Context(
             config=CfnginConfig.parse_obj({"namespace": "test"}), stack_names=["stack"],
@@ -106,12 +110,12 @@ class TestContext(unittest.TestCase):
         self.assertEqual(context.mappings, {})
         self.assertEqual(context.stack_names, ["stack"])
 
-    def test_context_get_stacks(self):
+    def test_context_get_stacks(self) -> None:
         """Test context get stacks."""
         context = Context(config=self.config)
         self.assertEqual(len(context.get_stacks()), 2)
 
-    def test_context_get_stacks_dict_use_fqn(self):
+    def test_context_get_stacks_dict_use_fqn(self) -> None:
         """Test context get stacks dict use fqn."""
         context = Context(config=self.config)
         stacks_dict = context.get_stacks_dict()
@@ -119,42 +123,42 @@ class TestContext(unittest.TestCase):
         self.assertEqual(stack_names[0], "namespace-stack1")
         self.assertEqual(stack_names[1], "namespace-stack2")
 
-    def test_context_get_fqn(self):
+    def test_context_get_fqn(self) -> None:
         """Test context get fqn."""
         context = Context(config=self.config)
         fqn = context.get_fqn()
         self.assertEqual(fqn, "namespace")
 
-    def test_context_get_fqn_replace_dot(self):
+    def test_context_get_fqn_replace_dot(self) -> None:
         """Test context get fqn replace dot."""
         context = Context(config=CfnginConfig.parse_obj({"namespace": "my.namespace"}))
         fqn = context.get_fqn()
         self.assertEqual(fqn, "my-namespace")
 
-    def test_context_get_fqn_empty_namespace(self):
+    def test_context_get_fqn_empty_namespace(self) -> None:
         """Test context get fqn empty namespace."""
         context = Context(config=CfnginConfig.parse_obj({"namespace": ""}))
         fqn = context.get_fqn("vpc")
         self.assertEqual(fqn, "vpc")
         self.assertEqual(context.tags, {})
 
-    def test_context_namespace(self):
+    def test_context_namespace(self) -> None:
         """Test context namespace."""
         context = Context(config=CfnginConfig.parse_obj({"namespace": "namespace"}))
         self.assertEqual(context.namespace, "namespace")
 
-    def test_context_get_fqn_stack_name(self):
+    def test_context_get_fqn_stack_name(self) -> None:
         """Test context get fqn stack name."""
         context = Context(config=self.config)
         fqn = context.get_fqn("stack1")
         self.assertEqual(fqn, "namespace-stack1")
 
-    def test_context_default_bucket_name(self):
+    def test_context_default_bucket_name(self) -> None:
         """Test context default bucket name."""
         context = Context(config=CfnginConfig.parse_obj({"namespace": "test"}))
         self.assertEqual(context.bucket_name, "stacker-test")
 
-    def test_context_bucket_name_is_overridden_but_is_none(self):
+    def test_context_bucket_name_is_overridden_but_is_none(self) -> None:
         """Test context bucket name is overridden but is none."""
         config = CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": ""})
         context = Context(config=config)
@@ -164,7 +168,7 @@ class TestContext(unittest.TestCase):
         context = Context(config=config)
         self.assertEqual(context.bucket_name, "stacker-test")
 
-    def test_context_bucket_name_is_overridden(self):
+    def test_context_bucket_name_is_overridden(self) -> None:
         """Test context bucket name is overridden."""
         config = CfnginConfig.parse_obj(
             {"namespace": "test", "cfngin_bucket": "bucket123"}
@@ -172,7 +176,7 @@ class TestContext(unittest.TestCase):
         context = Context(config=config)
         self.assertEqual(context.bucket_name, "bucket123")
 
-    def test_context_default_bucket_no_namespace(self):
+    def test_context_default_bucket_no_namespace(self) -> None:
         """Test context default bucket no namespace."""
         context = Context(config=CfnginConfig.parse_obj({"namespace": ""}))
         self.assertEqual(context.bucket_name, None)
@@ -182,7 +186,7 @@ class TestContext(unittest.TestCase):
         )
         self.assertEqual(context.bucket_name, None)
 
-    def test_context_namespace_delimiter_is_overridden_and_not_none(self):
+    def test_context_namespace_delimiter_is_overridden_and_not_none(self) -> None:
         """Test context namespace delimiter is overridden and not none."""
         config = CfnginConfig.parse_obj(
             {"namespace": "namespace", "namespace_delimiter": "_"}
@@ -191,7 +195,7 @@ class TestContext(unittest.TestCase):
         fqn = context.get_fqn("stack1")
         self.assertEqual(fqn, "namespace_stack1")
 
-    def test_context_namespace_delimiter_is_overridden_and_is_empty(self):
+    def test_context_namespace_delimiter_is_overridden_and_is_empty(self) -> None:
         """Test context namespace delimiter is overridden and is empty."""
         config = CfnginConfig.parse_obj(
             {"namespace": "namespace", "namespace_delimiter": ""}
@@ -200,20 +204,20 @@ class TestContext(unittest.TestCase):
         fqn = context.get_fqn("stack1")
         self.assertEqual(fqn, "namespacestack1")
 
-    def test_context_tags_with_empty_map(self):
+    def test_context_tags_with_empty_map(self) -> None:
         """Test context tags with empty map."""
         config = CfnginConfig.parse_obj({"namespace": "test", "tags": {}})
         context = Context(config=config)
         self.assertEqual(context.tags, {})
 
-    def test_context_no_tags_specified(self):
+    def test_context_no_tags_specified(self) -> None:
         """Test context no tags specified."""
         config = CfnginConfig.parse_obj({"namespace": "test"})
         context = Context(config=config)
         self.assertEqual(context.tags, {"cfngin_namespace": "test"})
 
     @patch("runway.cfngin.context.get_session")
-    def test_get_session(self, mock_get_session):
+    def test_get_session(self, mock_get_session: MagicMock) -> None:
         """Test get_session."""
         creds = BOTO3_CREDENTIALS.copy()
         context = Context(boto3_credentials=creds, region="us-east-1")
@@ -227,7 +231,7 @@ class TestContext(unittest.TestCase):
         context.get_session(profile="user")
         mock_get_session.assert_called_with(region="us-east-1", profile="user")
 
-    def test_hook_with_sys_path(self):
+    def test_hook_with_sys_path(self) -> None:
         """Test hook with sys path."""
         config = CfnginConfig.parse_obj(
             {
@@ -246,16 +250,21 @@ class TestContext(unittest.TestCase):
         config.load()
         context = Context(config=config)
         stage = "pre_build"
-        handle_hooks(stage, getattr(context.config, stage), "mock-region-1", context)
+        handle_hooks(
+            stage,
+            getattr(context.config, stage),
+            MagicMock(autospec=Provider, region="mock-region-1"),
+            context,
+        )
         self.assertEqual("mockResult", context.hook_data["myHook"]["result"])
 
-    def test_persistent_graph_location(self):
+    def test_persistent_graph_location(self) -> None:
         """Test persistent graph location."""
         context = Context(config=self.persist_graph_config)
         expected = {"Bucket": "cfngin-test", "Key": "persistent_graphs/test/test.json"}
         self.assertEqual(expected, context.persistent_graph_location)
 
-    def test_persistent_graph_location_no_json(self):
+    def test_persistent_graph_location_no_json(self) -> None:
         """'.json' appended to the key if it does not exist."""
         cp_config = self.persist_graph_raw_config.copy()
         cp_config["persistent_graph_key"] = "test"
@@ -264,12 +273,12 @@ class TestContext(unittest.TestCase):
         expected = {"Bucket": "cfngin-test", "Key": "persistent_graphs/test/test.json"}
         self.assertEqual(expected, context.persistent_graph_location)
 
-    def test_persistent_graph_location_no_key(self):
+    def test_persistent_graph_location_no_key(self) -> None:
         """Return an empty dict if key is not set."""
         context = Context(config=self.config)
         self.assertEqual({}, context.persistent_graph_location)
 
-    def test_persistent_graph_location_no_bucket(self):
+    def test_persistent_graph_location_no_bucket(self) -> None:
         """Return an empty dict if key is set but no bucket name."""
         cp_config = self.persist_graph_raw_config.copy()
         cp_config["cfngin_bucket"] = ""
@@ -281,14 +290,14 @@ class TestContext(unittest.TestCase):
         "runway.cfngin.context.Context._persistent_graph_tags",
         new_callable=PropertyMock,
     )
-    def test_persistent_graph_lock_code_disabled(self, mock_prop):
+    def test_persistent_graph_lock_code_disabled(self, mock_prop: PropertyMock) -> None:
         """Return 'None' when not used."""
         mock_prop.return_value = None
         context = Context(config=self.config)
         mock_prop.assert_not_called()
         self.assertIsNone(context.persistent_graph_lock_code)
 
-    def test_persistent_graph_lock_code_present(self):
+    def test_persistent_graph_lock_code_present(self) -> None:
         """Return the value of the lock tag when it exists."""
         context = Context(config=self.persist_graph_config)
         stubber = Stubber(context.s3_conn)
@@ -306,7 +315,7 @@ class TestContext(unittest.TestCase):
             self.assertEqual(code, context._persistent_graph_lock_code)
             stubber.assert_no_pending_responses()
 
-    def test_persistent_graph_lock_code_none(self):
+    def test_persistent_graph_lock_code_none(self) -> None:
         """Return 'None' when the tag is not set."""
         context = Context(config=self.persist_graph_config)
         stubber = Stubber(context.s3_conn)
@@ -320,7 +329,7 @@ class TestContext(unittest.TestCase):
             self.assertIsNone(context._persistent_graph_lock_code)
             stubber.assert_no_pending_responses()
 
-    def test_persistent_graph_lock_code_no_object(self):
+    def test_persistent_graph_lock_code_no_object(self) -> None:
         """Return 'None' when object does not exist."""
         context = Context(config=self.persist_graph_config)
         stubber = Stubber(context.s3_conn)
@@ -336,7 +345,7 @@ class TestContext(unittest.TestCase):
             self.assertIsNone(context._persistent_graph_lock_code)
             stubber.assert_no_pending_responses()
 
-    def test_persistent_graph(self):
+    def test_persistent_graph(self) -> None:
         """Return Graph from S3 object."""
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
@@ -358,7 +367,7 @@ class TestContext(unittest.TestCase):
             self.assertEqual(expected_content, context.persistent_graph.to_dict())
             stubber.assert_no_pending_responses()
 
-    def test_persistent_graph_no_object(self):
+    def test_persistent_graph_no_object(self) -> None:
         """Create object if one does not exist and return empty Graph."""
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
@@ -366,7 +375,7 @@ class TestContext(unittest.TestCase):
         expected_get_params = {"ResponseContentType": "application/json"}
         expected_get_params.update(context.persistent_graph_location)
         expected_put_params = {
-            "Body": "{}",
+            "Body": "{}".encode(),
             "ServerSideEncryption": "AES256",
             "ACL": "bucket-owner-full-control",
             "ContentType": "application/json",
@@ -385,20 +394,20 @@ class TestContext(unittest.TestCase):
             self.assertEqual({}, context.persistent_graph.to_dict())
             stubber.assert_no_pending_responses()
 
-    def test_persistent_graph_disabled(self):
+    def test_persistent_graph_disabled(self) -> None:
         """Return 'None' when key is not set."""
         context = Context(config=self.config)
         self.assertIsNone(context._persistent_graph)
         self.assertIsNone(context.persistent_graph)
 
-    def test_lock_persistent_graph(self):
+    def test_lock_persistent_graph(self) -> None:
         """Return 'None' when lock is successful."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
-        expected_params = {
+        expected_params: Dict[str, Any] = {
             "Tagging": {
                 "TagSet": gen_tagset({context._persistent_graph_lock_tag: code})
             }
@@ -414,14 +423,14 @@ class TestContext(unittest.TestCase):
             self.assertIsNone(context.lock_persistent_graph(code))
             stubber.assert_no_pending_responses()
 
-    def test_lock_persistent_graph_locked(self):
+    def test_lock_persistent_graph_locked(self) -> None:
         """Error raised when when object is locked."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
-        expected_params = {
+        expected_params: Dict[str, Any] = {
             "Tagging": {
                 "TagSet": gen_tagset({context._persistent_graph_lock_tag: code})
             }
@@ -439,14 +448,14 @@ class TestContext(unittest.TestCase):
                 context.lock_persistent_graph(code)
             stubber.assert_no_pending_responses()
 
-    def test_lock_persistent_graph_no_object(self):
+    def test_lock_persistent_graph_no_object(self) -> None:
         """Error raised when when there is no object to lock."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
         context._persistent_graph = Graph()
         stubber = Stubber(context.s3_conn)
-        expected_params = {
+        expected_params: Dict[str, Any] = {
             "Tagging": {
                 "TagSet": gen_tagset({context._persistent_graph_lock_tag: code})
             }
@@ -467,7 +476,7 @@ class TestContext(unittest.TestCase):
                 context.lock_persistent_graph(code)
             stubber.assert_no_pending_responses()
 
-    def test_put_persistent_graph(self):
+    def test_put_persistent_graph(self) -> None:
         """Return 'None' when put is successful."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
@@ -476,7 +485,7 @@ class TestContext(unittest.TestCase):
         context._persistent_graph = Graph.from_dict(graph_dict, context)
         stubber = Stubber(context.s3_conn)
         expected_params = {
-            "Body": json.dumps(graph_dict, indent=4),
+            "Body": json.dumps(graph_dict, indent=4).encode(),
             "ServerSideEncryption": "AES256",
             "ACL": "bucket-owner-full-control",
             "ContentType": "application/json",
@@ -495,7 +504,7 @@ class TestContext(unittest.TestCase):
             self.assertIsNone(context.put_persistent_graph(code))
             stubber.assert_no_pending_responses()
 
-    def test_put_persistent_graph_unlocked(self):
+    def test_put_persistent_graph_unlocked(self) -> None:
         """Error raised when trying to update an unlocked object."""
         context = Context(config=self.persist_graph_config)
         context._s3_bucket_verified = True
@@ -511,7 +520,7 @@ class TestContext(unittest.TestCase):
                 context.put_persistent_graph("")
             stubber.assert_no_pending_responses()
 
-    def test_put_persistent_graph_code_missmatch(self):
+    def test_put_persistent_graph_code_missmatch(self) -> None:
         """Error raised when provided lock code does not match object."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
@@ -530,7 +539,7 @@ class TestContext(unittest.TestCase):
                 context.put_persistent_graph(code)
             stubber.assert_no_pending_responses()
 
-    def test_put_persistent_graph_empty(self):
+    def test_put_persistent_graph_empty(self) -> None:
         """Object deleted when persistent graph is empty."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
@@ -549,25 +558,25 @@ class TestContext(unittest.TestCase):
         "runway.cfngin.context.Context._persistent_graph_tags",
         new_callable=PropertyMock,
     )
-    def test_persistent_graph_locked(self, mock_prop):
+    def test_persistent_graph_locked(self, mock_prop: PropertyMock) -> None:
         """Return 'True' or 'False' based on code property."""
         mock_prop.return_value = {}
         context = Context(config=self.persist_graph_config)
-        context._persistent_graph = True
+        context._persistent_graph = Graph.from_dict({"something": []}, context)
 
-        context._persistent_graph_lock_code = True
-        self.assertTrue(context.persistent_graph_locked)
+        context._persistent_graph_lock_code = "something"
+        assert context.persistent_graph_locked
 
         context._persistent_graph_lock_code = None
         self.assertFalse(context.persistent_graph_locked)
         mock_prop.assert_called_once()
 
-    def test_persistent_graph_locked_disabled(self):
+    def test_persistent_graph_locked_disabled(self) -> None:
         """Return 'None' when key is not set."""
         context = Context(config=self.config)
         self.assertFalse(context.persistent_graph_locked)
 
-    def test_s3_bucket_exists(self):
+    def test_s3_bucket_exists(self) -> None:
         """Test s3 bucket exists."""
         context = Context(config=self.config)
         stubber = Stubber(context.s3_conn)
@@ -582,7 +591,7 @@ class TestContext(unittest.TestCase):
             self.assertTrue(context._s3_bucket_verified)
             stubber.assert_no_pending_responses()
 
-    def test_s3_bucket_does_not_exist_us_east(self):
+    def test_s3_bucket_does_not_exist_us_east(self) -> None:
         """Create S3 bucket when it does not exist."""
         context = Context(config=self.config, region="us-east-1")
         stubber = Stubber(context.s3_conn)
@@ -603,7 +612,7 @@ class TestContext(unittest.TestCase):
             self.assertTrue(context._s3_bucket_verified)
             stubber.assert_no_pending_responses()
 
-    def test_s3_bucket_does_not_exist_us_west(self):
+    def test_s3_bucket_does_not_exist_us_west(self) -> None:
         """Create S3 bucket with loc constraints when it does not exist."""
         region = "us-west-1"
         context = Context(config=self.config, region=region)
@@ -630,7 +639,7 @@ class TestContext(unittest.TestCase):
             self.assertTrue(context._s3_bucket_verified)
             stubber.assert_no_pending_responses()
 
-    def test_s3_bucket_forbidden(self):
+    def test_s3_bucket_forbidden(self) -> None:
         """Error raised when S3 bucket exists but cannot access."""
         context = Context(config=self.config)
         stubber = Stubber(context.s3_conn)
@@ -647,7 +656,7 @@ class TestContext(unittest.TestCase):
                 self.assertFalse(context.s3_bucket_verified)
             stubber.assert_no_pending_responses()
 
-    def test_unlock_persistent_graph(self):
+    def test_unlock_persistent_graph(self) -> None:
         """Return 'True' when delete tag is successful."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
@@ -668,7 +677,7 @@ class TestContext(unittest.TestCase):
             self.assertTrue(context.unlock_persistent_graph(code))
             stubber.assert_no_pending_responses()
 
-    def test_unlock_persistent_graph_not_locked(self):
+    def test_unlock_persistent_graph_not_locked(self) -> None:
         """Error raised when object is not locked."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
@@ -685,7 +694,7 @@ class TestContext(unittest.TestCase):
                 context.unlock_persistent_graph(code)
             stubber.assert_no_pending_responses()
 
-    def test_unlock_persistent_graph_code_missmatch(self):
+    def test_unlock_persistent_graph_code_missmatch(self) -> None:
         """Error raised when local code does not match object."""
         code = "0000"
         context = Context(config=self.persist_graph_config)
@@ -704,7 +713,7 @@ class TestContext(unittest.TestCase):
                 context.unlock_persistent_graph(code)
             stubber.assert_no_pending_responses()
 
-    def test_unlock_persistent_graph_no_object(self):
+    def test_unlock_persistent_graph_no_object(self) -> None:
         """Return 'None' when object does not exist.
 
         This can occur if the object is deleted by 'put_persistent_graph'.
@@ -730,7 +739,7 @@ class TestContext(unittest.TestCase):
 class TestFunctions(unittest.TestCase):
     """Test the module level functions."""
 
-    def test_get_fqn_redundant_base(self):
+    def test_get_fqn_redundant_base(self) -> None:
         """Test get fqn redundant base."""
         base = "woot"
         name = "woot-blah"
@@ -738,14 +747,14 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(get_fqn(base, "", name), name)
         self.assertEqual(get_fqn(base, "_", name), "woot_woot-blah")
 
-    def test_get_fqn_only_base(self):
+    def test_get_fqn_only_base(self) -> None:
         """Test get fqn only base."""
         base = "woot"
         self.assertEqual(get_fqn(base, "-"), base)
         self.assertEqual(get_fqn(base, ""), base)
         self.assertEqual(get_fqn(base, "_"), base)
 
-    def test_get_fqn_full(self):
+    def test_get_fqn_full(self) -> None:
         """Test get fqn full."""
         base = "woot"
         name = "blah"

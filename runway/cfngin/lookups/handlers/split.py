@@ -1,6 +1,8 @@
 """Split lookup."""
-# pylint: disable=arguments-differ,unused-argument
-from runway.lookups.handlers.base import LookupHandler
+# pylint: disable=arguments-differ
+from typing import Any, List
+
+from ....lookups.handlers.base import LookupHandler
 
 TYPE_NAME = "split"
 
@@ -9,17 +11,11 @@ class SplitLookup(LookupHandler):
     """Split lookup."""
 
     @classmethod
-    def handle(cls, value, context=None, provider=None, **kwargs):
+    def handle(cls, value: str, **_: Any) -> List[str]:
         """Split the supplied string on the given delimiter, providing a list.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-            provider (:class:`runway.cfngin.providers.base.BaseProvider`):
-                Provider instance.
-
-        Returns:
-            str: Looked up value.
+            value: Parameter(s) given to this lookup.
 
         Format of value::
 
@@ -48,8 +44,7 @@ class SplitLookup(LookupHandler):
             delimiter, text = value.split("::", 1)
         except ValueError:
             raise ValueError(
-                "Invalid value for split: %s. Must be in "
-                "<delimiter>::<text> format." % value
+                f"Invalid value for split: {value}. Must be in <delimiter>::<text> format."
             )
 
         return text.split(delimiter)

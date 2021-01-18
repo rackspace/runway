@@ -1,4 +1,6 @@
 """Serverless module."""
+from __future__ import annotations
+
 import argparse
 import logging
 import os
@@ -8,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import uuid
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import yaml
 
@@ -18,10 +21,15 @@ from ..s3_util import does_s3_object_exist, download, ensure_bucket_exists, uplo
 from ..util import YamlDumper, cached_property, merge_dicts
 from . import ModuleOptions, RunwayModuleNpm, generate_node_command, run_module_command
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from ..context import Context
+
 LOGGER = logging.getLogger(__name__)
 
 
-def gen_sls_config_files(stage, region):
+def gen_sls_config_files(stage: str, region: str) -> List[str]:
     """Generate possible SLS config files names."""
     names = []
     for ext in ["yml", "json"]:
@@ -34,7 +42,9 @@ def gen_sls_config_files(stage, region):
     return names
 
 
-def run_sls_print(sls_opts, env_vars, path):
+def run_sls_print(
+    sls_opts: List[str], env_vars: Dict[str, str], path: Path
+) -> Dict[str, Any]:
     """Run sls print command."""
     sls_info_opts = list(sls_opts)
     sls_info_opts[0] = "print"
@@ -45,38 +55,38 @@ def run_sls_print(sls_opts, env_vars, path):
     return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
 
 
-def get_src_hash(sls_config, path):
+def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
     """Get hash(es) of serverless source."""
     funcs = sls_config["functions"]
 
     if sls_config.get("package", {}).get("individually"):
-        hashes = {
-            key: get_hash_of_files(
-                os.path.join(path, os.path.dirname(funcs[key].get("handler")))
-            )
+        return {
+            key: get_hash_of_files(path / os.path.dirname(funcs[key].get("handler")))
             for key in funcs.keys()
         }
-    else:
-        directories = []
-        for (key, value) in funcs.items():
-            func_path = {"path": os.path.dirname(value.get("handler"))}
-            if func_path not in directories:
-                directories.append(func_path)
-        hashes = {sls_config["service"]: get_hash_of_files(path, directories)}
-
-    return hashes
+    directories = []
+    for _key, value in funcs.items():
+        func_path = {"path": os.path.dirname(value.get("handler"))}
+        if func_path not in directories:
+            directories.append(func_path)
+    return {sls_config["service"]: get_hash_of_files(path, directories)}
 
 
-def deploy_package(sls_opts, bucketname, context, path, logger=LOGGER):
+def deploy_package(
+    sls_opts: List[str],
+    bucketname: str,
+    context: Context,
+    path: Path,
+    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+) -> None:
     """Run sls package command.
 
     Args:
-        sls_opts (List[str]): List of options for Serverless CLI.
-        bucketname (str): S3 Bucket name.
-        context (Context): Runway context object.
-        path (str): Module path.
-        logger(Optional[logging.Logger]): A more granular
-            logger for log messages.
+        sls_opts: List of options for Serverless CLI.
+        bucketname: S3 Bucket name.
+        context: Runway context object.
+        path: Module path.
+        logger: A more granular logger for log messages.
 
     """
     package_dir = tempfile.mkdtemp()
@@ -92,11 +102,11 @@ def deploy_package(sls_opts, bucketname, context, path, logger=LOGGER):
         command="sls", command_opts=sls_opts, path=path
     )
 
-    logger.info("package %s (in progress)", os.path.basename(path))
+    logger.info("package %s (in progress)", path.name)
     run_module_command(
         cmd_list=sls_package_cmd, env_vars=context.env.vars, logger=logger
     )
-    logger.info("package %s (complete)", os.path.basename(path))
+    logger.info("package %s (complete)", path.name)
 
     for key in hashes.keys():
         hash_zip = hashes[key] + ".zip"
@@ -130,15 +140,19 @@ def deploy_package(sls_opts, bucketname, context, path, logger=LOGGER):
 class Serverless(RunwayModuleNpm):
     """Serverless Runway Module."""
 
-    def __init__(self, context, path, options=None):
+    def __init__(
+        self,
+        context: Context,
+        path: Path,
+        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
-            context (Context): Runway context object.
-            path (str): Path to the module.
-            options (Dict[str, Dict[str, Any]]): Everything in the module
-                definition merged with applicable values from the deployment
-                definition.
+            context: Runway context object.
+            path: Path to the module.
+            options: Everything in the module definition merged with applicable
+                values from the deployment definition.
 
         """
         options = options or {}
@@ -153,26 +167,16 @@ class Serverless(RunwayModuleNpm):
         self.stage = self.context.env.name
 
     @property
-    def cli_args(self):
-        """Generate CLI args from self used in all Serverless commands.
-
-        Returns:
-            List[str]
-
-        """
+    def cli_args(self) -> List[str]:
+        """Generate CLI args from self used in all Serverless commands."""
         result = ["--region", self.region, "--stage", self.stage]
         if "DEBUG" in self.context.env.vars:
             result.append("--verbose")
         return result
 
     @cached_property
-    def env_file(self):
-        """Find the environment file for the module.
-
-        Returns:
-            Path: Path object for the environment file that was found.
-
-        """
+    def env_file(self) -> Optional[Path]:
+        """Find the environment file for the module."""
         for name in gen_sls_config_files(self.stage, self.region):
             test_path = self.path / name
             if test_path.is_file():
@@ -180,13 +184,8 @@ class Serverless(RunwayModuleNpm):
         return None
 
     @property
-    def skip(self):
-        """Determine if the module should be skipped.
-
-        Returns:
-            bool: To skip, or not to skip, that is the question.
-
-        """
+    def skip(self) -> bool:
+        """Determine if the module should be skipped."""
         if not self.package_json_missing():
             if self.parameters or self.environments or self.env_file:
                 return False
@@ -202,12 +201,11 @@ class Serverless(RunwayModuleNpm):
             )
         return True
 
-    def extend_serverless_yml(self, func):
+    def extend_serverless_yml(self, func: Callable[..., None]) -> None:
         """Extend the Serverless config file with additional YAML from options.
 
         Args:
-            func (Callable): Callable to use after handling the Serverless
-                config file.
+            func: Callable to use after handling the Serverless config file.
 
         """
         self.npm_install()  # doing this here for a cleaner log
@@ -238,18 +236,17 @@ class Serverless(RunwayModuleNpm):
                     exc_info=True,
                 )
 
-    def gen_cmd(self, command, args_list=None):
+    def gen_cmd(self, command: str, args_list: Optional[List[str]] = None) -> List[str]:
         """Generate and log a Serverless command.
 
         This does not execute the command, only prepares it for use.
 
         Args:
-            command (str): The Serverless command to be executed.
-            args_list (Optiona[List[str]]): Additional arguments to include
-                in the generated command.
+            command: The Serverless command to be executed.
+            args_list: Additional arguments to include in the generated command.
 
         Returns:
-            List[str]: The full command to be passed into a subprocess.
+            The full command to be passed into a subprocess.
 
         """
         args = [command] + self.cli_args + self.options.args
@@ -262,11 +259,11 @@ class Serverless(RunwayModuleNpm):
             command="sls", command_opts=args, path=self.path, logger=self.logger
         )
 
-    def sls_deploy(self, skip_install=False):
+    def sls_deploy(self, skip_install: bool = False) -> None:
         """Execute ``sls deploy`` command.
 
         Args:
-            skip_install (bool): Skip ``npm install`` before running the
+            skip_install: Skip ``npm install`` before running the
                 Serverless command. (*default:* ``False``)
 
         """
@@ -283,7 +280,7 @@ class Serverless(RunwayModuleNpm):
                 sls_opts,
                 self.options.promotezip["bucketname"],
                 self.context,
-                str(self.path),
+                self.path,
                 self.logger,
             )
             return
@@ -295,17 +292,18 @@ class Serverless(RunwayModuleNpm):
         )
         self.logger.info("deploy (complete)")
 
-    def sls_print(self, item_path=None, skip_install=False):
+    def sls_print(
+        self, item_path: Optional[str] = None, skip_install: bool = False
+    ) -> Dict[str, Any]:
         """Execute ``sls print`` command.
 
         Keyword Args:
-            item_path (Optional[str]): Period-separated path to print a
-                sub-value (eg: "provider.name").
-            skip_install (bool): Skip ``npm install`` before running the
-                Serverless command. (*default:* ``False``)
+            item_path: Period-separated path to print a sub-value (eg: "provider.name").
+            skip_install: Skip ``npm install`` before running the Serverless command.
+                (*default:* ``False``)
 
         Returns:
-            Dict[str, Any]: Resolved Serverless config file.
+            Resolved Serverless config file.
 
         Raises:
             SystemExit: If a runway-tmp.serverless.yml file already exists.
@@ -329,12 +327,12 @@ class Serverless(RunwayModuleNpm):
             )
         return result
 
-    def sls_remove(self, skip_install=False):
+    def sls_remove(self, skip_install: bool = False) -> None:
         """Execute ``sls remove`` command.
 
         Args:
-            skip_install (bool): Skip ``npm install`` before running the
-                Serverless command. (*default:* ``False``)
+            skip_install: Skip ``npm install`` before running the Serverless command.
+                (*default:* ``False``)
 
         """
         if not skip_install:
@@ -357,11 +355,11 @@ class Serverless(RunwayModuleNpm):
             sys.exit(proc.returncode)
         self.logger.info("destroy (complete)")
 
-    def plan(self):
+    def plan(self) -> None:
         """Entrypoint for Runway's plan action."""
         self.logger.info("plan not currently supported for Serverless")
 
-    def deploy(self):
+    def deploy(self) -> None:
         """Entrypoint for Runway's deploy action."""
         if self.skip:
             return
@@ -370,7 +368,7 @@ class Serverless(RunwayModuleNpm):
         else:
             self.sls_deploy()
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Entrypoint for Runway's destroy action."""
         if self.skip:
             return
@@ -383,23 +381,27 @@ class Serverless(RunwayModuleNpm):
 class ServerlessOptions(ModuleOptions):
     """Module options for Serverless."""
 
-    def __init__(self, args, extend_serverless_yml, promotezip, skip_npm_ci=False):
+    def __init__(
+        self,
+        args: List[str],
+        extend_serverless_yml: Dict[str, Any],
+        promotezip: Dict[str, str],
+        skip_npm_ci: bool = False,
+    ) -> None:
         """Instantiate class.
 
         Keyword Args:
-            args (List[str]): Arguments to append to Serverless CLI
-                commands. These will always be placed after the default
-                arguments provided by Runway.
-            extend_serverless_yml (Dict[str, Any]): If provided,
-                a temporary Serverless config will be created will be created
-                from what exists in the module directory then the value of
-                this option will be merged into it. The temporary file will
-                be deleted at the end of execution.
-            promotezip (Dict[str, str]): If provided, promote
-                Serverless generated zip files between environments from a
-                *build* AWS account.
-            skip_npm_ci (bool): Skip the ``npm ci`` Runway executes at the
-                begining of each Serverless module run.
+            args: Arguments to append to Serverless CLI commands.
+                These will always be placed after the default arguments provided
+                by Runway.
+            extend_serverless_yml: If provided, a temporary Serverless config
+                will be created will be created from what exists in the module
+                directory then the value of this option will be merged into it.
+                The temporary file will be deleted at the end of execution.
+            promotezip: If provided, promote Serverless generated zip files
+                between environments from a *build* AWS account.
+            skip_npm_ci: Skip the ``npm ci`` Runway executes at the begining of
+                each Serverless module run.
 
         """
         super().__init__()
@@ -413,25 +415,20 @@ class ServerlessOptions(ModuleOptions):
         self.skip_npm_ci = skip_npm_ci
 
     @property
-    def args(self):
-        """Args to pass to the CLI.
-
-        Returns:
-            List[str]: List of arguments.
-
-        """
+    def args(self) -> List[str]:
+        """Args to pass to the CLI."""
         known_args = []
         for key, val in self._cli_args.items():
             if isinstance(val, str):
                 known_args.extend(["--%s" % key, val])
         return known_args + self._unknown_cli_args
 
-    def update_args(self, key, value):
+    def update_args(self, key: str, value: str) -> None:
         """Update a known CLI argument.
 
         Args:
-            key (str): Dict key to be updated.
-            value (str): New value
+            key: Dict key to be updated.
+            value: New value
 
         Raises:
             KeyError: The key provided for update is now a known arg.
@@ -443,7 +440,7 @@ class ServerlessOptions(ModuleOptions):
             raise KeyError(key)
 
     @staticmethod
-    def _create_arg_parser():
+    def _create_arg_parser() -> argparse.ArgumentParser:
         """Create argparse parser to parse args.
 
         Used to pull arguments out of self.args when logic could change
@@ -458,7 +455,7 @@ class ServerlessOptions(ModuleOptions):
         return parser
 
     @classmethod
-    def parse(cls, **kwargs):  # pylint: disable=arguments-differ
+    def parse(cls, **kwargs) -> ServerlessOptions:  # pylint: disable=arguments-differ
         """Parse the options definition and return an options object.
 
         Keyword Args:
@@ -475,9 +472,6 @@ class ServerlessOptions(ModuleOptions):
                 *build* AWS account.
             skip_npm_ci (bool): Skip the ``npm ci`` Runway executes at the
                 begining of each Serverless module run.
-
-        Returns:
-            ServerlessOptions
 
         Raises:
             ValueError: promotezip was provided but missing bucketname.

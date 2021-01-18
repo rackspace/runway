@@ -76,8 +76,10 @@ tags (Optional[List[str]])
             - python3.9
 
 """
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from docker.errors import ImageNotFound
 
@@ -95,31 +97,35 @@ class ImageRemoveArgs(BaseModel):
 
     def __init__(
         self,
-        ecr_repo=None,  # type: Optional[Dict[str, Any]]
-        force=False,  # type: bool
-        image=None,  # type: Optional[DockerImage]
-        noprune=False,  # type: bool
-        repo=None,  # type: Optional[str]
-        tags=None,  # type: Optional[List[str]]
-        **kwargs  # type: Any
-    ):  # type: (...) -> None
+        *,
+        ecr_repo: Optional[Dict[str, Any]] = None,
+        force: bool = False,
+        image: DockerImage = None,
+        noprune: bool = False,
+        repo: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        **kwargs: Any
+    ) -> None:
         """Instantiate class."""
+        super().__init__(**kwargs)
         self.force = force
         self.noprune = noprune
         self.repo = self.determine_repo(
-            context=kwargs.get("context"), ecr_repo=ecr_repo, image=image, repo=repo
+            context=self._ctx, ecr_repo=ecr_repo, image=image, repo=repo
         )
         if image and not tags:
             tags = image.tags
-        self.tags = self._validate_list_str(tags or ["latest"], required=True)
+        self.tags = cast(
+            List[str], self._validate_list_str(tags or ["latest"], required=True)
+        )
 
     @staticmethod
     def determine_repo(
-        context=None,  # type: Optional["Context"]
-        ecr_repo=None,  # type: Optional[Dict[str, Optional[str]]]
-        image=None,  # type: Optional[DockerImage]
-        repo=None,  # type: Optional[str]
-    ):  # type: (...) -> Optional[str]
+        context: Optional[Context] = None,
+        ecr_repo: Optional[Dict[str, Optional[str]]] = None,
+        image: Optional[DockerImage] = None,
+        repo: Optional[str] = None,
+    ) -> Optional[str]:
         """Determine repo URI.
 
         Args:
@@ -140,13 +146,12 @@ class ImageRemoveArgs(BaseModel):
         raise ValueError("a repo must be specified")
 
 
-def remove(**kwargs):  # type: (...) -> DockerHookData
+def remove(*, context: Context, **kwargs: Any) -> DockerHookData:
     """Docker image push remove.
 
     Replicates the functionality of ``docker image push`` CLI command.
 
     """
-    context = kwargs.pop("context")  # type: "Context"
     kwargs.pop("provider", None)  # not needed
     args = ImageRemoveArgs.parse_obj(kwargs, context=context)
     docker_hook_data = DockerHookData.from_cfngin_context(context)

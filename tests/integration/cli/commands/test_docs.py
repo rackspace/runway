@@ -1,14 +1,21 @@
 """Test ``runway docs`` command."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from click.testing import CliRunner
 from mock import patch
 
 from runway._cli import cli
 
+if TYPE_CHECKING:
+    from mock import MagicMock
+
 DOCS_URL = "https://docs.onica.com/projects/runway/"
 
 
 @patch("click.launch")
-def test_docs(mock_launch):
+def test_docs(mock_launch: MagicMock) -> None:
     """Test docs."""
     runner = CliRunner()
     assert runner.invoke(cli, ["docs"], env={}).exit_code == 0

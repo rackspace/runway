@@ -25,18 +25,18 @@ class MockBlueprint(Blueprint):
     }
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Return version."""
         return MOCK_VERSION
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
 
 
 class TestBaseAction(unittest.TestCase):
     """Tests for runway.cfngin.actions.base.BaseAction."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.region = "us-east-1"
         self.session = get_session(self.region)
@@ -57,13 +57,13 @@ class TestBaseAction(unittest.TestCase):
             ],
         }
 
-    def test_ensure_cfn_bucket_exists(self):
+    def test_ensure_cfn_bucket_exists(self) -> None:
         """Test ensure cfn bucket exists."""
         session = get_session("us-east-1")
         provider = Provider(session)
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider),
+            provider_builder=MockProviderBuilder(provider=provider),
         )
         stubber = Stubber(action.s3_conn)
         stubber.add_response(
@@ -72,13 +72,13 @@ class TestBaseAction(unittest.TestCase):
         with stubber:
             action.ensure_cfn_bucket()
 
-    def test_ensure_cfn_bucket_does_not_exist_us_east(self):
+    def test_ensure_cfn_bucket_does_not_exist_us_east(self) -> None:
         """Test ensure cfn bucket does not exist us east."""
         session = get_session("us-east-1")
         provider = Provider(session)
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider),
+            provider_builder=MockProviderBuilder(provider=provider),
         )
         stubber = Stubber(action.s3_conn)
         stubber.add_client_error(
@@ -93,13 +93,13 @@ class TestBaseAction(unittest.TestCase):
         with stubber:
             action.ensure_cfn_bucket()
 
-    def test_ensure_cfn_bucket_does_not_exist_us_west(self):
+    def test_ensure_cfn_bucket_does_not_exist_us_west(self) -> None:
         """Test ensure cfn bucket does not exist us west."""
         session = get_session("us-west-1")
         provider = Provider(session)
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider, region="us-west-1"),
+            provider_builder=MockProviderBuilder(provider=provider, region="us-west-1"),
         )
         stubber = Stubber(action.s3_conn)
         stubber.add_client_error(
@@ -119,13 +119,13 @@ class TestBaseAction(unittest.TestCase):
         with stubber:
             action.ensure_cfn_bucket()
 
-    def test_ensure_cfn_forbidden(self):
+    def test_ensure_cfn_forbidden(self) -> None:
         """Test ensure cfn forbidden."""
         session = get_session("us-west-1")
         provider = Provider(session)
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider),
+            provider_builder=MockProviderBuilder(provider=provider),
         )
         stubber = Stubber(action.s3_conn)
         stubber.add_client_error(
@@ -145,7 +145,9 @@ class TestBaseAction(unittest.TestCase):
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
     )
-    def test_generate_plan_no_persist_exclude(self, mock_stack_action, mock_tags):
+    def test_generate_plan_no_persist_exclude(
+        self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
+    ) -> None:
         """Test generate plan no persist exclude."""
         mock_stack_action.return_value = MagicMock()
         mock_tags.return_value = {}
@@ -156,7 +158,9 @@ class TestBaseAction(unittest.TestCase):
         )
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(self.provider, region=self.region),
+            provider_builder=MockProviderBuilder(
+                provider=self.provider, region=self.region
+            ),
         )
 
         plan = action._generate_plan(include_persistent_graph=False)
@@ -178,7 +182,9 @@ class TestBaseAction(unittest.TestCase):
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
     )
-    def test_generate_plan_no_persist_include(self, mock_stack_action, mock_tags):
+    def test_generate_plan_no_persist_include(
+        self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
+    ) -> None:
         """Test generate plan no persist include."""
         mock_stack_action.return_value = MagicMock()
         mock_tags.return_value = {}
@@ -189,7 +195,9 @@ class TestBaseAction(unittest.TestCase):
         )
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(self.provider, region=self.region),
+            provider_builder=MockProviderBuilder(
+                provider=self.provider, region=self.region
+            ),
         )
 
         plan = action._generate_plan(include_persistent_graph=True)
@@ -211,7 +219,9 @@ class TestBaseAction(unittest.TestCase):
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
     )
-    def test_generate_plan_with_persist_exclude(self, mock_stack_action, mock_tags):
+    def test_generate_plan_with_persist_exclude(
+        self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
+    ) -> None:
         """Test generate plan with persist exclude."""
         mock_stack_action.return_value = MagicMock()
         mock_tags.return_value = {}
@@ -222,7 +232,9 @@ class TestBaseAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps([persist_step])
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(self.provider, region=self.region),
+            provider_builder=MockProviderBuilder(
+                provider=self.provider, region=self.region
+            ),
         )
 
         plan = action._generate_plan(include_persistent_graph=False)
@@ -243,7 +255,9 @@ class TestBaseAction(unittest.TestCase):
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
     )
-    def test_generate_plan_with_persist_include(self, mock_stack_action, mock_tags):
+    def test_generate_plan_with_persist_include(
+        self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
+    ) -> None:
         """Test generate plan with persist include."""
         mock_stack_action.return_value = MagicMock()
         mock_tags.return_value = {}
@@ -254,7 +268,9 @@ class TestBaseAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps([persist_step])
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(self.provider, region=self.region),
+            provider_builder=MockProviderBuilder(
+                provider=self.provider, region=self.region
+            ),
         )
 
         plan = action._generate_plan(include_persistent_graph=True)
@@ -277,7 +293,9 @@ class TestBaseAction(unittest.TestCase):
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
     )
-    def test_generate_plan_with_persist_no_lock_req(self, mock_stack_action, mock_tags):
+    def test_generate_plan_with_persist_no_lock_req(
+        self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
+    ) -> None:
         """Test generate plan with persist no lock req."""
         mock_stack_action.return_value = MagicMock()
         mock_tags.return_value = {}
@@ -288,7 +306,9 @@ class TestBaseAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps([persist_step])
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(self.provider, region=self.region),
+            provider_builder=MockProviderBuilder(
+                provider=self.provider, region=self.region
+            ),
         )
 
         plan = action._generate_plan(
@@ -306,7 +326,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertFalse(plan.require_unlocked)
 
-    def test_stack_template_url(self):
+    def test_stack_template_url(self) -> None:
         """Test stack template url."""
         context = mock_context("mynamespace")
         blueprint = MockBlueprint(name="myblueprint", context=context)
@@ -317,7 +337,7 @@ class TestBaseAction(unittest.TestCase):
         provider = Provider(session)
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(provider, region=region),
+            provider_builder=MockProviderBuilder(provider=provider, region=region),
         )
 
         with patch(

@@ -35,7 +35,7 @@ class TestRunwayTestDefinitionModel:
 
         assert isinstance(obj, ScriptRunwayTestDefinitionModel)
         assert obj.args.dict() == {"commands": []}
-        assert not obj.name
+        assert obj.name == "script"
         assert obj.type == "script"
 
     def test_init_yamllint(self) -> None:

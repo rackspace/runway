@@ -28,7 +28,7 @@ error
 class TestEnvironment(unittest.TestCase):
     """Tests for runway.cfngin.environment."""
 
-    def test_simple_key_value_parsing(self):
+    def test_simple_key_value_parsing(self) -> None:
         """Test simple key value parsing."""
         parsed_env = parse_environment(TEST_ENV)
         self.assertTrue(isinstance(parsed_env, dict))
@@ -39,12 +39,12 @@ class TestEnvironment(unittest.TestCase):
         self.assertEqual(parsed_env["key5"], "<another>@value")
         self.assertEqual(len(parsed_env), 5)
 
-    def test_simple_key_value_parsing_exception(self):
+    def test_simple_key_value_parsing_exception(self) -> None:
         """Test simple key value parsing exception."""
         with self.assertRaises(ValueError):
             parse_environment(TEST_ERROR_ENV)
 
-    def test_blank_value(self):
+    def test_blank_value(self) -> None:
         """Test blank value."""
         env = """key1:"""
         parsed = parse_environment(env)

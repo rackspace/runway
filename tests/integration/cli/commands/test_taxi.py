@@ -1,5 +1,8 @@
 """Test ``runway taxi``."""
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
 from mock import MagicMock
@@ -7,8 +10,21 @@ from mock import MagicMock
 from runway._cli import cli
 from runway._cli.commands import plan
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_taxi(caplog, cd_tmp_path, cp_config, monkeypatch):
+    from _pytest.logging import LogCaptureFixture
+    from _pytest.monkeypatch import MonkeyPatch
+
+    from ...conftest import CpConfigTypeDef
+
+
+def test_taxi(
+    caplog: LogCaptureFixture,
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    monkeypatch: MonkeyPatch,
+) -> None:
     """Test taxi."""
     cp_config("min_required", cd_tmp_path)
     caplog.set_level(logging.DEBUG, logger="runway.cli.commands.taxi")

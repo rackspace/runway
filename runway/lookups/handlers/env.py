@@ -35,6 +35,8 @@ limited or no effect:
 
 """
 # pylint: disable=arguments-differ
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any
 
 from .base import LookupHandler
@@ -49,8 +51,7 @@ class EnvLookup(LookupHandler):
     """Environment variable Lookup."""
 
     @classmethod
-    def handle(cls, value, context, **_):
-        # type: (str, 'Context', Any) -> Any
+    def handle(cls, value: str, context: Context, **_: Any) -> Any:
         """Retrieve an environment variable.
 
         The value is retrieved from a copy of the current environment variables

@@ -1,27 +1,32 @@
 """Test runway.module.cloudformation."""
-# pylint: disable=protected-access,no-self-use
-from mock import patch
+# pylint: disable=no-self-use
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 from runway.core.components import DeployEnvironment
 from runway.module.cloudformation import CloudFormation
-from runway.util import MutableMap
 
 from ..factories import MockRunwayContext
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest_mock import MockerFixture
 
 
 class TestCloudFormation:
     """Test runway.module.cloudformation.CloudFormation."""
 
     @property
-    def generic_options(self):
+    def generic_options(self) -> Dict[str, Union[Dict[str, Any], str]]:
         """Return generic module options."""
         return {
-            "environment": True,
-            "parameters": MutableMap(**{"test_key": "test-value"}),
+            "parameters": {"test_key": "test-value"},
         }
 
     @staticmethod
-    def get_context(name="test", region="us-east-1"):
+    def get_context(name: str = "test", region: str = "us-east-1") -> MockRunwayContext:
         """Create a basic Runway context object."""
         context = MockRunwayContext(
             deploy_environment=DeployEnvironment(explicit_name=name)
@@ -29,23 +34,23 @@ class TestCloudFormation:
         context.env.aws_region = region
         return context
 
-    @patch("runway.cfngin.cfngin.CFNgin.deploy")
-    def test_deploy(self, mock_action, tmp_path):
+    def test_deploy(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test deploy."""
-        module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
+        mock_action = mocker.patch("runway.cfngin.cfngin.CFNgin.deploy")
+        module = CloudFormation(self.get_context(), tmp_path, self.generic_options)
         module.deploy()
         mock_action.assert_called_once()
 
-    @patch("runway.cfngin.cfngin.CFNgin.destroy")
-    def test_destroy(self, mock_action, tmp_path):
+    def test_destroy(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test destroy."""
-        module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
+        mock_action = mocker.patch("runway.cfngin.cfngin.CFNgin.destroy")
+        module = CloudFormation(self.get_context(), tmp_path, self.generic_options)
         module.destroy()
         mock_action.assert_called_once()
 
-    @patch("runway.cfngin.cfngin.CFNgin.plan")
-    def test_plan(self, mock_action, tmp_path):
+    def test_plan(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test plan."""
-        module = CloudFormation(self.get_context(), str(tmp_path), self.generic_options)
+        mock_action = mocker.patch("runway.cfngin.cfngin.CFNgin.plan")
+        module = CloudFormation(self.get_context(), tmp_path, self.generic_options)
         module.plan()
         mock_action.assert_called_once()

@@ -1,4 +1,6 @@
 """Terraform version management."""
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -9,6 +11,8 @@ import sys
 import tempfile
 import zipfile
 from distutils.version import LooseVersion
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -19,19 +23,28 @@ import requests
 from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
 
-LOGGER = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from .._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 TF_VERSION_FILENAME = ".terraform-version"
 
 
 # Branch and local variable count will go down when py2 support is dropped
 def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branches
-    version, versions_dir, command_suffix, tf_platform=None, arch=None,
-):
+    version: str,
+    versions_dir: Path,
+    command_suffix: str,
+    tf_platform: Optional[str] = None,
+    arch: Optional[str] = None,
+) -> None:
     """Download Terraform archive and return path to it."""
     version_dir = versions_dir / version
 
     if arch is None:
-        arch = os.environ.get("TFENV_ARCH") if os.environ.get("TFENV_ARCH") else "amd64"
+        arch = os.getenv("TFENV_ARCH", "amd64")
 
     if tf_platform:
         tfver_os = tf_platform + "_" + arch
@@ -78,7 +91,7 @@ def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branch
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
-def get_available_tf_versions(include_prerelease=False):
+def get_available_tf_versions(include_prerelease: bool = False) -> List[str]:
     """Return available Terraform versions."""
     tf_releases = json.loads(
         requests.get("https://releases.hashicorp.com/index.json").text
@@ -89,55 +102,46 @@ def get_available_tf_versions(include_prerelease=False):
         reverse=True,
     )
     if include_prerelease:
-        return tf_versions
-    return [i for i in tf_versions if "-" not in i]
+        return [i for i in tf_versions if i]
+    return [i for i in tf_versions if i and "-" not in i]
 
 
-def get_latest_tf_version(include_prerelease=False):
+def get_latest_tf_version(include_prerelease: bool = False) -> str:
     """Return latest Terraform version."""
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def load_terrafrom_module(parser, path):
+def load_terrafrom_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
     """Load all Terraform files in a module into one dict.
 
     Args:
         parser (Union[hcl, hcl2]): Parser to use when loading files.
-        path (Path): Terraform module path. All Terraform files in the
+        path: Terraform module path. All Terraform files in the
             path will be loaded.
 
-    Returns:
-        Dict[str, Any]: Combined contents of all Terraform files in a
-        single dict.
-
     """
-    result = {}
+    result: Dict[str, Any] = {}
     LOGGER.debug("using %s parser to load module: %s", parser.__name__.upper(), path)
     for tf_file in path.glob("*.tf"):
-        tf_config = parser.loads(tf_file.read_text())
-        result = merge_dicts(result, tf_config)
+        tf_config = parser.loads(tf_file.read_text())  # type: ignore
+        result = merge_dicts(result, cast(Dict[str, Any], tf_config))
     return result
 
 
-class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
+class TFEnvManager(EnvManager):
     """Terraform version management.
 
     Designed to be compatible with https://github.com/tfutils/tfenv.
 
     """
 
-    def __init__(self, path=None):
+    def __init__(self, path: Optional[Path] = None) -> None:
         """Initialize class."""
         super().__init__("terraform", "tfenv", path)
 
     @cached_property
-    def backend(self):
-        """Backend config of the Terraform module.
-
-        Returns:
-            Dict[str, Any]
-
-        """
+    def backend(self) -> Dict[str, Any]:
+        """Backend config of the Terraform module."""
         # Terraform can only have one backend configured; this formats the
         # data to make it easier to work with
         return [
@@ -146,15 +150,10 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         ][0]
 
     @cached_property
-    def terraform_block(self):
-        """Collect Terraform configuration blocks from a Terraform module.
+    def terraform_block(self) -> Dict[str, Any]:
+        """Collect Terraform configuration blocks from a Terraform module."""
 
-        Returns:
-            Dict[str, Any]
-
-        """
-
-        def _flatten_lists(data):
+        def _flatten_lists(data: Any) -> Dict[str, Any]:
             """Flatten HCL2 list attributes until its fixed.
 
             python-hcl2 incorrectly turns all attributes into lists so we need
@@ -163,7 +162,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             https://github.com/amplify-education/python-hcl2/issues/6
 
             Args:
-                data (Dict[str, List[Any]]): Dict with lists to flatten.
+                data: Dict with lists to flatten.
 
             """
             if not isinstance(data, dict):
@@ -196,11 +195,11 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         return _flatten_lists(result)
 
     @cached_property
-    def version_file(self):
+    def version_file(self) -> Optional[Path]:
         """Find and return a ".terraform-version" file if one is present.
 
         Returns:
-            Optional[Path]: Path to the Terraform version file.
+            Path to the Terraform version file.
 
         """
         for path in [self.path, self.path.parent]:
@@ -210,11 +209,11 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
                 return test_path
         return None
 
-    def get_min_required(self):
+    def get_min_required(self) -> str:
         """Get the defined minimum required version of Terraform.
 
         Returns:
-            str: The minimum required version as defined in the module.
+            The minimum required version as defined in the module.
 
         """
         version = self.terraform_block.get("required_version")
@@ -237,11 +236,11 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         )
         sys.exit(1)
 
-    def get_version_from_file(self, file_path=None):
+    def get_version_from_file(self, file_path: Optional[Path] = None) -> Optional[str]:
         """Get Terraform version from a file.
 
         Args:
-            file_path (Optional[Path]): Path to file that will be read.
+            file_path: Path to file that will be read.
 
         """
         file_path = file_path or self.version_file
@@ -250,7 +249,7 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
         LOGGER.debug("file path not provided and version file could not be found")
         return None
 
-    def install(self, version_requested=None):
+    def install(self, version_requested: Optional[str] = None) -> str:
         """Ensure Terraform is available."""
         version_requested = version_requested or self.get_version_from_file()
 

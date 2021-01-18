@@ -1,14 +1,22 @@
 """Test ``runway gen-sample`` command."""
 # pylint: disable=unused-argument
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
 
 from runway._cli import cli
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_cdk_csharp(cd_tmp_path, caplog):
+    from _pytest.logging import LogCaptureFixture
+
+
+def test_cdk_csharp(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample cdk-csharp`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -41,7 +49,7 @@ def test_cdk_csharp(cd_tmp_path, caplog):
     ]
 
 
-def test_cdk_py(cd_tmp_path, caplog):
+def test_cdk_py(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample cdk-py`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -73,7 +81,7 @@ def test_cdk_py(cd_tmp_path, caplog):
     ]
 
 
-def test_cdk_tsc(cd_tmp_path, caplog):
+def test_cdk_tsc(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample cdk-tsc`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -105,7 +113,7 @@ def test_cdk_tsc(cd_tmp_path, caplog):
     ]
 
 
-def test_cfn(cd_tmp_path, caplog):
+def test_cfn(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample cfn`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -125,7 +133,7 @@ def test_cfn(cd_tmp_path, caplog):
     ]
 
 
-def test_cfngin(cd_tmp_path, caplog):
+def test_cfngin(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample cfngin`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -148,7 +156,7 @@ def test_cfngin(cd_tmp_path, caplog):
     assert caplog.messages == ["Sample CFNgin module created at {}".format(str(module))]
 
 
-def test_k8s_cfn_repo(cd_tmp_path, caplog):
+def test_k8s_cfn_repo(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample k8s-cfn-repo`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -199,7 +207,7 @@ def test_k8s_cfn_repo(cd_tmp_path, caplog):
     ]
 
 
-def test_k8s_tf_repo(cd_tmp_path, caplog):
+def test_k8s_tf_repo(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample k8s-tf-repo`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -245,7 +253,7 @@ def test_k8s_tf_repo(cd_tmp_path, caplog):
     ]
 
 
-def test_sls_py(cd_tmp_path, caplog):
+def test_sls_py(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample sls-py`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -276,7 +284,7 @@ def test_sls_py(cd_tmp_path, caplog):
     ]
 
 
-def test_sls_tsc(cd_tmp_path, caplog):
+def test_sls_tsc(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample sls-tsc`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -309,7 +317,7 @@ def test_sls_tsc(cd_tmp_path, caplog):
     ]
 
 
-def test_stacker(cd_tmp_path, caplog):
+def test_stacker(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample stacker`` command."""
     caplog.set_level(logging.WARNING, logger="runway.cli")
     runner = CliRunner()
@@ -321,7 +329,7 @@ def test_stacker(cd_tmp_path, caplog):
     )
 
 
-def test_static_angular(cd_tmp_path, caplog):
+def test_static_angular(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample static-angular`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -375,7 +383,7 @@ def test_static_angular(cd_tmp_path, caplog):
     ]
 
 
-def test_static_react(cd_tmp_path, caplog):
+def test_static_react(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample static-react`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -415,7 +423,7 @@ def test_static_react(cd_tmp_path, caplog):
     ]
 
 
-def test_tf(cd_tmp_path, caplog):
+def test_tf(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample tf`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -455,7 +463,9 @@ def test_tf(cd_tmp_path, caplog):
         ("tf", "sampleapp.tf"),
     ],
 )
-def test_dir_exists(command, dir_name, caplog, cd_tmp_path):
+def test_dir_exists(
+    command: str, dir_name: str, caplog: LogCaptureFixture, cd_tmp_path: Path
+) -> None:
     """Test ``runway gen-sample`` commands when directory exists."""
     caplog.set_level(logging.ERROR, logger="runway.cli.gen_sample")
     dir_path = cd_tmp_path / dir_name

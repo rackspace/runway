@@ -33,13 +33,15 @@ limited or no effect:
 
 """
 # pylint: disable=arguments-differ
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ...util import MutableMap
 
 
 LOGGER = logging.getLogger(__name__)
@@ -50,8 +52,7 @@ class VarLookup(LookupHandler):
     """Variable definition Lookup."""
 
     @classmethod
-    def handle(cls, value, context, **kwargs):
-        # type: (str, 'Context', Any) -> Any
+    def handle(cls, value: str, variables: MutableMap, **_: Any) -> Any:
         """Retrieve a variable from the variable definition.
 
         The value is retrieved from the variables passed to Runway using
@@ -68,7 +69,6 @@ class VarLookup(LookupHandler):
 
         """
         query, args = cls.parse(value)
-        variables = kwargs["variables"]
 
         result = variables.find(query, default=args.pop("default", ""))
 

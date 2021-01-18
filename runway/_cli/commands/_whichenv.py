@@ -1,6 +1,7 @@
 """``runway whichenv`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
+from typing import Any
 
 import click
 
@@ -15,7 +16,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def whichenv(ctx, **_):  # noqa: D301
+def whichenv(ctx: click.Context, **_: Any) -> None:
     """Print the current deploy environment name to stdout.
 
     When run, the deploy environment will be determined from one of the
@@ -26,7 +27,7 @@ def whichenv(ctx, **_):  # noqa: D301
       - git branch name (strips "ENV-" prefix, master => common)
       - current working directory
 
-    """
+    """  # noqa: D301
     if not (ctx.obj.debug or ctx.obj.verbose):
         logging.getLogger("runway").setLevel(logging.ERROR)  # suppress warnings
     with SafeHaven(environ={"CI": "1"}):  # prevent prompts

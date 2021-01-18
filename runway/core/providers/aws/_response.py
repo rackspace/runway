@@ -1,31 +1,30 @@
 """Base class for AWS responses."""
+# pylint: disable=invalid-name
 from http import HTTPStatus
-from typing import Any, Dict, Union  # pylint: disable=W
+from typing import Any, Dict, Optional
 
 
-class ResponseError:  # pylint: disable=too-few-public-methods
+class ResponseError:
     """Analyse the response from AWS S3 HeadBucket API response.
 
     Attributes:
-        code (str): A unique short code representing the error that was emitted.
-        message (str): A longer human readable error message.
+        code: A unique short code representing the error that was emitted.
+        message: A longer human readable error message.
 
     """
 
-    def __init__(self, **kwargs):
-        # type: (str) -> None
+    def __init__(self, *, Code: str = "", Message: str = "") -> None:  # noqa
         """Instantiate class.
 
-        Keyword Args:
-            Code (str): A unique short code representing the error that was emitted.
-            Message (str): A longer human readable error message.
+        Args:
+            Code: A unique short code representing the error that was emitted.
+            Message: A longer human readable error message.
 
         """
-        self.code = kwargs.get("Code", "")
-        self.message = kwargs.get("Message", "")
+        self.code = Code
+        self.message = Message
 
-    def __bool__(self):
-        # type: () -> bool
+    def __bool__(self) -> bool:
         """Implement evaluation of instances as a bool."""
         return bool(self.code or self.message)
 
@@ -34,63 +33,65 @@ class ResponseMetadata:
     """Analyse the response from AWS S3 HeadBucket API response.
 
     Attributes:
-        host_id (Optional[str]): Host ID data.
-        https_headers (Dict[str, Any]): A map of response header keys and
+        host_id: Host ID data.
+        https_headers: A map of response header keys and
             their respective values.
-        http_status_code (int): The HTTP status code of the response (e.g., 200, 404).
-        request_id (Optional[str]): The unique request ID associated with the response.
+        http_status_code: The HTTP status code of the response (e.g., 200, 404).
+        request_id: The unique request ID associated with the response.
             Log this value when debugging requests for AWS support.
-        retry_attempts (int): The number of retries that were attempted
+        retry_attempts: The number of retries that were attempted
             before the request was completed.
 
     """
 
-    def __init__(self, **kwargs):
-        # type: (Union[int, None, str]) -> None
+    def __init__(
+        self,
+        *,
+        HostId: Optional[str] = None,  # noqa
+        HTTPHeaders: Optional[Dict[str, Any]] = None,  # noqa
+        HTTPStatusCode: int = 200,  # noqa
+        RequestId: Optional[str] = None,  # noqa
+        RetryAttempts: int = 0,  # noqa
+    ) -> None:
         """Instantiate class.
 
         Keyword Args:
-            HostId (str): Host ID data.
-            HTTPHeaders (Dict[str, Any]): A map of response header keys and
-                their respective values.
-            HTTPStatusCode (int): The HTTP status code of the response
-                (e.g., 200, 404).
-            RequestId (str): The unique request ID associated with the response.
+            HostId: Host ID data.
+            HTTPHeaders: A map of response header keys and their respective values.
+            HTTPStatusCode: The HTTP status code of the response (e.g., 200, 404).
+            RequestId: The unique request ID associated with the response.
                 Log this value when debugging requests for AWS support.
-            RetryAttempts (int): The number of retries that were attempted
-                before the request was completed.
+            RetryAttempts: The number of retries that were attempted before the
+                request was completed.
 
         """
-        self.host_id = kwargs.get("HostId")
-        self.https_headers = kwargs.get("HTTPHeaders", {})
-        self.http_status_code = kwargs.get("HTTPStatusCode", 200)
-        self.request_id = kwargs.get("RequestId")
-        self.retry_attempts = kwargs.get("RetryAttempts", 0)
+        self.host_id = HostId
+        self.https_headers = HTTPHeaders or {}
+        self.http_status_code = HTTPStatusCode
+        self.request_id = RequestId
+        self.retry_attempts = RetryAttempts
 
     @property
-    def forbidden(self):
-        # type: () -> bool
+    def forbidden(self) -> bool:
         """Whether the response returned 403 (forbidden)."""
         return self.http_status_code == HTTPStatus.FORBIDDEN
 
     @property
-    def not_found(self):
-        # type: () -> bool
+    def not_found(self) -> bool:
         """Whether the response returned 404 (Not Found)."""
         return self.http_status_code == HTTPStatus.NOT_FOUND
 
 
-class BaseResponse:  # pylint: disable=too-few-public-methods
+class BaseResponse:
     """Analyse the response from AWS S3 HeadBucket API response.
 
     Attributes:
-        error (ResponseError): Information about a service or networking error.
-        metadata (ResponseMetadata): Information about the request.
+        error: Information about a service or networking error.
+        metadata: Information about the request.
 
     """
 
-    def __init__(self, **kwargs):
-        # type: (Dict[str, Any]) -> None
+    def __init__(self, **kwargs: Any) -> None:
         """Instantiate class.
 
         Keyword Args:

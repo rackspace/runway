@@ -14,7 +14,7 @@ from .factories import generate_definition
 class TestStack(unittest.TestCase):
     """Tests for runway.cfngin.stack.Stack."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Run before tests."""
         self.sd = {"name": "test"}  # pylint: disable=invalid-name
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
@@ -24,7 +24,7 @@ class TestStack(unittest.TestCase):
         )
         register_lookup_handler("noop", lambda **kwargs: "test")
 
-    def test_stack_requires(self):
+    def test_stack_requires(self) -> None:
         """Test stack requires."""
         definition = generate_definition(
             base_name="vpc",
@@ -49,7 +49,7 @@ class TestStack(unittest.TestCase):
             "fakeStack2", stack.requires,
         )
 
-    def test_stack_requires_circular_ref(self):
+    def test_stack_requires_circular_ref(self) -> None:
         """Test stack requires circular ref."""
         definition = generate_definition(
             base_name="vpc",
@@ -60,7 +60,7 @@ class TestStack(unittest.TestCase):
         with self.assertRaises(ValueError):
             stack.requires  # pylint: disable=pointless-statement
 
-    def test_stack_cfn_parameters(self):
+    def test_stack_cfn_parameters(self) -> None:
         """Test stack cfn parameters."""
         definition = generate_definition(
             base_name="vpc",
@@ -77,14 +77,14 @@ class TestStack(unittest.TestCase):
         param = stack.parameter_values["Param2"]
         self.assertEqual(param, "Some Resolved Value")
 
-    def test_stack_tags_default(self):
+    def test_stack_tags_default(self) -> None:
         """Test stack tags default."""
         self.config.tags = {"environment": "prod"}
         definition = generate_definition(base_name="vpc", stack_id=1)
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "prod"})
 
-    def test_stack_tags_override(self):
+    def test_stack_tags_override(self) -> None:
         """Test stack tags override."""
         self.config.tags = {"environment": "prod"}
         definition = generate_definition(
@@ -93,7 +93,7 @@ class TestStack(unittest.TestCase):
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "stage"})
 
-    def test_stack_tags_extra(self):
+    def test_stack_tags_extra(self) -> None:
         """Test stack tags extra."""
         self.config.tags = {"environment": "prod"}
         definition = generate_definition(

@@ -126,13 +126,11 @@ class Deployment:
         return self.definition.parallel_regions or self.definition.regions
 
     @cached_property
-    def use_async(self):
-        # type: () -> bool
+    def use_async(self) -> bool:
         """Whether to use asynchronous method."""
         return bool(self.definition.parallel_regions and self.ctx.use_concurrent)
 
-    def deploy(self):
-        # type: () -> None
+    def deploy(self) -> None:
         """Deploy the deployment.
 
         High level method for running a deployment.
@@ -145,8 +143,7 @@ class Deployment:
             return self.__async("deploy")
         return self.__sync("deploy")
 
-    def destroy(self):
-        # type: () -> None
+    def destroy(self) -> None:
         """Destroy the deployment.
 
         High level method for running a deployment.
@@ -159,8 +156,7 @@ class Deployment:
             return self.__async("destroy")
         return self.__sync("destroy")
 
-    def plan(self):
-        # type: () -> None
+    def plan(self) -> None:
         """Plan for the next deploy of the deployment.
 
         High level method for running a deployment.
@@ -176,15 +172,14 @@ class Deployment:
             )
         return self.__sync("plan")
 
-    def run(self, action, region):
-        # type: (str, str) -> None
+    def run(self, action: str, region: str) -> None:
         """Run a single deployment in a single region.
 
         Low level API access to run a deployment object.
 
         Args:
-            action (str): Action to run (deploy, destroy, plan, etc.)
-            region (str): AWS region to run in.
+            action: Action to run (deploy, destroy, plan, etc.)
+            region: AWS region to run in.
 
         """
         context = self.ctx.copy() if self.use_async else self.ctx
@@ -203,12 +198,11 @@ class Deployment:
                 variables=self._variables,
             )
 
-    def validate_account_credentials(self, context=None):
-        # type: (Optional[Context]) -> None
+    def validate_account_credentials(self, context: Optional[Context] = None) -> None:
         """Exit if requested deployment account doesn't match credentials.
 
         Args:
-            context (Optional[Context]): Context object.
+            context: Context object.
 
         Raises:
             SystemExit: AWS Account associated with the current credentials

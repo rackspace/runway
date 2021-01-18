@@ -1,25 +1,30 @@
 """Tests for lookup handler for env."""
-from unittest import TestCase
+# pylint: disable=no-self-use
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import pytest
 
 from runway.lookups.handlers.env import EnvLookup
-from runway.util import MutableMap
 
-CONTEXT = MutableMap(**{"env_vars": {"str_val": "test"}})
+if TYPE_CHECKING:
+    from ...factories import MockRunwayContext
+
+ENV_VARS = {"str_val": "test"}
 
 
-class TestEnvLookup(TestCase):
+class TestEnvLookup:
     """Tests for EnvLookup."""
 
-    def test_handle(self):
+    def test_handle(self, runway_context: MockRunwayContext) -> None:
         """Validate handle base functionality."""
-        query = "str_val"
-        result = EnvLookup.handle(query, context=CONTEXT)
+        runway_context.env.vars = ENV_VARS.copy()
+        result = EnvLookup.handle("str_val", context=runway_context)
+        assert result == "test"
 
-        self.assertEqual(result, "test")
-
-    def test_handle_not_found(self):
+    def test_handle_not_found(self, runway_context: MockRunwayContext) -> None:
         """Validate exception when lookup cannot be resolved."""
-        query = "NOT_VALID"
-
-        with self.assertRaises(ValueError):
-            EnvLookup.handle(query, context=CONTEXT)
+        runway_context.env.vars = ENV_VARS.copy()
+        with pytest.raises(ValueError):
+            EnvLookup.handle("NOT_VALID", context=runway_context)

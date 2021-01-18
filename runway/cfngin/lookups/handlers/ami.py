@@ -1,11 +1,16 @@
 """AMI lookup."""
 # pylint: disable=unused-argument,arguments-differ
+from __future__ import annotations
+
 import operator
 import re
+from typing import TYPE_CHECKING
 
-from runway.lookups.handlers.base import LookupHandler
-
+from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
+
+if TYPE_CHECKING:
+    from ...context import Context
 
 TYPE_NAME = "ami"
 
@@ -13,7 +18,9 @@ TYPE_NAME = "ami"
 class ImageNotFound(Exception):
     """Image not found."""
 
-    def __init__(self, search_string):
+    search_string: str
+
+    def __init__(self, search_string: str) -> None:
         """Instantiate class."""
         self.search_string = search_string
         message = ("Unable to find ec2 image with search string: {}").format(
@@ -26,15 +33,12 @@ class AmiLookup(LookupHandler):
     """AMI lookup."""
 
     @classmethod
-    def handle(cls, value, context, *_, **kwargs):
+    def handle(cls, value: str, context: Context, *_args, **kwargs) -> str:
         """Fetch the most recent AMI Id using a filter.
 
         Args:
-            value (str): Parameter(s) given to this lookup.
-            context (:class:`runway.cfngin.context.Context`): Context instance.
-
-        Returns:
-            str: Looked up value.
+            value: Parameter(s) given to this lookup.
+            context: Context instance.
 
         Example:
             .. code-block:
@@ -93,9 +97,7 @@ class AmiLookup(LookupHandler):
             executable_users = values.pop("executable_users").split(",")
             describe_args["ExecutableUsers"] = executable_users
 
-        filters = []
-        for k, v in values.items():
-            filters.append({"Name": k, "Values": v.split(",")})
+        filters = [{"Name": k, "Values": v.split(",")} for k, v in values.items()]
         describe_args["Filters"] = filters
 
         result = ec2.describe_images(**describe_args)

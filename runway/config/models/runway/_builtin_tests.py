@@ -2,8 +2,7 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from pydantic import Extra, Field, validator
 from typing_extensions import Literal
@@ -11,24 +10,7 @@ from typing_extensions import Literal
 from .. import utils
 from ..base import ConfigProperty
 
-
-class ValidRunwayTestTypeValues(Enum):
-    """Valid build-in test types."""
-
-    cfn_lint = "cfn-lint"
-    script = "script"
-    yamllint = "yamllint"
-
-    @classmethod
-    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
-        """Mutate the field schema in place.
-
-        This is only called when output JSON schema from a model.
-
-        """
-        field_schema.update(  # cov: ignore
-            title="Test Type", description="The type of test to run.",
-        )
+ValidRunwayTestTypeValues = Literal["cfn-lint", "script", "yamllint"]
 
 
 class RunwayTestDefinitionModel(ConfigProperty):
@@ -39,13 +21,13 @@ class RunwayTestDefinitionModel(ConfigProperty):
         title="Arguments",
         description="Arguments to be passed to the test. Support varies by test type.",
     )
-    name: Optional[str] = Field(None, description="Name of the test.")
+    name: str = Field("test-name", description="Name of the test.")
     required: Union[bool, str] = Field(
         False, description="Whether the test must pass for subsequent tests to be run."
     )
     type: ValidRunwayTestTypeValues
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         schema_extra = {
@@ -86,7 +68,7 @@ class CfnLintRunwayTestArgs(ConfigProperty):
         description="Array of arguments to pass to the cfn-lint CLI.",
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -109,7 +91,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         title="Arguments",
         description="Arguments to be passed to the test.",
     )
-    name: Optional[str] = Field("cfn-lint", description="Name of the test.")
+    name: str = Field("cfn-lint", description="Name of the test.")
     required: Union[bool, str] = Field(
         False, description="Whether the test must pass for subsequent tests to be run."
     )
@@ -117,7 +99,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         "cfn-lint", description="The type of test to run."
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         schema_extra = {
@@ -133,7 +115,7 @@ class ScriptRunwayTestArgs(ConfigProperty):
         [], description="Array of commands that will be run for this test."
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         extra = Extra.forbid
@@ -156,13 +138,13 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         title="Arguments",
         description="Arguments to be passed to the test.",
     )
-    name: Optional[str] = Field(None, description="Name of the test.")
+    name: str = Field("script", description="Name of the test.")
     required: Union[bool, str] = Field(
         False, description="Whether the test must pass for subsequent tests to be run."
     )
     type: Literal["script"] = Field("script", description="The type of test to run.")
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         schema_extra = {
@@ -174,7 +156,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
 class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     """Model for a yamllint test definition."""
 
-    name: Optional[str] = Field("yamllint", description="Name of the test.")
+    name: str = Field("yamllint", description="Name of the test.")
     required: Union[bool, str] = Field(
         False, description="Whether the test must pass for subsequent tests to be run."
     )
@@ -182,7 +164,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         "yamllint", description="The type of test to run."
     )
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         schema_extra = {

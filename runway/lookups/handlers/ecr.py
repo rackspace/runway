@@ -43,6 +43,8 @@ This Lookup does not support any arguments.
 
 """
 # pylint: disable=arguments-differ
+from __future__ import annotations
+
 import base64
 import logging
 from typing import TYPE_CHECKING, Any, Union  # pylint: disable=W
@@ -53,12 +55,10 @@ from runway.lookups.handlers.base import LookupHandler
 # python2 supported pylint sees this is cyclic even though its only for type checking
 # pylint: disable=cyclic-import
 if TYPE_CHECKING:
-    from mypy_boto3_ecr.client import ECRClient  # pylint: disable=E
+    from mypy_boto3_ecr.client import ECRClient
 
-    from runway.cfngin.context import (
-        Context as CFNginContext,  # noqa: F401 pylint: disable=W
-    )
-    from runway.context import Context as RunwayContext  # noqa: F401 pylint: disable=W
+    from runway.cfngin.context import Context as CFNginContext
+    from runway.context import Context as RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class EcrLookup(LookupHandler):
     """ECR Lookup."""
 
     @staticmethod
-    def get_login_password(client):  # type: (ECRClient) -> str
+    def get_login_password(client: ECRClient) -> str:
         """Get a password to login to ECR registry."""
         auth = client.get_authorization_token()["authorizationData"][0]
         auth_token = base64.b64decode(auth["authorizationToken"]).decode()
@@ -77,8 +77,9 @@ class EcrLookup(LookupHandler):
         return password
 
     @classmethod
-    def handle(cls, value, context, **_):
-        # type: (str, Union['CFNginContext', 'RunwayContext'], Any) -> Any
+    def handle(
+        cls, value: str, context: Union[CFNginContext, RunwayContext], **_: Any
+    ) -> Any:
         """Retrieve a value from AWS Elastic Container Registry (ECR).
 
         Args:

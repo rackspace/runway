@@ -22,9 +22,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def destroy(
-    ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any
-) -> None:  # noqa: D301
+def destroy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
     """Destroy infrastructure as code.
 
     \b
@@ -39,7 +37,7 @@ def destroy(
         - (non-interactive) all
     3. Destroys selected in reverse the order defined.
 
-    """
+    """  # noqa: D301
     if not ctx.obj.env.ci:
         click.secho(
             "[WARNING] Runway is about to be run in DESTROY mode. " "[WARNING]",

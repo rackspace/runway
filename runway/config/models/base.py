@@ -9,7 +9,7 @@ import pydantic
 class ConfigProperty(pydantic.BaseModel):
     """Base class for Runway configuration properties."""
 
-    class Config:  # pylint: disable=too-few-public-methods
+    class Config:
         """Model configuration."""
 
         validate_all = True
@@ -57,4 +57,4 @@ class ConfigProperty(pydantic.BaseModel):
             value: Value to assign to the attribute.
 
         """
-        super().__setattr__(name, value)
+        super().__setattr__(name, value)  # type: ignore

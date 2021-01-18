@@ -35,7 +35,7 @@ AWS_LAMBDA_DIR = path.join(path.dirname(path.realpath(__file__)), "aws_lambda")
 IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
 
 
-class Pipeline(Blueprint):  # pylint: disable=too-few-public-methods
+class Pipeline(Blueprint):
     """Stacker blueprint for app building components."""
 
     cleanup_ecr_src = parameterized_codec(
