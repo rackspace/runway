@@ -18,13 +18,13 @@ if TYPE_CHECKING:
         UploadServerCertificateResponseTypeDef,
     )
 
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
 def create_ecs_service_role(
-    context: Context, *, role_name: str = "ecsServiceRole", **_: Any
+    context: CfnginContext, *, role_name: str = "ecsServiceRole", **_: Any
 ) -> bool:
     """Create ecsServieRole, which has to be named exactly that currently.
 
@@ -135,7 +135,7 @@ def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def ensure_server_cert_exists(
-    context: Context, *, cert_name: str, prompt: bool = True, **kwargs: Any
+    context: CfnginContext, *, cert_name: str, prompt: bool = True, **kwargs: Any
 ) -> Dict[str, str]:
     """Ensure server cert exists.
 

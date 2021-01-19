@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ec2.type_defs import ImportKeyPairResultTypeDef, KeyPairTypeDef
     from mypy_boto3_ssm.client import SSMClient
 
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -212,7 +212,7 @@ def interactive_prompt(
 
 
 def ensure_keypair_exists(
-    context: Context,
+    context: CfnginContext,
     *,
     keypair: str,
     public_key_path: Optional[str] = None,

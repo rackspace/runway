@@ -548,7 +548,7 @@ Example::
 Hook Data Lookup
 ****************
 
-When using hooks, you can have the hook store results in the :attr:`Context.hook_data <runway.cfngin.context.Context.hook_data>` dictionary on the context by setting :attr:`~cfngin.hook.data_key` in the :class:`~cfngin.hook` config.
+When using hooks, you can have the hook store results in the :attr:`CfnginContext.hook_data <runway.context.cfngin.CfnginContext.hook_data>` dictionary on the context by setting :attr:`~cfngin.hook.data_key` in the :class:`~cfngin.hook` config.
 
 This lookup lets you look up values in that dictionary. A good example of this
 is when you use the `aws_lambda hook`_ to upload AWS Lambda code, then need to
@@ -612,9 +612,9 @@ If using boto3 in a lookup, use ``context.get_session()`` instead of creating a 
 .. code-block:: python
 
     """Example lookup."""
-    from runway.cfngin.context import Context
     from runway.cfngin.providers.base import BaseProvider
     from runway.cfngin.util import read_value_from_path
+    from runway.context.cfngin import CfnginContext
     from runway.lookups.handlers.base import LookupHandler
 
     TYPE_NAME = 'mylookup'
@@ -625,7 +625,7 @@ If using boto3 in a lookup, use ``context.get_session()`` instead of creating a 
         @classmethod
         def handle(cls,
                    value: str,
-                   context: Context,
+                   context: CfnginContext,
                    provider: BaseProvider,
                    **kwargs: Any
                    ) -> str:

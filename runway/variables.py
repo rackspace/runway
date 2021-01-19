@@ -33,10 +33,10 @@ from .lookups.handlers.base import LookupHandler
 from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 
 if TYPE_CHECKING:
-    from .cfngin.context import Context as CFNginContext
     from .cfngin.providers.base import BaseProvider
     from .config.components.runway import RunwayVariablesDefinition
-    from .context import Context as RunwayContext
+    from .context.cfngin import CfnginContext
+    from .context.runway import RunwayContext
 
 
 LOGGER = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ class Variable:
 
     def resolve(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
@@ -136,7 +136,7 @@ class Variable:
 
 def resolve_variables(
     variables: List[Variable],
-    context: Union[CFNginContext, RunwayContext],
+    context: Union[CfnginContext, RunwayContext],
     provider: Optional[BaseProvider] = None,
 ) -> None:
     """Given a list of variables, resolve all of them.
@@ -196,7 +196,7 @@ class VariableValue:
 
     def resolve(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
@@ -391,7 +391,7 @@ class VariableValueList(VariableValue, list):
 
     def resolve(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
@@ -466,7 +466,7 @@ class VariableValueDict(VariableValue, dict):
 
     def resolve(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
@@ -591,7 +591,7 @@ class VariableValueConcatenation(VariableValue, list):
 
     def resolve(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
@@ -712,7 +712,7 @@ class VariableValueLookup(VariableValue):
 
     def resolve(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
@@ -771,7 +771,7 @@ class VariableValueLookup(VariableValue):
     # TODO Remove during the next major release.
     def _resolve_legacy(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[BaseProvider],
     ) -> Any:
         """Resolve legacy lookups.

@@ -45,7 +45,7 @@ class TestCommonLookupFunctionality:
         lookup_handlers.pop("cfn")  # requires special testing
         lookup_handlers.pop("ecr")  # requires special testing
         lookup_handlers.pop("ssm")  # requires special testing
-        runway_context.env_vars.update(VALUES)
+        runway_context.env.vars.update(VALUES)
 
         for _, lookup in lookup_handlers.items():
             result = lookup.handle(

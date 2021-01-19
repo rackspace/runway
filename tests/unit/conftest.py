@@ -119,11 +119,7 @@ def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
 @pytest.fixture(scope="function")
 def cfngin_context(runway_context: MockRunwayContext) -> MockCFNginContext:
     """Create a mock CFNgin context object."""
-    return MockCFNginContext(
-        environment={},
-        boto3_credentials=runway_context.boto3_credentials,
-        region=runway_context.env_region,
-    )
+    return MockCFNginContext(deploy_environment=runway_context.env, parameters={},)
 
 
 @pytest.fixture

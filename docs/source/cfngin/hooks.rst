@@ -37,7 +37,7 @@ Only the following actions allow pre/post hooks:
   .. attribute:: data_key
     :type: Optional[str]
 
-    If set, and the hook returns data (a dictionary), the results will be stored in :attr:`Context.hook_data <runway.cfngin.context.Context.hook_data>` with the ``data_key`` as its key.
+    If set, and the hook returns data (a dictionary), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.cfngin.CfnginContext.hook_data>` with the ``data_key`` as its key.
 
   .. attribute:: enabled
     :type: Optional[bool]
@@ -685,10 +685,10 @@ If using boto3 in a hook, use ``context.get_session()`` instead of creating a ne
 .. code-block::
 
     """context.get_session() example."""
-    from runway.cfngin.context import Context
     from runway.cfngin.providers.aws.default import Provider
+    from runway.context.cfngin import CfnginContext
 
-    def do_something(context: Context, provider: Provider, **kwargs: str) -> None:
+    def do_something(context: CfnginContext, provider: Provider, **kwargs: str) -> None:
         """Do something."""
         session = context.get_session()
         s3_client = session.client('s3')
@@ -703,11 +703,11 @@ Example Hook Function
     """My hook."""
     from typing import Dict
 
-    from runway.cfngin.context import Context
     from runway.cfngin.providers.aws.default import Provider
+    from runway.context.cfngin import CfnginContext
 
 
-    def do_something(context: Context,
+    def do_something(context: CfnginContext,
                      provider: Provider,
                      is_failure: bool = True,
                      **kwargs: str

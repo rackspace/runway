@@ -100,8 +100,7 @@ from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
 
 if TYPE_CHECKING:
-    from ...cfngin.context import Context as CFNginContext
-    from ...context import Context as RunwayContext
+    from ...context import CfnginContext, RunwayContext
     from ...variables import VariableValue
 
 LOGGER = logging.getLogger(__name__)
@@ -174,7 +173,7 @@ class LookupHandler:
     def handle(
         cls,
         value: str,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         *__args: Any,
         **__kwargs: Any
     ) -> Any:

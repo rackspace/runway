@@ -3,8 +3,8 @@ import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.context import Context
 from runway.cfngin.lookups.handlers.default import DefaultLookup
+from runway.context.cfngin import CfnginContext
 
 
 class TestDefaultLookup(unittest.TestCase):
@@ -13,8 +13,8 @@ class TestDefaultLookup(unittest.TestCase):
     def setUp(self) -> None:
         """Run before tests."""
         self.provider = MagicMock()
-        self.context = Context(
-            environment={"namespace": "test", "env_var": "val_in_env"}
+        self.context = CfnginContext(
+            parameters={"namespace": "test", "env_var": "val_in_env"}
         )
 
     def test_env_var_present(self) -> None:

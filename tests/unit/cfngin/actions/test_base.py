@@ -139,7 +139,7 @@ class TestBaseAction(unittest.TestCase):
                 action.ensure_cfn_bucket()
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(
@@ -176,7 +176,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(
@@ -213,7 +213,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(
@@ -249,7 +249,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(
@@ -287,7 +287,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(

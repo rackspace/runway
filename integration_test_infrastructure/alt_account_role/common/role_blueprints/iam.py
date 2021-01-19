@@ -50,6 +50,10 @@ class CrossAccountRole(Blueprint):
 
 
 if __name__ == "__main__":
-    from runway.cfngin.context import Context
+    from runway.context.cfngin import CfnginContext
 
-    print(CrossAccountRole("test", Context({"namespace": "test"}), None).to_json())
+    print(
+        CrossAccountRole(
+            "test", CfnginContext(parameters={"namespace": "test"})
+        ).to_json()
+    )

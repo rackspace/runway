@@ -16,7 +16,7 @@ from . import RunwayModule
 from .cloudformation import CloudFormation
 
 if TYPE_CHECKING:
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class StaticSite(RunwayModule):
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:
@@ -243,7 +243,7 @@ class StaticSite(RunwayModule):
         build_staticsite_args["options"]["namespace"] = "${namespace}"  # type: ignore
         build_staticsite_args["options"]["name"] = self.name  # type: ignore
         build_staticsite_args["options"]["path"] = os.path.join(  # type: ignore
-            os.path.realpath(self.context.env_root), self.path
+            os.path.realpath(self.context.env.root_dir), self.path
         )
 
         site_stack_variables = self._get_site_stack_variables()

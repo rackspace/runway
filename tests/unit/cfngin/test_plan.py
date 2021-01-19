@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, List, Optional
 
 import mock
 
-from runway.cfngin.context import Context
 from runway.cfngin.dag import walk
 from runway.cfngin.exceptions import (
     CancelExecution,
@@ -28,6 +27,7 @@ from runway.cfngin.stack import Stack
 from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
 from runway.cfngin.util import stack_template_key_name
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 from .factories import generate_definition, mock_context
 
@@ -148,7 +148,7 @@ class TestPlan(unittest.TestCase):
         """Run before tests."""
         self.count = 0
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
-        self.context = Context(config=self.config)
+        self.context = CfnginContext(config=self.config)
         register_lookup_handler("noop", lambda **kwargs: "test")
 
     def tearDown(self) -> None:
@@ -187,7 +187,7 @@ class TestPlan(unittest.TestCase):
 
     def test_plan_targeted(self) -> None:
         """Test plan targeted."""
-        context = Context(config=self.config)
+        context = CfnginContext(config=self.config)
         vpc = Stack(definition=generate_definition("vpc", 1), context=context)
         bastion = Stack(
             definition=generate_definition("bastion", 1, requires=[vpc.name]),
@@ -201,7 +201,7 @@ class TestPlan(unittest.TestCase):
 
     def test_execute_plan(self) -> None:
         """Test execute plan."""
-        context = Context(config=self.config)
+        context = CfnginContext(config=self.config)
         context.put_persistent_graph = mock.MagicMock()
         vpc = Stack(definition=generate_definition("vpc", 1), context=context)
         bastion = Stack(
@@ -249,7 +249,7 @@ class TestPlan(unittest.TestCase):
 
     def test_execute_plan_no_persist(self) -> None:
         """Test execute plan with no persistent graph."""
-        context = Context(config=self.config)
+        context = CfnginContext(config=self.config)
         context.put_persistent_graph = mock.MagicMock()
         vpc = Stack(definition=generate_definition("vpc", 1), context=context)
         bastion = Stack(
@@ -436,7 +436,7 @@ class TestPlan(unittest.TestCase):
 
     def test_execute_plan_graph_locked(self) -> None:
         """Test execute plan with locked persistent graph."""
-        context = Context(config=self.config)
+        context = CfnginContext(config=self.config)
         context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         context._persistent_graph_lock_code = "1111"
         plan = Plan(description="Test", graph=Graph(), context=context)

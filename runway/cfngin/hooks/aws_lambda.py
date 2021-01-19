@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef
 
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
     from ..providers.aws.default import Provider
 
 # mask to retrieve only UNIX file permissions from the external attributes
@@ -909,7 +909,7 @@ def select_bucket_region(
     return region or provider_region
 
 
-def upload_lambda_functions(context: Context, provider: Provider, **kwargs: Any):
+def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs: Any):
     """Build Lambda payloads from user configuration and upload them to S3.
 
     Constructs ZIP archives containing files matching specified patterns for
@@ -929,10 +929,8 @@ def upload_lambda_functions(context: Context, provider: Provider, **kwargs: Any)
     The configuration settings are documented as keyword arguments below.
 
     Args:
-        provider (:class:`runway.cfngin.providers.base.BaseProvider`): Provider
-            instance. (passed in by CFNgin)
-        context (:class:`runway.cfngin.context.Context`): Context instance.
-            (passed in by CFNgin)
+        provider: Provider instance. (passed in by CFNgin)
+        context: Context instance. (passed in by CFNgin)
 
     Keyword Args:
         bucket (Optional[str]): Custom bucket to upload functions to.

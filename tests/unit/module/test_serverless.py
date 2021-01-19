@@ -31,17 +31,17 @@ class TestServerless:
 
         assert obj.cli_args == [
             "--region",
-            runway_context.env_region,
+            runway_context.env.aws_region,
             "--stage",
-            runway_context.env_name,
+            runway_context.env.name,
         ]
 
-        runway_context.env_vars["DEBUG"] = "1"
+        runway_context.env.vars["DEBUG"] = "1"
         assert obj.cli_args == [
             "--region",
-            runway_context.env_region,
+            runway_context.env.aws_region,
             "--stage",
-            runway_context.env_name,
+            runway_context.env.name,
             "--verbose",
         ]
 
@@ -215,9 +215,9 @@ class TestServerless:
         expected_opts = [
             command,
             "--region",
-            runway_context.env_region,
+            runway_context.env.aws_region,
             "--stage",
-            runway_context.env_name,
+            runway_context.env.name,
             "--config",
             "test",
             "--extra-arg",
@@ -229,7 +229,7 @@ class TestServerless:
         )
         mock_cmd.reset_mock()
 
-        obj.context.env_vars["CI"] = "1"
+        obj.context.env.vars["CI"] = "1"
         mocker.patch.object(runway_context, "no_color", True)
         expected_opts.append("--no-color")
         if command not in ["remove", "print"]:
@@ -249,8 +249,8 @@ class TestServerless:
         caplog.set_level(logging.ERROR, logger="runway")
         obj = Serverless(runway_context, tmp_path, {"options": {"skip_npm_ci": True}})
         assert isinstance(obj.options, ServerlessOptions)
-        assert obj.region == runway_context.env_region
-        assert obj.stage == runway_context.env_name
+        assert obj.region == runway_context.env.aws_region
+        assert obj.stage == runway_context.env.name
 
         with pytest.raises(SystemExit):
             assert not Serverless(
@@ -338,7 +338,7 @@ class TestServerless:
         obj.npm_install.assert_called_once()
         obj.gen_cmd.assert_called_once_with("deploy")
         mock_run.assert_called_once_with(
-            cmd_list=["deploy"], env_vars=runway_context.env_vars, logger=obj.logger
+            cmd_list=["deploy"], env_vars=runway_context.env.vars, logger=obj.logger
         )
 
         obj.options.promotezip["bucketname"] = "test-bucket"
@@ -348,9 +348,9 @@ class TestServerless:
             [
                 "deploy",
                 "--region",
-                runway_context.env_region,
+                runway_context.env.aws_region,
                 "--stage",
-                runway_context.env_name,
+                runway_context.env.name,
                 "--config",
                 "test.yml",
             ],
@@ -367,9 +367,9 @@ class TestServerless:
             [
                 "deploy",
                 "--region",
-                runway_context.env_region,
+                runway_context.env.aws_region,
                 "--stage",
-                runway_context.env_name,
+                runway_context.env.name,
                 "--config",
                 "test.yml",
                 "--no-color",
@@ -395,7 +395,7 @@ class TestServerless:
         assert obj.sls_print() == expected_dict
         obj.npm_install.assert_called_once()
         mock_check_output.assert_called_once_with(
-            ["print"], env=runway_context.env_vars
+            ["print"], env=runway_context.env.vars
         )
         obj.gen_cmd.assert_called_once_with("print", args_list=["--format", "yaml"])
         obj.gen_cmd.reset_mock()

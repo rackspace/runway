@@ -23,7 +23,7 @@ from ..util import read_value_from_path
 from .variables.types import CFNType, TroposphereType
 
 if TYPE_CHECKING:
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
     from .type_defs import BlueprintVariable
 
 LOGGER = logging.getLogger(__name__)
@@ -279,7 +279,7 @@ class Blueprint:
 
     VARIABLES: Dict[str, BlueprintVariable]
 
-    context: Context
+    context: CfnginContext
     description: Optional[str]
     mappings: Optional[Dict[str, Dict[str, Any]]]
     name: str
@@ -289,7 +289,7 @@ class Blueprint:
     def __init__(
         self,
         name: str,
-        context: Context,
+        context: CfnginContext,
         mappings: Optional[Dict[str, Dict[str, Any]]] = None,
         description: Optional[str] = None,
     ):
