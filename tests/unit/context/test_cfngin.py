@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
@@ -159,11 +160,11 @@ class TestCFNginContext:
         assert obj.get_stack("test-stack1") == obj.stacks[0]
         assert not obj.get_stack("stack1")
 
-    def test_init(self) -> None:
+    def test_init(self, tmp_path: Path) -> None:
         """Test init."""
         obj = CfnginContext(
             config=self.config,
-            config_path="./something",
+            config_path=tmp_path,
             deploy_environment=self.env,
             force_stacks=["stack-01"],
             parameters={"key": "val"},
@@ -171,7 +172,7 @@ class TestCFNginContext:
         )
         assert obj.bucket_region == self.env.aws_region
         assert obj.config == self.config
-        assert obj.config_path == "./something"
+        assert obj.config_path == tmp_path
         assert obj.env == self.env
         assert obj.force_stacks == ["stack-01"]
         assert obj.hook_data == {}
@@ -185,7 +186,7 @@ class TestCFNginContext:
         assert obj.bucket_region == self.env.aws_region
         assert isinstance(obj.config, CfnginConfig)
         assert obj.config.namespace == "example"
-        assert obj.config_path == "./"
+        assert obj.config_path == Path.cwd()
         assert isinstance(obj.env, DeployEnvironment)
         assert obj.force_stacks == []
         assert obj.hook_data == {}

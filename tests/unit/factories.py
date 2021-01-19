@@ -108,7 +108,7 @@ class MockCFNginContext(CfnginContext):
     def __init__(
         self,
         *,
-        config_path: Optional[str] = None,
+        config_path: Optional[Path] = None,
         config: Optional[CfnginConfig] = None,
         deploy_environment: Optional[DeployEnvironment] = None,
         parameters: Optional[MutableMapping[str, Any]] = None,

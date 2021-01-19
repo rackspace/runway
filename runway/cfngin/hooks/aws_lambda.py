@@ -1126,7 +1126,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
             options,
             follow_symlinks,
             payload_acl,
-            sys_path,
+            str(sys_path),
         )
 
     return results

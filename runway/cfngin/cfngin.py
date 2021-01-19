@@ -258,7 +258,7 @@ class CFNgin:
 
         """
         return CfnginContext(
-            config_path=str(config_path),
+            config_path=config_path,
             config=config,
             deploy_environment=self.__ctx.env.copy(),
             force_stacks=[],  # placeholder

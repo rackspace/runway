@@ -9,6 +9,7 @@ import random  # pylint: disable=syntax-error
 import sys
 import unittest
 from io import BytesIO as StringIO
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 
@@ -40,8 +41,6 @@ from ...mock_docker.fake_api_client import make_fake_client
 from ..factories import mock_provider
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from _pytest.logging import LogCaptureFixture
     from _pytest.monkeypatch import MonkeyPatch
     from mypy_boto3_s3.client import S3Client
@@ -193,7 +192,7 @@ class TestLambdaHooks(unittest.TestCase):
                     config=CfnginConfig.parse_obj(
                         {"namespace": "test", "cfngin_bucket": "test"}
                     ),
-                    config_path=temp_dir.path,
+                    config_path=Path(str(temp_dir.path)),
                 ),
             )
 

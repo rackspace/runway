@@ -4,6 +4,7 @@ from __future__ import annotations
 import collections
 import json
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Union, cast
 
 from .._logging import PrefixAdaptor, RunwayLogger
@@ -53,7 +54,7 @@ class CfnginContext(BaseContext):
     _s3_bucket_verified: bool
 
     bucket_region: str
-    config_path: str
+    config_path: Path
     config: CfnginConfig
     env: DeployEnvironment
     force_stacks: List[str]
@@ -65,7 +66,7 @@ class CfnginContext(BaseContext):
     def __init__(
         self,
         *,
-        config_path: Optional[str] = None,
+        config_path: Optional[Path] = None,
         config: Optional[CfnginConfig] = None,
         deploy_environment: Optional[DeployEnvironment] = None,
         force_stacks: Optional[List[str]] = None,
@@ -87,11 +88,12 @@ class CfnginContext(BaseContext):
                 all stacks defined in the config will be operated on.
 
         """
-        self.config_path = config_path or "./"
+        self.config_path = config_path or Path.cwd()
         super().__init__(
             deploy_environment=deploy_environment or DeployEnvironment(),
             logger=PrefixAdaptor(
-                self.config_path, logger if isinstance(logger, RunwayLogger) else LOGGER
+                self.config_path.name.split(".")[0],
+                logger if isinstance(logger, RunwayLogger) else LOGGER,
             ),
         )
         self._persistent_graph_lock_code = None
