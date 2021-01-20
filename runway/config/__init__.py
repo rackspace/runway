@@ -38,7 +38,6 @@ from .models.cfngin import (
     CfnginHookDefinitionModel,
     CfnginPackageSourcesDefinitionModel,
     CfnginStackDefinitionModel,
-    CfnginTargetDefinitionModel,
 )
 from .models.runway import RunwayConfigDefinitionModel, RunwayFutureDefinitionModel
 
@@ -213,7 +212,6 @@ class CfnginConfig(BaseConfig):
     stacks: List[CfnginStackDefinitionModel]  #: Stacks to be processed.
     sys_path: Optional[Path]  #: Relative or absolute path to use as the work directory.
     tags: Optional[Dict[str, str]]  #: Tags to apply to all resources.
-    targets: List[CfnginTargetDefinitionModel]  #: Stack grouping.
     template_indent: int  #: Spaces to use per-indent level when outputing a template to json.
 
     _data: CfnginConfigDefinitionModel
@@ -251,7 +249,6 @@ class CfnginConfig(BaseConfig):
         self.stacks = cast(List[CfnginStackDefinitionModel], self._data.stacks)
         self.sys_path = self._data.sys_path
         self.tags = self._data.tags
-        self.targets = self._data.targets
         self.template_indent = self._data.template_indent
 
     def load(self) -> None:

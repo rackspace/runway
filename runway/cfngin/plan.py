@@ -33,7 +33,6 @@ from .status import (
     FailedStatus,
     SkippedStatus,
 )
-from .target import Target
 from .ui import ui
 from .util import merge_map, stack_template_key_name
 
@@ -93,13 +92,13 @@ class Step:
     fn: Optional[Callable[..., Any]]
     last_updated: float
     logger: PrefixAdaptor
-    stack: Union[Stack, Target]
+    stack: Stack
     status: Status
     watch_func: Optional[Callable[..., Any]]
 
     def __init__(
         self,
-        stack: Union[Stack, Target],
+        stack: Stack,
         *,
         fn: Optional[Callable[..., Any]] = None,
         watch_func: Optional[Callable[..., Any]] = None
@@ -669,8 +668,6 @@ class Plan:
 
         def walk_func(step: Step) -> bool:
             """Walk function."""
-            if isinstance(step.stack, Target):
-                raise TypeError("step contains type Target; type Stack is required")
             step.stack.resolve(
                 context=context, provider=provider,
             )
