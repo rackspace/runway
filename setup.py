@@ -76,8 +76,6 @@ setup(
     use_scm_version={"local_scheme": local_scheme},
     entry_points={"console_scripts": ["runway=runway._cli.main:cli"]},
     scripts=[
-        "scripts/stacker-runway",
-        "scripts/stacker-runway.cmd",
         "scripts/tf-runway",
         "scripts/tf-runway.cmd",
         "scripts/tfenv-runway",
