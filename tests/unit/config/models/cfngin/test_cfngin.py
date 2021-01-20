@@ -11,7 +11,6 @@ from runway.config.models.cfngin import (
     CfnginHookDefinitionModel,
     CfnginPackageSourcesDefinitionModel,
     CfnginStackDefinitionModel,
-    CfnginTargetDefinitionModel,
 )
 
 
@@ -83,7 +82,6 @@ class TestCfnginConfigDefinitionModel:
         assert obj.stacks == []
         assert not obj.sys_path
         assert not obj.tags
-        assert obj.targets == []
 
     def test_parse_file(self, tmp_path: Path) -> None:
         """Test parse_file."""
@@ -272,23 +270,3 @@ class TestCfnginStackDefinitionModel:
         assert len(errors) == 1
         assert errors[0]["loc"] == ("__root__",)
         assert errors[0]["msg"] == "either class_path or template_path must be defined"
-
-
-class TestCfnginTargetDefinitionModel:
-    """Test runway.config.models.cfngin.CfnginTargetDefinitionModel."""
-
-    def test_extra(self) -> None:
-        """Test extra fields."""
-        with pytest.raises(ValidationError) as excinfo:
-            CfnginTargetDefinitionModel(invalid="something", name="something")
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("invalid",)
-        assert errors[0]["msg"] == "extra fields not permitted"
-
-    def test_field_defaults(self) -> None:
-        """Test field default values."""
-        obj = CfnginTargetDefinitionModel(name="something")
-        assert obj.name == "something"
-        assert obj.required_by == []
-        assert obj.requires == []
