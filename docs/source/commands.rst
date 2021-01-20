@@ -621,46 +621,6 @@ When installed from PyPI, the current interpreter is used.
 
   $ runway run-python my_script.py
 
-----
-
-
-.. _command-run-stacker:
-
-***********
-run-stacker
-***********
-
-.. file://./../../runway/_cli/commands/_run_stacker.py
-
-Execute the "shimmed" `Stacker <https://stacker.readthedocs.io/en/stable/>`__ aka :ref:`Runway CFNgin <mod-cfn>`.
-
-This command allows direct access to Runway's CloudFormation management tool.
-
-.. deprecated:: 1.5.0
-
-.. important:: When using options shared with Runway, ``--`` **must** be placed before the Stacker command.
-
-
-.. rubric:: Usage
-.. code-block:: text
-
-  $ runway run-stacker [OPTIONS] <args>
-
-
-.. rubric:: Options
-.. code-block:: text
-
-  --debug                         Supply once to display Runway debug logs.
-                                  Supply twice to display all debug logs.
-  --no-color                      Disable color in Runway's logs.
-  --verbose                       Display Runway verbose logs.
-
-
-.. rubric:: Example
-.. code-block:: shell
-
-  $ runway run-stacker build cfngin_config.yml
-  $ runway run-stacker -- info --help
 
 ----
 
