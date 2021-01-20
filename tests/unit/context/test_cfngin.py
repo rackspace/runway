@@ -40,8 +40,6 @@ BOTO3_CREDENTIALS: Boto3CredentialsTypeDef = {
     "aws_session_token": "foobar",
 }
 
-pytestmark = pytest.mark.wip
-
 
 def gen_tagset(tags: Dict[str, str]) -> TagSetTypeDef:
     """Create TagSet value from a dict."""
