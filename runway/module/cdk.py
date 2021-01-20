@@ -19,7 +19,7 @@ from . import (
 )
 
 if TYPE_CHECKING:
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class CloudDevelopmentKit(RunwayModule):
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:

@@ -10,13 +10,17 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context
+    from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
 def get(
-    context: Context, *, stack_name: str, user_pool_arn: Optional[str] = None, **_: Any
+    context: CfnginContext,
+    *,
+    stack_name: str,
+    user_pool_arn: Optional[str] = None,
+    **_: Any
 ) -> Dict[str, Any]:
     """Retrieve the callback URLs for User Pool Client Creation.
 

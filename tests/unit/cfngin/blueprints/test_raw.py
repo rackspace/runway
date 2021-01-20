@@ -137,7 +137,7 @@ class TestBlueprintRendering(unittest.TestCase):
                         }
                     ]
                 },
-                environment={"foo": "bar"},
+                parameters={"foo": "bar"},
             ),
             raw_template_path=RAW_J2_TEMPLATE_PATH,
         )

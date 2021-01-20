@@ -17,7 +17,7 @@ from ...core.providers import aws
 if TYPE_CHECKING:
     from boto3.session import Session
 
-    from ...cfngin.context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ def get_archives_to_prune(
 
 
 def sync(
-    context: Context,
+    context: CfnginContext,
     *,
     bucket_name: str,
     cf_disabled: bool = False,
@@ -127,7 +127,7 @@ def sync(
     return True
 
 
-def update_ssm_hash(context: Context, session: Session) -> bool:
+def update_ssm_hash(context: CfnginContext, session: Session) -> bool:
     """Update the SSM hash with the new tracking data.
 
     Args:
@@ -179,7 +179,7 @@ def invalidate_distribution(
     return True
 
 
-def prune_archives(context: Context, session: Session) -> bool:
+def prune_archives(context: CfnginContext, session: Session) -> bool:
     """Prune the archives from the bucket.
 
     Args:
@@ -373,7 +373,7 @@ def set_ssm_value(
 
 
 def sync_extra_files(
-    context: Context,
+    context: CfnginContext,
     bucket: str,
     extra_files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]],
     **kwargs: Any

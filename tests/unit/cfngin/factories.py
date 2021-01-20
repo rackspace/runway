@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from mock import MagicMock
 
-from runway.cfngin.context import Context
 from runway.cfngin.providers.aws.default import ProviderBuilder
 from runway.config import CfnginConfig, CfnginStackDefinitionModel
+from runway.context.cfngin import CfnginContext
 
 if TYPE_CHECKING:
     from runway.cfngin.providers.aws.default import Provider
@@ -51,15 +51,15 @@ def mock_context(
     namespace: str = "default",
     extra_config_args: Optional[Dict[str, Any]] = None,
     **kwargs: Any
-) -> Context:
+) -> CfnginContext:
     """Mock context."""
     config_args = {"namespace": namespace}
     if extra_config_args:
         config_args.update(extra_config_args)
     config = CfnginConfig.parse_obj(config_args)
     if kwargs.get("environment"):
-        return Context(config=config, **kwargs)
-    return Context(config=config, environment={}, **kwargs)
+        return CfnginContext(config=config, **kwargs)
+    return CfnginContext(config=config, environment={}, **kwargs)
 
 
 def generate_definition(

@@ -39,6 +39,9 @@ concurrency = [
 ]
 omit = [
     "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
+    "*/runway/hooks/staticsite/auth_at_edge/templates/*",
+    "*/compat.py",
+    "*/type_defs.py",
 ]
 
 [tool.isort]

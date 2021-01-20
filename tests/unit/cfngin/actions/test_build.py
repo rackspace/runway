@@ -16,7 +16,6 @@ from runway.cfngin.actions.build import (
     _resolve_parameters,
 )
 from runway.cfngin.blueprints.variables.types import CFNString
-from runway.cfngin.context import Context
 from runway.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
 from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.providers.aws.default import Provider
@@ -31,6 +30,7 @@ from runway.cfngin.status import (
     NotSubmittedStatus,
 )
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -83,7 +83,7 @@ class TestBuildAction(unittest.TestCase):
 
     def setUp(self) -> None:
         """Run before tests."""
-        self.context = Context(
+        self.context = CfnginContext(
             config=CfnginConfig.parse_obj({"namespace": "namespace"})
         )
         self.provider = MockProvider()
@@ -94,7 +94,7 @@ class TestBuildAction(unittest.TestCase):
 
     def _get_context(
         self, extra_config_args: Optional[Dict[str, Any]] = None, **kwargs: Any
-    ) -> Context:
+    ) -> CfnginContext:
         """Get context."""
         config = {
             "namespace": "namespace",
@@ -118,10 +118,10 @@ class TestBuildAction(unittest.TestCase):
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=CfnginConfig.parse_obj(config), **kwargs)
+        return CfnginContext(config=CfnginConfig.parse_obj(config), **kwargs)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     def test_generate_plan_persist_destroy(self, mock_graph_tags: PropertyMock) -> None:
@@ -223,14 +223,16 @@ class TestBuildAction(unittest.TestCase):
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(
-        "runway.cfngin.context.Context.lock_persistent_graph", new_callable=MagicMock
+        "runway.context.cfngin.CfnginContext.lock_persistent_graph",
+        new_callable=MagicMock,
     )
     @patch(
-        "runway.cfngin.context.Context.unlock_persistent_graph", new_callable=MagicMock
+        "runway.context.cfngin.CfnginContext.unlock_persistent_graph",
+        new_callable=MagicMock,
     )
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(
@@ -492,7 +494,7 @@ class TestFunctions(unittest.TestCase):
 
     def setUp(self) -> None:
         """Run before tests."""
-        self.ctx = Context()
+        self.ctx = CfnginContext()
         self.prov = MagicMock()
         self.blueprint = MagicMock()
 

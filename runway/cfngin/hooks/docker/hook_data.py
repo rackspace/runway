@@ -8,7 +8,7 @@ from docker import DockerClient
 from ....util import MutableMap, cached_property
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
     from .data_models import DockerImage
 
 
@@ -23,7 +23,7 @@ class DockerHookData(MutableMap):
         return DockerClient.from_env()
 
     @overload
-    def update_context(self, context: Context = ...) -> DockerHookData:  # noqa
+    def update_context(self, context: CfnginContext = ...) -> DockerHookData:  # noqa
         ...
 
     @overload
@@ -31,7 +31,7 @@ class DockerHookData(MutableMap):
         ...
 
     def update_context(
-        self, context: Optional[Context] = None
+        self, context: Optional[CfnginContext] = None
     ) -> Optional[DockerHookData]:
         """Update context object with new the current DockerHookData."""
         if not context:
@@ -40,7 +40,9 @@ class DockerHookData(MutableMap):
         return self
 
     @classmethod
-    def from_cfngin_context(cls, context: Optional[Context] = None) -> DockerHookData:
+    def from_cfngin_context(
+        cls, context: Optional[CfnginContext] = None
+    ) -> DockerHookData:
         """Get existing object or create a new one."""
         if context and "docker" in context.hook_data:
             found = context.hook_data["docker"]

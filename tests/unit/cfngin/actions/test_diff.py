@@ -108,7 +108,7 @@ class TestAction:
         )
         monkeypatch.setattr(provider, "get_stack_changes", mock_get_stack_changes)
         stack = MagicMock()
-        stack.region = cfngin_context.region
+        stack.region = cfngin_context.env.aws_region
         stack.name = "test-stack"
         stack.fqn = "test-stack"
         stack.blueprint.rendered = "{}"

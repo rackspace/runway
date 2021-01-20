@@ -107,7 +107,7 @@ class TestCFNgin:
         )
 
         context = self.get_context()
-        context.env_vars["CI"] = "1"
+        context.env.vars["CI"] = "1"
 
         cfngin = CFNgin(
             ctx=context,
@@ -136,7 +136,7 @@ class TestCFNgin:
         patch_safehaven.assert_has_calls(
             [
                 call(
-                    environ=context.env_vars,
+                    environ=context.env.vars,
                     sys_modules_exclude=["awacs", "troposphere"],
                 ),
                 call.__enter__(),
@@ -178,7 +178,7 @@ class TestCFNgin:
         )
         patch_safehaven.assert_has_calls(
             [
-                call(environ=context.env_vars),
+                call(environ=context.env.vars),
                 call.__enter__(),
                 call(argv=["stacker", "destroy", str(tmp_path / "basic.yml")]),
                 call.__enter__(),
@@ -195,8 +195,8 @@ class TestCFNgin:
 
         assert not result.bucket_name
         assert result.namespace == "test-namespace"
-        assert len(result.get_stacks()) == 1
-        assert result.get_stacks()[0].name == "test-stack"
+        assert len(result.stacks) == 1
+        assert result.stacks[0].name == "test-stack"
 
     def test_load_cfn_template(self, caplog: LogCaptureFixture, tmp_path: Path) -> None:
         """Test load a CFN template."""
@@ -231,7 +231,7 @@ class TestCFNgin:
         mock_instance.execute.assert_called_once_with()
         patch_safehaven.assert_has_calls(
             [
-                call(environ=context.env_vars),
+                call(environ=context.env.vars),
                 call.__enter__(),
                 call(argv=["stacker", "diff", str(tmp_path / "basic.yml")]),
                 call.__enter__(),

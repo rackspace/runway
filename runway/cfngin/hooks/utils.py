@@ -15,7 +15,7 @@ from ..blueprints.base import Blueprint
 
 if TYPE_CHECKING:
     from ...config.models.cfngin import CfnginHookDefinitionModel
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
     from ..providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
     stage: str,
     hooks: List[CfnginHookDefinitionModel],
     provider: Provider,
-    context: Context,
+    context: CfnginContext,
 ):
     """Handle pre/post_build hooks.
 

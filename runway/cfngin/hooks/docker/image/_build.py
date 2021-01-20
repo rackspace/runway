@@ -133,7 +133,7 @@ from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryReposi
 from ..hook_data import DockerHookData
 
 if TYPE_CHECKING:
-    from ....context import Context
+    from .....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -211,7 +211,7 @@ class ImageBuildArgs(BaseModel):
     def __init__(
         self,
         *,
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         docker: Optional[Dict[str, Any]] = None,
         dockerfile: str = "./Dockerfile",
         ecr_repo=None,
@@ -271,7 +271,7 @@ class ImageBuildArgs(BaseModel):
 
     @staticmethod
     def determine_repo(
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         ecr_repo: Optional[Dict[str, Optional[str]]] = None,
         repo: Optional[str] = None,
     ) -> Optional[str]:
@@ -292,7 +292,7 @@ class ImageBuildArgs(BaseModel):
         return None
 
 
-def build(*, context: Context, **kwargs: Any) -> DockerHookData:
+def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     """Docker image build hook.
 
     Replicates the functionality of ``docker image build`` CLI command.

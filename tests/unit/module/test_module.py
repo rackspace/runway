@@ -86,7 +86,7 @@ class TestRunwayModuleNpm:
         assert obj.parameters == options["parameters"]
         assert isinstance(obj.path, Path)
         assert str(obj.path) == str(tmp_path)
-        mock_warn.assert_called_once_with(runway_context.env_vars)
+        mock_warn.assert_called_once_with(runway_context.env.vars)
 
         obj = RunwayModuleNpm(context=runway_context, path=tmp_path)  # side_effect[1]
         assert not obj.environments

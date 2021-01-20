@@ -35,12 +35,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Union
 
-# using absolute for runway imports so stacker shim doesn't break when used from CFNgin
-from runway.lookups.handlers.base import LookupHandler
+from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
-    from runway.cfngin.context import Context as CFNginContext
-    from runway.context import Context as RunwayContext
+    from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "ssm"
@@ -51,7 +49,7 @@ class SsmLookup(LookupHandler):
 
     @classmethod
     def handle(
-        cls, value: str, context: Union[CFNginContext, RunwayContext], **_: Any
+        cls, value: str, context: Union[CfnginContext, RunwayContext], **_: Any
     ) -> Any:
         """Retrieve a value from SSM Parameter Store.
 

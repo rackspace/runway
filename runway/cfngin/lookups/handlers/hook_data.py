@@ -12,7 +12,7 @@ from ....lookups.handlers.base import LookupHandler
 from ....util import DOC_SITE, MutableMap
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "hook_data"
@@ -44,7 +44,9 @@ class HookDataLookup(LookupHandler):
         return "{}.{}".format(hook_name, key), {}
 
     @classmethod
-    def handle(cls, value: str, context: Optional[Context] = None, **_: Any) -> Any:
+    def handle(
+        cls, value: str, context: Optional[CfnginContext] = None, **_: Any
+    ) -> Any:
         """Return the data from ``hook_data``.
 
         Args:

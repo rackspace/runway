@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import ParameterTypeDef, StackTypeDef
 
     from ...config.models.cfngin import CfnginHookDefinitionModel
+    from ...context.cfngin import CfnginContext
     from ...core.providers.aws.type_defs import TagTypeDef
     from ..blueprints.base import Blueprint
-    from ..context import Context
     from ..providers.aws.default import Provider
     from ..stack import Stack
     from ..status import Status
@@ -189,7 +189,7 @@ def handle_hooks(
     stage: Literal["post_build", "pre_build"],
     hooks: List[CfnginHookDefinitionModel],
     provider: Provider,
-    context: Context,
+    context: CfnginContext,
     *,
     dump: Union[bool, str] = False,
     outline: bool = False,
@@ -486,7 +486,7 @@ class Action(BaseAction):
             return self._generate_plan(tail)
 
         graph = Graph()
-        config_stack_names = [stack.name for stack in self.context.get_stacks()]
+        config_stack_names = [stack.name for stack in self.context.stacks]
         inverse_steps = []
         persist_graph = self.context.persistent_graph.transposed()
 
@@ -517,10 +517,10 @@ class Action(BaseAction):
                 fn=self._launch_stack,
                 watch_func=(self._tail_stack if tail else None),
             )
-            for stack in self.context.get_stacks()
+            for stack in self.context.stacks
         ]
 
-        steps += [Step(target, fn=target_fn) for target in self.context.get_targets()]
+        steps += [Step(target, fn=target_fn) for target in self.context.targets]
 
         graph.add_steps(steps)
 

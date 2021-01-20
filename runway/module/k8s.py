@@ -14,7 +14,7 @@ from ..util import DOC_SITE, which
 from . import RunwayModule, run_module_command
 
 if TYPE_CHECKING:
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class K8s(RunwayModule):
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:

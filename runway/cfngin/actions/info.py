@@ -20,9 +20,9 @@ class Action(BaseAction):  # pylint: disable=abstract-method
     def run(self, *_args: Any, **_kwargs: Any) -> None:
         """Get information on CloudFormation stacks."""
         LOGGER.info("outputs for stacks: %s", self.context.get_fqn())
-        if not self.context.get_stacks():
+        if not self.context.stacks:
             LOGGER.warning("no stacks detected (error in config?)")
-        for stack in self.context.get_stacks():
+        for stack in self.context.stacks:
             provider = self.build_provider(stack)
 
             try:

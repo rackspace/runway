@@ -9,7 +9,7 @@ from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 TYPE_NAME = "kms"
 
@@ -18,7 +18,7 @@ class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: Context, **_: Any) -> str:
+    def handle(cls, value: str, context: CfnginContext, **_: Any) -> str:
         r"""Decrypt the specified value with a master key in KMS.
 
         Args:

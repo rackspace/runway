@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 
 import click
 
-from ...type_defs import EnvVarsAwsCredentials
+from ...type_defs import EnvVarsAwsCredentialsTypeDef
 from ...util import AWS_ENV_VARS, cached_property
 
 try:  # will raise an import error if git is not in the current path
@@ -60,9 +60,9 @@ class DeployEnvironment:
         self.vars = environ or os.environ.copy()
 
     @property
-    def aws_credentials(self) -> EnvVarsAwsCredentials:
+    def aws_credentials(self) -> EnvVarsAwsCredentialsTypeDef:
         """Get AWS credentials from environment variables."""
-        return EnvVarsAwsCredentials(
+        return EnvVarsAwsCredentialsTypeDef(
             **{name: self.vars[name] for name in AWS_ENV_VARS if self.vars.get(name)}
         )
 
