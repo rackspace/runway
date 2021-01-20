@@ -12,7 +12,6 @@ import botocore.exceptions
 from ..dag import ThreadedWalker, UnlimitedSemaphore, walk
 from ..exceptions import PlanFailed
 from ..plan import Graph, Plan, Step, merge_graphs
-from ..status import COMPLETE
 from ..util import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
 
 if TYPE_CHECKING:
@@ -22,7 +21,6 @@ if TYPE_CHECKING:
     from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider, ProviderBuilder
     from ..stack import Stack
-    from ..status import Status
 
 LOGGER = logging.getLogger(__name__)
 
@@ -251,16 +249,10 @@ class BaseAction:
         """
         tail_fn = self._tail_stack if tail else None
 
-        def target_fn(*_args: Any, **_kwargs: Any) -> Status:
-            """Target function."""
-            return COMPLETE
-
         steps = [
             Step(stack, fn=self._stack_action, watch_func=tail_fn)
             for stack in self.context.stacks
         ]
-
-        steps.extend([Step(target, fn=target_fn) for target in self.context.targets])
 
         graph = Graph.from_steps(steps)
 

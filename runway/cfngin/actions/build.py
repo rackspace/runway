@@ -16,7 +16,6 @@ from ..hooks import utils
 from ..plan import Graph, Plan, Step
 from ..providers.base import Template
 from ..status import (
-    COMPLETE,
     INTERRUPTED,
     PENDING,
     SUBMITTED,
@@ -490,10 +489,6 @@ class Action(BaseAction):
         inverse_steps = []
         persist_graph = self.context.persistent_graph.transposed()
 
-        def target_fn(*_args: Any, **_kwargs: Any) -> Status:
-            """Target function."""
-            return COMPLETE
-
         for ind_node, dep_nodes in persist_graph.dag.graph.items():
             if ind_node not in config_stack_names:
                 inverse_steps.append(
@@ -519,8 +514,6 @@ class Action(BaseAction):
             )
             for stack in self.context.stacks
         ]
-
-        steps += [Step(target, fn=target_fn) for target in self.context.targets]
 
         graph.add_steps(steps)
 
