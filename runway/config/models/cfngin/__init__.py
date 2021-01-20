@@ -24,7 +24,6 @@ __all__ = [
     "CfnginHookDefinitionModel",
     "CfnginPackageSourcesDefinitionModel",
     "CfnginStackDefinitionModel",
-    "CfnginTargetDefinitionModel",
     "GitCfnginPackageSourceDefinitionModel",
     "LocalCfnginPackageSourceDefinitionModel",
     "S3CfnginPackageSourceDefinitionModel",
@@ -176,21 +175,6 @@ class CfnginStackDefinitionModel(ConfigProperty):
         return values
 
 
-class CfnginTargetDefinitionModel(ConfigProperty):
-    """Model for a CFNgin target definition."""
-
-    name: str
-    required_by: List[str] = []
-    requires: List[str] = []
-
-    class Config:
-        """Model configuration."""
-
-        extra = Extra.forbid
-        schema_extra = {"description": "Lightweight grouping of stacks."}
-        title = "CFNgin Target"
-
-
 class CfnginConfigDefinitionModel(ConfigProperty):
     """Model for a CFNgin config definition."""
 
@@ -278,9 +262,6 @@ class CfnginConfigDefinitionModel(ConfigProperty):
     tags: Optional[Dict[str, str]] = Field(
         None,  # None is significant here
         description="Tags to try to apply to all resources created from this configuration file.",
-    )
-    targets: List[CfnginTargetDefinitionModel] = Field(
-        [], description=CfnginTargetDefinitionModel.Config.schema_extra["description"]
     )
     template_indent: int = Field(
         4,
