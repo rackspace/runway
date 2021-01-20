@@ -8,6 +8,7 @@ from typing import Any, List
 
 import boto3
 import mock
+import pytest
 from pydantic import ValidationError
 
 from runway.cfngin.util import (
@@ -22,6 +23,7 @@ from runway.cfngin.util import (
     get_s3_endpoint,
     merge_map,
     parse_cloudformation_template,
+    read_value_from_path,
     s3_bucket_location_constraint,
     yaml_to_ordered_dict,
 )
@@ -49,6 +51,54 @@ def mock_create_cache_directories(self, **kwargs: Any) -> int:
 
     """
     return 1
+
+
+def test_read_value_from_path_abs(tmp_path: Path) -> None:
+    """Test read_value_from_path absolute path."""
+    test_file = tmp_path / "test.txt"
+    test_file.write_text("success")
+    assert read_value_from_path(f"file://{test_file.absolute()}") == "success"
+
+
+def test_read_value_from_path_dir(tmp_path: Path) -> None:
+    """Test read_value_from_path direcory."""
+    with pytest.raises(ValueError):
+        read_value_from_path(f"file://{tmp_path.absolute()}")
+
+
+def test_read_value_from_path_not_exist(tmp_path: Path) -> None:
+    """Test read_value_from_path does not exist."""
+    with pytest.raises(ValueError):
+        read_value_from_path(f"file://{(tmp_path / 'something.txt').absolute()}")
+
+
+def test_read_value_from_path_no_root_path(cd_tmp_path: Path) -> None:
+    """Test read_value_from_path no root_path."""
+    test_file = cd_tmp_path / "test.txt"
+    test_file.write_text("success")
+    assert read_value_from_path(f"file://./{test_file.name}") == "success"
+
+
+def test_read_value_from_path_root_path_dir(tmp_path: Path) -> None:
+    """Test read_value_from_path root_path is dir."""
+    test_file = tmp_path / "test.txt"
+    test_file.write_text("success")
+    assert (
+        read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path)
+        == "success"
+    )
+
+
+def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
+    """Test read_value_from_path root_path is file."""
+    test_file = tmp_path / "test.txt"
+    test_file.write_text("success")
+    assert (
+        read_value_from_path(
+            f"file://./{test_file.name}", root_path=tmp_path / "something.json"
+        )
+        == "success"
+    )
 
 
 class TestUtil(unittest.TestCase):

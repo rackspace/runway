@@ -816,7 +816,6 @@ class _UploadFunctionOptionsTypeDef(TypedDict):
         path: Base path to retrieve files from. If not absolute, it
             will be interpreted as relative to the CFNgin configuration file
             directory, then converted to an absolutepath.
-            See :func:`runway.cfngin.util.get_config_directory`.
 
     """
 
