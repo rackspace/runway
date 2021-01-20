@@ -11,7 +11,6 @@ import sys
 import tarfile
 import tempfile
 import uuid
-import warnings
 import zipfile
 from collections import OrderedDict
 from pathlib import Path
@@ -391,27 +390,7 @@ def cf_safe_name(name: str) -> str:
     return "".join(uppercase_first_letter(part) for part in parts)
 
 
-def get_config_directory() -> str:
-    """Return the directory the config file is located in.
-
-    This enables us to use relative paths in config values.
-
-    """
-    # avoid circular import
-    from .commands.stacker import Stacker  # pylint: disable=import-outside-toplevel
-
-    deprecation_msg = (
-        "get_config_directory has been deprecated and will be "
-        "removed in the next major release"
-    )
-    warnings.warn(deprecation_msg, DeprecationWarning)
-    LOGGER.warning(deprecation_msg)
-    command = Stacker()
-    namespace = command.parse_args()
-    return os.path.dirname(namespace.config.name)
-
-
-def read_value_from_path(value: str) -> str:
+def read_value_from_path(value: str, *, root_path: Optional[Path] = None) -> str:
     """Enable translators to read values from files.
 
     The value can be referred to with the `file://` prefix.
@@ -425,12 +404,20 @@ def read_value_from_path(value: str) -> str:
     if value.startswith("file://"):
         path = value.split("file://", 1)[1]
         if os.path.isabs(path):
-            read_path = path
+            read_path = Path(path)
         else:
-            config_directory = get_config_directory()
-            read_path = os.path.join(config_directory, path)
-        with open(read_path) as read_file:
-            value = read_file.read()
+            root_path = root_path or Path.cwd()
+            if root_path.is_dir():
+                read_path = root_path / path
+            else:
+                read_path = root_path.parent / path
+        if read_path.is_file():
+            return read_path.read_text()
+        if read_path.is_dir():
+            raise ValueError(
+                f"path must lead to a file not directory: {read_path.absolute()}"
+            )
+        raise ValueError(f"path does not exist: {read_path.absolute()}")
     return value
 
 
