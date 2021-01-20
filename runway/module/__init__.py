@@ -14,7 +14,7 @@ from ..util import merge_nested_environment_dicts, which
 
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
@@ -85,7 +85,7 @@ def use_npm_ci(path: Path) -> bool:
 def run_npm_install(
     path: Path,
     options: Dict[str, Union[Dict[str, Any], str]],
-    context: Context,
+    context: RunwayContext,
     logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
 ) -> None:
     """Run npm install/ci."""
@@ -96,7 +96,7 @@ def run_npm_install(
     if cast(Dict[str, Any], options.get("options", {})).get("skip_npm_ci"):
         logger.info("skipped npm ci/npm install")
         return
-    if context.env_vars.get("CI") and use_npm_ci(path):
+    if context.env.vars.get("CI") and use_npm_ci(path):
         logger.info("running npm ci...")
         cmd[1] = "ci"
     else:
@@ -119,13 +119,13 @@ def warn_on_boto_env_vars(env_vars: Dict[str, str]) -> None:
 class RunwayModule:
     """Base class for Runway modules."""
 
-    context: Context
+    context: RunwayContext
     logger: Union[PrefixAdaptor, RunwayLogger]
     name: str
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:
@@ -175,7 +175,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
     # TODO we need a better name than "options" or pass in as kwargs
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:
@@ -205,7 +205,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             setattr(self, k, v)
 
         self.check_for_npm()  # fail fast
-        warn_on_boto_env_vars(self.context.env_vars)
+        warn_on_boto_env_vars(self.context.env.vars)
 
     def check_for_npm(self) -> None:
         """Ensure npm is installed and in the current path."""
@@ -278,7 +278,7 @@ class ModuleOptions(MutableMapping):
         )
 
     @classmethod
-    def parse(cls, context: Context, **kwargs: Any) -> ModuleOptions:
+    def parse(cls, context: RunwayContext, **kwargs: Any) -> ModuleOptions:
         """Parse module options definition to extract usable options.
 
         Args:

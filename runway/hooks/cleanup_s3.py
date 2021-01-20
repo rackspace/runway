@@ -8,12 +8,12 @@ from typing import TYPE_CHECKING, Any
 from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
-    from ..cfngin.context import Context
+    from ..context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
-def purge_bucket(context: Context, *, bucket_name: str, **_: Any) -> bool:
+def purge_bucket(context: CfnginContext, *, bucket_name: str, **_: Any) -> bool:
     """Delete objects in bucket."""
     session = context.get_session()
     s3_resource = session.resource("s3")

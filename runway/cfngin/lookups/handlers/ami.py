@@ -10,7 +10,7 @@ from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 TYPE_NAME = "ami"
 
@@ -33,7 +33,7 @@ class AmiLookup(LookupHandler):
     """AMI lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: Context, *_args, **kwargs) -> str:
+    def handle(cls, value: str, context: CfnginContext, *_args, **kwargs) -> str:
         """Fetch the most recent AMI Id using a filter.
 
         Args:

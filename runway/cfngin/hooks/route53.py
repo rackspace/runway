@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from ..util import create_route53_zone
 
 if TYPE_CHECKING:
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
 def create_domain(
-    context: Context, *, domain: Optional[str] = None, **_: Any
+    context: CfnginContext, *, domain: Optional[str] = None, **_: Any
 ) -> Dict[str, str]:
     """Create a domain within route53.
 

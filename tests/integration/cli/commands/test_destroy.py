@@ -14,7 +14,7 @@ from mock import MagicMock, patch
 
 from runway._cli import cli
 from runway.config import RunwayConfig
-from runway.context import Context
+from runway.context.runway import RunwayContext
 from runway.core import Runway
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ def test_destroy(
 
     mock_runway.assert_called_once()
     assert isinstance(mock_runway.call_args.args[0], RunwayConfig)
-    assert isinstance(mock_runway.call_args.args[1], Context)
+    assert isinstance(mock_runway.call_args.args[1], RunwayContext)
 
     mock_runway.reverse_deployments.assert_called_once()
     assert len(mock_runway.reverse_deployments.call_args.args[0]) == 1

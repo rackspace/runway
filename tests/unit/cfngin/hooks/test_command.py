@@ -7,9 +7,9 @@ from typing import Any, List, Optional, Tuple, Union
 
 import mock
 
-from runway.cfngin.context import Context
 from runway.cfngin.hooks.command import run_command
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 from ..factories import mock_provider
 
@@ -48,7 +48,7 @@ class TestCommandHook(unittest.TestCase):
 
     def setUp(self) -> None:
         """Run before tests."""
-        self.context = Context(
+        self.context = CfnginContext(
             config=CfnginConfig.parse_obj(
                 {"namespace": "test", "cfngin_bucket": "test"}
             )

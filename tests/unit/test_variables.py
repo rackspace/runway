@@ -9,11 +9,11 @@ from mock import MagicMock
 from troposphere import s3
 
 from runway.cfngin.blueprints.variables.types import TroposphereType
-from runway.cfngin.context import Context as CfnginContext
 from runway.cfngin.lookups import register_lookup_handler
 from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.stack import Stack
-from runway.context import Context as RunwayContext
+from runway.context import CfnginContext, RunwayContext
+from runway.core.components import DeployEnvironment
 from runway.exceptions import UnresolvedVariable
 from runway.variables import Variable
 
@@ -26,7 +26,12 @@ VALUE = {
     "dict_val": {"test": "success"},
     "list_val": ["success"],
 }
-CONTEXT = cast(RunwayContext, MagicMock(autospec=RunwayContext, env_vars=VALUE))
+CONTEXT = cast(
+    RunwayContext,
+    MagicMock(
+        autospec=RunwayContext, env=MagicMock(autospec=DeployEnvironment, vars=VALUE)
+    ),
+)
 
 
 class TestCfnginVariables(TestCase):

@@ -31,7 +31,7 @@ from troposphere import (
 from typing_extensions import TypedDict
 
 from ...cfngin.blueprints.base import Blueprint
-from ...cfngin.context import Context
+from ...context.cfngin import CfnginContext
 
 if TYPE_CHECKING:
     from troposphere import Ref  # pylint: disable=ungrouped-imports
@@ -626,5 +626,7 @@ class StaticSite(Blueprint):
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
     print(
-        StaticSite("test", Context(environment={"namespace": "test"}), None).to_json()
+        StaticSite(
+            "test", CfnginContext(parameters={"namespace": "test"}), None
+        ).to_json()
     )

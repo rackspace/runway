@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ssm.client import SSMClient
 
     from .._logging import RunwayLogger
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -67,7 +67,7 @@ class Terraform(RunwayModule):
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:
@@ -569,7 +569,7 @@ class TerraformOptions(ModuleOptions):
 
     @staticmethod
     def resolve_version(
-        context: Context,
+        context: RunwayContext,
         terraform_version: Optional[Union[Dict[str, str], int, str]] = None,
         **_: Any
     ) -> Optional[str]:
@@ -582,7 +582,7 @@ class TerraformOptions(ModuleOptions):
 
     @classmethod
     def parse(  # pylint: disable=arguments-differ
-        cls, context: Context, path: Optional[Path] = None, **kwargs: Any
+        cls, context: RunwayContext, path: Optional[Path] = None, **kwargs: Any
     ) -> TerraformOptions:
         """Parse the options definition and return an options object.
 
@@ -641,7 +641,7 @@ class TerraformBackendConfig(ModuleOptions):
     ]
 
     def __init__(
-        self, context: Context, config_file: Optional[Path] = None, **kwargs: str
+        self, context: RunwayContext, config_file: Optional[Path] = None, **kwargs: str
     ):
         """Instantiate class.
 
@@ -795,7 +795,7 @@ class TerraformBackendConfig(ModuleOptions):
 
     @classmethod
     def parse(  # pylint: disable=arguments-differ
-        cls, context: Context, path: Optional[Path] = None, **kwargs: Any
+        cls, context: RunwayContext, path: Optional[Path] = None, **kwargs: Any
     ) -> TerraformBackendConfig:
         """Parse backend options and return an options object.
 

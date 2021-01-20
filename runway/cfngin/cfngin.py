@@ -13,14 +13,14 @@ from runway._logging import PrefixAdaptor
 from runway.util import MutableMap, SafeHaven, cached_property
 
 from ..config import CfnginConfig
+from ..context.cfngin import CfnginContext
 from .actions import build, destroy, diff
-from .context import Context as CFNginContext
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
-    from ..context import Context as RunwayContext
+    from ..context.runway import RunwayContext
 
 # explicitly name logger so its not redundant
 LOGGER = cast("RunwayLogger", logging.getLogger("runway.cfngin"))
@@ -71,7 +71,7 @@ class CFNgin:
         self.interactive = ctx.is_interactive
         self.parameters = MutableMap()
         self.recreate_failed = ctx.is_noninteractive
-        self.region = ctx.env_region
+        self.region = ctx.env.aws_region
         self.sys_path = sys_path
         self.tail = bool(ctx.env.debug or ctx.env.verbose)
 
@@ -88,8 +88,8 @@ class CFNgin:
         """Contents of a CFNgin environment file."""
         result = {}
         supported_names = [
-            "{}.env".format(self.__ctx.env_name),
-            "{}-{}.env".format(self.__ctx.env_name, self.region),
+            "{}.env".format(self.__ctx.env.name),
+            "{}-{}.env".format(self.__ctx.env.name, self.region),
         ]
         for _, file_name in enumerate(supported_names):
             file_path = os.path.join(self.sys_path, file_name)
@@ -117,7 +117,7 @@ class CFNgin:
         config_file_paths = self.find_config_files(sys_path=sys_path)
 
         with SafeHaven(
-            environ=self.__ctx.env_vars, sys_modules_exclude=["awacs", "troposphere"]
+            environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]
         ):
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
@@ -154,7 +154,7 @@ class CFNgin:
         # destroy should run in reverse to handle dependencies
         config_file_paths.reverse()
 
-        with SafeHaven(environ=self.__ctx.env_vars):
+        with SafeHaven(environ=self.__ctx.env.vars):
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("destroy (in progress)")
@@ -171,7 +171,7 @@ class CFNgin:
                     )
                 logger.success("destroy (complete)")
 
-    def load(self, config_path: Path) -> CFNginContext:
+    def load(self, config_path: Path) -> CfnginContext:
         """Load a CFNgin config into a context object.
 
         Args:
@@ -211,7 +211,7 @@ class CFNgin:
         if not sys_path:
             sys_path = self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
-        with SafeHaven(environ=self.__ctx.env_vars):
+        with SafeHaven(environ=self.__ctx.env.vars):
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("plan (in progress)")
@@ -249,7 +249,7 @@ class CFNgin:
         """
         return CfnginConfig.parse_file(file_path=file_path, parameters=self.parameters)
 
-    def _get_context(self, config: CfnginConfig, config_path: Path) -> CFNginContext:
+    def _get_context(self, config: CfnginConfig, config_path: Path) -> CfnginContext:
         """Initialize a CFNgin context object.
 
         Args:
@@ -257,13 +257,12 @@ class CFNgin:
             config_path: Path to the config file that was provided.
 
         """
-        return CFNginContext(
-            boto3_credentials=self.__ctx.boto3_credentials,
+        return CfnginContext(
+            config_path=config_path,
             config=config,
-            config_path=str(config_path),
-            environment=self.parameters,
+            deploy_environment=self.__ctx.env.copy(),
             force_stacks=[],  # placeholder
-            region=self.region,
+            parameters=self.parameters,
             stack_names=[],  # placeholder
         )
 
@@ -307,7 +306,7 @@ class CFNgin:
 
         """
         if not self.parameters.get("environment"):
-            self.parameters["environment"] = self.__ctx.env_name
+            self.parameters["environment"] = self.__ctx.env.name
         if not self.parameters.get("region"):
             self.parameters["region"] = self.region
 

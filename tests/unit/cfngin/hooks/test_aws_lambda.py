@@ -9,6 +9,7 @@ import random  # pylint: disable=syntax-error
 import sys
 import unittest
 from io import BytesIO as StringIO
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 from zipfile import ZipFile
 
@@ -20,7 +21,6 @@ from moto import mock_s3
 from testfixtures import ShouldRaise, TempDirectory, compare
 from troposphere.awslambda import Code
 
-from runway.cfngin.context import Context
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
 from runway.cfngin.hooks.aws_lambda import (
     ZIP_PERMS_MASK,
@@ -34,14 +34,13 @@ from runway.cfngin.hooks.aws_lambda import (
     upload_lambda_functions,
 )
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 from ...mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
 from ...mock_docker.fake_api_client import make_fake_client
 from ..factories import mock_provider
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from _pytest.logging import LogCaptureFixture
     from _pytest.monkeypatch import MonkeyPatch
     from mypy_boto3_s3.client import S3Client
@@ -111,7 +110,7 @@ class TestLambdaHooks(unittest.TestCase):
 
     def setUp(self) -> None:
         """Run before tests."""
-        self.context = Context(
+        self.context = CfnginContext(
             config=CfnginConfig.parse_obj(
                 {"namespace": "test", "cfngin_bucket": "test"}
             )
@@ -189,11 +188,11 @@ class TestLambdaHooks(unittest.TestCase):
         with self.temp_directory_with_files(["test/test.py"]) as temp_dir:
             results = self.run_hook(
                 functions={"MyFunction": {"path": "test"}},
-                context=Context(
+                context=CfnginContext(
                     config=CfnginConfig.parse_obj(
                         {"namespace": "test", "cfngin_bucket": "test"}
                     ),
-                    config_path=temp_dir.path,
+                    config_path=Path(str(temp_dir.path)),
                 ),
             )
 

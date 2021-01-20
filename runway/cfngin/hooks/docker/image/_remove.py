@@ -87,7 +87,7 @@ from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryReposi
 from ..hook_data import DockerHookData
 
 if TYPE_CHECKING:
-    from ....context import Context
+    from .....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -121,7 +121,7 @@ class ImageRemoveArgs(BaseModel):
 
     @staticmethod
     def determine_repo(
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         ecr_repo: Optional[Dict[str, Optional[str]]] = None,
         image: Optional[DockerImage] = None,
         repo: Optional[str] = None,
@@ -146,7 +146,7 @@ class ImageRemoveArgs(BaseModel):
         raise ValueError("a repo must be specified")
 
 
-def remove(*, context: Context, **kwargs: Any) -> DockerHookData:
+def remove(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     """Docker image push remove.
 
     Replicates the functionality of ``docker image push`` CLI command.

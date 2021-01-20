@@ -8,8 +8,7 @@ from ....util import cached_property
 if TYPE_CHECKING:
     import boto3
 
-    from ....cfngin.context import Context as CfnginContext
-    from ....context import Context as RunwayContext
+    from ....context import CfnginContext, RunwayContext
 
 
 class AccountDetails:

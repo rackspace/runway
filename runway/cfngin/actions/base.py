@@ -18,8 +18,8 @@ from ..util import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
 
+    from ...context import CfnginContext
     from ..blueprints.base import Blueprint
-    from ..context import Context
     from ..providers.aws.default import Provider, ProviderBuilder
     from ..stack import Stack
     from ..status import Status
@@ -105,13 +105,13 @@ class BaseAction:
     bucket_name: Optional[str]
     bucket_region: Optional[str]
     cancel: threading.Event
-    context: Context
+    context: CfnginContext
     provider_builder: Optional[ProviderBuilder]
     s3_conn: S3Client
 
     def __init__(
         self,
-        context: Context,
+        context: CfnginContext,
         provider_builder: Optional[ProviderBuilder] = None,
         cancel: Optional[threading.Event] = None,
     ):
@@ -131,7 +131,7 @@ class BaseAction:
         self.bucket_region = context.config.cfngin_bucket_region
         if not self.bucket_region and provider_builder:
             self.bucket_region = provider_builder.region
-        self.s3_conn = self.context.s3_conn
+        self.s3_conn = self.context.s3_client
 
     @property
     def _stack_action(self) -> Callable[..., Any]:
@@ -257,12 +257,10 @@ class BaseAction:
 
         steps = [
             Step(stack, fn=self._stack_action, watch_func=tail_fn)
-            for stack in self.context.get_stacks()
+            for stack in self.context.stacks
         ]
 
-        steps.extend(
-            [Step(target, fn=target_fn) for target in self.context.get_targets()]
-        )
+        steps.extend([Step(target, fn=target_fn) for target in self.context.targets])
 
         graph = Graph.from_steps(steps)
 

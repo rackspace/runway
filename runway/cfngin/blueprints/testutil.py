@@ -13,7 +13,7 @@ from runway.util import load_object_from_string
 from runway.variables import Variable
 
 from ...config import CfnginConfig
-from ..context import Context
+from ...context.cfngin import CfnginContext
 
 if TYPE_CHECKING:
     from ...config.models.cfngin import CfnginStackDefinitionModel
@@ -139,7 +139,7 @@ class YamlDirTestGenerator:
         class ConfigTest(self.base_class):  # type: ignore
             """Config test."""
 
-            context: Context
+            context: CfnginContext
 
             def __init__(  # pylint: disable=super-init-not-called
                 self,
@@ -159,8 +159,8 @@ class YamlDirTestGenerator:
                 try:
                     ctx = self.context
                 except AttributeError:
-                    ctx = Context(
-                        config=self.config, environment={"environment": "test"}
+                    ctx = CfnginContext(
+                        config=self.config, parameters={"environment": "test"}
                     )
 
                 configvars = self.stack.variables or {}

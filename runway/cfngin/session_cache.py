@@ -4,17 +4,13 @@ from typing import Optional
 
 import boto3
 
-from runway.aws_sso_botocore.session import Session
-
+from ..aws_sso_botocore.session import Session
+from ..constants import BOTO3_CREDENTIAL_CACHE
 from .ui import ui
 
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PROFILE = None
-# A global credential cache that can be shared among boto3 sessions. This is
-# inherently threadsafe thanks to the GIL:
-# https://docs.python.org/3/glossary.html#term-global-interpreter-lock
-CREDENTIAL_CACHE = {}
 
 
 def get_session(
@@ -60,6 +56,6 @@ def get_session(
     )
     cred_provider = session._session.get_component("credential_provider")  # type: ignore
     provider = cred_provider.get_provider("assume-role")
-    provider.cache = CREDENTIAL_CACHE
+    provider.cache = BOTO3_CREDENTIAL_CACHE
     provider._prompter = ui.getpass
     return session
