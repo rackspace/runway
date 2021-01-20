@@ -17,7 +17,6 @@ from ..cfngin.exceptions import (
 )
 from ..cfngin.plan import Graph
 from ..cfngin.stack import Stack
-from ..cfngin.target import Target
 from ..cfngin.util import ensure_s3_bucket
 from ..compat import cached_property
 from ..config import CfnginConfig
@@ -290,11 +289,6 @@ class CfnginContext(BaseContext):
             if self.config.namespace
             else {}
         )
-
-    @cached_property
-    def targets(self) -> List[Target]:
-        """Named targets that are specified in the config."""
-        return [Target(target_def) for target_def in self.config.targets]
 
     @cached_property
     def template_indent(self) -> int:

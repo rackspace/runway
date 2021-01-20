@@ -21,7 +21,6 @@ from runway.cfngin.exceptions import (
 )
 from runway.cfngin.plan import Graph, json_serial
 from runway.cfngin.stack import Stack
-from runway.cfngin.target import Target
 from runway.config import CfnginConfig
 from runway.context.cfngin import CfnginContext, get_fqn
 from runway.core.components import DeployEnvironment
@@ -612,18 +611,6 @@ class TestCFNginContext:
             config=CfnginConfig.parse_obj({"namespace": "test", "tags": {"key": "val"}})
         )
         assert obj.tags == obj.config.tags
-
-    def test_targets(self) -> None:
-        """Test targets."""
-        config = CfnginConfig.parse_obj(
-            {"namespace": "test", "targets": [{"name": "stack0"}, {"name": "stack1"}]}
-        )
-        obj = CfnginContext(config=config)
-        assert len(obj.targets) == len(config.targets)
-        assert isinstance(obj.targets[0], Target)
-        assert obj.targets[0].name == config.targets[0].name
-        assert isinstance(obj.targets[1], Target)
-        assert obj.targets[1].name == config.targets[1].name
 
     def test_template_indent(self) -> None:
         """Test template_indent."""
