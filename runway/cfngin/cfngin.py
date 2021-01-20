@@ -122,10 +122,7 @@ class CFNgin:
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
                 logger.notice("deploy (in progress)")
-                with SafeHaven(
-                    argv=["stacker", "build", str(config_path)],
-                    sys_modules_exclude=["awacs", "troposphere"],
-                ):
+                with SafeHaven(sys_modules_exclude=["awacs", "troposphere"],):
                     ctx = self.load(config_path)
                     action = build.Action(
                         context=ctx,
@@ -158,7 +155,7 @@ class CFNgin:
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("destroy (in progress)")
-                with SafeHaven(argv=["stacker", "destroy", str(config_path)]):
+                with SafeHaven():
                     ctx = self.load(config_path)
                     action = destroy.Action(
                         context=ctx,
@@ -215,7 +212,7 @@ class CFNgin:
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("plan (in progress)")
-                with SafeHaven(argv=["stacker", "diff", str(config_path)]):
+                with SafeHaven():
                     ctx = self.load(config_path)
                     action = diff.Action(
                         context=ctx,
