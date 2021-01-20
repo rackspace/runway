@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context
+    from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def get_redirect_uris(
 
 
 def update(
-    context: Context,
+    context: CfnginContext,
     *,
     alternate_domains: List[str],
     client_id: str,

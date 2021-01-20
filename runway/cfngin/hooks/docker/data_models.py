@@ -25,7 +25,7 @@ from ....util import MutableMap
 if TYPE_CHECKING:
     from docker.models.images import Image
 
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
     Model = TypeVar("Model", bound="BaseModel")
 
@@ -38,7 +38,9 @@ ECR_REPO_FQN_TEMPLATE = (
 class BaseModel:
     """Base model."""
 
-    def __init__(self, *, context: Optional[Context] = None, **_kwargs: Any) -> None:
+    def __init__(
+        self, *, context: Optional[CfnginContext] = None, **_kwargs: Any
+    ) -> None:
         """Instantiate class."""
         self._ctx = context
 
@@ -176,7 +178,7 @@ class BaseModel:
 
     @classmethod
     def parse_obj(
-        cls: Type[Model], obj: Any, context: Optional[Context] = None
+        cls: Type[Model], obj: Any, context: Optional[CfnginContext] = None
     ) -> Model:
         """Parse object."""
         if not isinstance(obj, dict):
@@ -235,7 +237,7 @@ class ElasticContainerRegistry(BaseModel):
         account_id: Optional[str] = None,
         alias: Optional[str] = None,
         aws_region: Optional[str] = None,
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         **kwargs: Any
     ) -> None:
         """Instantiate class."""
@@ -250,10 +252,10 @@ class ElasticContainerRegistry(BaseModel):
                 raise ValueError("context is required to resolve values")
             if not self.region:
                 self.region = self._validate_str(
-                    self._ctx.region or "us-east-1", required=True
+                    self._ctx.env.aws_region or "us-east-1", required=True
                 )
             if not self.account_id:
-                self.account_id = AccountDetails(cast("Context", self._ctx)).id
+                self.account_id = AccountDetails(cast("CfnginContext", self._ctx)).id
 
     @property
     def fqn(self) -> str:
@@ -329,7 +331,7 @@ class ElasticContainerRegistryRepository(BaseModel):
         *,
         account_id: Optional[str] = None,
         aws_region: Optional[str] = None,
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         registry_alias: Optional[str] = None,
         repo_name: str,
         **kwargs: Any

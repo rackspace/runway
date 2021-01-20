@@ -11,7 +11,7 @@ from ....variables import Variable
 
 if TYPE_CHECKING:
     from ...._logging import RunwayLogger
-    from ....context import Context
+    from ....context.runway import RunwayContext
     from ...models.base import ConfigProperty
     from ._variables_def import RunwayVariablesDefinition
 
@@ -52,7 +52,7 @@ class ConfigComponentDefinition:
 
     def resolve(
         self,
-        context: Context,
+        context: RunwayContext,
         *,
         pre_process: bool = False,
         variables: Optional[RunwayVariablesDefinition] = None

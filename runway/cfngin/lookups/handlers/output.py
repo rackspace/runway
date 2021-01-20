@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any, Optional
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
+    from ....context.cfngin import CfnginContext
     from ....variables import VariableValue
-    from ...context import Context
 
 TYPE_NAME = "output"
 
@@ -21,7 +21,7 @@ class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
 
     @classmethod
-    def handle(cls, value, context: Optional[Context] = None, **_: Any) -> str:
+    def handle(cls, value, context: Optional[CfnginContext] = None, **_: Any) -> str:
         """Fetch an output from the designated stack.
 
         Args:

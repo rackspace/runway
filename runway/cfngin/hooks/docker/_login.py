@@ -65,7 +65,7 @@ from .data_models import BaseModel, ElasticContainerRegistry
 from .hook_data import DockerHookData
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -77,7 +77,7 @@ class LoginArgs(BaseModel):
         self,
         *,
         password: str,
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         dockercfg_path: Optional[str] = None,
         ecr: Optional[Union[bool, Dict[str, Optional[str]]]] = None,
         email: Optional[str] = None,
@@ -102,7 +102,7 @@ class LoginArgs(BaseModel):
 
     @staticmethod
     def determine_registry(
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         ecr: Optional[Union[bool, Dict[str, Optional[str]]]] = None,
         registry: Optional[str] = None,
     ) -> Optional[str]:
@@ -116,7 +116,7 @@ class LoginArgs(BaseModel):
         return None
 
 
-def login(*, context: Context, **kwargs: Any) -> DockerHookData:
+def login(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     """Docker login hook.
 
     Replicates the functionality of ``docker login`` cli command.

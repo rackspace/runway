@@ -9,7 +9,7 @@ from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "ssmstore"
@@ -21,7 +21,7 @@ class SsmstoreLookup(LookupHandler):
     DEPRECATION_MSG = "ssmstore lookup has been deprecated; use the ssm lookup instead"
 
     @classmethod
-    def handle(cls, value: str, context: Context, **_: Any) -> str:
+    def handle(cls, value: str, context: CfnginContext, **_: Any) -> str:
         """Retrieve (and decrypt) a parameter from AWS SSM Parameter Store.
 
         Args:

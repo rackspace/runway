@@ -15,7 +15,7 @@ from typing_extensions import TypedDict
 if TYPE_CHECKING:
     from mypy_boto3_ecs.type_defs import CreateClusterResponseTypeDef
 
-    from ..context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class CreateClustersResponseTypeDef(TypedDict):
 
 
 def create_clusters(
-    context: Context, *, clusters: Union[List[str], str], **_: Any
+    context: CfnginContext, *, clusters: Union[List[str], str], **_: Any
 ) -> CreateClustersResponseTypeDef:
     """Create ECS clusters.
 

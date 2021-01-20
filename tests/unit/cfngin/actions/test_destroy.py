@@ -8,11 +8,11 @@ from typing import Any, Dict, Optional
 from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin.actions import destroy
-from runway.cfngin.context import Context
 from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.plan import Graph, Step
 from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -39,7 +39,7 @@ class TestDestroyAction(unittest.TestCase):
 
     def _get_context(
         self, extra_config_args: Optional[Dict[str, Any]] = None, **kwargs: Any
-    ) -> Context:
+    ) -> CfnginContext:
         """Get context."""
         config = {
             "namespace": "namespace",
@@ -61,7 +61,7 @@ class TestDestroyAction(unittest.TestCase):
         }
         if extra_config_args:
             config.update(extra_config_args)
-        return Context(config=CfnginConfig.parse_obj(config), **kwargs)
+        return CfnginContext(config=CfnginConfig.parse_obj(config), **kwargs)
 
     def test_generate_plan(self) -> None:
         """Test generate plan."""
@@ -108,7 +108,7 @@ class TestDestroyAction(unittest.TestCase):
     def test_destroy_stack_step_statuses(self) -> None:
         """Test destroy stack step statuses."""
         mock_provider = MagicMock()
-        stacks_dict = self.context.get_stacks_dict()
+        stacks_dict = self.context.stacks_dict
 
         def get_stack(stack_name):
             return stacks_dict.get(stack_name)
@@ -145,14 +145,16 @@ class TestDestroyAction(unittest.TestCase):
         self.assertEqual(step.status, COMPLETE)
 
     @patch(
-        "runway.cfngin.context.Context._persistent_graph_tags",
+        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
         new_callable=PropertyMock,
     )
     @patch(
-        "runway.cfngin.context.Context.lock_persistent_graph", new_callable=MagicMock
+        "runway.context.cfngin.CfnginContext.lock_persistent_graph",
+        new_callable=MagicMock,
     )
     @patch(
-        "runway.cfngin.context.Context.unlock_persistent_graph", new_callable=MagicMock
+        "runway.context.cfngin.CfnginContext.unlock_persistent_graph",
+        new_callable=MagicMock,
     )
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(

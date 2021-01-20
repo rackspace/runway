@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from ....cfngin.hooks import aws_lambda
 
 if TYPE_CHECKING:
-    from ....cfngin.context import Context
     from ....cfngin.providers.aws.default import Provider
+    from ....context.cfngin import CfnginContext
 
 # The functions associated with Auth@Edge
 FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_headers"]
@@ -25,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def write(  # pylint: disable=too-many-locals
-    context: Context,
+    context: CfnginContext,
     *,
     bucket: str,
     client_id: str,
@@ -154,7 +154,7 @@ def write(  # pylint: disable=too-many-locals
     return context_dict
 
 
-def get_nonce_signing_secret(param_name: str, context: Context,) -> str:
+def get_nonce_signing_secret(param_name: str, context: CfnginContext,) -> str:
     """Retrieve signing secret, generating & storing it first if not present."""
     session = context.get_session()
     ssm_client = session.client("ssm")

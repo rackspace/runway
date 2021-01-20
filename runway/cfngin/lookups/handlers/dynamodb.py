@@ -12,7 +12,7 @@ from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 TYPE_NAME = "dynamodb"
 
@@ -21,7 +21,9 @@ class DynamodbLookup(LookupHandler):
     """DynamoDB lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: Context, *__args: Any, **__kwargs: Any) -> Any:
+    def handle(
+        cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
+    ) -> Any:
         """Get a value from a DynamoDB table.
 
         Args:

@@ -7,7 +7,7 @@ import click
 from cfn_flip import to_yaml
 
 from ....blueprints.tf_state import TfState
-from ....cfngin.context import Context as CFNginContext
+from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 ROOT = Path(__file__).parent.parent.parent.parent
@@ -57,7 +57,7 @@ def write_tfstate_template(dest: Path) -> None:
     dest.write_text(
         to_yaml(
             TfState(
-                "test", CFNginContext(environment={"namespace": "test"}), None
+                "test", CfnginContext(environment={"namespace": "test"}), None
             ).to_json()
         )
     )

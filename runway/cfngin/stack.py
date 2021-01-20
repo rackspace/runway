@@ -13,8 +13,8 @@ from .blueprints.raw import RawTemplateBlueprint
 
 if TYPE_CHECKING:
     from ..config.models.cfngin import CfnginStackDefinitionModel
+    from ..context import CfnginContext
     from .blueprints.base import Blueprint
-    from .context import Context
     from .providers.base import BaseProvider
 
 
@@ -69,7 +69,7 @@ class Stack:
     _blueprint: Optional[Blueprint]
     _stack_policy: Optional[str]
 
-    context: Context
+    context: CfnginContext
     definition: CfnginStackDefinitionModel
     enabled: bool
     force: bool
@@ -89,7 +89,7 @@ class Stack:
     def __init__(
         self,
         definition: CfnginStackDefinitionModel,
-        context: Context,
+        context: CfnginContext,
         *,
         variables: Optional[Dict[str, Any]] = None,
         mappings: Dict[str, Dict[str, Dict[str, Any]]] = None,
@@ -231,7 +231,7 @@ class Stack:
         return self.blueprint.get_required_parameter_definitions()
 
     def resolve(
-        self, context: Context, provider: Optional[BaseProvider] = None
+        self, context: CfnginContext, provider: Optional[BaseProvider] = None
     ) -> None:
         """Resolve the Stack variables.
 

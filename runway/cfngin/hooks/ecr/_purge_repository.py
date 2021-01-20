@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ecr.client import ECRClient
     from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
 
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -79,7 +79,7 @@ def list_ecr_images(
 
 
 def purge_repository(
-    context: Context, repository_name: str, **_: Any,
+    context: CfnginContext, repository_name: str, **_: Any,
 ) -> Dict[str, str]:
     """Purge all images from an ECR repository."""
     client = context.get_session().client("ecr")

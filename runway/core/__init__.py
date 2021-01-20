@@ -19,7 +19,7 @@ from . import components, providers
 if TYPE_CHECKING:
     from ..config import RunwayConfig
     from ..config.components.runway import RunwayDeploymentDefinition
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = cast(_RunwayLogger, _logging.getLogger(__name__))
 
@@ -29,7 +29,7 @@ __all__ = ["Runway", "components", "providers"]
 class Runway:
     """Runway's core functionality."""
 
-    def __init__(self, config: RunwayConfig, context: Context) -> None:
+    def __init__(self, config: RunwayConfig, context: RunwayContext) -> None:
         """Instantiate class.
 
         Args:

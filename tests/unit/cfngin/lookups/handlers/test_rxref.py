@@ -3,9 +3,9 @@ import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.context import Context
 from runway.cfngin.lookups.handlers.rxref import RxrefLookup
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 
 class TestRxrefHandler(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestRxrefHandler(unittest.TestCase):
     def setUp(self) -> None:
         """Run before tests."""
         self.provider = MagicMock()
-        self.context = Context(config=CfnginConfig.parse_obj({"namespace": "ns"}))
+        self.context = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "ns"}))
 
     def test_rxref_handler(self) -> None:
         """Test rxref handler."""

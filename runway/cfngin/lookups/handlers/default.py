@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ....context.cfngin import CfnginContext
 
 TYPE_NAME = "default"
 
@@ -16,7 +16,9 @@ class DefaultLookup(LookupHandler):
     """Lookup to provide a default value."""
 
     @classmethod
-    def handle(cls, value: str, context: Optional[Context] = None, **_: Any) -> Any:
+    def handle(
+        cls, value: str, context: Optional[CfnginContext] = None, **_: Any
+    ) -> Any:
         """Use a value from the environment or fall back to a default value.
 
         Allows defaults to be set at the config file level.
@@ -43,6 +45,6 @@ class DefaultLookup(LookupHandler):
                 "<env_var>::<default value> format." % value
             )
 
-        if context and env_var_name in context.environment:
-            return context.environment[env_var_name]
+        if context and env_var_name in context.parameters:
+            return context.parameters[env_var_name]
         return default_val

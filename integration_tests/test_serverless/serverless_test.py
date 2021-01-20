@@ -7,7 +7,7 @@ from integration_tests.test_serverless.test_serverless import Serverless
 from integration_tests.util import run_command
 
 # from runway.commands.modules_command import assume_role
-from runway.context import Context
+from runway.context.cfngin import CfnginContext
 from runway.core.providers import aws
 from runway.hooks.staticsite.util import get_hash_of_files
 from runway.module.serverless import get_src_hash
@@ -54,7 +54,7 @@ class ServerlessTest(Serverless):
     def get_session(self, role_arn):
         """Get assumed role session."""
         self.logger.info("Assuming role: %s", role_arn)
-        ctx = Context()
+        ctx = CfnginContext()
         with aws.AssumeRole(
             ctx, role_arn=role_arn, session_name="runway-integration-tests"
         ):

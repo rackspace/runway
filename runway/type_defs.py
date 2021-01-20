@@ -10,7 +10,7 @@ class Boto3CredentialsTypeDef(TypedDict, total=False):
     aws_session_token: str
 
 
-class EnvVarsAwsCredentials(TypedDict, total=False):
+class EnvVarsAwsCredentialsTypeDef(TypedDict, total=False):
     """AWS credentials from/for environment variables."""
 
     AWS_ACCESS_KEY_ID: str
