@@ -14,7 +14,7 @@ from mock import patch
 
 from runway._cli import cli
 from runway.config import RunwayConfig
-from runway.context import Context
+from runway.context.runway import RunwayContext
 from runway.core import Runway
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ def test_plan(
 
     mock_runway.assert_called_once()
     assert isinstance(mock_runway.call_args.args[0], RunwayConfig)
-    assert isinstance(mock_runway.call_args.args[1], Context)
+    assert isinstance(mock_runway.call_args.args[1], RunwayContext)
 
     inst = mock_runway.return_value
     inst.plan.assert_called_once()

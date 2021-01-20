@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Any
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...context import Context
+    from ...context.runway import RunwayContext
 
 TYPE_NAME = "env"
 
@@ -51,7 +51,7 @@ class EnvLookup(LookupHandler):
     """Environment variable Lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: Context, **_: Any) -> Any:
+    def handle(cls, value: str, context: RunwayContext, **_: Any) -> Any:
         """Retrieve an environment variable.
 
         The value is retrieved from a copy of the current environment variables
@@ -71,7 +71,7 @@ class EnvLookup(LookupHandler):
         """
         query, args = cls.parse(value)
 
-        result = context.env_vars.get(query, args.pop("default", ""))
+        result = context.env.vars.get(query, args.pop("default", ""))
 
         if result != "":  # allows for False bool and NoneType results
             return cls.format_results(result, **args)

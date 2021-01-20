@@ -16,7 +16,7 @@ from ..config.components.runway import (
     RunwayDeploymentDefinition,
     RunwayModuleDefinition,
 )
-from ..context import Context as RunwayContext
+from ..context import RunwayContext
 from ..core.components import DeployEnvironment
 from ..exceptions import ConfigNotFound
 from ..util import cached_property

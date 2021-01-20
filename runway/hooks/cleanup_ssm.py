@@ -7,12 +7,12 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ..cfngin.context import Context
+    from ..context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
-def delete_param(context: Context, *, parameter_name: str, **_: Any) -> bool:
+def delete_param(context: CfnginContext, *, parameter_name: str, **_: Any) -> bool:
     """Delete SSM parameter."""
     if not parameter_name:
         raise ValueError("Must specify `parameter_name` for delete_param hook.")

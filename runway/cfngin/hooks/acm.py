@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     from mypy_boto3_route53.client import Route53Client
     from mypy_boto3_route53.type_defs import ChangeTypeDef
 
+    from ...context.cfngin import CfnginContext
     from ..blueprints.base import Blueprint
-    from ..context import Context
     from ..providers.aws.default import Provider
     from ..stack import Stack
     from ..status import Status
@@ -88,7 +88,9 @@ class Certificate(Hook):
     stack: Stack
     template_description: str
 
-    def __init__(self, context: Context, provider: Provider, **kwargs: Any) -> None:
+    def __init__(
+        self, context: CfnginContext, provider: Provider, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:

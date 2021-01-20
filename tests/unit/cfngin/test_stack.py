@@ -3,10 +3,10 @@ import unittest
 
 from mock import MagicMock
 
-from runway.cfngin.context import Context
 from runway.cfngin.lookups import register_lookup_handler
 from runway.cfngin.stack import Stack
 from runway.config import CfnginConfig
+from runway.context.cfngin import CfnginContext
 
 from .factories import generate_definition
 
@@ -18,7 +18,7 @@ class TestStack(unittest.TestCase):
         """Run before tests."""
         self.sd = {"name": "test"}  # pylint: disable=invalid-name
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
-        self.context = Context(config=self.config)
+        self.context = CfnginContext(config=self.config)
         self.stack = Stack(
             definition=generate_definition("vpc", 1), context=self.context,
         )

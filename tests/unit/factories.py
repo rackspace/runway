@@ -10,9 +10,8 @@ from botocore.stub import Stubber
 from mock import MagicMock
 from packaging.specifiers import SpecifierSet
 
-from runway.cfngin.context import Context as CFNginContext
 from runway.config.components.runway import RunwayDeploymentDefinition
-from runway.context import Context as RunwayContext
+from runway.context import CfnginContext, RunwayContext
 from runway.core.components import DeployEnvironment
 from runway.util import MutableMap
 
@@ -20,7 +19,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from runway.config import CfnginConfig
-    from runway.type_defs import Boto3CredentialsTypeDef
 
 
 class MockBoto3Session:
@@ -104,36 +102,35 @@ class MockBoto3Session:
         raise NotImplementedError
 
 
-class MockCFNginContext(CFNginContext):
+class MockCFNginContext(CfnginContext):
     """Subclass CFNgin context object for tests."""
 
     def __init__(
         self,
         *,
-        boto3_credentials: Optional[Boto3CredentialsTypeDef] = None,
-        config_path: Optional[str] = None,
+        config_path: Optional[Path] = None,
         config: Optional[CfnginConfig] = None,
-        environment: Optional[MutableMapping[str, Any]] = None,
+        deploy_environment: Optional[DeployEnvironment] = None,
+        parameters: Optional[MutableMapping[str, Any]] = None,
         force_stacks: Optional[List[str]] = None,
         region: Optional[str] = "us-east-1",
         stack_names: Optional[List[str]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class."""
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
 
         # used during init process
-        self.__boto3_credentials = boto3_credentials or {}
         self.s3_stubber = self.add_stubber("s3", region=region)
 
         super().__init__(
-            environment=environment,
-            boto3_credentials=boto3_credentials or {},
-            stack_names=stack_names,
-            config=config,
             config_path=config_path,
-            region=region,
+            config=config,
+            deploy_environment=deploy_environment,
             force_stacks=force_stacks,
+            parameters=parameters,
+            stack_names=stack_names,
         )
 
     def add_stubber(self, service_name: str, region: Optional[str] = None) -> Stubber:
@@ -144,24 +141,31 @@ class MockCFNginContext(CFNginContext):
             region: AWS region.
 
         """
-        key = "{}.{}".format(service_name, region or self.region)
+        key = "{}.{}".format(service_name, region or self.env.aws_region)
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
-            service_name,
-            region_name=region or self.region,
-            **self.__boto3_credentials or {}
+            service_name, region_name=region or self.env.aws_region,
         )
         self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
 
     def get_session(
-        self, profile: Optional[str] = None, region: Optional[str] = None
+        self,
+        *,
+        aws_access_key_id: Optional[str] = None,
+        aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
+        profile: Optional[str] = None,
+        region: Optional[str] = None
     ) -> MockBoto3Session:
         """Wrap get_session to enable stubbing."""
         return MockBoto3Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
             clients=self._boto3_test_client,
             profile_name=profile,
-            region_name=region or self.region,
+            region_name=region or self.env.aws_region,
         )
 
 
@@ -197,7 +201,7 @@ class MockRunwayContext(RunwayContext):
     _use_concurrent: bool
 
     def __init__(
-        self, *, command: Optional[str] = None, deploy_environment: Any = None
+        self, *, command: Optional[str] = None, deploy_environment: Any = None, **_: Any
     ) -> None:
         """Instantiate class."""
         if not deploy_environment:
@@ -215,33 +219,44 @@ class MockRunwayContext(RunwayContext):
             region: AWS region name.
 
         """
-        key = "{}.{}".format(service_name, region or self.env_region)
+        key = "{}.{}".format(service_name, region or self.env.aws_region)
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
             service_name,
-            region_name=region or self.env_region,
+            region_name=region or self.env.aws_region,
             **self.boto3_credentials
         )
         self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
 
     def get_session(
-        self, profile: Optional[str] = None, region: Optional[str] = None
+        self,
+        *,
+        aws_access_key_id: Optional[str] = None,
+        aws_secret_access_key: Optional[str] = None,
+        aws_session_token: Optional[str] = None,
+        profile: Optional[str] = None,
+        region: Optional[str] = None
     ) -> MockBoto3Session:
         """Wrap get_session to enable stubbing."""
         return MockBoto3Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
             clients=self._boto3_test_client,
             profile_name=profile,
-            region_name=region or self.env_region,
+            region_name=region or self.env.aws_region,
         )
 
     @property
-    def use_concurrent(self) -> bool:
+    def use_concurrent(self) -> bool:  # pylint: disable=invalid-overridden-method
         """Override property of parent with something that can be set."""
         return self._use_concurrent
 
     @use_concurrent.setter
-    def use_concurrent(self, value: bool) -> None:
+    def use_concurrent(  # pylint: disable=invalid-overridden-method
+        self, value: bool
+    ) -> None:
         """Override property of parent with something that can be set.
 
         Args:

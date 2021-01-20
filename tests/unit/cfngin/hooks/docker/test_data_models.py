@@ -350,7 +350,7 @@ class TestElasticContainerRegistry:
         sts_stubber.assert_no_pending_responses()
         assert obj.account_id == account_id
         assert obj.alias is None
-        assert obj.region == cfngin_context.region
+        assert obj.region == cfngin_context.env.aws_region
         assert not obj.public
 
     def test_init_no_context(self) -> None:

@@ -19,7 +19,7 @@ from ..factories import mock_context
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from runway.cfngin.context import Context
+    from runway.context.cfngin import CfnginContext
 
 REGION = "us-east-1"
 KEY_PAIR_NAME = "FakeKey"
@@ -39,7 +39,7 @@ def ssh_key(cfngin_fixtures: Path) -> SSHKey:
 
 
 @pytest.fixture
-def context() -> Context:
+def context() -> CfnginContext:
     """Mock context."""
     return mock_context(namespace="fake")
 
@@ -95,7 +95,7 @@ def assert_key_present(
     assert key_pairs[0]["KeyFingerprint"] == fingerprint
 
 
-def test_param_validation(context: Context) -> None:
+def test_param_validation(context: CfnginContext) -> None:
     """Test param validation."""
     result = ensure_keypair_exists(
         context,
@@ -106,7 +106,7 @@ def test_param_validation(context: Context) -> None:
     assert result == {}
 
 
-def test_keypair_exists(context: Context) -> None:
+def test_keypair_exists(context: CfnginContext) -> None:
     """Test keypair exists."""
     ec2 = boto3.client("ec2")
     keypair = ec2.create_key_pair(KeyName=KEY_PAIR_NAME)
@@ -118,7 +118,7 @@ def test_keypair_exists(context: Context) -> None:
     assert result == expected
 
 
-def test_import_file(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
+def test_import_file(tmp_path: Path, context: CfnginContext, ssh_key: SSHKey) -> None:
     """Test import file."""
     pub_key = tmp_path / "id_rsa.pub"
     pub_key.write_bytes(ssh_key.public_key)
@@ -130,7 +130,7 @@ def test_import_file(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
     assert result["status"] == "imported"
 
 
-def test_import_bad_key_data(tmp_path: Path, context: Context) -> None:
+def test_import_bad_key_data(tmp_path: Path, context: CfnginContext) -> None:
     """Test import bad key data."""
     pub_key = tmp_path / "id_rsa.pub"
     pub_key.write_text("garbage")
@@ -142,7 +142,9 @@ def test_import_bad_key_data(tmp_path: Path, context: Context) -> None:
 
 
 @pytest.mark.parametrize("ssm_key_id", ["my-key"])
-def test_create_in_ssm(context: Context, ssh_key: SSHKey, ssm_key_id: str) -> None:
+def test_create_in_ssm(
+    context: CfnginContext, ssh_key: SSHKey, ssm_key_id: str
+) -> None:
     """Test create in ssm."""
     result = ensure_keypair_exists(
         context,
@@ -167,7 +169,7 @@ def test_create_in_ssm(context: Context, ssh_key: SSHKey, ssm_key_id: str) -> No
     assert param_details.get("KeyId") == ssm_key_id
 
 
-def test_interactive_non_terminal_input(context: Context) -> None:
+def test_interactive_non_terminal_input(context: CfnginContext) -> None:
     """Test interactive non terminal input."""
     with mock_input(isatty=False) as _input:
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
@@ -175,7 +177,7 @@ def test_interactive_non_terminal_input(context: Context) -> None:
     assert result == {}
 
 
-def test_interactive_retry_cancel(context: Context) -> None:
+def test_interactive_retry_cancel(context: CfnginContext) -> None:
     """Test interactive retry cancel."""
     lines = ["garbage", "cancel"]
     with mock_input(lines) as _input:
@@ -184,7 +186,9 @@ def test_interactive_retry_cancel(context: Context) -> None:
     assert result == {}
 
 
-def test_interactive_import(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
+def test_interactive_import(
+    tmp_path: Path, context: CfnginContext, ssh_key: SSHKey
+) -> None:
     """."""
     key_file = tmp_path / "id_rsa.pub"
     key_file.write_bytes(ssh_key.public_key)
@@ -197,7 +201,9 @@ def test_interactive_import(tmp_path: Path, context: Context, ssh_key: SSHKey) -
     assert result["status"] == "imported"
 
 
-def test_interactive_create(tmp_path: Path, context: Context, ssh_key: SSHKey) -> None:
+def test_interactive_create(
+    tmp_path: Path, context: CfnginContext, ssh_key: SSHKey
+) -> None:
     """Test interactive create."""
     key_dir = tmp_path / "keys"
     key_dir.mkdir(parents=True, exist_ok=True)
@@ -213,7 +219,7 @@ def test_interactive_create(tmp_path: Path, context: Context, ssh_key: SSHKey) -
     assert key_file.read_bytes() == ssh_key.private_key
 
 
-def test_interactive_create_bad_dir(tmp_path: Path, context: Context) -> None:
+def test_interactive_create_bad_dir(tmp_path: Path, context: CfnginContext) -> None:
     """Test interactive create bad dir."""
     key_dir = tmp_path / "missing"
 
@@ -224,7 +230,9 @@ def test_interactive_create_bad_dir(tmp_path: Path, context: Context) -> None:
     assert result == {}
 
 
-def test_interactive_create_existing_file(tmp_path: Path, context: Context) -> None:
+def test_interactive_create_existing_file(
+    tmp_path: Path, context: CfnginContext
+) -> None:
     """Test interactive create existing file."""
     key_dir = tmp_path / "keys"
     key_dir.mkdir(exist_ok=True, parents=True)

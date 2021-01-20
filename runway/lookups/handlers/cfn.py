@@ -51,17 +51,15 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from botocore.exceptions import ClientError
 
-from runway.cfngin.exceptions import StackDoesNotExist
-from runway.exceptions import OutputDoesNotExist
-
+from ...cfngin.exceptions import StackDoesNotExist
+from ...exceptions import OutputDoesNotExist
 from .base import LookupHandler
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
 
-    from runway.cfngin.context import Context as CFNginContext
-    from runway.cfngin.providers.aws.default import Provider
-    from runway.context import Context as RunwayContext
+    from ...cfngin.providers.aws.default import Provider
+    from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "cfn"
@@ -113,7 +111,7 @@ class CfnLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         **_: Any,
     ) -> Any:

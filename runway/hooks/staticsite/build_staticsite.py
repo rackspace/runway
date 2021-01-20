@@ -19,8 +19,8 @@ from ...util import change_dir, run_commands
 from .util import get_hash_of_files
 
 if TYPE_CHECKING:
-    from ...cfngin.context import Context
     from ...cfngin.providers.aws.default import Provider
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ class OptionsArgTypeDef(TypedDict, total=False):
 
 
 def build(
-    context: Context,
+    context: CfnginContext,
     provider: Provider,
     *,
     artifact_bucket_rxref_lookup: str,

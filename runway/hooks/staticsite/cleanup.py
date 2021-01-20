@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, List
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef
 
-    from ...cfngin.context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 STACK_STATUSES_TO_IGNORE = [
@@ -47,7 +47,7 @@ def get_replicated_function_names(outputs: List[OutputTypeDef],) -> List[str]:
     return function_names
 
 
-def warn(context: Context, *, stack_relative_name: str, **_: Any) -> bool:
+def warn(context: CfnginContext, *, stack_relative_name: str, **_: Any) -> bool:
     """Notify the user of Lambda functions to delete.
 
     Args:
@@ -74,7 +74,7 @@ def warn(context: Context, *, stack_relative_name: str, **_: Any) -> bool:
         if functions:
             runway_cmd = (
                 "runway run-aws -- lambda delete-function "
-                "--function-name $x --region %s" % context.region
+                "--function-name $x --region %s" % context.env.aws_region
             )
             LOGGER.warning(
                 "About to delete the Static Site stack that contains "

@@ -24,7 +24,7 @@ from . import ModuleOptions, RunwayModuleNpm, generate_node_command, run_module_
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ..context import Context
+    from ..context.runway import RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
 def deploy_package(
     sls_opts: List[str],
     bucketname: str,
-    context: Context,
+    context: RunwayContext,
     path: Path,
     logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
 ) -> None:
@@ -142,7 +142,7 @@ class Serverless(RunwayModuleNpm):
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         path: Path,
         options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
     ) -> None:

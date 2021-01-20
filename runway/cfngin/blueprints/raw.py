@@ -15,8 +15,8 @@ from ..util import parse_cloudformation_template
 from .base import Blueprint
 
 if TYPE_CHECKING:
+    from ...context.cfngin import CfnginContext
     from ...variables import Variable
-    from ..context import Context
 
 
 def get_template_path(file_path: Path) -> Optional[Path]:
@@ -89,7 +89,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
     def __init__(  # pylint: disable=super-init-not-called
         self,
         name: str,
-        context: Context,
+        context: CfnginContext,
         raw_template_path: Path,
         mappings: Optional[Dict[str, Any]] = None,
         description: Optional[str] = None,

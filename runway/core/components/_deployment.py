@@ -19,7 +19,7 @@ from ._module import Module
 
 if TYPE_CHECKING:
     from ...config.components.runway import RunwayDeploymentDefinition
-    from ...context import Context
+    from ...context.runway import RunwayContext
 
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -30,7 +30,7 @@ class Deployment:
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         definition: RunwayDeploymentDefinition,
         future: Optional[RunwayFutureDefinitionModel] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
@@ -198,7 +198,9 @@ class Deployment:
                 variables=self._variables,
             )
 
-    def validate_account_credentials(self, context: Optional[Context] = None) -> None:
+    def validate_account_credentials(
+        self, context: Optional[RunwayContext] = None
+    ) -> None:
         """Exit if requested deployment account doesn't match credentials.
 
         Args:
@@ -284,7 +286,7 @@ class Deployment:
     def run_list(
         cls,
         action: str,
-        context: Context,
+        context: RunwayContext,
         deployments: List[RunwayDeploymentDefinition],
         future: RunwayFutureDefinitionModel,
         variables: RunwayVariablesDefinition,

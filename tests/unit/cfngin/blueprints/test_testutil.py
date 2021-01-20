@@ -5,7 +5,7 @@ from troposphere import ecr
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.testutil import BlueprintTestCase
-from runway.cfngin.context import Context
+from runway.context.cfngin import CfnginContext
 from runway.variables import Variable
 
 
@@ -37,7 +37,7 @@ class TestRepositories(BlueprintTestCase):
 
     def test_create_template_passes(self) -> None:
         """Test create template passes."""
-        ctx = Context()
+        ctx = CfnginContext()
         blueprint = Repositories("test_repo", ctx)
         blueprint.resolve_variables(
             [Variable("Repositories", ["repo1", "repo2"], "cfngin")]
@@ -47,7 +47,7 @@ class TestRepositories(BlueprintTestCase):
 
     def test_create_template_fails(self) -> None:
         """Test create template fails."""
-        ctx = Context()
+        ctx = CfnginContext()
         blueprint = Repositories("test_repo", ctx)
         blueprint.resolve_variables(
             [Variable("Repositories", ["repo1", "repo2", "repo3"], "cfngin")]

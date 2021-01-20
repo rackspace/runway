@@ -15,8 +15,8 @@ from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
+    from ...context.cfngin import CfnginContext
     from ..blueprints.base import Blueprint
-    from ..context import Context
     from ..providers.aws.default import Provider
     from ..status import Status
 
@@ -72,12 +72,12 @@ class Hook:
 
     args: HookArgsBaseModel
     blueprint: Optional[Blueprint] = None
-    context: Context
+    context: CfnginContext
     provider: Provider
     stack: Optional[Stack] = None
     stack_name: str = "stack"
 
-    def __init__(self, context: Context, provider: Provider, **kwargs: Any):
+    def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any):
         """Instantiate class.
 
         Args:
@@ -270,7 +270,7 @@ class Hook:
 class HookBuildAction(build.Action):
     """Build action that can be used from hooks."""
 
-    def __init__(self, context: Context, provider: Provider):
+    def __init__(self, context: CfnginContext, provider: Provider):
         """Instantiate class.
 
         Args:

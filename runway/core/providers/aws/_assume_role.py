@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from mypy_boto3_sts.type_defs import AssumedRoleUserTypeDef, CredentialsTypeDef
 
     from ...._logging import RunwayLogger
-    from ....context import Context
+    from ....context.runway import RunwayContext
 
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
@@ -23,14 +23,14 @@ class AssumeRole(AbstractContextManager):
 
     assumed_role_user: AssumedRoleUserTypeDef
     credentials: CredentialsTypeDef
-    ctx: Context
+    ctx: RunwayContext
     duration_seconds: int
     revert_on_exit: bool
     session_name: str = "runway"
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         role_arn: Optional[str] = None,
         duration_seconds: Optional[int] = None,
         revert_on_exit: bool = True,
@@ -99,11 +99,11 @@ class AssumeRole(AbstractContextManager):
             return
         for k in self.ctx.current_aws_creds.keys():
             old = "OLD_" + k
-            if self.ctx.env_vars.get(old):
-                self.ctx.env_vars[k] = self.ctx.env_vars.pop(old)
+            if self.ctx.env.vars.get(old):
+                self.ctx.env.vars[k] = self.ctx.env.vars.pop(old)
                 LOGGER.debug("reverted environment variables: %s", k)
             else:
-                self.ctx.env_vars.pop(k, None)
+                self.ctx.env.vars.pop(k, None)
                 LOGGER.debug("removed environment variables: %s ", k)
 
     def save_existing_iam_env_vars(self) -> None:
@@ -111,7 +111,7 @@ class AssumeRole(AbstractContextManager):
         for k, v in self.ctx.current_aws_creds.items():
             new = "OLD_" + k
             LOGGER.debug('saving environment variable "%s" as "%s"', k, new)
-            self.ctx.env_vars[new] = cast(str, v)
+            self.ctx.env.vars[new] = cast(str, v)
 
     def __enter__(self) -> AssumeRole:
         """Enter the context manager."""

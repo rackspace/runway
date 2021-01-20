@@ -17,8 +17,7 @@ if TYPE_CHECKING:
         GetBucketVersioningOutputTypeDef,
     )
 
-    from .....cfngin.context import Context as CFNginContext
-    from .....context import Context as RunwayContext
+    from .....context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -28,7 +27,7 @@ class Bucket:
 
     def __init__(
         self,
-        context: Union[CFNginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         name: str,
         region: Optional[str] = None,
     ) -> None:

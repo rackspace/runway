@@ -357,6 +357,10 @@ class NodeGroup(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from runway.cfngin.context import Context
+    from runway.context.cfngin import CfnginContext
 
-    print(NodeGroup("test", Context(environment={"namespace": "test"}), None).to_json())
+    print(
+        NodeGroup(
+            "test", CfnginContext(parameters={"namespace": "test"}), None
+        ).to_json()
+    )

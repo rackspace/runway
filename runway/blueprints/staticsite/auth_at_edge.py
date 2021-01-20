@@ -18,7 +18,7 @@ from .staticsite import StaticSite
 
 if TYPE_CHECKING:
     from ...cfngin.blueprints.base import BlueprintVariable
-    from ...cfngin.context import Context
+    from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger("runway")
 
@@ -63,7 +63,7 @@ class AuthAtEdge(StaticSite):
     def __init__(
         self,
         name: str,
-        context: Context,
+        context: CfnginContext,
         mappings: Optional[Dict[str, Dict[str, Any]]] = None,
         description: Optional[str] = None,
     ) -> None:

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         RunwayDeploymentDefinition,
         RunwayModuleDefinition,
     )
-    from ...context import Context
+    from ...context.runway import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
@@ -36,13 +36,13 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 class Module:
     """Runway module."""
 
-    ctx: Context
+    ctx: RunwayContext
     logger: PrefixAdaptor
     name: str
 
     def __init__(
         self,
-        context: Context,
+        context: RunwayContext,
         definition: RunwayModuleDefinition,
         deployment: RunwayDeploymentDefinition = None,
         future: RunwayFutureDefinitionModel = None,
@@ -269,13 +269,13 @@ class Module:
                 self.logger.debug(
                     "environment variable overrides: %s", resolved_env_vars
                 )
-                self.ctx.env.vars = merge_dicts(self.ctx.env_vars, resolved_env_vars)
+                self.ctx.env.vars = merge_dicts(self.ctx.env.vars, resolved_env_vars)
 
     @classmethod
     def run_list(
         cls,
         action: str,
-        context: Context,
+        context: RunwayContext,
         modules: List[RunwayModuleDefinition],
         variables: RunwayVariablesDefinition,
         deployment: RunwayDeploymentDefinition = None,
@@ -312,7 +312,7 @@ class Module:
 
 
 def validate_environment(
-    context: Context,
+    context: RunwayContext,
     env_def: Any,
     logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
     strict: bool = False,

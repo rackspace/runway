@@ -38,7 +38,7 @@ from .ui import ui
 from .util import merge_map, stack_template_key_name
 
 if TYPE_CHECKING:
-    from .context import Context
+    from ..context.cfngin import CfnginContext
     from .providers.base import BaseProvider
     from .status import Status
 
@@ -249,7 +249,7 @@ class Step:
     def from_stack_name(
         cls,
         stack_name: str,
-        context: Context,
+        context: CfnginContext,
         requires: Optional[Union[List[str], Set[str]]] = None,
         fn: Callable = None,
         watch_func: Callable = None,
@@ -280,7 +280,7 @@ class Step:
     def from_persistent_graph(
         cls,
         graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
-        context: Context,
+        context: CfnginContext,
         fn: Callable = None,
         watch_func: Callable = None,
     ) -> List[Step]:
@@ -529,7 +529,7 @@ class Graph:
     def from_dict(
         cls,
         graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
-        context: Context,
+        context: CfnginContext,
     ) -> Graph:
         """Create a Graph from a graph dict.
 
@@ -571,7 +571,7 @@ class Plan:
 
     """
 
-    context: Optional[Context]
+    context: Optional[CfnginContext]
     description: str
     graph: Graph
     id: uuid.UUID
@@ -582,7 +582,7 @@ class Plan:
         self,
         description: str,
         graph: Graph,
-        context: Optional[Context] = None,
+        context: Optional[CfnginContext] = None,
         reverse: bool = False,
         require_unlocked: bool = True,
     ) -> None:
@@ -651,7 +651,7 @@ class Plan:
         self,
         *,
         directory: str,
-        context: Context,
+        context: CfnginContext,
         provider: Optional[BaseProvider] = None
     ) -> Any:
         """Output the rendered blueprint for all stacks in the plan.
