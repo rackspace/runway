@@ -140,16 +140,10 @@ class TestCFNgin:
                     sys_modules_exclude=["awacs", "troposphere"],
                 ),
                 call.__enter__(),
-                call(
-                    argv=["stacker", "build", str(tmp_path / "basic.yml")],
-                    sys_modules_exclude=["awacs", "troposphere"],
-                ),
+                call(sys_modules_exclude=["awacs", "troposphere"],),
                 call.__enter__(),
                 call.__exit__(None, None, None),
-                call(
-                    argv=["stacker", "build", str(tmp_path / "basic2.yml")],
-                    sys_modules_exclude=["awacs", "troposphere"],
-                ),
+                call(sys_modules_exclude=["awacs", "troposphere"],),
                 call.__enter__(),
                 call.__exit__(None, None, None),
                 call.__exit__(None, None, None),
@@ -180,7 +174,7 @@ class TestCFNgin:
             [
                 call(environ=context.env.vars),
                 call.__enter__(),
-                call(argv=["stacker", "destroy", str(tmp_path / "basic.yml")]),
+                call(),
                 call.__enter__(),
                 call.__exit__(None, None, None),
                 call.__exit__(None, None, None),
@@ -233,7 +227,7 @@ class TestCFNgin:
             [
                 call(environ=context.env.vars),
                 call.__enter__(),
-                call(argv=["stacker", "diff", str(tmp_path / "basic.yml")]),
+                call(),
                 call.__enter__(),
                 call.__exit__(None, None, None),
                 call.__exit__(None, None, None),
