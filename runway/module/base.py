@@ -14,6 +14,7 @@ from ..util import which
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger
     from ..context.runway import RunwayContext
+    from . import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
@@ -54,18 +55,19 @@ class RunwayModule:
     explicitly_enabled: Optional[bool]
     logger: Union[PrefixAdaptor, RunwayLogger]
     name: str
-    options: Dict[str, Any]
+    options: Union[Dict[str, Any], ModuleOptions]
     parameters: Dict[str, Any]
+    region: str
 
     def __init__(
         self,
         context: RunwayContext,
         *,
         explicitly_enabled: Optional[bool] = False,
-        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+        logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -93,6 +95,7 @@ class RunwayModule:
         self.options = options or {}
         self.parameters = parameters or {}
         self.path = module_root
+        self.region = context.env.aws_region
 
     def deploy(self):
         """Abstract method called when running deploy."""
@@ -124,10 +127,10 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         context: RunwayContext,
         *,
         explicitly_enabled: Optional[bool] = False,
-        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+        logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:

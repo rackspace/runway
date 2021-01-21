@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -10,18 +9,15 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
 from ..util import change_dir, run_commands, which
-from . import (
-    RunwayModule,
-    generate_node_command,
-    run_module_command,
-    run_npm_install,
-    warn_on_boto_env_vars,
-)
+from . import generate_node_command, run_module_command
+from .base import RunwayModuleNpm
 
 if TYPE_CHECKING:
+    from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
+    from . import ModuleOptions
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 def get_cdk_stacks(
@@ -42,29 +38,47 @@ def get_cdk_stacks(
     return result
 
 
-class CloudDevelopmentKit(RunwayModule):
+class CloudDevelopmentKit(RunwayModuleNpm):
     """CDK Runway Module."""
 
     def __init__(
         self,
         context: RunwayContext,
-        path: Path,
-        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+        *,
+        explicitly_enabled: Optional[bool] = False,
+        logger: RunwayLogger = LOGGER,
+        module_root: Path,
+        name: Optional[str] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-            options: Everything in the module definition merged with applicable
-                values from the deployment definition.
+            context: Runway context object for the current session.
+            explicitly_enabled: Whether or not the module is explicitly enabled.
+                This is can be set in the event that the current environment being
+                deployed to matches the defined environments of the module/deployment.
+            logger: Used to write logs.
+            module_root: Root path of the module.
+            name: Name of the module.
+            options: Options passed to the module class from the config as ``options``
+                or ``module_options`` if coming from the deployment level.
+            parameters: Values to pass to the underlying infrastructure as code
+                tool that will alter the resulting infrastructure being deployed.
+                Used to templatize IaC.
 
         """
-        super().__init__(context, path, options)
-        self._raw_path = (
-            Path(cast(str, options.pop("path"))) if options.get("path") else None
+        super().__init__(
+            context,
+            explicitly_enabled=explicitly_enabled,
+            logger=logger,
+            module_root=module_root,
+            name=name,
+            options=options,
+            parameters=parameters,
         )
-        self.path = path if isinstance(self.path, Path) else Path(self.path)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
@@ -87,30 +101,27 @@ class CloudDevelopmentKit(RunwayModule):
         if "DEBUG" in self.context.env.vars:
             cdk_opts.append("-v")  # Increase logging if requested
 
-        warn_on_boto_env_vars(self.context.env.vars)
-
-        if self.options["environment"]:
-            if os.path.isfile(os.path.join(self.path, "package.json")):
+        if self.explicitly_enabled:
+            if not self.package_json_missing():
                 with change_dir(self.path):
-                    run_npm_install(
-                        self.path, self.options, self.context, logger=self.logger
-                    )
-                    if cast(Dict[str, Any], self.options.get("options", {})).get(
-                        "build_steps", []
-                    ):
+                    self.npm_install()
+                    if cast(Dict[str, Any], self.options.get("build_steps", [])):
                         self.logger.info("build steps (in progress)")
                         run_commands(
                             commands=cast(
-                                Dict[str, Any], self.options.get("options", {})
-                            ).get("build_steps", []),
-                            directory=str(self.path),
+                                List[
+                                    Union[
+                                        str, List[str], Dict[str, Union[str, List[str]]]
+                                    ]
+                                ],
+                                self.options.get("build_steps", []),
+                            ),
+                            directory=self.path,
                             env=self.context.env.vars,
                         )
                         self.logger.info("build steps (complete)")
                     cdk_context_opts = []
-                    for key, val in cast(
-                        Dict[str, str], self.options["parameters"]
-                    ).items():
+                    for key, val in cast(Dict[str, str], self.parameters).items():
                         cdk_context_opts.extend(["-c", "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)
                     if command == "diff":

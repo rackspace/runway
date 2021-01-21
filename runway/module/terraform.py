@@ -16,7 +16,8 @@ from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
 from ..env_mgr.tfenv import TFEnvManager
 from ..util import DOC_SITE, cached_property, find_cfn_output, which
-from . import ModuleOptions, RunwayModule, run_module_command
+from . import ModuleOptions, run_module_command
+from .base import RunwayModule
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
@@ -65,41 +66,49 @@ def update_env_vars_with_tf_var_values(
 class Terraform(RunwayModule):
     """Terraform Runway Module."""
 
+    options: TerraformOptions
+
     def __init__(
         self,
         context: RunwayContext,
-        path: Path,
-        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+        *,
+        explicitly_enabled: Optional[bool] = False,
+        logger: RunwayLogger = LOGGER,
+        module_root: Path,
+        name: Optional[str] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-            options: Everything in the module definition merged with applicable
-                values from the deployment definition.
+            context: Runway context object for the current session.
+            explicitly_enabled: Whether or not the module is explicitly enabled.
+                This is can be set in the event that the current environment being
+                deployed to matches the defined environments of the module/deployment.
+            logger: Used to write logs.
+            module_root: Root path of the module.
+            name: Name of the module.
+            options: Options passed to the module class from the config as ``options``
+                or ``module_options`` if coming from the deployment level.
+            parameters: Values to pass to the underlying infrastructure as code
+                tool that will alter the resulting infrastructure being deployed.
+                Used to templatize IaC.
 
         """
-        options = options or {}
-        super().__init__(context.copy(), path, options)
-        del self.options  # remove the attr set by the parent class
-
+        super().__init__(
+            context,
+            explicitly_enabled=explicitly_enabled,
+            logger=logger,
+            module_root=module_root,
+            name=name,
+            options=TerraformOptions.parse(context, module_root, **options or {}),
+            parameters=parameters,
+        )
         # logger needs to be created here to use the correct logger
-        self.logger = PrefixAdaptor(self.name, LOGGER)
-        self.path = path if isinstance(self.path, Path) else Path(self.path)
-
-        self._raw_path = (
-            Path(cast(str, options.pop("path"))) if options.get("path") else None
-        )
-        self.environments = cast(Dict[str, Any], options.pop("environments", {}))
-        self.options = TerraformOptions.parse(
-            context, self.path, **options.pop("options", {})
-        )
-        self.parameters = cast(Dict[str, Any], options.pop("parameters", {}))
+        self.logger = PrefixAdaptor(self.name, logger)
         self.required_workspace = self.options.workspace or self.context.env.name
-
-        for k, v in options.items():
-            setattr(self, k, v)
 
     @cached_property
     def auto_tfvars(self) -> Path:

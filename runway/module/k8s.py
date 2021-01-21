@@ -11,12 +11,15 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from .._logging import PrefixAdaptor
 from ..env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
 from ..util import DOC_SITE, which
-from . import RunwayModule, run_module_command
+from . import run_module_command
+from .base import RunwayModule
 
 if TYPE_CHECKING:
+    from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
+    from . import ModuleOptions
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 def gen_overlay_dirs(environment: str, region: str) -> List[str]:
@@ -74,38 +77,55 @@ def generate_response(
 class K8s(RunwayModule):
     """Kubectl Runway Module."""
 
+    options: Dict[str, Any]
+
     def __init__(
         self,
         context: RunwayContext,
-        path: Path,
-        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+        *,
+        explicitly_enabled: Optional[bool] = False,
+        logger: RunwayLogger = LOGGER,
+        module_root: Path,
+        name: Optional[str] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-            options: Everything in the module definition merged with applicable
-                values from the deployment definition.
+            context: Runway context object for the current session.
+            explicitly_enabled: Whether or not the module is explicitly enabled.
+                This is can be set in the event that the current environment being
+                deployed to matches the defined environments of the module/deployment.
+            logger: Used to write logs.
+            module_root: Root path of the module.
+            name: Name of the module.
+            options: Options passed to the module class from the config as ``options``
+                or ``module_options`` if coming from the deployment level.
+            parameters: Values to pass to the underlying infrastructure as code
+                tool that will alter the resulting infrastructure being deployed.
+                Used to templatize IaC.
 
         """
-        super().__init__(context, path, options)
-        self._raw_path = (
-            Path(cast(str, options.pop("path"))) if options.get("path") else None
+        super().__init__(
+            context,
+            explicitly_enabled=explicitly_enabled,
+            logger=logger,
+            module_root=module_root,
+            name=name,
+            options=options,
+            parameters=parameters,
         )
-        self.path = path if isinstance(self.path, Path) else Path(self.path)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
     def run_kubectl(self, command: str = "plan") -> Dict[str, bool]:
         """Run kubectl."""
-        if cast(Dict[str, str], self.options.get("options", {})).get("overlay_path"):
+        if self.options.get("overlay_path"):
             # config path is overridden from runway
             kustomize_config_path = self.path / cast(
-                str,
-                cast(Dict[str, str], self.options.get("options", {})).get(
-                    "overlay_path"
-                ),
+                str, self.options.get("overlay_path"),
             )
         else:
             kustomize_config_path = get_overlay_dir(
@@ -123,10 +143,7 @@ class K8s(RunwayModule):
             return response
 
         module_defined_k8s_ver = get_module_defined_k8s_ver(
-            cast(
-                Dict[str, Union[Dict[str, str], str]], self.options.get("options", {})
-            ).get("kubectl_version", {}),
-            self.context.env.name,
+            self.options.get("kubectl_version", {}), self.context.env.name,
         )
         if module_defined_k8s_ver:
             self.logger.debug("using kubectl version from the module definition")
