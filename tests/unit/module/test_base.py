@@ -10,14 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List
 import pytest
 
 from runway.exceptions import NpmNotFound
-from runway.module.base import (
-    NPM_BIN,
-    ModuleOptions,
-    RunwayModule,
-    RunwayModuleNpm,
-    format_npm_command_for_logging,
-    use_npm_ci,
-)
+from runway.module.base import NPM_BIN, ModuleOptions, RunwayModule, RunwayModuleNpm
 
 if TYPE_CHECKING:
     from _pytest.logging import LogCaptureFixture
@@ -33,74 +26,6 @@ MODULE = "runway.module.base"
 def does_not_raise() -> Iterator[None]:
     """Use for conditional pytest.raises when using parametrize."""
     yield
-
-
-@pytest.mark.parametrize(
-    "command, expected",
-    [
-        (["npx.cmd", "-c", "hello-world"], "npx.cmd -c hello-world"),
-        (["npx", "-c", "hello-world"], "npx -c hello-world"),
-        (["npm.cmd", "hello-world"], "npm.cmd hello-world"),
-        (["npm", "hello-world"], "npm hello-world"),
-    ],
-)
-def test_format_npm_command_for_logging_darwin(
-    command: List[str], expected: str, platform_darwin: None
-) -> None:
-    """Test format_npm_command_for_logging on Darwin/macOS."""
-    assert format_npm_command_for_logging(command) == expected
-
-
-@pytest.mark.parametrize(
-    "command, expected",
-    [
-        (["npx.cmd", "-c", "hello-world"], 'npx.cmd -c "hello-world"'),
-        (["npx", "-c", "hello-world"], "npx -c hello-world"),
-        (["npm.cmd", "hello-world"], "npm.cmd hello-world"),
-        (["npm", "hello-world"], "npm hello-world"),
-    ],
-)
-def test_format_npm_command_for_logging_windows(
-    command: List[str], expected: str, platform_windows: None
-) -> None:
-    """Test format_npm_command_for_logging on windows."""
-    assert format_npm_command_for_logging(command) == expected
-
-
-@pytest.mark.parametrize(
-    "has_lock, has_shrinkwrap, exit_code, expected",
-    [
-        (False, False, 0, False),
-        (False, False, 1, False),
-        (True, False, 1, False),
-        (False, True, 1, False),
-        (True, True, 1, False),
-        (True, False, 0, True),
-        (False, True, 0, True),
-        (True, True, 0, True),
-    ],
-)
-def test_use_npm_ci(
-    exit_code: int,
-    expected: bool,
-    fake_process: FakeProcess,
-    has_lock: bool,
-    has_shrinkwrap: bool,
-    tmp_path: Path,
-) -> None:
-    """Test use_npm_ci."""
-    if has_lock:
-        (tmp_path / "package-lock.json").touch()
-    if has_shrinkwrap:
-        (tmp_path / "package-lock.json").touch()
-    cmd: List[Any] = [NPM_BIN, "ci", "-h"]
-    fake_process.register_subprocess(cmd, returncode=exit_code)
-
-    assert use_npm_ci(tmp_path) is expected
-    if has_lock or has_shrinkwrap:
-        assert fake_process.call_count(cmd) == 1
-    else:
-        assert fake_process.call_count(cmd) == 0
 
 
 class TestModuleOptions:

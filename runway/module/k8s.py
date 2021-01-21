@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from .._logging import PrefixAdaptor
 from ..env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
 from ..util import DOC_SITE, which
-from . import run_module_command
 from .base import RunwayModule
+from .utils import run_module_command
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger

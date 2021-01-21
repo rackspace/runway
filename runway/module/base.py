@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import logging
-import os
-import platform
 import subprocess
 from collections.abc import MutableMapping
 from pathlib import Path
@@ -11,41 +9,13 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union, ca
 
 from ..exceptions import NpmNotFound
 from ..util import merge_nested_environment_dicts, which
+from .utils import NPM_BIN, format_npm_command_for_logging, use_npm_ci
 
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger
     from ..context.runway import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
-NPX_BIN = "npx.cmd" if platform.system().lower() == "windows" else "npx"
-
-
-def format_npm_command_for_logging(command: List[str]) -> str:
-    """Convert npm command list to string for display to user."""
-    if platform.system().lower() == "windows" and (
-        command[0] == "npx.cmd" and command[1] == "-c"
-    ):
-        return 'npx.cmd -c "%s"' % " ".join(command[2:])
-    return " ".join(command)
-
-
-def use_npm_ci(path: Path) -> bool:
-    """Return true if npm ci should be used in lieu of npm install."""
-    # https://docs.npmjs.com/cli/ci#description
-    with open(os.devnull, "w") as fnull:
-        if (
-            (
-                (path / "package-lock.json").is_file()
-                or (path / "npm-shrinkwrap.json").is_file()
-            )
-            and subprocess.call(
-                [NPM_BIN, "ci", "-h"], stdout=fnull, stderr=subprocess.STDOUT
-            )
-            == 0
-        ):
-            return True
-    return False
 
 
 class RunwayModule:

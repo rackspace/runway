@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
 from ..util import change_dir, run_commands, which
-from . import generate_node_command, run_module_command
 from .base import RunwayModuleNpm
+from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
