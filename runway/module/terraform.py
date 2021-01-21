@@ -16,8 +16,8 @@ from .._logging import PrefixAdaptor
 from ..cfngin.lookups.handlers.output import deconstruct
 from ..env_mgr.tfenv import TFEnvManager
 from ..util import DOC_SITE, cached_property, find_cfn_output, which
-from . import ModuleOptions, run_module_command
-from .base import RunwayModule
+from . import run_module_command
+from .base import ModuleOptions, RunwayModule
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient

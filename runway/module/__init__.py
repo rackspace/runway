@@ -6,11 +6,10 @@ import os
 import platform
 import subprocess
 import sys
-from collections.abc import MutableMapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
-from ..util import merge_nested_environment_dicts, which
+from ..util import which
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
@@ -114,124 +113,3 @@ def warn_on_boto_env_vars(env_vars: Dict[str, str]) -> None:
             "during use of nodejs-based module and AWS_PROFILE is "
             "not set -- you likely want to set AWS_PROFILE instead"
         )
-
-
-class ModuleOptions(MutableMapping):
-    """Base class for Runway module options."""
-
-    @staticmethod
-    def merge_nested_env_dicts(data: Any, env_name: Optional[str] = None) -> Any:
-        """Merge nested env dicts.
-
-        Args:
-            data: Data to try to merge.
-            env_name: Current environment.
-
-        """
-        if isinstance(data, (list, type(None), str)):
-            return data
-        if isinstance(data, dict):
-            return {
-                key: merge_nested_environment_dicts(value, env_name)
-                for key, value in data.items()
-            }
-        raise TypeError(
-            "expected type of list, NoneType, or str; got type %s" % type(data)
-        )
-
-    @classmethod
-    def parse(cls, context: RunwayContext, **kwargs: Any) -> ModuleOptions:
-        """Parse module options definition to extract usable options.
-
-        Args:
-            context: Runway context object.
-
-        """
-        raise NotImplementedError
-
-    def __delitem__(self, key: str) -> None:
-        """Implement deletion of self[key].
-
-        Args:
-            key: Attribute name to remove from the object.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                del obj['key']
-                print(obj.__dict__)
-                # {}
-
-        """
-        delattr(self, key)
-
-    def __getitem__(self, key: str) -> Any:
-        """Implement evaluation of self[key].
-
-        Args:
-            key: Attribute name to return the value for.
-
-        Returns:
-            The value associated with the provided key/attribute name.
-
-        Raises:
-            KeyError: Key does not exist in the object.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                print(obj['key'])
-                # value
-
-        """
-        try:
-            return getattr(self, key)
-        except AttributeError:
-            raise KeyError(key)
-
-    def __setitem__(self, key: str, value: Any) -> Any:
-        """Implement assignment to self[key].
-
-        Args:
-            key: Attribute name to associate with a value.
-            value: Value of a key/attribute.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions()
-                obj['key'] = 'value'
-                print(obj['key'])
-                # value
-
-        """
-        setattr(self, key, value)
-
-    def __len__(self) -> int:
-        """Implement the built-in function len().
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                print(len(obj))
-                # 1
-
-        """
-        return len(self.__dict__)
-
-    def __iter__(self) -> Iterator[str]:
-        """Return iterator object that can iterate over all attributes.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                for k, v in obj.items():
-                    print(f'{key}: {value}')
-                # key: value
-
-        """
-        return iter(self.__dict__)

@@ -18,7 +18,7 @@ from .cloudformation import CloudFormation
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
-    from . import ModuleOptions
+    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
