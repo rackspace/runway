@@ -2,18 +2,16 @@
 from __future__ import annotations
 
 import logging
-import os
 import platform
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Union, cast
 
 from ..util import which
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
-    from ..context.runway import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 NPM_BIN = "npm.cmd" if platform.system().lower() == "windows" else "npm"
@@ -61,55 +59,3 @@ def run_module_command(
             sys.exit(shelloutexc.returncode)
     else:
         subprocess.check_call(cmd_list, env=env_vars)
-
-
-def use_npm_ci(path: Path) -> bool:
-    """Return true if npm ci should be used in lieu of npm install."""
-    # https://docs.npmjs.com/cli/ci#description
-    with open(os.devnull, "w") as fnull:
-        if (
-            (
-                (path / "package-lock.json").is_file()
-                or (path / "npm-shrinkwrap.json").is_file()
-            )
-            and subprocess.call(
-                [NPM_BIN, "ci", "-h"], stdout=fnull, stderr=subprocess.STDOUT
-            )
-            == 0
-        ):
-            return True
-    return False
-
-
-def run_npm_install(
-    path: Path,
-    options: Dict[str, Union[Dict[str, Any], str]],
-    context: RunwayContext,
-    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
-) -> None:
-    """Run npm install/ci."""
-    # Use npm ci if available (npm v5.7+)
-    cmd = [NPM_BIN, "<place-holder>"]
-    if context.no_color:
-        cmd.append("--no-color")
-    if cast(Dict[str, Any], options.get("options", {})).get("skip_npm_ci"):
-        logger.info("skipped npm ci/npm install")
-        return
-    if context.env.vars.get("CI") and use_npm_ci(path):
-        logger.info("running npm ci...")
-        cmd[1] = "ci"
-    else:
-        logger.info("running npm install...")
-        cmd[1] = "install"
-    subprocess.check_call(cmd)
-
-
-def warn_on_boto_env_vars(env_vars: Dict[str, str]) -> None:
-    """Inform user if boto-specific environment variables are in use."""
-    # https://github.com/serverless/serverless/issues/2151#issuecomment-255646512
-    if env_vars.get("AWS_DEFAULT_PROFILE") and not env_vars.get("AWS_PROFILE"):
-        LOGGER.warning(
-            "AWS_DEFAULT_PROFILE environment variable is set "
-            "during use of nodejs-based module and AWS_PROFILE is "
-            "not set -- you likely want to set AWS_PROFILE instead"
-        )
