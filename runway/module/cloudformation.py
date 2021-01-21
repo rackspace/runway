@@ -64,7 +64,7 @@ class CloudFormation(RunwayModule):
     def deploy(self) -> None:
         """Run stacker build."""
         cfngin = CFNgin(
-            self.context,
+            self.ctx,
             parameters=cast(Dict[str, Any], self.parameters),
             sys_path=self.path,
         )
@@ -73,7 +73,7 @@ class CloudFormation(RunwayModule):
     def destroy(self) -> None:
         """Run stacker destroy."""
         cfngin = CFNgin(
-            self.context,
+            self.ctx,
             parameters=cast(Dict[str, Any], self.parameters),
             sys_path=self.path,
         )
@@ -82,7 +82,7 @@ class CloudFormation(RunwayModule):
     def plan(self) -> None:
         """Run stacker diff."""
         cfngin = CFNgin(
-            self.context,
+            self.ctx,
             parameters=cast(Dict[str, Any], self.parameters),
             sys_path=self.path,
         )

@@ -104,7 +104,7 @@ class StaticSite(RunwayModule):
                 if (
                     self.parameters.get("staticsite_auth_at_edge", False)
                     and not self.parameters.get("staticsite_aliases", False)
-                    and self.context.is_interactive
+                    and self.ctx.is_interactive
                 ):
                     self.logger.warning(
                         "A hook that is part of the dependencies stack of "
@@ -150,7 +150,7 @@ class StaticSite(RunwayModule):
             self._create_cleanup_yaml(module_dir)
 
         cfn = CloudFormation(
-            self.context,
+            self.ctx,
             explicitly_enabled=self.explicitly_enabled,
             module_root=module_dir,
             name=self.name,
@@ -265,7 +265,7 @@ class StaticSite(RunwayModule):
         build_staticsite_args["options"]["namespace"] = "${namespace}"  # type: ignore
         build_staticsite_args["options"]["name"] = self.name  # type: ignore
         build_staticsite_args["options"]["path"] = os.path.join(  # type: ignore
-            os.path.realpath(self.context.env.root_dir), self.path
+            os.path.realpath(self.ctx.env.root_dir), self.path
         )
 
         site_stack_variables = self._get_site_stack_variables()

@@ -140,7 +140,7 @@ class TestRunwayModuleNpm:
             options={"options": "test"},
             parameters={"parameters": "test"},
         )
-        assert obj.context == runway_context
+        assert obj.ctx == runway_context
         assert not obj.explicitly_enabled
         assert obj.logger
         assert obj.name == tmp_path.name
@@ -340,7 +340,7 @@ class TestRunwayModule:
             parameters={"parameters": "test"},
             something=None,
         )
-        assert obj.context == runway_context
+        assert obj.ctx == runway_context
         assert obj.explicitly_enabled
         assert obj.logger
         assert obj.name == "test"

@@ -88,7 +88,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         """Run CDK."""
         response = {"skipped_configs": False}
         cdk_opts = [command]
-        if self.context.no_color:
+        if self.ctx.no_color:
             cdk_opts.append("--no-color")
 
         if not which("npm"):
@@ -98,7 +98,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
             )
             sys.exit(1)
 
-        if "DEBUG" in self.context.env.vars:
+        if "DEBUG" in self.ctx.env.vars:
             cdk_opts.append("-v")  # Increase logging if requested
 
         if self.explicitly_enabled:
@@ -117,7 +117,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                                 self.options.get("build_steps", []),
                             ),
                             directory=self.path,
-                            env=self.context.env.vars,
+                            env=self.ctx.env.vars,
                         )
                         self.logger.info("build steps (complete)")
                     cdk_context_opts = []
@@ -127,13 +127,13 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                     if command == "diff":
                         self.logger.info("plan (in progress)")
                         for i in get_cdk_stacks(
-                            self.path, self.context.env.vars, cdk_context_opts
+                            self.path, self.ctx.env.vars, cdk_context_opts
                         ):
                             subprocess.call(
                                 generate_node_command(
                                     "cdk", cdk_opts + [i], self.path  # 'diff <stack>'
                                 ),
-                                env=self.context.env.vars,
+                                env=self.ctx.env.vars,
                             )
                         self.logger.info("plan (complete)")
                     else:
@@ -142,30 +142,30 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                             cdk_opts.append('"*"')
 
                         if command == "deploy":
-                            if "CI" in self.context.env.vars:
+                            if "CI" in self.ctx.env.vars:
                                 cdk_opts.append("--ci")
                                 cdk_opts.append("--require-approval=never")
                             bootstrap_command = generate_node_command(
                                 "cdk",
                                 ["bootstrap"]
                                 + cdk_context_opts
-                                + (["--no-color"] if self.context.no_color else []),
+                                + (["--no-color"] if self.ctx.no_color else []),
                                 self.path,
                             )
                             self.logger.info("bootstrap (in progress)")
                             run_module_command(
                                 cmd_list=bootstrap_command,
-                                env_vars=self.context.env.vars,
+                                env_vars=self.ctx.env.vars,
                                 logger=self.logger,
                             )
                             self.logger.info("bootstrap (complete)")
-                        elif command == "destroy" and self.context.is_noninteractive:
+                        elif command == "destroy" and self.ctx.is_noninteractive:
                             cdk_opts.append("-f")  # Don't prompt
                         cdk_command = generate_node_command("cdk", cdk_opts, self.path)
                         self.logger.info("%s (in progress)", command)
                         run_module_command(
                             cmd_list=cdk_command,
-                            env_vars=self.context.env.vars,
+                            env_vars=self.ctx.env.vars,
                             logger=self.logger,
                         )
                         self.logger.info("%s (complete)", command)

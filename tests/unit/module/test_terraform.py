@@ -356,10 +356,10 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         expected.insert(0, "terraform")
 
         obj = Terraform(runway_context, module_root=tmp_path)
-        mocker.patch.object(obj.context, "no_color", False)
+        mocker.patch.object(obj.ctx, "no_color", False)
         assert obj.gen_command(command, args_list=args_list) == expected
 
-        mocker.patch.object(obj.context, "no_color", True)
+        mocker.patch.object(obj.ctx, "no_color", True)
         expected.append("-no-color")
         assert obj.gen_command(command, args_list=args_list) == expected
 
@@ -425,7 +425,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
 
         assert not obj.handle_backend()
         mock_get_full_configuration.assert_called_once_with()
-        assert "TF_WORKSPACE" not in obj.context.env.vars
+        assert "TF_WORKSPACE" not in obj.ctx.env.vars
         assert obj.required_workspace == "default"
         assert 'forcing use of static workspace "default"' in "\n".join(caplog.messages)
 
@@ -452,7 +452,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
 
         assert not obj.handle_backend()
         mock_get_full_configuration.assert_called_once_with()
-        assert obj.context.env.vars["TF_WORKSPACE"] == obj.context.env.name
+        assert obj.ctx.env.vars["TF_WORKSPACE"] == obj.ctx.env.name
         assert 'set environment variable "TF_WORKSPACE" to avoid prompt' in "\n".join(
             caplog.messages
         )
@@ -502,7 +502,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
 
         assert not obj.handle_parameters()
         mock_update_envvars.assert_called_once_with(runway_context.env.vars, {})
-        assert obj.context.env.vars == {"result": "success"}
+        assert obj.ctx.env.vars == {"result": "success"}
 
     def test_terraform_apply(
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
@@ -514,16 +514,16 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         options = {"args": {"apply": ["arg"]}}
         obj = Terraform(runway_context, module_root=tmp_path, options=options)
         mocker.patch.object(obj, "env_file", ["env_file"])
-        mocker.patch.object(obj.context.env, "ci", True)
+        mocker.patch.object(obj.ctx.env, "ci", True)
 
         expected_arg_list = ["env_file", "arg", "-auto-approve=true"]
         assert not obj.terraform_apply()
         mock_gen_command.assert_called_once_with("apply", expected_arg_list)
         mock_run_command.assert_called_once_with(
-            ["mock_gen_command"], env_vars=obj.context.env.vars, logger=obj.logger
+            ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
 
-        mocker.patch.object(obj.context.env, "ci", False)
+        mocker.patch.object(obj.ctx.env, "ci", False)
         expected_arg_list[2] = "-auto-approve=false"
         assert not obj.terraform_apply()
         mock_gen_command.assert_called_with("apply", expected_arg_list)
@@ -544,7 +544,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.terraform_destroy()
         mock_gen_command.assert_called_once_with("destroy", expected_arg_list)
         mock_run_command.assert_called_once_with(
-            ["mock_gen_command"], env_vars=obj.context.env.vars, logger=obj.logger
+            ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
 
     def test_terraform_get(
@@ -560,7 +560,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.terraform_get()
         mock_gen_command.assert_called_once_with("get", ["-update=true"])
         mock_run_command.assert_called_once_with(
-            ["mock_gen_command"], env_vars=obj.context.env.vars, logger=obj.logger
+            ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
 
     def test_terraform_init(
@@ -587,7 +587,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         mock_gen_command.assert_called_once_with("init", expected_arg_list)
         mock_run_command.assert_called_once_with(
             ["mock_gen_command"],
-            env_vars=obj.context.env.vars,
+            env_vars=obj.ctx.env.vars,
             exit_on_error=False,
             logger=obj.logger,
         )
@@ -612,7 +612,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.terraform_plan()
         mock_gen_command.assert_called_once_with("plan", ["env_file", "plan_arg"])
         mock_run_command.assert_called_once_with(
-            ["mock_gen_command"], env_vars=obj.context.env.vars, logger=obj.logger
+            ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
 
     def test_terraform_workspace_list(
@@ -631,7 +631,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert obj.terraform_workspace_list() == "decoded"
         mock_gen_command.assert_called_once_with(["workspace", "list"])
         mock_subprocess.check_output.assert_called_once_with(
-            ["mock_gen_command"], env=obj.context.env.vars
+            ["mock_gen_command"], env=obj.ctx.env.vars
         )
         check_output_result.decode.assert_called_once_with()
 
@@ -648,7 +648,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.terraform_workspace_new("name")
         mock_gen_command.assert_called_once_with(["workspace", "new"], ["name"])
         mock_run_command.assert_called_once_with(
-            ["mock_gen_command"], env_vars=obj.context.env.vars, logger=obj.logger
+            ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
 
     def test_terraform_workspace_select(
@@ -670,7 +670,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.terraform_workspace_select("name")
         mock_gen_command.assert_called_once_with(["workspace", "select"], ["name"])
         mock_run_command.assert_called_once_with(
-            ["mock_gen_command"], env_vars=obj.context.env.vars, logger=obj.logger
+            ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
         # cache was cleared and a new value was obtained
         assert obj.current_workspace == "second-val"
@@ -694,7 +694,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert obj.terraform_workspace_show() == "decoded"
         mock_gen_command.assert_called_once_with(["workspace", "show"])
         mock_subprocess.check_output.assert_called_once_with(
-            ["mock_gen_command"], env=obj.context.env.vars
+            ["mock_gen_command"], env=obj.ctx.env.vars
         )
         check_output_result.strip.assert_called_once_with()
         check_output_result.strip.return_value.decode.assert_called_once_with()

@@ -129,21 +129,19 @@ class K8s(RunwayModule):
             )
         else:
             kustomize_config_path = get_overlay_dir(
-                self.path / "overlays",
-                self.context.env.name,
-                self.context.env.aws_region,
+                self.path / "overlays", self.ctx.env.name, self.ctx.env.aws_region,
             )
         response = generate_response(
             kustomize_config_path,
             self.path,
-            self.context.env.name,
-            self.context.env.aws_region,
+            self.ctx.env.name,
+            self.ctx.env.aws_region,
         )
         if response["skipped_configs"]:
             return response
 
         module_defined_k8s_ver = get_module_defined_k8s_ver(
-            self.options.get("kubectl_version", {}), self.context.env.name,
+            self.options.get("kubectl_version", {}), self.ctx.env.name,
         )
         if module_defined_k8s_ver:
             self.logger.debug("using kubectl version from the module definition")
@@ -159,13 +157,13 @@ class K8s(RunwayModule):
                 "using kubectl version from the module directory: %s", self.path
             )
             k8s_bin = KBEnvManager(self.path).install()
-        elif (self.context.env.root_dir / KB_VERSION_FILENAME).is_file():
-            file_path = self.context.env.root_dir / KB_VERSION_FILENAME
+        elif (self.ctx.env.root_dir / KB_VERSION_FILENAME).is_file():
+            file_path = self.ctx.env.root_dir / KB_VERSION_FILENAME
             self.logger.debug(
                 "using kubectl version from the project's root directory: %s",
                 file_path,
             )
-            k8s_bin = KBEnvManager(self.context.env.root_dir).install()
+            k8s_bin = KBEnvManager(self.ctx.env.root_dir).install()
         else:
             self.logger.debug("kubectl version not specified; checking path")
             if not which("kubectl"):
@@ -182,9 +180,7 @@ class K8s(RunwayModule):
 
         kustomize_cmd = [k8s_bin, "kustomize", kustomize_config_path]
         self.logger.debug("running kubectl command: %s", " ".join(kustomize_cmd))
-        kustomize_yml = subprocess.check_output(
-            kustomize_cmd, env=self.context.env.vars
-        )
+        kustomize_yml = subprocess.check_output(kustomize_cmd, env=self.ctx.env.vars)
         if isinstance(kustomize_yml, bytes):  # python3 returns encoded bytes
             kustomize_yml = kustomize_yml.decode()
         if command == "plan":
@@ -199,9 +195,7 @@ class K8s(RunwayModule):
 
             self.logger.info("%s (in progress)", command)
             self.logger.debug("running kubectl command: %s", " ".join(kubectl_command))
-            run_module_command(
-                kubectl_command, self.context.env.vars, logger=self.logger
-            )
+            run_module_command(kubectl_command, self.ctx.env.vars, logger=self.logger)
             self.logger.info("%s (complete)", command)
         return response
 

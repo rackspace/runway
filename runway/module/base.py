@@ -21,7 +21,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 class RunwayModule:
     """Base class for Runway modules."""
 
-    context: RunwayContext
+    ctx: RunwayContext
     explicitly_enabled: Optional[bool]
     logger: Union[PrefixAdaptor, RunwayLogger]
     name: str
@@ -58,7 +58,7 @@ class RunwayModule:
                 Used to templatize IaC.
 
         """
-        self.context = context
+        self.ctx = context
         self.explicitly_enabled = explicitly_enabled
         self.logger = logger
         self.name = name or module_root.name
@@ -131,7 +131,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             parameters=parameters,
         )
         self.check_for_npm(logger=self.logger)  # fail fast
-        self.warn_on_boto_env_vars(self.context.env.vars, logger=logger)
+        self.warn_on_boto_env_vars(self.ctx.env.vars, logger=logger)
 
     def log_npm_command(self, command: List[str]) -> None:
         """Log an npm command that is going to be run.
@@ -148,9 +148,9 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             self.logger.info("skipped npm ci/npm install")
             return
         cmd = [NPM_BIN, "<place-holder>"]
-        if self.context.no_color:
+        if self.ctx.no_color:
             cmd.append("--no-color")
-        if self.context.is_noninteractive and use_npm_ci(self.path):
+        if self.ctx.is_noninteractive and use_npm_ci(self.path):
             self.logger.info("running npm ci...")
             cmd[1] = "ci"
         else:

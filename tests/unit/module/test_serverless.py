@@ -229,7 +229,7 @@ class TestServerless:
         )
         mock_cmd.reset_mock()
 
-        obj.context.env.vars["CI"] = "1"
+        obj.ctx.env.vars["CI"] = "1"
         mocker.patch.object(runway_context, "no_color", True)
         expected_opts.append("--no-color")
         if command not in ["remove", "print"]:

@@ -108,7 +108,7 @@ class Terraform(RunwayModule):
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, logger)
-        self.required_workspace = self.options.workspace or self.context.env.name
+        self.required_workspace = self.options.workspace or self.ctx.env.name
 
     @cached_property
     def auto_tfvars(self) -> Path:
@@ -145,7 +145,7 @@ class Terraform(RunwayModule):
         """Find the environment file for the module."""
         result = []
         for name in gen_workspace_tfvars_files(
-            self.context.env.name, self.context.env.aws_region
+            self.ctx.env.name, self.ctx.env.aws_region
         ):
             test_path = self.path / name
             if test_path.is_file():
@@ -162,9 +162,7 @@ class Terraform(RunwayModule):
             "skipped; tfvars file for this environmet/region not found "
             "and no parameters provided -- looking for one of: %s",
             ", ".join(
-                gen_workspace_tfvars_files(
-                    self.context.env.name, self.context.env.aws_region
-                )
+                gen_workspace_tfvars_files(self.ctx.env.name, self.ctx.env.aws_region)
             ),
         )
         return True
@@ -233,7 +231,7 @@ class Terraform(RunwayModule):
         else:
             cmd = [self.tf_bin, command]
         cmd.extend(args_list or [])
-        if self.context.no_color:
+        if self.ctx.no_color:
             cmd.append("-no-color")
         return cmd
 
@@ -289,7 +287,7 @@ class Terraform(RunwayModule):
             self.logger.verbose(
                 "handling use of backend config: remote.workspaces.prefix"
             )
-            self.context.env.vars.update({"TF_WORKSPACE": self.context.env.name})
+            self.ctx.env.vars.update({"TF_WORKSPACE": self.ctx.env.name})
             self.logger.verbose(
                 'set environment variable "TF_WORKSPACE" to avoid prompt '
                 "during init by pre-selecting an appropriate workspace"
@@ -300,7 +298,7 @@ class Terraform(RunwayModule):
                 "handling use of backend config: remote.workspaces.name"
             )
             # this can't be set or it will cause errors
-            self.context.env.vars.pop("TF_WORKSPACE", None)
+            self.ctx.env.vars.pop("TF_WORKSPACE", None)
             self.required_workspace = "default"
             self.logger.info(
                 'forcing use of static workspace "default"; '
@@ -316,8 +314,8 @@ class Terraform(RunwayModule):
         if self.auto_tfvars.exists():
             return
 
-        self.context.env.vars = update_env_vars_with_tf_var_values(
-            self.context.env.vars, self.parameters
+        self.ctx.env.vars = update_env_vars_with_tf_var_values(
+            self.ctx.env.vars, self.parameters
         )
 
     def terraform_apply(self) -> None:
@@ -327,13 +325,13 @@ class Terraform(RunwayModule):
 
         """
         args_list = self.env_file + self.options.args["apply"]
-        if self.context.env.ci:
+        if self.ctx.env.ci:
             args_list.append("-auto-approve=true")
         else:
             args_list.append("-auto-approve=false")
         run_module_command(
             self.gen_command("apply", args_list),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
 
@@ -345,7 +343,7 @@ class Terraform(RunwayModule):
         """
         run_module_command(
             self.gen_command("destroy", ["-force"] + self.env_file),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
 
@@ -358,7 +356,7 @@ class Terraform(RunwayModule):
         self.logger.info("downloading and updating Terraform modules")
         run_module_command(
             self.gen_command("get", ["-update=true"]),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
 
@@ -377,7 +375,7 @@ class Terraform(RunwayModule):
         try:
             run_module_command(
                 cmd,
-                env_vars=self.context.env.vars,
+                env_vars=self.ctx.env.vars,
                 exit_on_error=False,
                 logger=self.logger,
             )
@@ -393,7 +391,7 @@ class Terraform(RunwayModule):
         """
         run_module_command(
             self.gen_command("plan", self.env_file + self.options.args["plan"]),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
 
@@ -408,7 +406,7 @@ class Terraform(RunwayModule):
         """
         self.logger.debug("listing available Terraform workspaces")
         workspaces = subprocess.check_output(
-            self.gen_command(["workspace", "list"]), env=self.context.env.vars
+            self.gen_command(["workspace", "list"]), env=self.ctx.env.vars
         ).decode()
         self.logger.debug("available Terraform workspaces:\n%s", workspaces)
         return workspaces
@@ -425,7 +423,7 @@ class Terraform(RunwayModule):
         self.logger.debug("creating workspace: %s", workspace)
         run_module_command(
             self.gen_command(["workspace", "new"], [workspace]),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
         self.logger.debug("workspace created")
@@ -446,7 +444,7 @@ class Terraform(RunwayModule):
         )
         run_module_command(
             self.gen_command(["workspace", "select"], [workspace]),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
         del self.current_workspace
@@ -463,7 +461,7 @@ class Terraform(RunwayModule):
         self.logger.debug("using Terraform to get the current workspace")
         workspace = (
             subprocess.check_output(
-                self.gen_command(["workspace", "show"]), env=self.context.env.vars
+                self.gen_command(["workspace", "show"]), env=self.ctx.env.vars
             )
             .strip()
             .decode()
