@@ -1,9 +1,9 @@
 """Test runway.core.components._module."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=no-self-use,protected-access,redefined-outer-name,unused-argument
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional
 
 import pytest
 import yaml
@@ -22,6 +22,12 @@ if TYPE_CHECKING:
     from ...factories import MockRunwayContext, YamlLoaderDeployment
 
 MODULE = "runway.core.components._module"
+
+
+@pytest.fixture(scope="function")
+def empty_opts_from_file(mocker: MockerFixture) -> None:
+    """Empty Module.opts_from_file."""
+    mocker.patch.object(Module, "opts_from_file", {})
 
 
 class TestModule:
@@ -69,6 +75,88 @@ class TestModule:
             assert child.ctx.env.name == runway_context.env.name
             assert child.definition.path == mod0.definition.child_modules[index].path
 
+    def test_environment_matches_defined(
+        self,
+        cd_tmp_path: Path,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test environment_matches_defined."""
+        mock_validate_environment = mocker.patch(
+            f"{MODULE}.validate_environment", return_value="success"
+        )
+        mocker.patch.object(Module, "environments", {"key": "val"})
+        mod = Module(
+            context=runway_context,
+            definition=fx_deployments.load("min_required").modules[0],
+        )
+        assert mod.environment_matches_defined == "success"
+        mock_validate_environment.assert_called_once_with(
+            mod.ctx, {"key": "val"}, logger=mod.logger, strict=False
+        )
+
+    def test_environments_deployment(
+        self,
+        cd_tmp_path: Path,
+        empty_opts_from_file: None,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test environments with opts_from_file."""
+        runway_context.env.root_dir = cd_tmp_path
+        deployment = fx_deployments.load("environments_map_str")
+        mod_def = deployment.modules[0]
+        mod_def.environments = {"dev": ["us-east-1"], "prod": ["us-east-1"]}
+        mod = Module(context=runway_context, definition=mod_def, deployment=deployment)
+        assert mod.environments == {
+            "dev": ["us-east-1"],
+            "prod": ["us-east-1"],
+            "test": "123456789012/us-east-1",
+        }
+
+    def test_environments_opts_from_file(
+        self,
+        cd_tmp_path: Path,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test environments with opts_from_file."""
+        runway_context.env.root_dir = cd_tmp_path
+        mocker.patch.object(
+            Module, "opts_from_file", {"environments": {"test": ["us-east-1"]}}
+        )
+        deployment = fx_deployments.load("environments_map_str")
+        mod = Module(
+            context=runway_context,
+            definition=deployment.modules[0],
+            deployment=deployment,
+        )
+        assert mod.environments == {
+            "test": ["us-east-1"],
+            "dev": "012345678901/us-west-2",
+        }
+
+    def test_opts_from_file(
+        self,
+        cd_tmp_path: Path,
+        fx_deployments: YamlLoaderDeployment,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test opts_from_file."""
+        runway_context.env.root_dir = cd_tmp_path
+        mod_dir = cd_tmp_path / "sampleapp-01.cfn"
+        mod_dir.mkdir()
+        (mod_dir / "runway.module.yml").write_text(yaml.dump({"test": "success"}))
+        deployment = fx_deployments.load("simple_module_options")
+        mod = Module(
+            context=runway_context,
+            definition=deployment.modules[0],
+            deployment=deployment,
+        )
+        assert mod.opts_from_file == {"test": "success"}
+
     def test_path(
         self,
         mocker: MockerFixture,
@@ -92,6 +180,7 @@ class TestModule:
     def test_payload_with_deployment(
         self,
         cd_tmp_path: Path,
+        empty_opts_from_file: None,
         fx_deployments: YamlLoaderDeployment,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -111,23 +200,23 @@ class TestModule:
         assert result["options"]["module_option"] == "module-val"
         assert result["options"]["overlap_option"] == "module-val"
 
-    def test_payload_with_local_config(
+    def test_payload_with_opts_from_file(
         self,
         cd_tmp_path: Path,
         fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
         runway_context: MockRunwayContext,
     ) -> None:
         """Test payload."""
         runway_context.env.root_dir = cd_tmp_path
-        mod_dir = cd_tmp_path / "sampleapp-01.cfn"
-        mod_dir.mkdir()
+        mocker.patch.object(Module, "environment_matches_defined", True)
         opts = {
             "env_vars": {"local-var": "local-val"},
             "environments": {"test": ["us-east-1"]},
             "options": {"local-opt": "local-opt-val"},
             "parameters": {"local-param": "local-param-val"},
         }
-        (mod_dir / "runway.module.yml").write_text(yaml.safe_dump(opts))
+        mocker.patch.object(Module, "opts_from_file", opts)
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("simple_env_vars").modules[0],
@@ -137,24 +226,23 @@ class TestModule:
         assert mod.ctx.env.vars["module_var"] == "val"
         assert mod.ctx.env.vars["local-var"] == opts["env_vars"]["local-var"]
         assert result["environments"] == opts["environments"]
-        assert result["environment"] == opts["environments"]["test"]
+        assert result["explicitly_enabled"]
         assert result["options"] == opts["options"]
         assert result["parameters"] == opts["parameters"]
 
     @pytest.mark.parametrize(
-        "env, strict, validate",
+        "strict, validate",
         [
-            ({}, False, None),
-            ({}, True, False),
-            ({"test": "something"}, False, None),
-            ({"test": "something"}, True, False),
-            ({"test": ["something"]}, False, None),
-            ({"test": ["something"]}, True, False),
+            (False, None),
+            (True, False),
+            (False, None),
+            (True, False),
+            (False, None),
+            (True, False),
         ],
     )
     def test_should_skip(
         self,
-        env: Dict[str, Union[List[str], str]],
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -162,16 +250,8 @@ class TestModule:
         validate: Optional[bool],
     ) -> None:
         """Test should_skip."""
-        mock_validate = mocker.patch(
-            f"{MODULE}.validate_environment", return_value=validate
-        )
-        env_copy = env.copy()
-        payload = {
-            "environment": env_copy.get("test", {}),
-            "environments": env_copy,
-            "parameters": {},
-        }
-        mocker.patch.object(Module, "payload", payload)
+        mocker.patch.object(Module, "environment_matches_defined", validate)
+
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
@@ -180,9 +260,6 @@ class TestModule:
 
         result = mod.should_skip
         assert result is (bool(not validate) if isinstance(validate, bool) else False)
-        mock_validate.assert_called_once_with(
-            mod.ctx, env, logger=mod.logger, strict=strict
-        )
 
     def test_type(
         self,
@@ -413,6 +490,7 @@ class TestModule:
 
     def test_run(
         self,
+        empty_opts_from_file: None,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -439,7 +517,7 @@ class TestModule:
         assert not mod.run("deploy")
         mock_change_dir.assert_called_once_with(tmp_path)
         mock_type.module_class.assert_called_once_with(
-            context=mod.ctx, path=tmp_path, options=mod.payload
+            mod.ctx, module_root=tmp_path, **mod.payload
         )
         mock_inst["deploy"].assert_called_once_with()
 

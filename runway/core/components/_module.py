@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         RunwayDeploymentDefinition,
         RunwayModuleDefinition,
     )
+    from ...config.models.runway import RunwayEnvironmentsType
     from ...context.runway import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
@@ -86,11 +87,44 @@ class Module:
         ]
 
     @cached_property
+    def environment_matches_defined(self) -> Optional[bool]:
+        """Environment matches one of the defined environments.
+
+        Will return None if there is nothing defined for the current environment.
+
+        """
+        return validate_environment(
+            self.ctx,
+            self.environments,
+            logger=self.logger,
+            strict=self.__future.strict_environments,
+        )
+
+    @cached_property
+    def environments(self) -> RunwayEnvironmentsType:
+        """Environments defined for the deployment and module."""
+        tmp: RunwayEnvironmentsType = self.definition.environments
+        if self.__deployment:
+            tmp = merge_dicts(self.__deployment.environments, tmp)
+        if self.opts_from_file:
+            tmp = merge_dicts(tmp, self.opts_from_file.get("environments", {}))
+        return tmp
+
+    @cached_property
     def fqn(self):
         """Fully qualified name."""
         if not self.__deployment:
             return self.name
         return "{}.{}".format(self.__deployment.name, self.name)
+
+    @cached_property
+    def opts_from_file(self) -> Dict[str, Any]:
+        """Load module options from local file."""
+        opts_file = Path(self.path.module_root) / "runway.module.yml"
+        if opts_file.is_file():
+            self.logger.verbose("module-level config file found")
+            return yaml.safe_load(opts_file.read_text())
+        return {}
 
     @cached_property
     def path(self) -> ModulePath:  # lazy load the path
@@ -104,33 +138,25 @@ class Module:
     @cached_property
     def payload(self) -> Dict[str, Any]:  # lazy load the payload
         """Return payload to be passed to module class handler class."""
-        payload = {"environments": {}}
+        payload = {}
         if self.__deployment:
             payload.update(
                 {
-                    "environments": self.__deployment.environments,
                     "options": self.__deployment.module_options,
                     "parameters": self.__deployment.parameters,
                 }
             )
         payload = merge_dicts(payload, self.definition.data)
-        payload = merge_dicts(payload, self.__load_opts_from_file())
-        payload["environment"] = payload["environments"].get(self.ctx.env.name, {})
+        payload = merge_dicts(payload, self.opts_from_file)
+        payload["explicitly_enabled"] = bool(self.environment_matches_defined)
         self.__merge_env_vars(payload.pop("env_vars", {}))
         return payload
 
     @cached_property
     def should_skip(self) -> bool:
         """Whether the module should be skipped by Runway."""
-        is_valid = validate_environment(
-            self.ctx,
-            self.payload["environments"],
-            logger=self.logger,
-            strict=self.__future.strict_environments,
-        )
-        self.payload["environment"] = is_valid
-        if isinstance(is_valid, bool):
-            return not is_valid
+        if isinstance(self.environment_matches_defined, bool):
+            return not self.environment_matches_defined
         return False
 
     @cached_property
@@ -205,7 +231,7 @@ class Module:
             # dynamically load the particular module's class, 'get' the method
             # associated with the command, and call the method.
             inst = self.type.module_class(
-                context=self.ctx, path=self.path.module_root, options=self.payload
+                self.ctx, module_root=self.path.module_root, **self.payload
             )
             if hasattr(inst, action):
                 inst[action]()
@@ -249,14 +275,6 @@ class Module:
         self.logger.info("processing modules sequentially...")
         for module in self.child_modules:
             module.run(action)
-
-    def __load_opts_from_file(self) -> Dict[str, Any]:
-        """Load module options from local file."""
-        opts_file = Path(self.path.module_root) / "runway.module.yml"
-        if opts_file.is_file():
-            self.logger.verbose("module-level config file found")
-            return yaml.safe_load(opts_file.read_text())
-        return {}
 
     def __merge_env_vars(self, env_vars: RunwayEnvVarsType) -> None:
         """Merge defined env_vars into context.env_vars."""
