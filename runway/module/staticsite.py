@@ -12,13 +12,15 @@ import yaml
 
 from .._logging import PrefixAdaptor
 from ..util import YamlDumper
-from . import RunwayModule
+from .base import RunwayModule
 from .cloudformation import CloudFormation
 
 if TYPE_CHECKING:
+    from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
+    from .base import ModuleOptions
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 def add_url_scheme(url: str) -> str:
@@ -36,29 +38,46 @@ def add_url_scheme(url: str) -> str:
 class StaticSite(RunwayModule):
     """Static website Runway Module."""
 
+    options: Dict[str, Any]
+
     def __init__(
         self,
         context: RunwayContext,
-        path: Path,
-        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+        *,
+        explicitly_enabled: Optional[bool] = False,
+        logger: RunwayLogger = LOGGER,
+        module_root: Path,
+        name: Optional[str] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-            options: Everything in the module definition merged with applicable
-                values from the deployment definition.
+            context: Runway context object for the current session.
+            explicitly_enabled: Whether or not the module is explicitly enabled.
+                This is can be set in the event that the current environment being
+                deployed to matches the defined environments of the module/deployment.
+            logger: Used to write logs.
+            module_root: Root path of the module.
+            name: Name of the module.
+            options: Options passed to the module class from the config as ``options``
+                or ``module_options`` if coming from the deployment level.
+            parameters: Values to pass to the underlying infrastructure as code
+                tool that will alter the resulting infrastructure being deployed.
+                Used to templatize IaC.
 
         """
-        super().__init__(context, path, options)
-        self.user_options = cast(Dict[str, Any], self.options.get("options", {}))
-        self.parameters = cast(Dict[str, Any], self.options.get("parameters"))
-        self.region = self.context.env.aws_region
-        self._raw_path = (
-            Path(cast(str, options.pop("path"))) if options.get("path") else None
+        super().__init__(
+            context,
+            explicitly_enabled=explicitly_enabled,
+            logger=logger,
+            module_root=module_root,
+            name=name,
+            options=options,
+            parameters=parameters,
         )
-        self.path = path if isinstance(self.path, Path) else Path(self.path)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
         self._ensure_valid_environment_config()
@@ -85,7 +104,7 @@ class StaticSite(RunwayModule):
                 if (
                     self.parameters.get("staticsite_auth_at_edge", False)
                     and not self.parameters.get("staticsite_aliases", False)
-                    and self.context.is_interactive
+                    and self.ctx.is_interactive
                 ):
                     self.logger.warning(
                         "A hook that is part of the dependencies stack of "
@@ -131,9 +150,12 @@ class StaticSite(RunwayModule):
             self._create_cleanup_yaml(module_dir)
 
         cfn = CloudFormation(
-            self.context,
-            module_dir,
-            {i: self.options[i] for i in self.options if i != "class_path"},
+            self.ctx,
+            explicitly_enabled=self.explicitly_enabled,
+            module_root=module_dir,
+            name=self.name,
+            options=self.options,
+            parameters=self.parameters,
         )
         self.logger.info("%s (in progress)", command)
         getattr(cfn, command)()
@@ -231,7 +253,7 @@ class StaticSite(RunwayModule):
 
     def _create_staticsite_yaml(self, module_dir: Path) -> None:
         # Default parameter name matches build_staticsite hook
-        hash_param = self.user_options.get("source_hashing", {}).get(
+        hash_param = self.options.get("source_hashing", {}).get(
             "parameter", "${namespace}-%s-hash" % self.name
         )
         nonce_secret_param = "${namespace}-%s-nonce-secret" % self.name
@@ -243,7 +265,7 @@ class StaticSite(RunwayModule):
         build_staticsite_args["options"]["namespace"] = "${namespace}"  # type: ignore
         build_staticsite_args["options"]["name"] = self.name  # type: ignore
         build_staticsite_args["options"]["path"] = os.path.join(  # type: ignore
-            os.path.realpath(self.context.env.root_dir), self.path
+            os.path.realpath(self.ctx.env.root_dir), self.path
         )
 
         site_stack_variables = self._get_site_stack_variables()
@@ -266,7 +288,7 @@ class StaticSite(RunwayModule):
                 "args": {
                     "bucket_name": f"${{cfn ${{namespace}}-{self.name}.BucketName}}",
                     "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL::default=undefined}}",  # noqa
-                    "extra_files": self.user_options.get("extra_files", []),
+                    "extra_files": self.options.get("extra_files", []),
                     "cf_disabled": site_stack_variables["DisableCloudFront"],
                     "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId}}",
                     "distribution_domain": f"${{cfn ${{namespace}}-{self.name}.CFDistributionDomainName}}",  # noqa

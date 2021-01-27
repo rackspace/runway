@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest_mock import MockerFixture
 
 
 @pytest.fixture
-def patch_module_npm(monkeypatch: MonkeyPatch) -> None:
+def patch_module_npm(mocker: MockerFixture) -> None:
     """Patch methods and functions used during init of RunwayModuleNpm."""
-    monkeypatch.setattr("runway.module.RunwayModuleNpm.check_for_npm", lambda x: None)
-    monkeypatch.setattr("runway.module.warn_on_boto_env_vars", lambda x: None)
+    mocker.patch("runway.module.base.RunwayModuleNpm.check_for_npm")
+    mocker.patch("runway.module.base.RunwayModuleNpm.warn_on_boto_env_vars")

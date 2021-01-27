@@ -49,13 +49,13 @@ statements if applicable.
 Context Object
 **************
 
-``self.context`` includes many helpful resources for use in your Python
+``self.ctx`` includes many helpful resources for use in your Python
 module. Some notable examples are::
 
-- self.context.env_name - name of the environment
-- self.context.env_region - region in which the module is being executed
-- self.context.env_vars - OS environment variables provided to the module
-- self.path - path to your Runway module folder
+- ``self.ctx.env.name`` - name of the environment
+- ``self.ctx.env.aws_region`` - region in which the module is being executed
+- ``self.ctx.env.vars`` - OS environment variables provided to the module
+- ``self.path`` - path to your Runway module folder
 
 
 ******************
@@ -99,58 +99,61 @@ skipped. This matches the behavior of the Runway's native modules.
 
 .. code-block:: python
 
-    """Ansible Plugin example for Runway."""
+  """Ansible Plugin example for Runway."""
+  from __future__ import annotations
 
-    import logging
-    import subprocess
-    import sys
-    import os
+  import logging
+  import subprocess
+  import sys
+  from typing import TYPE_CHECKING, Dict
 
-    from runway.module import RunwayModule
-    from runway.util import which
+  from runway.module.base import RunwayModule
+  from runway.util import which
 
-    LOGGER = logging.getLogger('runway')
+  if TYPE_CHECKING:
+      from pathlib import Path
 
-
-    def check_for_playbook(playbook_path):
-        """Determine if environment/region playbook exists."""
-        if os.path.isfile(playbook_path):
-            LOGGER.info("Processing playbook: %s", playbook_path)
-            return {'skipped_configs': False}
-        else:
-            LOGGER.error("No playbook for this environment/region found -- "
-                         "looking for %s", playbook_path)
-            return {'skipped_configs': True}
+  LOGGER = logging.getLogger("runway")
 
 
-    class DeployToAWS(RunwayModule):
-        """Ansible Runway Module."""
+  def check_for_playbook(playbook_path: Path) -> Dict[str, bool]:
+      """Determine if environment/region playbook exists."""
+      if playbook_path.is_file():
+          LOGGER.info("Processing playbook: %s", playbook_path)
+          return {"skipped_configs": False}
+      LOGGER.error(
+          "No playbook for this environment/region found -- looking for %s",
+          playbook_path,
+      )
+      return {"skipped_configs": True}
 
-        def plan(self):
-            """Skip plan"""
-            LOGGER.info('plan not currently supported for Ansible')
-            pass
 
-        def deploy(self):
-            """Run ansible-playbook."""
-            if not which('ansible-playbook'):
-                LOGGER.error('"ansible-playbook" not found in path or is not '
-                             'executable; please ensure it is installed'
-                             'correctly.')
-                sys.exit(1)
-            playbook_path = (self.path + "-" + self.context.env_name + self.context.env_region)
-            response = check_for_playbook(playbook_path)
-            if response['skipped_configs']:
-                return response
-            else:
-                subprocess.check_output(
-                    ['ansible-playbook', playbook_path])
-                return response
+  class DeployToAWS(RunwayModule):
+      """Ansible Runway Module."""
 
-        def destroy(self):
-            """Skip destroy."""
-            LOGGER.info('Destroy not currently supported for Ansible')
-            pass
+      def plan(self) -> None:
+          """Skip plan."""
+          LOGGER.info("plan not currently supported for Ansible")
+
+      def deploy(self) -> None:
+          """Run ansible-playbook."""
+          if not which("ansible-playbook"):
+              LOGGER.error(
+                  '"ansible-playbook" not found in path or is not '
+                  "executable; please ensure it is installed"
+                  "correctly."
+              )
+              sys.exit(1)
+          playbook_path = self.path / f"{self.ctx.env.name}-{self.ctx.env.aws_region}"
+          response = check_for_playbook(playbook_path)
+          if response["skipped_configs"]:
+              return
+          subprocess.check_output(["ansible-playbook", str(playbook_path)])
+
+      def destroy(self) -> None:
+          """Skip destroy."""
+          LOGGER.info("Destroy not currently supported for Ansible")
+
 
 And below is the example Ansible playbook itself, saved as
 ``dev-us-east-1.yaml`` in the security_group.ansible folder:
