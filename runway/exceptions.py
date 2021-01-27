@@ -130,6 +130,20 @@ class InvalidLookupConcatenation(Exception):
         super().__init__(message, *args, **kwargs)
 
 
+class NpmNotFound(Exception):
+    """Raised when npm could not be executed or was not found in path."""
+
+    message: str
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Instantiate class."""
+        self.message = (
+            '"npm" not found in path or is not executable; '
+            "please ensure it is installed correctly"
+        )
+        super().__init__(self.message, *args, **kwargs)
+
+
 class OutputDoesNotExist(Exception):
     """Raised when a specific stack output does not exist."""
 

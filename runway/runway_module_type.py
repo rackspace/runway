@@ -1,11 +1,16 @@
 """Abstraction for the module 'type' value in a a Runway configuration."""
+from __future__ import annotations
+
 import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, Type, cast
 
 from .util import load_object_from_string
+
+if TYPE_CHECKING:
+    from .module.base import RunwayModule
 
 LOGGER = logging.getLogger(__name__)
 
@@ -85,7 +90,7 @@ class RunwayModuleType:
         self.type_str = type_str
         self.module_class = self._determine_module_class()
 
-    def _determine_module_class(self):
+    def _determine_module_class(self) -> Type[RunwayModule]:
         """Determine type of module and return deployment module class.
 
         Returns:
@@ -122,7 +127,7 @@ class RunwayModuleType:
             )
             sys.exit(1)
 
-        return load_object_from_string(self.class_path)
+        return cast(Type["RunwayModule"], load_object_from_string(self.class_path))
 
     def _set_class_path_based_on_extension(self) -> None:
         """Based on the directory suffix set the class_path."""

@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 import yaml
 
@@ -19,14 +19,16 @@ from runway.hooks.staticsite.util import get_hash_of_files
 from .._logging import PrefixAdaptor
 from ..s3_util import does_s3_object_exist, download, ensure_bucket_exists, upload
 from ..util import YamlDumper, cached_property, merge_dicts
-from . import ModuleOptions, RunwayModuleNpm, generate_node_command, run_module_command
+from .base import ModuleOptions, RunwayModuleNpm
+from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 def gen_sls_config_files(stage: str, region: str) -> List[str]:
@@ -140,37 +142,58 @@ def deploy_package(
 class Serverless(RunwayModuleNpm):
     """Serverless Runway Module."""
 
+    options: ServerlessOptions
+
     def __init__(
         self,
         context: RunwayContext,
-        path: Path,
-        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+        *,
+        explicitly_enabled: Optional[bool] = False,
+        logger: RunwayLogger = LOGGER,
+        module_root: Path,
+        name: Optional[str] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-            options: Everything in the module definition merged with applicable
-                values from the deployment definition.
+            context: Runway context object for the current session.
+            explicitly_enabled: Whether or not the module is explicitly enabled.
+                This is can be set in the event that the current environment being
+                deployed to matches the defined environments of the module/deployment.
+            logger: Used to write logs.
+            module_root: Root path of the module.
+            name: Name of the module.
+            options: Options passed to the module class from the config as ``options``
+                or ``module_options`` if coming from the deployment level.
+            parameters: Values to pass to the underlying infrastructure as code
+                tool that will alter the resulting infrastructure being deployed.
+                Used to templatize IaC.
 
         """
-        options = options or {}
-        super().__init__(context, path, options.copy())
-        self.logger = PrefixAdaptor(self.name, LOGGER)
         try:
-            self.options = ServerlessOptions.parse(**options.get("options", {}))
+            super().__init__(
+                context,
+                explicitly_enabled=explicitly_enabled,
+                logger=logger,
+                module_root=module_root,
+                name=name,
+                options=ServerlessOptions.parse(**options or {}),
+                parameters=parameters,
+            )
         except ValueError:
-            self.logger.exception("error encountered while parsing options")
+            logger.exception("error encountered while parsing options")
             sys.exit(1)
-        self.region = self.context.env.aws_region
-        self.stage = self.context.env.name
+        self.logger = PrefixAdaptor(self.name, logger)
+        self.stage = self.ctx.env.name
 
     @property
     def cli_args(self) -> List[str]:
         """Generate CLI args from self used in all Serverless commands."""
         result = ["--region", self.region, "--stage", self.stage]
-        if "DEBUG" in self.context.env.vars:
+        if "DEBUG" in self.ctx.env.vars:
             result.append("--verbose")
         return result
 
@@ -187,7 +210,7 @@ class Serverless(RunwayModuleNpm):
     def skip(self) -> bool:
         """Determine if the module should be skipped."""
         if not self.package_json_missing():
-            if self.parameters or self.environments or self.env_file:
+            if self.parameters or self.explicitly_enabled or self.env_file:
                 return False
             self.logger.info(
                 "skipped; config file for this stage/region not found"
@@ -251,9 +274,9 @@ class Serverless(RunwayModuleNpm):
         """
         args = [command] + self.cli_args + self.options.args
         args.extend(args_list or [])
-        if self.context.no_color and "--no-color" not in args:
+        if self.ctx.no_color and "--no-color" not in args:
             args.append("--no-color")
-        if command not in ["remove", "print"] and self.context.is_noninteractive:
+        if command not in ["remove", "print"] and self.ctx.is_noninteractive:
             args.append("--conceal")  # hide secrets from serverless output
         return generate_node_command(
             command="sls", command_opts=args, path=self.path, logger=self.logger
@@ -274,12 +297,12 @@ class Serverless(RunwayModuleNpm):
             # TODO refactor deploy_package to be part of the class
             self.path.absolute()
             sls_opts = ["deploy"] + self.cli_args + self.options.args
-            if self.context.no_color and "--no-color" not in sls_opts:
+            if self.ctx.no_color and "--no-color" not in sls_opts:
                 sls_opts.append("--no-color")
             deploy_package(
                 sls_opts,
                 self.options.promotezip["bucketname"],
-                self.context,
+                self.ctx,
                 self.path,
                 self.logger,
             )
@@ -287,7 +310,7 @@ class Serverless(RunwayModuleNpm):
         self.logger.info("deploy (in progress)")
         run_module_command(
             cmd_list=self.gen_cmd("deploy"),
-            env_vars=self.context.env.vars,
+            env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
         self.logger.info("deploy (complete)")
@@ -317,7 +340,7 @@ class Serverless(RunwayModuleNpm):
             args.extend(["--path", item_path])
         result = yaml.safe_load(
             subprocess.check_output(
-                self.gen_cmd("print", args_list=args), env=self.context.env.vars
+                self.gen_cmd("print", args_list=args), env=self.ctx.env.vars
             )
         )
         # this could be expensive so only dump if needed
@@ -342,7 +365,7 @@ class Serverless(RunwayModuleNpm):
         proc = subprocess.Popen(
             self.gen_cmd("remove"),
             bufsize=1,
-            env=self.context.env.vars,
+            env=self.ctx.env.vars,
             stdout=subprocess.PIPE,
             universal_newlines=True,
         )

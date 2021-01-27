@@ -27,7 +27,7 @@ class TestServerless:
 
     def test_cli_args(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test cli_args."""
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
 
         assert obj.cli_args == [
             "--region",
@@ -53,7 +53,7 @@ class TestServerless:
             Serverless, "extend_serverless_yml"
         )
         mock_sls_deploy = mocker.patch.object(Serverless, "sls_deploy")
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
 
         mocker.patch.object(Serverless, "skip", True)
         assert not obj.deploy()
@@ -78,7 +78,7 @@ class TestServerless:
         # pylint: disable=no-member
         mocker.patch.object(Serverless, "extend_serverless_yml")
         mocker.patch.object(Serverless, "sls_remove", MagicMock())
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
 
         mocker.patch.object(Serverless, "skip", True)
         assert not obj.destroy()
@@ -107,7 +107,7 @@ class TestServerless:
         """
         env_dir = tmp_path / "env"
         env_dir.mkdir()
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
         assert not obj.env_file
         del obj.env_file
 
@@ -169,7 +169,7 @@ class TestServerless:
         mocker.patch.object(ServerlessOptions, "update_args", MagicMock())
 
         options = {"extend_serverless_yml": {"new-key": "val"}}
-        obj = Serverless(runway_context, tmp_path, options={"options": options})
+        obj = Serverless(runway_context, module_root=tmp_path, options=options)
 
         assert not obj.extend_serverless_yml(mock_func)
         obj.npm_install.assert_called_once()
@@ -210,7 +210,7 @@ class TestServerless:
         )
         mocker.patch.object(runway_context, "no_color", False)
         obj = Serverless(
-            runway_context, tmp_path, {"options": {"args": ["--config", "test"]}}
+            runway_context, module_root=tmp_path, options={"args": ["--config", "test"]}
         )
         expected_opts = [
             command,
@@ -229,7 +229,7 @@ class TestServerless:
         )
         mock_cmd.reset_mock()
 
-        obj.context.env.vars["CI"] = "1"
+        obj.ctx.env.vars["CI"] = "1"
         mocker.patch.object(runway_context, "no_color", True)
         expected_opts.append("--no-color")
         if command not in ["remove", "print"]:
@@ -247,7 +247,9 @@ class TestServerless:
     ) -> None:
         """Test init and the attributes set in init."""
         caplog.set_level(logging.ERROR, logger="runway")
-        obj = Serverless(runway_context, tmp_path, {"options": {"skip_npm_ci": True}})
+        obj = Serverless(
+            runway_context, module_root=tmp_path, options={"skip_npm_ci": True}
+        )
         assert isinstance(obj.options, ServerlessOptions)
         assert obj.region == runway_context.env.aws_region
         assert obj.stage == runway_context.env.name
@@ -255,12 +257,10 @@ class TestServerless:
         with pytest.raises(SystemExit):
             assert not Serverless(
                 runway_context,
-                tmp_path,
-                {"options": {"promotezip": {"invalid": "value"}}},
+                module_root=tmp_path,
+                options={"promotezip": {"invalid": "value"}},
             )
-        assert [
-            f"{tmp_path.name}:error encountered while parsing options"
-        ] == caplog.messages
+        assert ["error encountered while parsing options"] == caplog.messages
 
     def test_plan(
         self,
@@ -270,7 +270,7 @@ class TestServerless:
     ) -> None:
         """Test plan."""
         caplog.set_level(logging.INFO, logger="runway")
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
 
         assert not obj.plan()
         assert [
@@ -286,7 +286,7 @@ class TestServerless:
     ) -> None:
         """Test skip."""
         caplog.set_level(logging.INFO, logger="runway")
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
         mocker.patch.object(obj, "package_json_missing", lambda: True)
         mocker.patch.object(obj, "env_file", False)
 
@@ -307,9 +307,9 @@ class TestServerless:
         ] == caplog.messages
         caplog.clear()
 
-        obj.environments = True  # type: ignore
+        obj.explicitly_enabled = True
         assert not obj.skip
-        obj.environments = False  # type: ignore
+        obj.explicitly_enabled = False
 
         obj.parameters = True  # type: ignore
         assert not obj.skip
@@ -330,8 +330,8 @@ class TestServerless:
         mocker.patch.object(Serverless, "npm_install", MagicMock())
         obj = Serverless(
             runway_context,
-            tmp_path,
-            options={"options": {"args": ["--config", "test.yml"]}},
+            module_root=tmp_path,
+            options={"args": ["--config", "test.yml"]},
         )
 
         assert not obj.sls_deploy()
@@ -390,7 +390,7 @@ class TestServerless:
         mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["print"]))
         mocker.patch.object(Serverless, "npm_install", MagicMock())
         mocker.patch("subprocess.check_output", mock_check_output)
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
 
         assert obj.sls_print() == expected_dict
         obj.npm_install.assert_called_once()
@@ -436,7 +436,7 @@ class TestServerless:
         mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["remove"]))
         mocker.patch.object(Serverless, "npm_install", MagicMock())
 
-        obj = Serverless(runway_context, tmp_path)
+        obj = Serverless(runway_context, module_root=tmp_path)
         assert not obj.sls_remove()
         obj.npm_install.assert_called_once()
         obj.gen_cmd.assert_called_once_with("remove")
