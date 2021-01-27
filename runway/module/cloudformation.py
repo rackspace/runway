@@ -7,12 +7,14 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
 from ..cfngin.cfngin import CFNgin
-from . import RunwayModule
+from .base import RunwayModule
 
 if TYPE_CHECKING:
+    from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
+    from .base import ModuleOptions
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 class CloudFormation(RunwayModule):
@@ -21,55 +23,67 @@ class CloudFormation(RunwayModule):
     def __init__(
         self,
         context: RunwayContext,
-        path: Path,
-        options: Optional[Dict[str, Union[Dict[str, Any], str]]] = None,
+        *,
+        explicitly_enabled: Optional[bool] = False,
+        logger: RunwayLogger = LOGGER,
+        module_root: Path,
+        name: Optional[str] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-            options: Everything in the module definition merged with applicable
-                values from the deployment definition.
+            context: Runway context object for the current session.
+            explicitly_enabled: Whether or not the module is explicitly enabled.
+                This is can be set in the event that the current environment being
+                deployed to matches the defined environments of the module/deployment.
+            logger: Used to write logs.
+            module_root: Root path of the module.
+            name: Name of the module.
+            options: Options passed to the module class from the config as ``options``
+                or ``module_options`` if coming from the deployment level.
+            parameters: Values to pass to the underlying infrastructure as code
+                tool that will alter the resulting infrastructure being deployed.
+                Used to templatize IaC.
 
         """
-        super().__init__(context, path, options)
-        self._raw_path = (
-            Path(cast(str, options.pop("path"))) if options.get("path") else None
+        super().__init__(
+            context,
+            explicitly_enabled=explicitly_enabled,
+            logger=logger,
+            module_root=module_root,
+            name=name,
+            options=options,
+            parameters=parameters,
         )
-        self.path = path if isinstance(self.path, Path) else Path(self.path)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
     def deploy(self) -> None:
         """Run stacker build."""
         cfngin = CFNgin(
-            self.context,
-            parameters=cast(Dict[str, Any], self.options["parameters"]),
+            self.ctx,
+            parameters=cast(Dict[str, Any], self.parameters),
             sys_path=self.path,
         )
-        cfngin.deploy(
-            force=bool(self.options["parameters"] or self.options["environment"])
-        )
+        cfngin.deploy(force=bool(self.parameters or self.explicitly_enabled))
 
     def destroy(self) -> None:
         """Run stacker destroy."""
         cfngin = CFNgin(
-            self.context,
-            parameters=cast(Dict[str, Any], self.options["parameters"]),
+            self.ctx,
+            parameters=cast(Dict[str, Any], self.parameters),
             sys_path=self.path,
         )
-        cfngin.destroy(
-            force=bool(self.options["parameters"] or self.options["environment"])
-        )
+        cfngin.destroy(force=bool(self.parameters or self.explicitly_enabled))
 
     def plan(self) -> None:
         """Run stacker diff."""
         cfngin = CFNgin(
-            self.context,
-            parameters=cast(Dict[str, Any], self.options["parameters"]),
+            self.ctx,
+            parameters=cast(Dict[str, Any], self.parameters),
             sys_path=self.path,
         )
-        cfngin.plan(
-            force=bool(self.options["parameters"] or self.options["environment"])
-        )
+        cfngin.plan(force=bool(self.parameters or self.explicitly_enabled))

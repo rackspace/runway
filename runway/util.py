@@ -689,7 +689,7 @@ def fix_windows_command_list(commands: List[str]) -> List[str]:
 
 def run_commands(
     commands: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]],
-    directory: str,
+    directory: Union[Path, str],
     env: Optional[Dict[str, str]] = None,
 ) -> None:
     """Run list of commands."""

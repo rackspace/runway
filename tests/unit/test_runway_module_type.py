@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, List, Type
 
 import pytest
 
-from runway.module import RunwayModule
 from runway.module.cdk import CloudDevelopmentKit
 from runway.module.cloudformation import CloudFormation
 from runway.module.k8s import K8s
@@ -20,6 +19,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from _pytest.logging import LogCaptureFixture
+
+    from runway.module.base import RunwayModule
 
 
 class TestRunwayModuleType:
