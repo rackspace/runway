@@ -16,10 +16,10 @@ from ...config.models.runway import (
     RunwayFutureDefinitionModel,
     RunwayVariablesDefinitionModel,
 )
-from ...runway_module_type import RunwayModuleType
 from ...util import cached_property, change_dir, flatten_path_lists, merge_dicts
 from ..providers import aws
 from ._module_path import ModulePath
+from ._module_type import RunwayModuleType
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
