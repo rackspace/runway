@@ -7,10 +7,10 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Type, cast
 
-from .util import load_object_from_string
+from ...util import load_object_from_string
 
 if TYPE_CHECKING:
-    from .module.base import RunwayModule
+    from ...module.base import RunwayModule
 
 LOGGER = logging.getLogger(__name__)
 
