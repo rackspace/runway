@@ -5,7 +5,6 @@ import concurrent.futures
 import json
 import logging
 import sys
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import yaml
@@ -17,10 +16,10 @@ from ...config.models.runway import (
     RunwayFutureDefinitionModel,
     RunwayVariablesDefinitionModel,
 )
-from ...path import Path as ModulePath
 from ...runway_module_type import RunwayModuleType
 from ...util import cached_property, change_dir, flatten_path_lists, merge_dicts
 from ..providers import aws
+from ._module_path import ModulePath
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
@@ -120,7 +119,7 @@ class Module:
     @cached_property
     def opts_from_file(self) -> Dict[str, Any]:
         """Load module options from local file."""
-        opts_file = Path(self.path.module_root) / "runway.module.yml"
+        opts_file = self.path.module_root / "runway.module.yml"
         if opts_file.is_file():
             self.logger.verbose("module-level config file found")
             return yaml.safe_load(opts_file.read_text())
@@ -129,11 +128,7 @@ class Module:
     @cached_property
     def path(self) -> ModulePath:  # lazy load the path
         """Return resolve module path."""
-        return ModulePath(
-            self.definition._data,  # pylint: disable=protected-access
-            self.ctx.env.root_dir,
-            self.ctx.env.root_dir / ".runway/cache",
-        )
+        return ModulePath.parse_obj(self.definition, deploy_environment=self.ctx.env)
 
     @cached_property
     def payload(self) -> Dict[str, Any]:  # lazy load the payload

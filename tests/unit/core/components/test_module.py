@@ -164,17 +164,16 @@ class TestModule:
         runway_context: MockRunwayContext,
     ) -> None:
         """Test path."""
-        mock_path = mocker.patch(f"{MODULE}.ModulePath", return_value="module-path")
+        mock_path = mocker.patch(f"{MODULE}.ModulePath")
+        mock_path.parse_obj.return_value = "module-path"
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
         )
 
         assert mod.path == "module-path"
-        mock_path.assert_called_once_with(
-            mod.definition._data,
-            runway_context.env.root_dir,
-            runway_context.env.root_dir / ".runway/cache",
+        mock_path.parse_obj.assert_called_once_with(
+            mod.definition, deploy_environment=mod.ctx.env
         )
 
     def test_payload_with_deployment(
@@ -268,10 +267,11 @@ class TestModule:
         runway_context: MockRunwayContext,
     ) -> None:
         """Test type."""
-        mock_path = mocker.patch(f"{MODULE}.ModulePath", module_root="path")
+        mock_path = mocker.patch(
+            f"{MODULE}.ModulePath", module_root=runway_context.env.root_dir
+        )
         mock_type = mocker.patch(f"{MODULE}.RunwayModuleType")
         mock_type.return_value = mock_type
-        mock_path.module_root = "path"
         mocker.patch.object(Module, "path", mock_path)
 
         mod = Module(
@@ -281,20 +281,24 @@ class TestModule:
         mocker.patch.object(mod, "payload", {})
 
         assert mod.type == mock_type
-        mock_type.assert_called_once_with(path="path", class_path=None, type_str=None)
+        mock_type.assert_called_once_with(
+            path=mock_path.module_root, class_path=None, type_str=None
+        )
         del mod.type
 
         mod.payload.update({"class_path": "parent.dir.class"})
         assert mod.type == mock_type
         mock_type.assert_called_with(
-            path="path", class_path="parent.dir.class", type_str=None
+            path=mock_path.module_root, class_path="parent.dir.class", type_str=None
         )
         del mod.type
 
         mod.payload.update({"type": "test-type"})
         assert mod.type == mock_type
         mock_type.assert_called_with(
-            path="path", class_path="parent.dir.class", type_str="test-type"
+            path=mock_path.module_root,
+            class_path="parent.dir.class",
+            type_str="test-type",
         )
         del mod.type
 
