@@ -117,6 +117,12 @@ def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
+def deploy_environment(tmp_path: Path) -> DeployEnvironment:
+    """Create a deploy environment that can be used for testing."""
+    return DeployEnvironment(explicit_name="test", root_dir=tmp_path)
+
+
+@pytest.fixture(scope="function")
 def cfngin_context(runway_context: MockRunwayContext) -> MockCFNginContext:
     """Create a mock CFNgin context object."""
     return MockCFNginContext(deploy_environment=runway_context.env, parameters={},)
