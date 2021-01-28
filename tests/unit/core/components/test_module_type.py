@@ -1,4 +1,4 @@
-"""Test runway.runway_module_type."""
+"""Test runway.core.components._module_type."""
 # pylint: disable=no-self-use
 from __future__ import annotations
 
@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, List, Type
 
 import pytest
 
+from runway.core.components import RunwayModuleType
 from runway.module.cdk import CloudDevelopmentKit
 from runway.module.cloudformation import CloudFormation
 from runway.module.k8s import K8s
 from runway.module.serverless import Serverless
 from runway.module.staticsite import StaticSite
 from runway.module.terraform import Terraform
-from runway.runway_module_type import RunwayModuleType
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 class TestRunwayModuleType:
-    """Test runway.runway_module_type.RunwayModuleType."""
+    """Test runway.core.components._module_type.RunwayModuleType."""
 
     @pytest.mark.parametrize(
         "files, expected",
