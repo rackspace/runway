@@ -22,26 +22,26 @@ class Git(Source):
     def __init__(
         self,
         *,
+        arguments: Optional[Dict[str, str]] = None,
         location: str = "",
-        options: Optional[Dict[str, str]] = None,
         uri: str = "",
         **kwargs: Any
     ) -> None:
         """Git Path Source.
 
         Args:
+            arguments: A reference can be passed along via the arguments so that a specific
+                version of the repository is cloned. **commit**, **tag**, **branch**
+                are all valid keys with respective output
             location: The relative location to the root of the repository where the
                 module resides. Leaving this as an empty string, ``/``, or ``./``
                 will have runway look in the root folder.
-            options: A reference can be passed along via the options so that a specific
-                version of the repository is cloned. **commit**, **tag**, **branch**
-                are all valid keys with respective output
             uri: The uniform resource identifier that targets the remote git repository
 
         """
+        self.args = arguments or {}
         self.uri = uri
         self.location = location
-        self.options = options or {}
 
         super().__init__(**kwargs)
 
@@ -84,14 +84,14 @@ class Git(Source):
     def __determine_git_ls_remote_ref(self) -> str:
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
-        if self.options.get("branch"):
-            ref = "refs/heads/%s" % self.options["branch"]
+        if self.args.get("branch"):
+            ref = "refs/heads/%s" % self.args["branch"]
         return ref
 
     def __determine_git_ref(self) -> str:
         """Determine the git reference code."""
         ref_config_keys = sum(
-            bool(self.options.get(i)) for i in ["commit", "tag", "branch"]
+            bool(self.args.get(i)) for i in ["commit", "tag", "branch"]
         )
         if ref_config_keys > 1:
             raise ValueError(
@@ -99,10 +99,10 @@ class Git(Source):
                 "(e.g. 'commit', 'tag', 'branch') specified for a package source"
             )
 
-        if self.options.get("commit"):
-            return self.options["commit"]
-        if self.options.get("tag"):
-            return self.options["tag"]
+        if self.args.get("commit"):
+            return self.args["commit"]
+        if self.args.get("tag"):
+            return self.args["tag"]
         return self.__git_ls_remote(self.__determine_git_ls_remote_ref())
 
     @classmethod

@@ -963,7 +963,7 @@ They syntax is based on that of `Terraform module sources <https://www.terraform
   This field is preceded by a ``//``. If not defining a location, this separator does not need to be provided.
 
 :arguments:
-  An optional comma delimited list of ``key=value`` pairs that are unique to each remote location source.
+  An optional ampersand (``&``) delimited list of ``key=value`` pairs that are unique to each remote location source.
   These are used to provide granular control over how Runway retrieves resources from the remote location.
 
   This field is preceded by a ``?``. If not defining a location, this separator does not need to be provided.

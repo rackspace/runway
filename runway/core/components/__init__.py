@@ -2,5 +2,6 @@
 from ._deploy_environment import DeployEnvironment
 from ._deployment import Deployment
 from ._module import Module
+from ._module_path import ModulePath
 
-__all__ = ["DeployEnvironment", "Deployment", "Module"]
+__all__ = ["DeployEnvironment", "Deployment", "Module", "ModulePath"]
