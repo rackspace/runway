@@ -276,8 +276,8 @@ Deployment
 
 
   .. attribute:: account_alias
-    :type: Optional[Union[Dict[str, str], str]]
-    :value: {}
+    :type: Optional[str]
+    :value: None
 
     An `AWS account alias <https://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html>`__ use to verify the currently assumed role or credentials.
     Verification is performed by listing the account's alias and comparing the result to what is defined.
@@ -301,16 +301,9 @@ Deployment
         account_alias:
           dev: example-dev
 
-    .. code-block:: yaml
-      :caption: using an environment map
-
-      deployments:
-      - account_alias:
-          dev: example-dev
-
   .. attribute:: account_id
-    :type: Optional[Union[Dict[str, str], str]]
-    :value: {}
+    :type: Optional[str]
+    :value: None
 
     An AWS account ID use to verify the currently assumed role or credentials.
     Verification is performed by `getting the caller identity <https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html>`__.
@@ -332,13 +325,6 @@ Deployment
 
       variables:
         account_id:
-          dev: 123456789012
-
-    .. code-block:: yaml
-      :caption: using an environment map
-
-      deployments:
-      - account_id:
           dev: 123456789012
 
   .. attribute:: assume_role
