@@ -14,12 +14,14 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, ca
 
 import yaml
 
-from runway.hooks.staticsite.util import get_hash_of_files
-
 from .._logging import PrefixAdaptor
+from ..config.models.runway.options.serverless import (
+    RunwayServerlessModuleOptionsDataModel,
+)
+from ..hooks.staticsite.util import get_hash_of_files
 from ..s3_util import does_s3_object_exist, download, ensure_bucket_exists, upload
 from ..util import YamlDumper, cached_property, merge_dicts
-from .base import ModuleOptions, RunwayModuleNpm
+from .base import ModuleOptionsV2, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
@@ -27,6 +29,7 @@ if TYPE_CHECKING:
 
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
+    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -152,7 +155,7 @@ class Serverless(RunwayModuleNpm):
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -173,19 +176,15 @@ class Serverless(RunwayModuleNpm):
                 Used to templatize IaC.
 
         """
-        try:
-            super().__init__(
-                context,
-                explicitly_enabled=explicitly_enabled,
-                logger=logger,
-                module_root=module_root,
-                name=name,
-                options=ServerlessOptions.parse(**options or {}),
-                parameters=parameters,
-            )
-        except ValueError:
-            logger.exception("error encountered while parsing options")
-            sys.exit(1)
+        super().__init__(
+            context,
+            explicitly_enabled=explicitly_enabled,
+            logger=logger,
+            module_root=module_root,
+            name=name,
+            options=ServerlessOptions.parse_obj(options or {}),
+            parameters=parameters,
+        )
         self.logger = PrefixAdaptor(self.name, logger)
         self.stage = self.ctx.env.name
 
@@ -345,7 +344,7 @@ class Serverless(RunwayModuleNpm):
         )
         # this could be expensive so only dump if needed
         if self.logger.getEffectiveLevel() == logging.DEBUG:
-            self.logger.debug(
+            self.logger.debug(  # cov: ignore
                 "resolved Serverless config:\n%s", yaml.dump(result, Dumper=YamlDumper)
             )
         return result
@@ -401,45 +400,41 @@ class Serverless(RunwayModuleNpm):
             self.sls_remove()
 
 
-class ServerlessOptions(ModuleOptions):
-    """Module options for Serverless."""
+class ServerlessOptions(ModuleOptionsV2):
+    """Module options for Serverless Framework.
 
-    def __init__(
-        self,
-        args: List[str],
-        extend_serverless_yml: Dict[str, Any],
-        promotezip: Dict[str, str],
-        skip_npm_ci: bool = False,
-    ) -> None:
+    Attributes:
+        data: Options parsed into a data model.
+        extend_serverless_yml: If provided, the value of this option will be
+            recursively merged into the module's Serverless config file.
+        promotezip: If provided, promote Serverless Framework generated zip files
+            between environments from a build AWS account.
+        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
+            processing the module.
+
+    """
+
+    def __init__(self, data: RunwayServerlessModuleOptionsDataModel) -> None:
         """Instantiate class.
 
-        Keyword Args:
-            args: Arguments to append to Serverless CLI commands.
-                These will always be placed after the default arguments provided
-                by Runway.
-            extend_serverless_yml: If provided, a temporary Serverless config
-                will be created will be created from what exists in the module
-                directory then the value of this option will be merged into it.
-                The temporary file will be deleted at the end of execution.
-            promotezip: If provided, promote Serverless generated zip files
-                between environments from a *build* AWS account.
-            skip_npm_ci: Skip the ``npm ci`` Runway executes at the begining of
-                each Serverless module run.
+        Args:
+            data: Options parsed into a data model.
 
         """
-        super().__init__()
         self._arg_parser = self._create_arg_parser()
-        self.extend_serverless_yml = extend_serverless_yml
         cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(
-            list(args) if isinstance(args, list) else []
+            data.args.copy()
         )
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
-        self.promotezip = promotezip
-        self.skip_npm_ci = skip_npm_ci
+
+        self.data = data
+        self.extend_serverless_yml = data.extend_serverless_yml
+        self.promotezip = data.promotezip
+        self.skip_npm_ci = data.skip_npm_ci
 
     @property
     def args(self) -> List[str]:
-        """Args to pass to the CLI."""
+        """List of CLI arguments/options to pass to the Serverless Framework CLI."""
         known_args = []
         for key, val in self._cli_args.items():
             if isinstance(val, str):
@@ -454,7 +449,7 @@ class ServerlessOptions(ModuleOptions):
             value: New value
 
         Raises:
-            KeyError: The key provided for update is now a known arg.
+            KeyError: The key provided for update is not a known arg.
 
         """
         if key in self._cli_args:
@@ -478,37 +473,11 @@ class ServerlessOptions(ModuleOptions):
         return parser
 
     @classmethod
-    def parse(cls, **kwargs) -> ServerlessOptions:  # pylint: disable=arguments-differ
-        """Parse the options definition and return an options object.
+    def parse_obj(cls, obj: object) -> ServerlessOptions:
+        """Parse options definition and return an options object.
 
-        Keyword Args:
-            args (Optional[List[str]]): Arguments to append to Serverless CLI
-                commands. These will always be placed after the default
-                arguments provided by Runway.
-            extend_serverless_yml (Optional[Dict[str, Any]]): If provided,
-                a temporary Serverless config will be created will be created
-                from what exists in the module directory then the value of
-                this option will be merged into it. The temporary file will
-                be deleted at the end of execution.
-            promotezip (Optional[Dict[str, str]]): If provided, promote
-                Serverless generated zip files between environments from a
-                *build* AWS account.
-            skip_npm_ci (bool): Skip the ``npm ci`` Runway executes at the
-                begining of each Serverless module run.
-
-        Raises:
-            ValueError: promotezip was provided but missing bucketname.
+        Args:
+            obj: Object to parse.
 
         """
-        promotezip = kwargs.get("promotezip", {})
-        if promotezip and not promotezip.get("bucketname"):
-            raise ValueError(
-                '"bucketname" must be provided when using '
-                '"options.promotezip": {}'.format(promotezip)
-            )
-        return cls(
-            args=kwargs.get("args", []),
-            extend_serverless_yml=kwargs.get("extend_serverless_yml", {}),
-            promotezip=promotezip,
-            skip_npm_ci=kwargs.get("skip_npm_ci", False),
-        )
+        return cls(data=RunwayServerlessModuleOptionsDataModel.parse_obj(obj))
