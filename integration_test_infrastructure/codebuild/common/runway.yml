@@ -9,7 +9,6 @@ deployments:
       namespace: common
       bucket_name: runway-integration-testing-${env AWS_REGION}
       repo_url: https://github.com/onicagroup/runway
-    account_id:
-      common: "523485371024"
+    account_id: "523485371024"
 
 ignore_git_branch: true

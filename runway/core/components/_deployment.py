@@ -53,36 +53,6 @@ class Deployment:
         self.__merge_env_vars()
 
     @property
-    def account_alias_config(self) -> Optional[str]:
-        """Parse the definition to get the correct AWS account alias configuration.
-
-        Returns:
-            Expected AWS account alias for the current context.
-
-        """
-        if isinstance(self.definition.account_alias, str):
-            return self.definition.account_alias
-        if isinstance(self.definition.account_alias, dict):
-            return self.definition.account_alias.get(self.ctx.env.name)
-        return None
-
-    @property
-    def account_id_config(self) -> Optional[str]:
-        """Parse the definition to get the correct AWS account ID configuration.
-
-        Returns:
-            Expected AWS account ID for the current context.
-
-        """
-        if isinstance(self.definition.account_id, (int, str)):
-            return str(self.definition.account_id)
-        if isinstance(self.definition.account_id, dict):
-            result = self.definition.account_id.get(self.ctx.env.name)
-            if result:
-                return str(result)
-        return None
-
-    @property
     def assume_role_config(self) -> Dict[str, Union[bool, int, str]]:
         """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
@@ -212,31 +182,31 @@ class Deployment:
 
         """
         account = aws.AccountDetails(context or self.ctx)
-        if self.account_id_config:
-            if self.account_id_config != account.id:
+        if self.definition.account_id:
+            if self.definition.account_id != account.id:
                 self.logger.error(
                     'current AWS account "%s" does not match '
                     'required account "%s" in Runway config',
                     account.id,
-                    self.account_id_config,
+                    self.definition.account_id,
                 )
                 sys.exit(1)
             self.logger.info(
                 "verified current AWS account matches required " 'account id "%s"',
-                self.account_id_config,
+                self.definition.account_id,
             )
-        if self.account_alias_config:
-            if self.account_alias_config not in account.aliases:
+        if self.definition.account_alias:
+            if self.definition.account_alias not in account.aliases:
                 self.logger.error(
                     'current AWS account aliases "%s" do not match '
                     'required account alias "%s" in Runway config.',
                     ",".join(account.aliases),
-                    self.account_alias_config,
+                    self.definition.account_alias,
                 )
                 sys.exit(1)
             self.logger.info(
                 'verified current AWS account alias matches required alias "%s"',
-                self.account_alias_config,
+                self.definition.account_alias,
             )
 
     def __merge_env_vars(self) -> None:
