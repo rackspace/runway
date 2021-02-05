@@ -155,25 +155,17 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
 class RunwayDeploymentDefinitionModel(ConfigProperty):
     """Model for a Runway deployment definition."""
 
-    account_alias: Union[Dict[str, str], str] = Field(
-        {},
+    account_alias: Optional[str] = Field(
+        None,
         description="Used to verify the currently assumed role or credentials. "
         "(supports lookups)",
-        examples=[
-            {"dev": "example-dev", "prod": "example-prod"},
-            "example-alias",
-            "${var alias.${env DEPLOY_ENVIRONMENT}}",
-        ],
+        examples=["example-alias", "${var alias.${env DEPLOY_ENVIRONMENT}}"],
     )
-    account_id: Union[Dict[str, str], str] = Field(
-        {},
+    account_id: Optional[str] = Field(
+        None,
         description="Used to verify the currently assumed role or credentials. "
         "(supports lookups)",
-        examples=[
-            {"dev": "123456789012", "prod": "234567890123"},
-            "123456789012",
-            "${var id.${env DEPLOY_ENVIRONMENT}}",
-        ],
+        examples=["123456789012", "${var id.${env DEPLOY_ENVIRONMENT}}"],
     )
     assume_role: Union[str, RunwayAssumeRoleDefinitionModel] = Field(
         {},

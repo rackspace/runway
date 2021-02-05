@@ -19,5 +19,4 @@ deployments:
             - npm run build
     regions:
       - us-west-2
-    account_id:
-      common: '093415447880'  # onica-public-prod
+    account_id: '093415447880'  # onica-public-prod

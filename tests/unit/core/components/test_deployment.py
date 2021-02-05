@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import pytest
 from mock import ANY, MagicMock, PropertyMock, call
@@ -70,51 +70,6 @@ class TestDeployment:
         assert obj.ctx == runway_context
         assert obj.name == "unnamed_deployment"
         assert obj.ctx.env.vars["deployment_var"] == "val"
-
-    @pytest.mark.parametrize(
-        "config, expected",
-        [
-            ("min_required", None),
-            ("validate_account", "test"),
-            ("validate_account_map", "test"),
-        ],
-    )
-    def test_account_alias_config(
-        self,
-        config: str,
-        expected: Optional[str],
-        fx_deployments: YamlLoaderDeployment,
-        runway_context: MockRunwayContext,
-    ) -> None:
-        """Test account_alias_config."""
-        obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
-        assert obj.account_alias_config == expected
-
-    def test_account_alias_config_none(
-        self, runway_context: MockRunwayContext,
-    ) -> None:
-        """Test account_alias_config with incompatible type."""
-        obj = Deployment(context=runway_context, definition=MagicMock())
-        assert obj.account_alias_config is None
-
-    @pytest.mark.parametrize(
-        "config, expected",
-        [
-            ("min_required", None),
-            ("validate_account", "123456789012"),
-            ("validate_account_map", "123456789012"),
-        ],
-    )
-    def test_account_id_config(
-        self,
-        config: str,
-        expected: Optional[str],
-        fx_deployments: YamlLoaderDeployment,
-        runway_context: MockRunwayContext,
-    ) -> None:
-        """Test account_id_config."""
-        obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
-        assert obj.account_id_config == expected
 
     @pytest.mark.parametrize(
         "config, expected",

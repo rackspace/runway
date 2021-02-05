@@ -1,7 +1,7 @@
 """Runway config deployment definition."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
 
 from ....variables import Variable
 from ...models.runway import (
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 class RunwayDeploymentDefinition(ConfigComponentDefinition):
     """Runway deployment definition."""
 
-    account_alias: Dict[str, str]
-    account_id: Dict[str, str]
+    account_alias: Optional[str]
+    account_id: Optional[str]
     assume_role: RunwayAssumeRoleDefinitionModel
     environments: RunwayEnvironmentsType
     env_vars: RunwayEnvVarsType

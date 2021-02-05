@@ -190,8 +190,8 @@ class TestRunwayDeploymentDefinitionModel:
     def test_field_defaults(self) -> None:
         """Test field default values."""
         obj = RunwayDeploymentDefinitionModel(modules=[], regions=["us-east-1"])
-        assert obj.account_alias == {}
-        assert obj.account_id == {}
+        assert obj.account_alias is None
+        assert obj.account_id is None
         assert isinstance(obj.assume_role, RunwayAssumeRoleDefinitionModel)
         assert obj.env_vars == {}
         assert obj.environments == {}
