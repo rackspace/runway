@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 import pytest
 import yaml
 from mock import ANY, MagicMock
+from pydantic import ValidationError
 
+from runway.config.models.runway.options.serverless import (
+    RunwayServerlessModuleOptionsDataModel,
+)
 from runway.module.serverless import Serverless, ServerlessOptions, gen_sls_config_files
 
 if TYPE_CHECKING:
@@ -239,14 +243,8 @@ class TestServerless:
             command="sls", command_opts=expected_opts, logger=obj.logger, path=tmp_path
         )
 
-    def test_init(
-        self,
-        caplog: LogCaptureFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
-    ) -> None:
+    def test_init(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test init and the attributes set in init."""
-        caplog.set_level(logging.ERROR, logger="runway")
         obj = Serverless(
             runway_context, module_root=tmp_path, options={"skip_npm_ci": True}
         )
@@ -254,13 +252,12 @@ class TestServerless:
         assert obj.region == runway_context.env.aws_region
         assert obj.stage == runway_context.env.name
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(ValidationError):
             assert not Serverless(
                 runway_context,
                 module_root=tmp_path,
                 options={"promotezip": {"invalid": "value"}},
             )
-        assert ["error encountered while parsing options"] == caplog.messages
 
     def test_plan(
         self,
@@ -465,7 +462,7 @@ class TestServerlessOptions:
     )
     def test_args(self, args: List[str], expected: List[str]) -> None:
         """Test args."""
-        obj = ServerlessOptions(args=args, extend_serverless_yml={}, promotezip={})
+        obj = ServerlessOptions.parse_obj({"args": args})
         assert obj.args == expected
 
     @pytest.mark.parametrize(
@@ -508,24 +505,32 @@ class TestServerlessOptions:
     )
     def test_parse(self, config: Dict[str, Any]) -> None:
         """Test parse."""
-        obj = ServerlessOptions.parse(**config)
+        obj = ServerlessOptions.parse_obj(config)
 
         assert obj.args == config.get("args", [])
         assert obj.extend_serverless_yml == config.get("extend_serverless_yml", {})
-        assert obj.promotezip == config.get("promotezip", {})
+        if config.get("promotezip"):
+            assert obj.promotezip
+        else:
+            assert not obj.promotezip
+        assert obj.promotezip.bucketname == config.get("promotezip", {}).get(
+            "bucketname"
+        )
         assert obj.skip_npm_ci == config.get("skip_npm_ci", False)
 
     def test_parse_invalid_promotezip(self) -> None:
         """Test parse with invalid promotezip value."""
-        with pytest.raises(ValueError):
-            assert not ServerlessOptions.parse(promotezip={"key": "value"})
+        with pytest.raises(ValidationError):
+            assert not ServerlessOptions.parse_obj({"promotezip": {"key": "value"}})
 
     def test_update_args(self) -> None:
         """Test update_args."""
         obj = ServerlessOptions(
-            args=["--config", "something", "--unknown-arg", "value"],
-            extend_serverless_yml={},
-            promotezip={},
+            RunwayServerlessModuleOptionsDataModel(
+                args=["--config", "something", "--unknown-arg", "value"],
+                extend_serverless_yml={},
+                promotezip={},
+            )
         )
         assert obj.args == ["--config", "something", "--unknown-arg", "value"]
 
