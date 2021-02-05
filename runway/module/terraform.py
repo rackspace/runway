@@ -13,18 +13,22 @@ import hcl
 from send2trash import send2trash
 
 from .._logging import PrefixAdaptor
-from ..cfngin.lookups.handlers.output import deconstruct
+from ..compat import cached_property
+from ..config.models.runway.options.terraform import (
+    RunwayTerraformBackendConfigDataModel,
+    RunwayTerraformModuleOptionsDataModel,
+)
 from ..env_mgr.tfenv import TFEnvManager
-from ..util import DOC_SITE, cached_property, find_cfn_output, which
-from .base import ModuleOptions, RunwayModule
+from ..util import DOC_SITE, which
+from .base import ModuleOptionsV2, RunwayModule
 from .utils import run_module_command
 
 if TYPE_CHECKING:
-    from mypy_boto3_cloudformation.client import CloudFormationClient
-    from mypy_boto3_ssm.client import SSMClient
 
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
+    from ..core.components import DeployEnvironment
+    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -103,12 +107,14 @@ class Terraform(RunwayModule):
             logger=logger,
             module_root=module_root,
             name=name,
-            options=TerraformOptions.parse(context, module_root, **options or {}),
+            options=TerraformOptions.parse_obj(
+                deploy_environment=context.env, obj=options or {}, path=module_root
+            ),
             parameters=parameters,
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, logger)
-        self.required_workspace = self.options.workspace or self.ctx.env.name
+        self.required_workspace = self.options.workspace
 
     @cached_property
     def auto_tfvars(self) -> Path:
@@ -324,7 +330,7 @@ class Terraform(RunwayModule):
         https://www.terraform.io/docs/commands/apply.html
 
         """
-        args_list = self.env_file + self.options.args["apply"]
+        args_list = self.env_file + self.options.args.apply
         if self.ctx.env.ci:
             args_list.append("-auto-approve=true")
         else:
@@ -370,7 +376,7 @@ class Terraform(RunwayModule):
             "init",
             ["-reconfigure"]
             + self.options.backend_config.init_args
-            + self.options.args["init"],
+            + self.options.args.init,
         )
         try:
             run_module_command(
@@ -390,7 +396,7 @@ class Terraform(RunwayModule):
 
         """
         run_module_command(
-            self.gen_command("plan", self.env_file + self.options.args["plan"]),
+            self.gen_command("plan", self.env_file + self.options.args.plan),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
@@ -510,175 +516,118 @@ class Terraform(RunwayModule):
         self.run("destroy")
 
 
-class TerraformOptions(ModuleOptions):
-    """Module options for Terraform."""
+class TerraformOptions(ModuleOptionsV2):
+    """Module options for Terraform.
+
+    Attributes:
+        args: CLI arguments/options to pass to Terraform.
+        data: Options parsed into a data model.
+        env: Current deploy environment.
+        path: Module path.
+        version: String continaing a Terraform version.
+        write_auto_tfvars: Optionally write parameters to a tfvars file instead
+            of updating variables.
+
+    """
 
     def __init__(
         self,
-        args: Union[Dict[str, List[str]], List[str]],
-        backend: TerraformBackendConfig,
-        workspace: str,
-        version: Optional[str] = None,
-        write_auto_tfvars: bool = False,
+        data: RunwayTerraformModuleOptionsDataModel,
+        deploy_environment: DeployEnvironment,
+        path: Optional[Path] = None,
     ) -> None:
         """Instantiate class.
 
         Args:
-            args: Arguments to append
-                to Terraform CLI commands. If providing a list, all arguments
-                will be passed to ``terraform apply`` only. Can also be
-                provided as a mapping to pass arguments to ``terraform apply``,
-                ``terraform init``, and/or ``terraform plan``.
-            backend: Backend configuration.
-            workspace: Name of the Terraform workspace to use.
-                While it is recommended to let Runway manage this automatically,
-                it has been exposed as an option for cases when a static
-                workspace needs to be used (e.g. remote backend).
-            version: Terraform version.
-            write_auto_tfvars: Optionally write parameters to a tfvars file
-                instead of updating environment variables.
+            deploy_environment: Current deploy environment.
+            data: Options parsed into a data model.
+            path: Module path.
 
         """
-        super().__init__()
-        self.args = self._parse_args(args)
-        self.backend_config = backend
-        self.write_auto_tfvars = write_auto_tfvars
-        self.version = version
-        self.workspace = workspace
+        self.args = data.args
+        self.data = data
+        self.env = deploy_environment
+        self.path = path or Path.cwd()
+        self.version = data.version
+        self.workspace = data.workspace or deploy_environment.name
+        self.write_auto_tfvars = data.write_auto_tfvars
 
-    @staticmethod
-    def _parse_args(
-        args: Union[Dict[str, List[str]], List[str]]
-    ) -> Dict[str, List[str]]:
-        """Parse args option.
-
-        Args:
-            args: Arguments to append to Terraform CLI commands.
-                If providing a list, all arguments will be passed to
-                ``terraform apply`` only.
-                Can also be provided as a mapping to pass arguments to
-                ``terraform apply``, ``terraform init``, and/or ``terraform plan``.
-
-        Returns:
-            Arguments seperated by the command they should be associated with.
-
-        """
-        result = {"apply": [], "init": [], "plan": []}
-
-        if isinstance(args, list):
-            result["apply"] = args
-            return result
-
-        for key in result:
-            result[key] = args.get(key, [])
-
-        return result
-
-    @staticmethod
-    def resolve_version(
-        context: RunwayContext,
-        terraform_version: Optional[Union[Dict[str, str], int, str]] = None,
-        **_: Any
-    ) -> Optional[str]:
-        """Resolve terraform_version option."""
-        if isinstance(terraform_version, str) or terraform_version is None:
-            return terraform_version
-        if isinstance(terraform_version, int):
-            return str(terraform_version)
-        return terraform_version.get(context.env.name, terraform_version.get("*"))
+    @cached_property
+    def backend_config(self) -> TerraformBackendConfig:
+        """Backend configuration options."""
+        return TerraformBackendConfig.parse_obj(
+            deploy_environment=self.env,
+            obj=self.data.backend_config or {},
+            path=self.path,
+        )
 
     @classmethod
-    def parse(  # pylint: disable=arguments-differ
-        cls, context: RunwayContext, path: Optional[Path] = None, **kwargs: Any
+    def parse_obj(
+        cls,
+        deploy_environment: DeployEnvironment,
+        obj: object,
+        path: Optional[Path] = None,
     ) -> TerraformOptions:
-        """Parse the options definition and return an options object.
+        """Parse options definition and return an options object.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-
-        Keyword Args:
-            args (Union[Dict[str, List[str]], List[str]]): Arguments to append
-                to Terraform CLI commands. If providing a list, all arguments
-                will be passed to ``terraform apply`` only. Can also be
-                provided as a mapping to pass arguments to ``terraform apply``,
-                ``terraform init``, and/or ``terraform plan``.
-            terraform_backend_config (Optional[Dict[str, str]]):
-                Mapping of Terraform backend configuration options.
-            terraform_backend_cfn_outputs (Optional[Dict[str, str]]):
-                Mapping of Terraform backend configuration options
-                whose values are stored in Cloudformation outputs.
-            terraform_backend_ssm_params (Optional[Dict[str, str]]):
-                Mapping of Terraform backend configuration options
-                whose values are stored in SSM parameters.
-            terraform_version (Optional[Union[Dict[str, str], str]]):
-                Version of Terraform to use when processing a module.
-            terraform_workspace (str): Name of the Terraform workspace to use.
-                While it is recommended to let Runway manage this automatically,
-                it has been exposed as an option for cases when a static
-                workspace may be needed.
-            terraform_write_auto_tfvars (bool): Optionally write parameters
-                to a tfvars file instead of updating environment variables.
-
-        Returns:
-            TerraformOptions
+            deploy_environment: Current deploy environment.
+            obj: Object to parse.
+            path: Module path.
 
         """
         return cls(
-            args=kwargs.get("args", []),
-            backend=TerraformBackendConfig.parse(context, path, **kwargs),
-            version=cls.resolve_version(context, **kwargs),
-            workspace=kwargs.get("terraform_workspace", context.env.name),
-            write_auto_tfvars=kwargs.get("terraform_write_auto_tfvars", False),
+            data=RunwayTerraformModuleOptionsDataModel.parse_obj(obj),
+            deploy_environment=deploy_environment,
+            path=path or Path.cwd(),
         )
 
 
-class TerraformBackendConfig(ModuleOptions):
-    """Terraform backend configuration module options.
-
-    Attributes:
-        OPTIONS: A list of option names that are parsed by this class.
-
-    """
-
-    OPTIONS = [
-        "terraform_backend_config",
-        "terraform_backend_cfn_outputs",
-        "terraform_backend_ssm_params",
-    ]
+class TerraformBackendConfig(ModuleOptionsV2):
+    """Terraform backend configuration module options."""
 
     def __init__(
-        self, context: RunwayContext, config_file: Optional[Path] = None, **kwargs: str
-    ):
+        self,
+        data: RunwayTerraformBackendConfigDataModel,
+        deploy_environment: DeployEnvironment,
+        path: Path,
+    ) -> None:
         """Instantiate class.
 
-        See Terraform documentation for the keyword arguments needed for the
-        desired backend.
-
-        https://www.terraform.io/docs/backends/types/index.html
+        Args:
+            deploy_environment: Current deploy environment.
+            data: Options parsed into a data model.
+            path: Module path.
 
         """
-        super().__init__()
-        self.__ctx = context
-        self._raw_config = kwargs
-        self.config_file = config_file
+        self.bucket = data.bucket
+        self.data = data
+        self.dynamodb_table = data.dynamodb_table
+        self.env = deploy_environment
+        self.path = path
+        if data and not data.region:
+            data.region = deploy_environment.aws_region  # default to region from env
+        self.region = data.region
+
+    @cached_property
+    def config_file(self) -> Optional[Path]:
+        """Backend configuration file."""
+        return self.get_backend_file(self.path, self.env.name, self.env.aws_region)
 
     @cached_property
     def init_args(self) -> List[str]:
         """Return command line arguments for init."""
         result = []
-        for k, v in self._raw_config.items():
-            result.extend(["-backend-config", "{}={}".format(k, v)])
+        for k, v in self.data.dict(exclude_none=True).items():
+            result.extend(["-backend-config", f"{k}={v}"])
         if not result:
             if self.config_file:
                 LOGGER.verbose("using backend config file: %s", self.config_file.name)
-                return ["-backend-config=" + self.config_file.name]
+                return [f"-backend-config={self.config_file.name}"]
             LOGGER.info(
                 "backend file not found -- looking for one " "of: %s",
                 ", ".join(
-                    self.gen_backend_filenames(
-                        self.__ctx.env.name, self.__ctx.env.aws_region
-                    )
+                    self.gen_backend_filenames(self.env.name, self.env.aws_region)
                 ),
             )
             return []
@@ -689,74 +638,29 @@ class TerraformBackendConfig(ModuleOptions):
     def get_full_configuration(self) -> Dict[str, str]:
         """Get full backend configuration."""
         if not self.config_file:
-            return self._raw_config
+            return self.data.dict(exclude_none=True)
         result = cast(Dict[str, str], hcl.loads(self.config_file.read_text()))
-        result.update(self._raw_config)
+        result.update(self.data.dict(exclude_none=True))
         return result
 
-    @staticmethod
-    def resolve_cfn_outputs(
-        client: CloudFormationClient, **kwargs: str
-    ) -> Dict[str, str]:
-        """Resolve CloudFormation output values.
+    @classmethod
+    def get_backend_file(
+        cls, path: Path, environment: str, region: str
+    ) -> Optional[Path]:
+        """Determine Terraform backend file.
 
         Args:
-            client: Boto3 Cloudformation client.
-
-        Keyword Args:
-            bucket (Optional[str]): Cloudformation output containing an S3
-                bucket name.
-            dynamodb_table (Optional[str]): Cloudformation output containing a
-                DynamoDB table name.
-
-        Returns:
-            Resolved values from Cloudformation.
+            path: Path to the module.
+            environment: Current deploy environment.
+            region: Current AWS region.
 
         """
-        LOGGER.warning(
-            "terraform_backend_cfn_outputs option has been deprecated; "
-            "use terraform_backend_config with a cfn Lookup"
-        )
-        if not kwargs:
-            return {}
-
-        result = {}
-        for key, val in kwargs.items():
-            query = deconstruct(val)
-            result[key] = find_cfn_output(
-                query.output_name,
-                client.describe_stacks(StackName=query.stack_name)["Stacks"][0][
-                    "Outputs"
-                ],
-            )
-        return result
-
-    @staticmethod
-    def resolve_ssm_params(client: SSMClient, **kwargs: str) -> Dict[str, str]:
-        """Resolve SSM parameters.
-
-        Args:
-            client: Boto3 SSM client.
-
-        Keyword Args:
-            bucket (Optional[str]): SSM parameter containing an S3 bucket name.
-            dynamodb_table (Optional[str]): SSM parameter containing a
-                DynamoDB table name.
-
-        Returns:
-            Dict[str, str]: Resolved values from SSM.
-
-        """
-        LOGGER.warning(
-            "terraform_backend_ssm_params option has been deprecated; "
-            "use terraform_backend_config with an ssm Lookup"
-        )
-        return {
-            key: client.get_parameter(Name=val, WithDecryption=True)["Parameter"][
-                "Value"
-            ]
-            for key, val in kwargs.items()
-        }
+        backend_filenames = cls.gen_backend_filenames(environment, region)
+        for name in backend_filenames:
+            test_path = path / name
+            if test_path.is_file():
+                return test_path
+        return None
 
     @staticmethod
     def gen_backend_filenames(environment: str, region: str) -> List[str]:
@@ -782,80 +686,22 @@ class TerraformBackendConfig(ModuleOptions):
         return result
 
     @classmethod
-    def get_backend_file(
-        cls, path: Path, environment: str, region: str
-    ) -> Optional[Path]:
-        """Determine Terraform backend file.
-
-        Args:
-            path: Path to the module.
-            environment: Current deploy environment.
-            region: Current AWS region.
-
-        """
-        backend_filenames = cls.gen_backend_filenames(environment, region)
-        for name in backend_filenames:
-            test_path = path / name
-            if test_path.is_file():
-                return test_path
-        return None
-
-    @classmethod
-    def parse(  # pylint: disable=arguments-differ
-        cls, context: RunwayContext, path: Optional[Path] = None, **kwargs: Any
+    def parse_obj(
+        cls,
+        deploy_environment: DeployEnvironment,
+        obj: object,
+        path: Optional[Path] = None,
     ) -> TerraformBackendConfig:
-        """Parse backend options and return an options object.
+        """Parse options definition and return an options object.
 
         Args:
-            context: Runway context object.
-            path: Path to the module.
-
-        Keyword Args:
-            terraform_backend_config (Optional[Dict[str, str]]):
-                Mapping of Terraform backend configuration options.
-            terraform_backend_cfn_outputs (Optional[Dict[str, str]]):
-                Mapping of Terraform backend configuration options
-                whose values are stored in Cloudformation outputs.
-            terraform_backend_ssm_params (Optional[Dict[str, str]]):
-                Mapping of Terraform backend configuration options
-                whose values are stored in SSM parameters.
-
-        Returns:
-            TerraformBackendConfig
+            deploy_environment: Current deploy environment.
+            obj: Object to parse.
+            path: Module path.
 
         """
-        kwargs = cls.merge_nested_env_dicts(
-            {key: val for key, val in kwargs.items() if key in cls.OPTIONS},
-            context.env.name,
+        return cls(
+            data=RunwayTerraformBackendConfigDataModel.parse_obj(obj),
+            deploy_environment=deploy_environment,
+            path=path or Path.cwd(),
         )
-        result = kwargs.get("terraform_backend_config", {})
-
-        session = context.get_session(
-            region=result.get("region", context.env.aws_region)
-        )
-
-        if kwargs.get("terraform_backend_cfn_outputs"):
-            result.update(
-                cls.resolve_cfn_outputs(
-                    client=session.client("cloudformation"),
-                    **kwargs["terraform_backend_cfn_outputs"]
-                )
-            )
-        if kwargs.get("terraform_backend_ssm_params"):
-            result.update(
-                cls.resolve_ssm_params(
-                    client=session.client("ssm"),
-                    **kwargs["terraform_backend_ssm_params"]
-                )
-            )
-
-        if result.get("dynamodb_table") and not result.get("region"):
-            # dynamodb_table is the only option exclusive to the s3 backend
-            # that can be used to determine if region should be inserted
-            result["region"] = context.env.aws_region
-
-        if path:
-            result["config_file"] = cls.get_backend_file(
-                path, context.env.name, context.env.aws_region
-            )
-        return cls(context=context, **result)
