@@ -20,7 +20,7 @@ from ..config.models.runway.options.terraform import (
 )
 from ..env_mgr.tfenv import TFEnvManager
 from ..util import DOC_SITE, which
-from .base import ModuleOptionsV2, RunwayModule
+from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
 
 if TYPE_CHECKING:
@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
     from ..core.components import DeployEnvironment
-    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -516,7 +515,7 @@ class Terraform(RunwayModule):
         self.run("destroy")
 
 
-class TerraformOptions(ModuleOptionsV2):
+class TerraformOptions(ModuleOptions):
     """Module options for Terraform.
 
     Attributes:
@@ -583,7 +582,7 @@ class TerraformOptions(ModuleOptionsV2):
         )
 
 
-class TerraformBackendConfig(ModuleOptionsV2):
+class TerraformBackendConfig(ModuleOptions):
     """Terraform backend configuration module options."""
 
     def __init__(
