@@ -5,7 +5,17 @@ import logging
 import subprocess
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Union,
+    cast,
+    no_type_check_decorator,
+)
 
 from ..exceptions import NpmNotFound
 from ..util import merge_nested_environment_dicts, which
@@ -25,7 +35,7 @@ class RunwayModule:
     explicitly_enabled: Optional[bool]
     logger: Union[PrefixAdaptor, RunwayLogger]
     name: str
-    options: Union[Dict[str, Any], ModuleOptions]
+    options: Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]
     parameters: Dict[str, Any]
     region: str
 
@@ -37,7 +47,7 @@ class RunwayModule:
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -100,7 +110,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -207,6 +217,15 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
                 "during use of nodejs-based module and AWS_PROFILE is "
                 "not set -- you likely want to set AWS_PROFILE instead"
             )
+
+
+class ModuleOptionsV2:
+    """Base class for Runway module options."""
+
+    @no_type_check_decorator
+    def get(self, name: str, default: Any = None):
+        """Get a value or return the default."""
+        return getattr(self, name, default)
 
 
 class ModuleOptions(MutableMapping):
