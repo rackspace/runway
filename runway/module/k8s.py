@@ -2,82 +2,31 @@
 from __future__ import annotations
 
 import logging
-import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
+from ..compat import cached_property
+from ..config.models.runway.options.k8s import RunwayK8sModuleOptionsDataModel
+from ..core.components import DeployEnvironment
 from ..env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
 from ..util import DOC_SITE, which
-from .base import RunwayModule
+from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
-    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-
-
-def gen_overlay_dirs(environment: str, region: str) -> List[str]:
-    """Generate possible overlay directories."""
-    return [
-        # Give preference to explicit environment-region dirs
-        "%s-%s" % (environment, region),
-        # Fallback to environment name only
-        environment,
-    ]
-
-
-def get_module_defined_k8s_ver(
-    k8s_version_opts: Union[str, Dict[str, str]], env_name: str
-) -> Optional[str]:
-    """Return version of Terraform requested in module options."""
-    if isinstance(k8s_version_opts, str):
-        return k8s_version_opts
-    if k8s_version_opts.get(env_name):
-        return k8s_version_opts[env_name]
-    if k8s_version_opts.get("*"):
-        return k8s_version_opts["*"]
-    return None
-
-
-def get_overlay_dir(overlays_path: Path, environment: str, region: str) -> Path:
-    """Determine overlay directory to use."""
-    overlay_dir = overlays_path
-    for name in gen_overlay_dirs(environment, region):
-        overlay_dir = overlays_path / name
-        if (overlay_dir / "kustomization.yaml").is_file():
-            return overlay_dir
-    return overlay_dir  # fallback to last dir
-
-
-def generate_response(
-    overlay_path: Path, module_path: Path, environment: str, region: str
-) -> Dict[str, bool]:
-    """Determine if environment is defined."""
-    configfile = overlay_path / "kustomization.yaml"
-    if configfile.is_file():
-        LOGGER.info("processing kustomize overlay: %s", configfile)
-        return {"skipped_configs": False}
-    LOGGER.info(
-        "skipped; kustomize overlay for this environment/region not"
-        " found -- looking for one of: %s",
-        ", ".join(
-            str(module_path / "overlays" / i / "kustomization.yaml")
-            for i in gen_overlay_dirs(environment, region)
-        ),
-    )
-    return {"skipped_configs": True}
 
 
 class K8s(RunwayModule):
     """Kubectl Runway Module."""
 
-    options: Dict[str, Any]
+    options: K8sOptions
 
     def __init__(
         self,
@@ -114,45 +63,49 @@ class K8s(RunwayModule):
             logger=logger,
             module_root=module_root,
             name=name,
-            options=options,
+            options=K8sOptions.parse_obj(
+                deploy_environment=context.env, obj=options or {}, path=module_root
+            ),
             parameters=parameters,
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
+    @property
+    def skip(self) -> bool:
+        """Determine if the module should be skipped."""
+        if self.options.kustomize_config.is_file():
+            LOGGER.info(
+                "processing kustomize overlay: %s", self.options.kustomize_config
+            )
+            return False
+        LOGGER.info(
+            "skipped; kustomize overlay for this environment/region not"
+            " found -- looking for one of: %s",
+            ", ".join(
+                str(self.path / "overlays" / i / "kustomization.yaml")
+                for i in self.options.gen_overlay_dirs(
+                    self.ctx.env.name, self.ctx.env.aws_region
+                )
+            ),
+        )
+        return True
+
     def run_kubectl(self, command: str = "plan") -> Dict[str, bool]:
         """Run kubectl."""
-        if self.options.get("overlay_path"):
-            # config path is overridden from runway
-            kustomize_config_path = self.path / cast(
-                str, self.options.get("overlay_path"),
-            )
-        else:
-            kustomize_config_path = get_overlay_dir(
-                self.path / "overlays", self.ctx.env.name, self.ctx.env.aws_region,
-            )
-        response = generate_response(
-            kustomize_config_path,
-            self.path,
-            self.ctx.env.name,
-            self.ctx.env.aws_region,
-        )
-        if response["skipped_configs"]:
-            return response
+        if self.skip:
+            return {"skipped_configs": True}
 
-        module_defined_k8s_ver = get_module_defined_k8s_ver(
-            self.options.get("kubectl_version", {}), self.ctx.env.name,
-        )
-        if module_defined_k8s_ver:
+        if self.options.kubectl_version:
             self.logger.debug("using kubectl version from the module definition")
-            k8s_bin = KBEnvManager(self.path).install(module_defined_k8s_ver)
-        elif os.path.isfile(os.path.join(kustomize_config_path, KB_VERSION_FILENAME)):
+            k8s_bin = KBEnvManager(self.path).install(self.options.kubectl_version)
+        elif (self.options.kustomize_config / KB_VERSION_FILENAME).is_file():
             self.logger.debug(
                 "using kubectl version from the overlay directory: %s",
-                kustomize_config_path,
+                self.options.kustomize_config,
             )
-            k8s_bin = KBEnvManager(kustomize_config_path).install()
-        elif os.path.isfile(os.path.join(self.path, KB_VERSION_FILENAME)):
+            k8s_bin = KBEnvManager(self.options.kustomize_config).install()
+        elif (self.path / KB_VERSION_FILENAME).is_file():
             self.logger.debug(
                 "using kubectl version from the module directory: %s", self.path
             )
@@ -178,7 +131,7 @@ class K8s(RunwayModule):
                 sys.exit(1)
             k8s_bin = "kubectl"
 
-        kustomize_cmd = [k8s_bin, "kustomize", kustomize_config_path]
+        kustomize_cmd = [k8s_bin, "kustomize", str(self.options.kustomize_config)]
         self.logger.debug("running kubectl command: %s", " ".join(kustomize_cmd))
         kustomize_yml = subprocess.check_output(kustomize_cmd, env=self.ctx.env.vars)
         if isinstance(kustomize_yml, bytes):  # python3 returns encoded bytes
@@ -191,13 +144,13 @@ class K8s(RunwayModule):
             kubectl_command = [k8s_bin, command]
             if command == "delete":
                 kubectl_command.append("--ignore-not-found=true")
-            kubectl_command.extend(["-k", str(kustomize_config_path)])
+            kubectl_command.extend(["-k", str(self.options.kustomize_config)])
 
             self.logger.info("%s (in progress)", command)
             self.logger.debug("running kubectl command: %s", " ".join(kubectl_command))
             run_module_command(kubectl_command, self.ctx.env.vars, logger=self.logger)
             self.logger.info("%s (complete)", command)
-        return response
+        return {"skipped_configs": False}
 
     def plan(self) -> None:
         """Run kustomize build and display generated plan."""
@@ -210,3 +163,93 @@ class K8s(RunwayModule):
     def destroy(self) -> None:
         """Run kubectl delete."""
         self.run_kubectl(command="delete")
+
+
+class K8sOptions(ModuleOptions):
+    """Module options for Kubernetes.
+
+    Attributes:
+        data: Options parsed into a data model.
+        kubectl_version: Version of kubectl to use.
+        overlay_path: Explicit directory containing the kustomize overlay to use.
+
+    """
+
+    def __init__(
+        self,
+        data: RunwayK8sModuleOptionsDataModel,
+        deploy_environment: DeployEnvironment,
+        path: Path,
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Options parsed into a data model.
+            deploy_environment: Current deploy environment.
+            path: Module path.
+
+        """
+        self.data = data
+        self.env = deploy_environment
+        self.kubectl_version = data.kubectl_version
+        self.path = path
+
+    @cached_property
+    def kustomize_config(self) -> Path:
+        """Kustomize configuration file."""
+        return self.overlay_path / "kustomization.yaml"
+
+    @cached_property
+    def overlay_path(self) -> Path:
+        """Directory containing the kustomize overlay to use."""
+        if self.data.overlay_path:
+            return self.data.overlay_path
+        return self.get_overlay_dir(
+            path=self.path / "overlays",
+            environment=self.env.name,
+            region=self.env.aws_region,
+        )
+
+    @staticmethod
+    def gen_overlay_dirs(environment: str, region: str) -> List[str]:
+        """Generate possible overlay directories.
+
+        Prefers more explicit direcory name but falls back to environmet name only.
+
+        Args:
+            environment: Current deploy environment.
+            region : Current AWS region.
+
+        """
+        return [f"{environment}-{region}", environment]
+
+    @classmethod
+    def get_overlay_dir(cls, path: Path, environment: str, region: str) -> Path:
+        """Determine the overlay directory to use."""
+        overlay_dir = path
+        for name in cls.gen_overlay_dirs(environment, region):
+            overlay_dir = path / name
+            if (overlay_dir / "kustomization.yaml").is_file():
+                return overlay_dir
+        return overlay_dir
+
+    @classmethod
+    def parse_obj(
+        cls,
+        deploy_environment: DeployEnvironment,
+        obj: object,
+        path: Optional[Path] = None,
+    ) -> K8sOptions:
+        """Parse options definition and return an options object.
+
+        Args:
+            deploy_environment: Current deploy environment.
+            obj: Object to parse.
+            path: Module path.
+
+        """
+        return cls(
+            data=RunwayK8sModuleOptionsDataModel.parse_obj(obj),
+            deploy_environment=deploy_environment,
+            path=path or Path.cwd(),
+        )
