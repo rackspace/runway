@@ -3,22 +3,11 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from collections.abc import MutableMapping
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Union,
-    cast,
-    no_type_check_decorator,
-)
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from ..exceptions import NpmNotFound
-from ..util import merge_nested_environment_dicts, which
+from ..util import which
 from .utils import NPM_BIN, format_npm_command_for_logging, use_npm_ci
 
 if TYPE_CHECKING:
@@ -35,7 +24,7 @@ class RunwayModule:
     explicitly_enabled: Optional[bool]
     logger: Union[PrefixAdaptor, RunwayLogger]
     name: str
-    options: Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]
+    options: Union[Dict[str, Any], ModuleOptions]
     parameters: Dict[str, Any]
     region: str
 
@@ -47,7 +36,7 @@ class RunwayModule:
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -110,7 +99,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -219,131 +208,9 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
             )
 
 
-class ModuleOptionsV2:
+class ModuleOptions:
     """Base class for Runway module options."""
 
-    @no_type_check_decorator
-    def get(self, name: str, default: Any = None):
+    def get(self, name: str, default: Any = None) -> Any:
         """Get a value or return the default."""
         return getattr(self, name, default)
-
-
-class ModuleOptions(MutableMapping):
-    """Base class for Runway module options."""
-
-    @staticmethod
-    def merge_nested_env_dicts(data: Any, env_name: Optional[str] = None) -> Any:
-        """Merge nested env dicts.
-
-        Args:
-            data: Data to try to merge.
-            env_name: Current environment.
-
-        """
-        if isinstance(data, (list, type(None), str)):
-            return data
-        if isinstance(data, dict):
-            return {
-                key: merge_nested_environment_dicts(value, env_name)
-                for key, value in data.items()
-            }
-        raise TypeError(
-            "expected type of list, NoneType, or str; got type %s" % type(data)
-        )
-
-    @classmethod
-    def parse(cls, context: RunwayContext, **kwargs: Any) -> ModuleOptions:
-        """Parse module options definition to extract usable options.
-
-        Args:
-            context: Runway context object.
-
-        """
-        raise NotImplementedError
-
-    def __delitem__(self, key: str) -> None:
-        """Implement deletion of self[key].
-
-        Args:
-            key: Attribute name to remove from the object.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                del obj['key']
-                print(obj.__dict__)
-                # {}
-
-        """
-        delattr(self, key)
-
-    def __getitem__(self, key: str) -> Any:
-        """Implement evaluation of self[key].
-
-        Args:
-            key: Attribute name to return the value for.
-
-        Returns:
-            The value associated with the provided key/attribute name.
-
-        Raises:
-            KeyError: Key does not exist in the object.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                print(obj['key'])
-                # value
-
-        """
-        try:
-            return getattr(self, key)
-        except AttributeError:
-            raise KeyError(key)
-
-    def __setitem__(self, key: str, value: Any) -> Any:
-        """Implement assignment to self[key].
-
-        Args:
-            key: Attribute name to associate with a value.
-            value: Value of a key/attribute.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions()
-                obj['key'] = 'value'
-                print(obj['key'])
-                # value
-
-        """
-        setattr(self, key, value)
-
-    def __len__(self) -> int:
-        """Implement the built-in function len().
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                print(len(obj))
-                # 1
-
-        """
-        return len(self.__dict__)
-
-    def __iter__(self) -> Iterator[str]:
-        """Return iterator object that can iterate over all attributes.
-
-        Example:
-            .. codeblock: python
-
-                obj = ModuleOptions(**{'key': 'value'})
-                for k, v in obj.items():
-                    print(f'{key}: {value}')
-                # key: value
-
-        """
-        return iter(self.__dict__)

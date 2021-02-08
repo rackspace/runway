@@ -21,7 +21,7 @@ from ..config.models.runway.options.serverless import (
 from ..hooks.staticsite.util import get_hash_of_files
 from ..s3_util import does_s3_object_exist, download, ensure_bucket_exists, upload
 from ..util import YamlDumper, cached_property, merge_dicts
-from .base import ModuleOptionsV2, RunwayModuleNpm
+from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
-    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -155,7 +154,7 @@ class Serverless(RunwayModuleNpm):
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions, ModuleOptionsV2]] = None,
+        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
         parameters: Optional[Dict[str, Any]] = None,
         **_: Any,
     ) -> None:
@@ -400,7 +399,7 @@ class Serverless(RunwayModuleNpm):
             self.sls_remove()
 
 
-class ServerlessOptions(ModuleOptionsV2):
+class ServerlessOptions(ModuleOptions):
     """Module options for Serverless Framework.
 
     Attributes:
