@@ -5,12 +5,9 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
-import boto3
 import pytest
-from botocore.stub import Stubber
 from mock import MagicMock
 
 from runway._logging import LogLevels
@@ -581,6 +578,8 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
             "-reconfigure",
             "-backend-config",
             "bucket=name",
+            "-backend-config",
+            "region=us-east-1",
             "init_arg",
         ]
         assert not obj.terraform_init()
@@ -785,6 +784,19 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
 class TestTerraformOptions:
     """Test runway.module.terraform.TerraformOptions."""
 
+    def test_backend_config(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test backend_config."""
+        backend_config = {"bucket": "test"}
+        mocker.patch.object(TerraformBackendConfig, "parse_obj", return_value="success")
+        obj = TerraformOptions.parse_obj(
+            deploy_environment=runway_context.env,
+            obj={"terraform_backend_config": backend_config},
+            path=tmp_path,
+        )
+        assert obj.backend_config == "success"
+
     @pytest.mark.parametrize(
         "config",
         [
@@ -830,22 +842,6 @@ class TestTerraformOptions:
                 }
             ),
             ({"terraform_version": "0.11.6"}),
-            ({"terraform_version": {"test": "0.12", "prod": "0.11.6"}}),  # deprecated
-            (
-                {
-                    "args": {
-                        "apply": ["-key=apply"],
-                        "init": ["-key=init"],
-                        "plan": ["-key=plan"],
-                    },
-                    "terraform_backend_config": {"region": "us-west-2"},
-                    "terraform_backend_ssm_params": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    },
-                    "terraform_version": {"test": "0.12", "prod": "0.11.6"},
-                }
-            ),  # deprecated
             (
                 {
                     "args": {
@@ -861,77 +857,25 @@ class TestTerraformOptions:
                     "terraform_version": "0.11.6",
                 }
             ),
-            (
-                {
-                    "args": ["-key=val"],  # deprecated
-                    "terraform_backend_config": {
-                        "test": {"bucket": "foo", "dynamodb_table": "bar"},
-                        "prod": {"bucket": "invalid", "dynamodb_table": "invalid"},
-                    },
-                    "terraform_version": {"test": "0.12", "prod": "0.11.6"},
-                }
-            ),
         ],
     )
-    def test_parse(
-        self,
-        config: Dict[str, Any],
-        mocker: MockerFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
+    def test_parse_obj(
+        self, config: Dict[str, Any], runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
-        """Test parse."""
-        mock_backend = mocker.patch.object(
-            TerraformBackendConfig, "parse", return_value="successfully parsed backend"
+        """Test parse_obj."""
+        obj = TerraformOptions.parse_obj(
+            deploy_environment=runway_context.env, obj=config, path=tmp_path
         )
-
-        def assert_resolve_version_kwargs(
-            context: MockRunwayContext,
-            terraform_version: Optional[str] = None,
-            **_: Any
-        ) -> str:
-            """Assert args passed to the method during parse."""
-            assert config.get("terraform_version") == terraform_version
-            return "successfully resolved version"
-
-        mocker.patch.object(
-            TerraformOptions, "resolve_version", assert_resolve_version_kwargs
-        )
-
-        result = TerraformOptions.parse(context=runway_context, path=tmp_path, **config)
 
         if isinstance(config.get("args"), list):
-            assert result.args["apply"] == config["args"]
-            assert result.args["init"] == []
-            assert result.args["plan"] == []
+            assert obj.args.apply == config["args"]
+            assert obj.args.init == []
+            assert obj.args.plan == []
         elif isinstance(config.get("args"), dict):
-            assert result.args["apply"] == config["args"].get("apply", [])
-            assert result.args["init"] == config["args"].get("init", [])
-            assert result.args["plan"] == config["args"].get("plan", [])
-        assert result.backend_config == "successfully parsed backend"
-        assert result.version == "successfully resolved version"
-        mock_backend.assert_called_once_with(runway_context, tmp_path, **config)
-
-    @pytest.mark.parametrize(
-        "terraform_version, expected",
-        [
-            ("0.11.6", "0.11.6"),
-            ({"test": "0.12", "prod": "0.11.6"}, "0.12"),  # deprecated
-            ({"*": "0.11.6", "test": "0.12"}, "0.12"),  # deprecated
-            ({"*": "0.11.6", "prod": "0.12"}, "0.11.6"),  # deprecated
-            ({"prod": "0.11.6"}, None),  # deprecated
-            (None, None),
-            (13, "13"),
-        ],
-    )
-    def test_resolve_version(
-        self, expected: Any, runway_context: MockRunwayContext, terraform_version: Any,
-    ) -> None:
-        """Test resolve_version."""
-        config = {"something": None}
-        if terraform_version:
-            config["terraform_version"] = terraform_version
-        assert TerraformOptions.resolve_version(runway_context, **config) == expected
+            assert obj.args.apply == config["args"].get("apply", [])
+            assert obj.args.init == config["args"].get("init", [])
+            assert obj.args.plan == config["args"].get("plan", [])
+        assert obj.version == config.get("terraform_version")
 
 
 class TestTerraformBackendConfig:
@@ -942,22 +886,33 @@ class TestTerraformBackendConfig:
     ) -> None:
         """Test get_full_configuration."""
         config_file = tmp_path / "backend.hcl"
-        config_file.write_text('key2 = "val2"')
-        backend = TerraformBackendConfig(runway_context, **{"key1": "val1"})
-        assert backend.get_full_configuration() == {"key1": "val1"}
-        backend.config_file = config_file
-        assert backend.get_full_configuration() == {"key1": "val1", "key2": "val2"}
+        config_file.write_text('dynamodb_table = "test-table"')
+        backend = TerraformBackendConfig.parse_obj(
+            deploy_environment=runway_context.env, obj={"bucket": "test-bucket"}
+        )
+        assert backend.get_full_configuration() == {
+            "bucket": "test-bucket",
+            "region": "us-east-1",
+        }
+        backend.config_file = config_file  # type: ignore
+        assert backend.get_full_configuration() == {
+            "bucket": "test-bucket",
+            "dynamodb_table": "test-table",
+            "region": "us-east-1",
+        }
 
     @pytest.mark.parametrize(
         "input_data, expected_items",
         [
             ({}, []),
-            ({"some-key": "anything"}, ["some-key=anything"]),
-            ({"dynamodb_table": "test-table"}, ["dynamodb_table=test-table"]),
+            (
+                {"dynamodb_table": "test-table"},
+                ["dynamodb_table=test-table", "region=us-east-1"],
+            ),
             ({"region": "us-east-1"}, ["region=us-east-1"]),
             (
                 {"bucket": "test-bucket", "dynamodb_table": "test-table"},
-                ["bucket=test-bucket", "dynamodb_table=test-table"],
+                ["bucket=test-bucket", "dynamodb_table=test-table", "region=us-east-1"],
             ),
             (
                 {
@@ -972,7 +927,6 @@ class TestTerraformBackendConfig:
                     "bucket": "test-bucket",
                     "dynamodb_table": "test-table",
                     "region": "us-east-1",
-                    "config_file": MagicMock(),
                 },
                 ["bucket=test-bucket", "dynamodb_table=test-table", "region=us-east-1"],
             ),
@@ -981,15 +935,19 @@ class TestTerraformBackendConfig:
     def test_init_args(
         self,
         expected_items: List[str],
-        input_data: Dict[str, Any],
+        input_data: Dict[str, str],
         runway_context: MockRunwayContext,
+        tmp_path: Path,
     ) -> None:
         """Test init_args."""
         expected = []
         for i in expected_items:
             expected.extend(["-backend-config", i])
         assert (
-            TerraformBackendConfig(runway_context, **input_data).init_args == expected
+            TerraformBackendConfig.parse_obj(
+                deploy_environment=runway_context.env, obj=input_data, path=tmp_path
+            ).init_args
+            == expected
         )
 
     def test_init_args_file(
@@ -1001,101 +959,12 @@ class TestTerraformBackendConfig:
         """Test init_args with backend file."""
         caplog.set_level(LogLevels.VERBOSE, logger=MODULE)
         config_file = tmp_path / "backend.hcl"
-        assert TerraformBackendConfig(
-            runway_context, config_file=config_file
-        ).init_args == ["-backend-config=backend.hcl"]
+        config_file.touch()
+        obj = TerraformBackendConfig.parse_obj(
+            deploy_environment=runway_context.env, obj={}, path=tmp_path
+        )
+        assert obj.init_args == [f"-backend-config={config_file.name}"]
         assert "using backend config file: backend.hcl" in caplog.messages
-
-    @pytest.mark.parametrize(
-        "kwargs, stack_info,expected",
-        [
-            (
-                {
-                    "bucket": "tf-state::BucketName",
-                    "dynamodb_table": "tf-state::TableName",
-                },
-                {"tf-state": {"BucketName": "test-bucket", "TableName": "test-table"}},
-                {"bucket": "test-bucket", "dynamodb_table": "test-table"},
-            ),
-            ({}, {}, {}),
-        ],
-    )
-    def test_resolve_cfn_outputs(
-        self,
-        expected: Dict[str, str],
-        kwargs: Dict[str, str],
-        stack_info: Dict[str, Dict[str, str]],
-    ) -> None:
-        """Test resolve_cfn_outputs."""
-        client = boto3.client("cloudformation")
-        stubber = Stubber(client)
-        for stack, outputs in stack_info.items():
-            for key, val in outputs.items():
-                stubber.add_response(
-                    "describe_stacks",
-                    {
-                        "Stacks": [
-                            {
-                                "StackName": stack,
-                                "CreationTime": datetime.now(),
-                                "StackStatus": "CREATE_COMPLETE",
-                                "Outputs": [{"OutputKey": key, "OutputValue": val}],
-                            }
-                        ]
-                    },
-                )
-        with stubber:
-            assert (
-                TerraformBackendConfig.resolve_cfn_outputs(client, **kwargs) == expected
-            )
-        stubber.assert_no_pending_responses()
-
-    @pytest.mark.parametrize(
-        "kwargs, parameters, expected",
-        [
-            (
-                {"bucket": "/some/param/key", "dynamodb_table": "foo"},
-                [
-                    {"name": "/some/param/key", "value": "test-bucket"},
-                    {"name": "foo", "value": "test-table"},
-                ],
-                {"bucket": "test-bucket", "dynamodb_table": "test-table"},
-            ),
-            ({}, {}, {}),
-        ],
-    )
-    def test_resolve_ssm_params(
-        self,
-        caplog: LogCaptureFixture,
-        expected: Dict[str, str],
-        kwargs: Dict[str, Any],
-        parameters: List[Dict[str, str]],
-    ) -> None:
-        """Test resolve_ssm_params."""
-        caplog.set_level("WARNING")
-
-        client = boto3.client("ssm")
-        stubber = Stubber(client)
-
-        for param in parameters:
-            stubber.add_response(
-                "get_parameter",
-                {
-                    "Parameter": {
-                        "Name": param["name"],
-                        "Value": param["value"],
-                        "LastModifiedDate": datetime.now(),
-                    }
-                },
-                {"Name": param["name"], "WithDecryption": True},
-            )
-
-        with stubber:
-            assert (
-                TerraformBackendConfig.resolve_ssm_params(client, **kwargs) == expected
-            )
-        stubber.assert_no_pending_responses()
-        assert "deprecated" in "\n".join(caplog.messages)
 
     def test_gen_backend_filenames(self) -> None:
         """Test gen_backend_filenames."""
@@ -1148,167 +1017,28 @@ class TestTerraformBackendConfig:
         "config, expected_region",
         [
             (
-                {
-                    "terraform_backend_config": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                        "region": "us-west-2",
-                    }
-                },
+                {"bucket": "foo", "dynamodb_table": "bar", "region": "us-west-2"},
                 "us-west-2",
             ),
-            (
-                {
-                    "terraform_backend_config": {"region": "us-west-2"},
-                    "terraform_backend_cfn_outputs": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    },
-                },
-                "us-west-2",
-            ),
-            (
-                {
-                    "terraform_backend_config": {"region": "us-west-2"},
-                    "terraform_backend_ssm_params": {  # deprecated
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    },
-                },
-                "us-west-2",
-            ),
-            (
-                {
-                    "terraform_backend_config": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    }
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_cfn_outputs": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    }
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_ssm_params": {  # deprecated
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    }
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_cfn_outputs": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    }
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_ssm_params": {  # deprecated
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    }
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_cfn_outputs": {"bucket": "foo"},
-                    "terraform_backend_ssm_params": {  # deprecated
-                        "dynamodb_table": "bar"
-                    },
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_config": {
-                        "bucket": "nope",
-                        "dynamodb_table": "nope",
-                        "region": "us-west-2",
-                    },
-                    "terraform_backend_cfn_outputs": {
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    },
-                },
-                "us-west-2",
-            ),
-            (
-                {
-                    "terraform_backend_config": {
-                        "bucket": "nope",
-                        "dynamodb_table": "nope",
-                        "region": "us-west-2",
-                    },
-                    "terraform_backend_ssm_params": {  # deprecated
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    },
-                },
-                "us-west-2",
-            ),
-            (
-                {
-                    "terraform_backend_cfn_outputs": {
-                        "bucket": "nope",
-                        "dynamodb_table": "nope",
-                    },
-                    "terraform_backend_ssm_params": {  # deprecated
-                        "bucket": "foo",
-                        "dynamodb_table": "bar",
-                    },
-                },
-                "us-east-1",
-            ),
-            (
-                {
-                    "terraform_backend_config": {
-                        "test": {  # deprecated
-                            "bucket": "foo",
-                            "dynamodb_table": "bar",
-                        },
-                        "prod": {"bucket": "invalid", "dynamodb_table": "invalid"},
-                    }
-                },
-                "us-east-1",
-            ),
+            ({"bucket": "foo", "dynamodb_table": "bar"}, "us-east-1"),
         ],
     )
-    def test_parse(
+    def test_parse_obj(
         self,
-        config: Dict[str, Any],
+        config: Dict[str, str],
         expected_region: str,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
-        """Test parse."""
-        runway_context.add_stubber("cloudformation", expected_region)
-        runway_context.add_stubber("ssm", expected_region)
+        """Test parse_obj."""
 
-        def assert_cfn_kwargs(client: Any, **kwargs: str):
-            """Assert args passed to the method during parse."""
-            assert kwargs == config.get("terraform_backend_cfn_outputs")
-            return kwargs
-
-        def assert_ssm_kwargs(client: Any, **kwargs: str):
-            """Assert args passed to the method during parse."""
-            assert kwargs == config.get("terraform_backend_ssm_params")
-            return kwargs
-
-        def assert_get_backend_file_args(path: Path, env_name: str, env_region: str):
+        def assert_get_backend_file_args(
+            _cls: Type[TerraformBackendConfig],
+            path: Path,
+            env_name: str,
+            env_region: str,
+        ):
             """Assert args passed to the method during parse."""
             assert path == tmp_path
             assert env_name == "test"
@@ -1316,18 +1046,14 @@ class TestTerraformBackendConfig:
             return "success"
 
         mocker.patch.object(
-            TerraformBackendConfig, "resolve_cfn_outputs", assert_cfn_kwargs
-        )
-        mocker.patch.object(
-            TerraformBackendConfig, "resolve_ssm_params", assert_ssm_kwargs
-        )
-        mocker.patch.object(
             TerraformBackendConfig, "get_backend_file", assert_get_backend_file_args
         )
 
-        result = TerraformBackendConfig.parse(runway_context, tmp_path, **config)
+        result = TerraformBackendConfig.parse_obj(
+            deploy_environment=runway_context.env, obj=config, path=tmp_path
+        )
 
-        assert result._raw_config["bucket"] == "foo"
-        assert result._raw_config["dynamodb_table"] == "bar"
-        assert result._raw_config["region"] == expected_region
+        assert result.bucket == "foo"
+        assert result.dynamodb_table == "bar"
+        assert result.region == expected_region
         assert result.config_file == "success"
