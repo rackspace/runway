@@ -8,14 +8,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
+from ..config.models.runway.options.cdk import RunwayCdkModuleOptionsDataModel
 from ..util import change_dir, run_commands, which
-from .base import RunwayModuleNpm
+from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
     from ..context.runway import RunwayContext
-    from .base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -40,6 +40,8 @@ def get_cdk_stacks(
 
 class CloudDevelopmentKit(RunwayModuleNpm):
     """CDK Runway Module."""
+
+    options: CloudDevelopmentKitOptions
 
     def __init__(
         self,
@@ -76,7 +78,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
             logger=logger,
             module_root=module_root,
             name=name,
-            options=options,
+            options=CloudDevelopmentKitOptions.parse_obj(options or {}),
             parameters=parameters,
         )
         # logger needs to be created here to use the correct logger
@@ -105,7 +107,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
             if not self.package_json_missing():
                 with change_dir(self.path):
                     self.npm_install()
-                    if cast(Dict[str, Any], self.options.get("build_steps", [])):
+                    if self.options.build_steps:
                         self.logger.info("build steps (in progress)")
                         run_commands(
                             commands=cast(
@@ -114,7 +116,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                                         str, List[str], Dict[str, Union[str, List[str]]]
                                     ]
                                 ],
-                                self.options.get("build_steps", []),
+                                self.options.build_steps,
                             ),
                             directory=self.path,
                             env=self.ctx.env.vars,
@@ -190,3 +192,37 @@ class CloudDevelopmentKit(RunwayModuleNpm):
     def destroy(self) -> None:
         """Run cdk destroy."""
         self.run_cdk(command="destroy")
+
+
+class CloudDevelopmentKitOptions(ModuleOptions):
+    """Module options for AWS Cloud Development Kit.
+
+    Attributes:
+        build_steps: A list of commands to be executed before each action (e.g.
+            diff, deploy, destroy).
+        data: Options parsed into a data model.
+        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
+            processing the module.
+
+    """
+
+    def __init__(self, data: RunwayCdkModuleOptionsDataModel) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Options parsed into a data model.
+
+        """
+        self.build_steps = data.build_steps
+        self.data = data
+        self.skip_npm_ci = data.skip_npm_ci
+
+    @classmethod
+    def parse_obj(cls, obj: object) -> CloudDevelopmentKitOptions:
+        """Parse options definition and return an options object.
+
+        Args:
+            obj: Object to parse.
+
+        """
+        return cls(data=RunwayCdkModuleOptionsDataModel.parse_obj(obj))
