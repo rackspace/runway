@@ -594,8 +594,8 @@ class TerraformBackendConfig(ModuleOptions):
         """Instantiate class.
 
         Args:
-            deploy_environment: Current deploy environment.
             data: Options parsed into a data model.
+            deploy_environment: Current deploy environment.
             path: Module path.
 
         """
