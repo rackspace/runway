@@ -17,6 +17,7 @@ from ..base import RunwayModule
 from ..cloudformation import CloudFormation
 from .options import StaticSiteOptions
 from .parameters import RunwayStaticSiteModuleParametersDataModel
+from .utils import add_url_scheme
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
@@ -24,18 +25,6 @@ if TYPE_CHECKING:
     from ..base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-
-
-def add_url_scheme(url: str) -> str:
-    """Add the scheme to an existing url.
-
-    Args:
-        url (str): The current url.
-
-    """
-    if url.startswith("https://") or url.startswith("http://"):
-        return url
-    return "https://%s" % url
 
 
 class StaticSite(RunwayModule):

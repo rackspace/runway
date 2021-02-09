@@ -8,7 +8,7 @@ from troposphere import AccountId, Join, Output, cognito, s3
 
 from ...cfngin.blueprints.base import Blueprint
 from ...hooks.staticsite.auth_at_edge.client_updater import get_redirect_uris
-from ...module.staticsite.handler import add_url_scheme
+from ...module.staticsite.utils import add_url_scheme
 
 LOGGER = logging.getLogger(__name__)
 
