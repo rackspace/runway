@@ -1,24 +1,27 @@
-"""Static website module."""
+"""Static website Module."""
 from __future__ import annotations
 
+import json
 import logging
 import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 import yaml
 
-from .._logging import PrefixAdaptor
-from ..util import YamlDumper
-from .base import RunwayModule
-from .cloudformation import CloudFormation
+from ..._logging import PrefixAdaptor
+from ...util import YamlDumper
+from ..base import RunwayModule
+from ..cloudformation import CloudFormation
+from .options import StaticSiteOptions
+from .parameters import RunwayStaticSiteModuleParametersDataModel
 
 if TYPE_CHECKING:
-    from .._logging import RunwayLogger
-    from ..context.runway import RunwayContext
-    from .base import ModuleOptions
+    from ..._logging import RunwayLogger
+    from ...context.runway import RunwayContext
+    from ..base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -38,7 +41,8 @@ def add_url_scheme(url: str) -> str:
 class StaticSite(RunwayModule):
     """Static website Runway Module."""
 
-    options: Dict[str, Any]
+    options: StaticSiteOptions
+    parameters: RunwayStaticSiteModuleParametersDataModel
 
     def __init__(
         self,
@@ -75,8 +79,11 @@ class StaticSite(RunwayModule):
             logger=logger,
             module_root=module_root,
             name=name,
-            options=options,
+            options=StaticSiteOptions.parse_obj(options or {}),
             parameters=parameters,
+        )
+        self.parameters = RunwayStaticSiteModuleParametersDataModel.parse_obj(
+            self.parameters
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
@@ -94,7 +101,7 @@ class StaticSite(RunwayModule):
     def deploy(self) -> None:
         """Create website CFN module and run stacker build."""
         if self.parameters:
-            if self.parameters.get("staticsite_cf_disable", False) is False:
+            if not self.parameters.cf_disable:
                 self.logger.warning(
                     "initial creation of & updates to distributions can take "
                     "up to an hour to complete"
@@ -102,8 +109,8 @@ class StaticSite(RunwayModule):
 
                 # Auth@Edge warning about subsequent deploys
                 if (
-                    self.parameters.get("staticsite_auth_at_edge", False)
-                    and not self.parameters.get("staticsite_aliases", False)
+                    self.parameters.auth_at_edge
+                    and not self.parameters.aliases
                     and self.ctx.is_interactive
                 ):
                     self.logger.warning(
@@ -144,8 +151,8 @@ class StaticSite(RunwayModule):
         # Runway delete the old `-cleanup` stack, as the resources in it don't
         # have any costs when unused.
         if command == "destroy" and (
-            self.parameters.get("staticsite_auth_at_edge")
-            or self.parameters.get("staticsite_rewrite_index_index")
+            self.parameters.auth_at_edge
+            or self.parameters.dict().get("staticsite_rewrite_index_index")
         ):
             self._create_cleanup_yaml(module_dir)
 
@@ -154,8 +161,8 @@ class StaticSite(RunwayModule):
             explicitly_enabled=self.explicitly_enabled,
             module_root=module_dir,
             name=self.name,
-            options=self.options,
-            parameters=self.parameters,
+            options=self.options.data.dict(),
+            parameters=self.parameters.dict(by_alias=True),
         )
         self.logger.info("%s (in progress)", command)
         getattr(cfn, command)()
@@ -178,8 +185,8 @@ class StaticSite(RunwayModule):
             for i in ["AWSLogBucketName", "ArtifactsBucketName"]
         ]
 
-        if self.parameters.get("staticsite_auth_at_edge", False):
-            if not self.parameters.get("staticsite_aliases"):
+        if self.parameters.auth_at_edge:
+            if not self.parameters.aliases:
                 # Retrieve the appropriate callback urls from the User Pool Client
                 pre_build.append(
                     {
@@ -187,19 +194,14 @@ class StaticSite(RunwayModule):
                         "required": True,
                         "data_key": "aae_callback_url_retriever",
                         "args": {
-                            "user_pool_arn": self.parameters.get(
-                                "staticsite_user_pool_arn", ""
-                            ),
-                            "aliases": self.parameters.get("staticsite_aliases", ""),
-                            "additional_callback_domains": self.parameters.get(
-                                "staticsite_additional_callback_domains", ""
-                            ),
+                            "user_pool_arn": self.parameters.user_pool_arn,
+                            "aliases": self.parameters.aliases,
                             "stack_name": "${namespace}-%s-dependencies" % self.name,
                         },
                     }
                 )
 
-            if self.parameters.get("staticsite_create_user_pool"):
+            if self.parameters.create_user_pool:
                 # Retrieve the user pool id
                 pre_destroy.append(
                     {
@@ -253,12 +255,14 @@ class StaticSite(RunwayModule):
 
     def _create_staticsite_yaml(self, module_dir: Path) -> None:
         # Default parameter name matches build_staticsite hook
-        hash_param = self.options.get("source_hashing", {}).get(
-            "parameter", "${namespace}-%s-hash" % self.name
-        )
+        if not self.options.source_hashing.parameter:
+            self.options.source_hashing.parameter = f"${{namespace}}-{self.name}-hash"
         nonce_secret_param = "${namespace}-%s-nonce-secret" % self.name
 
-        build_staticsite_args = self.options.copy() or {}
+        build_staticsite_args: Dict[str, Any] = {
+            # ensures yaml.safe_load will work by using JSON to convert objects
+            "options": json.loads(self.options.data.json(by_alias=True))
+        }
         build_staticsite_args["artifact_bucket_rxref_lookup"] = (
             "%s-dependencies::ArtifactsBucketName" % self.name
         )
@@ -288,7 +292,7 @@ class StaticSite(RunwayModule):
                 "args": {
                     "bucket_name": f"${{cfn ${{namespace}}-{self.name}.BucketName}}",
                     "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL::default=undefined}}",  # noqa
-                    "extra_files": self.options.get("extra_files", []),
+                    "extra_files": [i.dict() for i in self.options.extra_files],
                     "cf_disabled": site_stack_variables["DisableCloudFront"],
                     "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId}}",
                     "distribution_domain": f"${{cfn ${{namespace}}-{self.name}.CFDistributionDomainName}}",  # noqa
@@ -304,9 +308,7 @@ class StaticSite(RunwayModule):
             }
         ]
 
-        if self.parameters.get(
-            "staticsite_rewrite_directory_index"
-        ) or self.parameters.get("staticsite_auth_at_edge"):
+        if self.parameters.rewrite_directory_index or self.parameters.auth_at_edge:
             pre_destroy.append(
                 {
                     "path": "runway.hooks.staticsite.cleanup.warn",
@@ -320,10 +322,14 @@ class StaticSite(RunwayModule):
                 "path": "runway.hooks.cleanup_ssm.delete_param",
                 "args": {"parameter_name": i},
             }
-            for i in [hash_param, nonce_secret_param, "%sextra" % hash_param]
+            for i in [
+                self.options.source_hashing.parameter,
+                nonce_secret_param,
+                "%sextra" % self.options.source_hashing.parameter,
+            ]
         ]
 
-        if self.parameters.get("staticsite_auth_at_edge", False):
+        if self.parameters.auth_at_edge:
             class_path = "auth_at_edge.AuthAtEdge"
 
             pre_build.append(
@@ -350,11 +356,11 @@ class StaticSite(RunwayModule):
                     "args": self._get_lambda_config_variables(
                         site_stack_variables,
                         nonce_secret_param,
-                        self.parameters.get("staticsite_required_group"),
+                        self.parameters.required_group,
                     ),
                 }
             )
-            if not self.parameters.get("staticsite_aliases"):
+            if not self.parameters.aliases:
                 post_build.insert(
                     0,
                     {
@@ -367,16 +373,15 @@ class StaticSite(RunwayModule):
                     },
                 )
 
-        if self.parameters.get("staticsite_role_boundary_arn", False):
-            site_stack_variables["RoleBoundaryArn"] = self.parameters[
-                "staticsite_role_boundary_arn"
-            ]
+        if self.parameters.role_boundary_arn:
+            site_stack_variables["RoleBoundaryArn"] = self.parameters.role_boundary_arn
 
-        # If lambda_function_associations or custom_error_responses defined,
-        # add to stack config
-        for i in ["custom_error_responses", "lambda_function_associations"]:
-            if self.parameters.get("staticsite_%s" % i):
-                site_stack_variables[i] = self.parameters.pop("staticsite_%s" % i)
+        site_stack_variables["custom_error_responses"] = [
+            i.dict(exclude_none=True) for i in self.parameters.custom_error_responses
+        ]
+        site_stack_variables["lambda_function_associations"] = [
+            i.dict() for i in self.parameters.lambda_function_associations
+        ]
 
         content = {
             "namespace": "${namespace}",
@@ -422,151 +427,82 @@ class StaticSite(RunwayModule):
     def _get_site_stack_variables(self) -> Dict[str, Any]:
         site_stack_variables = {
             "Aliases": [],
-            "DisableCloudFront": self.parameters.get("staticsite_cf_disable", False),
-            "RewriteDirectoryIndex": self.parameters.get(
-                "staticsite_rewrite_directory_index", ""
-            ),
+            "DisableCloudFront": self.parameters.cf_disable,
+            "RewriteDirectoryIndex": self.parameters.rewrite_directory_index or "",
             "RedirectPathSignIn": "${default staticsite_redirect_path_sign_in::/parseauth}",
             "RedirectPathSignOut": "${default staticsite_redirect_path_sign_out::/}",
             "RedirectPathAuthRefresh": "${default staticsite_redirect_path_auth_refresh"
             "::/refreshauth}",
             "SignOutUrl": "${default staticsite_sign_out_url::/signout}",
-            "WAFWebACL": self.parameters.get("staticsite_web_acl", ""),
+            "WAFWebACL": self.parameters.web_acl or "",
         }
 
-        if self.parameters.get("staticsite_aliases"):
-            site_stack_variables["Aliases"] = self.parameters.get(
-                "staticsite_aliases"
-            ).split(",")
+        if self.parameters.aliases:
+            site_stack_variables["Aliases"] = self.parameters.aliases
 
-        if self.parameters.get("staticsite_acmcert_arn"):
-            site_stack_variables["AcmCertificateArn"] = self.parameters[
-                "staticsite_acmcert_arn"
-            ]
+        if self.parameters.acmcert_arn:
+            site_stack_variables["AcmCertificateArn"] = self.parameters.acmcert_arn
 
-        if self.parameters.get("staticsite_acmcert_ssm_param"):
-            self.logger.warning(
-                "staticsite_acmcert_ssm_param option has been deprecated; "
-                "use staticsite_acmcert_arn with an ssm lookup"
-            )
-            site_stack_variables[
-                "AcmCertificateArn"
-            ] = "${ssmstore ${staticsite_acmcert_ssm_param}}"
-
-        if self.parameters.get("staticsite_enable_cf_logging", True):
+        if self.parameters.enable_cf_logging:
             site_stack_variables["LogBucketName"] = (
                 "${rxref %s-dependencies::AWSLogBucketName}" % self.name
             )
 
-        if self.parameters.get("staticsite_auth_at_edge", False):
+        if self.parameters.auth_at_edge:
             self._ensure_auth_at_edge_requirements()
-            site_stack_variables["UserPoolArn"] = self.parameters.get(
-                "staticsite_user_pool_arn"
-            )
-            site_stack_variables["NonSPAMode"] = self.parameters.get(
-                "staticsite_non_spa", False
-            )
-            site_stack_variables["HttpHeaders"] = self._get_http_headers()
-            site_stack_variables["CookieSettings"] = self._get_cookie_settings()
-            site_stack_variables["OAuthScopes"] = self._get_oauth_scopes()
+            site_stack_variables["UserPoolArn"] = self.parameters.user_pool_arn
+            site_stack_variables["NonSPAMode"] = self.parameters.non_spa
+            site_stack_variables["HttpHeaders"] = self.parameters.http_headers
+            site_stack_variables["CookieSettings"] = self.parameters.cookie_settings
+            site_stack_variables["OAuthScopes"] = self.parameters.oauth_scopes
         else:
-            # If lambda_function_associations or custom_error_responses defined,
-            # add to stack config. Only if not using Auth@Edge
-            for i in ["custom_error_responses", "lambda_function_associations"]:
-                if self.parameters.get("staticsite_%s" % i):
-                    site_stack_variables[i] = self.parameters.get("staticsite_%s" % i)
-                    self.parameters.pop("staticsite_%s" % i)
+            site_stack_variables["custom_error_responses"] = [
+                i.dict(exclude_none=True)
+                for i in self.parameters.custom_error_responses
+            ]
+            site_stack_variables["lambda_function_associations"] = [
+                i.dict() for i in self.parameters.lambda_function_associations
+            ]
 
         return site_stack_variables
 
-    def _get_cookie_settings(self) -> Dict[str, str]:
-        """Retrieve the cookie settings from the variables or return the default."""
-        if self.parameters.get("staticsite_cookie_settings"):
-            return self.parameters["staticsite_cookie_settings"]
-        return {
-            "idToken": "Path=/; Secure; SameSite=Lax",
-            "accessToken": "Path=/; Secure; SameSite=Lax",
-            "refreshToken": "Path=/; Secure; SameSite=Lax",
-            "nonce": "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax",
-        }
-
-    def _get_http_headers(self) -> Dict[str, str]:
-        """Retrieve the http headers from the variables or return the default."""
-        if self.parameters.get("staticsite_http_headers"):
-            return self.parameters["staticsite_http_headers"]
-        return {
-            "Content-Security-Policy": "default-src https: 'unsafe-eval' 'unsafe-inline'; "
-            "font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; "
-            "object-src 'none'; "
-            "connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com",
-            "Strict-Transport-Security": "max-age=31536000; "
-            "includeSubdomains; "
-            "preload",
-            "Referrer-Policy": "same-origin",
-            "X-XSS-Protection": "1; mode=block",
-            "X-Frame-Options": "DENY",
-            "X-Content-Type-Options": "nosniff",
-        }
-
-    def _get_oauth_scopes(self) -> List[str]:
-        """Retrieve the oauth scopes from the variables or return the default."""
-        if self.parameters.get("staticsite_oauth_scopes"):
-            return self.parameters["staticsite_oauth_scopes"]
-        return ["phone", "email", "profile", "openid", "aws.cognito.signin.user.admin"]
-
-    def _get_supported_identity_providers(self) -> List[str]:
-        providers = self.parameters.get("staticsite_supported_identity_providers")
-        if providers:
-            return [provider.strip() for provider in providers.split(",")]
-        return ["COGNITO"]
-
     def _get_dependencies_variables(self) -> Dict[str, Any]:
-        variables = {"OAuthScopes": self._get_oauth_scopes()}
-        if self.parameters.get("staticsite_auth_at_edge", False):
+        variables: Dict[str, Any] = {"OAuthScopes": self.parameters.oauth_scopes}
+        if self.parameters.auth_at_edge:
             self._ensure_auth_at_edge_requirements()
 
             variables.update(
                 {
-                    "AuthAtEdge": self.parameters.get("staticsite_auth_at_edge", False),
-                    "SupportedIdentityProviders": self._get_supported_identity_providers(),
+                    "AuthAtEdge": self.parameters.auth_at_edge,
+                    "SupportedIdentityProviders": self.parameters.supported_identity_providers,
                     "RedirectPathSignIn": (
                         "${default staticsite_redirect_path_sign_in::/parseauth}"
                     ),
                     "RedirectPathSignOut": (
                         "${default staticsite_redirect_path_sign_out::/}"
                     ),
-                }
+                },
             )
 
-            if self.parameters.get("staticsite_aliases"):
-                variables.update(
-                    {"Aliases": self.parameters.get("staticsite_aliases").split(",")}
-                )
-            if self.parameters.get("staticsite_additional_redirect_domains"):
+            if self.parameters.aliases:
+                variables.update({"Aliases": self.parameters.aliases})
+            if self.parameters.additional_redirect_domains:
                 variables.update(
                     {
-                        "AdditionalRedirectDomains": self.parameters.get(
-                            "staticsite_additional_redirect_domains"
-                        ).split(",")
+                        "AdditionalRedirectDomains": self.parameters.additional_redirect_domains
                     }
                 )
-            if self.parameters.get("staticsite_create_user_pool", False):
-                variables.update(
-                    {
-                        "CreateUserPool": self.parameters.get(
-                            "staticsite_create_user_pool", False
-                        )
-                    }
-                )
+            if self.parameters.create_user_pool:
+                variables.update({"CreateUserPool": self.parameters.create_user_pool})
 
         return variables
 
     def _get_user_pool_id_retriever_variables(self) -> Dict[str, Any]:
-        args = {
-            "user_pool_arn": self.parameters.get("staticsite_user_pool_arn", ""),
+        args: Dict[str, Any] = {
+            "user_pool_arn": self.parameters.user_pool_arn,
         }
 
-        if self.parameters.get("staticsite_create_user_pool", False):
+        if self.parameters.create_user_pool:
             args[
                 "created_user_pool_id"
             ] = "${rxref %s-dependencies::AuthAtEdgeUserPoolId}" % (self.name)
@@ -615,10 +551,7 @@ class StaticSite(RunwayModule):
         }
 
     def _ensure_auth_at_edge_requirements(self) -> None:
-        if not (
-            self.parameters.get("staticsite_user_pool_arn")
-            or self.parameters.get("staticsite_create_user_pool")
-        ):
+        if not (self.parameters.user_pool_arn or self.parameters.create_user_pool):
             self.logger.error(
                 "staticsite_user_pool_arn or staticsite_create_user_pool "
                 "is required for Auth@Edge; "
@@ -631,18 +564,13 @@ class StaticSite(RunwayModule):
         Lambda@Edge is only available within the us-east-1 region.
 
         """
-        if (
-            self.parameters.get("staticsite_auth_at_edge", False)
-            and self.region != "us-east-1"
-        ):
+        if self.parameters.auth_at_edge and self.region != "us-east-1":
             self.logger.error("Auth@Edge must be deployed in us-east-1.")
             sys.exit(1)
 
     def _ensure_cloudfront_with_auth_at_edge(self) -> None:
         """Exit if both the Auth@Edge and CloudFront disablement are true."""
-        if self.parameters.get("staticsite_cf_disable", False) and self.parameters.get(
-            "staticsite_auth_at_edge", False
-        ):
+        if self.parameters.cf_disable and self.parameters.auth_at_edge:
             self.logger.error(
                 'staticsite_cf_disable must be "false" if '
                 'staticsite_auth_at_edge is "true"'
@@ -651,6 +579,6 @@ class StaticSite(RunwayModule):
 
     def _ensure_valid_environment_config(self) -> None:
         """Exit if config is invalid."""
-        if not self.parameters.get("namespace"):
+        if not self.parameters.namespace:
             self.logger.error("namespace parameter is required but not defined")
             sys.exit(1)

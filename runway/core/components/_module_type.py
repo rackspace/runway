@@ -59,7 +59,7 @@ class RunwayModuleType:
         "cdk": "runway.module.cdk.CloudDevelopmentKit",
         "k8s": "runway.module.k8s.K8s",
         "cfn": "runway.module.cloudformation.CloudFormation",
-        "web": "runway.module.staticsite.StaticSite",
+        "web": "runway.module.staticsite.handler.StaticSite",
     }
 
     TYPE_MAP = {
