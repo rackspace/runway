@@ -16,7 +16,7 @@ ValidRunwayTestTypeValues = Literal["cfn-lint", "script", "yamllint"]
 class RunwayTestDefinitionModel(ConfigProperty):
     """Model for a Runway test definition."""
 
-    args: Union[Dict[str, Any], ConfigProperty] = Field(
+    args: Union[Dict[str, Any], ConfigProperty, str] = Field(
         {},
         title="Arguments",
         description="Arguments to be passed to the test. Support varies by test type.",
