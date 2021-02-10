@@ -27,7 +27,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
     )
     type: ValidRunwayTestTypeValues
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         schema_extra = {
@@ -68,7 +68,7 @@ class CfnLintRunwayTestArgs(ConfigProperty):
         description="Array of arguments to pass to the cfn-lint CLI.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -99,7 +99,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         "cfn-lint", description="The type of test to run."
     )
 
-    class Config:
+    class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
 
         schema_extra = {
@@ -115,7 +115,7 @@ class ScriptRunwayTestArgs(ConfigProperty):
         [], description="Array of commands that will be run for this test."
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -144,7 +144,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     )
     type: Literal["script"] = Field("script", description="The type of test to run.")
 
-    class Config:
+    class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
 
         schema_extra = {
@@ -164,7 +164,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         "yamllint", description="The type of test to run."
     )
 
-    class Config:
+    class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
 
         schema_extra = {

@@ -84,7 +84,7 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         description="An identifier for the assumed role session. (supports lookups)",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -134,7 +134,7 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         description="An array of AWS Regions to process asynchronously. (supports lookups)",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -246,7 +246,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         + RunwayDeploymentRegionDefinitionModel.Config.schema_extra["examples"],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -331,7 +331,7 @@ class RunwayFutureDefinitionModel(ConfigProperty):
         "be skipped if the current environment is not defined.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -440,7 +440,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         examples=[[{"path": "sampleapp-01.cfn"}, {"path": "sampleapp-02.cfn"}]],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -512,7 +512,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         "If not provided, the current working directory is used.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.allow
@@ -595,7 +595,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
     )
     variables: RunwayVariablesDefinitionModel = RunwayVariablesDefinitionModel()
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid

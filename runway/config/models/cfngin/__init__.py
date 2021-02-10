@@ -48,7 +48,7 @@ class CfnginHookDefinitionModel(ConfigProperty):
         description="Whether to continue execution if the hook results in an error.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -119,7 +119,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
         "Blueprint/CloudFormation stack. (supports lookups)",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration options."""
 
         extra = Extra.forbid
@@ -269,7 +269,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         "rendering/outputting CloudFormation templates.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         schema_extra = {"description": "Configuration file for Runway's CFNgin."}

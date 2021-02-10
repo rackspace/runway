@@ -65,7 +65,7 @@ class Git(Source):
 
         return cached_dir_path
 
-    def __git_ls_remote(self, ref) -> str:
+    def __git_ls_remote(self, ref: str) -> str:
         """List remote repositories based on uri and ref received.
 
         Keyword Args:

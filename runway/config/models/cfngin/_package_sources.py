@@ -44,7 +44,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         examples=["git@github.com:onicagroup/runway.git"],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -91,7 +91,7 @@ class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
         "root of the local package source.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -138,7 +138,7 @@ class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
         description="Update the local copy if the last modified date in AWS S3 changes.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -182,7 +182,7 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
         ],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
