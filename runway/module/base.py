@@ -214,3 +214,9 @@ class ModuleOptions:
     def get(self, name: str, default: Any = None) -> Any:
         """Get a value or return the default."""
         return getattr(self, name, default)
+
+    def __eq__(self, other: Any) -> bool:
+        """Assess equality."""
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
