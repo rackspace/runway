@@ -12,7 +12,7 @@ from runway.module.cdk import CloudDevelopmentKit
 from runway.module.cloudformation import CloudFormation
 from runway.module.k8s import K8s
 from runway.module.serverless import Serverless
-from runway.module.staticsite import StaticSite
+from runway.module.staticsite.handler import StaticSite
 from runway.module.terraform import Terraform
 
 if TYPE_CHECKING:
