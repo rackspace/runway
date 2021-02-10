@@ -1,7 +1,7 @@
 """Runway config deployment definition."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, overload
 
 from ....variables import Variable
 from ...models.runway import (
@@ -83,7 +83,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
             TypeError: The provided value does not match the required types.
 
         """
-        if not all(isinstance(i, RunwayModuleDefinition) for i in modules):
+        if not all(isinstance(i, RunwayModuleDefinition) for i in modules):  # type: ignore
             raise TypeError("modules must be type List[RunwayModuleDefinition]")
         self._data.modules = [
             RunwayModuleDefinitionModel.parse_obj(mod.data) for mod in modules
@@ -110,7 +110,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
             TypeError: The provided value does not match the required types.
 
         """
-        if not isinstance(modules, list):
+        if not isinstance(modules, list):  # type: ignore
             raise TypeError(
                 f"expected List[RunwayModuleDefinition]; got {type(modules)}"
             )
@@ -118,7 +118,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
                 sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
-            elif isinstance(mod, RunwayModuleDefinitionModel):
+            elif isinstance(mod, RunwayModuleDefinitionModel):  # type: ignore
                 sanitized.append(mod)
             else:
                 raise TypeError(
@@ -144,7 +144,10 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
     @overload
     @classmethod
     def parse_obj(  # noqa
-        cls, obj: Union[list, set, tuple]
+        cls,
+        obj: Union[
+            List[ConfigProperty], Set[ConfigProperty], Tuple[ConfigProperty, ...]
+        ],
     ) -> List[RunwayDeploymentDefinition]:
         ...  # cov: ignore
 
@@ -166,5 +169,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
         """
         if isinstance(obj, (list, set, tuple)):
-            return [cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj]
+            return [
+                cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj  # type: ignore
+            ]
         return cls(RunwayDeploymentDefinitionModel.parse_obj(obj))

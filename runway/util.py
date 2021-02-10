@@ -11,12 +11,17 @@ import platform
 import re
 import stat
 import sys
-from collections.abc import MutableMapping
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 from decimal import Decimal
 from pathlib import Path
 from subprocess import check_call
 from types import TracebackType
+from typing import (
+    ContextManager,  # deprecated in 3.9 for contextlib.AbstractContextManager
+)
+from typing import (
+    MutableMapping,  # deprecated in 3.9 for collections.abc.MutableMapping
+)
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -76,7 +81,7 @@ class JsonEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-class MutableMap(MutableMapping):
+class MutableMap(MutableMapping[str, Any]):
     """Base class for mutable map objects."""
 
     def __init__(self, **kwargs: Any) -> None:
@@ -284,7 +289,7 @@ class MutableMap(MutableMapping):
         return json.dumps(self.data, default=json_serial)
 
 
-class SafeHaven(AbstractContextManager):
+class SafeHaven(ContextManager["SafeHaven"]):
     """Context manager that caches and resets important values on exit.
 
     Caches and resets os.environ, sys.argv, sys.modules, and sys.path.
@@ -404,7 +409,7 @@ class YamlDumper(yaml.Dumper):
 
     def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:
         """Override parent method."""
-        return super().increase_indent(flow, False)
+        return super().increase_indent(flow, False)  # type: ignore
 
 
 @contextmanager
@@ -457,7 +462,7 @@ def ensure_file_is_executable(path: str) -> None:
 
 
 @contextmanager
-def environ(env: Dict[str, str] = None, **kwargs: str) -> Iterator[None]:
+def environ(env: Optional[Dict[str, str]] = None, **kwargs: str) -> Iterator[None]:
     """Context manager for temporarily changing os.environ.
 
     The original value of os.environ is restored upon exit.
@@ -583,7 +588,7 @@ def extract_boto_args_from_env(env_vars: Dict[str, str]) -> Dict[str, str]:
     return {
         i: env_vars[i.upper()]
         for i in ["aws_access_key_id", "aws_secret_access_key", "aws_session_token"]
-        if env_vars.get(i.upper())
+        if env_vars.get(i.upper(), "")
     }
 
 
@@ -596,9 +601,9 @@ def flatten_path_lists(
         # to strings
         if isinstance(val, list):
             env_dict[key] = (
-                os.path.join(env_root, os.path.join(*val))
-                if (env_root and not os.path.isabs(os.path.join(*val)))
-                else os.path.join(*val)
+                os.path.join(env_root, os.path.join(*cast(List[str], val)))
+                if (env_root and not os.path.isabs(os.path.join(*cast(List[str], val))))
+                else os.path.join(*cast(List[str], val))
             )
     return env_dict
 
@@ -654,8 +659,10 @@ def get_hash_for_filename(filename: str, hashfile_path: str) -> str:
     with open(hashfile_path, "r") as stream:
         for _cnt, line in enumerate(stream):
             if line.rstrip().endswith(filename):
-                filehash = re.match(r"^[A-Za-z0-9]*", line).group(0)
-                break
+                match = re.match(r"^[A-Za-z0-9]*", line)
+                if match:
+                    filehash = match.group(0)
+                    break
     if filehash:
         return filehash
     raise AttributeError("Filename %s not found in hash file" % filename)
@@ -816,7 +823,7 @@ def which(program: str) -> Optional[str]:
                 return exe_file
         else:
             for path in (
-                os.environ.get("PATH").split(os.pathsep)
+                os.environ.get("PATH", "").split(os.pathsep)
                 if "PATH" in os.environ
                 else [os.getcwd()]
             ):

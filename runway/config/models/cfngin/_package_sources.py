@@ -48,7 +48,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Information about git repositories that should be included "
             "in the processing of this configuration file."
         }
@@ -95,7 +95,7 @@ class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Information about local directories that should be "
             "included in the processing of this configuration file."
         }
@@ -142,7 +142,7 @@ class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Information about a AWS S3 objects that should be "
             "downloaded, unzipped, and included in the processing of "
             "this configuration file."
@@ -186,7 +186,7 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Map of additional package sources to include when "
             "processing this configuration file."
         }

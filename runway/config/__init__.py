@@ -16,8 +16,6 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
-    Type,
-    TypeVar,
     Union,
     cast,
 )
@@ -47,8 +45,6 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-_BaseConfig = TypeVar("_BaseConfig", bound="BaseConfig")
-
 
 class BaseConfig:
     """Base class for configurations."""
@@ -72,13 +68,13 @@ class BaseConfig:
         *,
         by_alias: bool = False,
         exclude: Optional[
-            Union[AbstractSet[Union[int, str]], Mapping[Union[int, str]]]
+            Union[AbstractSet[Union[int, str]], Mapping[Union[int, str], Any]]
         ] = None,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
         exclude_unset: bool = True,
         include: Optional[
-            Union[AbstractSet[Union[int, str]], Mapping[Union[int, str]]]
+            Union[AbstractSet[Union[int, str]], Mapping[Union[int, str], Any]]
         ] = None,
     ) -> str:
         """Dump model to a YAML string.
@@ -101,11 +97,11 @@ class BaseConfig:
         return yaml.dump(
             self._data.dict(
                 by_alias=by_alias,
-                exclude=exclude,
+                exclude=exclude,  # type: ignore
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
                 exclude_unset=exclude_unset,
-                include=include,
+                include=include,  # type: ignore
             ),
             default_flow_style=False,
         )
@@ -116,40 +112,6 @@ class BaseConfig:
 
         Args:
             path: The path to search for a config file.
-
-        """
-        raise NotImplementedError  # cov: ignore
-
-    @classmethod
-    def parse_file(
-        cls: Type[_BaseConfig],
-        *,
-        path: Optional[Path] = None,
-        file_path: Optional[Path] = None,
-        **kwargs: Any
-    ) -> _BaseConfig:
-        """Parse a YAML file to create a config object.
-
-        Args:
-            path: The path to search for a config file.
-            file_path: Exact path to a file to parse.
-
-        Raises:
-            ConfigNotFound: Provided config file was not found.
-            ValueError: path and file_path were both excluded.
-
-        """
-        raise NotImplementedError  # cov: ignore
-
-    @classmethod
-    def parse_obj(
-        cls: Type[_BaseConfig], obj: Any, *, path: Optional[Path] = None
-    ) -> _BaseConfig:
-        """Parse a python object into a config object.
-
-        Args:
-            obj: The object to be parsed.
-            path: Path to the file the object was parsed from.
 
         """
         raise NotImplementedError  # cov: ignore
@@ -262,7 +224,7 @@ class CfnginConfig(BaseConfig):
                 register_lookup_handler(key, handler)
 
     @classmethod
-    def find_config_file(  # pylint: disable=arguments-differ
+    def find_config_file(  # type: ignore pylint: disable=arguments-differ
         cls, path: Optional[Path] = None, *, exclude: Optional[List[str]] = None,
     ) -> List[Path]:
         """Find a config file in the provided path.

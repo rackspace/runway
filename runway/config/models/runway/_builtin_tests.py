@@ -16,7 +16,7 @@ ValidRunwayTestTypeValues = Literal["cfn-lint", "script", "yamllint"]
 class RunwayTestDefinitionModel(ConfigProperty):
     """Model for a Runway test definition."""
 
-    args: Union[Dict[str, Any], str] = Field(
+    args: Union[Dict[str, Any], ConfigProperty] = Field(
         {},
         title="Arguments",
         description="Arguments to be passed to the test. Support varies by test type.",
@@ -36,7 +36,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
         title = "Runway Test Definition"
         use_enum_values = True
 
-    def __new__(cls, **kwargs) -> RunwayTestDefinitionModel:
+    def __new__(cls, **kwargs: Any) -> RunwayTestDefinitionModel:
         """Create a new instance of a class.
 
         Returns:
