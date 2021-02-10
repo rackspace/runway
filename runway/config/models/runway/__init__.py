@@ -666,9 +666,9 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         cls: Type[Model],
         b: Union[bytes, str],
         *,
-        content_type: str = "",  # pylint: disable=unused-argument
+        content_type: Optional[str] = None,  # pylint: disable=unused-argument
         encoding: str = "utf8",  # pylint: disable=unused-argument
-        proto: Protocol = Protocol.json,  # pylint: disable=unused-argument
+        proto: Optional[Protocol] = None,  # pylint: disable=unused-argument
         allow_pickle: bool = False,  # pylint: disable=unused-argument
     ) -> Model:
         """Parse raw data."""

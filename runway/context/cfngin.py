@@ -429,7 +429,7 @@ class CfnginContext(BaseContext):
             "persistent graph updated:\n%s", self.persistent_graph.dumps(indent=4)
         )
 
-    def set_hook_data(self, key: str, data: collections.Mapping) -> None:
+    def set_hook_data(self, key: str, data: collections.Mapping[str, Any]) -> None:
         """Set hook data for the given key.
 
         Args:
@@ -437,7 +437,7 @@ class CfnginContext(BaseContext):
             data: A dictionary of data to store, as returned from a hook.
 
         """
-        if not isinstance(data, collections.Mapping):
+        if not isinstance(data, collections.Mapping):  # type: ignore
             raise TypeError(
                 f"Hook (key: {key}) data must be an instance of "
                 "collections.Mapping (a dictionary for example)."
