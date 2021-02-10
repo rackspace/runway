@@ -245,7 +245,7 @@ Parameters
           arn: arn:aws:lambda:<region>:<account-id>:function:<function>:<version>
 
 **staticsite_non_spa (Optional[bool])**
-  Whether this site is a single page application (*SPA*). (*default:* ``true``)
+  Whether this site is a single page application (*SPA*). (*default:* ``false``)
 
   A custom error response directing ``ErrorCode: 404`` to the primary ``/index.html`` as a ``ResponseCode: 200`` is added, allowing the *SPA* to take over error handling.
   If you are not running an *SPA*, setting this to ``true`` will prevent this custom error from being added.
