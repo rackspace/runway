@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.811.0",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {

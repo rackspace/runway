@@ -33,7 +33,7 @@ module.exports = {
     },
     // Can externalize dependencies if needed (see comment on webpack-node-externals above):
     // externals: [nodeExternals()],
-    // or alternatively the aws sdk can be ommitted from the package without webpack-node-externals:
+    // or alternatively specific packages can be omitted from the archive without webpack-node-externals:
     // externals: ['aws-sdk'],
     devtool: 'source-map'
 };
