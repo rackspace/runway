@@ -52,7 +52,9 @@ class VarLookup(LookupHandler):
     """Variable definition Lookup."""
 
     @classmethod
-    def handle(cls, value: str, variables: MutableMap, **_: Any) -> Any:
+    def handle(  # type: ignore
+        cls, value: str, *__args: Any, variables: MutableMap, **__kwargs: Any
+    ) -> Any:
         """Retrieve a variable from the variable definition.
 
         The value is retrieved from the variables passed to Runway using

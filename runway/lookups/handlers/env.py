@@ -51,7 +51,9 @@ class EnvLookup(LookupHandler):
     """Environment variable Lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: RunwayContext, **_: Any) -> Any:
+    def handle(  # type: ignore
+        cls, value: str, context: RunwayContext, *__args: Any, **__kwargs: Any
+    ) -> Any:
         """Retrieve an environment variable.
 
         The value is retrieved from a copy of the current environment variables

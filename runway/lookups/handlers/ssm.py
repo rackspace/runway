@@ -49,7 +49,11 @@ class SsmLookup(LookupHandler):
 
     @classmethod
     def handle(
-        cls, value: str, context: Union[CfnginContext, RunwayContext], **_: Any
+        cls,
+        value: str,
+        context: Union[CfnginContext, RunwayContext],
+        *__args: Any,
+        **__kwargs: Any
     ) -> Any:
         """Retrieve a value from SSM Parameter Store.
 
