@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sys
 import unittest
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 from mock import MagicMock, patch
 from troposphere import Base64, Ref, s3, sns
@@ -33,8 +33,12 @@ from runway.cfngin.exceptions import (
     ValidatorError,
     VariableTypeRequired,
 )
-from runway.cfngin.lookups import register_lookup_handler
+from runway.cfngin.lookups.registry import (
+    register_lookup_handler,
+    unregister_lookup_handler,
+)
 from runway.exceptions import InvalidLookupConcatenation
+from runway.lookups.handlers.base import LookupHandler
 from runway.variables import Variable
 
 from ..factories import mock_context
@@ -48,7 +52,16 @@ def mock_lookup_handler(value: str, **_: Any) -> str:
     return value
 
 
-register_lookup_handler("mock", mock_lookup_handler)
+class MockLookupHandler(LookupHandler):
+    """Mock lookup handler."""
+
+    @classmethod
+    def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> Any:  # type: ignore
+        """Perform the lookup."""
+        return value
+
+
+register_lookup_handler("mock", MockLookupHandler)
 
 
 class TestBuildParameter(unittest.TestCase):
@@ -133,6 +146,17 @@ class TestBaseBlueprint(unittest.TestCase):
 
 class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Tests for runway.cfngin.blueprints.base.Blueprint variables."""
+
+    def setUp(self) -> None:
+        """Run before tests."""
+        register_lookup_handler("mock", MockLookupHandler)
+        return super().setUp()
+
+    def tearDown(self) -> None:
+        """Run after tests."""
+        unregister_lookup_handler("custom")
+        unregister_lookup_handler("mock")
+        return super().tearDown()
 
     def test_defined_variables(self) -> None:
         """Test defined variables."""
@@ -496,11 +520,15 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
                 "Param1": {"type": list},
             }
 
-        def return_list_something(*_args, **_kwargs):
-            """Return list something."""
-            return ["something"]
+        class FakeLookup(LookupHandler):
+            """False Lookup."""
 
-        register_lookup_handler("custom", return_list_something)
+            @classmethod
+            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> Any:  # type: ignore
+                """Perform the lookup."""
+                return ["something"]
+
+        register_lookup_handler("custom", FakeLookup)
         blueprint = TestBlueprint(name="test", context=MagicMock())
         variables = [Variable("Param1", "${custom non-string-return-val}", "cfngin")]
         for var in variables:
@@ -519,11 +547,15 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
                 "Param1": {"type": Base64},
             }
 
-        def return_obj(*_args, **_kwargs):
-            """Return object."""
-            return Base64("test")
+        class FakeLookup(LookupHandler):
+            """False Lookup."""
 
-        register_lookup_handler("custom", return_obj)
+            @classmethod
+            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> Any:  # type: ignore
+                """Perform the lookup."""
+                return Base64("test")
+
+        register_lookup_handler("custom", FakeLookup)
         blueprint = TestBlueprint(name="test", context=MagicMock())
         variables = [Variable("Param1", "${custom non-string-return-val}", "cfngin")]
         for var in variables:
@@ -537,11 +569,15 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variables_lookup_returns_non_string_invalid_combo(self) -> None:
         """Test resolve variables lookup returns non string invalid combo."""
 
-        def return_list_something(*_args: Any, **_kwargs: Any) -> List[str]:
-            """Return list something."""
-            return ["something"]
+        class FakeLookup(LookupHandler):
+            """False Lookup."""
 
-        register_lookup_handler("custom", return_list_something)
+            @classmethod
+            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> Any:  # type: ignore
+                """Perform the lookup."""
+                return ["something"]
+
+        register_lookup_handler("custom", FakeLookup)
         variable = Variable(
             "Param1",
             "${custom non-string-return-val},${output some-stack::Output}",

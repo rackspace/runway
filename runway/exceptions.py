@@ -76,8 +76,8 @@ class FailedVariableLookup(Exception):
 
     """
 
-    lookup: "Variable"
     cause: FailedLookup
+    variable: "Variable"
 
     def __init__(
         self,
