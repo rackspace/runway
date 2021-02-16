@@ -414,7 +414,7 @@ class StaticSite(RunwayModule):
         )
 
     def _get_site_stack_variables(self) -> Dict[str, Any]:
-        site_stack_variables = {
+        site_stack_variables: Dict[str, Any] = {
             "Aliases": [],
             "DisableCloudFront": self.parameters.cf_disable,
             "RewriteDirectoryIndex": self.parameters.rewrite_directory_index or "",
