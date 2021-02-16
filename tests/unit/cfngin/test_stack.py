@@ -1,12 +1,17 @@
 """Tests for runway.cfngin.stack."""
 import unittest
+from typing import Any
 
 from mock import MagicMock
 
-from runway.cfngin.lookups import register_lookup_handler
+from runway.cfngin.lookups.registry import (
+    register_lookup_handler,
+    unregister_lookup_handler,
+)
 from runway.cfngin.stack import Stack
 from runway.config import CfnginConfig
 from runway.context.cfngin import CfnginContext
+from runway.lookups.handlers.base import LookupHandler
 
 from .factories import generate_definition
 
@@ -22,7 +27,21 @@ class TestStack(unittest.TestCase):
         self.stack = Stack(
             definition=generate_definition("vpc", 1), context=self.context,
         )
-        register_lookup_handler("noop", lambda **kwargs: "test")
+
+        class FakeLookup(LookupHandler):
+            """False Lookup."""
+
+            @classmethod
+            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
+                """Perform the lookup."""
+                return "test"
+
+        register_lookup_handler("noop", FakeLookup)
+
+    def tearDown(self) -> None:
+        """Run after tests."""
+        unregister_lookup_handler("noop")
+        return super().tearDown()
 
     def test_stack_requires(self) -> None:
         """Test stack requires."""

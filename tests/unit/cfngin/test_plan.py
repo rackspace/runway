@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 import mock
 
@@ -28,6 +28,7 @@ from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
 from runway.cfngin.util import stack_template_key_name
 from runway.config import CfnginConfig
 from runway.context.cfngin import CfnginContext
+from runway.lookups.handlers.base import LookupHandler
 
 from .factories import generate_definition, mock_context
 
@@ -149,7 +150,16 @@ class TestPlan(unittest.TestCase):
         self.count = 0
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = CfnginContext(config=self.config)
-        register_lookup_handler("noop", lambda **kwargs: "test")
+
+        class FakeLookup(LookupHandler):
+            """False Lookup."""
+
+            @classmethod
+            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
+                """Perform the lookup."""
+                return "test"
+
+        register_lookup_handler("noop", FakeLookup)
 
     def tearDown(self) -> None:
         """Run after tests."""
