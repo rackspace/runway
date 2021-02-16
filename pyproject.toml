@@ -29,6 +29,7 @@ exclude_lines = [
     "raise AssertionError",  # defensive exceptions
     "raise NotImplimentedError",
     "from pathlib import Path",
+    "@overload",
 ]
 
 

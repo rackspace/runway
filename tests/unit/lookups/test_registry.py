@@ -2,17 +2,75 @@
 # pylint: disable=no-self-use
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from runway.lookups.registry import RUNWAY_LOOKUP_HANDLERS
+import pytest
+
+from runway.lookups.handlers.env import EnvLookup
+from runway.lookups.registry import (
+    RUNWAY_LOOKUP_HANDLERS,
+    register_lookup_handler,
+    unregister_lookup_handler,
+)
 from runway.util import MutableMap
 
 if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
     from ..factories import MockRunwayContext
 
 VALUES = {"str_val": "test"}
 CONTEXT = MutableMap(**{"env_vars": VALUES})
 VARIABLES = MutableMap(**VALUES)
+
+
+def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
+    """Test autoloaded lookup handlers."""
+    mocker.patch.dict(RUNWAY_LOOKUP_HANDLERS, {})
+    handlers = ["cfn", "ecr", "env", "ssm", "var"]
+    for handler in handlers:
+        assert (
+            handler in RUNWAY_LOOKUP_HANDLERS
+        ), f'Lookup handler: "{handler}" not registered'
+    assert len(RUNWAY_LOOKUP_HANDLERS) == len(
+        handlers
+    ), f"expected {len(handlers)} autoloaded handlers but found {len(RUNWAY_LOOKUP_HANDLERS)}"
+
+
+def test_register_lookup_handler_function() -> None:
+    """Test register_lookup_handler function."""
+
+    def fake_lookup(**_: Any) -> None:
+        """Fake lookup."""
+
+    with pytest.raises(TypeError):
+        register_lookup_handler("test", fake_lookup)  # type: ignore
+
+
+def test_register_lookup_handler_not_subclass() -> None:
+    """Test register_lookup_handler no subclass."""
+
+    class FakeLookup:
+        """Fake lookup."""
+
+    with pytest.raises(TypeError):
+        register_lookup_handler("test", FakeLookup)  # type: ignore
+
+
+def test_register_lookup_handler_str(mocker: MockerFixture) -> None:
+    """Test register_lookup_handler from string."""
+    mocker.patch.dict(RUNWAY_LOOKUP_HANDLERS, {})
+    register_lookup_handler("test", "runway.lookups.handlers.env.EnvLookup")
+    assert "test" in RUNWAY_LOOKUP_HANDLERS
+    assert RUNWAY_LOOKUP_HANDLERS["test"] == EnvLookup
+
+
+def test_unregister_lookup_handler(mocker: MockerFixture) -> None:
+    """Test unregister_lookup_handler."""
+    mocker.patch.dict(RUNWAY_LOOKUP_HANDLERS, {"test": "something"})
+    assert "test" in RUNWAY_LOOKUP_HANDLERS
+    unregister_lookup_handler("test")
+    assert "test" not in RUNWAY_LOOKUP_HANDLERS
 
 
 class TestCommonLookupFunctionality:

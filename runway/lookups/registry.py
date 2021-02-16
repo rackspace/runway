@@ -1,19 +1,20 @@
 """Register test handlers."""
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Type, Union
+import logging
+from typing import Dict, Type, Union, cast
 
 from runway.util import load_object_from_string
 
 from .handlers import cfn, ecr, env, ssm, var
 from .handlers.base import LookupHandler
 
-RUNWAY_LOOKUP_HANDLERS: Dict[str, Union[Callable[..., Any], Type[LookupHandler]]] = {}
+RUNWAY_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
+LOGGER = logging.getLogger(__name__)
 
 
 def register_lookup_handler(
-    lookup_type: str,
-    handler_or_path: Union[Callable[..., Any], str, Type[LookupHandler]],
+    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]],
 ) -> None:
     """Register a lookup handler.
 
@@ -25,11 +26,20 @@ def register_lookup_handler(
     handler = handler_or_path
 
     if isinstance(handler_or_path, str):
-        handler = load_object_from_string(handler_or_path)
+        handler = cast(type, load_object_from_string(handler_or_path))
     else:
         handler = handler_or_path
 
-    RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
+    try:
+        if issubclass(handler, LookupHandler):
+            RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
+            return
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.debug("failed to validate lookup handler", exc_info=True)
+    raise TypeError(
+        f"lookup {handler_or_path} must be a subclass of "
+        "runway.lookups.handlers.base.LookupHandler"
+    )
 
 
 def unregister_lookup_handler(lookup_type: str) -> None:

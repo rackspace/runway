@@ -2,24 +2,21 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, Type, Union
+from typing import Dict, Type, Union, cast
 
 from ...lookups.handlers import cfn, ecr, ssm
+from ...lookups.handlers.base import LookupHandler
 from ...util import DOC_SITE, load_object_from_string
 from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler
 from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref
 
-if TYPE_CHECKING:
-    from ...lookups.handlers.base import LookupHandler
-
-CFNGIN_LOOKUP_HANDLERS: Dict[str, Union[Callable[..., Any], Type[LookupHandler]]] = {}
+CFNGIN_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
 
 
 def register_lookup_handler(
-    lookup_type: str,
-    handler_or_path: Union[Callable[..., Any], str, Type[LookupHandler]],
+    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]],
 ) -> None:
     """Register a lookup handler.
 
@@ -32,19 +29,27 @@ def register_lookup_handler(
     LOGGER.debug("registering CFNgin lookup: %s=%s", lookup_type, handler_or_path)
 
     if isinstance(handler_or_path, str):
-        handler = load_object_from_string(handler_or_path)
+        handler = cast(type, load_object_from_string(handler_or_path))
     else:
         handler = handler_or_path
 
-    if not isinstance(handler, type):
-        # Hander is a not a new-style handler
-        LOGGER.warning(
-            'lookup "%s" uses a deprecated format; to learn how to write '
-            "lookups visit %s/page/cfngin/lookups.html#writing-a-custom-lookup",
-            lookup_type,
-            DOC_SITE,
-        )
-    CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
+    try:
+        if issubclass(handler, LookupHandler):
+            CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
+            return
+    # Hander is a not a new-style handler
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.debug("failed to validate lookup handler", exc_info=True)
+    LOGGER.error(
+        'lookup "%s" uses an unsupported format; to learn how to write '
+        "lookups visit %s/page/cfngin/lookups.html#writing-a-custom-lookup",
+        lookup_type,
+        DOC_SITE,
+    )
+    raise TypeError(
+        f"lookup {handler_or_path} must be a subclass of "
+        "runway.lookups.handlers.base.LookupHandler"
+    )
 
 
 def unregister_lookup_handler(lookup_type: str) -> None:

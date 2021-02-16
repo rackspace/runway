@@ -1,86 +1,84 @@
 """Tests for runway.cfngin.lookups.registry."""
 # pylint: disable=no-self-use
-import unittest
+from __future__ import annotations
 
-from mock import MagicMock
+from typing import TYPE_CHECKING, Any
 
-from runway.cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
-from runway.exceptions import FailedVariableLookup, UnknownLookupType
-from runway.variables import Variable, VariableValueLookup
+import pytest
 
-from ..factories import mock_context, mock_provider
+from runway.cfngin.lookups.handlers.default import DefaultLookup
+from runway.cfngin.lookups.registry import (
+    CFNGIN_LOOKUP_HANDLERS,
+    register_lookup_handler,
+    unregister_lookup_handler,
+)
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
-class TestRegistry(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.registry."""
+def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
+    """Test autoloaded lookup handlers."""
+    mocker.patch.dict(CFNGIN_LOOKUP_HANDLERS, {})
+    handlers = [
+        "ami",
+        "cfn",
+        "default",
+        "dynamodb",
+        "ecr",
+        "envvar",
+        "file",
+        "hook_data",
+        "kms",
+        "output",
+        "rxref",
+        "split",
+        "ssm",
+        "ssmstore",
+        "xref",
+    ]
+    for handler in handlers:
+        assert (
+            handler in CFNGIN_LOOKUP_HANDLERS
+        ), f'Lookup handler: "{handler}" not registered'
+    assert len(CFNGIN_LOOKUP_HANDLERS) == len(
+        handlers
+    ), f"expected {len(handlers)} autoloaded handlers but found {len(CFNGIN_LOOKUP_HANDLERS)}"
 
-    def setUp(self) -> None:
-        """Run before tests."""
-        self.ctx = mock_context()
-        self.provider = mock_provider()
 
-    def test_autoloaded_lookup_handlers(self) -> None:
-        """Test autoloaded lookup handlers."""
-        handlers = [
-            "output",
-            "xref",
-            "kms",
-            "ssm",
-            "ssmstore",
-            "envvar",
-            "rxref",
-            "ami",
-            "file",
-            "split",
-            "default",
-            "hook_data",
-            "dynamodb",
-        ]
-        for handler in handlers:
-            try:
-                CFNGIN_LOOKUP_HANDLERS[handler]
-            except KeyError:
-                assert False, 'Lookup handler: "{}" was not registered'.format(handler)
+def test_register_lookup_handler_function() -> None:
+    """Test register_lookup_handler function."""
 
-    def test_resolve_lookups_string_unknown_lookup(self) -> None:
-        """Test resolve lookups string unknown lookup."""
-        with self.assertRaises(UnknownLookupType):
-            Variable("MyVar", "${bad_lookup foo}")
+    def fake_lookup(**_: Any) -> None:
+        """Fake lookup."""
 
-    def test_resolve_lookups_list_unknown_lookup(self) -> None:
-        """Test resolve lookups list unknown lookup."""
-        with self.assertRaises(UnknownLookupType):
-            Variable("MyVar", ["${bad_lookup foo}", "random string"])
+    with pytest.raises(TypeError):
+        register_lookup_handler("test", fake_lookup)  # type: ignore
 
-    def resolve_lookups_with_output_handler_raise_valueerror(
-        self, variable: Variable
-    ) -> None:
-        """Resolve lookups with output handler raise valueerror.
 
-        Mock output handler to throw ValueError, then run resolve_lookups
-        on the given variable.
+def test_register_lookup_handler_not_subclass() -> None:
+    """Test register_lookup_handler no subclass."""
 
-        """
-        mock_handler = MagicMock(handle=MagicMock(side_effect=ValueError("Error")))
+    class FakeLookup:
+        """Fake lookup."""
 
-        # find the only lookup in the variable
-        for value in variable._value:  # pylint: disable=protected-access
-            if isinstance(value, VariableValueLookup):
-                value.handler = mock_handler
+    with pytest.raises(TypeError):
+        register_lookup_handler("test", FakeLookup)  # type: ignore
 
-        with self.assertRaises(FailedVariableLookup) as result:
-            variable.resolve(self.ctx, self.provider)
 
-        self.assertIsInstance(result.exception.cause.__cause__, ValueError)
+def test_register_lookup_handler_str(mocker: MockerFixture) -> None:
+    """Test register_lookup_handler from string."""
+    mocker.patch.dict(CFNGIN_LOOKUP_HANDLERS, {})
+    register_lookup_handler(
+        "test", "runway.cfngin.lookups.handlers.default.DefaultLookup"
+    )
+    assert "test" in CFNGIN_LOOKUP_HANDLERS
+    assert CFNGIN_LOOKUP_HANDLERS["test"] == DefaultLookup
 
-    def test_resolve_lookups_string_failed_variable_lookup(self) -> None:
-        """Test resolve lookups string failed variable lookup."""
-        variable = Variable("MyVar", "${output foo::bar}")
-        self.resolve_lookups_with_output_handler_raise_valueerror(variable)
 
-    def test_resolve_lookups_list_failed_variable_lookup(self) -> None:
-        """Test resolve lookups list failed variable lookup."""
-        variable = Variable(
-            "MyVar", ["random string", "${output foo::bar}", "random string"]
-        )
-        self.resolve_lookups_with_output_handler_raise_valueerror(variable)
+def test_unregister_lookup_handler(mocker: MockerFixture) -> None:
+    """Test unregister_lookup_handler."""
+    mocker.patch.dict(CFNGIN_LOOKUP_HANDLERS, {"test": "something"})
+    assert "test" in CFNGIN_LOOKUP_HANDLERS
+    unregister_lookup_handler("test")
+    assert "test" not in CFNGIN_LOOKUP_HANDLERS
