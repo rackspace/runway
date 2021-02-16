@@ -598,7 +598,7 @@ A custom lookup must be in an executable, importable python package or standalon
 The lookup must be importable using your current ``sys.path``.
 This takes into account the :attr:`sys_path <cfngin.sys_path>` defined in the config file as well as any ``paths`` of :attr:`package_sources <cfngin.package_sources>`.
 
-The lookup must be a class, preferable with a base class of :class:`~runway.lookups.handlers.base.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
+The lookup must be a subclass of :class:`~runway.lookups.handlers.base.LookupHandler` with a ``@classmethod`` of handle that accepts four arguments - ``value``, ``context``,  ``provider``, ``**kwargs``.
 There must be only one lookup per file.
 The file containing the lookup class must have a ``TYPE_NAME`` global variable with a value of the name that will be used to register the lookup.
 
