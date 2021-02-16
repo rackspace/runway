@@ -134,8 +134,7 @@ def download_kb_release(
     try:
         LOGGER.verbose("downloading kubectl from %s...", kb_url)
         urlretrieve(kb_url + "/" + filename, os.path.join(download_dir, filename))
-    # IOError in py2; URLError in 3+
-    except (IOError, URLError) as exc:
+    except URLError as exc:
         handle_bin_download_error(exc, "kubectl")
 
     verify_kb_release(kb_url, download_dir, filename)

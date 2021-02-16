@@ -71,8 +71,7 @@ def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branch
         LOGGER.verbose("downloading Terraform from %s...", tf_url)
         for i in [filename, shasums_name]:
             urlretrieve(tf_url + "/" + i, os.path.join(download_dir, i))
-    # IOError in py2; URLError in 3+
-    except (IOError, URLError) as exc:
+    except URLError as exc:
         handle_bin_download_error(exc, "Terraform")
 
     tf_hash = get_hash_for_filename(filename, os.path.join(download_dir, shasums_name))
@@ -167,17 +166,17 @@ class TFEnvManager(EnvManager):
             """
             if not isinstance(data, dict):
                 return data
-            copy_data = data.copy()
+            copy_data = cast(Dict[str, Any], data.copy())
             for attr, val in copy_data.items():
                 if isinstance(val, list):
-                    if len(val) == 1:
+                    if len(cast(List[Any], val)) == 1:
                         # pull single values out of lists
-                        data[attr] = _flatten_lists(val[0])
+                        data[attr] = _flatten_lists(cast(Any, val[0]))
                     else:
-                        data[attr] = [_flatten_lists(v) for v in val]
+                        data[attr] = [_flatten_lists(v) for v in cast(List[Any], val)]
                 elif isinstance(val, dict):
-                    data[attr] = _flatten_lists(val)
-            return data
+                    data[attr] = _flatten_lists(cast(Dict[str, Any], val))
+            return data  # type: ignore
 
         try:
             result = load_terrafrom_module(hcl2, self.path).get("terraform", {})
@@ -191,7 +190,9 @@ class TFEnvManager(EnvManager):
 
         # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.
         if isinstance(result, list):
-            return _flatten_lists({k: v for i in result for k, v in i.items()})
+            return _flatten_lists(
+                {k: v for i in cast(List[Dict[str, Any]], result) for k, v in i.items()}
+            )
         return _flatten_lists(result)
 
     @cached_property
@@ -227,9 +228,10 @@ class TFEnvManager(EnvManager):
                 )
                 sys.exit(1)
             else:
-                version = re.search(r"[0-9]*\.[0-9]*(?:\.[0-9]*)?", version).group(0)
-                LOGGER.debug("detected minimum Terraform version is %s", version)
-                return version
+                version = re.search(r"[0-9]*\.[0-9]*(?:\.[0-9]*)?", version)
+                if version:
+                    LOGGER.debug("detected minimum Terraform version is %s", version)
+                    return version.group(0)
         LOGGER.error(
             "Terraform version specified as min-required, but unable to "
             "find a specified version requirement in this module's tf files"
@@ -265,7 +267,9 @@ class TFEnvManager(EnvManager):
             version_requested = self.get_min_required()
 
         if re.match(r"^latest:.*$", version_requested):
-            regex = re.search(r"latest:(.*)", version_requested).group(1)
+            regex = re.search(r"latest:(.*)", version_requested).group(  # type: ignore
+                1
+            )
             include_prerelease_versions = False
         elif re.match(r"^latest$", version_requested):
             regex = r"^[0-9]+\.[0-9]+\.[0-9]+$"
