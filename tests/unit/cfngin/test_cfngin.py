@@ -16,7 +16,7 @@ from ..factories import MockRunwayContext
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 

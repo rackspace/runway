@@ -290,7 +290,9 @@ class Step:
     @classmethod
     def from_persistent_graph(
         cls,
-        graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
+        graph_dict: Union[
+            Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]
+        ],
         context: CfnginContext,
         fn: Optional[Callable[..., Status]] = None,
         watch_func: Optional[Callable[..., Any]] = None,
@@ -539,7 +541,9 @@ class Graph:
     @classmethod
     def from_dict(
         cls,
-        graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
+        graph_dict: Union[
+            Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]
+        ],
         context: CfnginContext,
     ) -> Graph:
         """Create a Graph from a graph dict.

@@ -332,20 +332,21 @@ class UnsupportedSignatureVersionError(BotoCoreError):
 
     fmt = ...
 
-ErrorResponseError = TypedDict("ErrorResponseError", Code=str, Message=str)
-ErrorResponseResponseMetadata = TypedDict(
-    "ErrorResponseResponseMetadata",
-    HostId=str,
-    HTTPHeaders=Dict[str, Any],
-    HTTPStatusCode=int,
-    RequestId=str,
-    RetryAttempts=int,
-)
-ErrorResponse = TypedDict(
-    "ErrorResponse",
-    Error=ErrorResponseError,
-    ResponseMetadata=ErrorResponseResponseMetadata,
-)
+class ErrorResponseError(TypedDict, total=False):
+    Code: str
+    Message: str
+
+class ErrorResponseResponseMetadata(TypedDict, total=False):
+    attempt: int
+    HostId: str
+    HTTPHeaders: Dict[str, Any]
+    HTTPStatusCode: int
+    RequestId: str
+    RetryAttempts: int
+
+class ErrorResponse(TypedDict, total=False):
+    Error: ErrorResponseError
+    ResponseMetadata: ErrorResponseResponseMetadata
 
 _ClientError = TypeVar("_ClientError", bound="ClientError")
 

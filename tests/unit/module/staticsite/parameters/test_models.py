@@ -1,5 +1,6 @@
 """Test runway.module.staticsite.parameters.models."""
 # pylint: disable=no-self-use
+# pyright: basic
 from typing import Any, Dict
 
 import pytest
@@ -198,20 +199,20 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert obj.cookie_settings == data["staticsite_cookie_settings"]
         assert obj.create_user_pool is data["staticsite_create_user_pool"]
         assert len(obj.custom_error_responses) == len(
-            data["staticsite_custom_error_responses"]
+            data["staticsite_custom_error_responses"]  # type: ignore
         )
         assert (
             obj.custom_error_responses[0].dict(exclude_none=True)
-            == data["staticsite_custom_error_responses"][0]
+            == data["staticsite_custom_error_responses"][0]  # type: ignore
         )
         assert obj.enable_cf_logging is data["staticsite_enable_cf_logging"]
         assert obj.http_headers == data["staticsite_http_headers"]
         assert len(obj.lambda_function_associations) == len(
-            data["staticsite_lambda_function_associations"]
+            data["staticsite_lambda_function_associations"]  # type: ignore
         )
         assert (
             obj.lambda_function_associations[0].dict()
-            == data["staticsite_lambda_function_associations"][0]
+            == data["staticsite_lambda_function_associations"][0]  # type: ignore
         )
         assert obj.namespace == data["namespace"]
         assert obj.non_spa is data["staticsite_non_spa"]

@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.hooks.ecs."""
+# pyright: basic
 import unittest
 
 import boto3

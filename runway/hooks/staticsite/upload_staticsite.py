@@ -30,7 +30,7 @@ class ExtraFileTypeDef(TypedDict, total=False):
 
     content_type: Optional[str]
     content: Union[Dict[str, Any], List[Any], str, Any]
-    file: Optional[Path]
+    file: Optional[Union[Path, str]]
     name: str
 
 

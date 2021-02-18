@@ -143,20 +143,25 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
     @overload
     @classmethod
-    def parse_obj(  # noqa
+    def parse_obj(cls, obj: List[Dict[str, Any]]) -> List[RunwayDeploymentDefinition]:
+        ...
+
+    @overload
+    @classmethod
+    def parse_obj(
         cls,
         obj: Union[
             List[ConfigProperty], Set[ConfigProperty], Tuple[ConfigProperty, ...]
         ],
     ) -> List[RunwayDeploymentDefinition]:
-        ...  # cov: ignore
+        ...
 
     @overload
     @classmethod
-    def parse_obj(  # noqa
+    def parse_obj(
         cls, obj: Union[Dict[str, Any], ConfigProperty]
     ) -> RunwayDeploymentDefinition:
-        ...  # cov: ignore
+        ...
 
     @classmethod
     def parse_obj(

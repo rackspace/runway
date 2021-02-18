@@ -1,4 +1,5 @@
 """Test classes."""
+# pyright: basic, reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, List, MutableMapping, Optional, Tuple
@@ -93,9 +94,9 @@ class MockBoto3Session:
         client = boto3.client(  # type: ignore
             service_name, region_name=region_name or self.region_name
         )
-        stubber = Stubber(client)
-        self._clients[key] = client
-        return client, stubber
+        stubber = Stubber(client)  # type: ignore
+        self._clients[key] = client  # type: ignore
+        return client, stubber  # type: ignore
 
     def service(self, service_name: str, region_name: Optional[str] = None) -> None:
         """Not implimented."""
@@ -253,7 +254,7 @@ class MockRunwayContext(RunwayContext):
         """Override property of parent with something that can be set."""
         return self._use_concurrent
 
-    @use_concurrent.setter
+    @use_concurrent.setter  # type: ignore
     def use_concurrent(  # pylint: disable=invalid-overridden-method
         self, value: bool
     ) -> None:

@@ -174,7 +174,7 @@ class LookupHandler:
     def handle(
         cls,
         __value: str,
-        __context: Union[CfnginContext, RunwayContext],
+        context: Union[CfnginContext, RunwayContext],
         *__args: Any,
         provider: Optional[Provider] = None,
         **__kwargs: Any
@@ -183,7 +183,7 @@ class LookupHandler:
 
         Args:
             __value: Parameter(s) given to the lookup.
-            __context: The current context object.
+            context: The current context object.
             provider: CFNgin AWS provider.
 
         """

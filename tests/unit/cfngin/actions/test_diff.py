@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.actions.diff."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -23,8 +24,7 @@ from runway.cfngin.status import SkippedStatus
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import LogCaptureFixture, MonkeyPatch
 
     from ...factories import MockCFNginContext
 

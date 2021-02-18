@@ -1,5 +1,6 @@
 """Tests for runway.variables."""
 # pylint: disable=expression-not-assigned,no-self-use,protected-access,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, List, Union

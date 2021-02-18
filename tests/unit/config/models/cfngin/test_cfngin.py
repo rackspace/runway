@@ -1,5 +1,6 @@
 """Test runway.config.models.cfngin.__init__."""
 # pylint: disable=no-self-use
+# pyright: basic
 from pathlib import Path
 
 import pytest
@@ -20,7 +21,7 @@ class TestCfnginConfigDefinitionModel:
     @pytest.mark.parametrize(
         "field", ["post_build", "post_destroy", "pre_build", "pre_destroy"],
     )
-    def test_convert_hook_definitions(self, field) -> None:
+    def test_convert_hook_definitions(self, field: str) -> None:
         """Test _convert_hook_definitions."""
         dict_hook = {"name": {"path": "something"}}
         list_hook = [{"path": "something"}]
@@ -97,7 +98,7 @@ class TestCfnginConfigDefinitionModel:
             namespace="test", cfngin_cache_dir="./cache", sys_path="./something",
         )
         assert obj.cfngin_cache_dir.is_absolute()
-        assert obj.sys_path.is_absolute()
+        assert obj.sys_path.is_absolute()  # type: ignore
 
     def test_required_fields(self) -> None:
         """Test required fields."""
@@ -218,8 +219,8 @@ class TestCfnginStackDefinitionModel:
             stack_policy_path="./policy.json",
             template_path="./template.yml",
         )
-        assert obj.stack_policy_path.is_absolute()
-        assert obj.template_path.is_absolute()
+        assert obj.stack_policy_path.is_absolute()  # type: ignore
+        assert obj.template_path.is_absolute()  # type: ignore
 
     def test_required_fields_w_class_path(self) -> None:
         """Test required fields."""

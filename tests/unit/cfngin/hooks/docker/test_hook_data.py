@@ -1,5 +1,6 @@
 """Test runway.cfngin.hooks.docker.hook_data."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.docker.hook_data"
 
 
-class TestDockerHookData(object):
+class TestDockerHookData:
     """Test runway.cfngin.hooks.docker._hook_data.DockerHookData."""
 
     def test_client(self, mocker: MockerFixture) -> None:

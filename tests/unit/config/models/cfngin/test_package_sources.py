@@ -1,5 +1,6 @@
 """Test runway.config.models.cfngin._package_sources."""
 # pylint: disable=no-self-use
+# pyright: basic
 from typing import Dict, List
 
 import pytest

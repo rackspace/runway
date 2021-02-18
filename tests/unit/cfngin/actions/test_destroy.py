@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.actions.destroy."""
 # pylint: disable=no-self-use,protected-access,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import unittest
@@ -110,7 +111,7 @@ class TestDestroyAction(unittest.TestCase):
         mock_provider = MagicMock()
         stacks_dict = self.context.stacks_dict
 
-        def get_stack(stack_name):
+        def get_stack(stack_name: Any) -> Any:
             return stacks_dict.get(stack_name)
 
         plan = self.action._generate_plan()

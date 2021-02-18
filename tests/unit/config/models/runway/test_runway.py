@@ -1,5 +1,6 @@
 """Test runway.config.models.runway.__init__."""
 # pylint: disable=no-self-use,too-few-public-methods
+# pyright: basic
 from pathlib import Path
 
 import pytest

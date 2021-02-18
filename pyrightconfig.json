@@ -15,7 +15,6 @@
         "**/integration_tests",
         "**/npm",
         "**/runway/aws_sso_botocore",
-        "**/runway/cfngin/commands",
         "**/runway/hooks/staticsite/auth_at_edge/templates",
         "**/runway/templates",
         "**/scripts"

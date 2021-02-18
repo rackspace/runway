@@ -1,5 +1,6 @@
 """Test runway.lookups.handlers.ecr."""
 # pylint: disable=no-self-use,too-few-public-methods,redefined-outer-name
+# pyright: basic
 from __future__ import annotations
 
 import base64

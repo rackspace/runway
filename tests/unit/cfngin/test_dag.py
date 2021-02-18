@@ -1,5 +1,7 @@
 """Tests for runway.cfngin.dag."""
+# pyright: basic
 import threading
+from typing import Any
 
 import pytest
 
@@ -69,7 +71,7 @@ def test_walk(empty_dag: DAG) -> None:
 
     nodes = []
 
-    def walk_func(node):
+    def walk_func(node: Any) -> bool:
         nodes.append(node)
         return True
 
@@ -210,7 +212,7 @@ def test_threaded_walker(empty_dag: DAG) -> None:
     lock = threading.Lock()  # Protects nodes from concurrent access
     nodes = []
 
-    def walk_func(node):
+    def walk_func(node: Any) -> bool:
         lock.acquire()
         nodes.append(node)
         lock.release()

@@ -1,5 +1,6 @@
 """Test runway.core.providers.aws._assume_role."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -9,7 +10,7 @@ from typing import TYPE_CHECKING
 from runway.core.providers.aws import AssumeRole
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
 
     from ....factories import MockRunwayContext
 

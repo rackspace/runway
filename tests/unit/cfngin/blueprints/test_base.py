@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.blueprints.base."""
-# pylint: disable=abstract-method,no-self-use,protected-access,unused-argument
+# pylint: disable=abstract-method,arguments-differ,no-self-use,protected-access,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import sys
@@ -451,7 +452,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variable_validator_valid_value(self) -> None:
         """Test resolve variable validator valid value."""
 
-        def triple_validator(value):
+        def triple_validator(value: Any) -> Any:
             if len(value) != 3:
                 raise ValueError
             return value
@@ -471,7 +472,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variable_validator_invalid_value(self) -> None:
         """Test resolve variable validator invalid value."""
 
-        def triple_validator(value):
+        def triple_validator(value: Any) -> Any:
             if len(value) != 3:
                 raise ValueError("Must be a triple.")
             return value
@@ -512,9 +513,9 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         variables[1]._value._resolve("Test Output")
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"], 1)
-        self.assertEqual(blueprint.resolved_variables["Param2"], "Test Output")
-        self.assertIsNone(blueprint.resolved_variables.get("Param3"))
+        self.assertEqual(blueprint.resolved_variables["Param1"], 1)  # type: ignore
+        self.assertEqual(blueprint.resolved_variables["Param2"], "Test Output")  # type: ignore
+        self.assertIsNone(blueprint.resolved_variables.get("Param3"))  # type: ignore
 
     def test_resolve_variables_lookup_returns_non_string(self) -> None:
         """Test resolve variables lookup returns non string."""
@@ -541,7 +542,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
             var._value.resolve({}, {})  # type: ignore
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"], ["something"])
+        self.assertEqual(blueprint.resolved_variables["Param1"], ["something"])  # type: ignore
 
     def test_resolve_variables_lookup_returns_troposphere_obj(self) -> None:
         """Test resolve variables lookup returns troposphere obj."""
@@ -569,7 +570,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
 
         blueprint.resolve_variables(variables)
         self.assertEqual(
-            blueprint.resolved_variables["Param1"].data, Base64("test").data
+            blueprint.resolved_variables["Param1"].data, Base64("test").data  # type: ignore
         )
 
     def test_resolve_variables_lookup_returns_non_string_invalid_combo(self) -> None:

@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.util."""
 # pylint: disable=unused-argument,invalid-name
+# pyright: basic
 from __future__ import annotations
 
 import unittest
@@ -43,7 +44,7 @@ AWS_REGIONS = [
 ]
 
 
-def mock_create_cache_directories(self, **kwargs: Any) -> int:
+def mock_create_cache_directories(self: Any, **kwargs: Any) -> int:
     """Mock create cache directories.
 
     Don't actually need the directories created in testing
@@ -198,7 +199,7 @@ Outputs:
         self.assertEqual(ZipExtractor().extension, ".zip")
         for i in [TarExtractor(), ZipExtractor(), ZipExtractor()]:
             i.set_archive(Path("/tmp/foo"))
-            self.assertEqual(i.archive.name.endswith(i.extension), True)
+            self.assertEqual(i.archive.name.endswith(i.extension), True)  # type: ignore
 
     def test_SourceProcessor_helpers(self):  # noqa: N802
         """Test SourceProcessor helpers."""

@@ -1,5 +1,6 @@
 """Tests for lookup handler for var."""
 # pylint: disable=no-self-use,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

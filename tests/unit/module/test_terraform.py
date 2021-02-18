@@ -1,5 +1,6 @@
 """Test runway.module.terraform."""
 # pylint: disable=no-self-use,protected-access,too-many-statements,unused-argument,too-many-lines
+# pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json
@@ -22,8 +23,7 @@ from runway.module.terraform import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
     from ..factories import MockRunwayContext
@@ -999,7 +999,7 @@ class TestTerraformBackendConfig:
         ],
     )
     def test_get_backend_file(
-        self, tmp_path: Path, filename: List[str], expected: Optional[str]
+        self, tmp_path: Path, filename: Union[List[str], str], expected: Optional[str]
     ) -> None:
         """Test get_backend_file."""
         if isinstance(filename, list):
