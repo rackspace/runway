@@ -1,12 +1,11 @@
 """Hook utils."""
 from __future__ import annotations
 
-import collections
+import collections.abc
 import logging
 import os
 import sys
-from types import FunctionType
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, List, Mapping, cast
 
 from ...exceptions import FailedVariableLookup
 from ...util import load_object_from_string
@@ -78,7 +77,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
                 raise
             continue
 
-        if isinstance(hook.args, dict):
+        if hook.args:
             args = [Variable(k, v) for k, v in hook.args.items()]
             try:  # handling for output or similar being used in pre_build
                 resolve_variables(args, context, provider)
@@ -94,17 +93,17 @@ def handle_hooks(  # pylint: disable=too-many-statements
                 raise
             kwargs = {v.name: v.value for v in args}
         else:
-            kwargs = hook.args or {}
+            kwargs = {}
 
         try:
-            if isinstance(method, FunctionType):
-                result = method(context=context, provider=provider, **kwargs)
-            else:
+            if isinstance(method, type):
                 result = getattr(
                     method(context=context, provider=provider, **kwargs), stage
                 )()
+            else:
+                result = method(context=context, provider=provider, **kwargs)
         except Exception:  # pylint: disable=broad-except
-            LOGGER.exception("method %s threw an exception", hook.path)
+            LOGGER.exception("hook %s threw an exception", hook.path)
             if hook.required:
                 raise
             continue
@@ -119,14 +118,16 @@ def handle_hooks(  # pylint: disable=too-many-statements
                 "non-required hook %s failed; return value: %s", hook.path, result
             )
         else:
-            if isinstance(result, collections.Mapping):
+            if isinstance(result, collections.abc.Mapping):
                 if hook.data_key:
                     LOGGER.debug(
                         "adding result for hook %s to context in data_key %s",
                         hook.path,
                         hook.data_key,
                     )
-                    context.set_hook_data(hook.data_key, result)
+                    context.set_hook_data(
+                        hook.data_key, cast(Mapping[str, Any], result)
+                    )
                 else:
                     LOGGER.debug(
                         "hook %s returned result data but no data key set; ignoring",

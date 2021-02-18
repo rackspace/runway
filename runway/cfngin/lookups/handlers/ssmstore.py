@@ -1,5 +1,4 @@
 """AWS SSM Parameter Store lookup."""
-# pylint: disable=arguments-differ,unused-argument
 from __future__ import annotations
 
 import logging
@@ -21,7 +20,9 @@ class SsmstoreLookup(LookupHandler):
     DEPRECATION_MSG = "ssmstore lookup has been deprecated; use the ssm lookup instead"
 
     @classmethod
-    def handle(cls, value: str, context: CfnginContext, **_: Any) -> str:
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: CfnginContext, **_: Any
+    ) -> str:
         """Retrieve (and decrypt) a parameter from AWS SSM Parameter Store.
 
         Args:

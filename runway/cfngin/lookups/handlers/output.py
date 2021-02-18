@@ -1,12 +1,11 @@
 """AWS CloudFormation Output lookup."""
-# pylint: disable=arguments-differ,unused-argument
 from __future__ import annotations
 
 import re
-from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from ....lookups.handlers.base import LookupHandler
+from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
     from ....context.cfngin import CfnginContext
@@ -14,14 +13,21 @@ if TYPE_CHECKING:
 
 TYPE_NAME = "output"
 
-Output = namedtuple("Output", ("stack_name", "output_name"))
+
+class OutputQuery(NamedTuple):
+    """Output query NamedTuple."""
+
+    stack_name: str
+    output_name: str
 
 
 class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
 
     @classmethod
-    def handle(cls, value, context: Optional[CfnginContext] = None, **_: Any) -> str:
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: CfnginContext, **_: Any
+    ) -> str:
         """Fetch an output from the designated stack.
 
         Args:
@@ -32,13 +38,15 @@ class OutputLookup(LookupHandler):
         Returns:
             Output from the specified stack.
 
-        """
-        if context is None:
-            raise ValueError("Context is required")
+        Raises:
+            StackDoesNotExist: Stack not found for the name provided.
 
+        """
         decon = deconstruct(value)
         stack = context.get_stack(decon.stack_name)
-        return stack.outputs[decon.output_name]
+        if stack:
+            return stack.outputs[decon.output_name]
+        raise StackDoesNotExist(decon.stack_name)
 
     @classmethod
     def dependencies(cls, lookup_query: VariableValue):
@@ -74,7 +82,7 @@ class OutputLookup(LookupHandler):
         return set()
 
 
-def deconstruct(value: str) -> Output:
+def deconstruct(value: str) -> OutputQuery:
     """Deconstruct the value."""
     try:
         stack_name, output_name = value.split("::")
@@ -83,4 +91,4 @@ def deconstruct(value: str) -> Output:
             "output handler requires syntax of <stack>::<output>. Got: %s" % value
         )
 
-    return Output(stack_name, output_name)
+    return OutputQuery(stack_name, output_name)

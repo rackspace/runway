@@ -492,7 +492,9 @@ def json_serial(obj: Any) -> Any:
     raise TypeError("Type %s not serializable" % type(obj))
 
 
-def load_object_from_string(fqcn: str, try_reload: bool = False) -> Callable[..., Any]:
+def load_object_from_string(
+    fqcn: str, try_reload: bool = False
+) -> Union[type, Callable[..., Any]]:
     """Convert "." delimited strings to a python object.
 
     Args:
@@ -530,17 +532,15 @@ def load_object_from_string(fqcn: str, try_reload: bool = False) -> Callable[...
 
 @overload
 def merge_dicts(
-    dict1: Dict[Any, Any], dict2: Dict[Any, Any], deep_merge: bool = True
+    dict1: Dict[Any, Any], dict2: Dict[Any, Any], deep_merge: bool = ...
 ) -> Dict[str, Any]:
-    """Merge dict2 into dict1."""
     ...
 
 
 @overload
 def merge_dicts(
-    dict1: List[Any], dict2: List[Any], deep_merge: bool = True
+    dict1: List[Any], dict2: List[Any], deep_merge: bool = ...
 ) -> List[Any]:
-    """Merge dict2 into dict1."""
     ...
 
 

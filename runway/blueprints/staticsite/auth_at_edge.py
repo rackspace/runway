@@ -17,7 +17,7 @@ from troposphere import Join, Output, awslambda, cloudfront, iam, s3
 from .staticsite import StaticSite
 
 if TYPE_CHECKING:
-    from ...cfngin.blueprints.base import BlueprintVariable
+    from ...cfngin.blueprints.type_defs import BlueprintVariableTypeDef
     from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger("runway")
@@ -26,7 +26,7 @@ LOGGER = logging.getLogger("runway")
 class AuthAtEdge(StaticSite):
     """Auth@Edge Blueprint."""
 
-    AUTH_VARIABLES: Dict[str, BlueprintVariable] = {
+    AUTH_VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
         "OAuthScopes": {"type": list, "default": [], "description": "OAuth2 Scopes"},
         "PriceClass": {
             "type": str,
@@ -58,7 +58,7 @@ class AuthAtEdge(StaticSite):
         },
     }
     IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
-    VARIABLES: Dict[str, BlueprintVariable] = {}
+    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {}
 
     def __init__(
         self,

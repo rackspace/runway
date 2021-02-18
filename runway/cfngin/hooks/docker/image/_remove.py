@@ -165,6 +165,7 @@ def remove(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
             LOGGER.info("successfully removed local image %s", image)
         except ImageNotFound:
             LOGGER.warning("local image %s does not exist", image)
-    if kwargs.get("image") and kwargs["image"].id == docker_hook_data.image.id:
-        docker_hook_data.image = None  # clear out the image that was set
+    if docker_hook_data.image and kwargs.get("image"):
+        if kwargs["image"].id == docker_hook_data.image.id:
+            docker_hook_data.image = None  # clear out the image that was set
     return docker_hook_data.update_context(context)

@@ -41,7 +41,6 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 
 
 """
-# pylint: disable=arguments-differ
 from __future__ import annotations
 
 import json
@@ -112,7 +111,7 @@ class CfnLookup(LookupHandler):
         return outputs[query.output_name]
 
     @classmethod
-    def handle(
+    def handle(  # pylint: disable=arguments-differ
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],

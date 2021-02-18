@@ -1,13 +1,16 @@
 """File lookup."""
-# pylint: disable=arguments-differ,unused-argument
+# pylint: disable=arguments-differ
+from __future__ import annotations
+
 import base64
+import collections.abc
 import json
 import re
-from collections.abc import Mapping, Sequence
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, List, Mapping, Sequence, Union, overload
 
 import yaml
 from troposphere import Base64, GenericHelperFn
+from typing_extensions import Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
@@ -15,6 +18,13 @@ from ...util import read_value_from_path
 TYPE_NAME = "file"
 
 _PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
+
+ParameterizedObjectTypeDef = Union[bytes, str, Mapping[str, Any], Sequence[Any], Any]
+ParameterizedObjectReturnTypeDef = Union[
+    Dict[str, "ParameterizedObjectReturnTypeDef"],
+    GenericHelperFn,
+    List["ParameterizedObjectReturnTypeDef"],
+]
 
 
 class FileLookup(LookupHandler):
@@ -179,6 +189,18 @@ def _parameterize_string(raw: str) -> GenericHelperFn:
     return GenericHelperFn({u"Fn::Join": [u"", parts]})
 
 
+@overload
+def parameterized_codec(
+    raw: Union[bytes, str], b64: Literal[False] = ...
+) -> GenericHelperFn:
+    ...
+
+
+@overload
+def parameterized_codec(raw: Union[bytes, str], b64: Literal[True] = ...) -> Base64:
+    ...
+
+
 def parameterized_codec(raw: Union[bytes, str], b64: bool = False) -> Any:
     """Parameterize a string, possibly encoding it as Base64 afterwards.
 
@@ -202,7 +224,24 @@ def parameterized_codec(raw: Union[bytes, str], b64: bool = False) -> Any:
     return Base64(result.data) if b64 else result
 
 
-def _parameterize_obj(obj: Any) -> Any:
+@overload
+def _parameterize_obj(obj: Union[bytes, str]) -> GenericHelperFn:
+    ...
+
+
+@overload
+def _parameterize_obj(obj: Mapping[str, Any]) -> ParameterizedObjectReturnTypeDef:
+    ...
+
+
+@overload
+def _parameterize_obj(obj: List[Any]) -> ParameterizedObjectReturnTypeDef:
+    ...
+
+
+def _parameterize_obj(
+    obj: ParameterizedObjectTypeDef,
+) -> ParameterizedObjectReturnTypeDef:
     """Recursively parameterize all strings contained in an object.
 
     Parametrizes all values of a Mapping, all items of a Sequence, an
@@ -219,13 +258,13 @@ def _parameterize_obj(obj: Any) -> Any:
         and strings possibly replaced by compositions of function calls.
 
     """
-    if isinstance(obj, Mapping):
-        return {key: _parameterize_obj(value) for key, value in obj.items()}
     if isinstance(obj, bytes):
         return _parameterize_string(obj.decode("utf8"))
     if isinstance(obj, str):
         return _parameterize_string(obj)
-    if isinstance(obj, Sequence):
+    if isinstance(obj, collections.abc.Mapping):
+        return {key: _parameterize_obj(value) for key, value in obj.items()}
+    if isinstance(obj, collections.abc.Sequence):
         return [_parameterize_obj(item) for item in obj]
     return obj
 

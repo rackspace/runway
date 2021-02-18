@@ -1,10 +1,9 @@
 """AMI lookup."""
-# pylint: disable=unused-argument,arguments-differ
 from __future__ import annotations
 
 import operator
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
@@ -33,7 +32,9 @@ class AmiLookup(LookupHandler):
     """AMI lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: CfnginContext, *_args, **kwargs) -> str:
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
+    ) -> str:
         """Fetch the most recent AMI Id using a filter.
 
         Args:

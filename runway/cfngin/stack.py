@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ..config.models.cfngin import CfnginStackDefinitionModel
     from ..context import CfnginContext
     from .blueprints.base import Blueprint
-    from .providers.base import BaseProvider
+    from .providers.aws.default import Provider
 
 
 def _initialize_variables(
@@ -231,7 +231,7 @@ class Stack:
         return self.blueprint.get_required_parameter_definitions()
 
     def resolve(
-        self, context: CfnginContext, provider: Optional[BaseProvider] = None
+        self, context: CfnginContext, provider: Optional[Provider] = None
     ) -> None:
         """Resolve the Stack variables.
 

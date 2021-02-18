@@ -13,6 +13,7 @@ from typing import (
     List,
     Tuple,
     TypeVar,
+    Union,
     cast,
 )
 
@@ -249,7 +250,16 @@ class Action(build.Action):
             raise
         return COMPLETE
 
-    def run(self, *, concurrency: int = 0, **_: Any) -> None:
+    def run(
+        self,
+        *,
+        concurrency: int = 0,
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        force: bool = False,  # pylint: disable=unused-argument
+        outline: bool = False,  # pylint: disable=unused-argument
+        tail: bool = False,  # pylint: disable=unused-argument
+        **_kwargs: Any
+    ) -> None:
         """Kicks off the diffing of the stacks in the stack_definitions."""
         plan = self._generate_plan(
             require_unlocked=False, include_persistent_graph=True
@@ -262,7 +272,13 @@ class Action(build.Action):
         walker = build_walker(concurrency)
         plan.execute(walker)
 
-    def pre_run(self, **_: Any) -> None:
+    def pre_run(
+        self,
+        *,
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        outline: bool = False,  # pylint: disable=unused-argument
+        **__kwargs: Any
+    ) -> None:
         """Any steps that need to be taken prior to running the action.
 
         Handle CFNgin bucket access denied & not existing.
@@ -283,5 +299,11 @@ class Action(build.Action):
             LOGGER.verbose("proceeding without a cfngin_bucket...")
             self.bucket_name = None
 
-    def post_run(self, **_: Any) -> None:
+    def post_run(
+        self,
+        *,
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        outline: bool = False,  # pylint: disable=unused-argument
+        **__kwargs: Any
+    ) -> None:
         """Do nothing."""

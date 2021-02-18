@@ -32,7 +32,6 @@ limited or no effect:
         SOME_VARIABLE: ${var some_variable::default=default}
 
 """
-# pylint: disable=arguments-differ
 from __future__ import annotations
 
 import logging
@@ -52,7 +51,7 @@ class VarLookup(LookupHandler):
     """Variable definition Lookup."""
 
     @classmethod
-    def handle(  # type: ignore
+    def handle(  # pylint: disable=arguments-differ
         cls, value: str, *__args: Any, variables: MutableMap, **__kwargs: Any
     ) -> Any:
         """Retrieve a variable from the variable definition.

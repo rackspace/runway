@@ -6,13 +6,13 @@ from typing import Any, Callable, List
 from typing_extensions import TypedDict
 
 
-class _RequiredBlueprintVariable(TypedDict, total=False):
+class _RequiredBlueprintVariableTypeDef(TypedDict, total=False):
     """Type definition for runway.cfngin.blueprints.base.Blueprint.VARIABLES items."""
 
     type: Any
 
 
-class _OptionalBlueprintVariable(TypedDict, total=False):
+class _OptionalBlueprintVariableTypeDef(TypedDict, total=False):
     """Type definition for runway.cfngin.blueprints.base.Blueprint.VARIABLES items."""
 
     allowed_pattern: str
@@ -27,5 +27,7 @@ class _OptionalBlueprintVariable(TypedDict, total=False):
     validator: Callable[[Any], Any]
 
 
-class BlueprintVariable(_RequiredBlueprintVariable, _OptionalBlueprintVariable):
+class BlueprintVariableTypeDef(
+    _RequiredBlueprintVariableTypeDef, _OptionalBlueprintVariableTypeDef
+):
     """Type definition for runway.cfngin.blueprints.base.Blueprint.VARIABLES items."""

@@ -1,5 +1,4 @@
 """Lookup to provide a default value."""
-# pylint: disable=arguments-differ,unused-argument
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
@@ -16,7 +15,7 @@ class DefaultLookup(LookupHandler):
     """Lookup to provide a default value."""
 
     @classmethod
-    def handle(
+    def handle(  # pylint: disable=arguments-differ
         cls, value: str, context: Optional[CfnginContext] = None, **_: Any
     ) -> Any:
         """Use a value from the environment or fall back to a default value.

@@ -24,8 +24,9 @@ import yaml
 
 from ..cfngin import exceptions
 from ..cfngin.lookups import register_lookup_handler
-from ..cfngin.util import SourceProcessor, merge_map
+from ..cfngin.util import SourceProcessor
 from ..exceptions import ConfigNotFound
+from ..util import merge_dicts
 from .components.runway import (
     RunwayDeploymentDefinition,
     RunwayTestDefinition,
@@ -361,7 +362,7 @@ class CfnginConfig(BaseConfig):
         if processor.configs_to_merge:
             for i in processor.configs_to_merge:
                 LOGGER.debug("merging in remote config: %s", i)
-                config = merge_map(yaml.safe_load(open(i)), config)
+                config = merge_dicts(yaml.safe_load(open(i)), config)
             return cls.render_raw_data(yaml.dump(config), parameters=parameters or {})
         return raw_data
 

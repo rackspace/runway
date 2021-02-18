@@ -1,10 +1,9 @@
 """Hook data lookup."""
-# pylint: disable=arguments-differ,unused-argument
 from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 from troposphere import BaseAWSObject
 
@@ -44,8 +43,8 @@ class HookDataLookup(LookupHandler):
         return "{}.{}".format(hook_name, key), {}
 
     @classmethod
-    def handle(
-        cls, value: str, context: Optional[CfnginContext] = None, **_: Any
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: CfnginContext, **_: Any
     ) -> Any:
         """Return the data from ``hook_data``.
 

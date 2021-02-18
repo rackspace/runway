@@ -36,7 +36,7 @@ from ...context.cfngin import CfnginContext
 if TYPE_CHECKING:
     from troposphere import Ref  # pylint: disable=ungrouped-imports
 
-    from ...cfngin.blueprints.base import BlueprintVariable
+    from ...cfngin.blueprints.type_defs import BlueprintVariableTypeDef
 
 LOGGER = logging.getLogger("runway")
 
@@ -53,7 +53,7 @@ class _IndexRewriteFunctionInfoTypeDef(TypedDict, total=False):
 class StaticSite(Blueprint):
     """CFNgin blueprint for creating S3 bucket and CloudFront distribution."""
 
-    VARIABLES: Dict[str, BlueprintVariable] = {
+    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
         "AcmCertificateArn": {
             "type": str,
             "default": "",

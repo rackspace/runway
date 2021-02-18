@@ -16,11 +16,14 @@ from typing import (
     Optional,
     OrderedDict,
     Set,
+    TypeVar,
     Union,
+    overload,
 )
 
 from runway._logging import LogLevels, PrefixAdaptor
 
+from ..util import merge_dicts
 from .dag import DAG, DAGValidationError, walk
 from .exceptions import CancelExecution, GraphError, PersistentGraphLocked, PlanFailed
 from .stack import Stack
@@ -34,17 +37,24 @@ from .status import (
     SkippedStatus,
 )
 from .ui import ui
-from .util import merge_map, stack_template_key_name
+from .util import stack_template_key_name
 
 if TYPE_CHECKING:
     from ..context.cfngin import CfnginContext
-    from .providers.base import BaseProvider
+    from .providers.aws.default import Provider
     from .status import Status
 
 LOGGER = logging.getLogger(__name__)
 
+_T = TypeVar("_T")
 
-def json_serial(obj: Any) -> Any:
+
+@overload
+def json_serial(obj: Set[_T]) -> List[_T]:
+    ...
+
+
+def json_serial(obj: Union[Set[Any], Any]) -> Any:
     """Serialize json.
 
     Args:
@@ -67,7 +77,7 @@ def merge_graphs(graph1: Graph, graph2: Graph) -> Graph:
         graph2: Graph that will be merged into ``graph1``.
 
     """
-    merged_graph_dict = merge_map(graph1.to_dict().copy(), graph2.to_dict())
+    merged_graph_dict = merge_dicts(graph1.to_dict().copy(), graph2.to_dict())
     steps = [
         graph1.steps.get(name, graph2.steps.get(name))
         for name in merged_graph_dict.keys()
@@ -141,6 +151,8 @@ class Step:
 
     def _run_once(self) -> Status:
         """Run a step exactly once."""
+        if not self.fn:
+            raise TypeError("Step.fn must be type Callable[..., Status] not None")
         try:
             status = self.fn(self.stack, status=self.status)
         except CancelExecution:
@@ -250,8 +262,8 @@ class Step:
         stack_name: str,
         context: CfnginContext,
         requires: Optional[Union[List[str], Set[str]]] = None,
-        fn: Callable = None,
-        watch_func: Callable = None,
+        fn: Optional[Callable[..., Status]] = None,
+        watch_func: Optional[Callable[..., Any]] = None,
     ) -> Step:
         """Create a step using only a stack name.
 
@@ -280,8 +292,8 @@ class Step:
         cls,
         graph_dict: Union[Dict[str, List[str]], OrderedDict[str, Set[str]]],
         context: CfnginContext,
-        fn: Callable = None,
-        watch_func: Callable = None,
+        fn: Optional[Callable[..., Status]] = None,
+        watch_func: Optional[Callable[..., Any]] = None,
     ) -> List[Step]:
         """Create a steps for a persistent graph dict.
 
@@ -641,7 +653,7 @@ class Plan:
                 '  - step: %s: target: "%s", action: "%s"',
                 steps,
                 step.name,
-                step.fn.__name__,
+                step.fn.__name__ if callable(step.fn) else step.fn,
             )
         if message:
             LOGGER.log(level, message)
@@ -651,7 +663,7 @@ class Plan:
         *,
         directory: str,
         context: CfnginContext,
-        provider: Optional[BaseProvider] = None
+        provider: Optional[Provider] = None
     ) -> Any:
         """Output the rendered blueprint for all stacks in the plan.
 
@@ -739,12 +751,13 @@ class Plan:
                 step.skipped
                 and step.status.reason == ("does not exist in cloudformation")
             ):
-                if step.fn.__name__ == "_destroy_stack":
+                fn_name = step.fn.__name__ if callable(step.fn) else step.fn
+                if fn_name == "_destroy_stack":
                     self.context.persistent_graph.pop(step)
                     LOGGER.debug(
                         "removed step '%s' from the persistent graph", step.name
                     )
-                elif step.fn.__name__ == "_launch_stack":
+                elif fn_name == "_launch_stack":
                     self.context.persistent_graph.add_step_if_not_exists(
                         step, add_dependencies=True, add_dependants=True
                     )

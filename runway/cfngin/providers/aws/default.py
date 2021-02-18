@@ -171,7 +171,7 @@ def requires_replacement(changeset: List[ChangeTypeDef]) -> List[ChangeTypeDef]:
 
 def output_full_changeset(
     full_changeset: Optional[List[ChangeTypeDef]] = None,
-    params_diff: Optional[List[DictValue]] = None,
+    params_diff: Optional[List[DictValue[Any, Any]]] = None,
     answer: Optional[str] = None,
     fqn: Optional[str] = None,
 ) -> None:
@@ -209,7 +209,7 @@ def output_full_changeset(
 
 def ask_for_approval(
     full_changeset: Optional[List[ChangeTypeDef]] = None,
-    params_diff: Optional[List[DictValue]] = None,
+    params_diff: Optional[List[DictValue[Any, Any]]] = None,
     include_verbose: bool = False,
     fqn: Optional[str] = None,
 ) -> None:
@@ -252,7 +252,7 @@ def output_summary(
     fqn: str,
     action: str,
     changeset: List[ChangeTypeDef],
-    params_diff: List[DictValue],
+    params_diff: List[DictValue[Any, Any]],
     replacements_only: bool = False,
 ) -> None:
     """Log a summary of the changeset.
@@ -297,12 +297,12 @@ def output_summary(
     LOGGER.info("%s %s:\n%s", fqn, action, summary)
 
 
-def format_params_diff(params_diff: List[DictValue]) -> str:
+def format_params_diff(params_diff: List[DictValue[Any, Any]]) -> str:
     """Wrap :func:`runway.cfngin.actions.diff.format_params_diff` for testing."""
     return format_diff(params_diff)
 
 
-def summarize_params_diff(params_diff: List[DictValue]) -> str:
+def summarize_params_diff(params_diff: List[DictValue[Any, Any]]) -> str:
     """Summarize parameter diff."""
     summary = ""
 
@@ -500,8 +500,12 @@ def generate_cloudformation_args(
 
     if template.url:
         args["TemplateURL"] = template.url
-    else:
+    elif template.body:
         args["TemplateBody"] = template.body
+    else:
+        raise ValueError(
+            "either template.body or template.url is required; neither were provided"
+        )
 
     # When creating args for CreateChangeSet, don't include the stack policy,
     # since ChangeSets don't support it.
@@ -655,7 +659,8 @@ class Provider(BaseProvider):
                 raise
             raise exceptions.StackDoesNotExist(stack_name)
 
-    def get_stack_status(self, stack: StackTypeDef, *_args: Any, **_kwargs: Any) -> str:
+    @staticmethod
+    def get_stack_status(stack: StackTypeDef, *_args: Any, **_kwargs: Any) -> str:
         """Get stack status."""
         return stack["StackStatus"]
 
@@ -773,7 +778,7 @@ class Provider(BaseProvider):
             return reversed(sum(event_list, []))
         return sum(event_list, [])
 
-    def get_rollback_status_reason(self, stack_name: str) -> str:
+    def get_rollback_status_reason(self, stack_name: str) -> Optional[str]:
         """Process events and returns latest roll back reason."""
         event = next(
             (
@@ -794,8 +799,10 @@ class Provider(BaseProvider):
             ),
             None,
         )
-        reason = event["ResourceStatusReason"]
-        return reason
+        if event:
+            reason = event["ResourceStatusReason"]
+            return reason
+        return None
 
     def tail(
         self,
@@ -825,7 +832,7 @@ class Provider(BaseProvider):
             if cancel.wait(sleep_time):
                 return
 
-    def destroy_stack(  # pylint: disable=arguments-differ
+    def destroy_stack(
         self,
         stack: StackTypeDef,
         *,
@@ -833,7 +840,7 @@ class Provider(BaseProvider):
         approval: Optional[str] = None,
         force_interactive: bool = False,
         **kwargs: Any
-    ):
+    ) -> None:
         """Destroy a CloudFormation Stack.
 
         Args:
@@ -854,7 +861,7 @@ class Provider(BaseProvider):
         destroy_method = self.select_destroy_method(force_interactive)
         return destroy_method(fqn=fqn, action=action, approval=approval, **kwargs)
 
-    def create_stack(  # pylint: disable=arguments-differ
+    def create_stack(
         self,
         fqn: str,
         template: Template,
@@ -1029,7 +1036,7 @@ class Provider(BaseProvider):
 
         return False
 
-    def update_stack(  # pylint: disable=arguments-differ
+    def update_stack(
         self,
         fqn: str,
         template: Template,
@@ -1218,7 +1225,7 @@ class Provider(BaseProvider):
                 x
                 if "ParameterValue" in x
                 else {
-                    "ParameterKey": cast(str, x["ParameterKey"]),
+                    "ParameterKey": x["ParameterKey"],
                     "ParameterValue": cast(
                         str, old_parameters_as_dict[x["ParameterKey"]]
                     ),
@@ -1418,7 +1425,8 @@ class Provider(BaseProvider):
 
         parameters = self.params_as_dict(stack.get("Parameters", []))
 
-        if isinstance(template, str):  # handle yaml templates
+        # handle yaml templates
+        if isinstance(template, str):  # type: ignore
             template = parse_cloudformation_template(template)
 
         return json.dumps(template, cls=JsonEncoder), parameters
@@ -1471,7 +1479,7 @@ class Provider(BaseProvider):
                 x
                 if "ParameterValue" in x
                 else {
-                    "ParameterKey": cast(str, x["ParameterKey"]),
+                    "ParameterKey": x["ParameterKey"],
                     "ParameterValue": cast(str, old_params[x["ParameterKey"]]),
                 }
                 for x in parameters

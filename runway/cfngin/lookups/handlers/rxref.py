@@ -1,8 +1,7 @@
 """Handler for fetching outputs from a stack in the current namespace."""
-# pylint: disable=arguments-differ,unused-argument
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
@@ -18,12 +17,8 @@ class RxrefLookup(LookupHandler):
     """Rxref lookup."""
 
     @classmethod
-    def handle(
-        cls,
-        value: str,
-        context: Optional[CfnginContext] = None,
-        provider: Optional[Provider] = None,
-        **_: Any
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: CfnginContext, provider: Provider, **_: Any
     ) -> str:
         """Fetch an output from the designated stack in the current namespace.
 
@@ -44,11 +39,6 @@ class RxrefLookup(LookupHandler):
                 conf_value: ${rxref relative-stack-name::SomeOutputName}
 
         """
-        if provider is None:
-            raise ValueError("Provider is required")
-        if context is None:
-            raise ValueError("Context is required")
-
         decon = deconstruct(value)
         stack_fqn = context.get_fqn(decon.stack_name)
         return provider.get_output(stack_fqn, decon.output_name)
