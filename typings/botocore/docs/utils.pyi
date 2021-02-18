@@ -38,18 +38,26 @@ def get_official_service_name(service_model):
     """
     ...
 
-_DocumentedShape = namedtuple('DocumentedShape', ['name', 'type_name', 'documentation', 'metadata', 'members', 'required_members'])
+_DocumentedShape = namedtuple(
+    "DocumentedShape",
+    ["name", "type_name", "documentation", "metadata", "members", "required_members"],
+)
+
 class DocumentedShape(_DocumentedShape):
     """Use this class to inject new shapes into a model for documentation"""
-    def __new__(cls, name, type_name, documentation, metadata=..., members=..., required_members=...):
-        ...
 
-
+    def __new__(
+        cls,
+        name,
+        type_name,
+        documentation,
+        metadata=...,
+        members=...,
+        required_members=...,
+    ): ...
 
 class AutoPopulatedParam(object):
-    def __init__(self, name, param_description=...) -> None:
-        ...
-
+    def __init__(self, name, param_description=...) -> None: ...
     def document_auto_populated_param(self, event_name, section, **kwargs):
         """Documents auto populated parameters
 
@@ -59,8 +67,6 @@ class AutoPopulatedParam(object):
         """
         ...
 
-
-
 class HideParamFromOperations(object):
     """Hides a single parameter from multiple operations.
 
@@ -68,6 +74,7 @@ class HideParamFromOperations(object):
     examples. This method is typically used for things that are
     automatically populated because a user would be unable to provide
     a value (e.g., a checksum of a serialized XML request body)."""
+
     def __init__(self, service_name, parameter_name, operation_names) -> None:
         """
         :type service_name: str
@@ -80,24 +87,15 @@ class HideParamFromOperations(object):
         :param operation_names: Operation names to modify.
         """
         ...
-
-    def hide_param(self, event_name, section, **kwargs):
-        ...
-
-
+    def hide_param(self, event_name, section, **kwargs): ...
 
 class AppendParamDocumentation(object):
     """Appends documentation to a specific parameter"""
-    def __init__(self, parameter_name, doc_string) -> None:
-        ...
 
-    def append_documentation(self, event_name, section, **kwargs):
-        ...
+    def __init__(self, parameter_name, doc_string) -> None: ...
+    def append_documentation(self, event_name, section, **kwargs): ...
 
+_CONTROLS = {"\n": "\\n", "\r": "\\r", "\t": "\\t", "\b": "\\b", "\f": "\\f"}
+_ESCAPE_CONTROLS_RE = re.compile("|".join(map(re.escape, _CONTROLS)))
 
-
-_CONTROLS = { '\n': '\\n','\r': '\\r','\t': '\\t','\b': '\\b','\f': '\\f' }
-_ESCAPE_CONTROLS_RE = re.compile('|'.join(map(re.escape, _CONTROLS)))
-_CONTROLS_MATCH_HANDLER = lambda match: ,
-def escape_controls(value):
-    ...
+def escape_controls(value): ...

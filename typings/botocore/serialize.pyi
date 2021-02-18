@@ -29,11 +29,11 @@ The input to the serializers should be text (str/unicode), not bytes,
 with the exception of blob types.  Those are assumed to be binary,
 and if a str/unicode type is passed in, it will be encoded as utf-8.
 """
-DEFAULT_TIMESTAMP_FORMAT = 'iso8601'
-ISO8601 = '%Y-%m-%dT%H:%M:%SZ'
-ISO8601_MICRO = '%Y-%m-%dT%H:%M:%S.%fZ'
-def create_serializer(protocol_name, include_validation=...):
-    ...
+DEFAULT_TIMESTAMP_FORMAT = "iso8601"
+ISO8601 = "%Y-%m-%dT%H:%M:%SZ"
+ISO8601_MICRO = "%Y-%m-%dT%H:%M:%S.%fZ"
+
+def create_serializer(protocol_name, include_validation=...): ...
 
 class Serializer(object):
     DEFAULT_METHOD = ...
@@ -77,14 +77,9 @@ class Serializer(object):
         """
         ...
 
-
-
 class QuerySerializer(Serializer):
     TIMESTAMP_FORMAT = ...
-    def serialize_to_request(self, parameters, operation_model):
-        ...
-
-
+    def serialize_to_request(self, parameters, operation_model): ...
 
 class EC2Serializer(QuerySerializer):
     """EC2 specific customizations to the query protocol serializers.
@@ -95,15 +90,12 @@ class EC2Serializer(QuerySerializer):
     to worry about wiring this class up correctly.
 
     """
-    ...
 
+    ...
 
 class JSONSerializer(Serializer):
     TIMESTAMP_FORMAT = ...
-    def serialize_to_request(self, parameters, operation_model):
-        ...
-
-
+    def serialize_to_request(self, parameters, operation_model): ...
 
 class BaseRestSerializer(Serializer):
     """Base class for rest protocols.
@@ -115,20 +107,21 @@ class BaseRestSerializer(Serializer):
     Subclasses must implement the ``_serialize_body_params`` method.
 
     """
+
     QUERY_STRING_TIMESTAMP_FORMAT = ...
     HEADER_TIMESTAMP_FORMAT = ...
     KNOWN_LOCATIONS = ...
-    def serialize_to_request(self, parameters, operation_model):
-        ...
+    def serialize_to_request(self, parameters, operation_model): ...
 
-
-
-class RestJSONSerializer(BaseRestSerializer, JSONSerializer):
-    ...
-
+class RestJSONSerializer(BaseRestSerializer, JSONSerializer): ...
 
 class RestXMLSerializer(BaseRestSerializer):
     TIMESTAMP_FORMAT = ...
 
-
-SERIALIZERS = { 'ec2': EC2Serializer,'query': QuerySerializer,'json': JSONSerializer,'rest-json': RestJSONSerializer,'rest-xml': RestXMLSerializer }
+SERIALIZERS = {
+    "ec2": EC2Serializer,
+    "query": QuerySerializer,
+    "json": JSONSerializer,
+    "rest-json": RestJSONSerializer,
+    "rest-xml": RestXMLSerializer,
+}

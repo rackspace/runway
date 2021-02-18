@@ -11,10 +11,12 @@ given service and region and resolving the available endpoints for a service
 in a specific AWS partition.
 """
 LOG = logging.getLogger(__name__)
-DEFAULT_URI_TEMPLATE = '{service}.{region}.{dnsSuffix}'
-DEFAULT_SERVICE_DATA = { 'endpoints': {  } }
+DEFAULT_URI_TEMPLATE = "{service}.{region}.{dnsSuffix}"
+DEFAULT_SERVICE_DATA = {"endpoints": {}}
+
 class BaseEndpointResolver(object):
     """Resolves regions and endpoints. Must be subclassed."""
+
     def construct_endpoint(self, service_name, region_name=...):
         """Resolves an endpoint for a service and region combination.
 
@@ -43,15 +45,15 @@ class BaseEndpointResolver(object):
             - ...: Other keys may be included as well based on the metadata
         """
         ...
-
     def get_available_partitions(self):
         """Lists the partitions available to the endpoint resolver.
 
         :return: Returns a list of partition names (e.g., ["aws", "aws-cn"]).
         """
         ...
-
-    def get_available_endpoints(self, service_name, partition_name=..., allow_non_regional=...):
+    def get_available_endpoints(
+        self, service_name, partition_name=..., allow_non_regional=...
+    ):
         """Lists the endpoint names of a particular partition.
 
         :type service_name: string
@@ -70,21 +72,16 @@ class BaseEndpointResolver(object):
         """
         ...
 
-
-
 class EndpointResolver(BaseEndpointResolver):
     """Resolves endpoints based on partition endpoint metadata"""
+
     def __init__(self, endpoint_data) -> None:
         """
         :param endpoint_data: A dict of partition data.
         """
         ...
-
-    def get_available_partitions(self):
-        ...
-
-    def get_available_endpoints(self, service_name, partition_name=..., allow_non_regional=...):
-        ...
-
-    def construct_endpoint(self, service_name, region_name=..., partition_name=...):
-        ...
+    def get_available_partitions(self): ...
+    def get_available_endpoints(
+        self, service_name, partition_name=..., allow_non_regional=...
+    ): ...
+    def construct_endpoint(self, service_name, region_name=..., partition_name=...): ...

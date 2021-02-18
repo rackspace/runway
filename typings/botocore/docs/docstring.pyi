@@ -10,6 +10,7 @@ class LazyLoadedDocstring(str):
     help(). Note that all docstring classes **must** subclass from
     this class. It cannot be used directly as a docstring.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         """
         The args and kwargs are the same as the underlying document
@@ -17,10 +18,7 @@ class LazyLoadedDocstring(str):
         function.
         """
         ...
-
-    def __new__(cls, *args, **kwargs):
-        ...
-
+    def __new__(cls, *args, **kwargs): ...
     def expandtabs(self, tabsize=...):
         """Expands tabs to spaces
 
@@ -32,20 +30,9 @@ class LazyLoadedDocstring(str):
         docstrings.
         """
         ...
-
-    def __str__(self) -> str:
-        ...
-
+    def __str__(self) -> str: ...
     __repr__ = ...
 
-
-class ClientMethodDocstring(LazyLoadedDocstring):
-    ...
-
-
-class WaiterDocstring(LazyLoadedDocstring):
-    ...
-
-
-class PaginatorDocstring(LazyLoadedDocstring):
-    ...
+class ClientMethodDocstring(LazyLoadedDocstring): ...
+class WaiterDocstring(LazyLoadedDocstring): ...
+class PaginatorDocstring(LazyLoadedDocstring): ...

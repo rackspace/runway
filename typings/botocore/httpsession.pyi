@@ -7,10 +7,9 @@ import logging
 logger = logging.getLogger(__name__)
 DEFAULT_TIMEOUT = 60
 MAX_POOL_CONNECTIONS = 10
-DEFAULT_CA_BUNDLE = os.path.join(os.path.dirname(__file__), 'cacert.pem')
-def get_cert_path(verify):
-    ...
+DEFAULT_CA_BUNDLE = os.path.join(os.path.dirname(__file__), "cacert.pem")
 
+def get_cert_path(verify): ...
 def create_urllib3_context(ssl_version=..., cert_reqs=..., options=..., ciphers=...):
     """ This function is a vendored version of the same function in urllib3
 
@@ -26,22 +25,16 @@ class ProxyConfiguration(object):
     functions to retreive well structured proxy urls and proxy headers from the
     proxy configuration dictionary.
     """
-    def __init__(self, proxies=..., proxies_settings=...) -> None:
-        ...
 
+    def __init__(self, proxies=..., proxies_settings=...) -> None: ...
     def proxy_url_for(self, url):
         """Retrieves the corresponding proxy url for a given url. """
         ...
-
     def proxy_headers_for(self, proxy_url):
         """Retrieves the corresponding proxy headers for a given proxy url. """
         ...
-
     @property
-    def settings(self):
-        ...
-
-
+    def settings(self): ...
 
 class URLLib3Session(object):
     """A basic HTTP client that supports connection pooling and proxies.
@@ -54,8 +47,15 @@ class URLLib3Session(object):
     v2.7.0 implemented this themselves, later version urllib3 support this
     directly via a flag to urlopen so enabling it if needed should be trivial.
     """
-    def __init__(self, verify=..., proxies=..., timeout=..., max_pool_connections=..., socket_options=..., client_cert=..., proxies_config=...) -> None:
-        ...
 
-    def send(self, request):
-        ...
+    def __init__(
+        self,
+        verify=...,
+        proxies=...,
+        timeout=...,
+        max_pool_connections=...,
+        socket_options=...,
+        client_cert=...,
+        proxies_config=...,
+    ) -> None: ...
+    def send(self, request): ...

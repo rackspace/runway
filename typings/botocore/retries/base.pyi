@@ -11,8 +11,6 @@ class BaseRetryBackoff(object):
         """
         ...
 
-
-
 class BaseRetryableChecker(object):
     """Base class for determining if a retry should happen.
 
@@ -22,6 +20,7 @@ class BaseRetryableChecker(object):
     ``BaseRetryableCheckers`` to make the final decision on whether a retry
     should happen.
     """
+
     def is_retryable(self, context):
         """Returns True if retryable, False if not.
 

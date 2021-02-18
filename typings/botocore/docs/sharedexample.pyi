@@ -15,14 +15,8 @@ class SharedExampleDocumenter(object):
         :param operation_model: The model of the operation used in the example
         """
         ...
-
-    def document_input(self, section, example, prefix, shape):
-        ...
-
-    def document_output(self, section, example, shape):
-        ...
-
-
+    def document_input(self, section, example, prefix, shape): ...
+    def document_output(self, section, example, shape): ...
 
 def document_shared_examples(section, operation_model, example_prefix, shared_examples):
     """Documents the shared examples

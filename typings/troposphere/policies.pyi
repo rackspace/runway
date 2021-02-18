@@ -7,30 +7,23 @@ from . import AWSAttribute, AWSProperty
 class AutoScalingRollingUpdate(AWSProperty):
     props = ...
 
-
 class AutoScalingScheduledAction(AWSProperty):
     props = ...
-
 
 class AutoScalingReplacingUpdate(AWSProperty):
     props = ...
 
-
 class CodeDeployLambdaAliasUpdate(AWSProperty):
     props = ...
-
 
 class UpdatePolicy(AWSAttribute):
     props = ...
 
-
 class ResourceSignal(AWSProperty):
     props = ...
 
-
 class AutoScalingCreationPolicy(AWSProperty):
     props = ...
-
 
 class CreationPolicy(AWSAttribute):
     props = ...

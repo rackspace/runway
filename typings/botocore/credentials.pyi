@@ -6,7 +6,10 @@ import logging
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
-ReadOnlyCredentials = namedtuple('ReadOnlyCredentials', ['access_key', 'secret_key', 'token'])
+ReadOnlyCredentials = namedtuple(
+    "ReadOnlyCredentials", ["access_key", "secret_key", "token"]
+)
+
 def create_credential_resolver(session, cache=..., region_name=...):
     """Create a default credential resolver.
 
@@ -27,25 +30,16 @@ class ProfileProviderBuilder(object):
     This is needed to enable sharing between the default credential chain and
     the source profile chain created by the assume role provider.
     """
-    def __init__(self, session, cache=..., region_name=..., sso_token_cache=...) -> None:
-        ...
 
-    def providers(self, profile_name, disable_env_vars=...):
-        ...
+    def __init__(
+        self, session, cache=..., region_name=..., sso_token_cache=...
+    ) -> None: ...
+    def providers(self, profile_name, disable_env_vars=...): ...
 
-
-
-def get_credentials(session):
-    ...
-
-def create_assume_role_refresher(client, params):
-    ...
-
+def get_credentials(session): ...
+def create_assume_role_refresher(client, params): ...
 def create_mfa_serial_refresher(actual_refresh):
-    class _Refresher(object):
-        ...
-
-
+    class _Refresher(object): ...
 
 class JSONFileCache(object):
     """JSON file cache.
@@ -54,21 +48,14 @@ class JSONFileCache(object):
     The objects are serialized to JSON and stored in a file.  These
     values can be retrieved at a later time.
     """
+
     CACHE_DIR = ...
-    def __init__(self, working_dir=...) -> None:
-        ...
-
-    def __contains__(self, cache_key):
-        ...
-
+    def __init__(self, working_dir=...) -> None: ...
+    def __contains__(self, cache_key): ...
     def __getitem__(self, cache_key):
         """Retrieve value from a cache key."""
         ...
-
-    def __setitem__(self, cache_key, value):
-        ...
-
-
+    def __setitem__(self, cache_key, value): ...
 
 class Credentials(object):
     """
@@ -80,13 +67,9 @@ class Credentials(object):
     :ivar method: A string which identifies where the credentials
         were found.
     """
-    def __init__(self, access_key, secret_key, token=..., method=...) -> None:
-        ...
 
-    def get_frozen_credentials(self):
-        ...
-
-
+    def __init__(self, access_key, secret_key, token=..., method=...) -> None: ...
+    def get_frozen_credentials(self): ...
 
 class RefreshableCredentials(Credentials):
     """
@@ -99,15 +82,21 @@ class RefreshableCredentials(Credentials):
     :ivar method: A string which identifies where the credentials
         were found.
     """
+
     _advisory_refresh_timeout = ...
     _mandatory_refresh_timeout = ...
-    def __init__(self, access_key, secret_key, token, expiry_time, refresh_using, method, time_fetcher=...) -> None:
-        ...
-
+    def __init__(
+        self,
+        access_key,
+        secret_key,
+        token,
+        expiry_time,
+        refresh_using,
+        method,
+        time_fetcher=...,
+    ) -> None: ...
     @classmethod
-    def create_from_metadata(cls, metadata, refresh_using, method):
-        ...
-
+    def create_from_metadata(cls, metadata, refresh_using, method): ...
     @property
     def access_key(self):
         """Warning: Using this property can lead to race conditions if you
@@ -115,11 +104,8 @@ class RefreshableCredentials(Credentials):
         Please use get_frozen_credentials instead.
         """
         ...
-
     @access_key.setter
-    def access_key(self, value):
-        ...
-
+    def access_key(self, value): ...
     @property
     def secret_key(self):
         """Warning: Using this property can lead to race conditions if you
@@ -127,11 +113,8 @@ class RefreshableCredentials(Credentials):
         Please use get_frozen_credentials instead.
         """
         ...
-
     @secret_key.setter
-    def secret_key(self, value):
-        ...
-
+    def secret_key(self, value): ...
     @property
     def token(self):
         """Warning: Using this property can lead to race conditions if you
@@ -139,11 +122,8 @@ class RefreshableCredentials(Credentials):
         Please use get_frozen_credentials instead.
         """
         ...
-
     @token.setter
-    def token(self, value):
-        ...
-
+    def token(self, value): ...
     def refresh_needed(self, refresh_in=...):
         """Check if a refresh is needed.
 
@@ -165,7 +145,6 @@ class RefreshableCredentials(Credentials):
 
         """
         ...
-
     def get_frozen_credentials(self):
         """Return immutable credentials.
 
@@ -202,39 +181,41 @@ class RefreshableCredentials(Credentials):
         """
         ...
 
-
-
 class DeferredRefreshableCredentials(RefreshableCredentials):
     """Refreshable credentials that don't require initial credentials.
 
     refresh_using will be called upon first access.
     """
-    def __init__(self, refresh_using, method, time_fetcher=...) -> None:
-        ...
 
-    def refresh_needed(self, refresh_in=...):
-        ...
-
-
+    def __init__(self, refresh_using, method, time_fetcher=...) -> None: ...
+    def refresh_needed(self, refresh_in=...): ...
 
 class CachedCredentialFetcher(object):
     DEFAULT_EXPIRY_WINDOW_SECONDS = ...
-    def __init__(self, cache=..., expiry_window_seconds=...) -> None:
-        ...
-
-    def fetch_credentials(self):
-        ...
-
-
+    def __init__(self, cache=..., expiry_window_seconds=...) -> None: ...
+    def fetch_credentials(self): ...
 
 class BaseAssumeRoleCredentialFetcher(CachedCredentialFetcher):
-    def __init__(self, client_creator, role_arn, extra_args=..., cache=..., expiry_window_seconds=...) -> None:
-        ...
-
-
+    def __init__(
+        self,
+        client_creator,
+        role_arn,
+        extra_args=...,
+        cache=...,
+        expiry_window_seconds=...,
+    ) -> None: ...
 
 class AssumeRoleCredentialFetcher(BaseAssumeRoleCredentialFetcher):
-    def __init__(self, client_creator, source_credentials, role_arn, extra_args=..., mfa_prompter=..., cache=..., expiry_window_seconds=...) -> None:
+    def __init__(
+        self,
+        client_creator,
+        source_credentials,
+        role_arn,
+        extra_args=...,
+        mfa_prompter=...,
+        cache=...,
+        expiry_window_seconds=...,
+    ) -> None:
         """
         :type client_creator: callable
         :param client_creator: A callable that creates a client taking
@@ -268,10 +249,16 @@ class AssumeRoleCredentialFetcher(BaseAssumeRoleCredentialFetcher):
         """
         ...
 
-
-
 class AssumeRoleWithWebIdentityCredentialFetcher(BaseAssumeRoleCredentialFetcher):
-    def __init__(self, client_creator, web_identity_token_loader, role_arn, extra_args=..., cache=..., expiry_window_seconds=...) -> None:
+    def __init__(
+        self,
+        client_creator,
+        web_identity_token_loader,
+        role_arn,
+        extra_args=...,
+        cache=...,
+        expiry_window_seconds=...,
+    ) -> None:
         """
         :type client_creator: callable
         :param client_creator: A callable that creates a client taking
@@ -301,14 +288,10 @@ class AssumeRoleWithWebIdentityCredentialFetcher(BaseAssumeRoleCredentialFetcher
         """
         ...
 
-
-
 class CredentialProvider(object):
     METHOD = ...
     CANONICAL_NAME = ...
-    def __init__(self, session=...) -> None:
-        ...
-
+    def __init__(self, session=...) -> None: ...
     def load(self):
         """
         Loads the credentials from their source & sets them on the object.
@@ -328,28 +311,16 @@ class CredentialProvider(object):
         """
         ...
 
-
-
 class ProcessProvider(CredentialProvider):
     METHOD = ...
-    def __init__(self, profile_name, load_config, popen=...) -> None:
-        ...
-
-    def load(self):
-        ...
-
-
+    def __init__(self, profile_name, load_config, popen=...) -> None: ...
+    def load(self): ...
 
 class InstanceMetadataProvider(CredentialProvider):
     METHOD = ...
     CANONICAL_NAME = ...
-    def __init__(self, iam_role_fetcher) -> None:
-        ...
-
-    def load(self):
-        ...
-
-
+    def __init__(self, iam_role_fetcher) -> None: ...
+    def load(self): ...
 
 class EnvProvider(CredentialProvider):
     METHOD = ...
@@ -370,14 +341,11 @@ class EnvProvider(CredentialProvider):
             ``session_token``.
         """
         ...
-
     def load(self):
         """
         Search for credentials in explicit environment variables.
         """
         ...
-
-
 
 class OriginalEC2Provider(CredentialProvider):
     METHOD = ...
@@ -385,16 +353,12 @@ class OriginalEC2Provider(CredentialProvider):
     CRED_FILE_ENV = ...
     ACCESS_KEY = ...
     SECRET_KEY = ...
-    def __init__(self, environ=..., parser=...) -> None:
-        ...
-
+    def __init__(self, environ=..., parser=...) -> None: ...
     def load(self):
         """
         Search for a credential file used by original EC2 CLI tools.
         """
         ...
-
-
 
 class SharedCredentialProvider(CredentialProvider):
     METHOD = ...
@@ -402,16 +366,12 @@ class SharedCredentialProvider(CredentialProvider):
     ACCESS_KEY = ...
     SECRET_KEY = ...
     TOKENS = ...
-    def __init__(self, creds_filename, profile_name=..., ini_parser=...) -> None:
-        ...
-
-    def load(self):
-        ...
-
-
+    def __init__(self, creds_filename, profile_name=..., ini_parser=...) -> None: ...
+    def load(self): ...
 
 class ConfigProvider(CredentialProvider):
     """INI based config provider with profile sections."""
+
     METHOD = ...
     CANONICAL_NAME = ...
     ACCESS_KEY = ...
@@ -427,15 +387,12 @@ class ConfigProvider(CredentialProvider):
 
         """
         ...
-
     def load(self):
         """
         If there is are credentials in the configuration associated with
         the session, use those.
         """
         ...
-
-
 
 class BotoProvider(CredentialProvider):
     METHOD = ...
@@ -444,16 +401,12 @@ class BotoProvider(CredentialProvider):
     DEFAULT_CONFIG_FILENAMES = ...
     ACCESS_KEY = ...
     SECRET_KEY = ...
-    def __init__(self, environ=..., ini_parser=...) -> None:
-        ...
-
+    def __init__(self, environ=..., ini_parser=...) -> None: ...
     def load(self):
         """
         Look for credentials in boto config file.
         """
         ...
-
-
 
 class AssumeRoleProvider(CredentialProvider):
     METHOD = ...
@@ -461,7 +414,16 @@ class AssumeRoleProvider(CredentialProvider):
     ROLE_CONFIG_VAR = ...
     WEB_IDENTITY_TOKE_FILE_VAR = ...
     EXPIRY_WINDOW_SECONDS = ...
-    def __init__(self, load_config, client_creator, cache, profile_name, prompter=..., credential_sourcer=..., profile_provider_builder=...) -> None:
+    def __init__(
+        self,
+        load_config,
+        client_creator,
+        cache,
+        profile_name,
+        prompter=...,
+        credential_sourcer=...,
+        profile_provider_builder=...,
+    ) -> None:
         """
         :type load_config: callable
         :param load_config: A function that accepts no arguments, and
@@ -491,28 +453,25 @@ class AssumeRoleProvider(CredentialProvider):
             for the STS call.
         """
         ...
-
-    def load(self):
-        ...
-
-
+    def load(self): ...
 
 class AssumeRoleWithWebIdentityProvider(CredentialProvider):
     METHOD = ...
     CANONICAL_NAME = ...
     _CONFIG_TO_ENV_VAR = ...
-    def __init__(self, load_config, client_creator, profile_name, cache=..., disable_env_vars=..., token_loader_cls=...) -> None:
-        ...
-
-    def load(self):
-        ...
-
-
+    def __init__(
+        self,
+        load_config,
+        client_creator,
+        profile_name,
+        cache=...,
+        disable_env_vars=...,
+        token_loader_cls=...,
+    ) -> None: ...
+    def load(self): ...
 
 class CanonicalNameCredentialSourcer(object):
-    def __init__(self, providers) -> None:
-        ...
-
+    def __init__(self, providers) -> None: ...
     def is_supported(self, source_name):
         """Validates a given source name.
 
@@ -525,7 +484,6 @@ class CanonicalNameCredentialSourcer(object):
             False otherwise.
         """
         ...
-
     def source_credentials(self, source_name):
         """Loads source credentials based on the provided configuration.
 
@@ -537,21 +495,14 @@ class CanonicalNameCredentialSourcer(object):
         """
         ...
 
-
-
 class ContainerProvider(CredentialProvider):
     METHOD = ...
     CANONICAL_NAME = ...
     ENV_VAR = ...
     ENV_VAR_FULL = ...
     ENV_VAR_AUTH_TOKEN = ...
-    def __init__(self, environ=..., fetcher=...) -> None:
-        ...
-
-    def load(self):
-        ...
-
-
+    def __init__(self, environ=..., fetcher=...) -> None: ...
+    def load(self): ...
 
 class CredentialResolver(object):
     def __init__(self, providers) -> None:
@@ -561,7 +512,6 @@ class CredentialResolver(object):
 
         """
         ...
-
     def insert_before(self, name, credential_provider):
         """
         Inserts a new instance of ``CredentialProvider`` into the chain that
@@ -577,7 +527,6 @@ class CredentialResolver(object):
         :type cred_instance: A subclass of ``Credentials``
         """
         ...
-
     def insert_after(self, name, credential_provider):
         """
         Inserts a new type of ``Credentials`` instance into the chain that will
@@ -593,7 +542,6 @@ class CredentialResolver(object):
         :type cred_instance: A subclass of ``Credentials``
         """
         ...
-
     def remove(self, name):
         """
         Removes a given ``Credentials`` instance from the chain.
@@ -602,7 +550,6 @@ class CredentialResolver(object):
         :type name: string
         """
         ...
-
     def get_provider(self, name):
         """Return a credential provider by name.
 
@@ -614,7 +561,6 @@ class CredentialResolver(object):
             is found.
         """
         ...
-
     def load_credentials(self):
         """
         Goes through the credentials chain, returning the first ``Credentials``
@@ -622,21 +568,25 @@ class CredentialResolver(object):
         """
         ...
 
-
-
 class SSOCredentialFetcher(CachedCredentialFetcher):
     _UTC_DATE_FORMAT = ...
-    def __init__(self, start_url, sso_region, role_name, account_id, client_creator, token_loader=..., cache=..., expiry_window_seconds=...) -> None:
-        ...
-
-
+    def __init__(
+        self,
+        start_url,
+        sso_region,
+        role_name,
+        account_id,
+        client_creator,
+        token_loader=...,
+        cache=...,
+        expiry_window_seconds=...,
+    ) -> None: ...
 
 class SSOProvider(CredentialProvider):
     METHOD = ...
     _SSO_TOKEN_CACHE_DIR = ...
     _SSO_CONFIG_VARS = ...
-    def __init__(self, load_config, client_creator, profile_name, cache=..., token_cache=...) -> None:
-        ...
-
-    def load(self):
-        ...
+    def __init__(
+        self, load_config, client_creator, profile_name, cache=..., token_cache=...
+    ) -> None: ...
+    def load(self): ...

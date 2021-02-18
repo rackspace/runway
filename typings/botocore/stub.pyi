@@ -7,18 +7,13 @@ class _ANY(object):
     A helper object that compares equal to everything. Copied from
     unittest.mock
     """
-    def __eq__(self, other) -> bool:
-        ...
 
-    def __ne__(self, other) -> bool:
-        ...
-
-    def __repr__(self):
-        ...
-
-
+    def __eq__(self, other) -> bool: ...
+    def __ne__(self, other) -> bool: ...
+    def __repr__(self): ...
 
 ANY = _ANY()
+
 class Stubber(object):
     """
     This class will allow you to stub out requests so you don't have to hit
@@ -140,30 +135,24 @@ class Stubber(object):
 
         assert service_response == response
     """
+
     def __init__(self, client) -> None:
         """
         :param client: The client to add your stubs to.
         """
         ...
-
-    def __enter__(self):
-        ...
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        ...
-
+    def __enter__(self): ...
+    def __exit__(self, exception_type, exception_value, traceback): ...
     def activate(self):
         """
         Activates the stubber on the client
         """
         ...
-
     def deactivate(self):
         """
         Deactivates the stubber on the client
         """
         ...
-
     def add_response(self, method, service_response, expected_params=...):
         """
         Adds a service response to the response queue. This will be validated
@@ -188,8 +177,16 @@ class Stubber(object):
             in validation. stub.ANY is only valid for top level params.
         """
         ...
-
-    def add_client_error(self, method, service_error_code=..., service_message=..., http_status_code=..., service_error_meta=..., expected_params=..., response_meta=...):
+    def add_client_error(
+        self,
+        method,
+        service_error_code=...,
+        service_message=...,
+        http_status_code=...,
+        service_error_meta=...,
+        expected_params=...,
+        response_meta=...,
+    ):
         """
         Adds a ``ClientError`` to the response queue.
 
@@ -224,7 +221,6 @@ class Stubber(object):
 
         """
         ...
-
     def assert_no_pending_responses(self):
         """
         Asserts that all expected calls were made.

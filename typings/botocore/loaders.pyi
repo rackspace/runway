@@ -96,6 +96,7 @@ for the sdk. For instance, additional operation parameters might be added here
 which don't represent the actual service api.
 """
 logger = logging.getLogger(__name__)
+
 def instance_cache(func):
     """Cache the result of a method on a per instance basis.
 
@@ -113,6 +114,7 @@ class JSONFileLoader(object):
     This class can load the default format of models, which is a JSON file.
 
     """
+
     def exists(self, file_path):
         """Checks if the file exists.
 
@@ -124,7 +126,6 @@ class JSONFileLoader(object):
 
         """
         ...
-
     def load_file(self, file_path):
         """Attempt to load the file path.
 
@@ -136,8 +137,6 @@ class JSONFileLoader(object):
 
         """
         ...
-
-
 
 def create_loader(search_path_string=...):
     """Create a Loader class.
@@ -164,21 +163,23 @@ class Loader(object):
     convenience method over ``load_data`` and ``determine_latest_version``.
 
     """
+
     FILE_LOADER_CLASS = ...
     BUILTIN_DATA_PATH = ...
     CUSTOMER_DATA_PATH = ...
     BUILTIN_EXTRAS_TYPES = ...
-    def __init__(self, extra_search_paths=..., file_loader=..., cache=..., include_default_search_paths=..., include_default_extras=...) -> None:
-        ...
-
+    def __init__(
+        self,
+        extra_search_paths=...,
+        file_loader=...,
+        cache=...,
+        include_default_search_paths=...,
+        include_default_extras=...,
+    ) -> None: ...
     @property
-    def search_paths(self):
-        ...
-
+    def search_paths(self): ...
     @property
-    def extras_types(self):
-        ...
-
+    def extras_types(self): ...
     @instance_cache
     def list_available_services(self, type_name):
         """List all known services.
@@ -199,7 +200,6 @@ class Loader(object):
 
         """
         ...
-
     @instance_cache
     def determine_latest_version(self, service_name, type_name):
         """Find the latest API version available for a service.
@@ -222,7 +222,6 @@ class Loader(object):
 
         """
         ...
-
     @instance_cache
     def list_api_versions(self, service_name, type_name):
         """List all API versions available for a particular service type
@@ -239,7 +238,6 @@ class Loader(object):
 
         """
         ...
-
     @instance_cache
     def load_service_model(self, service_name, type_name, api_version=...):
         """Load a botocore service model
@@ -271,7 +269,6 @@ class Loader(object):
         :return: The loaded data, as a python type (e.g. dict, list, etc).
         """
         ...
-
     @instance_cache
     def load_data(self, name):
         """Load data given a data path.
@@ -291,10 +288,9 @@ class Loader(object):
         """
         ...
 
-
-
 class ExtrasProcessor(object):
     """Processes data from extras files into service models."""
+
     def process(self, original_model, extra_models):
         """Processes data from a list of loaded extras files into a model
 

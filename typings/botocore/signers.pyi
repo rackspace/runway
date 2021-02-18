@@ -36,25 +36,32 @@ class RequestSigner(object):
     :type event_emitter: :py:class:`~botocore.hooks.BaseEventHooks`
     :param event_emitter: Extension mechanism to fire events.
     """
-    def __init__(self, service_id, region_name, signing_name, signature_version, credentials, event_emitter) -> None:
-        ...
 
+    def __init__(
+        self,
+        service_id,
+        region_name,
+        signing_name,
+        signature_version,
+        credentials,
+        event_emitter,
+    ) -> None: ...
     @property
-    def region_name(self):
-        ...
-
+    def region_name(self): ...
     @property
-    def signature_version(self):
-        ...
-
+    def signature_version(self): ...
     @property
-    def signing_name(self):
-        ...
-
-    def handler(self, operation_name=..., request=..., **kwargs):
-        ...
-
-    def sign(self, operation_name, request, region_name=..., signing_type=..., expires_in=..., signing_name=...):
+    def signing_name(self): ...
+    def handler(self, operation_name=..., request=..., **kwargs): ...
+    def sign(
+        self,
+        operation_name,
+        request,
+        region_name=...,
+        signing_type=...,
+        expires_in=...,
+        signing_name=...,
+    ):
         """Sign a request before it goes out over the wire.
 
         :type operation_name: string
@@ -82,8 +89,9 @@ class RequestSigner(object):
         :param signing_name: The name to use for the service when signing.
         """
         ...
-
-    def get_auth_instance(self, signing_name, region_name, signature_version=..., **kwargs):
+    def get_auth_instance(
+        self, signing_name, region_name, signature_version=..., **kwargs
+    ):
         """
         Get an auth instance which can be used to sign a request
         using the given signature version.
@@ -103,9 +111,15 @@ class RequestSigner(object):
         :return: Auth instance to sign a request.
         """
         ...
-
     get_auth = ...
-    def generate_presigned_url(self, request_dict, operation_name, expires_in=..., region_name=..., signing_name=...):
+    def generate_presigned_url(
+        self,
+        request_dict,
+        operation_name,
+        expires_in=...,
+        region_name=...,
+        signing_name=...,
+    ):
         """Generates a presigned url
 
         :type request_dict: dict
@@ -129,10 +143,8 @@ class RequestSigner(object):
         """
         ...
 
-
-
 class CloudFrontSigner(object):
-    '''A signer to create a signed CloudFront URL.
+    """A signer to create a signed CloudFront URL.
 
     First you create a cloudfront signer based on a normalized RSA signer::
 
@@ -153,7 +165,8 @@ class CloudFrontSigner(object):
     To sign with a custom policy::
 
         signed_url = cf_signer.generate_signed_url(url, policy=my_policy)
-    '''
+    """
+
     def __init__(self, key_id, rsa_signer) -> None:
         """Create a CloudFrontSigner.
 
@@ -167,7 +180,6 @@ class CloudFrontSigner(object):
                The hash algorithm needed by CloudFront is SHA-1.
         """
         ...
-
     def generate_presigned_url(self, url, date_less_than=..., policy=...):
         """Creates a signed CloudFront URL based on given parameters.
 
@@ -184,8 +196,9 @@ class CloudFrontSigner(object):
         :return: The signed URL.
         """
         ...
-
-    def build_policy(self, resource, date_less_than, date_greater_than=..., ip_address=...):
+    def build_policy(
+        self, resource, date_less_than, date_greater_than=..., ip_address=...
+    ):
         """A helper to build policy.
 
         :type resource: str
@@ -205,11 +218,7 @@ class CloudFrontSigner(object):
         """
         ...
 
-
-
-def add_generate_db_auth_token(class_attributes, **kwargs):
-    ...
-
+def add_generate_db_auth_token(class_attributes, **kwargs): ...
 def generate_db_auth_token(self, DBHostname, Port, DBUsername, Region=...):
     """Generates an auth token used to connect to a db with IAM credentials.
 
@@ -231,10 +240,10 @@ def generate_db_auth_token(self, DBHostname, Port, DBUsername, Region=...):
     ...
 
 class S3PostPresigner(object):
-    def __init__(self, request_signer) -> None:
-        ...
-
-    def generate_presigned_post(self, request_dict, fields=..., conditions=..., expires_in=..., region_name=...):
+    def __init__(self, request_signer) -> None: ...
+    def generate_presigned_post(
+        self, request_dict, fields=..., conditions=..., expires_in=..., region_name=...
+    ):
         """Generates the url and the form fields used for a presigned s3 post
 
         :type request_dict: dict
@@ -276,12 +285,10 @@ class S3PostPresigner(object):
         """
         ...
 
-
-
-def add_generate_presigned_url(class_attributes, **kwargs):
-    ...
-
-def generate_presigned_url(self, ClientMethod, Params=..., ExpiresIn=..., HttpMethod=...):
+def add_generate_presigned_url(class_attributes, **kwargs): ...
+def generate_presigned_url(
+    self, ClientMethod, Params=..., ExpiresIn=..., HttpMethod=...
+):
     """Generate a presigned url given a client, its method, and arguments
 
     :type ClientMethod: string
@@ -303,10 +310,10 @@ def generate_presigned_url(self, ClientMethod, Params=..., ExpiresIn=..., HttpMe
     """
     ...
 
-def add_generate_presigned_post(class_attributes, **kwargs):
-    ...
-
-def generate_presigned_post(self, Bucket, Key, Fields=..., Conditions=..., ExpiresIn=...):
+def add_generate_presigned_post(class_attributes, **kwargs): ...
+def generate_presigned_post(
+    self, Bucket, Key, Fields=..., Conditions=..., ExpiresIn=...
+):
     """Builds the url and the form fields used for a presigned s3 post
 
     :type Bucket: string

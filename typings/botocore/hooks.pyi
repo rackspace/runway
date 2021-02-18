@@ -6,15 +6,13 @@ import logging
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
-_NodeList = namedtuple('NodeList', ['first', 'middle', 'last'])
+_NodeList = namedtuple("NodeList", ["first", "middle", "last"])
 _FIRST = 0
 _MIDDLE = 1
 _LAST = 2
+
 class NodeList(_NodeList):
-    def __copy__(self):
-        ...
-
-
+    def __copy__(self): ...
 
 def first_non_none_response(responses, default=...):
     """Find first non None response in a list of tuples.
@@ -57,7 +55,6 @@ class BaseEventHooks(object):
 
         """
         ...
-
     def register(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
         """Register an event handler for a given event.
 
@@ -73,8 +70,9 @@ class BaseEventHooks(object):
 
         """
         ...
-
-    def register_first(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
+    def register_first(
+        self, event_name, handler, unique_id=..., unique_id_uses_count=...
+    ):
         """Register an event handler to be called first for an event.
 
         All event handlers registered with ``register_first()`` will
@@ -83,8 +81,9 @@ class BaseEventHooks(object):
 
         """
         ...
-
-    def register_last(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
+    def register_last(
+        self, event_name, handler, unique_id=..., unique_id_uses_count=...
+    ):
         """Register an event handler to be called last for an event.
 
         All event handlers registered with ``register_last()`` will be called
@@ -92,8 +91,9 @@ class BaseEventHooks(object):
 
         """
         ...
-
-    def unregister(self, event_name, handler=..., unique_id=..., unique_id_uses_count=...):
+    def unregister(
+        self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
+    ):
         """Unregister an event handler for a given event.
 
         If no ``unique_id`` was given during registration, then the
@@ -103,12 +103,8 @@ class BaseEventHooks(object):
         """
         ...
 
-
-
 class HierarchicalEmitter(BaseEventHooks):
-    def __init__(self) -> None:
-        ...
-
+    def __init__(self) -> None: ...
     def emit(self, event_name, **kwargs):
         """
         Emit an event by name with arguments passed as keyword args.
@@ -121,7 +117,6 @@ class HierarchicalEmitter(BaseEventHooks):
                  handlers.
         """
         ...
-
     def emit_until_response(self, event_name, **kwargs):
         """
         Emit an event by name with arguments passed as keyword args,
@@ -136,41 +131,28 @@ class HierarchicalEmitter(BaseEventHooks):
                  is not ``None``, otherwise (``None``, ``None``).
         """
         ...
-
-    def unregister(self, event_name, handler=..., unique_id=..., unique_id_uses_count=...):
-        ...
-
-    def __copy__(self):
-        ...
-
-
+    def unregister(
+        self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
+    ): ...
+    def __copy__(self): ...
 
 class EventAliaser(BaseEventHooks):
-    def __init__(self, event_emitter, event_aliases=...) -> None:
-        ...
-
-    def emit(self, event_name, **kwargs):
-        ...
-
-    def emit_until_response(self, event_name, **kwargs):
-        ...
-
-    def register(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
-        ...
-
-    def register_first(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
-        ...
-
-    def register_last(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
-        ...
-
-    def unregister(self, event_name, handler=..., unique_id=..., unique_id_uses_count=...):
-        ...
-
-    def __copy__(self):
-        ...
-
-
+    def __init__(self, event_emitter, event_aliases=...) -> None: ...
+    def emit(self, event_name, **kwargs): ...
+    def emit_until_response(self, event_name, **kwargs): ...
+    def register(
+        self, event_name, handler, unique_id=..., unique_id_uses_count=...
+    ): ...
+    def register_first(
+        self, event_name, handler, unique_id=..., unique_id_uses_count=...
+    ): ...
+    def register_last(
+        self, event_name, handler, unique_id=..., unique_id_uses_count=...
+    ): ...
+    def unregister(
+        self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
+    ): ...
+    def __copy__(self): ...
 
 class _PrefixTrie(object):
     """Specialized prefix trie that handles wildcards.
@@ -194,9 +176,8 @@ class _PrefixTrie(object):
     most specific to least specific.
 
     """
-    def __init__(self) -> None:
-        ...
 
+    def __init__(self) -> None: ...
     def append_item(self, key, value, section=...):
         """Add an item to a key.
 
@@ -204,7 +185,6 @@ class _PrefixTrie(object):
         value is appended to the list for the key.
         """
         ...
-
     def prefix_search(self, key):
         """Collect all items that are prefixes of key.
 
@@ -214,7 +194,6 @@ class _PrefixTrie(object):
 
         """
         ...
-
     def remove_item(self, key, value):
         """Remove an item associated with a key.
 
@@ -224,6 +203,4 @@ class _PrefixTrie(object):
 
         """
         ...
-
-    def __copy__(self):
-        ...
+    def __copy__(self): ...
