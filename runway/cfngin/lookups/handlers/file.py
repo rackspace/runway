@@ -1,5 +1,6 @@
 """File lookup."""
 # pylint: disable=arguments-differ
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import base64

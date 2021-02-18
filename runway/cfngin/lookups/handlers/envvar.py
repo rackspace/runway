@@ -1,4 +1,5 @@
 """Environment variable lookup."""
+# pyright: reportIncompatibleMethodOverride=none
 import os
 from typing import Any
 

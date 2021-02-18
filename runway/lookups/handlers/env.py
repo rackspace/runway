@@ -34,6 +34,7 @@ limited or no effect:
         ENVIRONMENT: ${env DEPLOY_ENVIRONMENT::default=default}
 
 """
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any

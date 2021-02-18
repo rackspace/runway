@@ -138,8 +138,7 @@ class BaseContext:
             .get_frozen_credentials()
         )
 
-        # the value of these is currently unknown
-        self.env.vars["AWS_ACCESS_KEY_ID"] = creds.access_key  # type: ignore
-        self.env.vars["AWS_SECRET_ACCESS_KEY"] = creds.secret_key  # type: ignore
+        self.env.vars["AWS_ACCESS_KEY_ID"] = creds.access_key
+        self.env.vars["AWS_SECRET_ACCESS_KEY"] = creds.secret_key
         if creds.token:
-            self.env.vars["AWS_SESSION_TOKEN"] = creds.token  # type: ignore
+            self.env.vars["AWS_SESSION_TOKEN"] = creds.token

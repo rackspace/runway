@@ -583,7 +583,7 @@ class RunwayVersionField(SpecifierSet):
         try:
             return RunwayVersionField(v, prereleases=True)
         except InvalidSpecifier:
-            if any(cast(str, v).startswith(i) for i in ["!", "~", "<", ">", "="]):
+            if any(v.startswith(i) for i in ["!", "~", "<", ">", "="]):
                 raise ValueError(f"{v} is not a valid version specifier set") from None
             LOGGER.debug(
                 "runway_version is not a valid version specifier; trying as an exact version",

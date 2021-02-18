@@ -1,4 +1,5 @@
 """AWS SSM Parameter Store lookup."""
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging

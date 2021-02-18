@@ -32,6 +32,7 @@ limited or no effect:
         SOME_VARIABLE: ${var some_variable::default=default}
 
 """
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging

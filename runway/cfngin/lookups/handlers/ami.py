@@ -1,4 +1,5 @@
 """AMI lookup."""
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import operator

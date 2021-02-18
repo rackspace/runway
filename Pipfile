@@ -21,7 +21,7 @@ flake8-docstrings = "~=1.5.0"
 pep8-naming = "~=0.11"
 pydocstyle = "~=5.0.2"
 # Typing
-boto3-stubs = {extras = ["acm", "awslambda", "cloudformation", "cognito-idp", "dynamodb", "ec2", "ecr", "ecs", "iam", "kms", "route53", "s3", "ssm", "sts"],version = "*"}
+boto3-stubs = {extras = ["acm", "awslambda", "cloudformation", "cloudfront", "cognito-idp", "dynamodb", "ec2", "ecr", "ecs", "iam", "kms", "route53", "s3", "ssm", "sts"],version = "*"}
 mypy-boto3 = "*"
 # Test
 coverage = {extras = ["toml"],version = "~=5.2.1"}
