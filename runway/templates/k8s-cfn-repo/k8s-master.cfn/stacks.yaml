@@ -28,7 +28,7 @@ post_build:
         - aws-auth-cm.k8s
         - overlays
         - ${namespace}
-      file: aws-auth-cm.yaml
+      filename: aws-auth-cm.yaml
       stack: *iamstackname
   - path: k8s_hooks.awscli.aws_eks_update_kubeconfig
     required: true

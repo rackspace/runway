@@ -2,19 +2,21 @@
 import logging
 import os
 import shutil
+from pathlib import Path
+from typing import Any
 
-import yaml
+from runway.config import RunwayConfig
 
 LOGGER = logging.getLogger(__name__)
 
 
-def copy_template_to_env(path, env, region):
+def copy_template_to_env(path: Path, env: str, region: str):
     """Copy k8s module template into new environment directory."""
-    overlays_dir = os.path.join(path, "overlays")
-    template_dir = os.path.join(overlays_dir, "template")
-    env_dir = os.path.join(overlays_dir, env)
-    if os.path.isdir(template_dir):
-        if os.path.isdir(env_dir) or (os.path.isdir("%s-%s" % (env_dir, region))):
+    overlays_dir = path / "overlays"
+    template_dir = overlays_dir / "template"
+    env_dir = overlays_dir / env
+    if template_dir.is_dir():
+        if env_dir.is_dir() or (os.path.isdir("%s-%s" % (env_dir, region))):
             LOGGER.info(
                 'Bootstrap of k8s module at "%s" skipped; module '
                 "already has a config for this environment",
@@ -33,14 +35,13 @@ def copy_template_to_env(path, env, region):
                 # namespace files can't be directly kustomized
                 "namespace.yaml",
             ]:
-                templated_file_path = os.path.join(env_dir, i)
-                if os.path.isfile(templated_file_path):
-                    with open(templated_file_path, "r") as stream:
-                        filedata = stream.read()
+                templated_file_path = env_dir / i
+                if templated_file_path.is_file():
+                    filedata = templated_file_path.read_text()
                     if "REPLACEMEENV" in filedata:
-                        filedata = filedata.replace("REPLACEMEENV", env)
-                        with open(templated_file_path, "w") as stream:
-                            stream.write(filedata)
+                        templated_file_path.write_text(
+                            filedata.replace("REPLACEMEENV", env)
+                        )
     else:
         LOGGER.info(
             'Skipping bootstrap of k8s module at "%s"; no template directory present',
@@ -48,35 +49,39 @@ def copy_template_to_env(path, env, region):
         )
 
 
-# pylint: disable=unused-argument
-def create_runway_environments(provider, context, **kwargs):
+def create_runway_environments(*, namespace: str, **_: Any):
     """Copy k8s module templates into new environment directories.
 
     Args:
-        provider (:class:`stacker.providers.base.BaseProvider`): provider
-            instance
-        context (:class:`stacker.context.Context`): context instance
+        namespace: Current CFNgin namespace.
 
     Returns: boolean for whether or not the hook succeeded.
 
     """
     LOGGER.info(
-        "Bootstrapping runway k8s modules, looking for unconfigured " "environments..."
+        "Bootstrapping runway k8s modules, looking for unconfigured environments..."
     )
 
-    environment = kwargs["namespace"]
-    region = os.environ.get("AWS_DEFAULT_REGION")
+    environment = namespace
+    region = os.environ["AWS_REGION"]
 
-    env_root = os.path.dirname(os.path.realpath(os.environ.get("RUNWAYCONFIG")))
-    with open(os.environ.get("RUNWAYCONFIG")) as data_file:
-        runway_config = yaml.safe_load(data_file)
+    runway_config_path = Path(os.environ.get("RUNWAYCONFIG", ""))
+    if not runway_config_path.is_file():
+        LOGGER.warning("could not find RUNWAYCONFIG=%s", runway_config_path)
+        return False
 
-    for deployment in runway_config.get("deployments", []):
-        for module in deployment.get("modules", []):
-            if isinstance(module, str):
-                path = module
+    runway_config = RunwayConfig.parse_file(file_path=runway_config_path)
+
+    for deployment in runway_config.deployments:
+        for module in deployment.modules:
+            if isinstance(module.path, Path):
+                path = module.path.name
+            elif isinstance(module.path, str):
+                path = module.path
             else:
-                path = module.get("path")
+                path = ""
             if path.endswith(".k8s"):
-                copy_template_to_env(os.path.join(env_root, path), environment, region)
+                copy_template_to_env(
+                    runway_config_path.parent / path, environment, region
+                )
     return True

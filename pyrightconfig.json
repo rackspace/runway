@@ -16,7 +16,7 @@
         "**/npm",
         "**/runway/aws_sso_botocore",
         "**/runway/hooks/staticsite/auth_at_edge/templates",
-        "**/runway/templates",
+        "**/runway/templates/cdk-py",
         "**/scripts"
     ],
     "pythonVersion": "3.8",
