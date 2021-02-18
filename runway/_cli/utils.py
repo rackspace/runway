@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any, Iterator, List, Optional, Tuple
 
@@ -24,7 +23,7 @@ from ..util import cached_property
 LOGGER = logging.getLogger(__name__)
 
 
-class CliContext(MutableMapping):
+class CliContext:
     """CLI context object."""
 
     def __init__(

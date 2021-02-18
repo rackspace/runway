@@ -1,7 +1,7 @@
 """``runway run-aws`` command."""
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any, Tuple
+from typing import Any, Tuple, cast
 
 import click
 from awscli.clidriver import create_clidriver
@@ -36,4 +36,4 @@ def run_aws(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
             if name.startswith("awscli.") and isinstance(logger, logging.Logger):
                 logger.setLevel(logging.ERROR)
     with SafeHaven(environ={"LC_CTYPE": "en_US.UTF"}):
-        ctx.exit(create_clidriver().main(list(args)))
+        ctx.exit(cast(int, create_clidriver().main(list(args))))

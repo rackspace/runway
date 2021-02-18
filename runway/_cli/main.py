@@ -14,7 +14,10 @@ from .utils import CliContext
 
 LOGGER = logging.getLogger("runway.cli")
 
-CLICK_CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=999)
+CLICK_CONTEXT_SETTINGS: Dict[str, Any] = {
+    "help_option_names": ["-h", "--help"],
+    "max_content_width": 999,
+}
 
 
 class _CliGroup(click.Group):
