@@ -1,8 +1,10 @@
 """Runway config deployment definition."""
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, overload
 
+from ....exceptions import UnresolvedVariable
 from ....variables import Variable
 from ...models.runway import (
     RunwayDeploymentDefinitionModel,
@@ -19,6 +21,8 @@ if TYPE_CHECKING:
         RunwayEnvVarsType,
     )
 
+LOGGER = logging.getLogger(__name__.replace("._", "."))
+
 
 class RunwayDeploymentDefinition(ConfigComponentDefinition):
     """Runway deployment definition."""
@@ -32,7 +36,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
     name: str
     parallel_regions: List[str]
     parameters: Dict[str, Any]
-    regions: List[str]  # TODO add support for regions.parallel
+    regions: List[str]
 
     _data: RunwayDeploymentDefinitionModel
     _pre_process_vars: Tuple[str, ...] = (
@@ -61,10 +65,19 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
     @property
     def menu_entry(self) -> str:
         """Return menu entry representation of this deployment."""
+        try:
+            regions = self.regions or self.parallel_regions
+        except UnresolvedVariable as err:
+            LOGGER.debug(
+                "attempted to use variable %s before it was resolved; "
+                "using literal value in menu entry",
+                err.variable.name,
+            )
+            regions = self._data.regions or self._data.parallel_regions
         return "{name} - {modules} ({regions})".format(
             name=self.name,
             modules=", ".join(module.name for module in self.modules),
-            regions=", ".join(self.regions or self.parallel_regions),
+            regions=", ".join(regions if isinstance(regions, list) else [regions]),
         )
 
     @property
