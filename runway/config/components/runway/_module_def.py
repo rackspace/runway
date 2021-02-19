@@ -9,7 +9,11 @@ from ...models.runway import RunwayModuleDefinitionModel
 from .base import ConfigComponentDefinition
 
 if TYPE_CHECKING:
-    from ...models.runway import RunwayEnvironmentsType, RunwayEnvVarsType
+    from ...models.runway import (
+        RunwayEnvironmentsType,
+        RunwayEnvVarsType,
+        RunwayModuleTypeTypeDef,
+    )
 
 
 class RunwayModuleDefinition(ConfigComponentDefinition):
@@ -23,7 +27,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     parameters: Dict[str, Any]
     path: Optional[Union[str, Path]]
     tags: List[str]
-    type: Optional[str]  # TODO add enum
+    type: Optional[RunwayModuleTypeTypeDef]
 
     _data: RunwayModuleDefinitionModel
     _supports_vars: Tuple[str, ...] = (

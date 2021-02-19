@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
     from pytest import LogCaptureFixture
 
+    from runway.config.models.runway import RunwayModuleTypeTypeDef
     from runway.module.base import RunwayModule
 
 
@@ -110,7 +111,10 @@ class TestRunwayModuleType:
         ],
     )
     def test_from_type_str(
-        self, type_str: str, expected: Type[RunwayModule], cd_tmp_path: Path
+        self,
+        type_str: RunwayModuleTypeTypeDef,
+        expected: Type[RunwayModule],
+        cd_tmp_path: Path,
     ) -> None:
         """Test from type_str."""
         result = RunwayModuleType(cd_tmp_path, type_str=type_str)
