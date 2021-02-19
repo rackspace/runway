@@ -1,5 +1,6 @@
 """Test runway.core.providers.aws._response."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

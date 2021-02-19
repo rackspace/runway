@@ -15,7 +15,7 @@ class RunwayK8sModuleOptionsDataModel(ConfigProperty):
     kubectl_version: Optional[str] = None
     overlay_path: Optional[Path] = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.ignore

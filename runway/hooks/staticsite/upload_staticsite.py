@@ -11,15 +11,27 @@ from operator import itemgetter
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import yaml
+from typing_extensions import TypedDict
 
 from ...core.providers import aws
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from boto3.session import Session
 
     from ...context.cfngin import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
+
+
+class ExtraFileTypeDef(TypedDict, total=False):
+    """Type definition for extra_files item."""
+
+    content_type: Optional[str]
+    content: Union[Dict[str, Any], List[Any], str, Any]
+    file: Optional[Union[Path, str]]
+    name: str
 
 
 def get_archives_to_prune(
@@ -51,10 +63,10 @@ def sync(
     *,
     bucket_name: str,
     cf_disabled: bool = False,
-    distribution_domain: Optional[str] = None,
-    distribution_id: Optional[str] = None,
+    distribution_domain: str = "undefined",
+    distribution_id: str,
     distribution_path: str = "/*",
-    extra_files: Optional[List[Dict[str, Optional[Union[Dict[str, Any], str]]]]] = None,
+    extra_files: Optional[List[ExtraFileTypeDef]] = None,
     website_url: Optional[str] = None,
     **_: Any
 ) -> bool:
@@ -154,7 +166,12 @@ def update_ssm_hash(context: CfnginContext, session: Session) -> bool:
 
 
 def invalidate_distribution(
-    session: Session, *, domain="", identifier="", path="", **_
+    session: Session,
+    *,
+    domain: str = "undefined",
+    identifier: str,
+    path: str = "/*",
+    **_: Any
 ) -> bool:
     """Invalidate the current distribution.
 
@@ -235,9 +252,7 @@ def auto_detect_content_type(filename: Optional[str]) -> Optional[str]:
     return None
 
 
-def get_content_type(
-    extra_file: Dict[str, Optional[Union[Dict[str, Any], str]]]
-) -> Optional[str]:
+def get_content_type(extra_file: ExtraFileTypeDef) -> Optional[str]:
     """Return the content type of the file.
 
     Args:
@@ -248,18 +263,12 @@ def get_content_type(
         that is returned, otherways it is auto detected based on the name.
 
     """
-    return cast(
-        Optional[str],
-        extra_file.get(
-            "content_type",
-            auto_detect_content_type(cast(Optional[str], extra_file.get("name"))),
-        ),
+    return extra_file.get(
+        "content_type", auto_detect_content_type(extra_file.get("name")),
     )
 
 
-def get_content(
-    extra_file: Dict[str, Optional[Union[Dict[str, Any], str]]]
-) -> Optional[str]:
+def get_content(extra_file: ExtraFileTypeDef) -> Optional[str]:
     """Get serialized content based on content_type.
 
     Args:
@@ -287,12 +296,10 @@ def get_content(
         if not isinstance(content, str):
             raise TypeError("unsupported content: %s" % type(content))
 
-    return cast(str, content)
+    return cast(Optional[str], content)
 
 
-def calculate_hash_of_extra_files(
-    extra_files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]]
-) -> str:
+def calculate_hash_of_extra_files(extra_files: List[ExtraFileTypeDef]) -> str:
     """Return a hash of all of the given extra files.
 
     Adapted from stacker.hooks.aws_lambda; used according to its license:
@@ -314,14 +321,14 @@ def calculate_hash_of_extra_files(
         file_hash.update((extra_file["name"] + "\0").encode())
 
         if extra_file.get("content_type"):
-            file_hash.update((extra_file["content_type"] + "\0").encode())
+            file_hash.update((cast(str, extra_file["content_type"]) + "\0").encode())
 
         if extra_file.get("content"):
             LOGGER.debug("hashing content: %s", extra_file["name"])
-            file_hash.update((extra_file["content"] + "\0").encode())
+            file_hash.update((cast(str, extra_file["content"]) + "\0").encode())
 
         if extra_file.get("file"):
-            with open(extra_file["file"], "rb") as f:
+            with open(cast("Path", extra_file["file"]), "rb") as f:
                 LOGGER.debug("hashing file: %s", extra_file["file"])
                 for chunk in iter(
                     lambda: f.read(4096), "",  # pylint: disable=cell-var-from-loop
@@ -375,7 +382,7 @@ def set_ssm_value(
 def sync_extra_files(
     context: CfnginContext,
     bucket: str,
-    extra_files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]],
+    extra_files: List[ExtraFileTypeDef],
     **kwargs: Any
 ) -> List[str]:
     """Sync static website extra files to S3 bucket.
@@ -430,7 +437,7 @@ def sync_extra_files(
 
             s3_client.put_object(
                 Bucket=bucket,
-                Key=cast(str, filename),
+                Key=filename,
                 Body=cast(str, content).encode(),
                 ContentType=cast(str, content_type),
             )
@@ -445,9 +452,7 @@ def sync_extra_files(
             if content_type:
                 extra_args = {"ContentType": content_type}
 
-            s3_client.upload_file(
-                cast(str, source), bucket, cast(str, filename), ExtraArgs=extra_args
-            )
+            s3_client.upload_file(str(source), bucket, filename, ExtraArgs=extra_args)
 
             uploaded.append(filename)
 

@@ -1,5 +1,6 @@
 """Test runway.context.base."""
 # pylint: disable=no-self-use,redefined-outer-name
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
@@ -89,11 +90,6 @@ class TestBaseContext:
 
         mocker.patch.object(self.env, "ci", True)
         assert ctx.is_noninteractive
-
-    def test_copy(self) -> None:
-        """Test copy."""
-        with pytest.raises(NotImplementedError):
-            BaseContext(deploy_environment=self.env).copy()
 
     def test_get_session(
         self, mock_boto3_session: MagicMock, mock_sso_botocore_session: MagicMock

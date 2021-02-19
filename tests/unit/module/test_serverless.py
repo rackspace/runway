@@ -1,5 +1,6 @@
 """Test runway.module.serverless."""
 # pylint: disable=no-self-use,unused-argument
+# pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import logging
@@ -18,7 +19,7 @@ from runway.module.serverless import Serverless, ServerlessOptions, gen_sls_conf
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess.core import FakeProcess
 
@@ -86,7 +87,7 @@ class TestServerless:
 
         mocker.patch.object(Serverless, "skip", True)
         assert not obj.destroy()
-        obj.extend_serverless_yml.assert_not_called()
+        obj.extend_serverless_yml.assert_not_called()  # type: ignore
         obj.sls_remove.assert_not_called()
 
         mocker.patch.object(Serverless, "skip", False)

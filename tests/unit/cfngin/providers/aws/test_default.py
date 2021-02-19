@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.providers.aws.default."""
 # pylint: disable=too-many-lines
+# pyright: basic
 from __future__ import annotations
 
 import copy
@@ -621,7 +622,9 @@ class TestProviderDefaultMode(unittest.TestCase):
             [{"force_interactive": False}, self.provider.noninteractive_destroy_stack],
             [{"force_interactive": True}, self.provider.interactive_destroy_stack],
         ]:
-            self.assertEqual(self.provider.select_destroy_method(**i[0]), i[1])
+            self.assertEqual(
+                self.provider.select_destroy_method(**i[0]), i[1]  # type: ignore
+            )
 
     def test_select_update_method(self) -> None:
         """Test select update method."""
@@ -643,7 +646,9 @@ class TestProviderDefaultMode(unittest.TestCase):
                 self.provider.interactive_update_stack,
             ],
         ]:
-            self.assertEqual(self.provider.select_update_method(**i[0]), i[1])
+            self.assertEqual(
+                self.provider.select_update_method(**i[0]), i[1]  # type: ignore
+            )
 
     def test_prepare_stack_for_update_completed(self) -> None:
         """Test prepare stack for update completed."""
@@ -934,10 +939,10 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         received_events = []
 
-        def mock_log_func(event):
+        def mock_log_func(event: Any) -> None:
             received_events.append(event)
 
-        def valid_event_response(stack, event_id):
+        def valid_event_response(stack: Stack, event_id: str) -> Dict[str, Any]:
             return {
                 "StackEvents": [
                     {
@@ -1160,7 +1165,9 @@ class TestProviderInteractiveMode(unittest.TestCase):
             [{"force_interactive": False}, self.provider.interactive_destroy_stack],
             [{"force_interactive": True}, self.provider.interactive_destroy_stack],
         ]:
-            self.assertEqual(self.provider.select_destroy_method(**i[0]), i[1])
+            self.assertEqual(
+                self.provider.select_destroy_method(**i[0]), i[1]  # type: ignore
+            )
 
     def test_select_update_method(self) -> None:
         """Test select update method."""
@@ -1182,7 +1189,9 @@ class TestProviderInteractiveMode(unittest.TestCase):
                 self.provider.interactive_update_stack,
             ],
         ]:
-            self.assertEqual(self.provider.select_update_method(**i[0]), i[1])
+            self.assertEqual(
+                self.provider.select_update_method(**i[0]), i[1]  # type: ignore
+            )
 
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
     @patch("runway.cfngin.providers.aws.default.output_summary")

@@ -117,7 +117,7 @@
         "xtrace"
     ],
     "files.insertFinalNewline": true,
-    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "strict",
     "python.formatting.provider": "black",
     "python.linting.flake8Args": [
         "--docstring-convention=all"

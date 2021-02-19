@@ -11,8 +11,10 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
+from __future__ import annotations
+
 import json
-from typing import Any, Dict
+from typing import Any, Dict, MutableMapping, MutableSequence, cast
 
 import yaml
 
@@ -47,11 +49,11 @@ def intrinsics_multi_constructor(  # pylint: disable=unused-argument
 
     elif isinstance(node, yaml.SequenceNode):
         # Value of this node is an array (Ex: [1,2])
-        value = loader.construct_sequence(node)
+        value = cast(MutableSequence[Any], loader.construct_sequence(node))
 
     else:
         # Value of this node is an mapping (ex: {foo: bar})
-        value = loader.construct_mapping(node)
+        value = cast(MutableMapping[Any, Any], loader.construct_mapping(node))
 
     return {cfntag: value}
 

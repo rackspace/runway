@@ -371,7 +371,7 @@ class Action(BaseAction):
             # a successful update.
             elif provider.is_stack_failed(provider_stack):
                 reason = status.reason
-                if "rolling" in reason:
+                if reason and "rolling" in reason:
                     reason = reason.replace("rolling", "rolled")
                 status_reason = provider.get_rollback_status_reason(stack.fqn)
                 LOGGER.info("%s:roll back reason: %s", stack.fqn, status_reason)
@@ -534,14 +534,15 @@ class Action(BaseAction):
             outline=outline,
         )
 
-    def run(  # pylint: disable=arguments-differ
+    def run(
         self,
         *,
         concurrency: int = 0,
         dump: Union[bool, str] = False,
+        force: bool = False,  # pylint: disable=unused-argument
         outline: bool = False,
         tail: bool = False,
-        **_: Any
+        **_kwargs: Any
     ) -> None:
         """Kicks off the build/update of the stacks in the stack_definitions.
 

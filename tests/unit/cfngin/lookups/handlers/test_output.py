@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.output."""
+# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 import unittest
 
 from mock import MagicMock

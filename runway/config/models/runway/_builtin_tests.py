@@ -16,7 +16,7 @@ ValidRunwayTestTypeValues = Literal["cfn-lint", "script", "yamllint"]
 class RunwayTestDefinitionModel(ConfigProperty):
     """Model for a Runway test definition."""
 
-    args: Union[Dict[str, Any], str] = Field(
+    args: Union[Dict[str, Any], ConfigProperty, str] = Field(
         {},
         title="Arguments",
         description="Arguments to be passed to the test. Support varies by test type.",
@@ -27,7 +27,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
     )
     type: ValidRunwayTestTypeValues
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         schema_extra = {
@@ -36,7 +36,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
         title = "Runway Test Definition"
         use_enum_values = True
 
-    def __new__(cls, **kwargs) -> RunwayTestDefinitionModel:
+    def __new__(cls, **kwargs: Any) -> RunwayTestDefinitionModel:
         """Create a new instance of a class.
 
         Returns:
@@ -68,7 +68,7 @@ class CfnLintRunwayTestArgs(ConfigProperty):
         description="Array of arguments to pass to the cfn-lint CLI.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -99,7 +99,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         "cfn-lint", description="The type of test to run."
     )
 
-    class Config:
+    class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
 
         schema_extra = {
@@ -115,7 +115,7 @@ class ScriptRunwayTestArgs(ConfigProperty):
         [], description="Array of commands that will be run for this test."
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -144,7 +144,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     )
     type: Literal["script"] = Field("script", description="The type of test to run.")
 
-    class Config:
+    class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
 
         schema_extra = {
@@ -164,7 +164,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         "yamllint", description="The type of test to run."
     )
 
-    class Config:
+    class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
 
         schema_extra = {

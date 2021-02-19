@@ -1,9 +1,11 @@
 """Tests for runway.cfngin.hooks.acm."""
 # pylint: disable=no-self-use,protected-access,unused-argument
+# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
+# pyright: reportUnknownLambdaType=none
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, NoReturn, Union, cast
 
 import boto3
 import pytest
@@ -23,7 +25,6 @@ from runway.cfngin.status import FAILED, NO_CHANGE, SubmittedStatus
 from runway.util import MutableMap
 
 if TYPE_CHECKING:
-    from _pytest.monkeypatch import MonkeyPatch
     from mypy_boto3_acm.type_defs import DomainValidationTypeDef, ResourceRecordTypeDef
     from mypy_boto3_cloudformation.type_defs import StackResourceTypeDef
     from mypy_boto3_route53.type_defs import (
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
         ChangeTypeDef,
         ResourceRecordSetTypeDef,
     )
+    from pytest import MonkeyPatch
 
     from ...factories import MockCFNginContext
 
@@ -832,7 +834,7 @@ class TestCertificate:
         assert cert.destroy()
         assert cert.destroy(skip_r53=True)
         assert (  # pylint: disable=no-member
-            cert.remove_validation_records.call_count == 1
+            cert.remove_validation_records.call_count == 1  # type: ignore
         )
 
     def test_destory_aws_errors(
@@ -877,7 +879,7 @@ class TestCertificate:
         cfngin_context.add_stubber("route53", "us-east-1")
         cfngin_context.config.namespace = "test"
 
-        def build_client_error(msg):
+        def build_client_error(msg: str) -> ClientError:
             """Raise a ClientError."""
             return ClientError({"Error": {"Message": msg}}, "test")
 
@@ -889,13 +891,13 @@ class TestCertificate:
         )
         monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)
 
-        def raise_stack_not_exist(_records):
+        def raise_stack_not_exist(_records: Any) -> NoReturn:
             """Raise ClientError mimicing stack not existing."""
             raise build_client_error(
                 "Stack with id {} does not exist".format(cert.stack.fqn)
             )
 
-        def raise_other(_records):
+        def raise_other(_records: Any) -> NoReturn:
             """Raise other ClientError."""
             raise build_client_error("something")
 

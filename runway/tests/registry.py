@@ -24,7 +24,7 @@ def register_test_handler(test_type: str, handler: Type[TestHandler]) -> None:
     TEST_HANDLERS[test_type] = handler
 
 
-def unregister_test_handler(test_type):
+def unregister_test_handler(test_type: str) -> None:
     """Unregister the specified test type.
 
     This is useful when testing various lookup types if you want to unregister

@@ -1,4 +1,5 @@
-"""AWS Lambda hook."""  # pylint: disable=too-many-lines
+"""AWS Lambda hook."""
+# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import hashlib
@@ -14,7 +15,6 @@ from distutils.util import strtobool
 from io import BytesIO as StringIO
 from pathlib import Path
 from shutil import copyfile
-from types import GeneratorType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -29,13 +29,13 @@ from typing import (
 )
 from zipfile import ZIP_DEFLATED, ZipFile
 
-# pylint import order false alerts appear to be specific to py2 on Windows
 import botocore
 import botocore.exceptions
 import docker
 import docker.types
 import formic
 from docker.models.containers import Container
+from docker.models.images import Image
 from troposphere.awslambda import Code
 from typing_extensions import Literal, TypedDict
 
@@ -188,12 +188,7 @@ def _zip_files(files: Iterable[str], root: str) -> Tuple[bytes, str]:
 
     """
     zip_data = StringIO()
-    if isinstance(files, GeneratorType):
-        # if file list is a generator, save the contents so it can be reused
-        # since generators are empty after the first iteration and cannot be
-        # rewound.
-        LOGGER.debug("converting file generater to list for reuse...")
-        files = list(files)
+    files = list(files)  # create copy of list also converts generator to list
     with ZipFile(zip_data, "w", ZIP_DEFLATED) as zip_file:
         for file_name in files:
             zip_file.write(os.path.join(root, file_name), file_name)
@@ -450,20 +445,23 @@ def dockerized_pip(
         if not os.path.isfile(docker_file):
             raise ValueError('could not find docker_file "%s"' % docker_file)
         LOGGER.info('building docker image from "%s"', docker_file)
-        response = client.images.build(
-            path=os.path.dirname(docker_file),
-            dockerfile=os.path.basename(docker_file),
-            forcerm=True,
+        response = cast(
+            Union[Image, Tuple[Image, Iterator[Dict[str, str]]]],
+            client.images.build(
+                path=os.path.dirname(docker_file),
+                dockerfile=os.path.basename(docker_file),
+                forcerm=True,
+            ),
         )
         # the response can be either a tuple of (Image, Generator[Dict[str, str]])
         # or just Image depending on API version.
         if isinstance(response, tuple):
-            docker_image = response[0].id
+            docker_image = cast(str, response[0].id)
             for log_msg in response[1]:
                 if log_msg.get("stream"):
                     LOGGER.info(log_msg["stream"].strip("\n"))
         else:
-            docker_image = response.id
+            docker_image = cast(str, response.id)
         LOGGER.info('docker image "%s" created', docker_image)
     if runtime:
         if runtime not in SUPPORTED_RUNTIMES:
@@ -506,7 +504,9 @@ def dockerized_pip(
 
     # 'stream' creates a blocking generator that allows for real-time logs.
     # this loop ends when the container 'auto_remove's itself.
-    for log in container.logs(stdout=True, stderr=True, stream=True, tail=0):
+    for log in cast(
+        Iterator[bytes], container.logs(stdout=True, stderr=True, stream=True, tail=0)
+    ):
         # without strip there are a bunch blank lines in the output
         LOGGER.info(log.decode().strip())
 
@@ -539,7 +539,7 @@ def _pip_has_no_color_option(python_path: str) -> bool:
                 "print(pip.__version__)",
             ]
         )
-        if isinstance(pip_version_string, bytes):
+        if isinstance(pip_version_string, bytes):  # type: ignore
             pip_version_string = pip_version_string.decode()
         if int(pip_version_string.split(".")[0]) > 10:
             return True
@@ -595,6 +595,7 @@ def _zip_package(
         temp_root.mkdir(parents=True)
 
     # exclude potential virtual environments in the package
+    excludes = excludes or []
     excludes.append(".venv/")
 
     with tempfile.TemporaryDirectory(prefix="cfngin", dir=temp_root) as tmpdir:
@@ -785,7 +786,7 @@ def _check_pattern_list(
     if isinstance(patterns, str):
         return [patterns]
 
-    if isinstance(patterns, list) and all(isinstance(p, str) for p in patterns):
+    if isinstance(patterns, list) and all(isinstance(p, str) for p in patterns):  # type: ignore
         return patterns
 
     raise ValueError(

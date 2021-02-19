@@ -12,8 +12,7 @@ from runway._cli import cli
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import LogCaptureFixture, MonkeyPatch
 
     from ...conftest import CpConfigTypeDef
 

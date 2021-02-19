@@ -1,9 +1,10 @@
 """Test runway.hooks.staticsite.upload_staticsite."""
 # pylint: disable=no-self-use,too-few-public-methods
+# pyright: basic
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional
 
 import pytest
 import yaml
@@ -18,6 +19,8 @@ from runway.hooks.staticsite.upload_staticsite import (
 )
 
 if TYPE_CHECKING:
+    from runway.hooks.staticsite.upload_staticsite import ExtraFileTypeDef
+
     from ...factories import MockCFNginContext
 
 
@@ -55,9 +58,7 @@ class TestGetContentType:
         ],
     )
     def test_get_content_type(
-        self,
-        provided: Dict[str, Optional[Union[Dict[str, Any], str]]],
-        expected: Optional[str],
+        self, provided: ExtraFileTypeDef, expected: Optional[str],
     ) -> None:
         """Test get_content_type."""
         assert get_content_type(provided) == expected
@@ -110,9 +111,7 @@ class TestCalculateExtraFilesHash:
         ],
     )
     def test_calculate_hash_of_extra_files(
-        self,
-        a: Dict[str, Optional[Union[Dict[str, Any], str]]],
-        b: Dict[str, Optional[Union[Dict[str, Any], str]]],
+        self, a: ExtraFileTypeDef, b: ExtraFileTypeDef,
     ) -> None:
         """Test calculate_hash_of_extra_files."""
         assert calculate_hash_of_extra_files([a]) != calculate_hash_of_extra_files([b])
@@ -138,7 +137,7 @@ class TestSyncExtraFiles:
             },
         )
 
-        files = [{"name": "test.json", "content": content}]
+        files: List[ExtraFileTypeDef] = [{"name": "test.json", "content": content}]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -163,7 +162,7 @@ class TestSyncExtraFiles:
             },
         )
 
-        files = [{"name": "test.yaml", "content": content}]
+        files: List[ExtraFileTypeDef] = [{"name": "test.yaml", "content": content}]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -204,9 +203,7 @@ class TestSyncExtraFiles:
             },
         )
 
-        files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]] = [
-            {"name": "test", "file": "Pipfile"}
-        ]
+        files: List[ExtraFileTypeDef] = [{"name": "test", "file": "Pipfile"}]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -231,9 +228,7 @@ class TestSyncExtraFiles:
             },
         )
 
-        files: List[Dict[str, Optional[Union[Dict[str, Any], str]]]] = [
-            {"name": "test.json", "file": "Pipfile"}
-        ]
+        files: List[ExtraFileTypeDef] = [{"name": "test.json", "file": "Pipfile"}]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -246,7 +241,7 @@ class TestSyncExtraFiles:
         s3_stub = cfngin_context.add_stubber("s3")
         ssm_stub = cfngin_context.add_stubber("ssm")
 
-        extra: Dict[str, Optional[Union[Dict[str, Any], str]]] = {
+        extra: ExtraFileTypeDef = {
             "name": "test",
             "content": "test",
         }
@@ -276,7 +271,7 @@ class TestSyncExtraFiles:
         s3_stub = cfngin_context.add_stubber("s3")
         ssm_stub = cfngin_context.add_stubber("ssm")
 
-        extra: Dict[str, Optional[Union[Dict[str, Any], str]]] = {
+        extra: ExtraFileTypeDef = {
             "name": "test",
             "content": "test",
             "content_type": "text/plain",

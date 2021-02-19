@@ -21,7 +21,7 @@ class RunwayStaticSiteCustomErrorResponseDataModel(ConfigProperty):
     ResponseCode: Optional[int] = None
     ResponsePagePath: Optional[str] = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -40,7 +40,7 @@ class RunwayStaticSiteLambdaFunctionAssociationDataModel(ConfigProperty):
     arn: str
     type: str
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -162,7 +162,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     user_pool_arn: Optional[str] = Field(None, alias="staticsite_user_pool_arn")
     web_acl: Optional[str] = Field(None, alias="staticsite_web_acl")
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.ignore

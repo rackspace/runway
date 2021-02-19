@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 import yaml
 
@@ -367,8 +367,8 @@ class Serverless(RunwayModuleNpm):
             stdout=subprocess.PIPE,
             universal_newlines=True,
         )
-        with proc.stdout:  # live output
-            for line in proc.stdout:
+        with cast(IO[str], proc.stdout):
+            for line in cast(IO[str], proc.stdout):
                 print(line, end="")
                 if re.search(r"Stack '.*' does not exist", line):
                     stack_missing = True

@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.actions.base."""
 # pylint: disable=no-self-use,protected-access,unused-argument
+# pyright: basic
 import unittest
 
 import botocore.exceptions

@@ -1,5 +1,6 @@
 """Test runway.config.models.base."""
 # pylint: disable=no-self-use
+# pyright: basic
 from typing import Any, Dict, Optional
 
 import pytest
@@ -17,7 +18,7 @@ class BadObject(ConfigProperty):
 
     name: str = ("invalid",)  # type: ignore
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -35,7 +36,7 @@ class GoodObject(ConfigProperty):
     dict_field: Dict[str, Any] = {}
     optional_str_field: Optional[str] = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid

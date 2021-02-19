@@ -1,9 +1,10 @@
 """Test runway.core.components._module."""
 # pylint: disable=no-self-use,protected-access,redefined-outer-name,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, cast
 
 import pytest
 import yaml
@@ -16,7 +17,7 @@ from runway.core.components._module import validate_environment
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from ...factories import MockRunwayContext, YamlLoaderDeployment
@@ -282,21 +283,23 @@ class TestModule:
 
         assert mod.type == mock_type
         mock_type.assert_called_once_with(
-            path=mock_path.module_root, class_path=None, type_str=None
+            path=cast("Path", mock_path.module_root), class_path=None, type_str=None
         )
         del mod.type
 
         mod.payload.update({"class_path": "parent.dir.class"})
         assert mod.type == mock_type
         mock_type.assert_called_with(
-            path=mock_path.module_root, class_path="parent.dir.class", type_str=None
+            path=cast("Path", mock_path.module_root),
+            class_path="parent.dir.class",
+            type_str=None,
         )
         del mod.type
 
         mod.payload.update({"type": "test-type"})
         assert mod.type == mock_type
         mock_type.assert_called_with(
-            path=mock_path.module_root,
+            path=cast("Path", mock_path.module_root),
             class_path="parent.dir.class",
             type_str="test-type",
         )

@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.lookups.handlers.file."""
 # pylint: disable=no-self-use
+# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 import base64
 import json
 import unittest

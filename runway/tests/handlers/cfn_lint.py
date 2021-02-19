@@ -1,15 +1,20 @@
 """cfn-list test runner."""
+from __future__ import annotations
+
 import logging
 import runpy
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 import yaml
 
 from ..._logging import PrefixAdaptor
 from ...util import argv
 from .base import TestHandler
+
+if TYPE_CHECKING:
+    from ...config.components.runway.base import ConfigProperty
 
 TYPE_NAME = "cfn-lint"
 LOGGER = logging.getLogger(__name__)
@@ -19,7 +24,7 @@ class CfnLintHandler(TestHandler):
     """Lints CFN."""
 
     @classmethod
-    def handle(cls, name: str, args: Dict[str, Any]) -> None:
+    def handle(cls, name: str, args: Union[ConfigProperty, Dict[str, Any]]) -> None:
         """Perform the actual test.
 
         Relies on .cfnlintrc file to be located beside the Runway config file.

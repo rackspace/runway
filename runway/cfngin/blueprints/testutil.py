@@ -34,7 +34,7 @@ class BlueprintTestCase(unittest.TestCase):
 
     def assertRenderedBlueprint(  # noqa: N802 pylint: disable=invalid-name
         self, blueprint: Blueprint
-    ):
+    ) -> None:
         """Test that the rendered blueprint json matches the expected result.
 
         Result files are to be stored in the repo as

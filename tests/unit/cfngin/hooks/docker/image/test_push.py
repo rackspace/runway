@@ -1,5 +1,6 @@
 """Test runway.cfngin.hooks.docker.image._push."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

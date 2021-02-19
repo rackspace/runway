@@ -1,5 +1,6 @@
 """Test runway.core.components._module_type."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -18,7 +19,7 @@ from runway.module.terraform import Terraform
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
 
     from runway.module.base import RunwayModule
 

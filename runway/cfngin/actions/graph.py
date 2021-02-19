@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Iterable, List, TextIO, Tuple
+from typing import TYPE_CHECKING, Any, Iterable, List, TextIO, Tuple, Union
 
 from ..plan import merge_graphs
 from .base import BaseAction
@@ -77,11 +77,20 @@ class Action(BaseAction):
     NAME = "graph"
 
     @property
-    def _stack_action(self) -> None:
+    def _stack_action(self) -> Any:
         """Run against a step."""
         return None
 
-    def run(self, **kwargs: Any) -> None:  # pylint: disable=arguments-differ
+    def run(
+        self,
+        *,
+        concurrency: int = 0,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        force: bool = False,  # pylint: disable=unused-argument
+        outline: bool = False,  # pylint: disable=unused-argument
+        tail: bool = False,  # pylint: disable=unused-argument
+        **kwargs: Any
+    ) -> None:
         """Generate the underlying graph and prints it."""
         graph = self._generate_plan(
             require_unlocked=False, include_persistent_graph=True

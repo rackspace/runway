@@ -1,5 +1,6 @@
 """Test runway.config.models.runway._builtin_tests."""
 # pylint: disable=no-self-use,too-few-public-methods
+# pyright: basic
 from typing import Optional
 
 import pytest
@@ -131,7 +132,7 @@ class TestCfnLintRunwayTestDefinitionModel:
         data = {"args": {"cli_args": ["example"]}, "type": "cfn-lint"}
         obj = CfnLintRunwayTestDefinitionModel.parse_obj(data)
         assert isinstance(obj.args, CfnLintRunwayTestArgs)
-        assert obj.args.cli_args == data["args"]["cli_args"]
+        assert obj.args.cli_args == data["args"]["cli_args"]  # type: ignore
 
 
 class TestScriptRunwayTestArgs:

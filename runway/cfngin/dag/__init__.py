@@ -182,7 +182,7 @@ class DAG:
         See https://en.wikipedia.org/wiki/Transitive_reduction
 
         """
-        combinations = []
+        combinations: List[List[str]] = []
         for node, edges in self.graph.items():
             combinations += [[node, edge] for edge in edges]
 
@@ -298,7 +298,7 @@ class DAG:
         graph = self.graph
         return [key for key in graph if not graph[key]]
 
-    def from_dict(self, graph_dict: Dict[str, Iterable[str]]) -> None:
+    def from_dict(self, graph_dict: Dict[str, Union[Iterable[str], Any]]) -> None:
         """Reset the graph and build it from the passed dictionary.
 
         The dictionary takes the form of {node_name: [directed edges]}
@@ -431,7 +431,7 @@ class ThreadedWalker:
 
         # Blocks until all of the given nodes have completed execution (whether
         # successfully, or errored). Returns True if all nodes returned True.
-        def wait_for(nodes):
+        def wait_for(nodes: List[str]):
             """Wait for nodes."""
             for node in nodes:
                 thread = threads[node]
@@ -443,7 +443,7 @@ class ThreadedWalker:
         # nodes dependencies have executed.
         for node in nodes:
 
-            def _fn(node_, deps):
+            def _fn(node_: str, deps: List[str]) -> Any:
                 if deps:
                     LOGGER.debug(
                         "%s waiting for %s to complete", node_, ", ".join(deps)

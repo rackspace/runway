@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.blueprints.raw."""
 # pylint: disable=unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import json
@@ -20,7 +21,7 @@ from runway.variables import Variable
 from ..factories import mock_context
 
 if TYPE_CHECKING:
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import MonkeyPatch
 
 RAW_JSON_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.json")
 RAW_YAML_TEMPLATE_PATH = Path("tests/unit/cfngin/fixtures/cfn_template.yaml")

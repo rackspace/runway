@@ -13,11 +13,16 @@ from typing import (
     Dict,
     ItemsView,
     List,
+    NoReturn,
     Optional,
     Type,
     TypeVar,
+    Union,
     cast,
+    overload,
 )
+
+from typing_extensions import Literal
 
 from ....core.providers.aws import AccountDetails
 from ....util import MutableMap
@@ -87,10 +92,51 @@ class BaseModel:
             return value
         return bool(value)
 
+    @overload
+    @classmethod
+    def _validate_dict(cls, value: Dict[str, Any]) -> Dict[str, Any]:
+        ...
+
+    @overload
+    @classmethod
+    def _validate_dict(cls, value: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        ...
+
+    @overload
     @classmethod
     def _validate_dict(
-        cls, value: Any, optional: bool = False, required: bool = False
-    ) -> Optional[Dict[Any, Any]]:
+        cls, value: Optional[Dict[str, Any]], optional: Literal[True]
+    ) -> Optional[Dict[str, Any]]:
+        ...
+
+    @overload
+    @classmethod
+    def _validate_dict(
+        cls, value: Dict[str, Any], optional: bool = ..., required: bool = ...
+    ) -> Dict[str, str]:
+        ...
+
+    @overload
+    @classmethod
+    def _validate_dict(
+        cls, value: None, optional: bool = ..., required: Literal[True] = ...
+    ) -> NoReturn:
+        ...
+
+    @overload
+    @classmethod
+    def _validate_dict(
+        cls, value: Literal[None], optional: Literal[True], required: Literal[False]
+    ) -> None:
+        ...
+
+    @classmethod
+    def _validate_dict(
+        cls,
+        value: Union[Dict[str, Any], Any],
+        optional: bool = False,
+        required: bool = False,
+    ) -> Optional[Dict[str, Any]]:
         """Validate a Dict type attribute."""
         if not value:
             if required:
@@ -119,7 +165,10 @@ class BaseModel:
 
     @classmethod
     def _validate_list_str(
-        cls, value: Any, optional: bool = False, required: bool = False
+        cls,
+        value: Union[List[str], Any],
+        optional: bool = False,
+        required: bool = False,
     ) -> Optional[List[str]]:
         """Validate a List[str] type attribute."""
         if not value:
@@ -137,7 +186,9 @@ class BaseModel:
                     raise TypeError(
                         "expected List[str] not List[{}]".format(type(i).__name__)
                     )
-        return cls._validate_list_str(list(value), required=required)
+        return cls._validate_list_str(  # type: ignore
+            list(value), optional=optional, required=required
+        )
 
     @staticmethod
     def _validate_path(value: Any, must_exist: bool = False) -> Path:
@@ -173,7 +224,7 @@ class BaseModel:
         if isinstance(value, str):
             return value
         if isinstance(value, (dict, list, set, tuple)):
-            raise TypeError("value can't be {}".format(type(value).__name__))
+            raise TypeError("value can't be {}".format(type(value).__name__))  # type: ignore
         return cls._validate_str(str(value), optional=optional, required=required)
 
     @classmethod
@@ -252,7 +303,8 @@ class ElasticContainerRegistry(BaseModel):
                 raise ValueError("context is required to resolve values")
             if not self.region:
                 self.region = self._validate_str(
-                    self._ctx.env.aws_region or "us-east-1", required=True
+                    self._ctx.env.aws_region if self._ctx else "us-east-1",
+                    required=True,
                 )
             if not self.account_id:
                 self.account_id = AccountDetails(cast("CfnginContext", self._ctx)).id
@@ -304,7 +356,7 @@ class DockerImage(BaseModel):
     @property
     def short_id(self) -> str:
         """ID of the image truncated to 10 characters plus the ``sha256:`` prefix."""
-        return self.image.short_id
+        return cast(str, self.image.short_id)
 
     @short_id.setter
     def short_id(self, value: str) -> None:
@@ -315,12 +367,14 @@ class DockerImage(BaseModel):
     def tags(self) -> List[str]:
         """List of image tags."""
         self.image.reload()
-        return [uri.split(":")[-1] for uri in self.image.tags]
+        return [uri.split(":")[-1] for uri in cast(List[str], self.image.tags)]
 
     @property
     def uri(self) -> MutableMap:
         """Return a mapping of tag to image URI."""
-        return MutableMap(**{uri.split(":")[-1]: uri for uri in self.image.tags})
+        return MutableMap(
+            **{uri.split(":")[-1]: uri for uri in cast(List[str], self.image.tags)}
+        )
 
 
 class ElasticContainerRegistryRepository(BaseModel):

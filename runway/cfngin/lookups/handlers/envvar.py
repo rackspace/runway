@@ -1,5 +1,5 @@
 """Environment variable lookup."""
-# pylint: disable=unused-argument,arguments-differ
+# pyright: reportIncompatibleMethodOverride=none
 import os
 from typing import Any
 
@@ -13,7 +13,7 @@ class EnvvarLookup(LookupHandler):
     """Environment variable lookup."""
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> str:
+    def handle(cls, value: str, **_: Any) -> str:  # pylint: disable=arguments-differ
         """Retrieve an environment variable.
 
         Args:

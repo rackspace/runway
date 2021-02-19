@@ -12,7 +12,7 @@ from runway._cli import cli
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
 
 
 def test_whichenv(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:

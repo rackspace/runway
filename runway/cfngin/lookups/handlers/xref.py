@@ -1,9 +1,9 @@
 """Handler for fetching outputs from fully qualified stacks."""
-# pylint: disable=arguments-differ
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
@@ -23,7 +23,9 @@ class XrefLookup(LookupHandler):
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
 
     @classmethod
-    def handle(cls, value: str, provider: Optional[Provider] = None, **_: Any) -> str:
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, provider: Provider, **_: Any
+    ) -> str:
         """Fetch an output from the designated, fully qualified stack.
 
         The `output` handler supports fetching outputs from stacks created
@@ -45,12 +47,6 @@ class XrefLookup(LookupHandler):
                 conf_value: ${xref fully-qualified-stack-name::SomeOutputName}
 
         """
-        if not XREF_PRESISTENT_STATE.get("has_warned"):
-            LOGGER.warning(cls.DEPRECATION_MSG)
-            XREF_PRESISTENT_STATE["has_warned"] = True
-        if provider is None:
-            raise ValueError("Provider is required")
-
         decon = deconstruct(value)
         stack_fqn = decon.stack_name
         return provider.get_output(stack_fqn, decon.output_name)

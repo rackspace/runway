@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import boto3
 
@@ -17,9 +17,6 @@ if TYPE_CHECKING:
     from ..type_defs import EnvVarsAwsCredentialsTypeDef
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-
-
-_Context = TypeVar("_Context", bound="BaseContext")
 
 
 class BaseContext:
@@ -76,10 +73,6 @@ class BaseContext:
         """
         return self.env.ci
 
-    def copy(self: _Context) -> _Context:
-        """Copy the contents of this object into a new instance."""
-        raise NotImplementedError
-
     def get_session(
         self,
         *,
@@ -123,7 +116,7 @@ class BaseContext:
             profile_name=profile,
         )
         cred_provider = session._session.get_component("credential_provider")  # type: ignore
-        provider = cred_provider.get_provider("assume-role")
+        provider = cred_provider.get_provider("assume-role")  # type: ignore
         provider.cache = BOTO3_CREDENTIAL_CACHE
         provider._prompter = ui.getpass
         return session

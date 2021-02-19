@@ -41,13 +41,11 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 
 
 """
-# pylint: disable=arguments-differ
 from __future__ import annotations
 
 import json
 import logging
-from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional, Union, cast
 
 from botocore.exceptions import ClientError
 
@@ -64,7 +62,12 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "cfn"
 
-OutputQuery = namedtuple("OutputQuery", ("stack_name", "output_name"))
+
+class OutputQuery(NamedTuple):
+    """Output query NamedTuple."""
+
+    stack_name: str
+    output_name: str
 
 
 class CfnLookup(LookupHandler):
@@ -108,10 +111,11 @@ class CfnLookup(LookupHandler):
         return outputs[query.output_name]
 
     @classmethod
-    def handle(
+    def handle(  # pylint: disable=arguments-differ
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],
+        *,
         provider: Optional[Provider] = None,
         **_: Any,
     ) -> Any:
@@ -143,7 +147,9 @@ class CfnLookup(LookupHandler):
             # args for testing to function correctly
             if cls.should_use_provider(args.copy(), provider):
                 # this will only happen when used from cfngin
-                result = provider.get_output(query.stack_name, query.output_name)
+                result = cast("Provider", provider).get_output(
+                    query.stack_name, query.output_name
+                )
             else:
                 cfn_client = context.get_session(region=args.get("region")).client(
                     "cloudformation"

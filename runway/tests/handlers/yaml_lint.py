@@ -1,13 +1,18 @@
 """yamllint test runner."""
 # filename contains underscore to prevent namespace collision
+from __future__ import annotations
+
 import glob
 import logging
 import os
 import runpy
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from ...tests.handlers.base import TestHandler
 from ...util import argv
+
+if TYPE_CHECKING:
+    from ...config.components.runway.base import ConfigProperty
 
 TYPE_NAME = "yamllint"
 LOGGER = logging.getLogger(__name__)
@@ -31,7 +36,7 @@ class YamllintHandler(TestHandler):
         return yamllint_options + cls.get_dirs(path) + cls.get_yaml_files_at_path(path)
 
     @classmethod
-    def handle(cls, name: str, args: Dict[str, Any]) -> None:
+    def handle(cls, name: str, args: Union[ConfigProperty, Dict[str, Any]]) -> None:
         """Perform the actual test."""
         base_dir = os.getcwd()
 

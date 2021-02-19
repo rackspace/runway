@@ -14,10 +14,10 @@ class CopyReturnMagicMock(mock.MagicMock):
     """A MagicMock which deep copies every return value."""
 
     def _mock_call(self, *args: Any, **kwargs: Any) -> Any:
-        ret = super()._mock_call(*args, **kwargs)
+        ret = super()._mock_call(*args, **kwargs)  # type: ignore
         if isinstance(ret, (dict, list)):
-            ret = copy.deepcopy(ret)
-        return ret
+            ret = copy.deepcopy(ret)  # type: ignore
+        return ret  # type: ignore
 
 
 def make_fake_api_client(
@@ -32,7 +32,7 @@ def make_fake_api_client(
     if overrides is None:
         overrides = {}
     api_client = docker.APIClient(version=DEFAULT_DOCKER_API_VERSION)
-    mock_attrs = {
+    mock_attrs = {  # type: ignore
         "build.return_value": fake_api.FAKE_IMAGE_ID,
         "commit.return_value": fake_api.post_fake_commit()[1],
         "containers.return_value": fake_api.get_fake_containers()[1],

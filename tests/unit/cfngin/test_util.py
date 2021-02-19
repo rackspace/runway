@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.util."""
 # pylint: disable=unused-argument,invalid-name
+# pyright: basic
 from __future__ import annotations
 
 import unittest
@@ -21,7 +22,6 @@ from runway.cfngin.util import (
     cf_safe_name,
     get_client_region,
     get_s3_endpoint,
-    merge_map,
     parse_cloudformation_template,
     read_value_from_path,
     s3_bucket_location_constraint,
@@ -44,7 +44,7 @@ AWS_REGIONS = [
 ]
 
 
-def mock_create_cache_directories(self, **kwargs: Any) -> int:
+def mock_create_cache_directories(self: Any, **kwargs: Any) -> int:
     """Mock create cache directories.
 
     Don't actually need the directories created in testing
@@ -121,42 +121,6 @@ class TestUtil(unittest.TestCase):
         for test in tests:
             self.assertEqual(camel_to_snake(test[0]), test[1])
 
-    def test_merge_map(self) -> None:
-        """Test merge map."""
-        tests = [
-            # 2 lists of stacks defined
-            [
-                {"stacks": [{"stack1": {"variables": {"a": "b"}}}]},
-                {"stacks": [{"stack2": {"variables": {"c": "d"}}}]},
-                {
-                    "stacks": [
-                        {"stack1": {"variables": {"a": "b"}}},
-                        {"stack2": {"variables": {"c": "d"}}},
-                    ]
-                },
-            ],
-            # A list of stacks combined with a higher precedence dict of stacks
-            [
-                {"stacks": [{"stack1": {"variables": {"a": "b"}}}]},
-                {"stacks": {"stack2": {"variables": {"c": "d"}}}},
-                {"stacks": {"stack2": {"variables": {"c": "d"}}}},
-            ],
-            # 2 dicts of stacks with non-overlapping variables merged
-            [
-                {"stacks": {"stack1": {"variables": {"a": "b"}}}},
-                {"stacks": {"stack1": {"variables": {"c": "d"}}}},
-                {"stacks": {"stack1": {"variables": {"a": "b", "c": "d"}}}},
-            ],
-            # 2 dicts of stacks with overlapping variables merged
-            [
-                {"stacks": {"stack1": {"variables": {"a": "b"}}}},
-                {"stacks": {"stack1": {"variables": {"a": "c"}}}},
-                {"stacks": {"stack1": {"variables": {"a": "c"}}}},
-            ],
-        ]
-        for test in tests:
-            self.assertEqual(merge_map(test[0], test[1]), test[2])
-
     def test_yaml_to_ordered_dict(self) -> None:
         """Test yaml to ordered dict."""
         raw_config = """
@@ -230,12 +194,12 @@ Outputs:
     def test_extractors(self):
         """Test extractors."""
         self.assertEqual(Extractor(Path("test.zip")).archive, Path("test.zip"))
-        self.assertEqual(TarExtractor().extension(), ".tar")
-        self.assertEqual(TarGzipExtractor().extension(), ".tar.gz")
-        self.assertEqual(ZipExtractor().extension(), ".zip")
+        self.assertEqual(TarExtractor().extension, ".tar")
+        self.assertEqual(TarGzipExtractor().extension, ".tar.gz")
+        self.assertEqual(ZipExtractor().extension, ".zip")
         for i in [TarExtractor(), ZipExtractor(), ZipExtractor()]:
             i.set_archive(Path("/tmp/foo"))
-            self.assertEqual(i.archive.name.endswith(i.extension()), True)
+            self.assertEqual(i.archive.name.endswith(i.extension), True)  # type: ignore
 
     def test_SourceProcessor_helpers(self):  # noqa: N802
         """Test SourceProcessor helpers."""

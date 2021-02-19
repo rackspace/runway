@@ -1,5 +1,5 @@
 """DynamoDB lookup."""
-# pylint: disable=arguments-differ,unused-argument
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import re
@@ -21,7 +21,7 @@ class DynamodbLookup(LookupHandler):
     """DynamoDB lookup."""
 
     @classmethod
-    def handle(
+    def handle(  # pylint: disable=arguments-differ
         cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
     ) -> Any:
         """Get a value from a DynamoDB table.

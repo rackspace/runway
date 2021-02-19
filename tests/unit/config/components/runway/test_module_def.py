@@ -1,5 +1,6 @@
 """Test runway.config.components.runway._module_def."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic
 from pathlib import Path
 from typing import Any, Dict
 
@@ -31,7 +32,7 @@ class TestRunwayModuleDefinition:
         ]
         obj.child_modules = new_modules
         assert obj._data.parallel[0] == new_modules[0]
-        assert obj._data.parallel[1] == new_modules[1].data
+        assert obj._data.parallel[1] == new_modules[1].data  # type: ignore
 
     def test_child_modules_setter_not_list(self) -> None:
         """Test child_modules.setter not a list."""

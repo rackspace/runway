@@ -1,4 +1,5 @@
 """Test runway.core.providers.aws._cli."""
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -9,7 +10,7 @@ import pytest
 from runway.core.providers.aws import cli
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.core.providers.aws._cli"

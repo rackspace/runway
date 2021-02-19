@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.actions.build."""
 # pylint: disable=no-self-use,protected-access,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import unittest
@@ -72,10 +73,10 @@ class MockProvider(BaseProvider):
             raise exceptions.StackDoesNotExist(stack_name)
         return {"name": stack_name, "outputs": self._outputs[stack_name]}
 
-    def get_outputs(self, stack_name, *args, **kwargs):
+    def get_outputs(self, stack_name: str, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """Get outputs."""
         stack = self.get_stack(stack_name)
-        return stack["outputs"]
+        return stack["outputs"]  # type: ignore
 
 
 class TestBuildAction(unittest.TestCase):
@@ -260,7 +261,7 @@ class TestBuildAction(unittest.TestCase):
 
     def test_should_update(self) -> None:
         """Test should update."""
-        test_scenario = namedtuple("test_scenario", ["locked", "force", "result"])
+        test_scenario = namedtuple("test_scenario", ["locked", "force", "result"])  # type: ignore
         test_scenarios = (
             test_scenario(locked=False, force=False, result=True),
             test_scenario(locked=False, force=True, result=True),
@@ -272,7 +273,7 @@ class TestBuildAction(unittest.TestCase):
         for test in test_scenarios:
             mock_stack.locked = test.locked
             mock_stack.force = test.force
-            self.assertEqual(build.should_update(mock_stack), test.result)
+            self.assertEqual(build.should_update(mock_stack), test.result)  # type: ignore
 
     def test_should_ensure_cfn_bucket(self) -> None:
         """Test should ensure cfn bucket."""
@@ -289,14 +290,16 @@ class TestBuildAction(unittest.TestCase):
             dump = scenario["dump"]
             result = scenario["result"]
             try:
-                self.assertEqual(build.should_ensure_cfn_bucket(outline, dump), result)
+                self.assertEqual(
+                    build.should_ensure_cfn_bucket(outline, dump), result  # type: ignore
+                )
             except AssertionError as err:
                 err.args += ("scenario", str(scenario))
                 raise
 
     def test_should_submit(self) -> None:
         """Test should submit."""
-        test_scenario = namedtuple("test_scenario", ["enabled", "result"])
+        test_scenario = namedtuple("test_scenario", ["enabled", "result"])  # type: ignore
         test_scenarios = (
             test_scenario(enabled=False, result=False),
             test_scenario(enabled=True, result=True),
@@ -306,7 +309,7 @@ class TestBuildAction(unittest.TestCase):
         mock_stack.name = "test-stack"
         for test in test_scenarios:
             mock_stack.enabled = test.enabled
-            self.assertEqual(build.should_submit(mock_stack), test.result)
+            self.assertEqual(build.should_submit(mock_stack), test.result)  # type: ignore
 
 
 class TestLaunchStack(TestBuildAction):
@@ -454,7 +457,7 @@ class TestLaunchStack(TestBuildAction):
         self.assertEqual(self.step.status, PENDING)
 
         # start the upgrade, that will be skipped
-        self.provider.update_stack.side_effect = StackDidNotChange
+        self.provider.update_stack.side_effect = StackDidNotChange  # type: ignore
         self._advance("CREATE_COMPLETE", SKIPPED, "nochange")
 
     def test_launch_stack_update_rollback(self) -> None:

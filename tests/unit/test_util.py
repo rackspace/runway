@@ -1,5 +1,6 @@
 """Test Runway utils."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import datetime
@@ -9,7 +10,7 @@ import os
 import string
 import sys
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pytest
 from mock import MagicMock, patch
@@ -24,8 +25,7 @@ from runway.util import (
 )
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import LogCaptureFixture, MonkeyPatch
 
 MODULE = "runway.util"
 VALUE = {
@@ -120,6 +120,9 @@ class TestMutableMap:
         ), "default should be ignored"
 
 
+TestParamsTypeDef = Optional[Union[Dict[str, str], List[str], str]]
+
+
 class TestSafeHaven:
     """Test SafeHaven context manager."""
 
@@ -151,7 +154,10 @@ class TestSafeHaven:
 
     @pytest.mark.parametrize("provided", TEST_PARAMS)
     def test_os_environ(
-        self, provided: Any, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+        self,
+        provided: TestParamsTypeDef,
+        caplog: LogCaptureFixture,
+        monkeypatch: MonkeyPatch,
     ) -> None:
         """Test os.environ interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
@@ -168,7 +174,7 @@ class TestSafeHaven:
         if isinstance(provided, dict):
             expected_val.update(provided)
 
-        with SafeHaven(environ=provided) as obj:
+        with SafeHaven(environ=provided) as obj:  # type: ignore
             assert os.environ == expected_val
             os.environ.update({"SOMETHING_ELSE": "val"})
             obj.reset_os_environ()
@@ -201,7 +207,10 @@ class TestSafeHaven:
 
     @pytest.mark.parametrize("provided", TEST_PARAMS)
     def test_sys_argv(
-        self, provided: Any, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+        self,
+        provided: TestParamsTypeDef,
+        caplog: LogCaptureFixture,
+        monkeypatch: MonkeyPatch,
     ) -> None:
         """Test sys.argv interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
@@ -215,7 +224,7 @@ class TestSafeHaven:
             "leaving the safe haven...",
         ]
 
-        with SafeHaven(argv=provided) as obj:
+        with SafeHaven(argv=provided) as obj:  # type: ignore
             assert sys.argv == expected_val
             sys.argv.append("something-else")
             obj.reset_sys_argv()
@@ -261,7 +270,10 @@ class TestSafeHaven:
 
     @pytest.mark.parametrize("provided", TEST_PARAMS)
     def test_sys_path(
-        self, provided: Any, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
+        self,
+        provided: TestParamsTypeDef,
+        caplog: LogCaptureFixture,
+        monkeypatch: MonkeyPatch,
     ) -> None:
         """Test sys.path interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
@@ -275,7 +287,7 @@ class TestSafeHaven:
             "leaving the safe haven...",
         ]
 
-        with SafeHaven(sys_path=provided) as obj:
+        with SafeHaven(sys_path=provided) as obj:  # type: ignore
             assert sys.path == expected_val
             sys.path.append("something-else")
             obj.reset_sys_path()

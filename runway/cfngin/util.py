@@ -12,19 +12,18 @@ import tarfile
 import tempfile
 import uuid
 import zipfile
-from collections import OrderedDict
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Dict,
     Iterator,
-    List,
-    MutableMapping,
     Optional,
+    OrderedDict,
     Type,
     Union,
-    overload,
+    cast,
 )
 
 import botocore.client
@@ -32,7 +31,6 @@ import botocore.exceptions
 import dateutil
 import yaml
 from yaml.constructor import ConstructorError
-from yaml.nodes import MappingNode
 
 from .awscli_yamlhelper import yaml_parse
 from .session_cache import get_session
@@ -233,57 +231,10 @@ def create_route53_zone(client: Route53Client, zone_name: str) -> str:
     return zone_id
 
 
-@overload
-def merge_map(
-    dict1: MutableMapping[Any, Any],
-    dict2: MutableMapping[Any, Any],
-    deep_merge: bool = True,
-) -> MutableMapping[str, Any]:
-    """Recursively merge elements of argument b into argument a.
-
-    Primarily used for merging two dictionaries together, where dict b takes
-    precedence over dict a. If 2 lists are provided, they are concatenated.
-
-    """
-    ...
-
-
-@overload
-def merge_map(dict1: List[Any], dict2: List[Any], deep_merge: bool = True) -> List[Any]:
-    """Recursively merge elements of argument b into argument a.
-
-    Primarily used for merging two dictionaries together, where dict b takes
-    precedence over dict a. If 2 lists are provided, they are concatenated.
-
-    """
-    ...
-
-
-def merge_map(
-    a: Union[MutableMapping[Any, Any], List[Any]],
-    b: Union[MutableMapping[Any, Any], List[Any]],
-) -> Union[MutableMapping[Any, Any], List[Any]]:
-    """Recursively merge elements of argument b into argument a.
-
-    Primarily used for merging two dictionaries together, where dict b takes
-    precedence over dict a. If 2 lists are provided, they are concatenated.
-
-    """
-    if isinstance(a, list) and isinstance(b, list):
-        return a + b
-
-    if not isinstance(a, dict) or not isinstance(b, dict):
-        return b
-
-    for key in b:
-        a[key] = merge_map(a[key], b[key]) if key in a else b[key]
-    return a
-
-
 def yaml_to_ordered_dict(
     stream: str,
     loader: Union[Type[yaml.Loader], Type[yaml.SafeLoader]] = yaml.SafeLoader,
-) -> OrderedDict:
+) -> OrderedDict[str, Any]:
     """yaml.load alternative with preserved dictionary order.
 
     Args:
@@ -308,9 +259,12 @@ def yaml_to_ordered_dict(
         NO_DUPE_CHILDREN = ["stacks"]
 
         @staticmethod
-        def _error_mapping_on_dupe(node: Any, node_name: str) -> None:
+        def _error_mapping_on_dupe(
+            node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode],
+            node_name: str,
+        ) -> None:
             """Check mapping node for dupe children keys."""
-            if isinstance(node, MappingNode):
+            if isinstance(node, yaml.MappingNode):
                 mapping = {}
                 for val in node.value:
                     a = val[0]
@@ -322,17 +276,21 @@ def yaml_to_ordered_dict(
                         )
                     mapping[a.value] = a
 
-        def _validate_mapping(self, node: Any, deep: bool = False) -> OrderedDict:
-            if not isinstance(node, MappingNode):
+        def _validate_mapping(
+            self,
+            node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode],
+            deep: bool = False,
+        ) -> OrderedDict[Any, Any]:
+            if not isinstance(node, yaml.MappingNode):
                 raise ConstructorError(
                     None,
                     None,
-                    "expected a mapping node, but found %s" % node.id,
+                    f"expected a mapping node, but found {node.id}",
                     node.start_mark,
                 )
-            mapping = OrderedDict()
+            mapping: OrderedDict[Any, Any] = OrderedDict()
             for key_node, value_node in node.value:
-                key = self.construct_object(key_node, deep=deep)
+                key = cast(object, self.construct_object(key_node, deep=deep))
                 try:
                     hash(key)
                 except TypeError as exc:
@@ -351,20 +309,26 @@ def yaml_to_ordered_dict(
                 if key in self.NO_DUPE_CHILDREN:
                     # prevent duplicate children keys for this mapping.
                     self._error_mapping_on_dupe(value_node, key_node.value)
-                value = self.construct_object(value_node, deep=deep)
+                value = cast(object, self.construct_object(value_node, deep=deep))
                 mapping[key] = value
             return mapping
 
-        def construct_mapping(self, node: Any, deep: bool = False) -> OrderedDict:
+        def construct_mapping(
+            self,
+            node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode],
+            deep: bool = False,
+        ) -> OrderedDict[Any, Any]:
             """Override parent method to use OrderedDict."""
-            if isinstance(node, MappingNode):
+            if isinstance(node, yaml.MappingNode):
                 self.flatten_mapping(node)
             return self._validate_mapping(node, deep=deep)
 
-        def construct_yaml_map(self, node: Any) -> Iterator[OrderedDict]:
-            data = OrderedDict()
+        def construct_yaml_map(
+            self, node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode]
+        ) -> Iterator[OrderedDict[Any, Any]]:
+            data: OrderedDict[Any, Any] = OrderedDict()
             yield data
-            value = self.construct_mapping(node)
+            value: OrderedDict[Any, Any] = self.construct_mapping(node)
             data.update(value)
 
     OrderedUniqueLoader.add_constructor(
@@ -531,7 +495,7 @@ def ensure_s3_bucket(
         raise
 
 
-def parse_cloudformation_template(template: str) -> Any:
+def parse_cloudformation_template(template: str) -> Dict[str, Any]:
     """Parse CFN template string.
 
     Leverages the vendored aws-cli yamlhelper to handle JSON or YAML templates.
@@ -545,6 +509,8 @@ def parse_cloudformation_template(template: str) -> Any:
 
 class Extractor:
     """Base class for extractors."""
+
+    extension: ClassVar[str] = ""
 
     def __init__(self, archive: Optional[Path] = None) -> None:
         """Instantiate class.
@@ -562,55 +528,41 @@ class Extractor:
             dir_name: Archive directory name
 
         """
-        self.archive = dir_name.with_suffix(self.extension())
-
-    @staticmethod
-    def extension() -> str:
-        """Serve as placeholder; override this in subclasses."""
-        return ""
+        self.archive = dir_name.with_suffix(self.extension)
 
 
 class TarExtractor(Extractor):
     """Extracts tar archives."""
+
+    extension: ClassVar[str] = ".tar"
 
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:") as tar:
             tar.extractall(path=destination)
 
-    @staticmethod
-    def extension() -> str:
-        """Return archive extension."""
-        return ".tar"
-
 
 class TarGzipExtractor(Extractor):
     """Extracts compressed tar archives."""
+
+    extension: ClassVar[str] = ".tar.gz"
 
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:gz") as tar:
             tar.extractall(path=destination)
 
-    @staticmethod
-    def extension() -> str:
-        """Return archive extension."""
-        return ".tar.gz"
-
 
 class ZipExtractor(Extractor):
     """Extracts zip archives."""
+
+    extension: ClassVar[str] = ".zip"
 
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         if self.archive:
             with zipfile.ZipFile(self.archive, "r") as zip_ref:
                 zip_ref.extractall(destination)
-
-    @staticmethod
-    def extension() -> str:
-        """Return archive extension."""
-        return ".zip"
 
 
 class SourceProcessor:
@@ -873,8 +825,6 @@ class SourceProcessor:
         if b"\t" in ls_remote_output:  # pylint: disable=unsupported-membership-test
             commit_id = ls_remote_output.split(b"\t")[0]
             LOGGER.debug("matching commit id found: %s", commit_id)
-            if isinstance(commit_id, str):
-                return commit_id
             return commit_id.decode()
         raise ValueError('Ref "%s" not found for repo %s.' % (ref, uri))
 

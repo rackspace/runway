@@ -24,9 +24,9 @@ from .mock_docker.fake_api_client import make_fake_client
 
 if TYPE_CHECKING:
     from _pytest.config import Config
-    from _pytest.fixtures import FixtureRequest
-    from _pytest.monkeypatch import MonkeyPatch
+    from _pytest.python import Module
     from docker import DockerClient
+    from pytest import FixtureRequest, MonkeyPatch
 
 LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -107,7 +107,7 @@ def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
     `YAML_FIXTURES` variable of the module.
 
     """
-    file_paths = getattr(request.module, "YAML_FIXTURES", [])
+    file_paths = getattr(cast("Module", request.module), "YAML_FIXTURES", [])
     result = {}
     for file_path in file_paths:
         with open(os.path.join(fixture_dir, file_path)) as _file:
@@ -131,7 +131,7 @@ def cfngin_context(runway_context: MockRunwayContext) -> MockCFNginContext:
 @pytest.fixture
 def patch_time(monkeypatch: MonkeyPatch) -> None:
     """Patch built-in time object."""
-    monkeypatch.setattr("time.sleep", lambda s: None)
+    monkeypatch.setattr("time.sleep", lambda s: None)  # type: ignore
 
 
 @pytest.fixture
@@ -151,7 +151,7 @@ def patch_runway_config(
     request: FixtureRequest, monkeypatch: MonkeyPatch, runway_config: MockRunwayConfig
 ) -> MockRunwayConfig:
     """Patch Runway config and return a mock config object."""
-    patch_path = getattr(request.module, "PATCH_RUNWAY_CONFIG", None)
+    patch_path = getattr(cast("Module", request.module), "PATCH_RUNWAY_CONFIG", None)
     if patch_path:
         monkeypatch.setattr(patch_path, runway_config)
     return runway_config
@@ -167,17 +167,23 @@ def runway_config() -> MockRunwayConfig:
 def runway_context(request: FixtureRequest) -> MockRunwayContext:
     """Create a mock Runway context object."""
     env_vars = {
-        "AWS_REGION": getattr(request.module, "AWS_REGION", "us-east-1"),
-        "DEFAULT_AWS_REGION": getattr(request.module, "AWS_REGION", "us-east-1"),
-        "DEPLOY_ENVIRONMENT": getattr(request.module, "DEPLOY_ENVIRONMENT", "test"),
+        "AWS_REGION": getattr(
+            cast("Module", request.module), "AWS_REGION", "us-east-1"
+        ),
+        "DEFAULT_AWS_REGION": getattr(
+            cast("Module", request.module), "AWS_REGION", "us-east-1"
+        ),
+        "DEPLOY_ENVIRONMENT": getattr(
+            cast("Module", request.module), "DEPLOY_ENVIRONMENT", "test"
+        ),
     }
     creds = {
         "AWS_ACCESS_KEY_ID": "test_access_key",
         "AWS_SECRET_ACCESS_KEY": "test_secret_key",
         "AWS_SESSION_TOKEN": "test_session_token",
     }
-    env_vars.update(getattr(request.module, "AWS_CREDENTIALS", creds))
-    env_vars.update(getattr(request.module, "ENV_VARS", {}))
+    env_vars.update(getattr(cast("Module", request.module), "AWS_CREDENTIALS", creds))
+    env_vars.update(getattr(cast("Module", request.module), "ENV_VARS", {}))
     return MockRunwayContext(
         command="test",
         deploy_environment=DeployEnvironment(environ=env_vars, explicit_name="test"),
