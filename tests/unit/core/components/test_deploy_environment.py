@@ -1,5 +1,6 @@
 """Test runway.core.components.deploy_environment."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -14,7 +15,7 @@ from mock import MagicMock
 from runway.core.components import DeployEnvironment
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.core.components._deploy_environment"

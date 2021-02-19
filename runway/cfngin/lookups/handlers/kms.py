@@ -1,5 +1,5 @@
 """AWS KMS lookup."""
-# pylint: disable=arguments-differ,unused-argument
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import codecs
@@ -18,7 +18,9 @@ class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: CfnginContext, **_: Any) -> str:
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: CfnginContext, **_: Any
+    ) -> str:
         r"""Decrypt the specified value with a master key in KMS.
 
         Args:

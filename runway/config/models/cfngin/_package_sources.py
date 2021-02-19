@@ -44,11 +44,11 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         examples=["git@github.com:onicagroup/runway.git"],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Information about git repositories that should be included "
             "in the processing of this configuration file."
         }
@@ -91,11 +91,11 @@ class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
         "root of the local package source.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Information about local directories that should be "
             "included in the processing of this configuration file."
         }
@@ -138,11 +138,11 @@ class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
         description="Update the local copy if the last modified date in AWS S3 changes.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Information about a AWS S3 objects that should be "
             "downloaded, unzipped, and included in the processing of "
             "this configuration file."
@@ -182,11 +182,11 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
         ],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Map of additional package sources to include when "
             "processing this configuration file."
         }

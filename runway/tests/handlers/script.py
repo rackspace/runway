@@ -1,12 +1,17 @@
 """Script test runner."""
+from __future__ import annotations
+
 import logging
 import subprocess
 import sys
 from subprocess import CalledProcessError
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 from ..._logging import PrefixAdaptor
 from ...tests.handlers.base import TestHandler
+
+if TYPE_CHECKING:
+    from ...config.components.runway.base import ConfigProperty
 
 TYPE_NAME = "script"
 LOGGER = logging.getLogger(__name__)
@@ -32,7 +37,7 @@ class ScriptHandler(TestHandler):
     """
 
     @classmethod
-    def handle(cls, name: str, args: Dict[str, Any]) -> None:
+    def handle(cls, name: str, args: Union[ConfigProperty, Dict[str, Any]]) -> None:
         """Perform the actual test."""
         logger = PrefixAdaptor(name, LOGGER)
         for cmd in args["commands"]:

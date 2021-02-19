@@ -1,13 +1,18 @@
 """Base module for test handlers."""
+from __future__ import annotations
+
 import os
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
+
+if TYPE_CHECKING:
+    from ...config.components.runway.base import ConfigProperty
 
 
 class TestHandler:
     """Base class for test handlers."""
 
     @classmethod
-    def handle(cls, name: str, args: Dict[str, Any]) -> None:
+    def handle(cls, name: str, args: Union[ConfigProperty, Dict[str, Any]]) -> None:
         """Redefine in subclass."""
         raise NotImplementedError()
 

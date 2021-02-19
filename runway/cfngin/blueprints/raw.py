@@ -6,7 +6,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -176,7 +176,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             if value is not None:
                 self.resolved_variables[var_name] = value
 
-    def get_parameter_values(self) -> Optional[Dict[str, Any]]:
+    def get_parameter_values(self) -> Dict[str, Union[List[Any], str]]:
         """Return a dictionary of variables with `type` :class:`CFNType`.
 
         Returns:
@@ -184,7 +184,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             Will be a dictionary of ``<parameter name>: <parameter value>``.
 
         """
-        return self.resolved_variables
+        return self.resolved_variables or {}
 
     @property
     def requires_change_set(self) -> bool:

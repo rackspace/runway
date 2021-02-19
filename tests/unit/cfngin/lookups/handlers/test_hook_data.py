@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

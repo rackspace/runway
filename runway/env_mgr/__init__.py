@@ -1,18 +1,28 @@
 """Base module for environment managers."""
+from __future__ import annotations
+
 import logging
 import os
 import platform
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from ..util import cached_property
+
+if TYPE_CHECKING:
+    from urllib.error import URLError
 
 LOGGER = logging.getLogger(__name__)
 
 
-def handle_bin_download_error(exc, name):
-    """Give user info about their failed download."""
+def handle_bin_download_error(exc: URLError, name: str) -> None:
+    """Give user info about their failed download.
+
+    Raises:
+        SystemExit: Always raised after logging reason.
+
+    """
     url_error_msg = str(exc.reason)
 
     if "CERTIFICATE_VERIFY_FAILED" not in url_error_msg:

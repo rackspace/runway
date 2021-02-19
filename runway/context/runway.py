@@ -54,9 +54,10 @@ class RunwayContext(BaseContext):
         """
         colorize = self.env.vars.get("RUNWAY_COLORIZE")  # explicitly enable/disable
         try:
-            if isinstance(colorize, bool):  # catch False
+            if isinstance(colorize, bool):  # type: ignore
+                # catch False
                 return not colorize
-            if colorize and isinstance(colorize, str):
+            if colorize and isinstance(colorize, str):  # type: ignore
                 return not strtobool(colorize)
         except ValueError:
             pass  # likely invalid RUNWAY_COLORIZE value

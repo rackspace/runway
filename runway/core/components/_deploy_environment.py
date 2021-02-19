@@ -335,14 +335,15 @@ class DeployEnvironment:
 
     def _parse_branch_name(self) -> Optional[str]:
         """Parse branch name for use as deploy environment name."""
-        if self.branch_name.startswith("ENV-"):
-            LOGGER.verbose(
-                'stripped "ENV-" from the branch name "%s"', self.branch_name
-            )
-            return self.branch_name[4:]
-        if self.branch_name == "master":
-            LOGGER.verbose('translated branch name "master" to "common"')
-            return "common"
+        if self.branch_name:
+            if self.branch_name.startswith("ENV-"):
+                LOGGER.verbose(
+                    'stripped "ENV-" from the branch name "%s"', self.branch_name
+                )
+                return self.branch_name[4:]
+            if self.branch_name == "master":
+                LOGGER.verbose('translated branch name "master" to "common"')
+                return "common"
         if not self.ci:
             LOGGER.warning('Found unexpected branch name "%s"', self.branch_name)
             result = click.prompt(

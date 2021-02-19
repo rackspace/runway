@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 """Helper functions for bootstrap actions."""
+from __future__ import annotations
 
-import botocore
+from typing import TYPE_CHECKING, Any
+
+from botocore.exceptions import ClientError
+
+if TYPE_CHECKING:
+    from runway.context import CfnginContext
 
 
-def bootstrap_value(value, context, **kwargs):
+def bootstrap_value(value: str, context: CfnginContext, **kwargs: Any) -> str:
     """Return the bootstrap value on creation, otherwise the post_bootstrap.
 
     Format of value:
@@ -19,12 +25,12 @@ def bootstrap_value(value, context, **kwargs):
             "<post_bootstrap val> format." % value
         )
 
-    stack = next(i for i in context.get_stacks() if i.name == stack_name)
+    stack = next(i for i in context.stacks_dict.values() if i.name == stack_name)
     try:
         stack_des = kwargs["provider"].cloudformation.describe_stacks(
             StackName=stack.fqn
         )["Stacks"][0]
-    except botocore.exceptions.ClientError as exc:
+    except ClientError as exc:
         if "does not exist" not in str(exc):
             raise
         return bootstrap_val

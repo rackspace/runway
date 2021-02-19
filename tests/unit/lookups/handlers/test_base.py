@@ -1,5 +1,6 @@
 """Tests for lookup handler base class."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import json
@@ -107,7 +108,10 @@ class TestLookupHandler:
         ],
     )
     def test_parse(
-        self, query: str, raw_args: Optional[Dict], expected_args: Dict[str, str]
+        self,
+        query: str,
+        raw_args: Optional[Dict[str, str]],
+        expected_args: Dict[str, str],
     ) -> None:
         """Test parse."""
         value = "{}::{}".format(query, raw_args)

@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import logging
-from contextlib import AbstractContextManager
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, ContextManager, Dict, Optional, Type, Union, cast
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
-class AssumeRole(AbstractContextManager):
+class AssumeRole(ContextManager["AssumeRole"]):
     """Context manager for assuming an AWS role."""
 
     assumed_role_user: AssumedRoleUserTypeDef

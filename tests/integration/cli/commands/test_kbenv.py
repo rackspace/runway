@@ -11,8 +11,7 @@ from click.testing import CliRunner
 from runway._cli import cli
 
 if TYPE_CHECKING:
-    from _pytest.capture import CaptureFixture
-    from _pytest.logging import LogCaptureFixture
+    from pytest import CaptureFixture, LogCaptureFixture
 
 
 def test_kbenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
@@ -70,7 +69,7 @@ def test_kbenv_run_no_version_file(
     assert "no .kubectl-version file present" in caplog.messages[0]
 
 
-def test_kbenv_run_separator(cd_tmp_path: Path, capfd: CaptureFixture) -> None:
+def test_kbenv_run_separator(cd_tmp_path: Path, capfd: CaptureFixture[str]) -> None:
     """Test ``runway kbenv run -- --help``.
 
     Parsing of command using ``--`` as a seperator between options and args.
@@ -88,7 +87,7 @@ def test_kbenv_run_separator(cd_tmp_path: Path, capfd: CaptureFixture) -> None:
     assert "kubectl <command> --help" in captured.out
 
 
-def test_kbenv_run_version(cd_tmp_path: Path, capfd: CaptureFixture) -> None:
+def test_kbenv_run_version(cd_tmp_path: Path, capfd: CaptureFixture[str]) -> None:
     """Test ``runway kbenv run version``.
 
     Parsing of bare command.

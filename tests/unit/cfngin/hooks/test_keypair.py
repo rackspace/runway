@@ -1,11 +1,11 @@
 """Tests for runway.cfngin.hooks.keypair."""
 # pylint: disable=redefined-outer-name
+# pyright: basic
 from __future__ import annotations
 
 import sys
-from collections import namedtuple
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Iterator, Tuple
+from typing import TYPE_CHECKING, Iterator, NamedTuple, Tuple
 
 import boto3
 import mock
@@ -24,7 +24,13 @@ if TYPE_CHECKING:
 REGION = "us-east-1"
 KEY_PAIR_NAME = "FakeKey"
 
-SSHKey = namedtuple("SSHKey", "public_key private_key fingerprint")
+
+class SSHKey(NamedTuple):
+    """SSHKey."""
+
+    fingerprint: str
+    private_key: bytes
+    public_key: bytes
 
 
 @pytest.fixture(scope="module")
@@ -112,7 +118,7 @@ def test_keypair_exists(context: CfnginContext) -> None:
     keypair = ec2.create_key_pair(KeyName=KEY_PAIR_NAME)
 
     result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
-    expected = dict(
+    expected = dict(  # type: ignore
         status="exists", key_name=KEY_PAIR_NAME, fingerprint=keypair["KeyFingerprint"]
     )
     assert result == expected

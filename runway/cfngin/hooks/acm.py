@@ -409,7 +409,7 @@ class Certificate(Hook):
             LOGGER.error(err)
             self.destroy(
                 records=[record] if record else None,
-                skip_r53=isinstance(
+                skip_r53=isinstance(  # type: ignore
                     err,
                     (
                         self.r53_client.exceptions.InvalidChangeBatch,
@@ -466,14 +466,14 @@ class Certificate(Hook):
         """Run during the **post_deploy** stage."""
         return self.deploy()
 
-    def post_destroy(self):
+    def post_destroy(self) -> bool:
         """Run during the **post_destroy** stage."""
         return self.destroy()
 
-    def pre_deploy(self):
+    def pre_deploy(self) -> Dict[str, str]:
         """Run during the **pre_deploy** stage."""
         return self.deploy()
 
-    def pre_destroy(self):
+    def pre_destroy(self) -> bool:
         """Run during the **pre_destroy** stage."""
         return self.destroy()

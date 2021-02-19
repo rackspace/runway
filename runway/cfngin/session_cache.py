@@ -18,7 +18,7 @@ def get_session(
     profile: Optional[str] = None,
     access_key: Optional[str] = None,
     secret_key: Optional[str] = None,
-    session_token=None,
+    session_token: Optional[str] = None,
 ) -> boto3.Session:
     """Create a thread-safe boto3 session.
 
@@ -55,7 +55,7 @@ def get_session(
         profile_name=profile,
     )
     cred_provider = session._session.get_component("credential_provider")  # type: ignore
-    provider = cred_provider.get_provider("assume-role")
+    provider = cred_provider.get_provider("assume-role")  # type: ignore
     provider.cache = BOTO3_CREDENTIAL_CACHE
     provider._prompter = ui.getpass
     return session

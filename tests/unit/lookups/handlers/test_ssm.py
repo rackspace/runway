@@ -1,5 +1,6 @@
 """Test runway.lookups.handlers.ssm."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import json
@@ -153,7 +154,7 @@ class TestSsmLookup:
             for test in tests:
                 var = Variable(
                     "test_var.{}".format(parser),
-                    test["lookup"].format(name=name, parser=parser),
+                    test["lookup"].format(name=name, parser=parser),  # type: ignore
                     variable_type="runway",
                 )
                 if parser == "json":

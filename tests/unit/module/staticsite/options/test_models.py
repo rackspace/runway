@@ -1,5 +1,6 @@
 """Test runway.module.staticsite.options.models."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 from pathlib import Path
@@ -119,13 +120,13 @@ class TestRunwayStaticSiteModuleOptionsDataModel:
         assert obj.build_output == data["build_output"]
         assert obj.build_steps == data["build_steps"]
         assert obj.extra_files == [
-            RunwayStaticSiteExtraFileDataModel(**data["extra_files"][0])
+            RunwayStaticSiteExtraFileDataModel(**data["extra_files"][0])  # type: ignore
         ]
         assert obj.pre_build_steps == [
-            RunwayStaticSitePreBuildStepDataModel(**data["pre_build_steps"][0])
+            RunwayStaticSitePreBuildStepDataModel(**data["pre_build_steps"][0])  # type: ignore
         ]
         assert obj.source_hashing == RunwayStaticSiteSourceHashingDataModel(
-            **data["source_hashing"]
+            **data["source_hashing"]  # type: ignore
         )
 
 
@@ -185,7 +186,9 @@ class TestRunwayStaticSiteSourceHashingDataModel:
         }
         obj = RunwayStaticSiteSourceHashingDataModel(**data)
         assert obj.directories == [
-            RunwayStaticSiteSourceHashingDirectoryDataModel(**data["directories"][0])
+            RunwayStaticSiteSourceHashingDirectoryDataModel(
+                **data["directories"][0]  # type: ignore
+            )
         ]
         assert obj.enabled is data["enabled"]
         assert obj.parameter == data["parameter"]

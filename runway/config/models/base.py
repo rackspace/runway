@@ -9,7 +9,7 @@ import pydantic
 class ConfigProperty(pydantic.BaseModel):
     """Base class for Runway configuration properties."""
 
-    class Config:
+    class Config(pydantic.BaseConfig):
         """Model configuration."""
 
         validate_all = True

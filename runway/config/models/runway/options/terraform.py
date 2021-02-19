@@ -16,7 +16,7 @@ class RunwayTerraformArgsDataModel(ConfigProperty):
     init: List[str] = []
     plan: List[str] = []
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -30,7 +30,7 @@ class RunwayTerraformBackendConfigDataModel(ConfigProperty):
     dynamodb_table: Optional[str] = None
     region: Optional[str] = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -53,7 +53,7 @@ class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
     workspace: Optional[str] = Field(None, alias="terraform_workspace")
     write_auto_tfvars: bool = Field(False, alias="terraform_write_auto_tfvars")
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.ignore

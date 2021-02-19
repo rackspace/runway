@@ -1,7 +1,7 @@
 """Runway logging."""
 import logging
 from enum import IntEnum
-from typing import Any, Dict, Text, Tuple, Union
+from typing import Any, MutableMapping, Text, Tuple, Union
 
 
 class LogLevels(IntEnum):
@@ -62,8 +62,8 @@ class PrefixAdaptor(logging.LoggerAdapter):
         self.log(LogLevels.NOTICE, msg, *args, **kwargs)
 
     def process(
-        self, msg: Union[Exception, str], kwargs: Dict[str, Any]
-    ) -> Tuple[str, Dict[str, Any]]:
+        self, msg: Union[Exception, str], kwargs: MutableMapping[str, Any]
+    ) -> Tuple[str, MutableMapping[str, Any]]:
         """Process the message to append the prefix.
 
         Args:

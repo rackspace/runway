@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.hooks.base."""
 # pylint: disable=no-self-use,too-few-public-methods
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -20,8 +21,7 @@ from runway.cfngin.status import (
 )
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import LogCaptureFixture, MonkeyPatch
 
     from ...factories import MockCFNginContext
 

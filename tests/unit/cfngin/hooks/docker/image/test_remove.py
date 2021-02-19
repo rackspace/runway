@@ -1,5 +1,6 @@
 """Test runway.cfngin.hooks.docker.image._remove."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -84,7 +85,7 @@ def test_remove_image_not_found(
     )
     cfngin_context.hook_data["docker"] = docker_hook_data
     docker_hook_data.client.api.remove_image.side_effect = ImageNotFound(
-        args.repo + ":latest"
+        args.repo + ":latest"  # type: ignore
     )
     assert remove(context=cfngin_context, **args.dict()) == docker_hook_data
     docker_hook_data.client.api.remove_image.assert_has_calls(  # pylint: disable=no-member

@@ -58,7 +58,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
             TypeError: The provided value does not match the required types.
 
         """
-        if not isinstance(modules, list):
+        if not isinstance(modules, list):  # type: ignore
             raise TypeError(
                 f"expected List[RunwayModuleDefinition]; got {type(modules)}"
             )
@@ -66,7 +66,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
                 sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
-            elif isinstance(mod, RunwayModuleDefinitionModel):
+            elif isinstance(mod, RunwayModuleDefinitionModel):  # type: ignore
                 sanitized.append(mod)
             else:
                 raise TypeError(

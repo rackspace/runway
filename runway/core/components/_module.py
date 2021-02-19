@@ -206,7 +206,7 @@ class Module:
             )
         return self.__sync("plan")
 
-    def run(self, action) -> None:
+    def run(self, action: str) -> None:
         """Run a single module.
 
         Low level API access to run a module object.
@@ -326,7 +326,7 @@ class Module:
 
 def validate_environment(
     context: RunwayContext,
-    env_def: Any,
+    env_def: Optional[Union[bool, Dict[str, Any], int, str, List[str]]],
     logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
     strict: bool = False,
 ) -> Optional[bool]:
@@ -351,7 +351,7 @@ def validate_environment(
         else:
             logger.verbose("environment not defined; module will determine deployment")
             env_def = None
-        return env_def
+        return cast(Optional[bool], env_def)
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
             if strict:
@@ -362,7 +362,10 @@ def validate_environment(
             )
             return None
         return validate_environment(
-            context, env_def.get(context.env.name, False), logger=logger, strict=strict
+            context,
+            cast(Any, env_def.get(context.env.name, False)),
+            logger=logger,
+            strict=strict,
         )
 
     account = aws.AccountDetails(context)
@@ -377,7 +380,7 @@ def validate_environment(
     if isinstance(env_def, (int, str)):
         logger.debug('checking if "%s" in %s', env_def, accepted_values)
         result = env_def in accepted_values
-    elif isinstance(env_def, list):
+    elif isinstance(env_def, list):  # type: ignore
         logger.debug("checking if any(%s in %s)", env_def, accepted_values)
         result = any(val in env_def for val in accepted_values)
     else:

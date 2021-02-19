@@ -1,7 +1,7 @@
 """Runway config test definition."""
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 
 from ....variables import Variable
 from ...models.runway import (
@@ -15,11 +15,16 @@ from ...models.runway import (
 )
 from .base import ConfigComponentDefinition
 
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
+    from ...models.base import ConfigProperty
+
 
 class RunwayTestDefinition(ConfigComponentDefinition):
     """Runway test definition."""
 
-    args: Dict[str, Any]
+    args: Union[Dict[str, Any], ConfigProperty]
     name: str
     required: bool
     type: ValidRunwayTestTypeValues
@@ -81,7 +86,7 @@ class CfnLintRunwayTestDefinition(RunwayTestDefinition):
     """Runway cfn-lint test definition."""
 
     args: CfnLintRunwayTestArgs
-    type = "cfn-lint"
+    type: Literal["cfn-lint"] = "cfn-lint"
 
     def __init__(self, data: CfnLintRunwayTestDefinitionModel) -> None:
         """Instantiate class."""
@@ -102,7 +107,7 @@ class ScriptRunwayTestDefinition(RunwayTestDefinition):
     """Runway script test definition."""
 
     args: ScriptRunwayTestArgs
-    type = "script"
+    type: Literal["script"] = "script"
 
     def __init__(self, data: ScriptRunwayTestDefinitionModel) -> None:
         """Instantiate class."""
@@ -121,6 +126,8 @@ class ScriptRunwayTestDefinition(RunwayTestDefinition):
 
 class YamlLintRunwayTestDefinition(RunwayTestDefinition):
     """Runway yamllint test definition."""
+
+    type: Literal["yamllint"] = "yamllint"
 
     def __init__(self, data: YamlLintRunwayTestDefinitionModel) -> None:
         """Instantiate class."""

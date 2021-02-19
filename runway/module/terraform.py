@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import hcl
 from send2trash import send2trash
+from typing_extensions import Literal
 
 from .._logging import PrefixAdaptor
 from ..compat import cached_property
@@ -64,6 +65,19 @@ def update_env_vars_with_tf_var_values(
         else:
             os_env_vars["TF_VAR_%s" % key] = val
     return os_env_vars
+
+
+TerraformActionTypeDef = Literal[
+    "apply",
+    "destroy",
+    "get",
+    "init",
+    "plan",
+    "workspace_list",
+    "workspace_new",
+    "workspace_select",
+    "workspace_show",
+]
 
 
 class Terraform(RunwayModule):
@@ -474,7 +488,7 @@ class Terraform(RunwayModule):
         self.logger.debug("current Terraform workspace: %s", workspace)
         return workspace
 
-    def run(self, action) -> None:
+    def run(self, action: TerraformActionTypeDef) -> None:
         """Run module."""
         try:
             self.handle_backend()

@@ -1,5 +1,6 @@
 """Test runway.config.components.runway.base."""
 # pylint: disable=no-self-use,protected-access
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -14,7 +15,7 @@ from runway.config.models.base import ConfigProperty
 from runway.exceptions import UnresolvedVariable
 
 if TYPE_CHECKING:
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import MonkeyPatch
 
     from ....factories import MockRunwayContext
 
@@ -26,7 +27,7 @@ class SampleConfigProperty(ConfigProperty):
     var_attr: Any = None
     var_attr_pre: Any = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.allow

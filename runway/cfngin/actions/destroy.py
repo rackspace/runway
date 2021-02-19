@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from ..exceptions import StackDoesNotExist
 from ..hooks.utils import handle_hooks
@@ -75,10 +75,16 @@ class Action(BaseAction):
         provider.destroy_stack(provider_stack)
         return DESTROYING_STATUS
 
-    def pre_run(self, **kwargs):
+    def pre_run(
+        self,
+        *,
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        outline: bool = False,
+        **__kwargs: Any
+    ) -> None:
         """Any steps that need to be taken prior to running the action."""
         pre_destroy = self.context.config.pre_destroy
-        if not kwargs.get("outline") and pre_destroy:
+        if not outline and pre_destroy:
             handle_hooks(
                 stage="pre_destroy",
                 hooks=pre_destroy,
@@ -86,8 +92,15 @@ class Action(BaseAction):
                 context=self.context,
             )
 
-    def run(  # pylint: disable=arguments-differ
-        self, *, concurrency: int = 0, force: bool = False, tail: bool = False, **_: Any
+    def run(
+        self,
+        *,
+        concurrency: int = 0,
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        force: bool = False,
+        outline: bool = False,  # pylint: disable=unused-argument
+        tail: bool = False,
+        **_kwargs: Any
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
         plan = self._generate_plan(
@@ -108,8 +121,12 @@ class Action(BaseAction):
         else:
             plan.outline(message='To execute this plan, run with --force" flag.')
 
-    def post_run(  # pylint: disable=arguments-differ
-        self, *, outline: bool = False, **_: Any
+    def post_run(
+        self,
+        *,
+        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        outline: bool = False,
+        **__kwargs: Any
     ) -> None:
         """Any steps that need to be taken after running the action."""
         if not outline and self.context.config.post_destroy:

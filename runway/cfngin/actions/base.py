@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 import botocore.exceptions
 
@@ -143,18 +143,19 @@ class BaseAction:
         Used for running things like hooks.
 
         """
+        if not self.provider_builder:
+            raise ValueError("ProviderBuilder required to build a provider")
         return self.provider_builder.build()
 
     def build_provider(self, stack: Stack) -> Provider:
-        """Build a :class:`runway.cfngin.providers.base.BaseProvider`.
+        """Build a CFNgin provider.
 
         Args:
             stack: Stack the action will be executed on.
 
-        Returns:
-            Suitable for operating on the given :class:`runway.cfngin.stack.Stack`.
-
         """
+        if not self.provider_builder:
+            raise ValueError("ProviderBuilder required to build a provider")
         return self.provider_builder.build(region=stack.region, profile=stack.profile)
 
     def ensure_cfn_bucket(self) -> None:
@@ -172,13 +173,26 @@ class BaseAction:
             LOGGER.error(str(err))
             sys.exit(1)
 
-    def pre_run(self, **_: Any) -> None:
+    def pre_run(
+        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
+    ) -> None:
         """Perform steps before running the action."""
 
-    def post_run(self, **_: Any) -> None:
+    def post_run(
+        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
+    ) -> None:
         """Perform steps after running the action."""
 
-    def run(self, *_args: Any, **_kwargs: Any) -> None:
+    def run(
+        self,
+        *,
+        concurrency: int = 0,
+        dump: Union[bool, str] = False,
+        force: bool = False,
+        outline: bool = False,
+        tail: bool = False,
+        **_kwargs: Any
+    ) -> None:
         """Abstract method for running the action."""
         raise NotImplementedError('Subclass must implement "run" method')
 

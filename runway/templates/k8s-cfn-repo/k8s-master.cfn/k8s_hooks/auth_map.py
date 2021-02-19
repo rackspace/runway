@@ -1,13 +1,20 @@
 """Execute the AWS CLI update-kubeconfig to generate your kubectl config."""
+from __future__ import annotations
+
 import logging
 import os
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, List
 
 from runway.cfngin.lookups.handlers.output import OutputLookup
+
+if TYPE_CHECKING:
+    from runway.context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
-def assumed_role_to_principle(assumed_role_arn):
+def assumed_role_to_principle(assumed_role_arn: str) -> str:
     """Return role ARN from assumed role ARN."""
     arn_split = assumed_role_arn.split(":")
     arn_split[2] = "iam"
@@ -15,7 +22,7 @@ def assumed_role_to_principle(assumed_role_arn):
     return base_arn + assumed_role_arn.split("/")[1]
 
 
-def get_principal_arn(context):
+def get_principal_arn(context: CfnginContext) -> str:
     """Return ARN of current session principle."""
     # looking up caller identity
     session = context.get_session()
@@ -28,60 +35,57 @@ def get_principal_arn(context):
     return assumed_role_to_principle(caller_identity_arn)
 
 
-def generate(provider, context, **kwargs):  # pylint: disable=W0613
+def generate(
+    context: CfnginContext, *, filename: str, path: List[str], stack: str, **_: Any
+):
     """Generate an EKS auth_map for worker connection.
 
     Args:
-        provider (:class:`stacker.providers.base.BaseProvider`): provider
-            instance
-        context (:class:`stacker.context.Context`): context instance
+        context: Context object.
+        filename: Name of the file.
+        path: Path to the file.
+        stack: Stack definition.
 
-    Returns: boolean for whether or not the hook succeeded.
+    Returns:
+        boolean for whether or not the hook succeeded
 
     """
-    overlay_path = os.path.join(*kwargs["path"])
-    filename = os.path.join(overlay_path, kwargs["file"])
+    overlay_path = Path(*path)
+    file_path = overlay_path / filename
     if os.path.exists(filename):
-        LOGGER.info("%s file present; skipping initial creation", filename)
+        LOGGER.info("%s file present; skipping initial creation", file_path)
         return True
-    LOGGER.info("Creating auth_map at %s", filename)
-    if not os.path.isdir(overlay_path):
-        os.makedirs(overlay_path)
+    LOGGER.info("Creating auth_map at %s", file_path)
+    overlay_path.mkdir(parents=True, exist_ok=True)
     principal_arn = get_principal_arn(context)
-    stack_name = kwargs["stack"]
     node_instancerole_arn = OutputLookup.handle(
-        "%s::NodeInstanceRoleArn" % stack_name, provider=provider, context=context
+        "%s::NodeInstanceRoleArn" % stack, context=context
     )
-    with open(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), "aws-auth-cm.yaml"),
-        "r",
-    ) as stream:
-        aws_authmap_template = stream.read()
-    with open(filename, "w") as out:
-        out.write(
-            aws_authmap_template.replace(
-                "INSTANCEROLEARNHERE", node_instancerole_arn
-            ).replace("ORIGINALPRINCIPALARNHERE", principal_arn)
-        )
+    aws_authmap_template = (Path(__file__).parent / "aws-auth-cm.yaml").read_text()
+    file_path.write_text(
+        aws_authmap_template.replace(
+            "INSTANCEROLEARNHERE", node_instancerole_arn
+        ).replace("ORIGINALPRINCIPALARNHERE", principal_arn)
+    )
     return True
 
 
-def remove(provider, context, **kwargs):  # pylint: disable=W0613
+def remove(*, path: List[str], filename: str, **_: Any) -> bool:
     """Remove an EKS auth_map for worker connection.
 
     For use after destroying a cluster.
 
     Args:
-        provider (:class:`stacker.providers.base.BaseProvider`): provider
-            instance
-        context (:class:`stacker.context.Context`): context instance
+        path: Path of the file.
+        filename: Name of the file.
 
-    Returns: boolean for whether or not the hook succeeded.
+    Returns:
+        boolean for whether or not the hook succeeded.
 
     """
-    overlay_path = os.path.join(*kwargs["path"])
-    filename = os.path.join(overlay_path, kwargs["file"])
-    if os.path.exists(filename):
-        LOGGER.info("Removing %s...", filename)
-        os.remove(filename)
+    overlay_path = Path(*path)
+    file_path = overlay_path / filename
+    if file_path.is_file():
+        LOGGER.info("Removing %s...", file_path)
+        file_path.unlink()
     return True

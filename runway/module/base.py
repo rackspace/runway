@@ -25,7 +25,6 @@ class RunwayModule:
     logger: Union[PrefixAdaptor, RunwayLogger]
     name: str
     options: Union[Dict[str, Any], ModuleOptions]
-    parameters: Dict[str, Any]
     region: str
 
     def __init__(
@@ -66,15 +65,15 @@ class RunwayModule:
         self.path = module_root
         self.region = context.env.aws_region
 
-    def deploy(self):
+    def deploy(self) -> None:
         """Abstract method called when running deploy."""
         raise NotImplementedError("You must implement the deploy() method yourself!")
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Abstract method called when running destroy."""
         raise NotImplementedError("You must implement the destroy() method yourself!")
 
-    def plan(self):
+    def plan(self) -> None:
         """Abstract method called when running plan."""
         raise NotImplementedError("You must implement the plan() method yourself!")
 

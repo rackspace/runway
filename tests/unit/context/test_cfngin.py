@@ -1,5 +1,6 @@
 """Test runway.context.cfngin."""
 # pylint: disable=no-self-use,redefined-outer-name
+# pyright: basic
 from __future__ import annotations
 
 import io

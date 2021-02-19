@@ -1,5 +1,6 @@
 """Test runway.env_mgr.tfenv."""
 # pylint: disable=no-self-use
+# pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from types import ModuleType
 
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.env_mgr.tfenv"
@@ -288,7 +289,7 @@ class TestTFEnvManager:
 
     @pytest.mark.parametrize(
         "response, expected",
-        [
+        [  # type: ignore
             ([{}], {}),
             ([hcl2.loads(HCL_BACKEND_S3)], {"backend": {"s3": {"bucket": "name"}}}),
             (

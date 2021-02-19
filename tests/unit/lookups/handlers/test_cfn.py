@@ -1,5 +1,6 @@
 """Test runway.lookups.handlers.cfn."""
 # pylint: disable=no-self-use
+# pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json
@@ -19,8 +20,8 @@ from runway.exceptions import OutputDoesNotExist
 from runway.lookups.handlers.cfn import TYPE_NAME, CfnLookup, OutputQuery
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
     from mypy_boto3_cloudformation.client import CloudFormationClient
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from ...factories import MockRunwayContext

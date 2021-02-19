@@ -91,7 +91,7 @@ from __future__ import annotations
 import json
 import logging
 from distutils.util import strtobool
-from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Set, Tuple, Union, cast
 
 import yaml
 from troposphere import BaseAWSObject
@@ -100,6 +100,7 @@ from runway.cfngin.util import read_value_from_path
 from runway.util import MutableMap
 
 if TYPE_CHECKING:
+    from ...cfngin.providers.aws.default import Provider
     from ...context import CfnginContext, RunwayContext
     from ...variables import VariableValue
 
@@ -172,16 +173,18 @@ class LookupHandler:
     @classmethod
     def handle(
         cls,
-        value: str,
+        __value: str,
         context: Union[CfnginContext, RunwayContext],
         *__args: Any,
+        provider: Optional[Provider] = None,
         **__kwargs: Any
     ) -> Any:
         """Perform the lookup.
 
         Args:
-            value: Parameter(s) given to the lookup.
+            __value: Parameter(s) given to the lookup.
             context: The current context object.
+            provider: CFNgin AWS provider.
 
         """
         raise NotImplementedError
@@ -228,7 +231,7 @@ class LookupHandler:
         }
 
     @classmethod
-    def load(cls, value: str, parser: Optional[str] = None, **kwargs: Any) -> Any:
+    def load(cls, value: Any, parser: Optional[str] = None, **kwargs: Any) -> Any:
         """Load a formatted string or object into a python data type.
 
         First action taken in :meth:`~LookupHandler.format_results`.
@@ -256,7 +259,7 @@ class LookupHandler:
         return mapping[parser](value, **kwargs)
 
     @classmethod
-    def _load_json(cls, value: str, **_: Any) -> MutableMap:
+    def _load_json(cls, value: Any, **_: Any) -> MutableMap:
         """Load a JSON string into a MutableMap.
 
         Args:
@@ -273,7 +276,7 @@ class LookupHandler:
         return result
 
     @classmethod
-    def _load_troposphere(cls, value: BaseAWSObject, **_: Any) -> MutableMap:
+    def _load_troposphere(cls, value: Any, **_: Any) -> MutableMap:
         """Load a Troposphere resource into a MutableMap.
 
         Args:
@@ -292,7 +295,7 @@ class LookupHandler:
         )
 
     @classmethod
-    def _load_yaml(cls, value: str, **_: Any) -> MutableMap:
+    def _load_yaml(cls, value: Any, **_: Any) -> MutableMap:
         """Load a YAML string into a MutableMap.
 
         Args:
@@ -373,13 +376,15 @@ class LookupHandler:
 
         """
         if isinstance(value, (list, set, tuple)):
-            return "{}".format(delimiter).join(value)
+            return "{}".format(delimiter).join(cast(Sequence[str], value))
         if isinstance(value, MutableMap):
             # convert into a dict with protected attrs removed
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            return json.dumps(json.dumps(value, indent=int(indent)))
+            return json.dumps(
+                json.dumps(cast(Dict[str, Any], value), indent=int(indent))
+            )
         if isinstance(value, bool):
             return json.dumps(str(value))
         return str(value)

@@ -42,7 +42,6 @@ This Lookup does not support any arguments.
           ...
 
 """
-# pylint: disable=arguments-differ
 from __future__ import annotations
 
 import base64
@@ -73,8 +72,12 @@ class EcrLookup(LookupHandler):
         return password
 
     @classmethod
-    def handle(
-        cls, value: str, context: Union[CfnginContext, RunwayContext], **_: Any
+    def handle(  # pylint: disable=arguments-differ
+        cls,
+        value: str,
+        context: Union[CfnginContext, RunwayContext],
+        *__args: Any,
+        **__kwargs: Any
     ) -> Any:
         """Retrieve a value from AWS Elastic Container Registry (ECR).
 

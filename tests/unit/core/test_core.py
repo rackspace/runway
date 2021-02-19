@@ -1,5 +1,6 @@
 """Test runway.core."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -11,8 +12,7 @@ from mock import MagicMock, call
 from runway.core import Runway
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
     from ..factories import MockRunwayConfig, MockRunwayContext
