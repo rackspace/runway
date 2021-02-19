@@ -186,10 +186,12 @@ def select_deployments(
         choice = 1
         LOGGER.debug("only one deployment detected; no selection necessary")
     else:
-        click.secho("\nConfigured deployments\n", bold=True, underline=True)
-        click.echo(
-            yaml.safe_dump({i + 1: d.menu_entry for i, d in enumerate(deployments)})
+        # build the menu before displaying it so debug logs don't break up what is printed
+        deployment_menu = yaml.safe_dump(
+            {i + 1: d.menu_entry for i, d in enumerate(deployments)}
         )
+        click.secho("\nConfigured deployments\n", bold=True, underline=True)
+        click.echo(deployment_menu)
         if ctx.command.name == "destroy":
             click.echo(
                 '(operating in destroy mode -- "all" will destroy all '
