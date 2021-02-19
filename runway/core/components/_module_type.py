@@ -5,14 +5,20 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Type, cast
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type, cast
+
+from typing_extensions import Literal
 
 from ...util import load_object_from_string
 
 if TYPE_CHECKING:
+    from ...config.models.runway import RunwayModuleTypeTypeDef
     from ...module.base import RunwayModule
 
 LOGGER = logging.getLogger(__name__)
+
+
+RunwayModuleTypeExtensionsTypeDef = Literal["cdk", "cfn", "k8s", "sls", "tf", "web"]
 
 
 class RunwayModuleType:
@@ -53,29 +59,29 @@ class RunwayModuleType:
 
     """
 
-    EXTENSION_MAP = {
+    EXTENSION_MAP: ClassVar[Dict[str, str]] = {
+        "cdk": "runway.module.cdk.CloudDevelopmentKit",
+        "cfn": "runway.module.cloudformation.CloudFormation",
+        "k8s": "runway.module.k8s.K8s",
         "sls": "runway.module.serverless.Serverless",
         "tf": "runway.module.terraform.Terraform",
-        "cdk": "runway.module.cdk.CloudDevelopmentKit",
-        "k8s": "runway.module.k8s.K8s",
-        "cfn": "runway.module.cloudformation.CloudFormation",
         "web": "runway.module.staticsite.handler.StaticSite",
     }
 
-    TYPE_MAP = {
-        "serverless": EXTENSION_MAP["sls"],
-        "terraform": EXTENSION_MAP["tf"],
+    TYPE_MAP: ClassVar[Dict[str, str]] = {
         "cdk": EXTENSION_MAP["cdk"],
-        "kubernetes": EXTENSION_MAP["k8s"],
         "cloudformation": EXTENSION_MAP["cfn"],
+        "kubernetes": EXTENSION_MAP["k8s"],
+        "serverless": EXTENSION_MAP["sls"],
         "static": EXTENSION_MAP["web"],
+        "terraform": EXTENSION_MAP["tf"],
     }
 
     def __init__(
         self,
         path: Path,
         class_path: Optional[str] = None,
-        type_str: Optional[str] = None,
+        type_str: Optional[RunwayModuleTypeTypeDef] = None,
     ) -> None:
         """Instantiate class.
 
