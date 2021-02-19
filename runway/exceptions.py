@@ -188,10 +188,11 @@ class UnresolvedVariable(Exception):
             variable: The unresolved variable.
 
         """
-        message = 'Attempted to use variable "{}" before it was resolved'.format(
-            variable.name
+        self.message = (
+            f'Attempted to use variable "{variable.name}" before it was resolved'
         )
-        super().__init__(message, *args, **kwargs)
+        self.variable = variable
+        super().__init__(self.message, *args, **kwargs)
 
 
 class UnresolvedVariableValue(Exception):

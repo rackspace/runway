@@ -57,6 +57,18 @@ class TestRunwayDeploymentDefinition:
                 },
                 "test - test-01.cfn, test-02.cfn (us-east-1)",
             ),
+            (
+                {"name": "test", "modules": ["test-01.cfn"], "regions": "${var test}"},
+                "test - test-01.cfn (${var test})",
+            ),
+            (
+                {
+                    "name": "test",
+                    "modules": ["test-01.cfn"],
+                    "parallel_regions": "${var test}",
+                },
+                "test - test-01.cfn (${var test})",
+            ),
         ],
     )
     def test_menu_entry(self, data: Dict[str, Any], expected: str) -> None:
