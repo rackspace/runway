@@ -667,9 +667,11 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         values: List[str] = []
         for value in self:
             resolved_value = value.value
-            if not isinstance(resolved_value, str):
+            if isinstance(resolved_value, bool) or not isinstance(
+                resolved_value, (int, str)
+            ):
                 raise InvalidLookupConcatenation(value, self)
-            values.append(resolved_value)
+            values.append(str(resolved_value))
         return "".join(values)
 
     def resolve(
