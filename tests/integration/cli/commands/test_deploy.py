@@ -20,8 +20,8 @@ from runway.core import Runway
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.logging import LogCaptureFixture
     from mock import MagicMock
+    from pytest import LogCaptureFixture
 
     from ...conftest import CpConfigTypeDef
 

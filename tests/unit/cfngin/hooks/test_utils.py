@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.hooks.utils."""
 # pylint: disable=no-self-use,unused-argument
+# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 from __future__ import annotations
 
 import queue

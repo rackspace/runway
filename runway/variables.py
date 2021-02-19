@@ -37,7 +37,7 @@ from .lookups.handlers.base import LookupHandler
 from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 
 if TYPE_CHECKING:
-    from .cfngin.providers.base import BaseProvider
+    from .cfngin.providers.aws.default import Provider
     from .config.components.runway import RunwayVariablesDefinition
     from .context.cfngin import CfnginContext
     from .context.runway import RunwayContext
@@ -107,7 +107,7 @@ class Variable:
     def resolve(
         self,
         context: Union[CfnginContext, RunwayContext],
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
@@ -147,7 +147,7 @@ class Variable:
 def resolve_variables(
     variables: List[Variable],
     context: Union[CfnginContext, RunwayContext],
-    provider: Optional[BaseProvider] = None,
+    provider: Optional[Provider] = None,
 ) -> None:
     """Given a list of variables, resolve all of them.
 
@@ -211,7 +211,7 @@ class VariableValue:
     def resolve(
         self,
         context: Union[CfnginContext, RunwayContext],
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
@@ -393,7 +393,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
     def resolve(
         self,
         context: Union[CfnginContext, RunwayContext],
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
@@ -492,7 +492,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
     def resolve(
         self,
         context: Union[CfnginContext, RunwayContext],
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
@@ -675,7 +675,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
     def resolve(
         self,
         context: Union[CfnginContext, RunwayContext],
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:
@@ -822,7 +822,7 @@ class VariableValueLookup(VariableValue):
     def resolve(
         self,
         context: Union[CfnginContext, RunwayContext],
-        provider: Optional[BaseProvider] = None,
+        provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
         **kwargs: Any
     ) -> None:

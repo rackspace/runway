@@ -1,5 +1,8 @@
 """Tests for runway.cfngin.hooks.aws_lambda."""
 # pylint: disable=invalid-name,no-self-use
+# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
+# pyright: reportFunctionMemberAccess=none, reportOptionalMemberAccess=none
+# pyright: reportOptionalOperand=none
 from __future__ import annotations
 
 import logging
@@ -41,9 +44,8 @@ from ...mock_docker.fake_api_client import make_fake_client
 from ..factories import mock_provider
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
-    from _pytest.monkeypatch import MonkeyPatch
     from mypy_boto3_s3.client import S3Client
+    from pytest import LogCaptureFixture, MonkeyPatch
 
 REGION = "us-east-1"
 ALL_FILES = (
@@ -211,7 +213,7 @@ class TestLambdaHooks(unittest.TestCase):
         ) as mock1:
             test_path = "~/test"
 
-            mock1.side_effect = lambda p: (
+            mock1.side_effect = lambda p: (  # type: ignore
                 temp_dir.path if p == test_path else orig_expanduser(p)
             )
 

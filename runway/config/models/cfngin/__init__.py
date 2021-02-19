@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
 
 import yaml
-from pydantic import Extra, Field, root_validator, validator
+from pydantic import Extra, Field, Protocol, root_validator, validator
 from typing_extensions import Literal
 
 from .. import utils
@@ -18,6 +18,11 @@ from ._package_sources import (
     LocalCfnginPackageSourceDefinitionModel,
     S3CfnginPackageSourceDefinitionModel,
 )
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
+
+    Model = TypeVar("Model", bound=BaseModel)
 
 __all__ = [
     "CfnginConfigDefinitionModel",
@@ -48,7 +53,7 @@ class CfnginHookDefinitionModel(ConfigProperty):
         description="Whether to continue execution if the hook results in an error.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -119,17 +124,19 @@ class CfnginStackDefinitionModel(ConfigProperty):
         "Blueprint/CloudFormation stack. (supports lookups)",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration options."""
 
         extra = Extra.forbid
         title = "CFNgin Stack Definition"
 
         @staticmethod
-        def schema_extra(schema: Dict[str, Any]) -> None:
+        def schema_extra(schema: Dict[str, Any]) -> None:  # type: ignore
             """Processess the schema after it has been generated.
 
             Schema is modified in place. Return value is ignored.
+
+            https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
 
             """
             schema[
@@ -269,7 +276,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         "rendering/outputting CloudFormation templates.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         schema_extra = {"description": "Configuration file for Runway's CFNgin."}
@@ -314,11 +321,36 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         return stacks
 
     @classmethod
-    def parse_file(cls, path: Path) -> CfnginConfigDefinitionModel:
+    def parse_file(
+        cls: Type[Model],
+        path: Union[str, Path],
+        *,
+        content_type: Optional[str] = None,
+        encoding: str = "utf8",
+        proto: Optional[Protocol] = None,
+        allow_pickle: bool = False,
+    ) -> Model:
         """Parse a file."""
-        return cls.parse_raw(path.read_text())
+        return cast(
+            "Model",
+            cls.parse_raw(
+                path.read_text() if isinstance(path, Path) else Path(path).read_text(),
+                content_type=content_type,  # type: ignore
+                encoding=encoding,
+                proto=proto,  # type: ignore
+                allow_pickle=allow_pickle,
+            ),
+        )
 
     @classmethod
-    def parse_raw(cls, data: str) -> CfnginConfigDefinitionModel:
+    def parse_raw(
+        cls: Type[Model],
+        b: Union[bytes, str],
+        *,
+        content_type: Optional[str] = None,  # pylint: disable=unused-argument
+        encoding: str = "utf8",  # pylint: disable=unused-argument
+        proto: Optional[Protocol] = None,  # pylint: disable=unused-argument
+        allow_pickle: bool = False,  # pylint: disable=unused-argument
+    ) -> Model:
         """Parse raw data."""
-        return cls.parse_obj(yaml.safe_load(data))
+        return cast("Model", cls.parse_obj(yaml.safe_load(b)))

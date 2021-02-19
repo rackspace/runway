@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.stack."""
+# pyright: basic
 import unittest
 from typing import Any
 
@@ -31,6 +32,7 @@ class TestStack(unittest.TestCase):
         class FakeLookup(LookupHandler):
             """False Lookup."""
 
+            # pylint: disable=arguments-differ
             @classmethod
             def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
                 """Perform the lookup."""

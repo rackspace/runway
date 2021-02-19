@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.blueprints.base."""
-# pylint: disable=abstract-method,no-self-use,protected-access,unused-argument
+# pylint: disable=abstract-method,arguments-differ,no-self-use,protected-access,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import sys
@@ -44,7 +45,7 @@ from runway.variables import Variable
 from ..factories import mock_context
 
 if TYPE_CHECKING:
-    from runway.cfngin.blueprints.type_defs import BlueprintVariable
+    from runway.cfngin.blueprints.type_defs import BlueprintVariableTypeDef
 
 
 def mock_lookup_handler(value: str, **_: Any) -> str:
@@ -164,7 +165,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
-            VARIABLES: Dict[str, BlueprintVariable] = {
+            VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
                 "Param1": {"default": "default", "type": str},
             }
 
@@ -179,7 +180,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         class TestBlueprint(Blueprint):
             """Test blueprint."""
 
-            VARIABLES: Dict[str, BlueprintVariable] = {
+            VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
                 "Param1": {"default": 0, "type": int},
                 "Param2": {"default": 0, "type": int},
             }
@@ -187,12 +188,12 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         class TestBlueprintSubclass(TestBlueprint):
             """Test blueprint subclass."""
 
-            def defined_variables(self) -> Dict[str, BlueprintVariable]:
+            def defined_variables(self) -> Dict[str, BlueprintVariableTypeDef]:
                 """Return defined variables."""
                 variables = super().defined_variables()
                 variables["Param2"]["default"] = 1
                 variables["Param3"] = cast(
-                    "BlueprintVariable", {"default": 1, "type": int}
+                    "BlueprintVariableTypeDef", {"default": 1, "type": int}
                 )
                 return variables
 
@@ -290,7 +291,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         """Test resolve variable no provided with default."""
         var_name = "testVar"
         default_value = "foo"
-        var_def: BlueprintVariable = {"default": default_value, "type": str}
+        var_def: BlueprintVariableTypeDef = {"default": default_value, "type": str}
         provided_variable = None
         blueprint_name = "testBlueprint"
 
@@ -302,7 +303,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         """Test resolve variable no provided without default."""
         with self.assertRaises(MissingVariable):
             var_name = "testVar"
-            var_def: BlueprintVariable = {"type": str}
+            var_def: BlueprintVariableTypeDef = {"type": str}
             provided_variable = None
             blueprint_name = "testBlueprint"
 
@@ -313,7 +314,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         var_name = "testVar"
         provided_variable = Variable(var_name, "${mock abc}", "cfngin")
         with self.assertRaises(UnresolvedBlueprintVariable):
-            var_def: BlueprintVariable = {"type": str}
+            var_def: BlueprintVariableTypeDef = {"type": str}
             blueprint_name = "testBlueprint"
 
             resolve_variable(var_name, var_def, provided_variable, blueprint_name)
@@ -321,7 +322,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def _resolve_troposphere_var(self, tpe: Any, value: Any, **kwargs: Any) -> Any:
         """Resolve troposphere var."""
         var_name = "testVar"
-        var_def: BlueprintVariable = {"type": TroposphereType(tpe, **kwargs)}
+        var_def: BlueprintVariableTypeDef = {"type": TroposphereType(tpe, **kwargs)}
         provided_variable = Variable(var_name, value, "cfngin")
         blueprint_name = "testBlueprint"
 
@@ -427,7 +428,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variable_provided_resolved(self) -> None:
         """Test resolve variable provided resolved."""
         var_name = "testVar"
-        var_def: BlueprintVariable = {"type": str}
+        var_def: BlueprintVariableTypeDef = {"type": str}
         provided_variable = Variable(var_name, "${mock 1}", "cfngin")
         provided_variable.resolve(context=MagicMock(), provider=MagicMock())
         blueprint_name = "testBlueprint"
@@ -438,7 +439,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variable_allowed_values(self) -> None:
         """Test resolve variable allowed values."""
         var_name = "testVar"
-        var_def: BlueprintVariable = {"type": str, "allowed_values": ["allowed"]}
+        var_def: BlueprintVariableTypeDef = {"type": str, "allowed_values": ["allowed"]}
         provided_variable = Variable(var_name, "not_allowed", "cfngin")
         blueprint_name = "testBlueprint"
         with self.assertRaises(ValueError):
@@ -451,13 +452,16 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variable_validator_valid_value(self) -> None:
         """Test resolve variable validator valid value."""
 
-        def triple_validator(value):
+        def triple_validator(value: Any) -> Any:
             if len(value) != 3:
                 raise ValueError
             return value
 
         var_name = "testVar"
-        var_def: BlueprintVariable = {"type": list, "validator": triple_validator}
+        var_def: BlueprintVariableTypeDef = {
+            "type": list,
+            "validator": triple_validator,
+        }
         var_value = [1, 2, 3]
         provided_variable = Variable(var_name, var_value, "cfngin")
         blueprint_name = "testBlueprint"
@@ -468,13 +472,16 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
     def test_resolve_variable_validator_invalid_value(self) -> None:
         """Test resolve variable validator invalid value."""
 
-        def triple_validator(value):
+        def triple_validator(value: Any) -> Any:
             if len(value) != 3:
                 raise ValueError("Must be a triple.")
             return value
 
         var_name = "testVar"
-        var_def: BlueprintVariable = {"type": list, "validator": triple_validator}
+        var_def: BlueprintVariableTypeDef = {
+            "type": list,
+            "validator": triple_validator,
+        }
         var_value = [1, 2]
         provided_variable = Variable(var_name, var_value, "cfngin")
         blueprint_name = "testBlueprint"
@@ -506,9 +513,9 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         variables[1]._value._resolve("Test Output")
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"], 1)
-        self.assertEqual(blueprint.resolved_variables["Param2"], "Test Output")
-        self.assertIsNone(blueprint.resolved_variables.get("Param3"))
+        self.assertEqual(blueprint.resolved_variables["Param1"], 1)  # type: ignore
+        self.assertEqual(blueprint.resolved_variables["Param2"], "Test Output")  # type: ignore
+        self.assertIsNone(blueprint.resolved_variables.get("Param3"))  # type: ignore
 
     def test_resolve_variables_lookup_returns_non_string(self) -> None:
         """Test resolve variables lookup returns non string."""
@@ -535,7 +542,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
             var._value.resolve({}, {})  # type: ignore
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"], ["something"])
+        self.assertEqual(blueprint.resolved_variables["Param1"], ["something"])  # type: ignore
 
     def test_resolve_variables_lookup_returns_troposphere_obj(self) -> None:
         """Test resolve variables lookup returns troposphere obj."""
@@ -563,7 +570,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
 
         blueprint.resolve_variables(variables)
         self.assertEqual(
-            blueprint.resolved_variables["Param1"].data, Base64("test").data
+            blueprint.resolved_variables["Param1"].data, Base64("test").data  # type: ignore
         )
 
     def test_resolve_variables_lookup_returns_non_string_invalid_combo(self) -> None:
@@ -849,7 +856,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         var_value = None
         provided_variable = Variable(var_name, var_value, "cfngin")
         with self.assertRaises(ValueError):
-            var_def: BlueprintVariable = {"type": str}
+            var_def: BlueprintVariableTypeDef = {"type": str}
             blueprint_name = "testBlueprint"
 
             resolve_variable(var_name, var_def, provided_variable, blueprint_name)

@@ -14,7 +14,7 @@ class RunwayCdkModuleOptionsDataModel(ConfigProperty):
     build_steps: List[str] = []
     skip_npm_ci: bool = False
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.ignore

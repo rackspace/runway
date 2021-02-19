@@ -29,7 +29,6 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
         DEFAULT_VARIABLE: ${ssm /example/default::default=default}
 
 """
-# pylint: disable=arguments-differ
 from __future__ import annotations
 
 import logging
@@ -48,8 +47,12 @@ class SsmLookup(LookupHandler):
     """SSM Parameter Store Lookup."""
 
     @classmethod
-    def handle(
-        cls, value: str, context: Union[CfnginContext, RunwayContext], **_: Any
+    def handle(  # pylint: disable=arguments-differ
+        cls,
+        value: str,
+        context: Union[CfnginContext, RunwayContext],
+        *__args: Any,
+        **__kwargs: Any
     ) -> Any:
         """Retrieve a value from SSM Parameter Store.
 

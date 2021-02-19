@@ -15,7 +15,7 @@ else:
     from importlib.metadata import version  # pylint: disable=E
 
 if TYPE_CHECKING:
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import MonkeyPatch
 
 
 def test_run_aws_head_bucket(monkeypatch: MonkeyPatch) -> None:

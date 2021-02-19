@@ -30,7 +30,7 @@ def zip_and_upload(
 ) -> None:
     """Zip built static site and upload to S3."""
     s3_client = session.client("s3") if session else boto3.client("s3")
-    transfer = S3Transfer(s3_client)
+    transfer = S3Transfer(s3_client)  # type: ignore
 
     filedes, temp_file = tempfile.mkstemp()
     os.close(filedes)

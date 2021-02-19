@@ -1,9 +1,9 @@
 """Factories for tests."""
 # pylint: disable=no-self-use,unused-argument
+# pyright: basic
 from __future__ import annotations
 
-from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional
 
 from mock import MagicMock
 
@@ -14,7 +14,13 @@ from runway.context.cfngin import CfnginContext
 if TYPE_CHECKING:
     from runway.cfngin.providers.aws.default import Provider
 
-Lookup = namedtuple("Lookup", ("type", "input", "raw"))
+
+class Lookup(NamedTuple):
+    """Lookup named tuple."""
+
+    type: str
+    input: str
+    raw: str
 
 
 class MockThreadingEvent:

@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.hooks.command."""
 # pylint: disable=no-self-use
+# pyright: basic
 import os
 import unittest
 from subprocess import PIPE

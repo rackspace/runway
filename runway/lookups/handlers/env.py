@@ -34,7 +34,7 @@ limited or no effect:
         ENVIRONMENT: ${env DEPLOY_ENVIRONMENT::default=default}
 
 """
-# pylint: disable=arguments-differ
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -51,7 +51,9 @@ class EnvLookup(LookupHandler):
     """Environment variable Lookup."""
 
     @classmethod
-    def handle(cls, value: str, context: RunwayContext, **_: Any) -> Any:
+    def handle(  # pylint: disable=arguments-differ
+        cls, value: str, context: RunwayContext, *__args: Any, **__kwargs: Any
+    ) -> Any:
         """Retrieve an environment variable.
 
         The value is retrieved from a copy of the current environment variables

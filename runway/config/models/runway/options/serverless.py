@@ -13,7 +13,7 @@ class RunwayServerlessPromotezipOptionDataModel(ConfigProperty):
 
     bucketname: Optional[str] = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -32,7 +32,7 @@ class RunwayServerlessModuleOptionsDataModel(ConfigProperty):
     promotezip: RunwayServerlessPromotezipOptionDataModel = RunwayServerlessPromotezipOptionDataModel()  # noqa
     skip_npm_ci: bool = False
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.ignore

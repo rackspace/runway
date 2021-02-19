@@ -1,5 +1,6 @@
 """Test runway.config.models.utils."""
 # pylint: disable=no-self-use
+# pyright: basic
 from pathlib import Path
 from typing import Any, Optional
 
@@ -41,7 +42,7 @@ def test_resolve_path_field(provided: Optional[Path]) -> None:
         assert not resolve_path_field(provided)
     else:
         result = resolve_path_field(provided)
-        assert result.is_absolute()
+        assert result.is_absolute()  # type: ignore
         assert result == provided.resolve()
 
 
@@ -63,7 +64,7 @@ def test_validate_string_is_lookup(provided: Any) -> None:
 @pytest.mark.parametrize(
     "provided", ["fail", "${fail", "fail}", "fail.${env fail}", "${env fail}.fail"]
 )
-def test_validate_string_is_lookup_raises(provided) -> None:
+def test_validate_string_is_lookup_raises(provided: str) -> None:
     """Test validate_string_is_lookup."""
     with pytest.raises(ValueError) as excinfo:
         validate_string_is_lookup(provided)

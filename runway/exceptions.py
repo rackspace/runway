@@ -50,11 +50,11 @@ class FailedLookup(Exception):
 
     """
 
-    lookup: "VariableValueLookup"
+    lookup: VariableValueLookup
     cause: Exception
 
     def __init__(
-        self, lookup: "VariableValueLookup", cause: Exception, *args: Any, **kwargs: Any
+        self, lookup: VariableValueLookup, cause: Exception, *args: Any, **kwargs: Any
     ) -> None:
         """Instantiate class.
 
@@ -77,14 +77,10 @@ class FailedVariableLookup(Exception):
     """
 
     cause: FailedLookup
-    variable: "Variable"
+    variable: Variable
 
     def __init__(
-        self,
-        variable: "Variable",
-        lookup_error: FailedLookup,
-        *args: Any,
-        **kwargs: Any
+        self, variable: Variable, lookup_error: FailedLookup, *args: Any, **kwargs: Any
     ) -> None:
         """Instantiate class.
 
@@ -109,13 +105,13 @@ class InvalidLookupConcatenation(Exception):
 
     """
 
-    concatenated_lookups: "VariableValueConcatenation"
-    invalid_lookup: "VariableValue"
+    concatenated_lookups: VariableValueConcatenation[Any]
+    invalid_lookup: VariableValue
 
     def __init__(
         self,
-        invalid_lookup: "VariableValue",
-        concat_lookups: "VariableValueConcatenation",
+        invalid_lookup: VariableValue,
+        concat_lookups: VariableValueConcatenation[Any],
         *args: Any,
         **kwargs: Any
     ) -> None:
@@ -171,9 +167,7 @@ class UnknownLookupType(Exception):
 
     """
 
-    def __init__(
-        self, lookup: "VariableValueLookup", *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -187,7 +181,7 @@ class UnknownLookupType(Exception):
 class UnresolvedVariable(Exception):
     """Raised when trying to use a variable before it has been resolved."""
 
-    def __init__(self, variable: "Variable", *args: Any, **kwargs: Any) -> None:
+    def __init__(self, variable: Variable, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -209,11 +203,9 @@ class UnresolvedVariableValue(Exception):
 
     """
 
-    lookup: "VariableValueLookup"
+    lookup: VariableValueLookup
 
-    def __init__(
-        self, lookup: "VariableValueLookup", *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:

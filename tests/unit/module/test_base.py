@@ -1,5 +1,6 @@
 """Test runway.module.base."""
 # pylint: disable=no-self-use,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import logging
@@ -13,7 +14,7 @@ from runway.exceptions import NpmNotFound
 from runway.module.base import NPM_BIN, ModuleOptions, RunwayModule, RunwayModuleNpm
 
 if TYPE_CHECKING:
-    from _pytest.logging import LogCaptureFixture
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
 

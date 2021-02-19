@@ -1,5 +1,6 @@
 """Test runway.env_mgr."""
 # pylint: disable=no-self-use,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -9,7 +10,7 @@ from runway.env_mgr import EnvManager
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from _pytest.monkeypatch import MonkeyPatch
+    from pytest import MonkeyPatch
     from pytest_mock import MockerFixture
 
 

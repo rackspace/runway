@@ -29,7 +29,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
     file: Optional[Path]
     name: str
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -76,7 +76,7 @@ class RunwayStaticSitePreBuildStepDataModel(ConfigProperty):
     command: str
     cwd: Path = Path.cwd()
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -96,7 +96,7 @@ class RunwayStaticSiteSourceHashingDirectoryDataModel(ConfigProperty):
     exclusions: List[str] = []
     path: Path
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -121,7 +121,7 @@ class RunwayStaticSiteSourceHashingDataModel(ConfigProperty):
     enabled: bool = True
     parameter: Optional[str] = None
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -148,7 +148,7 @@ class RunwayStaticSiteModuleOptionsDataModel(ConfigProperty):
     pre_build_steps: List[RunwayStaticSitePreBuildStepDataModel] = []
     source_hashing: RunwayStaticSiteSourceHashingDataModel = RunwayStaticSiteSourceHashingDataModel()  # noqa: E501
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.ignore

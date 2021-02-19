@@ -1,10 +1,13 @@
 """Test runway.config."""
 # pylint: disable=no-self-use
+# pyright: basic
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
-from _pytest.monkeypatch import MonkeyPatch
 from mock import MagicMock, patch
 from pydantic import BaseModel
 
@@ -15,6 +18,9 @@ from runway.config.models.cfngin import (
     CfnginPackageSourcesDefinitionModel,
 )
 from runway.exceptions import ConfigNotFound
+
+if TYPE_CHECKING:
+    from pytest import MonkeyPatch
 
 MODULE = "runway.config"
 
@@ -153,7 +159,7 @@ class TestCfnginConfig:
         """Test parse_obj."""
         monkeypatch.setattr(
             MODULE + ".CfnginConfigDefinitionModel.parse_obj",
-            lambda x: CfnginConfigDefinitionModel(namespace="success"),
+            lambda x: CfnginConfigDefinitionModel(namespace="success"),  # type: ignore
         )
         assert CfnginConfig.parse_obj({}).namespace == "success"
 

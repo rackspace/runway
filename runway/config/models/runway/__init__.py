@@ -5,11 +5,23 @@ from __future__ import annotations
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
-from pydantic import Extra, Field, root_validator, validator
+from pydantic import Extra, Field, Protocol, root_validator, validator
 
 from .. import utils
 from ..base import ConfigProperty
@@ -23,6 +35,11 @@ from ._builtin_tests import (
     ValidRunwayTestTypeValues,
     YamlLintRunwayTestDefinitionModel,
 )
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
+
+    Model = TypeVar("Model", bound=BaseModel)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -84,11 +101,11 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         description="An identifier for the assumed role session. (supports lookups)",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Used to defined a role to assume while Runway is "
             "processing each module.",
             "examples": [
@@ -134,11 +151,11 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         description="An array of AWS Regions to process asynchronously. (supports lookups)",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra = {
+        schema_extra: Dict[str, Any] = {
             "description": "Only supports 'parallel' field.",
             "examples": [
                 {"parallel": ["us-east-1", "us-east-2"]},
@@ -171,7 +188,9 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         {},
         description="Assume a role when processing the deployment. (supports lookups)",
         examples=["arn:aws:iam::123456789012:role/name"]
-        + RunwayAssumeRoleDefinitionModel.Config.schema_extra["examples"],
+        + cast(
+            List[Any], RunwayAssumeRoleDefinitionModel.Config.schema_extra["examples"]
+        ),
     )
     env_vars: RunwayEnvVarsUnresolvedType = Field(
         {},
@@ -246,17 +265,19 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         + RunwayDeploymentRegionDefinitionModel.Config.schema_extra["examples"],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
         title = "Runway Deployment Definition"
 
         @staticmethod
-        def schema_extra(schema: Dict[str, Any]) -> None:
+        def schema_extra(schema: Dict[str, Any]) -> None:  # type: ignore
             """Processess the schema after it has been generated.
 
             Schema is modified in place. Return value is ignored.
+
+            https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
 
             """
             schema[
@@ -331,7 +352,7 @@ class RunwayFutureDefinitionModel(ConfigProperty):
         "be skipped if the current environment is not defined.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -440,7 +461,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         examples=[[{"path": "sampleapp-01.cfn"}, {"path": "sampleapp-02.cfn"}]],
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -466,7 +487,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_path(cls, values):  # noqa: N805
+    def _validate_path(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
         """Validate path and sets a default value if needed."""
         if not values.get("path") and not values.get("parallel"):
             values["path"] = Path.cwd()
@@ -512,7 +533,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         "If not provided, the current working directory is used.",
     )
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.allow
@@ -529,7 +550,7 @@ class RunwayVersionField(SpecifierSet):
     """Extends packaging.specifiers.SpecifierSet for use with pydantic."""
 
     @classmethod
-    def __get_validators__(cls) -> Generator:
+    def __get_validators__(cls) -> Generator[Callable[..., Any], None, None]:
         """Yield one of more validators with will be called to validate the input.
 
         Each validator will receive, as input, the value returned from the previous validator.
@@ -595,7 +616,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
     )
     variables: RunwayVariablesDefinitionModel = RunwayVariablesDefinitionModel()
 
-    class Config:
+    class Config(ConfigProperty.Config):
         """Model configuration."""
 
         extra = Extra.forbid
@@ -619,14 +640,39 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         return values
 
     @classmethod
-    def parse_file(cls, path: Path) -> RunwayConfigDefinitionModel:
+    def parse_file(
+        cls: Type[Model],
+        path: Union[str, Path],
+        *,
+        content_type: Optional[str] = None,
+        encoding: str = "utf8",
+        proto: Optional[Protocol] = None,
+        allow_pickle: bool = False,
+    ) -> Model:
         """Parse a file."""
-        return cls.parse_raw(path.read_text())
+        return cast(
+            "Model",
+            cls.parse_raw(
+                path.read_text() if isinstance(path, Path) else Path(path).read_text(),
+                content_type=content_type,  # type: ignore
+                encoding=encoding,
+                proto=proto,  # type: ignore
+                allow_pickle=allow_pickle,
+            ),
+        )
 
     @classmethod
-    def parse_raw(cls, data: str) -> RunwayConfigDefinitionModel:
+    def parse_raw(
+        cls: Type[Model],
+        b: Union[bytes, str],
+        *,
+        content_type: Optional[str] = None,  # pylint: disable=unused-argument
+        encoding: str = "utf8",  # pylint: disable=unused-argument
+        proto: Optional[Protocol] = None,  # pylint: disable=unused-argument
+        allow_pickle: bool = False,  # pylint: disable=unused-argument
+    ) -> Model:
         """Parse raw data."""
-        return cls.parse_obj(yaml.safe_load(data))
+        return cast("Model", cls.parse_obj(yaml.safe_load(b)))
 
 
 # https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models

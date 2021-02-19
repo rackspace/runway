@@ -214,7 +214,7 @@ class ImageBuildArgs(BaseModel):
         context: Optional[CfnginContext] = None,
         docker: Optional[Dict[str, Any]] = None,
         dockerfile: str = "./Dockerfile",
-        ecr_repo=None,
+        ecr_repo: Optional[Dict[str, Optional[str]]] = None,
         path: Optional[Union[Path, str]] = None,
         repo: Optional[str] = None,
         tags: Optional[List[str]] = None,
@@ -311,6 +311,10 @@ def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     for tag in args.tags:
         image.tag(args.repo, tag=tag)
     image.reload()
-    LOGGER.info("created image %s with tags %s", image.short_id, ", ".join(image.tags))
+    LOGGER.info(
+        "created image %s with tags %s",
+        cast(str, image.short_id),
+        ", ".join(cast(List[str], image.tags)),
+    )
     docker_hook_data.image = DockerImage(image=image)
     return docker_hook_data.update_context(context)

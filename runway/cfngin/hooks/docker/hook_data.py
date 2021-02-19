@@ -40,11 +40,9 @@ class DockerHookData(MutableMap):
         return self
 
     @classmethod
-    def from_cfngin_context(
-        cls, context: Optional[CfnginContext] = None
-    ) -> DockerHookData:
+    def from_cfngin_context(cls, context: CfnginContext) -> DockerHookData:
         """Get existing object or create a new one."""
-        if context and "docker" in context.hook_data:
+        if "docker" in context.hook_data:
             found = context.hook_data["docker"]
             if isinstance(found, cls):
                 return found

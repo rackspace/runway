@@ -30,9 +30,7 @@ def get_cdk_stacks(
             command="cdk", command_opts=["list"] + context_opts, path=module_path
         ),
         env=env_vars,
-    )
-    if isinstance(result, bytes):  # python3 returns encoded bytes
-        result = result.decode()
+    ).decode()
     result = result.strip().split("\n")
     LOGGER.debug("found stacks: %s", result)
     return result

@@ -23,22 +23,6 @@ class BaseProvider:
         """Abstract method."""
         not_implemented("get_stack")
 
-    def create_stack(self, *args: Any, **kwargs: Any) -> Any:
-        """Abstract method."""
-        not_implemented("create_stack")
-
-    def update_stack(self, *args: Any, **kwargs: Any) -> Any:
-        """Abstract method."""
-        not_implemented("update_stack")
-
-    def destroy_stack(self, stack: str, *args: Any, **kwargs: Any) -> Any:
-        """Abstract method."""
-        not_implemented("destroy_stack")
-
-    def get_stack_status(self, stack: str, *args: Any, **kwargs: Any) -> Any:
-        """Abstract method."""
-        not_implemented("get_stack_status")
-
     def get_outputs(self, stack_name: str, *args: Any, **kwargs: Any) -> Any:
         """Abstract method."""
         not_implemented("get_outputs")
@@ -57,7 +41,7 @@ class Template:
 
     """
 
-    def __init__(self, url: Optional[str] = None, body: Optional[str] = None):
+    def __init__(self, url: Optional[str] = None, body: Optional[str] = None) -> None:
         """Instantiate class."""
         self.url = url
         self.body = body

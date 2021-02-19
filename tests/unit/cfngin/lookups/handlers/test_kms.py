@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.lookups.handlers.kms."""
 # pylint: disable=no-self-use
+# pyright: basic
 from __future__ import annotations
 
 import codecs

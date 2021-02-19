@@ -26,7 +26,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 class HookArgsBaseModel(BaseModel):
     """Base model for hook args."""
 
-    tags: Dict[str, str]
+    tags: Dict[str, str] = {}
 
     def __contains__(self, name: str) -> bool:
         """Implement evaluation of 'in' conditional.
@@ -290,7 +290,7 @@ class HookBuildAction(build.Action):
         """Override the inherited method to always return local provider."""
         return self._provider
 
-    def run(self, **kwargs: Any) -> Status:
+    def run(self, **kwargs: Any) -> Status:  # type: ignore
         """Run the action for one stack."""
         return self._launch_stack(**kwargs)
 

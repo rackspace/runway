@@ -1,5 +1,6 @@
 """Tests for runway.cfngin.plan."""
 # pylint: disable=protected-access,unused-argument
+# pyright: basic
 from __future__ import annotations
 
 import json
@@ -154,6 +155,7 @@ class TestPlan(unittest.TestCase):
         class FakeLookup(LookupHandler):
             """False Lookup."""
 
+            # pylint: disable=arguments-differ
             @classmethod
             def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
                 """Perform the lookup."""
@@ -241,7 +243,7 @@ class TestPlan(unittest.TestCase):
             ]
         )
         plan = Plan(description="Test", graph=graph, context=context)
-        plan.context._persistent_graph_lock_code = plan.lock_code
+        plan.context._persistent_graph_lock_code = plan.lock_code  # type: ignore
         plan.execute(walk)
 
         # the order these are appended changes between python2/3
@@ -251,7 +253,7 @@ class TestPlan(unittest.TestCase):
         context.put_persistent_graph.assert_called()
 
         # order is different between python2/3 so can't compare dicts
-        result_graph_dict = context.persistent_graph.to_dict()
+        result_graph_dict = context.persistent_graph.to_dict()  # type: ignore
         self.assertEqual(2, len(result_graph_dict))
         self.assertEqual(set(), result_graph_dict.get("vpc.1"))
         self.assertEqual(set(["vpc.1"]), result_graph_dict.get("bastion.1"))

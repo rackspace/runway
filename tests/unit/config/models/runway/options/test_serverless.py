@@ -1,5 +1,6 @@
 """Test runway.config.models.runway.options.serverless."""
 # pylint: disable=no-self-use
+# pyright: basic
 import pytest
 from pydantic import ValidationError
 
@@ -32,7 +33,7 @@ class TestRunwayServerlessModuleOptionsDataModel:
         assert obj.args == data["args"]
         assert obj.extend_serverless_yml == data["extend_serverless_yml"]
         assert obj.promotezip == RunwayServerlessPromotezipOptionDataModel(
-            **data["promotezip"]
+            **data["promotezip"]  # type: ignore
         )
         assert obj.skip_npm_ci == data["skip_npm_ci"]
 

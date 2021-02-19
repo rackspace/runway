@@ -1,5 +1,6 @@
 """Test runway.cfngin.hooks.docker.data_models."""
 # pylint: disable=no-self-use,protected-access,redefined-outer-name
+# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -150,7 +151,7 @@ class TestBaseModel:
     def test_validate_dict_value_error(self) -> None:
         """Test _validate_dict raise ValueError."""
         with pytest.raises(ValueError):
-            BaseModel._validate_dict(["something"])
+            BaseModel._validate_dict(["something"])  # type: ignore
         with pytest.raises(ValueError):
             BaseModel._validate_dict(None, required=True)
         with pytest.raises(ValueError):
