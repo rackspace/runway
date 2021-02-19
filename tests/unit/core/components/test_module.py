@@ -279,7 +279,7 @@ class TestModule:
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
         )
-        mocker.patch.object(mod, "payload", {})
+        mod.definition.class_path = None
 
         assert mod.type == mock_type
         mock_type.assert_called_once_with(
@@ -287,7 +287,7 @@ class TestModule:
         )
         del mod.type
 
-        mod.payload.update({"class_path": "parent.dir.class"})
+        mod.definition.class_path = "parent.dir.class"
         assert mod.type == mock_type
         mock_type.assert_called_with(
             path=cast("Path", mock_path.module_root),
@@ -296,12 +296,12 @@ class TestModule:
         )
         del mod.type
 
-        mod.payload.update({"type": "test-type"})
+        mod.definition.type = "kubernetes"
         assert mod.type == mock_type
         mock_type.assert_called_with(
             path=cast("Path", mock_path.module_root),
             class_path="parent.dir.class",
-            type_str="test-type",
+            type_str="kubernetes",
         )
         del mod.type
 

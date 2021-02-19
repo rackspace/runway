@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from enum import Enum
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -22,6 +21,7 @@ from typing import (
 import yaml
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from pydantic import Extra, Field, Protocol, root_validator, validator
+from typing_extensions import Literal
 
 from .. import utils
 from ..base import ConfigProperty
@@ -47,28 +47,31 @@ RunwayEnvironmentsType = Dict[str, Union[bool, List[str], str]]
 RunwayEnvironmentsUnresolvedType = Union[Dict[str, Union[bool, List[str], str]], str]
 RunwayEnvVarsType = Dict[str, Union[List[str], str]]
 RunwayEnvVarsUnresolvedType = Union[RunwayEnvVarsType, str]
+RunwayModuleTypeTypeDef = Literal[
+    "cdk", "cloudformation", "kubernetes", "serverless", "static", "terraform"
+]
 
 __all__ = [
+    "CfnLintRunwayTestArgs",
+    "CfnLintRunwayTestDefinitionModel",
     "RUNWAY_LOOKUP_STRING_ERROR",
     "RUNWAY_LOOKUP_STRING_REGEX",
-    "CfnLintRunwayTestDefinitionModel",
-    "CfnLintRunwayTestArgs",
     "RunwayAssumeRoleDefinitionModel",
     "RunwayConfigDefinitionModel",
-    "RunwayDeploymentRegionDefinitionModel",
     "RunwayDeploymentDefinitionModel",
+    "RunwayDeploymentRegionDefinitionModel",
     "RunwayEnvironmentsType",
     "RunwayEnvironmentsUnresolvedType",
     "RunwayEnvVarsType",
     "RunwayEnvVarsUnresolvedType",
     "RunwayFutureDefinitionModel",
     "RunwayModuleDefinitionModel",
+    "RunwayModuleTypeTypeDef",
     "RunwayTestDefinitionModel",
     "RunwayVariablesDefinitionModel",
     "RunwayVersionField",
-    "ScriptRunwayTestDefinitionModel",
     "ScriptRunwayTestArgs",
-    "ValidRunwayModuleTypeValues",
+    "ScriptRunwayTestDefinitionModel",
     "ValidRunwayTestTypeValues",
     "YamlLintRunwayTestDefinitionModel",
 ]
@@ -363,29 +366,6 @@ class RunwayFutureDefinitionModel(ConfigProperty):
         title = "Runway Future Definition"
 
 
-class ValidRunwayModuleTypeValues(Enum):
-    """Valid Runway module types."""
-
-    cdk = "cdk"
-    cloudformation = "cloudformation"
-    serverless = "serverless"
-    terraform = "terraform"
-    kubernetes = "kubernetes"
-    static = "static"
-
-    @classmethod
-    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
-        """Mutate the field schema in place.
-
-        This is only called when output JSON schema from a model.
-
-        """
-        field_schema.update(  # cov: ignore
-            title="Module Type",
-            description="Explicitly define the type of IaC contained within the directory.",
-        )
-
-
 class RunwayModuleDefinitionModel(ConfigProperty):
     """Model for a Runway module definition."""
 
@@ -452,7 +432,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         "This field is only used by the `--tag` CLI option.",
         examples=[["type:network", "app:sampleapp"]],
     )
-    type: Optional[ValidRunwayModuleTypeValues] = None
+    type: Optional[RunwayModuleTypeTypeDef] = None
     # needs to be last
     parallel: List[RunwayModuleDefinitionModel] = Field(
         [],

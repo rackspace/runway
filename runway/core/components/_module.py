@@ -159,8 +159,8 @@ class Module:
         """Determine Runway module type."""
         return RunwayModuleType(
             path=self.path.module_root,
-            class_path=self.payload.get("class_path"),
-            type_str=self.payload.get("type"),
+            class_path=self.definition.class_path,
+            type_str=self.definition.type,
         )
 
     @cached_property
