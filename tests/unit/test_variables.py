@@ -45,7 +45,7 @@ class MockLookupHandler(LookupHandler):
     side_effect: ClassVar[Union[Any, List[Any]]] = None
 
     @classmethod
-    def handle(
+    def handle(  # pylint: disable=arguments-differ
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],
@@ -481,13 +481,21 @@ class TestVariableValueConcatenation:
             ).value
             == "foobar"
         )
-        with pytest.raises(InvalidLookupConcatenation):
+        assert (
             VariableValueConcatenation(
-                [VariableValueLiteral("foo"), VariableValueLiteral(13)]  # type: ignore
+                [VariableValueLiteral(13), VariableValueLiteral("/test")]  # type: ignore
             ).value
+            == "13/test"
+        )
+        assert (
+            VariableValueConcatenation(
+                [VariableValueLiteral(5), VariableValueLiteral(13)]
+            ).value
+            == "513"
+        )
         with pytest.raises(InvalidLookupConcatenation):
             VariableValueConcatenation(
-                [VariableValueLiteral(5), VariableValueLiteral(13)]  # type: ignore
+                [VariableValueLiteral(True), VariableValueLiteral("test")]  # type: ignore
             ).value
 
     def test_value_single(self) -> None:
