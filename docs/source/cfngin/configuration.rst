@@ -222,7 +222,7 @@ Top-Level Fields
     :type: Optional[str]
     :value: "-"
 
-    By default, ``-`` will be used as a delimiter between the :attr:`~cfngin.config.namespace` and the declared stack name to build the actual CloudFormation stack name that gets created.
+    By default, ``-`` will be used as a delimiter between the :attr:`~cfngin.config.namespace` and the declared stack name to deploy the actual CloudFormation stack name that gets created.
 
     If you prefer to not use a delimiter, an empty string can be used as the value of this field.
 
@@ -264,7 +264,7 @@ Top-Level Fields
 
       persistent_graph_key: unique-key.json
 
-  .. attribute:: post_build
+  .. attribute:: post_deploy
     :type: Union[Dict[str, cfngin.hook], List[cfngin.hook]]
     :value: []
 
@@ -276,14 +276,14 @@ Top-Level Fields
     .. code-block:: yaml
       :caption: using a dict
 
-      post_build:
+      post_deploy:
         do_something:
           path: do.something
 
     .. code-block:: yaml
       :caption: using a list
 
-      post_build:
+      post_deploy:
         - path: do.something
 
   .. attribute:: post_destroy
@@ -308,7 +308,7 @@ Top-Level Fields
       post_destroy:
         - path: do.something
 
-  .. attribute:: pre_build
+  .. attribute:: pre_deploy
     :type: Union[Dict[str, cfngin.hook], List[cfngin.hook]]
     :value: []
 
@@ -320,14 +320,14 @@ Top-Level Fields
     .. code-block:: yaml
       :caption: using a dict
 
-      pre_build:
+      pre_deploy:
         do_something:
           path: do.something
 
     .. code-block:: yaml
       :caption: using a list
 
-      pre_build:
+      pre_deploy:
         - path: do.something
 
   .. attribute:: pre_destroy
@@ -700,7 +700,7 @@ Variables
 ==========
 
 Variables are values that will be passed into a :ref:`Blueprint` before it is rendered.
-Variables can be any valid YAML data structure and can leverage :ref:`Lookups <cfngin-lookups>` to expand values at build time.
+Variables can be any valid YAML data structure and can leverage :ref:`Lookups <cfngin-lookups>` to expand values at runtime.
 
 The following concepts make working with variables within large templates easier:
 
@@ -766,7 +766,7 @@ To do so, use the :ref:`output lookup` in the :attr:`~cfngin.stack.variables` on
 
 For more information see :ref:`Lookups <cfngin-lookups>`.
 
-In this example config - when building things inside a VPC, you will need to pass the **VpcId** of the VPC that you want the resources to be located in.
+In this example config - when deploying things inside a VPC, you will need to pass the **VpcId** of the VPC that you want the resources to be located in.
 If the **vpc** stack provides an Output called **VpcId**, you can reference it easily.
 
 .. code-block:: yaml

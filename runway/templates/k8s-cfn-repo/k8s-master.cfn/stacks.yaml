@@ -15,7 +15,7 @@ stacks:
       EksVersion: ${EksVersion}
       VPC: ${VPCid}
 
-post_build:
+post_deploy:
   - path: k8s_hooks.bootstrap.create_runway_environments
     required: true
     args:

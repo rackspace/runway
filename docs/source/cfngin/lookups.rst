@@ -158,8 +158,8 @@ value.
   an environment file. It does not support other embedded lookups to see
   if they exist. Only checking variables in the environment file are supported.
   If you attempt to have the default lookup perform any other lookup that
-  fails, CFNgin will throw an exception for that lookup and will stop your
-  build before it gets a chance to fall back to the default in your config.
+  fails, CFNgin will throw an exception for that lookup and will exit
+  before it gets a chance to fall back to the default in your config.
 
 .. _`kms lookup`:
 

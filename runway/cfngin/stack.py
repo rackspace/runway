@@ -102,7 +102,7 @@ class Stack:
 
         Args:
             definition: A stack definition.
-            context: Current context for building the stack.
+            context: Current context for deploying the stack.
             variables: Variables for the stack.
             mappings: Cloudformation mappings passed to the blueprint.
             locked: Whether or not the stack is locked.

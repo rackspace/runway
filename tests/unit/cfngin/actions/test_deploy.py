@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.actions.build."""
+"""Tests for runway.cfngin.actions.deploy."""
 # pylint: disable=no-self-use,protected-access,unused-argument
 # pyright: basic
 from __future__ import annotations
@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin import exceptions
-from runway.cfngin.actions import build
-from runway.cfngin.actions.build import (
+from runway.cfngin.actions import deploy
+from runway.cfngin.actions.deploy import (
     UsePreviousParameterValue,
     _handle_missing_parameters,
     _resolve_parameters,
@@ -80,7 +80,7 @@ class MockProvider(BaseProvider):
 
 
 class TestBuildAction(unittest.TestCase):
-    """Tests for runway.cfngin.actions.build.BuildAction."""
+    """Tests for runway.cfngin.actions.deploy.BuildAction."""
 
     def setUp(self) -> None:
         """Run before tests."""
@@ -88,7 +88,7 @@ class TestBuildAction(unittest.TestCase):
             config=CfnginConfig.parse_obj({"namespace": "namespace"})
         )
         self.provider = MockProvider()
-        self.build_action = build.Action(
+        self.deploy_action = deploy.Action(
             self.context,
             provider_builder=MockProviderBuilder(provider=self.provider),  # type: ignore
         )
@@ -134,11 +134,11 @@ class TestBuildAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps(
             [Step.from_stack_name("removed", context)]
         )
-        build_action = build.Action(context=context)
-        plan = cast(Plan, build_action._Action__generate_plan())  # type: ignore
+        deploy_action = deploy.Action(context=context)
+        plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
 
         self.assertIsInstance(plan, Plan)
-        self.assertEqual(build.Action.DESCRIPTION, plan.description)
+        self.assertEqual(deploy.Action.DESCRIPTION, plan.description)
         mock_graph_tags.assert_called_once()
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
@@ -148,11 +148,11 @@ class TestBuildAction(unittest.TestCase):
         self.assertEqual(set(), result_graph_dict["vpc"])
         self.assertEqual(set(["vpc"]), result_graph_dict["bastion"])
         self.assertEqual(set(["bastion", "vpc"]), result_graph_dict["db"])
-        self.assertEqual(build_action._destroy_stack, plan.graph.steps["removed"].fn)
-        self.assertEqual(build_action._launch_stack, plan.graph.steps["vpc"].fn)
-        self.assertEqual(build_action._launch_stack, plan.graph.steps["bastion"].fn)
-        self.assertEqual(build_action._launch_stack, plan.graph.steps["db"].fn)
-        self.assertEqual(build_action._launch_stack, plan.graph.steps["other"].fn)
+        self.assertEqual(deploy_action._destroy_stack, plan.graph.steps["removed"].fn)
+        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["vpc"].fn)
+        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["bastion"].fn)
+        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["db"].fn)
+        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["other"].fn)
 
     def test_handle_missing_params(self) -> None:
         """Test handle missing params."""
@@ -195,8 +195,8 @@ class TestBuildAction(unittest.TestCase):
     def test_generate_plan(self) -> None:
         """Test generate plan."""
         context = self._get_context()
-        build_action = build.Action(context, cancel=MockThreadingEvent())  # type: ignore
-        plan = cast(Plan, build_action._Action__generate_plan())  # type: ignore
+        deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
+        plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
         self.assertEqual(
             {
                 "db": set(["bastion", "vpc"]),
@@ -210,17 +210,17 @@ class TestBuildAction(unittest.TestCase):
     def test_does_not_execute_plan_when_outline_specified(self) -> None:
         """Test does not execute plan when outline specified."""
         context = self._get_context()
-        build_action = build.Action(context, cancel=MockThreadingEvent())  # type: ignore
-        with patch.object(build_action, "_generate_plan") as mock_generate_plan:
-            build_action.run(outline=True)
+        deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
+        with patch.object(deploy_action, "_generate_plan") as mock_generate_plan:
+            deploy_action.run(outline=True)
             self.assertEqual(mock_generate_plan().execute.call_count, 0)
 
     def test_execute_plan_when_outline_not_specified(self) -> None:
         """Test execute plan when outline not specified."""
         context = self._get_context()
-        build_action = build.Action(context, cancel=MockThreadingEvent())  # type: ignore
-        with patch.object(build_action, "_generate_plan") as mock_generate_plan:
-            build_action.run(outline=False)
+        deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
+        with patch.object(deploy_action, "_generate_plan") as mock_generate_plan:
+            deploy_action.run(outline=False)
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
 
     @patch(
@@ -251,8 +251,8 @@ class TestBuildAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps(
             [Step.from_stack_name("removed", context)]
         )
-        build_action = build.Action(context=context)
-        build_action.run()
+        deploy_action = deploy.Action(context=context)
+        deploy_action.run()
 
         mock_graph_tags.assert_called_once()
         mock_lock.assert_called_once()
@@ -273,7 +273,7 @@ class TestBuildAction(unittest.TestCase):
         for test in test_scenarios:
             mock_stack.locked = test.locked
             mock_stack.force = test.force
-            self.assertEqual(build.should_update(mock_stack), test.result)  # type: ignore
+            self.assertEqual(deploy.should_update(mock_stack), test.result)  # type: ignore
 
     def test_should_ensure_cfn_bucket(self) -> None:
         """Test should ensure cfn bucket."""
@@ -291,7 +291,7 @@ class TestBuildAction(unittest.TestCase):
             result = scenario["result"]
             try:
                 self.assertEqual(
-                    build.should_ensure_cfn_bucket(outline, dump), result  # type: ignore
+                    deploy.should_ensure_cfn_bucket(outline, dump), result  # type: ignore
                 )
             except AssertionError as err:
                 err.args += ("scenario", str(scenario))
@@ -309,11 +309,11 @@ class TestBuildAction(unittest.TestCase):
         mock_stack.name = "test-stack"
         for test in test_scenarios:
             mock_stack.enabled = test.enabled
-            self.assertEqual(build.should_submit(mock_stack), test.result)  # type: ignore
+            self.assertEqual(deploy.should_submit(mock_stack), test.result)  # type: ignore
 
 
 class TestLaunchStack(TestBuildAction):
-    """Tests for runway.cfngin.actions.build.BuildAction launch stack."""
+    """Tests for runway.cfngin.actions.deploy.BuildAction launch stack."""
 
     def setUp(self) -> None:
         """Run before tests."""
@@ -321,7 +321,7 @@ class TestLaunchStack(TestBuildAction):
         self.session = get_session(region=None)
         self.provider = Provider(self.session, interactive=False, recreate_failed=False)
         provider_builder = MockProviderBuilder(provider=self.provider)
-        self.build_action = build.Action(
+        self.deploy_action = deploy.Action(
             self.context,
             provider_builder=provider_builder,
             cancel=MockThreadingEvent(),  # type: ignore
@@ -335,7 +335,7 @@ class TestLaunchStack(TestBuildAction):
         self.stack.locked = False
         self.stack_status = None
 
-        plan = cast(Plan, self.build_action._Action__generate_plan())  # type: ignore
+        plan = cast(Plan, self.deploy_action._Action__generate_plan())  # type: ignore
         self.step = plan.steps[0]
         self.step.stack = self.stack
 
@@ -369,7 +369,7 @@ class TestLaunchStack(TestBuildAction):
         patch_object(self.provider, "destroy_stack")
         patch_object(self.provider, "get_events", side_effect=get_events)
 
-        patch_object(self.build_action, "s3_stack_push")
+        patch_object(self.deploy_action, "s3_stack_push")
 
     def _advance(
         self,
@@ -493,7 +493,7 @@ class TestLaunchStack(TestBuildAction):
 
 
 class TestFunctions(unittest.TestCase):
-    """Tests for runway.cfngin.actions.build module level functions."""
+    """Tests for runway.cfngin.actions.deploy module level functions."""
 
     def setUp(self) -> None:
         """Run before tests."""

@@ -6,7 +6,7 @@ lookups:
   bootstrap_value: local_lookups.bootstrap_value.bootstrap_value
 
 # Could specify a SSH keypair to allow access to the instances
-# pre_build:
+# pre_deploy:
 #   - path: stacker.hooks.keypair.ensure_keypair_exists
 #     required: true
 #     args:

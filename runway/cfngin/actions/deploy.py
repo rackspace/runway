@@ -1,4 +1,4 @@
-"""CFNgin build action."""
+"""CFNgin deploy action."""
 from __future__ import annotations
 
 import logging
@@ -185,7 +185,7 @@ def _handle_missing_parameters(
 
 
 def handle_hooks(
-    stage: Literal["post_build", "pre_build"],
+    stage: Literal["post_deploy", "pre_deploy"],
     hooks: List[CfnginHookDefinitionModel],
     provider: Provider,
     context: CfnginContext,
@@ -196,7 +196,7 @@ def handle_hooks(
     """Handle pre/post hooks.
 
     Args:
-        stage: The name of the hook stage - pre_build/post_build.
+        stage: The name of the hook stage - pre_deploy/post_deploy.
         hooks: A list of dictionaries containing the hooks to execute.
         provider: The provider the current stack is using.
         context: The current CFNgin context.
@@ -209,22 +209,22 @@ def handle_hooks(
 
 
 class Action(BaseAction):
-    """Responsible for building & coordinating CloudFormation stacks.
+    """Responsible for building & deploying CloudFormation stacks.
 
-    Generates the build plan based on stack dependencies (these dependencies
+    Generates the deploy plan based on stack dependencies (these dependencies
     are determined automatically based on output lookups from other stacks).
 
     The plan can then either be printed out as an outline or executed. If
     executed, each stack will get launched in order which entails:
 
     - Pushing the generated CloudFormation template to S3 if it has changed
-    - Submitting either a build or update of the given stack to the
+    - Submitting either a create or update of the given stack to the
       :class:`runway.cfngin.providers.base.BaseProvider`.
 
     """
 
     DESCRIPTION = "Create/Update stacks"
-    NAME = "build"
+    NAME = "deploy"
 
     @staticmethod
     def build_parameters(
@@ -233,11 +233,11 @@ class Action(BaseAction):
         """Build the CloudFormation Parameters for our stack.
 
         Args:
-            stack (:class:`runway.cfngin.stack.Stack`): A CFNgin stack.
-            provider_stack (Dict[str, Any]): An optional CFNgin provider object.
+            stack: A CFNgin stack.
+            provider_stack: An optional CFNgin provider object.
 
         Returns:
-            Dict[str, Any]: The parameters for the given stack
+            The parameters for the given stack
 
         """
         resolved = _resolve_parameters(stack.parameter_values, stack.blueprint)
@@ -301,7 +301,7 @@ class Action(BaseAction):
             if wait and provider.is_stack_in_progress(stack_data):
                 return WAITING
             LOGGER.debug("%s:destroying stack", stack.fqn)
-            provider.destroy_stack(stack_data, action="build")
+            provider.destroy_stack(stack_data, action="deploy")
             return DESTROYING_STATUS
         except CancelExecution:
             return SkippedStatus(reason="canceled execution")
@@ -526,8 +526,8 @@ class Action(BaseAction):
         if should_ensure_cfn_bucket(outline, bool(dump)):
             self.ensure_cfn_bucket()
         handle_hooks(
-            "pre_build",
-            self.context.config.pre_build,
+            "pre_deploy",
+            self.context.config.pre_deploy,
             self.provider,
             self.context,
             dump=bool(dump),
@@ -544,9 +544,9 @@ class Action(BaseAction):
         tail: bool = False,
         **_kwargs: Any
     ) -> None:
-        """Kicks off the build/update of the stacks in the stack_definitions.
+        """Kicks off the create/update of the stacks in the stack_definitions.
 
-        This is the main entry point for the Builder.
+        This is the main entry point for the action.
 
         """
         plan = self.__generate_plan(tail=tail)
@@ -572,8 +572,8 @@ class Action(BaseAction):
     ) -> None:
         """Any steps that need to be taken after running the action."""
         handle_hooks(
-            "post_build",
-            self.context.config.post_build,
+            "post_deploy",
+            self.context.config.post_deploy,
             self.provider,
             self.context,
             dump=bool(dump),

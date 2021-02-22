@@ -91,7 +91,7 @@ class TestCFNgin:
         )
         assert result.env_file["test_value"] == "lab-ca-central-1"
 
-    @patch("runway.cfngin.actions.build.Action")
+    @patch("runway.cfngin.actions.deploy.Action")
     def test_deploy(
         self,
         mock_action: MagicMock,

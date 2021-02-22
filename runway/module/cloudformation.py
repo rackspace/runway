@@ -62,16 +62,16 @@ class CloudFormation(RunwayModule):
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
     def deploy(self) -> None:
-        """Run stacker build."""
+        """Run deploy."""
         cfngin = CFNgin(self.ctx, parameters=self.parameters, sys_path=self.path,)
         cfngin.deploy(force=bool(self.parameters or self.explicitly_enabled))
 
     def destroy(self) -> None:
-        """Run stacker destroy."""
+        """Run destroy."""
         cfngin = CFNgin(self.ctx, parameters=self.parameters, sys_path=self.path,)
         cfngin.destroy(force=bool(self.parameters or self.explicitly_enabled))
 
     def plan(self) -> None:
-        """Run stacker diff."""
+        """Run diff."""
         cfngin = CFNgin(self.ctx, parameters=self.parameters, sys_path=self.path,)
         cfngin.plan(force=bool(self.parameters or self.explicitly_enabled))
