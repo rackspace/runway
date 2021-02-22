@@ -35,7 +35,7 @@ This Lookup does not support any arguments.
 .. code-block:: yaml
     :caption: cfngin.yml
 
-    pre_build:
+    pre_deploy:
       - path: runway.cfngin.hooks.docker.login
         args:
           password: ${ecr login-password}

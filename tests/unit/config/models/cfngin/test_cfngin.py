@@ -19,7 +19,7 @@ class TestCfnginConfigDefinitionModel:
     """Test runway.config.models.cfngin.CfnginConfigDefinitionModel."""
 
     @pytest.mark.parametrize(
-        "field", ["post_build", "post_destroy", "pre_build", "pre_destroy"],
+        "field", ["post_deploy", "post_destroy", "pre_deploy", "pre_destroy"],
     )
     def test_convert_hook_definitions(self, field: str) -> None:
         """Test _convert_hook_definitions."""
@@ -75,9 +75,9 @@ class TestCfnginConfigDefinitionModel:
         assert obj.namespace_delimiter == "-"
         assert obj.package_sources == CfnginPackageSourcesDefinitionModel()
         assert not obj.persistent_graph_key
-        assert obj.post_build == []
+        assert obj.post_deploy == []
         assert obj.post_destroy == []
-        assert obj.pre_build == []
+        assert obj.pre_deploy == []
         assert obj.pre_destroy == []
         assert not obj.service_role
         assert obj.stacks == []

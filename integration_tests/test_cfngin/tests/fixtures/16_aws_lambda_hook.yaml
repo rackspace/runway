@@ -3,7 +3,7 @@ cfngin_bucket: ${CFNGIN_NAMESPACE}-${region}
 
 sys_path: ./
 
-pre_build:
+pre_deploy:
   upload_lambdas:
     path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
     required: true

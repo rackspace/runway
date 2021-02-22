@@ -124,15 +124,15 @@ class TestUtil(unittest.TestCase):
     def test_yaml_to_ordered_dict(self) -> None:
         """Test yaml to ordered dict."""
         raw_config = """
-        pre_build:
+        pre_deploy:
           hook2:
             path: foo.bar
           hook1:
             path: foo1.bar1
         """
         config = yaml_to_ordered_dict(raw_config)
-        self.assertEqual(list(config["pre_build"].keys())[0], "hook2")
-        self.assertEqual(config["pre_build"]["hook2"]["path"], "foo.bar")
+        self.assertEqual(list(config["pre_deploy"].keys())[0], "hook2")
+        self.assertEqual(config["pre_deploy"]["hook2"]["path"], "foo.bar")
 
     def test_get_client_region(self) -> None:
         """Test get client region."""

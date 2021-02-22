@@ -2,7 +2,7 @@ namespace: ${namespace}
 cfngin_bucket: ""  # not uploading any CFN templates
 sys_path: ./
 
-pre_build:
+pre_deploy:
   - path: k8s_hooks.awscli.aws_eks_update_kubeconfig
     required: true
     args:

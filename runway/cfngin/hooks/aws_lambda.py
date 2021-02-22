@@ -1027,7 +1027,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
         .. Hook configuration.
         .. code-block:: yaml
 
-            pre_build:
+            pre_deploy:
               upload_functions:
                 path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
                 required: true

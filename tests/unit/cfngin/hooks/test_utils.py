@@ -86,7 +86,7 @@ class TestHooks(unittest.TestCase):
                 }
             ),
         ]
-        handle_hooks("pre_build", hooks, self.provider, self.context)
+        handle_hooks("pre_deploy", hooks, self.provider, self.context)
         assert mock_load.call_count == 2
         mock_load.assert_has_calls(
             [call(hooks[0].path, try_reload=True), call(hooks[1].path, try_reload=True)]

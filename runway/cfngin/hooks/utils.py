@@ -39,10 +39,10 @@ def handle_hooks(  # pylint: disable=too-many-statements
     provider: Provider,
     context: CfnginContext,
 ):
-    """Handle pre/post_build hooks.
+    """Handle pre/post_deploy hooks.
 
-    These are pieces of code that we want to run before/after the builder
-    builds the stacks.
+    These are pieces of code that we want to run before/after deploying
+    stacks.
 
     Args:
         stage: The current stage (pre_run, post_run, etc).
@@ -63,7 +63,6 @@ def handle_hooks(  # pylint: disable=too-many-statements
             raise ValueError("%s hook #%d missing path." % (stage, i))
 
     LOGGER.info("executing %s hooks: %s", stage, ", ".join(hook_paths))
-    stage = stage.replace("build", "deploy")
     for hook in hooks:
         if not hook.enabled:
             LOGGER.debug("hook with method %s is disabled; skipping", hook.path)
@@ -79,7 +78,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
 
         if hook.args:
             args = [Variable(k, v) for k, v in hook.args.items()]
-            try:  # handling for output or similar being used in pre_build
+            try:  # handling for output or similar being used in pre_deploy
                 resolve_variables(args, context, provider)
             except FailedVariableLookup:
                 if "pre" in stage:

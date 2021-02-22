@@ -234,7 +234,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         description="Key for an AWS S3 object used to track a graph of stacks "
         "between executions.",
     )
-    post_build: Union[
+    post_deploy: Union[
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
     ] = Field([], title="Post Deploy Hooks")
@@ -242,7 +242,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
     ] = Field([], title="Pre Destroy Hooks")
-    pre_build: Union[
+    pre_deploy: Union[
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
     ] = Field([], title="Pre Deploy Hooks")
@@ -286,7 +286,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         utils.resolve_path_field
     )
 
-    @validator("post_build", "post_destroy", "pre_build", "pre_destroy", pre=True)
+    @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)
     def _convert_hook_definitions(
         cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]  # noqa: N805
     ) -> List[Dict[str, Any]]:

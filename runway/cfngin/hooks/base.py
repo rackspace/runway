@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from troposphere import Tags
 
 from ...config.models.cfngin import CfnginStackDefinitionModel
-from ..actions import build
+from ..actions import deploy
 from ..exceptions import StackFailed
 from ..stack import Stack
 from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
@@ -91,7 +91,7 @@ class Hook:
         self.args.tags.update(context.tags)
         self.context = context
         self.provider = provider
-        self._deploy_action = HookBuildAction(self.context, self.provider)
+        self._deploy_action = HookDeployAction(self.context, self.provider)
         self._destroy_action = HookDestroyAction(self.context, self.provider)
 
     @property
@@ -193,7 +193,7 @@ class Hook:
 
     def _run_stack_action(
         self,
-        action: Union[HookBuildAction, HookDestroyAction],
+        action: Union[HookDeployAction, HookDestroyAction],
         stack: Optional[Stack] = None,
         wait: bool = False,
     ) -> Status:
@@ -222,7 +222,7 @@ class Hook:
 
     def _wait_for_stack(
         self,
-        action: Union[HookBuildAction, HookDestroyAction],
+        action: Union[HookDeployAction, HookDestroyAction],
         last_status: Optional[Status] = None,
         stack: Optional[Stack] = None,
         till_reason: Optional[str] = None,
@@ -267,8 +267,8 @@ class Hook:
         return status
 
 
-class HookBuildAction(build.Action):
-    """Build action that can be used from hooks."""
+class HookDeployAction(deploy.Action):
+    """Deploy action that can be used from hooks."""
 
     def __init__(self, context: CfnginContext, provider: Provider):
         """Instantiate class.
@@ -296,8 +296,8 @@ class HookBuildAction(build.Action):
 
 
 # the build action has logic to destroy stacks so we can just extend the
-# HookBuildAction and change `run` in use the `_destroy_stack` method instead
-class HookDestroyAction(HookBuildAction):
+# HookDeployAction and change `run` in use the `_destroy_stack` method instead
+class HookDestroyAction(HookDeployAction):
     """Destroy action that can be used from hooks."""
 
     def run(self, **kwargs: Any) -> Status:
