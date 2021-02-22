@@ -117,7 +117,7 @@ A graph is constructed for each execution of CFNgin from the contents of the
 lookup
 ======
 
-A method for expanding values in the :class:`~cfngin.config` at build time. By default
+A method for expanding values in the :class:`~cfngin.config` at runtime. By default
 lookups are used to reference Output values from other :class:`stacks <cfngin.stack>` within the
 same :attr:`~cfngin.config.namespace`.
 
