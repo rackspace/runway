@@ -69,7 +69,7 @@ class Certificate(Hook):
     Example:
     .. code-block: yaml
 
-        pre_build:
+        pre_deploy:
           example-wildcard-cert:
             path: runway.cfngin.hooks.acm.Certificate
             required: true

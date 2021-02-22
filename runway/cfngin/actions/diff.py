@@ -29,7 +29,7 @@ from ..status import (
     SkippedStatus,
 )
 from ..status import StackDoesNotExist as StackDoesNotExistStatus
-from . import build
+from . import deploy
 from .base import build_walker
 
 if TYPE_CHECKING:
@@ -175,10 +175,10 @@ def diff_parameters(
     return diff
 
 
-class Action(build.Action):
+class Action(deploy.Action):
     """Responsible for diffing CloudFormation stacks in AWS and locally.
 
-    Generates the build plan based on stack dependencies (these dependencies
+    Generates the deploy plan based on stack dependencies (these dependencies
     are determined automatically based on references to output values from
     other stacks).
 
@@ -202,16 +202,16 @@ class Action(build.Action):
         if self.cancel.wait(0):
             return INTERRUPTED
 
-        if not build.should_submit(stack):
+        if not deploy.should_submit(stack):
             return NotSubmittedStatus()
 
         provider = self.build_provider(stack)
 
-        if not build.should_update(stack):
+        if not deploy.should_update(stack):
             stack.set_outputs(provider.get_outputs(stack.fqn))
             return NotUpdatedStatus()
 
-        tags = build.build_stack_tags(stack)
+        tags = deploy.build_stack_tags(stack)
 
         try:
             stack.resolve(self.context, provider)

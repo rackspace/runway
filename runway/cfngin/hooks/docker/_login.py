@@ -49,7 +49,7 @@ username (str)
 .. rubric:: Example
 .. code-block:: yaml
 
-    pre_build:
+    pre_deploy:
       - path: runway.cfngin.hooks.docker.login
         args:
           ecr: true

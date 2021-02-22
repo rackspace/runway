@@ -14,7 +14,7 @@ from runway.util import MutableMap, SafeHaven, cached_property
 
 from ..config import CfnginConfig
 from ..context.cfngin import CfnginContext
-from .actions import build, destroy, diff
+from .actions import deploy, destroy, diff
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
 
@@ -124,7 +124,7 @@ class CFNgin:
                 logger.notice("deploy (in progress)")
                 with SafeHaven(sys_modules_exclude=["awacs", "troposphere"],):
                     ctx = self.load(config_path)
-                    action = build.Action(
+                    action = deploy.Action(
                         context=ctx,
                         provider_builder=self._get_provider_builder(
                             ctx.config.service_role

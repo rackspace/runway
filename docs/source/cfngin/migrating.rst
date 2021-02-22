@@ -51,7 +51,7 @@ All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the sa
 .. rubric:: Example Definition
 .. code-block:: yaml
 
-    pre_build:
+    pre_deploy:
       what_use_to_be_this:
         path: stacker.hooks.commands.run_command
         args:

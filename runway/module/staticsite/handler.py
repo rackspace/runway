@@ -81,14 +81,14 @@ class StaticSite(RunwayModule):
         self._ensure_correct_region_with_auth_at_edge()
 
     def plan(self) -> None:
-        """Create website CFN module and run stacker diff."""
+        """Create website CFN module and run CFNgin.diff."""
         if self.parameters:
             self._setup_website_module(command="plan")
         else:
             self.logger.info("skipped; environment required but not defined")
 
     def deploy(self) -> None:
-        """Create website CFN module and run stacker build."""
+        """Create website CFN module and run CFNgin.deploy."""
         if self.parameters:
             if not self.parameters.cf_disable:
                 self.logger.warning(
@@ -119,7 +119,7 @@ class StaticSite(RunwayModule):
             self.logger.info("skipped; environment required but not defined")
 
     def destroy(self) -> None:
-        """Create website CFN module and run stacker destroy."""
+        """Create website CFN module and run CFNgin.destroy."""
         if self.parameters:
             self._setup_website_module(command="destroy")
         else:
@@ -163,7 +163,7 @@ class StaticSite(RunwayModule):
         return module_dir
 
     def _create_dependencies_yaml(self, module_dir: Path) -> None:
-        pre_build = []
+        pre_deploy = []
 
         pre_destroy = [
             {
@@ -177,7 +177,7 @@ class StaticSite(RunwayModule):
         if self.parameters.auth_at_edge:
             if not self.parameters.aliases:
                 # Retrieve the appropriate callback urls from the User Pool Client
-                pre_build.append(
+                pre_deploy.append(
                     {
                         "path": "runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get",
                         "required": True,
@@ -213,7 +213,7 @@ class StaticSite(RunwayModule):
                 )
             else:
                 # Retrieve the user pool id
-                pre_build.append(
+                pre_deploy.append(
                     {
                         "path": "runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get",
                         "required": True,
@@ -232,7 +232,7 @@ class StaticSite(RunwayModule):
                     "variables": self._get_dependencies_variables(),
                 }
             },
-            "pre_build": pre_build,
+            "pre_deploy": pre_deploy,
             "pre_destroy": pre_destroy,
         }
 
@@ -265,7 +265,7 @@ class StaticSite(RunwayModule):
 
         class_path = "staticsite.StaticSite"
 
-        pre_build = [
+        pre_deploy = [
             {
                 "path": "runway.hooks.staticsite.build_staticsite.build",
                 "required": True,
@@ -274,7 +274,7 @@ class StaticSite(RunwayModule):
             }
         ]
 
-        post_build = [
+        post_deploy = [
             {
                 "path": "runway.hooks.staticsite.upload_staticsite.sync",
                 "required": True,
@@ -321,7 +321,7 @@ class StaticSite(RunwayModule):
         if self.parameters.auth_at_edge:
             class_path = "auth_at_edge.AuthAtEdge"
 
-            pre_build.append(
+            pre_deploy.append(
                 {
                     "path": "runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get",
                     "required": True,
@@ -329,7 +329,7 @@ class StaticSite(RunwayModule):
                     "args": self._get_user_pool_id_retriever_variables(),
                 }
             )
-            pre_build.append(
+            pre_deploy.append(
                 {
                     "path": "runway.hooks.staticsite.auth_at_edge.domain_updater.update",
                     "required": True,
@@ -337,7 +337,7 @@ class StaticSite(RunwayModule):
                     "args": self._get_domain_updater_variables(),
                 }
             )
-            pre_build.append(
+            pre_deploy.append(
                 {
                     "path": "runway.hooks.staticsite.auth_at_edge.lambda_config.write",
                     "required": True,
@@ -350,7 +350,7 @@ class StaticSite(RunwayModule):
                 }
             )
             if not self.parameters.aliases:
-                post_build.insert(
+                post_deploy.insert(
                     0,
                     {
                         "path": "runway.hooks.staticsite.auth_at_edge.client_updater.update",
@@ -375,14 +375,14 @@ class StaticSite(RunwayModule):
         content = {
             "namespace": "${namespace}",
             "cfngin_bucket": "",
-            "pre_build": pre_build,
+            "pre_deploy": pre_deploy,
             "stacks": {
                 self.name: {
                     "class_path": "runway.blueprints.staticsite.%s" % class_path,
                     "variables": site_stack_variables,
                 }
             },
-            "post_build": post_build,
+            "post_deploy": post_deploy,
             "pre_destroy": pre_destroy,
             "post_destroy": post_destroy,
         }

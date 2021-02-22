@@ -853,7 +853,7 @@ class Provider(BaseProvider):
         fqn = self.get_stack_name(stack)
         LOGGER.debug("%s:attempting to delete stack", fqn)
 
-        if action == "build":
+        if action == "deploy":
             LOGGER.info(
                 "%s:removed from the CFNgin config file; it is being destroyed", fqn
             )

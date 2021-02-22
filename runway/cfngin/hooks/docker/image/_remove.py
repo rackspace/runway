@@ -45,7 +45,7 @@ tags (Optional[List[str]])
 .. rubric:: Example
 .. code-block:: yaml
 
-    pre_build:
+    pre_deploy:
       - path: runway.cfngin.hooks.docker.login
         args:
           ecr: true
@@ -67,7 +67,7 @@ tags (Optional[List[str]])
     stacks:
       ...
 
-    post_build:
+    post_deploy:
       - path: runway.cfngin.hooks.docker.image.remove
         args:
           image: ${hook_data docker.image}

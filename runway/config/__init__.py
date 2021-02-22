@@ -123,7 +123,7 @@ class CfnginConfig(BaseConfig):
 
     This is used internally by CFNgin to parse and validate a YAML formatted
     CFNgin configuration file, but can also be used in scripts to generate a
-    CFNgin config file before handing it off to CFNgin to build/destroy.
+    CFNgin config file before handing it off to CFNgin to deploy/destroy.
 
     Example::
 
@@ -163,11 +163,11 @@ class CfnginConfig(BaseConfig):
     persistent_graph_key: Optional[  #: S3 object key were the persistent graph is stored.
         str
     ] = None
-    post_build: List[CfnginHookDefinitionModel]  #: Hooks to run after a build action.
+    post_deploy: List[CfnginHookDefinitionModel]  #: Hooks to run after a deploy action.
     post_destroy: List[  #: Hooks to run after a destroy action.
         CfnginHookDefinitionModel
     ]
-    pre_build: List[CfnginHookDefinitionModel]  #: Hooks to run before a build action.
+    pre_deploy: List[CfnginHookDefinitionModel]  #: Hooks to run before a deploy action.
     pre_destroy: List[  #: Hooks to run before a destroy action.
         CfnginHookDefinitionModel
     ]
@@ -202,11 +202,11 @@ class CfnginConfig(BaseConfig):
         self.namespace_delimiter = self._data.namespace_delimiter
         self.package_sources = self._data.package_sources
         self.persistent_graph_key = self._data.persistent_graph_key
-        self.post_build = cast(List[CfnginHookDefinitionModel], self._data.post_build)
+        self.post_deploy = cast(List[CfnginHookDefinitionModel], self._data.post_deploy)
         self.post_destroy = cast(
             List[CfnginHookDefinitionModel], self._data.post_destroy
         )
-        self.pre_build = cast(List[CfnginHookDefinitionModel], self._data.pre_build)
+        self.pre_deploy = cast(List[CfnginHookDefinitionModel], self._data.pre_deploy)
         self.pre_destroy = cast(List[CfnginHookDefinitionModel], self._data.pre_destroy)
         self.service_role = self._data.service_role
         self.stacks = cast(List[CfnginStackDefinitionModel], self._data.stacks)

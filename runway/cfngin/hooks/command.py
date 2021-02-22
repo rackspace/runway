@@ -58,7 +58,7 @@ def run_command(
     Examples:
         .. code-block:: yaml
 
-            pre_build:
+            pre_deploy:
               command_copy_environment:
                 path: runway.cfngin.hooks.command.run_command
                 required: true

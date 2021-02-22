@@ -1,6 +1,6 @@
 namespace: test
 
-pre_build:
+pre_deploy:
   - path: runway.cfngin.hooks.route53.create_domain
     required: true
     enabled: true

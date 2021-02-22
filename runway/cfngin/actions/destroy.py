@@ -25,8 +25,8 @@ class Action(BaseAction):
     """Responsible for destroying CloudFormation stacks.
 
     Generates a destruction plan based on stack dependencies. Stack
-    dependencies are reversed from the build action. For example, if a Stack B
-    requires Stack A during build, during destroy Stack A requires Stack B be
+    dependencies are reversed from the deploy action. For example, if a Stack B
+    requires Stack A during deploy, during destroy Stack A requires Stack B be
     destroyed first.
 
     The plan defaults to printing an outline of what will be destroyed. If

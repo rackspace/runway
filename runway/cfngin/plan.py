@@ -334,8 +334,8 @@ class Graph:
 
     Example:
         >>> dag = DAG()
-        >>> a = Step("a", fn=build)
-        >>> b = Step("b", fn=build)
+        >>> a = Step("a", fn=deploy)
+        >>> b = Step("b", fn=deploy)
         >>> dag.add_step(a)
         >>> dag.add_step(b)
         >>> dag.connect(a, b)

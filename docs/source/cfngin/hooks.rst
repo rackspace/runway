@@ -8,8 +8,8 @@ A :class:`~cfngin.hook` is a python function, class, or class method that is exe
 
 Only the following actions allow pre/post hooks:
 
-:build:
-  using fields :attr:`~cfngin.config.pre_build` and :attr:`~cfngin.config.post_build`
+:deploy:
+  using fields :attr:`~cfngin.config.pre_deploy` and :attr:`~cfngin.config.post_deploy`
 :destroy:
   using fields :attr:`~cfngin.config.pre_destroy` and :attr:`~cfngin.config.post_destroy`
 
@@ -49,7 +49,7 @@ Only the following actions allow pre/post hooks:
     .. rubric:: Example
     .. code-block:: yaml
 
-      pre_build:
+      pre_deploy:
         example-hook:
           enabled: ${enable_example_hook}
 
@@ -61,7 +61,7 @@ Only the following actions allow pre/post hooks:
     .. rubric:: Example
     .. code-block:: yaml
 
-      pre_build:
+      pre_deploy:
         example-hook:
           path: runway.cfngin.hooks.command.run_command
 
@@ -91,7 +91,7 @@ acm.Certificate
 
 Manage a DNS validated certificate in AWS Certificate Manager.
 
-When used in the :attr:`~cfngin.config.pre_build` or :attr:`~cfngin.config.post_build` stage this hook will create a CloudFormation stack containing a DNS validated certificate.
+When used in the :attr:`~cfngin.config.pre_deploy` or :attr:`~cfngin.config.post_deploy` stage this hook will create a CloudFormation stack containing a DNS validated certificate.
 It will automatically create a record in Route 53 to validate the certificate and wait for the stack to complete before returning the ``CertificateArn`` as hook data.
 The CloudFormation stack also outputs the ARN of the certificate as ``CertificateArn`` so that it can be referenced from other stacks.
 
@@ -138,7 +138,7 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
 
     sys_path: ./
 
-    pre_build:
+    pre_deploy:
       acm-cert:
         path: runway.cfngin.hooks.acm.Certificate
         required: true
@@ -287,7 +287,7 @@ to be skipped in subsequent runs.
 
 .. code-block:: yaml
 
-    pre_build:
+    pre_deploy:
       upload_functions:
         path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
         required: true
@@ -442,7 +442,7 @@ Run a custom command as a hook.
 
 .. code-block:: yaml
 
-    pre_build:
+    pre_deploy:
       command_copy_environment:
         path: runway.cfngin.hooks.command.run_command
         required: true
@@ -723,7 +723,7 @@ Example Hook Function
     namespace: example
     sys_path: ./
 
-    pre_build:
+    pre_deploy:
       my_hook_do_something:
         path: hooks.my_hook.do_something
         args:
@@ -757,7 +757,7 @@ Example Hook Class
         Example:
         .. code-block:: yaml
 
-          pre_build:
+          pre_deploy:
             my_hook_do_something:
               path: hooks.my_hook.MyClass
               args:
@@ -790,7 +790,7 @@ Example Hook Class
     namespace: example
     sys_path: ./
 
-    pre_build:
+    pre_deploy:
       my_hook_do_something:
         path: hooks.my_hook.MyClass
         args:
