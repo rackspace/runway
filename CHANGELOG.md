@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.18.2] - 2021-02-24
+### Fixed
+- CloudFormation AWS Lambda build hook build errors when Docker left behind root-owned files
+
 ## [1.18.1] - 2021-01-14
 ### Fixed
 - (binary builds) Support older glibc versions (e.g. Amazon Linux 2) by reverting Linux binary build platform to Ubuntu 18.04
@@ -1050,7 +1054,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.18.1...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.18.2...HEAD
+[1.18.2]: https://github.com/onicagroup/runway/compare/v1.18.1...v1.18.2
 [1.18.1]: https://github.com/onicagroup/runway/compare/v1.18.0...v1.18.1
 [1.18.0]: https://github.com/onicagroup/runway/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/onicagroup/runway/compare/v1.16.4...v1.17.0
