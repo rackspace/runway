@@ -516,7 +516,8 @@ def _pip_has_no_color_option(python_path):
     return False
 
 
-def _zip_package(
+# too-many-statements override can be dropped with py2 support
+def _zip_package(  # pylint: disable=too-many-statements
     package_root,
     includes,
     excludes=None,
@@ -563,88 +564,102 @@ def _zip_package(
     # exclude potential virtual environments in the package
     excludes.append(".venv/")
 
-    with tempfile.TemporaryDirectory(prefix="cfngin", dir=temp_root) as tmpdir:
-        tmp_req = os.path.join(tmpdir, "requirements.txt")
-        copydir(package_root, tmpdir, includes, excludes, follow_symlinks)
-        tmp_req = handle_requirements(
-            package_root=package_root,
-            dest_path=tmpdir,
-            requirements=requirements_files,
-            python_path=python_path,
-            use_pipenv=use_pipenv,
-            pipenv_timeout=kwargs["pipenv_timeout"],
+    tmpdir = tempfile.TemporaryDirectory(prefix="cfngin", dir=temp_root)
+    tmp_req = os.path.join(tmpdir.name, "requirements.txt")
+    copydir(package_root, tmpdir.name, includes, excludes, follow_symlinks)
+    tmp_req = handle_requirements(
+        package_root=package_root,
+        dest_path=tmpdir.name,
+        requirements=requirements_files,
+        python_path=python_path,
+        use_pipenv=use_pipenv,
+        pipenv_timeout=kwargs["pipenv_timeout"],
+    )
+
+    if should_use_docker(dockerize_pip):
+        dockerized_pip(tmpdir.name, **kwargs)
+    else:
+        tmp_script = Path(tmpdir.name) / "__runway_run_pip_install.py"
+        pip_cmd = [
+            python_path or sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--target",
+            tmpdir.name,
+            "--requirement",
+            tmp_req,
+            "--no-color",
+        ]
+
+        subprocess_args = {}
+        if kwargs.get("python_dontwritebytecode"):
+            subprocess_args["env"] = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+
+        # Pyinstaller build or explicit python path
+        if getattr(sys, "frozen", False) and not python_path:
+            script_contents = os.linesep.join(
+                [
+                    "import runpy",
+                    "from runway.util import argv",
+                    "with argv(*{}):".format(json.dumps(pip_cmd[2:])),
+                    '   runpy.run_module("pip", run_name="__main__")\n',
+                ]
+            )
+            # TODO remove python 2 logic when dropping python 2
+            tmp_script.write_text(
+                script_contents
+                if sys.version_info.major > 2
+                else script_contents.decode("UTF-8")
+            )
+            cmd = [sys.executable, "run-python", str(tmp_script)]
+        else:
+            if not _pip_has_no_color_option(pip_cmd[0]):
+                pip_cmd.remove("--no-color")
+            cmd = pip_cmd
+
+        LOGGER.info(
+            "The following output from pip may include incompatibility errors. "
+            "These can generally be ignored (pip will erroneously warn "
+            "about conflicts between the packages in your Lambda zip and "
+            "your host system)."
         )
 
-        if should_use_docker(dockerize_pip):
-            dockerized_pip(tmpdir, **kwargs)
-        else:
-            tmp_script = Path(tmpdir) / "__runway_run_pip_install.py"
-            pip_cmd = [
-                python_path or sys.executable,
-                "-m",
-                "pip",
-                "install",
-                "--target",
-                tmpdir,
-                "--requirement",
-                tmp_req,
-                "--no-color",
-            ]
+        try:
+            subprocess.check_call(cmd, **subprocess_args)
+        except subprocess.CalledProcessError:
+            raise PipError
+        finally:
+            if tmp_script.is_file():
+                tmp_script.unlink()
 
-            subprocess_args = {}
-            if kwargs.get("python_dontwritebytecode"):
-                subprocess_args["env"] = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
+    if kwargs.get("python_exclude_bin_dir") and os.path.isdir(
+        os.path.join(tmpdir.name, "bin")
+    ):
+        LOGGER.debug("Removing python /bin directory from Lambda files")
+        shutil.rmtree(os.path.join(tmpdir.name, "bin"))
+    if kwargs.get("python_exclude_setuptools_dirs"):
+        for i in os.listdir(tmpdir.name):
+            if i.endswith(".egg-info") or i.endswith(".dist-info"):
+                LOGGER.debug("Removing directory %s from Lambda files", i)
+                shutil.rmtree(os.path.join(tmpdir.name, i))
 
-            # Pyinstaller build or explicit python path
-            if getattr(sys, "frozen", False) and not python_path:
-                script_contents = os.linesep.join(
-                    [
-                        "import runpy",
-                        "from runway.util import argv",
-                        "with argv(*{}):".format(json.dumps(pip_cmd[2:])),
-                        '   runpy.run_module("pip", run_name="__main__")\n',
-                    ]
-                )
-                # TODO remove python 2 logic when dropping python 2
-                tmp_script.write_text(
-                    script_contents
-                    if sys.version_info.major > 2
-                    else script_contents.decode("UTF-8")
-                )
-                cmd = [sys.executable, "run-python", str(tmp_script)]
-            else:
-                if not _pip_has_no_color_option(pip_cmd[0]):
-                    pip_cmd.remove("--no-color")
-                cmd = pip_cmd
-
-            LOGGER.info(
-                "The following output from pip may include incompatibility errors. "
-                "These can generally be ignored (pip will erroneously warn "
-                "about conflicts between the packages in your Lambda zip and "
-                "your host system)."
-            )
-
-            try:
-                subprocess.check_call(cmd, **subprocess_args)
-            except subprocess.CalledProcessError:
-                raise PipError
-            finally:
-                if tmp_script.is_file():
-                    tmp_script.unlink()
-
-        if kwargs.get("python_exclude_bin_dir") and os.path.isdir(
-            os.path.join(tmpdir, "bin")
-        ):
-            LOGGER.debug("Removing python /bin directory from Lambda files")
-            shutil.rmtree(os.path.join(tmpdir, "bin"))
-        if kwargs.get("python_exclude_setuptools_dirs"):
-            for i in os.listdir(tmpdir):
-                if i.endswith(".egg-info") or i.endswith(".dist-info"):
-                    LOGGER.debug("Removing directory %s from Lambda files", i)
-                    shutil.rmtree(os.path.join(tmpdir, i))
-
-        req_files = _find_files(tmpdir, includes="**", follow_symlinks=False)
-        return _zip_files(req_files, tmpdir)
+    req_files = _find_files(tmpdir.name, includes="**", follow_symlinks=False)
+    contents, content_hash = _zip_files(req_files, tmpdir.name)
+    if sys.version_info.major < 3:
+        remove_error = OSError
+    else:
+        remove_error = PermissionError  # noqa pylint: disable=E
+    try:
+        tmpdir.cleanup()
+    except remove_error:
+        LOGGER.warning(
+            'Error removing temporary Lambda build directory "%s", '
+            "likely due to root-owned files it in. Delete it manually to "
+            "reclaim space",
+            tmpdir.name,
+        )
+    return contents, content_hash
 
 
 def _head_object(s3_conn, bucket, key):
