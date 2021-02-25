@@ -357,6 +357,7 @@ class TestModule:
         executor = MagicMock()
         mock_futures.ProcessPoolExecutor.return_value = executor
         mocker.patch.object(Module, "use_async", True)
+        mock_mp_context = mocker.patch("multiprocessing.get_context")
 
         obj = Module(
             context=runway_context,
@@ -367,8 +368,10 @@ class TestModule:
             "parallel_parent:processing modules in parallel... (output "
             "will be interwoven)" in caplog.messages
         )
+        mock_mp_context.assert_called_once_with("fork")
         mock_futures.ProcessPoolExecutor.assert_called_once_with(
-            max_workers=runway_context.env.max_concurrent_modules
+            max_workers=runway_context.env.max_concurrent_modules,
+            mp_context=mock_mp_context.return_value,
         )
         executor.submit.assert_has_calls(
             [

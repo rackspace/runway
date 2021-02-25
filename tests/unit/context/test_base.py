@@ -10,6 +10,7 @@ import pytest
 from mock import MagicMock
 
 from runway.context.base import BaseContext
+from runway.context.sys_info import SystemInfo
 from runway.core.components import DeployEnvironment
 
 if TYPE_CHECKING:
@@ -160,3 +161,7 @@ class TestBaseContext:
             region_name="us-east-2",
             profile_name=None,
         )
+
+    def test_sys_info(self) -> None:
+        """Test sys_info."""
+        assert isinstance(BaseContext(deploy_environment=self.env).sys_info, SystemInfo)

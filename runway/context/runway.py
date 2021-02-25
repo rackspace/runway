@@ -75,8 +75,13 @@ class RunwayContext(BaseContext):
 
         """
         if self.is_noninteractive:
+            if not self.sys_info.os.is_posix:
+                LOGGER.warning(
+                    "parallel execution disabled; only POSIX systems are supported currently"
+                )
+                return False
             return True
-        LOGGER.warning("Parallel execution disabled; not running in CI mode")
+        LOGGER.warning("parallel execution disabled; not running in CI mode")
         return False
 
     def copy(self) -> RunwayContext:

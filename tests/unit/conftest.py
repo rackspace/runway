@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from _pytest.python import Module
     from docker import DockerClient
     from pytest import FixtureRequest, MonkeyPatch
+    from pytest_mock import MockerFixture
 
 LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -135,15 +136,21 @@ def patch_time(monkeypatch: MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def platform_darwin(monkeypatch: MonkeyPatch) -> None:
+def platform_darwin(mocker: MockerFixture) -> None:
     """Patch platform.system to always return "Darwin"."""
-    monkeypatch.setattr("platform.system", lambda: "Darwin")
+    mocker.patch("platform.system", return_value="Darwin")
 
 
 @pytest.fixture
-def platform_windows(monkeypatch: MonkeyPatch) -> None:
+def platform_linux(mocker: MockerFixture) -> None:
+    """Patch platform.system to always return "Linux"."""
+    mocker.patch("platform.system", return_value="Linux")
+
+
+@pytest.fixture
+def platform_windows(mocker: MockerFixture) -> None:
     """Patch platform.system to always return "Windows"."""
-    monkeypatch.setattr("platform.system", lambda: "Windows")
+    mocker.patch("platform.system", return_value="Windows")
 
 
 @pytest.fixture(scope="function")

@@ -9,6 +9,7 @@ import pytest
 from mock import MagicMock
 
 from runway.context.runway import RunwayContext
+from runway.context.sys_info import OsInfo
 from runway.core.components import DeployEnvironment
 
 if TYPE_CHECKING:
@@ -89,8 +90,17 @@ class TestRunwayContext:
         mocker.patch.object(self.env, "vars", {"RUNWAY_COLORIZE": "invalid"})
         assert not RunwayContext(deploy_environment=self.env).no_color
 
-    def test_use_concurrent(self, mocker: MockerFixture) -> None:
+    def test_use_concurrent_not_posix(self, mocker: MockerFixture) -> None:
         """Test use_concurrent."""
+        mocker.patch.object(OsInfo, "is_posix", False)
+        mocker.patch.object(self.env, "ci", False)
+        assert not RunwayContext(deploy_environment=self.env).use_concurrent
+        mocker.patch.object(self.env, "ci", True)
+        assert not RunwayContext(deploy_environment=self.env).use_concurrent
+
+    def test_use_concurrent_posix(self, mocker: MockerFixture) -> None:
+        """Test use_concurrent."""
+        mocker.patch.object(OsInfo, "is_posix", True)
         mocker.patch.object(self.env, "ci", False)
         assert not RunwayContext(deploy_environment=self.env).use_concurrent
         mocker.patch.object(self.env, "ci", True)
