@@ -18,7 +18,7 @@ class OsInfo:
     def __new__(cls, *args: Any, **kwargs: Any) -> OsInfo:
         """Create a new instance of class.
 
-        This class is a singleton so it will return always return the same instance.
+        This class is a singleton so it will always return the same instance.
 
         """
         if cls.__instance is None:
@@ -77,7 +77,7 @@ class SystemInfo:
     def __new__(cls, *args: Any, **kwargs: Any) -> SystemInfo:
         """Create a new instance of class.
 
-        This class is a singleton so it will return always return the same instance.
+        This class is a singleton so it will always return the same instance.
 
         """
         if cls.__instance is None:
