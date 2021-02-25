@@ -49,7 +49,7 @@ docker (Optional[Dict[str, Any]])
         being built. (*default:* ``False``)
 
 dockerfile (Optional[str])
-    Path within the build cont4ext to the Dockerfile. *(default: ./Dockerfile)*
+    Path within the build context to the Dockerfile. *(default: ./Dockerfile)*
 ecr_repo (Optional[Dict[str, Optional[str]]])
     Information describing an ECR repository. This is used to construct the repository URL.
     If providing a value for this field, do not provide a value for ``repo``.
@@ -214,7 +214,7 @@ class ImageBuildArgs(BaseModel):
         Args:
             context: CFNgin context object.
             docker: Options for `docker image build`.
-            dockerfile: Path within the build cont4ext to the Dockerfile.
+            dockerfile: Path within the build context to the Dockerfile.
             ecr_repo: AWS Elastic Container Registry repository information.
                 Providing this will automatically create the repo URI.
                 If provided, do not provide ``repo``.
