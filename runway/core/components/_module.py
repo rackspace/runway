@@ -4,6 +4,7 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import logging
+import multiprocessing
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
@@ -251,7 +252,8 @@ class Module:
         # we need to be able to do things like `cd` which is not
         # thread safe.
         executor = concurrent.futures.ProcessPoolExecutor(
-            max_workers=self.ctx.env.max_concurrent_modules
+            max_workers=self.ctx.env.max_concurrent_modules,
+            mp_context=multiprocessing.get_context("fork"),
         )
         futures = [
             executor.submit(child.run, *[action]) for child in self.child_modules

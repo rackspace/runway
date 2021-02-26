@@ -10,6 +10,7 @@ from ..aws_sso_botocore.session import Session
 from ..cfngin.ui import ui
 from ..constants import BOTO3_CREDENTIAL_CACHE
 from ..type_defs import Boto3CredentialsTypeDef
+from .sys_info import SystemInfo
 
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger
@@ -24,6 +25,7 @@ class BaseContext:
 
     env: DeployEnvironment
     logger: Union[PrefixAdaptor, RunwayLogger]
+    sys_info: SystemInfo
 
     def __init__(
         self,
@@ -41,6 +43,7 @@ class BaseContext:
         """
         self.env = deploy_environment
         self.logger = logger
+        self.sys_info = SystemInfo()
 
     @property
     def boto3_credentials(self) -> Boto3CredentialsTypeDef:

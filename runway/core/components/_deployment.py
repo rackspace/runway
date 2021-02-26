@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import concurrent.futures
 import logging
+import multiprocessing
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -231,7 +232,8 @@ class Deployment:
             "processing regions in parallel... (output will be interwoven)"
         )
         executor = concurrent.futures.ProcessPoolExecutor(
-            max_workers=self.ctx.env.max_concurrent_regions
+            max_workers=self.ctx.env.max_concurrent_regions,
+            mp_context=multiprocessing.get_context("fork"),
         )
         futures = [
             executor.submit(self.run, *[action, region]) for region in self.regions

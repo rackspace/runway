@@ -86,6 +86,7 @@ good-names = [
     "j",
     "k",
     "ok",
+    "os",
     "ui",
     "v",
 ]
