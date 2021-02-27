@@ -14,7 +14,7 @@ from runway.env_mgr.tfenv import (
     TFEnvManager,
     get_available_tf_versions,
     get_latest_tf_version,
-    load_terrafrom_module,
+    load_terraform_module,
 )
 
 # TODO remove condition and import-error when dropping python 2
@@ -82,12 +82,12 @@ def test_get_latest_tf_version(mock_get_available_tf_versions):
         (hcl2, {"terraform": [{"backend": [{"s3": {"bucket": ["name"]}}]}]}),
     ],
 )
-def test_load_terrafrom_module(parser, expected, tmp_path):
-    """Test runway.env_mgr.tfenv.load_terrafrom_module."""
+def test_load_terraform_module(parser, expected, tmp_path):
+    """Test runway.env_mgr.tfenv.load_terraform_module."""
     tf_file = tmp_path / "module.tf"
     tf_file.write_text(six.u(HCL_BACKEND_S3))
 
-    assert load_terrafrom_module(parser, tmp_path) == expected
+    assert load_terraform_module(parser, tmp_path) == expected
 
 
 class TestTFEnvManager(object):
@@ -121,10 +121,10 @@ class TestTFEnvManager(object):
             ),
         ],
     )
-    @patch(MODULE + ".load_terrafrom_module")
-    def test_backend(self, mock_load_terrafrom_module, response, expected, tmp_path):
+    @patch(MODULE + ".load_terraform_module")
+    def test_backend(self, mock_load_terraform_module, response, expected, tmp_path):
         """Test backend."""
-        mock_load_terrafrom_module.return_value = response
+        mock_load_terraform_module.return_value = response
         tfenv = TFEnvManager(tmp_path)
         assert tfenv.backend == expected
 
@@ -315,24 +315,24 @@ class TestTFEnvManager(object):
             ([Exception, hcl.loads(HCL_ATTR_LIST)], {"some_attr": ["val1", "val2"]}),
         ],
     )
-    @patch(MODULE + ".load_terrafrom_module")
+    @patch(MODULE + ".load_terraform_module")
     def test_terraform_block(
-        self, mock_load_terrafrom_module, response, expected, caplog, tmp_path
+        self, mock_load_terraform_module, response, expected, caplog, tmp_path
     ):
         """Test terraform_block."""
         caplog.set_level(LogLevels.VERBOSE, logger=MODULE)
-        mock_load_terrafrom_module.side_effect = response
+        mock_load_terraform_module.side_effect = response
         tfenv = TFEnvManager(tmp_path)
 
         assert tfenv.terraform_block == expected
 
         if not isinstance(response[0], dict):
             assert "failed to parse as HCL2; trying HCL" in "\n".join(caplog.messages)
-            mock_load_terrafrom_module.assert_has_calls(
+            mock_load_terraform_module.assert_has_calls(
                 [call(hcl2, tmp_path), call(hcl, tmp_path)]
             )
         else:
-            mock_load_terrafrom_module.assert_called_once_with(hcl2, tmp_path)
+            mock_load_terraform_module.assert_called_once_with(hcl2, tmp_path)
 
     def test_version_file(self, tmp_path):
         """Test version_file."""

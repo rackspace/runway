@@ -103,7 +103,7 @@ def get_latest_tf_version(include_prerelease=False):
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def load_terrafrom_module(parser, path):
+def load_terraform_module(parser, path):
     """Load all Terraform files in a module into one dict.
 
     Args:
@@ -186,17 +186,36 @@ class TFEnvManager(EnvManager):  # pylint: disable=too-few-public-methods
             return data
 
         result = None
+        hcl2_exc = None
         if hcl2:  # TODO remove condition when dropping python 2
             try:
-                result = load_terrafrom_module(hcl2, self.path).get("terraform", {})
-            except Exception:  # pylint: disable=broad-except
+                result = load_terraform_module(hcl2, self.path).get("terraform", {})
+            except Exception as exc:  # pylint: disable=broad-except
                 # could result in any number of lark exceptions
                 LOGGER.verbose(
                     "failed to parse as HCL2; trying HCL",
                     exc_info=True,  # useful in troubleshooting
                 )
+                hcl2_exc = exc
         if result is None:
-            result = load_terrafrom_module(hcl, self.path).get("terraform", {})
+            try:
+                result = load_terraform_module(hcl, self.path).get("terraform", {})
+            except Exception as exc:  # pylint: disable=broad-except
+                LOGGER.error("failed to parse Terraform file")
+                if hcl2_exc:
+                    LOGGER.error("HCL2 parsing error was:")
+                    LOGGER.error(hcl2_exc)
+                else:
+                    LOGGER.error("HCL parsing error was:")
+                    LOGGER.error(exc)
+                LOGGER.error(
+                    "If this parsing error is legitimate (e.g. a typo), "
+                    "correct it and re-run Runway. Otherwise, file an "
+                    "issue with Runway detailing the parsing error and "
+                    "provide an example Terraform file that will reproduce "
+                    "it."
+                )
+                sys.exit(1)
 
         # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.
         if isinstance(result, list):
