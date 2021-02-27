@@ -4,7 +4,6 @@ import logging
 from typing import Any, Tuple  # noqa pylint: disable=unused-import
 
 import click
-from awscli.clidriver import create_clidriver
 
 from ...util import SafeHaven
 from .. import options
@@ -31,6 +30,13 @@ def run_aws(ctx, args, **_):
     before the awscli command.
 
     """
+    # Ensure runway awscli v1 is not instantiated during `runway kbenv` executions,
+    # which may in turn invoke system awscli v2 via kubeconfigs causing a
+    # "'Namespace' object has no attribute 'cli_binary_format'" error
+    from awscli.clidriver import (  # pylint: disable=import-outside-toplevel
+        create_clidriver,
+    )
+
     if not ctx.obj.debug:
         # suppress awscli debug logs
         for name, logger in logging.getLogger("awscli").manager.loggerDict.items():
