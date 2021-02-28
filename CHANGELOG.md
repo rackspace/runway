@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.18.3] - 2021-02-27
+### Fixed
+- `kbenv` executions that invoked awscliv2 (i.e. through kubeconfigs) would fail
+
 ## [1.18.2] - 2021-02-24
 ### Fixed
 - CloudFormation AWS Lambda build hook build errors when Docker left behind root-owned files
@@ -1054,7 +1058,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Fix changed CFN parameters not being displayed during `runway plan`.
 
-[Unreleased]: https://github.com/onicagroup/runway/compare/v1.18.2...HEAD
+[Unreleased]: https://github.com/onicagroup/runway/compare/v1.18.3...HEAD
+[1.18.3]: https://github.com/onicagroup/runway/compare/v1.18.2...v1.18.3
 [1.18.2]: https://github.com/onicagroup/runway/compare/v1.18.1...v1.18.2
 [1.18.1]: https://github.com/onicagroup/runway/compare/v1.18.0...v1.18.1
 [1.18.0]: https://github.com/onicagroup/runway/compare/v1.17.0...v1.18.0
