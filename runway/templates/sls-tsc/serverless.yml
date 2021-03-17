@@ -8,15 +8,12 @@ provider:
   name: aws
   runtime: nodejs12.x
 
-# After adding a few functions and associated dependencies, individual function
-# packages can be created to avoid a single massive zip file.
-# This comes at the cost of potential memory issues at build time:
-# https://github.com/serverless-heaven/serverless-webpack/issues/299
-# package:
-#   individually: true
+package:
+  individually: true
 
 custom:
   webpack:
+    serializedCompile: true
     excludeFiles:
       - "src/**/*.test.ts"
       - "src/**/__mocks__/*.ts"
