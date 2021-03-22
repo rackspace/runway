@@ -86,7 +86,6 @@ class CfnginStackDefinitionModel(ConfigProperty):
     )
     locked: bool = Field(False, description="Whether to limit updating of the stack.")
     name: str = Field(..., title="Stack Name", description="Name of the stack.")
-    profile: Optional[str]  # TODO remove
     protected: bool = Field(
         False,
         description="Whether to force all updates to the stack to be performed interactively.",

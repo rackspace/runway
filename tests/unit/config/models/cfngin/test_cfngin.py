@@ -191,7 +191,6 @@ class TestCfnginStackDefinitionModel:
         assert not obj.in_progress_behavior
         assert not obj.locked
         assert obj.name == "stack-name"
-        assert not obj.profile
         assert not obj.protected
         assert not obj.region
         assert obj.required_by == []
