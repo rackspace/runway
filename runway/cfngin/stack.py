@@ -57,7 +57,6 @@ class Stack:
         mappings: Cloudformation mappings passed to the blueprint.
         name: Name of the stack taken from the definition.
         outputs: CloudFormation Stack outputs.
-        profile: Profile name from the stack definition.
         protected: Whether this stack is protected.
         region: AWS region name.
         termination_protection: The state of termination protection
@@ -80,7 +79,6 @@ class Stack:
     mappings: Dict[str, Dict[str, Dict[str, Any]]]
     name: str
     outputs: Dict[str, Any]
-    profile: Optional[str]
     protected: bool
     region: Optional[str]
     termination_protection: bool
@@ -125,7 +123,6 @@ class Stack:
         self.logging = True
         self.mappings = mappings or {}
         self.outputs = {}
-        self.profile = definition.profile
         self.protected = protected
         self.region = definition.region
         self.termination_protection = definition.termination_protection

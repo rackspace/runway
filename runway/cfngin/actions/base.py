@@ -156,7 +156,7 @@ class BaseAction:
         """
         if not self.provider_builder:
             raise ValueError("ProviderBuilder required to build a provider")
-        return self.provider_builder.build(region=stack.region, profile=stack.profile)
+        return self.provider_builder.build(region=stack.region)
 
     def ensure_cfn_bucket(self) -> None:
         """CloudFormation bucket where templates will be stored."""
