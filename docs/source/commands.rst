@@ -332,39 +332,6 @@ If a directory already exists with the name Runway tries to use, the sample will
   $ runway gen-sample cfngin
   $ runway gen-sample static-react
 
-----
-
-
-.. _command-init:
-
-****
-init
-****
-
-.. file://./../../runway/_cli/commands/_envvars.py
-
-Creates a sample :ref:`runway-config` in the current directory.
-
-.. rubric:: Usage
-.. code-block:: text
-
-  $ runway init [OPTIONS]
-
-
-.. rubric:: Options
-.. code-block:: text
-
-  --debug                         Supply once to display Runway debug logs.
-                                  Supply twice to display all debug logs.
-  --no-color                      Disable color in Runway's logs.
-  --verbose                       Display Runway verbose logs.
-
-
-.. rubric:: Example
-.. code-block:: shell
-
-  $ runway init
-  $ runway init --debug
 
 ----
 
@@ -443,6 +410,42 @@ Uses the version of kubectl_ specified in the ``.kubectl-version`` file in the c
 
   $ runway kbenv run version --client
   $ runway kbenv run -- --help
+
+
+----
+
+
+.. _command-new:
+
+****
+new
+****
+
+.. file://./../../runway/_cli/commands/_new.py
+
+Creates a sample :ref:`runway-config` in the current directory.
+
+.. rubric:: Usage
+.. code-block:: text
+
+  $ runway new [OPTIONS]
+
+
+.. rubric:: Options
+.. code-block:: text
+
+  --debug                         Supply once to display Runway debug logs.
+                                  Supply twice to display all debug logs.
+  --no-color                      Disable color in Runway's logs.
+  --verbose                       Display Runway verbose logs.
+
+
+.. rubric:: Example
+.. code-block:: shell
+
+  $ runway new
+  $ runway new --debug
+
 
 ----
 

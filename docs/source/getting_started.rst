@@ -115,12 +115,12 @@ Deploying Your First Module
 
 #. With the :ref:`module<runway-module>` ready to deploy, now we need to create
    our :ref:`Runway config file<runway-config>`. Do to this, use the
-   :ref:`init<command-init>` command to generate a sample file at the root of
+   :ref:`new<command-new>` command to generate a sample file at the root of
    the project repo.
 
    .. code-block:: shell
 
-       $ ./runway init
+       $ ./runway new
 
    **runway.yml contents**
 

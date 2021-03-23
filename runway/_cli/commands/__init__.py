@@ -7,6 +7,7 @@ from ._envvars import envvars
 from ._gen_sample import gen_sample
 from ._init import init
 from ._kbenv import kbenv
+from ._new import new
 from ._plan import plan
 from ._preflight import preflight
 from ._run_aws import run_aws
@@ -27,6 +28,7 @@ __all__ = [
     "gen_sample",
     "init",
     "kbenv",
+    "new",
     "plan",
     "preflight",
     "run_aws",

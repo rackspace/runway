@@ -68,7 +68,7 @@ Use one of the endpoints below to download a single-binary executable version of
 ```shell
 $ curl -L oni.ca/runway/latest/osx -o runway
 $ chmod +x runway
-$ ./runway init
+$ ./runway new
 ```
 
 **Suggested use:** CloudFormation or Terraform projects
@@ -78,7 +78,7 @@ $ ./runway init
 
 ```shell
 $ npm i -D @onica/runway
-$ npx runway init
+$ npx runway new
 ```
 
 **Suggested use:** Serverless or AWS CDK projects
@@ -88,10 +88,10 @@ $ npx runway init
 
 ```shell
 $ pip install runway
-$ runway init
+$ runway new
 # OR
 $ pipenv install runway
-$ pipenv run runway init
+$ pipenv run runway new
 ```
 
 **Suggested use:** Python projects

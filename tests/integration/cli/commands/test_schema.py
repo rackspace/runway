@@ -1,4 +1,4 @@
-"""Test ``runway schema cfngin`` command."""
+"""Test ``runway schema`` command."""
 from __future__ import annotations
 
 from click.testing import CliRunner
