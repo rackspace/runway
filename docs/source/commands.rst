@@ -625,6 +625,88 @@ When installed from PyPI, the current interpreter is used.
 ----
 
 
+.. _command-schema-cfngin:
+
+*************
+schema cfngin
+*************
+
+.. file://./../../runway/_cli/commands/_schema/_cfngin.py
+
+Output JSON schema for CFNgin configuration files.
+The schema that is output can be used to validate configuration files.
+It can also be added to text editors to provide autocompletion, tool tips, and suggestions within configuration files.
+
+.. rubric:: Usage
+.. code-block:: text
+
+  $ runway schema cfngin [OPTIONS]
+
+
+.. rubric:: Options
+.. code-block:: text
+
+  --debug                   Supply once to display Runway debug logs.
+                            Supply twice to display all debug logs.
+  --indent <int>            Number of spaces to use per indentation level
+                            when output JSON.  [default: 4]
+  --no-color                Disable color in Runway's logs.
+  -o, --output <file-name>  If provided, schema will be saved to a file
+                            instead of being output to stdout.
+  --verbose                 Display Runway verbose logs.
+  -h, --help                Show this message and exit.
+
+
+.. rubric:: Example
+.. code-block:: shell
+
+  $ runway schema cfngin --output cfngin-schema.json
+
+
+----
+
+
+.. _command-schema-runway:
+
+*************
+schema runway
+*************
+
+.. file://./../../runway/_cli/commands/_schema/_runway.py
+
+Output JSON schema for Runway configuration files.
+The schema that is output can be used to validate configuration files.
+It can also be added to text editors to provide autocompletion, tool tips, and suggestions within configuration files.
+
+.. rubric:: Usage
+.. code-block:: text
+
+  $ runway schema runway [OPTIONS]
+
+
+.. rubric:: Options
+.. code-block:: text
+
+  --debug                   Supply once to display Runway debug logs.
+                            Supply twice to display all debug logs.
+  --indent <int>            Number of spaces to use per indentation level
+                            when output JSON.  [default: 4]
+  --no-color                Disable color in Runway's logs.
+  -o, --output <file-name>  If provided, schema will be saved to a file
+                            instead of being output to stdout.
+  --verbose                 Display Runway verbose logs.
+  -h, --help                Show this message and exit.
+
+
+.. rubric:: Example
+.. code-block:: shell
+
+  $ runway schema runway --output runway-schema.json
+
+
+----
+
+
 .. _command-takeoff:
 
 *******
