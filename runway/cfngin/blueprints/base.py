@@ -452,8 +452,7 @@ class Blueprint:
         env file, the config, and any lookups resolved.
 
         Args:
-            provided_variables (List[:class:`runway.cfngin.variables.Variable`]):
-                List of provided variables.
+            provided_variables: List of provided variables.
 
         """
         self.resolved_variables = {}
