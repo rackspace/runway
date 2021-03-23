@@ -1,11 +1,19 @@
 """Output Runway configuration file schema."""
+from __future__ import annotations
+
+import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import click
 
 from ....config.models.runway import RunwayConfigDefinitionModel
 from ... import options
+
+if TYPE_CHECKING:
+    from runway._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 @click.command("runway", short_help="config schema")
@@ -31,6 +39,8 @@ def runway(indent: int, output: Optional[str], **_: Any) -> None:
     """Output Runway configuration file schema."""
     content = RunwayConfigDefinitionModel.schema_json(indent=indent)
     if output:
-        Path(output).write_text(content + "\n")  # append empty line to end of file
+        file_path = Path(output).absolute()
+        file_path.write_text(content + "\n")  # append empty line to end of file
+        LOGGER.success("output JSON schema to %s", file_path)
     else:
         click.echo(content)
