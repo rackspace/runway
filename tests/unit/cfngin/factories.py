@@ -72,7 +72,7 @@ def generate_definition(
     base_name: str, stack_id: Any, **overrides: Any
 ) -> CfnginStackDefinitionModel:
     """Generate definitions."""
-    definition = {
+    definition: Dict[str, Any] = {
         "name": f"{base_name}.{stack_id}",
         "class_path": f"tests.unit.cfngin.fixtures.mock_blueprints.{base_name.upper()}",
         "requires": [],

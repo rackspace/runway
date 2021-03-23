@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 from mock import MagicMock
 
@@ -61,7 +61,7 @@ def test_get_template_path_file_in_syspath(
 
 def test_get_template_params() -> None:
     """Verify get_template_params function operation."""
-    template_dict = {
+    template_dict: Dict[str, Any] = {
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "TestTemplate",
         "Parameters": {

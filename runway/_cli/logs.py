@@ -14,7 +14,7 @@ LOGGER = logging.getLogger("runway")
 
 LOG_FORMAT = "[%(programname)s] %(message)s"
 LOG_FORMAT_VERBOSE = logging.BASIC_FORMAT
-LOG_FIELD_STYLES = {
+LOG_FIELD_STYLES: Dict[str, Dict[str, Any]] = {
     "asctime": {},
     "hostname": {},
     "levelname": {},
@@ -23,7 +23,7 @@ LOG_FIELD_STYLES = {
     "prefix": {},
     "programname": {},
 }
-LOG_LEVEL_STYLES = {
+LOG_LEVEL_STYLES: Dict[str, Dict[str, Any]] = {
     "critical": {"color": "red", "bold": True},
     "debug": {"color": "green"},
     "error": {"color": "red"},
@@ -96,7 +96,11 @@ class LogSettings:
 
         result = LOG_FIELD_STYLES.copy()
         if self.ENV["field_styles"]:
-            result.update(coloredlogs.parse_encoded_styles(self.ENV["field_styles"]))
+            result.update(
+                coloredlogs.parse_encoded_styles(  # type: ignore
+                    self.ENV["field_styles"]
+                )
+            )
         return result
 
     @cached_property
@@ -112,7 +116,11 @@ class LogSettings:
 
         result = LOG_LEVEL_STYLES.copy()
         if self.ENV["level_styles"]:
-            result.update(coloredlogs.parse_encoded_styles(self.ENV["level_styles"]))
+            result.update(
+                coloredlogs.parse_encoded_styles(  # type: ignore
+                    self.ENV["level_styles"]
+                )
+            )
         return result
 
     @cached_property

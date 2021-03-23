@@ -6,7 +6,7 @@ from __future__ import annotations
 import io
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import pytest
 from botocore.response import StreamingBody
@@ -712,7 +712,9 @@ class TestCFNginContext:
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    @pytest.mark.parametrize("graph_dict", [{"stack0": []}, {}])
+    @pytest.mark.parametrize(
+        "graph_dict", cast(List[Dict[str, List[str]]], [{"stack0": []}, {}])
+    )
     def test_unlock_persistent_graph(
         self, graph_dict: Dict[str, List[str]], mocker: MockerFixture
     ) -> None:

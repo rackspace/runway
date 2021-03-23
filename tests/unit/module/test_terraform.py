@@ -370,7 +370,10 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         """Test handle_backend with no handler."""
         caplog.set_level(LogLevels.DEBUG, logger=MODULE)
         mock_get_full_configuration = MagicMock(return_value={})
-        backend = {"type": "unsupported", "config": {}}
+        backend: Dict[str, Union[Dict[str, Any], str]] = {
+            "type": "unsupported",
+            "config": {},
+        }
 
         obj = Terraform(runway_context, module_root=tmp_path)
         mocker.patch.object(obj, "tfenv", MagicMock(backend=backend))
@@ -465,7 +468,10 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         caplog.set_level(LogLevels.WARNING, logger=MODULE)
         monkeypatch.delenv("TF_WORKSPACE", raising=False)
         mock_get_full_configuration = MagicMock(return_value={})
-        backend = {"type": "remote", "config": {}}
+        backend: Dict[str, Union[Dict[str, Any], str]] = {
+            "type": "remote",
+            "config": {},
+        }
 
         obj = Terraform(runway_context, module_root=tmp_path)
         monkeypatch.setattr(obj, "tfenv", MagicMock(backend=backend))
@@ -940,7 +946,7 @@ class TestTerraformBackendConfig:
         tmp_path: Path,
     ) -> None:
         """Test init_args."""
-        expected = []
+        expected: List[str] = []
         for i in expected_items:
             expected.extend(["-backend-config", i])
         assert (

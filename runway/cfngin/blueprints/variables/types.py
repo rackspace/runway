@@ -71,19 +71,19 @@ class TroposphereType(Generic[_TroposphereType]):
         return str(getattr(self._type, "resource_name", None) or self._type.__name__)
 
     @overload
-    def create(self, value: Dict[str, Any]) -> _TroposphereType:  # noqa
+    def create(self, value: Dict[str, Any]) -> _TroposphereType:
         ...
 
     @overload
-    def create(self, value: List[Dict[str, Any]]) -> List[_TroposphereType]:  # noqa
+    def create(self, value: List[Dict[str, Any]]) -> List[_TroposphereType]:
         ...
 
     @overload
-    def create(self, value: None) -> None:  # noqa
+    def create(self, value: None) -> None:
         ...
 
     def create(
-        self, value: Union[Dict[str, Any], List[Dict[str, Any]]]
+        self, value: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
     ) -> Optional[Union[_TroposphereType, List[_TroposphereType]]]:
         """Create the troposphere type from the value.
 

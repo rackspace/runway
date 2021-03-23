@@ -13,6 +13,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    NoReturn,
     Optional,
     OrderedDict,
     Set,
@@ -51,6 +52,11 @@ _T = TypeVar("_T")
 
 @overload
 def json_serial(obj: Set[_T]) -> List[_T]:
+    ...
+
+
+@overload
+def json_serial(obj: Union[Dict[Any, Any], int, List[Any], str]) -> NoReturn:
     ...
 
 

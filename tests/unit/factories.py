@@ -2,7 +2,7 @@
 # pyright: basic, reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, MutableMapping, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Tuple
 
 import boto3
 import yaml
@@ -50,8 +50,8 @@ class MockBoto3Session:
             region_name: Same as boto3.Session.
 
         """
-        self._clients = clients or {}
-        self._client_calls = {}
+        self._clients = clients or MutableMap()
+        self._client_calls: Dict[str, Any] = {}
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.aws_session_token = aws_session_token

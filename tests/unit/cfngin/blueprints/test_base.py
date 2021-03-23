@@ -279,7 +279,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         """Test resolve variable no type on variable definition."""
         with self.assertRaises(VariableTypeRequired):
             var_name = "testVar"
-            var_def = {}
+            var_def: Dict[str, Any] = {}
             provided_variable = None
             blueprint_name = "testBlueprint"
 

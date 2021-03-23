@@ -162,7 +162,7 @@ class Terraform(RunwayModule):
     @cached_property
     def env_file(self) -> List[str]:
         """Find the environment file for the module."""
-        result = []
+        result: List[str] = []
         for name in gen_workspace_tfvars_files(
             self.ctx.env.name, self.ctx.env.aws_region
         ):
@@ -630,7 +630,7 @@ class TerraformBackendConfig(ModuleOptions):
     @cached_property
     def init_args(self) -> List[str]:
         """Return command line arguments for init."""
-        result = []
+        result: List[str] = []
         for k, v in self.data.dict(exclude_none=True).items():
             result.extend(["-backend-config", f"{k}={v}"])
         if not result:
@@ -690,7 +690,7 @@ class TerraformBackendConfig(ModuleOptions):
             "backend-{region}.{extension}",
             "backend.{extension}",
         ]
-        result = []
+        result: List[str] = []
         for fmt in formats:
             for ext in ["hcl", "tfvars"]:
                 result.append(

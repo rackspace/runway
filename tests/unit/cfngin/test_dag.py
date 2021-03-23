@@ -1,7 +1,7 @@
 """Tests for runway.cfngin.dag."""
 # pyright: basic
 import threading
-from typing import Any
+from typing import Any, List
 
 import pytest
 
@@ -69,7 +69,7 @@ def test_walk(empty_dag: DAG) -> None:
     # b and c should be executed at the same time.
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
 
-    nodes = []
+    nodes: List[Any] = []
 
     def walk_func(node: Any) -> bool:
         nodes.append(node)
@@ -210,7 +210,7 @@ def test_threaded_walker(empty_dag: DAG) -> None:
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
 
     lock = threading.Lock()  # Protects nodes from concurrent access
-    nodes = []
+    nodes: List[Any] = []
 
     def walk_func(node: Any) -> bool:
         lock.acquire()

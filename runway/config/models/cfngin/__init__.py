@@ -301,7 +301,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         """Convert stacks defined as a dict to a list."""
         if isinstance(v, list):
             return v
-        result = []
+        result: List[Dict[str, Any]] = []
         for name, stack in copy.deepcopy(v).items():
             stack["name"] = name
             result.append(stack)

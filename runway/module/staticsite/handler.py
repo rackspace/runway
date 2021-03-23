@@ -7,7 +7,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import yaml
 
@@ -163,7 +163,7 @@ class StaticSite(RunwayModule):
         return module_dir
 
     def _create_dependencies_yaml(self, module_dir: Path) -> None:
-        pre_deploy = []
+        pre_deploy: List[Any] = []
 
         pre_destroy = [
             {
@@ -222,7 +222,7 @@ class StaticSite(RunwayModule):
                     }
                 )
 
-        content = {
+        content: Dict[str, Any] = {
             "namespace": "${namespace}",
             "cfngin_bucket": "",
             "stacks": {

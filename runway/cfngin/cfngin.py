@@ -86,7 +86,7 @@ class CFNgin:
     @cached_property
     def env_file(self) -> MutableMap:
         """Contents of a CFNgin environment file."""
-        result = {}
+        result: Dict[str, Any] = {}
         supported_names = [
             "{}.env".format(self.__ctx.env.name),
             "{}-{}.env".format(self.__ctx.env.name, self.region),

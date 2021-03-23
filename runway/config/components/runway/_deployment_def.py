@@ -127,7 +127,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
             raise TypeError(
                 f"expected List[RunwayModuleDefinition]; got {type(modules)}"
             )
-        sanitized = []
+        sanitized: List[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
                 sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
@@ -177,7 +177,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         ...
 
     @classmethod
-    def parse_obj(
+    def parse_obj(  # type: ignore
         cls, obj: Any
     ) -> Union[RunwayDeploymentDefinition, List[RunwayDeploymentDefinition]]:
         """Parse a python object into this class.

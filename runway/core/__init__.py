@@ -94,7 +94,7 @@ class Runway:
 
         """
         deployments = deployments or self.deployments
-        result = {}
+        result: Dict[str, str] = {}
         for deployment in deployments:
             obj = components.Deployment(
                 context=self.ctx, definition=deployment, variables=self.variables
@@ -129,7 +129,7 @@ class Runway:
             Deployments and modules in reverse order.
 
         """
-        result = []
+        result: List[RunwayDeploymentDefinition] = []
         for deployment in deployments:
             deployment.reverse()
             result.insert(0, deployment)
@@ -163,7 +163,7 @@ class Runway:
             _sys.exit(1)
         self.ctx.command = "test"
 
-        failed_tests = []
+        failed_tests: List[str] = []
 
         LOGGER.info("found %i test(s)", len(self.tests))
         for tst in self.tests:

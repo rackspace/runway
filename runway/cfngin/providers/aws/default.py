@@ -268,8 +268,8 @@ def output_summary(
             replacements.
 
     """
-    replacements = []
-    changes = []
+    replacements: List[Any] = []
+    changes: List[Any] = []
     for change in changeset:
         resource = change["ResourceChange"]
         replacement = resource.get("Replacement") == "True"
@@ -524,7 +524,7 @@ def generate_stack_policy_args(
         stack_policy: A template object representing a stack policy.
 
     """
-    args = {}
+    args: Dict[str, str] = {}
     if stack_policy:
         LOGGER.debug("stack has a stack policy")
         if stack_policy.url:
@@ -535,7 +535,7 @@ def generate_stack_policy_args(
             #
             # args["StackPolicyURL"] = stack_policy.url
             raise NotImplementedError
-        args["StackPolicyBody"] = stack_policy.body
+        args["StackPolicyBody"] = cast(str, stack_policy.body)
     return args
 
 
@@ -761,7 +761,7 @@ class Provider(BaseProvider):
     ) -> Iterable[StackEventTypeDef]:
         """Get the events in batches and return in chronological order."""
         next_token = None
-        event_list = []
+        event_list: List[List[StackEventTypeDef]] = []
         while True:
             if next_token is not None:
                 events = self.cloudformation.describe_stack_events(
@@ -775,8 +775,15 @@ class Provider(BaseProvider):
                 break
             time.sleep(GET_EVENTS_SLEEP)
         if chronological:
-            return reversed(sum(event_list, []))
-        return sum(event_list, [])
+            return cast(
+                Iterable["StackEventTypeDef"],
+                reversed(
+                    cast(
+                        List["StackEventTypeDef"], sum(event_list, cast(List[Any], [])),
+                    )
+                ),
+            )
+        return cast(Iterable["StackEventTypeDef"], sum(event_list, cast(List[Any], [])))
 
     def get_rollback_status_reason(self, stack_name: str) -> Optional[str]:
         """Process events and returns latest roll back reason."""
@@ -1458,10 +1465,10 @@ class Provider(BaseProvider):
             if self.get_stack_status(stack_details) == self.REVIEW_STATUS:
                 raise exceptions.StackDoesNotExist(stack.fqn)
             _old_template, old_params = self.get_stack_info(stack_details)
-            old_template = parse_cloudformation_template(_old_template)
+            old_template: Dict[str, Any] = parse_cloudformation_template(_old_template)
             change_type = "UPDATE"
         except exceptions.StackDoesNotExist:
-            old_params = {}
+            old_params: Dict[str, Union[List[str], str]] = {}
             old_template = {}
             change_type = "CREATE"
 
@@ -1517,7 +1524,7 @@ class Provider(BaseProvider):
         self.get_outputs(stack.fqn)
 
         # infer which outputs may have changed
-        refs_to_invalidate = []
+        refs_to_invalidate: List[str] = []
         for change in changes:
             resc_change = change.get("ResourceChange", {})
             if resc_change.get("Type") == "Add":
@@ -1535,10 +1542,11 @@ class Provider(BaseProvider):
                 refs_to_invalidate.append(resc_change["LogicalResourceId"])
 
         # invalidate cached outputs with inferred changes
-        for output, props in old_template.get("Outputs", {}).items():
-            if any(r in str(props["Value"]) for r in refs_to_invalidate):
-                self._outputs[stack.fqn].pop(output)
-                LOGGER.debug("%s:removed from the outputs: %s", output, stack.fqn)
+        if "Outputs" in old_template:
+            for output, props in old_template["Outputs"].items():
+                if any(r in str(props["Value"]) for r in refs_to_invalidate):
+                    self._outputs[stack.fqn].pop(output)
+                    LOGGER.debug("%s:removed from the outputs: %s", output, stack.fqn)
 
         # push values for new + invalidated outputs to outputs
         for (

@@ -5,7 +5,7 @@ import collections.abc
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Any, List, Mapping, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, cast
 
 from ...exceptions import FailedVariableLookup
 from ...util import load_object_from_string
@@ -55,7 +55,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
         LOGGER.debug("no %s hooks defined", stage)
         return
 
-    hook_paths = []
+    hook_paths: List[str] = []
     for i, hook in enumerate(hooks):
         try:
             hook_paths.append(hook.path)
@@ -90,7 +90,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
                         "does not exist yet"
                     )
                 raise
-            kwargs = {v.name: v.value for v in args}
+            kwargs: Dict[str, Any] = {v.name: v.value for v in args}
         else:
             kwargs = {}
 

@@ -55,7 +55,7 @@ def get_hash_of_files(
     if not directories:
         directories = [{"path": "./"}]
 
-    files_to_hash = []
+    files_to_hash: List[str] = []
     for i in directories:
         ignorer = get_ignorer(
             root_path / cast(str, i["path"]), cast(List[str], i.get("exclusions"))
@@ -64,8 +64,8 @@ def get_hash_of_files(
         with change_dir(root_path):
             for root, dirs, files in os.walk(cast(str, i["path"]), topdown=True):
                 if (root != "./") and ignorer.is_ignored(root, True):
-                    dirs[:] = []
-                    files[:] = []
+                    dirs[:] = []  # type: ignore
+                    files[:] = []  # type: ignore
                 else:
                     for filename in files:
                         filepath = os.path.join(root, filename)

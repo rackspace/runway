@@ -25,7 +25,7 @@ STACK_STATUSES_TO_IGNORE = [
 
 def get_replicated_function_names(outputs: List[OutputTypeDef],) -> List[str]:
     """Extract replicated function names from CFN outputs."""
-    function_names = []
+    function_names: List[str] = []
     for i in [
         "LambdaCheckAuthArn",
         "LambdaHttpHeadersArn",

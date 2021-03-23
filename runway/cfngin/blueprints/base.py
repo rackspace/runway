@@ -255,7 +255,7 @@ def parse_user_data(
             is not given in the blueprint
 
     """
-    variable_values = {}
+    variable_values: Dict[str, Any] = {}
 
     for key, value in variables.items():
         if isinstance(value, CFNParameter):
@@ -337,7 +337,7 @@ class Blueprint:
             containing key/values for various parameter properties.
 
         """
-        output = {}
+        output: Dict[str, BlueprintVariableTypeDef] = {}
         for var_name, attrs in self.defined_variables().items():
             var_type = attrs.get("type")
             if isinstance(var_type, CFNType):
@@ -379,7 +379,7 @@ class Blueprint:
 
         """
         variables = self.get_variables()
-        output = {}
+        output: Dict[str, Any] = {}
         for key, value in variables.items():
             try:
                 output[key] = value.to_parameter_value()
@@ -497,7 +497,7 @@ class Blueprint:
             variables: Dictionary providing/overriding variable values.
 
         """
-        variables_to_resolve = []
+        variables_to_resolve: List[Variable] = []
         if variables:
             for key, value in variables.items():
                 variables_to_resolve.append(Variable(key, value, "cfngin"))

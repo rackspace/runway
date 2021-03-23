@@ -70,7 +70,7 @@ class DictValue(Generic[_OV, _NV]):
             Representation of the change (if any) between old and new value.
 
         """
-        output = []
+        output: List[str] = []
         if self.status() is self.UNMODIFIED:
             output = [self.formatter % (" ", self.key, self.old_value)]
         elif self.status() is self.ADDED:
@@ -115,7 +115,7 @@ def diff_dictionaries(
     common_set = old_set & new_set
 
     changes = 0
-    output = []
+    output: List[DictValue[Any, Any]] = []
     for key in added_set:
         changes += 1
         output.append(DictValue(key, None, new_dict[key]))

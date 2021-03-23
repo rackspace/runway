@@ -175,7 +175,7 @@ def _parameterize_string(raw: str) -> GenericHelperFn:
         are found, and a composition of CloudFormation calls otherwise.
 
     """
-    parts = []
+    parts: List[Any] = []
     s_index = 0
 
     for match in _PARAMETER_PATTERN.finditer(raw):

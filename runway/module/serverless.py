@@ -35,7 +35,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 def gen_sls_config_files(stage: str, region: str) -> List[str]:
     """Generate possible SLS config files names."""
-    names = []
+    names: List[str] = []
     for ext in ["yml", "json"]:
         # Give preference to explicit stage-region files
         names.append(os.path.join("env", "%s-%s.%s" % (stage, region, ext)))
@@ -63,12 +63,12 @@ def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
     """Get hash(es) of serverless source."""
     funcs = sls_config["functions"]
 
-    if sls_config.get("package", {}).get("individually"):
+    if sls_config.get("package", {"": ""}).get("individually"):
         return {
             key: get_hash_of_files(path / os.path.dirname(funcs[key].get("handler")))
             for key in funcs.keys()
         }
-    directories = []
+    directories: List[Dict[str, Union[List[str], str]]] = []
     for _key, value in funcs.items():
         func_path = {"path": os.path.dirname(value.get("handler"))}
         if func_path not in directories:
@@ -434,7 +434,7 @@ class ServerlessOptions(ModuleOptions):
     @property
     def args(self) -> List[str]:
         """List of CLI arguments/options to pass to the Serverless Framework CLI."""
-        known_args = []
+        known_args: List[str] = []
         for key, val in self._cli_args.items():
             if isinstance(val, str):
                 known_args.extend(["--%s" % key, val])

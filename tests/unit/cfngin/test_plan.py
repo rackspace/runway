@@ -8,7 +8,7 @@ import os
 import shutil
 import tempfile
 import unittest
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import mock
 
@@ -79,7 +79,7 @@ class TestStep(unittest.TestCase):
     def test_from_persistent_graph(self) -> None:
         """Return list of steps from graph dict."""
         context = mock_context()
-        graph_dict = {"stack1": [], "stack2": ["stack1"]}
+        graph_dict: Dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
         result = Step.from_persistent_graph(graph_dict, context)
 
         self.assertEqual(2, len(result))
@@ -96,7 +96,7 @@ class TestGraph(unittest.TestCase):
     def setUp(self) -> None:
         """Run before tests."""
         self.context = mock_context()
-        self.graph_dict = {"stack1": [], "stack2": ["stack1"]}
+        self.graph_dict: Dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
         self.graph_dict_expected = {"stack1": set(), "stack2": set(["stack1"])}
         self.steps = Step.from_persistent_graph(self.graph_dict, self.context)
 
@@ -225,7 +225,7 @@ class TestPlan(unittest.TestCase):
         )
         context._persistent_graph = Graph.from_steps([Step(removed)])
 
-        calls = []
+        calls: List[str] = []
 
         def _launch_stack(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -269,7 +269,7 @@ class TestPlan(unittest.TestCase):
             context=context,
         )
 
-        calls = []
+        calls: List[str] = []
 
         def _launch_stack(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -299,7 +299,7 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls = []
+        calls: List[str] = []
 
         def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -323,7 +323,7 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls = []
+        calls: List[str] = []
 
         def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -346,7 +346,7 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls = []
+        calls: List[str] = []
 
         def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -374,7 +374,7 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls = []
+        calls: List[str] = []
 
         def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -400,7 +400,7 @@ class TestPlan(unittest.TestCase):
         )
         db = Stack(definition=generate_definition("db", 1), context=self.context)
 
-        calls = []
+        calls: List[str] = []
 
         def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)
@@ -429,7 +429,7 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls = []
+        calls: List[str] = []
 
         def fn(stack: Stack, status: Optional[Status] = None) -> Status:
             calls.append(stack.fqn)

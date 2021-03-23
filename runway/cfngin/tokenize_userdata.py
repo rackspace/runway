@@ -40,7 +40,7 @@ def cf_tokenize(raw_userdata: str) -> List[str]:
             Base64(Join('', cf_tokenize(userdata_string)))
 
     """
-    result = []
+    result: List[str] = []
     parts = SPLIT_RE.split(raw_userdata)
     for part in parts:
         cf_func = REPLACE_RE.search(part)

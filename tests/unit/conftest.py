@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, cast
 
 import pytest
 import yaml
@@ -54,7 +54,7 @@ def aws_credentials() -> Iterator[None]:
         "AWS_SECRET_ACCESS_KEY": "testing",
         "AWS_DEFAULT_REGION": "us-east-1",
     }
-    saved_env = {}
+    saved_env: Dict[str, Optional[str]] = {}
     for key, value in overrides.items():
         LOG.info("Overriding env var: %s=%s", key, value)
         saved_env[key] = os.environ.get(key, None)
@@ -109,7 +109,7 @@ def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
 
     """
     file_paths = getattr(cast("Module", request.module), "YAML_FIXTURES", [])
-    result = {}
+    result: Dict[str, Any] = {}
     for file_path in file_paths:
         with open(os.path.join(fixture_dir, file_path)) as _file:
             data = _file.read()

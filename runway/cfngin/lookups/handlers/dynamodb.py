@@ -197,7 +197,7 @@ def _convert_ddb_list_to_list(conversion_list: List[Dict[str, Any]]) -> List[Any
         Returns A sanitized list without the datatypes.
 
     """
-    ret_list = []
+    ret_list: List[Any] = []
     for val in conversion_list:
         for v in val:
             ret_list.append(val[v])

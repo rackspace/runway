@@ -97,7 +97,7 @@ class TestBuildAction(unittest.TestCase):
         self, extra_config_args: Optional[Dict[str, Any]] = None, **kwargs: Any
     ) -> CfnginContext:
         """Get context."""
-        config = {
+        config: Dict[str, Any] = {
             "namespace": "namespace",
             "stacks": [
                 {"name": "vpc", "template_path": "."},
@@ -174,7 +174,7 @@ class TestBuildAction(unittest.TestCase):
         """Test missing params no existing stack."""
         all_params = ["Address", "StackName"]
         required = ["Address"]
-        parameter_values = {}
+        parameter_values: Dict[str, Any] = {}
         with self.assertRaises(exceptions.MissingParameterException) as result:
             _handle_missing_parameters(parameter_values, all_params, required)
 

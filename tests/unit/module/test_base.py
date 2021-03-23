@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 
 import pytest
 
@@ -235,7 +235,7 @@ class TestRunwayModuleNpm:
     @pytest.mark.parametrize(
         "env_vars",
         [
-            {},
+            cast(Dict[str, str], {}),
             {"AWS_PROFILE": "something"},
             {"AWS_DEFAULT_PROFILE": "something", "AWS_PROFILE": "something"},
         ],

@@ -465,13 +465,13 @@ class TestMethods(unittest.TestCase):
         stack_name = "mystack"
         template_url = "http://fake.s3url.com/blah.json"
         template_body = '{"fake_body": "woot"}'
-        std_args = {
+        std_args: Dict[str, Any] = {
             "stack_name": stack_name,
             "parameters": [],
             "tags": [],
             "template": Template(url=template_url),
         }
-        std_return = {
+        std_return: Dict[str, Any] = {
             "StackName": stack_name,
             "Parameters": [],
             "Tags": [],
@@ -521,8 +521,8 @@ class TestProviderDefaultMode(unittest.TestCase):
         """Test create_stack, no changeset, template url."""
         stack_name = "fake_stack"
         template = Template(url="http://fake.template.url.com/")
-        parameters = []
-        tags = []
+        parameters: List[Any] = []
+        tags: List[Any] = []
 
         expected_args = generate_cloudformation_args(
             stack_name, parameters, tags, template
@@ -546,8 +546,8 @@ class TestProviderDefaultMode(unittest.TestCase):
         stack_name = "fake_stack"
         template_path = Path("./tests/unit/cfngin/fixtures/cfn_template.yaml")
         template = Template(body=template_path.read_text())
-        parameters = []
-        tags = []
+        parameters: List[Any] = []
+        tags: List[Any] = []
 
         changeset_id = "CHANGESETID"
 
@@ -937,7 +937,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         default.TAIL_RETRY_SLEEP = 0.01
         default.GET_EVENTS_SLEEP = 0.01
 
-        received_events = []
+        received_events: List[Any] = []
 
         def mock_log_func(event: Any) -> None:
             received_events.append(event)

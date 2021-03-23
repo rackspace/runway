@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, cast
 
 from typing_extensions import Literal
 
@@ -164,8 +164,7 @@ class Stack:
     def blueprint(self) -> Blueprint:
         """Return the blueprint associated with this stack."""
         if not self._blueprint:
-            kwargs = {}
-            blueprint_class = None
+            kwargs: Dict[str, Any] = {}
             if self.definition.class_path:
                 class_path = self.definition.class_path
                 blueprint_class = load_object_from_string(class_path)
@@ -183,12 +182,15 @@ class Stack:
                     "Stack does not have a defined class or " "template path."
                 )
 
-            self._blueprint = blueprint_class(
-                name=self.name,
-                context=self.context,
-                mappings=self.mappings,
-                description=self.definition.description,
-                **kwargs
+            self._blueprint = cast(
+                "Blueprint",
+                blueprint_class(
+                    name=self.name,
+                    context=self.context,
+                    mappings=self.mappings,
+                    description=self.definition.description,
+                    **kwargs
+                ),
             )
         return self._blueprint
 

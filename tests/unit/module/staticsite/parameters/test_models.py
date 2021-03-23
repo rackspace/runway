@@ -1,7 +1,7 @@
 """Test runway.module.staticsite.parameters.models."""
 # pylint: disable=no-self-use
 # pyright: basic
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 import pytest
 from pydantic import ValidationError
@@ -57,7 +57,7 @@ class TestRunwayStaticSiteLambdaFunctionAssociationDataModel:
     @pytest.mark.parametrize(
         "data",
         [
-            {},
+            cast(Dict[str, Any], {}),
             {"arn": "aws:arn:lambda:us-east-1:function:test"},
             {"type": "origin-request"},
         ],

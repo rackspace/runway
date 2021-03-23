@@ -5,7 +5,7 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import TYPE_CHECKING, Iterator, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Sequence, cast
 
 import boto3
 from botocore.exceptions import ClientError
@@ -98,7 +98,7 @@ def ensure_bucket_exists(
         LOGGER.info('creating bucket "%s" (in progress)', bucket_name)
         s3_client = _get_client(session, region)
         if region == "us-east-1":
-            create_bucket_opts = {}
+            create_bucket_opts: Dict[str, Any] = {}
         else:
             create_bucket_opts = {
                 "CreateBucketConfiguration": {"LocationConstraint": region}

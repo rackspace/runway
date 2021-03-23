@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
-from typing import Any, List
+from typing import Any, Dict, List, cast
 
 import boto3
 import mock
@@ -228,7 +228,7 @@ Outputs:
                 ),
                 "refs/heads/foo",
             )
-            for i in [{}, {"tag": "foo"}, {"commit": "1234"}]:
+            for i in [cast(Dict[str, Any], {}), {"tag": "foo"}, {"commit": "1234"}]:
                 self.assertEqual(
                     sp.determine_git_ls_remote_ref(
                         GitCfnginPackageSourceDefinitionModel(uri="git@foo", **i)

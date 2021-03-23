@@ -205,7 +205,7 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
 
     """
     LOGGER.info("cleaning up old site archives...")
-    archives = []
+    archives: List[Dict[str, Any]] = []
     s3_client = session.client("s3")
     list_objects_v2_paginator = s3_client.get_paginator("list_objects_v2")
     response_iterator = list_objects_v2_paginator.paginate(
@@ -214,7 +214,7 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
     )
 
     for page in response_iterator:
-        archives.extend(page.get("Contents", []))
+        archives.extend(page.get("Contents", []))  # type: ignore
     archives_to_prune = get_archives_to_prune(archives, context.hook_data["staticsite"])
 
     # Iterate in chunks of 1000 to match delete_objects limit
@@ -400,7 +400,7 @@ def sync_extra_files(
 
     session = context.get_session()
     s3_client = session.client("s3")
-    uploaded = []
+    uploaded: List[str] = []
 
     hash_param = cast(str, kwargs.get("hash_tracking_parameter", ""))
     hash_new = None

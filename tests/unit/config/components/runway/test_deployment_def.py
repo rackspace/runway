@@ -1,7 +1,7 @@
 """Test runway.config.components.runway._deployment_dev."""
 # pylint: disable=no-self-use,protected-access
 # pyright: basic
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 
@@ -118,13 +118,15 @@ class TestRunwayDeploymentDefinition:
 
     def test_parse_obj(self) -> None:
         """Test parse_obj."""
-        data = {"name": "test", "modules": [], "regions": ["us-east-1"]}
+        data: Dict[str, Any] = {"name": "test", "modules": [], "regions": ["us-east-1"]}
         obj = RunwayDeploymentDefinition.parse_obj(data)
         assert obj._data.dict(exclude_unset=True) == data
 
     def test_parse_obj_list(self) -> None:
         """Test parse_obj list."""
-        data = [{"name": "test", "modules": [], "regions": ["us-east-1"]}]
+        data: List[Dict[str, Any]] = [
+            {"name": "test", "modules": [], "regions": ["us-east-1"]}
+        ]
         result = RunwayDeploymentDefinition.parse_obj(data)
 
         assert isinstance(result, list)

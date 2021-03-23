@@ -155,7 +155,7 @@ def post_fake_create_container() -> Tuple[int, Any]:
 
 def get_fake_inspect_container(tty: bool = False) -> Tuple[int, Any]:
     status_code = 200
-    response = {
+    response: Dict[str, Any] = {
         "Id": FAKE_CONTAINER_ID,
         "Config": {"Labels": {"foo": "bar"}, "Privileged": True, "Tty": tty},
         "ID": FAKE_CONTAINER_ID,
