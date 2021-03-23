@@ -11,6 +11,7 @@ from ._plan import plan
 from ._preflight import preflight
 from ._run_aws import run_aws
 from ._run_python import run_python
+from ._schema import schema
 from ._takeoff import takeoff
 from ._taxi import taxi
 from ._test import test
@@ -30,6 +31,7 @@ __all__ = [
     "preflight",
     "run_aws",
     "run_python",
+    "schema",
     "takeoff",
     "taxi",
     "test",
