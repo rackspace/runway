@@ -126,7 +126,7 @@ TestParamsTypeDef = Optional[Union[Dict[str, str], List[str], str]]
 class TestSafeHaven:
     """Test SafeHaven context manager."""
 
-    TEST_PARAMS = [
+    TEST_PARAMS: List[TestParamsTypeDef] = [
         (None),
         ("string"),
         ({}),

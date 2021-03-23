@@ -130,7 +130,7 @@ class YamlDirTestGenerator:
     ) -> Iterator[BlueprintTestCase]:
         """Test generator."""
         # Search for tests in given paths
-        configs = []
+        configs: List[str] = []
         for directory in self.yaml_dirs:
             configs.extend(
                 glob("%s/%s/%s" % (self.classdir, directory, self.yaml_filename))

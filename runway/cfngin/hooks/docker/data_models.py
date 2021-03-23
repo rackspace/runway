@@ -133,10 +133,10 @@ class BaseModel:
     @classmethod
     def _validate_dict(
         cls,
-        value: Union[Dict[str, Any], Any],
+        value: Optional[Union[Dict[str, Any], Any]],
         optional: bool = False,
         required: bool = False,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[Union[Dict[str, Any], NoReturn]]:
         """Validate a Dict type attribute."""
         if not value:
             if required:

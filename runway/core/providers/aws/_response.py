@@ -99,5 +99,5 @@ class BaseResponse:
             ResponseMetadata: Information about the request.
 
         """
-        self.error = ResponseError(**kwargs.pop("Error", {}))
-        self.metadata = ResponseMetadata(**kwargs.pop("ResponseMetadata", {}))
+        self.error = ResponseError(**kwargs.pop("Error", {}))  # type: ignore
+        self.metadata = ResponseMetadata(**kwargs.pop("ResponseMetadata", {}))  # type: ignore

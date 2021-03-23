@@ -31,7 +31,7 @@ class YamllintHandler(TestHandler):
     @classmethod
     def get_yamllint_options(cls, path: str) -> List[str]:
         """Return yamllint option list."""
-        yamllint_options = []
+        yamllint_options: List[str] = []
 
         return yamllint_options + cls.get_dirs(path) + cls.get_yaml_files_at_path(path)
 

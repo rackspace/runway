@@ -519,21 +519,27 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
     def __getitem__(self, __index: slice) -> List[VariableValue]:
         ...
 
-    def __getitem__(self, __index: int) -> VariableValue:
+    def __getitem__(
+        self, __index: Union[int, slice]
+    ) -> Union[List[VariableValue], VariableValue]:
         """Get item by index."""
-        return self._data[__index]
+        return self._data[__index]  # type: ignore
 
     @overload
-    def __setitem__(self, __index: int, __value: List[VariableValue]) -> None:
+    def __setitem__(self, __index: int, __value: VariableValue) -> None:
         ...
 
     @overload
     def __setitem__(self, __index: slice, __value: List[VariableValue]) -> None:
         ...
 
-    def __setitem__(self, __index: int, __value: VariableValue) -> None:
+    def __setitem__(
+        self,
+        __index: Union[int, slice],
+        __value: Union[List[VariableValue], VariableValue],
+    ) -> None:
         """Set item by index."""
-        self._data[__index] = __value
+        self._data[__index] = __value  # type: ignore
 
     def __iter__(self) -> Iterator[VariableValue]:
         """Object iteration."""
@@ -704,7 +710,9 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
     def __getitem__(self, __index: slice) -> List[_VariableValue]:
         ...
 
-    def __getitem__(self, __index: int) -> _VariableValue:
+    def __getitem__(
+        self, __index: Union[int, slice]
+    ) -> Union[List[_VariableValue], _VariableValue]:
         """Get item by index."""
         return self._data[__index]
 
@@ -716,7 +724,11 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
     def __setitem__(self, __index: slice, __value: List[_VariableValue]) -> None:
         ...
 
-    def __setitem__(self, __index: int, __value: _VariableValue) -> None:
+    def __setitem__(
+        self,
+        __index: Union[int, slice],
+        __value: Union[List[_VariableValue], _VariableValue],
+    ) -> None:
         """Set item by index."""
         self._data[__index] = __value
 

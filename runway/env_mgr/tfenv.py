@@ -12,7 +12,7 @@ import tempfile
 import zipfile
 from distutils.version import LooseVersion
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -143,9 +143,9 @@ class TFEnvManager(EnvManager):
         """Backend config of the Terraform module."""
         # Terraform can only have one backend configured; this formats the
         # data to make it easier to work with
-        return [
+        return [  # type: ignore
             {"type": k, "config": v}
-            for k, v in self.terraform_block.get("backend", {None: {}}).items()
+            for k, v in self.terraform_block.get("backend", {None: {}}).items()  # type: ignore
         ][0]
 
     @cached_property
@@ -179,20 +179,22 @@ class TFEnvManager(EnvManager):
             return data  # type: ignore
 
         try:
-            result = load_terrafrom_module(hcl2, self.path).get("terraform", {})
+            result: Union[Dict[str, Any], List[Dict[str, Any]]] = load_terrafrom_module(
+                hcl2, self.path
+            ).get(
+                "terraform", {}  # type: ignore
+            )
         except Exception:  # pylint: disable=broad-except
             # could result in any number of lark exceptions
             LOGGER.verbose(
                 "failed to parse as HCL2; trying HCL",
                 exc_info=True,  # useful in troubleshooting
             )
-            result = load_terrafrom_module(hcl, self.path).get("terraform", {})
+            result = load_terrafrom_module(hcl, self.path).get("terraform", {})  # type: ignore
 
         # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.
         if isinstance(result, list):
-            return _flatten_lists(
-                {k: v for i in cast(List[Dict[str, Any]], result) for k, v in i.items()}
-            )
+            return _flatten_lists({k: v for i in result for k, v in i.items()})
         return _flatten_lists(result)
 
     @cached_property

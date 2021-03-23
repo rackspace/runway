@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
 import pytest
 import yaml
@@ -509,14 +509,16 @@ class TestServerlessOptions:
         obj = ServerlessOptions.parse_obj(config)
 
         assert obj.args == config.get("args", [])
-        assert obj.extend_serverless_yml == config.get("extend_serverless_yml", {})
+        assert obj.extend_serverless_yml == config.get(
+            "extend_serverless_yml", cast(Dict[str, Any], {})
+        )
         if config.get("promotezip"):
             assert obj.promotezip
         else:
             assert not obj.promotezip
-        assert obj.promotezip.bucketname == config.get("promotezip", {}).get(
-            "bucketname"
-        )
+        assert obj.promotezip.bucketname == config.get(
+            "promotezip", cast(Dict[str, Any], {})
+        ).get("bucketname")
         assert obj.skip_npm_ci == config.get("skip_npm_ci", False)
 
     def test_parse_invalid_promotezip(self) -> None:

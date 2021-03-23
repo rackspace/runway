@@ -54,7 +54,7 @@ def list_ecr_images(
     client: ECRClient, repository_name: str,
 ) -> List[ImageIdentifierTypeDef]:
     """List all images in an ECR repository."""
-    image_ids = []
+    image_ids: List[ImageIdentifierTypeDef] = []
     try:
         response = client.list_images(
             repositoryName=repository_name, filter={"tagStatus": "ANY"}

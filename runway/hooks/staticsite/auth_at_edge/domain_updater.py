@@ -27,15 +27,15 @@ def update(
     session = context.get_session()
     cognito_client = session.client("cognito-idp")
 
-    context_dict = {}
+    context_dict: Dict[str, Any] = {}
 
     user_pool_id = context.hook_data["aae_user_pool_id_retriever"]["id"]
     user_pool = cognito_client.describe_user_pool(UserPoolId=user_pool_id).get(
-        "UserPool"
+        "UserPool", {}
     )
     (user_pool_region, user_pool_hash) = user_pool_id.split("_")
 
-    domain_prefix = user_pool.get("CustomDomain") or user_pool.get("Domain")
+    domain_prefix = user_pool.get("CustomDomain", user_pool.get("Domain"))
 
     # Return early if we already have a domain
     if domain_prefix:

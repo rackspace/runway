@@ -116,7 +116,7 @@ def _resolve_parameters(
         The resolved parameters.
 
     """
-    params = {}
+    params: Dict[str, Any] = {}
     param_defs = blueprint.get_parameter_definitions()
 
     for key, value in parameters.items():
@@ -247,7 +247,7 @@ class Action(BaseAction):
             resolved, all_parameters, required_parameters, provider_stack
         )
 
-        param_list = []
+        param_list: List[ParameterTypeDef] = []
 
         for key, value in parameters:
             param_dict: ParameterTypeDef = {"ParameterKey": key}
@@ -486,7 +486,7 @@ class Action(BaseAction):
 
         graph = Graph()
         config_stack_names = [stack.name for stack in self.context.stacks]
-        inverse_steps = []
+        inverse_steps: List[Step] = []
         persist_graph = self.context.persistent_graph.transposed()
 
         for ind_node, dep_nodes in persist_graph.dag.graph.items():

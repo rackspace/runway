@@ -89,7 +89,7 @@ def write(  # pylint: disable=too-many-locals
 
     # Shared file that contains the method called for configuration data
     path = os.path.join(os.path.dirname(__file__), "templates", "shared.py")
-    context_dict = {}
+    context_dict: Dict[str, Any] = {}
 
     with open(path) as file_:
         # Dynamically replace our configuration values

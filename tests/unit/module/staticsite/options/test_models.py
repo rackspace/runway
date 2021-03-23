@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 import pytest
 from pydantic import ValidationError
@@ -82,7 +82,13 @@ class TestRunwayStaticSiteExtraFileDataModel:
         assert obj.name == data["name"]
 
     @pytest.mark.parametrize(
-        "data", [{}, {"name": "test"}, {"content": "test"}, {"file": "test"}]
+        "data",
+        [
+            cast(Dict[str, str], {}),
+            {"name": "test"},
+            {"content": "test"},
+            {"file": "test"},
+        ],
     )
     def test_init_required(self, data: Dict[str, Any]) -> None:
         """Test init required fields."""

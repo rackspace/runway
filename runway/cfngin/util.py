@@ -19,6 +19,7 @@ from typing import (
     ClassVar,
     Dict,
     Iterator,
+    List,
     Optional,
     OrderedDict,
     Type,
@@ -265,7 +266,7 @@ def yaml_to_ordered_dict(
         ) -> None:
             """Check mapping node for dupe children keys."""
             if isinstance(node, yaml.MappingNode):
-                mapping = {}
+                mapping: Dict[str, Any] = {}
                 for val in node.value:
                     a = val[0]
                     b = mapping.get(a.value, None)
@@ -589,7 +590,7 @@ class SourceProcessor:
         self.cache_dir = cache_dir
         self.package_cache_dir = cache_dir / "packages"
         self.sources = sources
-        self.configs_to_merge = []
+        self.configs_to_merge: List[Path] = []
         self.create_cache_directories()
 
     def create_cache_directories(self) -> None:
@@ -657,7 +658,7 @@ class SourceProcessor:
             )
 
         session = get_session(region=None)
-        extra_s3_args = {}
+        extra_s3_args: Dict[str, Any] = {}
         if config.requester_pays:
             extra_s3_args["RequestPayer"] = "requester"
 
@@ -670,7 +671,7 @@ class SourceProcessor:
                     session.client("s3")
                     .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
                         "LastModified"
-                    ]
+                    ]  # type: ignore
                     .astimezone(dateutil.tz.tzutc())  # type: ignore
                 )
             except botocore.exceptions.ClientError as client_error:

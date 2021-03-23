@@ -246,7 +246,7 @@ class CfnginConfig(BaseConfig):
             return [path]
 
         exclude = exclude or []
-        result = []
+        result: List[Path] = []
         exclude.extend(cls.EXCLUDE_LIST)
 
         yml_files = list(path.glob("*.yml"))
@@ -354,7 +354,7 @@ class CfnginConfig(BaseConfig):
         config = yaml.safe_load(raw_data) or {}
         processor = SourceProcessor(
             sources=CfnginPackageSourcesDefinitionModel.parse_obj(
-                config.get("package_sources", {})
+                config.get("package_sources", {})  # type: ignore
             ),
             cache_dir=config.get("cfngin_cache_dir"),
         )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import operator
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict
 
 from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
@@ -77,8 +77,8 @@ class AmiLookup(LookupHandler):
 
         ec2 = context.get_session(region=region).client("ec2")
 
-        values = {}
-        describe_args = {}
+        values: Dict[str, Any] = {}
+        describe_args: Dict[str, Any] = {}
 
         # now find any other arguments that can be filters
         matches = re.findall(r"([0-9a-zA-z_-]+:[^\s$]+)", value)

@@ -59,7 +59,9 @@ terraform {
 def test_get_available_tf_versions(mocker: MockerFixture) -> None:
     """Test runway.env_mgr.tfenv.get_available_tf_versions."""
     mock_requests = mocker.patch(f"{MODULE}.requests")
-    response = {"terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}}
+    response: Dict[str, Any] = {
+        "terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}
+    }
     mock_requests.get.return_value = MagicMock(text=json.dumps(response))
     assert get_available_tf_versions() == ["0.12.0"]
     assert get_available_tf_versions(include_prerelease=True) == [

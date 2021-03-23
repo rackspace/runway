@@ -40,7 +40,7 @@ def create_clusters(
     if isinstance(clusters, str):
         clusters = [clusters]
 
-    cluster_info = {}
+    cluster_info: Dict[str, Any] = {}
     for cluster in clusters:
         LOGGER.debug("creating ECS cluster: %s", cluster)
         response = conn.create_cluster(clusterName=cluster)

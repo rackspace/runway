@@ -9,7 +9,7 @@ def parse_environment(raw_environment: str) -> Dict[str, Any]:
         raw_environment: Environment file read into a string.
 
     """
-    environment = {}
+    environment: Dict[str, Any] = {}
     for line in raw_environment.split("\n"):
         line = line.strip()
         if not line:

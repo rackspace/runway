@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 import pytest
 from mock import MagicMock, call
@@ -274,7 +274,7 @@ class TestRunway:
     ) -> None:
         """Test test with handler not found."""
         caplog.set_level(logging.ERROR, logger="runway")
-        test_handlers = {}
+        test_handlers: Dict[str, Any] = {}
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
         obj = Runway(runway_config, runway_context)  # type: ignore
 

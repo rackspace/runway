@@ -486,7 +486,7 @@ def dockerized_pip(
 
     LOGGER.info('using docker image "%s" to build deployment package...', docker_image)
 
-    docker_run_args = {}
+    docker_run_args: Dict[str, Any] = {}
     if python_dontwritebytecode:
         docker_run_args["environment"] = "1"
 
@@ -627,7 +627,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
             "--no-color",
         ]
 
-        subprocess_args = {}
+        subprocess_args: Dict[str, Any] = {}
         if python_dontwritebytecode:
             subprocess_args["env"] = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
 
@@ -1115,7 +1115,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
 
     # Check for S3 object acl. Valid values from:
     # https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
-    payload_acl = kwargs.get("payload_acl", "private")
+    payload_acl = cast(PayloadAclTypeDef, kwargs.get("payload_acl", "private"))
 
     # Always use the global client for s3
     session = context.get_session(region=bucket_region)
@@ -1125,7 +1125,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
 
     prefix = kwargs.get("prefix", "")
 
-    results = {}
+    results: Dict[str, Any] = {}
     for name, options in kwargs["functions"].items():
         sys_path = (
             os.path.dirname(context.config_path)

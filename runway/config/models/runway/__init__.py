@@ -480,7 +480,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         """Validate parallel."""
         if v and values.get("path"):
             raise ValueError("only one of parallel or path can be defined")
-        result = []
+        result: List[Dict[str, Any]] = []
         for mod in v:
             if isinstance(mod, str):
                 result.append({"path": mod})

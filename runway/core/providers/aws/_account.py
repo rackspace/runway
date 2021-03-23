@@ -29,7 +29,7 @@ class AccountDetails:
         # Super overkill here using pagination when an account can only
         # have a single alias, but at least this implementation should be
         # future-proof.
-        aliases = []
+        aliases: List[str] = []
         paginator = self.__session.client("iam").get_paginator("list_account_aliases")
         response_iterator = paginator.paginate()
         for page in response_iterator:

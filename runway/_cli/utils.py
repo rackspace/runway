@@ -272,9 +272,9 @@ def select_modules_using_tags(
         List of selected deployments with selected modules.
 
     """
-    deployments_to_run = []
+    deployments_to_run: List[RunwayDeploymentDefinition] = []
     for deployment in deployments:
-        modules_to_run = []
+        modules_to_run: List[RunwayModuleDefinition] = []
         for module in deployment.modules:
             if module.child_modules:
                 module.child_modules = [

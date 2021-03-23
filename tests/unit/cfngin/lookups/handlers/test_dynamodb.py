@@ -3,7 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 import pytest
 
@@ -171,7 +171,7 @@ class TestDynamoDBHandler:
             "Key": {"TestKey": {"S": "FakeVal"}},
             "ProjectionExpression": "FakeVal,TestMap,String1",
         }
-        empty_response = {"ResponseMetadata": {}}
+        empty_response: Dict[str, Any] = {"ResponseMetadata": {}}
         stubber.add_response("get_item", empty_response, expected_params)
         with stubber, pytest.raises(ValueError) as excinfo:
             DynamodbLookup.handle(

@@ -120,7 +120,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                             env=self.ctx.env.vars,
                         )
                         self.logger.info("build steps (complete)")
-                    cdk_context_opts = []
+                    cdk_context_opts: List[str] = []
                     for key, val in cast(Dict[str, str], self.parameters).items():
                         cdk_context_opts.extend(["-c", "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)

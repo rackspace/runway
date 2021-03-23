@@ -205,7 +205,7 @@ class LookupHandler:
         colon_split = raw_value.split("::", 1)
 
         query = colon_split.pop(0)
-        args = cls._parse_args(colon_split[0]) if colon_split else {}
+        args: Dict[str, str] = cls._parse_args(colon_split[0]) if colon_split else {}
 
         return query, args
 

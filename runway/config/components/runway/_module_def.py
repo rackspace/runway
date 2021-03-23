@@ -66,7 +66,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
             raise TypeError(
                 f"expected List[RunwayModuleDefinition]; got {type(modules)}"
             )
-        sanitized = []
+        sanitized: List[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
                 sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))

@@ -134,7 +134,7 @@ class Module:
     @cached_property
     def payload(self) -> Dict[str, Any]:  # lazy load the payload
         """Return payload to be passed to module class handler class."""
-        payload = {}
+        payload: Dict[str, Any] = {}
         if self.__deployment:
             payload.update(
                 {

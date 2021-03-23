@@ -187,7 +187,7 @@ class DAG:
             combinations += [[node, edge] for edge in edges]
 
         while True:
-            new_combinations = []
+            new_combinations: List[List[str]] = []
             for comb1 in combinations:
                 for comb2 in combinations:
                     if comb1[-1] != comb2[0]:
@@ -360,7 +360,7 @@ class DAG:
             if value == 0:
                 queue.appendleft(node)
 
-        sorted_graph = []
+        sorted_graph: List[str] = []
         while queue:
             node = queue.pop()
             sorted_graph.append(node)
@@ -427,7 +427,7 @@ class ThreadedWalker:
         nodes.reverse()
 
         # This maps a node name to a thread of execution.
-        threads = {}
+        threads: Dict[str, Any] = {}
 
         # Blocks until all of the given nodes have completed execution (whether
         # successfully, or errored). Returns True if all nodes returned True.

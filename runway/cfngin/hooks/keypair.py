@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from botocore.exceptions import ClientError
 from typing_extensions import Literal, TypedDict
@@ -108,7 +108,7 @@ def create_key_pair_in_ssm(
     keypair = create_key_pair(ec2, keypair_name)
     try:
         kms_key_label = "default"
-        kms_args = {}
+        kms_args: Dict[str, Any] = {}
         if kms_key_id:
             kms_key_label = kms_key_id
             kms_args = {"KeyId": kms_key_id}
