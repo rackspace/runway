@@ -90,7 +90,6 @@ class CfnginStackDefinitionModel(ConfigProperty):
         False,
         description="Whether to force all updates to the stack to be performed interactively.",
     )
-    region: Optional[str] = None  # TODO remove
     required_by: List[str] = Field(
         [], description="Array of stacks (by name) that require this stack."
     )

@@ -28,7 +28,7 @@ class Action(BaseAction):
         if not self.context.stacks:
             LOGGER.warning("no stacks detected (error in config?)")
         for stack in self.context.stacks:
-            provider = self.build_provider(stack)
+            provider = self.build_provider()
 
             try:
                 provider_stack = provider.get_stack(stack.fqn)

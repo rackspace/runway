@@ -58,7 +58,6 @@ class Stack:
         name: Name of the stack taken from the definition.
         outputs: CloudFormation Stack outputs.
         protected: Whether this stack is protected.
-        region: AWS region name.
         termination_protection: The state of termination protection
             to apply to the stack.
         variables: Variables for the stack.
@@ -80,7 +79,6 @@ class Stack:
     name: str
     outputs: Dict[str, Any]
     protected: bool
-    region: Optional[str]
     termination_protection: bool
     variables: List[Variable]
 
@@ -124,7 +122,6 @@ class Stack:
         self.mappings = mappings or {}
         self.outputs = {}
         self.protected = protected
-        self.region = definition.region
         self.termination_protection = definition.termination_protection
         self.variables = _initialize_variables(definition, variables)
 

@@ -147,16 +147,11 @@ class BaseAction:
             raise ValueError("ProviderBuilder required to build a provider")
         return self.provider_builder.build()
 
-    def build_provider(self, stack: Stack) -> Provider:
-        """Build a CFNgin provider.
-
-        Args:
-            stack: Stack the action will be executed on.
-
-        """
+    def build_provider(self) -> Provider:
+        """Build a CFNgin provider."""
         if not self.provider_builder:
             raise ValueError("ProviderBuilder required to build a provider")
-        return self.provider_builder.build(region=stack.region)
+        return self.provider_builder.build()
 
     def ensure_cfn_bucket(self) -> None:
         """CloudFormation bucket where templates will be stored."""
@@ -292,7 +287,7 @@ class BaseAction:
         self, stack: Stack, cancel: threading.Event, retries: int = 0, **kwargs: Any
     ) -> None:
         """Tail a stack's event stream."""
-        provider = self.build_provider(stack)
+        provider = self.build_provider()
         return provider.tail_stack(
             stack, cancel, action=self.NAME, retries=retries, **kwargs
         )

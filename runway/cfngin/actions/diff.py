@@ -205,7 +205,7 @@ class Action(deploy.Action):
         if not deploy.should_submit(stack):
             return NotSubmittedStatus()
 
-        provider = self.build_provider(stack)
+        provider = self.build_provider()
 
         if not deploy.should_update(stack):
             stack.set_outputs(provider.get_outputs(stack.fqn))

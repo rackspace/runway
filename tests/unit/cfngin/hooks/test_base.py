@@ -242,7 +242,7 @@ class TestHookDeployAction:
         provider = MagicMock()
         obj = HookDeployAction(cfngin_context, provider)
 
-        assert obj.build_provider(None) == provider  # type: ignore
+        assert obj.build_provider() == provider
 
     def test_run(
         self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
