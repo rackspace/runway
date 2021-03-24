@@ -286,7 +286,7 @@ class HookDeployAction(deploy.Action):
         """Override the inherited property to return the local provider."""
         return self._provider
 
-    def build_provider(self, stack: Stack) -> Provider:
+    def build_provider(self) -> Provider:
         """Override the inherited method to always return local provider."""
         return self._provider
 

@@ -49,7 +49,7 @@ class Action(BaseAction):
         if self.cancel.wait(wait_time):
             return INTERRUPTED
 
-        provider = self.build_provider(stack)
+        provider = self.build_provider()
 
         try:
             provider_stack = provider.get_stack(stack.fqn)

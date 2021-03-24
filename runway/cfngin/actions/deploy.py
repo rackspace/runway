@@ -277,7 +277,7 @@ class Action(BaseAction):
         if self.cancel.wait(wait_time):
             return INTERRUPTED
 
-        provider = self.build_provider(stack)
+        provider = self.build_provider()
 
         try:
             stack_data = provider.get_stack(stack.fqn)
@@ -327,7 +327,7 @@ class Action(BaseAction):
         if not should_submit(stack):
             return NotSubmittedStatus()
 
-        provider = self.build_provider(stack)
+        provider = self.build_provider()
 
         try:
             provider_stack = provider.get_stack(stack.fqn)
