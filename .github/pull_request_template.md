@@ -1,35 +1,47 @@
-_The title of the pull request should be a short description of what was done._
+<!-- The title of the pull request should be a short description of what was done.  -->
 
-_You can remove any parts of this template not applicable to your Pull Request._
+<!-- You can remove any parts of this template not applicable to your Pull Request.  -->
 
-## Summary
+# Summary
 
-_A short summary describing what was done..._
+<!-- A short summary describing what was done... -->
 
-## Why This Is Needed
+# Why This Is Needed
 
-_Explain why this change is needed. Can be omitted if covered in the summary._
+<!-- Explain why this change is needed. Can be omitted if covered in the summary. -->
 
-## What Changed
+# What Changed
 
-_A detailed list of all the changes made, broken down by category._
+<!-- A detailed list of all the changes made, broken down by category. -->
 
-### Added
+## Added
 
-_What was added?_
+<!-- What was added? -->
 
-### Changed
+## Changed
 
-_Did any functionality change?_
+<!-- Did any functionality change? -->
 
-### Fixed
+## Fixed
 
-_Were any bugs fixed?_
+<!-- Were any bugs fixed? -->
 
-### Removed
+## Removed
 
-_Was anything removed?_
+<!-- Was anything removed? -->
 
-## Screenshots
+# Screenshots
 
-_Please include screenshots of any new features to show how it works._
+<!-- Please include screenshots of any new features to show how it works. -->
+
+# Checklist
+
+<!-- You can erase any parts of this template not applicable to your Pull Request. -->
+- [ ] Have you followed the guidelines in our [Contribution Requirements](https://docs.onica.com/projects/runway/page/developers/contributing.html)?
+- [ ] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?
+- [ ] Does your submission pass tests?
+- [ ] Have you linted your code locally prior to submission?
+- [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
+- [ ] Have you written new tests for your core changes, as applicable?
+- [ ] Have you successfully ran tests with your changes locally?
+- [ ] Have you updated documentation, as applicable?
