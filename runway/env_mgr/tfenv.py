@@ -111,7 +111,7 @@ def get_latest_tf_version(include_prerelease: bool = False) -> str:
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def load_terrafrom_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
+def load_terraform_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
     """Load all Terraform files in a module into one dict.
 
     Args:
@@ -199,14 +199,14 @@ class TFEnvManager(EnvManager):
             return data
 
         try:
-            result: Union[Dict[str, Any], List[Dict[str, Any]]] = load_terrafrom_module(
+            result: Union[Dict[str, Any], List[Dict[str, Any]]] = load_terraform_module(
                 hcl2, self.path
             ).get("terraform", cast(Dict[str, Any], {}))
         except HclParserError as exc:
             LOGGER.warning(exc)
             LOGGER.warning("failed to parse as HCL2; trying HCL...")
             try:
-                result = load_terrafrom_module(hcl, self.path).get(
+                result = load_terraform_module(hcl, self.path).get(
                     "terraform", cast(Dict[str, Any], {})
                 )
             except HclParserError as exc:
