@@ -16,6 +16,14 @@ help: ## show this message
 		printf "%s\n" $$help_info; \
 	done
 
+cov-report: ## display a report in the terminal of files missing coverage
+	@pipenv run coverage report \
+		--precision=2 \
+		--show-missing \
+		--skip-covered \
+		--skip-empty \
+		--rcfile=pyproject.toml
+
 list: ## list all targets in this Makefile
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
@@ -86,7 +94,7 @@ lint-pyright:
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
-	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration
+	@pipenv run pytest --cov=runway --cov-report term-missing:skip-covered --integration
 
 test-functional: ## run function tests only
 	@echo "Running functional tests..."
@@ -94,11 +102,11 @@ test-functional: ## run function tests only
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
-	@pipenv run pytest --cov=runway --cov-report term:skip-covered --integration-only
+	@pipenv run pytest --cov=runway --cov-report term-missing:skip-covered --integration-only
 
 test-unit: ## run unit tests only
 	@echo "Running unit tests..."
-	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing
+	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing:skip-covered
 
 create_tfenv_ver_file: ## create a tfenv version file using the latest version
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
