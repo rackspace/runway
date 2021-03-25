@@ -127,7 +127,7 @@ def load_terrafrom_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
             tf_config = parser.loads(tf_file.read_text())  # type: ignore
             result = merge_dicts(result, cast(Dict[str, Any], tf_config))
         except Exception as exc:
-            raise HclParserError(exc, tf_file, parser)
+            raise HclParserError(exc, tf_file, parser) from None
     return result
 
 
