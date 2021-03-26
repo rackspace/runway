@@ -179,7 +179,7 @@ addopts = [
     "--no-cov-on-fail"
 ]
 minversion = 6.0
-filterwarnings = ["ignore::DeprecationWarning"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::pytest_mock.PytestMockWarning"]
 python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]

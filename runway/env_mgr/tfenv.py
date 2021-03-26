@@ -11,8 +11,7 @@ import sys
 import tempfile
 import zipfile
 from distutils.version import LooseVersion
-from types import ModuleType
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast, overload
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -20,11 +19,13 @@ import hcl
 import hcl2
 import requests
 
+from ..exceptions import HclParserError
 from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:
     from pathlib import Path
+    from types import ModuleType
 
     from .._logging import RunwayLogger
 
@@ -110,7 +111,7 @@ def get_latest_tf_version(include_prerelease: bool = False) -> str:
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def load_terrafrom_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
+def load_terraform_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
     """Load all Terraform files in a module into one dict.
 
     Args:
@@ -122,8 +123,11 @@ def load_terrafrom_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
     result: Dict[str, Any] = {}
     LOGGER.debug("using %s parser to load module: %s", parser.__name__.upper(), path)
     for tf_file in path.glob("*.tf"):
-        tf_config = parser.loads(tf_file.read_text())  # type: ignore
-        result = merge_dicts(result, cast(Dict[str, Any], tf_config))
+        try:
+            tf_config = parser.loads(tf_file.read_text())  # type: ignore
+            result = merge_dicts(result, cast(Dict[str, Any], tf_config))
+        except Exception as exc:
+            raise HclParserError(exc, tf_file, parser) from None
     return result
 
 
@@ -143,16 +147,32 @@ class TFEnvManager(EnvManager):
         """Backend config of the Terraform module."""
         # Terraform can only have one backend configured; this formats the
         # data to make it easier to work with
-        return [  # type: ignore
+        return [
             {"type": k, "config": v}
-            for k, v in self.terraform_block.get("backend", {None: {}}).items()  # type: ignore
+            for k, v in self.terraform_block.get(
+                "backend", {None: cast(Dict[str, str], {})}
+            ).items()
         ][0]
 
     @cached_property
     def terraform_block(self) -> Dict[str, Any]:
         """Collect Terraform configuration blocks from a Terraform module."""
 
-        def _flatten_lists(data: Any) -> Dict[str, Any]:
+        @overload
+        def _flatten_lists(data: Dict[str, Any]) -> Dict[str, Any]:
+            ...
+
+        @overload
+        def _flatten_lists(data: List[Any]) -> List[Any]:
+            ...
+
+        @overload
+        def _flatten_lists(data: str) -> str:
+            ...
+
+        def _flatten_lists(
+            data: Union[Dict[str, Any], List[Any], Any]
+        ) -> Union[Dict[str, Any], Any]:
             """Flatten HCL2 list attributes until its fixed.
 
             python-hcl2 incorrectly turns all attributes into lists so we need
@@ -176,21 +196,24 @@ class TFEnvManager(EnvManager):
                         data[attr] = [_flatten_lists(v) for v in cast(List[Any], val)]
                 elif isinstance(val, dict):
                     data[attr] = _flatten_lists(cast(Dict[str, Any], val))
-            return data  # type: ignore
+            return data
 
         try:
-            result: Union[Dict[str, Any], List[Dict[str, Any]]] = load_terrafrom_module(
+            result: Union[Dict[str, Any], List[Dict[str, Any]]] = load_terraform_module(
                 hcl2, self.path
-            ).get(
-                "terraform", {}  # type: ignore
-            )
-        except Exception:  # pylint: disable=broad-except
-            # could result in any number of lark exceptions
-            LOGGER.verbose(
-                "failed to parse as HCL2; trying HCL",
-                exc_info=True,  # useful in troubleshooting
-            )
-            result = load_terrafrom_module(hcl, self.path).get("terraform", {})  # type: ignore
+            ).get("terraform", cast(Dict[str, Any], {}))
+        except HclParserError as exc:
+            LOGGER.warning(exc)
+            LOGGER.warning("failed to parse as HCL2; trying HCL...")
+            try:
+                result = load_terraform_module(hcl, self.path).get(
+                    "terraform", cast(Dict[str, Any], {})
+                )
+            except HclParserError as exc:
+                LOGGER.warning(exc)
+                # return an empty dict if we can't parse HCL
+                # let Terraform decide if it's actually valid
+                result = {}
 
         # python-hcl2 turns all blocks into lists in v0.3.0. this flattens it.
         if isinstance(result, list):

@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
     from .variables import (
         Variable,
         VariableValue,
@@ -96,6 +98,34 @@ class FailedVariableLookup(Exception):
             *args,
             **kwargs
         )
+
+
+class HclParserError(Exception):
+    """HCL/HCL2 parser error."""
+
+    def __init__(
+        self,
+        exc: Exception,
+        file_path: Union[Path, str],
+        parser: Optional[ModuleType] = None,
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            exc: Exception that was raised.
+            file_path: File that resulted in the error.
+            parser: The parser what was used to try to parse the file (hcl|hcl2).
+
+        """
+        self.reason = exc
+        self.file_path = file_path
+        if parser:
+            self.message = (
+                f"Unable to parse {file_path} as {parser.__name__.upper()}\n\n{exc}"
+            )
+        else:
+            self.message = f"Unable to parse {file_path}\n\n{exc}"
+        super().__init__(self.message)
 
 
 class InvalidLookupConcatenation(Exception):
