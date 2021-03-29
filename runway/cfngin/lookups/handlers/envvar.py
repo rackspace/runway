@@ -43,5 +43,5 @@ class EnvvarLookup(LookupHandler):
 
         try:
             return os.environ[value]
-        except KeyError:
-            raise ValueError('EnvVar "{}" does not exist'.format(value))
+        except KeyError as exc:
+            raise ValueError('EnvVar "{}" does not exist'.format(value)) from exc

@@ -43,7 +43,7 @@ class DefaultLookup(LookupHandler):
             raise ValueError(
                 "Invalid value for default: %s. Must be in "
                 "<env_var>::<default value> format." % value
-            )
+            ) from None
 
         if context and env_var_name in context.parameters:
             return context.parameters[env_var_name]

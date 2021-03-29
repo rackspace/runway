@@ -32,7 +32,7 @@ class TestStack(unittest.TestCase):
         class FakeLookup(LookupHandler):
             """False Lookup."""
 
-            # pylint: disable=arguments-differ
+            # pylint: disable=arguments-differ,unused-argument
             @classmethod
             def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
                 """Perform the lookup."""

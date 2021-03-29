@@ -73,7 +73,7 @@ def test_get_fqn(delim: str, expected: str, name: Optional[str]) -> None:
     assert get_fqn("test", delim, name) == expected
 
 
-class TestCFNginContext:
+class TestCFNginContext:  # pylint: disable=too-many-public-methods
     """Test runway.context.cfngin.CFNginContext."""
 
     config = CfnginConfig.parse_obj(

@@ -47,6 +47,6 @@ class SplitLookup(LookupHandler):
         except ValueError:
             raise ValueError(
                 f"Invalid value for split: {value}. Must be in <delimiter>::<text> format."
-            )
+            ) from None
 
         return text.split(delimiter)

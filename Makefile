@@ -84,7 +84,7 @@ lint-isort: ## run isort
 
 lint-pylint: ## run pylint
 	@echo "Running pylint..."
-	@find runway -name '*.py' -not -path 'runway/templates/cdk-py/*' | xargs pipenv run pylint --rcfile=pyproject.toml
+	@pipenv run pylint runway tests --rcfile=pyproject.toml
 	@echo ""
 
 lint-pyright:

@@ -658,7 +658,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
         try:
             subprocess.check_call(cmd, **subprocess_args)
         except subprocess.CalledProcessError:
-            raise PipError
+            raise PipError from None
         finally:
             if tmp_script.is_file():
                 tmp_script.unlink()
@@ -862,10 +862,10 @@ def _upload_function(
     """
     try:
         root = os.path.expanduser(options["path"])
-    except KeyError as err:
+    except KeyError as exc:
         raise ValueError(
-            "missing required property '{}' in function '{}'".format(err.args[0], name)
-        )
+            "missing required property '{}' in function '{}'".format(exc.args[0], name)
+        ) from exc
 
     includes = _check_pattern_list(options.get("include"), "include", default=["**"])
     excludes = _check_pattern_list(options.get("exclude"), "exclude", default=[])

@@ -153,7 +153,7 @@ class ConfigComponentDefinition:
         try:
             return self.__getattr__(name)
         except AttributeError:
-            raise KeyError(name)
+            raise KeyError(name) from None
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Implement evaluation of self.name = value.

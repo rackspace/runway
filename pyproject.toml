@@ -159,8 +159,6 @@ disable = [
     "missing-function-docstring",  # flake8 (pydocstyle) overlap
     "missing-module-docstring",  # flake8 (pydocstyle) overlap
     "similarities",  # black overcomplicates this
-    # TODO fix these - python 3 only code
-    "raise-missing-from",
     "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
 ]
 

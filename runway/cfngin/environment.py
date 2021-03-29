@@ -21,7 +21,7 @@ def parse_environment(raw_environment: str) -> Dict[str, Any]:
         try:
             key, value = line.split(":", 1)
         except ValueError:
-            raise ValueError("Environment must be in key: value format")
+            raise ValueError("Environment must be in key: value format") from None
 
         environment[key] = value.strip()
     return environment

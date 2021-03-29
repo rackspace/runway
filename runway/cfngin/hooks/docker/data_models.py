@@ -240,7 +240,7 @@ class BaseModel:
                     "{} expected dict not {}".format(
                         cls.__name__, obj.__class__.__name__
                     )
-                )
+                ) from None
         return cls(context=context, **obj)
 
     def __eq__(self, other: Any) -> bool:

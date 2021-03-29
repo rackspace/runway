@@ -385,8 +385,8 @@ class CfnginContext(BaseContext):
                 ),
                 lock_code,
             )
-        except self.s3_client.exceptions.NoSuchKey:
-            raise PersistentGraphCannotLock("s3 object does not exist")
+        except self.s3_client.exceptions.NoSuchKey as exc:
+            raise PersistentGraphCannotLock("s3 object does not exist") from exc
 
     def put_persistent_graph(self, lock_code: str) -> None:
         """Upload persistent graph to s3.

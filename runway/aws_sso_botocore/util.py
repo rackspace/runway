@@ -39,9 +39,9 @@ class SSOTokenLoader:
         try:
             token = self._cache[cache_key]
             return token["accessToken"]
-        except KeyError:
+        except KeyError as exc:
             LOGGER.debug("Failed to load SSO token:", exc_info=True)
             error_msg = (
                 "The SSO access token has either expired or is otherwise invalid."
             )
-            raise SSOTokenLoadError(error_msg=error_msg)
+            raise SSOTokenLoadError(error_msg=error_msg) from exc

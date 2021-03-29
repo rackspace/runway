@@ -300,7 +300,7 @@ def yaml_to_ordered_dict(
                         node.start_mark,
                         "found unhashable key (%s)" % exc,
                         key_node.start_mark,
-                    )
+                    ) from exc
                 # prevent duplicate sibling keys for certain "keywords".
                 if key in mapping and key in self.NO_DUPE_SIBLINGS:
                     msg = "{} key cannot have duplicate siblings {} {}"
