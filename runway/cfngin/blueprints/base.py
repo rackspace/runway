@@ -128,7 +128,7 @@ def validate_variable_type(
             value = var_type.create(value)
         except Exception as exc:
             name = "{}.create".format(var_type.resource_name)
-            raise ValidatorError(var_name, name, value, exc)
+            raise ValidatorError(var_name, name, value, exc) from exc
     else:
         if not isinstance(value, var_type):
             raise ValueError(
@@ -189,7 +189,7 @@ def resolve_variable(
     try:
         var_type = var_def["type"]
     except KeyError:
-        raise VariableTypeRequired(blueprint_name, var_name)
+        raise VariableTypeRequired(blueprint_name, var_name) from None
 
     if provided_variable:
         if not provided_variable.resolved:
@@ -202,14 +202,14 @@ def resolve_variable(
         try:
             value = var_def["default"]
         except KeyError:
-            raise MissingVariable(blueprint_name, var_name)
+            raise MissingVariable(blueprint_name, var_name) from None
 
     # If no validator, return the value as is, otherwise apply validator
     validator = var_def.get("validator", lambda v: v)
     try:
         value = validator(value)
     except Exception as exc:
-        raise ValidatorError(var_name, validator.__name__, value, exc)
+        raise ValidatorError(var_name, validator.__name__, value, exc) from exc
 
     # Ensure that the resulting value is the correct type
     value = validate_variable_type(var_name, var_type, value)
@@ -269,10 +269,10 @@ def parse_user_data(
 
     try:
         res = template.substitute(variable_values)
-    except ValueError as err:
-        raise InvalidUserdataPlaceholder(blueprint_name, err.args[0])
-    except KeyError as err:
-        raise MissingVariable(blueprint_name, str(err))
+    except ValueError as exc:
+        raise InvalidUserdataPlaceholder(blueprint_name, exc.args[0]) from exc
+    except KeyError as exc:
+        raise MissingVariable(blueprint_name, str(exc)) from exc
 
     return res
 

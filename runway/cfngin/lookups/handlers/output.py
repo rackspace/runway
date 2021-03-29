@@ -90,6 +90,6 @@ def deconstruct(value: str) -> OutputQuery:
     except ValueError:
         raise ValueError(
             "output handler requires syntax of <stack>::<output>. Got: %s" % value
-        )
+        ) from None
 
     return OutputQuery(stack_name, output_name)

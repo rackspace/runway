@@ -463,10 +463,8 @@ class Graph:
         """
         try:
             self.dag.add_edge(step, dep)
-        except KeyError as err:
-            raise GraphError(err, step, dep)
-        except DAGValidationError as err:
-            raise GraphError(err, step, dep)
+        except (DAGValidationError, KeyError) as exc:
+            raise GraphError(exc, step, dep) from None
 
     def transitive_reduction(self) -> None:
         """Perform a transitive reduction on the underlying DAG.

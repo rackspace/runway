@@ -219,8 +219,8 @@ class SSOCredentialFetcher(CachedCredentialFetcher):
         }
         try:
             response = client.get_role_credentials(**kwargs)
-        except client.exceptions.UnauthorizedException:
-            raise UnauthorizedSSOTokenError()
+        except client.exceptions.UnauthorizedException as exc:
+            raise UnauthorizedSSOTokenError() from exc
         credentials = response["roleCredentials"]
 
         credentials = {

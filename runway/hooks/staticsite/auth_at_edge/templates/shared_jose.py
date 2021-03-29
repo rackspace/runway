@@ -130,8 +130,8 @@ class JwksClient:
         try:
             key = next(x for x in keys if x.get("kid") == kid)
             return key
-        except StopIteration:
-            raise Exception("Was not able to locate a key with kid %s" % kid)
+        except StopIteration as exc:
+            raise Exception("Was not able to locate a key with kid %s" % kid) from exc
 
     def get_signing_keys(self):
         """Given a set of keys find all that are signing keys."""

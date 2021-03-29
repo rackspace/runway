@@ -59,8 +59,8 @@ def handle_hooks(  # pylint: disable=too-many-statements
     for i, hook in enumerate(hooks):
         try:
             hook_paths.append(hook.path)
-        except KeyError:
-            raise ValueError("%s hook #%d missing path." % (stage, i))
+        except KeyError as exc:
+            raise ValueError("%s hook #%d missing path." % (stage, i)) from exc
 
     LOGGER.info("executing %s hooks: %s", stage, ", ".join(hook_paths))
     for hook in hooks:

@@ -69,20 +69,20 @@ class DynamodbLookup(LookupHandler):
                 Key={table_lookup: new_keys[0]},
                 ProjectionExpression=projection_expression,
             )
-        except ClientError as err:
-            if err.response["Error"]["Code"] == "ResourceNotFoundException":
+        except ClientError as exc:
+            if exc.response["Error"]["Code"] == "ResourceNotFoundException":
                 raise ValueError(
                     "Cannot find the DynamoDB table: {}".format(table_name)
-                )
-            if err.response["Error"]["Code"] == "ValidationException":
+                ) from exc
+            if exc.response["Error"]["Code"] == "ValidationException":
                 raise ValueError(
                     "No DynamoDB record matched the partition key: {}".format(
                         table_lookup
                     )
-                )
+                ) from exc
             raise ValueError(
-                "The DynamoDB lookup {} had an error: {}".format(value, err)
-            )
+                "The DynamoDB lookup {} had an error: {}".format(value, exc)
+            ) from exc
         # find and return the key from the dynamo data returned
         if "Item" in response:
             return _get_val_from_ddb_data(response["Item"], new_keys[1:])

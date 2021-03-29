@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Union
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -15,7 +15,20 @@ if TYPE_CHECKING:
     )
 
 
-class ConfigNotFound(Exception):
+class RunwayError(Exception):
+    """Base class for custom exceptions raised by Runway."""
+
+    message: str
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Instantiate class."""
+        if self.message:
+            super().__init__(self.message, *args, **kwargs)
+        else:
+            super().__init__(*args, **kwargs)
+
+
+class ConfigNotFound(RunwayError):
     """Configuration file could not be found."""
 
     looking_for: List[str]
@@ -40,10 +53,10 @@ class ConfigNotFound(Exception):
             )
         else:
             self.message = f"config file not found at path {path}"
-        super().__init__(self.message, self.path, self.looking_for)
+        super().__init__(self.path, self.looking_for)
 
 
-class FailedLookup(Exception):
+class FailedLookup(RunwayError):
     """Intermediary Exception to be converted to FailedVariableLookup.
 
     Should be caught by error handling and
@@ -52,8 +65,9 @@ class FailedLookup(Exception):
 
     """
 
-    lookup: VariableValueLookup
     cause: Exception
+    lookup: VariableValueLookup
+    message: ClassVar[str] = "Failed lookup"
 
     def __init__(
         self, lookup: VariableValueLookup, cause: Exception, *args: Any, **kwargs: Any
@@ -66,12 +80,12 @@ class FailedLookup(Exception):
             cause: The exception that was raised.
 
         """
-        self.lookup = lookup
         self.cause = cause
-        super().__init__("Failed lookup", *args, **kwargs)
+        self.lookup = lookup
+        super().__init__(*args, **kwargs)
 
 
-class FailedVariableLookup(Exception):
+class FailedVariableLookup(RunwayError):
     """Lookup could not be resolved.
 
     Raised when an exception is raised when trying to resolve a lookup.
@@ -80,6 +94,7 @@ class FailedVariableLookup(Exception):
 
     cause: FailedLookup
     variable: Variable
+    message: str
 
     def __init__(
         self, variable: Variable, lookup_error: FailedLookup, *args: Any, **kwargs: Any
@@ -91,17 +106,19 @@ class FailedVariableLookup(Exception):
             lookup_error: The exception that was raised directly before this one.
 
         """
-        self.variable = variable
         self.cause = lookup_error
-        super().__init__(
-            f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"',
-            *args,
-            **kwargs
+        self.variable = variable
+        self.message = (
+            f'Could not resolve lookup "{lookup_error.lookup}" '
+            f'for variable "{variable.name}"'
         )
+        super().__init__(*args, **kwargs)
 
 
-class HclParserError(Exception):
+class HclParserError(RunwayError):
     """HCL/HCL2 parser error."""
+
+    message: str
 
     def __init__(
         self,
@@ -125,10 +142,10 @@ class HclParserError(Exception):
             )
         else:
             self.message = f"Unable to parse {file_path}\n\n{exc}"
-        super().__init__(self.message)
+        super().__init__()
 
 
-class InvalidLookupConcatenation(Exception):
+class InvalidLookupConcatenation(RunwayError):
     """Invalid return value for a concatinated (chained) lookup.
 
     The return value must be a string when lookups are concatinated.
@@ -137,6 +154,7 @@ class InvalidLookupConcatenation(Exception):
 
     concatenated_lookups: VariableValueConcatenation[Any]
     invalid_lookup: VariableValue
+    message: str
 
     def __init__(
         self,
@@ -148,15 +166,15 @@ class InvalidLookupConcatenation(Exception):
         """Instantiate class."""
         self.concatenated_lookups = concat_lookups
         self.invalid_lookup = invalid_lookup
-        message = (
+        self.message = (
             f"expected return value of type {str} but received "
             f'{type(invalid_lookup.value)} for lookup "{invalid_lookup}" '
             f'in "{concat_lookups}"'
         )
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class NpmNotFound(Exception):
+class NpmNotFound(RunwayError):
     """Raised when npm could not be executed or was not found in path."""
 
     message: str
@@ -167,11 +185,13 @@ class NpmNotFound(Exception):
             '"npm" not found in path or is not executable; '
             "please ensure it is installed correctly"
         )
-        super().__init__(self.message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class OutputDoesNotExist(Exception):
+class OutputDoesNotExist(RunwayError):
     """Raised when a specific stack output does not exist."""
+
+    message: str
 
     def __init__(self, stack_name: str, output: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -184,11 +204,11 @@ class OutputDoesNotExist(Exception):
         self.stack_name = stack_name
         self.output = output
 
-        message = "Output %s does not exist on stack %s" % (output, stack_name)
-        super().__init__(message, *args, **kwargs)
+        self.message = "Output %s does not exist on stack %s" % (output, stack_name)
+        super().__init__(*args, **kwargs)
 
 
-class UnknownLookupType(Exception):
+class UnknownLookupType(RunwayError):
     """Lookup type provided does not match a registered lookup.
 
     Example:
@@ -197,6 +217,8 @@ class UnknownLookupType(Exception):
 
     """
 
+    message: str
+
     def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
@@ -204,12 +226,14 @@ class UnknownLookupType(Exception):
             lookup: Variable value lookup that could not find a handler.
 
         """
-        message = f'Unknown lookup type "{lookup.lookup_name.value}" in "{lookup}"'
-        super().__init__(message, *args, **kwargs)
+        self.message = f'Unknown lookup type "{lookup.lookup_name.value}" in "{lookup}"'
+        super().__init__(*args, **kwargs)
 
 
-class UnresolvedVariable(Exception):
+class UnresolvedVariable(RunwayError):
     """Raised when trying to use a variable before it has been resolved."""
+
+    message: str
 
     def __init__(self, variable: Variable, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -222,10 +246,10 @@ class UnresolvedVariable(Exception):
             f'Attempted to use variable "{variable.name}" before it was resolved'
         )
         self.variable = variable
-        super().__init__(self.message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class UnresolvedVariableValue(Exception):
+class UnresolvedVariableValue(RunwayError):
     """Intermediary Exception to be converted to UnresolvedVariable.
 
     Should be caught by error handling and
@@ -235,6 +259,7 @@ class UnresolvedVariableValue(Exception):
     """
 
     lookup: VariableValueLookup
+    message: ClassVar[str] = "Unresolved lookup"
 
     def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -244,10 +269,10 @@ class UnresolvedVariableValue(Exception):
 
         """
         self.lookup = lookup
-        super().__init__("Unresolved lookup", *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class VariablesFileNotFound(Exception):
+class VariablesFileNotFound(RunwayError):
     """Defined variables file could not be found."""
 
     file_path: Path
@@ -262,4 +287,4 @@ class VariablesFileNotFound(Exception):
         """
         self.file_path = file_path
         self.message = f"defined variables file not found at path {file_path}"
-        super().__init__(self.file_path, self.message)
+        super().__init__(self.file_path)

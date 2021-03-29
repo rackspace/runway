@@ -137,10 +137,10 @@ class CfnLookup(LookupHandler):
         raw_query, args = cls.parse(value)
         try:
             query = OutputQuery(*raw_query.split("."))
-        except TypeError:
+        except TypeError as exc:
             raise ValueError(
                 'query must be <stack-name>.<output-name>; got "{}"'.format(raw_query)
-            )
+            ) from exc
 
         try:
             # dict is not perserved in mock call so it must be a copy of
@@ -155,7 +155,7 @@ class CfnLookup(LookupHandler):
                     "cloudformation"
                 )
                 result = cls.get_stack_output(cfn_client, query)
-        except (ClientError, KeyError, StackDoesNotExist) as err:
+        except (ClientError, KeyError, StackDoesNotExist) as exc:
             # StackDoesNotExist is only raised by provider
             if "default" in args:
                 LOGGER.debug(
@@ -166,8 +166,8 @@ class CfnLookup(LookupHandler):
                 )
                 args.pop("load", None)  # don't load a default value
                 result = args.pop("default")
-            elif isinstance(err, (ClientError, StackDoesNotExist)):
+            elif isinstance(exc, (ClientError, StackDoesNotExist)):
                 raise
             else:
-                raise OutputDoesNotExist(query.stack_name, query.output_name)
+                raise OutputDoesNotExist(query.stack_name, query.output_name) from exc
         return cls.format_results(result, **args)
