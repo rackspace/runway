@@ -1,19 +1,31 @@
 """CFNgin exceptions."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Union
+
+from ..exceptions import RunwayError
 
 if TYPE_CHECKING:
     from ..variables import Variable
     from .plan import Step
 
 
-class CancelExecution(Exception):
+class CfnginError(RunwayError):
+    """Base class for custom exceptions raised by Runway."""
+
+    message: str
+
+
+class CancelExecution(CfnginError):
     """Raised when we want to cancel executing the plan."""
 
+    message: ClassVar[str] = "Plan canceled"
 
-class ChangesetDidNotStabilize(Exception):
+
+class ChangesetDidNotStabilize(CfnginError):
     """Raised when the applying a changeset fails."""
+
+    message: str
 
     def __init__(self, change_set_id: str) -> None:
         """Instantiate class.
@@ -23,13 +35,16 @@ class ChangesetDidNotStabilize(Exception):
 
         """
         self.id = change_set_id
-        message = "Changeset '%s' did not reach a completed state." % (change_set_id)
+        self.message = "Changeset '%s' did not reach a completed state." % (
+            change_set_id
+        )
+        super().__init__()
 
-        super().__init__(message)
 
-
-class GraphError(Exception):
+class GraphError(CfnginError):
     """Raised when the graph is invalid (e.g. acyclic dependencies)."""
+
+    message: str
 
     def __init__(self, exception: Exception, stack: str, dependency: str) -> None:
         """Instantiate class.
@@ -44,14 +59,16 @@ class GraphError(Exception):
         self.stack = stack
         self.dependency = dependency
         self.exception = exception
-        message = "Error detected when adding '{}' as a dependency of '{}': {}".format(
+        self.message = "Error detected when adding '{}' as a dependency of '{}': {}".format(
             dependency, stack, str(exception),
         )
-        super().__init__(message)
+        super().__init__()
 
 
-class ImproperlyConfigured(Exception):
+class ImproperlyConfigured(CfnginError):
     """Raised when a componenet is improperly configured."""
+
+    message: str
 
     def __init__(self, cls: Any, error: Exception, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -61,12 +78,15 @@ class ImproperlyConfigured(Exception):
             error: The exception that was raised when trying to use cls.
 
         """
-        message = 'Class "%s" is improperly configured: %s' % (cls, error,)
-        super().__init__(message, *args, **kwargs)
+        self.message = 'Class "%s" is improperly configured: %s' % (cls, error,)
+        super().__init__(*args, **kwargs)
 
 
-class InvalidConfig(Exception):
+class InvalidConfig(CfnginError):
     """Provided config file is invalid."""
+
+    errors: Union[str, List[Union[Exception, str]]]
+    message: str
 
     def __init__(self, errors: Union[str, List[Union[Exception, str]]]) -> None:
         """Instantiate class.
@@ -76,12 +96,18 @@ class InvalidConfig(Exception):
                 config is invalid.
 
         """
-        super().__init__(errors)
         self.errors = errors
+        if isinstance(errors, list):
+            self.message = "\n".join(str(e) for e in errors)
+        else:
+            self.message = errors
+        super().__init__(errors)
 
 
-class InvalidDockerizePipConfiguration(Exception):
+class InvalidDockerizePipConfiguration(CfnginError):
     """Raised when the provided configuration for dockerized pip is invalid."""
+
+    message: str
 
     def __init__(self, msg: str) -> None:
         """Instantiate class.
@@ -91,15 +117,17 @@ class InvalidDockerizePipConfiguration(Exception):
 
         """
         self.message = msg
-        super().__init__(self.message)
+        super().__init__()
 
 
-class InvalidUserdataPlaceholder(Exception):
+class InvalidUserdataPlaceholder(CfnginError):
     """Raised when a placeholder name in raw_user_data is not valid.
 
     E.g ``${100}`` would raise this.
 
     """
+
+    message: str
 
     def __init__(
         self, blueprint_name: str, exception_message: str, *args: Any, **kwargs: Any
@@ -112,14 +140,17 @@ class InvalidUserdataPlaceholder(Exception):
                 parsing the userdata.
 
         """
-        message = exception_message + ". "
-        message += 'Could not parse userdata in blueprint "%s". ' % (blueprint_name)
-        message += "Make sure to escape all $ symbols with a $$."
-        super().__init__(message, *args, **kwargs)
+        self.message = (
+            f'{exception_message}. Could not parse userdata in blueprint {blueprint_name}". '
+            "Make sure to escape all $ symbols with a $$."
+        )
+        super().__init__(*args, **kwargs)
 
 
-class MissingEnvironment(Exception):
+class MissingEnvironment(CfnginError):
     """Raised when an environment lookup is used but the key doesn't exist."""
+
+    message: str
 
     def __init__(self, key: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -129,12 +160,14 @@ class MissingEnvironment(Exception):
 
         """
         self.key = key
-        message = "Environment missing key %s." % (key,)
-        super().__init__(message, *args, **kwargs)
+        self.message = "Environment missing key %s." % (key,)
+        super().__init__(*args, **kwargs)
 
 
-class MissingParameterException(Exception):
+class MissingParameterException(CfnginError):
     """Raised if a required parameter with no default is missing."""
+
+    message: str
 
     def __init__(self, parameters: List[str], *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -144,14 +177,16 @@ class MissingParameterException(Exception):
 
         """
         self.parameters = parameters
-        message = "Missing required cloudformation parameters: %s" % (
-            ", ".join(parameters),
+        self.message = (
+            f"Missing required cloudformation parameters: {', '.join(parameters)}"
         )
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class MissingVariable(Exception):
+class MissingVariable(CfnginError):
     """Raised when a variable with no default is not provided a value."""
+
+    message: str
 
     def __init__(
         self, blueprint_name: str, variable_name: str, *args: Any, **kwargs: Any
@@ -163,15 +198,16 @@ class MissingVariable(Exception):
             variable_name: Name of the variable missing a value.
 
         """
-        message = 'Variable "%s" in blueprint "%s" is missing' % (
-            variable_name,
-            blueprint_name,
+        self.message = (
+            f'Variable "{variable_name}" in blueprint "{blueprint_name}" is missing'
         )
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class PipError(Exception):
+class PipError(CfnginError):
     """Raised when pip returns a non-zero exit code."""
+
+    message: str
 
     def __init__(self) -> None:
         """Instantiate class."""
@@ -179,11 +215,13 @@ class PipError(Exception):
             "A non-zero exit code was returned when invoking "
             "pip. More information can be found in the error above."
         )
-        super().__init__(self.message)
+        super().__init__()
 
 
-class PipenvError(Exception):
+class PipenvError(CfnginError):
     """Raised when pipenv returns a non-zero exit code."""
+
+    message: str
 
     def __init__(self) -> None:
         """Instantiate class."""
@@ -193,47 +231,55 @@ class PipenvError(Exception):
             "Pipfile being used is valid. More information can be "
             "found in the error above."
         )
-        super().__init__(self.message)
+        super().__init__()
 
 
-class PersistentGraphCannotLock(Exception):
+class PersistentGraphCannotLock(CfnginError):
     """Raised when the persistent graph in S3 cannot be locked."""
+
+    message: str
 
     def __init__(self, reason: str) -> None:
         """Instantiate class."""
-        message = "Could not lock persistent graph; %s" % reason
-        super().__init__(message)
+        self.message = "Could not lock persistent graph; %s" % reason
+        super().__init__()
 
 
-class PersistentGraphCannotUnlock(Exception):
+class PersistentGraphCannotUnlock(CfnginError):
     """Raised when the persistent graph in S3 cannot be unlocked."""
+
+    message: str
 
     def __init__(self, reason: Union[Exception, str]) -> None:
         """Instantiate class."""
-        message = "Could not unlock persistent graph; %s" % reason
-        super().__init__(message)
+        self.message = "Could not unlock persistent graph; %s" % reason
+        super().__init__()
 
 
-class PersistentGraphLocked(Exception):
+class PersistentGraphLocked(CfnginError):
     """Raised when the persistent graph in S3 is lock.
 
     The action being executed requires it to be unlocked before attempted.
 
     """
 
+    message: str
+
     def __init__(
         self, message: Optional[str] = None, reason: Optional[str] = None
     ) -> None:
         """Instantiate class."""
-        if not message:
-            message = "Persistant graph is locked. {}".format(
+        if message:
+            self.message = message
+        else:
+            self.message = "Persistant graph is locked. {}".format(
                 reason
                 or ("This action requires the graph to be unlocked to be executed.")
             )
-        super().__init__(message)
+        super().__init__()
 
 
-class PersistentGraphLockCodeMissmatch(Exception):
+class PersistentGraphLockCodeMissmatch(CfnginError):
     """Raised when the provided persistent graph lock code does not match.
 
     The code used to unlock the persistent graph must match the s3 object lock
@@ -241,36 +287,44 @@ class PersistentGraphLockCodeMissmatch(Exception):
 
     """
 
+    message: str
+
     def __init__(self, provided_code: str, s3_code: Optional[str]) -> None:
         """Instantiate class."""
-        message = (
-            "The provided lock code '%s' does not match the S3 "
-            "object lock code '%s'" % (provided_code, s3_code)
+        self.message = (
+            f"The provided lock code '{provided_code}' does not match the S3 "
+            f"object lock code '{s3_code}'"
         )
-        super().__init__(message)
+        super().__init__()
 
 
-class PersistentGraphUnlocked(Exception):
+class PersistentGraphUnlocked(CfnginError):
     """Raised when the persistent graph in S3 is unlock.
 
     The action being executed requires it to be locked before attempted.
 
     """
 
+    message: str
+
     def __init__(
         self, message: Optional[str] = None, reason: Optional[str] = None
     ) -> None:
         """Instantiate class."""
-        if not message:
-            message = "Persistant graph is unlocked. {}".format(
+        if message:
+            self.message = message
+        else:
+            self.message = "Persistant graph is unlocked. {}".format(
                 reason
                 or ("This action requires the graph to be locked to be executed.")
             )
-        super().__init__(message)
+        super().__init__()
 
 
-class PlanFailed(Exception):
+class PlanFailed(CfnginError):
     """Raised if any step of a plan fails."""
+
+    message: str
 
     def __init__(self, failed_steps: List[Step], *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -282,17 +336,21 @@ class PlanFailed(Exception):
         self.failed_steps = failed_steps
 
         step_names = ", ".join(step.name for step in failed_steps)
-        message = "The following steps failed: %s" % (step_names,)
+        self.message = f"The following steps failed: {step_names}"
 
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class StackDidNotChange(Exception):
+class StackDidNotChange(CfnginError):
     """Raised when there are no changes to be made by the provider."""
 
+    message: ClassVar[str] = "Stack did not change"
 
-class StackDoesNotExist(Exception):
+
+class StackDoesNotExist(CfnginError):
     """Raised when a stack does not exist in AWS."""
+
+    message: str
 
     def __init__(self, stack_name: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -301,15 +359,17 @@ class StackDoesNotExist(Exception):
             stack_name: Name of the stack that does not exist.
 
         """
-        message = (
-            'Stack: "%s" does not exist in outputs or the lookup is '
+        self.message = (
+            f'Stack: "{stack_name}" does not exist in outputs or the lookup is '
             "not available in this CFNgin run"
-        ) % (stack_name,)
-        super().__init__(message, *args, **kwargs)
+        )
+        super().__init__(*args, **kwargs)
 
 
-class StackUpdateBadStatus(Exception):
+class StackUpdateBadStatus(CfnginError):
     """Raised if the state of a stack can't be handled."""
+
+    message: str
 
     def __init__(
         self, stack_name: str, stack_status: str, reason: str, *args: Any, **kwargs: Any
@@ -325,19 +385,21 @@ class StackUpdateBadStatus(Exception):
         self.stack_name = stack_name
         self.stack_status = stack_status
 
-        message = (
-            'Stack: "%s" cannot be updated nor re-created from state '
-            "%s: %s" % (stack_name, stack_status, reason)
+        self.message = (
+            f'Stack: "{stack_name}" cannot be updated nor re-created from state '
+            f"{stack_status}: {reason}"
         )
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class StackFailed(Exception):
+class StackFailed(CfnginError):
     """Raised when a stack action fails.
 
     Primarily used with hooks that act on stacks.
 
     """
+
+    message: str
 
     def __init__(self, stack_name: str, status_reason: Optional[str] = None) -> None:
         """Instantiate class.
@@ -350,14 +412,16 @@ class StackFailed(Exception):
         self.stack_name = stack_name
         self.status_reason = status_reason
 
-        message = 'Stack "{}" failed'.format(stack_name)
+        self.message = f'Stack "{stack_name}" failed'
         if status_reason:
-            message += ' with reason "{}"'.format(status_reason)
-        super().__init__(message)
+            self.message += f' with reason "{status_reason}"'
+        super().__init__()
 
 
-class UnableToExecuteChangeSet(Exception):
+class UnableToExecuteChangeSet(CfnginError):
     """Raised if changeset execution status is not ``AVAILABLE``."""
+
+    message: str
 
     def __init__(
         self, stack_name: str, change_set_id: str, execution_status: str
@@ -375,19 +439,22 @@ class UnableToExecuteChangeSet(Exception):
         self.id = change_set_id
         self.execution_status = execution_status
 
-        message = "Changeset '{}' on stack '{}' had bad execution status: {}".format(
-            change_set_id, stack_name, execution_status,
+        self.message = (
+            f"Changeset '{change_set_id}' on stack '{stack_name}' had bad "
+            f"execution status: {execution_status}"
         )
 
-        super().__init__(message)
+        super().__init__()
 
 
-class UnhandledChangeSetStatus(Exception):
+class UnhandledChangeSetStatus(CfnginError):
     """Raised when creating a changeset failed for an unhandled reason.
 
     Handled failure reasons include: no changes
 
     """
+
+    message: str
 
     def __init__(
         self, stack_name: str, change_set_id: str, status: str, status_reason: str
@@ -405,16 +472,18 @@ class UnhandledChangeSetStatus(Exception):
         self.id = change_set_id
         self.status = status
         self.status_reason = status_reason
-        message = (
-            "Changeset '%s' on stack '%s' returned an unhandled status "
-            "'%s: %s'." % (change_set_id, stack_name, status, status_reason)
+        self.message = (
+            f"Changeset '{change_set_id}' on stack '{stack_name}' returned an unhandled status "
+            f"'{status}: {status_reason}'."
         )
 
-        super().__init__(message)
+        super().__init__()
 
 
-class UnresolvedBlueprintVariable(Exception):
+class UnresolvedBlueprintVariable(CfnginError):
     """Raised when trying to use a variable before it has been resolved."""
+
+    message: str
 
     def __init__(
         self, blueprint_name: str, variable: Variable, *args: Any, **kwargs: Any
@@ -427,14 +496,17 @@ class UnresolvedBlueprintVariable(Exception):
             variable: The unresolved variable.
 
         """
-        message = 'Variable "{}" in blueprint "{}" hasn\'t been resolved'.format(
-            variable.name, blueprint_name,
+        self.message = (
+            f'Variable "{variable.name}" in blueprint "{blueprint_name}" '
+            "hasn't been resolved"
         )
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
-class UnresolvedBlueprintVariables(Exception):
+class UnresolvedBlueprintVariables(CfnginError):
     """Raised when trying to use variables before they has been resolved."""
+
+    message: str
 
     def __init__(self, blueprint_name: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -444,14 +516,14 @@ class UnresolvedBlueprintVariables(Exception):
                 variables.
 
         """
-        message = "Blueprint: \"{}\" hasn't resolved it's variables".format(
-            blueprint_name
-        )
-        super().__init__(message, *args, **kwargs)
+        self.message = f"Blueprint: \"{blueprint_name}\" hasn't resolved it's variables"
+        super().__init__(*args, **kwargs)
 
 
-class ValidatorError(Exception):
+class ValidatorError(CfnginError):
     """Used for errors raised by custom validators of blueprint variables."""
+
+    message: str
 
     def __init__(
         self,
@@ -473,14 +545,14 @@ class ValidatorError(Exception):
         self.validator = validator
         self.value = value
         self.exception = exception
-        self.message = "Validator '{}' failed for variable '{}' with value '{}'".format(
-            self.validator, self.variable, self.value
+        self.message = (
+            f"Validator '{self.validator}' failed for variable '{self.variable}' "
+            f"with value '{self.value}'"
         )
 
         if self.exception:
-            self.message += ": %s: %s" % (
-                self.exception.__class__.__name__,
-                str(self.exception),
+            self.message += (
+                f": {self.exception.__class__.__name__}: {str(self.exception)}"
             )
         super().__init__()
 
@@ -489,8 +561,10 @@ class ValidatorError(Exception):
         return self.message
 
 
-class VariableTypeRequired(Exception):
+class VariableTypeRequired(CfnginError):
     """Raised when a variable defined in a blueprint is missing a type."""
+
+    message: str
 
     def __init__(
         self, blueprint_name: str, variable_name: str, *args: Any, **kwargs: Any
@@ -502,7 +576,8 @@ class VariableTypeRequired(Exception):
             variable_name: Name of the variable missing a type.
 
         """
-        message = 'Variable "{}" in blueprint "{}" does not have a type'.format(
-            variable_name, blueprint_name,
+        self.message = (
+            f'Variable "{variable_name}" in blueprint "{blueprint_name}" '
+            "does not have a type"
         )
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
