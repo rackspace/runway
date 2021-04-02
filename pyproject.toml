@@ -71,8 +71,8 @@ skip = [
 
 [tool.pylint.basic]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
-attr-rgx = "([a-z_][a-z0-9_]{2,30}|VARIABLES)$"
-attr-name-hint = "([a-z_][a-z0-9_]{2,30}|VARIABLES)$"
+attr-rgx = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
+attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
 good-names = [
     "_",
     "a",
