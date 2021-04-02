@@ -566,6 +566,7 @@ class ResultPrinter(BaseResultHandler):
         self._redisplay_progress()
 
     def _print_error(self, result: ErrorResult, **_: Any) -> None:
+        # pylint: disable=logging-format-interpolation
         LOGGER.error(self.ERROR_FORMAT.format(exception=result.exception))
 
     # pylint: disable=unused-argument
