@@ -16,6 +16,7 @@ from typing import (
     Set,
     Tuple,
     Union,
+    cast,
 )
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ class DAG:
         graph = self.graph
         if node_name in graph:
             raise KeyError("node %s already exists" % node_name)
-        graph[node_name] = set()
+        graph[node_name] = cast(Set[str], set())
 
     def add_node_if_not_exists(self, node_name: str) -> None:
         """Add a node if it does not exist yet, ignoring duplicates.
@@ -262,7 +263,7 @@ class DAG:
 
         """
         nodes = [node]
-        nodes_seen = set()
+        nodes_seen: Set[str] = set()
         for node__ in nodes:
             downstreams = self.downstream(node__)
             for downstream_node in downstreams:
@@ -355,7 +356,7 @@ class DAG:
             for val in graph[node]:
                 in_degree[val] += 1
 
-        queue = collections.deque()
+        queue: "collections.deque[str]" = collections.deque()
         for node, value in in_degree.items():
             if value == 0:
                 queue.appendleft(node)

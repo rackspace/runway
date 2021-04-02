@@ -139,7 +139,7 @@ def validate_variable_type(
     return value
 
 
-def validate_allowed_values(allowed_values: List[Any], value: Any) -> bool:
+def validate_allowed_values(allowed_values: Optional[List[Any]], value: Any) -> bool:
     """Support a variable defining which values it allows.
 
     Args:

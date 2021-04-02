@@ -15,6 +15,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Set,
     Tuple,
     Union,
     cast,
@@ -818,11 +819,11 @@ class Provider(BaseProvider):
         log_func: Callable[[StackEventTypeDef], None] = _tail_print,
         sleep_time: int = 5,
         include_initial: bool = True,
-    ):
+    ) -> None:
         """Show and then tail the event log."""
         # First dump the full list of events in chronological order and keep
         # track of the events we've seen already
-        seen = set()
+        seen: Set[str] = set()
         initial_events = self.get_events(stack_name)
         for event in initial_events:
             if include_initial:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple, Set
 
 from ....lookups.handlers.base import LookupHandler
 from ...exceptions import StackDoesNotExist
@@ -50,7 +50,7 @@ class OutputLookup(LookupHandler):
         raise StackDoesNotExist(decon.stack_name)
 
     @classmethod
-    def dependencies(cls, lookup_query: VariableValue):
+    def dependencies(cls, lookup_query: VariableValue) -> Set[str]:
         """Calculate any dependencies required to perform this lookup.
 
         Note that lookup_query may not be (completely) resolved at this time.
