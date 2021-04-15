@@ -12,10 +12,10 @@ This repo represents a sample Terraform infrastructure deployment of EKS, featur
 * kustomize-templated k8s configurations
   * Runway uses the kustomize base/overlays directory structure to apply per-environment k8s configurations
 
-## Pre-reqs
+## Prerequisites
 
-* Runway
-* awscli
+* [awscli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
+* [Runway](https://pypi.org/project/runway/)
 
 ## Setup
 

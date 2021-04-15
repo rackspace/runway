@@ -34,15 +34,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
         )
     LOGGER.info("writing kubeconfig...")
     subprocess.check_output(
-        [
-            "runway",
-            "run-aws",
-            "--",
-            "eks",
-            "update-kubeconfig",
-            "--name",
-            eks_cluster_name,
-        ]
+        ["aws", "eks", "update-kubeconfig", "--name", eks_cluster_name]
     )
     LOGGER.info("kubeconfig written successfully...")
 
@@ -55,36 +47,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
         print("", file=sys.stderr)
         print(
             "Warning: the generated kubeconfig uses the aws-cli for "
-            "authentication, but it is not found in your environment. "
-            "Either install it, or update the kubeconfig to use runway "
-            "instead, e.g.:",
+            "authentication, but it is not found in your environment. ",
             file=sys.stderr,
         )
-        print("", file=sys.stderr)
-        print("```", file=sys.stderr)
-        print("      args:", file=sys.stderr)
-        print("        - --region", file=sys.stderr)
-        print("        - REGIONHERE", file=sys.stderr)
-        print("        - eks", file=sys.stderr)
-        print("        - get-token", file=sys.stderr)
-        print("        - --cluster-name", file=sys.stderr)
-        print("        - CLUSTERNAME", file=sys.stderr)
-        print("        command: aws", file=sys.stderr)
-        print("```", file=sys.stderr)
-        print("", file=sys.stderr)
-        print("becomes:", file=sys.stderr)
-        print("", file=sys.stderr)
-        print("```", file=sys.stderr)
-        print("      args:", file=sys.stderr)
-        print("        - run-aws", file=sys.stderr)
-        print("        - --", file=sys.stderr)
-        print("        - --region", file=sys.stderr)
-        print("        - REGIONHERE", file=sys.stderr)
-        print("        - eks", file=sys.stderr)
-        print("        - get-token", file=sys.stderr)
-        print("        - --cluster-name", file=sys.stderr)
-        print("        - CLUSTERNAMEHERE", file=sys.stderr)
-        print("        command: runway", file=sys.stderr)
-        print("```", file=sys.stderr)
-        print("", file=sys.stderr)
     return True
