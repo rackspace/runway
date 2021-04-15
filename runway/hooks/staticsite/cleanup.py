@@ -72,9 +72,9 @@ def warn(context: CfnginContext, *, stack_relative_name: str, **_: Any) -> bool:
         )
         functions = get_replicated_function_names(stack["Outputs"])
         if functions:
-            runway_cmd = (
-                "runway run-aws -- lambda delete-function "
-                "--function-name $x --region %s" % context.env.aws_region
+            cmd = (
+                "aws lambda delete-function --function-name $x "
+                f"--region {context.env.aws_region}"
             )
             LOGGER.warning(
                 "About to delete the Static Site stack that contains "
@@ -85,15 +85,11 @@ def warn(context: CfnginContext, *, stack_relative_name: str, **_: Any) -> bool:
                 "E.g.:"
             )
             LOGGER.warning("On macOS/Linux:")
-            LOGGER.warning(
-                "for x in %s; do %s; done", (" ").join(functions), runway_cmd
-            )
+            LOGGER.warning("for x in %s; do %s; done", (" ").join(functions), cmd)
             LOGGER.warning("On Windows:")
-            LOGGER.warning(
-                'Foreach ($x in "%s") { %s }', ('","').join(functions), runway_cmd
-            )
+            LOGGER.warning('Foreach ($x in "%s") { %s }', ('","').join(functions), cmd)
     except Exception:  # pylint: disable=broad-except
         # There's no harm in continuing on in the event of an error
-        # Orphanized functions have no cost
+        # Orphaned functions have no cost
         pass
     return True
