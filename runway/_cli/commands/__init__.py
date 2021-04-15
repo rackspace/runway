@@ -10,7 +10,6 @@ from ._kbenv import kbenv
 from ._new import new
 from ._plan import plan
 from ._preflight import preflight
-from ._run_aws import run_aws
 from ._run_python import run_python
 from ._schema import schema
 from ._takeoff import takeoff
@@ -31,7 +30,6 @@ __all__ = [
     "new",
     "plan",
     "preflight",
-    "run_aws",
     "run_python",
     "schema",
     "takeoff",

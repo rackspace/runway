@@ -547,44 +547,6 @@ Alias of :ref:`command-test`.
 
   $ runway preflight
 
-----
-
-
-.. _command-run-aws:
-
-*******
-run-aws
-*******
-
-.. file://./../../runway/_cli/commands/_run_aws.py
-
-Execute awscli commands using the version bundled with Runway.
-
-This command gives access to the awscli when it might not otherwise be installed (e.g. when using a binary release of Runway).
-
-.. important:: When using options shared with Runway, ``--`` **must** be placed before the awscli command.
-
-
-.. rubric:: Usage
-.. code-block:: text
-
-  $ runway run-aws [OPTIONS] <args>
-
-
-.. rubric:: Options
-.. code-block:: text
-
-  --debug                         Supply once to display Runway debug logs.
-                                  Supply twice to display all debug logs.
-  --no-color                      Disable color in Runway's logs.
-  --verbose                       Display Runway verbose logs.
-
-
-.. rubric:: Example
-.. code-block:: shell
-
-  $ runway run-aws sts get-caller-identity
-  $ runway run-aws -- --version
 
 ----
 
