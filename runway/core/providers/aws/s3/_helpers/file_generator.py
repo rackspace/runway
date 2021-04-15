@@ -47,6 +47,27 @@ if TYPE_CHECKING:
     from .format_path import FormatPathResult, SupportedPathType
 
 
+def is_readable(path: Path) -> bool:
+    """Check to see if a file or a directory can be read.
+
+    This is tested by performing an operation that requires read access
+    on the file or the directory.
+
+    """
+    if path.is_dir():
+        try:
+            os.listdir(path)
+        except (OSError, IOError):
+            return False
+    else:
+        try:
+            with open(path, "r"):
+                pass
+        except (OSError, IOError):
+            return False
+    return True
+
+
 def is_special_file(path: Path) -> bool:
     """Check to see if a special file.
 
@@ -68,27 +89,6 @@ def is_special_file(path: Path) -> bool:
     if stat.S_ISSOCK(mode):
         return True
     return False
-
-
-def is_readable(path: Path) -> bool:
-    """Check to see if a file or a directory can be read.
-
-    This is tested by performing an operation that requires read access
-    on the file or the directory.
-
-    """
-    if path.is_dir():
-        try:
-            os.listdir(path)
-        except (OSError, IOError):
-            return False
-    else:
-        try:
-            with open(path, "r"):
-                pass
-        except (OSError, IOError):
-            return False
-    return True
 
 
 FileStatsDict = TypedDict(
@@ -126,8 +126,8 @@ class FileStats:
 
     src: AnyPath
     compare_key: Optional[str] = None
-    dest_type: Optional[SupportedPathType] = None
     dest: Optional[str] = None
+    dest_type: Optional[SupportedPathType] = None
     last_update: datetime.datetime = EPOCH_TIME
     operation_name: Optional[str] = None
     response_data: Optional[Union[HeadObjectOutputTypeDef, ObjectTypeDef]] = None
@@ -220,7 +220,7 @@ class FileGenerator:
             path = Path(path)
         if not self.should_ignore_file(path):
             if not dir_op:
-                stats = self._safely_get_file_stats(path)
+                stats = self.safely_get_file_stats(path)
                 if stats:
                     yield stats
             else:
@@ -239,11 +239,26 @@ class FileGenerator:
                         for result in self.list_files(file_path, dir_op):
                             yield result
                     else:
-                        stats = self._safely_get_file_stats(file_path)
+                        stats = self.safely_get_file_stats(file_path)
                         if stats:
                             yield stats
 
-    def _safely_get_file_stats(
+    @staticmethod
+    def normalize_sort(names: List[str], os_sep: str, character: str) -> None:
+        """Ensure that the same path seperator is used when sorting.
+
+        On Windows, the path operator is a backslash as opposed to a forward slash
+        which can lead to differences in sorting between S3 and a Windows machine.
+
+        Args:
+            names: List of file names.
+            os_sep: OS seperator.
+            character: Character that will be used to replace the os_sep.
+
+        """
+        names.sort(key=lambda item: item.replace(os_sep, character))
+
+    def safely_get_file_stats(
         self, path: Path
     ) -> Optional[Tuple[Path, _LastModifiedAndSize]]:
         """Get file stats with handling for some common errors.
@@ -275,21 +290,6 @@ class FileGenerator:
             self.result_queue.put(warning)
             return EPOCH_TIME
         return update_time
-
-    @staticmethod
-    def normalize_sort(names: List[str], os_sep: str, character: str) -> None:
-        """Ensure that the same path seperator is used when sorting.
-
-        On Windows, the path operator is a backslash as opposed to a forward slash
-        which can lead to differences in sorting between S3 and a Windows machine.
-
-        Args:
-            names: List of file names.
-            os_sep: OS seperator.
-            character: Character that will be used to replace the os_sep.
-
-        """
-        names.sort(key=lambda item: item.replace(os_sep, character))
 
     def should_ignore_file(self, path: Path) -> bool:
         """Check whether a file should be ignored in the file generation process.
@@ -361,13 +361,13 @@ class FileGenerator:
         else:
             lister = BucketLister(self._client)
             extra_args: Any = self.request_parameters.get("ListObjectsV2", {})
-            for key in lister.list_objects(
+            for obj in lister.list_objects(
                 bucket=bucket,
                 prefix=prefix,
                 page_size=self.page_size,
                 extra_args=extra_args,
             ):
-                source_path, response_data = key
+                source_path, response_data = obj
                 if response_data.get("Size", 0) == 0 and source_path.endswith("/"):
                     if self.operation_name == "delete":
                         # This is to filter out manually created folders
@@ -403,12 +403,12 @@ class FileGenerator:
             # We want to try to give a more helpful error message.
             # This is what the customer is going to see so we want to
             # give as much detail as we have.
-            if not exc.response["Error"]["Code"] == "404":  # type: ignore
+            if not exc.response["Error"]["Code"] == "404":
                 raise
             # The key does not exist so we'll raise a more specific
             # error message here.
             response = exc.response.copy()
-            response["Error"]["Message"] = f'Key "{key}" does not exist'  # type: ignore
+            response["Error"]["Message"] = f'Key "{key}" does not exist'
             raise ClientError(response, "HeadObject") from None
         response["Size"] = int(response.pop("ContentLength"))  # type: ignore
         last_update = parse(response["LastModified"])  # type: ignore

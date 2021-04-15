@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from typing_extensions import Literal
 
@@ -24,7 +24,9 @@ class ExactTimestampsSync(SizeAndLastModifiedSync):
 
     NAME: ClassVar[Literal["exact_timestamps"]] = "exact_timestamps"
 
-    def compare_time(self, src_file: FileStats, dest_file: FileStats) -> bool:
+    def compare_time(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Compare modified time of two FileStats objects.
 
         Returns:
@@ -33,6 +35,8 @@ class ExactTimestampsSync(SizeAndLastModifiedSync):
             updating based on the time of last modification and type of operation.
 
         """
+        if not (src_file and dest_file):
+            raise ValueError("src_file and dest_file must not be None")
         delta = dest_file.last_update - src_file.last_update
         if src_file.operation_name == "download":
             return delta.total_seconds() == 0

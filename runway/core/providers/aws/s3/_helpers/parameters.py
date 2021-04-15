@@ -38,8 +38,8 @@ class ParametersDataModel(BaseModel):
     ) -> PathsType:
         """Determine paths type for the given src and dest."""
         # these have already been validated so it's "safe" to cast them
-        dest = cast(str, values.get("dest"))
-        src = cast(str, values.get("src"))
+        dest = cast(str, values.get("dest", ""))
+        src = cast(str, values.get("src", ""))
         src_type = "s3" if src.startswith("s3://") else "local"
         dest_type = "s3" if dest.startswith("s3://") else "local"
         return cast(PathsType, f"{src_type}{dest_type}")
@@ -80,17 +80,16 @@ class Parameters:
 
     def _validate_path_args(self) -> None:
         # If we're using a mv command, you can't copy the object onto itself.
-        params = self.data
         if self.cmd == "mv" and self._same_path():
             raise ValueError(
-                f"Cannot mv a file onto itself: '{params.src}' - '{params.dest}'"
+                f"Cannot mv a file onto itself: '{self.data.src}' - '{self.data.dest}'"
             )
 
         # If the operation is downloading to a directory that does not exist,
         # create the directories so no warnings are thrown during the syncing
         # process.
-        if params.paths_type == "s3local" and params.dir_op:
-            dest_path = Path(params.dest)
+        if self.data.paths_type == "s3local" and self.data.dir_op:
+            dest_path = Path(self.data.dest)
             if not dest_path.exists():
                 dest_path.mkdir(exist_ok=True, parents=True)
 

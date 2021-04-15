@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from typing_extensions import Literal
 
@@ -25,13 +25,16 @@ class DeleteSync(BaseSync):
 
     NAME: ClassVar[Literal["delete"]] = "delete"
 
-    def determine_should_sync(self, src_file: FileStats, dest_file: FileStats) -> bool:
+    def determine_should_sync(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Determine if file should sync."""
-        dest_file.operation_name = "delete"
+        if dest_file:
+            dest_file.operation_name = "delete"
         LOGGER.debug(
             "syncing: (None) -> %s (remove), file does not "
             "exist at source (%s) and delete mode enabled",
-            dest_file.src,
-            dest_file.dest,
+            dest_file.src if dest_file else None,
+            dest_file.dest if dest_file else None,
         )
         return True

@@ -92,6 +92,63 @@ class BaseProvideContentTypeSubscriber(BaseSubscriber):
         raise NotImplementedError("_get_filename()")
 
 
+def _date_parser(date_string: Union[datetime, str]) -> datetime:
+    """Parse date string into a datetime object."""
+    if isinstance(date_string, datetime):
+        return date_string
+    return parse(date_string).astimezone(tzlocal())
+
+
+class BucketLister:
+    """List keys in a bucket."""
+
+    def __init__(
+        self,
+        client: S3Client,
+        date_parser: Callable[[Union[datetime, str]], datetime] = _date_parser,
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            client: boto3 S3 client.
+            date_parser: Parser for date string.
+
+        """
+        self._client = client
+        self._date_parser = date_parser
+
+    def list_objects(
+        self,
+        bucket: str,
+        prefix: Optional[str] = None,
+        page_size: Optional[int] = None,
+        extra_args: Any = None,
+    ) -> Generator[Tuple[str, ObjectTypeDef], None, None]:
+        """List objects in S3 bucket.
+
+        Args:
+            bucket: Bucket name.
+            prefix: Object prefix.
+            page_size: Number of items per page
+            extra_args: Additional arguments to pass to list call.
+
+        """
+        kwargs = {"Bucket": bucket, "PaginationConfig": {"PageSize": page_size}}
+        if prefix is not None:
+            kwargs["Prefix"] = prefix
+        if extra_args is not None:
+            kwargs.update(extra_args)
+
+        paginator = self._client.get_paginator("list_objects_v2")
+        pages = paginator.paginate(**kwargs)
+        for page in pages:
+            contents = page.get("Contents", [])
+            for content in contents:
+                source_path = bucket + "/" + content.get("Key", "")
+                content["LastModified"] = self._date_parser(content["LastModified"])
+                yield source_path, content
+
+
 class OnDoneFilteredSubscriber(BaseSubscriber):
     """Subscriber that differentiates between successes and failures.
 
@@ -113,7 +170,7 @@ class OnDoneFilteredSubscriber(BaseSubscriber):
         """On success."""
 
     # pylint: disable=invalid-name
-    def _on_failure(self, future: TransferFuture, e: Exception) -> None:
+    def _on_failure(self, future: TransferFuture, exception: Exception) -> None:
         """On failure."""
 
 
@@ -273,8 +330,8 @@ class ProvideLastModifiedTimeSubscriber(OnDoneFilteredSubscriber):
             set_file_utime(filename, int(mod_timestamp))
         except Exception as exc:  # pylint: disable=broad-except
             warning_message = (
-                "Successfully Downloaded %s but was unable to update the "
-                "last modified time. %s" % (filename, exc)
+                f"Successfully Downloaded {filename} but was unable to update the "
+                f"last modified time. {exc}"
             )
             self._result_queue.put(create_warning(filename, warning_message))
 
@@ -321,43 +378,6 @@ class RequestParamsMapper:
     """
 
     @classmethod
-    def map_put_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ) -> None:
-        """Map config params to PutObject request params.
-
-        Args:
-            request_params: A dictionary to be filled out with the appropriate
-                parameters for the specified client operation using the current
-                config parameters.
-            config_params: A dictionary of the current config params that will be
-                used to generate the request parameters for the specified operation.
-
-        """
-        cls._set_general_object_params(request_params, config_params)
-        cls._set_metadata_params(request_params, config_params)
-        cls._set_sse_request_params(request_params, config_params)
-        cls._set_sse_c_request_params(request_params, config_params)
-        cls._set_request_payer_param(request_params, config_params)
-
-    @classmethod
-    def map_get_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ) -> None:
-        """Map config params to GetObject request params.
-
-        Args:
-            request_params: A dictionary to be filled out with the appropriate
-                parameters for the specified client operation using the current
-                config parameters.
-            config_params: A dictionary of the current config params that will be
-                used to generate the request parameters for the specified operation.
-
-        """
-        cls._set_sse_c_request_params(request_params, config_params)
-        cls._set_request_payer_param(request_params, config_params)
-
-    @classmethod
     def map_copy_object_params(
         cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
     ) -> None:
@@ -380,23 +400,6 @@ class RequestParamsMapper:
         cls._set_request_payer_param(request_params, config_params)
 
     @classmethod
-    def map_head_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ) -> None:
-        """Map config params to HeadObject request params.
-
-        Args:
-            request_params: A dictionary to be filled out with the appropriate
-                parameters for the specified client operation using the current
-                config parameters.
-            config_params: A dictionary of the current config params that will be
-                used to generate the request parameters for the specified operation.
-
-        """
-        cls._set_sse_c_request_params(request_params, config_params)
-        cls._set_request_payer_param(request_params, config_params)
-
-    @classmethod
     def map_create_multipart_upload_params(
         cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
     ) -> None:
@@ -414,6 +417,92 @@ class RequestParamsMapper:
         cls._set_sse_request_params(request_params, config_params)
         cls._set_sse_c_request_params(request_params, config_params)
         cls._set_metadata_params(request_params, config_params)
+        cls._set_request_payer_param(request_params, config_params)
+
+    @classmethod
+    def map_delete_object_params(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ) -> None:
+        """Map config params to DeleteObject request params.
+
+        Args:
+            request_params: A dictionary to be filled out with the appropriate
+                parameters for the specified client operation using the current
+                config parameters.
+            config_params: A dictionary of the current config params that will be
+                used to generate the request parameters for the specified operation.
+
+        """
+        cls._set_request_payer_param(request_params, config_params)
+
+    @classmethod
+    def map_get_object_params(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ) -> None:
+        """Map config params to GetObject request params.
+
+        Args:
+            request_params: A dictionary to be filled out with the appropriate
+                parameters for the specified client operation using the current
+                config parameters.
+            config_params: A dictionary of the current config params that will be
+                used to generate the request parameters for the specified operation.
+
+        """
+        cls._set_sse_c_request_params(request_params, config_params)
+        cls._set_request_payer_param(request_params, config_params)
+
+    @classmethod
+    def map_head_object_params(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ) -> None:
+        """Map config params to HeadObject request params.
+
+        Args:
+            request_params: A dictionary to be filled out with the appropriate
+                parameters for the specified client operation using the current
+                config parameters.
+            config_params: A dictionary of the current config params that will be
+                used to generate the request parameters for the specified operation.
+
+        """
+        cls._set_sse_c_request_params(request_params, config_params)
+        cls._set_request_payer_param(request_params, config_params)
+
+    @classmethod
+    def map_list_objects_v2_params(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ) -> None:
+        """Map config params to DeleteObjectV2 request params.
+
+        Args:
+            request_params: A dictionary to be filled out with the appropriate
+                parameters for the specified client operation using the current
+                config parameters.
+            config_params: A dictionary of the current config params that will be
+                used to generate the request parameters for the specified operation.
+
+        """
+        cls._set_request_payer_param(request_params, config_params)
+
+    @classmethod
+    def map_put_object_params(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ) -> None:
+        """Map config params to PutObject request params.
+
+        Args:
+            request_params: A dictionary to be filled out with the appropriate
+                parameters for the specified client operation using the current
+                config parameters.
+            config_params: A dictionary of the current config params that will be
+                used to generate the request parameters for the specified operation.
+
+        """
+        cls._set_general_object_params(request_params, config_params)
+        cls._set_metadata_params(request_params, config_params)
+        cls._set_sse_request_params(request_params, config_params)
+        cls._set_sse_c_request_params(request_params, config_params)
         cls._set_request_payer_param(request_params, config_params)
 
     @classmethod
@@ -451,44 +540,25 @@ class RequestParamsMapper:
         cls._set_request_payer_param(request_params, config_params)
 
     @classmethod
-    def map_delete_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ) -> None:
-        """Map config params to DeleteObject request params.
-
-        Args:
-            request_params: A dictionary to be filled out with the appropriate
-                parameters for the specified client operation using the current
-                config parameters.
-            config_params: A dictionary of the current config params that will be
-                used to generate the request parameters for the specified operation.
-
-        """
-        cls._set_request_payer_param(request_params, config_params)
+    def _auto_populate_metadata_directive(cls, request_params: Dict[Any, Any]) -> None:
+        """Auto populate metadata directive."""
+        if request_params.get("Metadata") and not request_params.get(
+            "MetadataDirective"
+        ):
+            request_params["MetadataDirective"] = "REPLACE"
 
     @classmethod
-    def map_list_objects_v2_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ) -> None:
-        """Map config params to DeleteObjectV2 request params.
-
-        Args:
-            request_params: A dictionary to be filled out with the appropriate
-                parameters for the specified client operation using the current
-                config parameters.
-            config_params: A dictionary of the current config params that will be
-                used to generate the request parameters for the specified operation.
-
-        """
-        cls._set_request_payer_param(request_params, config_params)
-
-    @classmethod
-    def _set_request_payer_param(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ):
-        """Set request payer param."""
-        if config_params.get("request_payer"):
-            request_params["RequestPayer"] = config_params["request_payer"]
+    def _permission_to_param(cls, permission: Dict[Any, Any]) -> str:
+        """Permission to param."""
+        if permission == "read":
+            return "GrantRead"
+        if permission == "full":
+            return "GrantFullControl"
+        if permission == "readacl":
+            return "GrantReadACP"
+        if permission == "writeacl":
+            return "GrantWriteACP"
+        raise ValueError("permission must be one of: read|readacl|writeacl|full")
 
     @classmethod
     def _set_general_object_params(
@@ -529,38 +599,9 @@ class RequestParamsMapper:
                     permission, grantee = grant.split("=", 1)
                 except ValueError:
                     raise ValueError(
-                        "grants should be of the form " "permission=principal"
+                        "grants should be of the form permission=principal"
                     ) from None
                 request_params[cls._permission_to_param(permission)] = grantee
-
-    @classmethod
-    def _permission_to_param(cls, permission: Dict[Any, Any]) -> str:
-        """Permission to param."""
-        if permission == "read":
-            return "GrantRead"
-        if permission == "full":
-            return "GrantFullControl"
-        if permission == "readacl":
-            return "GrantReadACP"
-        if permission == "writeacl":
-            return "GrantWriteACP"
-        raise ValueError("permission must be one of: " "read|readacl|writeacl|full")
-
-    @classmethod
-    def _set_metadata_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ) -> None:
-        """Get metadata params."""
-        if config_params.get("metadata"):
-            request_params["Metadata"] = config_params["metadata"]
-
-    @classmethod
-    def _auto_populate_metadata_directive(cls, request_params: Dict[Any, Any]) -> None:
-        """Auto populate metadata directive."""
-        if request_params.get("Metadata") and not request_params.get(
-            "MetadataDirective"
-        ):
-            request_params["MetadataDirective"] = "REPLACE"
 
     @classmethod
     def _set_metadata_directive_param(
@@ -571,23 +612,28 @@ class RequestParamsMapper:
             request_params["MetadataDirective"] = config_params["metadata_directive"]
 
     @classmethod
-    def _set_sse_request_params(
+    def _set_metadata_params(
         cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
     ) -> None:
-        """Set SSE request params."""
-        if config_params.get("sse"):
-            request_params["ServerSideEncryption"] = config_params["sse"]
-        if config_params.get("sse_kms_key_id"):
-            request_params["SSEKMSKeyId"] = config_params["sse_kms_key_id"]
+        """Get metadata params."""
+        if config_params.get("metadata"):
+            request_params["Metadata"] = config_params["metadata"]
 
     @classmethod
-    def _set_sse_c_request_params(
+    def _set_request_payer_param(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ):
+        """Set request payer param."""
+        if config_params.get("request_payer"):
+            request_params["RequestPayer"] = config_params["request_payer"]
+
+    @classmethod
+    def _set_sse_c_and_copy_source_request_params(
         cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
     ) -> None:
-        """Set SSE-C request params."""
-        if config_params.get("sse_c"):
-            request_params["SSECustomerAlgorithm"] = config_params["sse_c"]
-            request_params["SSECustomerKey"] = config_params["sse_c_key"]
+        """Set SSE-C and copy source request params."""
+        cls._set_sse_c_request_params(request_params, config_params)
+        cls._set_sse_c_copy_source_request_params(request_params, config_params)
 
     @classmethod
     def _set_sse_c_copy_source_request_params(
@@ -602,12 +648,23 @@ class RequestParamsMapper:
             ]
 
     @classmethod
-    def _set_sse_c_and_copy_source_request_params(
+    def _set_sse_c_request_params(
         cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
     ) -> None:
-        """Set SSE-C and copy source request params."""
-        cls._set_sse_c_request_params(request_params, config_params)
-        cls._set_sse_c_copy_source_request_params(request_params, config_params)
+        """Set SSE-C request params."""
+        if config_params.get("sse_c"):
+            request_params["SSECustomerAlgorithm"] = config_params["sse_c"]
+            request_params["SSECustomerKey"] = config_params["sse_c_key"]
+
+    @classmethod
+    def _set_sse_request_params(
+        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+    ) -> None:
+        """Set SSE request params."""
+        if config_params.get("sse"):
+            request_params["ServerSideEncryption"] = config_params["sse"]
+        if config_params.get("sse_kms_key_id"):
+            request_params["SSEKMSKeyId"] = config_params["sse_kms_key_id"]
 
 
 class StdoutBytesWriter:
@@ -634,10 +691,7 @@ def block_s3_object_lambda(s3_path: str) -> None:
     """Check for S3 Object Lambda resource."""
     match = _S3_OBJECT_LAMBDA_TO_BUCKET_KEY_REGEX.match(s3_path)
     if match:
-        raise ValueError(
-            "S3 commands do not support S3 Object Lambda resources. "
-            "Use s3api commands instead."
-        )
+        raise ValueError("S3 action does not support S3 Object Lambda resources")
 
 
 def create_warning(
@@ -646,7 +700,7 @@ def create_warning(
     """Create a ``PrintTask`` for whenever a warning is to be thrown."""
     print_string = "warning: "
     if skip_file:
-        print_string = f"{print_string}Skipping file {path}. "
+        print_string = f"{print_string}skipping file {path}; "
     print_string += error_message
     return PrintTask(message=print_string, error=False, warning=True)
 
@@ -733,14 +787,6 @@ def guess_content_type(filename: AnyPath) -> Optional[str]:
     """
     try:
         return mimetypes.guess_type(str(filename))[0]
-    # This catches a bug in the mimetype library where some MIME types
-    # specifically on windows machines cause a UnicodeDecodeError
-    # because the MIME type in the Windows registers has an encoding
-    # that cannot be properly encoded using the default system encoding.
-    # https://bugs.python.org/issue9291
-    #
-    # So instead of hard failing, just log the issue and fall back to the
-    # default guessed content type of None.
     except UnicodeDecodeError:
         LOGGER.debug(
             "Unable to guess content type for %s due to " "UnicodeDecodeError: ",
@@ -777,7 +823,7 @@ def human_readable_size(value: float) -> Optional[str]:
     if bytes_int == 1:
         return "1 Byte"
     if bytes_int < base:
-        return f"{bytes_int} Bytes"
+        return f"{bytes_int:.0f} Bytes"
 
     for i, suffix in enumerate(HUMANIZE_SUFFIXES):
         unit = base ** (i + 2)
@@ -887,89 +933,14 @@ def uni_print(statement: str, out_file: Optional[TextIO] = None) -> None:
     if out_file is None:
         out_file = sys.stdout
     try:
-        # Otherwise we assume that out_file is a
-        # text writer type that accepts str/unicode instead
-        # of bytes.
         out_file.write(statement)
     except UnicodeEncodeError:
-        # Some file like objects like cStringIO will
-        # try to decode as ascii on python2.
-        #
-        # This can also fail if our encoding associated
-        # with the text writer cannot encode the unicode
-        # ``statement`` we've been given. This commonly
-        # happens on windows where we have some S3 key
-        # previously encoded with utf-8 that can't be
-        # encoded using whatever codepage the user has
-        # configured in their console.
-        #
-        # At this point we've already failed to do what's
-        # been requested.  We now try to make a best effort
-        # attempt at printing the statement to the outfile.
-        # We're using 'ascii' as the default because if the
-        # stream doesn't give us any encoding information
-        # we want to pick an encoding that has the highest
-        # chance of printing successfully.
+        print("caught")
         new_encoding = getattr(out_file, "encoding", "ascii")
-        if new_encoding is None:
+        print(f"new_encoding: {new_encoding}")
+        if not new_encoding:
             new_encoding = "ascii"
+        print(f"new_encoding: {new_encoding}")
         new_statement = statement.encode(new_encoding, "replace").decode(new_encoding)
         out_file.write(new_statement)
     out_file.flush()
-
-
-def _date_parser(date_string: Union[datetime, str]) -> datetime:
-    """Parse date string into a datetime object."""
-    if isinstance(date_string, datetime):
-        return date_string
-    return parse(date_string).astimezone(tzlocal())
-
-
-class BucketLister:
-    """List keys in a bucket."""
-
-    def __init__(
-        self,
-        client: S3Client,
-        date_parser: Callable[[Union[datetime, str]], datetime] = _date_parser,
-    ) -> None:
-        """Instantiate class.
-
-        Args:
-            client: boto3 S3 client.
-            date_parser: Parser for date string.
-
-        """
-        self._client = client
-        self._date_parser = date_parser
-
-    def list_objects(
-        self,
-        bucket: str,
-        prefix: Optional[str] = None,
-        page_size: Optional[int] = None,
-        extra_args: Any = None,
-    ) -> Generator[Tuple[str, ObjectTypeDef], None, None]:
-        """List objects in S3 bucket.
-
-        Args:
-            bucket: Bucket name.
-            prefix: Object prefix.
-            page_size: Number of items per page
-            extra_args: Additional arguments to pass to list call.
-
-        """
-        kwargs = {"Bucket": bucket, "PaginationConfig": {"PageSize": page_size}}
-        if prefix is not None:
-            kwargs["Prefix"] = prefix
-        if extra_args is not None:
-            kwargs.update(extra_args)
-
-        paginator = self._client.get_paginator("list_objects_v2")
-        pages = paginator.paginate(**kwargs)
-        for page in pages:
-            contents = page.get("Contents", [])
-            for content in contents:
-                source_path = bucket + "/" + content.get("Key", "")
-                content["LastModified"] = self._date_parser(content["LastModified"])
-                yield source_path, content

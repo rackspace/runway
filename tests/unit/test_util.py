@@ -20,6 +20,7 @@ from runway.util import (
     MutableMap,
     SafeHaven,
     argv,
+    ensure_string,
     environ,
     load_object_from_string,
 )
@@ -307,6 +308,20 @@ def test_argv() -> None:
         assert sys.argv == override, "validate override"
 
     assert sys.argv == orig_expected, "validate value returned to original"
+
+
+@pytest.mark.parametrize("provided, expected", [("test", "test"), (b"test", "test")])
+def test_ensure_string(expected: str, provided: str) -> None:
+    """Test ensure_string."""
+    assert ensure_string(provided) == expected
+
+
+@pytest.mark.parametrize("provided", [None, True, [], {}, set()])  # type: ignore
+def test_ensure_string_raise_type_error(provided: Any) -> None:
+    """Test ensure_string."""
+    with pytest.raises(TypeError) as excinfo:
+        ensure_string(provided)
+    assert "Expected str or bytes but received " in str(excinfo.value)
 
 
 def test_environ() -> None:

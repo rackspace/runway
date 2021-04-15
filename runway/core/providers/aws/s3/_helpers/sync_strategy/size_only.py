@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from typing_extensions import Literal
 
@@ -25,15 +25,17 @@ class SizeOnlySync(BaseSync):
 
     NAME: ClassVar[Literal["size_only"]] = "size_only"
 
-    def determine_should_sync(self, src_file: FileStats, dest_file: FileStats) -> bool:
+    def determine_should_sync(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Determine if file should sync."""
         same_size = self.compare_size(src_file, dest_file)
         should_sync = not same_size
         if should_sync:
             LOGGER.debug(
                 "syncing: %s -> %s, size_changed: %s",
-                src_file.src,
-                src_file.dest,
+                src_file.src if src_file else None,
+                src_file.dest if src_file else None,
                 not same_size,
             )
         return should_sync

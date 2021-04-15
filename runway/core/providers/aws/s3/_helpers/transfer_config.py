@@ -42,11 +42,11 @@ class RuntimeConfig:
     """Runtime configuration."""
 
     POSITIVE_INTEGERS: ClassVar[List[str]] = [
-        "multipart_chunksize",
-        "multipart_threshold",
+        "max_bandwidth",
         "max_concurrent_requests",
         "max_queue_size",
-        "max_bandwidth",
+        "multipart_chunksize",
+        "multipart_threshold",
     ]
     HUMAN_READABLE_SIZES: ClassVar[List[str]] = [
         "multipart_chunksize",
@@ -60,7 +60,15 @@ class RuntimeConfig:
         return DEFAULTS.copy()
 
     @classmethod
-    def build_config(cls, **kwargs: Union[int, str]) -> TransferConfigDict:
+    def build_config(
+        cls,
+        *,
+        max_bandwidth: Optional[Union[int, str]] = None,
+        max_concurrent_requests: Optional[Union[int, str]] = None,
+        max_queue_size: Optional[Union[int, str]] = None,
+        multipart_chunksize: Optional[Union[int, str]] = None,
+        multipart_threshold: Optional[Union[int, str]] = None
+    ) -> TransferConfigDict:
         """Create and convert a runtime config dictionary.
 
         This method will merge and convert S3 runtime configuration
@@ -69,8 +77,14 @@ class RuntimeConfig:
 
         """
         runtime_config = DEFAULTS.copy()
-        if kwargs:
-            runtime_config.update(kwargs)  # type: ignore
+        kwargs = {
+            "max_bandwidth": max_bandwidth,
+            "max_concurrent_requests": max_concurrent_requests,
+            "max_queue_size": max_queue_size,
+            "multipart_chunksize": multipart_chunksize,
+            "multipart_threshold": multipart_threshold,
+        }
+        runtime_config.update(**{k: v for k, v in kwargs.items() if v is not None})
         cls._convert_human_readable_sizes(runtime_config)
         cls._convert_human_readable_rates(runtime_config)
         cls._validate_config(runtime_config)
@@ -80,14 +94,14 @@ class RuntimeConfig:
     def _convert_human_readable_sizes(cls, runtime_config: TransferConfigDict) -> None:
         for attr in cls.HUMAN_READABLE_SIZES:
             value = runtime_config.get(attr)
-            if value is not None and not isinstance(value, int):
+            if isinstance(value, str):
                 runtime_config[attr] = human_readable_to_bytes(value)
 
     @classmethod
     def _convert_human_readable_rates(cls, runtime_config: TransferConfigDict) -> None:
         for attr in cls.HUMAN_READABLE_RATES:
             value = runtime_config.get(attr)
-            if value is not None and not isinstance(value, int):
+            if isinstance(value, str):
                 if not value.endswith("B/s"):
                     raise InvalidConfigError(
                         f"Invalid rate: {value}. The value must be expressed "
@@ -128,11 +142,11 @@ def create_transfer_config_from_runtime_config(
 
     """
     translation_map = {
+        "max_bandwidth": "max_bandwidth",
         "max_concurrent_requests": "max_request_concurrency",
         "max_queue_size": "max_request_queue_size",
-        "multipart_threshold": "multipart_threshold",
         "multipart_chunksize": "multipart_chunksize",
-        "max_bandwidth": "max_bandwidth",
+        "multipart_threshold": "multipart_threshold",
     }
     kwargs: Dict[str, Any] = {}
     for key, value in runtime_config.items():

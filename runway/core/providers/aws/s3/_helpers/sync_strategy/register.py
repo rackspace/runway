@@ -9,8 +9,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Type
 
 from .delete import DeleteSync
-from .exacttimestamps import ExactTimestampsSync
-from .sizeonly import SizeOnlySync
+from .exact_timestamps import ExactTimestampsSync
+from .size_only import SizeOnlySync
 
 if TYPE_CHECKING:
     from botocore.session import Session

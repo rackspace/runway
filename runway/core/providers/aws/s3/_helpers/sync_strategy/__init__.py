@@ -6,9 +6,9 @@
 """
 from .base import BaseSync, MissingFileSync, NeverSync, SizeAndLastModifiedSync
 from .delete import DeleteSync
-from .exacttimestamps import ExactTimestampsSync
+from .exact_timestamps import ExactTimestampsSync
 from .register import register_sync_strategies
-from .sizeonly import SizeOnlySync
+from .size_only import SizeOnlySync
 
 __all__ = [
     "BaseSync",

@@ -84,7 +84,7 @@ class StdinMissingError(Exception):
 
     def __init__(self) -> None:
         """Instantiate class."""
-        self.message = "stdin is required for this operation, but is not available."
+        self.message = "stdin is required for this operation, but is not available"
         super().__init__(self.message)
 
 
@@ -134,13 +134,19 @@ class S3TransferHandlerFactory:
         result_recorder = ResultRecorder()
         result_processor_handlers: List[Any] = [result_recorder]
         self._add_result_printer(result_recorder, result_processor_handlers)
-        result_processor = ResultProcessor(result_queue, result_processor_handlers)
+        result_processor = ResultProcessor(
+            result_queue=result_queue, result_handlers=result_processor_handlers
+        )
         command_result_recorder = CommandResultRecorder(
-            result_queue, result_recorder, result_processor
+            result_queue=result_queue,
+            result_recorder=result_recorder,
+            result_processor=result_processor,
         )
 
         return S3TransferHandler(
-            transfer_manager, self._config_params, command_result_recorder
+            transfer_manager=transfer_manager,
+            config_params=self._config_params,
+            result_command_recorder=command_result_recorder,
         )
 
     def _add_result_printer(
@@ -188,12 +194,6 @@ class S3TransferHandler:
 
         """
         self._transfer_manager = transfer_manager
-        # TODO: Ideally the s3 transfer handler should not need to know
-        # about the result command recorder. It really only needs an interface
-        # for adding results to the queue. When all of the commands have
-        # converted to use this transfer handler, an effort should be made
-        # to replace the passing of a result command recorder with an
-        # abstraction to enqueue results.
         self._result_command_recorder = result_command_recorder
 
         submitter_args = (
@@ -411,12 +411,11 @@ class BaseTransferRequestSubmitter:
         # normpath() will use the OS path separator so we
         # need to take that into account when checking for a parent prefix.
         parent_prefix = ".." + os.path.sep
-        if fileinfo.compare_key:
-            escapes_cwd = os.path.normpath(fileinfo.compare_key).startswith(
-                parent_prefix
-            )
-        else:
-            escapes_cwd = False
+        escapes_cwd = (
+            os.path.normpath(fileinfo.compare_key).startswith(parent_prefix)
+            if fileinfo.compare_key
+            else False
+        )
         if escapes_cwd:
             warning = create_warning(
                 fileinfo.compare_key, "File references a parent directory."
@@ -429,7 +428,7 @@ class BaseTransferRequestSubmitter:
         self, fileinfo: FileInfo
     ) -> Tuple[Optional[str], Optional[str]]:
         """Return formatted versions of a fileinfos source and destination."""
-        raise NotImplementedError("_format_src_dest")
+        raise NotImplementedError("_format_src_dest()")
 
     def _format_local_path(self, path: Optional[AnyPath]) -> Optional[str]:
         """Format local path."""
@@ -558,8 +557,10 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
         subscribers.append(
             ProvideLastModifiedTimeSubscriber(fileinfo.last_update, self._result_queue)
         )
-        if self._config_params.get("is_move", False) and fileinfo.source_client:
-            subscribers.append(DeleteSourceObjectSubscriber(fileinfo.source_client))
+        if self._config_params.get("is_move", False):
+            subscribers.append(
+                DeleteSourceObjectSubscriber(fileinfo.source_client)  # type: ignore
+            )
 
     def _submit_transfer_request(
         self,
@@ -624,8 +625,10 @@ class CopyRequestSubmitter(BaseTransferRequestSubmitter):
         subscribers.append(ProvideSizeSubscriber(fileinfo.size))
         if self._should_inject_content_type():
             subscribers.append(ProvideCopyContentTypeSubscriber())
-        if self._config_params.get("is_move", False) and fileinfo.source_client:
-            subscribers.append(DeleteCopySourceObjectSubscriber(fileinfo.source_client))
+        if self._config_params.get("is_move", False):
+            subscribers.append(
+                DeleteCopySourceObjectSubscriber(fileinfo.source_client)  # type: ignore
+            )
 
     def _submit_transfer_request(
         self,
@@ -734,8 +737,8 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
         """Add additional subscribers."""
 
     @staticmethod
-    def _get_filein(fileinfo: FileInfo) -> StdoutBytesWriter:  # type: ignore
-        """Get file in."""
+    def _get_fileout(fileinfo: FileInfo) -> StdoutBytesWriter:  # type: ignore
+        """Get file out."""
         return StdoutBytesWriter()
 
     # pylint: disable=unused-argument

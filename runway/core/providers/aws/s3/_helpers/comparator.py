@@ -7,10 +7,10 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Generator, Iterator, cast
+from typing import TYPE_CHECKING, Generator, Iterator, Optional, cast
 
 if TYPE_CHECKING:
-    from .file_info import FileInfo
+    from .file_generator import FileStats
     from .sync_strategy.base import BaseSync
 
 
@@ -31,9 +31,9 @@ class Comparator:
         self._not_at_dest_sync_strategy = file_not_at_dest_sync_strategy
         self._not_at_src_sync_strategy = file_not_at_src_sync_strategy
 
-    def call(
-        self, src_files: Iterator[FileInfo], dest_files: Iterator[FileInfo]
-    ) -> Generator[FileInfo, None, None]:
+    def call(  # pylint: disable=too-many-statements
+        self, src_files: Iterator[FileStats], dest_files: Iterator[FileStats]
+    ) -> Generator[FileStats, None, None]:
         """Preform the actual comparisons.
 
         The parameters this takes are the generated files for both the source
@@ -69,10 +69,12 @@ class Comparator:
             Yields the FilInfo objects of the files that need to be operated on.
 
         """
-        src_done = False  # True if there are no more files from the source left.
+        dest_file: Optional[FileStats] = None
         dest_done = False  # True if there are no more files form the dest left.
-        src_take = True  # Take the next source file from the generated files if true
         dest_take = True  # Take the next dest file from the generated files if true
+        src_file: Optional[FileStats] = None
+        src_done = False  # True if there are no more files from the source left.
+        src_take = True  # Take the next source file from the generated files if true
         while True:
             try:
                 if not src_done and src_take:
@@ -88,59 +90,62 @@ class Comparator:
                 dest_file = None
                 dest_done = True
 
-            if not src_done and not dest_done:
+            if not (src_done or dest_done):
                 src_take = True
                 dest_take = True
 
-                compare_keys = self.compare_comp_key(src_file, dest_file)  # type: ignore
+                compare_keys = self.compare_comp_key(src_file, dest_file)
+                print(f"compare_keys: {compare_keys}")
 
                 if compare_keys == "equal":
                     should_sync = self._sync_strategy.determine_should_sync(
-                        src_file, dest_file  # type: ignore
+                        src_file, dest_file
                     )
                     if should_sync:
-                        yield src_file  # type: ignore
+                        yield cast("FileStats", src_file)
                 elif compare_keys == "less_than":
                     src_take = True
                     dest_take = False
                     should_sync = self._not_at_dest_sync_strategy.determine_should_sync(
-                        src_file, None  # type: ignore
+                        src_file, None
                     )
                     if should_sync:
-                        yield src_file  # type: ignore
+                        yield cast("FileStats", src_file)
 
                 elif compare_keys == "greater_than":
                     src_take = False
                     dest_take = True
                     should_sync = self._not_at_src_sync_strategy.determine_should_sync(
-                        None, dest_file  # type: ignore
+                        None, dest_file
                     )
                     if should_sync:
-                        yield dest_file  # type: ignore
+                        yield cast("FileStats", dest_file)
 
             elif (not src_done) and dest_done:
                 src_take = True
                 should_sync = self._not_at_dest_sync_strategy.determine_should_sync(
-                    src_file, None  # type: ignore
+                    src_file, None
                 )
                 if should_sync:
-                    yield src_file  # type: ignore
+                    yield cast("FileStats", src_file)
 
             elif src_done and (not dest_done):
                 dest_take = True
                 should_sync = self._not_at_src_sync_strategy.determine_should_sync(
-                    None, dest_file  # type: ignore
+                    None, dest_file
                 )
                 if should_sync:
-                    yield dest_file  # type: ignore
+                    yield cast("FileStats", dest_file)
             else:
-                break
+                break  # cov: ignore
 
     @staticmethod
-    def compare_comp_key(src_file: FileInfo, dest_file: FileInfo) -> str:
+    def compare_comp_key(
+        src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> str:
         """Compare the source & destination compare_key."""
-        src_comp_key = cast(str, src_file.compare_key)
-        dest_comp_key = cast(str, dest_file.compare_key)
+        src_comp_key = (src_file.compare_key if src_file else None) or ""
+        dest_comp_key = (dest_file.compare_key if dest_file else None) or ""
         if src_comp_key == dest_comp_key:
             return "equal"
         if src_comp_key < dest_comp_key:

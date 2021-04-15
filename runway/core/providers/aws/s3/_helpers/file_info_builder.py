@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, Iterator, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, Optional
 
 from .file_info import FileInfo
 
@@ -44,7 +44,7 @@ class FileInfoBuilder:
         self._parameters = parameters or {}
         self._is_stream = is_stream
 
-    def call(self, files: Iterator[FileStats]) -> Generator[FileInfo, None, None]:
+    def call(self, files: Iterable[FileStats]) -> Generator[FileInfo, None, None]:
         """Iterate generator of ``FileStats`` to generate ``FileInfo`` objects."""
         for file_base in files:
             file_info = self._inject_info(file_base)

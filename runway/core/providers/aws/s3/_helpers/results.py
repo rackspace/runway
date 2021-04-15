@@ -195,7 +195,9 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
         self, future: TransferFuture, bytes_transferred: int, **_: Any
     ) -> None:
         """On progress."""
-        result_kwargs = self._result_kwargs_cache[future.meta.transfer_id]  # type: ignore
+        result_kwargs: Dict[str, Any] = self._result_kwargs_cache.get(
+            cast(str, future.meta.transfer_id), cast(Dict[str, Any], {})
+        )
         progress_result = ProgressResult(
             bytes_transferred=bytes_transferred, timestamp=time.time(), **result_kwargs
         )
@@ -206,16 +208,16 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
         result_kwargs = self._on_done_pop_from_result_kwargs_cache(future)
         self._result_queue.put(SuccessResult(**result_kwargs))
 
-    def _on_failure(self, future: TransferFuture, e: Exception) -> None:
+    def _on_failure(self, future: TransferFuture, exception: Exception) -> None:
         """On failure."""
         result_kwargs = self._on_done_pop_from_result_kwargs_cache(future)
-        if isinstance(e, CancelledError):
+        if isinstance(exception, CancelledError):
             error_result_cls = CtrlCResult
-            if isinstance(e, FatalError):
+            if isinstance(exception, FatalError):
                 error_result_cls = ErrorResult
-            self._result_queue.put(error_result_cls(exception=e))
+            self._result_queue.put(error_result_cls(exception=exception))
         else:
-            self._result_queue.put(FailureResult(exception=e, **result_kwargs))
+            self._result_queue.put(FailureResult(exception=exception, **result_kwargs))
 
     def _add_to_result_kwargs_cache(self, future: TransferFuture) -> None:
         """Add to results cache."""
@@ -226,15 +228,17 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
             "dest": dest,
             "total_transfer_size": future.meta.size,
         }
-        self._result_kwargs_cache[future.meta.transfer_id] = result_kwargs  # type: ignore
+        self._result_kwargs_cache[cast(str, future.meta.transfer_id)] = result_kwargs
 
     def _on_done_pop_from_result_kwargs_cache(
         self, future: TransferFuture
     ) -> Dict[str, Any]:
         """On done, pop from results cache."""
-        result_kwargs = self._result_kwargs_cache.pop(future.meta.transfer_id)  # type: ignore
+        result_kwargs: Dict[str, Any] = self._result_kwargs_cache.pop(
+            cast(str, future.meta.transfer_id)
+        )
         result_kwargs.pop("total_transfer_size")
-        return result_kwargs  # type: ignore
+        return result_kwargs
 
     def _get_src_dest(self, future: TransferFuture) -> Tuple[str, str]:
         """Get source destination."""
@@ -363,7 +367,7 @@ class ResultRecorder(BaseResultHandler):
     @staticmethod
     def _get_ongoing_dict_key(result: Union[AnyResult, object]) -> str:
         if not isinstance(result, AllResultTypes):
-            raise ValueError(
+            raise TypeError(
                 "Any result using _get_ongoing_dict_key must be one of "
                 f"{', '.join(str(i) for i in AllResultTypes)}. "
                 f"Provided result is of type: {type(result)}"
@@ -418,13 +422,9 @@ class ResultRecorder(BaseResultHandler):
             )
 
     def _update_ongoing_transfer_size_if_unknown(self, result: ProgressResult) -> None:
-        # This is a special case when the transfer size was previous not
-        # known but was provided in a progress result.
+        """Handle transfer size unknown but shown in progress result."""
         ongoing_key = self._get_ongoing_dict_key(result)
-
-        # First, check if the total size is None, meaning its size is
-        # currently unknown.
-        if self._ongoing_total_sizes[ongoing_key] is None:
+        if self._ongoing_total_sizes.get(ongoing_key) is None:
             total_transfer_size = result.total_transfer_size
             # If the total size is no longer None that means we just learned
             # of the size so let's update the appropriate places with this
@@ -497,6 +497,7 @@ class ResultPrinter(BaseResultHandler):
     def __init__(
         self,
         result_recorder: ResultRecorder,
+        *,
         out_file: Optional[TextIO] = None,
         error_file: Optional[TextIO] = None,
     ):
@@ -612,8 +613,8 @@ class ResultPrinter(BaseResultHandler):
 
             transfer_speed = (
                 human_readable_size(self._result_recorder.bytes_transfer_speed)
-                or "0 Bytes" + "/s"
-            )
+                or "0 Bytes"
+            ) + "/s"
             progress_statement = self.BYTE_PROGRESS_FORMAT.format(
                 bytes_completed=bytes_completed,
                 expected_bytes_completed=expected_bytes_completed,
@@ -731,7 +732,7 @@ class ResultProcessor(threading.Thread):
                 # the shutdown request to clean up the process.
                 if isinstance(result, ErrorResult):
                     self._result_handlers_enabled = False
-            except queue.Empty:
+            except queue.Empty:  # cov: ignore
                 pass
 
     def _process_result(self, result: AnyResult) -> None:
@@ -813,7 +814,7 @@ class CommandResultRecorder:
         exc_type: Optional[Type[BaseException]],
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
-    ) -> None:
+    ) -> Optional[bool]:
         """Exit the context manager."""
         if exc_type:
             LOGGER.debug(
@@ -823,4 +824,7 @@ class CommandResultRecorder:
             )
             if exc_value:
                 self.result_queue.put(ErrorResult(exception=exc_value))
+            self.shutdown()
+            return True  # suppress error as it has been handled by the context manager
         self.shutdown()
+        return None

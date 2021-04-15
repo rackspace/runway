@@ -107,7 +107,7 @@ class ActionArchitecture:
         result.append("s3_handler")
         return result
 
-    def choose_sync_strategies(self):  # TODO
+    def choose_sync_strategies(self) -> Dict[str, BaseSync]:
         """Determine the sync strategy for the command.
 
         It defaults to the default sync strategies but a customizable sync

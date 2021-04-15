@@ -202,6 +202,18 @@ class TestBucket:
 
         assert not bucket.forbidden  # updated value
 
+    def test_format_bucket_path_uri(self) -> None:
+        """Test format_bucket_path_uri."""
+        uri = "s3://test-bucket"
+        bucket = Bucket(MagicMock(), uri[5:])
+        assert bucket.format_bucket_path_uri() == uri
+        assert bucket.format_bucket_path_uri(key="test.txt") == f"{uri}/test.txt"
+        assert (
+            bucket.format_bucket_path_uri(key="test.txt", prefix="prefix")
+            == f"{uri}/prefix/test.txt"
+        )
+        assert bucket.format_bucket_path_uri(prefix="prefix") == f"{uri}/prefix"
+
     def test_get_versioning(self, runway_context: MockRunwayContext) -> None:
         """Test get_versioning."""
         stubber = runway_context.add_stubber("s3")
@@ -269,3 +281,45 @@ class TestBucket:
         del bucket.not_found
 
         assert not bucket.not_found  # updated value
+
+    def test_sync_from_local(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext
+    ) -> None:
+        """Test sync_from_local."""
+        mock_handler = MagicMock()
+        mock_handler_class = mocker.patch(
+            f"{MODULE}.S3SyncHandler", return_value=mock_handler
+        )
+        runway_context.add_stubber("s3")
+        src_directory = "/test/"
+        obj = Bucket(runway_context, "test-bucket")
+        assert not obj.sync_from_local(src_directory, delete=True, prefix="prefix")
+        mock_handler_class.assert_called_once_with(
+            context=runway_context,
+            delete=True,
+            dest="s3://test-bucket/prefix",
+            session=obj.session,
+            src=src_directory,
+        )
+        mock_handler.run.assert_called_once_with()
+
+    def test_sync_to_local(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext
+    ) -> None:
+        """Test sync_to_local."""
+        mock_handler = MagicMock()
+        mock_handler_class = mocker.patch(
+            f"{MODULE}.S3SyncHandler", return_value=mock_handler
+        )
+        runway_context.add_stubber("s3")
+        dest_directory = "/test/"
+        obj = Bucket(runway_context, "test-bucket")
+        assert not obj.sync_to_local(dest_directory)
+        mock_handler_class.assert_called_once_with(
+            context=runway_context,
+            delete=False,
+            dest=dest_directory,
+            session=obj.session,
+            src="s3://test-bucket",
+        )
+        mock_handler.run.assert_called_once_with()

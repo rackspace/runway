@@ -11,8 +11,6 @@ from typing import TYPE_CHECKING, ClassVar, List, Optional
 
 from typing_extensions import Literal
 
-from .......compat import cached_property
-
 if TYPE_CHECKING:
     from botocore.session import Session
 
@@ -52,6 +50,11 @@ class BaseSync:
         self._check_sync_type(sync_type)
         self.sync_type = sync_type
 
+    @property
+    def name(self) -> Optional[str]:
+        """Retrieve the ``name`` of the sync strategy's ``ARGUMENT``."""
+        return self.NAME
+
     @staticmethod
     def _check_sync_type(sync_type: str) -> None:
         if sync_type not in VALID_SYNC_TYPES:
@@ -63,7 +66,9 @@ class BaseSync:
         """Register the sync strategy class to the given session."""
         session.register("choosing-s3-sync-strategy", self.use_sync_strategy)
 
-    def determine_should_sync(self, src_file: FileStats, dest_file: FileStats) -> bool:
+    def determine_should_sync(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Determine if file should sync.
 
         This function takes two ``FileStat`` objects (one from the source and
@@ -98,11 +103,6 @@ class BaseSync:
         """
         raise NotImplementedError("determine_should_sync")
 
-    @cached_property
-    def name(self) -> Optional[str]:
-        """Retrieve the ``name`` of the sync strategy's ``ARGUMENT``."""
-        return self.NAME
-
     def use_sync_strategy(self, params: ParametersDataModel, **_) -> Optional[BaseSync]:
         """Determine which sync strategy to use.
 
@@ -120,12 +120,18 @@ class BaseSync:
         return None
 
     @staticmethod
-    def compare_size(src_file: FileStats, dest_file: FileStats) -> bool:
+    def compare_size(
+        src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Compare the size of two FileStats objects."""
+        if not (src_file and dest_file):
+            raise ValueError("src_file and dest_file must not be None")
         return src_file.size == dest_file.size
 
     # pylint: disable=no-self-use
-    def compare_time(self, src_file: FileStats, dest_file: FileStats) -> bool:
+    def compare_time(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Compare modified time of two FileStats objects.
 
         Returns:
@@ -134,6 +140,8 @@ class BaseSync:
             updating based on the time of last modification and type of operation.
 
         """
+        if not (src_file and dest_file):
+            raise ValueError("src_file and dest_file must not be None")
         delta = dest_file.last_update - src_file.last_update
         cmd = src_file.operation_name
         if cmd in ["copy", "upload"]:
@@ -144,47 +152,6 @@ class BaseSync:
         if cmd == "download":
             if delta.total_seconds() <= 0:
                 return True
-        return False
-
-
-class SizeAndLastModifiedSync(BaseSync):
-    """Sync based on size and last modified date."""
-
-    def determine_should_sync(self, src_file: FileStats, dest_file: FileStats) -> bool:
-        """Determine if file should sync."""
-        same_size = self.compare_size(src_file, dest_file)
-        same_last_modified_time = self.compare_time(src_file, dest_file)
-        should_sync = (not same_size) or (not same_last_modified_time)
-        if should_sync:
-            LOGGER.debug(
-                "syncing: %s -> %s, size: %s -> %s, modified time: %s -> %s",
-                src_file.src,
-                src_file.dest,
-                src_file.size,
-                dest_file.size,
-                src_file.last_update,
-                dest_file.last_update,
-            )
-        return should_sync
-
-
-class NeverSync(BaseSync):
-    """Never sync file."""
-
-    def __init__(
-        self, sync_type: Literal["file_not_at_src"] = "file_not_at_src"
-    ) -> None:
-        """Instantiate class.
-
-        Args:
-            sync_type: This determines where the sync strategy will be
-                used. There are three strings to choose from.
-
-        """
-        super().__init__(sync_type)
-
-    def determine_should_sync(self, src_file: FileStats, dest_file: FileStats) -> bool:
-        """Determine if file should sync."""
         return False
 
 
@@ -203,11 +170,58 @@ class MissingFileSync(BaseSync):
         """
         super().__init__(sync_type)
 
-    def determine_should_sync(self, src_file: FileStats, dest_file: FileStats) -> bool:
+    def determine_should_sync(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
         """Determine if file should sync."""
         LOGGER.debug(
             "syncing: %s -> %s, file does not exist at destination",
-            src_file.src,
-            src_file.dest,
+            src_file.src if src_file else None,
+            src_file.dest if src_file else None,
         )
         return True
+
+
+class NeverSync(BaseSync):
+    """Never sync file."""
+
+    def __init__(
+        self, sync_type: Literal["file_not_at_src"] = "file_not_at_src"
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            sync_type: This determines where the sync strategy will be
+                used. There are three strings to choose from.
+
+        """
+        super().__init__(sync_type)
+
+    def determine_should_sync(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
+        """Determine if file should sync."""
+        return False
+
+
+class SizeAndLastModifiedSync(BaseSync):
+    """Sync based on size and last modified date."""
+
+    def determine_should_sync(
+        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+    ) -> bool:
+        """Determine if file should sync."""
+        same_size = self.compare_size(src_file, dest_file)
+        same_last_modified_time = self.compare_time(src_file, dest_file)
+        should_sync = (not same_size) or (not same_last_modified_time)
+        if should_sync:
+            LOGGER.debug(
+                "syncing: %s -> %s, size: %s -> %s, modified time: %s -> %s",
+                src_file.src if src_file else None,
+                src_file.dest if src_file else None,
+                src_file.size if src_file else None,
+                dest_file.size if dest_file else None,
+                src_file.last_update if src_file else None,
+                dest_file.last_update if dest_file else None,
+            )
+        return should_sync

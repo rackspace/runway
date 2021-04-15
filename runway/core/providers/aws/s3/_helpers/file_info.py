@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ......compat import cached_property
+from .utils import EPOCH_TIME
 
 if TYPE_CHECKING:
     import datetime
@@ -38,9 +39,9 @@ class FileInfo:
         dest_type: Optional[SupportedPathType] = None,
         dest: Optional[AnyPath] = None,
         is_stream: bool = False,
-        last_update: datetime.datetime,
+        last_update: Optional[datetime.datetime] = None,
         operation_name: Optional[str] = None,
-        parameters: Optional[Dict[str, Any]] = None,  # TODO refine
+        parameters: Optional[Dict[str, Any]] = None,
         response_data: Optional[Union[HeadObjectOutputTypeDef, ObjectTypeDef]] = None,
         size: Optional[int] = None,
         source_client: Optional[S3Client] = None,
@@ -78,7 +79,7 @@ class FileInfo:
         self.dest_type = dest_type
         self.compare_key = compare_key
         self.size = size
-        self.last_update = last_update
+        self.last_update = last_update or EPOCH_TIME
         self.parameters = parameters or {}
         self.source_client = source_client
         self.is_stream = is_stream
