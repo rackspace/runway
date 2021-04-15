@@ -282,7 +282,7 @@ class TestFileGenerator:
 
     def test_list_objects_single_client_error_403(self) -> None:
         """Test list_objects."""
-        exc = ClientError({"Error": {"Code": "403"}}, "HeadObject")
+        exc = ClientError({"Error": {"Code": "403", "Message": ""}}, "HeadObject")
         head_object = Mock(side_effect=exc)
         self.client.head_object = head_object
         with pytest.raises(ClientError) as excinfo:
