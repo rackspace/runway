@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import os
+import platform
 import stat
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -87,10 +88,12 @@ def test_is_special_file_character_device(
     assert is_special_file(tmp_file)
 
 
+@pytest.mark.skipif(platform.system() == "Windows", reason="os.mknod requires Linux")
 def test_is_special_file_fifo(tmp_path: Path) -> None:
     """Test is_special_file."""
     tmp_file = tmp_path / "foo"
-    os.mknod(tmp_file, 0o600 | stat.S_IFIFO)
+    # method only exists on linux systems
+    os.mknod(tmp_file, 0o600 | stat.S_IFIFO)  # type: ignore
     assert is_special_file(tmp_file)
 
 
