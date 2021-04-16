@@ -95,8 +95,6 @@ class Comparator:
                 dest_take = True
 
                 compare_keys = self.compare_comp_key(src_file, dest_file)
-                print(f"compare_keys: {compare_keys}")
-
                 if compare_keys == "equal":
                     should_sync = self._sync_strategy.determine_should_sync(
                         src_file, dest_file
@@ -111,7 +109,6 @@ class Comparator:
                     )
                     if should_sync:
                         yield cast("FileStats", src_file)
-
                 elif compare_keys == "greater_than":
                     src_take = False
                     dest_take = True
@@ -128,7 +125,6 @@ class Comparator:
                 )
                 if should_sync:
                     yield cast("FileStats", src_file)
-
             elif src_done and (not dest_done):
                 dest_take = True
                 should_sync = self._not_at_src_sync_strategy.determine_should_sync(

@@ -26,6 +26,7 @@ class ParametersDataModel(BaseModel):
             during sync.
         exclude: List of patterns for files/objects to exclude.
         follow_symlinks: Whether or not to follow symlinks.
+        guess_mime_type: Whether or not to guess content type.
         include: List of patterns for files/objects to explicitly include.
         is_move: Whether or not the action is move.
         only_show_errors: Whether or not to only show errors while running.
@@ -43,6 +44,7 @@ class ParametersDataModel(BaseModel):
     exact_timestamps: bool = False
     exclude: List[str] = []
     follow_symlinks: bool = False
+    guess_mime_type: bool = True
     include: List[str] = []
     is_move: bool = False
     only_show_errors: bool = False
