@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from botocore.exceptions import ClientError
 
@@ -172,7 +172,14 @@ class Bucket:
         return self.client.get_bucket_versioning(Bucket=self.name)
 
     def sync_from_local(
-        self, src_directory: str, *, delete: bool = False, prefix: Optional[str] = None
+        self,
+        src_directory: str,
+        *,
+        delete: bool = False,
+        exclude: Optional[List[str]] = None,
+        follow_symlinks: bool = False,
+        include: Optional[List[str]] = None,
+        prefix: Optional[str] = None
     ) -> None:
         """Sync local directory to the S3 Bucket.
 
@@ -180,6 +187,9 @@ class Bucket:
             src_directory: Local directory to sync to S3.
             delete: If true, files that exist in the destination but not in the
                 source are deleted.
+            exclude: List of patterns for files/objects to exclude.
+            follow_symlinks: If symlinks should be followed.
+            include: List of patterns for files/objects to explicitly include.
             prefix: Optional prefix to append to synced objects.
 
         """
@@ -187,12 +197,22 @@ class Bucket:
             context=self.__ctx,
             delete=delete,
             dest=self.format_bucket_path_uri(prefix=prefix),
+            exclude=exclude,
+            follow_symlinks=follow_symlinks,
+            include=include,
             session=self.session,
             src=src_directory,
         ).run()
 
     def sync_to_local(
-        self, dest_directory: str, *, delete: bool = False, prefix: Optional[str] = None
+        self,
+        dest_directory: str,
+        *,
+        delete: bool = False,
+        exclude: Optional[List[str]] = None,
+        follow_symlinks: bool = False,
+        include: Optional[List[str]] = None,
+        prefix: Optional[str] = None
     ) -> None:
         """Sync S3 bucket to local directory.
 
@@ -200,13 +220,19 @@ class Bucket:
             dest_directory: Local directory to sync S3 objects to.
             delete: If true, files that exist in the destination but not in the
                 source are deleted.
-            prefix: Optional prefix to the objects to sync.
+            exclude: List of patterns for files/objects to exclude.
+            follow_symlinks: If symlinks should be followed.
+            include: List of patterns for files/objects to explicitly include.
+            prefix: Optional prefix to append to synced objects.
 
         """
         S3SyncHandler(
             context=self.__ctx,
             delete=delete,
             dest=dest_directory,
+            exclude=exclude,
+            follow_symlinks=follow_symlinks,
+            include=include,
             session=self.session,
             src=self.format_bucket_path_uri(prefix=prefix),
         ).run()

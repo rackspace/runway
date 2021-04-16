@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from pydantic import validator
 from typing_extensions import Literal
@@ -14,7 +14,26 @@ PathsType = Literal["local", "locallocal", "locals3", "s3", "s3local", "s3s3"]
 
 
 class ParametersDataModel(BaseModel):
-    """Parameters data model."""
+    """Parameters data model.
+
+    Attributes:
+        dest: File/object destination.
+        src: File/object source.
+        delete: Whether or not to delete files at the destination that are
+            missing from the source location.
+        dir_op: If the source location is a directory.
+        exact_timestamps: Use exact time stamp when comparing files/objects
+            during sync.
+        exclude: List of patterns for files/objects to exclude.
+        follow_symlinks: Whether or not to follow symlinks.
+        include: List of patterns for files/objects to explicitly include.
+        is_move: Whether or not the action is move.
+        only_show_errors: Whether or not to only show errors while running.
+        page_size: Number of objects to list per call.
+        paths_type: Concatinated path types for source and destination.
+        size_only: When comparing files/objects, only consider size.
+
+    """
 
     dest: str
     src: str
@@ -22,7 +41,9 @@ class ParametersDataModel(BaseModel):
     delete: bool = False
     dir_op: bool = False
     exact_timestamps: bool = False
+    exclude: List[str] = []
     follow_symlinks: bool = False
+    include: List[str] = []
     is_move: bool = False
     only_show_errors: bool = False
     page_size: Optional[int] = None
@@ -59,20 +80,20 @@ class Parameters:
     """Initial error based on the parameters and arguments passed to sync."""
 
     def __init__(
-        self, cmd: str, parameters: Union[Dict[str, Any], ParametersDataModel]
+        self, action: str, parameters: Union[Dict[str, Any], ParametersDataModel]
     ):
         """Instantiate class.
 
         Args:
-            cmd: The name of the command.
+            action: The name of the action.
             parameters: A dictionary of parameters.
 
         """
-        self.cmd = cmd
+        self.action = action
         self.data = ParametersDataModel.parse_obj(parameters)
-        if self.cmd in ["sync", "mb", "rb"]:
+        if self.action in ["sync", "mb", "rb"]:
             self.data.dir_op = True
-        if self.cmd == "mv":
+        if self.action == "mv":
             self.data.is_move = True
         else:
             self.data.is_move = False
@@ -80,7 +101,7 @@ class Parameters:
 
     def _validate_path_args(self) -> None:
         # If we're using a mv command, you can't copy the object onto itself.
-        if self.cmd == "mv" and self._same_path():
+        if self.action == "mv" and self._same_path():
             raise ValueError(
                 f"Cannot mv a file onto itself: '{self.data.src}' - '{self.data.dest}'"
             )

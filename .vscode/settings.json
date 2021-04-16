@@ -54,6 +54,7 @@
         "executables",
         "filein",
         "fname",
+        "fnmatch",
         "fnull",
         "forcerm",
         "gitdb",

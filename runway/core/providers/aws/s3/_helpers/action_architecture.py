@@ -16,6 +16,7 @@ from ......compat import cached_property
 from .comparator import Comparator
 from .file_generator import FileGenerator
 from .file_info_builder import FileInfoBuilder
+from .filters import Filter
 from .format_path import FormatPath
 from .s3handler import S3TransferHandlerFactory
 from .sync_strategy.base import MissingFileSync, NeverSync, SizeAndLastModifiedSync
@@ -99,8 +100,8 @@ class ActionArchitecture:
 
         """
         result: List[_InstructionTypeDef] = ["file_generator"]
-        # if self.parameters.get("filters"):  # TODO handle filters
-        #     self.instructions.append("filters")
+        if self.parameters.exclude or self.parameters.include:
+            result.append("filters")
         if self.action == "sync":
             result.append("comparator")
         result.append("file_info_builder")
@@ -201,9 +202,9 @@ class ActionArchitecture:
             command_dict = {
                 "setup": [files, rev_files],
                 "file_generator": [file_generator, rev_generator],
-                "filters": [  # TODO handle filters
-                    # create_filter(self.parameters),
-                    # create_filter(self.parameters),
+                "filters": [
+                    Filter.parse_params(self.parameters),
+                    Filter.parse_params(self.parameters),
                 ],
                 "comparator": [Comparator(**sync_strategies)],
                 "file_info_builder": [file_info_builder],

@@ -548,7 +548,7 @@ class RequestParamsMapper:
             request_params["MetadataDirective"] = "REPLACE"
 
     @classmethod
-    def _permission_to_param(cls, permission: Dict[Any, Any]) -> str:
+    def _permission_to_param(cls, permission: str) -> str:
         """Permission to param."""
         if permission == "read":
             return "GrantRead"
@@ -922,6 +922,23 @@ def set_file_utime(filename: AnyPath, desired_time: float):
             "The file was downloaded, but attempting to modify the "
             "utime of the file failed. Is the file owned by another user?"
         ) from exc
+
+
+def split_s3_bucket_key(s3_path: str) -> Tuple[str, str]:
+    """Split s3 path into bucket and key prefix.
+
+    This will also handle the s3:// prefix.
+
+    Args:
+        s3_path: Path to an object in S3 or object prefix.
+
+    Returns:
+        Bucket name, key
+
+    """
+    if s3_path.startswith("s3://"):
+        s3_path = s3_path[5:]
+    return find_bucket_key(s3_path)
 
 
 def uni_print(statement: str, out_file: Optional[TextIO] = None) -> None:

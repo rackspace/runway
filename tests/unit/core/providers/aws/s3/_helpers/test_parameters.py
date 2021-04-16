@@ -37,7 +37,7 @@ class TestParameters:
         """Test __init__."""
         mock_validate_path_args = mocker.patch.object(Parameters, "_validate_path_args")
         obj = Parameters("test", self.data_locallocal)
-        assert obj.cmd == "test"
+        assert obj.action == "test"
         assert obj.data == self.data_locallocal
         mock_validate_path_args.assert_called_once_with()
 

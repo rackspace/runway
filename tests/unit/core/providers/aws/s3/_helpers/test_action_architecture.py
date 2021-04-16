@@ -6,7 +6,7 @@ import os
 from typing import TYPE_CHECKING
 
 import pytest
-from mock import Mock
+from mock import Mock, call
 
 from runway.core.providers.aws.s3._helpers.action_architecture import ActionArchitecture
 from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel
@@ -90,6 +90,40 @@ class TestActionArchitecture:
             "s3_handler",
         ]
 
+    def test_instructions_exclude(self) -> None:
+        """Test instructions."""
+        self.parameters.exclude = ["something"]
+        assert self.action.instructions == [
+            "file_generator",
+            "filters",
+            "comparator",
+            "file_info_builder",
+            "s3_handler",
+        ]
+
+    def test_instructions_filters(self) -> None:
+        """Test instructions."""
+        self.parameters.exclude = ["something"]
+        self.parameters.include = ["something"]
+        assert self.action.instructions == [
+            "file_generator",
+            "filters",
+            "comparator",
+            "file_info_builder",
+            "s3_handler",
+        ]
+
+    def test_instructions_include(self) -> None:
+        """Test instructions."""
+        self.parameters.include = ["something"]
+        assert self.action.instructions == [
+            "file_generator",
+            "filters",
+            "comparator",
+            "file_info_builder",
+            "s3_handler",
+        ]
+
     @pytest.mark.parametrize(
         "num_tasks_failed, num_tasks_warned, expected",
         [(0, 0, 0), (5, 0, 1), (0, 5, 2), (5, 5, 1)],
@@ -103,6 +137,7 @@ class TestActionArchitecture:
         num_tasks_warned: int,
     ) -> None:
         """Test run."""
+        self.parameters.exclude = ["something"]
         files = {"type": "files"}
         rev_files = {"type": "rev_files"}
         mocker.patch.object(
@@ -131,6 +166,10 @@ class TestActionArchitecture:
         mocker.patch(
             f"{MODULE}.FileInfoBuilder", return_value=mock_file_info_builder,
         )
+        mock_filter_inst = Mock(call=Mock(return_value="Filter.call()"))
+        mock_filter_class = mocker.patch(
+            f"{MODULE}.Filter", parse_params=Mock(return_value=mock_filter_inst),
+        )
         mock_s3_transfer_handler = Mock(
             call=Mock(
                 return_value=Mock(
@@ -148,9 +187,17 @@ class TestActionArchitecture:
         assert self.action.run() == expected
         mock_file_generator.call.assert_called_once_with(files)
         mock_file_generator_rev.call.assert_called_once_with(rev_files)
+        mock_filter_class.parse_params.assert_has_calls(
+            [call(self.parameters), call(self.parameters)]
+        )
+        mock_filter_inst.call.assert_has_calls(
+            [
+                call(mock_file_generator.call.return_value),
+                call(mock_file_generator_rev.call.return_value),
+            ]
+        )
         mock_comparator.call.assert_called_once_with(
-            mock_file_generator.call.return_value,
-            mock_file_generator_rev.call.return_value,
+            mock_filter_inst.call.return_value, mock_filter_inst.call.return_value,
         )
         mock_file_info_builder.call.assert_called_once_with(
             mock_comparator.call.return_value

@@ -1,7 +1,7 @@
 """S3 sync handler."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Union, cast
 
 from .....compat import cached_property
 from ._helpers.action_architecture import ActionArchitecture
@@ -27,7 +27,9 @@ class S3SyncHandler:
         *,
         delete: bool = False,
         dest: str,
+        exclude: Optional[List[str]] = None,
         follow_symlinks: bool = False,
+        include: Optional[List[str]] = None,
         page_size: Optional[int] = None,
         session: Optional[boto3.Session] = None,
         src: str
@@ -39,7 +41,9 @@ class S3SyncHandler:
             delete: If true, files that exist in the destination but not in the
                 source are deleted.
             dest: Destination path.
+            exclude: List of patterns for files/objects to exclude.
             follow_symlinks: If symlinks should be followed.
+            include: List of patterns for files/objects to explicitly include.
             page_size: Number of items per page.
             session: boto3 Session.
             src: Source path.
@@ -59,9 +63,11 @@ class S3SyncHandler:
             ParametersDataModel(
                 delete=delete,
                 dest=dest,
-                src=src,
+                exclude=exclude or [],
                 follow_symlinks=follow_symlinks,
+                include=include or [],
                 page_size=page_size,
+                src=src,
             ),
         )
 

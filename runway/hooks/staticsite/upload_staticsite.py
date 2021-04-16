@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 import yaml
 from typing_extensions import TypedDict
 
-from ...core.providers import aws
+from ...core.providers.aws.s3 import Bucket
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -101,22 +101,12 @@ def sync(
     if build_context["deploy_is_current"]:
         LOGGER.info("skipped upload; latest version already deployed")
     else:
-        # Using the awscli for s3 syncing is incredibly suboptimal, but on
-        # balance it's probably the most stable/efficient option for syncing
-        # the files until https://github.com/boto/boto3/issues/358 is resolved
-        sync_args = [
-            "s3",
-            "sync",
+        bucket = Bucket(context, bucket_name)
+        bucket.sync_from_local(
             build_context["app_directory"],
-            "s3://%s/" % bucket_name,
-            "--delete",
-        ]
-
-        for extra_file in [f["name"] for f in extra_files]:
-            sync_args.extend(["--exclude", extra_file])
-
-        aws.cli(sync_args)
-
+            delete=True,
+            exclude=[f["name"] for f in extra_files],
+        )
         invalidate_cache = True
 
     if cf_disabled:
