@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: "[REQUEST] feature"
 labels: feature, priority:low, status:review_needed
-assignees: ITProKyle, troyready
+assignees: ITProKyle
 
 ---
 
