@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from ..file_generator import FileStats
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class SizeOnlySync(BaseSync):

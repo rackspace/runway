@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from ......type_defs import AnyPath
 
 
-LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
 class CommandResult(NamedTuple):

@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from .sync_strategy.base import BaseSync
     from .transfer_config import TransferConfigDict
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 _InstructionTypeDef = Literal[

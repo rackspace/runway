@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from .results import CommandResult
     from .transfer_config import TransferConfigDict
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class StdinMissingError(Exception):

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from .sync_strategy.base import BaseSync
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class Comparator:

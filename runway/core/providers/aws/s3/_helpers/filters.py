@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from .file_generator import FileStats
     from .parameters import ParametersDataModel
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 _FilterType = Literal["exclude", "include"]

@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from ..parameters import ParametersDataModel
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 ValidSyncType = Literal["file_at_src_and_dest", "file_not_at_dest", "file_not_at_src"]
 VALID_SYNC_TYPES: List[ValidSyncType] = [

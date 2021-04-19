@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from ......type_defs import AnyPath
     from .format_path import FormatPathResult
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 EPOCH_TIME = datetime(1970, 1, 1, tzinfo=tzutc())
 HUMANIZE_SUFFIXES = ("KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
