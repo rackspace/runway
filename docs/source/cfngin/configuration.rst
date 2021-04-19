@@ -98,7 +98,7 @@ Top-Level Fields
     :type: Optional[str]
 
     By default, CloudFormation templates are pushed into an S3 bucket and CloudFormation is pointed to the template in that bucket when launching or updating stacks.
-    By default it uses a bucket named ``stacker-${namespace}``, where the namespace is :attr:`~cfngin.config.namespace`.
+    By default it uses a bucket named ``cfngin-${namespace}-${region}``, where the namespace is :attr:`~cfngin.config.namespace` and region is the current AWS region.
 
     To change this, define a value for this field.
 
