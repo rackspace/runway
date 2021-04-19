@@ -1,5 +1,12 @@
 """Type definitions."""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Union
+
 from typing_extensions import TypedDict
+
+AnyPath = Union[Path, str]
 
 
 class Boto3CredentialsTypeDef(TypedDict, total=False):

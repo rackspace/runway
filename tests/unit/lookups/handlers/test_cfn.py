@@ -118,8 +118,11 @@ class TestCfnLookup:
     @pytest.mark.parametrize(
         "exception, default",
         [
-            (ClientError({}, "something"), None),
-            (ClientError({}, "something"), "something"),
+            (ClientError({"Error": {"Code": "", "Message": ""}}, "something"), None),
+            (
+                ClientError({"Error": {"Code": "", "Message": ""}}, "something"),
+                "something",
+            ),
             (KeyError, None),
             (KeyError, "something"),
         ],
@@ -174,8 +177,11 @@ class TestCfnLookup:
     @pytest.mark.parametrize(
         "exception, default",
         [
-            (ClientError({}, "something"), None),
-            (ClientError({}, "something"), "something"),
+            (ClientError({"Error": {"Code": "", "Message": ""}}, "something"), None),
+            (
+                ClientError({"Error": {"Code": "", "Message": ""}}, "something"),
+                "something",
+            ),
             (KeyError, None),
             (KeyError, "something"),
             (StackDoesNotExist("test-stack", "output1"), None),

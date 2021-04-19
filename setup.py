@@ -19,8 +19,6 @@ with codecs_open(join(THIS_DIR, "README.md"), encoding="utf-8") as readfile:
 INSTALL_REQUIRES = [
     "Send2Trash",
     "awacs",  # for embedded hooks
-    # awscli included for embedded hooks and aws subcommand
-    "awscli>=1.18.196<2.0",
     'backports.cached_property ; python_version < "3.8"',
     "botocore>=1.19.36<2.0",
     "boto3>=1.16.36<2.0",
@@ -38,7 +36,7 @@ INSTALL_REQUIRES = [
     'importlib-metadata; python_version < "3.8"',
     "packaging",  # component of setuptools needed for version compare
     "pyOpenSSL",  # For embedded hook & associated script usage
-    "PyYAML>=4.1,<5.3",  # match awscli top-end
+    "PyYAML>=5",
     "yamllint",
     "zgitignore",  # for embedded hooks
     "troposphere>=2.4.2",

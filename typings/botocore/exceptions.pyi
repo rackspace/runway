@@ -332,7 +332,7 @@ class UnsupportedSignatureVersionError(BotoCoreError):
 
     fmt = ...
 
-class ErrorResponseError(TypedDict, total=False):
+class ErrorResponseError(TypedDict):
     Code: str
     Message: str
 
@@ -344,9 +344,11 @@ class ErrorResponseResponseMetadata(TypedDict, total=False):
     RequestId: str
     RetryAttempts: int
 
-class ErrorResponse(TypedDict, total=False):
-    Error: ErrorResponseError
+class _ErrorResponseNotRequired(TypedDict, total=False):
     ResponseMetadata: ErrorResponseResponseMetadata
+
+class ErrorResponse(_ErrorResponseNotRequired):
+    Error: ErrorResponseError
 
 _ClientError = TypeVar("_ClientError", bound="ClientError")
 

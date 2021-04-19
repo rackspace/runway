@@ -52,6 +52,7 @@ class MockBoto3Session:
         """
         self._clients = clients or MutableMap()
         self._client_calls: Dict[str, Any] = {}
+        self._session = MagicMock()
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.aws_session_token = aws_session_token

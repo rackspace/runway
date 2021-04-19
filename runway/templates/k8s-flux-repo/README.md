@@ -2,11 +2,11 @@
 
 This repo represents a sample Terraform infrastructure deployment of EKS & Flux. Terraform is used to manage the base infrastructure components, including a CodeCommit git repo configured for continous deployment via Flux.
 
-## Pre-reqs
+## Prerequisites
 
-* Runway
-* Docker
-* awscli
+* [awscli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
+* [Docker](https://docs.docker.com/get-docker/)
+* [Runway](https://pypi.org/project/runway/)
 
 ## Setup
 
@@ -107,4 +107,3 @@ runway kbenv run -- get namespace
 ### Teardown
 
 `runway destroy` will teardown the entire stack.
-

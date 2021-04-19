@@ -362,7 +362,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
     @property
     def dependencies(self) -> Set[str]:
         """Stack names that this variable depends on."""
-        deps = set()
+        deps: Set[str] = set()
         for item in self.values():  # pylint: disable=no-member
             deps.update(item.dependencies)
         return deps
@@ -457,7 +457,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
     @property
     def dependencies(self) -> Set[str]:
         """Stack names that this variable depends on."""
-        deps = set()
+        deps: Set[str] = set()
         for item in self:
             deps.update(item.dependencies)
         return deps
@@ -615,7 +615,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
     @property
     def dependencies(self) -> Set[str]:
         """Stack names that this variable depends on."""
-        deps = set()
+        deps: Set[str] = set()
         for item in self:
             deps.update(item.dependencies)
         return deps

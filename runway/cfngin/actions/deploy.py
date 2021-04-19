@@ -349,11 +349,11 @@ class Action(BaseAction):
             if provider.is_stack_rolling_back(  # pylint: disable=no-else-return
                 provider_stack
             ):
-                if "rolling back" in status.reason:
+                if status.reason and "rolling back" in status.reason:
                     return status
 
                 LOGGER.debug("%s:entered roll back", stack.fqn)
-                if "updating" in status.reason:
+                if status.reason and "updating" in status.reason:
                     reason = "rolling back update"
                 else:
                     reason = "rolling back new stack"

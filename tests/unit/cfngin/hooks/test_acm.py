@@ -881,7 +881,7 @@ class TestCertificate:
 
         def build_client_error(msg: str) -> ClientError:
             """Raise a ClientError."""
-            return ClientError({"Error": {"Message": msg}}, "test")
+            return ClientError({"Error": {"Code": "", "Message": msg}}, "test")
 
         cert = Certificate(
             context=cfngin_context,

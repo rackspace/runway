@@ -3,14 +3,16 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from botocore.exceptions import ClientError
 
 from .....util import cached_property
 from .._response import BaseResponse
+from ._sync_handler import S3SyncHandler
 
 if TYPE_CHECKING:
+    import boto3
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.type_defs import (
         CreateBucketOutputTypeDef,
@@ -46,7 +48,7 @@ class Bucket:
     @cached_property
     def client(self) -> S3Client:
         """Create or reuse a boto3 client."""
-        return self.__ctx.get_session(region=self._region).client("s3")
+        return self.session.client("s3")
 
     @property
     def exists(self) -> bool:
@@ -86,6 +88,11 @@ class Bucket:
     def not_found(self) -> bool:
         """Check whether the bucket exists."""
         return self.head.metadata.not_found
+
+    @cached_property
+    def session(self) -> boto3.Session:
+        """Create cached boto3 session."""
+        return self.__ctx.get_session(region=self._region)
 
     def create(self, **kwargs: Any) -> CreateBucketOutputTypeDef:
         """Create an S3 Bucket if it does not already exist.
@@ -132,6 +139,26 @@ class Bucket:
         )
         LOGGER.debug('enabled versioning for bucket "%s"', self.name)
 
+    def format_bucket_path_uri(
+        self, *, key: Optional[str] = None, prefix: Optional[str] = None
+    ) -> str:
+        """Format bucket path URI.
+
+        Args:
+            key: S3 object key.
+            prefix: Directory tree to append to key.
+
+        Returns:
+            S3 bucket URI in ``s3://{bucket-name}/{prefix}/{key}`` format
+
+        """
+        uri = f"s3://{self.name}"
+        if prefix:
+            uri += f"/{prefix}"
+        if key:
+            uri += f"/{key}"
+        return uri
+
     def get_versioning(self) -> GetBucketVersioningOutputTypeDef:
         """Get the versioning state of a bucket.
 
@@ -143,3 +170,69 @@ class Bucket:
 
         """
         return self.client.get_bucket_versioning(Bucket=self.name)
+
+    def sync_from_local(
+        self,
+        src_directory: str,
+        *,
+        delete: bool = False,
+        exclude: Optional[List[str]] = None,
+        follow_symlinks: bool = False,
+        include: Optional[List[str]] = None,
+        prefix: Optional[str] = None
+    ) -> None:
+        """Sync local directory to the S3 Bucket.
+
+        Args:
+            src_directory: Local directory to sync to S3.
+            delete: If true, files that exist in the destination but not in the
+                source are deleted.
+            exclude: List of patterns for files/objects to exclude.
+            follow_symlinks: If symlinks should be followed.
+            include: List of patterns for files/objects to explicitly include.
+            prefix: Optional prefix to append to synced objects.
+
+        """
+        S3SyncHandler(
+            context=self.__ctx,
+            delete=delete,
+            dest=self.format_bucket_path_uri(prefix=prefix),
+            exclude=exclude,
+            follow_symlinks=follow_symlinks,
+            include=include,
+            session=self.session,
+            src=src_directory,
+        ).run()
+
+    def sync_to_local(
+        self,
+        dest_directory: str,
+        *,
+        delete: bool = False,
+        exclude: Optional[List[str]] = None,
+        follow_symlinks: bool = False,
+        include: Optional[List[str]] = None,
+        prefix: Optional[str] = None
+    ) -> None:
+        """Sync S3 bucket to local directory.
+
+        Args:
+            dest_directory: Local directory to sync S3 objects to.
+            delete: If true, files that exist in the destination but not in the
+                source are deleted.
+            exclude: List of patterns for files/objects to exclude.
+            follow_symlinks: If symlinks should be followed.
+            include: List of patterns for files/objects to explicitly include.
+            prefix: Optional prefix to append to synced objects.
+
+        """
+        S3SyncHandler(
+            context=self.__ctx,
+            delete=delete,
+            dest=dest_directory,
+            exclude=exclude,
+            follow_symlinks=follow_symlinks,
+            include=include,
+            session=self.session,
+            src=self.format_bucket_path_uri(prefix=prefix),
+        ).run()

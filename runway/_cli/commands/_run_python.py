@@ -1,4 +1,4 @@
-"""``runway run-aws`` command."""
+"""``runway run-python`` command."""
 # docs: file://./../../../docs/source/commands.rst
 from pathlib import Path
 from typing import Any

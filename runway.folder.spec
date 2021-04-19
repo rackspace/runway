@@ -74,9 +74,6 @@ data_files.append(
 data_files.append(
     ("{}/botocore/data".format(get_distribution("botocore").location), "botocore/data/")
 )
-data_files.append(
-    ("{}/awscli/data".format(get_distribution("awscli").location), "awscli/data/")
-)
 data_files.extend(collect_data_files("cfnlint"))
 data_files.extend(collect_data_files("distutils"))
 data_files.extend(collect_data_files("hcl2"))
@@ -93,7 +90,6 @@ hiddenimports = []
 import runway  # noqa
 import troposphere  # noqa
 import awacs  # noqa
-import awscli  # noqa
 import botocore  # noqa
 import pip  # noqa
 import wheel  # noqa
@@ -103,7 +99,6 @@ import cfnlint  # noqa
 hiddenimports.extend(get_submodules(runway))
 hiddenimports.extend(get_submodules(troposphere))
 hiddenimports.extend(get_submodules(awacs))
-hiddenimports.extend(get_submodules(awscli))
 hiddenimports.extend(get_submodules(botocore))
 hiddenimports.extend(get_submodules(pip))
 hiddenimports.extend(get_submodules(wheel))

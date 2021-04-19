@@ -6,7 +6,7 @@ from __future__ import annotations
 import io
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
 
 import pytest
 from botocore.response import StreamingBody
@@ -96,7 +96,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             {"name": "stack2", "template_path": ".", "requires": ["stack1"]},
         ],
     }
-    persist_graph_raw = {"stack1": set(), "stack2": set(["stack1"])}
+    persist_graph_raw: Dict[str, Set[str]] = {"stack1": set(), "stack2": {"stack1"}}
     persist_graph_config = CfnginConfig.parse_obj(persist_graph_raw_config)
 
     @pytest.mark.parametrize(
