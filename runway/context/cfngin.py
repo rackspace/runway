@@ -120,8 +120,10 @@ class CfnginContext(BaseContext):
         """Return ``cfngin_bucket`` from config, calculated name, or None."""
         if not self.upload_to_s3:
             return None
-
-        return self.config.cfngin_bucket or f"stacker-{self.get_fqn()}"
+        return (
+            self.config.cfngin_bucket
+            or f"cfngin-{self.get_fqn()}-{self.env.aws_region}"
+        )
 
     @cached_property
     def mappings(self) -> Dict[str, Dict[str, Dict[str, Any]]]:

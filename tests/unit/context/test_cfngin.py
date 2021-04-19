@@ -128,7 +128,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
     def test_bucket_name_generated(self, mocker: MockerFixture) -> None:
         """Test bucket_name generated."""
         mocker.patch.object(CfnginContext, "upload_to_s3", True)
-        assert CfnginContext(config=self.config).bucket_name == "stacker-test"
+        assert CfnginContext(config=self.config).bucket_name == "cfngin-test-us-east-1"
 
     def test_bucket_name_none(self, mocker: MockerFixture) -> None:
         """Test bucket_name is None."""
