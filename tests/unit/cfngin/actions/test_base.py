@@ -351,7 +351,7 @@ class TestBaseAction(unittest.TestCase):
                 "%s/%s/stack_templates/%s/%s-%s.json"
                 % (
                     endpoint,
-                    "stacker-mynamespace",
+                    "cfngin-mynamespace-us-east-1",
                     "mynamespace-myblueprint",
                     "myblueprint",
                     MOCK_VERSION,
