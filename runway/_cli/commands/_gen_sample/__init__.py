@@ -15,7 +15,6 @@ from ._k8s_flux_repo import k8s_flux_repo
 from ._k8s_tf_repo import k8s_tf_repo
 from ._sls_py import sls_py
 from ._sls_tsc import sls_tsc
-from ._stacker import stacker
 from ._static_angular import static_angular
 from ._static_react import static_react
 from ._tf import tf
@@ -31,7 +30,6 @@ __all__ = [
     "k8s_flux_repo",
     "sls_py",
     "sls_tsc",
-    "stacker",
     "static_angular",
     "static_react",
     "tf",
@@ -48,7 +46,6 @@ COMMANDS = [
     k8s_flux_repo,
     sls_py,
     sls_tsc,
-    stacker,
     static_angular,
     static_react,
     tf,

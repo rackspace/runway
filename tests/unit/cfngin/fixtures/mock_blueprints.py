@@ -51,7 +51,7 @@ class FunctionalTests(Blueprint):
         bucket_arn = Sub("arn:aws:s3:::${StackerBucket}*")
         objects_arn = Sub("arn:aws:s3:::${StackerBucket}*/*")
         cloudformation_scope = Sub(
-            "arn:aws:cloudformation:*:${AWS::AccountId}:" "stack/${StackerNamespace}-*"
+            "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${StackerNamespace}-*"
         )
         changeset_scope = "*"
 
