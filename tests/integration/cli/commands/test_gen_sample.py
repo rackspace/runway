@@ -317,18 +317,6 @@ def test_sls_tsc(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     ]
 
 
-def test_stacker(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
-    """Test ``runway gen-sample stacker`` command."""
-    caplog.set_level(logging.WARNING, logger="runway.cli")
-    runner = CliRunner()
-    result = runner.invoke(cli, ["gen-sample", "stacker"])
-    assert result.exit_code == 0
-    assert caplog.messages[0] == (
-        "This command has been deprecated and will be "
-        "removed in the next major release."
-    )
-
-
 def test_static_angular(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway gen-sample static-angular`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
