@@ -1,5 +1,4 @@
 """Register test handlers."""
-# modeled after https://github.com/cloudtools/stacker/blob/master/stacker/lookups/registry.py
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Type

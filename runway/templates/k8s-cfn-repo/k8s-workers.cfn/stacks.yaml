@@ -7,10 +7,10 @@ lookups:
 
 # Could specify a SSH keypair to allow access to the instances
 # pre_deploy:
-#   - path: stacker.hooks.keypair.ensure_keypair_exists
+#   - path: runway.cfngin.hooks.keypair.ensure_keypair_exists
 #     required: true
 #     args:
-#       keypair: &keypairname mykeypairnamehere
+#       keypair: &keypair-name my_keypair_name_here
 
 stacks:
   - name: k8s-workers
@@ -27,5 +27,5 @@ stacks:
       UseSpotInstances: "${eks_use_spot_instances}"
       SpotBidPrice: "${eks_spot_bid_price}"
       BootstrapArguments: "--kubelet-extra-args '--node-labels=node-role.kubernetes.io/worker=true'"
-      UseDesiredInstanceCount: ${bootstrap_value k8s-workers::true::false}  # set ASG DesiredCount only on iniital deployment
-      # KeyName: *keypairname
+      UseDesiredInstanceCount: ${bootstrap_value k8s-workers::true::false}  # set ASG DesiredCount only on initial deployment
+      # KeyName: *keypair-name

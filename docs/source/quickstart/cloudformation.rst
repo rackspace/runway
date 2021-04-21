@@ -49,7 +49,7 @@ CloudFormation Quickstart
    .. code-block:: shell
 
        $ runway gen-sample cfn
-       $ sed -i -e "s/CUSTOMERNAMEHERE/mydemo/g; s/ENVIRONMENTNAMEHERE/dev/g; s/stacker-/stacker-$(uuidgen|tr "[:upper:]" "[:lower:]")-/g" sampleapp.cfn/dev-us-east-1.env
+       $ sed -i -e "s/CUSTOMERNAMEHERE/mydemo/g; s/ENVIRONMENTNAMEHERE/dev/g; s/cfngin-/cfngin-$(uuidgen|tr "[:upper:]" "[:lower:]")-/g" sampleapp.cfn/dev-us-east-1.env
        $ cat <<EOF >> runway.yml
        ---
        # Full syntax at https://github.com/onicagroup/runway
@@ -67,7 +67,7 @@ CloudFormation Quickstart
        $ runway gen-sample cfn
        $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('CUSTOMERNAMEHERE', 'mydemo') | Set-Content sampleapp.cfn\dev-us-east-1.env
        $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('ENVIRONMENTNAMEHERE', 'dev') | Set-Content sampleapp.cfn\dev-us-east-1.env
-       $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('stacker-', 'stacker-' + [guid]::NewGuid() + '-') | Set-Content sampleapp.cfn\dev-us-east-1.env
+       $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('cfngin-', 'cfngin-' + [guid]::NewGuid() + '-') | Set-Content sampleapp.cfn\dev-us-east-1.env
        $ $RunwayTemplate = @"
        ---
        # Full syntax at https://github.com/onicagroup/runway

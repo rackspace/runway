@@ -31,13 +31,13 @@ class FunctionalTests(Blueprint):
     """Creates a stack with an IAM user and access key for functional tests."""
 
     VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
-        "StackerNamespace": {
+        "Namespace": {
             "type": CFNString,
-            "description": "The stacker namespace that the tests will use. "
+            "description": "The namespace that the tests will use. "
             "Access to cloudformation will be restricted to "
             "only allow access to stacks with this prefix.",
         },
-        "StackerBucket": {
+        "CFNginBucket": {
             "type": CFNString,
             "description": "The name of the bucket that the tests will use "
             "for uploading templates.",
@@ -48,17 +48,17 @@ class FunctionalTests(Blueprint):
         """Create template."""
         template = self.template
 
-        bucket_arn = Sub("arn:aws:s3:::${StackerBucket}*")
-        objects_arn = Sub("arn:aws:s3:::${StackerBucket}*/*")
+        bucket_arn = Sub("arn:aws:s3:::${CFNginBucket}*")
+        objects_arn = Sub("arn:aws:s3:::${CFNginBucket}*/*")
         cloudformation_scope = Sub(
-            "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${StackerNamespace}-*"
+            "arn:aws:cloudformation:*:${AWS::AccountId}:stack/${Namespace}-*"
         )
         changeset_scope = "*"
 
-        # This represents the precise IAM permissions that stacker itself
+        # This represents the precise IAM permissions that cfngin itself
         # needs.
-        stacker_policy = iam.Policy(
-            PolicyName="Stacker",
+        cfngin_policy = iam.Policy(
+            PolicyName="CFNgin",
             PolicyDocument=Policy(
                 Statement=[
                     Statement(
@@ -137,7 +137,7 @@ class FunctionalTests(Blueprint):
                         )
                     ]
                 ),
-                Policies=[stacker_policy],
+                Policies=[cfngin_policy],
             )
         )
 
@@ -155,7 +155,7 @@ class FunctionalTests(Blueprint):
         )
 
         user = template.add_resource(
-            iam.User("FunctionalTestUser", Policies=[stacker_policy, assumerole_policy])
+            iam.User("FunctionalTestUser", Policies=[cfngin_policy, assumerole_policy])
         )
 
         key = template.add_resource(

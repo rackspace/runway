@@ -26,7 +26,7 @@ class FunctionalTests(Blueprint):
     VARIABLES = {
         "StackerNamespace": {
             "type": CFNString,
-            "description": "The stacker namespace that the tests will use. "
+            "description": "The namespace that the tests will use. "
             "Access to cloudformation will be restricted to "
             "only allow access to stacks with this prefix.",
         },
@@ -48,9 +48,9 @@ class FunctionalTests(Blueprint):
         )
         changeset_scope = "*"
 
-        # This represents the precise IAM permissions that stacker itself
+        # This represents the precise IAM permissions that CFNgin itself
         # needs.
-        stacker_policy = iam.Policy(
+        cfngin_policy = iam.Policy(
             PolicyName="Stacker",
             PolicyDocument=Policy(
                 Statement=[
@@ -130,7 +130,7 @@ class FunctionalTests(Blueprint):
                         )
                     ]
                 ),
-                Policies=[stacker_policy],
+                Policies=[cfngin_policy],
             )
         )
 
@@ -148,7 +148,7 @@ class FunctionalTests(Blueprint):
         )
 
         user = t.add_resource(
-            iam.User("FunctionalTestUser", Policies=[stacker_policy, assumerole_policy])
+            iam.User("FunctionalTestUser", Policies=[cfngin_policy, assumerole_policy])
         )
 
         key = t.add_resource(

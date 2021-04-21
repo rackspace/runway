@@ -81,9 +81,8 @@ def stack_template_url(bucket_name: str, blueprint: Blueprint, endpoint: str):
 class BaseAction:
     """Actions perform the actual work of each Command.
 
-    Each action is tied to a :class:`runway.cfngin.commands.stacker.base.BaseCommand`,
-    and is responsible for building the :class:`runway.cfngin.plan.Plan` that
-    will be executed to perform that command.
+    Each action is responsible for building the :class:`runway.cfngin.plan.Plan`
+    that will be executed.
 
     Attributes:
         DESCRIPTION: Description used when creating a plan for an action.
