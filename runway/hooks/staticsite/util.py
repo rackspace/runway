@@ -19,9 +19,6 @@ LOGGER = logging.getLogger(__name__)
 def calculate_hash_of_files(files: List[str], root: Path) -> str:
     """Return a hash of all of the given files at the given root.
 
-    Adapted from stacker.hooks.aws_lambda; used according to its license:
-    https://github.com/cloudtools/stacker/blob/1.4.0/LICENSE
-
     Args:
         files: file names to include in the hash calculation, relative to ``root``.
         root: base directory to analyze files in.

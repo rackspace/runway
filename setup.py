@@ -42,7 +42,6 @@ INSTALL_REQUIRES = [
     "troposphere>=2.4.2",
     # botocore pins its urllib3 dependency like this, so we need to do the
     "urllib3>=1.25.4,<1.27",
-    # inherited from stacker 1.7.0 requirements
     "jinja2>=2.7,<3.0",
     "formic2",
 ]

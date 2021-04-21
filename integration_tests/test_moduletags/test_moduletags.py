@@ -60,12 +60,10 @@ class ModuleTags(IntegrationTest):
         for i in range(1, 7):
             new_dir = os.path.join(self.base_dir, "sampleapp" + str(i))
             copy_dir(os.path.join(self.base_dir, "sampleapp"), new_dir)
-            stacker_contents = deepcopy(self.cfngin_file)
-            stacker_contents["stacks"] = {
-                "module-tags-" + str(i): self.stack_definition
-            }
-            with open(os.path.join(new_dir, "stacker.yml"), "w+") as yml:
-                yml.write(yaml.safe_dump(stacker_contents))
+            cfngin_contents = deepcopy(self.cfngin_file)
+            cfngin_contents["stacks"] = {"module-tags-" + str(i): self.stack_definition}
+            with open(os.path.join(new_dir, "cfngin.yml"), "w+") as yml:
+                yml.write(yaml.safe_dump(cfngin_contents))
 
     def runway_cmd(self, command, tags):
         """Run a deploy command based on tags."""

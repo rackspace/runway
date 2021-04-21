@@ -300,7 +300,7 @@ class TestSafeHaven:
 def test_argv() -> None:
     """Test argv."""
     orig_expected = ["runway", "deploy"]
-    override = ["stacker", "build", "test.yml"]
+    override = ["cfngin", "build", "test.yml"]
 
     assert sys.argv == orig_expected, "validate original value"
 

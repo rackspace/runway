@@ -256,9 +256,6 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         value = validate_variable_type(var_name, var_type, provided_value)
         self.assertEqual(value, provided_value)
 
-    # This tests that validate_variable_type doesn't change the original value
-    # even if it could.  IE: A string "1" shouldn't be valid for an int.
-    # See: https://github.com/remind101/stacker/pull/266
     def test_strict_validate_variable_type(self) -> None:
         """Test strict validate variable type."""
         with self.assertRaises(ValueError):

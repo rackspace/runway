@@ -116,9 +116,9 @@ def s3_fallback(
     change_set_name: Optional[str] = None,
     service_role: Optional[str] = None,
 ) -> Any:
-    """Falling back to legacy stacker S3 bucket region for templates."""
+    """Falling back to legacy CFNgin S3 bucket region for templates."""
     LOGGER.warning(
-        "falling back to deprecated, legacy stacker S3 bucket "
+        "falling back to deprecated, legacy CFNgin S3 bucket "
         "region for templates; to learn how to correctly provide an "
         "s3 bucket, visit %s/page/cfngin/configuration.html",
         DOC_SITE,

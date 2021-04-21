@@ -1,5 +1,4 @@
 .. _`aws_lambda hook`: ../apidocs/runway.cfngin.hooks.aws_lambda.html#runway.cfngin.hooks.aws_lambda.upload_lambda_functions
-.. _`aws_lambda blueprint`: https://github.com/cloudtools/stacker_blueprints/blob/master/stacker_blueprints/aws_lambda.py
 
 .. _cfngin-lookups:
 
@@ -552,8 +551,7 @@ When using hooks, you can have the hook store results in the :attr:`CfnginContex
 
 This lookup lets you look up values in that dictionary. A good example of this
 is when you use the `aws_lambda hook`_ to upload AWS Lambda code, then need to
-pass that code object as the **Code** variable in the `aws_lambda blueprint`_
-dictionary.
+pass that code object as the **Code** variable in a Blueprint.
 
 .. rubric:: Arguments
 

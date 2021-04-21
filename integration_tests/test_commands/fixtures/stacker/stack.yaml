@@ -2,5 +2,5 @@ namespace: dev
 cfngin_bucket: ''
 
 stacks:
-  stackerintegrationtest:
+  cfngin-integration-test:
     template_path: ssm.yaml

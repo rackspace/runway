@@ -292,9 +292,6 @@ def get_content(extra_file: ExtraFileTypeDef) -> Optional[str]:
 def calculate_hash_of_extra_files(extra_files: List[ExtraFileTypeDef]) -> str:
     """Return a hash of all of the given extra files.
 
-    Adapted from stacker.hooks.aws_lambda; used according to its license:
-    https://github.com/cloudtools/stacker/blob/1.4.0/LICENSE
-
     All attributes of the extra file object are included when hashing:
     name, content_type, content, and file data.
 
