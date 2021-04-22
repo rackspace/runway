@@ -1,16 +1,18 @@
 .. _install:
 
+############
 Installation
-============
+############
 
 To enable Runway to conform to our users' varying use cases, we have made it
 available via three different install methods - `cURL`_, `npm`_, and `pip`_.
 
+
 .. _install-curl:
 
-
+****
 cURL
-^^^^
+****
 
 Arguably the easiest way to install Runway is by using curl. Use one of the
 endpoints below to download a single-binary executable version of Runway based
@@ -26,9 +28,25 @@ on your operating system.
 | Windows          | https://oni.ca/runway/latest/windows              |
 +------------------+---------------------------------------------------+
 
-.. code-block:: shell
+.. tabs::
 
-    $ curl -L https://oni.ca/runway/latest/osx -o runway
+  .. tab:: Linux
+
+    .. code-block:: sh
+
+      curl -L https://oni.ca/runway/latest/linux -o runway
+
+  .. tab:: macOS
+
+    .. code-block:: sh
+
+        curl -L https://oni.ca/runway/latest/osx -o runway
+
+  .. tab:: Windows
+
+    .. code-block:: powershell
+
+      Invoke-WebRequest -Uri "https://oni.ca/runway/latest/windows" -OutFile runway
 
 .. note:: To install a specific version of Runway, you can replace ``latest``
           with a version number.
@@ -37,9 +55,9 @@ on your operating system.
 
 To use the single-binary, run it directly as shown below. Please note that
 after download, you may need to adjust the permissions before it can be
-executed. (eg. macOS/Ubuntu:``chmod +x runway``)
+executed. (eg. Linux/macOS:``chmod +x runway``)
 
-.. code-block:: shell
+.. code-block:: sh
 
     $ ./runway deploy
 
@@ -48,15 +66,16 @@ executed. (eg. macOS/Ubuntu:``chmod +x runway``)
 
 .. _install-npm:
 
+***
 npm
-^^^
+***
 
-Runway is published on npm as ``@onica/runway``. It currently contains binaries
-to support macOS, Ubuntu, and Windows.
+Runway is published on npm as ``@onica/runway``.
+It currently contains binaries to support macOS, Ubuntu, and Windows.
 
 While Runway can be installed globally like any other npm package, we strongly
-recommend using it per-project as a dev dependency. See
-`Why Version Lock Per-Project`_ for more info regarding this suggestion.
+recommend using it per-project as a dev dependency.
+See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
 .. code-block:: shell
 
@@ -73,56 +92,69 @@ recommend using it per-project as a dev dependency. See
 
 .. _install-python:
 
+***
 pip
-^^^
+***
 
 Runway runs on Python 2.7 and Python 3.5+.
 
-Runway is hosted on PyPI as the package named ``runway``. It can be installed
-like any other Python package, but we instead strongly recommend using it
-per-project with `pipenv <https://pypi.org/project/pipenv/>`_. See
-`Why Version Lock Per-Project`_ for more info regarding this suggestion.
+Runway is hosted on PyPI as the package named ``runway``.
+It can be installed like any other Python package, but we instead strongly recommend using it
+per-project with `pipenv <https://pypi.org/project/pipenv/>`_.
+See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
 **Suggested use:** Python projects
 
+.. tabs::
 
-Version Locking with Pipenv
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  .. tab:: poetry
 
-In your project's directory, execute ``pipenv install runway``. This will:
+    .. code-block:: sh
 
-#. Update (creating if missing) a ``Pipfile`` file with your project's Runway
-   dependency
-#. Create a Python virtual environment (hidden in your user profile folder)
-   dedicated to your project, with Runway installed in it
-#. Update (creating if missing) a ``Pipfile.lock`` file containing the exact
-   versions/crypto-hashes of Runway (and dependencies) installed in your
-   python virtual environment
+      poetry add runway
 
-Now Runway can be used in the project via ``pipenv run runway ...``
-(e.g. ``pipenv run runway takeoff``).
+  .. tab:: pipenv
 
-To ensure future users of the project use the same version of Runway,
-direct them (e.g. via a Makefile) to invoke it via
-``pipenv sync; pipenv run Runway ...`` -- this will ensure the version in
-their virtual environment is kept in sync with the project's lock file.
+    .. code-block:: sh
 
+      pipenv install runway
 
-Troubleshooting
-~~~~~~~~~~~~~~~
+  .. tab:: pip
 
+    .. code-block:: sh
 
-Pipenv Not Found
-----------------
+      pip install --user runway
+      # or (depending on how Python was installed)
+      pip install runway
 
-If pipenv isn't available after installation (via
-``pip install --user pipenv``, see the :ref:`python-setup` guide.
+.. rubric:: Usage
+
+.. tabs::
+
+  .. tab:: poetry
+
+    .. code-block:: sh
+
+      poetry run runway --help
+
+  .. tab:: pipenv
+
+    .. code-block:: sh
+
+      pipenv run runway  --help
+
+  .. tab:: pip
+
+    .. code-block:: sh
+
+      runway --help
 
 
 .. _why-version-lock:
 
+****************************
 Why Version Lock Per-Project
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+****************************
 
 Locking the version of Runway per-project will allow you to:
 
