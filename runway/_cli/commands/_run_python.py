@@ -22,9 +22,10 @@ def run_python(filename: str, **_: Any) -> None:
     """Execute a python script using a bundled copy of python.
 
     This command can execute actions using python without requiring python to
-    be installed on a system. This is only applicable when installing a binary
-    release of Runway (not installed from PyPi). When installed from PyPI,
-    the current interpreter is used.
+    be installed on a system.
+    This is only applicable when installing a binary release of Runway
+    (not installed from PyPi).
+    When installed from PyPI, the current interpreter is used.
 
     """
     execglobals = globals().copy()

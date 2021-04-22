@@ -22,8 +22,8 @@ def install(version: str, **_: Any) -> None:
     """Install the specified <version> of Terraform (e.g. 0.12.0).
 
     If no version is specified, Runway will attempt to find and read a
-    ".terraform-version" file in the current directory. If this file doesn't
-    exist, nothing will be installed.
+    ".terraform-version" file in the current directory.
+    If this file doesn't exist, nothing will be installed.
 
     """
     try:

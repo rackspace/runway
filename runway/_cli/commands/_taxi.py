@@ -23,6 +23,10 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 @options.verbose
 @click.pass_context
 def taxi(ctx: click.Context, **kwargs: Any) -> None:
-    """Alias of "runway plan"."""
+    """Alias of "runway plan".
+
+    For more information, refer to the output of "runway plan --help".
+
+    """
     LOGGER.verbose("forwarding to plan...")
     ctx.forward(plan, **kwargs)

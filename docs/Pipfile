@@ -4,7 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-Sphinx = "~=3.2.1"
-sphinx-rtd-theme = "~=0.5.0"
+Sphinx = "~=3.5"
 runway = {editable = true,path = "./.."}
+sphinx-rtd-theme = "~=0.5"
+sphinx-tabs = "*"
 sphinxcontrib-apidoc = "*"
+sphinxcontrib-programoutput = "*"

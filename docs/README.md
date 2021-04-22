@@ -1,4 +1,7 @@
+# Documentation
+
 ## Local Testing
+
 Run `make html` (`.\make.bat html` on Windows) to generate the HTML pages
 The generated webpages can then be viewed using a web browser
 
@@ -6,7 +9,7 @@ The generated webpages can then be viewed using a web browser
 
 Python packages for local testing are handled by the Pipfile/Pipfile.lock files.
 
-These are used to generate the requirements.txt used by RTD: `pipenv lock --requirements > requirements.txt`
+These are used to generate the requirements.txt used by RTD: `pipenv lock --requirements | sed "/-e .\/../d" > requirements.txt`
 
 ## runway-example.gif
 

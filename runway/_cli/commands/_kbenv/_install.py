@@ -20,8 +20,8 @@ def install(version: str, **_: Any) -> None:
     """Install the specified <version> of kubectl (e.g. v1.14.0).
 
     If no version is specified, Runway will attempt to find and read a
-    ".kubectl-version" file in the current directory. If this file doesn't
-    exist, nothing will be installed.
+    ".kubectl-version" file in the current directory.
+    If this file doesn't exist, nothing will be installed.
 
     Compatible with https://github.com/alexppg/kbenv.
 

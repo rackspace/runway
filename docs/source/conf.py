@@ -18,8 +18,8 @@ DOC_SRC = os.path.join(ROOT_DIR, "docs/source")
 
 # -- Project information -----------------------------------------------------
 
-project = u"runway"
-copyright = u"2019, Onica Group"
+project = u"Runway"
+copyright = u"2021, Onica Group"
 author = u"Onica Group"
 
 # The full version, including alpha/beta/rc tags
@@ -42,7 +42,9 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_tabs.tabs",
     "sphinxcontrib.apidoc",
+    "sphinxcontrib.programoutput",
 ]
 
 intersphinx_mapping = {

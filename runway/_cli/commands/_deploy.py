@@ -27,15 +27,17 @@ def deploy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> 
 
     \b
     1. Determines the deploy environment.
-        - option
+        - "-e, --deploy-environment" option
         - "DEPLOY_ENVIRONMENT" environment variable
-        - git branch name (strips "ENV-" prefix, master => common)
-        - current working directory
+        - git branch name
+            - strips "ENV-" prefix, master is converted to common
+            - ignored if "ignore_git_branch: true"
+        - name of the current working directory
     2. Selects deployments & modules to deploy.
         - (default) prompts
         - (tags) module contains all tags
         - (non-interactive) all
-    3. Deploys selected in the order defined.
+    3. Deploys selected deployments/modules in the order defined.
 
     """  # noqa: D301
     try:
