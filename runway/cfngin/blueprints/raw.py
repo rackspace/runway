@@ -98,9 +98,9 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         self.name = name
         self.context = context
         self.mappings = mappings
-        self.resolved_variables = None
         self.raw_template_path = raw_template_path
         self._rendered = None
+        self._resolved_variables = None
         self._version = None
 
     def to_json(self, variables: Optional[Dict[str, Any]] = None) -> str:
@@ -159,22 +159,22 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
 
         """
         # Pass 1 to set resolved_variables to provided variables
-        self.resolved_variables = {}
+        self._resolved_variables = {}
         variable_dict = {var.name: var for var in provided_variables}
         for var_name, _var_def in variable_dict.items():
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
-                self.resolved_variables[var_name] = value
+                self._resolved_variables[var_name] = value
 
         # Pass 2 to render the blueprint and set resolved_variables according
         # to defined variables
         defined_variables = self.get_parameter_definitions()
-        self.resolved_variables = {}
+        self._resolved_variables = {}
         variable_dict = {var.name: var for var in provided_variables}
         for var_name, _var_def in defined_variables.items():
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
-                self.resolved_variables[var_name] = value
+                self._resolved_variables[var_name] = value
 
     def get_parameter_values(self) -> Dict[str, Union[List[Any], str]]:
         """Return a dictionary of variables with `type` :class:`CFNType`.
@@ -184,7 +184,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             Will be a dictionary of ``<parameter name>: <parameter value>``.
 
         """
-        return self.resolved_variables or {}
+        return self._resolved_variables or {}
 
     @property
     def requires_change_set(self) -> bool:
@@ -211,7 +211,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
                             context=self.context,
                             mappings=self.mappings,
                             name=self.name,
-                            variables=self.resolved_variables,
+                            variables=self._resolved_variables,
                         )
                     )
                 else:

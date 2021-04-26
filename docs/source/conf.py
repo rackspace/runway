@@ -6,14 +6,14 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
-
-import os.path
-from os.path import dirname, realpath
+import os
+from pathlib import Path
 
 from pkg_resources import get_distribution
 
-ROOT_DIR = dirname(dirname(dirname(realpath(__file__))))
-DOC_SRC = os.path.join(ROOT_DIR, "docs/source")
+DOCS_DIR = Path(__file__).parent.parent.resolve()
+ROOT_DIR = DOCS_DIR.parent
+SRC_DIR = DOCS_DIR / "source"
 
 
 # -- Project information -----------------------------------------------------
@@ -185,21 +185,48 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
 
-# -- Options for autodoc  -----------------------------------------------------
+# -- Options for sphinx-apidoc -----------------------------------------------
+# https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html#environment
+os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 
+# -- Options of sphinx.ext.autodoc -------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 autoclass_content = "both"
+autodoc_default_options = {
+    "members": True,
+    "member-order": "bysource",
+    "show-inheritance": True,
+}
+autodoc_type_aliases = {
+    "Any": "typing.Any",
+    "ClassVar": "typing.ClassVar",
+    "Dict": "typing.Dict",
+    "List": "typing.List",
+    "Optional": "typing.Optional",
+}
+autodoc_typehints = "signature"
 
-# -- Options for napoleon  ----------------------------------------------------
+# -- Options for napoleon  ---------------------------------------------------
+# https://www.sphinx-doc.org/en/3.x/usage/extensions/napoleon.html#configuration
+napoleon_attr_annotations = True
 napoleon_google_docstring = True
 napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_type_aliases = autodoc_type_aliases
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = False
+napoleon_use_rtype = True
 
-# -- Options for sphinxcontrib.apidoc  ----------------------------------------
+# -- Options for sphinxcontrib.apidoc  ---------------------------------------
 apidoc_excluded_paths = [
-    "cfngin/commands",
     "hooks/staticsite/auth_at_edge/templates",
     "templates",
 ]
-apidoc_extra_args = [f"--templatedir={os.path.join(DOC_SRC, '_templates/apidocs')}"]
+apidoc_extra_args = [f"--templatedir={SRC_DIR / '_templates/apidocs'}"]
 apidoc_module_dir = "../../runway"
 apidoc_module_first = True
 apidoc_output_dir = "apidocs"

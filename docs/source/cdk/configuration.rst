@@ -4,6 +4,9 @@ Configuration
 
 Standard `CDK <https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html>`__ rules apply but, we have some added prerequisites, recommendations, and caveats.
 
+.. contents::
+  :depth: 4
+
 
 *************
 Prerequisites
@@ -19,17 +22,12 @@ We strongly recommend you commit the package-lock.json that is generated after r
 Environments
 ************
 
-Unlike some other module types, CDK does not have file that can be used to configure an environment.
-It can only be configured using the ``environments`` option of a deployment and/or module (see :ref:`Runway Config File <runway-config>` for details).
+Unlike some other module types, CDK does not have a file that can be used to configure an environment.
+It can only be configured using the :attr:`deployment.environments`/:attr:`module.environments` field.
 
-
-Runway Config
-=============
-
-.. rubric:: Top-level
+.. rubric:: Example
 .. code-block:: yaml
 
-  ---
   deployments:
     - modules:
         - path: mycdkmodule.cdl
@@ -42,10 +40,43 @@ Runway Config
         dev: true
         prod: true
 
-.. rubric:: In Module Directory
-.. code-block:: yaml
 
-  ---
-  environments:
-    dev: true
-    prod: true
+.. _cdk.options:
+
+*******
+Options
+*******
+
+.. _cdk.build_steps:
+
+.. data:: build_steps
+  :type: Optional[List[str]]
+  :value: None
+  :noindex:
+
+  Shell commands to be run before processing the module.
+
+  See :ref:`Build Steps <cdk.Build Steps>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      build_steps:
+        - npx tsc
+
+
+.. _cdk.skip_npm_ci:
+
+.. data:: skip_npm_ci
+  :type: bool
+  :value: False
+  :noindex:
+
+  See :ref:`Disable NPM CI <cdk.Disabling NPM CI>` for more details.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      skip_npm_ci: true

@@ -1,23 +1,12 @@
-####################
-Runway Documentation
-####################
+######
+Runway
+######
+
+Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease management of per-environment configs & deployment.
 
 .. image:: images/runway-example.gif
    :align: center
    :alt: runway-example.gif
-
-Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease management of per-environment configs & deployment.
-
-Very simple configuration to:
-
-- Perform automatic linting/verification
-- Ensure deployments are only performed when an environment config is present
-- Define an IAM role to assume for each deployment
-- Wrangle Terraform backend/workspace configs w/ per-environment tfvars
-- Avoid long-term tool lock-in
-
-  - Runway is a simple wrapper around standard tools. It simply helps to
-    avoid convoluted Makefiles / CI jobs
 
 .. toctree::
    :caption: Runway

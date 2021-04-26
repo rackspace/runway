@@ -63,7 +63,7 @@ dismantle
 .. command-output:: runway dismantle --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway dismantle
   $ runway dismantle --ci --deploy-environment example
@@ -83,7 +83,7 @@ docs
 .. command-output:: runway docs --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway docs
 
@@ -101,7 +101,7 @@ envvars
 .. command-output:: runway envvars --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway envvars
   $ eval "$(runway envvars)"
@@ -121,7 +121,7 @@ gen-sample
 .. command-output:: runway gen-sample --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway gen-sample cfngin
   $ runway gen-sample static-react
@@ -140,7 +140,7 @@ init
 .. command-output:: runway init --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway init
 
@@ -159,7 +159,7 @@ kbenv install
 .. command-output:: runway kbenv install --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway kbenv install
   $ runway kbenv install v1.14.0
@@ -178,7 +178,7 @@ kbenv run
 .. command-output:: runway kbenv run --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway kbenv run version --client
   $ runway kbenv run -- --help
@@ -198,7 +198,7 @@ new
 .. command-output:: runway new --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway new
   $ runway new --debug
@@ -220,7 +220,7 @@ plan
 .. command-output:: runway new --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway plan
   $ runway plan --ci --deploy-environment example
@@ -240,7 +240,7 @@ preflight
 .. command-output:: runway preflight --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway preflight
 
@@ -259,7 +259,7 @@ run-python
 .. command-output:: runway run-python --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway run-python my_script.py
 
@@ -278,7 +278,7 @@ schema cfngin
 .. command-output:: runway schema cfngin --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway schema cfngin --output cfngin-schema.json
 
@@ -297,7 +297,7 @@ schema runway
 .. command-output:: runway schema runway --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway schema runway --output runway-schema.json
 
@@ -316,7 +316,7 @@ takeoff
 .. command-output:: runway takeoff --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway takeoff
   $ runway takeoff --ci --deploy-environment example
@@ -336,7 +336,7 @@ taxi
 .. command-output:: runway taxi --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway taxi
   $ runway taxi --ci --deploy-environment example
@@ -356,7 +356,7 @@ test
 .. command-output:: runway test --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway test
 
@@ -375,7 +375,7 @@ tfenv install
 .. command-output:: runway tfenv install --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway tfenv install 0.12.0
 
@@ -393,7 +393,7 @@ tfenv run
 .. command-output:: runway tfenv run --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway tfenv run --version
   $ runway tfenv run -- --help
@@ -412,6 +412,6 @@ whichenv
 .. command-output:: runway whichenv --help
 
 .. rubric:: Example
-.. code-block:: shell
+.. code-block:: sh
 
   $ runway whichenv

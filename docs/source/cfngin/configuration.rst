@@ -8,6 +8,10 @@ In addition to the :ref:`Runway Config File <runway-config>`, there are two file
 - a key/value :ref:`environment file <cfngin-env>`
 
 
+.. contents::
+  :depth: 4
+
+
 **********
 runway.yml
 **********
@@ -62,10 +66,16 @@ Runway automatically makes the following commonly used :ref:`Parameters <term-pa
 .. note::
   If these parameters are already being explicitly defined in :attr:`deployment.parameters`/:attr:`module.parameters` the value provided will be used instead of what would be automatically added.
 
-:environment (str):
+.. data:: environment
+  :type: str
+  :noindex:
+
   Taken from the ``DEPLOY_ENVIRONMENT`` environment variable. This will the be current :ref:`deploy environment <term-deploy-env>`.
 
-:region (str):
+.. data:: region
+  :type: str
+  :noindex:
+
   Taken from the ``AWS_REGION`` environment variable. This will be the current region being processed.
 
 
@@ -79,10 +89,7 @@ Runway automatically makes the following commonly used :ref:`Parameters <term-pa
 CFNgin Config File
 ******************
 
-The configuration file has a loose definition, with only a few top-level fields.
-Other than those fields, you can define your own top-level keys to make use of other YAML features like
-`anchors & references <https://en.wikipedia.org/wiki/YAML#Repeated_nodes>`_ to avoid duplicating config.
-(See :ref:`YAML anchors & references <cfngin-yaml>` for details)
+The CFNgin config file has full support for YAML features like `anchors & references <https://en.wikipedia.org/wiki/YAML#Repeated_nodes>`_ for a DRY config file (See :ref:`YAML anchors & references <cfngin-yaml>` for details).
 
 
 Top-Level Fields
@@ -96,6 +103,7 @@ Top-Level Fields
 
   .. attribute:: cfngin_bucket
     :type: Optional[str]
+    :value: None
 
     By default, CloudFormation templates are pushed into an S3 bucket and CloudFormation is pointed to the template in that bucket when launching or updating stacks.
     By default it uses a bucket named ``cfngin-${namespace}-${region}``, where the namespace is :attr:`~cfngin.config.namespace` and region is the current AWS region.
@@ -105,8 +113,8 @@ Top-Level Fields
     The bucket will be created in the same region that the stacks will be launched in.
     If you want to change this, or if you already have an existing bucket in a different region, you can set the :attr:`~cfngin.config.cfngin_bucket_region` to the region where you want to create the bucket.
 
-    If you want CFNgin to upload templates directly to CloudFormation, instead of first uploading to S3, you can set this field to an empty string.
-    However, note that template size is greatly limited when uploading directly.
+    If you want CFNgin to upload templates directly to CloudFormation instead of first uploading to S3, you can set this field to an empty string.
+    However, the template size is greatly limited when uploading directly.
     See the `CloudFormation Limits Reference <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html>`__.
 
     .. rubric:: Example
@@ -121,6 +129,7 @@ Top-Level Fields
 
   .. attribute:: cfngin_bucket_region
     :type: Optional[str]
+    :value: None
 
     AWS Region where :attr:`~cfngin.config.cfngin_bucket` is located.
     If not provided, the current region is used.
@@ -252,7 +261,7 @@ Top-Level Fields
 
   .. attribute:: persistent_graph_key
     :type: Optional[str]
-    :value: null
+    :value: None
 
     Used to track the *state* of stacks defined in configuration file.
     This can result in stacks being destroyed when they are removed from the configuration file removing the need to manually delete the stacks.
@@ -265,7 +274,7 @@ Top-Level Fields
       persistent_graph_key: unique-key.json
 
   .. attribute:: post_deploy
-    :type: Union[Dict[str, cfngin.hook], List[cfngin.hook]]
+    :type: Optional[List[cfngin.hook]]
     :value: []
 
     Python functions/methods that are executed after processing the stacks in the config while using the :ref:`deploy command <command-deploy>`.
@@ -274,20 +283,12 @@ Top-Level Fields
 
     .. rubric:: Example
     .. code-block:: yaml
-      :caption: using a dict
-
-      post_deploy:
-        do_something:
-          path: do.something
-
-    .. code-block:: yaml
-      :caption: using a list
 
       post_deploy:
         - path: do.something
 
   .. attribute:: post_destroy
-    :type: Union[Dict[str, cfngin.hook], List[cfngin.hook]]
+    :type: Optional[List[cfngin.hook]]
     :value: []
 
     Python functions/methods that are executed after processing the stacks in the config while using the :ref:`destroy command <command-destroy>`.
@@ -296,20 +297,12 @@ Top-Level Fields
 
     .. rubric:: Example
     .. code-block:: yaml
-      :caption: using a dict
-
-      post_destroy:
-        do_something:
-          path: do.something
-
-    .. code-block:: yaml
-      :caption: using a list
 
       post_destroy:
         - path: do.something
 
   .. attribute:: pre_deploy
-    :type: Union[Dict[str, cfngin.hook], List[cfngin.hook]]
+    :type: Optional[List[cfngin.hook]]
     :value: []
 
     Python functions/methods that are executed before processing the stacks in the config while using the :ref:`deploy command <command-deploy>`.
@@ -317,21 +310,13 @@ Top-Level Fields
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
     .. rubric:: Example
-    .. code-block:: yaml
-      :caption: using a dict
-
-      pre_deploy:
-        do_something:
-          path: do.something
-
-    .. code-block:: yaml
-      :caption: using a list
+    . code-block:: yaml
 
       pre_deploy:
         - path: do.something
 
   .. attribute:: pre_destroy
-    :type: Union[Dict[str, cfngin.hook], List[cfngin.hook]]
+    :type: Optional[List[cfngin.hook]]
     :value: []
 
     Python functions/methods that are executed before processing the stacks in the config while using the :ref:`destroy command <command-destroy>`.
@@ -340,21 +325,13 @@ Top-Level Fields
 
     .. rubric:: Example
     .. code-block:: yaml
-      :caption: using a dict
-
-      pre_destroy:
-        do_something:
-          path: do.something
-
-    .. code-block:: yaml
-      :caption: using a list
 
       pre_destroy:
         - path: do.something
 
   .. attribute:: service_role
     :type: Optional[str]
-    :value: null
+    :value: None
 
     By default CFNgin doesn't specify a service role when executing changes to CloudFormation stacks.
     If you would prefer that it do so, you define the IAM Role ARN that CFNgin should use when executing CloudFormation changes.
@@ -369,24 +346,21 @@ Top-Level Fields
       service_role: arn:aws:iam::123456789012:role/name
 
   .. attribute:: stacks
-    :type: Optional[Dict[str, cfngin.stack]]
+    :type: Optional[List[cfngin.stack]]
     :Value: []
 
     This is the core part of the config where the CloudFormations stacks that will be deployed in the environment are defined.
-
-    For each :class:`~cfngin.stack` in the dictionary, the *key* is used as the logical name of the stack within CFNgin.
-    Each key should be unique as `PyYAML <https://pypi.org/project/PyYAML/>`__ treats duplicate keys as override keys.
 
     See Stack_ for more information.
 
   .. attribute:: sys_path
     :type: Optional[str]
-    :value: null
+    :value: None
 
-    A path to be added to *$PATH* while processing the configuration file.
-    This will allow modules from the provided path location to be used
+    A path to be added to ``$PATH`` while processing the configuration file.
+    This will allow modules from the provided path location to be used.
 
-    When setting :attr:`~cfngin.stack.class_path` for :ref:`Blueprints` or :attr:`~cfngin.hook.path` for :class:`hooks <cfngin.hook>` , it is sometimes desirable to load modules from outside the default *$PATH* (e.g. to include modules inside the same repo as config files).
+    When setting :attr:`~cfngin.stack.class_path` for :ref:`Blueprints` or :attr:`~cfngin.hook.path` for :class:`hooks <cfngin.hook>` , it is sometimes desirable to load modules from outside the default ``$PATH`` (e.g. to include modules inside the same repo as config files).
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -447,7 +421,7 @@ Stack
   .. code-block:: yaml
 
     stacks:
-      vpc-example:
+      - name: vpc-example
         class_path: blueprints.vpc.VPC
         variables:
           InstanceType: t2.small
@@ -468,6 +442,7 @@ Stack
 
   .. attribute:: class_path
     :type: Optional[str]
+    :value: None
 
     A python importable path to the :ref:`Blueprint` class to be used.
 
@@ -477,11 +452,12 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           class_path: example.BlueprintClass
 
   .. attribute:: description
     :type: Optional[str]
+    :value: None
 
     A short description to apply to the stack.
     This overwrites any description defined in the :ref:`Blueprint`.
@@ -491,12 +467,12 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           description: An Example Stack
 
   .. attribute:: enabled
     :type: Optional[bool]
-    :value: true
+    :value: True
 
     Whether to deploy/update the stack.
     This enables the ability to disable stacks in different environments.
@@ -507,13 +483,14 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           enabled: false
-        another-stack:
+        - name: another-stack
           enabled: ${enable_another_stack}
 
   .. attribute:: in_progress_behavior
     :type: Optional[Literal["wait"]]
+    :value: None
 
     Specifies the behavior for when a stack is in ``CREATE_IN_PROGRESS`` or ``UPDATE_IN_PROGRESS``.
     By default, CFNgin will raise an exception if the stack is in an ``IN_PROGRESS`` state when processing begins.
@@ -524,12 +501,12 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           in_progress_behavior: wait
 
   .. attribute:: locked
     :type: Optional[bool]
-    :value: false
+    :value: False
 
     Whether the stack should be updated after initial deployment.
     This is useful for *risky* stacks that you don't want to take the risk of allowing CloudFormation to update but still want to deploy it using CFNgin.
@@ -538,14 +515,30 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           locked: true
-        another-stack:
+        - name: another-stack
           locked: ${locked_another_stack}
+
+  .. attribute:: name
+    :type: str
+
+    Name of the CFNgin Stack.
+    The value of this field is used by CFNgin when referring to a Stack.
+    It will also be used as the name of the Stack when created in CloudFormation unless overridden by :attr:`~stack.stack_name`.
+
+    .. note::
+      :attr:`~cfngin.config.namespace` will be appended to this value when used as the name of the CloudFormation Stack.
+
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      stacks:
+        - name: example-stack
 
   .. attribute:: protected
     :type: Optional[bool]
-    :value: false
+    :value: False
 
     Whether to force all updates to be performed interactively.
 
@@ -555,9 +548,9 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           protected: true
-        another-stack:
+        - name: another-stack
           protected: ${protected_another_stack}
 
   .. attribute:: required_by
@@ -573,10 +566,10 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:  # deployed first
+        - name: example-stack:  # deployed first
           required_by:
             - another-stack
-        another-stack:  # deployed after example-stack
+        - name: another-stack:  # deployed after example-stack
           ...
 
   .. attribute:: requires
@@ -592,17 +585,18 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:  # deployed after another-stack
+        - name: example-stack# deployed after another-stack
           requires:
             - another-stack
-        another-stack:  # deployed first
+        - name: another-stack  # deployed first
           ...
 
   .. attribute:: stack_name
     :type: Optional[str]
+    :value: None
 
     The name used when creating the CloudFormation stack.
-    If not provided, the *key* used to define this stack in :attr:`~cfngin.config.stacks` will be used.
+    If not provided, :attr:`~stack.name` will be used.
 
     .. note:: :attr:`~cfngin.config.namespace` will be appended to this value.
 
@@ -610,11 +604,12 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           stack_name: another-name
 
   .. attribute:: stack_policy_path
     :type: Optional[str]
+    :value: None
 
     Path to a JSON formatted stack policy that will be applied when the CloudFormation stack is created and/or updated.
 
@@ -624,14 +619,14 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           stack_policy_path: ./stack_policies/example-stack.json
 
   .. attribute:: tags
     :type: Optional[Dict[str, str]]
     :value: {}
 
-    A dictionary of tags to add to all stacks.
+    A dictionary of tags to add to the Stack.
     These tags are propagated to all resources that AWS CloudFormation supports.
     See `CloudFormation - Resource Tag`_ for more information.
 
@@ -642,7 +637,7 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           tags:
             namespace: ${namespace}
             example: value
@@ -659,14 +654,14 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           template_path: ./templates/example-stack.yml
-        another-stack:
+        - name: another-stack
           template_path: remote/path/templates/another-stack.json
 
   .. attribute:: termination_protection
     :type: Optional[bool]
-    :value: false
+    :value: False
 
     Whether the stack will be protected from termination by CloudFormation.
 
@@ -679,9 +674,9 @@ Stack
     .. code-block:: yaml
 
       stacks:
-        example-stack:
+        - name: example-stack
           termination_protection: true
-        another-stack:
+        - name: another-stack
           termination_protection: ${termination_protection_another_stack}
 
   .. attribute:: variables
@@ -693,6 +688,14 @@ Stack
 
     When using a raw CloudFormation template, these are the values provided for it's *Parameters*.
 
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      stacks:
+        - name: example-stack
+          variables:
+            StackVariable: value
+
 
 .. _cfngin-variables:
 
@@ -701,8 +704,6 @@ Variables
 
 Variables are values that will be passed into a :ref:`Blueprint` before it is rendered.
 Variables can be any valid YAML data structure and can leverage :ref:`Lookups <cfngin-lookups>` to expand values at runtime.
-
-The following concepts make working with variables within large templates easier:
 
 .. _cfngin-yaml:
 
@@ -713,41 +714,35 @@ If you have a common set of variables that you need to pass around in many place
 Instead, using a feature of YAML known as `anchors & references`_, you can define common values in a single place and then refer to them with a simple syntax.
 
 For example, say you pass a common domain name to each of your stacks, each of them taking it as a Variable.
-Rather than having to enter the domain into each stack (and hopefully not typo'ing any of them) you could do the following:
-
-.. code-block:: yaml
-
-  domain_name: &domain mydomain.com
-
-Now you have an anchor called **domain** that you can use in place of any value in the config to provide the value **mydomain.com**.
-You use the anchor with a reference.
+Rather than having to enter the domain into each stack you could do the following to have an anchor called **domain** that you can use in place of any value in the config to provide the value **mydomain.com**.
 
 .. code-block:: yaml
 
   stacks:
-    vpc:
-      class_path: blueprints.vpc.VPC
+  - name: example-stack
+    class_path: blueprints.Example
+    variables:
+      DomainName: &domain mydomain.com
+    - name: vpc
+      class_path: blueprints.VPC
       variables:
         DomainName: *domain
 
-Even more powerful is the ability to anchor entire dictionaries, and then reference them in another dictionary, effectively providing it with default values.
-
-.. code-block:: yaml
-
-  common_variables: &common_variables
-    DomainName: mydomain.com
-    InstanceType: m3.medium
-    AMI: ami-12345abc
-
-Now, rather than having to provide each of those variables to every stack that could use them, you can just do this instead.
+Even more powerful is the ability to anchor entire dictionaries, and then reference them in another dictionary, effectively providing it with default values. Now, rather than having to provide each of those variables to every stack that could use them, you can just do this instead.
 
 .. code-block:: yaml
 
   stacks:
+    - name: example-stack
+      class_path: blueprints.Example
+      variables: &variables
+        DomainName: mydomain.com
+        InstanceType: m3.medium
+        AMI: ami-12345abc
     - name: vpc
-      class_path: blueprints.vpc.VPC
+      class_path: blueprints.VPC
       variables:
-        << : *common_variables
+        << : *variables
         InstanceType: c4.xlarge # override the InstanceType in this stack
 
 
@@ -766,7 +761,7 @@ To do so, use the :ref:`output lookup` in the :attr:`~cfngin.stack.variables` on
 
 For more information see :ref:`Lookups <cfngin-lookups>`.
 
-In this example config - when deploying things inside a VPC, you will need to pass the **VpcId** of the VPC that you want the resources to be located in.
+In this example config, when deploying things inside a VPC, you will need to pass the **VpcId** of the VPC that you want the resources to be located in.
 If the **vpc** stack provides an Output called **VpcId**, you can reference it easily.
 
 .. code-block:: yaml
@@ -855,7 +850,7 @@ With parameters, you can simply define two different values for **InstanceType**
 
   # in your config file:
   stacks:
-    webservers:
+    - name: webservers:
       class_path: blueprints.asg.AutoscalingGroup
       variables:
         InstanceType: ${web_instance_type}

@@ -41,3 +41,4 @@ pre-commit = "~=2.11"
 pefile = {version = "*",os_name = "== 'nt'"}
 pywin32 = {version = "*",os_name = "== 'nt'"}
 pywin32-ctypes = {version = "*",os_name = "== 'nt'"}
+doc8 = "*"  # vscode rst extension
