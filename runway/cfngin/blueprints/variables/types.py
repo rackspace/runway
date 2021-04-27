@@ -2,9 +2,24 @@
 # pylint: disable=invalid-name,len-as-condition
 from __future__ import annotations
 
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from troposphere import BaseAWSObject
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 _TroposphereType = TypeVar("_TroposphereType", bound=BaseAWSObject)
 
@@ -31,6 +46,7 @@ class TroposphereType(Generic[_TroposphereType]):
     def __init__(
         self,
         defined_type: Type[_TroposphereType],
+        *,
         many: bool = False,
         optional: bool = False,
         validate: bool = True,
@@ -144,105 +160,410 @@ class CFNType:
     Unlike other variables, a variable with ``type: CFNType``, will
     be submitted to CloudFormation as a Parameter.
 
+    Attributes:
+        parameter_type: Name of the CloudFormation Parameter type to specify when
+            submitting as a CloudFormation Parameter.
+
+    See Also:
+        https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+
     """
 
-    def __init__(self, parameter_type: str) -> None:
-        """Instantiate class.
-
-        Args:
-            parameter_type: An AWS specific parameter type. (http://goo.gl/PthovJ)
-
-        """
-        self.parameter_type = parameter_type
+    parameter_type: ClassVar[str]
 
 
 # General CFN types
-CFNString = CFNType("String")
-CFNNumber = CFNType("Number")
-CFNNumberList = CFNType("List<Number>")
-CFNCommaDelimitedList = CFNType("CommaDelimitedList")
+class CFNString(CFNType):
+    """A literal string."""
+
+    parameter_type: ClassVar[Literal["String"]] = "String"
+
+
+class CFNNumber(CFNType):
+    """An integer or float.
+
+    AWS CloudFormation validates the parameter value as a number; however,
+    whenyou use the parameter elsewhere in your template (for example, by using
+    the Ref intrinsic function), the parameter value becomes a string.
+
+    """
+
+    parameter_type: ClassVar[Literal["Number"]] = "Number"
+
+
+class CFNNumberList(CFNType):
+    """An array of integers or floats that are separated by commas.
+
+    AWS CloudFormation validates the parameter value as numbers; however,
+    when you use the parameter elsewhere in your template (for example, by using
+    the Ref intrinsic function), the parameter value becomes a list of strings.
+
+    """
+
+    parameter_type: ClassVar[Literal["List<Number>"]] = "List<Number>"
+
+
+class CFNCommaDelimitedList(CFNType):
+    """An array of literal strings that are separated by commas.
+
+    The total number of strings should be one more than the total number of commas.
+    Also, each member string is space trimmed.
+
+    """
+
+    parameter_type: ClassVar[Literal["CommaDelimitedList"]] = "CommaDelimitedList"
+
 
 # AWS-Specific Parameter Types
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html#aws-specific-parameter-types
-EC2AvailabilityZoneName = CFNType("AWS::EC2::AvailabilityZone::Name")
-EC2ImageId = CFNType("AWS::EC2::Image::Id")
-EC2InstanceId = CFNType("AWS::EC2::Instance::Id")
-EC2KeyPairKeyName = CFNType("AWS::EC2::KeyPair::KeyName")
-EC2SecurityGroupGroupName = CFNType("AWS::EC2::SecurityGroup::GroupName")
-EC2SecurityGroupId = CFNType("AWS::EC2::SecurityGroup::Id")
-EC2SubnetId = CFNType("AWS::EC2::Subnet::Id")
-EC2VolumeId = CFNType("AWS::EC2::Volume::Id")
-EC2VPCId = CFNType("AWS::EC2::VPC::Id")
-Route53HostedZoneId = CFNType("AWS::Route53::HostedZone::Id")
-EC2AvailabilityZoneNameList = CFNType("List<AWS::EC2::AvailabilityZone::Name>")
-EC2ImageIdList = CFNType("List<AWS::EC2::Image::Id>")
-EC2InstanceIdList = CFNType("List<AWS::EC2::Instance::Id>")
-EC2SecurityGroupGroupNameList = CFNType("List<AWS::EC2::SecurityGroup::GroupName>")
-EC2SecurityGroupIdList = CFNType("List<AWS::EC2::SecurityGroup::Id>")
-EC2SubnetIdList = CFNType("List<AWS::EC2::Subnet::Id>")
-EC2VolumeIdList = CFNType("List<AWS::EC2::Volume::Id>")
-EC2VPCIdList = CFNType("List<AWS::EC2::VPC::Id>")
-Route53HostedZoneIdList = CFNType("List<AWS::Route53::HostedZone::Id>")
+class EC2AvailabilityZoneName(CFNType):
+    """An Availability Zone, such as us-west-2a."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::EC2::AvailabilityZone::Name"]
+    ] = "AWS::EC2::AvailabilityZone::Name"
+
+
+class EC2ImageId(CFNType):
+    """An Amazon EC2 image ID, such as ami-0ff8a91507f77f867.
+
+    Note that the AWS CloudFormation console doesn't show a drop-down list of
+    values for this parameter type.
+
+    """
+
+    parameter_type: ClassVar[
+        Literal["AWS::EC2::AvailabilityZone::Name"]
+    ] = "AWS::EC2::AvailabilityZone::Name"
+
+
+class EC2InstanceId(CFNType):
+    """An Amazon EC2 instance ID, such as i-1e731a32."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::EC2::Instance::Id"]
+    ] = "AWS::EC2::Instance::Id"
+
+
+class EC2KeyPairKeyName(CFNType):
+    """An Amazon EC2 key pair name."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::EC2::KeyPair::KeyName"]
+    ] = "AWS::EC2::KeyPair::KeyName"
+
+
+class EC2SecurityGroupGroupName(CFNType):
+    """An EC2-Classic or default VPC security group name, such as my-sg-abc."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::EC2::SecurityGroup::GroupName"]
+    ] = "AWS::EC2::SecurityGroup::GroupName"
+
+
+class EC2SecurityGroupId(CFNType):
+    """A security group ID, such as sg-a123fd85."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::EC2::SecurityGroup::GroupName"]
+    ] = "AWS::EC2::SecurityGroup::GroupName"
+
+
+class EC2SubnetId(CFNType):
+    """A subnet ID, such as subnet-123a351e."""
+
+    parameter_type: ClassVar[Literal["AWS::EC2::Subnet::Id"]] = "AWS::EC2::Subnet::Id"
+
+
+class EC2VolumeId(CFNType):
+    """An Amazon EBS volume ID, such as vol-3cdd3f56."""
+
+    parameter_type: ClassVar[Literal["AWS::EC2::Volume::Id"]] = "AWS::EC2::Volume::Id"
+
+
+class EC2VPCId(CFNType):
+    """A VPC ID, such as vpc-a123baa3."""
+
+    parameter_type: ClassVar[Literal["AWS::EC2::VPC::Id"]] = "AWS::EC2::VPC::Id"
+
+
+class Route53HostedZoneId(CFNType):
+    """An Amazon Route 53 hosted zone ID, such as Z23YXV4OVPL04A."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::Route53::HostedZone::Id"]
+    ] = "AWS::Route53::HostedZone::Id"
+
+
+class EC2AvailabilityZoneNameList(CFNType):
+    """An array of Availability Zones for a region, such as us-west-2a, us-west-2b."""
+
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::AvailabilityZone::Name>"]
+    ] = "List<AWS::EC2::AvailabilityZone::Name>"
+
+
+class EC2ImageIdList(CFNType):
+    """An array of Amazon EC2 image IDs, such as ami-0ff8a91507f77f867, ami-0a584ac55a7631c0c.
+
+    Note that the AWS CloudFormation console doesn't show a drop-down list of
+    values for this parameter type.
+
+    """
+
+    parameter_type: ClassVar[Literal["EC2ImageIdList"]] = "EC2ImageIdList"
+
+
+class EC2InstanceIdList(CFNType):
+    """An array of Amazon EC2 instance IDs, such as i-1e731a32, i-1e731a34."""
+
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::Image::Id>"]
+    ] = "List<AWS::EC2::Image::Id>"
+
+
+class EC2SecurityGroupGroupNameList(CFNType):
+    """An array of EC2-Classic or default VPC security group names."""
+
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::Instance::Id>"]
+    ] = "List<AWS::EC2::Instance::Id>"
+
+
+class EC2SecurityGroupIdList(CFNType):
+    """An array of security group IDs, such as sg-a123fd85, sg-b456fd85."""
+
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::SecurityGroup::Id>"]
+    ] = "List<AWS::EC2::SecurityGroup::Id>"
+
+
+class EC2SubnetIdList(CFNType):
+    """An array of subnet IDs, such as subnet-123a351e, subnet-456b351e."""
+
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::SecurityGroup::Id>"]
+    ] = "List<AWS::EC2::SecurityGroup::Id>"
+
+
+class EC2VolumeIdList(CFNType):
+    """An array of Amazon EBS volume IDs, such as vol-3cdd3f56, vol-4cdd3f56."""
+
+    parameter_type: ClassVar[Literal["EC2VolumeIdList"]] = "EC2VolumeIdList"
+
+
+class EC2VPCIdList(CFNType):
+    """An array of VPC IDs, such as vpc-a123baa3, vpc-b456baa3."""
+
+    parameter_type: ClassVar[Literal["EC2VPCIdList"]] = "EC2VPCIdList"
+
+
+class Route53HostedZoneIdList(CFNType):
+    """An array of Amazon Route 53 hosted zone IDs, such as Z23YXV4OVPL04A, Z23YXV4OVPL04B."""
+
+    parameter_type: ClassVar[
+        Literal["List<AWS::Route53::HostedZone::Id>"]
+    ] = "List<AWS::Route53::HostedZone::Id>"
+
 
 # SSM Parameter Types
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html#aws-ssm-parameter-types
-SSMParameterName = CFNType("AWS::SSM::Parameter::Name")
-SSMParameterValueString = CFNType("AWS::SSM::Parameter::Value<String>")
-SSMParameterValueStringList = CFNType("AWS::SSM::Parameter::Value<List<String>>")
-SSMParameterValueCommaDelimitedList = CFNType(
-    "AWS::SSM::Parameter::Value<CommaDelimitedList>"
-)
-# Each AWS-specific type here is repeated from the the list above
-SSMParameterValueEC2AvailabilityZoneName = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::AvailabilityZone::Name>"
-)
-SSMParameterValueEC2ImageId = CFNType("AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>")
-SSMParameterValueEC2InstanceId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Instance::Id>"
-)
-SSMParameterValueEC2KeyPairKeyName = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::KeyPair::KeyName>"
-)
-SSMParameterValueEC2SecurityGroupGroupName = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::GroupName>"
-)
-SSMParameterValueEC2SecurityGroupId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>"
-)
-SSMParameterValueEC2SubnetId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>"
-)
-SSMParameterValueEC2VolumeId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::EC2::Volume::Id>"
-)
-SSMParameterValueEC2VPCId = CFNType("AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>")
-SSMParameterValueRoute53HostedZoneId = CFNType(
-    "AWS::SSM::Parameter::Value<AWS::Route53::HostedZone::Id>"
-)
-SSMParameterValueEC2AvailabilityZoneNameList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::AvailabilityZone::Name>>"
-)
-SSMParameterValueEC2ImageIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Image::Id>>"
-)
-SSMParameterValueEC2InstanceIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Instance::Id>>"
-)
-SSMParameterValueEC2SecurityGroupGroupNameList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::GroupName>>"
-)
-SSMParameterValueEC2SecurityGroupIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::Id>>"
-)
-SSMParameterValueEC2SubnetIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>"
-)
-SSMParameterValueEC2VolumeIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::Volume::Id>>"
-)
-SSMParameterValueEC2VPCIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::EC2::VPC::Id>>"
-)
-SSMParameterValueRoute53HostedZoneIdList = CFNType(
-    "AWS::SSM::Parameter::Value<List<AWS::Route53::HostedZone::Id>>"
-)
+class SSMParameterName(CFNType):
+    """The name of a Systems Manager parameter key.
+
+    Use this parameter when you want to pass the parameter key.
+    For example, you can use this type to validate that the parameter exists.
+
+    """
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Name"]
+    ] = "AWS::SSM::Parameter::Name"
+
+
+class SSMParameterValueString(CFNType):
+    """A Systems Manager parameter whose value is a string.
+
+    This corresponds to the String parameter type in Parameter Store.
+
+    """
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<String>"]
+    ] = "AWS::SSM::Parameter::Value<String>"
+
+
+class SSMParameterValueStringList(CFNType):
+    """A Systems Manager parameter whose value is a list of strings.
+
+    This corresponds to the StringList parameter type in Parameter Store.
+
+    """
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<String>>"]
+    ] = "AWS::SSM::Parameter::Value<List<String>>"
+
+
+class SSMParameterValueCommaDelimitedList(CFNType):
+    """A Systems Manager parameter whose value is a list of strings.
+
+    This corresponds to the StringList parameter type in Parameter Store.
+
+    """
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<CommaDelimitedList>"]
+    ] = "AWS::SSM::Parameter::Value<CommaDelimitedList>"
+
+
+class SSMParameterValueEC2AvailabilityZoneName(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::AvailabilityZone::Name>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::AvailabilityZone::Name>"
+
+
+class SSMParameterValueEC2ImageId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+
+
+class SSMParameterValueEC2InstanceId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::Instance::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::Instance::Id>"
+
+
+class SSMParameterValueEC2KeyPairKeyName(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::KeyPair::KeyName>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::KeyPair::KeyName>"
+
+
+class SSMParameterValueEC2SecurityGroupGroupName(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::GroupName>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::GroupName>"
+
+
+class SSMParameterValueEC2SecurityGroupId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>"
+
+
+class SSMParameterValueEC2SubnetId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>"
+
+
+class SSMParameterValueEC2VolumeId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::Volume::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::Volume::Id>"
+
+
+class SSMParameterValueEC2VPCId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>"
+
+
+class SSMParameterValueRoute53HostedZoneId(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<AWS::Route53::HostedZone::Id>"]
+    ] = "AWS::SSM::Parameter::Value<AWS::Route53::HostedZone::Id>"
+
+
+class SSMParameterValueEC2AvailabilityZoneNameList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::AvailabilityZone::Name>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::AvailabilityZone::Name>>"
+
+
+class SSMParameterValueEC2ImageIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::Image::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::Image::Id>>"
+
+
+class SSMParameterValueEC2InstanceIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::Instance::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::Instance::Id>>"
+
+
+class SSMParameterValueEC2SecurityGroupGroupNameList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::GroupName>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::GroupName>>"
+
+
+class SSMParameterValueEC2SecurityGroupIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::SecurityGroup::Id>>"
+
+
+class SSMParameterValueEC2SubnetIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::Subnet::Id>>"
+
+
+class SSMParameterValueEC2VolumeIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::Volume::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::Volume::Id>>"
+
+
+class SSMParameterValueEC2VPCIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::EC2::VPC::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::EC2::VPC::Id>>"
+
+
+class SSMParameterValueRoute53HostedZoneIdList(CFNType):
+    """A Systems Manager parameter whose value is an AWS-specific parameter type."""
+
+    parameter_type: ClassVar[
+        Literal["AWS::SSM::Parameter::Value<List<AWS::Route53::HostedZone::Id>>"]
+    ] = "AWS::SSM::Parameter::Value<List<AWS::Route53::HostedZone::Id>>"
