@@ -13,6 +13,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -113,7 +114,9 @@ def build_parameter(name: str, properties: BlueprintVariableTypeDef) -> Paramete
 
 
 def validate_variable_type(
-    var_name: str, var_type: Union[CFNType, TroposphereType[Any], type], value: Any,
+    var_name: str,
+    var_type: Union[Type[CFNType], TroposphereType[Any], type],
+    value: Any,
 ) -> Any:
     """Ensure the value is the correct variable type.
 
@@ -131,14 +134,14 @@ def validate_variable_type(
             that type, this is raised.
 
     """
-    if isinstance(var_type, CFNType):
-        value = CFNParameter(name=var_name, value=value)
-    elif isinstance(var_type, TroposphereType):
+    if isinstance(var_type, TroposphereType):
         try:
             value = var_type.create(value)
         except Exception as exc:
             name = "{}.create".format(var_type.resource_name)
             raise ValidatorError(var_name, name, value, exc) from exc
+    elif issubclass(var_type, CFNType):
+        value = CFNParameter(name=var_name, value=value)
     else:
         if not isinstance(value, var_type):
             raise ValueError(
@@ -363,7 +366,7 @@ class Blueprint:
         output: Dict[str, BlueprintVariableTypeDef] = {}
         for var_name, attrs in self.defined_variables().items():
             var_type = attrs.get("type")
-            if isinstance(var_type, CFNType):
+            if isinstance(var_type, type) and issubclass(var_type, CFNType):
                 cfn_attrs = copy.deepcopy(attrs)
                 cfn_attrs["type"] = var_type.parameter_type
                 output[var_name] = cfn_attrs
