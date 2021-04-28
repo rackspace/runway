@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Any
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...context.runway import RunwayContext
+    from ...context import RunwayContext
 
 TYPE_NAME = "env"
 

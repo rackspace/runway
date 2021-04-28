@@ -31,7 +31,7 @@ from ....util import MutableMap
 if TYPE_CHECKING:
     from docker.models.images import Image
 
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
     Model = TypeVar("Model", bound="BaseModel")
 

@@ -33,7 +33,7 @@ from ..util import read_value_from_path
 from .variables.types import CFNType, TroposphereType
 
 if TYPE_CHECKING:
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from .type_defs import BlueprintVariableTypeDef
 
 LOGGER = logging.getLogger(__name__)

@@ -15,7 +15,7 @@ from ....cfngin.hooks import aws_lambda
 
 if TYPE_CHECKING:
     from ....cfngin.providers.aws.default import Provider
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 # The functions associated with Auth@Edge
 FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_headers"]

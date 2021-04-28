@@ -11,7 +11,7 @@ from ....variables import Variable
 
 if TYPE_CHECKING:
     from ...._logging import RunwayLogger
-    from ....context.runway import RunwayContext
+    from ....context import RunwayContext
     from ...models.base import ConfigProperty
     from ._variables_def import RunwayVariablesDefinition
 

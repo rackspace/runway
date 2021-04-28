@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from mypy_boto3_route53.client import Route53Client
     from mypy_boto3_route53.type_defs import ChangeTypeDef
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider
     from ..stack import Stack

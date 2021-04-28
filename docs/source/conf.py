@@ -221,6 +221,7 @@ os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 autoclass_content = "both"
 autodoc_default_options = {
+    "inherited-members": "dict",  # show all inherited members
     "member-order": "bysource",
     "members": True,
     "show-inheritance": True,

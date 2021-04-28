@@ -31,7 +31,7 @@ from troposphere import (
 from typing_extensions import TypedDict
 
 from ...cfngin.blueprints.base import Blueprint
-from ...context.cfngin import CfnginContext
+from ...context import CfnginContext
 
 if TYPE_CHECKING:
     from troposphere import Ref  # pylint: disable=ungrouped-imports

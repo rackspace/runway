@@ -25,9 +25,8 @@ from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
 
 if TYPE_CHECKING:
-
     from .._logging import RunwayLogger
-    from ..context.runway import RunwayContext
+    from ..context import RunwayContext
     from ..core.components import DeployEnvironment
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))

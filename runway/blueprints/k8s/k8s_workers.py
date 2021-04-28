@@ -357,7 +357,7 @@ class NodeGroup(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    from runway.context.cfngin import CfnginContext
+    from runway.context import CfnginContext
 
     print(
         NodeGroup(

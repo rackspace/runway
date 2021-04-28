@@ -10,7 +10,7 @@ import mock
 
 from runway.cfngin.hooks.command import run_command
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 from ..factories import mock_provider
 

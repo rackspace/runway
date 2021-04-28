@@ -21,7 +21,7 @@ from ..cfngin.util import ensure_s3_bucket
 from ..compat import cached_property
 from ..config import CfnginConfig
 from ..core.components import DeployEnvironment
-from .base import BaseContext
+from ._base import BaseContext
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client

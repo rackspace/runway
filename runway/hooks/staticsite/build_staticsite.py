@@ -20,7 +20,7 @@ from .util import get_hash_of_files
 
 if TYPE_CHECKING:
     from ...cfngin.providers.aws.default import Provider
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

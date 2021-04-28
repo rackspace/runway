@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, List
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 STACK_STATUSES_TO_IGNORE = [

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 TYPE_NAME = "default"
 

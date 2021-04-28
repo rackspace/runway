@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         UploadServerCertificateResponseTypeDef,
     )
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

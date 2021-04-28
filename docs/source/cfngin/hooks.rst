@@ -45,7 +45,7 @@ Only the following actions allow pre/post hooks:
     :type: Optional[str]
     :value: None
 
-    If set, and the hook returns data (a dictionary), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.cfngin.CfnginContext.hook_data>` with the ``data_key`` as its key.
+    If set, and the hook returns data (a dictionary), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.CfnginContext.hook_data>` with the ``data_key`` as its key.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -1382,7 +1382,7 @@ If using boto3 in a hook, use :meth:`context.get_session() <runway.context.Cfngi
   from typing import TYPE_CHECKING, Any
 
   if TYPE_CHECKING:
-      from runway.context.cfngin import CfnginContext
+      from runway.context import CfnginContext
 
 
   def do_something(context: CfnginContext, **_kwargs: Any) -> None:

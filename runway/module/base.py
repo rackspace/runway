@@ -12,7 +12,7 @@ from .utils import NPM_BIN, format_npm_command_for_logging, use_npm_ci
 
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger
-    from ..context.runway import RunwayContext
+    from ..context import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 

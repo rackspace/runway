@@ -20,7 +20,7 @@ from ._module import Module
 
 if TYPE_CHECKING:
     from ...config.components.runway import RunwayDeploymentDefinition
-    from ...context.runway import RunwayContext
+    from ...context import RunwayContext
 
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))

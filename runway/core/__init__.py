@@ -19,7 +19,7 @@ from . import components, providers
 if TYPE_CHECKING:
     from ..config import RunwayConfig
     from ..config.components.runway import RunwayDeploymentDefinition
-    from ..context.runway import RunwayContext
+    from ..context import RunwayContext
 
 LOGGER = cast(_RunwayLogger, _logging.getLogger(__name__))
 

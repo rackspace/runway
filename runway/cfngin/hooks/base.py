@@ -15,7 +15,7 @@ from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider
     from ..status import Status

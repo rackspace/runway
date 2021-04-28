@@ -1,4 +1,4 @@
-"""Test runway.context.cfngin."""
+"""Test runway.context._cfngin."""
 # pylint: disable=no-self-use,redefined-outer-name
 # pyright: basic
 from __future__ import annotations
@@ -23,7 +23,7 @@ from runway.cfngin.exceptions import (
 from runway.cfngin.plan import Graph, json_serial
 from runway.cfngin.stack import Stack
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext, get_fqn
+from runway.context._cfngin import CfnginContext, get_fqn
 from runway.core.components import DeployEnvironment
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from runway.core.providers.aws.type_defs import TagSetTypeDef
     from runway.type_defs import Boto3CredentialsTypeDef
 
-MODULE = "runway.context.cfngin"
+MODULE = "runway.context._cfngin"
 
 BOTO3_CREDENTIALS: Boto3CredentialsTypeDef = {
     "aws_access_key_id": "foo",
@@ -69,12 +69,12 @@ def gen_s3_object_content(content: Union[Dict[str, Any], str]) -> StreamingBody:
     ],
 )
 def test_get_fqn(delim: str, expected: str, name: Optional[str]) -> None:
-    """Test runway.context.cfngin.get_fqn."""
+    """Test runway.context._cfngin.get_fqn."""
     assert get_fqn("test", delim, name) == expected
 
 
 class TestCFNginContext:  # pylint: disable=too-many-public-methods
-    """Test runway.context.cfngin.CFNginContext."""
+    """Test runway.context._cfngin.CFNginContext."""
 
     config = CfnginConfig.parse_obj(
         {

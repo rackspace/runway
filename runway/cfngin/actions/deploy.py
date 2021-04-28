@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import ParameterTypeDef, StackTypeDef
 
     from ...config.models.cfngin import CfnginHookDefinitionModel
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ...core.providers.aws.type_defs import TagTypeDef
     from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider

@@ -28,7 +28,7 @@ from runway.cfngin.stack import Stack
 from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
 from runway.cfngin.util import stack_template_key_name
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 from runway.lookups.handlers.base import LookupHandler
 
 from .factories import generate_definition, mock_context

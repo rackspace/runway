@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ec2.type_defs import ImportKeyPairResultTypeDef, KeyPairTypeDef
     from mypy_boto3_ssm.client import SSMClient
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

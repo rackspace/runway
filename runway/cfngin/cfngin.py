@@ -13,14 +13,14 @@ from runway._logging import PrefixAdaptor
 from runway.util import MutableMap, SafeHaven, cached_property
 
 from ..config import CfnginConfig
-from ..context.cfngin import CfnginContext
+from ..context import CfnginContext
 from .actions import deploy, destroy, diff
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
-    from ..context.runway import RunwayContext
+    from ..context import RunwayContext
 
 # explicitly name logger so its not redundant
 LOGGER = cast("RunwayLogger", logging.getLogger("runway.cfngin"))

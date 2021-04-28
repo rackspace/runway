@@ -21,7 +21,7 @@ from .utils import add_url_scheme
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
-    from ...context.runway import RunwayContext
+    from ...context import RunwayContext
     from ..base import ModuleOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))

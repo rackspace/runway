@@ -12,7 +12,7 @@ from ....lookups.handlers.base import LookupHandler
 from ....util import DOC_SITE, MutableMap
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "hook_data"

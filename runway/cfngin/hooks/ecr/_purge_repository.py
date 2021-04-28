@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ecr.client import ECRClient
     from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
 
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

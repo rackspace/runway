@@ -9,7 +9,7 @@ from cfn_flip import to_yaml
 from ....blueprints.k8s.k8s_iam import Iam
 from ....blueprints.k8s.k8s_master import Cluster
 from ....blueprints.k8s.k8s_workers import NodeGroup
-from ....context.cfngin import CfnginContext
+from ....context import CfnginContext
 from ... import options
 from .utils import TEMPLATES, convert_gitignore, copy_sample
 

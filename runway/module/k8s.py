@@ -18,7 +18,7 @@ from .utils import run_module_command
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
-    from ..context.runway import RunwayContext
+    from ..context import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 

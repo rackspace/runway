@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ..providers.aws.default import Provider
 
 # mask to retrieve only UNIX file permissions from the external attributes

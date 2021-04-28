@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
-    from ..context.cfngin import CfnginContext
+    from ..context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

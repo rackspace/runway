@@ -9,7 +9,7 @@ from mock import MagicMock
 
 from runway.cfngin.providers.aws.default import ProviderBuilder
 from runway.config import CfnginConfig, CfnginStackDefinitionModel
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 if TYPE_CHECKING:
     from runway.cfngin.providers.aws.default import Provider

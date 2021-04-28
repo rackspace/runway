@@ -41,7 +41,7 @@ from .ui import ui
 from .util import stack_template_key_name
 
 if TYPE_CHECKING:
-    from ..context.cfngin import CfnginContext
+    from ..context import CfnginContext
     from .providers.aws.default import Provider
     from .status import Status
 

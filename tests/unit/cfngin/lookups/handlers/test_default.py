@@ -5,7 +5,7 @@ import unittest
 from mock import MagicMock
 
 from runway.cfngin.lookups.handlers.default import DefaultLookup
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 
 class TestDefaultLookup(unittest.TestCase):

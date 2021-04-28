@@ -65,7 +65,7 @@ from .data_models import BaseModel, ElasticContainerRegistry
 from .hook_data import DockerHookData
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 

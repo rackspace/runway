@@ -15,7 +15,7 @@ from ..util import parse_cloudformation_template
 from .base import Blueprint
 
 if TYPE_CHECKING:
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ...variables import Variable
 
 

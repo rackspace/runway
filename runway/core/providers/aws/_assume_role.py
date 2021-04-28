@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from mypy_boto3_sts.type_defs import AssumedRoleUserTypeDef, CredentialsTypeDef
 
     from ...._logging import RunwayLogger
-    from ....context.runway import RunwayContext
+    from ....context import RunwayContext
 
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
