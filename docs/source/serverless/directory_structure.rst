@@ -5,6 +5,10 @@ Directory Structure
 Example directory structures for a Serverless module.
 
 
+.. contents::
+  :depth: 4
+
+
 **************
 Python Example
 **************

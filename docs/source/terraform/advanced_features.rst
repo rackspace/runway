@@ -6,6 +6,11 @@ Advanced Features
 
 Advanced features and detailed information for using Terraform with Runway.
 
+
+.. contents::
+  :depth: 4
+
+
 .. _tf-backend:
 
 *********************
@@ -20,7 +25,7 @@ If your Terraform will only ever be used with a single backend, it can be define
   terraform {
     backend "s3" {
       region = "us-east-1"
-      key = "some_unique_identifier_for_my_module" # e.g. contosovpc
+      key = "some_unique_identifier_for_my_module"
       bucket = "some_s3_bucket_name"
       dynamodb_table = "some_ddb_table_name"
     }
@@ -48,13 +53,10 @@ Backend Config File
 
 Backend config options can be specified in a separate file or multiple files per environment and/or region using one of the following naming schemes.
 
-- *backend-ENV-REGION.hcl/tfvars*
-- *backend-ENV.hcl/tfvars*
-- *backend-REGION.hcl/tfvars*
-- *backend.hcl/tfvars*
-
-.. versionchanged:: 1.11.0
-    Added support for hcl files.
+- *backend-ENV-REGION.(hcl|tfvars)*
+- *backend-ENV.(hcl|tfvars)*
+- *backend-REGION.(hcl|tfvars)*
+- *backend.(hcl|tfvars)*
 
 .. rubric:: Example
 .. code-block::
@@ -70,9 +72,12 @@ In the above example, where all but the key are defined, the **main.tf** backend
 
   terraform {
     backend "s3" {
-      key = "some_unique_identifier_for_my_module" # e.g. contosovpc
+      key = "some_unique_identifier_for_my_module"
     }
   }
+
+.. versionchanged:: 1.11.0
+  Added support for hcl files.
 
 
 runway.yml
@@ -82,7 +87,7 @@ Backend config options can also be specified as a module option in the `Runway C
 :ref:`Lookups` can be used to provide dynamic values to this option.
 
 .. important::
-  There is a *bug* in Terraform 0.12 that prevents passing blocks to ``-backend-config`` (`issue <https://github.com/hashicorp/terraform/issues/21830>`__).
+  There has been a *bug* since Terraform 0.12 that prevents passing blocks to ``-backend-config`` (`issue <https://github.com/hashicorp/terraform/issues/21830>`__).
   This means that for backends that use blocks in their config (e.g. remote), the blocks must be provided via file.
   Attributes are unaffected.
 
@@ -93,10 +98,9 @@ Backend config options can also be specified as a module option in the `Runway C
       prefix = "example-"
     }
 
-.. rubric:: Module Level
 .. code-block:: yaml
+  :caption: Module Level
 
-  ---
   deployments:
     - modules:
         - path: sampleapp-01.tf
@@ -112,10 +116,9 @@ Backend config options can also be specified as a module option in the `Runway C
               dynamodb_table: ${cfn common-tf-state.TerraformStateTableName}
               region: ${env AWS_REGION}
 
-.. rubric:: Deployment Level
 .. code-block:: yaml
+  :caption: Deployment Level
 
-  ---
   deployments:
     - modules:
         - path: sampleapp-01.tf
@@ -151,11 +154,9 @@ The value of each key in the map must be a list as described in the previous sec
   *auto-approve*, *backend-config*, *force*, *no-color*, *reconfigure*, *update*, and *var-file*.
   Providing any of these manually could result in unintended side-effects.
 
-
-.. rubric:: Runway Example
 .. code-block:: yaml
+  :caption: Runway Example
 
-  ---
   deployments:
     - modules:
         - path: sampleapp-01.tf
@@ -179,8 +180,8 @@ The value of each key in the map must be a list as described in the previous sec
       environments:
         example: true
 
-.. rubric:: Command Equivalent
-.. code-block::
+.. code-block:: sh
+  :caption: Command Equivalent
 
   # runway deploy - sampleapp-01.tf
   terraform init -reconfigure
@@ -188,8 +189,6 @@ The value of each key in the map must be a list as described in the previous sec
 
   # runway plan - sampleapp-01.tf
   terraform plan
-
-.. code-block::
 
   # runway deploy - sampleapp-02.tf
   terraform init -reconfigure -no-color
@@ -208,29 +207,21 @@ The value of each key in the map must be a list as described in the previous sec
 Version Management
 ******************
 
-By specifying which version of Terraform to use via a ``.terraform-version`` file in your module directory, or a module
-option, Runway will automatically download & use that version for the module. This, alongside
-tightly pinning Terraform provider versions, is highly recommended to keep a predictable experience
-when deploying your module.
+By specifying which version of Terraform to use via a ``.terraform-version`` file in your module directory or in :attr:`deployment.module_options`/:attr:`module.options`, Runway will automatically download & use that version for the module.
+This, alongside tightly pinning Terraform provider versions, is highly recommended to keep a predictable experience when deploying your module.
 
-.. rubric:: .terraform-version
-.. code-block::
+.. code-block:: text
+  :caption: .terraform-version
 
   0.11.6
 
-.. rubric:: runway.yml
 .. code-block:: yaml
+  :caption: runway.yml
 
-  ---
   deployments:
     - modules:
         - path: sampleapp-01.tf
           options:
             terraform_version: 0.11.13
-        - path: sampleapp-02.tf
-          options:
-            terraform_version:
-              "*": 0.11.13  # applies to all environments
-              # prod: 0.9.0  # can also be specified for a specific environment
 
 Without a version specified, Runway will fallback to whatever ``terraform`` it finds first in your PATH.

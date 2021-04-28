@@ -25,7 +25,9 @@ class ScriptHandler(TestHandler):
             Each command is run in its own subprocess. The working directory
             will be the same as where the 'runway test' command was executed.
 
-    Example:
+    .. rubric:: Example
+    .. code-block: yaml
+
         tests:
           - name: example-test
             type: script

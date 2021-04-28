@@ -165,10 +165,10 @@ class TestCfnginConfig:
 
     def test_parse_raw(self, monkeypatch: MonkeyPatch) -> None:
         """Test parse_raw."""
-        mock_render_raw_data = MagicMock()
+        mock_resolve_raw_data = MagicMock()
         mock_parse_obj = MagicMock()
         mock_process_package_sources = MagicMock()
-        monkeypatch.setattr(CfnginConfig, "render_raw_data", mock_render_raw_data)
+        monkeypatch.setattr(CfnginConfig, "resolve_raw_data", mock_resolve_raw_data)
         monkeypatch.setattr(CfnginConfig, "parse_obj", mock_parse_obj)
         monkeypatch.setattr(
             CfnginConfig, "process_package_sources", mock_process_package_sources
@@ -176,17 +176,17 @@ class TestCfnginConfig:
 
         data = {"namespace": "test"}
         data_str = yaml.dump(data)
-        mock_render_raw_data.return_value = data_str
+        mock_resolve_raw_data.return_value = data_str
         mock_parse_obj.return_value = data
         mock_process_package_sources.return_value = data_str
 
         assert CfnginConfig.parse_raw(data_str, skip_package_sources=True) == data
-        mock_render_raw_data.assert_called_once_with(yaml.dump(data), parameters={})
+        mock_resolve_raw_data.assert_called_once_with(yaml.dump(data), parameters={})
         mock_parse_obj.assert_called_once_with(data)
         mock_process_package_sources.assert_not_called()
 
         assert CfnginConfig.parse_raw(data_str, parameters={"key": "val"}) == data
-        mock_render_raw_data.assert_called_with(
+        mock_resolve_raw_data.assert_called_with(
             yaml.dump(data), parameters={"key": "val"}
         )
         mock_process_package_sources.assert_called_once_with(
@@ -199,8 +199,8 @@ class TestCfnginConfig:
         self, mock_source_processor: MagicMock, monkeypatch: MonkeyPatch, tmp_path: Path
     ) -> None:
         """Test process_package_sources."""
-        mock_render_raw_data = MagicMock(return_value="rendered")
-        monkeypatch.setattr(CfnginConfig, "render_raw_data", mock_render_raw_data)
+        mock_resolve_raw_data = MagicMock(return_value="rendered")
+        monkeypatch.setattr(CfnginConfig, "resolve_raw_data", mock_resolve_raw_data)
         mock_source_processor.return_value = mock_source_processor
         mock_source_processor.configs_to_merge = []
 
@@ -216,7 +216,7 @@ class TestCfnginConfig:
             sources=CfnginPackageSourcesDefinitionModel(), cache_dir=None
         )
         mock_source_processor.get_package_sources.assert_called_once_with()
-        mock_render_raw_data.assert_not_called()
+        mock_resolve_raw_data.assert_not_called()
 
         data = {"namespace": "test", "package_sources": {"git": [{"uri": "something"}]}}
         raw_data = yaml.dump(data)
@@ -232,29 +232,29 @@ class TestCfnginConfig:
         assert mock_source_processor.call_count == 2
         expected = data.copy()
         expected["merged"] = "value"
-        mock_render_raw_data.assert_called_once_with(
+        mock_resolve_raw_data.assert_called_once_with(
             yaml.dump(expected), parameters={"key": "val"}
         )
 
-    def test_render_raw_data(self) -> None:
-        """Test render_raw_data."""
+    def test_resolve_raw_data(self) -> None:
+        """Test resolve_raw_data."""
         raw_data = "namespace: ${namespace}"
         expected = "namespace: test"
         assert (
-            CfnginConfig.render_raw_data(raw_data, parameters={"namespace": "test"})
+            CfnginConfig.resolve_raw_data(raw_data, parameters={"namespace": "test"})
             == expected
         )
 
-    def test_render_raw_data_missing_value(self) -> None:
-        """Test render_raw_data missing value."""
+    def test_resolve_raw_data_missing_value(self) -> None:
+        """Test resolve_raw_data missing value."""
         with pytest.raises(MissingEnvironment) as excinfo:
-            CfnginConfig.render_raw_data("namespace: ${namespace}")
+            CfnginConfig.resolve_raw_data("namespace: ${namespace}")
         assert excinfo.value.key == "namespace"
 
-    def test_render_raw_data_ignore_lookup(self) -> None:
-        """Test render_raw_data ignores lookups."""
+    def test_resolve_raw_data_ignore_lookup(self) -> None:
+        """Test resolve_raw_data ignores lookups."""
         lookup_raw_data = "namespace: ${env something}"
-        assert CfnginConfig.render_raw_data(lookup_raw_data) == lookup_raw_data
+        assert CfnginConfig.resolve_raw_data(lookup_raw_data) == lookup_raw_data
 
 
 class TestRunwayConfig:

@@ -47,7 +47,7 @@ def update_env_vars_with_tf_var_values(
     os_env_vars: Dict[str, str],
     tf_vars: Dict[str, Union[Dict[str, Any], List[Any], str]],
 ) -> Dict[str, str]:
-    """Return os_env_vars with TF_VAR_ values for each tf_var."""
+    """Return os_env_vars with TF_VAR values for each tf_var."""
     # https://www.terraform.io/docs/commands/environment-variables.html#tf_var_name
     for key, val in tf_vars.items():
         if isinstance(val, dict):

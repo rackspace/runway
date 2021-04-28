@@ -18,9 +18,7 @@ def create_domain(
     """Create a domain within route53.
 
     Args:
-        context: Context instance. (passed in by CFNgin)
-
-    Keyword Args:
+        context: CFNgin context object.
         domain: Domain name for the Route 53 hosted zone to be created.
 
     Returns:

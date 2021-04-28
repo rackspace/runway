@@ -73,6 +73,7 @@ Options
   :value: False
   :noindex:
 
+  Skip running ``npm ci`` in the module directory prior to processing the module.
   See :ref:`Disable NPM CI <cdk.Disabling NPM CI>` for more details.
 
   .. rubric:: Example

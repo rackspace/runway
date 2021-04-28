@@ -4,6 +4,9 @@
 Migrating from Stacker
 ######################
 
+.. contents::
+  :depth: 4
+
 **********
 Blueprints
 **********
@@ -29,9 +32,6 @@ Config Files
 There are some config top-level keys that have changed when used Runway's CFNgin.
 Below is a table of the Stacker key and what they have been changed to for Runway's CFNgin
 
-.. important:: The Stacker keys can still be used with Runway's CFNgin for the time being.
-               This will remain in place until the release of Runway 2.0.0, no sooner then 2020-12.
-
 +---------------------------+----------------------------+
 | Stacker                   | Runway's CFNgin            |
 +===========================+============================+
@@ -48,16 +48,18 @@ Build-in Hooks
 
 All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the same path within ``runway.cfngin``.
 
+.. note::
+  Some hooks have different :attr:`~cfngin.hook.args` and/or altered functionality.
+  It is advised to review the documentation for the hook before using it.
+
 .. rubric:: Example Definition
 .. code-block:: yaml
 
     pre_deploy:
-      what_use_to_be_this:
-        path: stacker.hooks.commands.run_command
+      - path: stacker.hooks.commands.run_command
         args:
           command: echo "Hello $USER!"
-      now_becomes_this:
-        path: runway.cfngin.hooks.commands.run_command
+      - path: runway.cfngin.hooks.commands.run_command
         args:
           command: echo "Hello $USER!"
 
@@ -68,7 +70,3 @@ Custom Lookups
 ==============
 
 See the :ref:`Custom Lookups <custom lookup>` section of the docs for detailed instructions on how lookups should be written.
-
-.. important:: Stacker lookups (function and class styles) are supported for the time being.
-               It is recommended to update them to the Runway's CFNgin format outlined in :ref:`Custom Lookups <custom lookup>`.
-               Support for Stacker style lookups will remain in place until the release of Runway 2.0.0, no sooner then 2020-12.

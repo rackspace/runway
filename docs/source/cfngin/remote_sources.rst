@@ -59,6 +59,10 @@ By defining these additional sources you are able to extend your *$PATH* to make
           ...
 
 
+.. contents::
+  :depth: 4
+
+
 **************
 Git Repository
 **************
@@ -72,6 +76,7 @@ Git Repository
 
   .. attribute:: branch
     :type: Optional[str]
+    :value: None
 
     Name of a branch to checkout after cloning the git repository.
 
@@ -86,6 +91,7 @@ Git Repository
 
   .. attribute:: commit
     :type: Optional[str]
+    :value: None
 
     After cloning the git repository, reset *HEAD* to the given commit hash.
 
@@ -133,6 +139,7 @@ Git Repository
 
   .. attribute:: tag
     :type: Optional[str]
+    :value: None
 
     After cloning the git repository, reset *HEAD* to the given tag.
 
@@ -285,7 +292,7 @@ AWS S3
 
   .. attribute:: requester_pays
     :type: Optional[bool]
-    :value: false
+    :value: False
 
     Confirms that the requester knows that they will be charged for the request
 
@@ -298,7 +305,7 @@ AWS S3
 
   .. attribute:: use_latest
     :type: Optional[bool]
-    :value: true
+    :value: True
 
     Update the local copy if the last modified date in AWS S3 changes.
 

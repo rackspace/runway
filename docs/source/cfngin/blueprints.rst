@@ -8,13 +8,13 @@
 Blueprints
 ##########
 
-:ref:`Blueprints <term-blueprint>` are python classes that dynamically build CloudFormation templates.
-Where you would specify a raw Cloudformation template in a stack using the ``template_path`` key, you instead specify a :ref:`Blueprint <term-blueprint>` python file using the ``class_path`` key.
+A |Blueprint| is a python classes that dynamically builds CloudFormation templates.
+Where you would specify a raw Cloudformation template in a |stack| using the |template_path| key, you instead specify a |Blueprint| subclass using the |class_path| key.
 
-Traditionally :ref:`Blueprints <term-blueprint>` are built using troposphere_, but that is not absolutely necessary.
+Traditionally Blueprints are built using troposphere_, but that is not absolutely necessary.
 
 Making your own should be easy, and you can take a lot of examples from `Runway blueprints`_.
-In the end, all that is required is that the :ref:`Blueprint <term-blueprint>` is a subclass of :class:`runway.cfngin.blueprints.base.Blueprint` and it has the following method overridden:
+In the end, all that is required is that the |Blueprint| is a subclass of :class:`runway.cfngin.blueprints.base.Blueprint` and it has the following method overridden:
 
 .. code-block:: python
 
@@ -28,13 +28,17 @@ In the end, all that is required is that the :ref:`Blueprint <term-blueprint>` i
       """
 
 
+.. contents::
+  :depth: 4
+
+
 *********
 Variables
 *********
 
-A Blueprint can define a :attr:`~runway.cfngin.blueprints.base.Blueprint.VARIABLES` :data:`~typing.ClassVar` that defines the variables it accepts from the :ref:`Config Variables <cfngin-variables>`.
+A |Blueprint| can define a :attr:`~runway.cfngin.blueprints.base.Blueprint.VARIABLES` :data:`~typing.ClassVar` that defines the variables it accepts from the :ref:`Config Variables <cfngin-variables>`.
 
-:attr:`~runway.cfngin.blueprints.base.Blueprint.VARIABLES` should be a :class:`~typing.Dict` of ``<variable name>: <variable definition>``.
+:attr:`~runway.cfngin.blueprints.base.Blueprint.VARIABLES` should be a |Dict| of ``<variable name>: <variable definition>``.
 The variable definition should be a :class:`~runway.cfngin.blueprints.type_defs.BlueprintVariableTypeDef`.
 
 .. rubric:: Example
@@ -62,7 +66,7 @@ The variable definition should be a :class:`~runway.cfngin.blueprints.type_defs.
 
 .. seealso::
   :class:`runway.cfngin.blueprints.type_defs.BlueprintVariableTypeDef`
-    Documentation for the contents of a Blueprint variable definition.
+    Documentation for the contents of a |Blueprint| variable definition.
 
 
 **************
@@ -219,10 +223,10 @@ A sample config for the above:
 CFNType
 =======
 
-The :class:`~runway.cfngin.blueprints.variables.types.CFNType` can be used to signal that a variable should be submitted to CloudFormation as a Parameter instead of only available to the Blueprint when rendering.
+The :class:`~runway.cfngin.blueprints.variables.types.CFNType` can be used to signal that a variable should be submitted to CloudFormation as a Parameter instead of only available to the |Blueprint| when rendering.
 This is useful if you want to leverage AWS-Specific Parameter types (e.g. ``List<AWS::EC2::Image::Id>``) or Systems Manager Parameter Store values (e.g. ``AWS::SSM::Parameter::Value<String>``).
 
-See :mod:`runway.cfngin.blueprints.variables.types` for available subclasses of the ``CFNType``.
+See :mod:`runway.cfngin.blueprints.variables.types` for available subclasses of the :class:`~runway.cfngin.blueprints.variables.types.CFNType`.
 
 .. rubric:: Example
 .. code-block:: python
@@ -290,31 +294,27 @@ See :mod:`runway.cfngin.blueprints.variables.types` for available subclasses of 
 Utilizing Stack name within your Blueprint
 ******************************************
 
-Sometimes your :ref:`Blueprint <term-blueprint>` might want to utilize the already existing stack name
-within your :ref:`Blueprint <term-blueprint>`. Runway's CFNgin provides access to both the fully qualified
-stack name matching what’s shown in the CloudFormation console, in addition to
-the stacks short name you have set in your YAML config.
+Sometimes your |Blueprint| might want to utilize the already existing :attr:`stack.name <cfngin.stack.name>` within your |Blueprint|.
+Runway's CFNgin provides access to both the fully qualified stack name matching what’s shown in the CloudFormation console, in addition to the stack's short name you have set in your YAML config.
 
 
 Referencing Fully Qualified Stack name
 ======================================
 
-The fully qualified name is a combination of the CFNgin namespace + the short
-name (what you set as ``name`` in your YAML config file). If your CFNgin
-namespace is ``CFNginIsCool`` and the stacks short name is
-``myAwesomeEC2Instance``, the fully qualified name would be ``CFNginIsCool-myAwesomeEC2Instance``.
+The fully qualified name is a combination of the CFNgin namespace + the short name (what you set as ``name`` in your YAML config file).
+If your CFNgin |namespace| is ``CFNginIsCool`` and the stack's short name is ``myAwesomeEC2Instance``, the fully qualified name would be ``CFNginIsCool-myAwesomeEC2Instance``.
 
-To use this in your :ref:`Blueprint <term-blueprint>`, you can get the name from context using ``self.context.get_fqn(self.name)``.
+To use this in your |Blueprint|, you can get the name from context using ``self.context.get_fqn(self.name)``.
 
 
 Referencing the Stack short name
 ================================
 
-The Stack short name is the name you specified for the stack within your YAML config.
-It does not include the namespace.
-If your CFNgin namespace is ``CFNginIsCool`` and the stacks short name is ``myAwesomeEC2Instance``, the short name would be ``myAwesomeEC2Instance``.
+The |Stack| short name is the name you specified for the |stack| within your YAML config.
+It does not include the |namespace|.
+If your CFNgin namespace is ``CFNginIsCool`` and the stack's short name is ``myAwesomeEC2Instance``, the short name would be ``myAwesomeEC2Instance``.
 
-To use this in your :ref:`Blueprint <term-blueprint>`, you can get the name from ``self.name``.
+To use this in your |Blueprint|, you can get the name from the :attr:`~runway.cfngin.blueprints.base.Blueprint.name` attribute.
 
 .. rubric:: Example
 .. code-block:: python
@@ -367,19 +367,17 @@ To use this in your :ref:`Blueprint <term-blueprint>`, you can get the name from
 Testing Blueprints
 ******************
 
-When writing your own :ref:`Blueprints <term-blueprint>` its useful to write tests for them in order
-to make sure they behave the way you expect they would, especially if there is
-any complex logic inside.
+When writing your own |Blueprint| it is useful to write tests for them in order to make sure they behave the way you expect they would, especially if there is any complex logic inside.
 
-To this end, a sub-class of the ``unittest.TestCase`` class has been provided: ``runway.cfngin.blueprints.testutil.BlueprintTestCase``.
+To this end, a sub-class of the ``unittest.TestCase`` class has been provided: :class:`runway.cfngin.blueprints.testutil.BlueprintTestCase`.
 You use it like the regular TestCase class, but it comes with an addition assertion: ``assertRenderedBlueprint``.
-This assertion takes a Blueprint object and renders it, then compares it to an expected output, usually in ``tests/fixtures/blueprints``.
+This assertion takes a |Blueprint| object and renders it, then compares it to an expected output, usually in ``tests/fixtures/blueprints``.
 
 
 Yaml (CFNgin) format tests
 ==========================
 
-In order to wrap the ``BlueprintTestCase`` tests in a format similar to CFNgin's stack format, the ``YamlDirTestGenerator`` class is provided.
+In order to wrap the :class:`~runway.cfngin.blueprints.testutil.BlueprintTestCase` tests in a format similar to CFNgin's stack format, the :class:`~runway.cfngin.blueprints.testutil.YamlDirTestGenerator` class is provided.
 When subclassed in a directory, it will search for yaml files in that directory with certain structure and execute a test case for it.
 
 .. rubric:: Example

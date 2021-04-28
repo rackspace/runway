@@ -80,7 +80,35 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = "material"
+
+# Appended to the end of each rendered file
+rst_epilog = """
+.. |Blueprint| replace::
+  :class:`~runway.cfngin.blueprints.base.Blueprint`
+
+.. |Dict| replace::
+  :data:`~typing.Dict`
+
+.. |Stack| replace::
+  :class:`~runway.cfngin.stack.Stack`
+
+.. |cfngin_bucket| replace::
+  :attr:`~cfngin.config.cfngin_bucket`
+
+.. |class_path| replace::
+  :attr:`~cfngin.stack.class_path`
+
+.. |namespace| replace::
+  :attr:`~cfngin.config.namespace`
+
+.. |stack| replace::
+  :class:`~cfngin.stack`
+
+.. |template_path| replace::
+  :attr:`~cfngin.stack.template_path`
+
+"""
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -193,8 +221,8 @@ os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 autoclass_content = "both"
 autodoc_default_options = {
-    "members": True,
     "member-order": "bysource",
+    "members": True,
     "show-inheritance": True,
 }
 autodoc_type_aliases = {

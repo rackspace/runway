@@ -34,14 +34,28 @@ Only the following actions allow pre/post hooks:
     .. important::
       :ref:`Lookups <cfngin-lookups>` that change the order of execution, like :ref:`output <output lookup>`, can only be used in a *post* hook but hooks like :ref:`rxref <xref lookup>` are able to be used with either *pre* or *post* hooks.
 
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      pre_deploy:
+        - args:
+            key: ${val}
+
   .. attribute:: data_key
     :type: Optional[str]
+    :value: None
 
     If set, and the hook returns data (a dictionary), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.cfngin.CfnginContext.hook_data>` with the ``data_key`` as its key.
 
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      pre_deploy:
+        - data_key: example-key
+
   .. attribute:: enabled
     :type: Optional[bool]
-    :value: true
+    :value: True
 
     Whether to execute the hook every CFNgin run.
     This field provides the ability to execute a hook per environment when combined with a variable.
@@ -50,8 +64,7 @@ Only the following actions allow pre/post hooks:
     .. code-block:: yaml
 
       pre_deploy:
-        example-hook:
-          enabled: ${enable_example_hook}
+        - enabled: ${enable_example_hook}
 
   .. attribute:: path
     :type: str
@@ -62,14 +75,20 @@ Only the following actions allow pre/post hooks:
     .. code-block:: yaml
 
       pre_deploy:
-        example-hook:
-          path: runway.cfngin.hooks.command.run_command
+        - path: runway.cfngin.hooks.command.run_command
 
   .. attribute:: required
     :type: Optional[bool]
-    :value: true
+    :value: True
 
     Whether to stop execution if the hook fails.
+
+
+.. contents::
+  :depth: 4
+
+
+----
 
 
 **************
@@ -83,8 +102,8 @@ acm.Certificate
 
 - Route 53 hosted zone
 
-    - authoritative for the domain the certificate is being created for
-    - in the same AWS account as the certificate being created
+  - authoritative for the domain the certificate is being created for
+  - in the same AWS account as the certificate being created
 
 
 .. rubric:: Description
@@ -103,31 +122,49 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.acm.Certificate``
+:class:`runway.cfngin.hooks.acm.Certificate`
 
 
 .. rubric:: Args
+.. data:: alt_names
+  :type: Optional[List[str]]
+  :value: []
+  :noindex:
 
-**alt_names (Optional[List[str]])**
-    Additional FQDNs to be included in the Subject Alternative Name extension of the ACM certificate.
-    For example, you can add *www.example.net* to a certificate for which the ``domain`` field is
-    *www.example.com* if users can reach your site by using either name.
+  Additional FQDNs to be included in the Subject Alternative Name extension of the ACM certificate.
+  For example, you can add *www.example.net* to a certificate for which the ``domain`` field is
+  *www.example.com* if users can reach your site by using either name.
 
-**domain (str)**
-    The fully qualified domain name (FQDN), such as *www.example.com*, with which you want to secure an ACM certificate.
-    Use an asterisk (``*``) to create a wildcard certificate that protects several sites in the same domain.
-    For example, *\*.example.com* protects *www.example.com*, *site.example.com*, and *images.example.com*.
+.. data:: domain
+  :type: str
+  :noindex:
 
-**hosted_zone_id (str)**
-    The ID of the Route 53 Hosted Zone that contains the resource record sets that you want to change.
-    This must exist in the same account that the certificate will be created in.
+  The fully qualified domain name (FQDN), such as *www.example.com*, with which you want to secure an ACM certificate.
+  Use an asterisk (``*``) to create a wildcard certificate that protects several sites in the same domain.
+  For example, *\*.example.com* protects *www.example.com*, *site.example.com*, and *images.example.com*.
 
-**stack_name (Optional[str])**
-    Provide a name for the stack used to create the certificate. If not provided, the domain is used (replacing ``.`` with ``-``).
-    If the is provided in a deploy stage, its needs to be provided in the matching destroy stage.
+.. data:: hosted_zone_id
+  :type: str
+  :noindex:
 
-**ttl (Optional[int])**
-    The resource record cache time to live (TTL), in seconds. (*default:* ``300``)
+  The ID of the Route 53 Hosted Zone that contains the resource record sets that you want to change.
+  This must exist in the same account that the certificate will be created in.
+
+.. data:: stack_name
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  Provide a name for the stack used to create the certificate.
+  If not provided, the domain is used (replacing ``.`` with ``-``).
+  If the is provided in a deploy stage, its needs to be provided in the matching destroy stage.
+
+.. data:: ttl
+  :type: Optional[int]
+  :value: None
+  :noindex:
+
+  The resource record cache time to live (TTL), in seconds. (*default:* ``300``)
 
 
 .. rubric:: Example
@@ -161,176 +198,229 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
           hosted_zone_id: ${rxref example-com::HostedZone}
 
 
+----
+
+
+.. _aws_lambda hook:
+
 aws_lambda.upload_lambda_functions
 ==================================
 
 .. rubric:: Description
 
-Build Lambda payloads from user configuration and upload them to S3.
+Build Lambda payloads from user configuration and upload them to S3 using the following process:
 
-Constructs ZIP archives containing files matching specified patterns for
-each function, uploads the result to Amazon S3, then stores objects (of
-type :class:`troposphere.awslambda.Code`) in the context's hook data,
-ready to be referenced in blueprints.
+#. Constructs ZIP archives containing files matching specified patterns for each function.
+#. Uploads the result to Amazon S3
+#. Returns a |Dict| of "*function name*: :class:`troposphere.awslambda.Code`".
 
-Configuration consists of some global options, and a dictionary of function
-specifications. In the specifications, each key indicating the name of the
-function (used for generating names for artifacts), and the value
-determines what files to include in the ZIP (see more details below).
+The returned value can retrieved using the :ref:`hook_data Lookup <hook_data lookup>` or by interacting with the :class:`~runway.context.CfnginContext` object passed to the |Blueprint|.
 
-If a ``requirements.txt`` or ``Pipfile/Pipfile.lock`` files are found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically. If you want to explicitly use ``pipenv`` over ``pip``, provide ``use_pipenv: true`` for the function.
+Configuration consists of some global options, and a dictionary of function specifications.
+In the specifications, each key indicating the name of the function (used for generating names for artifacts), and the value determines what files to include in the ZIP (see more details below).
+
+If a ``requirements.txt`` file or ``Pipfile/Pipfile.lock`` files are found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically.
+If you want to explicitly use ``pipenv`` over ``pip``, provide ``use_pipenv: true`` for the function.
 
 Docker can be used to collect python dependencies instead of using system python to build appropriate binaries for Lambda.
 This can be done by including the ``dockerize_pip`` configuration option which can have a value of ``true`` or ``non-linux``.
 
-Payloads are uploaded to either a custom bucket or the CFNgin default
-bucket, with the key containing it's checksum, to allow repeated uploads
-to be skipped in subsequent runs.
+Payloads are uploaded to either the |cfngin_bucket| or an explicitly specified bucket, with the object key containing it's checksum to allow repeated uploads to be skipped in subsequent runs.
 
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.aws_lambda.upload_lambda_functions``
+:func:`runway.cfngin.hooks.aws_lambda.upload_lambda_functions`
 
 
 .. rubric:: Args
+.. data:: bucket
+  :type: Optional[str]
+  :value: None
+  :noindex:
 
-**bucket (Optional[str])**
-    Custom bucket to upload functions to. Omitting it will cause the default CFNgin bucket to be used.
+  Custom bucket to upload functions to. If not provided, |cfngin_bucket| will be used.
 
-**bucket_region (Optional[str])**
-    The region in which the bucket should exist.
-    If not given, the region will be either be that of the global ``cfngin_bucket_region`` setting, or else the region in use by the provider.
+.. data:: bucket_region
+  :type: Optional[str]
+  :value: None
+  :noindex:
 
-**prefix (Optional[str])**
-    S3 key prefix to prepend to the uploaded zip name.
+  The region in which the bucket should exist.
+  If not provided, :attr:`~cfngin.config.cfngin_bucket_region` will be used.
 
-**follow_symlinks (Optional[bool])**
-    Will determine if symlinks should be followed and included with the zip artifact. (*default:* ``False``)
+.. data:: prefix
+  :type: Optional[str]
+  :value: None
+  :noindex:
 
-**payload_acl (Optional[str])**
-    The canned S3 object ACL to be applied to the uploaded payload. (*default: private*)
+  S3 key prefix to prepend to the uploaded zip name.
 
-**functions (Dict[str, Any])**
-    Configurations of desired payloads to build.
-    Keys correspond to function names, used to derive key names for the payload.
-    Each value should itself be a dictionary, with the following data:
+.. data:: follow_symlinks
+  :type: Optional[bool]
+  :value: False
+  :noindex:
 
-    **docker_file (Optional[str])**
-        Path to a local DockerFile that will be built and used for
-        ``dockerize_pip``. Must provide exactly one of ``docker_file``,
-        ``docker_image``, or ``runtime``.
+  Whether symlinks should be followed and included with the zip artifact.
 
-    **docker_image (Optional[str])**
-        Custom Docker image to use  with ``dockerize_pip``. Must
-        provide exactly one of ``docker_file``, ``docker_image``, or
-        ``runtime``.
+.. data:: payload_acl
+  :type: runway.cfngin.hooks.aws_lambda.PayloadAclTypeDef
+  :value: private
+  :noindex:
 
-    **dockerize_pip (Optional[Union[str, bool]])**
-        Whether to use Docker when restoring dependencies with pip.
-        Can be set to ``true``/``false`` or the special string ``non-linux``
-        which will only run on non Linux systems.
-        To use this option Docker must be installed.
+  The canned S3 object ACL to be applied to the uploaded payload.
 
-    **exclude (Optional[Union[str, List[str]]])**
-        Pattern or list of patterns of files to exclude from the
-        payload. If provided, any files that match will be ignored,
-        regardless of whether they match an inclusion pattern.
+.. data:: functions
+  :type: Dict[str, Any]
+  :noindex:
 
-        Commonly ignored files are already excluded by default,
-        such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``,
-        ``.gitignore``, etc.
+  Configurations of desired payloads to build.
+  Keys correspond to function names, used to derive key names for the payload.
+  Each value should itself be a dictionary, with the following data:
 
-    **include (Optional[Union[str, List[str]]])**
-        Pattern or list of patterns of files to include in the
-        payload. If provided, only files that match these
-        patterns will be included in the payload.
+  .. data:: docker_file
+    :type: Optional[str]
+    :value: None
+    :noindex:
 
-        Omitting it is equivalent to accepting all files that are
-        not otherwise excluded.
+    Path to a local DockerFile that will be built and used for ``dockerize_pip``.
+    Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
 
-    **path (str)**
-        Base directory of the Lambda function payload content.
-        If it not an absolute path, it will be considered relative
-        to the directory containing the CFNgin configuration file
-        in use.
+  .. data:: docker_image
+    :type: Optional[str]
+    :value: None
+    :noindex:
 
-        Files in this directory will be added to the payload ZIP,
-        according to the include and exclude patterns. If no
-        patterns are provided, all files in this directory
-        (respecting default exclusions) will be used.
+    Custom Docker image to use  with ``dockerize_pip``.
+    Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
 
-        Files are stored in the archive with path names relative to
-        this directory. So, for example, all the files contained
-        directly under this directory will be added to the root of
-        the ZIP file.
+  .. data:: dockerize_pip
+    :type: Optional[Union[bool, Literal["non-linux"]]]
+    :value: None
+    :noindex:
 
-    **python_path (Optional[str])**
-        Absolute path to a python interpreter to use for ``pip``/``pipenv``
-        actions. If not provided, the current python interpreter will be used
-        for ``pip`` and ``pipenv`` will be used from the current ``$PATH``.
+    Whether to use Docker when restoring dependencies with pip.
+    Can be set to ``true``/``false`` or the special string ``non-linux`` which will only run on non Linux systems.
+    To use this option Docker must be installed.
 
-    **runtime (Optional[str])**
-        Runtime of the AWS Lambda Function being uploaded. Used with
-        ``dockerize_pip`` to automatically select the appropriate
-        Docker image to use. Must provide exactly one of
-        ``docker_file``, ``docker_image``, or ``runtime``.
+  .. data:: exclude
+    :type: Optional[Union[List[str], str]]
+    :value: None
+    :noindex:
 
-    **use_pipenv (Optional[bool])**:
-        Will determine if pipenv will be used to generate requirements.txt
-        from an existing Pipfile. To use this option pipenv must be installed.
+    Pattern or list of patterns of files to exclude from the payload.
+    If provided, any files that match will be ignored, regardless of whether they match an inclusion pattern.
+
+    Commonly ignored files are already excluded by default, such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``, ``.gitignore``, etc.
+
+  .. data:: include
+    :type: Optional[List[str], str]
+    :value: None
+    :noindex:
+
+    Pattern or list of patterns of files to include in the payload.
+    If provided, only files that match these patterns will be included in the payload.
+
+    Omitting it is equivalent to accepting all files that are not otherwise excluded.
+
+  .. data:: path
+    :type: str
+    :noindex:
+
+    Base directory of the Lambda function payload content.
+    If it not an absolute path, it will be considered relative to the directory containing the CFNgin configuration file in use.
+
+    Files in this directory will be added to the payload ZIP, according to the include and exclude patterns.
+    If no patterns are provided, all files in this directory (respecting default exclusions) will be used.
+
+    Files are stored in the archive with path names relative to this directory.
+    So, for example, all the files contained directly under this directory will be added to the root of the ZIP file.
+
+  .. data:: python_path
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Absolute path to a python interpreter to use for ``pip``/``pipenv`` actions.
+    If not provided, the current python interpreter will be used for ``pip`` and ``pipenv`` will be used from the current ``$PATH``.
+
+  .. data:: runtime
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Runtime of the AWS Lambda Function being uploaded.
+    Used with ``dockerize_pip`` to automatically select the appropriate Docker image to use.
+    Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
+
+  .. data:: use_pipenv
+    :type: Optional[bool]
+    :value: False
+    :noindex:
+
+    Will determine if pipenv will be used to generate requirements.txt from an existing Pipfile.
+    To use this option pipenv must be installed.
 
 
 .. rubric:: Example
-
-**Hook configuration**
-
 .. code-block:: yaml
+  :caption: Hook Configuration
 
-    pre_deploy:
-      upload_functions:
-        path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
-        required: true
-        enabled: true
-        data_key: lambda
-        args:
-          bucket: custom-bucket
-          follow_symlinks: true
-          prefix: cloudformation-custom-resources/
-          payload_acl: authenticated-read
-          functions:
-            MyFunction:
-              path: ./lambda_functions
-              dockerize_pip: non-linux
-              use_pipenv: true
-              runtime: python3.8
-              include:
-                - '*.py'
-                - '*.txt'
-              exclude:
-                - '*.pyc'
-                - test/
-
-**Blueprint Usage**
+  pre_deploy:
+    - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+      required: true
+      enabled: true
+      data_key: lambda
+      args:
+        bucket: custom-bucket
+        follow_symlinks: true
+        prefix: cloudformation-custom-resources/
+        payload_acl: authenticated-read
+        functions:
+          MyFunction:
+            path: ./lambda_functions
+            dockerize_pip: non-linux
+            use_pipenv: true
+            runtime: python3.8
+            include:
+              - '*.py'
+              - '*.txt'
+            exclude:
+              - '*.pyc'
+              - test/
 
 .. code-block:: python
+  :caption: Blueprint Usage
 
-    from troposphere.awslambda import Function
-    from runway.cfngin.blueprints.base import Blueprint
+  """Example Blueprint."""
+  from __future__ import annotations
 
-    class LambdaBlueprint(Blueprint):
-        def create_template(self):
-            code = self.context.hook_data['lambda']['MyFunction']
+  from typing import cast
 
-            self.template.add_resource(
-                Function(
-                    'MyFunction',
-                    Code=code,
-                    Handler='my_function.handler',
-                    Role='...',
-                    Runtime='python2.7'
-                )
-            )
+  from troposphere.awslambda import Code, Function
+
+  from runway.cfngin.blueprints.base import Blueprint
+
+
+  class LambdaBlueprint(Blueprint):
+      """Example Blueprint."""
+
+      def create_template(self) -> None:
+          """Create a template from the blueprint."""
+          code = cast(Code, self.context.hook_data["lambda"]["MyFunction"])
+
+          self.template.add_resource(
+              Function(
+                  "MyFunction",
+                  Code=code,
+                  Handler="my_function.handler",
+                  Role="...",
+                  Runtime="python3.8",
+              )
+          )
+
+
+----
 
 
 build_staticsite.build
@@ -343,7 +433,7 @@ Build static site. Used by the :ref:`Static Site <staticsite>` module type.
 
 .. rubric:: Hook Path
 
-``runway.hooks.staticsite.build_staticsite.build``
+:func:`runway.hooks.staticsite.build_staticsite.build`
 
 
 .. rubric:: Args
@@ -356,18 +446,21 @@ cleanup_s3.purge_bucket
 
 .. rubric:: Description
 
-Delete objects in bucket. Primarily used as a :attr:`~cfngin.config.pre_destroy` hook before deleting an S3 bucket.
+Delete objects in a Bucket.
+Primarily used as a :attr:`~cfngin.config.pre_destroy` hook before deleting an S3 bucket.
 
 
 .. rubric:: Hook Path
 
-``runway.hooks.cleanup_s3.purge_bucket``
+:func:`runway.hooks.cleanup_s3.purge_bucket`
 
 
 .. rubric:: Args
+.. data:: bucket_name
+  :type: str
+  :noindex:
 
-**bucket_name (str)**
-    Name of the S3 bucket.
+  Name of the S3 bucket.
 
 
 cleanup_ssm.delete_param
@@ -375,18 +468,21 @@ cleanup_ssm.delete_param
 
 .. rubric:: Description
 
-Delete SSM parameter. Primarily used when an SSM parameter is created by a hook rather than CloudFormation.
+Delete SSM parameter.
+Primarily used when an SSM parameter is created by a hook rather than CloudFormation.
 
 
 .. rubric:: Hook Path
 
-``runway.hooks.cleanup_ssm.delete_param``
+:func:`runway.hooks.cleanup_ssm.delete_param`
 
 
 .. rubric:: Args
+.. data:: parameter_name
+  :type: str
+  :noindex:
 
-**parameter_name (str)**
-    Name of an SSM parameter.
+  Name of an SSM parameter.
 
 
 command.run_command
@@ -394,64 +490,86 @@ command.run_command
 
 .. rubric:: Description
 
-Run a custom command as a hook.
+Run a shell custom command as a hook.
 
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.command.run_command``
+:func:`runway.cfngin.hooks.command.run_command`
 
 
 .. rubric:: Args
+.. data:: command
+  :type: Union[List[str], str]
+  :noindex:
 
-**command (Union[str, List[str]])**
-    Command(s) to run.
+  Command(s) to run.
 
-**capture (bool)**
-    If enabled, capture the command's stdout and stderr,
-    and return them in the hook result. (*default:* ``False``)
+.. data:: capture
+  :type: Optional[bool]
+  :value: False
+  :noindex:
 
-**interactive (bool)**
-    If enabled, allow the command to interact with
-    stdin. Otherwise, stdin will be set to the null device.
-    (*default:* ``False``)
+  If enabled, capture the command's stdout and stderr, and return them in the hook result.
 
-**ignore_status (bool)**
-    Don't fail the hook if the command returns a
-    non-zero status. (*default:* ``False``)
+.. data:: interactive
+  :type: Optional[bool]
+  :value: False
+  :noindex:
 
-**quiet (bool)**
-    Redirect the command's stdout and stderr to the null
-    device, silencing all output. Should not be enabled if
-    ``capture`` is also enabled. (*default:* ``False``)
+  If enabled, allow the command to interact with stdin.
+  Otherwise, stdin will be set to the null device.
 
-**stdin (Optional[str])**
-    String to send to the stdin of the command.
-    Implicitly disables ``interactive``.
-**env (Optional[Dict[str, str]])**
-    Dictionary of environment variable
-    overrides for the command context. Will be merged with the current
-    environment.
-**\**\kwargs (Any)**
-    Any other arguments will be forwarded to the
-    ``subprocess.Popen`` function. Interesting ones include: ``cwd``
-    and ``shell``.
+.. data:: ignore_status
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Don't fail the hook if the command returns a non-zero status.
+
+.. data:: quiet
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Redirect the command's stdout and stderr to the null device, silencing all output.
+  Should not be enabled if ``capture`` is also enabled.
+
+.. data:: stdin
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  String to send to the stdin of the command.
+  Implicitly disables ``interactive``.
+
+.. data:: env
+  :type: Optional[Dict[str, str]]
+  :value: None
+  :noindex:
+
+  Dictionary of environment variable overrides for the command context.
+  Will be merged with the current environment.
+
+.. data:: **kwargs
+  :type: Any
+  :noindex:
+
+  Any other arguments will be forwarded to the :class:`subprocess.Popen` function.
+  Interesting ones include: ``cwd`` and ``shell``.
 
 
 .. rubric:: Example
-
 .. code-block:: yaml
 
     pre_deploy:
-      command_copy_environment:
-        path: runway.cfngin.hooks.command.run_command
+      - path: runway.cfngin.hooks.command.run_command
         required: true
         enabled: true
         data_key: copy_env
         args:
           command: ['cp', 'environment.template', 'environment']
-      command_git_rev_parse:
-        path: runway.cfngin.hooks.command.run_command
+      - path: runway.cfngin.hooks.command.run_command
         required: true
         enabled: true
         data_key: get_git_commit
@@ -459,8 +577,7 @@ Run a custom command as a hook.
           command: ['git', 'rev-parse', 'HEAD']
           cwd: ./my-git-repo
           capture: true
-      command_npm_install:
-        path: runway.cfngin.hooks.command.run_command
+      - path: runway.cfngin.hooks.command.run_command
         args:
           command: '`cd $PROJECT_DIR/project; npm install`'
           env:
@@ -468,46 +585,602 @@ Run a custom command as a hook.
             shell: true
 
 
+----
+
+
 .. _cfngin.hooks.docker:
 
 docker
 ======
 
+A collection of hooks that interact with Docker.
+
 docker.image.build
 ------------------
 
 .. rubric:: Description
-.. automodule:: runway.cfngin.hooks.docker.image._build
+
+Docker image build hook.
+
+Replicates the functionality of the ``docker image build`` CLI command.
+
+.. rubric:: Hook Path
+
+:func:`runway.cfngin.hooks.docker.image.build`
+
+.. rubric:: Args
+.. data:: docker
+  :type: Optional[Dict[str, Any]]
+  :value: {}
   :noindex:
+
+  Options for ``docker image build``.
+
+  .. data:: buildargs
+    :type: Optional[Dict[str, str]]
+    :value: None
+    :noindex:
+
+    Dict of build-time variables.
+
+  .. data:: custom_context
+    :type: bool
+    :value: False
+    :noindex:
+
+    Optional if providing a path to a zip file.
+
+  .. data:: extra_hosts
+    :type: Optional[Dict[str, str]]
+    :value: None
+    :noindex:
+
+    Extra hosts to add to ``/etc/hosts`` in the building containers.
+    Defined as a mapping of hostmane to IP address.
+
+  .. data:: forcerm
+    :type: bool
+    :value: False
+    :noindex:
+
+    Always remove intermediate containers, even after unsuccessful builds.
+
+  .. data:: isolation
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Isolation technology used during build.
+
+  .. data: network_mode
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Network mode for the run commands during build.
+
+  .. data:: nocache
+    :type: bool
+    :value: False
+    :noindex:
+
+    Don't use cache when set to ``True``.
+
+  .. data:: platform
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Set platform if server is multi-platform capable.
+    Uses format ``os[/arch[/variant]]``.
+
+  .. data:: pull
+    :type: bool
+    :value: False
+    :noindex:
+
+    Download any updates to the FROM image in the Dockerfile.
+
+  .. data:: rm
+    :type: bool
+    :value: True
+    :noindex:
+
+    Remove intermediate containers.
+
+  .. data:: squash
+    :type: bool
+    :value: False
+    :noindex:
+
+    Squash the resulting image layers into a single layer.
+
+  .. data:: tag
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Optional name and tag to apply to the base image when it is built.
+
+  .. data:: target
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    Name of the build-stage to build in a multi-stage Dockerfile.
+
+  .. data:: timeout
+    :type: Optional[int]
+    :value: None
+    :noindex:
+
+    HTTP timeout.
+
+  .. data:: use_config_proxy
+    :type: bool
+    :value: False
+    :noindex:
+
+    If ``True`` and if the docker client configuration file (``~/.docker/config.json`` by default) contains a proxy configuration, the corresponding environment variables will be set in the container being built.
+
+.. data:: dockerfile
+  :type: Optional[str]
+  :value: "./Dockerfile"
+  :noindex:
+
+  Path within the build context to the Dockerfile.
+
+.. data:: ecr_repo
+  :type: Optional[Dict[str, Optional[str]]]
+  :value: None
+  :noindex:
+
+  Information describing an ECR repository. This is used to construct the repository URL.
+  If providing a value for this field, do not provide a value for ``repo``.
+
+  If using a private registry, only ``repo_name`` is required.
+  If using a public registry, ``repo_name`` and ``registry_alias``.
+
+  .. data:: account_id
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS account ID that owns the registry being logged into. If not provided,
+    it will be acquired automatically if needed.
+
+  .. data:: aws_region
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS region where the registry is located. If not provided, it will be acquired
+    automatically if needed.
+
+  .. data:: registry_alias
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    If it is a public repository, provide the alias.
+
+  .. data:: repo_name
+    :type: str
+    :noindex:
+
+    The name of the repository.
+
+.. data:: path
+  :type: Optional[str]
+  :noindex:
+
+  Path to the directory containing the Dockerfile.
+
+.. data:: repo
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  URI of a non Docker Hub repository where the image will be stored.
+  If providing one of the other repo values, leave this value empty.
+
+.. data:: tags
+  :type: Optional[List[str]]
+  :value: ["latest"]
+  :noindex:
+
+  List of tags to apply to the image.
+
+.. rubric:: Returns
+
+:type:
+  :class:`~runway.cfngin.hooks.docker.hook_data.DockerHookData`
+:description:
+  The value of item ``image`` in the returned object is set to the :class:`~runway.cfngin.hooks.docker.data_models.DockerImage` that was just created.
+
+The returned object is accessible with the :ref:`hook_data Lookup <hook_data lookup>` under the ``data_key`` of ``docker`` (do not specify a ``data_key`` for the hook, this is handled automatically).
+
+.. important::
+  Each execution of this hook overwrites any previous values stored in this attribute.
+  It is advices to consume the resulting image object after it has been built, if it
+  will be consumed by a later hook/stack.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  pre_deploy:
+    - path: runway.cfngin.hooks.docker.login
+      args:
+        ecr: true
+        password: ${ecr login-password}
+    - path: runway.cfngin.hooks.docker.image.build
+      args:
+        ecr_repo:
+          repo_name: ${cfn ${namespace}-test-ecr.Repository}
+        tags:
+          - latest
+          - python3.9
+    - path: runway.cfngin.hooks.docker.image.push
+      args:
+        image: ${hook_data docker.image}
+
 
 docker.image.push
 -----------------
 
 .. rubric:: Description
-.. automodule:: runway.cfngin.hooks.docker.image._push
+
+Docker image push hook.
+
+Replicates the functionality of the ``docker image push`` CLI command.
+
+.. rubric:: Hook Path
+
+:func:`runway.cfngin.hooks.docker.image.push`
+
+.. rubric:: Args
+.. data:: ecr_repo
+  :type: Optional[Dict[str, Optional[str]]]
+  :value: None
   :noindex:
+
+  Information describing an ECR repository. This is used to construct the repository URL.
+  If providing a value for this field, do not provide a value for ``repo`` or ``image``.
+
+  If using a private registry, only ``repo_name`` is required.
+  If using a public registry, ``repo_name`` and ``registry_alias``.
+
+  .. data:: account_id
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS account ID that owns the registry being logged into. If not provided,
+    it will be acquired automatically if needed.
+
+  .. data:: aws_region
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS region where the registry is located. If not provided, it will be acquired
+    automatically if needed.
+
+  .. data:: registry_alias
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    If it is a public repository, provide the alias.
+
+  .. data:: repo_name
+    :type: str
+    :noindex:
+
+    The name of the repository.
+
+.. data:: image
+  :type: Optional[DockerImage]
+  :value: None
+  :noindex:
+
+  A :class:`~runway.cfngin.hooks.docker.data_models.DockerImage` object.
+  This can be retrieved from ``hook_data`` for a preceding `docker.image.build`_ using the
+  :ref:`hook_data Lookup <hook_data lookup>`.
+
+  If providing a value for this field, do not provide a value for ``ecr_repo`` or ``repo``.
+
+.. data:: repo
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  URI of a non Docker Hub repository where the image will be stored.
+  If providing one of the other repo values or ``image``, leave this value empty.
+
+.. data:: tags
+  :type: Optional[List[str]]
+  :value: ["latest"]
+  :noindex:
+
+  List of tags to push.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  pre_deploy:
+    - path: runway.cfngin.hooks.docker.login
+      args:
+        ecr: true
+        password: ${ecr login-password}
+    - path: runway.cfngin.hooks.docker.image.build
+      args:
+        ecr_repo:
+          repo_name: ${cfn ${namespace}-test-ecr.Repository}
+        tags:
+          - latest
+          - python3.9
+    - path: runway.cfngin.hooks.docker.image.push
+      args:
+        image: ${hook_data docker.image}
+
+  stacks:
+    ecr-lambda-function:
+      class_path: blueprints.EcrFunction
+      variables:
+        ImageUri: ${hook_data docker.image.uri.latest}
+
 
 docker.image.remove
 -------------------
 
 .. rubric:: Description
-.. automodule:: runway.cfngin.hooks.docker.image._remove
+
+Docker image remove hook.
+
+Replicates the functionality of the ``docker image remove`` CLI command.
+
+.. rubric:: Hook Path
+
+:func:`runway.cfngin.hooks.docker.image.remove`
+
+.. rubric:: Args
+.. data:: ecr_repo
+  :type: Optional[Dict[str, Optional[str]]]
+  :value: None
   :noindex:
+
+  Information describing an ECR repository. This is used to construct the repository URL.
+  If providing a value for this field, do not provide a value for ``repo`` or ``image``.
+
+  If using a private registry, only ``repo_name`` is required.
+  If using a public registry, ``repo_name`` and ``registry_alias``.
+
+  .. data:: account_id
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS account ID that owns the registry being logged into. If not provided,
+    it will be acquired automatically if needed.
+
+  .. data:: aws_region
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS region where the registry is located. If not provided, it will be acquired
+    automatically if needed.
+
+  .. data:: registry_alias
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    If it is a public repository, provide the alias.
+
+  .. data:: repo_name
+    :type: str
+    :noindex:
+
+    The name of the repository.
+
+.. data:: force
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Whether to force the removal of the image.
+
+.. data:: image
+  :type: Optional[DockerImage]
+  :value: None
+  :noindex:
+
+  A :class:`~runway.cfngin.hooks.docker.data_models.DockerImage` object.
+  This can be retrieved from ``hook_data`` for a preceding `docker.image.build`_ using the
+  :ref:`hook_data Lookup <hook_data lookup>`.
+
+  If providing a value for this field, do not provide a value for ``ecr_repo`` or ``repo``.
+
+.. data:: noprune
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Whether to delete untagged parents.
+
+.. data:: repo
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  URI of a non Docker Hub repository where the image will be stored.
+  If providing one of the other repo values or ``image``, leave this value empty.
+
+.. data:: tags
+  :type: Optional[List[str]]
+  :value: ["latest"]
+  :noindex:
+
+  List of tags to remove.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  pre_deploy:
+    - path: runway.cfngin.hooks.docker.login
+      args:
+        ecr: true
+        password: ${ecr login-password}
+    - path: runway.cfngin.hooks.docker.image.build
+      args:
+        ecr_repo:
+          repo_name: ${cfn ${namespace}-test-ecr.Repository}
+        tags:
+          - latest
+          - python3.9
+    - path: runway.cfngin.hooks.docker.image.push
+      args:
+        image: ${hook_data docker.image}
+        tags:
+          - latest
+          - python3.9
+
+  stacks:
+    ...
+
+  post_deploy:
+    - path: runway.cfngin.hooks.docker.image.remove
+      args:
+        image: ${hook_data docker.image}
+        tags:
+          - latest
+          - python3.9
+
 
 docker.login
 ------------
 
 .. rubric:: Description
-.. automodule:: runway.cfngin.hooks.docker._login
+
+Docker login hook.
+
+Replicates the functionality of the ``docker login`` CLI command.
+
+.. rubric:: Hook Path
+
+:func:`runway.cfngin.hooks.docker.login`
+
+.. rubric:: Args
+.. data:: dockercfg_path
+  :type: Optional[str]
+  :value: None
   :noindex:
+
+  Use a custom path for the Docker config file (``$HOME/.docker/config.json`` if present, otherwise ``$HOME/.dockercfg``).
+
+.. data:: ecr
+  :type: Optional[Dict[str, Optional[str]]]
+  :value: None
+  :noindex:
+
+  Information describing an ECR repository. This is used to construct the repository URL.
+  If providing a value for this field, do not provide a value for ``repo`` or ``image``.
+
+  If using a private registry, only ``repo_name`` is required.
+  If using a public registry, ``repo_name`` and ``registry_alias``.
+
+  .. data:: account_id
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS account ID that owns the registry being logged into. If not provided,
+    it will be acquired automatically if needed.
+
+  .. data:: alias
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    If it is a public registry, provide the alias.
+
+  .. data:: aws_region
+    :type: Optional[str]
+    :value: None
+    :noindex:
+
+    AWS region where the registry is located. If not provided, it will be acquired
+    automatically if needed.
+
+.. data:: email
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  The email for the registry account.
+
+.. data:: password
+  :type: str
+  :noindex:
+
+  The plaintext password for the registry account.
+
+.. data:: registry
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  URL to the registry (e.g. ``https://index.docker.io/v1/``).
+
+  If providing a value for this field, do not provide a value for ``ecr``.
+
+.. data:: username
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  The registry username. Defaults to ``AWS`` if supplying ``ecr``.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  pre_deploy:
+    - path: runway.cfngin.hooks.docker.login
+      args:
+        ecr: true
+        password: ${ecr login-password}
 
 
 ecr.purge_repository
 ====================
 
 .. rubric:: Description
-.. automodule:: runway.cfngin.hooks.ecr._purge_repository
+
+Purge all images from an ECR repository.
+
+.. rubric:: Hook Path
+
+:func:`runway.cfngin.hooks.ecr.purge_repository`
+
+.. rubric:: Args
+.. data:: repository_name
+  :type: str
   :noindex:
+
+  The name of the ECR repository to purge.
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  pre_destroy:
+    - path: runway.cfngin.hooks.ecr.purge_repository
+      args:
+        repository_name: example-repo
+
+
+----
 
 
 ecs.create_clusters
@@ -517,16 +1190,21 @@ ecs.create_clusters
 
 Create ECS clusters.
 
-
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.ecs.create_clusters``
+:func:`runway.cfngin.hooks.ecs.create_clusters`
 
 
 .. rubric:: Args
 
-**clusters (List[str])**
-    Names of clusters to create.
+.. data:: clusters
+  :type: List[str]
+  :noindex:
+
+  Names of clusters to create.
+
+
+----
 
 
 iam.create_ecs_service_role
@@ -534,20 +1212,25 @@ iam.create_ecs_service_role
 
 .. rubric:: Description
 
-Create ecsServiceRole, which has to be named exactly that currently.
+Create ecsServiceRole IAM role.
 
-http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
-
+.. seealso::
+  `AWS Documentation describing the Role <http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role>`__
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.iam.create_ecs_service_role``
-
+:func:`runway.cfngin.hooks.iam.create_ecs_service_role`
 
 .. rubric:: Args
+.. data:: role_name
+  :type: Optional[str]
+  :value: "ecsServiceRole"
+  :noindex:
 
-**role_name (str)**
-    Name of the role to create. (*default: ecsServiceRole*)
+  Name of the role to create.
+
+
+----
 
 
 iam.ensure_server_cert_exists
@@ -555,21 +1238,28 @@ iam.ensure_server_cert_exists
 
 .. rubric:: Description
 
-Ensure server cert exists.
-
+Ensure server certificate exists.
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.iam.ensure_server_cert_exists``
-
+:func:`runway.cfngin.hooks.iam.ensure_server_cert_exists`
 
 .. rubric:: Args
+.. data:: cert_name
+  :type: str
+  :noindex:
 
-**cert_name (str)**
-    Name of the certificate that should exist.
+  Name of the certificate that should exist.
 
-**prompt (bool)**
-    Whether to prompt to upload a certificate if one does not exist. (*default:* ``True``)
+.. data:: prompt
+  :type: bool
+  :value: True
+  :noindex:
+
+  Whether to prompt to upload a certificate if one does not exist.
+
+
+----
 
 
 keypair.ensure_keypair_exists
@@ -582,28 +1272,41 @@ Ensure a specific keypair exists within AWS. If the key doesn't exist, upload it
 
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.keypair.ensure_keypair_exists``
+:func:`runway.cfngin.hooks.keypair.ensure_keypair_exists`
 
 
 .. rubric:: Args
+.. data:: keypair
+  :type: str
+  :noindex:
 
-**keypair (str)**
-    Name of the key pair to create
+  Name of the key pair to create
 
-**ssm_parameter_name (Optional[str])**
-    Path to an SSM store parameter
-    to receive the generated private key, instead of importing it or
-    storing it locally.
+.. data:: public_key_path
+  :type: Optional[str]
+  :value: None
+  :noindex:
 
-**ssm_key_id (Optional[str])**
-    ID of a KMS key to encrypt the SSM
-    parameter with. If omitted, the default key will be used.
+  Path to a public key file to be imported instead of generating a new key.
+  Incompatible with the SSM options, as the private key will not be available for storing.
 
-**public_key_path (Optional[str])**
-    Path to a public key file to be
-    imported instead of generating a new key. Incompatible with the
-    SSM options, as the private key will not be available for
-    storing.
+.. data:: ssm_key_id
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  ID of a KMS key to encrypt the SSM
+  parameter with. If omitted, the default key will be used.
+
+.. data:: ssm_parameter_name
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  Path to an SSM store parameter to receive the generated private key, instead of importing it or storing it locally.
+
+
+----
 
 
 route53.create_domain
@@ -613,35 +1316,20 @@ route53.create_domain
 
 Create a domain within route53.
 
-
 .. rubric:: Hook Path
 
-``runway.cfngin.hooks.route53.create_domain``
+:func:`runway.cfngin.hooks.route53.create_domain`
 
 
 .. rubric:: Args
+.. data:: domain
+  :type: str
+  :noindex:
 
-**domain (str)**
-    Domain name for the Route 53 hosted zone to be created.
-
-
-upload_staticsite.get_distribution_data
-=======================================
-
-.. rubric:: Description
-
-Retrieve information about the CloudFront distribution.
-Used by the :ref:`Static Site <staticsite>` module type.
+  Domain name for the Route 53 hosted zone to be created.
 
 
-.. rubric:: Hook Path
-
-``runway.hooks.staticsite.upload_staticsite.get_distribution_data``
-
-
-.. rubric:: Args
-
-See :ref:`Static Site <staticsite>` module documentation for details.
+----
 
 
 upload_staticsite.sync
@@ -654,12 +1342,16 @@ Sync static website to S3 bucket. Used by the :ref:`Static Site <staticsite>` mo
 
 .. rubric:: Hook Path
 
-``runway.hooks.staticsite.upload_staticsite.sync``
+:func:`runway.hooks.staticsite.upload_staticsite.sync`
 
 
 .. rubric:: Args
 
 See :ref:`Static Site <staticsite>` module documentation for details.
+
+
+----
+
 
 *********************
 Writing A Custom Hook
@@ -671,128 +1363,125 @@ This takes into account the :attr:`~cfngin.config.sys_path` defined in the :clas
 
 The hook must accept a minimum of two arguments, ``context`` and ``provider``.
 Aside from the required arguments, it can have any number of additional arguments or use ``**kwargs`` to accept anything passed to it.
-The values for these additional arguments come from the ``args`` key of the hook definition.
+The values for these additional arguments come from the :attr:`~cfngin.hook.args` field of the hook definition.
 
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
-This signifies to CFNgin whether or not to halt execution if the hook is ``required``.
-If ``dict`` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
-It will be stored as ``context.hook_data[data_key]`` where ``data_key`` is the value set in the hook definition.
-If ``data_key`` is not provided or the type of the returned data is not ``dict``, it will not be added to the context object.
+This signifies to CFNgin whether or not to halt execution if the hook is :attr:`~cfngin.hook.required`.
+If a |Dict| or :class:`~cfngin.util.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
+It will be stored as ``context.hook_data[data_key]`` where :attr:`~cfngin.hook.data_key` is the value set in the hook definition.
+If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict| or :class:`~cfngin.util.MutableMap`, it will not be added to the context object.
 
-If using boto3 in a hook, use ``context.get_session()`` instead of creating a new session to ensure the correct credentials are used.
+If using boto3 in a hook, use :meth:`context.get_session() <runway.context.CfnginContext.get_session>` instead of creating a new session to ensure the correct credentials are used.
 
-.. code-block::
+.. code-block:: python
 
-    """context.get_session() example."""
-    from runway.cfngin.providers.aws.default import Provider
-    from runway.context.cfngin import CfnginContext
+  """context.get_session() example."""
+  from __future__ import annotations
 
-    def do_something(context: CfnginContext, provider: Provider, **kwargs: str) -> None:
-        """Do something."""
-        session = context.get_session()
-        s3_client = session.client('s3')
+  from typing import TYPE_CHECKING, Any
+
+  if TYPE_CHECKING:
+      from runway.context.cfngin import CfnginContext
+
+
+  def do_something(context: CfnginContext, **_kwargs: Any) -> None:
+      """Do something."""
+      s3_client = context.get_session().client("s3")
 
 
 Example Hook Function
 =====================
 
-.. rubric:: local_path/hooks/my_hook.py
 .. code-block:: python
+  :caption: local_path/hooks/my_hook.py
 
-    """My hook."""
-    from typing import Dict
+  """My hook."""
+  from __future__ import annotations
 
-    from runway.cfngin.providers.aws.default import Provider
-    from runway.context.cfngin import CfnginContext
+  from typing import Dict, Optional
 
 
-    def do_something(context: CfnginContext,
-                     provider: Provider,
-                     is_failure: bool = True,
-                     **kwargs: str
-                     ) -> Dict[str, str]:
-        """Do something."""
-        if is_failure:
-            return None
-        return {'result': f"You are not a failure {kwargs.get('name', 'Kevin')}."}
+  def do_something(*, is_failure: bool = True, **kwargs: str) -> Optional[Dict[str, str]]:
+      """Do something."""
+      if is_failure:
+          return None
+      return {"result": f"You are not a failure {kwargs.get('name', 'Kevin')}."}
 
-.. rubric:: local_path/cfngin.yaml
 .. code-block:: yaml
+  :caption: local_path/cfngin.yaml
 
-    namespace: example
-    sys_path: ./
+  namespace: example
+  sys_path: ./
 
-    pre_deploy:
-      my_hook_do_something:
-        path: hooks.my_hook.do_something
-        args:
-          is_failure: False
+  pre_deploy:
+    - path: hooks.my_hook.do_something
+      args:
+        is_failure: false
 
 
 Example Hook Class
 ==================
 
-.. rubric:: local_path/hooks/my_hook.py
 .. code-block:: python
+  :caption: local_path/hooks/my_hook.py
 
-    """My hook."""
-    import logging
-    from typing import Dict
+  """My hook."""
+  import logging
+  from typing import Dict, Optional
 
-    from runway.cfngin.hooks.base import Hook
+  from runway.cfngin.hooks.base import Hook
 
-    LOGGER = logging.getLogger(__name__)
+  LOGGER = logging.getLogger(__name__)
 
-    class MyClass(Hook):
-        """My class does a thing.
 
-        Keyword Args:
-            is_failure (bool): Force the hook to fail if true.
-            name (str): Name used in the response.
+  class MyClass(Hook):
+      """My class does a thing.
 
-        Returns:
-            Dict[str, str]: Response message is stored in ``result``.
+      Keyword Args:
+          is_failure (bool): Force the hook to fail if true.
+          name (str): Name used in the response.
 
-        Example:
-        .. code-block:: yaml
+      Returns:
+          Dict[str, str]: Response message is stored in ``result``.
+
+      Example:
+      .. code-block:: yaml
 
           pre_deploy:
-            my_hook_do_something:
-              path: hooks.my_hook.MyClass
+            - path: hooks.my_hook.MyClass
               args:
-                is_failure: False
-                name: Karen
+              is_failure: False
+              name: Karen
 
-        """
+      """
 
-        def post_deploy(self) -> Dict[str, str]:
-            """Run during the **post_deploy** stage."""
-            if self.args.is_failure:
-                return None
-            return {'result': f"You are not a failure {self.args.name}."}
+      def post_deploy(self) -> Optional[Dict[str, str]]:
+          """Run during the **post_deploy** stage."""
+          if self.args["is_failure"]:
+              return None
+          return {"result": f"You are not a failure {self.args['name']}."}
 
-        def post_destroy(self) -> None:
-            """Run during the **post_destroy** stage."""
-            LOGGER.error('post_destroy is not supported by this hook')
+      def post_destroy(self) -> None:
+          """Run during the **post_destroy** stage."""
+          LOGGER.error("post_destroy is not supported by this hook")
 
-        def pre_deploy(self) -> None:
-            """Run during the **pre_deploy** stage."""
-            LOGGER.error('pre_deploy is not supported by this hook')
+      def pre_deploy(self) -> None:
+          """Run during the **pre_deploy** stage."""
+          LOGGER.error("pre_deploy is not supported by this hook")
 
-        def pre_destroy(self) -> None:
-            """Run during the **pre_destroy** stage."""
-            LOGGER.error('pre_destroy is not supported by this hook')
+      def pre_destroy(self) -> None:
+          """Run during the **pre_destroy** stage."""
+          LOGGER.error("pre_destroy is not supported by this hook")
 
-.. rubric:: local_path/cfngin.yaml
 .. code-block:: yaml
+  :caption: local_path/cfngin.yaml
 
-    namespace: example
-    sys_path: ./
+  namespace: example
+  sys_path: ./
 
-    pre_deploy:
-      my_hook_do_something:
-        path: hooks.my_hook.MyClass
-        args:
-          is_failure: False
-          name: Karen
+  pre_deploy:
+    - path: hooks.my_hook.MyClass
+      args:
+        is_failure: False
+        name: Karen

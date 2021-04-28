@@ -170,7 +170,7 @@ Top-Level Fields
     :value: {}
 
     Lookups allow you to create custom methods which take a value and are resolved at runtime time.
-    The resolved values are passed to the :ref:`Blueprint` before it is rendered.
+    The resolved values are passed to the |Blueprint| before it is rendered.
     For more information, see the :ref:`Lookups <cfngin-lookups>` documentation.
 
     CFNgin provides some common :ref:`Lookups <cfngin-lookups>`, but it is sometimes useful to have your own custom lookup that doesn't get shipped with Runway.
@@ -195,7 +195,7 @@ Top-Level Fields
 
     These can be useful for providing things like different AMIs for different instance types in different regions.
 
-    These can be used in each :ref:`Blueprint`/template as usual.
+    These can be used in each |Blueprint|/template as usual.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -360,7 +360,7 @@ Top-Level Fields
     A path to be added to ``$PATH`` while processing the configuration file.
     This will allow modules from the provided path location to be used.
 
-    When setting :attr:`~cfngin.stack.class_path` for :ref:`Blueprints` or :attr:`~cfngin.hook.path` for :class:`hooks <cfngin.hook>` , it is sometimes desirable to load modules from outside the default ``$PATH`` (e.g. to include modules inside the same repo as config files).
+    When setting :attr:`~cfngin.stack.class_path` for a |Blueprint| or :attr:`~cfngin.hook.path` for a :class:`hook <cfngin.hook>` , it is sometimes desirable to load modules from outside the default ``$PATH`` (e.g. to include modules inside the same repo as config files).
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -444,7 +444,7 @@ Stack
     :type: Optional[str]
     :value: None
 
-    A python importable path to the :ref:`Blueprint` class to be used.
+    A python importable path to the |Blueprint| class to be used.
 
     Exactly one of :attr:`~cfngin.stack.class_path` or :attr:`~cfngin.stack.template_path` must be defined.
 
@@ -460,7 +460,7 @@ Stack
     :value: None
 
     A short description to apply to the stack.
-    This overwrites any description defined in the :ref:`Blueprint`.
+    This overwrites any description defined in the |Blueprint|.
     See `Cloudformation - Template Description <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-description-structure.html>`__ for more information.
 
     .. rubric:: Example
@@ -683,7 +683,7 @@ Stack
     :type: Optional[Dict[str, Any]]
     :value: {}
 
-    A dictionary of Variables_ to pass to the :ref:`Blueprint` when rendering the CloudFormation template.
+    A dictionary of Variables_ to pass to the |Blueprint| when rendering the CloudFormation template.
     Can be any valid YAML data structure.
 
     When using a raw CloudFormation template, these are the values provided for it's *Parameters*.
@@ -702,7 +702,7 @@ Stack
 Variables
 ==========
 
-Variables are values that will be passed into a :ref:`Blueprint` before it is rendered.
+Variables are values that will be passed into a |Blueprint| before it is rendered.
 Variables can be any valid YAML data structure and can leverage :ref:`Lookups <cfngin-lookups>` to expand values at runtime.
 
 .. _cfngin-yaml:

@@ -332,7 +332,7 @@ class CfnginConfig(BaseConfig):
         """
         if not parameters:
             parameters = {}
-        pre_rendered = cls.render_raw_data(data, parameters=parameters)
+        pre_rendered = cls.resolve_raw_data(data, parameters=parameters)
         if skip_package_sources:
             return cls.parse_obj(yaml.safe_load(pre_rendered))
         config_dict = yaml.safe_load(
@@ -363,14 +363,14 @@ class CfnginConfig(BaseConfig):
             for i in processor.configs_to_merge:
                 LOGGER.debug("merging in remote config: %s", i)
                 config = merge_dicts(yaml.safe_load(open(i)), config)
-            return cls.render_raw_data(yaml.dump(config), parameters=parameters or {})
+            return cls.resolve_raw_data(yaml.dump(config), parameters=parameters or {})
         return raw_data
 
     @staticmethod
-    def render_raw_data(
+    def resolve_raw_data(
         raw_data: str, *, parameters: Optional[MutableMapping[str, Any]] = None
     ) -> str:
-        """Render raw data.
+        """Resolve raw data.
 
         Args:
             raw_data: Raw configuration data.

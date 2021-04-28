@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Dict,
     ItemsView,
     List,
@@ -277,10 +278,23 @@ class BaseModel:
 
 
 class ElasticContainerRegistry(BaseModel):
-    """AWS Elastic Container Registry."""
+    """AWS Elastic Container Registry.
 
-    PUBLIC_URI_TEMPLATE = "public.ecr.aws/{registry_alias}/"
-    URI_TEMPLATE = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/"
+    Attributes:
+        account_id: AWS account ID that owns the registry being logged into.
+        alias: If it is a public repository, the alias of the repository.
+        public: Whether the repository is public.
+        region: AWS region where the registry is located.
+
+    """
+
+    PUBLIC_URI_TEMPLATE: ClassVar[str] = "public.ecr.aws/{registry_alias}/"
+    URI_TEMPLATE: ClassVar[str] = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/"
+
+    account_id: Optional[str]
+    alias: Optional[str]
+    region: Optional[str]
+    public: bool
 
     def __init__(
         self,
@@ -378,7 +392,16 @@ class DockerImage(BaseModel):
 
 
 class ElasticContainerRegistryRepository(BaseModel):
-    """AWS Elastic Container Registry (ECR) Repository."""
+    """AWS Elastic Container Registry (ECR) Repository.
+
+    Attributes:
+        name: The name of the repository.
+        registry: Information about an ECR registry.
+
+    """
+
+    name: str
+    registry: ElasticContainerRegistry
 
     def __init__(
         self,

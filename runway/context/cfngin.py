@@ -45,7 +45,27 @@ def get_fqn(base_fqn: str, delimiter: str, name: Optional[str] = None) -> str:
 
 
 class CfnginContext(BaseContext):
-    """CFNgin context object."""
+    """CFNgin context object.
+
+    Attributes:
+        bucket_region: Region where the S3 Bucket is located. The S3 Bucket
+            being the Bucket configured for staging CloudFormation Templates.
+        config: CFNgin configuration file that has been resolved & parsed into a
+            python object.
+        config_path: Path to the configuration file that has been resolved, parsed
+            and made accessable via this object.
+        env: Deploy environment object containing information about the current
+            deploy environment.
+        force_stacks: List of stacks to force.
+        hook_data: Values returned by hooks that are stored based on the ``data_key``
+            defined for the hook. Returned values are only stored if a ``data_key``
+            was provided AND the return value is a dict.
+        logger: Custom logger to use when logging messages.
+        parameters: Parameters passed from Runway or read from a file.
+        stack_names: List of Stack names to operate on. If value is falsy, all
+            Stacks defined in the config will be operated on.
+
+    """
 
     _persistent_graph_lock_code: Optional[str]
     _persistent_graph_lock_tag: str = "cfngin_lock_code"
@@ -53,8 +73,8 @@ class CfnginContext(BaseContext):
     _s3_bucket_verified: bool
 
     bucket_region: str
-    config_path: Path
     config: CfnginConfig
+    config_path: Path
     env: DeployEnvironment
     force_stacks: List[str]
     hook_data: Dict[str, Any]
@@ -65,8 +85,8 @@ class CfnginContext(BaseContext):
     def __init__(
         self,
         *,
-        config_path: Optional[Path] = None,
         config: Optional[CfnginConfig] = None,
+        config_path: Optional[Path] = None,
         deploy_environment: Optional[DeployEnvironment] = None,
         force_stacks: Optional[List[str]] = None,
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
@@ -77,8 +97,8 @@ class CfnginContext(BaseContext):
         """Instantiate class.
 
         Args:
-            config_path: Path to the config file that was provided.
             config: The CFNgin configuration being operated on.
+            config_path: Path to the config file that was provided.
             deploy_environment: The current deploy environment.
             force_stacks: A list of stacks to force work on. Used to work on locked stacks.
             logger: Custom logger.
@@ -262,7 +282,7 @@ class CfnginContext(BaseContext):
 
     @cached_property
     def stacks_dict(self) -> Dict[str, Stack]:
-        """Construct a dict of {stack.fqn: Stack} for easy access to stacks."""
+        """Construct a dict of ``{stack.fqn: Stack}`` for easy access to stacks."""
         return {stack.fqn: stack for stack in self.stacks}
 
     @cached_property

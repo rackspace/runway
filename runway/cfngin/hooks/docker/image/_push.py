@@ -2,67 +2,6 @@
 
 Replicates the functionality of the ``docker image push`` CLI command.
 
-.. rubric:: Hook Path
-
-``runway.cfngin.hooks.docker.image.push``
-
-.. rubric:: Args
-
-ecr_repo (Optional[Dict[str, Optional[str]]])
-    Information describing an ECR repository. This is used to construct the repository URL.
-    If providing a value for this field, do not provide a value for ``image`` or ``repo``.
-
-    If using a private registry, only ``repo_name`` is required.
-    If using a public registry, ``repo_name`` and ``registry_alias``.
-
-    account_id (Optional[str])
-        AWS account ID that owns the registry being logged into. If not provided,
-        it will be acquired automatically if needed.
-    aws_region (Optional[str])
-        AWS region where the registry is located. If not provided, it will be acquired
-        automatically if needed.
-    registry_alias (Optional[str])
-        If it is a public repository, provide the alias.
-    repo_name (str)
-        The name of the repository
-
-image (Optional[DockerImage])
-    A :class:`~runway.cfngin.hooks.docker.data_models.DockerImage` object.
-    This can be retrieved from ``hook_data`` for a preceding *build* using the
-    :ref:`hook_data Lookup <hook_data lookup>`.
-
-    If providing a value for this field, do not provide a value for ``ecr_repo`` or ``repo``.
-repo (Optional[str])
-    URI of a non Docker Hub repository where the image will be stored.
-    If providing one of the other repo values or ``image``, leave this value empty.
-tags (Optional[List[str]])
-    List of tags push. (*default:* ``["latest"]``)
-
-.. rubric:: Example
-.. code-block:: yaml
-
-    pre_deploy:
-      - path: runway.cfngin.hooks.docker.login
-        args:
-          ecr: true
-          password: ${ecr login-password}
-      - path: runway.cfngin.hooks.docker.image.build
-        args:
-          ecr_repo:
-            repo_name: ${cfn ${namespace}-test-ecr.Repository}
-          tags:
-            - latest
-            - python3.9
-      - path: runway.cfngin.hooks.docker.image.push
-        args:
-          image: ${hook_data docker.image}
-
-    stacks:
-      ecr-lambda-function:
-        class_path: blueprints.EcrFunction
-        variables:
-          ImageUri: ${hook_data docker.image.uri.latest}
-
 """
 from __future__ import annotations
 
@@ -79,7 +18,16 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class ImagePushArgs(BaseModel):
-    """Args passed to image.push."""
+    """Args passed to image.push.
+
+    Attributes:
+        repo: URI of a non Docker Hub repository where the image will be stored.
+        tags: List of tags to push.
+
+    """
+
+    repo: Optional[str]
+    tags: List[str]
 
     def __init__(
         self,
@@ -90,7 +38,18 @@ class ImagePushArgs(BaseModel):
         tags: Optional[List[str]] = None,
         **kwargs: Any
     ) -> None:
-        """Instantiate class."""
+        """Instantiate class.
+
+        Args:
+            ecr_repo: AWS Elastic Container Registry repository information.
+                Providing this will automatically create the repo URI.
+                If provided, do not provide ``repo``.
+            image: Image to push.
+            repo: URI of a non Docker Hub repository where the image will be stored.
+                If providing one of the other repo values, leave this value empty.
+            tags: List of tags to push.
+
+        """
         super().__init__(**kwargs)
         self.repo = self.determine_repo(
             context=self._ctx, ecr_repo=ecr_repo, image=image, repo=repo
@@ -132,6 +91,8 @@ def push(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     """Docker image push hook.
 
     Replicates the functionality of ``docker image push`` CLI command.
+
+    kwargs are parsed by :class:`~runway.cfngin.hooks.docker.image.ImagePushArgs`.
 
     """
     kwargs.pop("provider", None)  # not needed

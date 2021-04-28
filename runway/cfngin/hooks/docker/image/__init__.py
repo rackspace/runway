@@ -1,10 +1,18 @@
-"""Docker image actions.
+"""Docker image actions & argument parsers.
 
 Replicates the functionality of ``docker image`` CLI commands.
 
 """
-from ._build import build
-from ._push import push
-from ._remove import remove
+from ._build import DockerImageBuildApiOptions, ImageBuildArgs, build
+from ._push import ImagePushArgs, push
+from ._remove import ImageRemoveArgs, remove
 
-__all__ = ["build", "push", "remove"]
+__all__ = [
+    "DockerImageBuildApiOptions",
+    "ImageBuildArgs",
+    "ImagePushArgs",
+    "ImageRemoveArgs",
+    "build",
+    "push",
+    "remove",
+]

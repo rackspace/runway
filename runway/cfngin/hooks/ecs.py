@@ -32,7 +32,7 @@ def create_clusters(
     """Create ECS clusters.
 
     Args:
-        context: Context instance. (passed in by CFNgin)
+        context: CFNgin context object.
         clusters: Names of clusters to create.
 
     """
