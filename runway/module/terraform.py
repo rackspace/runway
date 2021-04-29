@@ -339,7 +339,7 @@ class Terraform(RunwayModule):
     def terraform_apply(self) -> None:
         """Execute ``terraform apply`` command.
 
-        https://www.terraform.io/docs/commands/apply.html
+        https://www.terraform.io/docs/cli/commands/apply.html
 
         """
         args_list = self.env_file + self.options.args.apply
@@ -356,7 +356,7 @@ class Terraform(RunwayModule):
     def terraform_destroy(self) -> None:
         """Execute ``terraform destroy`` command.
 
-        https://www.terraform.io/docs/commands/destroy.html
+        https://www.terraform.io/docs/cli/commands/destroy.html
 
         """
         run_module_command(
@@ -368,7 +368,7 @@ class Terraform(RunwayModule):
     def terraform_get(self) -> None:
         """Execute ``terraform get`` command.
 
-        https://www.terraform.io/docs/commands/get.html
+        https://www.terraform.io/docs/cli/commands/get.html
 
         """
         self.logger.info("downloading and updating Terraform modules")
@@ -381,7 +381,7 @@ class Terraform(RunwayModule):
     def terraform_init(self) -> None:
         """Execute ``terraform init`` command.
 
-        https://www.terraform.io/docs/commands/init.html
+        https://www.terraform.io/docs/cli/commands/init.html
 
         """
         cmd = self.gen_command(
@@ -404,7 +404,7 @@ class Terraform(RunwayModule):
     def terraform_plan(self) -> None:
         """Execute ``terraform plan`` command.
 
-        https://www.terraform.io/docs/commands/plan.html
+        https://www.terraform.io/docs/cli/commands/plan.html
 
         """
         run_module_command(
@@ -416,7 +416,7 @@ class Terraform(RunwayModule):
     def terraform_workspace_list(self) -> str:
         """Execute ``terraform workspace list`` command.
 
-        https://www.terraform.io/docs/commands/workspace/list.html
+        https://www.terraform.io/docs/cli/commands/workspace/list.html
 
         Returns:
             str: The available Terraform workspaces.
@@ -432,7 +432,7 @@ class Terraform(RunwayModule):
     def terraform_workspace_new(self, workspace: str) -> None:
         """Execute ``terraform workspace new`` command.
 
-        https://www.terraform.io/docs/commands/workspace/new.html
+        permanently to https://www.terraform.io/docs/cli/commands/workspace/new.html
 
         Args:
             workspace: Terraform workspace to create.
@@ -449,7 +449,7 @@ class Terraform(RunwayModule):
     def terraform_workspace_select(self, workspace: str) -> None:
         """Execute ``terraform workspace select`` command.
 
-        https://www.terraform.io/docs/commands/workspace/select.html
+        https://www.terraform.io/docs/cli/commands/workspace/select.html
 
         Args:
             workspace: Terraform workspace to select.
@@ -470,7 +470,7 @@ class Terraform(RunwayModule):
     def terraform_workspace_show(self) -> str:
         """Execute ``terraform workspace show`` command.
 
-        https://www.terraform.io/docs/commands/workspace/show.html
+        https://www.terraform.io/docs/cli/commands/workspace/show.html
 
         Returns:
             The current Terraform workspace.

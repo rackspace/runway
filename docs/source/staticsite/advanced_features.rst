@@ -1,3 +1,5 @@
+.. _staticsite-advanced-features:
+
 #################
 Advanced Features
 #################

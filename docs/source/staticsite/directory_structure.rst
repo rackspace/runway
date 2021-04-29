@@ -1,3 +1,5 @@
+.. _staticsite-directory-structure:
+
 ###################
 Directory Structure
 ###################

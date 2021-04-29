@@ -1215,7 +1215,7 @@ iam.create_ecs_service_role
 Create ecsServiceRole IAM role.
 
 .. seealso::
-  `AWS Documentation describing the Role <http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role>`__
+  `AWS Documentation describing the Role <https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html>`__
 
 .. rubric:: Hook Path
 

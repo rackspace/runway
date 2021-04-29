@@ -1,3 +1,5 @@
+.. _cdk-configuration:
+
 #############
 Configuration
 #############

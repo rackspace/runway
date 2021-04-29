@@ -1,3 +1,5 @@
+.. _sls-directory-structure:
+
 ###################
 Directory Structure
 ###################

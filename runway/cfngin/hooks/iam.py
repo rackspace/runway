@@ -28,7 +28,7 @@ def create_ecs_service_role(
 ) -> bool:
     """Create ecsServiceRole IAM role.
 
-    http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
+    https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html
 
     Args:
         context: Context instance. (passed in by CFNgin)

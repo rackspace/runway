@@ -1,3 +1,5 @@
+.. _tf-directory-structure:
+
 ###################
 Directory Structure
 ###################

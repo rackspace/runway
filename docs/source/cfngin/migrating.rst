@@ -63,7 +63,9 @@ All hooks available in Stacker_ 1.7.0 are available in Runway's CFNgin at the sa
         args:
           command: echo "Hello $USER!"
 
-.. seealso:: `CFNgin API Docs <../apidocs/runway.cfngin.html>`__
+.. seealso::
+  :mod:`runway.cfngin`
+    CFNgin documentation
 
 
 Custom Lookups

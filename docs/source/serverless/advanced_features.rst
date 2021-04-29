@@ -1,3 +1,5 @@
+.. _sls-advanced-features:
+
 #################
 Advanced Features
 #################

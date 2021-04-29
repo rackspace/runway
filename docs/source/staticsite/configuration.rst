@@ -1,4 +1,5 @@
 .. _staticsite:
+.. _staticsite-configuration:
 
 #############
 Configuration

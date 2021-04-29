@@ -1,3 +1,5 @@
+.. _cdk-directory-structure:
+
 ###################
 Directory Structure
 ###################

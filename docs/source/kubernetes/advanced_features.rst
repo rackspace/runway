@@ -1,3 +1,5 @@
+.. _k8s-advanced-features:
+
 #################
 Advanced Features
 #################

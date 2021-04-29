@@ -1,3 +1,5 @@
+.. _cfngin-directory-structure:
+
 ###################
 Directory Structure
 ###################

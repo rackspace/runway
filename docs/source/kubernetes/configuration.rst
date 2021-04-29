@@ -1,3 +1,5 @@
+.. _k8s-configuration:
+
 #############
 Configuration
 #############

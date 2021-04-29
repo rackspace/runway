@@ -1,3 +1,5 @@
+.. _cdk-advanced-features:
+
 #################
 Advanced Features
 #################

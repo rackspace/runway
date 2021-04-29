@@ -1,3 +1,5 @@
+.. _sls-configuration:
+
 #############
 Configuration
 #############

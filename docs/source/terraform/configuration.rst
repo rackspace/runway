@@ -1,3 +1,5 @@
+.. _tf-configuration:
+
 #############
 Configuration
 #############

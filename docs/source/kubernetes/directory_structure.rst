@@ -1,3 +1,5 @@
+.. _k8s-directory-structure:
+
 ###################
 Directory Structure
 ###################

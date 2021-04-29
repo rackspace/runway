@@ -1,3 +1,5 @@
+.. _cfngin-configuration:
+
 #############
 Configuration
 #############
@@ -89,7 +91,7 @@ Runway automatically makes the following commonly used :ref:`Parameters <term-pa
 CFNgin Config File
 ******************
 
-The CFNgin config file has full support for YAML features like `anchors & references <https://en.wikipedia.org/wiki/YAML#Repeated_nodes>`_ for a DRY config file (See :ref:`YAML anchors & references <cfngin-yaml>` for details).
+The CFNgin config file has full support for YAML features like `anchors & references <https://en.wikipedia.org/wiki/YAML#Advanced_components>`_ for a DRY config file (See :ref:`YAML anchors & references <cfngin-yaml>` for details).
 
 
 Top-Level Fields

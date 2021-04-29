@@ -1,4 +1,4 @@
-.. _Runway Config File: runway_config.html
+.. _tf-advanced-features:
 
 #################
 Advanced Features
@@ -83,7 +83,7 @@ In the above example, where all but the key are defined, the **main.tf** backend
 runway.yml
 ==========
 
-Backend config options can also be specified as a module option in the `Runway Config File`_.
+Backend config options can also be specified as a module option in the Runway Config File.
 :ref:`Lookups` can be used to provide dynamic values to this option.
 
 .. important::
