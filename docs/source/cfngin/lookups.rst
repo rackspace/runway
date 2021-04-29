@@ -582,6 +582,9 @@ This Lookup supports all :ref:`Common Lookup Arguments` but, the following have 
   Bucket: ${hook_data myfunction.TheCode::load=troposphere, get=S3Bucket}
   Key: ${hook_data myfunction.TheCode::load=troposphere, get=S3Key}
 
+.. versionchanged:: 2.0.0
+  Support for the syntax deprecated in *1.5.0* has been removed.
+
 .. versionchanged:: 1.5.0
   The ``<hook_name>::<key>`` syntax was deprecated with support being added for the ``key.nested_key`` syntax for accessing data within a dictionary.
 
