@@ -139,6 +139,6 @@ class CodeBuild(Blueprint):
 
 
 if __name__ == "__main__":
-    from runway.context.cfngin import CfnginContext
+    from runway.context import CfnginContext
 
     print(CodeBuild("test", CfnginContext(parameters={"namespace": "test"})).to_json())

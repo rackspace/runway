@@ -4,42 +4,6 @@ The query syntax for this lookup is ``<stack-name>.<output-name>``.
 When specifying the output name, be sure to use the *Logical ID* of
 the output; not the *Export.Name*.
 
-If the Lookup is unable to find a CloudFormation Stack Output matching the
-provided query, the default value is returned or an exception is raised
-to show why the value could be be resolved (e.g. Stack does not exist or
-output does not exist on the Stack).
-
-.. seealso::
-    https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
-
-
-.. rubric:: Arguments
-
-This Lookup supports all :ref:`Common Lookup Arguments`.
-
-
-.. rubric:: Example
-.. code-block:: yaml
-  :caption: Runway config
-
-  deployments:
-    - modules:
-        path: sampleapp.tf
-        options:
-          terraform_backend_config:
-            bucket: ${cfn common-tf-state.TerraformStateBucketName::region=us-east-1}
-            dynamodb_table: ${cfn common-tf-state.TerraformStateTableName::region=us-east-1}
-            region: us-east-1
-
-.. code-block:: yaml
-  :caption: CFNgin config
-
-  stacks:
-    my-stack:
-      variables:
-        SomeParameter: ${cfn AnotherStack.OutputName}
-
-
 """
 from __future__ import annotations
 

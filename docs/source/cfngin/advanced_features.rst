@@ -1,3 +1,5 @@
+.. _cfngin-advanced-features:
+
 #################
 Advanced Features
 #################

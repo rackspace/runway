@@ -155,8 +155,7 @@ skipped. This matches the behavior of the Runway's native modules.
           LOGGER.info("Destroy not currently supported for Ansible")
 
 
-And below is the example Ansible playbook itself, saved as
-``dev-us-east-1.yaml`` in the security_group.ansible folder:
+And below is the example Ansible playbook itself, saved as ``dev-us-east-1.yaml`` in the security_group.ansible folder:
 
 .. code-block:: yaml
 
@@ -176,5 +175,4 @@ And below is the example Ansible playbook itself, saved as
                 cidr_ip: 0.0.0.0/0
           register: security_group
 
-The above would be deployed if ``runway deploy`` was executed in the ``dev``
-environment to ``us-east-1``.
+The above would be deployed if ``runway deploy`` was executed in the ``dev`` environment to ``us-east-1``.

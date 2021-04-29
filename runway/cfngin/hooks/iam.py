@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         UploadServerCertificateResponseTypeDef,
     )
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,9 +26,9 @@ LOGGER = logging.getLogger(__name__)
 def create_ecs_service_role(
     context: CfnginContext, *, role_name: str = "ecsServiceRole", **_: Any
 ) -> bool:
-    """Create ecsServieRole, which has to be named exactly that currently.
+    """Create ecsServiceRole IAM role.
 
-    http://docs.aws.amazon.com/AmazonECS/latest/developerguide/IAM_policies.html#service_IAM_role
+    https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html
 
     Args:
         context: Context instance. (passed in by CFNgin)
@@ -140,12 +140,9 @@ def ensure_server_cert_exists(
     """Ensure server cert exists.
 
     Args:
-        context: Context instance. (passed in by CFNgin)
-
-    Keyword Args:
-        cert_name : Name of the certificate that should exist.
+        context: CFNgin context object.
+        cert_name: Name of the certificate that should exist.
         prompt: Whether to prompt to upload a certificate if one does not exist.
-        (*default:* ``True``)
 
     Returns:
         Dict containing ``status``, ``cert_name``, and ``cert_arn``.

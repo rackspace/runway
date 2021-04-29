@@ -8,11 +8,11 @@ Each time Runway's CFNgin is run, it creates a dependency :ref:`graph <term-grap
 This is used to determine the order in which to execute them.
 This :ref:`graph <term-graph>` can be persisted between runs to track the removal of :class:`stacks <cfngin.stack>` from the config file.
 
-When a :class:`~cfngin.stack` is present in the persistent graph but not in the :ref:`graph <term-graph>` constructed from the config file, CFNgin will delete the :class:`~cfngin.stack` from CloudFormation.
+When a |stack| is present in the persistent graph but not in the :ref:`graph <term-graph>` constructed from the config file, CFNgin will delete the Stack from CloudFormation.
 This takes effect when running either the :ref:`deploy command <command-deploy>` or :ref:`destroy command <command-destroy>`.
 
 To enable persistent graph, define the :attr:`~cfngin.config.persistent_graph_key` field as a unique value that will be used to construct the path to the persistent graph object in S3.
-This object is stored in the :attr:`~cfngin.config.cfngin_bucket` which is also used for CloudFormation templates.
+This object is stored in the |cfngin_bucket| which is also used for CloudFormation templates.
 The fully qualified path to the object will look like the below.
 
 .. code-block:: shell
@@ -21,14 +21,14 @@ The fully qualified path to the object will look like the below.
 
 
 .. note::
-  It is recommended to enable versioning on the :attr:`~cfngin.config.cfngin_bucket` when using persistent graph to have a backup version in the event something unintended happens.
+  It is recommended to enable versioning on the |cfngin_bucket| when using persistent graph to have a backup version in the event something unintended happens.
   A warning will be logged if this is not enabled.
 
-  If CFNgin creates a :attr:`~cfngin.config.cfngin_bucket` for you when persistent graph is enabled, it will be created with versioning enabled.
+  If CFNgin creates a |cfngin_bucket| for you when persistent graph is enabled, it will be created with versioning enabled.
 
 .. important::
-  When choosing a value for :attr:`~cfngin.config.persistent_graph_key`, it is vital to ensure the value is unique for the :attr:`~cfngin.config.namespace` being used.
-  If the key is a duplicate, :class:`stacks <cfngin.stack>` that are not intended to be destroyed will be destroyed.
+  When choosing a value for :attr:`~cfngin.config.persistent_graph_key`, it is vital to ensure the value is unique for the |namespace| being used.
+  If the key is a duplicate, Stacks that are not intended to be destroyed will be destroyed.
 
 
 When executing an action that will be modifying the persistent graph (deploy or destroy), the S3 object is *"locked"*.
@@ -44,11 +44,7 @@ This prevents two parties from acting on the same persistent graph object concur
   A persistent graph object can be unlocked manually by removing the **cfngin_lock_code** tag from it.
   This should be done with caution as it will cause any active sessions to raise an error.
 
-
-*******
-Example
-*******
-
+.. rubric:: Example
 .. code-block:: yaml
   :caption: configuration file
 
@@ -56,9 +52,9 @@ Example
   cfngin_bucket: cfngin-bucket
   persistent_graph_key: my_graph  # .json - will be appended if not provided
   stacks:
-    first_stack:
+    - name: first_stack:
       ...
-    new_stack:
+    - name: new_stack:
       ...
 
 .. code-block:: json

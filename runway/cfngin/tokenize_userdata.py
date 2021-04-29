@@ -20,8 +20,6 @@ def cf_tokenize(raw_userdata: str) -> List[str]:
 
     http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html
 
-    http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-cloudformation.html#scenario-userdata-base64
-
     It breaks apart the given string at each recognized function (see
     ``HELPERS`` global variable) and instantiates the helper function objects
     in place of those.

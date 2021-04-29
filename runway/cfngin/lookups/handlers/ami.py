@@ -10,7 +10,7 @@ from ....lookups.handlers.base import LookupHandler
 from ...util import read_value_from_path
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 TYPE_NAME = "ami"
 

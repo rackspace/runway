@@ -510,9 +510,9 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
         variables[1]._value._resolve("Test Output")
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"], 1)  # type: ignore
-        self.assertEqual(blueprint.resolved_variables["Param2"], "Test Output")  # type: ignore
-        self.assertIsNone(blueprint.resolved_variables.get("Param3"))  # type: ignore
+        self.assertEqual(blueprint._resolved_variables["Param1"], 1)  # type: ignore
+        self.assertEqual(blueprint._resolved_variables["Param2"], "Test Output")  # type: ignore
+        self.assertIsNone(blueprint._resolved_variables.get("Param3"))  # type: ignore
 
     def test_resolve_variables_lookup_returns_non_string(self) -> None:
         """Test resolve variables lookup returns non string."""
@@ -539,7 +539,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
             var._value.resolve({}, {})  # type: ignore
 
         blueprint.resolve_variables(variables)
-        self.assertEqual(blueprint.resolved_variables["Param1"], ["something"])  # type: ignore
+        self.assertEqual(blueprint._resolved_variables["Param1"], ["something"])  # type: ignore
 
     def test_resolve_variables_lookup_returns_troposphere_obj(self) -> None:
         """Test resolve variables lookup returns troposphere obj."""
@@ -567,7 +567,7 @@ class TestVariables(unittest.TestCase):  # pylint: disable=too-many-public-metho
 
         blueprint.resolve_variables(variables)
         self.assertEqual(
-            blueprint.resolved_variables["Param1"].data, Base64("test").data  # type: ignore
+            blueprint._resolved_variables["Param1"].data, Base64("test").data  # type: ignore
         )
 
     def test_resolve_variables_lookup_returns_non_string_invalid_combo(self) -> None:

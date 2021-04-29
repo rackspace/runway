@@ -1,20 +1,24 @@
+.. _k8s-advanced-features:
+
 #################
 Advanced Features
 #################
 
 Advanced features and detailed information for using Kubernetes with Runway.
 
+.. contents::
+  :depth: 4
+
 
 ***************************
 Setting KUBECONFIG Location
 ***************************
 
-If using a non-default kubeconfig location, you can provide it using Runway's option for setting environment variables.
+If using a non-default kubeconfig location, you can provide it using :attr:`deployment.env_vars`/:attr:`module.env_vars` for setting environment variables.
 This can be set as a relative path or an absolute one.
 
 .. code-block:: yaml
 
-  ---
   deployments:
     - modules:
         - path: myk8smodule
@@ -36,23 +40,21 @@ This would set `KUBECONFIG` to ``<path_to_runway.yml>/.kube/$DEPLOY_ENVIRONMENT/
 Version Management
 ******************
 
-By specifying the version via a ``.kubectl-version`` file in your overlay directory, or a module option, Runway will automatically download & use that version for the module.
+By specifying the version via a ``.kubectl-version`` file in your overlay directory or :attr:`deployment.module_options`/:attr:`module.options`, Runway will automatically download & use that version for the module.
 This is recommended to keep a predictable experience when deploying your module.
 
 Without a version specified, Runway will fallback to whatever ``kubectl`` it finds first in your PATH.
 
-.. rubric:: .kubectl-version
-.. code-block::
+.. code-block:: text
+  :caption: .kubectl-version
 
   1.14.5
-
-.. rubric:: runway.yml
 
 Lookups can be used to provide different versions for each :ref:`deploy environment <term-deploy-env>`.
 
 .. code-block:: yaml
+  :caption: runway.yml
 
-  ---
   deployments:
     - modules:
         - path: sampleapp.k8s

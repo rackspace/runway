@@ -18,7 +18,7 @@ from .utils import run_module_command
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
-    from ..context.runway import RunwayContext
+    from ..context import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -170,10 +170,16 @@ class K8sOptions(ModuleOptions):
 
     Attributes:
         data: Options parsed into a data model.
+        deploy_environment: Runway deploy environment object.
         kubectl_version: Version of kubectl to use.
-        overlay_path: Explicit directory containing the kustomize overlay to use.
+        path: Module path.
 
     """
+
+    data: RunwayK8sModuleOptionsDataModel
+    deploy_environment: DeployEnvironment
+    kubectl_version: Optional[str]
+    path: Path
 
     def __init__(
         self,

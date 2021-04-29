@@ -867,7 +867,7 @@ class SourceProcessor:
         """Take a URI and converts it to a directory safe path.
 
         Args:
-            uri: URI (e.g. http://example.com/cats).
+            uri: URI to sanitize.
 
         Returns:
             Directory name for the supplied uri.

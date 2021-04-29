@@ -23,7 +23,23 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.verbose
 @click.pass_context
 def plan(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
-    """Determine what infrastructure changes will occur during the next deploy."""
+    """Determine what infrastructure changes will occur during the next deploy.
+
+    \b
+    1. Determines the deploy environment.
+        - "-e, --deploy-environment" option
+        - "DEPLOY_ENVIRONMENT" environment variable
+        - git branch name
+            - strips "ENV-" prefix, master is converted to common
+            - ignored if "ignore_git_branch: true"
+        - name of the current working directory
+    2. Selects deployments & modules to deploy.
+        - (default) prompts
+        - (tags) module contains all tags
+        - (non-interactive) all
+    3. Attempt to determine change for deployments/modules in the order defined.
+
+    """  # noqa: D301
     try:
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).plan(
             select_deployments(ctx, ctx.obj.runway_config.deployments, tags)

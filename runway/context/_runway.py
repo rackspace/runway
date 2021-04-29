@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 from ..compat import cached_property
 from ..core.components import DeployEnvironment
-from .base import BaseContext
+from ._base import BaseContext
 
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger

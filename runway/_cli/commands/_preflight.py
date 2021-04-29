@@ -21,6 +21,10 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 @options.verbose
 @click.pass_context
 def preflight(ctx: click.Context, **kwargs: Any) -> None:
-    """Alias of "runway test"."""
+    """Alias of "runway test".
+
+    For more information, refer to the output of "runway test --help".
+
+    """
     LOGGER.verbose("forwarding to test...")
     ctx.forward(test, **kwargs)

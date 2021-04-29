@@ -25,13 +25,13 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 @options.verbose
 @click.pass_context
 def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
-    """Output env_vars defined in the Runway config file.
+    """Output "env_vars" defined in the Runway config file.
 
     OS environment variables can be set in the Runway config file for different
     Runway environments (e.g. dev & prod KUBECONFIG values).
     This command allows access to these values for use outside of Runway.
 
-    NOTE: Only outputs env_vars defined in deployments, not modules.
+    NOTE: Only outputs "env_vars" defined in deployments, not modules.
 
     """
     if not (ctx.obj.debug or ctx.obj.verbose):

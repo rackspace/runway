@@ -1,4 +1,5 @@
 .. _staticsite:
+.. _staticsite-configuration:
 
 #############
 Configuration
@@ -8,11 +9,19 @@ Configuration options and parameters for :ref:`static site <mod-staticsite>` mod
 Example uses of the options and parameters can be found in the :ref:`Examples <staticsite-examples>` section.
 
 
+.. contents::
+  :depth: 4
+
+
 *******
 Options
 *******
 
-**build_output (Optional[str])**
+.. data:: build_output
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   Overrides default directory of top-level path setting.
 
   .. rubric:: Example
@@ -21,7 +30,11 @@ Options
     options:
       build_output: dist
 
-**build_steps (Optional[List[str]])**
+.. data:: build_steps
+  :type: Optional[List[str]]
+  :value: []
+  :noindex:
+
   The steps to run during the build portion of deployment.
 
   .. rubric:: Example
@@ -32,7 +45,11 @@ Options
         - npm ci
         - npm run build
 
-**extra_files (Optional[List[Dict[str, Union[str, Dict[str, Any]]]]])**
+.. data:: extra_files
+  :type: Optional[List[Dict[str, Union[str, Dict[str, Any]]]]]
+  :value: []
+  :noindex:
+
   Specifies extra files that should be uploaded to S3 after the build.
 
   Use ``extra_files`` if you want to have a single build artifact that can be used
@@ -67,7 +84,11 @@ Options
       "endpoint": "<api_endpoint value>"
     }
 
-**pre_build_steps (Optional[List[Dict[str, str]]])**
+.. data:: pre_build_steps
+  :type: Optional[List[Dict[str, str]]]
+  :value: []
+  :noindex:
+
   Commands to be run before generating the hash of files.
 
   .. rubric:: Example
@@ -80,7 +101,11 @@ Options
         - command: npm run export
           cwd: ../myothermodule
 
-**source_hashing (Optional[Dict[str, str]])**
+.. data:: source_hashing
+  :type: Optional[Dict[str, str]]
+  :value: {}
+  :noindex:
+
   Overrides for source hash collection and tracking
 
   .. rubric:: Example
@@ -94,15 +119,19 @@ Options
           - path: ./
           - path: ../common
             # Additional (gitignore-format) exclusions to
-            # hashing (.giignore files are loaded automatically)
+            # hashing (.gitignore files are loaded automatically)
             exclusions:
               - foo/*
+
 
 **********
 Parameters
 **********
 
-**namespace (str)**
+.. data:: namespace
+  :type: str
+  :noindex:
+
   The unique namespace for the deployment.
 
   .. rubric:: Example
@@ -113,7 +142,11 @@ Parameters
 
 .. _staticsite_acmcert_arn:
 
-**staticsite_acmcert_arn (Optional[str])**
+.. data:: staticsite_acmcert_arn
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   The certificate arn used for any alias domains supplied.
   This is a requirement when supplying any custom domain.
 
@@ -123,7 +156,11 @@ Parameters
     parameters:
       staticsite_acmcert_arn: arn:aws:acm:<region>:<account-id>:certificate/<cert>
 
-**staticsite_aliases (Optional[str])**
+.. data:: staticsite_aliases
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   Any custom domains that should be added to the CloudFront Distribution.
   This should be represented as a comma delimited list of domains.
 
@@ -137,8 +174,12 @@ Parameters
 
 .. _staticsite_auth_at_edge:
 
-**staticsite_auth_at_edge (Optional[bool])**
-  *Auth@Edge* make the static site *private* by placing it behind an authorization wall. (*default:* ``false``)
+.. data:: staticsite_auth_at_edge
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  *Auth@Edge* make the static site *private* by placing it behind an authorization wall.
   See :ref:`Auth@Edge` for more details.
 
   .. rubric:: Example
@@ -149,8 +190,12 @@ Parameters
 
 .. _staticsite_cf_disable:
 
-**staticsite_cf_disable (Optional[bool])**
-  Whether deployment of the CloudFront Distribution should be disabled. (*default:* ``false``)
+.. data:: staticsite_cf_disable
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Whether deployment of the CloudFront Distribution should be disabled.
 
   Useful for a development site as it makes it accessible via an S3 url with a much shorter launch time.
   This cannot be set to ``true`` when using :ref:`Auth@Edge`.
@@ -161,8 +206,12 @@ Parameters
     parameters:
       staticsite_cf_disable: false
 
-**staticsite_cookie_settings (Optional[Dict[str, str]])**
-  The default cookie settings for retrieved tokens and generated nonce's. *(default is shown in the example)*
+.. data:: staticsite_cookie_settings
+  :type: Optional[Dict[str, str]]
+  :value: {"idToken": "Path=/; Secure; SameSite=Lax", "accessToken": "Path=/; Secure; SameSite=Lax", "refreshToken": "Path=/; Secure; SameSite=Lax", "nonce": "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax"}
+  :noindex:
+
+  The default cookie settings for retrieved tokens and generated nonce's.
 
   Requires staticsite_auth_at_edge_.
 
@@ -178,7 +227,11 @@ Parameters
 
 .. _staticsite_create_user_pool:
 
-**staticsite_create_user_pool (Optional[bool])**
+.. data:: staticsite_create_user_pool
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
   Whether to create a User Pool for the :ref:`Auth@Edge` configuration.
 
   Requires staticsite_auth_at_edge_.
@@ -191,7 +244,11 @@ Parameters
 
 .. _staticsite_custom_error_responses:
 
-**staticsite_custom_error_responses (Optional[List[Dict[str, Union[int, str]]]])**
+.. data:: staticsite_custom_error_responses
+  :type: Optional[List[Dict[str, Union[int, str]]]]
+  :value: []
+  :noindex:
+
   Define custom error responses.
 
   .. rubric:: Example
@@ -203,8 +260,12 @@ Parameters
           ResponseCode: 200
           ResponsePagePath: /index.html
 
-**staticsite_enable_cf_logging (Optional[bool])**
-  Whether logging should be enabled for the CloudFront distribution. (*default:* ``true``)
+.. data:: staticsite_enable_cf_logging
+  :type: Optional[bool]
+  :value: True
+  :noindex:
+
+  Whether logging should be enabled for the CloudFront distribution.
 
   .. rubric:: Example
   .. code-block:: yaml
@@ -212,13 +273,18 @@ Parameters
     parameters:
       staticsite_enable_cf_logging: true
 
-**staticsite_http_headers (Optional[Dict[str, str]])**
-  Headers that should be sent with each origin response. *(default is shown in the example)*
+.. data:: staticsite_http_headers
+  :type: Optional[Dict[str, str]]
+  :value: {"Content-Security-Policy": "default-src https: 'unsafe-eval' 'unsafe-inline'; font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; object-src 'none'; connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com", "Strict-Transport-Security": "max-age=31536000;  includeSubdomains; preload", "Referrer-Policy": "same-origin", "X-XSS-Protection": "1; mode=block", "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff"}
+  :noindex:
 
-  Please note that the Content-Security-Policy is intentionally lax to allow for Single Page Application framework's to work as expected.
-  Review your Content Security Policy for your project and update these as need be to match.
+  Headers that should be sent with each origin response.
 
   Requires staticsite_auth_at_edge_.
+
+  .. note::
+    Please note that the Content-Security-Policy is intentionally lax to allow for Single Page Application framework's to work as expected.
+    Review your Content Security Policy for your project and update these as need be to match.
 
   .. rubric:: Example
   .. code-block:: yaml
@@ -232,7 +298,11 @@ Parameters
         X-Frame-Options: "DENY"
         X-Content-Type-Options: "nosniff"
 
-**staticsite_lambda_function_associations (Optional[List[Dict[str, str]]])**
+.. data:: staticsite_lambda_function_associations
+  :type: Optional[List[Dict[str, str]]]
+  :value: []
+  :noindex:
+
   This section allows the user to deploy custom *Lambda@Edge* associations with their pre-build function versions.
   This takes precedence over staticsite_rewrite_directory_index_ and cannot currently be used with staticsite_auth_at_edge_.
 
@@ -244,8 +314,12 @@ Parameters
         - type: origin-request
           arn: arn:aws:lambda:<region>:<account-id>:function:<function>:<version>
 
-**staticsite_non_spa (Optional[bool])**
-  Whether this site is a single page application (*SPA*). (*default:* ``false``)
+.. data:: staticsite_non_spa
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Whether this site is a single page application (*SPA*).
 
   A custom error response directing ``ErrorCode: 404`` to the primary ``/index.html`` as a ``ResponseCode: 200`` is added, allowing the *SPA* to take over error handling.
   If you are not running an *SPA*, setting this to ``true`` will prevent this custom error from being added.
@@ -259,10 +333,14 @@ Parameters
     parameters:
       staticsite_non_spa: true
 
-**staticsite_oauth_scopes (Optional[List[str]])**
+.. data:: staticsite_oauth_scopes
+  :type: Optional[List[str]]
+  :value: ["phone", "email", "profile", "openid", "aws.cognito.signin.user.admin"]
+  :noindex:
+
   Scope is a mechanism in OAuth 2.0 to limit an application's access to a user's account.
   An application can request one or more scopes.
-  This information is then presented to the user in the consent screen and the access token issued to the application will be limited to the scopes granted. *(default is shown in the example)*
+  This information is then presented to the user in the consent screen and the access token issued to the application will be limited to the scopes granted.
 
   Requires staticsite_auth_at_edge_.
 
@@ -277,8 +355,12 @@ Parameters
         - openid
         - aws.cognito.signin.user.admin
 
-**staticsite_redirect_path_auth_refresh (Optional[str])**
-  The path that a user is redirected to when their authorization tokens have expired (1 hour). (*default:* ``/refreshauth``)
+.. data:: staticsite_redirect_path_auth_refresh
+  :type: Optional[str]
+  :value: "/refreshauth"
+  :noindex:
+
+  The path that a user is redirected to when their authorization tokens have expired (1 hour).
 
   Requires staticsite_auth_at_edge_.
 
@@ -288,8 +370,12 @@ Parameters
     parameters:
       staticsite_redirect_path_auth_refresh: /refreshauth
 
-**staticsite_redirect_path_sign_in (Optional[str])**
-  The path that a user is redirected to after sign-in (*default:* ``/parseauth``).
+.. data:: staticsite_redirect_path_sign_in
+  :type: Optional[str]
+  :value: "/parseauth"
+  :noindex:
+
+  The path that a user is redirected to after sign-in.
   This corresponds with the ``parseauth`` *Lambda@Edge* function which will parse the authentication details and verify the reception.
 
   Requires staticsite_auth_at_edge_.
@@ -300,8 +386,12 @@ Parameters
     parameters:
       staticsite_redirect_path_sign_in: /parseauth
 
-**staticsite_redirect_path_sign_out (Optional[str])**
-  The path that a user is redirected to after sign-out (*default:* ``/``).
+.. data:: staticsite_redirect_path_sign_out
+  :type: Optional[str]
+  :value: "/"
+  :noindex:
+
+  The path that a user is redirected to after sign-out.
   This typically should be the root of the site as the user will be asked to re-login.
 
   Requires staticsite_auth_at_edge_.
@@ -314,7 +404,11 @@ Parameters
 
 .. _staticsite_rewrite_directory_index:
 
-**staticsite_rewrite_directory_index (Optional[str])**
+.. data:: staticsite_rewrite_directory_index
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   Deploy a *Lambda@Edge* function designed to rewrite directory indexes, e.g. supports accessing urls such as ``example.org/foo/``
 
   .. rubric:: Example
@@ -323,7 +417,11 @@ Parameters
     parameters:
       staticsite_rewrite_directory_index: index.html
 
-**staticsite_role_boundary_arn (Optional[str])**
+.. data:: staticsite_role_boundary_arn
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   Defines an IAM Managed Policy that will be set as the permissions boundary for any IAM Roles created to support the site.
   (e.g. when using staticsite_auth_at_edge_ or staticsite_rewrite_directory_index_)
 
@@ -333,8 +431,12 @@ Parameters
     parameters:
       staticsite_role_boundary_arn: arn:aws:iam::<account-id>:policy/<policy>
 
-**staticsite_sign_out_url (Optional[str])**
-  The path a user should access to sign themselves out of the application. (*default:* ``/signout``)
+.. data:: staticsite_sign_out_url
+  :type: Optional[str]
+  :value: "/signout"
+  :noindex:
+
+  The path a user should access to sign themselves out of the application.
 
   Requires staticsite_auth_at_edge_.
 
@@ -344,8 +446,12 @@ Parameters
     parameters:
       staticsite_sign_out_url: /signout
 
-**staticsite_supported_identity_providers (Optional[str])**
-  A comma delimited list of the User Pool client identity providers. (*default:* `COGNITO`)
+.. data:: staticsite_supported_identity_providers
+  :type: Optional[str]
+  :value: "COGNITO"
+  :noindex:
+
+  A comma delimited list of the User Pool client identity providers.
 
   Requires staticsite_auth_at_edge_.
 
@@ -355,7 +461,11 @@ Parameters
     parameters:
       staticsite_supported_identity_providers: facebook,onelogin
 
-**staticsite_user_pool_arn (Optional[str])**
+.. data:: staticsite_user_pool_arn
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   The ARN of a pre-existing Cognito User Pool to use with :ref:`Auth@Edge`.
 
   Requires staticsite_auth_at_edge_.
@@ -366,14 +476,16 @@ Parameters
     parameters
       staticsite_user_pool_arn: arn:aws:cognito-idp:<region>:<account-id>:userpool/<pool>
 
-**staticsite_additional_redirect_domains (Optional[str])**
-  Additional domains (beyond the `staticsite_aliases` domains or the CloudFront URL if no
-  aliases are provided) that will be authorized by the :ref:`Auth@Edge` UserPool AppClient.
-  This parameter typically won't be needed in production environments, but can be useful in
-  development environments to allow bypassing Runway Auth@Edge.
+.. data:: staticsite_additional_redirect_domains
+  :type: Optional[str]
+  :value: None
+  :noindex:
 
-  This should be represented as a comma delimited list of domains with protocols. Requires
-  staticsite_auth_at_edge_.
+  Additional domains (beyond the `staticsite_aliases` domains or the CloudFront URL if no aliases are provided) that will be authorized by the :ref:`Auth@Edge` UserPool AppClient.
+  This parameter typically won't be needed in production environments, but can be useful in development environments to allow bypassing Runway Auth@Edge.
+
+  This should be represented as a comma delimited list of domains with protocols.
+  Requires staticsite_auth_at_edge_.
 
   .. rubric:: Example
   .. code-block:: yaml
@@ -381,7 +493,11 @@ Parameters
     parameters:
       staticsite_additional_redirect_domains: http://localhost:3000
 
-**staticsite_web_acl (Optional[str])**
+.. data:: staticsite_web_acl
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   The ARN of a `web access control list (web ACL) <https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html>`__ to associate with the CloudFront Distribution.
 
   .. rubric:: Example
@@ -390,9 +506,13 @@ Parameters
     parameters:
       staticsite_web_acl: arn:aws:waf::<account-id>:certificate/<cert>
 
-**staticsite_required_group (Optional[str])**
-  Name of Cognito User Pool group of which users must be a member to be granted access
-  to the site. Omit to allow all UserPool users to have access.
+.. data:: staticsite_required_group
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  Name of Cognito User Pool group of which users must be a member to be granted access to the site.
+  Omit to allow all UserPool users to have access.
 
   Requires staticsite_auth_at_edge_.
 

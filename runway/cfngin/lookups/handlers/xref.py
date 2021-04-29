@@ -32,7 +32,7 @@ class XrefLookup(LookupHandler):
         within a single config file. Sometimes it's useful to fetch outputs
         from stacks created outside of the current config file. `xref`
         supports this by **not** using the
-        :class:`runway.context.cfngin.CfnginContext` to expand the fqn of the stack.
+        :class:`runway.context.CfnginContext` to expand the fqn of the stack.
 
         Args:
             value: Parameter(s) given to this lookup. ``<stack_name>::<output_name>``

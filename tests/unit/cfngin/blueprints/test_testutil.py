@@ -6,7 +6,7 @@ from troposphere import ecr
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.testutil import BlueprintTestCase
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 from runway.variables import Variable
 
 

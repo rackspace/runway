@@ -37,7 +37,7 @@ from runway.cfngin.hooks.aws_lambda import (
     upload_lambda_functions,
 )
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 from ...mock_docker.fake_api import FAKE_CONTAINER_ID, FAKE_IMAGE_ID
 from ...mock_docker.fake_api_client import make_fake_client

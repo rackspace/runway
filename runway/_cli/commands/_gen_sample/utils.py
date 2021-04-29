@@ -7,7 +7,7 @@ import click
 from cfn_flip import to_yaml
 
 from ....blueprints.tf_state import TfState
-from ....context.cfngin import CfnginContext
+from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 ROOT = Path(__file__).parent.parent.parent.parent

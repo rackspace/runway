@@ -23,6 +23,10 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 @options.verbose
 @click.pass_context
 def dismantle(ctx: click.Context, **kwargs: Any) -> None:
-    """Alias of "runway destroy"."""
+    """Alias of "runway destroy".
+
+    For more information, refer to the output of "runway destroy --help".
+
+    """
     LOGGER.verbose("forwarding to destroy...")
     ctx.forward(destroy, **kwargs)

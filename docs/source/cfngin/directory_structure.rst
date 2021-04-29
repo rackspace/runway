@@ -1,8 +1,13 @@
+.. _cfngin-directory-structure:
+
 ###################
 Directory Structure
 ###################
 
 Example directory structures for a CloudFormation module.
+
+.. contents::
+  :depth: 4
 
 
 **********

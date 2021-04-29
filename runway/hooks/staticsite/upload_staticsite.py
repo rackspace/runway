@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from boto3.session import Session
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

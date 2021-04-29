@@ -18,7 +18,7 @@ from .staticsite import StaticSite
 
 if TYPE_CHECKING:
     from ...cfngin.blueprints.type_defs import BlueprintVariableTypeDef
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger("runway")
 

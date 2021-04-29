@@ -1,91 +1,4 @@
-""".. Base class for lookup handlers.
-
-.. _lookup arguments:
-
-****************
-Lookup Arguments
-****************
-
-Arguments can be passed to Lookups to effect how they function.
-
-To provide arguments to a Lookup, use a double-colon (``::``) after the
-query. Each argument is then defined as a **key** and **value** seperated with
-equals (``=``) and the arguments theselves are seperated with a comma (``,``).
-The arguments can have an optional space after the comma and before the next
-key to make them easier to read but this is not required. The value of all
-arguments are read as strings.
-
-.. rubric:: Example
-.. code-block:: yaml
-
-    ${var my_query::default=true, transform=bool}
-    ${env MY_QUERY::default=1,transform=bool}
-
-Each Lookup may have their own, specific arguments that it uses to modify its
-functionality or the value it returns. There is also a common set of arguments
-that all Lookups accept.
-
-.. _Common Lookup Arguments:
-
-Common Lookup Arguments
-=======================
-
-**default (Any)**
-    If the Lookup is unable to find a value for the provided query, this
-    value will be returned instead of raising an exception.
-
-**get (Optional[str])**
-    Can be used on a dictionary type object to retrieve a specific piece of
-    data. This is executed after the optional ``load`` step.
-
-**indent (Optional[int])**
-    Number of spaces to use per indent level when transforming a dictionary
-    type object to a string.
-
-**load (Optional[str])**
-    Load the data to be processed by a Lookup using a specific parser. This is
-    the first action taking on the data after it has been retrieved from its
-    source. The data must be in a format that is supported by the parser
-    in order for it to be used.
-
-    **json**
-        Loads a JSON seralizable string into a dictionary like object.
-    **troposphere**
-        Loads the ``properties`` of a subclass of ``troposphere.BaseAWSObject``
-        into a dictionary.
-    **yaml**
-        Loads a YAML seralizable string into a dictionary like object.
-
-**region (Optional[str])**
-    AWS region used when creating a ``boto3.Session`` to retrieve data.
-    If not provided, the region currently being processed will be used.
-    This can be specified to always get data from one region regardless of
-    region is being deployed to.
-
-**transform (Optional[str])**
-    Transform the data that will be returned by a Lookup into a different
-    data type. This is the last action taking on the data before it is
-    returned. Supports the following:
-
-    **str**
-        Converts any value to a string. The original data type determines the
-        end result.
-
-        ``list``, ``set``, and ``tuple`` will become a comma delimited list
-
-        ``dict`` and anything else will become an escaped JSON string.
-    **bool**
-        Converts a string or boolean value into a boolean.
-
-.. rubric:: Example
-.. code-block:: yaml
-
-  deployments:
-    - parameters:
-        some_variable: ${var some_value::default=my_value}
-        comma_list: ${var my_list::default=undefined, transform=str}
-
-"""
+"""Base class for lookup handlers."""
 from __future__ import annotations
 
 import json
@@ -144,10 +57,10 @@ class LookupHandler:
 
         Runs the following actions in order:
 
-        1. :meth:`~LookupHandler.load` if ``load`` is provided.
+        1. :meth:`load` if ``load`` is provided.
         2. :meth:`runway.util.MutableMap.find` or :meth:`dict.get` depending
            on the data type if ``get`` is provided.
-        3. :meth:`~LookupHandler.transform` if ``transform`` is provided.
+        3. :meth:`transform` if ``transform`` is provided.
 
         """
         if load:
@@ -234,9 +147,9 @@ class LookupHandler:
     def load(cls, value: Any, parser: Optional[str] = None, **kwargs: Any) -> Any:
         """Load a formatted string or object into a python data type.
 
-        First action taken in :meth:`~LookupHandler.format_results`.
+        First action taken in :meth:`format_results`.
         If a lookup needs to handling loading data to process it before it
-        enters :meth:`~LookupHandler.format_results`, is should use
+        enters :meth:`format_results`, is should use
         ``args.pop('load')`` to prevent the data from being loaded twice.
 
         Args:
@@ -317,7 +230,7 @@ class LookupHandler:
     ) -> Any:
         """Transform the result of a lookup into another datatype.
 
-        Last action taken in :meth:`~LookupHandler.format_results`.
+        Last action taken in :meth:`format_results`.
         If a lookup needs to handling transforming the data in a way that
         the base class can't support it should overwrite this method of the
         base class to register different transform methods.

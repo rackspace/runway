@@ -13,7 +13,7 @@ from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.plan import Graph, Step
 from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -146,16 +146,13 @@ class TestDestroyAction(unittest.TestCase):
         self.assertEqual(step.status, COMPLETE)
 
     @patch(
-        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
-        new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
     )
     @patch(
-        "runway.context.cfngin.CfnginContext.lock_persistent_graph",
-        new_callable=MagicMock,
+        "runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock,
     )
     @patch(
-        "runway.context.cfngin.CfnginContext.unlock_persistent_graph",
-        new_callable=MagicMock,
+        "runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock,
     )
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(

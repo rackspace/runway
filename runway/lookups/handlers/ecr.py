@@ -1,47 +1,4 @@
-"""Retrieve a value from AWS Elastic Container Registry (ECR).
-
-This Lookup only supports very specific queries.
-
-Supported Queries
------------------
-
-login-password
-^^^^^^^^^^^^^^
-
-Get a password to login to ECR registry.
-
-The returned value can be passed to the login command of the container
-client of your preference, such as the :ref:`Docker CFNgin hook <cfngin.hooks.docker>`.
-After you have authenticated to an Amazon ECR registry with this Lookup,
-you can use the client to push and pull images from that registry as long
-as your IAM principal has access to do so until the token expires.
-The authorization token is valid for **12 hours**.
-
-.. rubric:: Arguments
-
-This Lookup does not support any arguments.
-
-.. rubric:: Example
-.. code-block:: yaml
-    :caption: runway.yml
-
-    deployments:
-      - modules:
-          - path: example.cfn
-            parameters:
-              ecr_password: ${ecr login-password}
-        ...
-
-.. code-block:: yaml
-    :caption: cfngin.yml
-
-    pre_deploy:
-      - path: runway.cfngin.hooks.docker.login
-        args:
-          password: ${ecr login-password}
-          ...
-
-"""
+"""Retrieve a value from AWS Elastic Container Registry (ECR)."""
 from __future__ import annotations
 
 import base64

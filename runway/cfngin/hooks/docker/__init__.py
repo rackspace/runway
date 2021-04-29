@@ -1,4 +1,4 @@
 """Docker hook."""
-from ._login import login
+from ._login import LoginArgs, login
 
-__all__ = ["login"]
+__all__ = ["LoginArgs", "login"]

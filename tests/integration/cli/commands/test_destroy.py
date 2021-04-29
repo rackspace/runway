@@ -14,7 +14,7 @@ from mock import MagicMock, patch
 
 from runway._cli import cli
 from runway.config import RunwayConfig
-from runway.context.runway import RunwayContext
+from runway.context import RunwayContext
 from runway.core import Runway
 
 if TYPE_CHECKING:

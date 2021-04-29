@@ -31,7 +31,7 @@ def test_new(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     assert caplog.messages == [
         "runway.yml generated",
         "See addition getting started information at "
-        "https://docs.onica.com/projects/runway/en/latest/getting_started.html",
+        "https://docs.onica.com/projects/runway/page/getting_started.html",
     ]
 
 

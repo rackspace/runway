@@ -3,13 +3,13 @@ alabaster==0.7.12
 attrs==20.3.0
 awacs==1.0.4
 aws-sam-translator==1.35.0
-babel==2.9.0
-boto3==1.17.53
-botocore==1.20.53
+babel==2.9.1
+boto3==1.17.60
+botocore==1.20.60
 certifi==2020.12.5
 cffi==1.14.5
 cfn-flip==1.2.3
-cfn-lint==0.48.3
+cfn-lint==0.49.0
 chardet==4.0.0
 click==7.1.2
 coloredlogs==15.0
@@ -19,7 +19,7 @@ docker==5.0.0
 docutils==0.16
 formic2==1.0.3
 gitdb==4.0.7
-gitpython==3.1.14
+gitpython==3.1.15
 humanfriendly==9.1
 idna==2.10
 imagesize==1.2.0
@@ -28,13 +28,14 @@ jmespath==0.10.0
 jsonpatch==1.32 ; python_version != '3.4'
 jsonpointer==2.1
 jsonschema==3.2.0
+jsx-lexer==1.0.0
 junit-xml==1.9
 lark-parser==0.10.1
 markupsafe==1.1.1
 networkx==2.5.1 ; python_version >= '3.5'
 packaging==20.9
 pathspec==0.8.1
-pbr==5.5.1
+pbr==5.6.0
 pycparser==2.20
 pydantic==1.8.1
 pygments==2.8.1
@@ -45,20 +46,22 @@ pyrsistent==0.17.3
 python-dateutil==2.8.1
 python-hcl2==2.0.3
 pytz==2021.1
-pyyaml==5.4.1 ; python_version != '3.4'
+pyyaml==5.4.1 ; python_version != '3.4' and python_version != '3.5'
 requests==2.25.1
-s3transfer==0.3.7
+s3transfer==0.4.2
 send2trash==1.5.0
 six==1.15.0
 smmap==4.0.0
 snowballstemmer==2.1.0
-sphinx-rtd-theme==0.5.1
-sphinx==3.2.1
+sphinx-rtd-theme==0.5.2
+sphinx-tabs==2.1.0
+sphinx==3.5.4
 sphinxcontrib-apidoc==0.3.0
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==1.0.3
 sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-programoutput==0.17
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 troposphere==2.7.1

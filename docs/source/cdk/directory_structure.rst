@@ -1,8 +1,14 @@
+.. _cdk-directory-structure:
+
 ###################
 Directory Structure
 ###################
 
 Example directory structures for a CDK module.
+
+
+.. contents::
+  :depth: 4
 
 
 **********

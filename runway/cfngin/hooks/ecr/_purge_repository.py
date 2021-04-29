@@ -1,23 +1,4 @@
-"""Purge all images from an ECR repository.
-
-.. rubric:: Hook Path
-
-``runway.cfngin.hooks.ecr.purge_repository``
-
-.. rubric:: Args
-
-repository_name (str)
-    The name of the ECR repository to purge.
-
-.. rubric:: Example
-.. code-block:: yaml
-
-    pre_destroy:
-      - path: runway.cfngin.hooks.ecr.purge_repository
-        args:
-          repository_name: example-repo
-
-"""
+"""Purge all images from an ECR repository."""
 from __future__ import annotations
 
 import logging
@@ -27,7 +8,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ecr.client import ECRClient
     from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
 
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -81,7 +62,13 @@ def list_ecr_images(
 def purge_repository(
     context: CfnginContext, repository_name: str, **_: Any,
 ) -> Dict[str, str]:
-    """Purge all images from an ECR repository."""
+    """Purge all images from an ECR repository.
+
+    Args:
+        context: CFNgin context object.
+        repository_name: Name of the repository to purge.
+
+    """
     client = context.get_session().client("ecr")
     image_ids = list_ecr_images(client, repository_name=repository_name)
     if not image_ids:

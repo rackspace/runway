@@ -8,7 +8,7 @@ from docker import DockerClient
 from ....util import MutableMap, cached_property
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
     from .data_models import DockerImage
 
 

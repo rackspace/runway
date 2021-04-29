@@ -50,7 +50,7 @@ class CrossAccountRole(Blueprint):
 
 
 if __name__ == "__main__":
-    from runway.context.cfngin import CfnginContext
+    from runway.context import CfnginContext
 
     print(
         CrossAccountRole(

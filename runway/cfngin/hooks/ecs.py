@@ -15,7 +15,7 @@ from typing_extensions import TypedDict
 if TYPE_CHECKING:
     from mypy_boto3_ecs.type_defs import CreateClusterResponseTypeDef
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def create_clusters(
     """Create ECS clusters.
 
     Args:
-        context: Context instance. (passed in by CFNgin)
+        context: CFNgin context object.
         clusters: Names of clusters to create.
 
     """

@@ -65,27 +65,51 @@ from .data_models import BaseModel, ElasticContainerRegistry
 from .hook_data import DockerHookData
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class LoginArgs(BaseModel):
-    """Args passed to the docker.login hook."""
+    """Args passed to the docker.login hook.
+
+    Attributes:
+        dockercfg_path: Path to a non-default Docker config file.
+        email: The email for the registry account.
+        password: The plaintext password for the registry account.
+        registry: URI of the registry to login to.
+        username: The registry username.
+
+    """
 
     def __init__(
         self,
         *,
-        password: str,
         context: Optional[CfnginContext] = None,
         dockercfg_path: Optional[str] = None,
         ecr: Optional[Union[bool, Dict[str, Optional[str]]]] = None,
         email: Optional[str] = None,
+        password: str,
         registry: Optional[str] = None,
         username: Optional[str] = None,
         **_: Any
     ) -> None:
-        """Instantiate class."""
+        """Instantiate class.
+
+        Args:
+            context: CFNgin context object.
+            dockercfg_path: Use a custom path for the Docker config file
+                (``$HOME/.docker/config.json`` if present, otherwise ``$HOME/.dockercfg``).
+            ecr: Information describing an ECR registry. This is used to construct
+                the registry URL. If providing a value for this field, do not provide
+                a value for ``registry``.
+            email: The email for the registry account.
+            password: The plaintext password for the registry account.
+            registry: URL to the registry (e.g. ``https://index.docker.io/v1/``).
+            username: The registry username.
+                Defaults to ``AWS`` if supplying ``ecr``.
+
+        """
         super().__init__(context=context)
         self.dockercfg_path = self._validate_str(dockercfg_path, optional=True)
         self.email = self._validate_str(email, optional=True)
@@ -121,16 +145,7 @@ def login(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
 
     Replicates the functionality of ``docker login`` cli command.
 
-    Keyword Args:
-        dockercfg_path (Optional[str]): Use a custom path for the Docker config file
-            (default ``$HOME/.docker/config.json`` if present,
-            otherwise``$HOME/.dockercfg``).
-        ecr (:class:`runway.cfngin.hooks.docker._data_models.ElasticContainerRegistry`):
-            Information describing an ECR registry.
-        email (Optional[str]): The email for the registry account.
-        password (str): The plaintext password.
-        registry (Optional[str]): URL to the registry (e.g. ``https://index.docker.io/v1/``)
-        username (str): The registry username. Optional if supplying ``ecr``.
+    kwargs are parsed by :class:`~runway.cfngin.hooks.docker.LoginArgs`.
 
     """
     kwargs.pop("provider", None)

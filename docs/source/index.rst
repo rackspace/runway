@@ -1,37 +1,26 @@
-####################
-Runway Documentation
-####################
-
-.. image:: images/runway-example.gif
-   :align: center
-   :alt: runway-example.gif
+######
+Runway
+######
 
 Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease management of per-environment configs & deployment.
 
-Very simple configuration to:
-
-- Perform automatic linting/verification
-- Ensure deployments are only performed when an environment config is present
-- Define an IAM role to assume for each deployment
-- Wrangle Terraform backend/workspace configs w/ per-environment tfvars
-- Avoid long-term tool lock-in
-
-  - Runway is a simple wrapper around standard tools. It simply helps to
-    avoid convoluted Makefiles / CI jobs
+.. image:: images/runway-example.gif
+  :align: center
+  :alt: runway-example.gif
 
 .. toctree::
-   :caption: Runway
-   :maxdepth: 2
-   :hidden:
+  :caption: Runway
+  :maxdepth: 2
+  :hidden:
 
-   installation
-   getting_started
-   quickstart/index
-   commands
-   runway_config
-   lookups
-   defining_tests
-   repo_structure
+  installation
+  getting_started
+  quickstart/index
+  commands
+  runway_config
+  lookups
+  defining_tests
+  repo_structure
 
 
 ----
@@ -52,18 +41,18 @@ The CDK module type is deployed using the `AWS Cloud Development Kit (CDK) <http
 Runway uses `system installed npm <https://www.npmjs.com/get-npm>`__ to install the CDK per-module.
 This means that the CDK must be included as a dev dependency in the **package.json** of the module.
 
-- `Configuration <cdk/configuration.html>`__
-- `Directory Structure <cdk/directory_structure.html>`__
-- `Advanced Features <cdk/advanced_features.html>`__
+- :ref:`Configuration <cdk-configuration>`
+- :ref:`Directory Structure <cdk-directory-structure>`
+- :ref:`Advanced Features <cdk-advanced-features>`
 
 .. toctree::
-   :caption: AWS Cloud Development Kit (CDK)
-   :maxdepth: 2
-   :hidden:
+  :caption: AWS Cloud Development Kit (CDK)
+  :maxdepth: 2
+  :hidden:
 
-   cdk/configuration
-   cdk/directory_structure
-   cdk/advanced_features
+  cdk/configuration
+  cdk/directory_structure
+  cdk/advanced_features
 
 
 .. _mod-cfn:
@@ -74,19 +63,19 @@ CloudFormation & Troposphere
 The CloudFormation module type is deployed using Runway's CloudFormation engine (CFNgin).
 It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_ templates that are written in the form of a :ref:`Blueprint`.
 
-- `Configuration <cfngin/configuration.html>`__
-- `Directory Structure <cfngin/directory_structure.html>`__
-- `Advanced Features <cfngin/advanced_features.html>`__
+- :ref:`Configuration <cfngin-configuration>`
+- :ref:`Directory Structure <cfngin-directory-structure>`
+- :ref:`Advanced Features <cfngin-advanced-features>`
 
 .. toctree::
-   :caption: CloudFormation & Troposphere
-   :maxdepth: 2
-   :hidden:
+  :caption: CloudFormation & Troposphere
+  :maxdepth: 2
+  :hidden:
 
-   cfngin/configuration
-   cfngin/directory_structure
-   cfngin/advanced_features
-   cfngin/migrating
+  cfngin/configuration
+  cfngin/directory_structure
+  cfngin/advanced_features
+  cfngin/migrating
 
 .. _Troposphere: https://github.com/cloudtools/troposphere
 
@@ -98,20 +87,20 @@ Kubernetes
 
 Kubernetes manifests can be deployed via Runway offering an ideal way to handle core infrastructure-layer (e.g. shared ConfigMaps & Service Accounts) configuration of clusters by using `Kustomize overlays <https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays>`__.
 
-- `Configuration <kubernetes/configuration.html>`__
-- `Directory Structure <kubernetes/directory_structure.html>`__
-- `Examples <kubernetes/examples.html>`__
-- `Advanced Features <kubernetes/advanced_features.html>`__
+- :ref:`Configuration <k8s-configuration>`
+- :ref:`Directory Structure <k8s-directory-structure>`
+- :ref:`Examples <k8s-examples>`
+- :ref:`Advanced Features <k8s-advanced-features>`
 
 .. toctree::
-   :caption: Kubernetes
-   :maxdepth: 2
-   :hidden:
+  :caption: Kubernetes
+  :maxdepth: 2
+  :hidden:
 
-   kubernetes/configuration
-   kubernetes/directory_structure
-   kubernetes/examples
-   kubernetes/advanced_features
+  kubernetes/configuration
+  kubernetes/directory_structure
+  kubernetes/examples
+  kubernetes/advanced_features
 
 
 .. _mod-sls:
@@ -123,18 +112,18 @@ The Serverless module type is deployed using the `Serverless Framework <https://
 Runway uses `system installed npm <https://www.npmjs.com/get-npm>`__ to install Serverless per-module.
 This means that Serverless must be included as a dev dependency in the **package.json** of the module.
 
-- `Configuration <serverless/configuration.html>`__
-- `Directory Structure <serverless/directory_structure.html>`__
-- `Advanced Features <serverless/advanced_features.html>`__
+- :ref:`Configuration <sls-configuration>`
+- :ref:`Directory Structure <sls-directory-structure>`
+- :ref:`Advanced Features <sls-advanced-features>`
 
 .. toctree::
-   :caption: Serverless Framework
-   :maxdepth: 2
-   :hidden:
+  :caption: Serverless Framework
+  :maxdepth: 2
+  :hidden:
 
-   serverless/configuration
-   serverless/directory_structure
-   serverless/advanced_features
+  serverless/configuration
+  serverless/directory_structure
+  serverless/advanced_features
 
 
 .. _mod-staticsite:
@@ -151,20 +140,20 @@ A start-to-finish example walkthrough is available in the :ref:`Conduit quicksta
   The CloudFront Distribution that is created by default can take a significant amount of time to spin up on initial deploy (5 to 60 minutes is not abnormal).
   Incorporating CloudFront with a static site is a common best practice, however, if you are working on a development project it may benefit you to add the :ref:`staticsite_cf_disable <staticsite_cf_disable>` parameter.
 
-- `Configuration <staticsite/configuration.html>`__
-- `Directory Structure <staticsite/directory_structure.html>`__
-- `Examples <staticsite/examples.html>`__
-- `Advanced Features <staticsite/advanced_features.html>`__
+- :ref:`Configuration <staticsite-configuration>`
+- :ref:`Directory Structure <staticsite-directory-structure>`
+- :ref:`Examples <staticsite-examples>`
+- :ref:`Advanced Features <staticsite-advanced-features>`
 
 .. toctree::
-   :caption: Static Site
-   :maxdepth: 2
-   :hidden:
+  :caption: Static Site
+  :maxdepth: 2
+  :hidden:
 
-   staticsite/configuration
-   staticsite/directory_structure
-   staticsite/examples
-   staticsite/advanced_features
+  staticsite/configuration
+  staticsite/directory_structure
+  staticsite/examples
+  staticsite/advanced_features
 
 
 .. _mod-tf:
@@ -176,54 +165,44 @@ Runway provides a simple way to run the Terraform versions you want with variabl
 Terraform does not need to be installed prior to using this module type.
 Runway maintains a cache of Terraform versions on a system, downloading and installing different versions as needed.
 
-- `Configuration <terraform/configuration.html>`__
-- `Directory Structure <terraform/directory_structure.html>`__
-- `Advanced Features <terraform/advanced_features.html>`__
+- :ref:`Configuration <tf-configuration>`
+- :ref:`Directory Structure <tf-directory-structure>`
+- :ref:`Advanced Features <tf-advanced-features>`
 
 .. toctree::
-   :caption: Terraform
-   :maxdepth: 2
-   :hidden:
+  :caption: Terraform
+  :maxdepth: 2
+  :hidden:
 
-   terraform/configuration
-   terraform/directory_structure
-   terraform/advanced_features
+  terraform/configuration
+  terraform/directory_structure
+  terraform/advanced_features
 
 
 ----
 
 
 .. toctree::
-   :caption: Developers Guide
-   :maxdepth: 2
-   :glob:
-   :hidden:
+  :caption: Developers Guide
+  :maxdepth: 2
+  :glob:
+  :hidden:
 
-   apidocs/index
-   developers/*
-
-.. toctree::
-   :caption: Maintainers Guide
-   :maxdepth: 2
-   :glob:
-   :hidden:
-
-   maintainers/*
+  apidocs/index
+  developers/*
 
 .. toctree::
-   :caption: Additional Information
-   :maxdepth: 2
-   :hidden:
+  :caption: Maintainers Guide
+  :maxdepth: 2
+  :glob:
+  :hidden:
 
-   License <license>
-   terminology
+  maintainers/*
 
+.. toctree::
+  :caption: Additional Information
+  :maxdepth: 2
+  :hidden:
 
-
-******************
-Indices and tables
-******************
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+  License <license>
+  terminology

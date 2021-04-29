@@ -31,7 +31,7 @@ from runway.cfngin.status import (
     NotSubmittedStatus,
 )
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
@@ -122,8 +122,7 @@ class TestBuildAction(unittest.TestCase):
         return CfnginContext(config=CfnginConfig.parse_obj(config), **kwargs)
 
     @patch(
-        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
-        new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
     )
     def test_generate_plan_persist_destroy(self, mock_graph_tags: PropertyMock) -> None:
         """Test generate plan persist destroy."""
@@ -224,16 +223,13 @@ class TestBuildAction(unittest.TestCase):
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
 
     @patch(
-        "runway.context.cfngin.CfnginContext.persistent_graph_tags",
-        new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
     )
     @patch(
-        "runway.context.cfngin.CfnginContext.lock_persistent_graph",
-        new_callable=MagicMock,
+        "runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock,
     )
     @patch(
-        "runway.context.cfngin.CfnginContext.unlock_persistent_graph",
-        new_callable=MagicMock,
+        "runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock,
     )
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(

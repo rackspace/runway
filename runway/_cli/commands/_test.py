@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.verbose
 @click.pass_context
 def test(ctx: click.Context, **_: Any) -> None:
-    """Execute tests as defined in the Runway config.
+    """Execute tests as defined in the Runway config file.
 
     If one of the tests fail, the command will exit immediately unless
     "required: false" is set on the failing test.

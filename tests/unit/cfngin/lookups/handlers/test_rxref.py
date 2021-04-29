@@ -6,7 +6,7 @@ from mock import MagicMock
 
 from runway.cfngin.lookups.handlers.rxref import RxrefLookup
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 
 
 class TestRxrefHandler(unittest.TestCase):

@@ -1,5 +1,5 @@
 """Context objects."""
-from .cfngin import CfnginContext
-from .runway import RunwayContext
+from ._cfngin import CfnginContext
+from ._runway import RunwayContext
 
 __all__ = ["CfnginContext", "RunwayContext"]

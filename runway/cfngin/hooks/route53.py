@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from ..util import create_route53_zone
 
 if TYPE_CHECKING:
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,9 +18,7 @@ def create_domain(
     """Create a domain within route53.
 
     Args:
-        context: Context instance. (passed in by CFNgin)
-
-    Keyword Args:
+        context: CFNgin context object.
         domain: Domain name for the Route 53 hosted zone to be created.
 
     Returns:

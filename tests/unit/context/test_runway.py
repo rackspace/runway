@@ -1,4 +1,4 @@
-"""Test runway.context.runway."""
+"""Test runway.context._runway."""
 # pylint: disable=no-self-use,redefined-outer-name
 # pyright: basic
 from __future__ import annotations
@@ -8,18 +8,18 @@ from typing import TYPE_CHECKING, Any
 import pytest
 from mock import MagicMock
 
-from runway.context.runway import RunwayContext
+from runway.context._runway import RunwayContext
 from runway.context.sys_info import OsInfo
 from runway.core.components import DeployEnvironment
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
-MODULE = "runway.context.runway"
+MODULE = "runway.context._runway"
 
 
 class TestRunwayContext:
-    """Test runway.context.runway.RunwayContext."""
+    """Test runway.context._runway.RunwayContext."""
 
     env = DeployEnvironment(explicit_name="test")
 

@@ -36,7 +36,13 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 )
 @options.verbose
 def cfngin(indent: int, output: Optional[str], **_: Any) -> None:
-    """Output CFNgin configuration file schema."""
+    """Output JSON schema for CFNgin configuration files.
+
+    The schema that is output can be used to validate configuration files.
+    It can also be added to text editors to provide autocompletion, tool tips,
+    and suggestions within configuration files.
+
+    """
     content = CfnginConfigDefinitionModel.schema_json(indent=indent)
     if output:
         file_path = Path(output).absolute()

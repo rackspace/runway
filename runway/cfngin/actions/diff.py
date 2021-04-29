@@ -24,11 +24,11 @@ from .. import exceptions
 from ..status import (
     COMPLETE,
     INTERRUPTED,
+    DoesNotExistInCloudFormation,
     NotSubmittedStatus,
     NotUpdatedStatus,
     SkippedStatus,
 )
-from ..status import StackDoesNotExist as StackDoesNotExistStatus
 from . import deploy
 from .base import build_walker
 
@@ -228,7 +228,7 @@ class Action(deploy.Action):
                 return SkippedStatus(
                     "persistent graph: stack does not exist, will be removed"
                 )
-            return StackDoesNotExistStatus()
+            return DoesNotExistInCloudFormation()
         except AttributeError as err:
             if (
                 self.context.persistent_graph

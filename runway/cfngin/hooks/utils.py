@@ -14,7 +14,7 @@ from ..blueprints.base import Blueprint
 
 if TYPE_CHECKING:
     from ...config.models.cfngin import CfnginHookDefinitionModel
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ..providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)

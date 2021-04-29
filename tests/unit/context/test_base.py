@@ -1,4 +1,4 @@
-"""Test runway.context.base."""
+"""Test runway.context._base."""
 # pylint: disable=no-self-use,redefined-outer-name
 # pyright: basic
 from __future__ import annotations
@@ -9,14 +9,14 @@ import boto3
 import pytest
 from mock import MagicMock
 
-from runway.context.base import BaseContext
+from runway.context._base import BaseContext
 from runway.context.sys_info import SystemInfo
 from runway.core.components import DeployEnvironment
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
-MODULE = "runway.context.base"
+MODULE = "runway.context._base"
 
 TEST_BOTO3_CREDS = {
     "aws_access_key_id": "foo",
@@ -45,7 +45,7 @@ def mock_sso_botocore_session(mocker: MockerFixture) -> MagicMock:
 
 
 class TestBaseContext:
-    """Test runway.context.base.BaseContext."""
+    """Test runway.context._base.BaseContext."""
 
     env = DeployEnvironment(explicit_name="test")
 

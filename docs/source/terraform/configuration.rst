@@ -1,6 +1,11 @@
+.. _tf-configuration:
+
 #############
 Configuration
 #############
+
+.. contents::
+  :depth: 4
 
 
 *******
@@ -9,7 +14,11 @@ Options
 
 Options specific to Terraform Modules.
 
-**args (Optional[Union[Dict[str, List[str]], List[str]]])**
+.. data:: args
+  :type: Optional[Union[Dict[str, List[str]], List[str]]]
+  :value: None
+  :noindex:
+
   List of CLI arguments/options to pass to Terraform.
   See :ref:`Specifying Terraform CLI Arguments/Options <tf-args>` for more details.
 
@@ -20,11 +29,13 @@ Options specific to Terraform Modules.
       args:
         - '-parallelism=25'
 
-**terraform_backend_config (Optional[Dict[str, str]])**
-  Mapping to configure Terraform backend. See :ref:`Backend <tf-backend>` for more details.
+.. data:: terraform_backend_config
+  :type: Optional[Dict[str, str]]
+  :value: {}
+  :noindex:
 
-  .. versionchanged:: 1.11.0
-    Added support for any *key: value*.
+  Mapping to configure Terraform backend.
+  See :ref:`Backend <tf-backend>` for more details.
 
   .. rubric:: Example
   .. code-block:: yaml
@@ -35,7 +46,14 @@ Options specific to Terraform Modules.
         dynamodb_table: mytable
         region: us-east-1
 
-**terraform_version (Optional[Union[str, Dict[str, str]]])**
+  .. versionchanged:: 1.11.0
+    Added support for any *key: value*.
+
+.. data:: terraform_version
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
   String containing the Terraform version or a mapping of deploy environment to a Terraform version.
   See :ref:`Version Management <tf-version>` for more details.
 
@@ -45,8 +63,12 @@ Options specific to Terraform Modules.
     options:
       terraform_version: 0.11.13
 
-**terraform_write_auto_tfvars (Optional[bool])**
-  Optionally write parameters to a tfvars file instead of updating variables (*default:* ``False``).
+.. data:: terraform_write_auto_tfvars
+  :type: Optional[bool]
+  :value: False
+  :noindex:
+
+  Optionally write parameters to a tfvars file instead of updating variables.
   This can be useful in cases where Runway may not be parsing/passing parameters as expected.
 
   When ``True``, Runway creates a temporary ``runway-parameters.auto.tfvars.json`` file in the module directory.
@@ -55,13 +77,13 @@ Options specific to Terraform Modules.
   If using a remote backend, use of this file to pass variables is required as environment variables are not available from the CLI and ``-var-file`` currently cannot be used.
   Once the module has finished processing, the file is deleted.
 
-  .. versionadded:: 1.11.0
-
   .. rubric:: Example
   .. code-block:: yaml
 
     options:
       terraform_write_auto_tfvars: true
+
+  .. versionadded:: 1.11.0
 
 
 *********
@@ -73,16 +95,12 @@ Variables can be defined per-environment using one or both of the following opti
 tfvars
 ======
 
-Standard Terraform `tfvars
-<https://www.terraform.io/docs/configuration/variables.html#variable-definitions-tfvars-files>`__
-files can be used, exactly as one normally would with ``terraform apply -var-file``.
+Standard Terraform `tfvars <https://www.terraform.io/docs/configuration/variables.html#variable-definitions-tfvars-files>`__ files can be used, exactly as one normally would with ``terraform apply -var-file``.
 Runway will automatically detect them when named like ``ENV-REGION.tfvars`` or ``ENV.tfvars``.
 
 .. rubric:: Example
-
-Contests of a file named **common-us-east-1.tfvars**
-
-.. code-block::
+.. code-block:: text
+  :caption: common-us-east-1.tfvars
 
   region = "us-east-1"
   image_id = "ami-abc123"
@@ -91,25 +109,21 @@ Contests of a file named **common-us-east-1.tfvars**
 runway.yml
 ==========
 
-Variable values can also be specified as parameter values in runway.yml. It
-is recommended to use :ref:`Lookups` in the ``parameters`` section to
-assist in selecting the appropriate values for the deploy environment and/or
-region being deployed to but, this is not a requirement if the value will
-remain the same.
+Variable values can also be specified as :attr:`deployment.parameters`/:attr:`module.parameters` values in runway.yml.
+It is recommended to use :ref:`Lookups` in the ``parameters`` section to assist in selecting the appropriate values for the deploy environment and/or region being deployed to but, this is not a requirement if the value will remain the same.
 
 .. code-block:: yaml
 
-  ---
   deployments:
     - modules:
         - path: sampleapp-01.tf
           parameters:
             region: ${env AWS_REGION}
             image_id: ${var image_id.${env AWS_REGION}}
-            mylist:
+            my_list:
               - item1
               - item2
-            mymap:
+            my_map:
               key1: value1
               key2: value1
     - modules:
@@ -117,9 +131,9 @@ remain the same.
       parameters:
         region: ${env AWS_REGION}
         image_id: ${var image_id.${env AWS_REGION}}
-        mylist:
+        my_list:
           - item1
           - item2
-        mymap:
+        my_map:
           key1: value1
           key2: value1

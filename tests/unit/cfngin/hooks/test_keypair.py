@@ -19,7 +19,7 @@ from ..factories import mock_context
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from runway.context.cfngin import CfnginContext
+    from runway.context import CfnginContext
 
 REGION = "us-east-1"
 KEY_PAIR_NAME = "FakeKey"

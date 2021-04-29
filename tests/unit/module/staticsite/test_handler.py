@@ -14,7 +14,7 @@ from runway.module.staticsite.parameters.models import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from runway.context.runway import RunwayContext
+    from runway.context import RunwayContext
 
 
 class TestStaticSite:

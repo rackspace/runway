@@ -1,8 +1,6 @@
 .. _blueprints: terminology.html#blueprint
 .. _CloudFormation: https://aws.amazon.com/cloudformation/
 .. _CloudFormation Parameters: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
-.. _module type: runway_config.html#type
-.. _Runway Config File: runway_config.html
 .. _troposphere: https://github.com/cloudtools/troposphere
 
 ###########
@@ -37,14 +35,14 @@ Deployment
 
 A :ref:`deployment<runway-deployment>` contains a list of `modules <#module>`_ and options for
 all the modules_ in the deployment_.
-A `Runway config file`_ can contain multiple :ref:`deployments<runway-deployment>` and a deployment_ can contain multiple modules_.
+A :ref:`runway-config` can contain multiple :ref:`deployments<runway-deployment>` and a deployment_ can contain multiple modules_.
 
 
 Lookup (Runway)
 ===============
 
-A method for expanding values in the `Runway Config File`_ file when processing a deployment/module.
-These are only supported in select areas of the `Runway Config File`_ (see the config docs for more details).
+A method for expanding values in the :ref:`runway-config` file when processing a deployment/module.
+These are only supported in select areas of the :ref:`runway-config` (see the config docs for more details).
 
 
 Module
@@ -52,7 +50,7 @@ Module
 
 A :ref:`module<runway-module>` is a directory containing a single infrastructure-as-code tool configuration of an application, a component, or some infrastructure (eg. a set of `CloudFormation`_ templates).
 It is defined in a `deployment`_ by path.
-Modules can also contain granular options that only pertain to it based on its `module type`_.
+Modules can also contain granular options that only pertain to it based on its :attr:`module.type`.
 
 
 .. _term-param:
@@ -62,7 +60,7 @@ Parameters
 
 A mapping of ``key: value`` that is passed to a module.
 Through the use of a `Lookup (Runway)`_, the value can be changed per region or deploy environment.
-The ``value`` can be any data type but, support for complex data types depends on the `module type`_.
+The ``value`` can be any data type but, support for complex data types depends on the :attr:`module.type`.
 
 
 -------------------------------------------------------------------------------

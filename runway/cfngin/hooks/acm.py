@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from mypy_boto3_route53.client import Route53Client
     from mypy_boto3_route53.type_defs import ChangeTypeDef
 
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider
     from ..stack import Stack
@@ -43,7 +43,7 @@ class HookArgs(HookArgsBaseModel):
 
 
 class Certificate(Hook):
-    """Hook for managing a **AWS::CertificateManager::Certificate**.
+    r"""Hook for managing a **AWS::CertificateManager::Certificate**.
 
     Keyword Args:
         alt_names (Optional[List[str]]): Additional FQDNs to be included in the
@@ -55,7 +55,7 @@ class Certificate(Hook):
             www.example.com, with which you want to secure an ACM certificate.
             Use an asterisk (``*``) to create a wildcard certificate that
             protects several sites in the same domain. For example,
-            *.example.com protects www.example.com, site.example.com, and
+            \*.example.com protects www.example.com, site.example.com, and
             images.example.com.
         hosted_zone_id (str): The ID of the Route 53 Hosted Zone that contains
             the resource record sets that you want to change. This must exist
@@ -66,8 +66,8 @@ class Certificate(Hook):
         ttl (Optional[int]): The resource record cache time to live (TTL),
             in seconds. (*default:* ``300``)
 
-    Example:
-    .. code-block: yaml
+    .. rubric:: Example
+    .. code-block:: yaml
 
         pre_deploy:
           example-wildcard-cert:
@@ -125,20 +125,24 @@ class Certificate(Hook):
 
     def _create_blueprint(self) -> Blueprint:
         """Create CFNgin Blueprint."""
-        blueprint = BlankBlueprint(self.stack_name, self.context)
-        blueprint.template.set_version("2010-09-09")
-        blueprint.template.set_description(self.template_description)
-
         var_description = (
             "NO NOT CHANGE MANUALLY! Used to track the "
             "state of a value set outside of CloudFormation"
             " using a Runway hook."
         )
 
-        blueprint.VARIABLES = {
-            "DomainName": {"type": CFNString, "description": var_description},
-            "ValidateRecordTTL": {"type": CFNString, "description": var_description},
-        }
+        class _BlankBlueprint(BlankBlueprint):
+            VARIABLES = {
+                "DomainName": {"type": CFNString, "description": var_description},
+                "ValidateRecordTTL": {
+                    "type": CFNString,
+                    "description": var_description,
+                },
+            }
+
+        blueprint = _BlankBlueprint(self.stack_name, self.context)
+        blueprint.template.set_version("2010-09-09")
+        blueprint.template.set_description(self.template_description)
 
         cert = blueprint.template.add_resource(
             CertificateResource("Certificate", **self.properties.data)

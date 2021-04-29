@@ -22,20 +22,20 @@ from ..status import (
     WAITING,
     CompleteStatus,
     DidNotChangeStatus,
+    DoesNotExistInCloudFormation,
     FailedStatus,
     NotSubmittedStatus,
     NotUpdatedStatus,
     SkippedStatus,
+    SubmittedStatus,
 )
-from ..status import StackDoesNotExist as StackDoesNotExistStatus
-from ..status import SubmittedStatus
 from .base import STACK_POLL_TIME, BaseAction, build_walker
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import ParameterTypeDef, StackTypeDef
 
     from ...config.models.cfngin import CfnginHookDefinitionModel
-    from ...context.cfngin import CfnginContext
+    from ...context import CfnginContext
     from ...core.providers.aws.type_defs import TagTypeDef
     from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider
@@ -285,7 +285,7 @@ class Action(BaseAction):
             LOGGER.debug("%s:stack does not exist", stack.fqn)
             if kwargs.get("status", None) == SUBMITTED:
                 return DESTROYED_STATUS
-            return StackDoesNotExistStatus()
+            return DoesNotExistInCloudFormation()
 
         LOGGER.debug(
             "%s:provider status: %s",

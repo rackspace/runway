@@ -39,8 +39,7 @@ from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 if TYPE_CHECKING:
     from .cfngin.providers.aws.default import Provider
     from .config.components.runway import RunwayVariablesDefinition
-    from .context.cfngin import CfnginContext
-    from .context.runway import RunwayContext
+    from .context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 

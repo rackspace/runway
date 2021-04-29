@@ -11,7 +11,7 @@ from runway.cfngin.lookups.registry import (
 )
 from runway.cfngin.stack import Stack
 from runway.config import CfnginConfig
-from runway.context.cfngin import CfnginContext
+from runway.context import CfnginContext
 from runway.lookups.handlers.base import LookupHandler
 
 from .factories import generate_definition

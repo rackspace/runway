@@ -23,6 +23,10 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 @options.verbose
 @click.pass_context
 def takeoff(ctx: click.Context, **kwargs: Any) -> None:
-    """Alias of "runway deploy"."""
+    """Alias of "runway deploy".
+
+    For more information, refer to the output of "runway deploy --help".
+
+    """
     LOGGER.verbose("forwarding to deploy...")
     ctx.forward(deploy, **kwargs)

@@ -9,7 +9,7 @@ from ....lookups.handlers.base import LookupHandler
 from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
     from ....variables import VariableValue
 
 TYPE_NAME = "output"

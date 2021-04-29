@@ -29,7 +29,7 @@ if TYPE_CHECKING:
         RunwayModuleDefinition,
     )
     from ...config.models.runway import RunwayEnvironmentsType
-    from ...context.runway import RunwayContext
+    from ...context import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 

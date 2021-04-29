@@ -8,7 +8,7 @@ from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 if TYPE_CHECKING:
-    from ....context.cfngin import CfnginContext
+    from ....context import CfnginContext
     from ...providers.aws.default import Provider
 
 TYPE_NAME = "rxref"
@@ -27,7 +27,7 @@ class RxrefLookup(LookupHandler):
         within a single config file. Sometimes it's useful to fetch outputs
         from stacks created outside of the current config file but using the
         same namespace. ``rxref`` supports this by using the
-        :class:`runway.context.cfngin.CfnginContext` to expand the fqn of the stack.
+        :class:`runway.context.CfnginContext` to expand the fqn of the stack.
 
         Args:
             value: Parameter(s) given to this lookup. `<stack_name>::<output_name>``
