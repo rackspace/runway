@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import logging
-import warnings
-from typing import TYPE_CHECKING, Any, Dict, Tuple
+from typing import TYPE_CHECKING, Any
 
 from troposphere import BaseAWSObject
 
 from ....lookups.handlers.base import LookupHandler
-from ....utils import DOC_SITE, MutableMap
+from ....utils import MutableMap
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
@@ -20,28 +19,6 @@ TYPE_NAME = "hook_data"
 
 class HookDataLookup(LookupHandler):
     """Hook data lookup."""
-
-    DEPRECATION_MSG = (
-        'lookup query syntax "<hook_name>::<key>" has been deprecated; to '
-        "learn how to use the new lookup query syntax visit "
-        "{}/page/lookups.html".format(DOC_SITE)
-    )
-
-    @classmethod
-    def legacy_parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
-        """Retain support for legacy lookup syntax.
-
-        Args:
-            value (str): Parameter(s) given to this lookup.
-
-        Format of value:
-            <hook_name>::<key>
-
-        """
-        hook_name, key = value.split("::")
-        warnings.warn(cls.DEPRECATION_MSG, DeprecationWarning)
-        LOGGER.warning(cls.DEPRECATION_MSG)
-        return "{}.{}".format(hook_name, key), {}
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ
@@ -54,10 +31,7 @@ class HookDataLookup(LookupHandler):
             context: Context instance.
 
         """
-        try:
-            query, args = cls.parse(value)
-        except ValueError:
-            query, args = cls.legacy_parse(value)
+        query, args = cls.parse(value)
 
         hook_data = MutableMap(**context.hook_data)
 

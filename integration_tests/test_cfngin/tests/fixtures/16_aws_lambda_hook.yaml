@@ -38,19 +38,19 @@ stacks:
   test-dockerize:
     class_path: fixtures.lambda_function.BlueprintClass
     variables:
-      Code: ${hook_data lambda::dockerize}
+      Code: ${hook_data lambda.dockerize}
       Entrypoint: dockerize.handler
       AppName: dockerizepip
   test-nondockerize:
     class_path: fixtures.lambda_function.BlueprintClass
     variables:
-      Code: ${hook_data lambda::nondockerize}
+      Code: ${hook_data lambda.nondockerize}
       Entrypoint: nondockerize.handler
       AppName: nondockerizepip
   test-authatedge:
     class_path: fixtures.lambda_function.BlueprintClass
     variables:
-      Code: ${hook_data lambda::authatedge}
+      Code: ${hook_data lambda.authatedge}
       AppName: authatedge
 
 post_destroy:
