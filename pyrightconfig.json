@@ -13,7 +13,7 @@
         "**/integration_test_infrastructure",
         "**/integration_tests",
         "**/runway/aws_sso_botocore",
-        "**/runway/hooks/staticsite/auth_at_edge/templates",
+        "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
         "**/runway/templates/cdk-py",
         "**/scripts"
     ],

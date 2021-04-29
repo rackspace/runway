@@ -1,13 +1,11 @@
 """CFNgin hook for cleaning up resources prior to CFN stack deletion."""
-# pylint: disable=unused-argument
-# TODO move to runway.cfngin.hooks on next major release
 from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ..context import CfnginContext
+    from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

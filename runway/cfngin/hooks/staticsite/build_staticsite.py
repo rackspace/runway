@@ -1,5 +1,4 @@
 """CFNgin hook for building static website."""
-# TODO move to runway.cfngin.hooks on next major release
 from __future__ import annotations
 
 import logging
@@ -13,14 +12,14 @@ import boto3
 from boto3.s3.transfer import S3Transfer  # type: ignore
 from typing_extensions import TypedDict
 
-from ...cfngin.lookups.handlers.rxref import RxrefLookup
-from ...s3_utils import does_s3_object_exist, download_and_extract_to_mkdtemp
-from ...utils import change_dir, run_commands
+from ....s3_utils import does_s3_object_exist, download_and_extract_to_mkdtemp
+from ....utils import change_dir, run_commands
+from ...lookups.handlers.rxref import RxrefLookup
 from .utils import get_hash_of_files
 
 if TYPE_CHECKING:
-    from ...cfngin.providers.aws.default import Provider
-    from ...context import CfnginContext
+    from ....cfngin.providers.aws.default import Provider
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

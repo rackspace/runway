@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Union
 
 if TYPE_CHECKING:
-    from ....context import CfnginContext
+    from .....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 

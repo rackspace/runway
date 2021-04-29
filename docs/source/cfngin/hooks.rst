@@ -433,12 +433,15 @@ Build static site. Used by the :ref:`Static Site <staticsite>` module type.
 
 .. rubric:: Hook Path
 
-:func:`runway.hooks.staticsite.build_staticsite.build`
+:func:`runway.cfngin.hooks.staticsite.build_staticsite.build`
 
 
 .. rubric:: Args
 
 See :ref:`Static Site <staticsite>` module documentation for details.
+
+.. versionchanged:: 2.0.0
+  Moved from ``runway.hooks`` to ``runway.cfngin.hooks``.
 
 
 cleanup_s3.purge_bucket
@@ -452,7 +455,7 @@ Primarily used as a :attr:`~cfngin.config.pre_destroy` hook before deleting an S
 
 .. rubric:: Hook Path
 
-:func:`runway.hooks.cleanup_s3.purge_bucket`
+:func:`runway.cfngin.hooks.cleanup_s3.purge_bucket`
 
 
 .. rubric:: Args
@@ -461,6 +464,9 @@ Primarily used as a :attr:`~cfngin.config.pre_destroy` hook before deleting an S
   :noindex:
 
   Name of the S3 bucket.
+
+.. versionchanged:: 2.0.0
+  Moved from ``runway.hooks`` to ``runway.cfngin.hooks``.
 
 
 cleanup_ssm.delete_param
@@ -474,7 +480,7 @@ Primarily used when an SSM parameter is created by a hook rather than CloudForma
 
 .. rubric:: Hook Path
 
-:func:`runway.hooks.cleanup_ssm.delete_param`
+:func:`runway.cfngin.hooks.cleanup_ssm.delete_param`
 
 
 .. rubric:: Args
@@ -483,6 +489,9 @@ Primarily used when an SSM parameter is created by a hook rather than CloudForma
   :noindex:
 
   Name of an SSM parameter.
+
+.. versionchanged:: 2.0.0
+  Moved from ``runway.hooks`` to ``runway.cfngin.hooks``.
 
 
 command.run_command
@@ -636,7 +645,7 @@ Replicates the functionality of the ``docker image build`` CLI command.
     :noindex:
 
     Extra hosts to add to ``/etc/hosts`` in the building containers.
-    Defined as a mapping of hostmane to IP address.
+    Defined as a mapping of hostname to IP address.
 
   .. data:: forcerm
     :type: bool
@@ -1342,7 +1351,7 @@ Sync static website to S3 bucket. Used by the :ref:`Static Site <staticsite>` mo
 
 .. rubric:: Hook Path
 
-:func:`runway.hooks.staticsite.upload_staticsite.sync`
+:func:`runway.cfngin.hooks.staticsite.upload_staticsite.sync`
 
 
 .. rubric:: Args

@@ -5,11 +5,11 @@ import tempfile
 
 from integration_tests.test_serverless.test_serverless import Serverless
 from integration_tests.utils import run_command
+from runway.cfngin.hooks.staticsite.utils import get_hash_of_files
 
 # from runway.commands.modules_command import assume_role
 from runway.context import CfnginContext
 from runway.core.providers import aws
-from runway.hooks.staticsite.utils import get_hash_of_files
 from runway.module.serverless import get_src_hash
 from runway.s3_utils import (
     download,

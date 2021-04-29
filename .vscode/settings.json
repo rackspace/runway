@@ -138,6 +138,7 @@
         "testfixtures",
         "tfvar",
         "tfver",
+        "thisfileisnotused",
         "unseekable",
         "unshallow",
         "urllib",

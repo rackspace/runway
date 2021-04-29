@@ -167,7 +167,7 @@ class StaticSite(RunwayModule):
 
         pre_destroy = [
             {
-                "path": "runway.hooks.cleanup_s3.purge_bucket",
+                "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
                 "args": {"bucket_name": f"${{rxref {self.name}-dependencies::{i}}}"},
             }
@@ -179,7 +179,8 @@ class StaticSite(RunwayModule):
                 # Retrieve the appropriate callback urls from the User Pool Client
                 pre_deploy.append(
                     {
-                        "path": "runway.hooks.staticsite.auth_at_edge.callback_url_retriever.get",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                        "callback_url_retriever.get",
                         "required": True,
                         "data_key": "aae_callback_url_retriever",
                         "args": {
@@ -194,7 +195,8 @@ class StaticSite(RunwayModule):
                 # Retrieve the user pool id
                 pre_destroy.append(
                     {
-                        "path": "runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                        "user_pool_id_retriever.get",
                         "required": True,
                         "data_key": "aae_user_pool_id_retriever",
                         "args": self._get_user_pool_id_retriever_variables(),
@@ -205,7 +207,8 @@ class StaticSite(RunwayModule):
                 # User Pool Client that was created
                 pre_destroy.append(
                     {
-                        "path": "runway.hooks.staticsite.auth_at_edge.domain_updater.delete",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                        "domain_updater.delete",
                         "required": True,
                         "data_key": "aae_domain_updater",
                         "args": self._get_domain_updater_variables(),
@@ -215,7 +218,8 @@ class StaticSite(RunwayModule):
                 # Retrieve the user pool id
                 pre_deploy.append(
                     {
-                        "path": "runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                        "user_pool_id_retriever.get",
                         "required": True,
                         "data_key": "aae_user_pool_id_retriever",
                         "args": self._get_user_pool_id_retriever_variables(),
@@ -267,7 +271,7 @@ class StaticSite(RunwayModule):
 
         pre_deploy = [
             {
-                "path": "runway.hooks.staticsite.build_staticsite.build",
+                "path": "runway.cfngin.hooks.staticsite.build_staticsite.build",
                 "required": True,
                 "data_key": "staticsite",
                 "args": build_staticsite_args,
@@ -276,7 +280,7 @@ class StaticSite(RunwayModule):
 
         post_deploy = [
             {
-                "path": "runway.hooks.staticsite.upload_staticsite.sync",
+                "path": "runway.cfngin.hooks.staticsite.upload_staticsite.sync",
                 "required": True,
                 "args": {
                     "bucket_name": f"${{cfn ${{namespace}}-{self.name}.BucketName}}",
@@ -291,7 +295,7 @@ class StaticSite(RunwayModule):
 
         pre_destroy = [
             {
-                "path": "runway.hooks.cleanup_s3.purge_bucket",
+                "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
                 "args": {"bucket_name": f"${{rxref {self.name}::BucketName}}"},
             }
@@ -300,7 +304,7 @@ class StaticSite(RunwayModule):
         if self.parameters.rewrite_directory_index or self.parameters.auth_at_edge:
             pre_destroy.append(
                 {
-                    "path": "runway.hooks.staticsite.cleanup.warn",
+                    "path": "runway.cfngin.hooks.staticsite.cleanup.warn",
                     "required": False,
                     "args": {"stack_relative_name": self.name},
                 }
@@ -308,7 +312,7 @@ class StaticSite(RunwayModule):
 
         post_destroy = [
             {
-                "path": "runway.hooks.cleanup_ssm.delete_param",
+                "path": "runway.cfngin.hooks.cleanup_ssm.delete_param",
                 "args": {"parameter_name": i},
             }
             for i in [
@@ -323,7 +327,8 @@ class StaticSite(RunwayModule):
 
             pre_deploy.append(
                 {
-                    "path": "runway.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get",
+                    "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                    "user_pool_id_retriever.get",
                     "required": True,
                     "data_key": "aae_user_pool_id_retriever",
                     "args": self._get_user_pool_id_retriever_variables(),
@@ -331,7 +336,7 @@ class StaticSite(RunwayModule):
             )
             pre_deploy.append(
                 {
-                    "path": "runway.hooks.staticsite.auth_at_edge.domain_updater.update",
+                    "path": "runway.cfngin.hooks.staticsite.auth_at_edge.domain_updater.update",
                     "required": True,
                     "data_key": "aae_domain_updater",
                     "args": self._get_domain_updater_variables(),
@@ -339,7 +344,7 @@ class StaticSite(RunwayModule):
             )
             pre_deploy.append(
                 {
-                    "path": "runway.hooks.staticsite.auth_at_edge.lambda_config.write",
+                    "path": "runway.cfngin.hooks.staticsite.auth_at_edge.lambda_config.write",
                     "required": True,
                     "data_key": "aae_lambda_config",
                     "args": self._get_lambda_config_variables(
@@ -353,7 +358,8 @@ class StaticSite(RunwayModule):
                 post_deploy.insert(
                     0,
                     {
-                        "path": "runway.hooks.staticsite.auth_at_edge.client_updater.update",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                        "client_updater.update",
                         "required": True,
                         "data_key": "client_updater",
                         "args": self._get_client_updater_variables(

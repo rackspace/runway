@@ -11,11 +11,11 @@ from distutils.dir_util import copy_tree
 from tempfile import mkstemp
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from ....cfngin.hooks import aws_lambda
+from ... import aws_lambda
 
 if TYPE_CHECKING:
-    from ....cfngin.providers.aws.default import Provider
-    from ....context import CfnginContext
+    from .....context import CfnginContext
+    from ....providers.aws.default import Provider
 
 # The functions associated with Auth@Edge
 FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_headers"]

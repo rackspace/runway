@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 import zgitignore
 
-from ...utils import change_dir
+from ....utils import change_dir
 
 if TYPE_CHECKING:
     from pathlib import Path

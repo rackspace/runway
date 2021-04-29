@@ -55,7 +55,7 @@ stacks:
 
 post_destroy:
   purge_bucket:
-    path: runway.hooks.cleanup_s3.purge_bucket
+    path: runway.cfngin.hooks.cleanup_s3.purge_bucket
     required: True
     args:
       bucket_name: ${CFNGIN_NAMESPACE}-${region}

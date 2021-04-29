@@ -1,4 +1,4 @@
-"""Test runway.hooks.staticsite.upload_staticsite."""
+"""Test runway.cfngin.hooks.staticsite.upload_staticsite."""
 # pylint: disable=no-self-use,too-few-public-methods
 # pyright: basic
 from __future__ import annotations
@@ -10,7 +10,7 @@ import pytest
 import yaml
 from botocore.stub import ANY
 
-from runway.hooks.staticsite.upload_staticsite import (
+from runway.cfngin.hooks.staticsite.upload_staticsite import (
     auto_detect_content_type,
     calculate_hash_of_extra_files,
     get_content,
@@ -19,13 +19,13 @@ from runway.hooks.staticsite.upload_staticsite import (
 )
 
 if TYPE_CHECKING:
-    from runway.hooks.staticsite.upload_staticsite import ExtraFileTypeDef
+    from runway.cfngin.hooks.staticsite.upload_staticsite import ExtraFileTypeDef
 
-    from ...factories import MockCFNginContext
+    from ....factories import MockCFNginContext
 
 
 class TestAutoDetectContentType:
-    """Test runway.hooks.staticsite.upload_staticsite.auto_detect_content_type."""
+    """Test runway.cfngin.hooks.staticsite.upload_staticsite.auto_detect_content_type."""
 
     @pytest.mark.parametrize(
         "provided, expected",
@@ -47,7 +47,7 @@ class TestAutoDetectContentType:
 
 
 class TestGetContentType:
-    """Test runway.hooks.staticsite.upload_staticsite.get_content_type."""
+    """Test runway.cfngin.hooks.staticsite.upload_staticsite.get_content_type."""
 
     @pytest.mark.parametrize(
         "provided, expected",
@@ -65,7 +65,7 @@ class TestGetContentType:
 
 
 class TestGetContent:
-    """Test runway.hooks.staticsite.upload_staticsite.get_content."""
+    """Test runway.cfngin.hooks.staticsite.upload_staticsite.get_content."""
 
     def test_json_content(self) -> None:
         """Test json content is serialized."""
@@ -97,7 +97,7 @@ class TestGetContent:
 
 
 class TestCalculateExtraFilesHash:
-    """Test runway.hooks.staticsite.upload_staticsite.calculate_hash_of_extra_files."""
+    """Test runway.cfngin.hooks.staticsite.upload_staticsite.calculate_hash_of_extra_files."""
 
     @pytest.mark.parametrize(
         "a, b",
@@ -118,7 +118,7 @@ class TestCalculateExtraFilesHash:
 
 
 class TestSyncExtraFiles:
-    """Test runway.hooks.staticsite.upload_staticsite.sync_extra_files."""
+    """Test runway.cfngin.hooks.staticsite.upload_staticsite.sync_extra_files."""
 
     def test_json_content(self, cfngin_context: MockCFNginContext) -> None:
         """Test json content is put in s3."""
