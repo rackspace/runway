@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 Sphinx = "~=3.5"
+jsx-lexer = "~=1.0"
 runway = {editable = true,path = "./.."}
 sphinx-rtd-theme = "~=0.5"
 sphinx-tabs = "*"
