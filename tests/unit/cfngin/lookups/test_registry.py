@@ -35,7 +35,6 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
         "rxref",
         "split",
         "ssm",
-        "ssmstore",
         "xref",
     ]
     for handler in handlers:
