@@ -310,7 +310,7 @@ Top-Level Fields
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
     .. rubric:: Example
-    . code-block:: yaml
+    .. code-block:: yaml
 
       pre_deploy:
         - path: do.something

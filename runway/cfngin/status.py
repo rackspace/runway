@@ -141,6 +141,12 @@ class DidNotChangeStatus(SkippedStatus):
     reason = "nochange"
 
 
+class DoesNotExistInCloudFormation(SkippedStatus):
+    """Skipped status with a reason of 'does not exist in cloudformation'."""
+
+    reason = "does not exist in cloudformation"
+
+
 class NotSubmittedStatus(SkippedStatus):
     """Skipped status with a reason of 'disabled'."""
 
@@ -151,12 +157,6 @@ class NotUpdatedStatus(SkippedStatus):
     """Skipped status with a reason of 'locked'."""
 
     reason = "locked"
-
-
-class StackDoesNotExist(SkippedStatus):
-    """Skipped status with a reason of 'does not exist in cloudformation'."""
-
-    reason = "does not exist in cloudformation"
 
 
 COMPLETE = CompleteStatus()

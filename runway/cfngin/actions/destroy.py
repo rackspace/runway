@@ -6,9 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from ..exceptions import StackDoesNotExist
 from ..hooks.utils import handle_hooks
-from ..status import INTERRUPTED, PENDING, SUBMITTED, CompleteStatus
-from ..status import StackDoesNotExist as StackDoesNotExistStatus
-from ..status import SubmittedStatus
+from ..status import (
+    INTERRUPTED,
+    PENDING,
+    SUBMITTED,
+    CompleteStatus,
+    DoesNotExistInCloudFormation,
+    SubmittedStatus,
+)
 from .base import STACK_POLL_TIME, BaseAction, build_walker
 
 if TYPE_CHECKING:
@@ -60,7 +65,7 @@ class Action(BaseAction):
             # otherwise it should be skipped
             if status == SUBMITTED:
                 return DESTROYED_STATUS
-            return StackDoesNotExistStatus()
+            return DoesNotExistInCloudFormation()
 
         LOGGER.debug(
             "%s:provider status: %s",

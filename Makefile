@@ -74,7 +74,7 @@ lint-black: ## run black
 
 lint-flake8: ## run flake8
 	@echo "Running flake8..."
-	@pipenv run flake8
+	@pipenv run flake8 --config=setup.cfg
 	@echo ""
 
 lint-isort: ## run isort

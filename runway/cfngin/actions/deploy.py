@@ -22,13 +22,13 @@ from ..status import (
     WAITING,
     CompleteStatus,
     DidNotChangeStatus,
+    DoesNotExistInCloudFormation,
     FailedStatus,
     NotSubmittedStatus,
     NotUpdatedStatus,
     SkippedStatus,
+    SubmittedStatus,
 )
-from ..status import StackDoesNotExist as StackDoesNotExistStatus
-from ..status import SubmittedStatus
 from .base import STACK_POLL_TIME, BaseAction, build_walker
 
 if TYPE_CHECKING:
@@ -285,7 +285,7 @@ class Action(BaseAction):
             LOGGER.debug("%s:stack does not exist", stack.fqn)
             if kwargs.get("status", None) == SUBMITTED:
                 return DESTROYED_STATUS
-            return StackDoesNotExistStatus()
+            return DoesNotExistInCloudFormation()
 
         LOGGER.debug(
             "%s:provider status: %s",
