@@ -61,9 +61,9 @@ def Entrypoint(dist, group, name, **kwargs):  # noqa
 # files that are not explicitly imported but consumed at runtime
 # need to be included as data_files.
 data_files = [
-    (os.path.join(CLI_PATH, "templates"), "./runway/templates"),
     (os.path.join(CLI_PATH, "blueprints"), "./runway/blueprints"),
-    (os.path.join(CLI_PATH, "hooks"), "./runway/hooks"),
+    (os.path.join(CLI_PATH, "cfngin/hooks"), "./runway/cfngin/hooks"),
+    (os.path.join(CLI_PATH, "templates"), "./runway/templates"),
 ]
 data_files.append(
     ("{}/yamllint/conf".format(get_distribution("yamllint").location), "yamllint/conf/")
