@@ -9,7 +9,7 @@ from ...lookups.handlers.base import LookupHandler
 from ...utils import DOC_SITE, load_object_from_string
 from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler
-from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref
+from .handlers import hook_data, kms, output, rxref, split, xref
 
 CFNGIN_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
@@ -78,5 +78,4 @@ register_lookup_handler(output.TYPE_NAME, output.OutputLookup)
 register_lookup_handler(rxref.TYPE_NAME, rxref.RxrefLookup)
 register_lookup_handler(split.TYPE_NAME, split.SplitLookup)
 register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
-register_lookup_handler(ssmstore.TYPE_NAME, ssmstore.SsmstoreLookup)
 register_lookup_handler(xref.TYPE_NAME, xref.XrefLookup)

@@ -443,40 +443,6 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 ----
 
 
-.. _`ssmstore lookup`:
-
-********
-ssmstore
-********
-
-.. deprecated:: 1.5.0
-  Replaced by ssm_
-
-The ssmstore_ lookup type retrieves a value from the Simple Systems Manager Parameter Store.
-
-As an example, if you have a database and it has a parameter called ``DBUser`` that you don't want to store in clear text in your config, you could instead store it as a SSM parameter named ``MyDBUser``.
-
-For example::
-
-  # We use the aws cli to store the database username
-  $ aws ssm put-parameter --name "MyDBUser" --type "String" \
-      --value "root"
-
-  # In CFNgin we would reference the value like:
-  DBUser: ${ssmstore us-east-1@MyDBUser}
-
-  # Which would resolve to:
-  DBUser: root
-
-Encrypted values ("SecureStrings") can also be used, which will be automatically decrypted (assuming the CFNgin user has access to the associated KMS key).
-Care should be taken when using this with encrypted values (i.e. a safe policy is to only use it with ``no_echo`` CFNString values).
-
-The region can be omitted (e.g. ``DBUser: ${ssmstore MyDBUser}``), in which case ``us-east-1`` will be assumed.
-
-
-----
-
-
 .. _`dynamodb lookup`:
 
 ********
