@@ -1,5 +1,4 @@
 """CFNgin hook for syncing static website to S3 bucket."""
-# TODO move to runway.cfngin.hooks on next major release
 from __future__ import annotations
 
 import hashlib
@@ -13,14 +12,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 import yaml
 from typing_extensions import TypedDict
 
-from ...core.providers.aws.s3 import Bucket
+from ....core.providers.aws.s3 import Bucket
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from boto3.session import Session
 
-    from ...context import CfnginContext
+    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
