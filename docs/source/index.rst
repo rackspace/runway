@@ -206,13 +206,3 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
 
    License <license>
    terminology
-
-
-
-******************
-Indices and tables
-******************
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
