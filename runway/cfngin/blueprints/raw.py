@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from jinja2 import Environment, FileSystemLoader
 
 from ..exceptions import InvalidConfig, UnresolvedBlueprintVariable
-from ..util import parse_cloudformation_template
+from ..utils import parse_cloudformation_template
 from .base import Blueprint
 
 if TYPE_CHECKING:

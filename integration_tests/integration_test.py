@@ -9,7 +9,7 @@ from copy import deepcopy
 import yaml
 from send2trash import send2trash
 
-from runway.util import change_dir
+from runway.utils import change_dir
 
 
 class IntegrationTest:

@@ -8,13 +8,14 @@ import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ..._logging import PrefixAdaptor
+from ...compat import cached_property
 from ...config.components.runway import RunwayVariablesDefinition
 from ...config.models.runway import (
     RunwayAssumeRoleDefinitionModel,
     RunwayFutureDefinitionModel,
 )
 from ...exceptions import UnresolvedVariable
-from ...util import cached_property, flatten_path_lists, merge_dicts
+from ...utils import flatten_path_lists, merge_dicts
 from ..providers import aws
 from ._module import Module
 

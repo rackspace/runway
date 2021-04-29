@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, Tuple
 from troposphere import BaseAWSObject
 
 from ....lookups.handlers.base import LookupHandler
-from ....util import DOC_SITE, MutableMap
+from ....utils import DOC_SITE, MutableMap
 
 if TYPE_CHECKING:
     from ....context import CfnginContext

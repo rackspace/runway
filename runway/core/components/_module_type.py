@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type, cast
 
 from typing_extensions import Literal
 
-from ...util import load_object_from_string
+from ...utils import load_object_from_string
 
 if TYPE_CHECKING:
     from ...config.models.runway import RunwayModuleTypeTypeDef

@@ -9,7 +9,7 @@ from send2trash import send2trash
 
 from integration_tests.test_cfngin.test_cfngin import Cfngin
 from runway._cli import cli
-from runway.util import change_dir
+from runway.utils import change_dir
 
 FILE_BASENAME = ".".join(os.path.basename(__file__).split(".")[:-1])
 

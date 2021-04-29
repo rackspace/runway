@@ -4,8 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Dict, Type, Union, cast
 
-from runway.util import load_object_from_string
-
+from ..utils import load_object_from_string
 from .handlers import cfn, ecr, env, ssm, var
 from .handlers.base import LookupHandler
 

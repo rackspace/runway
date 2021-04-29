@@ -12,8 +12,8 @@ from .. import __version__
 from .._logging import PrefixAdaptor as _PrefixAdaptor
 from .._logging import RunwayLogger as _RunwayLogger
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
-from ..util import DOC_SITE
-from ..util import YamlDumper as _YamlDumper
+from ..utils import DOC_SITE
+from ..utils import YamlDumper as _YamlDumper
 from . import components, providers
 
 if TYPE_CHECKING:

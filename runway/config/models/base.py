@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pydantic
 
-from ...util import BaseModel
+from ...utils import BaseModel
 
 
 class ConfigProperty(BaseModel):

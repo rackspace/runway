@@ -1,4 +1,4 @@
-"""Tests for runway.cfngin.util."""
+"""Tests for runway.cfngin.utils."""
 # pylint: disable=unused-argument,invalid-name
 # pyright: basic
 from __future__ import annotations
@@ -12,7 +12,7 @@ import mock
 import pytest
 from pydantic import ValidationError
 
-from runway.cfngin.util import (
+from runway.cfngin.utils import (
     Extractor,
     SourceProcessor,
     TarExtractor,
@@ -102,7 +102,7 @@ def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
 
 
 class TestUtil(unittest.TestCase):
-    """Tests for runway.cfngin.util."""
+    """Tests for runway.cfngin.utils."""
 
     def test_cf_safe_name(self) -> None:
         """Test cf safe name."""

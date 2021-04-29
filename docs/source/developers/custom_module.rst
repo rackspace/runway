@@ -108,7 +108,7 @@ skipped. This matches the behavior of the Runway's native modules.
   from typing import TYPE_CHECKING, Dict
 
   from runway.module.base import RunwayModule
-  from runway.util import which
+  from runway.utils import which
 
   if TYPE_CHECKING:
       from pathlib import Path

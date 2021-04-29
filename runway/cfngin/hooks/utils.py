@@ -8,7 +8,7 @@ import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, cast
 
 from ...exceptions import FailedVariableLookup
-from ...util import load_object_from_string
+from ...utils import load_object_from_string
 from ...variables import Variable, resolve_variables
 from ..blueprints.base import Blueprint
 

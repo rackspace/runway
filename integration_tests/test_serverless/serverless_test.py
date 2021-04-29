@@ -4,20 +4,20 @@ import os
 import tempfile
 
 from integration_tests.test_serverless.test_serverless import Serverless
-from integration_tests.util import run_command
+from integration_tests.utils import run_command
 
 # from runway.commands.modules_command import assume_role
 from runway.context import CfnginContext
 from runway.core.providers import aws
-from runway.hooks.staticsite.util import get_hash_of_files
+from runway.hooks.staticsite.utils import get_hash_of_files
 from runway.module.serverless import get_src_hash
-from runway.s3_util import (
+from runway.s3_utils import (
     download,
     get_matching_s3_keys,
     purge_and_delete_bucket,
     purge_bucket,
 )
-from runway.util import change_dir, find_cfn_output
+from runway.utils import change_dir, find_cfn_output
 
 
 class ServerlessTest(Serverless):

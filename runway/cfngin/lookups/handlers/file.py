@@ -14,7 +14,7 @@ from troposphere import Base64, GenericHelperFn
 from typing_extensions import Literal
 
 from ....lookups.handlers.base import LookupHandler
-from ...util import read_value_from_path
+from ...utils import read_value_from_path
 
 TYPE_NAME = "file"
 

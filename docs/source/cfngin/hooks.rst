@@ -1368,9 +1368,9 @@ The values for these additional arguments come from the :attr:`~cfngin.hook.args
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
 This signifies to CFNgin whether or not to halt execution if the hook is :attr:`~cfngin.hook.required`.
-If a |Dict| or :class:`~cfngin.util.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
+If a |Dict| or :class:`~cfngin.utils.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where :attr:`~cfngin.hook.data_key` is the value set in the hook definition.
-If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict| or :class:`~cfngin.util.MutableMap`, it will not be added to the context object.
+If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict| or :class:`~cfngin.utils.MutableMap`, it will not be added to the context object.
 
 If using boto3 in a hook, use :meth:`context.get_session() <runway.context.CfnginContext.get_session>` instead of creating a new session to ensure the correct credentials are used.
 

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from ..util import cached_property
+from ..compat import cached_property
 
 if TYPE_CHECKING:
     from urllib.error import URLError

@@ -37,7 +37,7 @@ from runway.cfngin.providers.aws.default import (
 from runway.cfngin.providers.base import Template
 from runway.cfngin.session_cache import get_session
 from runway.cfngin.stack import Stack
-from runway.util import MutableMap
+from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import (

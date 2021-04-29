@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from ..exceptions import NpmNotFound
-from ..util import which
+from ..utils import which
 from .utils import NPM_BIN, format_npm_command_for_logging, use_npm_ci
 
 if TYPE_CHECKING:

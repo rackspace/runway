@@ -8,7 +8,7 @@ import sys
 from typing import TYPE_CHECKING, Any
 
 from runway.cfngin.lookups.handlers.output import OutputLookup
-from runway.util import which
+from runway.utils import which
 
 if TYPE_CHECKING:
     from runway.context import CfnginContext

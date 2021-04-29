@@ -4,7 +4,7 @@ import os
 from typing import Any
 
 from ....lookups.handlers.base import LookupHandler
-from ...util import read_value_from_path
+from ...utils import read_value_from_path
 
 TYPE_NAME = "envvar"
 

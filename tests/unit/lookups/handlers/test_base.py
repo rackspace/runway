@@ -11,7 +11,7 @@ import yaml
 from mock import MagicMock
 
 from runway.lookups.handlers.base import LookupHandler
-from runway.util import MutableMap
+from runway.utils import MutableMap
 from runway.variables import VariableValue
 
 

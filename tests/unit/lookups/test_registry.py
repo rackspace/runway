@@ -13,7 +13,7 @@ from runway.lookups.registry import (
     register_lookup_handler,
     unregister_lookup_handler,
 )
-from runway.util import MutableMap
+from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

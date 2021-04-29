@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Union
 
-from ....util import cached_property
+from ....compat import cached_property
 
 if TYPE_CHECKING:
     import boto3

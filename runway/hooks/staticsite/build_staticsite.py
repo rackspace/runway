@@ -14,9 +14,9 @@ from boto3.s3.transfer import S3Transfer  # type: ignore
 from typing_extensions import TypedDict
 
 from ...cfngin.lookups.handlers.rxref import RxrefLookup
-from ...s3_util import does_s3_object_exist, download_and_extract_to_mkdtemp
-from ...util import change_dir, run_commands
-from .util import get_hash_of_files
+from ...s3_utils import does_s3_object_exist, download_and_extract_to_mkdtemp
+from ...utils import change_dir, run_commands
+from .utils import get_hash_of_files
 
 if TYPE_CHECKING:
     from ...cfngin.providers.aws.default import Provider

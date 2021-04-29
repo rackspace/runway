@@ -657,7 +657,7 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
 
   from typing import TYPE_CHECKING, Any, Optional, Union
 
-  from runway.cfngin.util import read_value_from_path
+  from runway.cfngin.utils import read_value_from_path
   from runway.lookups.handlers.base import LookupHandler
 
   if TYPE_CHECKING:

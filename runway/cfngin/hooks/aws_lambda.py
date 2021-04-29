@@ -41,7 +41,7 @@ from typing_extensions import Literal, TypedDict
 
 from ...constants import DOT_RUNWAY_DIR
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
-from ..util import ensure_s3_bucket
+from ..utils import ensure_s3_bucket
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
@@ -636,7 +636,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
             script_contents = os.linesep.join(
                 [
                     "import runpy",
-                    "from runway.util import argv",
+                    "from runway.utils imports argv",
                     "with argv(*{}):".format(json.dumps(pip_cmd[2:])),
                     '   runpy.run_module("pip", run_name="__main__")\n',
                 ]

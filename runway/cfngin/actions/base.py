@@ -12,7 +12,7 @@ import botocore.exceptions
 from ..dag import ThreadedWalker, UnlimitedSemaphore, walk
 from ..exceptions import PlanFailed
 from ..plan import Graph, Plan, Step, merge_graphs
-from ..util import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
+from ..utils import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client

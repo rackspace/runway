@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, cast
 
 from typing_extensions import Literal
 
-from runway.util import load_object_from_string
+from runway.utils import load_object_from_string
 from runway.variables import Variable, resolve_variables
 
 from .blueprints.raw import RawTemplateBlueprint

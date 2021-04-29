@@ -6,7 +6,7 @@ from typing import Dict, Type, Union, cast
 
 from ...lookups.handlers import cfn, ecr, ssm
 from ...lookups.handlers.base import LookupHandler
-from ...util import DOC_SITE, load_object_from_string
+from ...utils import DOC_SITE, load_object_from_string
 from .handlers import ami, default, dynamodb, envvar
 from .handlers import file as file_handler
 from .handlers import hook_data, kms, output, rxref, split, ssmstore, xref

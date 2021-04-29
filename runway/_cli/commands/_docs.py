@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import click
 
-from ...util import SafeHaven
+from ...utils import SafeHaven
 from .. import options
 
 if TYPE_CHECKING:
