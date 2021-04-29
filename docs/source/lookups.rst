@@ -14,27 +14,30 @@ The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``.
 +===========================+=================================================+
 | ``${``                    | Signifies the opening of the lookup.            |
 +---------------------------+-------------------------------------------------+
-| ``<lookup-name>``         | The name of the lookup you wish to use (e.g.    |
-|                           | ``env``). This signifies the *source* of the    |
-|                           | data to be retrieved by the lookup.             |
+| ``<lookup-name>``         || The name of the lookup you wish to use         |
+|                           |  (e.g. ``env``).                                |
+|                           || This signifies the *source* of the data to     |
+|                           | be retrieved by the lookup.                     |
 +---------------------------+-------------------------------------------------+
 |                           | The separator between lookup name a query.      |
 +---------------------------+-------------------------------------------------+
-| ``<query>``               | The value the lookup will be looking for. (e.g. |
-|                           | ``AWS_REGION``)                                 |
-|                           | | When using a lookup on a dictionary/mapping,  |
-|                           | like  for the `var`_ lookup, you can get nested |
-|                           | values by providing the full path to the value. |
-|                           | (e.g. ``ami.dev``}                              |
+| ``<query>``               || The value the lookup will be looking for       |
+|                           |  (e.g. ``AWS_REGION``).                         |
+|                           || When using a lookup on a dictionary/mapping,   |
+|                           |  like  for the `var`_ lookup,                   |
+|                           || you can get nested values by providing the     |
+|                           |  full path to the value (e.g. ``ami.dev``).     |
 +---------------------------+-------------------------------------------------+
 | ``::``                    | The separator between a query and optional      |
 |                           | arguments.                                      |
 +---------------------------+-------------------------------------------------+
-| ``<arg-key>=<arg-value>`` | An argument passed to a lookup. Multiple        |
-|                           | arguments can be passed to a lookup by          |
-|                           | separating them with a comma (``,``). Arguments |
-|                           | are optional. Supported arguments depend on the |
-|                           | lookup being used.                              |
+| ``<arg-key>=<arg-value>`` || An argument passed to a lookup.                |
+|                           || Multiple arguments can be passed to a lookup   |
+|                           |  by separating them with a                      |
+|                           || comma (``,``).                                 |
+|                           || Arguments are optional.                        |
+|                           || Supported arguments depend on the lookup being |
+|                           |  used.                                          |
 +---------------------------+-------------------------------------------------+
 
 Lookups can be nested (e.g. ``${var ami_id.${var AWS_REGION}}``).
@@ -321,12 +324,12 @@ If the Lookup is unable to find an defined variable matching the provided query,
 
 Nested values can be used by providing the full path to the value but, it will not select a list element.
 
-The returned value can contain any YAML support data type (dictionaries/mappings/hashes, lists/arrays/sequences, strings, numbers, and booleon).
+The returned value can contain any YAML support data type (dictionaries/mappings/hashes, lists/arrays/sequences, strings, numbers, and boolean).
 
 
 .. rubric:: Arguments
 
-This Lookup supports all :ref:`Common Lookup Arguments` but, the folling have limited or no effect:
+This Lookup supports all :ref:`Common Lookup Arguments` but, the following have limited or no effect:
 
 - region
 
