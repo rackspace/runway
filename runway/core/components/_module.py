@@ -11,13 +11,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 import yaml
 
 from ..._logging import PrefixAdaptor
+from ...compat import cached_property
 from ...config.components.runway import RunwayVariablesDefinition
 from ...config.models.runway import (
     RunwayEnvVarsType,
     RunwayFutureDefinitionModel,
     RunwayVariablesDefinitionModel,
 )
-from ...util import cached_property, change_dir, flatten_path_lists, merge_dicts
+from ...utils import change_dir, flatten_path_lists, merge_dicts
 from ..providers import aws
 from ._module_path import ModulePath
 from ._module_type import RunwayModuleType

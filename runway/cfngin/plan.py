@@ -22,9 +22,8 @@ from typing import (
     overload,
 )
 
-from runway._logging import LogLevels, PrefixAdaptor
-
-from ..util import merge_dicts
+from .._logging import LogLevels, PrefixAdaptor
+from ..utils import merge_dicts
 from .dag import DAG, DAGValidationError, walk
 from .exceptions import CancelExecution, GraphError, PersistentGraphLocked, PlanFailed
 from .stack import Stack
@@ -38,7 +37,7 @@ from .status import (
     SkippedStatus,
 )
 from .ui import ui
-from .util import stack_template_key_name
+from .utils import stack_template_key_name
 
 if TYPE_CHECKING:
     from ..context import CfnginContext

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 import yaml
 
 from ..._logging import PrefixAdaptor
-from ...util import YamlDumper
+from ...utils import YamlDumper
 from ..base import RunwayModule
 from ..cloudformation import CloudFormation
 from .options import StaticSiteOptions

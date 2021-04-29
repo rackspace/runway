@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import pytest
 from mock import MagicMock, patch
 
-from runway.util import (
+from runway.utils import (
     JsonEncoder,
     MutableMap,
     SafeHaven,
@@ -28,7 +28,7 @@ from runway.util import (
 if TYPE_CHECKING:
     from pytest import LogCaptureFixture, MonkeyPatch
 
-MODULE = "runway.util"
+MODULE = "runway.utils"
 VALUE = {
     "bool_val": False,
     "dict_val": {"test": "success"},
@@ -39,7 +39,7 @@ VALUE = {
 
 
 class TestJsonEncoder:
-    """Test runway.util.JsonEncoder."""
+    """Test runway.utils.JsonEncoder."""
 
     @pytest.mark.parametrize(
         "provided, expected", [(datetime.datetime.now(), str), (Decimal("1.1"), float)]
@@ -362,7 +362,7 @@ def test_load_object_from_string() -> None:
 def test_load_object_from_string_reload_conditions(monkeypatch: MonkeyPatch) -> None:
     """Test load_object_from_string reload conditions."""
     mock_reload = MagicMock()
-    monkeypatch.setattr("runway.util.importlib.reload", mock_reload)
+    monkeypatch.setattr("runway.utils.importlib.reload", mock_reload)
     builtin_test = "sys.version_info"
     mock_hook = "tests.unit.fixtures.mock_hooks.GLOBAL_VALUE"
 

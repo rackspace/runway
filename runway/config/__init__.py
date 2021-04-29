@@ -24,9 +24,9 @@ import yaml
 
 from ..cfngin import exceptions
 from ..cfngin.lookups import register_lookup_handler
-from ..cfngin.util import SourceProcessor
+from ..cfngin.utils import SourceProcessor
 from ..exceptions import ConfigNotFound
-from ..util import merge_dicts
+from ..utils import merge_dicts
 from .components.runway import (
     RunwayDeploymentDefinition,
     RunwayTestDefinition,

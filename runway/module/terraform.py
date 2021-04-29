@@ -20,7 +20,7 @@ from ..config.models.runway.options.terraform import (
     RunwayTerraformModuleOptionsDataModel,
 )
 from ..env_mgr.tfenv import TFEnvManager
-from ..util import DOC_SITE, which
+from ..utils import DOC_SITE, which
 from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
 

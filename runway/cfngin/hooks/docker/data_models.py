@@ -26,7 +26,7 @@ from typing import (
 from typing_extensions import Literal
 
 from ....core.providers.aws import AccountDetails
-from ....util import MutableMap
+from ....utils import MutableMap
 
 if TYPE_CHECKING:
     from docker.models.images import Image

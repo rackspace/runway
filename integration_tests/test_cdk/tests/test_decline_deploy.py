@@ -4,7 +4,7 @@ import sys
 import pexpect
 
 from integration_tests.test_cdk.test_cdk import CDK
-from runway.util import change_dir
+from runway.utils import change_dir
 
 
 class TestDeclineDeploy(CDK):

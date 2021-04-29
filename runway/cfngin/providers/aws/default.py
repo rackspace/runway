@@ -26,13 +26,13 @@ import botocore.exceptions
 import yaml
 from botocore.config import Config
 
-from ....util import DOC_SITE, JsonEncoder
+from ....utils import DOC_SITE, JsonEncoder
 from ... import exceptions
 from ...actions.diff import DictValue, diff_parameters
 from ...actions.diff import format_params_diff as format_diff
 from ...session_cache import get_session
 from ...ui import ui
-from ...util import parse_cloudformation_template
+from ...utils import parse_cloudformation_template
 from ..base import BaseProvider
 
 if TYPE_CHECKING:

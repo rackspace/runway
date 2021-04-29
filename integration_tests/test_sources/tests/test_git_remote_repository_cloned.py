@@ -2,8 +2,8 @@
 import os
 
 from integration_tests.test_sources.test_sources import TestSources
-from runway.util import change_dir
-from util import run_command
+from runway.utils import change_dir
+from utils import run_command
 
 
 class TestGitRemoteRepositoryCloned(TestSources):

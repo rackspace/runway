@@ -10,6 +10,7 @@ from typing import Any, Iterator, List, Optional, Tuple
 import click
 import yaml
 
+from ..compat import cached_property
 from ..config import RunwayConfig
 from ..config.components.runway import (
     RunwayDeploymentDefinition,
@@ -18,7 +19,6 @@ from ..config.components.runway import (
 from ..context import RunwayContext
 from ..core.components import DeployEnvironment
 from ..exceptions import ConfigNotFound
-from ..util import cached_property
 
 LOGGER = logging.getLogger(__name__)
 

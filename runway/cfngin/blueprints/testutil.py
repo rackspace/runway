@@ -9,11 +9,10 @@ from glob import glob
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Type, cast
 
-from runway.util import load_object_from_string
-from runway.variables import Variable
-
 from ...config import CfnginConfig
 from ...context import CfnginContext
+from ...utils import load_object_from_string
+from ...variables import Variable
 
 if TYPE_CHECKING:
     from ...config.models.cfngin import CfnginStackDefinitionModel

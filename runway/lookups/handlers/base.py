@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Set, Tuple, Uni
 import yaml
 from troposphere import BaseAWSObject
 
-from runway.cfngin.util import read_value_from_path
-from runway.util import MutableMap
+from ...cfngin.utils import read_value_from_path
+from ...utils import MutableMap
 
 if TYPE_CHECKING:
     from ...cfngin.providers.aws.default import Provider

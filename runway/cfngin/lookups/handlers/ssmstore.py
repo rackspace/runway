@@ -6,7 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from ....lookups.handlers.base import LookupHandler
-from ...util import read_value_from_path
+from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext

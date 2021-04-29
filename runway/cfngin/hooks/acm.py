@@ -10,7 +10,7 @@ from troposphere import Ref
 from troposphere.certificatemanager import Certificate as CertificateResource
 from typing_extensions import Literal
 
-from ...util import MutableMap
+from ...utils import MutableMap
 from ..blueprints.variables.types import CFNString
 from ..exceptions import StackDoesNotExist, StackFailed, StackUpdateBadStatus
 from ..status import NO_CHANGE, SUBMITTED

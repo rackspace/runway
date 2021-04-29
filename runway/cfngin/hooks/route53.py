@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from ..util import create_route53_zone
+from ..utils import create_route53_zone
 
 if TYPE_CHECKING:
     from ...context import CfnginContext

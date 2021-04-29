@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 from pydantic import validator
 from typing_extensions import Literal
 
-from ......util import BaseModel
+from ......utils import BaseModel
 from .utils import find_bucket_key
 
 PathsType = Literal["local", "locallocal", "locals3", "s3", "s3local", "s3s3"]

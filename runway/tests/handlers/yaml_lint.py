@@ -9,7 +9,7 @@ import runpy
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from ...tests.handlers.base import TestHandler
-from ...util import argv
+from ...utils import argv
 
 if TYPE_CHECKING:
     from ...config.components.runway.base import ConfigProperty

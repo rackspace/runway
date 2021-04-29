@@ -3,7 +3,7 @@ import logging
 import os
 
 from .integration_test import IntegrationTest
-from .util import execute_tests, import_tests
+from .utils import execute_tests, import_tests
 
 
 class Runner:

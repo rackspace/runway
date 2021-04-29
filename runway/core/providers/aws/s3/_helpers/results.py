@@ -31,7 +31,7 @@ from typing import (
 from s3transfer.exceptions import CancelledError, FatalError
 from typing_extensions import Literal
 
-from ......util import ensure_string
+from ......utils import ensure_string
 from .utils import (
     OnDoneFilteredSubscriber,
     PrintTask,

@@ -19,8 +19,9 @@ import hcl
 import hcl2
 import requests
 
+from ..compat import cached_property
 from ..exceptions import HclParserError
-from ..util import cached_property, get_hash_for_filename, merge_dicts, sha256sum
+from ..utils import get_hash_for_filename, merge_dicts, sha256sum
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:

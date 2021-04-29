@@ -22,7 +22,7 @@ from runway.cfngin.exceptions import (
 )
 from runway.cfngin.hooks.acm import Certificate
 from runway.cfngin.status import FAILED, NO_CHANGE, SubmittedStatus
-from runway.util import MutableMap
+from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from mypy_boto3_acm.type_defs import DomainValidationTypeDef, ResourceRecordTypeDef

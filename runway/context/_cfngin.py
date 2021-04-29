@@ -17,7 +17,7 @@ from ..cfngin.exceptions import (
 )
 from ..cfngin.plan import Graph
 from ..cfngin.stack import Stack
-from ..cfngin.util import ensure_s3_bucket
+from ..cfngin.utils import ensure_s3_bucket
 from ..compat import cached_property
 from ..config import CfnginConfig
 from ..core.components import DeployEnvironment

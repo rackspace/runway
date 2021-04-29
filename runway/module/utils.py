@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Union, cast
 
-from ..util import which
+from ..utils import which
 
 if TYPE_CHECKING:
     from .._logging import RunwayLogger

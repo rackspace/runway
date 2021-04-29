@@ -12,7 +12,7 @@ from ..compat import cached_property
 from ..config.models.runway.options.k8s import RunwayK8sModuleOptionsDataModel
 from ..core.components import DeployEnvironment
 from ..env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
-from ..util import DOC_SITE, which
+from ..utils import DOC_SITE, which
 from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
 

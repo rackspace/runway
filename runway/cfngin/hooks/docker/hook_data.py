@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Optional, overload
 
 from docker import DockerClient
 
-from ....util import MutableMap, cached_property
+from ....compat import cached_property
+from ....utils import MutableMap
 
 if TYPE_CHECKING:
     from ....context import CfnginContext

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, cast
 import yaml
 
 from ....exceptions import VariablesFileNotFound
-from ....util import MutableMap
+from ....utils import MutableMap
 from ...models.runway import RunwayVariablesDefinitionModel
 
 if TYPE_CHECKING:

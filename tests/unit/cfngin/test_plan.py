@@ -26,7 +26,7 @@ from runway.cfngin.lookups.registry import (
 from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.stack import Stack
 from runway.cfngin.status import COMPLETE, FAILED, SKIPPED, SUBMITTED
-from runway.cfngin.util import stack_template_key_name
+from runway.cfngin.utils import stack_template_key_name
 from runway.config import CfnginConfig
 from runway.context import CfnginContext
 from runway.lookups.handlers.base import LookupHandler

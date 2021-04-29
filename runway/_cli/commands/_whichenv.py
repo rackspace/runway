@@ -5,7 +5,7 @@ from typing import Any
 
 import click
 
-from ...util import SafeHaven
+from ...utils import SafeHaven
 from .. import options
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))

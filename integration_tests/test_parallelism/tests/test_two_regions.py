@@ -1,7 +1,7 @@
 """Test that two regions can be deployed in parallel."""
 from integration_tests.test_parallelism.test_parallelism import Parallelism
-from integration_tests.util import run_command
-from runway.util import change_dir
+from integration_tests.utils import run_command
+from runway.utils import change_dir
 
 
 class TestTwoRegions(Parallelism):

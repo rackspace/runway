@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from .._logging import PrefixAdaptor
 from ..config.models.runway.options.cdk import RunwayCdkModuleOptionsDataModel
-from ..util import change_dir, run_commands, which
+from ..utils import change_dir, run_commands, which
 from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 

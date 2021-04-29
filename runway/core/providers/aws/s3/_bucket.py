@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from botocore.exceptions import ClientError
 
-from .....util import cached_property
+from .....compat import cached_property
 from .._response import BaseResponse
 from ._sync_handler import S3SyncHandler
 

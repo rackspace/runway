@@ -15,7 +15,7 @@ from runway.cfngin.hooks.docker.data_models import (
     ElasticContainerRegistry,
     ElasticContainerRegistryRepository,
 )
-from runway.util import MutableMap
+from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from pathlib import Path

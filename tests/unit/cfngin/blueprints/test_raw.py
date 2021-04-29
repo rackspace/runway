@@ -15,7 +15,7 @@ from runway.cfngin.blueprints.raw import (
     get_template_params,
     get_template_path,
 )
-from runway.util import change_dir
+from runway.utils import change_dir
 from runway.variables import Variable
 
 from ..factories import mock_context

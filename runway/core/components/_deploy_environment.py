@@ -10,8 +10,9 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 
 import click
 
+from ...compat import cached_property
 from ...type_defs import EnvVarsAwsCredentialsTypeDef
-from ...util import AWS_ENV_VARS, cached_property
+from ...utils import AWS_ENV_VARS
 
 try:  # will raise an import error if git is not in the current path
     import git

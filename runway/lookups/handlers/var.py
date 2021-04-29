@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...util import MutableMap
+    from ...utils import MutableMap
 
 
 LOGGER = logging.getLogger(__name__)

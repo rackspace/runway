@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, Union
 import yaml
 
 from ..._logging import PrefixAdaptor
-from ...util import argv
+from ...utils import argv
 from .base import TestHandler
 
 if TYPE_CHECKING:

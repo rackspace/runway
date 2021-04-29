@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from runway.lookups.handlers.var import VarLookup
-from runway.util import MutableMap
+from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from ...factories import MockRunwayContext

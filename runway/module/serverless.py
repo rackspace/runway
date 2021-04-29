@@ -15,12 +15,13 @@ from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 import yaml
 
 from .._logging import PrefixAdaptor
+from ..compat import cached_property
 from ..config.models.runway.options.serverless import (
     RunwayServerlessModuleOptionsDataModel,
 )
-from ..hooks.staticsite.util import get_hash_of_files
-from ..s3_util import does_s3_object_exist, download, ensure_bucket_exists, upload
-from ..util import YamlDumper, cached_property, merge_dicts
+from ..hooks.staticsite.utils import get_hash_of_files
+from ..s3_utils import does_s3_object_exist, download, ensure_bucket_exists, upload
+from ..utils import YamlDumper, merge_dicts
 from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 

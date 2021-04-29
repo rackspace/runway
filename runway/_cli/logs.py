@@ -7,7 +7,7 @@ import coloredlogs
 
 from runway import LogLevels
 
-from ..util import cached_property
+from ..compat import cached_property
 
 # COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger("runway")

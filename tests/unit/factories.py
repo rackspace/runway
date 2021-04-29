@@ -14,7 +14,7 @@ from packaging.specifiers import SpecifierSet
 from runway.config.components.runway import RunwayDeploymentDefinition
 from runway.context import CfnginContext, RunwayContext
 from runway.core.components import DeployEnvironment
-from runway.util import MutableMap
+from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from pathlib import Path

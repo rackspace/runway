@@ -13,7 +13,7 @@ from urllib.request import urlretrieve
 
 import requests
 
-from ..util import get_file_hash
+from ..utils import get_file_hash
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:

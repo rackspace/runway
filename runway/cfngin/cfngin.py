@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from yaml.constructor import ConstructorError
 
-from runway._logging import PrefixAdaptor
-from runway.util import MutableMap, SafeHaven, cached_property
-
+from .._logging import PrefixAdaptor
+from ..compat import cached_property
 from ..config import CfnginConfig
 from ..context import CfnginContext
+from ..utils import MutableMap, SafeHaven
 from .actions import deploy, destroy, diff
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder

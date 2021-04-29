@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 from typing_extensions import Literal, TypedDict
 
 from ....lookups.handlers.base import LookupHandler
-from ...util import read_value_from_path
+from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext

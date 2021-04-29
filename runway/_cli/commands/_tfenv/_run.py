@@ -7,7 +7,7 @@ from typing import Any, Tuple
 import click
 
 from ....env_mgr.tfenv import TFEnvManager
-from ....util import DOC_SITE
+from ....utils import DOC_SITE
 from ... import options
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
