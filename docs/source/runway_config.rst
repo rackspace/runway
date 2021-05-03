@@ -364,6 +364,13 @@ Deployment
         environments:
           dev: True
 
+    .. versionchanged:: 1.4.0
+      Now acts as an explicit toggle for deploying modules to a set AWS Account/AWS Region.
+      For passing values to a module, :attr:`deployment.parameters`/:attr:`module.parameters` should be used instead.
+
+    .. versionchanged:: 2.0.0
+      If defined and the current deploy environment is missing from the definition, processing will be skipped.
+
   .. attribute:: modules
     :type: List[Union[module, str]]
 
@@ -490,6 +497,8 @@ Deployment
         parameters:
           dev:
             namespace: example-dev
+
+    .. versionadded:: 1.4.0
 
   .. attribute:: regions
     :type: Optional[Union[Dict[str, Union[List[str], str], List[str], str]]
@@ -677,6 +686,13 @@ Module
         environments:
           dev: True
 
+    .. versionchanged:: 1.4.0
+      Now acts as an explicit toggle for deploying modules to a set AWS Account/AWS Region.
+      For passing values to a module, :attr:`deployment.parameters`/:attr:`module.parameters` should be used instead.
+
+    .. versionchanged:: 2.0.0
+      If defined and the current deploy environment is missing from the definition, processing will be skipped.
+
   .. attribute:: name
     :type: Optional[str]
 
@@ -782,6 +798,8 @@ Module
         parameters:
           dev:
             namespace: example-dev
+
+    .. versionadded:: 1.4.0
 
   .. attribute:: path
     :type: Optional[Union[str, Path]]
