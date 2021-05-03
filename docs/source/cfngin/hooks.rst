@@ -167,6 +167,7 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
   The resource record cache time to live (TTL), in seconds. (*default:* ``300``)
 
 
+
 .. rubric:: Example
 .. code-block:: yaml
 
@@ -196,6 +197,9 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
         args:
           domain: www.example.com
           hosted_zone_id: ${rxref example-com::HostedZone}
+
+
+.. versionadded:: 1.6.0
 
 
 ----
@@ -833,6 +837,8 @@ The returned object is accessible with the :ref:`hook_data Lookup <hook_data loo
       args:
         image: ${hook_data docker.image}
 
+.. versionadded:: 1.18.0
+
 
 docker.image.push
 -----------------
@@ -938,6 +944,8 @@ Replicates the functionality of the ``docker image push`` CLI command.
       class_path: blueprints.EcrFunction
       variables:
         ImageUri: ${hook_data docker.image.uri.latest}
+
+.. versionadded:: 1.18.0
 
 
 docker.image.remove
@@ -1067,6 +1075,8 @@ Replicates the functionality of the ``docker image remove`` CLI command.
           - latest
           - python3.9
 
+.. versionadded:: 1.18.0
+
 
 docker.login
 ------------
@@ -1161,6 +1171,8 @@ Replicates the functionality of the ``docker login`` CLI command.
         ecr: true
         password: ${ecr login-password}
 
+.. versionadded:: 1.18.0
+
 
 ecr.purge_repository
 ====================
@@ -1187,6 +1199,8 @@ Purge all images from an ECR repository.
     - path: runway.cfngin.hooks.ecr.purge_repository
       args:
         repository_name: example-repo
+
+.. versionadded:: 1.18.0
 
 
 ----
@@ -1357,6 +1371,9 @@ Sync static website to S3 bucket. Used by the :ref:`Static Site <staticsite>` mo
 .. rubric:: Args
 
 See :ref:`Static Site <staticsite>` module documentation for details.
+
+.. versionchanged:: 2.0.0
+  Moved from ``runway.hooks`` to ``runway.cfngin.hooks``.
 
 
 ----

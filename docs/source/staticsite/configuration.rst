@@ -84,6 +84,8 @@ Options
       "endpoint": "<api_endpoint value>"
     }
 
+  .. versionadded:: 1.9.0
+
 .. data:: pre_build_steps
   :type: Optional[List[Dict[str, str]]]
   :value: []
@@ -188,6 +190,8 @@ Parameters
     parameters:
       staticsite_auth_at_edge: true
 
+  .. versionadded:: 1.5.0
+
 .. _staticsite_cf_disable:
 
 .. data:: staticsite_cf_disable
@@ -205,6 +209,8 @@ Parameters
 
     parameters:
       staticsite_cf_disable: false
+
+  .. versionadded:: 1.5.0
 
 .. data:: staticsite_cookie_settings
   :type: Optional[Dict[str, str]]
@@ -225,6 +231,8 @@ Parameters
         refreshToken: "Path=/; Secure; SameSite=Lax"
         nonce: "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax"
 
+  .. versionadded:: 1.5.0
+
 .. _staticsite_create_user_pool:
 
 .. data:: staticsite_create_user_pool
@@ -241,6 +249,8 @@ Parameters
 
     parameters:
       staticsite_create_user_pool: true
+
+  .. versionadded:: 1.5.0
 
 .. _staticsite_custom_error_responses:
 
@@ -298,6 +308,8 @@ Parameters
         X-Frame-Options: "DENY"
         X-Content-Type-Options: "nosniff"
 
+  .. versionadded:: 1.5.0
+
 .. data:: staticsite_lambda_function_associations
   :type: Optional[List[Dict[str, str]]]
   :value: []
@@ -333,6 +345,8 @@ Parameters
     parameters:
       staticsite_non_spa: true
 
+  .. versionadded:: 1.5.0
+
 .. data:: staticsite_oauth_scopes
   :type: Optional[List[str]]
   :value: ["phone", "email", "profile", "openid", "aws.cognito.signin.user.admin"]
@@ -355,6 +369,8 @@ Parameters
         - openid
         - aws.cognito.signin.user.admin
 
+  .. versionadded:: 1.5.0
+
 .. data:: staticsite_redirect_path_auth_refresh
   :type: Optional[str]
   :value: "/refreshauth"
@@ -369,6 +385,8 @@ Parameters
 
     parameters:
       staticsite_redirect_path_auth_refresh: /refreshauth
+
+  .. versionadded:: 1.5.0
 
 .. data:: staticsite_redirect_path_sign_in
   :type: Optional[str]
@@ -386,6 +404,8 @@ Parameters
     parameters:
       staticsite_redirect_path_sign_in: /parseauth
 
+  .. versionadded:: 1.5.0
+
 .. data:: staticsite_redirect_path_sign_out
   :type: Optional[str]
   :value: "/"
@@ -401,6 +421,8 @@ Parameters
 
     parameters:
       staticsite_redirect_path_sign_out: /
+
+  .. versionadded:: 1.5.0
 
 .. _staticsite_rewrite_directory_index:
 
@@ -431,6 +453,8 @@ Parameters
     parameters:
       staticsite_role_boundary_arn: arn:aws:iam::<account-id>:policy/<policy>
 
+  .. versionadded:: 1.8.0
+
 .. data:: staticsite_sign_out_url
   :type: Optional[str]
   :value: "/signout"
@@ -445,6 +469,8 @@ Parameters
 
     parameters:
       staticsite_sign_out_url: /signout
+
+  .. versionadded:: 1.5.0
 
 .. data:: staticsite_supported_identity_providers
   :type: Optional[str]
@@ -461,6 +487,8 @@ Parameters
     parameters:
       staticsite_supported_identity_providers: facebook,onelogin
 
+  .. versionadded:: 1.5.0
+
 .. data:: staticsite_user_pool_arn
   :type: Optional[str]
   :value: None
@@ -475,6 +503,8 @@ Parameters
 
     parameters
       staticsite_user_pool_arn: arn:aws:cognito-idp:<region>:<account-id>:userpool/<pool>
+
+  .. versionadded:: 1.5.0
 
 .. data:: staticsite_additional_redirect_domains
   :type: Optional[str]
@@ -492,6 +522,8 @@ Parameters
 
     parameters:
       staticsite_additional_redirect_domains: http://localhost:3000
+
+  .. versionadded:: 1.14.0
 
 .. data:: staticsite_web_acl
   :type: Optional[str]
@@ -521,3 +553,5 @@ Parameters
 
     parameters:
       staticsite_required_group: AuthorizedUsers
+
+  .. versionadded:: 1.5.0

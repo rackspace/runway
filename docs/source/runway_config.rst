@@ -70,6 +70,8 @@ Top-Level Configuration
 
     runway_version: ">=1.14.0,<2.0.0"  # or ~=1.14.0
 
+  .. versionadded:: 1.11.0
+
 .. attribute:: tests
   :type: Optional[List[test]]
   :value: []
@@ -126,6 +128,8 @@ Top-Level Configuration
         dev:
           - us-east-1
           - us-west-2
+
+  .. versionadded 1.4.0
 
   .. data:: variables.file_path
     :type: Optional[str]
@@ -223,6 +227,9 @@ Deployment
         account_alias:
           dev: example-dev
 
+    .. versionchanged:: 2.0.0
+      No longer accepts a :class:`typing.Dict`.
+
   .. attribute:: account_id
     :type: Optional[str]
     :value: None
@@ -248,6 +255,9 @@ Deployment
       variables:
         account_id:
           dev: 123456789012
+
+    .. versionchanged:: 2.0.0
+      No longer accepts a :class:`typing.Dict`.
 
   .. attribute:: assume_role
     :type: Optional[assume_role_definition, str]
@@ -275,6 +285,9 @@ Deployment
         assume_role:
           dev:
             arn:aws:iam::123456789012:role/name
+
+    .. versionchanged:: 2.0.0
+      No longer accepts a :class:`typing.Dict` defining a value per deploy environment.
 
     .. class:: assume_role_definition
 
@@ -331,6 +344,10 @@ Deployment
         env_vars:
           dev:
             NAME: value
+
+    .. versionchanged:: 2.0.0
+      No longer accepts a :class:`typing.Dict` defining a value per deploy environment.
+      The entire value of the field is used for all environments.
 
   .. attribute:: environments
     :type: Optional[Dict[str, Union[bool, List[str], str]]]
@@ -471,6 +488,8 @@ Deployment
             - us-east-1
             - us-west-2
 
+    .. versionadded:: 1.3.0
+
   .. attribute:: parameters
     :type: Optional[Union[Dict[str, Any], str]]
     :value: {}
@@ -543,6 +562,9 @@ Deployment
           regions:
             - us-east-1
             - us-west-2
+
+    .. versionchanged 1.3.0
+      Added support for asynchronous processing.
 
 
 ----
@@ -650,6 +672,10 @@ Module
         env_vars:
           dev:
             NAME: value
+
+    .. versionchanged:: 2.0.0
+      No longer accepts a :class:`typing.Dict` defining a value per deploy environment.
+      The entire value of the field is used for all environments.
 
   .. attribute:: environments
     :type: Optional[Dict[str, Union[bool, List[str], str]]]
@@ -817,6 +843,8 @@ Module
         - modules:
           - path: sampleapp-${env DEPLOY_ENVIRONMENT}.cfn
 
+    .. versionadded:: 1.4.0
+
   .. attribute:: tags
     :type: Optional[List[str]]
     :value: []
@@ -855,6 +883,8 @@ Module
       deployments:
         - modules:
           - type: static
+
+    .. versionadded:: 1.4.0
 
 
 .. _runway-module-path:
