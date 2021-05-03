@@ -46,19 +46,6 @@ def get_template_path(file_path: Path) -> Optional[Path]:
     return None
 
 
-def get_template_params(template: Dict[str, Any]) -> Dict[str, Any]:
-    """Parse a CFN template for defined parameters.
-
-    Args:
-        template: Parsed CFN template.
-
-    Returns:
-        Template parameters.
-
-    """
-    return template.get("Parameters", {})
-
-
 def resolve_variable(provided_variable: Optional[Variable], blueprint_name: str) -> Any:
     """Resolve a provided variable value against the variable definition.
 
@@ -128,7 +115,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
         self.raw_template_path = raw_template_path
 
     @property
-    def output_definitions(self) -> Dict[str, Any]:
+    def output_definitions(self) -> Dict[str, Dict[str, Any]]:
         """Get the output definitions.
 
         .. versionadded:: 2.0.0
@@ -151,7 +138,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             containing key/values for various parameter properties.
 
         """
-        return get_template_params(self.to_dict())
+        return self.to_dict().get("Parameters", {})
 
     @cached_property
     def parameter_values(self) -> Dict[str, Union[List[Any], str]]:

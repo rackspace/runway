@@ -395,7 +395,7 @@ class Blueprint:
         return copy.deepcopy(self.VARIABLES)
 
     @property
-    def output_definitions(self) -> Dict[str, Any]:
+    def output_definitions(self) -> Dict[str, Dict[str, Any]]:
         """Get the output definitions.
 
         .. versionadded:: 2.0.0
