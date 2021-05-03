@@ -29,6 +29,8 @@ Options specific to Terraform Modules.
       args:
         - '-parallelism=25'
 
+  .. versionadded:: 1.8.1
+
 .. data:: terraform_backend_config
   :type: Optional[Dict[str, str]]
   :value: {}

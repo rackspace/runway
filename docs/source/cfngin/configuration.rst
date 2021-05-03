@@ -10,6 +10,11 @@ In addition to the :ref:`Runway Config File <runway-config>`, there are two file
 - a key/value :ref:`environment file <cfngin-env>`
 
 
+.. versionchanged:: 1.5.0
+  Stacker is no longer used for handling CloudFormation/Troposphere.
+  It has been replaced with an internal CloudFormation engin (CFNgin).
+
+
 .. contents::
   :depth: 4
 
@@ -128,6 +133,9 @@ Top-Level Fields
       :caption: disable caching
 
         cfngin_bucket: ""
+
+    .. versionchanged:: 2.0.0
+      The format of the default value is now ``cfngin-${namespace}-${region}``.
 
   .. attribute:: cfngin_bucket_region
     :type: Optional[str]
@@ -289,6 +297,9 @@ Top-Level Fields
       post_deploy:
         - path: do.something
 
+    .. versionchanged:: 2.0.0
+      *post_build* renamed to *post_deploy*.
+
   .. attribute:: post_destroy
     :type: Optional[List[cfngin.hook]]
     :value: []
@@ -316,6 +327,9 @@ Top-Level Fields
 
       pre_deploy:
         - path: do.something
+
+    .. versionchanged:: 2.0.0
+      *pre_build* renamed to *pre_deploy*.
 
   .. attribute:: pre_destroy
     :type: Optional[List[cfngin.hook]]

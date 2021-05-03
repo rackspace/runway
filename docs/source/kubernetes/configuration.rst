@@ -41,6 +41,8 @@ Options
     options:
       overlay_path: overlays/${env DEPLOY_ENVIRONMENT}-blue
 
+  .. versionadded:: 1.12.0
+
 
 **********
 Parameters

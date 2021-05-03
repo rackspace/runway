@@ -28,11 +28,15 @@ Environment variables can be used to alter the functionality of Runway.
   - ``1`` will show Runway's debug logs
   - ``2`` will show Runway's debug logs and some dependency debug logs (e.g. botocore)
 
+  .. versionadded:: 1.10.0
+
 .. data:: DEPLOY_ENVIRONMENT
   :type: str
   :noindex:
 
   Explicitly define the deploy environment.
+
+  .. versionadded:: 1.3.4
 
 .. data:: CFNGIN_STACK_POLL_TIME
   :type: int
@@ -55,6 +59,8 @@ Environment variables can be used to alter the functionality of Runway.
   Falsy values are ``n``, ``no``, ``f``, ``false``, ``off`` and ``0``.
   Raises :exc:`ValueError` if anything else is used.
 
+  .. versionadded:: 1.8.1
+
 .. data:: RUNWAY_MAX_CONCURRENT_MODULES
   :type: int
   :noindex:
@@ -67,6 +73,8 @@ Environment variables can be used to alter the functionality of Runway.
   **IMPORTANT:** When using ``parallel_regions`` and ``child_modules``
   together, please consider the nature of their relationship when
   manually setting this value. (``parallel_regions * child_modules``)
+
+  .. versionadded:: 1.4.3
 
 .. data:: RUNWAY_MAX_CONCURRENT_REGIONS
   :type: int
@@ -81,6 +89,8 @@ Environment variables can be used to alter the functionality of Runway.
   together, please consider the nature of their relationship when
   manually setting this value. (``parallel_regions * child_modules``)
 
+  .. versionadded:: 1.4.3
+
 .. data:: RUNWAY_LOG_FIELD_STYLES
   :type: str
   :noindex:
@@ -88,6 +98,8 @@ Environment variables can be used to alter the functionality of Runway.
   Can be provided to customize the styling (color, bold, etc) used for `LogRecord attributes`_ (except for message).
   By default, Runway does not apply style to fields.
   For information on how to format the value, see the documentation provided by coloredlogs_.
+
+  .. versionadded:: 1.10.0
 
 .. data:: RUNWAY_LOG_FORMAT
   :type: str
@@ -100,6 +112,8 @@ Environment variables can be used to alter the functionality of Runway.
   If not provided, ``[%(programname)s] %(message)s`` is used unless using debug, verbose or no color.
   In that case, ``%(levelname)s:%(name)s:%(message)s`` is used.
 
+  .. versionadded:: 1.10.0
+
 .. data:: RUNWAY_LOG_LEVEL_STYLES
   :type: str
   :noindex:
@@ -108,6 +122,8 @@ Environment variables can be used to alter the functionality of Runway.
   If provided, the parsed value will be merged with Runway's default styling.
   For information on how to format the value, see the documentation provided by coloredlogs_.
 
+  .. versionadded:: 1.10.0
+
 .. data:: RUNWAY_NO_COLOR
   :type: Any
   :noindex:
@@ -115,11 +131,15 @@ Environment variables can be used to alter the functionality of Runway.
   Disable Runway's colorized logs.
   Providing this will also change the log format to ``%(levelname)s:%(name)s:%(message)s``.
 
+  .. versionadded:: 1.8.1
+
 .. data:: VERBOSE
   :type: Any
   :noindex:
 
   If not *undefined*, Runway will display verbose logs and change the logging format to ``%(levelname)s:%(name)s:%(message)s``.
+
+  .. versionadded:: 1.10.0
 
 .. _LogRecord attributes: https://docs.python.org/3/library/logging.html#logrecord-attributes
 .. _coloredlogs: https://coloredlogs.readthedocs.io/en/latest/api.html#changing-the-colors-styles

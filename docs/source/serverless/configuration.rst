@@ -42,6 +42,8 @@ Options specific to Serverless Framework modules.
         - '--config'
         - sls.yml
 
+  .. versionadded:: 1.4.0
+
 .. data:: extend_serverless_yml
   :type: Optional[Dict[str, Any]]
   :value: {}
@@ -58,6 +60,8 @@ Options specific to Serverless Framework modules.
         custom:
           env:
             memorySize: 512
+
+  .. versionadded:: 1.8.0
 
 .. data:: promotezip
   :type: Optional[Dict[str, str]]

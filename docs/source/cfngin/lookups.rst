@@ -99,6 +99,8 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 
 Given the above config file, the lookup will get the value of the Output named **Id** from Stack **example-vpc**.
 
+.. versionadded:: 1.11.0
+
 
 ----
 
@@ -110,6 +112,8 @@ ecr
 Retrieve a value from AWS Elastic Container Registry (ECR).
 
 This Lookup only supports very specific queries.
+
+.. versionadded:: 1.18.0
 
 Supported Queries
 =================
@@ -438,6 +442,8 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
     - ...
       variables:
         Example: ${ssm /example/secret}
+
+.. versionadded:: 1.5.0
 
 
 ----

@@ -188,6 +188,8 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
             dynamodb_table: ${cfn common-tf-state.TerraformStateTableName::region=us-east-1}
             region: us-east-1
 
+.. versionadded:: 1.11.0
+
 
 ----
 
@@ -202,6 +204,8 @@ ecr
 Retrieve a value from AWS Elastic Container Registry (ECR).
 
 This Lookup only supports very specific queries.
+
+.. versionadded:: 1.18.0
 
 Supported Queries
 =================
@@ -270,6 +274,8 @@ This Lookup supports all :ref:`Common Lookup Arguments` but, the following have 
       env_vars:
         ENVIRONMENT: ${env DEPLOY_ENVIRONMENT::default=default}
 
+.. versionadded:: 1.4.0
+
 
 ----
 
@@ -306,6 +312,8 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
       env_vars:
         SOME_VARIABLE: ${ssm /example/param::region=us-east-1}
         DEFAULT_VARIABLE: ${ssm /example/default::default=default}
+
+.. versionadded:: 1.5.0
 
 
 ----
@@ -344,3 +352,5 @@ This Lookup supports all :ref:`Common Lookup Arguments` but, the following have 
             ami_id: ${var ami_id.${env AWS_REGION}}
       env_vars:
         SOME_VARIABLE: ${var some_variable::default=default}
+
+.. versionadded:: 1.4.0
