@@ -113,37 +113,37 @@ class StaticSite(Blueprint):
     @property
     def aliases_specified(self) -> bool:
         """Aliases are specified conditional."""
-        return self.get_variables()["Aliases"] != [""]
+        return self.variables["Aliases"] != [""]
 
     @property
     def cf_enabled(self) -> bool:
         """CloudFront enabled conditional."""
-        return not self.get_variables().get("DisableCloudFront", False)
+        return not self.variables.get("DisableCloudFront", False)
 
     @property
     def acm_certificate_specified(self) -> bool:
         """ACM Certification specified conditional."""
-        return self.get_variables()["AcmCertificateArn"] != ""
+        return self.variables["AcmCertificateArn"] != ""
 
     @property
     def cf_logging_enabled(self) -> bool:
         """CloudFront Logging specified conditional."""
-        return self.get_variables()["LogBucketName"] != ""
+        return self.variables["LogBucketName"] != ""
 
     @property
     def directory_index_specified(self) -> bool:
         """Directory Index specified conditional."""
-        return self.get_variables()["RewriteDirectoryIndex"] != ""
+        return self.variables["RewriteDirectoryIndex"] != ""
 
     @property
     def role_boundary_specified(self) -> bool:
         """IAM Role Boundary specified conditional."""
-        return self.get_variables()["RoleBoundaryArn"] != ""
+        return self.variables["RoleBoundaryArn"] != ""
 
     @property
     def waf_name_specified(self) -> bool:
         """WAF name specified conditional."""
-        return self.get_variables()["WAFWebACL"] != ""
+        return self.variables["WAFWebACL"] != ""
 
     def create_template(self) -> None:
         """Create template (main function called by CFNgin)."""
@@ -173,15 +173,13 @@ class StaticSite(Blueprint):
 
     def get_lambda_associations(self) -> List[cloudfront.LambdaFunctionAssociation]:
         """Retrieve any lambda associations from the instance variables."""
-        variables = self.get_variables()
-
         # If custom associations defined, use them
-        if variables["lambda_function_associations"]:
+        if self.variables["lambda_function_associations"]:
             return [
                 cloudfront.LambdaFunctionAssociation(
                     EventType=x["type"], LambdaFunctionARN=x["arn"]
                 )
-                for x in variables["lambda_function_associations"]
+                for x in self.variables["lambda_function_associations"]
             ]
         return []
 
@@ -222,8 +220,6 @@ class StaticSite(Blueprint):
             The CloudFront Distribution Options.
 
         """
-        variables = self.get_variables()
-
         if os.getenv("AWS_REGION") == "us-east-1":
             # use global endpoint for us-east-1
             origin = Join(".", [bucket.ref(), "s3.amazonaws.com"])
@@ -258,14 +254,14 @@ class StaticSite(Blueprint):
             ),
             "DefaultRootObject": "index.html",
             "Logging": self.add_logging_bucket(),
-            "PriceClass": variables["PriceClass"],
+            "PriceClass": self.variables["PriceClass"],
             "CustomErrorResponses": [
                 cloudfront.CustomErrorResponse(
                     ErrorCode=response["ErrorCode"],
                     ResponseCode=response["ResponseCode"],
                     ResponsePagePath=response["ResponsePagePath"],
                 )
-                for response in variables["custom_error_responses"]
+                for response in self.variables["custom_error_responses"]
             ],
             "Enabled": True,
             "WebACLId": self.add_web_acl(),
@@ -275,22 +271,20 @@ class StaticSite(Blueprint):
     def add_aliases(self) -> Union[List[str], Ref]:
         """Add aliases."""
         if self.aliases_specified:
-            return self.get_variables()["Aliases"]
+            return self.variables["Aliases"]
         return NoValue
 
     def add_web_acl(self) -> Union[str, Ref]:
         """Add Web ACL."""
         if self.waf_name_specified:
-            return self.get_variables()["WAFWebACL"]
+            return self.variables["WAFWebACL"]
         return NoValue
 
     def add_logging_bucket(self) -> Union[cloudfront.Logging, Ref]:
         """Add Logging Bucket."""
         if self.cf_logging_enabled:
             return cloudfront.Logging(
-                Bucket=Join(
-                    ".", [self.get_variables()["LogBucketName"], "s3.amazonaws.com"]
-                )
+                Bucket=Join(".", [self.variables["LogBucketName"], "s3.amazonaws.com"])
             )
         return NoValue
 
@@ -298,7 +292,7 @@ class StaticSite(Blueprint):
         """Add ACM cert."""
         if self.acm_certificate_specified:
             return cloudfront.ViewerCertificate(
-                AcmCertificateArn=self.get_variables()["AcmCertificateArn"],
+                AcmCertificateArn=self.variables["AcmCertificateArn"],
                 SslSupportMethod="sni-only",
             )
         return NoValue
@@ -421,8 +415,6 @@ class StaticSite(Blueprint):
                 attached to.
 
         """
-        variables = self.get_variables()
-
         lambda_resource = Join(
             "",
             [
@@ -456,7 +448,7 @@ class StaticSite(Blueprint):
                     "lambda.amazonaws.com", "edgelambda.amazonaws.com"
                 ),
                 PermissionsBoundary=(
-                    variables["RoleBoundaryArn"]
+                    self.variables["RoleBoundaryArn"]
                     if self.role_boundary_specified
                     else NoValue
                 ),
@@ -494,7 +486,6 @@ class StaticSite(Blueprint):
             The CloudFront directory index rewrite lambda function resource.
 
         """
-        variables = self.get_variables()
         code_str = ""
         path = os.path.join(
             os.path.dirname(__file__),
@@ -502,7 +493,7 @@ class StaticSite(Blueprint):
         )
         with open(path) as file_:
             code_str = file_.read().replace(
-                "{{RewriteDirectoryIndex}}", variables["RewriteDirectoryIndex"]
+                "{{RewriteDirectoryIndex}}", self.variables["RewriteDirectoryIndex"]
             )
 
         function = self.template.add_resource(
@@ -625,8 +616,4 @@ class StaticSite(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    print(
-        StaticSite(
-            "test", CfnginContext(parameters={"namespace": "test"}), None
-        ).to_json()
-    )
+    print(StaticSite("test", CfnginContext(parameters={"namespace": "test"})).to_json())

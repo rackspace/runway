@@ -40,7 +40,6 @@ class Cluster(Blueprint):
     def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
-        variables = self.get_variables()
         template.add_version("2010-09-09")
         template.add_description("Kubernetes Master via EKS - V1.0.0")
 
@@ -58,7 +57,7 @@ class Cluster(Blueprint):
                     {"Key": "Project", "Value": "eks"},
                     {"Key": "Name", "Value": Sub("${EksClusterName}-sg-worker-nodes")},
                 ],
-                VpcId=variables["VPC"].ref,
+                VpcId=self.variables["VPC"].ref,
             )
         )
         template.add_output(
@@ -111,12 +110,12 @@ class Cluster(Blueprint):
         ekscluster = template.add_resource(
             eks.Cluster(
                 "EksCluster",
-                Name=variables["EksClusterName"].ref,
-                Version=variables["EksVersion"].ref,
+                Name=self.variables["EksClusterName"].ref,
+                Version=self.variables["EksVersion"].ref,
                 RoleArn=eksservicerole.get_att("Arn"),
                 ResourcesVpcConfig=eks.ResourcesVpcConfig(
                     SecurityGroupIds=[ccpsecuritygroup.ref()],
-                    SubnetIds=variables["EksSubnets"].ref,
+                    SubnetIds=self.variables["EksSubnets"].ref,
                 ),
             )
         )
@@ -143,7 +142,7 @@ class Cluster(Blueprint):
                 "VpcId",
                 Description="EKS Cluster VPC Id",
                 Export=Export(Sub("${AWS::StackName}-VpcId")),
-                Value=variables["VPC"].ref,
+                Value=self.variables["VPC"].ref,
             )
         )
         template.add_output(
@@ -151,7 +150,7 @@ class Cluster(Blueprint):
                 "Subnets",
                 Description="EKS Cluster Subnets",
                 Export=Export(Sub("${AWS::StackName}-Subnets")),
-                Value=Join(",", variables["EksSubnets"].ref),
+                Value=Join(",", self.variables["EksSubnets"].ref),
             )
         )
 
@@ -161,6 +160,4 @@ class Cluster(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(
-        Cluster("test", CfnginContext(parameters={"namespace": "test"}), None).to_json()
-    )
+    print(Cluster("test", CfnginContext(parameters={"namespace": "test"})).to_json())

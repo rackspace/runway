@@ -111,7 +111,7 @@ class FileLookup(LookupHandler):
                 }
 
             Then assign UserData in a LaunchConfiguration or Instance to
-            ``self.get_variables()["UserData"]``. Note that we use AWSHelperFn
+            ``self.variables["UserData"]``. Note that we use AWSHelperFn
             as the type because the parameterized-b64 codec returns either a
             Base64 or a GenericHelperFn troposphere object.
 

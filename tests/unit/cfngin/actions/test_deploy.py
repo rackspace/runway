@@ -499,7 +499,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_resolve_parameters_unused_parameter(self) -> None:
         """Test resolve parameters unused parameter."""
-        self.blueprint.get_parameter_definitions.return_value = {
+        self.blueprint.parameter_definitions = {
             "a": {"type": CFNString, "description": "A"},
             "b": {"type": CFNString, "description": "B"},
         }
@@ -510,7 +510,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_resolve_parameters_none_conversion(self) -> None:
         """Test resolve parameters none conversion."""
-        self.blueprint.get_parameter_definitions.return_value = {
+        self.blueprint.parameter_definitions = {
             "a": {"type": CFNString, "description": "A"},
             "b": {"type": CFNString, "description": "B"},
         }
@@ -520,7 +520,7 @@ class TestFunctions(unittest.TestCase):
 
     def test_resolve_parameters_booleans(self) -> None:
         """Test resolve parameters booleans."""
-        self.blueprint.get_parameter_definitions.return_value = {
+        self.blueprint.parameter_definitions = {
             "a": {"type": CFNString, "description": "A"},
             "b": {"type": CFNString, "description": "B"},
         }

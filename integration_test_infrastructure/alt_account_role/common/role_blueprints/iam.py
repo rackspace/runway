@@ -22,7 +22,6 @@ class CrossAccountRole(Blueprint):
     def create_template(self):
         """Create template (main function called by Stacker)."""
         template = self.template
-        variables = self.get_variables()
         template.set_version("2010-09-09")
         template.set_description("Runway Integration Testing - IAM Role")
 
@@ -43,7 +42,10 @@ class CrossAccountRole(Blueprint):
                 ManagedPolicyArns=["arn:aws:iam::aws:policy/AdministratorAccess"],
                 RoleName=Join(
                     "-",
-                    ["runway-integration-test-role", variables["EnvironmentName"].ref],
+                    [
+                        "runway-integration-test-role",
+                        self.variables["EnvironmentName"].ref,
+                    ],
                 ),
             )
         )

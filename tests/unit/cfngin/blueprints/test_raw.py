@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.blueprints.raw."""
-# pylint: disable=unused-argument
+# pylint: disable=no-self-use,unused-argument
 # pyright: basic
 from __future__ import annotations
 
@@ -142,16 +142,18 @@ class TestBlueprintRendering(unittest.TestCase):
             ),
             raw_template_path=RAW_J2_TEMPLATE_PATH,
         )
+        # print(blueprint.variables)
         blueprint.resolve_variables(
             [
                 Variable("Param1", "param1val", "cfngin"),
                 Variable("bar", "foo", "cfngin"),
             ]
         )
+        print(blueprint.variables)
         self.assertEqual(expected_json, blueprint.to_json())
 
 
-class TestVariables(unittest.TestCase):
+class TestVariables:
     """Test class for blueprint variable methods."""
 
     def test_get_parameter_definitions_json(self) -> None:
@@ -159,45 +161,35 @@ class TestVariables(unittest.TestCase):
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_JSON_TEMPLATE_PATH
         )
-        parameters = blueprint.get_parameter_definitions()
-        self.assertEqual(
-            parameters,
-            {
-                "Param1": {"Type": "String"},
-                "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
-            },
-        )
+        assert blueprint.parameter_definitions == {
+            "Param1": {"Type": "String"},
+            "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
+        }
 
     def test_get_parameter_definitions_yaml(self) -> None:
         """Verify get_parameter_definitions method with yaml raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_YAML_TEMPLATE_PATH
         )
-        parameters = blueprint.get_parameter_definitions()
-        self.assertEqual(
-            parameters,
-            {
-                "Param1": {"Type": "String"},
-                "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
-            },
-        )
+        assert blueprint.parameter_definitions == {
+            "Param1": {"Type": "String"},
+            "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
+        }
 
     def test_get_required_parameter_definitions_json(self) -> None:
         """Verify get_required_param... method with json raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_JSON_TEMPLATE_PATH
         )
-        self.assertEqual(
-            blueprint.get_required_parameter_definitions(),
-            {"Param1": {"Type": "String"}},
-        )
+        assert blueprint.required_parameter_definitions == {
+            "Param1": {"Type": "String"}
+        }
 
     def test_get_required_parameter_definitions_yaml(self) -> None:
         """Verify get_required_param... method with yaml raw template."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_YAML_TEMPLATE_PATH
         )
-        self.assertEqual(
-            blueprint.get_required_parameter_definitions(),
-            {"Param1": {"Type": "String"}},
-        )
+        assert blueprint.required_parameter_definitions == {
+            "Param1": {"Type": "String"}
+        }

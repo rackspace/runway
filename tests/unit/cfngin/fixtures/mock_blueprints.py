@@ -234,11 +234,10 @@ class LongRunningDummy(Blueprint):
 
     def create_template(self) -> None:
         """Create template."""
-        v = self.get_variables()
         template = self.template
         base_name = "Dummy"
 
-        for i in range(v["Count"]):
+        for i in range(self.variables["Count"]):
             name = "%s%s" % (base_name, i)
             last_name = None
             if i:
@@ -248,10 +247,10 @@ class LongRunningDummy(Blueprint):
                 wch.DependsOn = last_name
             template.add_resource(wch)
 
-        self.add_output("OutputValue", str(v["OutputValue"]))
-        self.add_output("WCHCount", str(v["Count"]))
+        self.add_output("OutputValue", str(self.variables["OutputValue"]))
+        self.add_output("WCHCount", str(self.variables["Count"]))
 
-        if v["BreakLast"]:
+        if self.variables["BreakLast"]:
             template.add_resource(
                 WaitCondition(
                     "BrokenWaitCondition",
@@ -366,7 +365,7 @@ class DiffTester(Blueprint):
 
     def create_template(self):
         """Create template."""
-        for i in range(self.get_variables()["WaitConditionCount"]):
+        for i in range(self.variables["WaitConditionCount"]):
             self.template.add_resource(WaitConditionHandle("VPC%d" % i))
 
 

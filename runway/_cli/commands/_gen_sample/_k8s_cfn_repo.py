@@ -39,18 +39,16 @@ def k8s_cfn_repo(ctx: click.Context, **_: Any) -> None:
     LOGGER.verbose("rendering master templates...")
     master_templates.mkdir()
     (master_templates / "k8s_iam.yaml").write_text(
-        to_yaml(Iam("test", CfnginContext(environment=env.copy()), None).to_json())
+        to_yaml(Iam("test", CfnginContext(environment=env.copy())).to_json())
     )
     (master_templates / "k8s_master.yaml").write_text(
-        to_yaml(Cluster("test", CfnginContext(environment=env.copy()), None).to_json())
+        to_yaml(Cluster("test", CfnginContext(environment=env.copy())).to_json())
     )
 
     LOGGER.verbose("rendering worker templates...")
     worker_templates.mkdir()
     (worker_templates / "k8s_workers.yaml").write_text(
-        to_yaml(
-            NodeGroup("test", CfnginContext(environment=env.copy()), None).to_json()
-        )
+        to_yaml(NodeGroup("test", CfnginContext(environment=env.copy())).to_json())
     )
 
     LOGGER.success("Sample k8s infrastructure repo created at %s", dest)

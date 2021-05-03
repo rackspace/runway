@@ -91,10 +91,9 @@ class TestStack(unittest.TestCase):
         stack = Stack(definition=definition, context=self.context)
         # pylint: disable=protected-access
         stack._blueprint = MagicMock()
-        stack._blueprint.get_parameter_values.return_value = {
+        stack._blueprint.parameter_values = {
             "Param2": "Some Resolved Value",
         }
-        self.assertEqual(len(stack.parameter_values), 1)
         param = stack.parameter_values["Param2"]
         self.assertEqual(param, "Some Resolved Value")
 
