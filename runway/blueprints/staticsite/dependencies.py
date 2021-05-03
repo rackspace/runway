@@ -69,7 +69,6 @@ class Dependencies(Blueprint):
     def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
-        variables = self.get_variables()
         template.set_version("2010-09-09")
         template.set_description("Static Website - Dependencies")
 
@@ -132,24 +131,27 @@ class Dependencies(Blueprint):
             )
         )
 
-        if variables["AuthAtEdge"]:
+        if self.variables["AuthAtEdge"]:
             userpool_client_params = {
                 "AllowedOAuthFlows": ["code"],
-                "AllowedOAuthScopes": variables["OAuthScopes"],
+                "AllowedOAuthScopes": self.variables["OAuthScopes"],
             }
-            if variables["Aliases"]:
+            if self.variables["Aliases"]:
                 userpool_client_params["AllowedOAuthFlowsUserPoolClient"] = True
-                userpool_client_params["SupportedIdentityProviders"] = variables[
+                userpool_client_params["SupportedIdentityProviders"] = self.variables[
                     "SupportedIdentityProviders"
                 ]
 
-                redirect_domains = [add_url_scheme(x) for x in variables["Aliases"]] + [
-                    add_url_scheme(x) for x in variables["AdditionalRedirectDomains"]
+                redirect_domains = [
+                    add_url_scheme(x) for x in self.variables["Aliases"]
+                ] + [
+                    add_url_scheme(x)
+                    for x in self.variables["AdditionalRedirectDomains"]
                 ]
                 redirect_uris = get_redirect_uris(
                     redirect_domains,
-                    variables["RedirectPathSignIn"],
-                    variables["RedirectPathSignOut"],
+                    self.variables["RedirectPathSignIn"],
+                    self.variables["RedirectPathSignOut"],
                 )
                 userpool_client_params["CallbackURLs"] = redirect_uris["sign_in"]
                 userpool_client_params["LogoutURLs"] = redirect_uris["sign_out"]
@@ -158,7 +160,7 @@ class Dependencies(Blueprint):
                     "aae_callback_url_retriever"
                 ]["callback_urls"]
 
-            if variables["CreateUserPool"]:
+            if self.variables["CreateUserPool"]:
                 user_pool = template.add_resource(
                     cognito.UserPool("AuthAtEdgeUserPool")
                 )
@@ -197,7 +199,5 @@ if __name__ == "__main__":
     from runway.context import CfnginContext
 
     print(
-        Dependencies(
-            "test", CfnginContext(parameters={"namespace": "test"}), None
-        ).to_json()
+        Dependencies("test", CfnginContext(parameters={"namespace": "test"})).to_json()
     )

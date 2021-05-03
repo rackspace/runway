@@ -76,7 +76,9 @@ class AuthAtEdge(StaticSite):
             description: Used to describe the resulting CloudFormation template.
 
         """
-        super().__init__(name, context, mappings, description)
+        super().__init__(
+            name=name, context=context, description=description, mappings=mappings
+        )
         self.VARIABLES.update(StaticSite.VARIABLES)
         self.VARIABLES.update(self.AUTH_VARIABLES)
 
@@ -264,8 +266,6 @@ class AuthAtEdge(StaticSite):
             The CloudFront Distribution Options.
 
         """
-        variables = self.get_variables()
-
         default_cache_behavior_lambdas = lambda_funcs
         default_cache_behavior_lambdas.append(
             cloudfront.LambdaFunctionAssociation(
@@ -295,7 +295,7 @@ class AuthAtEdge(StaticSite):
             ],
             "CacheBehaviors": [
                 cloudfront.CacheBehavior(
-                    PathPattern=variables["RedirectPathSignIn"],
+                    PathPattern=self.variables["RedirectPathSignIn"],
                     Compress=True,
                     ForwardedValues=cloudfront.ForwardedValues(QueryString=True),
                     LambdaFunctionAssociations=[
@@ -308,7 +308,7 @@ class AuthAtEdge(StaticSite):
                     ViewerProtocolPolicy="redirect-to-https",
                 ),
                 cloudfront.CacheBehavior(
-                    PathPattern=variables["RedirectPathAuthRefresh"],
+                    PathPattern=self.variables["RedirectPathAuthRefresh"],
                     Compress=True,
                     ForwardedValues=cloudfront.ForwardedValues(QueryString=True),
                     LambdaFunctionAssociations=[
@@ -321,7 +321,7 @@ class AuthAtEdge(StaticSite):
                     ViewerProtocolPolicy="redirect-to-https",
                 ),
                 cloudfront.CacheBehavior(
-                    PathPattern=variables["SignOutUrl"],
+                    PathPattern=self.variables["SignOutUrl"],
                     Compress=True,
                     ForwardedValues=cloudfront.ForwardedValues(QueryString=True),
                     LambdaFunctionAssociations=[
@@ -345,7 +345,7 @@ class AuthAtEdge(StaticSite):
             ),
             "DefaultRootObject": "index.html",
             "Logging": self.add_logging_bucket(),
-            "PriceClass": variables["PriceClass"],
+            "PriceClass": self.variables["PriceClass"],
             "Enabled": True,
             "WebACLId": self.add_web_acl(),
             "CustomErrorResponses": self._get_error_responses(),
@@ -360,17 +360,16 @@ class AuthAtEdge(StaticSite):
         for a SPA.
 
         """
-        variables = self.get_variables()
-        if variables["custom_error_responses"]:
+        if self.variables["custom_error_responses"]:
             return [
                 cloudfront.CustomErrorResponse(
                     ErrorCode=response["ErrorCode"],
                     ResponseCode=response["ResponseCode"],
                     ResponsePagePath=response["ResponsePagePath"],
                 )
-                for response in variables["custom_error_responses"]
+                for response in self.variables["custom_error_responses"]
             ]
-        if variables["NonSPAMode"]:
+        if self.variables["NonSPAMode"]:
             return []
         return [
             cloudfront.CustomErrorResponse(

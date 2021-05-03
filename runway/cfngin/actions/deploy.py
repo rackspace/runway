@@ -117,10 +117,8 @@ def _resolve_parameters(
 
     """
     params: Dict[str, Any] = {}
-    param_defs = blueprint.get_parameter_definitions()
-
     for key, value in parameters.items():
-        if key not in param_defs:
+        if key not in blueprint.parameter_definitions:
             LOGGER.debug("blueprint %s does not use parameter %s", blueprint.name, key)
             continue
         if value is None:

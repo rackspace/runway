@@ -42,7 +42,6 @@ class CodeBuild(Blueprint):
     def create_template(self):
         """Create template (main function called by Stacker)."""
         template = self.template
-        variables = self.get_variables()
         template.set_version("2010-09-09")
         template.set_description("Runway CodeBuild Project")
 
@@ -69,7 +68,7 @@ class CodeBuild(Blueprint):
                             codebuild.EnvironmentVariable(
                                 Name="DEPLOY_ENVIRONMENT",
                                 Type="PLAINTEXT",
-                                Value=variables["EnvironmentName"].ref,
+                                Value=self.variables["EnvironmentName"].ref,
                             ),
                             codebuild.EnvironmentVariable(
                                 Name="TEST_TO_RUN",
@@ -101,7 +100,7 @@ class CodeBuild(Blueprint):
                     Name=f"runway-int-test-{test_name}",
                     ServiceRole=codebuild_role.get_att("Arn"),
                     Source=codebuild.Source(
-                        Type="GITHUB", Location=variables["GitHubUrl"].ref
+                        Type="GITHUB", Location=self.variables["GitHubUrl"].ref
                     ),
                     Triggers=codebuild.ProjectTriggers(
                         Webhook=True,

@@ -56,8 +56,6 @@ def write_tfstate_template(dest: Path) -> None:
     LOGGER.debug('writing TfState as a YAML template to "%s"', dest)
     dest.write_text(
         to_yaml(
-            TfState(
-                "test", CfnginContext(environment={"namespace": "test"}), None
-            ).to_json()
+            TfState("test", CfnginContext(environment={"namespace": "test"})).to_json()
         )
     )

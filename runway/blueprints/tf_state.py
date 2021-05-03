@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 """Module with Terraform state resources."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, ClassVar, Dict
+
 import awacs.dynamodb
 import awacs.s3
 from awacs.aws import Allow, PolicyDocument, Statement
@@ -8,11 +12,14 @@ from troposphere import Equals, If, Join, NoValue, Or, Output, dynamodb, iam, s3
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNString
 
+if TYPE_CHECKING:
+    from runway.cfngin.blueprints.type_defs import BlueprintVariableTypeDef
+
 
 class TfState(Blueprint):
     """Stacker blueprint for creating Terraform state resources."""
 
-    VARIABLES = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "BucketName": {
             "type": CFNString,
             "description": "(optional) Name for the S3 bucket",
@@ -25,22 +32,23 @@ class TfState(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
-        template = self.template
-        variables = self.get_variables()
         self.template.set_version("2010-09-09")
         self.template.set_description("Terraform State Resources")
 
         # Conditions
         for i in ["BucketName", "TableName"]:
-            template.add_condition(
+            self.template.add_condition(
                 "%sOmitted" % i,
-                Or(Equals(variables[i].ref, ""), Equals(variables[i].ref, "undefined")),
+                Or(
+                    Equals(self.variables[i].ref, ""),
+                    Equals(self.variables[i].ref, "undefined"),
+                ),
             )
 
         # Resources
-        terraformlocktable = template.add_resource(
+        terraformlocktable = self.template.add_resource(
             dynamodb.Table(
                 "TerraformStateTable",
                 AttributeDefinitions=[
@@ -52,10 +60,12 @@ class TfState(Blueprint):
                 ProvisionedThroughput=dynamodb.ProvisionedThroughput(
                     ReadCapacityUnits=2, WriteCapacityUnits=2
                 ),
-                TableName=If("TableNameOmitted", NoValue, variables["TableName"].ref),
+                TableName=If(
+                    "TableNameOmitted", NoValue, self.variables["TableName"].ref
+                ),
             )
         )
-        template.add_output(
+        self.template.add_output(
             Output(
                 "%sName" % terraformlocktable.title,
                 Description="Name of DynamoDB table for Terraform state",
@@ -63,13 +73,13 @@ class TfState(Blueprint):
             )
         )
 
-        terraformstatebucket = template.add_resource(
+        terraformstatebucket = self.template.add_resource(
             s3.Bucket(
                 "TerraformStateBucket",
                 DeletionPolicy="Retain",
                 AccessControl=s3.Private,
                 BucketName=If(
-                    "BucketNameOmitted", NoValue, variables["BucketName"].ref
+                    "BucketNameOmitted", NoValue, self.variables["BucketName"].ref
                 ),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
@@ -81,14 +91,14 @@ class TfState(Blueprint):
                 VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
             )
         )
-        template.add_output(
+        self.template.add_output(
             Output(
                 "%sName" % terraformstatebucket.title,
                 Description="Name of bucket storing Terraform state",
                 Value=terraformstatebucket.ref(),
             )
         )
-        template.add_output(
+        self.template.add_output(
             Output(
                 "%sArn" % terraformstatebucket.title,
                 Description="Arn of bucket storing Terraform state",
@@ -96,7 +106,7 @@ class TfState(Blueprint):
             )
         )
 
-        managementpolicy = template.add_resource(
+        managementpolicy = self.template.add_resource(
             iam.ManagedPolicy(
                 "ManagementPolicy",
                 Description="Managed policy for Terraform state management.",
@@ -130,7 +140,7 @@ class TfState(Blueprint):
                 ),
             )
         )
-        template.add_output(
+        self.template.add_output(
             Output(
                 "PolicyArn",
                 Description="Managed policy Arn",
@@ -144,6 +154,4 @@ class TfState(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(
-        TfState("test", CfnginContext(parameters={"namespace": "test"}), None).to_json()
-    )
+    print(TfState("test", CfnginContext(parameters={"namespace": "test"})).to_json())

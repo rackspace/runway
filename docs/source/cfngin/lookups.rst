@@ -375,7 +375,7 @@ Basic examples:
         "default": Ref("AWS::NoValue")
     }
 
-  and then assign UserData in a LaunchConfiguration or Instance to ``self.get_variables()["UserData"]``.
+  and then assign UserData in a LaunchConfiguration or Instance to ``self.variables["UserData"]``.
   Note that we use AWSHelperFn as the type because the parameterized-b64 codec returns either a Base64 or a GenericHelperFn troposphere object.
 
 - **json** - Decode the file as JSON and return the resulting object.

@@ -181,7 +181,7 @@ napoleon_use_rtype = True
 # -- Options for sphinxcontrib.apidoc  ---------------------------------------
 # https://github.com/sphinx-contrib/apidoc
 apidoc_excluded_paths = [
-    "hooks/staticsite/auth_at_edge/templates",
+    "cfngin/hooks/staticsite/auth_at_edge/templates",
     "templates",
 ]
 apidoc_extra_args = [f"--templatedir={SRC_DIR / '_templates/apidocs'}"]

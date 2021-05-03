@@ -124,7 +124,6 @@ class NodeGroup(Blueprint):
     def create_template(self) -> None:
         """Create template (main function called by Stacker)."""
         template = self.template
-        variables = self.get_variables()
         template.add_version("2010-09-09")
         template.add_description(
             "Kubernetes workers via EKS - V1.0.0 "
@@ -139,7 +138,7 @@ class NodeGroup(Blueprint):
                         {
                             "Label": {"default": "EKS Cluster"},
                             "Parameters": [
-                                variables[i].name
+                                self.variables[i].name
                                 for i in [
                                     "ClusterName",
                                     "ClusterControlPlaneSecurityGroup",
@@ -149,7 +148,7 @@ class NodeGroup(Blueprint):
                         {
                             "Label": {"default": "Worker Node Configuration"},
                             "Parameters": [
-                                variables[i].name
+                                self.variables[i].name
                                 for i in [
                                     "NodeGroupName",
                                     "NodeAutoScalingGroupMinSize",
@@ -169,7 +168,7 @@ class NodeGroup(Blueprint):
                         {
                             "Label": {"default": "Worker Network Configuration"},
                             "Parameters": [
-                                variables[i].name for i in ["VpcId", "Subnets"]
+                                self.variables[i].name for i in ["VpcId", "Subnets"]
                             ],
                         },
                     ]
@@ -179,14 +178,14 @@ class NodeGroup(Blueprint):
 
         # Conditions
         template.add_condition(
-            "SetSpotPrice", Equals(variables["UseSpotInstances"].ref, "yes")
+            "SetSpotPrice", Equals(self.variables["UseSpotInstances"].ref, "yes")
         )
         template.add_condition(
             "DesiredInstanceCountSpecified",
-            Equals(variables["UseDesiredInstanceCount"].ref, "true"),
+            Equals(self.variables["UseDesiredInstanceCount"].ref, "true"),
         )
         template.add_condition(
-            "KeyNameSpecified", Not(Equals(variables["KeyName"].ref, ""))
+            "KeyNameSpecified", Not(Equals(self.variables["KeyName"].ref, ""))
         )
 
         # Resources
@@ -200,7 +199,7 @@ class NodeGroup(Blueprint):
                         "Value": "owned",
                     },
                 ],
-                VpcId=variables["VpcId"].ref,
+                VpcId=self.variables["VpcId"].ref,
             )
         )
         template.add_output(
@@ -227,7 +226,7 @@ class NodeGroup(Blueprint):
                 Description="Allow worker Kubelets and pods to receive "
                 "communication from the cluster control plane",
                 GroupId=nodesecuritygroup.ref(),
-                SourceSecurityGroupId=variables[
+                SourceSecurityGroupId=self.variables[
                     "ClusterControlPlaneSecurityGroup"
                 ].ref,  # noqa
                 IpProtocol="tcp",
@@ -240,7 +239,7 @@ class NodeGroup(Blueprint):
                 "ControlPlaneEgressToNodeSecurityGroup",
                 Description="Allow the cluster control plane to communicate "
                 "with worker Kubelet and pods",
-                GroupId=variables["ClusterControlPlaneSecurityGroup"].ref,
+                GroupId=self.variables["ClusterControlPlaneSecurityGroup"].ref,
                 DestinationSecurityGroupId=nodesecuritygroup.ref(),
                 IpProtocol="tcp",
                 FromPort=1025,
@@ -254,7 +253,7 @@ class NodeGroup(Blueprint):
                 "443 to receive communication from cluster "
                 "control plane",
                 GroupId=nodesecuritygroup.ref(),
-                SourceSecurityGroupId=variables[
+                SourceSecurityGroupId=self.variables[
                     "ClusterControlPlaneSecurityGroup"
                 ].ref,  # noqa
                 IpProtocol="tcp",
@@ -268,7 +267,7 @@ class NodeGroup(Blueprint):
                 Description="Allow the cluster control plane to communicate "
                 "with pods running extension API servers on port "
                 "443",
-                GroupId=variables["ClusterControlPlaneSecurityGroup"].ref,
+                GroupId=self.variables["ClusterControlPlaneSecurityGroup"].ref,
                 DestinationSecurityGroupId=nodesecuritygroup.ref(),
                 IpProtocol="tcp",
                 FromPort=443,
@@ -279,7 +278,7 @@ class NodeGroup(Blueprint):
             ec2.SecurityGroupIngress(
                 "ClusterControlPlaneSecurityGroupIngress",
                 Description="Allow pods to communicate with the cluster API " "Server",
-                GroupId=variables["ClusterControlPlaneSecurityGroup"].ref,
+                GroupId=self.variables["ClusterControlPlaneSecurityGroup"].ref,
                 SourceSecurityGroupId=nodesecuritygroup.ref(),
                 IpProtocol="tcp",
                 FromPort=443,
@@ -291,17 +290,19 @@ class NodeGroup(Blueprint):
             autoscaling.LaunchConfiguration(
                 "NodeLaunchConfig",
                 AssociatePublicIpAddress=True,
-                IamInstanceProfile=variables["NodeInstanceProfile"].ref,
-                ImageId=variables["NodeImageId"].ref,
-                InstanceType=variables["NodeInstanceType"].ref,
-                KeyName=If("KeyNameSpecified", variables["KeyName"].ref, NoValue),
+                IamInstanceProfile=self.variables["NodeInstanceProfile"].ref,
+                ImageId=self.variables["NodeImageId"].ref,
+                InstanceType=self.variables["NodeInstanceType"].ref,
+                KeyName=If("KeyNameSpecified", self.variables["KeyName"].ref, NoValue),
                 SecurityGroups=[nodesecuritygroup.ref()],
-                SpotPrice=If("SetSpotPrice", variables["SpotBidPrice"].ref, NoValue),
+                SpotPrice=If(
+                    "SetSpotPrice", self.variables["SpotBidPrice"].ref, NoValue
+                ),
                 BlockDeviceMappings=[
                     autoscaling.BlockDeviceMapping(
                         DeviceName="/dev/xvda",
                         Ebs=autoscaling.EBSBlockDevice(
-                            VolumeSize=variables["NodeVolumeSize"].ref,
+                            VolumeSize=self.variables["NodeVolumeSize"].ref,
                             VolumeType="gp2",
                             DeleteOnTermination=True,
                         ),
@@ -330,13 +331,13 @@ class NodeGroup(Blueprint):
                 "NodeGroup",
                 DesiredCapacity=If(
                     "DesiredInstanceCountSpecified",
-                    variables["NodeAutoScalingGroupMaxSize"].ref,
+                    self.variables["NodeAutoScalingGroupMaxSize"].ref,
                     NoValue,
                 ),
                 LaunchConfigurationName=nodelaunchconfig.ref(),
-                MinSize=variables["NodeAutoScalingGroupMinSize"].ref,
-                MaxSize=variables["NodeAutoScalingGroupMaxSize"].ref,
-                VPCZoneIdentifier=variables["Subnets"].ref,
+                MinSize=self.variables["NodeAutoScalingGroupMinSize"].ref,
+                MaxSize=self.variables["NodeAutoScalingGroupMaxSize"].ref,
+                VPCZoneIdentifier=self.variables["Subnets"].ref,
                 Tags=[
                     autoscaling.Tag(
                         "Name", Sub("${ClusterName}-${NodeGroupName}-Node"), True
@@ -359,8 +360,4 @@ class NodeGroup(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(
-        NodeGroup(
-            "test", CfnginContext(parameters={"namespace": "test"}), None
-        ).to_json()
-    )
+    print(NodeGroup("test", CfnginContext(parameters={"namespace": "test"})).to_json())

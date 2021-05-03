@@ -77,10 +77,8 @@ class Pipeline(Blueprint):
 
     def create_template(self):
         """Create template (main function called by Stacker)."""
-        template = self.template
-        variables = self.get_variables()
-        template.set_version("2010-09-09")
-        template.set_description("App - Build Pipeline")
+        self.template.set_version("2010-09-09")
+        self.template.set_description("App - Build Pipeline")
 
         # Resources
         boundary_arn = Join(
@@ -91,13 +89,15 @@ class Pipeline(Blueprint):
                 ":iam::",
                 AccountId,
                 ":policy/",
-                variables["RolePermissionsBoundaryName"].ref,
+                self.variables["RolePermissionsBoundaryName"].ref,
             ],
         )
 
         # Repo image limit is 1000 by default; this lambda function will prune
         # old images
-        image_param_path = Join("", ["/", variables["AppPrefix"].ref, "/current-hash"])
+        image_param_path = Join(
+            "", ["/", self.variables["AppPrefix"].ref, "/current-hash"]
+        )
         image_param_arn = Join(
             "",
             [
@@ -121,10 +121,10 @@ class Pipeline(Blueprint):
                 ":",
                 AccountId,
                 ":repository/",
-                variables["EcrRepoName"].ref,
+                self.variables["EcrRepoName"].ref,
             ],
         )
-        cleanuplambdarole = template.add_resource(
+        cleanuplambdarole = self.template.add_resource(
             iam.Role(
                 "CleanupLambdaRole",
                 AssumeRolePolicyDocument=make_simple_assume_policy(
@@ -135,7 +135,7 @@ class Pipeline(Blueprint):
                 Policies=[
                     iam.Policy(
                         PolicyName=Join(
-                            "", [variables["AppPrefix"].ref, "-ecrcleanup"]
+                            "", [self.variables["AppPrefix"].ref, "-ecrcleanup"]
                         ),
                         PolicyDocument=PolicyDocument(
                             Version="2012-10-17",
@@ -159,14 +159,14 @@ class Pipeline(Blueprint):
                 ],
             )
         )
-        cleanupfunction = template.add_resource(
+        cleanupfunction = self.template.add_resource(
             awslambda.Function(
                 "CleanupFunction",
                 Description="Cleanup stale ECR images",
-                Code=awslambda.Code(ZipFile=variables["ECRCleanupLambdaFunction"]),
+                Code=awslambda.Code(ZipFile=self.variables["ECRCleanupLambdaFunction"]),
                 Environment=awslambda.Environment(
                     Variables={
-                        "ECR_REPO_NAME": variables["EcrRepoName"].ref,
+                        "ECR_REPO_NAME": self.variables["EcrRepoName"].ref,
                         "SSM_PARAM": image_param_path,
                     }
                 ),
@@ -176,7 +176,7 @@ class Pipeline(Blueprint):
                 Timeout=120,
             )
         )
-        cleanuprule = template.add_resource(
+        cleanuprule = self.template.add_resource(
             events.Rule(
                 "CleanupRule",
                 Description="Regularly invoke CleanupFunction",
@@ -189,7 +189,7 @@ class Pipeline(Blueprint):
                 ],
             )
         )
-        template.add_resource(
+        self.template.add_resource(
             awslambda.Permission(
                 "AllowCWLambdaInvocation",
                 FunctionName=cleanupfunction.ref(),
@@ -199,14 +199,14 @@ class Pipeline(Blueprint):
             )
         )
 
-        appsource = template.add_resource(
+        appsource = self.template.add_resource(
             codecommit.Repository(
                 "AppSource",
-                RepositoryName=Join("-", [variables["AppPrefix"].ref, "source"]),
+                RepositoryName=Join("-", [self.variables["AppPrefix"].ref, "source"]),
             )
         )
         for i in ["Name", "Arn"]:
-            template.add_output(
+            self.template.add_output(
                 Output(
                     "AppRepo%s" % i,
                     Description="%s of app source repo" % i,
@@ -214,7 +214,7 @@ class Pipeline(Blueprint):
                 )
             )
 
-        bucket = template.add_resource(
+        bucket = self.template.add_resource(
             s3.Bucket(
                 "Bucket",
                 AccessControl=s3.Private,
@@ -228,7 +228,7 @@ class Pipeline(Blueprint):
                 VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
             )
         )
-        template.add_output(
+        self.template.add_output(
             Output(
                 "PipelineBucketName",
                 Description="Name of pipeline bucket",
@@ -238,9 +238,9 @@ class Pipeline(Blueprint):
 
         # This list must be kept in sync between the CodeBuild project and its
         # role
-        build_name = Join("", [variables["AppPrefix"].ref, "-build"])
+        build_name = Join("", [self.variables["AppPrefix"].ref, "-build"])
 
-        build_role = template.add_resource(
+        build_role = self.template.add_resource(
             iam.Role(
                 "BuildRole",
                 AssumeRolePolicyDocument=make_simple_assume_policy(
@@ -317,7 +317,7 @@ class Pipeline(Blueprint):
             )
         )
 
-        buildproject = template.add_resource(
+        buildproject = self.template.add_resource(
             codebuild.Project(
                 "BuildProject",
                 Artifacts=codebuild.Artifacts(Type="CODEPIPELINE"),
@@ -333,7 +333,7 @@ class Pipeline(Blueprint):
                         codebuild.EnvironmentVariable(
                             Name="IMAGE_REPO_NAME",
                             Type="PLAINTEXT",
-                            Value=variables["EcrRepoName"].ref,
+                            Value=self.variables["EcrRepoName"].ref,
                         ),
                     ],
                     Image="aws/codebuild/docker:18.09.0",
@@ -342,12 +342,13 @@ class Pipeline(Blueprint):
                 Name=build_name,
                 ServiceRole=build_role.get_att("Arn"),
                 Source=codebuild.Source(
-                    Type="CODEPIPELINE", BuildSpec=variables["BuildProjectBuildSpec"]
+                    Type="CODEPIPELINE",
+                    BuildSpec=self.variables["BuildProjectBuildSpec"],
                 ),
             )
         )
 
-        pipelinerole = template.add_resource(
+        pipelinerole = self.template.add_resource(
             iam.Role(
                 "PipelineRole",
                 AssumeRolePolicyDocument=make_simple_assume_policy(
@@ -396,7 +397,7 @@ class Pipeline(Blueprint):
             )
         )
 
-        template.add_resource(
+        self.template.add_resource(
             codepipeline.Pipeline(
                 "Pipeline",
                 ArtifactStore=codepipeline.ArtifactStore(
@@ -454,8 +455,4 @@ class Pipeline(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(
-        Pipeline(
-            "test", CfnginContext(parameters={"namespace": "test"}), None
-        ).to_json()
-    )
+    print(Pipeline("test", CfnginContext(parameters={"namespace": "test"})).to_json())

@@ -214,17 +214,17 @@ class Stack:
             Dictionary of ``<parameter name>: <parameter value>``.
 
         """
-        return self.blueprint.get_parameter_values()
+        return self.blueprint.parameter_values
 
     @property
     def all_parameter_definitions(self) -> Dict[str, Any]:
         """Return all parameters in the blueprint/template."""
-        return self.blueprint.get_parameter_definitions()
+        return self.blueprint.parameter_definitions
 
     @property
     def required_parameter_definitions(self) -> Dict[str, Any]:
         """Return all CloudFormation Parameters without a default value."""
-        return self.blueprint.get_required_parameter_definitions()
+        return self.blueprint.required_parameter_definitions
 
     def resolve(
         self, context: CfnginContext, provider: Optional[Provider] = None

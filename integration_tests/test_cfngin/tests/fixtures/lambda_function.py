@@ -42,8 +42,7 @@ class BlueprintClass(Blueprint):
     def create_resources(self):
         """Create the resources."""
         template = self.template
-        variables = self.get_variables()
-        app_name = variables["AppName"].ref
+        app_name = self.variables["AppName"].ref
 
         lambda_iam_role = template.add_resource(
             iam.Role(
@@ -101,8 +100,8 @@ class BlueprintClass(Blueprint):
         lambda_function = template.add_resource(
             awslambda.Function(
                 "LambdaFunction",
-                Code=variables["Code"],
-                Handler=variables["Entrypoint"].ref,
+                Code=self.variables["Code"],
+                Handler=self.variables["Entrypoint"].ref,
                 Role=GetAtt(lambda_iam_role, "Arn"),
                 Runtime="python3.6",
                 Timeout=30,

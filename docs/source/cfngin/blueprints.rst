@@ -167,21 +167,19 @@ Below is an annotated example:
 
       def create_template(self) -> None:
           """Create a template from the blueprint."""
-          variables = self.get_variables()
-
           # The Troposphere s3 buckets have already been created when we
-          # access variables["Buckets"], we just need to add them as
+          # access self.variables["Buckets"], we just need to add them as
           # resources to the template.
-          for bucket in variables["Buckets"]:
+          for bucket in self.variables["Buckets"]:
               self.template.add_resource(bucket)
 
           # Add the single bucket to the template. You can use
           # `Ref(single_bucket)` to pass CloudFormation references to the
           # bucket just as you would with any other Troposphere type.
-          self.template.add_resource(variables["SingleBucket"])
+          self.template.add_resource(self.variables["SingleBucket"])
 
-          subscriptions = variables["Subscriptions"]
-          optional_subscription = variables["SingleOptionalSubscription"]
+          subscriptions = self.variables["Subscriptions"]
+          optional_subscription = self.variables["SingleOptionalSubscription"]
           # Handle it in some special way...
           if optional_subscription is not None:
               subscriptions.append(optional_subscription)
@@ -266,27 +264,25 @@ See :mod:`runway.cfngin.blueprints.variables.types` for available subclasses of 
 
       def create_template(self) -> None:
           """Create a template from the blueprint."""
-          # `get_variables` returns a dictionary of <variable name>: <variable value>.
+          # `self.variables` returns a dictionary of <variable name>: <variable value>.
           # For the subclasses of `CFNType`, the values are
           # instances of `CFNParameter` which have a `ref` helper property
           # which will return a troposphere `Ref` to the parameter name.
-          variables = self.get_variables()
+          self.add_output("StringOutput", self.variables["String"])
 
-          self.add_output("StringOutput", variables["String"])
-
-          # variables["List"] is a native list
-          for index, value in enumerate(variables["List"]):
+          # self.variables["List"] is a native list
+          for index, value in enumerate(self.variables["List"]):
               self.add_output("ListOutput:{}".format(index), value)
 
           # `CFNParameter` values (which wrap variables with a `type`
           # that is a `CFNType` subclass) can be converted to troposphere
           # `Ref` objects with the `ref` property
           self.add_output(
-              "CloudFormationStringOutput", variables["CloudFormationString"].ref
+              "CloudFormationStringOutput", self.variables["CloudFormationString"].ref
           )
           self.add_output(
               "CloudFormationSpecificTypeOutput",
-              variables["CloudFormationSpecificType"].ref,
+              self.variables["CloudFormationSpecificType"].ref,
           )
 
 
@@ -346,14 +342,12 @@ To use this in your |Blueprint|, you can get the name from the :attr:`~runway.cf
 
       def create_template(self) -> None:
           """Create a template from the blueprint."""
-          variables = self.get_variables()
-
           # now adding a SecurityGroup resource named `SecurityGroup` to the CFN template
           self.template.add_resource(
               ec2.SecurityGroup(
                   "SecurityGroup",
                   # Referencing the VpcId set as the variable
-                  VpcId=variables["VpcId"].ref,
+                  VpcId=self.variables["VpcId"].ref,
                   # Setting the group description as the fully qualified name
                   GroupDescription=self.context.get_fqn(self.name),
                   # setting the Name tag to be the stack short name
