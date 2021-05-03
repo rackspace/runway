@@ -315,10 +315,6 @@ class TestRunwayFutureDefinitionModel:
         assert errors[0]["loc"] == ("invalid",)
         assert errors[0]["msg"] == "extra fields not permitted"
 
-    def test_field_defaults(self) -> None:
-        """Test field defaults."""
-        assert not RunwayFutureDefinitionModel().strict_environments
-
 
 class TestRunwayModuleDefinitionModel:
     """Test runway.config.models.runway.RunwayModuleDefinitionModel."""

@@ -349,12 +349,6 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
 class RunwayFutureDefinitionModel(ConfigProperty):
     """Model for the Runway future definition."""
 
-    strict_environments: bool = Field(
-        False,
-        description="If 'environments' is included in a deployment, modules will "
-        "be skipped if the current environment is not defined.",
-    )
-
     class Config(ConfigProperty.Config):
         """Model configuration."""
 

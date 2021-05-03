@@ -55,7 +55,7 @@ class TestDeployment:
     ) -> None:
         """Test init with args."""
         definition = fx_deployments.load("simple_env_vars")
-        future = RunwayFutureDefinitionModel(strict_environments=True)
+        future = RunwayFutureDefinitionModel()
         variables = RunwayVariablesDefinition.parse_obj({"some_key": "val"})
 
         obj = Deployment(
