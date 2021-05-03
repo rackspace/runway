@@ -94,12 +94,7 @@ class Module:
         Will return None if there is nothing defined for the current environment.
 
         """
-        return validate_environment(
-            self.ctx,
-            self.environments,
-            logger=self.logger,
-            strict=self.__future.strict_environments,
-        )
+        return validate_environment(self.ctx, self.environments, logger=self.logger,)
 
     @cached_property
     def environments(self) -> RunwayEnvironmentsType:
@@ -331,7 +326,6 @@ def validate_environment(
     context: RunwayContext,
     env_def: Optional[Union[bool, Dict[str, Any], int, str, List[str]]],
     logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-    strict: bool = False,
 ) -> Optional[bool]:
     """Check if an environment should be deployed to.
 
@@ -339,8 +333,6 @@ def validate_environment(
         context: Runway context object.
         env_def: Runway module definition.
         logger: Logger to log messages to.
-        strict: Whether to consider the current environment missing from
-            definition as a failure.
 
     Returns:
         Booleon value of whether to deploy or not.
@@ -357,18 +349,10 @@ def validate_environment(
         return cast(Optional[bool], env_def)
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
-            if strict:
-                logger.info("skipped; environment not in definition")
-                return False
-            logger.info(
-                "environment not in definition; module will determine deployment"
-            )
-            return None
+            logger.info("skipped; environment not in definition")
+            return False
         return validate_environment(
-            context,
-            cast(Any, env_def.get(context.env.name, False)),
-            logger=logger,
-            strict=strict,
+            context, cast(Any, env_def.get(context.env.name, False)), logger=logger,
         )
 
     account = aws.AccountDetails(context)

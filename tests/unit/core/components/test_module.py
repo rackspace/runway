@@ -10,7 +10,6 @@ import pytest
 import yaml
 from mock import MagicMock, call
 
-from runway.config.models.runway import RunwayFutureDefinitionModel
 from runway.core.components import Deployment, Module
 from runway.core.components._module import validate_environment
 
@@ -94,7 +93,7 @@ class TestModule:
         )
         assert mod.environment_matches_defined == "success"
         mock_validate_environment.assert_called_once_with(
-            mod.ctx, {"key": "val"}, logger=mod.logger, strict=False
+            mod.ctx, {"key": "val"}, logger=mod.logger
         )
 
     def test_environments_deployment(
@@ -231,22 +230,13 @@ class TestModule:
         assert result["parameters"] == opts["parameters"]
 
     @pytest.mark.parametrize(
-        "strict, validate",
-        [
-            (False, None),
-            (True, False),
-            (False, None),
-            (True, False),
-            (False, None),
-            (True, False),
-        ],
+        "validate", [None, False],
     )
     def test_should_skip(
         self,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
-        strict: bool,
         validate: Optional[bool],
     ) -> None:
         """Test should_skip."""
@@ -255,7 +245,6 @@ class TestModule:
         mod = Module(
             context=runway_context,
             definition=fx_deployments.load("min_required").modules[0],
-            future=RunwayFutureDefinitionModel(strict_environments=strict),
         )
 
         result = mod.should_skip
@@ -556,102 +545,51 @@ class TestModule:
 
 
 @pytest.mark.parametrize(
-    "env_def, strict, expected, expected_logs",
+    "env_def, expected, expected_logs",
     [
         (
             {"invalid"},
             False,
-            False,
             ['skipped; unsupported type for environments "%s"' % type(set())],  # type: ignore
         ),
-        (True, False, True, ["explicitly enabled"]),
-        (False, False, False, ["skipped; explicitly disabled"]),
-        (["123456789012/us-east-1"], False, True, []),
-        (
-            ["123456789012/us-east-2"],
-            False,
-            False,
-            ["skipped; account_id/region mismatch"],
-        ),
-        ("123456789012/us-east-1", False, True, []),
-        (
-            "123456789012/us-east-2",
-            False,
-            False,
-            ["skipped; account_id/region mismatch"],
-        ),
-        (
-            {},
-            False,
-            None,
-            ["environment not defined; module will determine deployment"],
-        ),
-        ({}, True, None, ["environment not defined; module will determine deployment"]),
+        (True, True, ["explicitly enabled"]),
+        (False, False, ["skipped; explicitly disabled"]),
+        (["123456789012/us-east-1"], True, []),
+        (["123456789012/us-east-2"], False, ["skipped; account_id/region mismatch"],),
+        ("123456789012/us-east-1", True, []),
+        ("123456789012/us-east-2", False, ["skipped; account_id/region mismatch"],),
+        ({}, None, ["environment not defined; module will determine deployment"],),
         (
             {"example": "111111111111/us-east-1"},
-            False,
-            None,
-            ["environment not in definition; module will determine deployment"],
-        ),
-        (
-            {"example": "111111111111/us-east-1"},
-            True,
             False,
             ["skipped; environment not in definition"],
         ),
-        ({"test": False}, False, False, ["skipped; explicitly disabled"]),
-        ({"test": True}, False, True, ["explicitly enabled"]),
-        ({"test": "123456789012/us-east-1"}, False, True, []),
+        ({"test": False}, False, ["skipped; explicitly disabled"]),
+        ({"test": True}, True, ["explicitly enabled"]),
+        ({"test": "123456789012/us-east-1"}, True, []),
         (
             {"test": "123456789012/us-east-2"},
             False,
-            False,
             ["skipped; account_id/region mismatch"],
         ),
-        ({"test": "123456789012"}, False, True, []),
-        (
-            {"test": "111111111111"},
-            False,
-            False,
-            ["skipped; account_id/region mismatch"],
-        ),
-        ({"test": 123456789012}, False, True, []),
-        ({"test": 111111111111}, False, False, ["skipped; account_id/region mismatch"]),
-        ({"test": "us-east-1"}, False, True, []),
-        ({"test": "us-east-2"}, False, False, ["skipped; account_id/region mismatch"]),
-        (
-            {"test": ["123456789012/us-east-1", "123456789012/us-east-2"]},
-            False,
-            True,
-            [],
-        ),
+        ({"test": "123456789012"}, True, []),
+        ({"test": "111111111111"}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": 123456789012}, True, []),
+        ({"test": 111111111111}, False, ["skipped; account_id/region mismatch"]),
+        ({"test": "us-east-1"}, True, []),
+        ({"test": "us-east-2"}, False, ["skipped; account_id/region mismatch"]),
+        ({"test": ["123456789012/us-east-1", "123456789012/us-east-2"]}, True, [],),
         (
             {"test": ["123456789012/us-east-2"]},
             False,
-            False,
             ["skipped; account_id/region mismatch"],
         ),
-        ({"test": ["123456789012", "111111111111"]}, False, True, []),
-        (
-            {"test": ["111111111111"]},
-            False,
-            False,
-            ["skipped; account_id/region mismatch"],
-        ),
-        ({"test": [123456789012, 111111111111]}, False, True, []),
-        (
-            {"test": [111111111111]},
-            False,
-            False,
-            ["skipped; account_id/region mismatch"],
-        ),
-        ({"test": ["us-east-1", "us-east-2"]}, False, True, []),
-        (
-            {"test": ["us-east-2"]},
-            False,
-            False,
-            ["skipped; account_id/region mismatch"],
-        ),
+        ({"test": ["123456789012", "111111111111"]}, True, []),
+        ({"test": ["111111111111"]}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": [123456789012, 111111111111]}, True, []),
+        ({"test": [111111111111]}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": ["us-east-1", "us-east-2"]}, True, []),
+        ({"test": ["us-east-2"]}, False, ["skipped; account_id/region mismatch"],),
     ],
 )
 def test_validate_environment(
@@ -661,7 +599,6 @@ def test_validate_environment(
     expected: Optional[bool],
     mocker: MockerFixture,
     runway_context: MockRunwayContext,
-    strict: bool,
 ) -> None:
     """Test validate_environment."""
     caplog.set_level(logging.DEBUG, logger="runway")
@@ -669,7 +606,7 @@ def test_validate_environment(
         f"{MODULE}.aws",
         **{"AccountDetails.return_value": MagicMock(id="123456789012")},
     )
-    assert validate_environment(runway_context, env_def, strict=strict) is expected
+    assert validate_environment(runway_context, env_def) is expected
     # all() does not give an output that can be used for troubleshooting failures
     for log in expected_logs:
         assert log in caplog.messages
