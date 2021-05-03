@@ -556,7 +556,7 @@ class Blueprint:
     def get_output_definitions(self) -> Dict[str, Dict[str, Any]]:
         """Get the output definitions.
 
-        .. versionchanged:: 2.0.0
+        .. deprecated:: 2.0.0
             Replaced by :attr:`output_definitions`.
 
         Returns:
