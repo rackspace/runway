@@ -156,7 +156,10 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         """Test get_stack."""
         obj = CfnginContext(config=self.config)
         assert obj.get_stack("test-stack1") == obj.stacks[0]
-        assert not obj.get_stack("stack1")
+        # namespace is added if not provided
+        assert obj.get_stack("stack1") == obj.stacks[0]
+        assert not obj.get_stack("dev-stack1")
+        assert not obj.get_stack("stack12")
 
     def test_init(self, tmp_path: Path) -> None:
         """Test init."""
