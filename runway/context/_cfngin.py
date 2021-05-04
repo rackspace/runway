@@ -366,10 +366,10 @@ class CfnginContext(BaseContext):
         """Get a stack by name.
 
         Args:
-            name: Name of a stack to retrieve.
+            name: Name of a Stack as defined in the config.
 
         """
-        return self.stacks_dict.get(name)
+        return self.stacks_dict.get(self.get_fqn(name))
 
     def lock_persistent_graph(self, lock_code: str) -> None:
         """Locks the persistent graph in s3.

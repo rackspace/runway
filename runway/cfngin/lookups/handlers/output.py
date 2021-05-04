@@ -47,7 +47,7 @@ class OutputLookup(LookupHandler):
         stack = context.get_stack(decon.stack_name)
         if stack:
             return stack.outputs[decon.output_name]
-        raise StackDoesNotExist(decon.stack_name)
+        raise StackDoesNotExist(context.get_fqn(decon.stack_name))
 
     @classmethod
     def dependencies(cls, lookup_query: VariableValue) -> Set[str]:
