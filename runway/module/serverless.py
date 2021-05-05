@@ -337,10 +337,11 @@ class Serverless(RunwayModuleNpm):
         args = ["--format", "yaml"]
         if item_path:
             args.extend(["--path", item_path])
+        # disable all deprecation messages to ensure the output is "clean"
+        env_vars = {"SLS_DEPRECATION_DISABLE": "*"}
+        env_vars.update(self.ctx.env.vars)
         result = yaml.safe_load(
-            subprocess.check_output(
-                self.gen_cmd("print", args_list=args), env=self.ctx.env.vars
-            )
+            subprocess.check_output(self.gen_cmd("print", args_list=args), env=env_vars)
         )
         # this could be expensive so only dump if needed
         if self.logger.getEffectiveLevel() == logging.DEBUG:
