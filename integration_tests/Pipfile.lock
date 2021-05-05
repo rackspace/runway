@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7f9023d941587961404cd706880c39427fc4384f9fae4468a1e6923477c6fb13"
+            "sha256": "c0ea77e5e8f77455217e9684e1e2800bca3e31971dca3e15d72edec27f1bccbd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -407,6 +407,8 @@
                 "sha256:9e9ec482d80ea030cdb1613d05a247f31eedabe6666d884d42dd890cc5fb0e05",
                 "sha256:ffe61d3c2a404354daf2d895e34e38c5044453353581b3c396bf5365de26250c"
             ],
+            "index": "pypi",
+            "markers": "sys_platform == 'darwin'",
             "version": "==7.2"
         },
         "pyobjc-framework-cocoa": {
@@ -419,6 +421,7 @@
                 "sha256:c9a9d1d49cc5a810773c88d6de821e60c8cc41d01113cf1b9e7662938f5f7d66"
             ],
             "index": "pypi",
+            "markers": "sys_platform == 'darwin'",
             "version": "==7.2"
         },
         "pyopenssl": {
