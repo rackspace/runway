@@ -281,7 +281,7 @@ class Action(BaseAction):
             stack_data = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
             LOGGER.debug("%s:stack does not exist", stack.fqn)
-            if kwargs.get("status", None) == SUBMITTED:
+            if status == SUBMITTED:
                 return DESTROYED_STATUS
             return DoesNotExistInCloudFormation()
 
