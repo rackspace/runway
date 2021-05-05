@@ -2,13 +2,13 @@
 # pylint: disable=no-self-use
 import os
 import tempfile
+from pathlib import Path
 
 from integration_tests.test_serverless.test_serverless import Serverless
 from integration_tests.utils import run_command
 from runway.cfngin.hooks.staticsite.utils import get_hash_of_files
 
-# from runway.commands.modules_command import assume_role
-from runway.context import CfnginContext
+from runway.context import RunwayContext
 from runway.core.providers import aws
 from runway.module.serverless import get_src_hash
 from runway.s3_utils import (
@@ -29,6 +29,8 @@ class ServerlessTest(Serverless):
         self, template, templates_dir, environment, logger
     ):
         """Initialize class."""
+        self.ctx = RunwayContext()
+        self.ctx.env.aws_region = "us-east-1"
         self.template_name = template
         self.templates_dir = templates_dir
         self.template_dir = os.path.join(templates_dir, template)
@@ -54,11 +56,17 @@ class ServerlessTest(Serverless):
     def get_session(self, role_arn):
         """Get assumed role session."""
         self.logger.info("Assuming role: %s", role_arn)
-        ctx = CfnginContext()
         with aws.AssumeRole(
-            ctx, role_arn=role_arn, session_name="runway-integration-tests"
-        ):
-            return ctx.get_session(region="us-east-1")
+            self.ctx, role_arn=role_arn, session_name="runway-integration-tests"
+        ) as assumed:
+            # explicitly supply creds so when env vars are reverted,
+            # assumed session is still valid
+            return self.ctx.get_session(
+                aws_access_key_id=assumed.credentials["AccessKeyId"],
+                aws_secret_access_key=assumed.credentials["SecretAccessKey"],
+                aws_session_token=assumed.credentials["SessionToken"],
+                region="us-east-1",
+            )
 
     def get_configs(self):
         """Get Runway and Serverless parsed configs."""
@@ -81,7 +89,7 @@ class ServerlessTest(Serverless):
             "-".join([configs["Serverless"].get("service"), env]), session
         )
 
-        hashes = get_src_hash(configs["Serverless"], self.template_dir)
+        hashes = get_src_hash(configs["Serverless"], Path(self.template_dir))
         zip_dirs = {"Runway": tempfile.mkdtemp(), "Serverless": tempfile.mkdtemp()}
         for key, value in hashes.items():
             # don't need to pass session for promotezip bucket as it will use default
@@ -108,7 +116,7 @@ class ServerlessTest(Serverless):
                     session,
                 )
 
-        return [get_hash_of_files(value) for key, value in zip_dirs.items()]
+        return [get_hash_of_files(Path(v)) for _k, v in zip_dirs.items()]
 
     def run_runway(self, template, command="deploy"):
         """Deploy serverless template."""
