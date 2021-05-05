@@ -49,7 +49,7 @@ class BaseAWSObject(object):
     def __init__(
         self,
         title: str,
-        template: Template = ...,
+        template: Optional[Template] = ...,
         validation: bool = ...,
         **kwargs: Any,
     ) -> None: ...

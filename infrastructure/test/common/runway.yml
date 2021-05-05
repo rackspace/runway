@@ -1,0 +1,11 @@
+ignore_git_branch: true  # using dir name
+
+deployments:
+  - modules:
+      - path: iam.cfn
+    environments:
+      common: 523485371024/us-east-1
+    regions:
+      - us-east-1
+    parameters:
+      namespace: runway-test-infrastructure
