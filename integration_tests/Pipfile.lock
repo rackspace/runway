@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0c3007d9ac0a55bd0938cc0d1bb112bb9e8d5d5b9dbe88cffca82c135e72c251"
+            "sha256": "d5e338b3f509fa6a0cdbaee111063c2361bc6142204fdd16deb1eb5e338123da"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -398,6 +398,29 @@
             ],
             "version": "==0.4.4"
         },
+        "pyobjc-core": {
+            "hashes": [
+                "sha256:860183540d1be792c26426018139ac8ba75e85f675c59ba080ccdc52d8e74c7a",
+                "sha256:94b4d9de9d228db52dd35012096d63bdf8c1ace58ea3be1d5f6f39313cd502f2",
+                "sha256:971cbd7189ae1aa03ef0d16124aa5bcd053779e0e6b6011a41c3dbd5b4ea7e88",
+                "sha256:9d93b20394008373d6d2856d49aaff26f4b97ff42d924a14516c8a82313ec8c0",
+                "sha256:9e9ec482d80ea030cdb1613d05a247f31eedabe6666d884d42dd890cc5fb0e05",
+                "sha256:ffe61d3c2a404354daf2d895e34e38c5044453353581b3c396bf5365de26250c"
+            ],
+            "version": "==7.2"
+        },
+        "pyobjc-framework-cocoa": {
+            "hashes": [
+                "sha256:506c2cd09f421eac92b9008a0142174c3d1d70ecd4b0e3fa2b924767995fd14e",
+                "sha256:7e4c6d7baa0c2ab5ea5efb8836ad0b3b3976cffcfc6195c1f195e826c6eb5744",
+                "sha256:828d183947fc7746953fd0c9b1092cc423745ba0b49719e7b7d1e1614aaa20ec",
+                "sha256:8e5dd5daa0096755937ec24c345a4b07c3fa131a457f99e0fdeeb01979178ec7",
+                "sha256:c8b23f03dc3f4436d36c0fd006a8a084835c4f6015187df7c3aa5de8ecd5c653",
+                "sha256:c9a9d1d49cc5a810773c88d6de821e60c8cc41d01113cf1b9e7662938f5f7d66"
+            ],
+            "index": "pypi",
+            "version": "==7.2"
+        },
         "pyopenssl": {
             "hashes": [
                 "sha256:4c231c759543ba02560fcd2480c48dcec4dae34c9da7d3747c508227e0624b51",
@@ -486,10 +509,11 @@
         },
         "send2trash": {
             "hashes": [
-                "sha256:60001cc07d707fe247c94f74ca6ac0d3255aabcb930529690897ca2a39db28b2",
-                "sha256:f1691922577b6fa12821234aeb57599d887c4900b9ca537948d2dac34aea888b"
+                "sha256:6259af001c2791a4b7b6c4e1dac5824299dc22aadc6824a6062b15c7d56bf8be",
+                "sha256:fbbfee81c1731a98d4759244620c797e33633f477999a718f84ef77d1390b732"
             ],
-            "version": "==1.5.0"
+            "index": "pypi",
+            "version": "==1.7.0a0"
         },
         "six": {
             "hashes": [
