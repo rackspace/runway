@@ -94,7 +94,7 @@ class CodeBuild(Blueprint):
                                 Value="1",
                             ),
                         ],
-                        Image="aws/codebuild/standard:2.0",
+                        Image="aws/codebuild/standard:5.0",
                         Type="LINUX_CONTAINER",
                     ),
                     Name=f"runway-int-test-{test_name}",

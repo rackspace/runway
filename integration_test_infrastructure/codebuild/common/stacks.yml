@@ -5,7 +5,7 @@ cfngin_bucket: ${bucket_name}
 sys_path: ./
 
 stacks:
-  runway-integration-testing-project:
+  - name: runway-integration-testing-project
     class_path: codebuild_blueprints.codebuild.CodeBuild
     variables:
       EnvironmentName: ${namespace}
