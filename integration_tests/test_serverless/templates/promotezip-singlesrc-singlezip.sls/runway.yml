@@ -1,12 +1,10 @@
----
-
 deployments:
   - modules:
-    - name: runway-serverless-integration-test-singlesrc-singlezip
-      path: ./
-      options:
-        promotezip:
-          bucketname: runway-serverless-integration-test-singlesrc-singlezip
+      - name: runway-serverless-integration-test-singlesrc-singlezip
+        path: ./
+        options:
+          promotezip:
+            bucketname: runway-serverless-integration-test-singlesrc-singlezip
     parameters:
       namespace: ${env DEPLOY_ENVIRONMENT}
       region: us-east-1
