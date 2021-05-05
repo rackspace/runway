@@ -74,6 +74,9 @@ def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
         func_path = {"path": os.path.dirname(value.get("handler"))}
         if func_path not in directories:
             directories.append(func_path)
+    if isinstance(sls_config["service"], dict):
+        # handle sls<3.0.0 potential service property object notation
+        return {sls_config["service"]["name"]: get_hash_of_files(path, directories)}
     return {sls_config["service"]: get_hash_of_files(path, directories)}
 
 
