@@ -39,8 +39,6 @@ class FunctionalTests(Blueprint):
 
     def create_template(self):
         """Create template."""
-        t = self.template
-
         bucket_arn = Sub("arn:aws:s3:::${StackerBucket}*")
         objects_arn = Sub("arn:aws:s3:::${StackerBucket}*/*")
         cloudformation_scope = Sub(
@@ -118,7 +116,7 @@ class FunctionalTests(Blueprint):
         )
 
         principal = AWSPrincipal(Ref("AWS::AccountId"))
-        role = t.add_resource(
+        role = self.template.add_resource(
             iam.Role(
                 "FunctionalTestRole",
                 AssumeRolePolicyDocument=Policy(
@@ -147,22 +145,24 @@ class FunctionalTests(Blueprint):
             ),
         )
 
-        user = t.add_resource(
+        user = self.template.add_resource(
             iam.User("FunctionalTestUser", Policies=[cfngin_policy, assumerole_policy])
         )
 
-        key = t.add_resource(
+        key = self.template.add_resource(
             iam.AccessKey("FunctionalTestKey", Serial=1, UserName=Ref(user))
         )
 
-        t.add_output(Output("User", Value=Ref(user)))
-        t.add_output(Output("AccessKeyId", Value=Ref(key)))
-        t.add_output(
+        self.template.add_output(Output("User", Value=Ref(user)))
+        self.template.add_output(Output("AccessKeyId", Value=Ref(key)))
+        self.template.add_output(
             Output(
                 "SecretAccessKey", Value=GetAtt("FunctionalTestKey", "SecretAccessKey")
             )
         )
-        t.add_output(Output("FunctionalTestRole", Value=GetAtt(role, "Arn")))
+        self.template.add_output(
+            Output("FunctionalTestRole", Value=GetAtt(role, "Arn"))
+        )
 
 
 class Dummy(Blueprint):
@@ -204,25 +204,24 @@ class LongRunningDummy(Blueprint):
     VARIABLES = {
         "Count": {
             "type": int,
-            "description": "The # of WaitConditonHandles to create.",
+            "description": "The # of WaitConditionHandles to create.",
             "default": 1,
         },
         "BreakLast": {
             "type": bool,
-            "description": "Whether or not to break the last WaitConditon "
+            "description": "Whether or not to break the last WaitCondition "
             "by creating an invalid WaitConditionHandle.",
             "default": True,
         },
         "OutputValue": {
             "type": str,
-            "description": "The value to put in an output to allow for " "updates.",
+            "description": "The value to put in an output to allow for updates.",
             "default": "DefaultOutput",
         },
     }
 
     def create_template(self):
         """Create template."""
-        t = self.template
         base_name = "Dummy"
 
         for i in range(self.variables["Count"]):
@@ -233,16 +232,16 @@ class LongRunningDummy(Blueprint):
             wch = WaitConditionHandle(name)
             if last_name is not None:
                 wch.DependsOn = last_name
-            t.add_resource(wch)
+            self.template.add_resource(wch)
 
         self.add_output("OutputValue", str(self.variables["OutputValue"]))
         self.add_output("WCHCount", str(self.variables["Count"]))
 
         if self.variables["BreakLast"]:
-            t.add_resource(
+            self.template.add_resource(
                 WaitCondition(
                     "BrokenWaitCondition",
-                    Handle=wch.Ref(),
+                    Handle=wch.Ref(),  # type: ignore
                     # Timeout is made deliberately large so CF rejects it
                     Timeout=2 ** 32,
                     Count=0,
@@ -261,9 +260,8 @@ class Broken(Blueprint):
 
     def create_template(self):
         """Create template."""
-        t = self.template
-        t.add_resource(WaitConditionHandle("BrokenDummy"))
-        t.add_resource(
+        self.template.add_resource(WaitConditionHandle("BrokenDummy"))
+        self.template.add_resource(
             WaitCondition(
                 "BrokenWaitCondition",
                 Handle=Ref("BrokenDummy"),
@@ -272,7 +270,7 @@ class Broken(Blueprint):
                 Count=0,
             )
         )
-        t.add_output(Output("DummyId", Value="dummy-1234"))
+        self.template.add_output(Output("DummyId", Value="dummy-1234"))
 
 
 class VPC(Blueprint):

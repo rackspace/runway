@@ -4,8 +4,7 @@ cfngin_bucket: ${CFNGIN_NAMESPACE}-${region}
 sys_path: ./
 
 pre_deploy:
-  upload_lambdas:
-    path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+  - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
     required: true
     data_key: lambda
     args:
@@ -35,27 +34,26 @@ pre_deploy:
               - '*.pyc'
 
 stacks:
-  test-dockerize:
+  - name: test-dockerize
     class_path: fixtures.lambda_function.BlueprintClass
     variables:
       Code: ${hook_data lambda.dockerize}
       Entrypoint: dockerize.handler
       AppName: dockerizepip
-  test-nondockerize:
+  - name: test-nondockerize
     class_path: fixtures.lambda_function.BlueprintClass
     variables:
       Code: ${hook_data lambda.nondockerize}
       Entrypoint: nondockerize.handler
       AppName: nondockerizepip
-  test-authatedge:
+  - name: test-authatedge
     class_path: fixtures.lambda_function.BlueprintClass
     variables:
       Code: ${hook_data lambda.authatedge}
       AppName: authatedge
 
 post_destroy:
-  purge_bucket:
-    path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+  - path: runway.cfngin.hooks.cleanup_s3.purge_bucket
     required: True
     args:
       bucket_name: ${CFNGIN_NAMESPACE}-${region}

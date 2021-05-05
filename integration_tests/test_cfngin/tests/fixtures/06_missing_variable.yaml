@@ -3,5 +3,5 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  vpc:
+  - name: vpc
     class_path: fixtures.mock_blueprints.VPC

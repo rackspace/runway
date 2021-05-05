@@ -3,7 +3,7 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  raw-template-diff-vpc:
+  - name: raw-template-diff-vpc
     template_path: fixtures/cfn_template.yaml
     variables:
       Param1: dummy

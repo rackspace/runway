@@ -3,7 +3,7 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  simple-diff-vpc:
+  - name: simple-diff-vpc
     class_path: fixtures.mock_blueprints.DiffTester
     variables:
       InstanceType: ${diff_inst_type}

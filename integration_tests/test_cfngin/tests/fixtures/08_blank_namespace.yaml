@@ -3,7 +3,7 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  blank-namespace-vpc:
+  - name: blank-namespace-vpc
     stack_name: ${CFNGIN_NAMESPACE}-vpc
     class_path: fixtures.mock_blueprints.Dummy
     variables:

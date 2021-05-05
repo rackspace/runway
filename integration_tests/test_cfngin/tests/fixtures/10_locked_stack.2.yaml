@@ -3,9 +3,9 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  locked-stack-vpc:
+  - name: locked-stack-vpc
     locked: true
-  locked-stack-bastion:
+  - name: locked-stack-bastion
     class_path: fixtures.mock_blueprints.Dummy
     variables:
       StringVariable: ${output locked-stack-vpc::DummyId}
