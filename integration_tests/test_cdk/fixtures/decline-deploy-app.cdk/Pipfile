@@ -12,3 +12,6 @@ verify_ssl = true
 "aws-cdk.aws_s3" = "~=1.13"
 
 [packages]
+
+[requires]
+python_version = "3.8"

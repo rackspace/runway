@@ -1,7 +1,7 @@
 ---
 deployments:
   - modules:
-    - decline-deploy-app.cdk
+      - decline-deploy-app.cdk
     regions:
       - us-east-1
     environments:
