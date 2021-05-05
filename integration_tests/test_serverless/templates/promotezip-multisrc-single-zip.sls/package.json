@@ -8,8 +8,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
-    "serverless": "^1.52.0"
+    "serverless": "^2.39.2"
   }
 }
