@@ -259,7 +259,7 @@ class Action(BaseAction):
         return param_list
 
     def _destroy_stack(  # pylint: disable=too-many-return-statements
-        self, stack: Stack, *, status: Optional[Status] = None, **kwargs: Any
+        self, stack: Stack, *, status: Optional[Status] = None, **_: Any
     ) -> Status:
         """Delete a CloudFormation stack.
 
@@ -281,7 +281,7 @@ class Action(BaseAction):
             stack_data = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
             LOGGER.debug("%s:stack does not exist", stack.fqn)
-            if kwargs.get("status", None) == SUBMITTED:
+            if status == SUBMITTED:
                 return DESTROYED_STATUS
             return DoesNotExistInCloudFormation()
 

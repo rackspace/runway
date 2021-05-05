@@ -3,7 +3,7 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  raw-template-vpc:
+  - name: raw-template-vpc
     template_path: fixtures/cfn_template.yaml
     variables:
       Param1: foobar

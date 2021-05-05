@@ -4,12 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-runway = {editable = true, path = "./.."}
-prettytable = "*"
 colorama = "<=0.3.9,>=0.2.5"
 pexpect = "*"
+prettytable = "*"
+pyobjc-framework-cocoa = "*"  # required for Send2Trash 1.7.0a0 to work
+runway = {editable = true,path = "./.."}
+send2trash = "==1.7.0a0"  # previous releases broken on macOS - https://github.com/arsenetar/send2trash/issues/51
 
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"

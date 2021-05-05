@@ -4,7 +4,7 @@ cfngin_bucket: ''
 sys_path: ./
 
 stacks:
-  recreate-failed:
+  - name: recreate-failed
     class_path: fixtures.mock_blueprints.LongRunningDummy
     variables:
       Count: 10
