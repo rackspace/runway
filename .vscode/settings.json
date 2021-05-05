@@ -47,6 +47,7 @@
         "bufsize",
         "buildargs",
         "ccpsecuritygroup",
+        "cdktoolkit",
         "certifi",
         "cffi",
         "cfngin",
@@ -151,6 +152,23 @@
         "xray",
         "xtrace"
     ],
+    "explorerExclude.backup": null,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.cache": true,
+        "**/.DS_Store": true,
+        "**/.eggs": true,
+        "**/.git": true,
+        "**/.hg": true,
+        "**/.mypy_cache": true,
+        "**/.pytest_cache": true,
+        "**/.runway": true,
+        "**/.serverless": true,
+        "**/.svn": true,
+        "**/*.egg-info": true,
+        "**/*.pyc": true,
+        "**/CVS": true
+    },
     "files.insertFinalNewline": true,
     "python.analysis.typeCheckingMode": "strict",
     "python.formatting.provider": "black",
@@ -178,22 +196,5 @@
     "restructuredtext.preview.scrollEditorWithPreview": false,
     "restructuredtext.preview.scrollPreviewWithEditor": false,
     "restructuredtext.sphinxBuildPath": "${workspaceFolder}/docs/.venv/bin/sphinx-build",
-    "restructuredtext.updateOnTextChanged": "true",
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/CVS": true,
-        "**/.DS_Store": true,
-        "**/__pycache__": true,
-        "**/.cache": true,
-        "**/.eggs": true,
-        "**/.mypy_cache": true,
-        "**/.pytest_cache": true,
-        "**/.runway_cache": true,
-        "**/.serverless": true,
-        "**/*.egg-info": true,
-        "**/*.pyc": true
-    },
-    "explorerExclude.backup": null
+    "restructuredtext.updateOnTextChanged": "true"
 }

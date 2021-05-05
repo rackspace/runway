@@ -12,6 +12,7 @@ docs/source/_build
 runway/templates/terraform/.terraform-version
 .idea
 node_modules
+.secrets
 .serverless
 .venv
 # paths usind during build
