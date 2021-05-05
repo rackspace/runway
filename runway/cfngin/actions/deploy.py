@@ -259,7 +259,7 @@ class Action(BaseAction):
         return param_list
 
     def _destroy_stack(  # pylint: disable=too-many-return-statements
-        self, stack: Stack, *, status: Optional[Status] = None, **kwargs: Any
+        self, stack: Stack, *, status: Optional[Status] = None, **_: Any
     ) -> Status:
         """Delete a CloudFormation stack.
 
