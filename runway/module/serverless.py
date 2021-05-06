@@ -57,7 +57,11 @@ def run_sls_print(
     sls_info_cmd = generate_node_command(
         command="sls", command_opts=sls_info_opts, path=path
     )
-    return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
+    return yaml.safe_load(
+        subprocess.check_output(
+            sls_info_cmd, env={"SLS_DEPRECATION_DISABLE": "*", **env_vars}
+        )
+    )
 
 
 def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
@@ -74,6 +78,9 @@ def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
         func_path = {"path": os.path.dirname(value.get("handler"))}
         if func_path not in directories:
             directories.append(func_path)
+    if isinstance(sls_config["service"], dict):
+        # handle sls<3.0.0 potential service property object notation
+        return {sls_config["service"]["name"]: get_hash_of_files(path, directories)}
     return {sls_config["service"]: get_hash_of_files(path, directories)}
 
 
@@ -339,7 +346,9 @@ class Serverless(RunwayModuleNpm):
             args.extend(["--path", item_path])
         result = yaml.safe_load(
             subprocess.check_output(
-                self.gen_cmd("print", args_list=args), env=self.ctx.env.vars
+                self.gen_cmd("print", args_list=args),
+                # disable all deprecation messages to ensure the output is "clean"
+                env={"SLS_DEPRECATION_DISABLE": "*", **self.ctx.env.vars},
             )
         )
         # this could be expensive so only dump if needed

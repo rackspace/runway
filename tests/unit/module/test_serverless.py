@@ -393,7 +393,7 @@ class TestServerless:
         assert obj.sls_print() == expected_dict
         obj.npm_install.assert_called_once()
         mock_check_output.assert_called_once_with(
-            ["print"], env=runway_context.env.vars
+            ["print"], env={"SLS_DEPRECATION_DISABLE": "*", **runway_context.env.vars}
         )
         obj.gen_cmd.assert_called_once_with("print", args_list=["--format", "yaml"])
         obj.gen_cmd.reset_mock()

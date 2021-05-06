@@ -1,12 +1,10 @@
----
-
 deployments:
   - modules:
-    - name: runway-serverless-integration-test-multisrc-multizip
-      path: ./
-      options:
-        promotezip:
-          bucketname: runway-serverless-integration-test-multisrc-multizip
+      - name: runway-serverless-integration-test-multisrc-multizip
+        path: ./
+        options:
+          promotezip:
+            bucketname: runway-serverless-integration-test-multisrc-multizip
     parameters:
       namespace: ${env DEPLOY_ENVIRONMENT}
       region: us-east-1
