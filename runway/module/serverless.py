@@ -57,7 +57,11 @@ def run_sls_print(
     sls_info_cmd = generate_node_command(
         command="sls", command_opts=sls_info_opts, path=path
     )
-    return yaml.safe_load(subprocess.check_output(sls_info_cmd, env=env_vars))
+    return yaml.safe_load(
+        subprocess.check_output(
+            sls_info_cmd, env={"SLS_DEPRECATION_DISABLE": "*", **env_vars}
+        )
+    )
 
 
 def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
@@ -340,11 +344,12 @@ class Serverless(RunwayModuleNpm):
         args = ["--format", "yaml"]
         if item_path:
             args.extend(["--path", item_path])
-        # disable all deprecation messages to ensure the output is "clean"
-        env_vars = {"SLS_DEPRECATION_DISABLE": "*"}
-        env_vars.update(self.ctx.env.vars)
         result = yaml.safe_load(
-            subprocess.check_output(self.gen_cmd("print", args_list=args), env=env_vars)
+            subprocess.check_output(
+                self.gen_cmd("print", args_list=args),
+                # disable all deprecation messages to ensure the output is "clean"
+                env={"SLS_DEPRECATION_DISABLE": "*", **self.ctx.env.vars},
+            )
         )
         # this could be expensive so only dump if needed
         if self.logger.getEffectiveLevel() == logging.DEBUG:
