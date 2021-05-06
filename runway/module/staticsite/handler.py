@@ -284,11 +284,14 @@ class StaticSite(RunwayModule):
                 "required": True,
                 "args": {
                     "bucket_name": f"${{cfn ${{namespace}}-{self.name}.BucketName}}",
-                    "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL::default=undefined}}",  # noqa
+                    "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL"
+                    "::default=undefined}}",
                     "extra_files": [i.dict() for i in self.options.extra_files],
                     "cf_disabled": site_stack_variables["DisableCloudFront"],
-                    "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId}}",
-                    "distribution_domain": f"${{cfn ${{namespace}}-{self.name}.CFDistributionDomainName}}",  # noqa
+                    "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId"
+                    "::default=undefined}}",
+                    "distribution_domain": f"${{cfn ${{namespace}}-{self.name}."
+                    "CFDistributionDomainName::default=undefined}}",
                 },
             }
         ]

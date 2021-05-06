@@ -63,7 +63,7 @@ def sync(
     bucket_name: str,
     cf_disabled: bool = False,
     distribution_domain: str = "undefined",
-    distribution_id: str,
+    distribution_id: str = "undefined",
     distribution_path: str = "/*",
     extra_files: Optional[List[ExtraFileTypeDef]] = None,
     website_url: Optional[str] = None,
