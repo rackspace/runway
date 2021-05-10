@@ -213,6 +213,7 @@ class TestDeployment:
         caplog.set_level(logging.INFO, logger="runway")
         mock_futures = mocker.patch(f"{MODULE}.concurrent.futures")
         executor = MagicMock()
+        executor.__enter__.return_value = executor
         mock_futures.ProcessPoolExecutor.return_value = executor
         mocker.patch.object(Deployment, "use_async", True)
         mock_mp_context = mocker.patch("multiprocessing.get_context")
@@ -234,7 +235,6 @@ class TestDeployment:
         executor.submit.assert_has_calls(
             [call(obj.run, "deploy", "us-east-1"), call(obj.run, "deploy", "us-west-2")]
         )
-        mock_futures.wait.assert_called_once()
         assert executor.submit.return_value.result.call_count == 2
 
     def test_deploy_sync(

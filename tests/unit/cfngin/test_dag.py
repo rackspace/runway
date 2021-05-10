@@ -213,9 +213,8 @@ def test_threaded_walker(empty_dag: DAG) -> None:
     nodes: List[Any] = []
 
     def walk_func(node: Any) -> bool:
-        lock.acquire()
-        nodes.append(node)
-        lock.release()
+        with lock:
+            nodes.append(node)
         return True
 
     walker.walk(dag, walk_func)

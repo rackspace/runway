@@ -232,14 +232,13 @@ class Deployment:
         self.logger.info(
             "processing regions in parallel... (output will be interwoven)"
         )
-        executor = concurrent.futures.ProcessPoolExecutor(
+        with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.ctx.env.max_concurrent_regions,
             mp_context=multiprocessing.get_context("fork"),
-        )
-        futures = [
-            executor.submit(self.run, *[action, region]) for region in self.regions
-        ]
-        concurrent.futures.wait(futures)
+        ) as executor:
+            futures = [
+                executor.submit(self.run, *[action, region]) for region in self.regions
+            ]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 

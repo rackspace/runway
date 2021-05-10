@@ -83,10 +83,10 @@ def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branch
         )
         sys.exit(1)
 
-    tf_zipfile = zipfile.ZipFile(os.path.join(download_dir, filename))
-    version_dir.mkdir(parents=True, exist_ok=True)
-    tf_zipfile.extractall(str(version_dir))
-    tf_zipfile.close()
+    with zipfile.ZipFile(os.path.join(download_dir, filename)) as tf_zipfile:
+        version_dir.mkdir(parents=True, exist_ok=True)
+        tf_zipfile.extractall(str(version_dir))
+
     shutil.rmtree(download_dir)
     result = version_dir / ("terraform" + command_suffix)
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable

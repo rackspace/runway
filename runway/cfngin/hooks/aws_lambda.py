@@ -389,21 +389,21 @@ def _handle_use_pipenv(
         cmd.insert(0, python_path)
         cmd.insert(1, "-m")
     with open(req_path, "w") as requirements:
-        pipenv_process = subprocess.Popen(
+        with subprocess.Popen(
             cmd, cwd=package_root, stdout=requirements, stderr=subprocess.PIPE
-        )
-        if int(sys.version[0]) > 2:
-            _stdout, stderr = pipenv_process.communicate(timeout=timeout)
-        else:
-            _stdout, stderr = pipenv_process.communicate()
-        if pipenv_process.returncode == 0:
-            return req_path
-        if int(sys.version[0]) > 2:
-            stderr = stderr.decode("UTF-8")
-        LOGGER.error(
-            '"%s" failed with the following output:\n%s', " ".join(cmd), stderr
-        )
-        raise PipenvError
+        ) as pipenv_process:
+            if int(sys.version[0]) > 2:
+                _stdout, stderr = pipenv_process.communicate(timeout=timeout)
+            else:
+                _stdout, stderr = pipenv_process.communicate()
+            if pipenv_process.returncode == 0:
+                return req_path
+            if int(sys.version[0]) > 2:
+                stderr = stderr.decode("UTF-8")
+            LOGGER.error(
+                '"%s" failed with the following output:\n%s', " ".join(cmd), stderr
+            )
+            raise PipenvError
 
 
 def dockerized_pip(
@@ -599,6 +599,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
     excludes = excludes or []
     excludes.append(".venv/")
 
+    # pylint: disable=consider-using-with
     tmpdir = tempfile.TemporaryDirectory(prefix="cfngin", dir=temp_root)
     tmp_req = os.path.join(tmpdir.name, "requirements.txt")
     copydir(package_root, tmpdir.name, includes, excludes, follow_symlinks)
