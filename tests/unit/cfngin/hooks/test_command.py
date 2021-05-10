@@ -1,10 +1,21 @@
 """Tests for runway.cfngin.hooks.command."""
+from __future__ import annotations
+
 # pylint: disable=no-self-use
 # pyright: basic
 import os
 import unittest
 from subprocess import PIPE
-from typing import Any, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ContextManager,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import mock
 
@@ -14,8 +25,11 @@ from runway.context import CfnginContext
 
 from ..factories import mock_provider
 
+if TYPE_CHECKING:
+    from types import TracebackType
 
-class MockProcess:
+
+class MockProcess(ContextManager["MockProcess"]):
     """Mock process."""
 
     def __init__(
@@ -43,6 +57,18 @@ class MockProcess:
         """Kill process."""
         return
 
+    def __enter__(self) -> MockProcess:
+        """Enter the context manager."""
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        """Exit the context manager."""
+
 
 class TestCommandHook(unittest.TestCase):
     """Tests for runway.cfngin.hooks.command."""
@@ -61,14 +87,8 @@ class TestCommandHook(unittest.TestCase):
             "runway.cfngin.hooks.command.Popen", return_value=self.mock_process
         ).start()
 
-        self.devnull = mock.Mock()
-        self.devnull_mock = mock.patch(
-            "runway.cfngin.hooks.command._devnull", return_value=self.devnull
-        ).start()
-
     def tearDown(self) -> None:
         """Run after tests."""
-        self.devnull_mock.stop()
         self.popen_mock.stop()
 
     def run_hook(self, *, command: Union[str, List[str]], **kwargs: Any) -> Any:
@@ -89,7 +109,7 @@ class TestCommandHook(unittest.TestCase):
 
         self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
         self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
+            ["foo"], stdin=mock.ANY, stdout=None, stderr=None, env=None
         )
 
     def test_command_fail(self) -> None:
@@ -102,7 +122,7 @@ class TestCommandHook(unittest.TestCase):
 
         self.assertEqual(results, {})
         self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
+            ["foo"], stdin=mock.ANY, stdout=None, stderr=None, env=None
         )
 
     def test_command_ignore_status(self) -> None:
@@ -115,7 +135,7 @@ class TestCommandHook(unittest.TestCase):
 
         self.assertEqual(results, {"returncode": 1, "stdout": None, "stderr": None})
         self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=self.devnull, stdout=None, stderr=None, env=None
+            ["foo"], stdin=mock.ANY, stdout=None, stderr=None, env=None
         )
 
     def test_command_quiet(self) -> None:
@@ -128,11 +148,7 @@ class TestCommandHook(unittest.TestCase):
         self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
 
         self.popen_mock.assert_called_once_with(
-            ["foo"],
-            stdin=self.devnull,
-            stdout=self.devnull,
-            stderr=self.devnull,
-            env=None,
+            ["foo"], stdin=mock.ANY, stdout=mock.ANY, stderr=mock.ANY, env=None,
         )
 
     def test_command_interactive(self) -> None:
@@ -174,7 +190,7 @@ class TestCommandHook(unittest.TestCase):
         )
 
         self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=self.devnull, stdout=PIPE, stderr=PIPE, env=None
+            ["foo"], stdin=mock.ANY, stdout=PIPE, stderr=PIPE, env=None
         )
 
     def test_command_env(self) -> None:
@@ -189,7 +205,7 @@ class TestCommandHook(unittest.TestCase):
             self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
             self.popen_mock.assert_called_once_with(
                 ["foo"],
-                stdin=self.devnull,
+                stdin=mock.ANY,
                 stdout=None,
                 stderr=None,
                 env={"hello": "world", "foo": "bar"},

@@ -19,10 +19,6 @@ class RunCommandResponseTypeDef(TypedDict, total=False):
     stdout: str
 
 
-def _devnull():
-    return open(os.devnull, "wb")
-
-
 def run_command(
     *,
     command: Union[str, List[str]],
@@ -94,51 +90,51 @@ def run_command(
             ValueError("Cannot enable `quiet` and `capture` options simultaneously"),
         )
 
-    if quiet:
-        out_err_type = _devnull()
-    elif capture:
-        out_err_type = PIPE
-    else:
-        out_err_type = None
-
-    if interactive:
-        in_type = None
-    elif stdin:
-        in_type = PIPE
-    else:
-        in_type = _devnull()
-
-    if env:
-        full_env = os.environ.copy()
-        full_env.update(env)
-        env = full_env
-
-    LOGGER.info("running command: %s", command)
-
-    proc = Popen(
-        command,
-        stdin=in_type,
-        stdout=out_err_type,
-        stderr=out_err_type,
-        env=env,
-        **kwargs
-    )
-    try:
-        out, err = proc.communicate(stdin)
-        status = proc.wait()
-
-        if status == 0 or ignore_status:
-            return {"returncode": proc.returncode, "stdout": out, "stderr": err}
-
-        # Don't print the command line again if we already did earlier
-        if LOGGER.isEnabledFor(logging.INFO):
-            LOGGER.warning("command failed with returncode %d", status)
+    with open(os.devnull, "wb") as devnull:
+        if quiet:
+            out_err_type = devnull
+        elif capture:
+            out_err_type = PIPE
         else:
-            LOGGER.warning("command failed with returncode %d: %s", status, command)
+            out_err_type = None
 
-        return {}
-    except Exception:  # pylint: disable=broad-except
-        return {}
-    finally:
-        if proc.returncode is None:
-            proc.kill()
+        if interactive:
+            in_type = None
+        elif stdin:
+            in_type = PIPE
+        else:
+            in_type = devnull
+
+        if env:
+            full_env = os.environ.copy()
+            full_env.update(env)
+            env = full_env
+
+        LOGGER.info("running command: %s", command)
+
+        with Popen(
+            command,
+            stdin=in_type,
+            stdout=out_err_type,
+            stderr=out_err_type,
+            env=env,
+            **kwargs
+        ) as proc:
+            try:
+                out, err = proc.communicate(stdin)
+                status = proc.wait()
+
+                if status == 0 or ignore_status:
+                    return {"returncode": proc.returncode, "stdout": out, "stderr": err}
+
+                # Don't print the command line again if we already did earlier
+                if LOGGER.isEnabledFor(logging.INFO):
+                    LOGGER.warning("command failed with returncode %d", status)
+                else:
+                    LOGGER.warning(
+                        "command failed with returncode %d: %s", status, command
+                    )
+
+                return {}
+            except Exception:  # pylint: disable=broad-except
+                return {}
