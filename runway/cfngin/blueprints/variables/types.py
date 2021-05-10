@@ -149,8 +149,7 @@ class TroposphereType(Generic[_TroposphereType]):
             for v in result:
                 v._validate_props()
 
-        # TODO: figure out why pyright does not like this
-        return result[0] if not self._many else result  # type: ignore
+        return result[0] if not self._many else result
 
 
 class CFNType:

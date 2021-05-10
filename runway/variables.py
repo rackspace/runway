@@ -284,8 +284,9 @@ class VariableValue:
         tokens: VariableValueConcatenation[
             Union[VariableValueLiteral[str], VariableValueLookup]
         ] = VariableValueConcatenation(
-            [
-                VariableValueLiteral(t, variable_type=variable_type)
+            # pyright 1.1.138 is having issues properly inferring the type from comprehension
+            [  # type: ignore
+                VariableValueLiteral(cast(str, t), variable_type=variable_type)
                 for t in re.split(r"(\$\{|\}|\s+)", obj)  # ${ or space or }
             ]
         )
@@ -518,9 +519,9 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
     def __getitem__(self, __index: slice) -> List[VariableValue]:
         ...
 
-    def __getitem__(
+    def __getitem__(  # type: ignore
         self, __index: Union[int, slice]
-    ) -> Union[List[VariableValue], VariableValue]:
+    ) -> Union[MutableSequence[VariableValue], VariableValue]:
         """Get item by index."""
         return self._data[__index]  # type: ignore
 

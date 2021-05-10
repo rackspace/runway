@@ -780,11 +780,11 @@ class Provider(BaseProvider):
                 Iterable["StackEventTypeDef"],
                 reversed(
                     cast(
-                        List["StackEventTypeDef"], sum(event_list, cast(List[Any], [])),
+                        List["StackEventTypeDef"], sum(event_list, []),  # type: ignore
                     )
                 ),
             )
-        return cast(Iterable["StackEventTypeDef"], sum(event_list, cast(List[Any], [])))
+        return cast(Iterable["StackEventTypeDef"], sum(event_list, []))  # type: ignore
 
     def get_rollback_status_reason(self, stack_name: str) -> Optional[str]:
         """Process events and returns latest roll back reason."""
@@ -792,7 +792,7 @@ class Provider(BaseProvider):
             (
                 item
                 for item in self.get_events(stack_name, False)
-                if item["ResourceStatus"] == "UPDATE_ROLLBACK_IN_PROGRESS"
+                if item["ResourceStatus"] == "UPDATE_ROLLBACK_IN_PROGRESS"  # type: ignore
             ),
             None,
         )
@@ -803,7 +803,7 @@ class Provider(BaseProvider):
             (
                 item
                 for item in self.get_events(stack_name)
-                if item["ResourceStatus"] == "ROLLBACK_IN_PROGRESS"
+                if item["ResourceStatus"] == "ROLLBACK_IN_PROGRESS"  # type: ignore
             ),
             None,
         )
