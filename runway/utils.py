@@ -686,8 +686,8 @@ def merge_nested_environment_dicts(
         return {}
 
     combined_dicts = merge_dicts(
-        cast(Dict[Any, Any], env_dicts.get("*", cast(Dict[Any, Any], {}))),
-        cast(Dict[Any, Any], env_dicts.get(env_name, cast(Dict[Any, Any], {}))),
+        cast(Dict[Any, Any], env_dicts.get("*", {})),
+        cast(Dict[Any, Any], env_dicts.get(env_name, {})),
     )
     return flatten_path_lists(combined_dicts, env_root)
 

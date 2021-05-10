@@ -53,12 +53,12 @@
   ],
   "version": "0.0.0",
   "dependencies": {
-    "tar": "^4.4.10"
+    "tar": "^6.1.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "pyright": "^1.1.127"
+    "pyright": "^1.1.138"
   }
 }
