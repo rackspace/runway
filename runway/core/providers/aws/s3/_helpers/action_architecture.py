@@ -189,10 +189,10 @@ class ActionArchitecture:
             request_parameters=self._get_file_generator_request_parameters_skeleton(),
         )
         file_info_builder = FileInfoBuilder(
-            client=self.client, parameters=self.parameters.dict()
+            client=self.client, parameters=self.parameters
         )
         s3_transfer_handler = S3TransferHandlerFactory(
-            config_params=self.parameters.dict(), runtime_config=self._runtime_config
+            config_params=self.parameters, runtime_config=self._runtime_config
         )(self.client, result_queue)
 
         sync_strategies = self.choose_sync_strategies()

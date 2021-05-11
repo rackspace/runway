@@ -73,6 +73,7 @@ if TYPE_CHECKING:
 
     from ......type_defs import AnyPath
     from .file_info import FileInfo
+    from .parameters import ParametersDataModel
     from .results import CommandResult
     from .transfer_config import TransferConfigDict
 
@@ -93,8 +94,8 @@ class S3TransferHandlerFactory:
 
     MAX_IN_MEMORY_CHUNKS: ClassVar[int] = 6
 
-    def __init__(  # TODO handle config_params data model
-        self, config_params: Dict[str, Any], runtime_config: TransferConfigDict
+    def __init__(
+        self, config_params: ParametersDataModel, runtime_config: TransferConfigDict
     ) -> None:
         """Instantiate class.
 
@@ -161,13 +162,13 @@ class S3TransferHandlerFactory:
             ]
         ],
     ) -> None:
-        if self._config_params.get("quiet"):
+        if self._config_params.quiet:
             return
-        if self._config_params.get("only_show_errors"):
+        if self._config_params.only_show_errors:
             result_printer = OnlyShowErrorsResultPrinter(result_recorder)
-        elif self._config_params.get("is_stream"):
+        elif self._config_params.is_stream:
             result_printer = OnlyShowErrorsResultPrinter(result_recorder)
-        elif self._config_params.get("no_progress"):
+        elif self._config_params.no_progress:
             result_printer = NoProgressResultPrinter(result_recorder)
         else:
             result_printer = ResultPrinter(result_recorder)
@@ -180,7 +181,7 @@ class S3TransferHandler:
     def __init__(
         self,
         transfer_manager: TransferManager,
-        config_params: Dict[str, Any],
+        config_params: ParametersDataModel,
         result_command_recorder: CommandResultRecorder,
     ) -> None:
         """Instantiate class.
@@ -256,7 +257,7 @@ class BaseTransferRequestSubmitter:
         self,
         transfer_manager: TransferManager,
         result_queue: "Queue[Any]",
-        config_params: Dict[str, Any],
+        config_params: ParametersDataModel,
     ):
         """Instantiate class.
 
@@ -312,7 +313,7 @@ class BaseTransferRequestSubmitter:
         extra_args: Dict[Any, Any] = {}
         if self.REQUEST_MAPPER_METHOD:
             # pylint: disable=not-callable
-            self.REQUEST_MAPPER_METHOD(extra_args, self._config_params)
+            self.REQUEST_MAPPER_METHOD(extra_args, self._config_params.dict())
         subscribers: List[BaseSubscriber] = []
         self._add_additional_subscribers(subscribers, fileinfo)
         # The result subscriber class should always be the last registered
@@ -320,19 +321,19 @@ class BaseTransferRequestSubmitter:
         # may have been added in a different subscriber such as size.
         if self.RESULT_SUBSCRIBER_CLASS:
             result_kwargs: Dict[str, Any] = {"result_queue": self._result_queue}
-            if self._config_params.get("is_move", False):
+            if self._config_params.is_move:
                 result_kwargs["transfer_type"] = "move"
             # pylint: disable=not-callable
             subscribers.append(self.RESULT_SUBSCRIBER_CLASS(**result_kwargs))
 
-        if not self._config_params.get("dryrun"):
+        if not self._config_params.dryrun:
             return self._submit_transfer_request(fileinfo, extra_args, subscribers)
         return self._submit_dryrun(fileinfo)
 
     def _submit_dryrun(self, fileinfo: FileInfo) -> None:
         """Submit dryrun."""
         transfer_type = fileinfo.operation_name
-        if self._config_params.get("is_move", False):
+        if self._config_params.is_move:
             transfer_type = "move"
         src, dest = self._format_src_dest(fileinfo)
         self._result_queue.put(
@@ -378,13 +379,12 @@ class BaseTransferRequestSubmitter:
     def _should_inject_content_type(self) -> bool:
         """If should inject content type."""
         return bool(
-            self._config_params.get("guess_mime_type")
-            and not self._config_params.get("content_type")
+            self._config_params.guess_mime_type and not self._config_params.content_type
         )
 
     def _warn_glacier(self, fileinfo: FileInfo) -> bool:
         """Warn glacier."""
-        if not self._config_params.get("force_glacier_transfer"):
+        if not self._config_params.force_glacier_transfer:
             if not fileinfo.is_glacier_compatible:
                 LOGGER.debug(
                     "Encountered glacier object s3://%s. Not performing "
@@ -392,7 +392,7 @@ class BaseTransferRequestSubmitter:
                     fileinfo.src,
                     fileinfo.operation_name,
                 )
-                if not self._config_params.get("ignore_glacier_warnings"):
+                if not self._config_params.ignore_glacier_warnings:
                     warning = create_warning(
                         f"s3://{fileinfo.src}",
                         "Object is of storage class GLACIER. Unable to "
@@ -475,7 +475,7 @@ class UploadRequestSubmitter(BaseTransferRequestSubmitter):
         subscribers.append(ProvideSizeSubscriber(fileinfo.size))
         if self._should_inject_content_type():
             subscribers.append(ProvideUploadContentTypeSubscriber())
-        if self._config_params.get("is_move", False):
+        if self._config_params.is_move:
             subscribers.append(DeleteSourceFileSubscriber())
 
     def _submit_transfer_request(
@@ -557,7 +557,7 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
         subscribers.append(
             ProvideLastModifiedTimeSubscriber(fileinfo.last_update, self._result_queue)
         )
-        if self._config_params.get("is_move", False):
+        if self._config_params.is_move:
             subscribers.append(
                 DeleteSourceObjectSubscriber(fileinfo.source_client)  # type: ignore
             )
@@ -625,7 +625,7 @@ class CopyRequestSubmitter(BaseTransferRequestSubmitter):
         subscribers.append(ProvideSizeSubscriber(fileinfo.size))
         if self._should_inject_content_type():
             subscribers.append(ProvideCopyContentTypeSubscriber())
-        if self._config_params.get("is_move", False):
+        if self._config_params.is_move:
             subscribers.append(
                 DeleteCopySourceObjectSubscriber(fileinfo.source_client)  # type: ignore
             )
@@ -682,14 +682,14 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
 
         """
         return bool(
-            fileinfo.operation_name == "upload" and self._config_params.get("is_stream")
+            fileinfo.operation_name == "upload" and self._config_params.is_stream
         )
 
     def _add_additional_subscribers(
         self, subscribers: List[BaseSubscriber], fileinfo: FileInfo
     ) -> None:
         """Add additional subscribers."""
-        expected_size = self._config_params.get("expected_size", None)
+        expected_size = self._config_params.expected_size
         if expected_size is not None:
             subscribers.append(ProvideSizeSubscriber(int(expected_size)))
 
@@ -726,8 +726,7 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
 
         """
         return bool(
-            fileinfo.operation_name == "download"
-            and self._config_params.get("is_stream")
+            fileinfo.operation_name == "download" and self._config_params.is_stream
         )
 
     # pylint: disable=unused-argument

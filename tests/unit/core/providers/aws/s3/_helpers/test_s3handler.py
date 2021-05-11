@@ -11,6 +11,7 @@ from mock import MagicMock, Mock
 from s3transfer.manager import TransferManager
 
 from runway.core.providers.aws.s3._helpers.file_info import FileInfo
+from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel
 from runway.core.providers.aws.s3._helpers.results import (
     CommandResultRecorder,
     CopyResultSubscriber,
@@ -98,7 +99,7 @@ class BaseTransferRequestSubmitterTest:
     """Base class for transfer request submitter test classes."""
 
     bucket: ClassVar[str] = "test-bucket"
-    config_params: Dict[str, Any]
+    config_params: ParametersDataModel
     filename: ClassVar[str] = "test-file.txt"
     key: ClassVar[str] = "test-key.txt"
     result_queue: "Queue[Any]"
@@ -106,7 +107,7 @@ class BaseTransferRequestSubmitterTest:
 
     def setup_method(self) -> None:
         """Run before each test method if run to return the class instance attrs to default."""
-        self.config_params = {}
+        self.config_params = ParametersDataModel(dest="", src="")
         self.result_queue = Queue()
         self.transfer_manager = Mock(spec=TransferManager)
 
@@ -118,7 +119,9 @@ class TestBaseTransferRequestSubmitter:
         """Test can_submit."""
         with pytest.raises(NotImplementedError) as excinfo:
             BaseTransferRequestSubmitter(
-                Mock(name="transfer_manager"), Mock(name="result_queue"), {}
+                Mock(name="transfer_manager"),
+                Mock(name="result_queue"),
+                ParametersDataModel(dest="", src=""),
             ).can_submit(Mock(name="fileinfo"))
         assert str(excinfo.value) == "can_submit()"
 
@@ -137,7 +140,9 @@ class TestBaseTransferRequestSubmitter:
         """Test _format_s3_path."""
         assert (
             # pylint: disable=protected-access
-            BaseTransferRequestSubmitter(Mock(), Mock(), {})._format_s3_path(path)
+            BaseTransferRequestSubmitter(
+                Mock(), Mock(), ParametersDataModel(dest="", src="")
+            )._format_s3_path(path)
             == expected
         )
 
@@ -145,7 +150,9 @@ class TestBaseTransferRequestSubmitter:
         """Test submit."""
         with pytest.raises(NotImplementedError) as excinfo:
             BaseTransferRequestSubmitter(
-                Mock(name="transfer_manager"), Mock(name="result_queue"), {}
+                Mock(name="transfer_manager"),
+                Mock(name="result_queue"),
+                ParametersDataModel(dest="", src=""),
             ).submit(Mock(name="fileinfo"))
         assert str(excinfo.value) == "_submit_transfer_request()"
 
@@ -155,7 +162,7 @@ class TestBaseTransferRequestSubmitter:
             BaseTransferRequestSubmitter(
                 Mock(name="transfer_manager"),
                 Mock(name="result_queue"),
-                {"dryrun": True},
+                ParametersDataModel(dest="", src="", dryrun=True),
             ).submit(Mock(name="fileinfo"))
         assert str(excinfo.value) == "_format_src_dest()"
 
@@ -773,7 +780,7 @@ class TestLocalDeleteRequestSubmitter(BaseTransferRequestSubmitterTest):
 class TestS3TransferHandler:
     """Test S3TransferHandler."""
 
-    config_params: ClassVar[Dict[str, Any]] = {}
+    config_params: ClassVar[ParametersDataModel] = ParametersDataModel(dest="", src="")
     result_command_recorder: CommandResultRecorder
     result_queue: "Queue[Any]"
     transfer_manager: TransferManager
@@ -807,14 +814,14 @@ class TestS3TransferHandler:
 class TestS3TransferHandlerFactory:
     """Test S3TransferHandlerFactory."""
 
-    config_params: Dict[str, Any]
+    config_params: ParametersDataModel
     client: S3Client
     result_queue: "Queue[Any]"
     runtime_config: TransferConfigDict
 
     def setup_method(self) -> None:
         """Run before each test method if run to return the class instance attrs to default."""
-        self.config_params = {}
+        self.config_params = ParametersDataModel(dest="", src="")
         self.client = Mock()
         self.result_queue = Queue()
         self.runtime_config = RuntimeConfig.build_config()
