@@ -102,7 +102,3 @@ $ pipenv run runway new
 See the [doc site](https://docs.onica.com/projects/runway) for full documentation.
 
 Quickstart documentation, including CloudFormation templates and walkthrough can be found [here](https://docs.onica.com/projects/runway/en/release/quickstart/index.html)
-
-## Community Chat
-
-Drop into the [#runway channel](https://kiwiirc.com/client/irc.freenode.net/?nick=RunwayHelp?#runway) for discussion/questions.

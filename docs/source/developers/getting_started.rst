@@ -16,20 +16,20 @@ Development Environment
 
 This project uses ``pipenv`` to create Python virtual environment. This must be installed on your system before setting up your dev environment.
 
-With pipenv installed, run ``make sync_all`` to setup your development environment. This will create all the requred virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
+With pipenv installed, run ``make setup`` to setup your development environment. This will create all the requred virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
 
 
 pre-commit
 ==========
 
 `pre-commit <https://pre-commit.com/>`__ is configured for this project to help developers follow the coding style.
-If you used ``make sync`` or ``make sync_all`` to setup your environment, it is already setup for you.
-If not, you can run ``pipenv run pre-commit install`` to to install the pre-commit hooks.
+If you used ``make setup`` to setup your environment, it is already setup for you.
+If not, you can run ``make setup-pre-commit`` to to install the pre-commit hooks.
 
-You can also run ``pipenv run pre-commit run --all-files`` at any time to manually trigger these hooks.
+You can also run ``make run-pre-commit`` at any time to manually trigger these hooks.
 
 
 pyright Type Checking
 =====================
 
-This project uses pyright to perform type checking. To run type checking locally, install pyright (``make npm-install``) then run ``make lint`` or ``make lint-pyright``.
+This project uses pyright to perform type checking. To run type checking locally, install pyright (``make npm-ci``) then run ``make lint`` or ``make lint-pyright``.

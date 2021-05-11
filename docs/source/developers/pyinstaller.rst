@@ -24,6 +24,6 @@ Process
 *******
 
 1. Export ``OS_NAME`` environment variable for your system (``ubuntu-18.04``, ``macos-10.15``, or ``windows-latest``).
-2. Execute ``make build_pyinstaller_file`` or ``make build_pyinstaller_folder`` from the root of the repo.
+2. Execute ``make build-pyinstaller-file`` or ``make build-pyinstaller-folder`` from the root of the repo.
 
 The output of these commands can be found in ``./artifacts``

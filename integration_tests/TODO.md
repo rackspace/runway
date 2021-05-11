@@ -1,17 +1,19 @@
-# Tests to Fix
+# TODO
+
+## Tests to Fix
 
 * ModuleTags test is currently broken; appears no tests are being run
-    * This was developed during reworking of the integration tests. Should be updated to match the error number returns as shown in the commands test
+  * This was developed during reworking of the integration tests. Should be updated to match the error number returns as shown in the commands test
 
-# Tests to Write
+## Tests to Write
 
-## CloudFormation
+### CloudFormation
 
-### Module-defined Environment Variables
+#### Module-defined Environment Variables
 
 Ensure that modules with defined env_vars work and don't pollute each other:
 
-```
+```yaml
 ---
 deployments:
   - modules:
@@ -32,14 +34,15 @@ deployments:
 (this can almost certainly be incorporated in another test)
 
 
-## Terraform
+### Terraform
 
-### Map values provided in runway.yml environments
+#### Map values provided in runway.yml environments
 
 Ensure that environment dicts are properly converted to strings
 
 runway.yml
-```
+
+```yaml
 ---
 global_variables: &global_variables
   customer: msp-agasper
@@ -76,7 +79,8 @@ deployments:
 ```
 
 terraform:
-```
+
+```hcl
 terraform {
     required_version = ">= 0.12.10"
 

@@ -2,12 +2,12 @@
 
 Scripts for the URL shortener action.
 
-**Table of Contents**
+Table of Contents
 
 - [urlshortener](#urlshortener)
   - [Updating Dependencies](#updating-dependencies)
   - [Scripts](#scripts)
-    - [update_urls.py](#updateurlspy)
+    - [update_urls.py](#update_urlspy)
 
 ## Updating Dependencies
 
@@ -20,7 +20,7 @@ Or, if being run from an Action, install using `pip install -r requirements.txt`
 
 ### update_urls.py
 
-```
+```text
 Usage: update_urls.py [OPTIONS]
 
   Update/add URLs to the URL shortener.

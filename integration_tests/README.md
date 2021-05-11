@@ -38,6 +38,7 @@ that also start with `test_` and execute the `run()` and `teardown()` methods in
 ## Helper Functions
 
 In `util.py` there are a couple of helper functions:
+
 - `import_tests`
   - This will import tests from a given path and pattern, so your tests can import more tests.
   - See `test_terraform.py` for an example of this.
@@ -46,6 +47,7 @@ In `util.py` there are a couple of helper functions:
   - This will also give a report of the results of each test.
 
 ## Permissions
+
 Put a file called policies.yaml in the integration test folder in order to define permissions. e.g. /integration_tests/test_cdk/policies.yaml
 
 Whenever permissions are updated, the permissions stack must be redeployed with the following command from the folder '/integration_test_infrastructure/codebuild/common': pipenv run runway deploy
