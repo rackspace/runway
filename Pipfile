@@ -14,7 +14,7 @@ black = "==19.10b0"  # since its pre-release, it has to be pinned this way for p
 typed-ast = "~=1.4.1"  # curent usable version of pipenv incorrectly lock this to excludes >= 3.8
 # Lint
 isort = "~=5.8"
-pylint = "~=2.7, !=2.7.3, !=2.7.4"  # incorrect handling of ClassVar till 2.8 - https://github.com/PyCQA/pylint/pull/4279
+pylint = "~=2.8"
 ## flake8
 flake8 = "~=3.9"
 flake8-docstrings = "~=1.6"

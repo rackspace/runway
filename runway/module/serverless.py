@@ -370,18 +370,18 @@ class Serverless(RunwayModuleNpm):
             self.npm_install()
         stack_missing = False  # track output for acceptable error
         self.logger.info("destroy (in progress)")
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             self.gen_cmd("remove"),
             bufsize=1,
             env=self.ctx.env.vars,
             stdout=subprocess.PIPE,
             universal_newlines=True,
-        )
-        with cast(IO[str], proc.stdout):
-            for line in cast(IO[str], proc.stdout):
-                print(line, end="")
-                if re.search(r"Stack '.*' does not exist", line):
-                    stack_missing = True
+        ) as proc:
+            with cast(IO[str], proc.stdout):
+                for line in cast(IO[str], proc.stdout):
+                    print(line, end="")
+                    if re.search(r"Stack '.*' does not exist", line):
+                        stack_missing = True
         if proc.wait() != 0 and not stack_missing:
             sys.exit(proc.returncode)
         self.logger.info("destroy (complete)")

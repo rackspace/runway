@@ -344,6 +344,7 @@ class TestModule:
         caplog.set_level(logging.INFO, logger="runway")
         mock_futures = mocker.patch(f"{MODULE}.concurrent.futures")
         executor = MagicMock()
+        executor.__enter__.return_value = executor
         mock_futures.ProcessPoolExecutor.return_value = executor
         mocker.patch.object(Module, "use_async", True)
         mock_mp_context = mocker.patch("multiprocessing.get_context")
@@ -368,7 +369,6 @@ class TestModule:
                 call(obj.child_modules[1].run, "deploy"),
             ]
         )
-        mock_futures.wait.assert_called_once()
         assert executor.submit.return_value.result.call_count == 2
 
     def test_deploy_sync(

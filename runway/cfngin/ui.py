@@ -1,8 +1,13 @@
 """CFNgin UI manipulation."""
+from __future__ import annotations
+
 import logging
 import threading
 from getpass import getpass
-from typing import Any, Optional, TextIO, Union
+from typing import TYPE_CHECKING, Any, ContextManager, Optional, TextIO, Type, Union
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 LOGGER = logging.getLogger(__name__)
 
@@ -12,7 +17,7 @@ def get_raw_input(message: str) -> str:
     return input(message)
 
 
-class UI:
+class UI(ContextManager["UI"]):
     """Used internally from terminal output in a multithreaded environment.
 
     Ensures that two threads don't write over each other while asking a user
@@ -23,10 +28,6 @@ class UI:
     def __init__(self) -> None:
         """Instantiate class."""
         self._lock = threading.RLock()
-
-    def lock(self, *_args: Any, **_kwargs: Any) -> bool:
-        """Obtain an exclusive lock on the UI for the current thread."""
-        return self._lock.acquire()
 
     def log(
         self,
@@ -44,15 +45,8 @@ class UI:
             logger: Specific logger to log to.
 
         """
-        self.lock()
-        try:
+        with self:
             return logger.log(lvl, msg, *args, **kwargs)
-        finally:
-            self.unlock()
-
-    def unlock(self, *_args: Any, **_kwargs: Any) -> None:
-        """Release the lock on the UI."""
-        return self._lock.release()
 
     def info(
         self,
@@ -81,19 +75,27 @@ class UI:
         user is being prompted.
 
         """
-        self.lock()
-        try:
+        with self:
             return get_raw_input(message)
-        finally:
-            self.unlock()
 
     def getpass(self, prompt: str, stream: Optional[TextIO] = None) -> str:
         """Wrap getpass to lock the UI."""
-        try:
-            self.lock()
+        with self:
             return getpass(prompt, stream)
-        finally:
-            self.unlock()
+
+    def __enter__(self) -> UI:
+        """Enter the context manager."""
+        self._lock.__enter__()  # pylint: disable=consider-using-with
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        """Exit the context manager."""
+        self._lock.__exit__(exc_type, exc_value, traceback)
 
 
 # Global UI object for other modules to use.

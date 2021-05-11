@@ -247,14 +247,13 @@ class Module:
         # Can't use threading or ThreadPoolExecutor here because
         # we need to be able to do things like `cd` which is not
         # thread safe.
-        executor = concurrent.futures.ProcessPoolExecutor(
+        with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.ctx.env.max_concurrent_modules,
             mp_context=multiprocessing.get_context("fork"),
-        )
-        futures = [
-            executor.submit(child.run, *[action]) for child in self.child_modules
-        ]
-        concurrent.futures.wait(futures)
+        ) as executor:
+            futures = [
+                executor.submit(child.run, *[action]) for child in self.child_modules
+            ]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 

@@ -171,9 +171,8 @@ def download_and_extract_to_mkdtemp(
     download(bucket, key, temp_file, session)
 
     output_dir = tempfile.mkdtemp()
-    zip_ref = zipfile.ZipFile(temp_file, "r")
-    zip_ref.extractall(output_dir)
-    zip_ref.close()
+    with zipfile.ZipFile(temp_file, "r") as zip_ref:
+        zip_ref.extractall(output_dir)
     os.remove(temp_file)
     LOGGER.verbose("extracted %s to %s", temp_file, output_dir)
     return output_dir

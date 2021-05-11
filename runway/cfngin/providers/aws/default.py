@@ -273,7 +273,7 @@ def output_summary(
     changes: List[Any] = []
     for change in changeset:
         resource = change["ResourceChange"]
-        replacement = resource.get("Replacement") == "True"
+        replacement = cast(str, resource.get("Replacement", "")) == "True"
         summary = "- %s %s (%s)" % (
             resource["Action"],
             resource["LogicalResourceId"],
@@ -1158,8 +1158,7 @@ class Provider(BaseProvider):
         action = kwargs.get("action", "destroy")
 
         approval_options = ["y", "n"]
-        try:
-            ui.lock()
+        with ui:
             approval = (
                 approval
                 or ui.ask(
@@ -1173,8 +1172,6 @@ class Provider(BaseProvider):
                     )
                 ).lower()
             )
-        finally:
-            ui.unlock()
 
         if approval != "y":
             raise exceptions.CancelExecution
@@ -1249,8 +1246,7 @@ class Provider(BaseProvider):
             changes = requires_replacement(changes)
 
         if changes or params_diff:
-            ui.lock()
-            try:
+            with ui:
                 output_summary(
                     fqn,
                     action,
@@ -1264,8 +1260,6 @@ class Provider(BaseProvider):
                     include_verbose=True,
                     fqn=fqn,
                 )
-            finally:
-                ui.unlock()
 
         self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
@@ -1496,8 +1490,7 @@ class Provider(BaseProvider):
         params_diff = diff_parameters(old_params, new_parameters_as_dict)
 
         if changes or params_diff:
-            ui.lock()
-            try:
+            with ui:
                 if self.interactive:
                     output_summary(
                         stack.fqn,
@@ -1516,8 +1509,6 @@ class Provider(BaseProvider):
                         answer="y",
                         fqn=stack.fqn,
                     )
-            finally:
-                ui.unlock()
 
         self.cloudformation.delete_change_set(ChangeSetName=change_set_id)
 
