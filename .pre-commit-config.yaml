@@ -5,7 +5,7 @@ minimum_pre_commit_version: "2.6.0"
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v3.4.0
     hooks:
       - id: check-merge-conflict
       - id: trailing-whitespace
@@ -15,12 +15,10 @@ repos:
       - id: check-yaml
         args:
           - "--unsafe"  # needed for parsing CFN
-
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.3.2
+    rev: 5.8.0
     hooks:
       - id: isort
-
   - repo: https://github.com/psf/black
     rev: stable
     hooks:
@@ -28,10 +26,13 @@ repos:
         # stable release of black does not respect exclude when file is explicitly provided
         # waiting for this to be released - https://github.com/psf/black/pull/1032
         exclude: (^npm/|^quickstarts/|^runway/aws_sso_botocore/)
-
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.9.2
     hooks:
       - id: flake8
         additional_dependencies:
           - flake8-docstrings
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.27.1
+    hooks:
+      - id: markdownlint

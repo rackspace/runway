@@ -1,6 +1,6 @@
 # Overview
 
-This repo represents a sample Terraform infrastructure deployment of EKS & Flux. Terraform is used to manage the base infrastructure components, including a CodeCommit git repo configured for continous deployment via Flux.
+This repo represents a sample Terraform infrastructure deployment of EKS & Flux. Terraform is used to manage the base infrastructure components, including a CodeCommit git repo configured for continuos deployment via Flux.
 
 ## Prerequisites
 
@@ -16,13 +16,13 @@ This repo represents a sample Terraform infrastructure deployment of EKS & Flux.
 
 Update the kubectl-access-role-arn to specify the IAM role to which cluster admin access should be granted. E.g., if you assume an IAM role for operating in your account `aws sts get-caller-identity --query 'Arn' --output text` will show you the assumed role principal like:
 
-```
+```text
 arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
 ```
 
 You can use that arn to determine the IAM role arn for runway.yml:
 
-```
+```yaml
         kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
 ```
 
@@ -32,14 +32,14 @@ After updating the role ARN, deploy to the dev environment via:
 
 macOS/Linux:
 
-```
+```sh
 export DEPLOY_ENVIRONMENT=dev
 runway deploy
 ```
 
 Windows:
 
-```
+```powershell
 $env:DEPLOY_ENVIRONMENT = dev
 runway deploy
 ```
@@ -50,7 +50,7 @@ Setup and push an initial commit to the AWS CodeCommit git repository called `fl
 
 macOS/Linux:
 
-```bash
+```sh
 CC_REPO_URL=https://git-codecommit.us-west-2.amazonaws.com/v1/repos/flux-dev
 cd flux-dev
 git init
@@ -84,7 +84,7 @@ git push --set-upstream origin master
 
 macOS/Linux:
 
-```
+```sh
 git ls-remote
 cd ..
 eval $(runway envvars)
@@ -93,7 +93,7 @@ runway kbenv run -- get namespace
 
 Windows:
 
-```
+```powershell
 git ls-remote
 cd ..
 runway envvars | iex

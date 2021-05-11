@@ -27,14 +27,14 @@ Then deploy to the dev environment via:
 
 macOS/Linux:
 
-```
+```sh
 export DEPLOY_ENVIRONMENT=dev
 runway deploy
 ```
 
 Windows:
 
-```
+```powershell
 $env:DEPLOY_ENVIRONMENT = dev
 runway deploy
 ```
@@ -53,7 +53,7 @@ After deployment, the sample hello-world app will be available at port 8666 on t
 
 macOS/Linux:
 
-```
+```sh
 eval $(runway envvars)
 RUNWAY_ENV=$(runway whichenv)
 cd service-hello-world.k8s/overlays/$RUNWAY_ENV
@@ -62,7 +62,7 @@ echo "http://$(runway kbenv run -- get svc $RUNWAY_ENV-the-service -o jsonpath="
 
 Windows:
 
-```
+```powershell
 runway envvars | iex
 $RUNWAY_ENV = $(runway whichenv)
 cd service-hello-world.k8s/overlays/$RUNWAY_ENV

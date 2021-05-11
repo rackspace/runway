@@ -1,3 +1,3 @@
-## Hello World
+# Hello World
 
-Adapted from https://github.com/kubernetes-sigs/kustomize/tree/master/examples/helloWorld
+Adapted from <https://github.com/kubernetes-sigs/kustomize/tree/master/examples/helloWorld>
