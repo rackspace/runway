@@ -115,10 +115,13 @@ Some of the checks can be run locally using ``make lint`` and ``make test``.
 
 To be considered for approval, the PR must meet the following requirements.
 
-- Title must be a brief explanation of what was done in the PR (think commit message).
-- A summary of was done.
-- Explain why this change is needed.
-- Detail the changes that were made (think CHANGELOG).
-- Screenshot if applicable.
+- PR title must be a brief explanation of what was done in the PR (think commit message).
+- PR body must comply with the formatting and prompts provided in the template (automatically applied when creating a PR on GitHub).
+  At a minimum the following should be provided in the body of the PR:
+
+  - A summary of was done.
+  - Explain why this change is needed.
+  - Detail the changes that were made (think CHANGELOG).
+
 - Include tests for any new features or changes to existing features. (unit tests and integration tests depending on the nature of the change)
 - Documentation was updated for any new feature or changes to existing features.
