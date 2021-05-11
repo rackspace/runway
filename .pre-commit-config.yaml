@@ -19,13 +19,17 @@ repos:
     rev: 5.8.0
     hooks:
       - id: isort
-  # - repo: https://github.com/psf/black
-  #   rev: stable  # TODO update black
-  #   hooks:
-  #     - id: black
-  #       # stable release of black does not respect exclude when file is explicitly provided
-  #       # waiting for this to be released - https://github.com/psf/black/pull/1032
-  #       exclude: (^npm/|^quickstarts/|^runway/aws_sso_botocore/)
+  - repo: https://github.com/psf/black
+    rev: 21.5b1
+    hooks:
+      - id: black
+        args:
+          - "--check"
+          - "--diff"
+          - "--color"
+        # stable release of black does not respect exclude when file is explicitly provided
+        # waiting for this to be released - https://github.com/psf/black/pull/1032
+        exclude: (^npm/|^quickstarts/|^runway/aws_sso_botocore/)
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
