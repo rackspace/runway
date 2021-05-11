@@ -1,4 +1,7 @@
-.PHONY: help list sync sync_two sync_all pipenv_lock clean fix-isort lint lint-flake8 lint-isort lint-pylint lint_two test test-integration test-unit create_tfenv_ver_file build build_pyinstaller_file build_pyinstaller_folder build_whl release npm_prep
+.PHONY: help list install install-all clean fix-isort lint lint-flake8 lint-isort lint-pylint lint_two test test-integration test-unit create-tfenv-ver-file build build-pyinstaller-file build-pyinstaller-folder build-whl release npm-prep
+
+PIPENV_KEEP_OUTDATED := $(if $(PIPENV_KEEP_OUTDATED), --keep-outdated,)
+SHELL := /bin/bash
 
 help: ## show this message
 	@IFS=$$'\n' ; \
@@ -16,40 +19,17 @@ help: ## show this message
 		printf "%s\n" $$help_info; \
 	done
 
-cov-report: ## display a report in the terminal of files missing coverage
-	@pipenv run coverage report \
-		--precision=2 \
-		--show-missing \
-		--skip-covered \
-		--skip-empty \
-		--rcfile=pyproject.toml
+build: clean create-tfenv-ver-file ## build the PyPi release
+	python setup.py sdist
 
-list: ## list all targets in this Makefile
-	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+build-pyinstaller-file: clean create-tfenv-ver-file ## build Pyinstaller single file release (github)
+	bash ./.github/scripts/cicd/build_pyinstaller.sh file
 
-npm-install:
-	@npm install --ignore-scripts
+build-pyinstaller-folder: clean create-tfenv-ver-file ## build Pyinstaller folder release(github)
+	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
 
-sync: ## create a python virtual environment in the project for development
-	PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev
-	pipenv run pre-commit install
-
-sync_all: sync ## sync all virtual environments used by this project with their Pipfile.lock
-	pushd docs && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
-	pushd integration_tests && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
-	pushd integration_test_infrastructure && PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev --three && popd
-
-pipenv_lock: ## update all Pipfile.lock's used by this project
-	pipenv lock --dev
-	pushd docs && pipenv lock --dev && popd
-	pushd integration_tests && pipenv lock --dev && popd
-	pushd integration_test_infrastructure && pipenv lock --dev && popd
-
-pipenv-update:
-	pipenv update --dev --keep-outdated
-	pushd docs && pipenv update --dev --keep-outdated && popd
-	pushd integration_tests && pipenv update --dev --keep-outdated && popd
-	pushd integration_test_infrastructure && pipenv update --dev --keep-outdated && popd
+build-whl: clean create-tfenv-ver-file ## build wheel
+	python setup.py bdist_wheel --universal
 
 clean: ## remove generated file from the project directory
 	rm -rf build/
@@ -59,11 +39,46 @@ clean: ## remove generated file from the project directory
 	rm -rf src/
 	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
 
+cov-report: ## display a report in the terminal of files missing coverage
+	@pipenv run coverage report \
+		--precision=2 \
+		--show-missing \
+		--skip-covered \
+		--skip-empty \
+		--rcfile=pyproject.toml
+
+create-tfenv-ver-file: ## create a tfenv version file using the latest version
+	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
+
 fix-black: ## automatically fix all black errors
 	@pipenv run black .
 
 fix-isort: ## automatically fix all isort errors
 	@pipenv run isort .
+
+install: ## create a python virtual environment in the project for development
+	@PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev
+	@PIPENV_VENV_IN_PROJECT=1 pipenv clean
+
+install-docs: ## create a python virtual environmnet for building documentation
+	@pushd docs && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		popd
+
+install-integration-tests:  ## create a python virtual environmnet for legacy integration tests
+	@pushd integration_tests && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		popd
+
+install-integration-test-infrastructure:  ## create a python virtual environmnet for legacy integration test infrastructure
+	@pushd integration_test_infrastructure && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		popd
+
+install-all: install install-docs install-integration-tests install-integration-test-infrastructure ## sync all virtual environments used by this project with their Pipfile.lock
 
 lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
@@ -87,10 +102,40 @@ lint-pylint: ## run pylint
 	@pipenv run pylint runway tests --rcfile=pyproject.toml
 	@echo ""
 
-lint-pyright:
+lint-pyright: ## run pyright
 	@echo "Running pyright..."
 	@npm run-script py-type-check
 	@echo ""
+
+npm-ci: ## run "npm ci" with the option to ignore scripts - required to succeed for this project
+	@npm ci --ignore-scripts
+
+npm-install: ## run "npm install" with the option to ignore scripts - required to succeed for this project
+	@npm install --ignore-scripts
+
+# requires setuptools-scm and setuptools global python installs
+# copies artifacts to src & npm package files to the root of the repo
+# updates package.json with the name of the package & semver version from scm (formated for npm)
+npm-prep: ## process that needs to be run before creating an npm package
+	mkdir -p tmp
+	mkdir -p src
+	cp -r artifacts/$$(python ./setup.py --version)/* src/
+	cp npm/* . && cp npm/.[^.]* .
+	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(python ./setup.py --version | sed -E "s/\.dev/-dev/")}\"" package.json > tmp/package.json
+	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
+	rm -rf tmp/package.json
+
+release: clean create-tfenv-ver-file build # publish to PyPi
+	twine upload dist/*
+	curl -D - -X PURGE https://pypi.org/simple/runway
+
+run-pre-commit: ## run pre-commit for all files
+	@pipenv run pre-commit run -a
+
+setup: npm-ci install install-docs setup-pre-commit ## setup development environment
+
+setup-pre-commit: ## install pre-commit git hooks
+	@pipenv run pre-commit install
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
@@ -108,33 +153,26 @@ test-unit: ## run unit tests only
 	@echo "Running unit tests..."
 	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing:skip-covered
 
-create_tfenv_ver_file: ## create a tfenv version file using the latest version
-	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
+update: ## update project python environment
+	@PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED}
+	@PIPENV_VENV_IN_PROJECT=1 pipenv clean
 
-build: clean create_tfenv_ver_file ## build the PyPi release
-	python setup.py sdist
+update-docs: ## update python virtual environmnet for building documentation
+	@pushd docs && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		popd
 
-build_pyinstaller_file: clean create_tfenv_ver_file ## build Pyinstaller single file release (github)
-	bash ./.github/scripts/cicd/build_pyinstaller.sh file
+update-integration-tests: ## update python virtual environmnet for legacy integration tests
+	@pushd integration_tests && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		popd
 
-build_pyinstaller_folder: clean create_tfenv_ver_file ## build Pyinstaller folder release(github)
-	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
+update-integration-test-infrastructure: ## update python virtual environmnet for legacy integration test
+	@pushd integration_test_infrastructure && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
+		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		popd
 
-build_whl: clean create_tfenv_ver_file ## build wheel
-	python setup.py bdist_wheel --universal
-
-release: clean create_tfenv_ver_file build # publish to PyPi
-	twine upload dist/*
-	curl -D - -X PURGE https://pypi.org/simple/runway
-
-# requires setuptools-scm and setuptools global python installs
-# copies artifacts to src & npm package files to the root of the repo
-# updates package.json with the name of the package & semver version from scm (formated for npm)
-npm_prep: ## process that needs to be run before creating an npm package
-	mkdir -p tmp
-	mkdir -p src
-	cp -r artifacts/$$(python ./setup.py --version)/* src/
-	cp npm/* . && cp npm/.[^.]* .
-	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(python ./setup.py --version | sed -E "s/\.dev/-dev/")}\"" package.json > tmp/package.json
-	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
-	rm -rf tmp/package.json
+update-all: update update-docs update-integration-tests update-integration-test-infrastructure ## update all python environments

@@ -7,7 +7,7 @@ Scripts for the URL shortener action.
 - [urlshortener](#urlshortener)
   - [Updating Dependencies](#updating-dependencies)
   - [Scripts](#scripts)
-    - [update_urls.py](#updateurlspy)
+    - [update_urls.py](#update_urlspy)
 
 ## Updating Dependencies
 

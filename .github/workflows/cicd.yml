@@ -154,7 +154,7 @@ jobs:
         # to we have to use pip within a venv to process it correctly
         run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
       - name: Run Build
-        run: make build_pyinstaller_file
+        run: make build-pyinstaller-file
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1.0.0
         with:
@@ -229,7 +229,7 @@ jobs:
         # to we have to use pip within a venv to process it correctly
         run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
       - name: Run Build
-        run: make build_pyinstaller_folder
+        run: make build-pyinstaller-folder
       - name: Upload Artifacts
         uses: actions/upload-artifact@v1.0.0
         with:
@@ -313,7 +313,7 @@ jobs:
         run: tree artifacts/
       - name: npm Prep
         if: steps.check_distance.outcome == 'success'
-        run: make npm_prep
+        run: make npm-prep
       - name: npm pack
         if: steps.check_distance.outcome == 'success'
         run: |
