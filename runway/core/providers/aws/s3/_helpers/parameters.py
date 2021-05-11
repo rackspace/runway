@@ -19,38 +19,58 @@ class ParametersDataModel(BaseModel):
     Attributes:
         dest: File/object destination.
         src: File/object source.
+        content_type: Explicitly provided content type.
         delete: Whether or not to delete files at the destination that are
             missing from the source location.
         dir_op: If the source location is a directory.
+        dryrun: Whether this is a dry run.
         exact_timestamps: Use exact time stamp when comparing files/objects
             during sync.
         exclude: List of patterns for files/objects to exclude.
+        expected_size: Expected size of transfer.
         follow_symlinks: Whether or not to follow symlinks.
+        force_glacier_transfer: Force transfer even if glacier.
         guess_mime_type: Whether or not to guess content type.
+        ignore_glacier_warnings: Don't show glacier warnings.
         include: List of patterns for files/objects to explicitly include.
         is_move: Whether or not the action is move.
+        is_stream: Source or destination is a stream.
+        no_progress: Whether to not show progress.
         only_show_errors: Whether or not to only show errors while running.
         page_size: Number of objects to list per call.
+        quiet: Don't output anything.
         paths_type: Concatinated path types for source and destination.
         size_only: When comparing files/objects, only consider size.
+        storage_class: S3 storage class.
 
     """
 
     dest: str
     src: str
     # these need to be set after dest & src so their validators can access the value if needed
+    content_type: Optional[str] = None
     delete: bool = False
     dir_op: bool = False
+    dryrun: bool = False
     exact_timestamps: bool = False
     exclude: List[str] = []
+    expected_size: Optional[int] = None
     follow_symlinks: bool = False
+    force_glacier_transfer: bool = False
     guess_mime_type: bool = True
+    ignore_glacier_warnings: bool = False
     include: List[str] = []
     is_move: bool = False
+    is_stream: bool = False
+    no_progress: bool = False
     only_show_errors: bool = False
     page_size: Optional[int] = None
     paths_type: PathsType = "local"  # will be overwritten
+    quiet: bool = False
     size_only: bool = False
+    sse_c: Optional[str] = None
+    sse_c_key: Optional[str] = None
+    storage_class: Optional[str] = None
 
     @validator("paths_type", always=True, pre=True)
     @classmethod

@@ -192,7 +192,7 @@ class ActionArchitecture:
             client=self.client, parameters=self.parameters.dict()
         )
         s3_transfer_handler = S3TransferHandlerFactory(
-            config_params=self.parameters.dict(), runtime_config=self._runtime_config
+            config_params=self.parameters, runtime_config=self._runtime_config
         )(self.client, result_queue)
 
         sync_strategies = self.choose_sync_strategies()
