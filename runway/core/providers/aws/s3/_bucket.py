@@ -94,7 +94,7 @@ class Bucket:
         """Create cached boto3 session."""
         return self.__ctx.get_session(region=self._region)
 
-    def create(self, **kwargs: Any) -> CreateBucketOutputTypeDef:
+    def create(self, **kwargs: Any) -> Optional[CreateBucketOutputTypeDef]:
         """Create an S3 Bucket if it does not already exist.
 
         Bucket creation will be skipped if it already exists or access is forbidden.
@@ -111,7 +111,7 @@ class Bucket:
                 self.name,
                 "access denied" if self.forbidden else "bucket already exists",
             )
-            return {}
+            return None
         kwargs["Bucket"] = self.name
         if self.client.meta.region_name != "us-east-1":
             kwargs.setdefault("CreateBucketConfiguration", {})
@@ -135,7 +135,11 @@ class Bucket:
             return
         config["Status"] = "Enabled"
         self.client.put_bucket_versioning(
-            Bucket=self.name, VersioningConfiguration=config
+            Bucket=self.name,
+            VersioningConfiguration={
+                "Status": "Enabled",
+                "MFADelete": config.get("MFADelete", "Disabled"),
+            },
         )
         LOGGER.debug('enabled versioning for bucket "%s"', self.name)
 
