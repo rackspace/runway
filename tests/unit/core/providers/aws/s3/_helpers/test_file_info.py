@@ -31,7 +31,7 @@ def build_object_data(
         "REDUCED_REDUNDANCY",
         "STANDARD",
         "STANDARD_IA",
-    ] = "STANDARD"
+    ] = "STANDARD",
 ) -> ObjectTypeDef:
     """Build object data."""
     return {

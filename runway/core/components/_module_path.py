@@ -45,7 +45,7 @@ class ModulePath:
         definition: Optional[Union[Path, str]] = None,
         *,
         cache_dir: Path = DEFAULT_CACHE_DIR,
-        deploy_environment: Optional[DeployEnvironment] = None
+        deploy_environment: Optional[DeployEnvironment] = None,
     ) -> None:
         """Instantiate class.
 
@@ -145,7 +145,7 @@ class ModulePath:
             Union[Path, RunwayModuleDefinition, RunwayModuleDefinitionModel, str]
         ],
         *,
-        deploy_environment: Optional[DeployEnvironment] = None
+        deploy_environment: Optional[DeployEnvironment] = None,
     ) -> ModulePath:
         """Parse object.
 

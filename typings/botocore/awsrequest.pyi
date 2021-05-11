@@ -31,12 +31,12 @@ class AWSConnection(object):
     def send(self, str): ...
 
 class AWSHTTPConnection(AWSConnection, HTTPConnection):
-    """ An HTTPConnection that supports 100 Continue behavior. """
+    """An HTTPConnection that supports 100 Continue behavior."""
 
     ...
 
 class AWSHTTPSConnection(AWSConnection, VerifiedHTTPSConnection):
-    """ An HTTPSConnection that supports 100 Continue behavior. """
+    """An HTTPSConnection that supports 100 Continue behavior."""
 
     ...
 
@@ -188,7 +188,7 @@ class _HeaderKey(object):
     def __repr__(self): ...
 
 class HeadersDict(MutableMapping):
-    """A case-insenseitive dictionary to represent HTTP headers. """
+    """A case-insenseitive dictionary to represent HTTP headers."""
 
     def __init__(self, *args, **kwargs) -> None: ...
     def __setitem__(self, key, value): ...

@@ -79,10 +79,10 @@ def test_generate_node_command_npx(
 
 
 @pytest.mark.parametrize(
-    "command, opts", [("test", []), ("test", ["arg1"]), ("test", ["arg1", "arg2"])],
+    "command, opts", [("test", []), ("test", ["arg1"]), ("test", ["arg1", "arg2"])]
 )
 def test_generate_node_command(
-    command: str, mocker: MockerFixture, opts: List[str], tmp_path: Path,
+    command: str, mocker: MockerFixture, opts: List[str], tmp_path: Path
 ) -> None:
     """Test generate_node_command."""
     mock_which = mocker.patch(f"{MODULE}.which", return_value=False)

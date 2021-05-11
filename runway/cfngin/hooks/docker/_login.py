@@ -92,7 +92,7 @@ class LoginArgs(BaseModel):
         password: str,
         registry: Optional[str] = None,
         username: Optional[str] = None,
-        **_: Any
+        **_: Any,
     ) -> None:
         """Instantiate class.
 

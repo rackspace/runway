@@ -29,7 +29,9 @@ class RunwayServerlessModuleOptionsDataModel(ConfigProperty):
 
     args: List[str] = []
     extend_serverless_yml: Dict[str, Any] = {}
-    promotezip: RunwayServerlessPromotezipOptionDataModel = RunwayServerlessPromotezipOptionDataModel()  # noqa
+    promotezip: RunwayServerlessPromotezipOptionDataModel = (
+        RunwayServerlessPromotezipOptionDataModel()
+    )
     skip_npm_ci: bool = False
 
     class Config(ConfigProperty.Config):

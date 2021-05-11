@@ -146,7 +146,7 @@ class MockCFNginContext(CfnginContext):
         key = "{}.{}".format(service_name, region or self.env.aws_region)
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
-            service_name, region_name=region or self.env.aws_region,
+            service_name, region_name=region or self.env.aws_region
         )
         self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
@@ -158,7 +158,7 @@ class MockCFNginContext(CfnginContext):
         aws_secret_access_key: Optional[str] = None,
         aws_session_token: Optional[str] = None,
         profile: Optional[str] = None,
-        region: Optional[str] = None
+        region: Optional[str] = None,
     ) -> MockBoto3Session:
         """Wrap get_session to enable stubbing."""
         return MockBoto3Session(
@@ -226,7 +226,7 @@ class MockRunwayContext(RunwayContext):
         self._boto3_test_client[key] = boto3.client(  # type: ignore
             service_name,
             region_name=region or self.env.aws_region,
-            **self.boto3_credentials
+            **self.boto3_credentials,
         )
         self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
@@ -238,7 +238,7 @@ class MockRunwayContext(RunwayContext):
         aws_secret_access_key: Optional[str] = None,
         aws_session_token: Optional[str] = None,
         profile: Optional[str] = None,
-        region: Optional[str] = None
+        region: Optional[str] = None,
     ) -> MockBoto3Session:
         """Wrap get_session to enable stubbing."""
         return MockBoto3Session(
@@ -272,7 +272,7 @@ class YamlLoader:
     """Load YAML files from a directory."""
 
     def __init__(
-        self, root: Path, load_class: Optional[type] = None, load_type: str = "default",
+        self, root: Path, load_class: Optional[type] = None, load_type: str = "default"
     ) -> None:
         """Instantiate class.
 

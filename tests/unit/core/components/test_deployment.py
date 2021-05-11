@@ -51,7 +51,7 @@ class TestDeployment:
         mock_merge.assert_called_once_with()
 
     def test_init_args(
-        self, fx_deployments: YamlLoaderDeployment, runway_context: MockRunwayContext,
+        self, fx_deployments: YamlLoaderDeployment, runway_context: MockRunwayContext
     ) -> None:
         """Test init with args."""
         definition = fx_deployments.load("simple_env_vars")

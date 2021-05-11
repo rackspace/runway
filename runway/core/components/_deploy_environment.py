@@ -42,7 +42,7 @@ class DeployEnvironment:
         environ: Optional[Dict[str, str]] = None,
         explicit_name: Optional[str] = None,
         ignore_git_branch: bool = False,
-        root_dir: Optional[Path] = None
+        root_dir: Optional[Path] = None,
     ) -> None:
         """Instantiate class.
 

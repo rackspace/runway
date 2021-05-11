@@ -183,7 +183,7 @@ class Bucket:
         exclude: Optional[List[str]] = None,
         follow_symlinks: bool = False,
         include: Optional[List[str]] = None,
-        prefix: Optional[str] = None
+        prefix: Optional[str] = None,
     ) -> None:
         """Sync local directory to the S3 Bucket.
 
@@ -216,7 +216,7 @@ class Bucket:
         exclude: Optional[List[str]] = None,
         follow_symlinks: bool = False,
         include: Optional[List[str]] = None,
-        prefix: Optional[str] = None
+        prefix: Optional[str] = None,
     ) -> None:
         """Sync S3 bucket to local directory.
 

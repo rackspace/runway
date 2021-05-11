@@ -63,5 +63,5 @@ class FileInfoBuilder:
             **file_base.dict(),
             **{"client": self._source_client, "source_client": self._client}
             if file_base.operation_name == "delete" and delete_enabled
-            else {"client": self._client, "source_client": self._source_client}
+            else {"client": self._client, "source_client": self._source_client},
         )

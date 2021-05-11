@@ -87,7 +87,7 @@ class TestCFNgin:
         assert result.env_file["test_value"] == "test-us-west-2"
 
         result = CFNgin(
-            ctx=self.get_context(name="lab", region="ca-central-1"), sys_path=tmp_path,
+            ctx=self.get_context(name="lab", region="ca-central-1"), sys_path=tmp_path
         )
         assert result.env_file["test_value"] == "lab-ca-central-1"
 
@@ -140,10 +140,10 @@ class TestCFNgin:
                     sys_modules_exclude=["awacs", "troposphere"],
                 ),
                 call.__enter__(),
-                call(sys_modules_exclude=["awacs", "troposphere"],),
+                call(sys_modules_exclude=["awacs", "troposphere"]),
                 call.__enter__(),
                 call.__exit__(None, None, None),
-                call(sys_modules_exclude=["awacs", "troposphere"],),
+                call(sys_modules_exclude=["awacs", "troposphere"]),
                 call.__enter__(),
                 call.__exit__(None, None, None),
                 call.__exit__(None, None, None),
@@ -195,7 +195,7 @@ class TestCFNgin:
     def test_load_cfn_template(self, caplog: LogCaptureFixture, tmp_path: Path) -> None:
         """Test load a CFN template."""
         cfn_template = tmp_path / "template.yml"
-        cfn_template.write_text(u"test_key: !Ref something")
+        cfn_template.write_text("test_key: !Ref something")
         cfngin = CFNgin(ctx=self.get_context(), sys_path=tmp_path)
 
         caplog.set_level("ERROR", logger="runway.cfngin")

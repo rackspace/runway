@@ -488,7 +488,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
 
     def test_handle_parameters(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test handle_parameters."""
         mock_update_envvars = mocker.patch(
@@ -508,7 +508,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert obj.ctx.env.vars == {"result": "success"}
 
     def test_terraform_apply(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_apply."""
         mock_gen_command = mocker.patch.object(Terraform, "gen_command")
@@ -533,7 +533,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert mock_run_command.call_count == 2
 
     def test_terraform_destroy(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_destroy."""
         mock_gen_command = mocker.patch.object(
@@ -551,7 +551,10 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
 
     def test_terraform_get(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
     ) -> None:
         """Test terraform_get."""
         mock_gen_command = mocker.patch.object(
@@ -567,7 +570,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
 
     def test_terraform_init(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_init."""
         mock_gen_command = mocker.patch.object(
@@ -603,7 +606,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert excinfo.value.code == 1
 
     def test_terraform_plan(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_plan."""
         mock_gen_command = mocker.patch.object(
@@ -621,7 +624,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
 
     def test_terraform_workspace_list(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_workspace_list."""
         mock_gen_command = mocker.patch.object(
@@ -641,7 +644,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         check_output_result.decode.assert_called_once_with()
 
     def test_terraform_workspace_new(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_workspace_new."""
         mock_gen_command = mocker.patch.object(
@@ -657,7 +660,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
 
     def test_terraform_workspace_select(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_workspace_new."""
         mock_gen_command = mocker.patch.object(
@@ -681,7 +684,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert obj.current_workspace == "second-val"
 
     def test_terraform_workspace_show(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test terraform_workspace_show."""
         mock_gen_command = mocker.patch.object(

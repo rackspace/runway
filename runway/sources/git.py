@@ -25,7 +25,7 @@ class Git(Source):
         arguments: Optional[Dict[str, str]] = None,
         location: str = "",
         uri: str = "",
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Git Path Source.
 

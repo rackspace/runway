@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 class EndpointDiscoveryException(BotoCoreError): ...
 
 class EndpointDiscoveryRequired(EndpointDiscoveryException):
-    """ Endpoint Discovery is disabled but is required for this operation. """
+    """Endpoint Discovery is disabled but is required for this operation."""
 
     fmt = ...
 
 class EndpointDiscoveryRefreshFailed(EndpointDiscoveryException):
-    """ Endpoint Discovery failed to the refresh the known endpoints. """
+    """Endpoint Discovery failed to the refresh the known endpoints."""
 
     fmt = ...
 

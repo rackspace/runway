@@ -115,7 +115,7 @@ def write(  # pylint: disable=too-many-locals
             # Copy the template code for the specific Lambda function
             # to the temporary folder
             copy_tree(
-                os.path.join(os.path.dirname(__file__), "templates", handler), dirpath,
+                os.path.join(os.path.dirname(__file__), "templates", handler), dirpath
             )
 
             # Save our dynamic configuration shared file to the
@@ -154,7 +154,7 @@ def write(  # pylint: disable=too-many-locals
     return context_dict
 
 
-def get_nonce_signing_secret(param_name: str, context: CfnginContext,) -> str:
+def get_nonce_signing_secret(param_name: str, context: CfnginContext) -> str:
     """Retrieve signing secret, generating & storing it first if not present."""
     session = context.get_session()
     ssm_client = session.client("ssm")

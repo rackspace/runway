@@ -109,7 +109,7 @@ def test_list_ecr_images_repository_not_found() -> None:
 
 
 def test_purge_repository(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture,
+    cfngin_context: MockCFNginContext, mocker: MockerFixture
 ) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(
@@ -130,7 +130,7 @@ def test_purge_repository(
 
 
 def test_purge_repository_skip(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture,
+    cfngin_context: MockCFNginContext, mocker: MockerFixture
 ) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(MODULE + ".list_ecr_images", return_value=[])

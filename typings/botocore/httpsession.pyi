@@ -11,10 +11,10 @@ DEFAULT_CA_BUNDLE = os.path.join(os.path.dirname(__file__), "cacert.pem")
 
 def get_cert_path(verify): ...
 def create_urllib3_context(ssl_version=..., cert_reqs=..., options=..., ciphers=...):
-    """ This function is a vendored version of the same function in urllib3
+    """This function is a vendored version of the same function in urllib3
 
-        We vendor this function to ensure that the SSL contexts we construct
-        always use the std lib SSLContext instead of pyopenssl.
+    We vendor this function to ensure that the SSL contexts we construct
+    always use the std lib SSLContext instead of pyopenssl.
     """
     ...
 
@@ -28,10 +28,10 @@ class ProxyConfiguration(object):
 
     def __init__(self, proxies=..., proxies_settings=...) -> None: ...
     def proxy_url_for(self, url):
-        """Retrieves the corresponding proxy url for a given url. """
+        """Retrieves the corresponding proxy url for a given url."""
         ...
     def proxy_headers_for(self, proxy_url):
-        """Retrieves the corresponding proxy headers for a given proxy url. """
+        """Retrieves the corresponding proxy headers for a given proxy url."""
         ...
     @property
     def settings(self): ...

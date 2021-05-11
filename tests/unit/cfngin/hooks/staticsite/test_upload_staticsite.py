@@ -58,7 +58,7 @@ class TestGetContentType:
         ],
     )
     def test_get_content_type(
-        self, provided: ExtraFileTypeDef, expected: Optional[str],
+        self, provided: ExtraFileTypeDef, expected: Optional[str]
     ) -> None:
         """Test get_content_type."""
         assert get_content_type(provided) == expected
@@ -111,7 +111,7 @@ class TestCalculateExtraFilesHash:
         ],
     )
     def test_calculate_hash_of_extra_files(
-        self, a: ExtraFileTypeDef, b: ExtraFileTypeDef,
+        self, a: ExtraFileTypeDef, b: ExtraFileTypeDef
     ) -> None:
         """Test calculate_hash_of_extra_files."""
         assert calculate_hash_of_extra_files([a]) != calculate_hash_of_extra_files([b])
@@ -308,11 +308,14 @@ class TestSyncExtraFiles:
         )
 
         with s3_stub as s3_stub, ssm_stub as ssm_stub:
-            assert sync_extra_files(
-                cfngin_context,
-                "bucket",
-                extra_files=[extra],
-                hash_tracking_parameter="hash_name",
-            ) == ["test"]
+            assert (
+                sync_extra_files(
+                    cfngin_context,
+                    "bucket",
+                    extra_files=[extra],
+                    hash_tracking_parameter="hash_name",
+                )
+                == ["test"]
+            )
             s3_stub.assert_no_pending_responses()
             ssm_stub.assert_no_pending_responses()

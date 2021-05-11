@@ -50,7 +50,7 @@ class MockLookupHandler(LookupHandler):
         value: str,
         context: Union[CfnginContext, RunwayContext],
         *__args: Any,
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> Any:
         """Perform the lookup."""
         if cls.side_effect is None:
@@ -805,7 +805,8 @@ class TestVariableValueLookup:
         """Test __init__ fund handler UnknownLookupType."""
         with pytest.raises(UnknownLookupType):
             VariableValueLookup(
-                VariableValueLiteral("invalid"), VariableValueLiteral("query"),
+                VariableValueLiteral("invalid"),
+                VariableValueLiteral("query"),
             )
 
     def test_init(self) -> None:

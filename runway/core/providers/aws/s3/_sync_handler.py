@@ -32,7 +32,7 @@ class S3SyncHandler:
         include: Optional[List[str]] = None,
         page_size: Optional[int] = None,
         session: Optional[boto3.Session] = None,
-        src: str
+        src: str,
     ) -> None:
         """Instantiate class.
 

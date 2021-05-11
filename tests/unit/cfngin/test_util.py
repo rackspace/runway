@@ -180,9 +180,9 @@ Outputs:
                     "Type": "AWS::S3::Bucket",
                     "Properties": {
                         "BucketName": {
-                            u"Fn::Join": [
+                            "Fn::Join": [
                                 "-",
-                                [{u"Ref": u"AWS::StackName"}, {u"Ref": u"AWS::Region"}],
+                                [{"Ref": "AWS::StackName"}, {"Ref": "AWS::Region"}],
                             ]
                         }
                     },

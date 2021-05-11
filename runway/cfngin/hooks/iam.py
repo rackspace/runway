@@ -169,9 +169,7 @@ def ensure_server_cert_exists(
         response = client.upload_server_certificate(**parameters)
         cert_arn = _get_cert_arn_from_response(response)
         status = "uploaded"
-        LOGGER.info(
-            "uploaded certificate: %s (%s)", cert_name, cert_arn,
-        )
+        LOGGER.info("uploaded certificate: %s (%s)", cert_name, cert_arn)
 
     return {
         "status": status,

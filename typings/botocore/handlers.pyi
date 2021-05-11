@@ -35,7 +35,7 @@ SERVICE_NAME_ALIASES = {"runtime.sagemaker": "sagemaker-runtime"}
 def handle_service_name_alias(service_name, **kwargs): ...
 def check_for_200_error(response, **kwargs): ...
 def set_operation_specific_signer(context, signing_name, **kwargs):
-    """ Choose the operation-specific signer.
+    """Choose the operation-specific signer.
 
     Individual operations may have a different auth type than the service as a
     whole. This will most often manifest as operations that should not be
@@ -160,7 +160,7 @@ class ParameterAlias(object):
 
 class ClientMethodAlias(object):
     def __init__(self, actual_name) -> None:
-        """ Aliases a non-extant method to an existing method.
+        """Aliases a non-extant method to an existing method.
 
         :param actual_name: The name of the method that actually exists on
             the client.
@@ -169,8 +169,7 @@ class ClientMethodAlias(object):
     def __call__(self, client, **kwargs): ...
 
 class HeaderToHostHoister(object):
-    """Takes a header and moves it to the front of the hoststring.
-    """
+    """Takes a header and moves it to the front of the hoststring."""
 
     _VALID_HOSTNAME = ...
     def __init__(self, header_name) -> None: ...

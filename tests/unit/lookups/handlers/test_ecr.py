@@ -32,7 +32,7 @@ class TestEcrLookup:
     """Test runway.lookups.handlers.ecr.EcrLookup."""
 
     def test_get_login_password(
-        self, cfngin_context: MockCFNginContext, runway_context: MockRunwayContext,
+        self, cfngin_context: MockCFNginContext, runway_context: MockRunwayContext
     ) -> None:
         """Test get_login_password."""
         cfngin_stubber = cfngin_context.add_stubber("ecr")

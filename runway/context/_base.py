@@ -32,7 +32,7 @@ class BaseContext:
         *,
         deploy_environment: DeployEnvironment,
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-        **_: Any
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
@@ -83,7 +83,7 @@ class BaseContext:
         aws_secret_access_key: Optional[str] = None,
         aws_session_token: Optional[str] = None,
         profile: Optional[str] = None,
-        region: Optional[str] = None
+        region: Optional[str] = None,
     ) -> boto3.Session:
         """Create a thread-safe boto3 session.
 

@@ -46,31 +46,28 @@ class TestFileTranslator(unittest.TestCase):
 
     def test_parameterized_codec_b64(self) -> None:
         """Test parameterized codec b64."""
-        expected = Base64(Join(u"", [u"Test ", {u"Ref": u"Interpolation"}, u" Here"]))
-
-        out = parameterized_codec(u"Test {{Interpolation}} Here", True)
+        expected = Base64(Join("", ["Test ", {"Ref": "Interpolation"}, " Here"]))
+        out = parameterized_codec("Test {{Interpolation}} Here", True)
         self.assertEqual(Base64, out.__class__)
         self.assertTemplateEqual(expected, out)
 
     def test_parameterized_codec_plain(self) -> None:
         """Test parameterized codec plain."""
-        expected = Join(u"", [u"Test ", {u"Ref": u"Interpolation"}, u" Here"])
-
-        out = parameterized_codec(u"Test {{Interpolation}} Here", False)
+        expected = Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])
+        out = parameterized_codec("Test {{Interpolation}} Here", False)
         self.assertEqual(GenericHelperFn, out.__class__)
         self.assertTemplateEqual(expected, out)
 
     def test_parameterized_codec_plain_no_interpolation(self) -> None:
         """Test parameterized codec plain no interpolation."""
-        expected = u"Test Without Interpolation Here"
-
-        out = parameterized_codec(u"Test Without Interpolation Here", False)
+        expected = "Test Without Interpolation Here"
+        out = parameterized_codec("Test Without Interpolation Here", False)
         self.assertEqual(GenericHelperFn, out.__class__)
         self.assertTemplateEqual(expected, out)
 
     def test_yaml_codec_raw(self) -> None:
         """Test yaml codec raw."""
-        structured = {u"Test": [1, None, u"unicode ✓", {u"some": u"obj"}]}
+        structured = {"Test": [1, None, "unicode ✓", {"some": "obj"}]}
         # Note: must use safe_dump, since regular dump adds !python/unicode
         # tags, which we don't want, or we can't be sure we're correctly
         # loading string as unicode.
@@ -81,10 +78,8 @@ class TestFileTranslator(unittest.TestCase):
 
     def test_yaml_codec_parameterized(self) -> None:
         """Test yaml codec parameterized."""
-        processed = {
-            u"Test": Join(u"", [u"Test ", {u"Ref": u"Interpolation"}, u" Here"])
-        }
-        structured = {u"Test": u"Test {{Interpolation}} Here"}
+        processed = {"Test": Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])}
+        structured = {"Test": "Test {{Interpolation}} Here"}
         raw = yaml.safe_dump(structured)
 
         out = yaml_codec(raw, parameterized=True)
@@ -92,7 +87,7 @@ class TestFileTranslator(unittest.TestCase):
 
     def test_json_codec_raw(self) -> None:
         """Test json codec raw."""
-        structured = {u"Test": [1, None, u"str", {u"some": u"obj"}]}
+        structured = {"Test": [1, None, "str", {"some": "obj"}]}
         raw = json.dumps(structured)
 
         out = json_codec(raw, parameterized=False)
@@ -100,10 +95,8 @@ class TestFileTranslator(unittest.TestCase):
 
     def test_json_codec_parameterized(self) -> None:
         """Test json codec parameterized."""
-        processed = {
-            u"Test": Join(u"", [u"Test ", {u"Ref": u"Interpolation"}, u" Here"])
-        }
-        structured = {u"Test": u"Test {{Interpolation}} Here"}
+        processed = {"Test": Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])}
+        structured = {"Test": "Test {{Interpolation}} Here"}
         raw = json.dumps(structured)
 
         out = json_codec(raw, parameterized=True)
@@ -114,26 +107,26 @@ class TestFileTranslator(unittest.TestCase):
     )
     def test_file_loaded(self, content_mock: mock.MagicMock) -> None:
         """Test file loaded."""
-        FileLookup.handle(u"plain:file://tmp/test")
-        content_mock.assert_called_with(u"file://tmp/test")
+        FileLookup.handle("plain:file://tmp/test")
+        content_mock.assert_called_with("file://tmp/test")
 
     @mock.patch(
         "runway.cfngin.lookups.handlers.file.read_value_from_path",
-        return_value=u"Hello, world",
+        return_value="Hello, world",
     )
     def test_handler_plain(self, _: mock.MagicMock) -> None:
         """Test handler plain."""
-        out = FileLookup.handle(u"plain:file://tmp/test")
-        self.assertEqual(u"Hello, world", out)
+        out = FileLookup.handle("plain:file://tmp/test")
+        self.assertEqual("Hello, world", out)
 
     @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
     def test_handler_b64(self, content_mock: mock.MagicMock) -> None:
         """Test handler b64."""
-        plain = u"Hello, world"
+        plain = "Hello, world"
         encoded = base64.b64encode(plain.encode("utf8")).decode("utf-8")
 
         content_mock.return_value = plain
-        out = FileLookup.handle(u"base64:file://tmp/test")
+        out = FileLookup.handle("base64:file://tmp/test")
         self.assertEqual(encoded, out)
 
     @mock.patch("runway.cfngin.lookups.handlers.file.parameterized_codec")
@@ -145,7 +138,7 @@ class TestFileTranslator(unittest.TestCase):
         result = mock.Mock()
         codec_mock.return_value = result
 
-        out = FileLookup.handle(u"parameterized:file://tmp/test")
+        out = FileLookup.handle("parameterized:file://tmp/test")
         codec_mock.assert_called_once_with(content_mock.return_value, False)
 
         self.assertEqual(result, out)
@@ -159,7 +152,7 @@ class TestFileTranslator(unittest.TestCase):
         result = mock.Mock()
         codec_mock.return_value = result
 
-        out = FileLookup.handle(u"parameterized-b64:file://tmp/test")
+        out = FileLookup.handle("parameterized-b64:file://tmp/test")
         codec_mock.assert_called_once_with(content_mock.return_value, True)
 
         self.assertEqual(result, out)
@@ -173,7 +166,7 @@ class TestFileTranslator(unittest.TestCase):
         result = mock.Mock()
         codec_mock.return_value = result
 
-        out = FileLookup.handle(u"yaml:file://tmp/test")
+        out = FileLookup.handle("yaml:file://tmp/test")
         codec_mock.assert_called_once_with(
             content_mock.return_value, parameterized=False
         )
@@ -189,7 +182,7 @@ class TestFileTranslator(unittest.TestCase):
         result = mock.Mock()
         codec_mock.return_value = result
 
-        out = FileLookup.handle(u"yaml-parameterized:file://tmp/test")
+        out = FileLookup.handle("yaml-parameterized:file://tmp/test")
         codec_mock.assert_called_once_with(
             content_mock.return_value, parameterized=True
         )
@@ -205,7 +198,7 @@ class TestFileTranslator(unittest.TestCase):
         result = mock.Mock()
         codec_mock.return_value = result
 
-        out = FileLookup.handle(u"json:file://tmp/test")
+        out = FileLookup.handle("json:file://tmp/test")
         codec_mock.assert_called_once_with(
             content_mock.return_value, parameterized=False
         )
@@ -221,7 +214,7 @@ class TestFileTranslator(unittest.TestCase):
         result = mock.Mock()
         codec_mock.return_value = result
 
-        out = FileLookup.handle(u"json-parameterized:file://tmp/test")
+        out = FileLookup.handle("json-parameterized:file://tmp/test")
         codec_mock.assert_called_once_with(
             content_mock.return_value, parameterized=True
         )
@@ -232,4 +225,4 @@ class TestFileTranslator(unittest.TestCase):
     def test_unknown_codec(self, _: mock.MagicMock) -> None:
         """Test unknown codec."""
         with self.assertRaises(KeyError):
-            FileLookup.handle(u"bad:file://tmp/test")
+            FileLookup.handle("bad:file://tmp/test")

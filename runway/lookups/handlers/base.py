@@ -39,7 +39,7 @@ class LookupHandler:
         get: Optional[str] = None,
         load: Optional[str] = None,
         transform: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Any:
         """Format results to be returned by a lookup.
 
@@ -90,7 +90,7 @@ class LookupHandler:
         context: Union[CfnginContext, RunwayContext],
         *__args: Any,
         provider: Optional[Provider] = None,
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> Any:
         """Perform the lookup.
 

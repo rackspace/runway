@@ -180,7 +180,7 @@ class CfnginConfig(BaseConfig):
     _data: CfnginConfigDefinitionModel
 
     def __init__(
-        self, data: CfnginConfigDefinitionModel, *, path: Optional[Path] = None,
+        self, data: CfnginConfigDefinitionModel, *, path: Optional[Path] = None
     ) -> None:
         """Instantiate class.
 
@@ -225,7 +225,7 @@ class CfnginConfig(BaseConfig):
 
     @classmethod
     def find_config_file(  # type: ignore pylint: disable=arguments-differ
-        cls, path: Optional[Path] = None, *, exclude: Optional[List[str]] = None,
+        cls, path: Optional[Path] = None, *, exclude: Optional[List[str]] = None
     ) -> List[Path]:
         """Find a config file in the provided path.
 
@@ -269,7 +269,7 @@ class CfnginConfig(BaseConfig):
         path: Optional[Path] = None,
         file_path: Optional[Path] = None,
         parameters: Optional[MutableMapping[str, Any]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> CfnginConfig:
         """Parse a YAML file to create a config object.
 
@@ -289,7 +289,7 @@ class CfnginConfig(BaseConfig):
                 file_path.read_text(),
                 path=file_path,
                 parameters=parameters or {},
-                **kwargs
+                **kwargs,
             )
         if path:
             found = cls.find_config_file(path)
@@ -408,7 +408,7 @@ class RunwayConfig(BaseConfig):
     _data: RunwayConfigDefinitionModel
 
     def __init__(
-        self, data: RunwayConfigDefinitionModel, *, path: Optional[Path] = None,
+        self, data: RunwayConfigDefinitionModel, *, path: Optional[Path] = None
     ) -> None:
         """Instantiate class.
 
@@ -455,7 +455,7 @@ class RunwayConfig(BaseConfig):
         *,
         path: Optional[Path] = None,
         file_path: Optional[Path] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> RunwayConfig:
         """Parse a YAML file to create a config object.
 

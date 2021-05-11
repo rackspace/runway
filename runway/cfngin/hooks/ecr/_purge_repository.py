@@ -14,7 +14,9 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 def delete_ecr_images(
-    client: ECRClient, image_ids: List[ImageIdentifierTypeDef], repository_name: str,
+    client: ECRClient,
+    image_ids: List[ImageIdentifierTypeDef],
+    repository_name: str,
 ) -> None:
     """Delete images from an ECR repository."""
     response = client.batch_delete_image(
@@ -32,7 +34,7 @@ def delete_ecr_images(
 
 
 def list_ecr_images(
-    client: ECRClient, repository_name: str,
+    client: ECRClient, repository_name: str
 ) -> List[ImageIdentifierTypeDef]:
     """List all images in an ECR repository."""
     image_ids: List[ImageIdentifierTypeDef] = []
@@ -60,7 +62,9 @@ def list_ecr_images(
 
 
 def purge_repository(
-    context: CfnginContext, repository_name: str, **_: Any,
+    context: CfnginContext,
+    repository_name: str,
+    **_: Any,
 ) -> Dict[str, str]:
     """Purge all images from an ECR repository.
 

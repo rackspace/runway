@@ -11,7 +11,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def update(
-    context: CfnginContext, *, client_id: str, **_: Any,
+    context: CfnginContext, *, client_id: str, **_: Any
 ) -> Union[Dict[str, Any], bool]:
     """Retrieve/Update the domain name of the specified client.
 
@@ -56,7 +56,7 @@ def update(
 
 
 def delete(
-    context: CfnginContext, *, client_id: str, **_: Any,
+    context: CfnginContext, *, client_id: str, **_: Any
 ) -> Union[Dict[str, Any], bool]:
     """Delete the domain if the user pool was created by Runway.
 

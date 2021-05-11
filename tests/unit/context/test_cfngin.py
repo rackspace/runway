@@ -442,7 +442,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         stubber = Stubber(obj.s3_client)
 
         stubber.add_response(
-            "get_object_tagging", {"TagSet": []}, obj.persistent_graph_location,
+            "get_object_tagging", {"TagSet": []}, obj.persistent_graph_location
         )
         stubber.add_response(
             "get_object_tagging",

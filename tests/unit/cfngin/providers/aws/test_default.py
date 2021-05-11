@@ -446,7 +446,7 @@ class TestMethods(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="UNAVAILABLE",
+                status="CREATE_COMPLETE", execution_status="UNAVAILABLE"
             ),
         )
 
@@ -743,7 +743,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
 
@@ -769,7 +769,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
         self.stubber.add_response("set_stack_policy", {})
@@ -813,7 +813,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
         self.stubber.add_response("delete_change_set", {})
@@ -863,7 +863,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
         self.stubber.add_response("delete_change_set", {})
@@ -1100,7 +1100,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
 
@@ -1136,7 +1136,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
 
@@ -1215,7 +1215,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         self.stubber.add_response(
             "describe_change_set",
             generate_change_set_response(
-                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes,
+                status="CREATE_COMPLETE", execution_status="AVAILABLE", changes=changes
             ),
         )
         self.stubber.add_response("delete_change_set", {})

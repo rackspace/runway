@@ -126,7 +126,7 @@ def deploy_environment(tmp_path: Path) -> DeployEnvironment:
 @pytest.fixture(scope="function")
 def cfngin_context(runway_context: MockRunwayContext) -> MockCFNginContext:
     """Create a mock CFNgin context object."""
-    return MockCFNginContext(deploy_environment=runway_context.env, parameters={},)
+    return MockCFNginContext(deploy_environment=runway_context.env, parameters={})
 
 
 @pytest.fixture

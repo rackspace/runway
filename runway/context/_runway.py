@@ -29,7 +29,7 @@ class RunwayContext(BaseContext):
         command: Optional[str] = None,
         deploy_environment: Optional[DeployEnvironment] = None,
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-        **_: Any
+        **_: Any,
     ) -> None:
         """Instantiate class.
 

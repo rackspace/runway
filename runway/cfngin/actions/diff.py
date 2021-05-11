@@ -258,7 +258,7 @@ class Action(deploy.Action):
         force: bool = False,  # pylint: disable=unused-argument
         outline: bool = False,  # pylint: disable=unused-argument
         tail: bool = False,  # pylint: disable=unused-argument
-        **_kwargs: Any
+        **_kwargs: Any,
     ) -> None:
         """Kicks off the diffing of the stacks in the stack_definitions."""
         plan = self._generate_plan(
@@ -277,7 +277,7 @@ class Action(deploy.Action):
         *,
         dump: Union[bool, str] = False,  # pylint: disable=unused-argument
         outline: bool = False,  # pylint: disable=unused-argument
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> None:
         """Any steps that need to be taken prior to running the action.
 
@@ -304,6 +304,6 @@ class Action(deploy.Action):
         *,
         dump: Union[bool, str] = False,  # pylint: disable=unused-argument
         outline: bool = False,  # pylint: disable=unused-argument
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> None:
         """Do nothing."""

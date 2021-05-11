@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def register_lookup_handler(
-    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]],
+    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]]
 ) -> None:
     """Register a lookup handler.
 

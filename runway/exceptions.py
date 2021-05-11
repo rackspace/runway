@@ -161,7 +161,7 @@ class InvalidLookupConcatenation(RunwayError):
         invalid_lookup: VariableValue,
         concat_lookups: VariableValueConcatenation[Any],
         *args: Any,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Instantiate class."""
         self.concatenated_lookups = concat_lookups

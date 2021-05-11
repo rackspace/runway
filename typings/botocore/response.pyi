@@ -32,12 +32,10 @@ class StreamingBody(object):
         """
         ...
     def __iter__(self) -> Generator[bytes, None, None]:
-        """Return an iterator to yield 1k chunks from the raw stream.
-        """
+        """Return an iterator to yield 1k chunks from the raw stream."""
         ...
     def __next__(self) -> bytes:
-        """Return the next 1k chunk from the raw stream.
-        """
+        """Return the next 1k chunk from the raw stream."""
         ...
     next = ...
     def iter_lines(

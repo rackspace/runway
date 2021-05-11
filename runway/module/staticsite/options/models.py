@@ -146,7 +146,9 @@ class RunwayStaticSiteModuleOptionsDataModel(ConfigProperty):
     build_steps: List[str] = []
     extra_files: List[RunwayStaticSiteExtraFileDataModel] = []
     pre_build_steps: List[RunwayStaticSitePreBuildStepDataModel] = []
-    source_hashing: RunwayStaticSiteSourceHashingDataModel = RunwayStaticSiteSourceHashingDataModel()  # noqa: E501
+    source_hashing: RunwayStaticSiteSourceHashingDataModel = (
+        RunwayStaticSiteSourceHashingDataModel()
+    )
 
     class Config(ConfigProperty.Config):
         """Model configuration."""

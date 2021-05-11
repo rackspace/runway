@@ -44,7 +44,7 @@ class TestIAMHooks(unittest.TestCase):
                 client.get_role(RoleName=role_name)
 
             self.assertTrue(
-                create_ecs_service_role(context=self.context, provider=self.provider,)
+                create_ecs_service_role(context=self.context, provider=self.provider)
             )
 
             role = client.get_role(RoleName=role_name)
@@ -65,7 +65,7 @@ class TestIAMHooks(unittest.TestCase):
             )
 
             self.assertTrue(
-                create_ecs_service_role(context=self.context, provider=self.provider,)
+                create_ecs_service_role(context=self.context, provider=self.provider)
             )
 
             role = client.get_role(RoleName=role_name)

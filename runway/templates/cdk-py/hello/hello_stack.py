@@ -16,7 +16,7 @@ class MyStack(core.Stack):
         super().__init__(scope, id, **kwargs)
 
         queue = sqs.Queue(
-            self, "MyFirstQueue", visibility_timeout=core.Duration.seconds(300),
+            self, "MyFirstQueue", visibility_timeout=core.Duration.seconds(300)
         )
 
         topic = sns.Topic(self, "MyFirstTopic", display_name="My First Topic")

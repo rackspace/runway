@@ -20,7 +20,7 @@ def get(
     *,
     stack_name: str,
     user_pool_arn: Optional[str] = None,
-    **_: Any
+    **_: Any,
 ) -> Dict[str, Any]:
     """Retrieve the callback URLs for User Pool Client Creation.
 

@@ -67,7 +67,7 @@ def sync(
     distribution_path: str = "/*",
     extra_files: Optional[List[ExtraFileTypeDef]] = None,
     website_url: Optional[str] = None,
-    **_: Any
+    **_: Any,
 ) -> bool:
     """Sync static website to S3 bucket.
 
@@ -160,7 +160,7 @@ def invalidate_distribution(
     domain: str = "undefined",
     identifier: str,
     path: str = "/*",
-    **_: Any
+    **_: Any,
 ) -> bool:
     """Invalidate the current distribution.
 
@@ -253,7 +253,7 @@ def get_content_type(extra_file: ExtraFileTypeDef) -> Optional[str]:
 
     """
     return extra_file.get(
-        "content_type", auto_detect_content_type(extra_file.get("name")),
+        "content_type", auto_detect_content_type(extra_file.get("name"))
     )
 
 
@@ -317,7 +317,7 @@ def calculate_hash_of_extra_files(extra_files: List[ExtraFileTypeDef]) -> str:
             with open(cast("Path", extra_file["file"]), "rb") as f:
                 LOGGER.debug("hashing file: %s", extra_file["file"])
                 for chunk in iter(
-                    lambda: f.read(4096), "",  # pylint: disable=cell-var-from-loop
+                    lambda: f.read(4096), ""  # pylint: disable=cell-var-from-loop
                 ):
                     if not chunk:
                         break
@@ -369,7 +369,7 @@ def sync_extra_files(
     context: CfnginContext,
     bucket: str,
     extra_files: List[ExtraFileTypeDef],
-    **kwargs: Any
+    **kwargs: Any,
 ) -> List[str]:
     """Sync static website extra files to S3 bucket.
 

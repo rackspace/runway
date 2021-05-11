@@ -24,7 +24,7 @@ class Repositories(Blueprint):
         """Create template."""
         for repo in self.variables["Repositories"]:
             self.template.add_resource(
-                ecr.Repository("%sRepository" % repo, RepositoryName=repo,)
+                ecr.Repository("%sRepository" % repo, RepositoryName=repo)
             )
 
 

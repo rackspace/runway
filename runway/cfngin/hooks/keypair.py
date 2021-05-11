@@ -126,7 +126,7 @@ def create_key_pair_in_ssm(
             Value=keypair["KeyMaterial"],
             Type="SecureString",
             Overwrite=False,
-            **kms_args
+            **kms_args,
         )
     except ClientError:
         # Erase the key pair if we failed to store it in SSM, since the
@@ -218,7 +218,7 @@ def ensure_keypair_exists(
     public_key_path: Optional[str] = None,
     ssm_key_id: Optional[str] = None,
     ssm_parameter_name: Optional[str] = None,
-    **_: Any
+    **_: Any,
 ) -> KeyPairInfo:
     """Ensure a specific keypair exists within AWS.
 

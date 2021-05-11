@@ -30,6 +30,7 @@ GetObjectJob = collections.namedtuple(
         "filename",
     ],
 )
+
 @contextlib.contextmanager
 def ignore_ctrl_c(): ...
 

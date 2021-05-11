@@ -36,7 +36,7 @@ class ImagePushArgs(BaseModel):
         image: Optional[DockerImage] = None,
         repo: Optional[str] = None,
         tags: Optional[List[str]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 

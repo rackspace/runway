@@ -74,7 +74,7 @@ class TestK8sOptions:
         overlay_path = tmp_path / "overlays" / "test"
         mocker.patch.object(K8sOptions, "overlay_path", overlay_path)
         obj = K8sOptions.parse_obj(
-            deploy_environment=runway_context.env, obj={}, path=tmp_path,
+            deploy_environment=runway_context.env, obj={}, path=tmp_path
         )
         assert obj.kustomize_config == overlay_path / "kustomization.yaml"
 
@@ -87,7 +87,7 @@ class TestK8sOptions:
             K8sOptions, "get_overlay_dir", return_value=overlay_path
         )
         obj = K8sOptions.parse_obj(
-            deploy_environment=runway_context.env, obj={}, path=tmp_path,
+            deploy_environment=runway_context.env, obj={}, path=tmp_path
         )
         assert obj.overlay_path == overlay_path
         mock_get_overlay_dir.assert_called_once_with(

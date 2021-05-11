@@ -34,7 +34,7 @@ class EcrLookup(LookupHandler):
         value: str,
         context: Union[CfnginContext, RunwayContext],
         *__args: Any,
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> Any:
         """Retrieve a value from AWS Elastic Container Registry (ECR).
 

@@ -25,7 +25,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
     """
 
     branch: Optional[str] = Field(
-        None, title="Git Branch", examples=["ENV-dev", "ENV-prod", "master"],
+        None, title="Git Branch", examples=["ENV-dev", "ENV-prod", "master"]
     )
     commit: Optional[str] = Field(None, title="Git Commit Hash")
     configs: List[str] = Field(

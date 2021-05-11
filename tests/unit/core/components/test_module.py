@@ -229,9 +229,7 @@ class TestModule:
         assert result["options"] == opts["options"]
         assert result["parameters"] == opts["parameters"]
 
-    @pytest.mark.parametrize(
-        "validate", [None, False],
-    )
+    @pytest.mark.parametrize("validate", [None, False])
     def test_should_skip(
         self,
         fx_deployments: YamlLoaderDeployment,
@@ -555,10 +553,10 @@ class TestModule:
         (True, True, ["explicitly enabled"]),
         (False, False, ["skipped; explicitly disabled"]),
         (["123456789012/us-east-1"], True, []),
-        (["123456789012/us-east-2"], False, ["skipped; account_id/region mismatch"],),
+        (["123456789012/us-east-2"], False, ["skipped; account_id/region mismatch"]),
         ("123456789012/us-east-1", True, []),
-        ("123456789012/us-east-2", False, ["skipped; account_id/region mismatch"],),
-        ({}, None, ["environment not defined; module will determine deployment"],),
+        ("123456789012/us-east-2", False, ["skipped; account_id/region mismatch"]),
+        ({}, None, ["environment not defined; module will determine deployment"]),
         (
             {"example": "111111111111/us-east-1"},
             False,
@@ -573,23 +571,27 @@ class TestModule:
             ["skipped; account_id/region mismatch"],
         ),
         ({"test": "123456789012"}, True, []),
-        ({"test": "111111111111"}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": "111111111111"}, False, ["skipped; account_id/region mismatch"]),
         ({"test": 123456789012}, True, []),
         ({"test": 111111111111}, False, ["skipped; account_id/region mismatch"]),
         ({"test": "us-east-1"}, True, []),
         ({"test": "us-east-2"}, False, ["skipped; account_id/region mismatch"]),
-        ({"test": ["123456789012/us-east-1", "123456789012/us-east-2"]}, True, [],),
+        (
+            {"test": ["123456789012/us-east-1", "123456789012/us-east-2"]},
+            True,
+            [],
+        ),
         (
             {"test": ["123456789012/us-east-2"]},
             False,
             ["skipped; account_id/region mismatch"],
         ),
         ({"test": ["123456789012", "111111111111"]}, True, []),
-        ({"test": ["111111111111"]}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": ["111111111111"]}, False, ["skipped; account_id/region mismatch"]),
         ({"test": [123456789012, 111111111111]}, True, []),
-        ({"test": [111111111111]}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": [111111111111]}, False, ["skipped; account_id/region mismatch"]),
         ({"test": ["us-east-1", "us-east-2"]}, True, []),
-        ({"test": ["us-east-2"]}, False, ["skipped; account_id/region mismatch"],),
+        ({"test": ["us-east-2"]}, False, ["skipped; account_id/region mismatch"]),
     ],
 )
 def test_validate_environment(

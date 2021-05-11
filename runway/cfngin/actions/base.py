@@ -185,7 +185,7 @@ class BaseAction:
         force: bool = False,
         outline: bool = False,
         tail: bool = False,
-        **_kwargs: Any
+        **_kwargs: Any,
     ) -> None:
         """Abstract method for running the action."""
         raise NotImplementedError('Subclass must implement "run" method')

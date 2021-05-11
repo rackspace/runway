@@ -59,8 +59,10 @@ class GraphError(CfnginError):
         self.stack = stack
         self.dependency = dependency
         self.exception = exception
-        self.message = "Error detected when adding '{}' as a dependency of '{}': {}".format(
-            dependency, stack, str(exception),
+        self.message = (
+            "Error detected when adding '{}' as a dependency of '{}': {}".format(
+                dependency, stack, str(exception)
+            )
         )
         super().__init__()
 
@@ -78,7 +80,7 @@ class ImproperlyConfigured(CfnginError):
             error: The exception that was raised when trying to use cls.
 
         """
-        self.message = 'Class "%s" is improperly configured: %s' % (cls, error,)
+        self.message = 'Class "%s" is improperly configured: %s' % (cls, error)
         super().__init__(*args, **kwargs)
 
 

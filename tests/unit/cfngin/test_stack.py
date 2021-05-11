@@ -26,7 +26,7 @@ class TestStack(unittest.TestCase):
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = CfnginContext(config=self.config)
         self.stack = Stack(
-            definition=generate_definition("vpc", 1), context=self.context,
+            definition=generate_definition("vpc", 1), context=self.context
         )
 
         class FakeLookup(LookupHandler):
@@ -63,12 +63,8 @@ class TestStack(unittest.TestCase):
         )
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(len(stack.requires), 2)
-        self.assertIn(
-            "fakeStack", stack.requires,
-        )
-        self.assertIn(
-            "fakeStack2", stack.requires,
-        )
+        self.assertIn("fakeStack", stack.requires)
+        self.assertIn("fakeStack2", stack.requires)
 
     def test_stack_requires_circular_ref(self) -> None:
         """Test stack requires circular ref."""

@@ -172,7 +172,7 @@ def _handle_missing_parameters(
         for param in missing_params:
             if param in stack_parameters:
                 LOGGER.debug(
-                    "using previous value for parameter %s from existing stack", param,
+                    "using previous value for parameter %s from existing stack", param
                 )
                 parameter_values[param] = UsePreviousParameterValue
     final_missing = list(set(required_params) - set(parameter_values.keys()))
@@ -540,7 +540,7 @@ class Action(BaseAction):
         force: bool = False,  # pylint: disable=unused-argument
         outline: bool = False,
         tail: bool = False,
-        **_kwargs: Any
+        **_kwargs: Any,
     ) -> None:
         """Kicks off the create/update of the stacks in the stack_definitions.
 

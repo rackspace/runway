@@ -187,12 +187,7 @@ class TestBaseSync:
         )
         mocker.patch.object(BaseSync, "name", "something")
         obj = BaseSync()
-        assert (
-            obj.use_sync_strategy(
-                {"something": True}  # type: ignore
-            )
-            == obj
-        )
+        assert obj.use_sync_strategy({"something": True}) == obj  # type: ignore
 
 
 class TestMissingFileSync:

@@ -33,7 +33,7 @@ class CliContext:
         debug: int = 0,
         deploy_environment: Optional[str] = None,
         verbose: bool = False,
-        **_: Any
+        **_: Any,
     ) -> None:
         """Instantiate class.
 

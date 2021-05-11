@@ -27,7 +27,7 @@ RESERVED_ENVIRONMENT_VARIABLES = [
 ENVIRONMENT_VARIABLES_NAME_PATTERN = r"[a-zA-Z][a-zA-Z0-9_]+"
 
 def validate_memory_size(memory_value):
-    """ Validate memory size for Lambda Function
+    """Validate memory size for Lambda Function
     :param memory_value: The memory size specified in the Function
     :return: The provided memory size if it is valid
     """

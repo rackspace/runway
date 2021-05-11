@@ -42,7 +42,11 @@ class ARN(BaseARN):
     def __init__(self, service, resource, region=..., account=...) -> None: ...
 
 class ConditionElement(AWSHelperFn):
-    def __init__(self, data: Union[Dict[str, Any], str], value: Any = ...,) -> None:
+    def __init__(
+        self,
+        data: Union[Dict[str, Any], str],
+        value: Any = ...,
+    ) -> None:
         """Create a ConditionElement
 
         There are two supported ways to create a new ConditionElement.

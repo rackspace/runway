@@ -1,5 +1,5 @@
 [tool.black]
-exclude = '''
+force-exclude = '''
 /(
     \.eggs
   | \.git

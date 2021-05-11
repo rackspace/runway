@@ -412,7 +412,7 @@ class TestElasticContainerRegistryRepository:
         )
         mock_registry.return_value = mock_registry
         obj = ElasticContainerRegistryRepository(
-            repo_name="something", registry_alias="test", context=cfngin_context,
+            repo_name="something", registry_alias="test", context=cfngin_context
         )
         assert obj.fqn == "repository/something"
         mock_registry.assert_called_once_with(

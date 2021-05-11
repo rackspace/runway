@@ -23,7 +23,7 @@ class TestCfnLintRunwayTestDefinition:
     def test_parse_obj(self) -> None:
         """Test parse_obj."""
         assert isinstance(
-            CfnLintRunwayTestDefinition.parse_obj({}), CfnLintRunwayTestDefinition,
+            CfnLintRunwayTestDefinition.parse_obj({}), CfnLintRunwayTestDefinition
         )
 
 
@@ -97,7 +97,7 @@ class TestScriptRunwayTestDefinition:
     def test_parse_obj(self) -> None:
         """Test parse_obj."""
         assert isinstance(
-            ScriptRunwayTestDefinition.parse_obj({}), ScriptRunwayTestDefinition,
+            ScriptRunwayTestDefinition.parse_obj({}), ScriptRunwayTestDefinition
         )
 
 
@@ -107,5 +107,5 @@ class TestYamlLintRunwayTestDefinition:
     def test_parse_obj(self) -> None:
         """Test parse_obj."""
         assert isinstance(
-            YamlLintRunwayTestDefinition.parse_obj({}), YamlLintRunwayTestDefinition,
+            YamlLintRunwayTestDefinition.parse_obj({}), YamlLintRunwayTestDefinition
         )

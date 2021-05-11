@@ -469,7 +469,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
 
     @validator("parallel", pre=True)
     def _validate_parallel(
-        cls, v: List[Union[Dict[str, Any], str]], values: Dict[str, Any],  # noqa: N805
+        cls, v: List[Union[Dict[str, Any], str]], values: Dict[str, Any]  # noqa: N805
     ) -> List[Dict[str, Any]]:
         """Validate parallel."""
         if v and values.get("path"):
@@ -484,7 +484,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
 
     # TODO add regex to schema
     _validate_string_is_lookup = validator(
-        "env_vars", "environments", "options", "parameters", allow_reuse=True, pre=True,
+        "env_vars", "environments", "options", "parameters", allow_reuse=True, pre=True
     )(utils.validate_string_is_lookup)
 
 

@@ -85,7 +85,7 @@ class Action(BaseAction):
         *,
         dump: Union[bool, str] = False,  # pylint: disable=unused-argument
         outline: bool = False,
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> None:
         """Any steps that need to be taken prior to running the action."""
         pre_destroy = self.context.config.pre_destroy
@@ -105,7 +105,7 @@ class Action(BaseAction):
         force: bool = False,
         outline: bool = False,  # pylint: disable=unused-argument
         tail: bool = False,
-        **_kwargs: Any
+        **_kwargs: Any,
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
         plan = self._generate_plan(
@@ -131,7 +131,7 @@ class Action(BaseAction):
         *,
         dump: Union[bool, str] = False,  # pylint: disable=unused-argument
         outline: bool = False,
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> None:
         """Any steps that need to be taken after running the action."""
         if not outline and self.context.config.post_destroy:

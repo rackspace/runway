@@ -28,7 +28,7 @@ def run_command(
     quiet: bool = False,
     stdin: Optional[str] = None,
     env: Optional[Dict[str, str]] = None,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> RunCommandResponseTypeDef:
     """Run a custom command as a hook.
 
@@ -118,7 +118,7 @@ def run_command(
             stdout=out_err_type,
             stderr=out_err_type,
             env=env,
-            **kwargs
+            **kwargs,
         ) as proc:
             try:
                 out, err = proc.communicate(stdin)

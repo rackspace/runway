@@ -22,7 +22,7 @@ class SsmLookup(LookupHandler):
         value: str,
         context: Union[CfnginContext, RunwayContext],
         *__args: Any,
-        **__kwargs: Any
+        **__kwargs: Any,
     ) -> Any:
         """Retrieve a value from SSM Parameter Store.
 
@@ -48,7 +48,7 @@ class SsmLookup(LookupHandler):
                 response["Value"].split(",")
                 if response["Type"] == "StringList"
                 else response["Value"],
-                **args
+                **args,
             )
         except client.exceptions.ParameterNotFound:
             if args.get("default"):

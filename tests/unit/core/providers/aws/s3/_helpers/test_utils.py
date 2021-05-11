@@ -164,7 +164,7 @@ class TestBucketLister:
         lister = BucketLister(self.client, self.date_parser)
         list(lister.list_objects(bucket="mybucket", prefix="prefix"))
         self.client.get_paginator.return_value.paginate.assert_called_with(
-            Bucket="mybucket", PaginationConfig={"PageSize": None}, Prefix="prefix",
+            Bucket="mybucket", PaginationConfig={"PageSize": None}, Prefix="prefix"
         )
 
 
@@ -650,7 +650,7 @@ class TestRequestParamsMapper:
         params: Dict[str, str] = {}
         with pytest.raises(ValueError) as excinfo:
             RequestParamsMapper.map_put_object_params(
-                params, {"grants": ["invalid"], **self.params},
+                params, {"grants": ["invalid"], **self.params}
             )
         assert str(excinfo.value) == "grants should be of the form permission=principal"
 
@@ -659,7 +659,7 @@ class TestRequestParamsMapper:
         params: Dict[str, str] = {}
         with pytest.raises(ValueError) as excinfo:
             RequestParamsMapper.map_put_object_params(
-                params, {"grants": ["invalid=test-read"], **self.params},
+                params, {"grants": ["invalid=test-read"], **self.params}
             )
         assert (
             str(excinfo.value)

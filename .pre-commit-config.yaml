@@ -25,11 +25,8 @@ repos:
       - id: black
         args:
           - "--check"
-          - "--diff"
           - "--color"
-        # stable release of black does not respect exclude when file is explicitly provided
-        # waiting for this to be released - https://github.com/psf/black/pull/1032
-        exclude: (^npm/|^quickstarts/|^runway/aws_sso_botocore/)
+          - "--diff"
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
