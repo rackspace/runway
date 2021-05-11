@@ -6,7 +6,7 @@
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional
 
 from .file_info import FileInfo
 
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
 
     from .file_generator import FileStats
+    from .parameters import ParametersDataModel
 
 
 class FileInfoBuilder:
@@ -24,7 +25,7 @@ class FileInfoBuilder:
         *,
         client: S3Client,
         is_stream: bool = False,
-        parameters: Optional[Dict[str, Any]] = None,  # TODO handle data model
+        parameters: Optional[ParametersDataModel] = None,
         source_client: Optional[Any] = None,
     ) -> None:
         """Instantiate class.
@@ -41,7 +42,7 @@ class FileInfoBuilder:
         self._source_client = client
         if source_client is not None:
             self._source_client = source_client
-        self._parameters = parameters or {}
+        self._parameters = parameters
         self._is_stream = is_stream
 
     def call(self, files: Iterable[FileStats]) -> Generator[FileInfo, None, None]:
@@ -57,9 +58,10 @@ class FileInfoBuilder:
             file_base: File stats to include in the FileInfo object.
 
         """
+        delete_enabled = self._parameters.delete if self._parameters else False
         return FileInfo(
             **file_base.dict(),
             **{"client": self._source_client, "source_client": self._client}
-            if file_base.operation_name == "delete" and self._parameters.get("delete")
+            if file_base.operation_name == "delete" and delete_enabled
             else {"client": self._client, "source_client": self._source_client}
         )

@@ -7,6 +7,7 @@ from mock import Mock
 from runway.core.providers.aws.s3._helpers.file_generator import FileStats
 from runway.core.providers.aws.s3._helpers.file_info import FileInfo
 from runway.core.providers.aws.s3._helpers.file_info_builder import FileInfoBuilder
+from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel
 
 
 class TestFileInfoBuilder:
@@ -17,7 +18,9 @@ class TestFileInfoBuilder:
         client = Mock()
         source_client = Mock()
         builder = FileInfoBuilder(
-            client=client, source_client=source_client, parameters={"delete": True}
+            client=client,
+            source_client=source_client,
+            parameters=ParametersDataModel(dest="", src="", delete=True),
         )
         file_stats = FileStats(
             src="src",
