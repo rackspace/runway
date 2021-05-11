@@ -440,9 +440,7 @@ def test_parse_user_data_raise_invalid_placeholder() -> None:
 def test_parse_user_data_raise_missing_variable() -> None:
     """Test parse_user_data."""
     with pytest.raises(MissingVariable):
-        parse_user_data(
-            {"name": "tom"}, "name: ${name}, last: $last and $$", "test",
-        )
+        parse_user_data({"name": "tom"}, "name: ${name}, last: $last and $$", "test")
 
 
 def test_resolve_variable_allowed_values() -> None:

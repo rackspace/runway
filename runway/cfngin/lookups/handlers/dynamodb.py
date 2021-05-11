@@ -100,7 +100,7 @@ class ParsedLookupKey(TypedDict):
     new_keys: List[Dict[Literal["L", "M", "N", "S"], str]]
 
 
-def _lookup_key_parse(table_keys: List[str],) -> ParsedLookupKey:
+def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
     """Return the order in which the stacks should be executed.
 
     Args:
@@ -154,7 +154,7 @@ def _build_projection_expression(clean_table_keys: List[str]) -> str:
     return projection_expression
 
 
-def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]],) -> Any:
+def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]]) -> Any:
     """Return the value of the lookup.
 
     Args:

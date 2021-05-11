@@ -108,7 +108,7 @@ class Variable:
         context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
 
@@ -212,7 +212,7 @@ class VariableValue:
         context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
 
@@ -395,7 +395,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
 
@@ -494,7 +494,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
 
@@ -685,7 +685,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
 
@@ -838,7 +838,7 @@ class VariableValueLookup(VariableValue):
         context: Union[CfnginContext, RunwayContext],
         provider: Optional[Provider] = None,
         variables: Optional[RunwayVariablesDefinition] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
 
@@ -860,7 +860,7 @@ class VariableValueLookup(VariableValue):
                 context=context,
                 provider=provider,
                 variables=variables,
-                **kwargs
+                **kwargs,
             )
             return self._resolve(result)
         except Exception as err:

@@ -522,7 +522,7 @@ class TestCertificate:
                                 gen_record_set(
                                     use_resource_record=True,
                                     TTL=cert.args.ttl,
-                                    **gen_domain_validation_option()["ResourceRecord"]
+                                    **gen_domain_validation_option()["ResourceRecord"],
                                 ),
                             ),
                         )

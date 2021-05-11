@@ -1,5 +1,5 @@
 [tool.black]
-exclude = '''
+force-exclude = '''
 /(
     \.eggs
   | \.git
@@ -18,7 +18,7 @@ exclude = '''
 '''
 include = '\.pyi?$'
 line-length = 88
-target-version = ['py27', 'py36', 'py37', 'py38']
+target-version = ["py37", "py38", "py39"]
 
 
 [tool.coverage.report]

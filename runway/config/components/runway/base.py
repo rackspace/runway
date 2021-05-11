@@ -55,7 +55,7 @@ class ConfigComponentDefinition:
         context: RunwayContext,
         *,
         pre_process: bool = False,
-        variables: Optional[RunwayVariablesDefinition] = None
+        variables: Optional[RunwayVariablesDefinition] = None,
     ) -> None:
         """Resolve variables.
 

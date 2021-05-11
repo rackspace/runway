@@ -56,7 +56,7 @@ def mock_provider(**kwargs: Any) -> MagicMock:
 def mock_context(
     namespace: str = "default",
     extra_config_args: Optional[Dict[str, Any]] = None,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> CfnginContext:
     """Mock context."""
     config_args = {"namespace": namespace}

@@ -211,7 +211,7 @@ class Certificate(Hook):
         cert_arn: Optional[str] = None,
         *,
         interval: int = 5,
-        status: str = "PENDING_VALIDATION"
+        status: str = "PENDING_VALIDATION",
     ) -> ResourceRecordTypeDef:
         """Get validation record from the certificate being created.
 

@@ -221,7 +221,7 @@ class TestPlan(unittest.TestCase):
             context=context,
         )
         removed = Stack(
-            definition=generate_definition("removed", 1, requires=[]), context=context,
+            definition=generate_definition("removed", 1, requires=[]), context=context
         )
         context._persistent_graph = Graph.from_steps([Step(removed)])
 

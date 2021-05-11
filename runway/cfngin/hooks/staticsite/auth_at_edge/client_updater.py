@@ -36,7 +36,7 @@ def update(
     redirect_path_sign_in: str,
     redirect_path_sign_out: str,
     supported_identity_providers: Optional[List[str]] = None,
-    **_: Any
+    **_: Any,
 ) -> bool:
     """Update the callback urls for the User Pool Client.
 
@@ -64,7 +64,7 @@ def update(
 
     # Create a list of all domains with their redirect paths
     redirect_uris = get_redirect_uris(
-        redirect_domains, redirect_path_sign_in, redirect_path_sign_out,
+        redirect_domains, redirect_path_sign_in, redirect_path_sign_out
     )
     # Update the user pool client
     try:

@@ -19,7 +19,7 @@ class TestCfnginConfigDefinitionModel:
     """Test runway.config.models.cfngin.CfnginConfigDefinitionModel."""
 
     @pytest.mark.parametrize(
-        "field", ["post_deploy", "post_destroy", "pre_deploy", "pre_destroy"],
+        "field", ["post_deploy", "post_destroy", "pre_deploy", "pre_destroy"]
     )
     def test_convert_hook_definitions(self, field: str) -> None:
         """Test _convert_hook_definitions."""
@@ -95,7 +95,7 @@ class TestCfnginConfigDefinitionModel:
     def test_resolve_path_fields(self) -> None:
         """Test _resolve_path_fields."""
         obj = CfnginConfigDefinitionModel(
-            namespace="test", cfngin_cache_dir="./cache", sys_path="./something",
+            namespace="test", cfngin_cache_dir="./cache", sys_path="./something"
         )
         assert obj.cfngin_cache_dir.is_absolute()
         assert obj.sys_path.is_absolute()  # type: ignore
@@ -262,9 +262,7 @@ class TestCfnginStackDefinitionModel:
     def test_validate_class_or_template_invalid(self) -> None:
         """Test _validate_class_or_template invalid."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginStackDefinitionModel(
-                enabled=True, locked=False, name="stack-name",
-            )
+            CfnginStackDefinitionModel(enabled=True, locked=False, name="stack-name")
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("__root__",)

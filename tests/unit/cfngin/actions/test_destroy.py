@@ -146,13 +146,11 @@ class TestDestroyAction(unittest.TestCase):
         self.assertEqual(step.status, COMPLETE)
 
     @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
     )
+    @patch("runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock)
     @patch(
-        "runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock,
-    )
-    @patch(
-        "runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock,
+        "runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock
     )
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(

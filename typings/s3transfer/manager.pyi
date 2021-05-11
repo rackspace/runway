@@ -112,7 +112,7 @@ class TransferManager:
         self,
         exc_type: Optional[Type[BaseException]],
         exc_value: Optional[BaseException],
-        *args: Any
+        *args: Any,
     ) -> None: ...
     def shutdown(self, cancel: bool = ..., cancel_msg: str = ...) -> None: ...
 

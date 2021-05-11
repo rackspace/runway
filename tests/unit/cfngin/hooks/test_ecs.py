@@ -33,7 +33,7 @@ class TestECSHooks(unittest.TestCase):
                 cluster = "test-cluster"
                 self.assertTrue(
                     create_clusters(
-                        provider=self.provider, context=self.context, clusters=cluster,
+                        provider=self.provider, context=self.context, clusters=cluster
                     )
                 )
 

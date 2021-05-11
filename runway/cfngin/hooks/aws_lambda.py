@@ -72,7 +72,7 @@ DockerizePipArgTypeDef = Optional[
     Union[
         bool,
         Literal[
-            "false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes",
+            "false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes"
         ],
     ]
 ]
@@ -266,7 +266,7 @@ def _find_files(
     """
     root = os.path.abspath(root)
     file_set = formic.FileSet(
-        directory=root, include=includes, exclude=excludes, symlinks=follow_symlinks,
+        directory=root, include=includes, exclude=excludes, symlinks=follow_symlinks
     )
     yield from file_set.qualified_files(absolute=False)
 
@@ -413,7 +413,7 @@ def dockerized_pip(
     docker_file: Optional[str] = None,
     docker_image: Optional[str] = None,
     python_dontwritebytecode: bool = False,
-    **_: Any
+    **_: Any,
 ) -> None:
     """Run pip with docker.
 
@@ -498,7 +498,7 @@ def dockerized_pip(
             auto_remove=True,
             detach=True,
             mounts=[work_dir_mount],
-            **docker_run_args
+            **docker_run_args,
         ),
     )
 
@@ -563,7 +563,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
     python_path: Optional[str] = None,
     requirements_files: Dict[str, bool],
     use_pipenv: bool = False,
-    **kwargs: Any
+    **kwargs: Any,
 ) -> Tuple[bytes, str]:
     """Create zip file in memory with package dependencies.
 
@@ -885,7 +885,7 @@ def _upload_function(
             excludes=excludes,
             follow_symlinks=follow_symlinks,
             requirements_files=requirements_files,
-            **options
+            **options,
         )
     else:
         zip_contents, content_hash = _zip_from_file_patterns(

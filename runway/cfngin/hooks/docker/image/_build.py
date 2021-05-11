@@ -91,7 +91,7 @@ class DockerImageBuildApiOptions(BaseModel):
         target: Optional[str] = None,
         timeout: Optional[int] = None,
         use_config_proxy: bool = False,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -170,7 +170,7 @@ class ImageBuildArgs(BaseModel):
         path: Optional[Union[Path, str]] = None,
         repo: Optional[str] = None,
         tags: Optional[List[str]] = None,
-        **_: Any
+        **_: Any,
     ) -> None:
         """Instantiate class.
 

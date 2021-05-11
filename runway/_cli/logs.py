@@ -153,7 +153,7 @@ def setup_logging(
         coloredlogs.install(
             settings.log_level,
             logger=logging.getLogger("botocore"),
-            **settings.coloredlogs
+            **settings.coloredlogs,
         )
         LOGGER.debug("set dependency log level to debug")
     LOGGER.debug("initalized logging for Runway")

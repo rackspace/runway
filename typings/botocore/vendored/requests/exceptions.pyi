@@ -84,7 +84,7 @@ class InvalidSchema(RequestException, ValueError):
     ...
 
 class InvalidURL(RequestException, ValueError):
-    """ The URL provided was somehow invalid. """
+    """The URL provided was somehow invalid."""
 
     ...
 

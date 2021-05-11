@@ -303,7 +303,7 @@ class ElasticContainerRegistry(BaseModel):
         alias: Optional[str] = None,
         aws_region: Optional[str] = None,
         context: Optional[CfnginContext] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Instantiate class."""
         super().__init__(context=context, **kwargs)
@@ -411,7 +411,7 @@ class ElasticContainerRegistryRepository(BaseModel):
         context: Optional[CfnginContext] = None,
         registry_alias: Optional[str] = None,
         repo_name: str,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Instantiace class.
 

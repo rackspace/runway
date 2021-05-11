@@ -16,7 +16,7 @@ class KeySchema(AWSProperty):
     props = ...
 
 class Key(KeySchema):
-    """ For backwards compatibility. """
+    """For backwards compatibility."""
 
     ...
 

@@ -283,16 +283,12 @@ class OperationNotPageableError(BotoCoreError):
     fmt = ...
 
 class ChecksumError(BotoCoreError):
-    """The expected checksum did not match the calculated checksum.
-
-    """
+    """The expected checksum did not match the calculated checksum."""
 
     fmt = ...
 
 class UnseekableStreamError(BotoCoreError):
-    """Need to seek a stream, but stream does not support seeking.
-
-    """
+    """Need to seek a stream, but stream does not support seeking."""
 
     fmt = ...
 

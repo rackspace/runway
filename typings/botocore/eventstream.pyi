@@ -8,27 +8,27 @@ _MAX_HEADERS_LENGTH = 128 * 1024
 _MAX_PAYLOAD_LENGTH = 16 * 1024 ** 2
 
 class ParserError(Exception):
-    """Base binary flow encoding parsing exception.  """
+    """Base binary flow encoding parsing exception."""
 
     ...
 
 class DuplicateHeader(ParserError):
-    """Duplicate header found in the event. """
+    """Duplicate header found in the event."""
 
     def __init__(self, header) -> None: ...
 
 class InvalidHeadersLength(ParserError):
-    """Headers length is longer than the maximum. """
+    """Headers length is longer than the maximum."""
 
     def __init__(self, length) -> None: ...
 
 class InvalidPayloadLength(ParserError):
-    """Payload length is longer than the maximum. """
+    """Payload length is longer than the maximum."""
 
     def __init__(self, length) -> None: ...
 
 class ChecksumMismatch(ParserError):
-    """Calculated checksum did not match the expected checksum. """
+    """Calculated checksum did not match the expected checksum."""
 
     def __init__(self, expected, calculated) -> None: ...
 
@@ -218,7 +218,7 @@ class DecodeUtils(object):
         ...
 
 class MessagePrelude(object):
-    """Represents the prelude of an event stream message. """
+    """Represents the prelude of an event stream message."""
 
     def __init__(self, total_length, headers_length, crc) -> None: ...
     @property
@@ -253,13 +253,13 @@ class MessagePrelude(object):
         ...
 
 class EventStreamMessage(object):
-    """Represents an event stream message. """
+    """Represents an event stream message."""
 
     def __init__(self, prelude, headers, payload, crc) -> None: ...
     def to_response_dict(self, status_code=...): ...
 
 class EventStreamHeaderParser(object):
-    """ Parses the event headers from an event stream message.
+    """Parses the event headers from an event stream message.
 
     Expects all of the header data upfront and creates a dictionary of headers
     to return. This object can be reused multiple times to parse the headers
@@ -353,5 +353,5 @@ class EventStream(object):
     def __iter__(self): ...
     def get_initial_response(self): ...
     def close(self):
-        """Closes the underlying streaming body. """
+        """Closes the underlying streaming body."""
         ...

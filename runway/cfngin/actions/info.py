@@ -33,9 +33,7 @@ class Action(BaseAction):
             try:
                 provider_stack = provider.get_stack(stack.fqn)
             except exceptions.StackDoesNotExist:
-                LOGGER.info(
-                    "%s:stack does not exist", stack.fqn,
-                )
+                LOGGER.info("%s:stack does not exist", stack.fqn)
                 continue
 
             LOGGER.info("%s:", stack.fqn)

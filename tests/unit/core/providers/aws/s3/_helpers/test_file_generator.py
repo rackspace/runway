@@ -268,7 +268,7 @@ class TestFileGenerator:
         result = list(obj.list_objects("bucket/", dir_op=False))
         mock_class.assert_called_once_with(self.client)
         mock_list_objects.assert_called_once_with(
-            bucket="bucket", prefix="", page_size=None, extra_args={},
+            bucket="bucket", prefix="", page_size=None, extra_args={}
         )
         assert result == []
 
@@ -281,7 +281,7 @@ class TestFileGenerator:
         obj = FileGenerator(self.client, "")
         result = list(obj.list_objects("bucket/key.txt", False))
         assert len(result) == 1
-        assert result[0] == ("bucket/key.txt", {"LastModified": NOW, "Size": 13},)
+        assert result[0] == ("bucket/key.txt", {"LastModified": NOW, "Size": 13})
         head_object.assert_called_once_with(Bucket="bucket", Key="key.txt")
 
     def test_list_objects_single_client_error_403(self) -> None:
@@ -312,7 +312,7 @@ class TestFileGenerator:
         obj = FileGenerator(self.client, "delete")
         result = list(obj.list_objects("bucket/key.txt", False))
         assert len(result) == 1
-        assert result[0] == ("bucket/key.txt", {"Size": None, "LastModified": None},)
+        assert result[0] == ("bucket/key.txt", {"Size": None, "LastModified": None})
 
     def test_normalize_sort(self) -> None:
         """Test normalize_sort."""

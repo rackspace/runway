@@ -293,8 +293,7 @@ class ShapeResolver(object):
     def resolve_shape_ref(self, shape_ref): ...
 
 class UnresolvableShapeMap(object):
-    """A ShapeResolver that will throw ValueErrors when shapes are resolved.
-    """
+    """A ShapeResolver that will throw ValueErrors when shapes are resolved."""
 
     def get_shape_by_name(self, shape_name, member_traits=...): ...
     def resolve_shape_ref(self, shape_ref): ...

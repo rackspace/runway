@@ -84,7 +84,7 @@ lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all lint
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
-	@pipenv run black . --check
+	@pipenv run black . --check --color --diff
 	@echo ""
 
 lint-flake8: ## run flake8

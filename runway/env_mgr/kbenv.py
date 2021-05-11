@@ -183,7 +183,7 @@ class KBEnvManager(EnvManager):
         # matching version is already installed
         if (self.versions_dir / version_requested).is_dir():
             LOGGER.verbose(
-                "kubectl version %s already installed; using it...", version_requested,
+                "kubectl version %s already installed; using it...", version_requested
             )
             self.current_version = version_requested
             return str(self.bin)

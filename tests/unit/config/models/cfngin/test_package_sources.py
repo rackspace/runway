@@ -40,8 +40,8 @@ class TestCfnginPackageSourcesDefinitionModel:
             "local": [{"source": "something"}],
             "s3": [{"bucket": "bucket", "key": "something"}],
         }
-        obj: CfnginPackageSourcesDefinitionModel = CfnginPackageSourcesDefinitionModel.parse_obj(
-            data
+        obj: CfnginPackageSourcesDefinitionModel = (
+            CfnginPackageSourcesDefinitionModel.parse_obj(data)
         )
         assert isinstance(obj.git[0], GitCfnginPackageSourceDefinitionModel)
         assert isinstance(obj.local[0], LocalCfnginPackageSourceDefinitionModel)

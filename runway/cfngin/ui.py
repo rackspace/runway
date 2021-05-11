@@ -35,7 +35,7 @@ class UI(ContextManager["UI"]):
         msg: Union[Exception, str],
         *args: Any,
         logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Log the message if the current thread owns the underlying lock.
 
@@ -53,7 +53,7 @@ class UI(ContextManager["UI"]):
         msg: str,
         *args: Any,
         logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Log the line if the current thread owns the underlying lock.
 

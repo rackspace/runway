@@ -156,19 +156,15 @@ class TestActionArchitecture:
             call=Mock(return_value="FileInfoBuilder().call()")
         )
         mock_comparator = Mock(call=Mock(return_value="Comparator().call()"))
-        mocker.patch(
-            f"{MODULE}.Comparator", return_value=mock_comparator,
-        )
+        mocker.patch(f"{MODULE}.Comparator", return_value=mock_comparator)
         mocker.patch(
             f"{MODULE}.FileGenerator",
             side_effect=[mock_file_generator, mock_file_generator_rev],
         )
-        mocker.patch(
-            f"{MODULE}.FileInfoBuilder", return_value=mock_file_info_builder,
-        )
+        mocker.patch(f"{MODULE}.FileInfoBuilder", return_value=mock_file_info_builder)
         mock_filter_inst = Mock(call=Mock(return_value="Filter.call()"))
         mock_filter_class = mocker.patch(
-            f"{MODULE}.Filter", parse_params=Mock(return_value=mock_filter_inst),
+            f"{MODULE}.Filter", parse_params=Mock(return_value=mock_filter_inst)
         )
         mock_s3_transfer_handler = Mock(
             call=Mock(
@@ -197,7 +193,7 @@ class TestActionArchitecture:
             ]
         )
         mock_comparator.call.assert_called_once_with(
-            mock_filter_inst.call.return_value, mock_filter_inst.call.return_value,
+            mock_filter_inst.call.return_value, mock_filter_inst.call.return_value
         )
         mock_file_info_builder.call.assert_called_once_with(
             mock_comparator.call.return_value

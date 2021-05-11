@@ -142,15 +142,17 @@ class TestRunwayDeploymentDefinition:
 
     def test_reverse(self) -> None:
         """Test reverse."""
-        data: RunwayDeploymentDefinitionModel = RunwayDeploymentDefinitionModel.parse_obj(
-            {
-                "name": "test",
-                "modules": [
-                    {"name": "test-01", "path": "./"},
-                    {"name": "test-02", "path": "./"},
-                ],
-                "regions": ["us-east-1", "us-west-2"],
-            }
+        data: RunwayDeploymentDefinitionModel = (
+            RunwayDeploymentDefinitionModel.parse_obj(
+                {
+                    "name": "test",
+                    "modules": [
+                        {"name": "test-01", "path": "./"},
+                        {"name": "test-02", "path": "./"},
+                    ],
+                    "regions": ["us-east-1", "us-west-2"],
+                }
+            )
         )
         obj = RunwayDeploymentDefinition(data)
         assert not obj.reverse()
@@ -161,19 +163,21 @@ class TestRunwayDeploymentDefinition:
 
     def test_reverse_parallel_modules(self) -> None:
         """Test reverse parallel modules."""
-        data: RunwayDeploymentDefinitionModel = RunwayDeploymentDefinitionModel.parse_obj(
-            {
-                "name": "test",
-                "modules": [
-                    {
-                        "parallel": [
-                            {"name": "test-01", "path": "./"},
-                            {"name": "test-02", "path": "./"},
-                        ]
-                    },
-                ],
-                "regions": ["us-east-1", "us-west-2"],
-            }
+        data: RunwayDeploymentDefinitionModel = (
+            RunwayDeploymentDefinitionModel.parse_obj(
+                {
+                    "name": "test",
+                    "modules": [
+                        {
+                            "parallel": [
+                                {"name": "test-01", "path": "./"},
+                                {"name": "test-02", "path": "./"},
+                            ]
+                        },
+                    ],
+                    "regions": ["us-east-1", "us-west-2"],
+                }
+            )
         )
         obj = RunwayDeploymentDefinition(data)
         assert not obj.reverse()
@@ -185,12 +189,14 @@ class TestRunwayDeploymentDefinition:
 
     def test_reverse_parallel_regions(self) -> None:
         """Test reverse parallel regions."""
-        data: RunwayDeploymentDefinitionModel = RunwayDeploymentDefinitionModel.parse_obj(
-            {
-                "name": "test",
-                "modules": [{"name": "test-01", "path": "./"}],
-                "parallel_regions": ["us-east-1", "us-west-2"],
-            }
+        data: RunwayDeploymentDefinitionModel = (
+            RunwayDeploymentDefinitionModel.parse_obj(
+                {
+                    "name": "test",
+                    "modules": [{"name": "test-01", "path": "./"}],
+                    "parallel_regions": ["us-east-1", "us-west-2"],
+                }
+            )
         )
         obj = RunwayDeploymentDefinition(data)
         assert not obj.reverse()

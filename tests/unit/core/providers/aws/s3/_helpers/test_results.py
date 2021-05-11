@@ -207,7 +207,7 @@ class TestUploadResultSubscriber(BaseResultSubscriberTest):
         result = self.get_queued_result()
         self.assert_result_queue_is_empty()
         assert result == SuccessResult(
-            transfer_type=self.transfer_type, src=self.src, dest=self.dest,
+            transfer_type=self.transfer_type, src=self.src, dest=self.dest
         )
 
     def test_on_done_unexpected_cancelled(self) -> None:
@@ -637,7 +637,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         """Test dry run."""
         caplog.set_level(LogLevels.NOTICE, "runway.core.providers.aws.s3")
         result = DryRunResult(
-            transfer_type="upload", src=u"s3://mybucket/\u2713", dest="./local/file"
+            transfer_type="upload", src="s3://mybucket/\u2713", dest="./local/file"
         )
         self.result_printer(result)
         assert caplog.messages == [f"(dryrun) upload: {result.src} to {result.dest}"]
@@ -793,7 +793,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         """Test failure."""
         caplog.set_level(LogLevels.ERROR, "runway.core.providers.aws.s3")
         transfer_type = "upload"
-        src = u"\u2713"
+        src = "\u2713"
         dest = "s3://mybucket/test-key"
         self.result_recorder.final_expected_files_transferred = 1
         self.result_recorder.expected_files_transferred = 1
@@ -1013,13 +1013,13 @@ class TestResultPrinter(BaseResultPrinterTest):
     def test_init_no_error_file(self, mocker: MockerFixture) -> None:
         """Test __init__ no error_file."""
         mock_stderr = mocker.patch("sys.stderr", Mock())
-        result = ResultPrinter(self.result_recorder, out_file=self.out_file,)
+        result = ResultPrinter(self.result_recorder, out_file=self.out_file)
         assert result._error_file == mock_stderr  # pylint: disable=protected-access
 
     def test_init_no_out_file(self, mocker: MockerFixture) -> None:
         """Test __init__ no out_file."""
         mock_stdout = mocker.patch("sys.stdout", Mock())
-        result = ResultPrinter(self.result_recorder, error_file=self.error_file,)
+        result = ResultPrinter(self.result_recorder, error_file=self.error_file)
         assert result._out_file == mock_stdout  # pylint: disable=protected-access
 
     def test_success(self, caplog: LogCaptureFixture) -> None:
@@ -1110,7 +1110,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
         result = SuccessResult(
-            transfer_type="delete", src=u"s3://mybucket/tmp/\u2713", dest=None
+            transfer_type="delete", src="s3://mybucket/tmp/\u2713", dest=None
         )
         self.result_printer(result)
         assert caplog.messages == [f"delete: {result.src}"]
@@ -1121,9 +1121,8 @@ class TestResultPrinter(BaseResultPrinterTest):
         self.result_recorder.final_expected_files_transferred = 1
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
-
         result = SuccessResult(
-            transfer_type="upload", src=u"/tmp/\u2713", dest="s3://mybucket/test-key"
+            transfer_type="upload", src="/tmp/\u2713", dest="s3://mybucket/test-key"
         )
         self.result_printer(result)
         assert caplog.messages == [f"upload: {result.src} to {result.dest}"]
@@ -1191,8 +1190,8 @@ class TestResultPrinter(BaseResultPrinterTest):
         self.result_recorder.final_expected_files_transferred = 1
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
-        self.result_printer(PrintTask(u"warning: unicode exists \u2713"))
-        assert caplog.messages == [u"warning: unicode exists \u2713"]
+        self.result_printer(PrintTask("warning: unicode exists \u2713"))
+        assert caplog.messages == ["warning: unicode exists \u2713"]
 
     def test_warning_with_progress(self, caplog: LogCaptureFixture) -> None:
         """Test warning."""

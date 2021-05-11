@@ -44,7 +44,7 @@ class ImageRemoveArgs(BaseModel):
         noprune: bool = False,
         repo: Optional[str] = None,
         tags: Optional[List[str]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 

@@ -73,13 +73,13 @@ class WebhookFilter(AWSProperty):
 class ProjectTriggers(AWSProperty):
     props = ...
     def validate(self):
-        """ FilterGroups, if set, needs to be a list of a list of
+        """FilterGroups, if set, needs to be a list of a list of
         WebhookFilters
         """
         ...
 
 def validate_status(status):
-    """ Validate status
+    """Validate status
     :param status: The Status of CloudWatchLogs or S3Logs
     :return: The provided value if valid
     """

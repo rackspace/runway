@@ -92,7 +92,7 @@ class CfnginContext(BaseContext):
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
         parameters: Optional[MutableMapping[str, Any]] = None,
         stack_names: Optional[List[str]] = None,
-        **_: Any
+        **_: Any,
     ) -> None:
         """Instantiate class.
 
@@ -227,7 +227,7 @@ class CfnginContext(BaseContext):
                     content = (
                         self.s3_client.get_object(
                             ResponseContentType="application/json",
-                            **self.persistent_graph_location
+                            **self.persistent_graph_location,
                         )["Body"]
                         .read()
                         .decode("utf-8")
@@ -242,7 +242,7 @@ class CfnginContext(BaseContext):
                         ServerSideEncryption="AES256",
                         ACL="bucket-owner-full-control",
                         ContentType="application/json",
-                        **self.persistent_graph_location
+                        **self.persistent_graph_location,
                     )
             self.persistent_graph = Graph.from_dict(json.loads(content), self)
 
@@ -390,7 +390,7 @@ class CfnginContext(BaseContext):
                         {"Key": self._persistent_graph_lock_tag, "Value": lock_code}
                     ]
                 },
-                **self.persistent_graph_location
+                **self.persistent_graph_location,
             )
             self.logger.info(
                 'locked persistent graph "%s" with lock ID "%s"',
@@ -440,7 +440,7 @@ class CfnginContext(BaseContext):
             ACL="bucket-owner-full-control",
             ContentType="application/json",
             Tagging="{}={}".format(self._persistent_graph_lock_tag, lock_code),
-            **self.persistent_graph_location
+            **self.persistent_graph_location,
         )
         self.logger.debug(
             "persistent graph updated:\n%s", self.persistent_graph.dumps(indent=4)
@@ -485,7 +485,7 @@ class CfnginContext(BaseContext):
             try:
                 self.s3_client.get_object(
                     ResponseContentType="application/json",
-                    **self.persistent_graph_location
+                    **self.persistent_graph_location,
                 )
             except self.s3_client.exceptions.NoSuchKey:
                 self.logger.info(

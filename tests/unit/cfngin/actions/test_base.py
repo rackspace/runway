@@ -140,7 +140,7 @@ class TestBaseAction(unittest.TestCase):
                 action.ensure_cfn_bucket()
 
     @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
     )
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
@@ -176,7 +176,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
     )
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
@@ -212,7 +212,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
     )
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
@@ -247,7 +247,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
     )
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
@@ -284,7 +284,7 @@ class TestBaseAction(unittest.TestCase):
         self.assertTrue(plan.require_unlocked)
 
     @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock,
+        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
     )
     @patch(
         "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock

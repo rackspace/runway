@@ -140,7 +140,7 @@ class Stack:
             deps = variable.dependencies
             if self.name in deps:
                 message = "Variable {} in stack {} has a circular reference".format(
-                    variable.name, self.name,
+                    variable.name, self.name
                 )
                 raise ValueError(message)
             requires.update(deps)
@@ -186,7 +186,7 @@ class Stack:
                     context=self.context,
                     mappings=self.mappings,
                     description=self.definition.description,
-                    **kwargs
+                    **kwargs,
                 ),
             )
         return self._blueprint

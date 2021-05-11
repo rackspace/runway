@@ -317,7 +317,7 @@ class TestServerless:
         assert not obj.skip
 
     def test_sls_deploy(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path,
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test sls_deploy."""
         # pylint: disable=no-member

@@ -116,7 +116,7 @@ class Step:
         stack: Stack,
         *,
         fn: Optional[Callable[..., Any]] = None,
-        watch_func: Optional[Callable[..., Any]] = None
+        watch_func: Optional[Callable[..., Any]] = None,
     ) -> None:
         """Instantiate class.
 
@@ -670,7 +670,7 @@ class Plan:
         *,
         directory: str,
         context: CfnginContext,
-        provider: Optional[Provider] = None
+        provider: Optional[Provider] = None,
     ) -> Any:
         """Output the rendered blueprint for all stacks in the plan.
 
@@ -687,9 +687,7 @@ class Plan:
 
         def walk_func(step: Step) -> bool:
             """Walk function."""
-            step.stack.resolve(
-                context=context, provider=provider,
-            )
+            step.stack.resolve(context=context, provider=provider)
             blueprint = step.stack.blueprint
             filename = stack_template_key_name(blueprint)
             path = os.path.join(directory, filename)

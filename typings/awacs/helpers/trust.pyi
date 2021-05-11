@@ -6,11 +6,11 @@ from awacs.aws import Policy, Statement
 def make_simple_assume_statement(*principals: str) -> Statement: ...
 def make_simple_assume_policy(*principals: str) -> Policy: ...
 def make_service_domain_name(service: str, region: str = ...) -> str:
-    """ Helper function for creating proper service domain names. """
+    """Helper function for creating proper service domain names."""
     ...
 
 def get_codedeploy_assumerole_policy(region: str = ...) -> Policy:
-    """ Helper function for building the AWS CodeDeploy AssumeRole Policy. """
+    """Helper function for building the AWS CodeDeploy AssumeRole Policy."""
     ...
 
 def get_default_assumerole_policy(region: str = ...) -> Policy:
@@ -23,21 +23,21 @@ def get_default_assumerole_policy(region: str = ...) -> Policy:
     ...
 
 def get_ecs_assumerole_policy(region: str = ...) -> Policy:
-    """ Helper function for building the ECS AssumeRole Policy. """
+    """Helper function for building the ECS AssumeRole Policy."""
     ...
 
 def get_ecs_task_assumerole_policy(region: str = ...) -> Policy:
-    """ Helper function for building the AssumeRole Policy for ECS Tasks. """
+    """Helper function for building the AssumeRole Policy for ECS Tasks."""
     ...
 
 def get_lambda_assumerole_policy(region: str = ...) -> Policy:
-    """ Helper function for building the AWS Lambda AssumeRole Policy. """
+    """Helper function for building the AWS Lambda AssumeRole Policy."""
     ...
 
 def get_lambda_edge_assumerole_policy(region: str = ...) -> Policy:
-    """ Helper function for building the AWS Lambda@Edge AssumeRole Policy. """
+    """Helper function for building the AWS Lambda@Edge AssumeRole Policy."""
     ...
 
 def get_application_autoscaling_assumerole_policy(region: str = ...) -> Policy:
-    """ Helper function for building the AWS Lambda AssumeRole Policy. """
+    """Helper function for building the AWS Lambda AssumeRole Policy."""
     ...

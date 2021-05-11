@@ -62,7 +62,7 @@ def build(
     *,
     artifact_bucket_rxref_lookup: str,
     options: Optional[OptionsArgTypeDef] = None,
-    **_: Any
+    **_: Any,
 ) -> Dict[str, Any]:
     """Build static site."""
     session = context.get_session()

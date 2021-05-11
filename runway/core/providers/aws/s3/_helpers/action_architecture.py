@@ -91,7 +91,7 @@ class ActionArchitecture:
         return self.session.client("s3")
 
     @cached_property
-    def instructions(self,) -> List[_InstructionTypeDef]:
+    def instructions(self) -> List[_InstructionTypeDef]:
         """Create the instructions based on the command name and parameters.
 
         Note that all commands must have an s3_handler instruction in the

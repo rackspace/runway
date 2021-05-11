@@ -161,7 +161,7 @@ class AuthAtEdge(StaticSite):
         self.add_cloudfront_distribution(bucket_policy, distribution_options)
 
     def get_auth_at_edge_lambda_and_ver(
-        self, title: str, description: str, handle: str, role: iam.Role,
+        self, title: str, description: str, handle: str, role: iam.Role
     ) -> Dict[str, Any]:
         """Create a lambda function and its version.
 
@@ -180,7 +180,7 @@ class AuthAtEdge(StaticSite):
         return {"function": function, "version": self.add_version(title, function)}
 
     def get_auth_at_edge_lambda(
-        self, title: str, description: str, handler: str, role: iam.Role,
+        self, title: str, description: str, handler: str, role: iam.Role
     ) -> awslambda.Function:
         """Create an Auth@Edge lambda resource.
 
@@ -217,7 +217,7 @@ class AuthAtEdge(StaticSite):
         return lamb
 
     def add_version(
-        self, title: str, lambda_function: awslambda.Function,
+        self, title: str, lambda_function: awslambda.Function
     ) -> awslambda.Version:
         """Create a version association with a Lambda@Edge function.
 
@@ -338,7 +338,7 @@ class AuthAtEdge(StaticSite):
                 AllowedMethods=["GET", "HEAD"],
                 Compress=True,
                 DefaultTTL="86400",
-                ForwardedValues=cloudfront.ForwardedValues(QueryString=True,),
+                ForwardedValues=cloudfront.ForwardedValues(QueryString=True),
                 LambdaFunctionAssociations=default_cache_behavior_lambdas,
                 TargetOriginId="protected-bucket",
                 ViewerProtocolPolicy="redirect-to-https",

@@ -201,9 +201,7 @@ def output_full_changeset(
                 yaml.safe_dump(full_changeset),
             )
         else:
-            LOGGER.info(
-                "%s:\n%s", msg, yaml.safe_dump(full_changeset),
-            )
+            LOGGER.info("%s:\n%s", msg, yaml.safe_dump(full_changeset))
         return
     raise exceptions.CancelExecution
 
@@ -410,7 +408,7 @@ def create_change_set(
             or "No updates are to be performed" in status_reason
         ):
             LOGGER.debug(
-                "%s:stack did not change; not updating and removing changeset", fqn,
+                "%s:stack did not change; not updating and removing changeset", fqn
             )
             cfn_client.delete_change_set(ChangeSetName=change_set_id)
             raise exceptions.StackDidNotChange()
@@ -575,7 +573,7 @@ class ProviderBuilder:
                 self.providers[key] = Provider(
                     get_session(region=region, profile=profile),
                     region=region,
-                    **self.kwargs
+                    **self.kwargs,
                 )
                 provider = self.providers[key]
 
@@ -779,9 +777,7 @@ class Provider(BaseProvider):
             return cast(
                 Iterable["StackEventTypeDef"],
                 reversed(
-                    cast(
-                        List["StackEventTypeDef"], sum(event_list, []),  # type: ignore
-                    )
+                    cast(List["StackEventTypeDef"], sum(event_list, []))  # type: ignore
                 ),
             )
         return cast(Iterable["StackEventTypeDef"], sum(event_list, []))  # type: ignore
@@ -847,7 +843,7 @@ class Provider(BaseProvider):
         action: str = "destroy",
         approval: Optional[str] = None,
         force_interactive: bool = False,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Destroy a CloudFormation Stack.
 
@@ -878,7 +874,7 @@ class Provider(BaseProvider):
         force_change_set: bool = False,
         stack_policy: Optional[Template] = None,
         termination_protection: bool = False,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Create a new Cloudformation stack.
 
@@ -914,10 +910,10 @@ class Provider(BaseProvider):
                 tags,
                 "CREATE",
                 service_role=self.service_role,
-                **kwargs
+                **kwargs,
             )
 
-            self.cloudformation.execute_change_set(ChangeSetName=change_set_id,)
+            self.cloudformation.execute_change_set(ChangeSetName=change_set_id)
             self.update_termination_protection(fqn, termination_protection)
         else:
             args = generate_cloudformation_args(
@@ -1055,7 +1051,7 @@ class Provider(BaseProvider):
         force_change_set: bool = False,
         stack_policy: Optional[Template] = None,
         termination_protection: bool = False,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Update a Cloudformation stack.
 
@@ -1097,7 +1093,7 @@ class Provider(BaseProvider):
             parameters,
             stack_policy=stack_policy,
             tags=tags,
-            **kwargs
+            **kwargs,
         )
 
     def update_termination_protection(
@@ -1263,7 +1259,7 @@ class Provider(BaseProvider):
 
         self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
-        self.cloudformation.execute_change_set(ChangeSetName=change_set_id,)
+        self.cloudformation.execute_change_set(ChangeSetName=change_set_id)
 
     def noninteractive_destroy_stack(self, fqn: str, **_kwargs: Any) -> None:
         """Delete a CloudFormation stack without interaction.
@@ -1318,7 +1314,7 @@ class Provider(BaseProvider):
 
         self.deal_with_changeset_stack_policy(fqn, stack_policy)
 
-        self.cloudformation.execute_change_set(ChangeSetName=change_set_id,)
+        self.cloudformation.execute_change_set(ChangeSetName=change_set_id)
 
     def select_destroy_method(self, force_interactive: bool) -> Callable[..., None]:
         """Select the correct destroy method for destroying a stack.

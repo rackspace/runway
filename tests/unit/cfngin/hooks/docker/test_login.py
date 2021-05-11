@@ -87,7 +87,7 @@ class TestLoginArgs:
             account_id="123456012", aws_region="us-east-1"
         )
         mock_determine_registry = mocker.patch.object(
-            LoginArgs, "determine_registry", return_value=registry.fqn,
+            LoginArgs, "determine_registry", return_value=registry.fqn
         )
         args = {
             "ecr": {"account_id": "123456012", "aws_region": "us-east-1"},

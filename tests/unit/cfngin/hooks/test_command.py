@@ -148,7 +148,7 @@ class TestCommandHook(unittest.TestCase):
         self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
 
         self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=mock.ANY, stdout=mock.ANY, stderr=mock.ANY, env=None,
+            ["foo"], stdin=mock.ANY, stdout=mock.ANY, stderr=mock.ANY, env=None
         )
 
     def test_command_interactive(self) -> None:

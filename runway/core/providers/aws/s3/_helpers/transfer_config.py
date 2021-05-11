@@ -67,7 +67,7 @@ class RuntimeConfig:
         max_concurrent_requests: Optional[Union[int, str]] = None,
         max_queue_size: Optional[Union[int, str]] = None,
         multipart_chunksize: Optional[Union[int, str]] = None,
-        multipart_threshold: Optional[Union[int, str]] = None
+        multipart_threshold: Optional[Union[int, str]] = None,
     ) -> TransferConfigDict:
         """Create and convert a runtime config dictionary.
 

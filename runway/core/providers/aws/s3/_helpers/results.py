@@ -376,7 +376,7 @@ class ResultRecorder(BaseResultHandler):
         for result_property in [result.transfer_type, result.src, result.dest]:
             if result_property is not None:
                 key_parts.append(ensure_string(result_property))
-        return u":".join(key_parts)
+        return ":".join(key_parts)
 
     def _pop_result_from_ongoing_dicts(
         self, result: AnyResult
@@ -482,17 +482,17 @@ class ResultPrinter(BaseResultHandler):
     FILE_PROGRESS_FORMAT: ClassVar[str] = (
         "Completed {files_completed} file(s) with " + _FILES_REMAINING
     )
-    SUCCESS_FORMAT: ClassVar[str] = u"{transfer_type}: {transfer_location}"
-    DRY_RUN_FORMAT: ClassVar[str] = u"(dryrun) " + SUCCESS_FORMAT
+    SUCCESS_FORMAT: ClassVar[str] = "{transfer_type}: {transfer_location}"
+    DRY_RUN_FORMAT: ClassVar[str] = "(dryrun) " + SUCCESS_FORMAT
     FAILURE_FORMAT: ClassVar[
         str
-    ] = u"{transfer_type} failed: {transfer_location} {exception}"
-    WARNING_FORMAT: ClassVar[str] = u"{message}"
-    ERROR_FORMAT: ClassVar[str] = u"fatal error: {exception}"
+    ] = "{transfer_type} failed: {transfer_location} {exception}"
+    WARNING_FORMAT: ClassVar[str] = "{message}"
+    ERROR_FORMAT: ClassVar[str] = "fatal error: {exception}"
     CTRL_C_MSG: ClassVar[str] = "cancelled: ctrl-c received"
 
-    SRC_DEST_TRANSFER_LOCATION_FORMAT: ClassVar[str] = u"{src} to {dest}"
-    SRC_TRANSFER_LOCATION_FORMAT: ClassVar[str] = u"{src}"
+    SRC_DEST_TRANSFER_LOCATION_FORMAT: ClassVar[str] = "{src} to {dest}"
+    SRC_TRANSFER_LOCATION_FORMAT: ClassVar[str] = "{src}"
 
     def __init__(
         self,

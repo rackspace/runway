@@ -16,9 +16,9 @@ SRC_DIR = DOCS_DIR / "source"
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-project = u"Runway"
-copyright = u"2021, Onica Group"
-author = u"Onica Group"
+project = "Runway"
+copyright = "2021, Onica Group"
+author = "Onica Group"
 release = get_distribution(  # full version, including alpha/beta/rc tags
     "runway"
 ).version
@@ -110,14 +110,14 @@ htmlhelp_basename = "runwaydoc"
 # -- Options for LaTeX output ------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
 latex_documents = [
-    (master_doc, "runway.tex", u"runway Documentation", u"Onica Group", "manual"),
+    (master_doc, "runway.tex", "runway Documentation", "Onica Group", "manual"),
 ]
 latex_elements = {}
 
 
 # -- Options for manual page output ------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-manual-page-output
-man_pages = [(master_doc, "runway", u"runway Documentation", [author], 1)]
+man_pages = [(master_doc, "runway", "runway Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -126,7 +126,7 @@ texinfo_documents = [
     (
         master_doc,
         "runway",
-        u"runway Documentation",
+        "runway Documentation",
         author,
         "runway",
         "One line description of project.",

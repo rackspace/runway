@@ -160,7 +160,7 @@ class TestBucket:
         bucket = Bucket(runway_context, "test-bucket")
 
         stubber.add_response(
-            "get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"},
+            "get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"}
         )
 
         with stubber:

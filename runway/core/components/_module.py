@@ -94,7 +94,7 @@ class Module:
         Will return None if there is nothing defined for the current environment.
 
         """
-        return validate_environment(self.ctx, self.environments, logger=self.logger,)
+        return validate_environment(self.ctx, self.environments, logger=self.logger)
 
     @cached_property
     def environments(self) -> RunwayEnvironmentsType:
@@ -351,7 +351,7 @@ def validate_environment(
             logger.info("skipped; environment not in definition")
             return False
         return validate_environment(
-            context, cast(Any, env_def.get(context.env.name, False)), logger=logger,
+            context, cast(Any, env_def.get(context.env.name, False)), logger=logger
         )
 
     account = aws.AccountDetails(context)

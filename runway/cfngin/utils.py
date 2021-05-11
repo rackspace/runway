@@ -333,7 +333,7 @@ def yaml_to_ordered_dict(
             data.update(value)
 
     OrderedUniqueLoader.add_constructor(
-        u"tag:yaml.org,2002:map", OrderedUniqueLoader.construct_yaml_map,
+        "tag:yaml.org,2002:map", OrderedUniqueLoader.construct_yaml_map
     )
     return yaml.load(stream, OrderedUniqueLoader)
 

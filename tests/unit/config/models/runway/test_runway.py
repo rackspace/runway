@@ -247,7 +247,7 @@ class TestRunwayDeploymentDefinitionModel:
             )
         with pytest.raises(ValidationError) as excinfo:
             RunwayDeploymentDefinitionModel(
-                modules=[], parallel_regions="something", regions="something",
+                modules=[], parallel_regions="something", regions="something"
             )
         error = excinfo.value.errors()[0]
         assert error["loc"] == ("__root__",)
@@ -382,7 +382,7 @@ class TestRunwayModuleDefinitionModel:
         ).parallel == [RunwayModuleDefinitionModel(name="test", path="./")]
 
     @pytest.mark.parametrize(
-        "field", ["env_vars", "environments", "options", "parameters"],
+        "field", ["env_vars", "environments", "options", "parameters"]
     )
     def test_fields_string_lookup_only(self, field: str) -> None:
         """Test fields that support strings only for lookups."""
