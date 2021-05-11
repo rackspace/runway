@@ -118,12 +118,7 @@ class CfnginContext(BaseContext):
         self._persistent_graph_lock_code = None
         self._persistent_graph = None
         self._s3_bucket_verified = False
-        # TODO load the config from context instead of taking it as an arg
         self.config = config or CfnginConfig.parse_obj({"namespace": "example"})
-        # TODO set this value when provisioning a Config object in context
-        # set to a fake location for the time being but this should be set
-        # by all runtime entry points. the only time the fake value should be
-        # used is during tests.
         self.bucket_region = self.config.cfngin_bucket_region or self.env.aws_region
         self.parameters = parameters or {}
         self.force_stacks = force_stacks or []

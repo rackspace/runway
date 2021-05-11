@@ -191,7 +191,6 @@ class CfnginConfig(BaseConfig):
         """
         super().__init__(data, path=path)
 
-        # TODO abstract away more of this with component classes or change getter/setter
         self.cfngin_bucket = self._data.cfngin_bucket
         self.cfngin_bucket_region = self._data.cfngin_bucket_region
         self.cfngin_cache_dir = self._data.cfngin_cache_dir

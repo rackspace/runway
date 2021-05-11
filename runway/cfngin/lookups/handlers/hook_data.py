@@ -35,7 +35,6 @@ class HookDataLookup(LookupHandler):
 
         hook_data = MutableMap(**context.hook_data)
 
-        # TODO use context.hook_data directly in next major release
         result = hook_data.find(query, args.get("default"))
 
         if (
