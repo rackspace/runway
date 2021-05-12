@@ -12,6 +12,7 @@ from ..status import (
     SUBMITTED,
     CompleteStatus,
     DoesNotExistInCloudFormation,
+    FailedStatus,
     SubmittedStatus,
 )
 from .base import STACK_POLL_TIME, BaseAction, build_walker
@@ -57,7 +58,7 @@ class Action(BaseAction):
         provider = self.build_provider()
 
         try:
-            provider_stack = provider.get_stack(stack.fqn)
+            stack_data = provider.get_stack(stack.fqn)
         except StackDoesNotExist:
             LOGGER.debug("%s:stack does not exist", stack.fqn)
             # Once the stack has been destroyed, it doesn't exist. If the
@@ -69,16 +70,21 @@ class Action(BaseAction):
 
         LOGGER.debug(
             "%s:provider status: %s",
-            provider.get_stack_name(provider_stack),
-            provider.get_stack_status(provider_stack),
+            provider.get_stack_name(stack_data),
+            provider.get_stack_status(stack_data),
         )
-        if provider.is_stack_destroyed(provider_stack):
+        if provider.is_stack_destroyed(stack_data):
             return DESTROYED_STATUS
-        if provider.is_stack_in_progress(provider_stack):
+        if provider.is_stack_in_progress(stack_data):
             return DESTROYING_STATUS
-        LOGGER.debug("%s:destroying stack", stack.fqn)
-        provider.destroy_stack(provider_stack)
-        return DESTROYING_STATUS
+        if provider.is_stack_destroy_possible(stack_data):
+            LOGGER.debug("%s:destroying stack", stack.fqn)
+            provider.destroy_stack(stack_data)
+            return DESTROYING_STATUS
+        LOGGER.critical(
+            "%s: %s", stack.fqn, provider.get_delete_failed_status_reason(stack.fqn)
+        )
+        return FailedStatus(provider.get_stack_status_reason(stack_data))
 
     def pre_run(
         self,

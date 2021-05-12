@@ -28,6 +28,7 @@ from runway.cfngin.status import (
     PENDING,
     SKIPPED,
     SUBMITTED,
+    FailedStatus,
     NotSubmittedStatus,
 )
 from runway.config import CfnginConfig
@@ -79,6 +80,25 @@ class MockProvider(BaseProvider):
         return stack["outputs"]  # type: ignore
 
 
+class MockStack:
+    """Mock our local CFNgin stack and an AWS provider stack."""
+
+    def __init__(
+        self,
+        name: str,
+        in_progress_behavior: Optional[str] = None,
+        tags: Any = None,
+        **_: Any,
+    ) -> None:
+        """Instantiate class."""
+        self.name = name
+        self.fqn = name
+        self.in_progress_behavior = in_progress_behavior
+        self.region = None
+        self.profile = None
+        self.requires = []
+
+
 class TestBuildAction(unittest.TestCase):
     """Tests for runway.cfngin.actions.deploy.BuildAction."""
 
@@ -120,6 +140,42 @@ class TestBuildAction(unittest.TestCase):
         if extra_config_args:
             config.update(extra_config_args)
         return CfnginContext(config=CfnginConfig.parse_obj(config), **kwargs)
+
+    def test_destroy_stack_delete_failed(self) -> None:
+        """Test _destroy_stack DELETE_FAILED."""
+        provider = MagicMock()
+        provider.get_stack.return_value = {
+            "StackName": "test",
+            "StackStatus": "DELETE_FAILED",
+            "StackStatusReason": "reason",
+        }
+        provider.is_stack_being_destroyed.return_value = False
+        provider.is_stack_destroyed.return_value = False
+        provider.is_stack_in_progress.return_value = False
+        provider.is_stack_destroy_possible.return_value = False
+        provider.get_stack_status_reason.return_value = "reason"
+        self.deploy_action.provider_builder = MockProviderBuilder(provider=provider)
+        status = self.deploy_action._destroy_stack(
+            MockStack("vpc", in_progress_behavior="wait"), status=PENDING  # type: ignore
+        )
+        provider.is_stack_being_destroyed.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.is_stack_destroyed.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.is_stack_in_progress.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.is_stack_destroy_possible.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.get_delete_failed_status_reason.assert_called_once_with("vpc")
+        provider.get_stack_status_reason.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        assert isinstance(status, FailedStatus)
+        assert status.reason == "reason"
 
     @patch(
         "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
