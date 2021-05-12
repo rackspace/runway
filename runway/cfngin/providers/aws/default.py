@@ -591,6 +591,7 @@ class Provider(BaseProvider):
         "UPDATE_COMPLETE",
         "UPDATE_ROLLBACK_COMPLETE",
     )
+    DELETE_IMPOSSIBLE_STATUS = "DELETE_FAILED"
     DELETED_STATUS = "DELETE_COMPLETE"
     DELETING_STATUS = "DELETE_IN_PROGRESS"
     FAILED_STATUSES = (
@@ -663,6 +664,11 @@ class Provider(BaseProvider):
         """Get stack status."""
         return stack["StackStatus"]
 
+    @staticmethod
+    def get_stack_status_reason(stack: StackTypeDef) -> Optional[str]:
+        """Get stack status reason."""
+        return stack.get("StackStatusReason")
+
     def is_stack_being_destroyed(self, stack: StackTypeDef) -> bool:
         """Whether the status of the stack indicates it is 'being destroyed'."""
         return self.get_stack_status(stack) == self.DELETING_STATUS
@@ -670,6 +676,10 @@ class Provider(BaseProvider):
     def is_stack_completed(self, stack: StackTypeDef) -> bool:
         """Whether the status of the stack indicates it is 'complete'."""
         return self.get_stack_status(stack) in self.COMPLETE_STATUSES
+
+    def is_stack_destroy_possible(self, stack: StackTypeDef) -> bool:
+        """Whether the status of the stack is able to be cleanly deleted."""
+        return self.get_stack_status(stack) != self.DELETE_IMPOSSIBLE_STATUS
 
     def is_stack_in_progress(self, stack: StackTypeDef) -> bool:
         """Whether the status of the stack indicates it is 'in progress'."""
@@ -755,6 +765,48 @@ class Provider(BaseProvider):
             % (event["ResourceStatus"], event["ResourceType"], event["EventId"])
         )
 
+    def get_delete_failed_status_reason(self, stack_name: str) -> Optional[str]:
+        """Process events and return latest delete failed reason.
+
+        Args:
+            stack_name: Name of a CloudFormation Stack.
+
+        Returns:
+            Reason for the Stack's DELETE_FAILED status if one can be found.
+
+        """
+        event: Union[Dict[str, str], StackEventTypeDef] = (
+            self.get_event_by_resource_status(
+                stack_name, "DELETE_FAILED", chronological=True
+            )
+            or {}
+        )
+        return event.get("ResourceStatusReason")
+
+    def get_event_by_resource_status(
+        self, stack_name: str, status: str, *, chronological: bool = True
+    ) -> Optional[StackEventTypeDef]:
+        """Get Stack Event of a given set of resource status.
+
+        Args:
+            stack_name: Name of a CloudFormation Stack.
+            status: Resource status to look for.
+            chronological: Whether to sort events in chronological order before
+                looking for the desired status.
+
+        Returns:
+            The first Stack Event matching the given status.
+
+        """
+        return next(
+            (
+                event
+                for event in self.get_events(stack_name, chronological=chronological)
+                if event.get("ResourceStatus") == status
+            ),
+            None,
+        )
+
     def get_events(
         self, stack_name: str, chronological: bool = True
     ) -> Iterable[StackEventTypeDef]:
@@ -783,30 +835,25 @@ class Provider(BaseProvider):
         return cast(Iterable["StackEventTypeDef"], sum(event_list, []))  # type: ignore
 
     def get_rollback_status_reason(self, stack_name: str) -> Optional[str]:
-        """Process events and returns latest roll back reason."""
-        event = next(
-            (
-                item
-                for item in self.get_events(stack_name, False)
-                if item["ResourceStatus"] == "UPDATE_ROLLBACK_IN_PROGRESS"  # type: ignore
-            ),
-            None,
+        """Process events and returns latest roll back reason.
+
+        Args:
+            stack_name: Name of a CloudFormation Stack.
+
+        Returns:
+            Reason for the Stack's rollback status if one can be found.
+
+        """
+        event: Union[Dict[str, str], StackEventTypeDef] = (
+            self.get_event_by_resource_status(
+                stack_name, "UPDATE_ROLLBACK_IN_PROGRESS", chronological=False
+            )
+            or self.get_event_by_resource_status(
+                stack_name, "ROLLBACK_IN_PROGRESS", chronological=True
+            )
+            or {}
         )
-        if event:
-            reason = event["ResourceStatusReason"]
-            return reason
-        event = next(
-            (
-                item
-                for item in self.get_events(stack_name)
-                if item["ResourceStatus"] == "ROLLBACK_IN_PROGRESS"  # type: ignore
-            ),
-            None,
-        )
-        if event:
-            reason = event["ResourceStatusReason"]
-            return reason
-        return None
+        return event.get("ResourceStatusReason")
 
     def tail(
         self,

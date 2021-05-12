@@ -11,7 +11,7 @@ from mock import MagicMock, PropertyMock, patch
 from runway.cfngin.actions import destroy
 from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.plan import Graph, Step
-from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED
+from runway.cfngin.status import COMPLETE, PENDING, SKIPPED, SUBMITTED, FailedStatus
 from runway.config import CfnginConfig
 from runway.context import CfnginContext
 
@@ -105,6 +105,36 @@ class TestDestroyAction(unittest.TestCase):
         # if we have processed the step and then can't find the stack, it means
         # we successfully deleted it
         self.assertEqual(status, COMPLETE)
+
+    def test_destroy_stack_delete_failed(self) -> None:
+        """Test _destroy_stack DELETE_FAILED."""
+        provider = MagicMock()
+        provider.get_stack.return_value = {
+            "StackName": "test",
+            "StackStatus": "DELETE_FAILED",
+            "StackStatusReason": "reason",
+        }
+        provider.is_stack_destroyed.return_value = False
+        provider.is_stack_in_progress.return_value = False
+        provider.is_stack_destroy_possible.return_value = False
+        provider.get_stack_status_reason.return_value = "reason"
+        self.action.provider_builder = MockProviderBuilder(provider=provider)
+        status = self.action._destroy_stack(MockStack("vpc"), status=PENDING)  # type: ignore
+        provider.is_stack_destroyed.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.is_stack_in_progress.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.is_stack_destroy_possible.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        provider.get_delete_failed_status_reason.assert_called_once_with("vpc")
+        provider.get_stack_status_reason.assert_called_once_with(
+            provider.get_stack.return_value
+        )
+        assert isinstance(status, FailedStatus)
+        assert status.reason == "reason"
 
     def test_destroy_stack_step_statuses(self) -> None:
         """Test destroy stack step statuses."""

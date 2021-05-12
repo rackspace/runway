@@ -298,9 +298,14 @@ class Action(BaseAction):
             wait = stack.in_progress_behavior == "wait"
             if wait and provider.is_stack_in_progress(stack_data):
                 return WAITING
-            LOGGER.debug("%s:destroying stack", stack.fqn)
-            provider.destroy_stack(stack_data, action="deploy")
-            return DESTROYING_STATUS
+            if provider.is_stack_destroy_possible(stack_data):
+                LOGGER.debug("%s:destroying stack", stack.fqn)
+                provider.destroy_stack(stack_data, action="deploy")
+                return DESTROYING_STATUS
+            LOGGER.critical(
+                "%s: %s", stack.fqn, provider.get_delete_failed_status_reason(stack.fqn)
+            )
+            return FailedStatus(provider.get_stack_status_reason(stack_data))
         except CancelExecution:
             return SkippedStatus(reason="canceled execution")
 

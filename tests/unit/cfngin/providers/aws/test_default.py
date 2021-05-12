@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.providers.aws.default."""
-# pylint: disable=too-many-lines
+# pylint: disable=no-self-use,too-many-lines
 # pyright: basic
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import boto3
+import pytest
 from botocore.exceptions import ClientError, UnStubbedResponseError
 from botocore.stub import Stubber
 from mock import MagicMock, patch
@@ -45,6 +46,7 @@ if TYPE_CHECKING:
         ResourceChangeTypeDef,
         StackTypeDef,
     )
+    from pytest_mock import MockerFixture
 
     from runway.core.providers.aws.type_defs import TagSetTypeDef
 
@@ -505,6 +507,91 @@ class TestMethods(unittest.TestCase):
         template_body_result["TemplateBody"] = template_body
         result = generate_cloudformation_args(**std_args)
         self.assertEqual(result, template_body_result)
+
+
+class TestProvider:
+    """Test Provider."""
+
+    def test_get_delete_failed_status_reason(self, mocker: MockerFixture) -> None:
+        """Test get_delete_failed_status_reason."""
+        mock_get_event_by_resource_status = mocker.patch.object(
+            Provider,
+            "get_event_by_resource_status",
+            side_effect=[{"ResourceStatusReason": "reason"}, {}],
+        )
+        obj = Provider(MagicMock())
+        assert obj.get_delete_failed_status_reason("test") == "reason"
+        mock_get_event_by_resource_status.assert_called_once_with(
+            "test", "DELETE_FAILED", chronological=True
+        )
+        assert not obj.get_delete_failed_status_reason("test")
+
+    def test_get_event_by_resource_status(self, mocker: MockerFixture) -> None:
+        """Test get_event_by_resource_status."""
+        events = [
+            {"StackName": "0"},
+            {"StackName": "1", "ResourceStatus": "no match"},
+            {"StackName": "2", "ResourceStatus": "match"},
+            {"StackName": "3", "ResourceStatus": "match"},
+        ]
+        mock_get_events = mocker.patch.object(
+            Provider, "get_events", return_value=events
+        )
+        obj = Provider(MagicMock())
+
+        result = obj.get_event_by_resource_status("test", "match")
+        assert result
+        assert result["StackName"] == "2"
+        mock_get_events.assert_called_once_with("test", chronological=True)
+
+        assert not obj.get_event_by_resource_status(
+            "test", "missing", chronological=False
+        )
+        mock_get_events.assert_called_with("test", chronological=False)
+
+    def test_get_rollback_status_reason(self, mocker: MockerFixture) -> None:
+        """Test get_rollback_status_reason."""
+        mock_get_event_by_resource_status = mocker.patch.object(
+            Provider,
+            "get_event_by_resource_status",
+            side_effect=[
+                {"ResourceStatusReason": "reason0"},
+                {},
+                {"ResourceStatusReason": "reason2"},
+                {},
+                {},
+            ],
+        )
+        obj = Provider(MagicMock())
+        assert obj.get_rollback_status_reason("test") == "reason0"
+        mock_get_event_by_resource_status.assert_called_once_with(
+            "test", "UPDATE_ROLLBACK_IN_PROGRESS", chronological=False
+        )
+        assert obj.get_rollback_status_reason("test") == "reason2"
+        mock_get_event_by_resource_status.assert_called_with(
+            "test", "ROLLBACK_IN_PROGRESS", chronological=True
+        )
+        assert not obj.get_rollback_status_reason("test")
+
+    def test_get_stack_status_reason(self) -> None:
+        """Test get_stack_status_reason."""
+        stack_details = generate_describe_stacks_stack("test")
+        assert Provider.get_stack_status_reason(stack_details) is None
+        stack_details["StackStatusReason"] = "reason"
+        assert Provider.get_stack_status_reason(stack_details) == "reason"
+
+    @pytest.mark.parametrize(
+        "status, expected",
+        [("DELETE_FAILED", False), ("CREATE_FAILED", True), ("CREATE_COMPLETE", True)],
+    )
+    def test_is_stack_destroy_possible(self, expected: bool, status: str) -> None:
+        """Test is_stack_destroy_possible."""
+        assert (
+            Provider(MagicMock()).is_stack_destroy_possible(
+                generate_describe_stacks_stack("test", stack_status=status)  # type: ignore
+            )
+            is expected
+        )
 
 
 class TestProviderDefaultMode(unittest.TestCase):

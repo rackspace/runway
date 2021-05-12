@@ -123,7 +123,7 @@ max-branches = 20
 max-locals = 25
 max-parents = 10
 max-public-methods = 30
-max-returns = 6
+max-returns = 10
 max-statements = 50
 min-public-methods = 0
 
