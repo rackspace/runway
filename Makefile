@@ -60,19 +60,19 @@ install: ## create a python virtual environment in the project for development
 	@PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev
 	@PIPENV_VENV_IN_PROJECT=1 pipenv clean
 
-install-docs: ## create a python virtual environmnet for building documentation
+install-docs: ## create a python virtual environment for building documentation
 	@pushd docs && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-install-integration-tests:  ## create a python virtual environmnet for legacy integration tests
+install-integration-tests:  ## create a python virtual environment for legacy integration tests
 	@pushd integration_tests && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-install-integration-test-infrastructure:  ## create a python virtual environmnet for legacy integration test infrastructure
+install-integration-test-infrastructure:  ## create a python virtual environment for legacy integration test infrastructure
 	@pushd integration_test_infrastructure && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
@@ -85,6 +85,11 @@ lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all lint
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@pipenv run black . --check --color --diff
+	@echo ""
+
+lint-cspell: ## run cspell
+	@echo "Running cSpell to checking spelling..."
+	@npx cspell --config .vscode/cspell.json "**/*"
 	@echo ""
 
 lint-flake8: ## run flake8
@@ -115,7 +120,7 @@ npm-install: ## run "npm install" with the option to ignore scripts - required t
 
 # requires setuptools-scm and setuptools global python installs
 # copies artifacts to src & npm package files to the root of the repo
-# updates package.json with the name of the package & semver version from scm (formated for npm)
+# updates package.json with the name of the package & semver version from scm (formatted for npm)
 npm-prep: ## process that needs to be run before creating an npm package
 	mkdir -p tmp
 	mkdir -p src
@@ -157,19 +162,19 @@ update: ## update project python environment
 	@PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED}
 	@PIPENV_VENV_IN_PROJECT=1 pipenv clean
 
-update-docs: ## update python virtual environmnet for building documentation
+update-docs: ## update python virtual environment for building documentation
 	@pushd docs && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-update-integration-tests: ## update python virtual environmnet for legacy integration tests
+update-integration-tests: ## update python virtual environment for legacy integration tests
 	@pushd integration_tests && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-update-integration-test-infrastructure: ## update python virtual environmnet for legacy integration test
+update-integration-test-infrastructure: ## update python virtual environment for legacy integration test
 	@pushd integration_test_infrastructure && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \

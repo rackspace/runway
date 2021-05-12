@@ -1,41 +1,28 @@
+!infrastructure/**/**/**/package.json
+!runway/templates/**/.npmignore
+*.egg-info
 *.pyc
 *.pyo
 .cache
 .coverage
 .eggs
-*.egg-info
-.mypy_cache
-build
-dist
-docs/source/_build
-# This is dynamically built at build-time via make
-runway/templates/terraform/.terraform-version
 .idea
-node_modules
+.mypy_cache
+.npmignore
 .secrets
 .serverless
 .venv
-# paths usind during build
-src/*
-tmp/*
+.vscode/bookmarks.json
 artifacts/*
-# npm files copied and modified at runtime
-.npmignore
+build
+dist
+docs/source/_build
+docs/source/apidocs
+integration_tests/test_cfngin/tests/[0-9][0-9]_*.yaml
+node_modules
 postinstall.js
 preuninstall.js
-
-# templates may include normally excluded files
-!runway/templates/**/.npmignore
-
-# Test artifacts & copied fixtures
+runway/templates/terraform/.terraform-version
+src/*
 tests/fixtures/blueprints/*-result
-integration_tests/test_cfngin/tests/[0-9][0-9]_*.yaml
-
-# Infrastructure
-!infrastructure/**/**/**/package.json
-
-# Programatically generated doc pages
-docs/source/apidocs
-
-# vscode settings
-.vscode/bookmarks.json
+tmp/*

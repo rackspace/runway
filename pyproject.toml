@@ -161,7 +161,7 @@ disable = [
     "missing-class-docstring",  # flake8 (pydocstyle) overlap
     "missing-function-docstring",  # flake8 (pydocstyle) overlap
     "missing-module-docstring",  # flake8 (pydocstyle) overlap
-    "similarities",  # black overcomplicates this
+    "similarities",  # black overcomplicated this
     "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
 ]
 

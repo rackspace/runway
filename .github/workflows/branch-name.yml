@@ -8,14 +8,14 @@ on:
 jobs:
   branch-name:
     name: Enforce Branch Name
-    runs-on: 'ubuntu-18.04'
+    runs-on: ubuntu-18.04
     steps:
       - uses: deepakputhraya/action-branch-name@v1.0.0
         with:
           # Regex the branch should match. This example enforces grouping
-          regex: '([a-z])+\/([a-zA-Z0-9\-\_])+'
+          regex: ([a-z])+\/([a-zA-Z0-9\-\_])+
           # All branches should start with the given prefix
-          allowed_prefixes: 'bugfix,chore,dependabot,docs,enhancement,feat,feature,fix,hotfix,maint,maintain,maintenance,release'
+          allowed_prefixes: bugfix,chore,dependabot,docs,enhancement,feat,feature,fix,hotfix,maint,maintain,maintenance,release
           # Ignore exactly matching branch names from convention
           ignore: master,release,develop,v0_47_fixes,v1,v2
           # Min length of the branch name

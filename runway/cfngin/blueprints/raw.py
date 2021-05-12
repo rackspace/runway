@@ -26,7 +26,7 @@ LOGGER = logging.getLogger(__name__)
 def get_template_path(file_path: Path) -> Optional[Path]:
     """Find raw template in working directory or in sys.path.
 
-    template_path from config may refer to templates colocated with the Stacker
+    template_path from config may refer to templates co-located with the CFNgin
     config, or files in remote package_sources. Here, we emulate python module
     loading to find the path to the template.
 

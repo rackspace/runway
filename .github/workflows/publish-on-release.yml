@@ -57,7 +57,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -132,7 +132,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -199,7 +199,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -296,7 +296,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}

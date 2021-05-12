@@ -1,0 +1,59 @@
+{
+    "dictionaries": [
+        "local",
+        "pypi",
+        "python",
+        "runway",
+        "softwareTerms",
+        "sphinx"
+    ],
+    "dictionaryDefinitions": [
+        {
+            "name": "local",
+            "path": "./dictionaries/local.txt"
+        },
+        {
+            "name": "pypi",
+            "path": "./dictionaries/pypi.txt"
+        },
+        {
+            "name": "runway",
+            "path": "./dictionaries/runway.txt"
+        },
+        {
+            "name": "sphinx",
+            "path": "./dictionaries/sphinx.txt"
+        }
+    ],
+    "ignorePaths": [
+        "**/*.egg-info/**",
+        "**/*.js",
+        "**/*.pyc",
+        "**/*.ts",
+        "**/.runway/**",
+        "**/.serverless/**",
+        "**/.terraform/**",
+        "**/.venv/**",
+        "**/Pipfile.lock",
+        "**/__pycache__/**",
+        "**/_gitignore",
+        "**/angular.json",
+        "**/build/**",
+        "**/dist/**",
+        "**/dot_gitignore",
+        "**/node_modules/**",
+        "**/package-lock.json",
+        "**/package.json",
+        "**/requirements.txt",
+        "**/tsconfig.json",
+        ".vscode/dictionaries/*.txt",
+        "docs/runway-example.yml",
+        "typings/**"
+    ],
+    "import": [
+        "@cspell/dict-python/cspell-ext.json"
+    ],
+    "language": "en",
+    "maxNumberOfProblems": 100,
+    "version": "0.1"
+}

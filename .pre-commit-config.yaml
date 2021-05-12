@@ -1,20 +1,45 @@
 default_language_version:
   python: python3.8
 
-minimum_pre_commit_version: "2.6.0"
+minimum_pre_commit_version: 2.6.0
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
     hooks:
-      - id: check-merge-conflict
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-        exclude: .*\.json-result
       - id: check-json
+      - id: check-merge-conflict
       - id: check-yaml
         args:
-          - "--unsafe"  # needed for parsing CFN
+          - --unsafe  # needed for parsing CFN
+      - id: end-of-file-fixer
+        exclude: .*\.json-result
+      - id: file-contents-sorter
+        files: |
+          (?x)^(
+            \.gitignore|\.vscode/dictionaries/.*\.txt
+          )$
+      - id: pretty-format-json
+        args: [--autofix, --indent, '4']
+        files: |
+          (?x)^(
+            \.vscode/.*\.json|
+            pyrightconfig.json
+          )$
+      - id: trailing-whitespace
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.1.0
+    hooks:
+      - id: yamlfmt
+        args: [--implicit_start, --mapping, '2', --offset, '2', --sequence, '4']
+        files: |
+          (?x)^(
+            \.github/.*\.(yaml|yml)|
+            \.markdownlint.yml|
+            \.pre-commit-config.yaml|
+            \.readthedocs.yml|
+            buildspec.yml
+          )$
   - repo: https://github.com/timothycrosley/isort
     rev: 5.8.0
     hooks:
@@ -24,9 +49,9 @@ repos:
     hooks:
       - id: black
         args:
-          - "--check"
-          - "--color"
-          - "--diff"
+          - --check
+          - --color
+          - --diff
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
