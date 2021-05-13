@@ -204,5 +204,6 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
   :maxdepth: 2
   :hidden:
 
+  changelog
   License <license>
   terminology

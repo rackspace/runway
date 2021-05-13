@@ -36,6 +36,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_github_changelog",
     "sphinx_tabs.tabs",
     "sphinxcontrib.apidoc",
     "sphinxcontrib.programoutput",
@@ -83,6 +84,8 @@ rst_epilog = """
 
 """
 rst_prolog = ""
+# GitHub PAT with "repo.public_repo" access provided by @ITProKyle
+changelog_github_token = os.getenv("SPHINX_GITHUB_CHANGELOG_TOKEN", "")
 source_suffix = {".rst": "restructuredtext"}
 templates_path = ["_templates"]  # template dir relative to this dir
 
