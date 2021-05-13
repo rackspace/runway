@@ -1,9 +1,4 @@
 # https://github.com/release-drafter/release-drafter
-branches:
-  - release  # this is the branch we tag for releases
-name-template: v$NEXT_MINOR_VERSION
-tag-template: v$NEXT_MINOR_VERSION
-sort-direction: ascending
 categories:
   - title: 🚀 Features
     labels:
@@ -20,11 +15,27 @@ categories:
       - documentation
   - title: 🧰 Maintenance
     label: maintenance
+category-template: |
+  ### $TITLE
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 exclude-labels:
   - skip-changelog
   - release
-change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+name-template: v$RESOLVED_VERSION
+sort-direction: ascending
+tag-template: v$RESOLVED_VERSION
 template: |
   ## What Changed
 
   $CHANGES
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch

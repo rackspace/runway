@@ -3,15 +3,17 @@ name: Release Management
 on:
   push:
     branches:
-      - release  # this is the branch we tag for releases
+      - master
+      - release
 
 jobs:
   update_draft_release:
     name: Draft release
     runs-on: ubuntu-18.04
     steps:
+      - uses: actions/checkout@v2
       # https://github.com/release-drafter/release-drafter
-      - uses: release-drafter/release-drafter@v5.6.1
+      - uses: release-drafter/release-drafter@v5.15.0
         env:
           # Using a PAT here will allow releases to trigger a build/release but
           # we're just using the actions token for the time being since we
