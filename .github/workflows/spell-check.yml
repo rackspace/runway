@@ -1,0 +1,17 @@
+name: Spell Check
+
+# There is an official action published by cSpell.
+# v1.1.1 was tested but did not function as desired so we are using the CLI.
+
+on: push
+
+jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '15'
+      - run: make npm-ci
+      - run: make lint-cspell

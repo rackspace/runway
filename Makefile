@@ -89,7 +89,7 @@ lint-black: ## run black
 
 lint-cspell: ## run cspell
 	@echo "Running cSpell to checking spelling..."
-	@npx cspell --config .vscode/cspell.json "**/*"
+	@npx cspell "**/*" --config .vscode/cspell.json --must-find-files
 	@echo ""
 
 lint-flake8: ## run flake8
