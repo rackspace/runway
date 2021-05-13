@@ -15,7 +15,7 @@ categories:
       - documentation
   - title: 🧰 Maintenance
     label: maintenance
-category-template: |
+category-template: >-
   ### $TITLE
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 exclude-labels:
