@@ -31,11 +31,11 @@ template: |
 version-resolver:
   major:
     labels:
-      - 'major'
+      - major
   minor:
     labels:
-      - 'minor'
+      - minor
   patch:
     labels:
-      - 'patch'
+      - patch
   default: patch
