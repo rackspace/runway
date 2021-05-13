@@ -325,7 +325,7 @@ class BaseResultHandler:
 
 
 class ResultRecorder(BaseResultHandler):
-    """Record and track transfer statistics based on results receieved."""
+    """Record and track transfer statistics based on results received."""
 
     def __init__(self):
         """Instantiate class."""

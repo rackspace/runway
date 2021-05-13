@@ -45,7 +45,7 @@ runway.yml
 ```yaml
 ---
 global_variables: &global_variables
-  customer: msp-agasper
+  customer: msp-example
 
 deployments:
   - name: Env Setup
@@ -123,5 +123,5 @@ resource "aws_s3_bucket" "example_bucket" {
 }
 ```
 
-Without conversion, python will attempt to shell out with TF_VAR_tags=`<dictobject>` causing
+Without conversion, python will attempt to shell out with TF_VAR_tags=`<dict object>` causing
 a stacktrace

@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -58,37 +58,37 @@ jobs:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     steps:
-      - # &checkout
-        name: Checkout Repo
+        # &checkout
+      - name: Checkout Repo
         uses: actions/checkout@v2.3.2
       - name: Install Node
         uses: actions/setup-node@v2
         with:
           node-version: '15'
-      - # &install_python
-        name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        # &install_python
+      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - # &dependencies_ubuntu
-        name: Install Dependencies (ubuntu)
+        # &dependencies_ubuntu
+      - name: Install Dependencies (ubuntu)
         if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
-      - # &dependencies_windows
-        name: Install Dependencies (windows)
+        # &dependencies_windows
+      - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - # &cache_pip_ubuntu
-        name: Pip Cache (ubuntu)
+        # &cache_pip_ubuntu
+      - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - # &cache_pip_windows
-        name: Pip Cache (windows)
+        # &cache_pip_windows
+      - name: Pip Cache (windows)
         uses: actions/cache@v1
         if: matrix.os == 'windows-latest'
         with:
@@ -96,15 +96,15 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - # &install_pip
-        name: Install Global Python Packages
+        # &install_pip
+      - name: Install Global Python Packages
         run: |
           python -m pip install --upgrade pip setuptools
           pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
       - name: Install Node Dependencies
         run: npm install --ignore-scripts
-      - # &pipenv_sync
-        name: Setup Python Virtual Environment
+        # &pipenv_sync
+      - name: Setup Python Virtual Environment
         run: pipenv sync --dev
       - name: Run Linters
         run: make lint
@@ -158,7 +158,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -233,7 +233,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -309,7 +309,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -428,7 +428,7 @@ jobs:
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
         with:
-          path:  ~/.cache/pip
+          path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}

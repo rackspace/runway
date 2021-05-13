@@ -59,6 +59,8 @@
     "access": "public"
   },
   "devDependencies": {
+    "@cspell/dict-python": "^1.0.34",
+    "cspell": "^5.4.1",
     "pyright": "^1.1.138"
   }
 }
