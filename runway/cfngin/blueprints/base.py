@@ -359,9 +359,8 @@ class Blueprint:
                 "deprecated PARAMETERS or "
                 "LOCAL_PARAMETERS, rather than VARIABLES. "
                 "Please update your blueprints. See "
-                "https://docs.onica.com/projects/runway"
-                "/en/release/cfngin/blueprints."
-                "html#variables for additional information." % name
+                "https://docs.onica.com/projects/runway/page/cfngin/blueprints.html#variables "
+                "for additional information." % name
             )
 
     @cached_property
