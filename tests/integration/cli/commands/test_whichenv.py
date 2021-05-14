@@ -66,5 +66,5 @@ def test_whichenv_invalid_debug_environ(cd_tmp_path: Path) -> None:
     result = runner.invoke(cli, ["whichenv"], env={"DEBUG": "invalid"})
     assert result.exit_code == 2
     assert (
-        "Invalid value for '--debug': invalid is not a valid integer" in result.output
+        "Invalid value for '--debug': 'invalid' is not a valid integer" in result.output
     )
