@@ -6,7 +6,7 @@ import logging
 import re
 from urllib import request
 
-from jose import jwt
+from jose import jwt  # noqa pylint: disable=import-error
 
 LOGGER = logging.getLogger(__name__)
 
