@@ -1,7 +1,7 @@
 """S3 sync handler."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from .....compat import cached_property
 from ._helpers.action_architecture import ActionArchitecture
@@ -11,7 +11,6 @@ from ._helpers.transfer_config import RuntimeConfig
 
 if TYPE_CHECKING:
     import boto3
-    from botocore.session import Session
     from mypy_boto3_s3.client import S3Client
 
     from .....context import CfnginContext, RunwayContext
@@ -50,7 +49,7 @@ class S3SyncHandler:
 
         """
         self._session = session or context.get_session(region=context.env.aws_region)
-        self._botocore_session = cast("Session", self._session._session)
+        self._botocore_session = self._session._session
         self.ctx = context
         self.instructions = [
             "file_generator",
