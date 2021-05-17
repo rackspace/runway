@@ -114,12 +114,14 @@ docnames
 docstrings
 dontwritebytecode
 ecrcleanup
+editorconfig
 ejholmes
 eksclustername
 endfor
 endswith
 ensurepip
 entrypoint
+envrc
 envvar
 envvars
 errno

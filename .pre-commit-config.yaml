@@ -17,7 +17,8 @@ repos:
       - id: file-contents-sorter
         files: |
           (?x)^(
-            \.gitignore|\.vscode/dictionaries/.*\.txt
+            \.gitignore|\.vscode/dictionaries/.*\.txt|
+            MANIFEST.in
           )$
       - id: pretty-format-json
         args: [--autofix, --indent, '4']
