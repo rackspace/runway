@@ -37,7 +37,7 @@ clean: ## remove generated file from the project directory
 	rm -rf runway.egg-info/
 	rm -rf tmp/
 	rm -rf src/
-	rm -rf package.json postinstall.js preuninstall.js .coverage .npmignore
+	rm -rf postinstall.js preuninstall.js .coverage .npmignore
 
 cov-report: ## display a report in the terminal of files missing coverage
 	@pipenv run coverage report \
