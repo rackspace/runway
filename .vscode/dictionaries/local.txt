@@ -169,6 +169,7 @@ linenodiv
 localhistory
 localnpipe
 maint
+markdownlint
 minversion
 mkdtemp
 mknod
