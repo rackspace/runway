@@ -36,7 +36,6 @@ prune integration_tests
 prune node_modules
 prune npm
 prune quickstarts
-prune scripts
 prune tests
 prune typings
 recursive-include runway/templates *
