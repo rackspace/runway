@@ -1,0 +1,17 @@
+name: PR
+
+
+on:
+  pull_request:
+
+
+jobs:
+  branch:
+    name: Label PR
+    # Skip running the job from forks.
+    if: github.repository == 'onicagroup/runway'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5.15.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

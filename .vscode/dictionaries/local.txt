@@ -104,6 +104,7 @@ decon
 delenv
 delim
 delims
+dependabot
 deps
 deque
 dockercfg
