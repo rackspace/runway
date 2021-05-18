@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - master
-      - v1
-      - v2
 
 env:
   AWS_DEFAULT_REGION: us-east-1
@@ -358,44 +356,44 @@ jobs:
           name: npm-pack
           path: artifacts
 
-  publish-npm:
-    name: Publish 📦 To npm
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - build-npm
-    env:
-      CI: true
-      NODE_VERSION: 12
-      NPM_PACKAGE_NAME: '@onica/runway'
-      NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
-        uses: actions/setup-node@v1.4.4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: https://registry.npmjs.org/
-      - name: Download Artifact
-        id: download-npm-pack
-        continue-on-error: true
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: npm-pack
-          path: artifacts
-      - name: Publish Distribution 📦 to npm (dev)
-        if: steps.download-npm-pack.outcome == 'success'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
-        run: |
-          find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
-      - name: Artifact Does Not Exist
-        if: steps.download-npm-pack.outcome == 'failure'
-        run: echo "Artifact npm-pack was not produced from the build step"
+  # publish-npm:
+  #   name: Publish 📦 To npm
+  #   if: github.ref == 'refs/heads/master'
+  #   needs:
+  #     - build-npm
+  #   env:
+  #     CI: true
+  #     NODE_VERSION: 12
+  #     NPM_PACKAGE_NAME: '@onica/runway'
+  #     NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-18.04]
+  #       python-version: [3.7]
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
+  #       uses: actions/setup-node@v1.4.4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         registry-url: https://registry.npmjs.org/
+  #     - name: Download Artifact
+  #       id: download-npm-pack
+  #       continue-on-error: true
+  #       uses: actions/download-artifact@v1.0.0
+  #       with:
+  #         name: npm-pack
+  #         path: artifacts
+  #     - name: Publish Distribution 📦 to npm (dev)
+  #       if: steps.download-npm-pack.outcome == 'success'
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
+  #       run: |
+  #         find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
+  #     - name: Artifact Does Not Exist
+  #       if: steps.download-npm-pack.outcome == 'failure'
+  #       run: echo "Artifact npm-pack was not produced from the build step"
 
   build-pypi:
     name: Build PyPi 📦
@@ -447,58 +445,58 @@ jobs:
           name: pypi-dist
           path: dist
 
-  publish-pypi:
-    name: Publish 📦 To PyPI
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - build-pypi
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Download Distribution Artifact
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pypi-dist
-          path: dist
-      - name: Publish Distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@v1.1.0
-        with:
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
+  # publish-pypi:
+  #   name: Publish 📦 To PyPI
+  #   if: github.ref == 'refs/heads/master'
+  #   needs:
+  #     - build-pypi
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - name: Download Distribution Artifact
+  #       uses: actions/download-artifact@v1.0.0
+  #       with:
+  #         name: pypi-dist
+  #         path: dist
+  #     - name: Publish Distribution 📦 to Test PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.1.0
+  #       with:
+  #         password: ${{ secrets.test_pypi_password }}
+  #         repository_url: https://test.pypi.org/legacy/
 
-  publish-s3:
-    name: Publish 📦 To S3
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - pre-commit
-      - test-python
-      - build-pyinstaller-onefile
-    env:
-      AWS_DEFAULT_REGION: us-west-2
-      AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
-      AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Install Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - name: Download Artifacts (macOS)
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefile-macos-10.15
-          path: artifacts
-      - name: Download Artifacts (ubuntu)
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefile-ubuntu-18.04
-          path: artifacts
-      - name: Download Artifacts (windows)
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefile-windows-latest
-          path: artifacts
-      - name: Install AWS CLI & Upload 📦
-        run: |
-          pip install "awscli~=1.18.19"
-          aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read
+  # publish-s3:
+  #   name: Publish 📦 To S3
+  #   if: github.ref == 'refs/heads/master'
+  #   needs:
+  #     - pre-commit
+  #     - test-python
+  #     - build-pyinstaller-onefile
+  #   env:
+  #     AWS_DEFAULT_REGION: us-west-2
+  #     AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
+  #     AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - name: Install Python
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: 3.7
+  #     - name: Download Artifacts (macOS)
+  #       uses: actions/download-artifact@v1.0.0
+  #       with:
+  #         name: pyinstaller-onefile-macos-10.15
+  #         path: artifacts
+  #     - name: Download Artifacts (ubuntu)
+  #       uses: actions/download-artifact@v1.0.0
+  #       with:
+  #         name: pyinstaller-onefile-ubuntu-18.04
+  #         path: artifacts
+  #     - name: Download Artifacts (windows)
+  #       uses: actions/download-artifact@v1.0.0
+  #       with:
+  #         name: pyinstaller-onefile-windows-latest
+  #         path: artifacts
+  #     - name: Install AWS CLI & Upload 📦
+  #       run: |
+  #         pip install "awscli~=1.18.19"
+  #         aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read
