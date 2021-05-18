@@ -145,6 +145,7 @@ fset
 ftype
 funcs
 getenv
+ghaction
 giturl
 hdlr
 hiddenimports

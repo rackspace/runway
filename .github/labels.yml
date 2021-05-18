@@ -1,0 +1,103 @@
+# more info https://github.com/crazy-max/ghaction-github-labeler
+  - name: breaking
+    color: b60205
+    description: Issue or PR is for a breaking change. Bug is a breaking bug with no workaround.
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  - name: dependencies
+    color: 0366d6
+    description: Pull request that updates a dependency file
+  - name: documentation
+    color: 93b0f9
+    description: Improvements or additions to documentation
+  - name: duplicate
+    color: cfd3d7
+    description: This issue or pull request already exists
+  - name: feature
+    color: 84b6eb
+    description: Request or pull request for a new feature
+  - name: good first issue
+    color: 7057ff
+    description: Good for newcomers
+  - name: help wanted
+    color: 008672
+    description: Extra attention is needed
+  - name: invalid
+    color: '000000'
+    description: This doesn't seem right
+  - name: javascript
+    color: f0db4f
+    description: Pull request that updates Javascript code
+  - name: maintenance
+    color: fbca04
+    description: General repo or CI/CD upkeep
+  - name: major
+    color: ffffff
+    description: Major change resulting in a major release
+  - name: minor
+    color: ffffff
+    description: Minor change resulting in a minor release
+  - name: patch
+    color: ffffff
+    description: Patch change resulting in a patch release
+  - name: priority:critical
+    color: e11d21
+    description: Critical priority issue or pull request
+  - name: priority:high
+    color: eb6420
+    description: High priority issue or pull request
+  - name: priority:low
+    color: 009800
+    description: Low priority issue or pull request
+  - name: priority:medium
+    color: fbca04
+    description: Medium priority issue or pull request
+  - name: python
+    color: '306998'
+    description: Update to Python code
+  - name: question
+    color: d876e3
+    description: Further information is requested
+  - name: release
+    color: e4e669
+    description: A release task or pull request
+  - name: skip-changelog
+    color: ffffff
+    description: Don't include this pull request in the release change log
+  - name: status:abandoned
+    color: '000000'
+    description: Issue or pull request abandoned by author
+  - name: status:accepted
+    color: '009800'
+    description: Issue or pull request accepted by maintainer
+  - name: status:available
+    color: bfe5bf
+    description: Task available for assignment
+  - name: status:blocked
+    color: e11d21
+    description: Issue or pull request is blocked by something
+  - name: status:completed
+    color: 006b75
+    description: Task is complete
+  - name: status:in_progress
+    color: cccccc
+    description: Task is actively being worked on
+  - name: status:on_hold
+    color: e11d21
+    description: Task was recently worked on but is now on hold
+  - name: status:pending
+    color: fef2c0
+    description: Task is pending review or completion of something else
+  - name: status:review_needed
+    color: fbca04
+    description: Issue or pull request needs reviewed
+  - name: status:revision_needed
+    color: e11d21
+    description: Issue or pull request needs to be revised by author
+  - name: wontfix
+    color: '000000'
+    description: This will not be worked on
+  - name: github/workflows
+    color: ffffff
+    description: Update to GitHub Action Workflow
