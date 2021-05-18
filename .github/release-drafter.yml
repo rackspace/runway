@@ -1,4 +1,42 @@
 # https://github.com/release-drafter/release-drafter
+autolabeler:  # cspell:ignore autolabeler
+  - label: bug
+    branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
+  - label: cloudformation
+    files:
+      - '**/templates/*.json'
+      - '**/templates/*.template'
+      - '**/templates/*.yaml'
+      - '**/templates/*.yml'
+  - label: dependencies
+    branch: [/^(depend|dependabot)\/.*/]
+  - label: documentation
+    branch: [/^(docs)\/.*/]
+  - label: feature
+    branch: [/^(enhancement|feat|feature)\/.*/]
+  - label: maintenance
+    branch: [/^(chore|maint|maintain|maintenance)\/.*/]
+  - label: patch
+    branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
+  - label: poetry
+    files:
+      - poetry.lock
+      - poetry.toml
+  - label: pyinstaller
+    files:
+      - runway.file.spec
+      - runway.folder.spec
+  - label: python
+    files:
+      - '**/*.py'
+      - poetry.lock
+      - pyproject.toml
+      - setup.cfg
+  - label: release
+    branch: [/^(release)\/.*/]
+  - label: workflows
+    files:
+      - .github/workflows/*.yml
 categories:
   - title: 🚀 Features
     labels:
@@ -18,6 +56,7 @@ categories:
 category-template: >-
   ### $TITLE
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+commitish: master  # cspell:ignore commitish
 exclude-labels:
   - skip-changelog
   - release
