@@ -1,0 +1,16 @@
+name: PR Target (opened)
+
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+
+
+jobs:
+  assign-author:
+    name: Assign Author to PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/assign-author@v1  # cspell:ignore technote
