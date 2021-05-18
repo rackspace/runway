@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  branch:
+  label-pr:
     name: Label PR
     # Skip running the job from forks.
     if: github.repository == 'onicagroup/runway'
