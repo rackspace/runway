@@ -1,10 +1,12 @@
 name: CI/CD
 
+
 on:
   pull_request:  # any pull request
   push:
     branches:
       - master
+
 
 env:
   AWS_DEFAULT_REGION: us-east-1
@@ -12,8 +14,6 @@ env:
   PIPENV_VENV_IN_PROJECT: true
   PIPENV_YES: true
 
-# YAML anchors are not currently supported but are included here, commented out for support is added
-# https://github.community/t5/GitHub-Actions/Support-for-YAML-anchors/td-p/30336
 
 jobs:
   pre-commit:
@@ -42,7 +42,6 @@ jobs:
       - name: Setup Python Virtual Environment
         run: pipenv sync --dev
       - uses: pre-commit/action@v2.0.0
-
   test-python:
     name: Python Linting & Tests
     strategy:
@@ -110,291 +109,6 @@ jobs:
         if: matrix.os != 'windows-latest'
         # assertions assume linux so some fail when run on windows
         run: make test
-
-  build-pyinstaller-onefile:
-    name: Pyinstaller "One File" Build
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
-    runs-on: ${{ matrix.os }}
-    env:
-      OS_NAME: ${{ matrix.os }}
-      # pydantic binary causes a recursion error
-      # https://github.com/pyinstaller/pyinstaller/issues/4406
-      PIP_NO_BINARY: pydantic
-    steps:
-      - name: Checkout Repo (complete)
-        uses: actions/checkout@v2.3.2
-        with:
-          fetch-depth: 0
-      # - *install_python
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      # - *dependencies_ubuntu
-      - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
-        run: sudo apt-get update && sudo apt-get install sed -y
-      # - *dependencies_windows
-      - name: Install Dependencies (windows)
-        if: matrix.os == 'windows-latest'
-        run: choco install make sed
-      # - &cache_pip_mac
-      - name: Pip Cache (macOS)
-        uses: actions/cache@v1
-        if: matrix.os == 'macos-10.15'
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      # - *cache_pip_ubuntu
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
-        with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      # - *cache_pip_windows
-      - name: Pip Cache (windows)
-        uses: actions/cache@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        working-directory: .github/requirements
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -r requirements.txt
-      - name: Setup Python Virtual Environment
-        # our version of pipenv does not respect versions in a requirements file
-        # to we have to use pip within a venv to process it correctly
-        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
-      - name: Run Build
-        run: make build-pyinstaller-file
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefile-${{ matrix.os }}
-          path: artifacts
-
-  build-pyinstaller-onefolder:
-    name: Pyinstaller "One Folder" Build
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
-    runs-on: ${{ matrix.os }}
-    env:
-      OS_NAME: ${{ matrix.os }}
-      # pydantic binary causes a recursion error
-      # https://github.com/pyinstaller/pyinstaller/issues/4406
-      PIP_NO_BINARY: pydantic
-    steps:
-      - name: Checkout Repo (complete)
-        uses: actions/checkout@v2.3.2
-        with:
-          fetch-depth: 0
-      # - *install_python
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      # - *dependencies_ubuntu
-      - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
-        run: sudo apt-get update && sudo apt-get install sed -y
-      # - *dependencies_windows
-      - name: Install Dependencies (windows)
-        if: matrix.os == 'windows-latest'
-        run: choco install make sed
-      # - *cache_pip_mac
-      - name: Pip Cache (macOS)
-        uses: actions/cache@v1
-        if: matrix.os == 'macos-10.15'
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      # - *cache_pip_ubuntu
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
-        with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      # - *cache_pip_windows
-      - name: Pip Cache (windows)
-        uses: actions/cache@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        working-directory: .github/requirements
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -r requirements.txt
-      - name: Setup Python Virtual Environment
-        # our version of pipenv does not respect versions in a requirements file
-        # to we have to use pip within a venv to process it correctly
-        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
-      - name: Run Build
-        run: make build-pyinstaller-folder
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefolder-${{ matrix.os }}
-          path: artifacts
-
-  build-npm:
-    name: Build npm 📦
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - pre-commit
-      - test-python
-      - build-pyinstaller-onefolder
-    env:
-      NODE_VERSION: 12
-      NPM_PACKAGE_NAME: '@onica/runway'
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Checkout Repo (complete)
-        uses: actions/checkout@v2.3.2
-        with:
-          fetch-depth: 0
-      - id: check_distance
-        name: Ensure Commit Is Not Tagged
-        continue-on-error: true
-        run: bash ./check_distance_from_tag.sh
-        working-directory: .github/scripts/cicd
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/setup-node@v1.4.4
-        with:
-          always-auth: true
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: https://registry.npmjs.org
-          scope: '@onica'
-      - name: Install Dependencies (ubuntu)
-        if: steps.check_distance.outcome == 'success'
-        run: sudo apt-get update && sudo apt-get install sed tree -y
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
-        with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        if: steps.check_distance.outcome == 'success'
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "setuptools-scm~=3.5.0" wheel
-      - name: Download Artifacts (macOS)
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefolder-macos-10.15
-          path: artifacts
-      - name: Download Artifacts (ubuntu)
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefolder-ubuntu-18.04
-          path: artifacts
-      - name: Download Artifacts (windows)
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: pyinstaller-onefolder-windows-latest
-          path: artifacts
-      - name: List Artifacts
-        if: steps.check_distance.outcome == 'success'
-        run: tree artifacts/
-      - name: npm Prep
-        if: steps.check_distance.outcome == 'success'
-        run: make npm-prep
-      - name: npm pack
-        if: steps.check_distance.outcome == 'success'
-        run: |
-          npm pack
-          rm -rf artifacts && mkdir -p artifacts
-          find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
-      - name: Skipped Publishing
-        if: steps.check_distance.outcome == 'failure'
-        run: echo "A pre-production version was not published because the current commit is tagged for release."
-      - name: Upload Artifacts
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: npm-pack
-          path: artifacts
-
-  # publish-npm:
-  #   name: Publish 📦 To npm
-  #   if: github.ref == 'refs/heads/master'
-  #   needs:
-  #     - build-npm
-  #   env:
-  #     CI: true
-  #     NODE_VERSION: 12
-  #     NPM_PACKAGE_NAME: '@onica/runway'
-  #     NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [ubuntu-18.04]
-  #       python-version: [3.7]
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
-  #       uses: actions/setup-node@v1.4.4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         registry-url: https://registry.npmjs.org/
-  #     - name: Download Artifact
-  #       id: download-npm-pack
-  #       continue-on-error: true
-  #       uses: actions/download-artifact@v1.0.0
-  #       with:
-  #         name: npm-pack
-  #         path: artifacts
-  #     - name: Publish Distribution 📦 to npm (dev)
-  #       if: steps.download-npm-pack.outcome == 'success'
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
-  #       run: |
-  #         find ./artifacts -name 'onica-runway-*.*.*-*.tgz' -exec npm publish --access public --tag dev {} +
-  #     - name: Artifact Does Not Exist
-  #       if: steps.download-npm-pack.outcome == 'failure'
-  #       run: echo "Artifact npm-pack was not produced from the build step"
-
   build-pypi:
     name: Build PyPi 📦
     if: github.ref == 'refs/heads/master'
@@ -412,16 +126,13 @@ jobs:
         uses: actions/checkout@v2.3.2
         with:
           fetch-depth: 0
-      # - *install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
         if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
-      # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
@@ -434,7 +145,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools
           pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
-      # - *pipenv_sync
       - name: Setup Python Virtual Environment
         run: pipenv sync --dev
       - name: Run Build
@@ -444,7 +154,6 @@ jobs:
         with:
           name: pypi-dist
           path: dist
-
   # publish-pypi:
   #   name: Publish 📦 To PyPI
   #   if: github.ref == 'refs/heads/master'
@@ -462,41 +171,3 @@ jobs:
   #       with:
   #         password: ${{ secrets.test_pypi_password }}
   #         repository_url: https://test.pypi.org/legacy/
-
-  # publish-s3:
-  #   name: Publish 📦 To S3
-  #   if: github.ref == 'refs/heads/master'
-  #   needs:
-  #     - pre-commit
-  #     - test-python
-  #     - build-pyinstaller-onefile
-  #   env:
-  #     AWS_DEFAULT_REGION: us-west-2
-  #     AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #     - name: Install Python
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: 3.7
-  #     - name: Download Artifacts (macOS)
-  #       uses: actions/download-artifact@v1.0.0
-  #       with:
-  #         name: pyinstaller-onefile-macos-10.15
-  #         path: artifacts
-  #     - name: Download Artifacts (ubuntu)
-  #       uses: actions/download-artifact@v1.0.0
-  #       with:
-  #         name: pyinstaller-onefile-ubuntu-18.04
-  #         path: artifacts
-  #     - name: Download Artifacts (windows)
-  #       uses: actions/download-artifact@v1.0.0
-  #       with:
-  #         name: pyinstaller-onefile-windows-latest
-  #         path: artifacts
-  #     - name: Install AWS CLI & Upload 📦
-  #       run: |
-  #         pip install "awscli~=1.18.19"
-  #         aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read
