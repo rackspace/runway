@@ -1,6 +1,14 @@
 """Blueprints."""
+from .admin_role import AdminRole
 from .admin_user import AdminUser
 from .prevent_privilege_escalation import AdminPreventPrivilegeEscalation
 from .test_runner_boundary import TestRunnerBoundary
+from .test_runner_user import TestRunnerUser
 
-__all__ = ["AdminPreventPrivilegeEscalation", "AdminUser", "TestRunnerBoundary"]
+__all__ = [
+    "AdminPreventPrivilegeEscalation",
+    "AdminRole",
+    "AdminUser",
+    "TestRunnerBoundary",
+    "TestRunnerUser",
+]

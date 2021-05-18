@@ -6,9 +6,10 @@ https://aws.amazon.com/premiumsupport/knowledge-center/iam-permission-boundaries
 # pylint: disable=no-self-use
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Union
 
 import awacs.iam
+import awacs.sts
 from awacs.aws import (
     Action,
     Allow,
@@ -40,7 +41,12 @@ class AdminPreventPrivilegeEscalation(Blueprint):
             "description": "List of policy names (not ARNs) that are approved to "
             "be attached to roles and users.",
             "type": list,
-        }
+        },
+        "DenyAssumeRoleNotResources": {
+            "default": [],
+            "description": "List of IAM Role ARNs that can be assumed.",
+            "type": list,
+        },
     }
 
     @cached_property
@@ -58,6 +64,18 @@ class AdminPreventPrivilegeEscalation(Blueprint):
                     f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:policy/{policy_name}"
                 )
             )
+        return tmp
+
+    @cached_property
+    def deny_assume_role_not_resources(self) -> List[Union[str, Sub]]:
+        """List of IAM Role ARNs that can be assumed."""
+        tmp: List[Union[str, Sub]] = [
+            Sub(
+                f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:role/{self.namespace}-*"
+            )
+        ]
+        for arn in self.variables["DenyAssumeRoleNotResources"]:
+            tmp.append(arn)
         return tmp
 
     @property
@@ -87,6 +105,20 @@ class AdminPreventPrivilegeEscalation(Blueprint):
             Effect=Deny,
             Resource=[self.policy_arn],
             Sid="DenyBoundaryPolicyAlteration",
+        )
+
+    @cached_property
+    def statement_deny_assume_role_not_resource(self) -> Statement:
+        """Statement to deny AssumeRole if NotResource."""
+        return Statement(
+            Action=[
+                awacs.sts.AssumeRole,
+                awacs.sts.AssumeRoleWithSAML,
+                awacs.sts.AssumeRoleWithWebIdentity,
+            ],
+            Effect=Deny,
+            NotResource=self.deny_assume_role_not_resources,
+            Sid="DenyAssumeRoleNotResource",
         )
 
     @cached_property
@@ -188,6 +220,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
         return [
             self.statement_allow_admin_access,
             self.statement_deny_alter_boundary_policy,
+            self.statement_deny_assume_role_not_resource,
             self.statement_deny_cost_explorer,
             self.statement_deny_create_without_boundary,
             self.statement_deny_onica_sso,
@@ -206,7 +239,8 @@ class AdminPreventPrivilegeEscalation(Blueprint):
             Description=self.DESCRIPTION,
             ManagedPolicyName=self.POLICY_NAME,
             PolicyDocument=PolicyDocument(
-                Statement=self.statements, Version="2012-10-17",
+                Statement=self.statements,
+                Version="2012-10-17",
             ),
         )
         self.add_output(policy.title, self.POLICY_NAME)

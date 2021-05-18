@@ -11,25 +11,22 @@ tags:
 stacks:
   - name: test-runner-boundary
     class_path: blueprints.TestRunnerBoundary
-    variables: &DenyAssumeRoleNotResources
-      DenyAssumeRoleNotResources:
-        - arn:aws:iam::${test_alt_account_id}:role/${namespace}-gh-action-deploy
-        - arn:aws:iam::${test_alt_account_id}:role/${namespace}-gh-action-runner
   - name: admin-prevent-privilege-escalation
     class_path: blueprints.AdminPreventPrivilegeEscalation
     variables:
-      <<: *DenyAssumeRoleNotResources
       ApprovedPermissionBoundaries:
         - ${output test-runner-boundary::Policy}
-  - name: deploy-user
-    class_path: blueprints.AdminUser
+  - name: deploy-role
+    class_path: blueprints.AdminRole
     variables:
+      CrossAccountAccessAccountIds:
+        - ${test_account_id}
       PermissionsBoundary: ${output admin-prevent-privilege-escalation::PolicyArn}
-      UserName: ${namespace}-gh-action-deploy
-  - name: test-runner-user
-    class_path: blueprints.TestRunnerUser
+      RoleName: ${namespace}-gh-action-deploy
+  - name: test-runner-role
+    class_path: blueprints.AdminRole
     variables:
-      DenyAssumeRoleNotResources:
-        - arn:aws:iam::${test_alt_account_id}:role/${namespace}-gh-action-runner
+      CrossAccountAccessAccountIds:
+        - ${test_account_id}
       PermissionsBoundary: ${output test-runner-boundary::PolicyArn}
-      UserName: ${namespace}-gh-action-runner
+      RoleName: ${namespace}-gh-action-runner
