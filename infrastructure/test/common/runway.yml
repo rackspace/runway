@@ -3,6 +3,7 @@ ignore_git_branch: true  # using dir name
 deployments:
   - modules:
       - path: iam.cfn
+      - path: test-dependencies.cfn
     environments:
       common: ${var account_id.test}/us-east-1
     regions:

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Final, List
 
 import awacs.iam
+import awacs.s3
 from awacs.aws import Action, Deny, Statement
 from troposphere import Sub
 
@@ -85,6 +86,33 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
         )
 
     @cached_property
+    def statement_deny_change_cfngin_bucket(self) -> Statement:
+        """Statement to deny changes to the CFNgin bucket."""
+        return Statement(
+            Action=[
+                awacs.s3.CreateBucket,
+                awacs.s3.DeleteBucket,
+                awacs.s3.DeleteBucketOwnershipControls,
+                awacs.s3.DeleteBucketPolicy,
+                awacs.s3.PutBucketAcl,
+                awacs.s3.PutBucketOwnershipControls,
+                awacs.s3.PutBucketPolicy,
+                awacs.s3.PutBucketTagging,
+                awacs.s3.PutBucketVersioning,
+                awacs.s3.PutBucketWebsite,
+                awacs.s3.PutEncryptionConfiguration,
+                awacs.s3.PutLifecycleConfiguration,
+                awacs.s3.PutReplicationConfiguration,
+            ],
+            Effect=Deny,
+            Resource=[
+                "aws:aws:s3:::runway-testing-lab-cfngin-bucket-*",
+                "aws:aws:s3:::runway-testing-alt-lab-cfngin-bucket-*",
+            ],
+            Sid="DenyChangeCfnginBucket",
+        )
+
+    @cached_property
     def statement_deny_namespace(self) -> Statement:
         """Statement to deny access to resources in the same namespace."""
         return Statement(
@@ -95,10 +123,10 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
                     "arn:aws:cloudformation:*:${AWS::AccountId}:stack/"
                     f"{self.namespace}-*"
                 ),
-                Sub(f"arn:aws:s3:::${self.namespace}"),
-                Sub(f"arn:aws:s3:::${self.namespace}/*"),
-                Sub(f"arn:aws:s3:::${self.namespace}-*"),
-                Sub(f"arn:aws:s3:::${self.namespace}-*/*"),
+                f"arn:aws:s3:::${self.namespace}",
+                f"arn:aws:s3:::${self.namespace}/*",
+                f"arn:aws:s3:::${self.namespace}-*",
+                f"arn:aws:s3:::${self.namespace}-*/*",
             ],
         )
 
@@ -106,6 +134,7 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
     def statements(self) -> List[Statement]:
         """List of statements to add to the policy."""
         return super().statements + [
+            self.statement_deny_change_cfngin_bucket,
             self.statement_deny_cloudtrail,
             self.statement_deny_iam,
             self.statement_deny_namespace,
