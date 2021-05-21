@@ -177,7 +177,8 @@ ignored-modules = ["distutils"]
 [tool.pytest.ini_options]
 addopts = [
     "--cov-config=pyproject.toml",
-    "--no-cov-on-fail"
+    "--force-sugar",
+    "--no-cov-on-fail",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
