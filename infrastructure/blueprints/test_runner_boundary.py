@@ -2,12 +2,13 @@
 # pylint: disable=no-self-use
 from __future__ import annotations
 
-from typing import Final, List
+from typing import List
 
 import awacs.iam
 import awacs.s3
 from awacs.aws import Action, Deny, Statement
 from troposphere import Sub
+from typing_extensions import Final
 
 from runway.compat import cached_property
 

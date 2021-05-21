@@ -1,12 +1,13 @@
 """Blueprint for an admin role."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Final, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import awacs.sts
 from awacs.aws import Allow, AWSPrincipal, PolicyDocument, Statement
 from troposphere import NoValue
 from troposphere.iam import Role
+from typing_extensions import Final
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.compat import cached_property

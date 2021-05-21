@@ -1,7 +1,9 @@
 """Bastion Blueprints."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Final
+from typing import TYPE_CHECKING, Dict
+
+from typing_extensions import Final
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import (
