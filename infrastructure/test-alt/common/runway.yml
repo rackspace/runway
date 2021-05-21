@@ -4,6 +4,8 @@ deployments:
   - modules:
       - path: iam.cfn
       - path: test-dependencies.cfn
+    assume_role:
+      arn: arn:aws:iam::395611358874:role/runway-test-infrastructure-gh-action-deploy
     environments:
       common: ${var account_id.test-alt}/us-east-1
     regions:
