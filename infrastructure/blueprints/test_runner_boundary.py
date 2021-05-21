@@ -116,8 +116,12 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
     def statement_deny_namespace(self) -> Statement:
         """Statement to deny access to resources in the same namespace."""
         return Statement(
-            Action=[Action("*")],
             Effect=Deny,
+            NotAction=[
+                Action("cloudformation", "Describe*"),
+                Action("cloudformation", "Get*"),
+                Action("cloudformation", "List*"),
+            ],
             Resource=[
                 Sub(
                     "arn:aws:cloudformation:*:${AWS::AccountId}:stack/"
