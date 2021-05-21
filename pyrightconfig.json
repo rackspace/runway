@@ -15,7 +15,8 @@
         "**/runway/aws_sso_botocore",
         "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
         "**/runway/templates/cdk-py",
-        "**/scripts"
+        "**/scripts",
+        "**/tests/functional/cfngin/aws_lambda_hook/lambda_src"
     ],
     "pythonVersion": "3.8",
     "reportDuplicateImport": "none",

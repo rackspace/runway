@@ -1,0 +1,12 @@
+# good config
+namespace: ${namespace}
+cfngin_bucket: ''
+sys_path: ./../../fixtures
+
+stacks:
+  - name: recreate-failed
+    class_path: blueprints.LongRunningDummy
+    variables:
+      Count: 10
+      BreakLast: false
+      OutputValue: GoodOutput

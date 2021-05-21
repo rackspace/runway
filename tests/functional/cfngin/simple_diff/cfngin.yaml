@@ -1,0 +1,10 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+sys_path: ./
+
+stacks:
+  - name: simple-diff-vpc
+    class_path: blueprints.DiffTester
+    variables:
+      InstanceType: ${instance_type}
+      WaitConditionCount: ${wait_condition}

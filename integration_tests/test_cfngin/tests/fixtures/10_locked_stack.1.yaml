@@ -1,7 +1,0 @@
-namespace: ${CFNGIN_NAMESPACE}
-cfngin_bucket: ''
-sys_path: ./
-
-stacks:
-  - name: locked-stack-vpc
-    class_path: fixtures.mock_blueprints.Dummy

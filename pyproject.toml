@@ -179,12 +179,15 @@ addopts = [
     "--cov-config=pyproject.toml",
     "--no-cov-on-fail"
 ]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::pytest_mock.PytestMockWarning",
+]
+markers = [
+    "wip: isolate tests currently being worked on.",
+]
 minversion = 6.0
-filterwarnings = ["ignore::DeprecationWarning", "ignore::pytest_mock.PytestMockWarning"]
 python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 testpaths = ["tests"]
-markers = [
-    "wip: isolate tests currently being worked on."
-]

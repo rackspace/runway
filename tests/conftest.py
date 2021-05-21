@@ -1,14 +1,29 @@
 """Pytest configuration, fixtures, and plugins."""
+# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Generator, Iterator
 
 import pytest
 
+from .factories import cli_runner_factory
+
 if TYPE_CHECKING:
+    from _pytest.config import Config
     from _pytest.config.argparsing import Parser
+    from _pytest.fixtures import SubRequest
+    from click.testing import CliRunner
+
+
+def pytest_configure(config: Config) -> None:
+    """Configure pytest."""
+    config.addinivalue_line(  # cspell:ignore addinivalue
+        "markers",
+        "cli_runner(charset:='utf-8', env=None, echo_stdin=False, mix_stderr=True): "
+        "Pass kwargs to `click.testing.CliRunner` initialization.",
+    )
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -31,6 +46,19 @@ def pytest_addoption(parser: Parser) -> None:
         default=False,
         help="run only integration tests",
     )
+
+
+@pytest.fixture(scope="function")
+def cli_runner(request: SubRequest) -> CliRunner:
+    """Initialize instance of `click.testing.CliRunner`."""
+    return cli_runner_factory(request)
+
+
+@pytest.fixture(scope="function")
+def cli_runner_isolated(cli_runner: CliRunner) -> Generator[CliRunner, None, None]:
+    """Initialize instance of `click.testing.CliRunner` with `isolate_filesystem()` called."""
+    with cli_runner.isolated_filesystem():
+        yield cli_runner
 
 
 @pytest.fixture(scope="function")

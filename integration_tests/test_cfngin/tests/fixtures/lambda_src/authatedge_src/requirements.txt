@@ -1,7 +1,0 @@
--i https://pypi.org/simple
-ecdsa==0.15
-pyasn1==0.4.8
-pyjwt==1.7.1
-python-jose==3.1.0
-rsa==4.0
-six==1.14.0

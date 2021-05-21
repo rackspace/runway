@@ -14,6 +14,7 @@
         "restructuredtext"
     ],
     "cSpell.enabled": true,
+    "explorerExclude.backup": null,
     "files.exclude": {
         "**/*.egg-info": true,
         "**/*.pyc": true,
@@ -25,6 +26,7 @@
         "**/.mypy_cache": true,
         "**/.pytest_cache": true,
         "**/.runway": true,
+        "**/.runway_cache": true,
         "**/.serverless": true,
         "**/.svn": true,
         "**/CVS": true,

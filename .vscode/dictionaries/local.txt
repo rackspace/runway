@@ -143,6 +143,7 @@ forcerm
 fpath
 fqcn
 fset
+fspath
 ftype
 funcs
 getenv

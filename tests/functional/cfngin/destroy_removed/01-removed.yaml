@@ -1,0 +1,13 @@
+namespace: ${namespace}
+cfngin_bucket: ${cfngin_bucket}
+persistent_graph_key: test.json
+
+sys_path: ./../fixtures
+
+stacks:
+  - name: vpc
+    class_path: blueprints.Dummy
+  - name: bastion
+    class_path: blueprints.Dummy
+    requires:
+      - vpc

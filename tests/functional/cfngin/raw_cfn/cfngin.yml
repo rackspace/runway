@@ -1,0 +1,9 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+sys_path: ./
+
+stacks:
+  - name: raw-template-vpc
+    template_path: templates/dummy.yml
+    variables:
+      Param1: foobar

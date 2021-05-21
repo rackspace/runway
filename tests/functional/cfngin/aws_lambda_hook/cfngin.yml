@@ -1,0 +1,66 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+
+sys_path: ./../fixtures
+
+pre_deploy:
+  - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+    required: true
+    data_key: lambda
+    args:
+      bucket: ${cfngin_bucket}
+      prefix: lambda_functions/${namespace}/
+      functions:
+        dockerize:
+          # this won't actually use docker at the moment.
+          # it will take additional work to get docker running in codebuild for this.
+          # but, for the time being we are at least testing the use of pipenv.
+          # note: leaving it set to `non-linux` will allow local testing to use docker even though codebuild testing does not.
+          dockerize_pip: true
+          use_pipenv: true
+          runtime: python3.8
+          path: ./lambda_src/dockerize_src
+          include:
+            - '*.py'
+          exclude:
+            - '*.pyc'
+        nondockerize:
+            path: ./lambda_src/nondockerize_src
+            runtime: python3.8
+            include:
+              - '*.py'
+            exclude:
+              - '*.pyc'
+
+stacks:
+  - name: test-dockerize
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: dockerizepip
+      Code: ${hook_data lambda.dockerize}
+      Entrypoint: dockerize.handler
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+  - name: test-nondockerize
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: nondockerizepip
+      Code: ${hook_data lambda.nondockerize}
+      Entrypoint: nondockerize.handler
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+
+post_deploy:
+  - path: hooks.awslambda_test.invoke
+    required: True
+    args:
+      function_name: ${cfn ${namespace}-test-dockerize.LambdaFunction}
+  - path: hooks.awslambda_test.invoke
+    required: True
+    args:
+      function_name: ${cfn ${namespace}-test-nondockerize.LambdaFunction}
+
+post_destroy:
+  - path: hooks.s3_cleanup.delete_prefix
+    required: True
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: lambda_functions/${namespace}/
