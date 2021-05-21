@@ -16,6 +16,72 @@ env:
 
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      infra-test: ${{ steps.filter.outputs.infrastructure-test }}
+      infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
+    steps:
+      - uses: actions/checkout@v2  # not needed for pull_request
+        if: |
+          github.event_name == 'push'
+      - uses: dorny/paths-filter@v2  # cspell:ignore dorny
+        id: filter
+        with:
+          filters: |
+            infrastructure-test:
+              - 'infrastructure/blueprints/admin_user.py'
+              - 'infrastructure/blueprints/cfngin_bucket.py'
+              - 'infrastructure/blueprints/prevent_privilege_escalation.py'
+              - 'infrastructure/blueprints/test_runner_boundary.py'
+              - 'infrastructure/blueprints/test_runner_user.py'
+              - 'infrastructure/test/common/**'
+            infrastructure-test-alt:
+              - 'infrastructure/blueprints/admin_role.py'
+              - 'infrastructure/blueprints/cfngin_bucket.py'
+              - 'infrastructure/blueprints/prevent_privilege_escalation.py'
+              - 'infrastructure/blueprints/test_runner_boundary.py'
+              - 'infrastructure/test-alt/common/**'
+  deploy-test-infrastructure:
+    name: Deploy Test Infrastructure
+    environment: test
+    concurrency: test-infrastructure
+    needs: changes
+    if: |
+      github.repository == 'onicagroup/runway' &&
+      (needs.changes.outputs.infra-test == 'true' || needs.changes.outputs.infra-test-alt == 'true')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2.3.2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Pip Cache (ubuntu)
+        uses: actions/cache@v1
+        if: matrix.os == 'ubuntu-18.04'
+        with:
+          path: ~/.cache/pip
+          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ matrix.os }}-pip-${{ matrix.python-version }}
+      - name: Install Global Python Packages
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
+      - name: Setup Python Virtual Environment
+        run: pipenv sync
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - run: make deploy test
+        working-directory: infrastructure
+      - run: make deploy test-alt
+        working-directory: infrastructure
   pre-commit:
     name: pre-commit
     runs-on: ubuntu-latest
@@ -42,6 +108,40 @@ jobs:
       - name: Setup Python Virtual Environment
         run: pipenv sync --dev
       - uses: pre-commit/action@v2.0.0
+  test-functional:
+    name: Functional Tests
+    needs: deploy-test-infrastructure
+    if: github.repository == 'onicagroup/runway'  # will fail if run from forks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2.3.2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Pip Cache (ubuntu)
+        uses: actions/cache@v1
+        if: matrix.os == 'ubuntu-18.04'
+        with:
+          path: ~/.cache/pip
+          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ matrix.os }}-pip-${{ matrix.python-version }}
+      - name: Install Global Python Packages
+        run: |
+          python -m pip install --upgrade pip setuptools
+          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
+      - name: Setup Python Virtual Environment
+        run: pipenv sync --dev
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.TEST_RUNNER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TEST_RUNNER_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Run Tests
+        run: make test-functional
   test-python:
     name: Python Linting & Tests
     strategy:
@@ -55,27 +155,22 @@ jobs:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     steps:
-        # &checkout
       - name: Checkout Repo
         uses: actions/checkout@v2.3.2
       - name: Install Node
         uses: actions/setup-node@v2
         with:
           node-version: '15'
-        # &install_python
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-        # &dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
         if: matrix.os == 'ubuntu-18.04'
         run: sudo apt-get update && sudo apt-get install sed -y
-        # &dependencies_windows
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-        # &cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
         if: matrix.os == 'ubuntu-18.04'
@@ -84,7 +179,6 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-        # &cache_pip_windows
       - name: Pip Cache (windows)
         uses: actions/cache@v1
         if: matrix.os == 'windows-latest'
@@ -93,14 +187,12 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-        # &install_pip
       - name: Install Global Python Packages
         run: |
           python -m pip install --upgrade pip setuptools
           pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
       - name: Install Node Dependencies
-        run: npm install --ignore-scripts
-        # &pipenv_sync
+        run: make npm-install
       - name: Setup Python Virtual Environment
         run: pipenv sync --dev
       - name: Run Linters
@@ -127,7 +219,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Dependencies (ubuntu)

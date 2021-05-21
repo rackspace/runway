@@ -148,7 +148,11 @@ test: ## run integration and unit tests
 
 test-functional: ## run function tests only
 	@echo "Running functional tests..."
-	@pipenv run pytest --functional --no-cov
+	@pipenv run pytest \
+		--functional \
+		--log-cli-format "[%(levelname)s] %(message)s" \
+		--log-cli-level 15 \
+		--no-cov
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
