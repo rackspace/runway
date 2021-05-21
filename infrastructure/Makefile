@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 sync:
 	pipenv sync --dev
 
