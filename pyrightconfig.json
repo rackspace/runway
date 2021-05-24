@@ -16,7 +16,7 @@
         "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
         "**/runway/templates/cdk-py",
         "**/scripts",
-        "**/tests/functional/cfngin/aws_lambda_hook/lambda_src"
+        "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src"
     ],
     "pythonVersion": "3.8",
     "reportDuplicateImport": "none",
