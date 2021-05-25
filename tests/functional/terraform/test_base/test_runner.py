@@ -47,11 +47,8 @@ def deploy_result(
     # cleanup files
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
-    (
-        CURRENT_DIR / ".terraform.lock.hcl"
-    ).unlink(  # pylint: disable=unexpected-keyword-arg
-        missing_ok=True
-    )
+    # pylint: disable=unexpected-keyword-arg
+    (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
     assert destroy_result.exit_code == 0
 
 

@@ -63,11 +63,8 @@ def deploy_s3_backend_result(
     (CURRENT_DIR / "local_backend").unlink(  # pylint: disable=unexpected-keyword-arg
         missing_ok=True
     )
-    (
-        CURRENT_DIR / ".terraform.lock.hcl"
-    ).unlink(  # pylint: disable=unexpected-keyword-arg
-        missing_ok=True
-    )
+    # pylint: disable=unexpected-keyword-arg
+    (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
 
 
 def test_deploy_local_backend_result(deploy_local_backend_result: Result) -> None:
