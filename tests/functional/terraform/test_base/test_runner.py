@@ -34,7 +34,7 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
     file_path = CURRENT_DIR / TF_VERSION_FILENAME
     file_path.write_text(cast(str, request.param) + "\n")
     yield cast(str, request.param)
-    file_path.unlink(missing_ok=True)
+    file_path.unlink(missing_ok=True)  # pylint: disable=unexpected-keyword-arg
 
 
 @pytest.fixture(scope="function")
@@ -47,7 +47,11 @@ def deploy_result(
     # cleanup files
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
-    (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
+    (
+        CURRENT_DIR / ".terraform.lock.hcl"
+    ).unlink(  # pylint: disable=unexpected-keyword-arg
+        missing_ok=True
+    )
     assert destroy_result.exit_code == 0
 
 
