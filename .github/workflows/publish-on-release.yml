@@ -35,9 +35,15 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
       # - *dependencies_windows
       - name: Install Dependencies (windows)
@@ -55,7 +61,7 @@ jobs:
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -110,9 +116,15 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
       # - *dependencies_windows
       - name: Install Dependencies (windows)
@@ -130,7 +142,7 @@ jobs:
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -192,12 +204,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org
           scope: '@onica'
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed tree -y
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -287,14 +305,20 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       # - *dependencies_ubuntu
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
       # - *cache_pip_ubuntu
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}

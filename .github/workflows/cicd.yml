@@ -65,7 +65,7 @@ jobs:
           python-version: 3.8
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -100,7 +100,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -127,7 +127,7 @@ jobs:
           python-version: 3.8
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -170,15 +170,21 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
@@ -227,12 +233,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        if: startsWith( matrix.os, 'ubuntu' )
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
       - name: Pip Cache (ubuntu)
         uses: actions/cache@v1
-        if: matrix.os == 'ubuntu-18.04'
+        if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
