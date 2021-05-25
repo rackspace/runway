@@ -244,6 +244,7 @@ pyobjc
 pyproject
 pyright
 pyrightconfig
+pytestmark
 pzmsmz
 pzmssz
 quickstart
@@ -324,5 +325,4 @@ yamlfmt
 yamlhelper
 yamlstr
 yamlstr
-zipfiles
 zipfiles

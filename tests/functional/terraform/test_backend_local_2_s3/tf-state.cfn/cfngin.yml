@@ -1,0 +1,15 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+sys_path: ./
+
+pre_destroy:
+  - path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+    required: true
+    args:
+      bucket_name: ${cfn ${namespace}-tf-state.TerraformStateBucketName}
+
+stacks:
+  - name: tf-state
+    class_path: runway.blueprints.tf_state.TfState
+    variables:
+      BucketDeletionPolicy: Delete

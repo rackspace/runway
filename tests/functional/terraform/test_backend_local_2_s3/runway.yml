@@ -1,0 +1,33 @@
+ignore_git_branch: true
+
+deployments:
+  - modules:
+      - path: tf-state.cfn
+        tags:
+          - bootstrap
+          - cleanup
+      - path: ./
+        tags:
+          - local
+      - path: ./
+        options:
+          args:
+            apply:
+              - -backend-config
+              - key=$${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-local-2-s3
+            init:
+              - -backend-config
+              - key=$${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-local-2-s3
+          terraform_backend_config:
+            bucket: ${cfn ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-local-2-s3-tf-state.TerraformStateBucketName}
+            dynamodb_table: ${cfn ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-local-2-s3-tf-state.TerraformStateTableName}
+            region: ${env AWS_REGION}
+        type: terraform
+        tags:
+          - test
+    environments:
+      test: true
+    parameters:
+      namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-local-2-s3
+    regions:
+      - us-east-1

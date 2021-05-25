@@ -20,6 +20,12 @@ class TfState(Blueprint):
     """Stacker blueprint for creating Terraform state resources."""
 
     VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+        "BucketDeletionPolicy": {
+            "type": str,
+            "allowed_values": ["Delete", "Retain"],
+            "description": "CloudFormation deletion policy",
+            "default": "Retain",
+        },
         "BucketName": {
             "type": CFNString,
             "description": "(optional) Name for the S3 bucket",
@@ -76,7 +82,7 @@ class TfState(Blueprint):
         terraformstatebucket = self.template.add_resource(
             s3.Bucket(
                 "TerraformStateBucket",
-                DeletionPolicy="Retain",
+                DeletionPolicy=self.variables["BucketDeletionPolicy"],
                 AccessControl=s3.Private,
                 BucketName=If(
                     "BucketNameOmitted", NoValue, self.variables["BucketName"].ref

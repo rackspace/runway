@@ -1,7 +1,0 @@
-deployments:
-  - modules:
-      - tf_state.cfn
-    regions:
-      - us-east-1
-    parameters:
-      namespace: testsuite

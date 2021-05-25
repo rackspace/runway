@@ -8,10 +8,12 @@ from typing import TYPE_CHECKING, Any, Generator
 
 import pytest
 from click.testing import CliRunner
+from mock import patch
 
 from runway.config import CfnginConfig, RunwayConfig
 from runway.context import CfnginContext, RunwayContext
 from runway.core.components import DeployEnvironment
+from runway.env_mgr.tfenv import TFEnvManager
 
 from ..factories import cli_runner_factory
 
@@ -97,6 +99,15 @@ def cli_runner_isolated(cli_runner: CliRunner) -> Generator[CliRunner, None, Non
 def namespace() -> str:
     """Get CFNgin namespace."""
     return os.getenv("RUNWAY_TEST_NAMESPACE", f"{os.getenv('USER', 'user')}-local")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def patch_tfenv_dir(tfenv_dir: Path) -> Generator[None, None, None]:
+    """Patch TFEnvManager.env_dir."""
+    mocker = patch.object(TFEnvManager, "env_dir", tfenv_dir)
+    mocker.start()
+    yield
+    mocker.stop()
 
 
 @pytest.fixture(scope="module")

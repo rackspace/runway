@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from _pytest.config.argparsing import Parser
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner
+    from pytest import TempPathFactory
 
 
 def pytest_configure(config: Config) -> None:
@@ -96,3 +97,9 @@ def sanitize_environment() -> None:
     ]
     for var in env_vars:
         os.environ.pop(var, None)
+
+
+@pytest.fixture(scope="session")
+def tfenv_dir(tmp_path_factory: TempPathFactory) -> Path:
+    """Directory for storing tfenv between tests."""
+    return tmp_path_factory.mktemp(".tfenv", numbered=True)
