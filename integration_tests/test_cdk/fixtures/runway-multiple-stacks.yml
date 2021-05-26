@@ -1,9 +1,0 @@
----
-deployments:
-  - modules:
-      - multiple-stacks-app.cdk
-    regions:
-      - us-east-1
-    environments:
-      dev:
-        - us-east-1

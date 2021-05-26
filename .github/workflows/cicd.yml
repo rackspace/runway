@@ -121,6 +121,10 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2.3.2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # testing with npm < 7
       - name: Install Python
         uses: actions/setup-python@v2
         with:

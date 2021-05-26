@@ -18,6 +18,7 @@
 .vscode/bookmarks.json
 artifacts/*
 build
+cdk.out
 dist
 docs/source/_build
 docs/source/apidocs

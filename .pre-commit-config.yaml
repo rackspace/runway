@@ -17,7 +17,8 @@ repos:
       - id: file-contents-sorter
         files: |
           (?x)^(
-            \.gitignore|\.vscode/dictionaries/.*\.txt|
+            \.gitignore|
+            \.vscode/dictionaries/.*\.txt|
             MANIFEST.in
           )$
       - id: pretty-format-json
@@ -26,6 +27,12 @@ repos:
           (?x)^(
             \.vscode/.*\.json|
             pyrightconfig.json
+          )$
+      - id: pretty-format-json
+        args: [--autofix, --indent, '2']
+        files: |
+          (?x)^(
+            (.*)?(cdk|tsconfig|tslint).json
           )$
       - id: trailing-whitespace
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
