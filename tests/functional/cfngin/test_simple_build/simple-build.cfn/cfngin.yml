@@ -1,7 +1,7 @@
 namespace: ${namespace}
 cfngin_bucket: ''
 
-sys_path: ./../fixtures
+sys_path: ./../../fixtures
 
 stacks:
   - name: simple-build-vpc

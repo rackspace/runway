@@ -51,12 +51,12 @@ def test_deploy_log_messages(deploy_result: Result) -> None:
         "deployment_1:processing deployment (in progress)",
         "deployment_1:processing regions sequentially...",
         "",
-        "deployment_1.test_simple_build:processing module in us-east-1 (in progress)",
+        "deployment_1.simple-build.cfn:processing module in us-east-1 (in progress)",
         "cfngin.yml:deploy (in progress)",
         "simple-build-vpc:submitted (creating new stack)",
         "simple-build-vpc:complete (creating new stack)",
         "cfngin.yml:deploy (complete)",
-        "deployment_1.test_simple_build:processing module in us-east-1 (complete)",
+        "deployment_1.simple-build.cfn:processing module in us-east-1 (complete)",
         "deployment_1:processing deployment (complete)",
     ]
     expected = "\n".join(f"[runway] {msg}" for msg in expected_lines)
@@ -79,11 +79,11 @@ def test_deploy_no_change_log_messages(deploy_no_change_result: Result) -> None:
         "deployment_1:processing deployment (in progress)",
         "deployment_1:processing regions sequentially...",
         "",
-        "deployment_1.test_simple_build:processing module in us-east-1 (in progress)",
+        "deployment_1.simple-build.cfn:processing module in us-east-1 (in progress)",
         "cfngin.yml:deploy (in progress)",
         "simple-build-vpc:skipped (nochange)",
         "cfngin.yml:deploy (complete)",
-        "deployment_1.test_simple_build:processing module in us-east-1 (complete)",
+        "deployment_1.simple-build.cfn:processing module in us-east-1 (complete)",
         "deployment_1:processing deployment (complete)",
     ]
     expected = "\n".join(f"[runway] {msg}" for msg in expected_lines)
@@ -106,12 +106,12 @@ def test_destroy_log_messages(destroy_result: Result) -> None:
         "deployment_1:processing deployment (in progress)",
         "deployment_1:processing regions sequentially...",
         "",
-        "deployment_1.test_simple_build:processing module in us-east-1 (in progress)",
+        "deployment_1.simple-build.cfn:processing module in us-east-1 (in progress)",
         "cfngin.yml:destroy (in progress)",
         "simple-build-vpc:submitted (submitted for destruction)",
         "simple-build-vpc:complete (stack destroyed)",
         "cfngin.yml:destroy (complete)",
-        "deployment_1.test_simple_build:processing module in us-east-1 (complete)",
+        "deployment_1.simple-build.cfn:processing module in us-east-1 (complete)",
         "deployment_1:processing deployment (complete)",
     ]
     expected = "\n".join(f"[runway] {msg}" for msg in expected_lines)

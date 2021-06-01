@@ -1,6 +1,6 @@
 deployments:
   - modules:
-      - path: ./
+      - path: simple-build.cfn
     environments:
       test: true
     parameters:
