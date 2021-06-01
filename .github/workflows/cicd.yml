@@ -18,7 +18,6 @@ env:
   PIPENV_NOSPIN: true
   PIPENV_VENV_IN_PROJECT: true
   PIPENV_YES: true
-  RUNWAY_TEST_NAMESPACE: gh-action-${{ env.GITHUB_RUN_ID }}
 
 
 jobs:
@@ -151,6 +150,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.TEST_RUNNER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       - name: Run Tests
+        env:
+          RUNWAY_TEST_NAMESPACE: gh-action-${{ env.GITHUB_RUN_ID }}
         run: make test-functional
   test-python:
     name: Python Linting & Tests
