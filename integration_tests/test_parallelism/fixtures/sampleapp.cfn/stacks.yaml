@@ -1,8 +1,0 @@
-namespace: test-parallelism
-cfngin_bucket: ''
-
-sys_path: ./
-
-stacks:
-  test-stack:
-    template_path: templates/test_stack.yaml
