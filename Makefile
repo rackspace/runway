@@ -160,14 +160,14 @@ test-functional: ## run function tests only
 		--log-cli-format "[%(levelname)s] %(message)s" \
 		--log-cli-level 15 \
 			--no-cov \
-			--numprocesses auto
+			--numprocesses auto; \
 	else \
 		echo "  not using pytest-xdist"; \
 		pipenv run pytest \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \
-		--no-cov
+			--no-cov; \
 	fi
 
 test-integration: ## run integration tests only
