@@ -1,0 +1,28 @@
+service: serverless-test-promotezip
+configValidationMode: error
+
+custom:
+  environment: ${opt:stage}
+  namespace: ${env:RUNWAY_TEST_NAMESPACE, "${env:USER, "user"}-local"}
+  region: ${opt:region}
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  iam:
+    role:
+      name: ${self:custom.namespace}-${self:custom.environment}-serverless-test-promotezip-role
+      permissionsBoundary: ${cf:runway-test-infrastructure-test-runner-boundary.PolicyArn}
+  lambdaHashingVersion: "20201221"
+  runtime: nodejs12.x
+  stackName: ${self:custom.namespace}-${self:custom.environment}-serverless-test-promotezip
+
+functions:
+  helloWorld0:
+    handler: backend/func/handler.hello0
+    name: ${self:custom.namespace}-${self:custom.environment}-serverless-test-promotezip-backend
+  helloWorld1:
+    handler: frontend/func/handler.hello1
+    name: ${self:custom.namespace}-${self:custom.environment}-serverless-test-promotezip-frontend

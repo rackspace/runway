@@ -25,8 +25,6 @@ if TYPE_CHECKING:
 
 CURRENT_DIR = Path(__file__).parent
 
-pytestmark = pytest.mark.wip
-
 
 @pytest.fixture(scope="module")
 def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
