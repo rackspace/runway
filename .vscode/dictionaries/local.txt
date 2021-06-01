@@ -169,6 +169,7 @@ lambci
 levelname
 libpeerconnection
 linenodiv
+loadfile
 localhistory
 localnpipe
 maint
@@ -215,6 +216,7 @@ noqa
 noreferrer
 npmignore
 ntpath
+numprocesses
 nusr
 onefile
 onelogin
@@ -318,6 +320,7 @@ whichenv
 wontfix
 woot
 workpath
+xdist
 xlarge
 xtrace
 xvda
