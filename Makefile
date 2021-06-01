@@ -144,19 +144,39 @@ setup-pre-commit: ## install pre-commit git hooks
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
-	@pipenv run pytest --cov=runway --cov-report term-missing:skip-covered --integration
+	@pipenv run pytest \
+		--cov runway \
+		--cov-report term-missing:skip-covered \
+		--integration \
+		--numprocesses auto
 
 test-functional: ## run function tests only
 	@echo "Running functional tests..."
-	@pipenv run pytest \
+	@if [ $${CI} ]; then \
+		echo "  using pytest-xdist"; \
+		pipenv run pytest \
+			--dist loadfile \
 		--functional \
 		--log-cli-format "[%(levelname)s] %(message)s" \
 		--log-cli-level 15 \
+			--no-cov \
+			--numprocesses auto
+	else \
+		echo "  not using pytest-xdist"; \
+		pipenv run pytest \
+			--functional \
+			--log-cli-format "[%(levelname)s] %(message)s" \
+			--log-cli-level 15 \
 		--no-cov
+	fi
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
-	@pipenv run pytest --cov=runway --cov-report term-missing:skip-covered --integration-only
+	@pipenv run pytest
+		--cov runway \
+		--cov-report term-missing:skip-covered \
+		--integration-only \
+		--numprocesses auto
 
 test-unit: ## run unit tests only
 	@echo "Running unit tests..."
