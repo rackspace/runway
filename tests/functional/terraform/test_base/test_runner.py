@@ -45,6 +45,7 @@ def deploy_result(
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     destroy_result = cli_runner.invoke(cli, ["destroy"], env={"CI": "1"})
     # cleanup files
+    shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
     # pylint: disable=unexpected-keyword-arg

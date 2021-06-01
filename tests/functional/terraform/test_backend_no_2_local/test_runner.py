@@ -42,6 +42,7 @@ def deploy_local_backend_result(
     assert (CURRENT_DIR / "terraform.tfstate.d").exists()
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     # cleanup files
+    shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
     # pylint: disable=unexpected-keyword-arg

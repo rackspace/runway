@@ -58,6 +58,7 @@ def deploy_s3_backend_result(
     """Execute `runway deploy` with `runway destory` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "test"], env={"CI": "1"})
     # cleanup files
+    shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
     (CURRENT_DIR / "local_backend").unlink(  # pylint: disable=unexpected-keyword-arg

@@ -2,6 +2,8 @@
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 
+import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING, Generator
 
 import pytest
@@ -13,12 +15,15 @@ if TYPE_CHECKING:
 
     from runway.context import CfnginContext
 
+CURRENT_DIR = Path(__file__).parent
+
 
 @pytest.fixture(scope="module")
 def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destory` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     assert cli_runner.invoke(cli, ["destroy"], env={"CI": "1"}).exit_code == 0
+    shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
 
 
 @pytest.fixture(scope="module")
