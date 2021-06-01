@@ -1,0 +1,10 @@
+deployments:
+  - modules:
+      - path: git::https://github.com/onicagroup/runway.git//tests/functional/cfngin/test_simple_build/simple-build.cfn?branch=master
+        type: cloudformation
+    environments:
+      test: true
+    parameters:
+      namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-git
+    regions:
+      - us-east-1
