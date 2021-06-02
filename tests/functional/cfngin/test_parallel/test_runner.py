@@ -49,11 +49,11 @@ def test_deploy_log_messages(deploy_result: Result) -> None:
     assert (
         "deployment_1:processing regions in parallel... (output will be interwoven)"
         in deploy_result.stdout
-    )
+    ), f"expected not in stdout:\n{deploy_result.stdout}"
     assert (
         "deployment_1.parallel_parent:processing modules in parallel... "
         "(output will be interwoven)" in deploy_result.stdout
-    )
+    ), f"expected not in stdout:\n{deploy_result.stdout}"
 
 
 @pytest.mark.order("last")
