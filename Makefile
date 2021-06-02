@@ -147,6 +147,7 @@ test: ## run integration and unit tests
 	@pipenv run pytest \
 		--cov runway \
 		--cov-report term-missing:skip-covered \
+		--dist loadfile \
 		--integration \
 		--numprocesses auto
 
@@ -175,6 +176,7 @@ test-integration: ## run integration tests only
 	@pipenv run pytest
 		--cov runway \
 		--cov-report term-missing:skip-covered \
+		--dist loadfile \
 		--integration-only \
 		--numprocesses auto
 
