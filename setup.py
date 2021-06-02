@@ -72,11 +72,5 @@ setup(
     setup_requires=["setuptools_scm"],
     use_scm_version={"local_scheme": local_scheme},
     entry_points={"console_scripts": ["runway=runway._cli.main:cli"]},
-    scripts=[
-        "scripts/tf-runway",
-        "scripts/tf-runway.cmd",
-        "scripts/tfenv-runway",
-        "scripts/tfenv-runway.cmd",
-    ],
     include_package_data=True,  # needed for templates,blueprints,hooks
 )
