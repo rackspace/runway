@@ -15,9 +15,6 @@ defaults:
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-  PIPENV_NOSPIN: true
-  PIPENV_VENV_IN_PROJECT: true
-  PIPENV_YES: true
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
 
 
@@ -72,12 +69,8 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - name: Setup Python Virtual Environment
-        run: pipenv sync
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -107,12 +100,8 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - uses: pre-commit/action@v2.0.0
   test-functional:
     name: Functional Tests
@@ -138,12 +127,8 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -202,14 +187,10 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Install Node Dependencies
         run: make npm-install
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
       - name: Run Linters
         run: make lint
       - name: Run Integration & Unit Tests
@@ -254,12 +235,8 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact

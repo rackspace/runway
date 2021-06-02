@@ -1,26 +1,28 @@
+.PHONY: blueprints public test test-alt
+
 SHELL := /bin/bash
 
-sync:
-	pipenv sync --dev
+install:
+	@poetry install
 
 deploy:
 	@pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
-		PIPENV_MAX_DEPTH=5 pipenv run runway deploy && \
+		poetry run runway deploy && \
 		popd
 
 destroy:
 	@pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
-		PIPENV_MAX_DEPTH=5 pipenv run runway destroy && \
+		poetry run runway destroy && \
 		popd
 
 test:
 	@pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
-		PIPENV_MAX_DEPTH=5 pipenv run runway test && \
+		poetry run runway test && \
 		popd
 
 plan:
 	@pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
-		PIPENV_MAX_DEPTH=5 pipenv run runway plan && \
+		poetry run runway plan && \
 		popd
 
 %:

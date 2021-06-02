@@ -1,6 +1,5 @@
 .PHONY: help list install install-all clean fix-isort lint lint-flake8 lint-isort lint-pylint lint_two test test-integration test-unit create-tfenv-ver-file build build-pyinstaller-file build-pyinstaller-folder build-whl release npm-prep
 
-PIPENV_KEEP_OUTDATED := $(if $(PIPENV_KEEP_OUTDATED), --keep-outdated,)
 SHELL := /bin/bash
 
 help: ## show this message
@@ -41,7 +40,7 @@ clean: ## remove generated file from the project directory
 	find . -name ".runway" -type d -prune -exec rm -rf '{}' +
 
 cov-report: ## display a report in the terminal of files missing coverage
-	@pipenv run coverage report \
+	@poetry run coverage report \
 		--precision=2 \
 		--show-missing \
 		--skip-covered \
@@ -52,28 +51,26 @@ create-tfenv-ver-file: ## create a tfenv version file using the latest version
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
 
 fix-black: ## automatically fix all black errors
-	@pipenv run black .
+	@poetry run black .
 
 fix-isort: ## automatically fix all isort errors
-	@pipenv run isort .
+	@poetry run isort .
 
 install: ## create a python virtual environment in the project for development
-	@PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev
-	@PIPENV_VENV_IN_PROJECT=1 pipenv clean
+	@poetry install --remove-untracked
 
 install-docs: ## create a python virtual environment for building documentation
 	@pushd docs && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		poetry install --remove-untracked && \
 		popd
 
-install-all: install install-docs ## sync all virtual environments used by this project with their Pipfile.lock
+install-all: install install-docs ## setup all virtual environments used by this project
 
 lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
-	@pipenv run black . --check --color --diff
+	@poetry run black . --check --color --diff
 	@echo ""
 
 lint-cspell: ## run cspell
@@ -83,17 +80,17 @@ lint-cspell: ## run cspell
 
 lint-flake8: ## run flake8
 	@echo "Running flake8..."
-	@pipenv run flake8 --config=setup.cfg
+	@poetry run flake8 --config=setup.cfg
 	@echo ""
 
 lint-isort: ## run isort
 	@echo "Running isort... If this fails, run 'make fix-isort' to resolve."
-	@pipenv run isort . --check-only
+	@poetry run isort . --check-only
 	@echo ""
 
 lint-pylint: ## run pylint
 	@echo "Running pylint..."
-	@pipenv run pylint runway tests --rcfile=pyproject.toml
+	@poetry run pylint runway tests --rcfile=pyproject.toml
 	@echo ""
 
 lint-pyright: ## run pyright
@@ -124,16 +121,16 @@ release: clean create-tfenv-ver-file build # publish to PyPi
 	curl -D - -X PURGE https://pypi.org/simple/runway
 
 run-pre-commit: ## run pre-commit for all files
-	@pipenv run pre-commit run -a
+	@poetry run pre-commit run -a
 
 setup: npm-ci install install-docs setup-pre-commit ## setup development environment
 
 setup-pre-commit: ## install pre-commit git hooks
-	@pipenv run pre-commit install
+	@poetry run pre-commit install
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
-	@pipenv run pytest \
+	@poetry run pytest \
 		--cov runway \
 		--cov-report term-missing:skip-covered \
 		--dist loadfile \
@@ -144,7 +141,7 @@ test-functional: ## run function tests only
 	@echo "Running functional tests..."
 	@if [ $${CI} ]; then \
 		echo "  using pytest-xdist"; \
-		pipenv run pytest \
+		poetry run pytest \
 			--dist loadfile \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
@@ -153,7 +150,7 @@ test-functional: ## run function tests only
 			--numprocesses auto; \
 	else \
 		echo "  not using pytest-xdist"; \
-		pipenv run pytest \
+		poetry run pytest \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \
@@ -162,7 +159,7 @@ test-functional: ## run function tests only
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
-	@pipenv run pytest
+	@poetry run pytest
 		--cov runway \
 		--cov-report term-missing:skip-covered \
 		--dist loadfile \
@@ -171,16 +168,14 @@ test-integration: ## run integration tests only
 
 test-unit: ## run unit tests only
 	@echo "Running unit tests..."
-	@pipenv run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing:skip-covered
+	@poetry run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing:skip-covered
 
 update: ## update project python environment
-	@PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED}
-	@PIPENV_VENV_IN_PROJECT=1 pipenv clean
+	@poetry update
 
 update-docs: ## update python virtual environment for building documentation
 	@pushd docs && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
+		poetry update && \
 		popd
 
 update-all: update update-docs ## update all python environments

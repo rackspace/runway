@@ -90,8 +90,8 @@ $ npx runway new
 $ pip install runway
 $ runway new
 # OR
-$ pipenv install runway
-$ pipenv run runway new
+$ poetry add --dev runway
+$ poetry run runway new
 ```
 
 **Suggested use:** Python projects

@@ -4,12 +4,9 @@ name: Pyinstaller (on_push)
 on:
   push:
     paths:
-      - .github/requirements/build-pyinstaller.txt
       - .github/scripts/cicd/build_pyinstaller.sh
       - .github/workflows/on-push-pyinstaller.yml
       - runway/*
-      - Pipfile
-      - Pipfile.lock
       - poetry.lock
       - pyproject.toml
       - runway.file.spec
@@ -19,9 +16,6 @@ on:
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-  PIPENV_NOSPIN: true
-  PIPENV_VENV_IN_PROJECT: true
-  PIPENV_YES: true
 
 
 jobs:
@@ -83,15 +77,8 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        working-directory: .github/requirements
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -r requirements.txt
-      - name: Setup Python Virtual Environment
-        # our version of pipenv does not respect versions in a requirements file
-        # so we have to use pip within a venv to process it correctly
-        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Run Build
         run: make build-pyinstaller-file
       - name: Upload Artifacts
@@ -157,15 +144,8 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        working-directory: .github/requirements
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -r requirements.txt
-      - name: Setup Python Virtual Environment
-        # our version of pipenv does not respect versions in a requirements file
-        # so we have to use pip within a venv to process it correctly
-        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Run Build
         run: make build-pyinstaller-folder
       - name: Upload Artifacts
