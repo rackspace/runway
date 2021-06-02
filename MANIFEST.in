@@ -31,7 +31,6 @@ prune build
 prune dist
 prune docs
 prune infrastructure
-prune integration_test_infrastructure
 prune node_modules
 prune npm
 prune quickstarts

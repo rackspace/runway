@@ -10,7 +10,6 @@
         "**/docs",
         "**/node_modules",
         "**/typings",
-        "**/integration_test_infrastructure",
         "**/runway/aws_sso_botocore",
         "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
         "**/runway/templates/cdk-py",
