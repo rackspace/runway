@@ -155,7 +155,6 @@ jobs:
   test-python:
     name: Python Linting & Tests
     strategy:
-      fail-fast: true
       matrix:
         python-version: [3.7, 3.8]
         os: [ubuntu-18.04, windows-latest]
