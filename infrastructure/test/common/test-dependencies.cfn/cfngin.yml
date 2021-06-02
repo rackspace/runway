@@ -1,0 +1,15 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+
+sys_path: ./../../../
+
+tags:
+  Environment: ${environment}
+  Namespace: ${namespace}
+  Repository: https://github.com/onicagroup/runway
+
+stacks:
+  - name: cfngin-bucket
+    class_path: blueprints.CfnginBucket
+    variables:
+      BucketName: runway-testing-lab-cfngin-bucket-${region}

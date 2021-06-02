@@ -1,0 +1,32 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+
+sys_path: ./../../../
+
+tags:
+  Environment: ${environment}
+  Namespace: ${namespace}
+  Repository: https://github.com/onicagroup/runway
+
+stacks:
+  - name: test-runner-boundary
+    class_path: blueprints.TestRunnerBoundary
+  - name: admin-prevent-privilege-escalation
+    class_path: blueprints.AdminPreventPrivilegeEscalation
+    variables:
+      ApprovedPermissionBoundaries:
+        - ${output test-runner-boundary::Policy}
+  - name: deploy-role
+    class_path: blueprints.AdminRole
+    variables:
+      CrossAccountAccessAccountIds:
+        - ${test_account_id}
+      PermissionsBoundary: ${output admin-prevent-privilege-escalation::PolicyArn}
+      RoleName: ${namespace}-gh-action-deploy
+  - name: test-runner-role
+    class_path: blueprints.AdminRole
+    variables:
+      CrossAccountAccessAccountIds:
+        - ${test_account_id}
+      PermissionsBoundary: ${output test-runner-boundary::PolicyArn}
+      RoleName: ${namespace}-gh-action-runner

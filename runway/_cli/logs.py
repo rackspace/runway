@@ -12,7 +12,7 @@ from ..compat import cached_property
 # COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger("runway")
 
-LOG_FORMAT = "[%(programname)s] %(message)s"
+LOG_FORMAT = "[runway] %(message)s"
 LOG_FORMAT_VERBOSE = logging.BASIC_FORMAT
 LOG_FIELD_STYLES: Dict[str, Dict[str, Any]] = {
     "asctime": {},

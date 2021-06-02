@@ -1,0 +1,11 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+sys_path: ./../fixtures
+
+stacks:
+  - name: dependent-rollback-parent
+    class_path: blueprints.Broken
+  - name: dependent-rollback-child
+    class_path: blueprints.Dummy
+    requires:
+      - dependent-rollback-parent

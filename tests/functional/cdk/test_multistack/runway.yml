@@ -1,0 +1,13 @@
+deployments:
+  - modules:
+      - path: ./
+        options:
+          build_steps:
+            - npm run build
+        type: cdk
+    environments:
+      test: true
+    parameters:
+      namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
+    regions:
+      - us-east-1

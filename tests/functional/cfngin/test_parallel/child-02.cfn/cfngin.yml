@@ -1,0 +1,8 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+
+sys_path: ./../../fixtures
+
+stacks:
+  - name: cfngin-test-parallel-child-02
+    class_path: blueprints.Dummy

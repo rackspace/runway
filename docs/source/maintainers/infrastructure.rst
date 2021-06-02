@@ -50,13 +50,11 @@ onica-public-prod
     - path to download the binary executables from S3
 
 
-*******
-testing
-*******
+****
+test
+****
 
-.. note:: Currently exists in the ``integration_test_infrastructure/`` directory as ``codebuild/``.
-
-AWS account for running Runway integration and end-to-end tests.
+AWS account for running Runway functional tests.
 
 .. rubric:: Onica SSO Name
 
@@ -67,13 +65,12 @@ onica-platform-runway-testing-lab
 TBA
 
 
-***********
-testing-alt
-***********
+*******
+test-alt
+********
 
-.. note:: Currently exists in the ``integration_test_infrastructure/`` directory as ``alt_account_role/``.
 
-AWS account for running Runway integration and end-to-end tests that require cross-account access to complete.
+AWS account for running Runway functional tests that require cross-account access to complete.
 
 .. rubric:: Onica SSO Name
 

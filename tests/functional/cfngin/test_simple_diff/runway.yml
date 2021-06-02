@@ -1,0 +1,20 @@
+deployments:
+  - modules:
+      - path: ./
+    environments:
+      test: true
+      test2: true
+    parameters:
+      instance_type: ${var instance_type.${env DEPLOY_ENVIRONMENT}}
+      namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
+      wait_condition: ${var wait_condition.${env DEPLOY_ENVIRONMENT}}
+    regions:
+      - us-east-1
+
+variables:
+  instance_type:
+    test: m5.large
+    test2: m5.xlarge
+  wait_condition:
+    test: 1
+    test2: 2

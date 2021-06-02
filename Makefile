@@ -38,6 +38,7 @@ clean: ## remove generated file from the project directory
 	rm -rf tmp/
 	rm -rf src/
 	rm -rf postinstall.js preuninstall.js .coverage .npmignore
+	find . -name ".runway" -type d -prune -exec rm -rf '{}' +
 
 cov-report: ## display a report in the terminal of files missing coverage
 	@pipenv run coverage report \
@@ -66,19 +67,7 @@ install-docs: ## create a python virtual environment for building documentation
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-install-integration-tests:  ## create a python virtual environment for legacy integration tests
-	@pushd integration_tests && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
-		popd
-
-install-integration-test-infrastructure:  ## create a python virtual environment for legacy integration test infrastructure
-	@pushd integration_test_infrastructure && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
-		popd
-
-install-all: install install-docs install-integration-tests install-integration-test-infrastructure ## sync all virtual environments used by this project with their Pipfile.lock
+install-all: install install-docs ## sync all virtual environments used by this project with their Pipfile.lock
 
 lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
@@ -144,15 +133,41 @@ setup-pre-commit: ## install pre-commit git hooks
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
-	@pipenv run pytest --cov=runway --cov-report term-missing:skip-covered --integration
+	@pipenv run pytest \
+		--cov runway \
+		--cov-report term-missing:skip-covered \
+		--dist loadfile \
+		--integration \
+		--numprocesses auto
 
 test-functional: ## run function tests only
 	@echo "Running functional tests..."
-	@pipenv run pytest --functional --no-cov
+	@if [ $${CI} ]; then \
+		echo "  using pytest-xdist"; \
+		pipenv run pytest \
+			--dist loadfile \
+			--functional \
+			--log-cli-format "[%(levelname)s] %(message)s" \
+			--log-cli-level 15 \
+			--no-cov \
+			--numprocesses auto; \
+	else \
+		echo "  not using pytest-xdist"; \
+		pipenv run pytest \
+			--functional \
+			--log-cli-format "[%(levelname)s] %(message)s" \
+			--log-cli-level 15 \
+			--no-cov; \
+	fi
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
-	@pipenv run pytest --cov=runway --cov-report term-missing:skip-covered --integration-only
+	@pipenv run pytest
+		--cov runway \
+		--cov-report term-missing:skip-covered \
+		--dist loadfile \
+		--integration-only \
+		--numprocesses auto
 
 test-unit: ## run unit tests only
 	@echo "Running unit tests..."
@@ -168,16 +183,4 @@ update-docs: ## update python virtual environment for building documentation
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-update-integration-tests: ## update python virtual environment for legacy integration tests
-	@pushd integration_tests && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
-		popd
-
-update-integration-test-infrastructure: ## update python virtual environment for legacy integration test
-	@pushd integration_test_infrastructure && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
-		popd
-
-update-all: update update-docs update-integration-tests update-integration-test-infrastructure ## update all python environments
+update-all: update update-docs ## update all python environments

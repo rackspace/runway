@@ -1,3 +1,0 @@
-namespace: ${CFNGIN_NAMESPACE}
-cfngin_bucket: ''
-sys_path: ./

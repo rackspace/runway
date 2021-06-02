@@ -1,0 +1,19 @@
+deployments:
+  - modules:
+      - path: bootstrap.cfn
+        tags:
+          - bootstrap
+      - path: ./
+        options:
+          promotezip:
+            bucketname: ${cfn ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}-sls-test-promotezip-bucket.BucketName}
+        tags:
+          - sls
+        type: serverless
+    environments:
+      test: true
+      promotezip: true
+    parameters:
+      namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
+    regions:
+      - us-east-1

@@ -2,14 +2,14 @@
   "compileOnSave": false,
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
     "baseUrl": "src",
+    "declaration": false,
+    "moduleResolution": "node",
+    "removeComments": true,
     "rootDirs": [
       "src"
     ],
     "sourceMap": true,
-    "declaration": false,
-    "removeComments": true,
     "strictNullChecks": true,
     "target": "es2018",
     "typeRoots": [

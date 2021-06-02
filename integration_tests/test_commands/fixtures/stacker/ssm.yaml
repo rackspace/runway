@@ -1,7 +1,0 @@
-Resources:
-  SSMString:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: /runway/integration-test/cfngin
-      Type: String
-      Value: foo

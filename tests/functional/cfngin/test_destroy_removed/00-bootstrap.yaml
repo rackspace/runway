@@ -1,0 +1,37 @@
+namespace: ${namespace}
+cfngin_bucket: ${cfngin_bucket}
+persistent_graph_key: test.json
+
+sys_path: ./../fixtures
+
+stacks:
+  - name: vpc
+    class_path: blueprints.Dummy
+  - name: bastion
+    class_path: blueprints.Dummy
+    requires:
+      - vpc
+  - name: other
+    class_path: blueprints.Dummy
+
+post_destroy:
+  - path: hooks.s3_cleanup.delete_prefix
+    required: True
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: persistent_graphs/${namespace}/
+  - path: hooks.s3_cleanup.delete_prefix
+    required: True
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: stack_templates/${namespace}-bastion/
+  - path: hooks.s3_cleanup.delete_prefix
+    required: True
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: stack_templates/${namespace}-other/
+  - path: hooks.s3_cleanup.delete_prefix
+    required: True
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: stack_templates/${namespace}-vpc/

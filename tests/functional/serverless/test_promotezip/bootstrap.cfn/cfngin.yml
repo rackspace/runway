@@ -1,0 +1,16 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+
+sys_path: ./../../../../../infrastructure
+
+pre_destroy:
+  - path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+    required: true
+    args:
+      bucket_name: ${cfn ${namespace}-sls-test-promotezip-bucket.BucketName}
+
+stacks:
+  - name: sls-test-promotezip-bucket
+    class_path: blueprints.CfnginBucket
+    variables:
+      BucketName: ${namespace}-sls-test-promotezip-bucket-${region}

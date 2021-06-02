@@ -30,8 +30,10 @@ moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"],version = "~=2.0"}
 pytest = "~=6.2"
 pytest-cov = "~=2.10"
 pytest-mock = "~=3.5"
+pytest-order = "*"
 pytest-subprocess = "~=1.0"
 pytest-sugar = "*"
+pytest-xdist = "~=2.2"
 testfixtures = "~=4.10.0"
 # Build
 setuptools-scm = "~=3.5.0"

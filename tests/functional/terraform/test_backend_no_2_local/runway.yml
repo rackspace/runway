@@ -1,0 +1,12 @@
+ignore_git_branch: true
+
+deployments:
+  - modules:
+      - path: ./
+        type: terraform
+    environments:
+      test: true
+    parameters:
+      test: "true"
+    regions:
+      - us-east-1

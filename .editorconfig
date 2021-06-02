@@ -9,7 +9,7 @@ trim_trailing_whitespace = true
 [*.json]
 indent_size = 4
 
-[*.{md,rst,yml,yaml}}]
+[*.{html,md,rst,yml,yaml}}]
 indent_size = 2
 
 [*.py]
@@ -23,5 +23,5 @@ indent_size = 2
 indent_size = 4
 indent_style = tab
 
-[{package,package-lock}.json]
+[{cdk,package,package-lock,tsconfig,tslint}.json]
 indent_size = 2

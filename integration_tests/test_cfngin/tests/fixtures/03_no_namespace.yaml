@@ -1,6 +1,0 @@
-cfngin_bucket: ''
-sys_path: ./
-
-stacks:
-  - name: fake_stack
-    template_path: no-template.yaml

@@ -1,0 +1,12 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+sys_path: ./../fixtures
+
+stacks:
+  - name: locked-stack-vpc
+    class_path: blueprints.Dummy
+    locked: true
+  - name: locked-stack-bastion
+    class_path: blueprints.Dummy
+    variables:
+      StringVariable: ${output locked-stack-vpc::DummyId}

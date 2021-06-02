@@ -1,0 +1,7 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+sys_path: ./../fixtures
+
+stacks:
+  - name: locked-stack-vpc
+    class_path: blueprints.Dummy

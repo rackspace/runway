@@ -1,0 +1,19 @@
+ignore_git_branch: true  # using dir name
+
+deployments:
+  - modules:
+      - path: iam.cfn
+      - path: test-dependencies.cfn
+    environments:
+      common: ${var account_id.test}/us-east-1
+    regions:
+      - us-east-1
+    parameters:
+      namespace: runway-test-infrastructure
+      test_account_id: ${var account_id.test}
+      test_alt_account_id: ${var account_id.test-alt}
+
+variables:
+  account_id:
+    test: "523485371024"
+    test-alt: "395611358874"

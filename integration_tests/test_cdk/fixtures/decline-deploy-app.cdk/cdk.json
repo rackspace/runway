@@ -1,4 +1,0 @@
-{
-    "app": "pipenv run python app.py",
-    "versionReporting": false
-}
