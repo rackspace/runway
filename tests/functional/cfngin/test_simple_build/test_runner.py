@@ -9,13 +9,30 @@ from typing import TYPE_CHECKING, Generator
 import pytest
 
 from runway._cli import cli
+from runway.config import CfnginConfig
 
 if TYPE_CHECKING:
+    from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
-    from runway.context import CfnginContext
+    from runway.config import RunwayConfig
+    from runway.context import CfnginContext, RunwayContext
 
 CURRENT_DIR = Path(__file__).parent
+
+
+@pytest.fixture(scope="module")
+def cfngin_config(
+    request: SubRequest, runway_config: RunwayConfig, runway_context: RunwayContext
+) -> CfnginConfig:
+    """Find and return the CFNgin config."""
+    runway_config.deployments[0].resolve(
+        runway_context, variables=runway_config.variables
+    )
+    return CfnginConfig.parse_file(
+        path=Path(request.fspath).parent / "simple-build.cfn" / "cfngin.yml",
+        parameters=runway_config.deployments[0].parameters,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -24,6 +41,7 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     assert cli_runner.invoke(cli, ["destroy"], env={"CI": "1"}).exit_code == 0
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
+    shutil.rmtree(CURRENT_DIR / "simple-build.cfn" / ".runway", ignore_errors=True)
 
 
 @pytest.fixture(scope="module")
