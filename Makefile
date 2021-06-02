@@ -66,19 +66,13 @@ install-docs: ## create a python virtual environment for building documentation
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-install-integration-tests:  ## create a python virtual environment for legacy integration tests
-	@pushd integration_tests && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
-		popd
-
 install-integration-test-infrastructure:  ## create a python virtual environment for legacy integration test infrastructure
 	@pushd integration_test_infrastructure && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv sync --dev && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-install-all: install install-docs install-integration-tests install-integration-test-infrastructure ## sync all virtual environments used by this project with their Pipfile.lock
+install-all: install install-docs install-integration-test-infrastructure ## sync all virtual environments used by this project with their Pipfile.lock
 
 lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
@@ -194,16 +188,10 @@ update-docs: ## update python virtual environment for building documentation
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-update-integration-tests: ## update python virtual environment for legacy integration tests
-	@pushd integration_tests && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
-		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
-		popd
-
 update-integration-test-infrastructure: ## update python virtual environment for legacy integration test
 	@pushd integration_test_infrastructure && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv update --dev${PIPENV_KEEP_OUTDATED} && \
 		PIPENV_VENV_IN_PROJECT=1 pipenv clean && \
 		popd
 
-update-all: update update-docs update-integration-tests update-integration-test-infrastructure ## update all python environments
+update-all: update update-docs update-integration-test-infrastructure ## update all python environments
