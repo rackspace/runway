@@ -18,7 +18,7 @@ env:
   PIPENV_NOSPIN: true
   PIPENV_VENV_IN_PROJECT: true
   PIPENV_YES: true
-  RUNWAY_TEST_NAMESPACE: gh-action-${{ github.run_id }}
+  RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
 
 
 jobs:
