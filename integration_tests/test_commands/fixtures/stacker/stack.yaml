@@ -1,6 +1,0 @@
-namespace: dev
-cfngin_bucket: ''
-
-stacks:
-  cfngin-integration-test:
-    template_path: ssm.yaml
