@@ -4,7 +4,6 @@
         "**/.demo",
         "**/.eggs",
         "**/.git",
-        "**/.github",
         "**/.runway",
         "**/.venv",
         "**/docs",
@@ -14,6 +13,9 @@
         "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
         "**/runway/templates/cdk-py",
         "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src"
+    ],
+    "extraPaths": [
+        "./.github/scripts/urlshortener"
     ],
     "pythonVersion": "3.8",
     "reportDuplicateImport": "none",

@@ -1,19 +1,16 @@
-export:
-	pipenv lock --requirements > requirements.txt
+install:
+	@poetry install
 
-lint: lint-flake8 lint-pylint lint-mypy
+lint: lint-flake8 lint-pylint
 
 lint-flake8:
-	pipenv run flake8 update_urls.py --max-line-length 98
-
-lint-mypy:
-	pipenv run mypy update_urls.py --ignore-missing-imports
+	@poetry run flake8 update_urls.py
 
 lint-pylint:
-	pipenv run pylint update_urls.py --rcfile=./../../../.pylintrc
-
-sync:
-	pipenv sync --dev
+	@poetry run pylint update_urls.py \
+		--rcfile=./../../../pyproject.toml
 
 test:
-	pipenv run pytest ./test_update_urls.py --cov=update_urls
+	@poetry run pytest ./test_update_urls.py \
+		--cov update_urls \
+		--cov-config ./../../../pyproject.toml

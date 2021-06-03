@@ -80,6 +80,7 @@ pytest-order = "^1"  # pytest plugin
 pytest-subprocess = "^1.0"  # pytest plugin
 pytest-sugar = "^0.9"  # pytest plugin
 pytest-xdist = "^2.2"  # pytest plugin
+semver = "^2.13"  # only used in .github/scripts/urlshortener
 testfixtures = "^4.10"  # TODO remove use of this dependency - was inherited
 
 [tool.poetry.dev-dependencies.boto3-stubs]

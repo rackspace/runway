@@ -5,18 +5,10 @@ Scripts for the URL shortener action.
 Table of Contents
 
 - [urlshortener](#urlshortener)
-  - [Updating Dependencies](#updating-dependencies)
   - [Scripts](#scripts)
     - [update_urls.py](#update_urlspy)
 
-## Updating Dependencies
-
-When making changes to the **Pipfile**, run `make export` to update the **requirements.txt** file.
-
 ## Scripts
-
-Before using any of the scripts in this directory, run `make sync` to install required dependencies in a virtualenv.
-Or, if being run from an Action, install using `pip install -r requirements.txt`.
 
 ### update_urls.py
 

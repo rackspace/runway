@@ -1,6 +1,6 @@
 """Tests for update_urls."""
 # pylint: disable=no-member
-from unittest.mock import ANY, MagicMock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 import boto3
 import pytest
@@ -40,59 +40,48 @@ def test_put_item():
 
 
 @patch("update_urls.put_item")
-def test_handler(mock_put_item):
+def test_handler(mock_put_item: Mock):
     """Test handler."""
-    table = MagicMock()
-    calls = []
+    table = Mock()
     assert not handler(table, "test-bucket", "us-west-2", "1.0.0", True)
-    calls.append(
+    calls = [
         call(
             table=table,
             id_val="runway/latest/linux",
             target="https://test-bucket.s3-us-west-2.amazonaws.com/"
             "runway/1.0.0/linux/runway",
-        )
-    )
-    calls.append(
+        ),
         call(
             table=table,
             id_val="runway/1.0.0/linux",
             target="https://test-bucket.s3-us-west-2.amazonaws.com/"
             "runway/1.0.0/linux/runway",
-        )
-    )
-    calls.append(
+        ),
         call(
             table=table,
             id_val="runway/latest/osx",
             target="https://test-bucket.s3-us-west-2.amazonaws.com/"
             "runway/1.0.0/osx/runway",
-        )
-    )
-    calls.append(
+        ),
         call(
             table=table,
             id_val="runway/1.0.0/osx",
             target="https://test-bucket.s3-us-west-2.amazonaws.com/"
             "runway/1.0.0/osx/runway",
-        )
-    )
-    calls.append(
+        ),
         call(
             table=table,
             id_val="runway/latest/windows",
             target="https://test-bucket.s3-us-west-2.amazonaws.com/"
             "runway/1.0.0/windows/runway.exe",
-        )
-    )
-    calls.append(
+        ),
         call(
             table=table,
             id_val="runway/1.0.0/windows",
             target="https://test-bucket.s3-us-west-2.amazonaws.com/"
             "runway/1.0.0/windows/runway.exe",
-        )
-    )
+        ),
+    ]
 
     assert not handler(table, "test-bucket", "us-east-1", "1.1.0", False)
     calls.append(
@@ -124,7 +113,7 @@ def test_handler(mock_put_item):
 
 
 @patch("update_urls.handler")
-def test_command(mock_handler):
+def test_command(mock_handler: Mock):
     """Test command."""
     runner = CliRunner()
     result = runner.invoke(
