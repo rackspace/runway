@@ -21,10 +21,11 @@ if [ "$1" != "file" ] && [ "$1" != "folder" ]; then
 fi
 
 RUNWAY_VERSION=$(poetry version --short)
+SDIST=$(find dist -type f -name "runway-*.tar.gz" -print | tail -n 1)
 
 poetry build
-poetry run pip install "dist/runway-${RUNWAY_VERSION}.tar.gz"
-rm -rf "dist/runway-${RUNWAY_VERSION}.tar.gz"
+poetry run pip install "${SDIST}"
+find dist/* -exec rm -rfv "{}" +
 mkdir -p "artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}"
 poetry run pip show setuptools
 poetry run pyinstaller --noconfirm --clean runway.$1.spec
