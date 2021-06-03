@@ -54,9 +54,9 @@ def deploy_no_backend_result(
     cli_runner: CliRunner,
     no_backend: Path,
     tf_version: str,
-) -> Result:
+) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destory` as a cleanup step."""
-    return cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
+    yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
 
 
 def test_deploy_no_backend_result(deploy_no_backend_result: Result) -> None:
@@ -64,7 +64,6 @@ def test_deploy_no_backend_result(deploy_no_backend_result: Result) -> None:
     assert deploy_no_backend_result.exit_code == 0
 
 
-@pytest.mark.order(after="test_deploy_no_backend_result")
 def test_deploy_local_backend_result(deploy_local_backend_result: Result) -> None:
     """Test deploy local backend result."""
     # currently, this is expected to fail - Terraform prompts for user confirmation
