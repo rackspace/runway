@@ -8,6 +8,7 @@ cfnlintrc
 coloredlogs
 ctypes
 distutils
+dunamai
 gitpython
 isort
 moto
