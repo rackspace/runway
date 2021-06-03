@@ -305,12 +305,14 @@ ungrouped
 unhashable
 unpause
 unseekable
+untracked
 urlshortener
 urlunparse
 userarn
 uuidgen
 vendored
 venv
+virtualenvs
 walkthrough
 webfonts
 webserver

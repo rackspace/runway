@@ -62,15 +62,15 @@ black = "21.5b1"  # since its pre-release, it has to be pinned this way
 coverage = { version = "^5.5", extras = ["toml"] }
 doc8 = "^0.8"  # for linting with vscode rst extension
 flake8 = "^3.9"
-flake8-docstrings = "^1.6"  # falke8 plugin
+flake8-docstrings = "^1.6"  # flake8 plugin
 isort = "^5.8"
 mock = "^4.0"
 moto = { version = "^2.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
 mypy-boto3 = "^1.16"  # importable boto3 type annotations
-pep8-naming = "^0.11"  # falke8 plugin
+pep8-naming = "^0.11"  # flake8 plugin
 pipenv = "^2021.5"  # only used in tests
 pre-commit = "^2.11"
-pydocstyle = "^6.0"  # falke8 plugin
+pydocstyle = "^6.0"  # flake8 plugin
 pyinstaller = "^4.3"  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
 pylint = "^2.8"
 pytest = "^6.2"
