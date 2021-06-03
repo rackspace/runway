@@ -1,4 +1,4 @@
-.PHONY: help list install install-all clean fix-isort lint lint-flake8 lint-isort lint-pylint lint_two test test-integration test-unit create-tfenv-ver-file build build-pyinstaller-file build-pyinstaller-folder build-whl release npm-prep
+.PHONY: build  clean help install lint list release test version
 
 SHELL := /bin/bash
 
@@ -18,17 +18,14 @@ help: ## show this message
 		printf "%s\n" $$help_info; \
 	done
 
-build: clean create-tfenv-ver-file ## build the PyPi release
-	python setup.py sdist
+build: clean create-tfenv-ver-file version ## build the PyPi release
+	poetry build
 
-build-pyinstaller-file: clean create-tfenv-ver-file ## build Pyinstaller single file release (github)
+build-pyinstaller-file: clean create-tfenv-ver-file version ## build Pyinstaller single file release (github)
 	bash ./.github/scripts/cicd/build_pyinstaller.sh file
 
-build-pyinstaller-folder: clean create-tfenv-ver-file ## build Pyinstaller folder release(github)
+build-pyinstaller-folder: clean create-tfenv-ver-file version ## build Pyinstaller folder release (github)
 	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
-
-build-whl: clean create-tfenv-ver-file ## build wheel
-	python setup.py bdist_wheel --universal
 
 clean: ## remove generated file from the project directory
 	rm -rf build/
@@ -104,15 +101,12 @@ npm-ci: ## run "npm ci" with the option to ignore scripts - required to succeed 
 npm-install: ## run "npm install" with the option to ignore scripts - required to succeed for this project
 	@npm install --ignore-scripts
 
-# requires setuptools-scm and setuptools global python installs
 # copies artifacts to src & npm package files to the root of the repo
-# updates package.json with the name of the package & semver version from scm (formatted for npm)
 npm-prep: ## process that needs to be run before creating an npm package
 	mkdir -p tmp
 	mkdir -p src
-	cp -r artifacts/$$(python ./setup.py --version)/* src/
+	cp -r artifacts/$$(poetry version --short)/* src/
 	cp npm/* . && cp npm/.[^.]* .
-	jq ".version = \"$${NPM_PACKAGE_VERSION:-$$(python ./setup.py --version | sed -E "s/\.dev/-dev/")}\"" package.json > tmp/package.json
 	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
 	rm -rf tmp/package.json
 
@@ -150,7 +144,7 @@ test-functional: ## run function tests only
 			--numprocesses auto; \
 	else \
 		echo "  not using pytest-xdist"; \
-		poetry run pytest \
+		poetry run pytest -s -m wip \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \
@@ -182,3 +176,9 @@ update-docs: ## update python virtual environment for building documentation
 		popd
 
 update-all: update update-docs ## update all python environments
+
+version: ## set project version using distance from last tag
+	@VERSION=$$(poetry run dunamai from git --style semver --no-metadata --bump) && \
+	echo setting version to $${VERSION}... && \
+	poetry version $${VERSION} && \
+	npm version $${VERSION} --allow-same-version --no-git-tag-version

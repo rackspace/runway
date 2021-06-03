@@ -203,15 +203,14 @@ jobs:
         run: make test
   build-pypi:
     name: Build PyPi 📦
-    if: github.ref == 'refs/heads/master'
     needs:
       - pre-commit
       - test-python
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
+        os: [ubuntu-latest]
+        python-version: [3.8]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
