@@ -1,5 +1,5 @@
 SPHINXOPTS    =
-SPHINXBUILD   = pipenv run sphinx-build
+SPHINXBUILD   = poetry run sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
@@ -21,7 +21,8 @@ open:
 	open build/html/index.html
 
 requirements:  # updates requirements.txt
-	pipenv lock --requirements | sed "/-e .\/../d" > requirements.txt
+	@poetry export --format requirements.txt --without-hashes | sed "/file:\/\/\//d" > requirements.txt
+	@echo "requirements.txt has been updated"
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
