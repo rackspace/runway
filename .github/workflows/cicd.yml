@@ -106,7 +106,11 @@ jobs:
   test-functional:
     name: Functional Tests
     needs: deploy-test-infrastructure
-    if: github.repository == 'onicagroup/runway'  # will fail if run from forks
+    # will fail if run from forks
+    if: |
+      always() &&
+      github.repository == 'onicagroup/runway' &&
+      (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
