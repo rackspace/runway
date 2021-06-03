@@ -168,7 +168,10 @@ test-integration: ## run integration tests only
 
 test-unit: ## run unit tests only
 	@echo "Running unit tests..."
-	@poetry run pytest --cov=runway --cov-config=tests/unit/.coveragerc --cov-report term-missing:skip-covered
+	@poetry run pytest \
+		--cov=runway \
+		--cov-config=tests/unit/.coveragerc \
+		--cov-report term-missing:skip-covered
 
 update: ## update project python environment
 	@poetry update

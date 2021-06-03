@@ -203,7 +203,7 @@ class TestSyncExtraFiles:
             },
         )
 
-        files: List[ExtraFileTypeDef] = [{"name": "test", "file": "Pipfile"}]
+        files: List[ExtraFileTypeDef] = [{"name": "test", "file": ".gitignore"}]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
@@ -228,7 +228,7 @@ class TestSyncExtraFiles:
             },
         )
 
-        files: List[ExtraFileTypeDef] = [{"name": "test.json", "file": "Pipfile"}]
+        files: List[ExtraFileTypeDef] = [{"name": "test.json", "file": ".gitignore"}]
 
         with s3_stub as stub:
             assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
