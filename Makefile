@@ -144,7 +144,7 @@ test-functional: ## run function tests only
 			--numprocesses auto; \
 	else \
 		echo "  not using pytest-xdist"; \
-		poetry run pytest -s -m wip \
+		poetry run pytest \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \
@@ -153,7 +153,7 @@ test-functional: ## run function tests only
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
-	@poetry run pytest
+	@poetry run pytest \
 		--cov runway \
 		--cov-report term-missing:skip-covered \
 		--dist loadfile \

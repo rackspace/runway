@@ -1,4 +1,4 @@
 {
-  "app": "pipenv run python app.py",
+  "app": "poetry run python app.py",
   "versionReporting": false
 }

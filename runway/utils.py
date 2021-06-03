@@ -742,8 +742,8 @@ def fix_windows_command_list(commands: List[str]) -> List[str]:
     npm on windows is npm.cmd, which will blow up
     subprocess.check_call(['npm', '...'])
 
-    Similar issues arise when calling python apps like pipenv that will have
-    a windows-only suffix applied to them
+    Similar issues arise when calling python apps that will have a windows-only
+    suffix applied to them.
 
     """
     fully_qualified_cmd_path = which(commands[0])
