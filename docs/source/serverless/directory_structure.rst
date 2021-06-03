@@ -18,14 +18,14 @@ Python Example
 .. code-block::
 
   .
-  ├── Pipfile
-  ├── Pipfile.lock
   ├── __init__.py
   ├── _gitignore
   ├── config-dev-us-east-1.json
   ├── hello_world
   │   └── __init__.py
   ├── package.json
+  ├── poetry.lock
+  ├── pyproject.toml
   └── serverless.yml
 
 

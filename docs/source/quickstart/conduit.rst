@@ -100,7 +100,7 @@ Setup
         $ npm install
         $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py" -OutFile update_env_endpoint.py
         $ cd ..
-        $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/Pipfile" -OutFile Pipfile
+        $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/pyproject.toml" -OutFile pyproject.toml
         $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml" -OutFile runway.yml
 
 .. highlight:: sh

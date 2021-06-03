@@ -20,8 +20,8 @@ Blueprints
 .. code-block::
 
   .
-  ├── Pipfile
-  ├── Pipfile.lock
+  ├── poetry.lock
+  ├── pyproject.toml
   ├── runway.variables.yml
   ├── runway.yml
   └── sampleapp.cfn
@@ -43,8 +43,8 @@ Cloudformation Templates
 .. code-block::
 
   .
-  ├── Pipfile
-  ├── Pipfile.lock
+  ├── poetry.lock
+  ├── pyproject.toml
   ├── runway.variables.yml
   ├── runway.yml
   └── sampleapp.cfn

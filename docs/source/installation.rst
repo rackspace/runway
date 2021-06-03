@@ -100,7 +100,7 @@ Runway runs on Python 2.7 and Python 3.5+.
 
 Runway is hosted on PyPI as the package named ``runway``.
 It can be installed like any other Python package, but we instead strongly recommend using it
-per-project with `pipenv <https://pypi.org/project/pipenv/>`_.
+per-project with `poetry <https://python-poetry.org/>`_.
 See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
 **Suggested use:** Python projects
@@ -112,12 +112,6 @@ See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
     .. code-block:: sh
 
       poetry add runway
-
-  .. tab:: pipenv
-
-    .. code-block:: sh
-
-      pipenv install runway
 
   .. tab:: pip
 
@@ -136,12 +130,6 @@ See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
     .. code-block:: sh
 
       poetry run runway --help
-
-  .. tab:: pipenv
-
-    .. code-block:: sh
-
-      pipenv run runway  --help
 
   .. tab:: pip
 

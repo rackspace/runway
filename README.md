@@ -84,7 +84,7 @@ $ npx runway new
 **Suggested use:** Serverless or AWS CDK projects
 
 
-### pip (or pipenv,poetry,etc)
+### pip (or poetry, etc)
 
 ```shell
 $ pip install runway

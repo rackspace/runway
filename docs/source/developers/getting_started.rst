@@ -14,9 +14,11 @@ Before getting started, `fork this repo`_ and `clone your fork`_.
 Development Environment
 ***********************
 
-This project uses ``pipenv`` to create Python virtual environment. This must be installed on your system before setting up your dev environment.
+This project uses `poetry <https://python-poetry.org/>`__ to create Python virtual environment. This must be installed on your system before setting up your dev environment.
 
-With pipenv installed, run ``make setup`` to setup your development environment. This will create all the required virtual environments to work on runway, build docs locally, and run integration tests locally. The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
+With poetry installed, run ``make setup`` to setup your development environment.
+This will create all the required virtual environments to work on Runway, build docs locally, and run integration tests locally.
+The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
 
 
 pre-commit

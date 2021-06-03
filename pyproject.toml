@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runway"
-version = "2.0.0"
+version = "2.0.0"  # do not change
 description = "Simplify infrastructure/app testing/deployment"
 license = "Apache-2.0"
 authors = [
@@ -130,7 +130,6 @@ force-exclude = '''
   | build
   | dist
   | npm
-  | quickstarts
   | runway/aws_sso_botocore
 )/
 '''
