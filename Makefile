@@ -95,11 +95,12 @@ npm-install: ## run "npm install" with the option to ignore scripts - required t
 	@npm install --ignore-scripts
 
 # copies artifacts to src & npm package files to the root of the repo
-npm-prep: ## process that needs to be run before creating an npm package
+npm-prep: version ## process that needs to be run before creating an npm package
 	mkdir -p tmp
 	mkdir -p src
 	cp -r artifacts/$$(poetry version --short)/* src/
 	cp npm/* . && cp npm/.[^.]* .
+	cp package.json tmp/package.json
 	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
 	rm -rf tmp/package.json
 
