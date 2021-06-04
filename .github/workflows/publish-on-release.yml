@@ -52,7 +52,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install -vv
       - name: Run Build
@@ -103,7 +103,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install -vv
       - name: Run Build
@@ -156,7 +156,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install -vv
       - name: Download Artifacts (macOS)
@@ -244,7 +244,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install -vv
       - name: Run Build
@@ -333,7 +333,7 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install -vv
       - name: Configure AWS Credentials
