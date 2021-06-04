@@ -110,10 +110,6 @@ npm-prep: ## process that needs to be run before creating an npm package
 	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
 	rm -rf tmp/package.json
 
-release: clean create-tfenv-ver-file build # publish to PyPi
-	twine upload dist/*
-	curl -D - -X PURGE https://pypi.org/simple/runway
-
 run-pre-commit: ## run pre-commit for all files
 	@poetry run pre-commit run -a
 

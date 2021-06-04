@@ -299,7 +299,7 @@ jobs:
     name: Publish 📦 To PyPI
     needs:
       - build-pypi
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Download Distribution Artifact
         uses: actions/download-artifact@v1.0.0
@@ -307,9 +307,9 @@ jobs:
           name: pypi-dist
           path: dist
       - name: Publish Distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.1.0
-        with:
-          password: ${{ secrets.pypi_password }}
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
+        run: poetry publish
   publish-s3:
     name: Publish 📦 To S3
     needs:
