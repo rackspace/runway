@@ -54,14 +54,7 @@ fix-isort: ## automatically fix all isort errors
 	@poetry run isort .
 
 install: ## create a python virtual environment in the project for development
-	@poetry install --remove-untracked
-
-install-docs: ## create a python virtual environment for building documentation
-	@pushd docs && \
-		poetry install --remove-untracked && \
-		popd
-
-install-all: install install-docs ## setup all virtual environments used by this project
+	@poetry install --extras docs --remove-untracked
 
 lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
@@ -113,7 +106,7 @@ npm-prep: ## process that needs to be run before creating an npm package
 run-pre-commit: ## run pre-commit for all files
 	@poetry run pre-commit run -a
 
-setup: npm-ci install install-docs setup-pre-commit ## setup development environment
+setup: npm-ci install setup-pre-commit ## setup development environment
 
 setup-pre-commit: ## install pre-commit git hooks
 	@poetry run pre-commit install
@@ -165,13 +158,6 @@ test-unit: ## run unit tests only
 
 update: ## update project python environment
 	@poetry update
-
-update-docs: ## update python virtual environment for building documentation
-	@pushd docs && \
-		poetry update && \
-		popd
-
-update-all: update update-docs ## update all python environments
 
 version: ## set project version using distance from last tag
 	@VERSION=$$(poetry run dunamai from git --style semver --no-metadata --bump) && \

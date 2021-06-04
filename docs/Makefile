@@ -7,7 +7,7 @@ BUILDDIR      = build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: clean docs open requirements help Makefile
+.PHONY: clean docs open help Makefile
 
 clean:
 	@rm -rf build/html/*
@@ -19,10 +19,6 @@ docs: clean html open
 
 open:
 	open build/html/index.html
-
-requirements:  # updates requirements.txt
-	@poetry export --format requirements.txt --without-hashes | sed "/file:\/\/\//d" > requirements.txt
-	@echo "requirements.txt has been updated"
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

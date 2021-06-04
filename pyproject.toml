@@ -30,6 +30,11 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.7, <4"
 
+# dependencies needed for building docs are included here.
+# they are marked as "optional" and are installed as the extra "docs".
+# this is a workaround for ReadTheDocs to work with poetry until fill support
+# is added or poetry dependency groups are added.
+
 "backports.cached_property" = { version = "*", python = "<3.8" }
 awacs = "*"
 boto3 = "^1.16"
@@ -43,6 +48,7 @@ formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 importlib-metadata = { version = "*", python = "<3.8" }
 jinja2 = "^2.7"  # used in runway.cfngin.blueprints.raw
+jsx-lexer = { version = "^1.0", optional = true }  # docs
 packaging = "*"  # component of setuptools needed for version compare
 pyOpenSSL = "*"  # For embedded hook & associated script usage
 pydantic = "^1.4"
@@ -51,6 +57,12 @@ python-hcl2 = "^2.0"
 pyyaml = "^5"
 requests = "*"
 send2trash = "*"
+sphinx = { version = "^3.5", optional = true }  # docs
+sphinx-github-changelog = { version = "^1.0", optional = true }# docs
+sphinx-rtd-theme = { version = "^0.5", optional = true } # docs
+sphinx-tabs = { version = "^3.0", optional = true }# docs
+sphinxcontrib-apidoc = { version = "^0.3", optional = true } # docs
+sphinxcontrib-programoutput = { version = "^0.17", optional = true } # docs
 troposphere = "^2.4"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
@@ -103,6 +115,17 @@ extras = [
   "sts",
 ]
 version = "^1.16"
+
+[tool.poetry.extras]
+docs = [
+  "jsx-lexer",
+  "sphinx",
+  "sphinx-github-changelog",
+  "sphinx-rtd-theme",
+  "sphinx-tabs",
+  "sphinxcontrib-apidoc",
+  "sphinxcontrib-programoutput",
+]
 
 [tool.poetry.scripts]
 runway = "runway._cli.main:cli"
