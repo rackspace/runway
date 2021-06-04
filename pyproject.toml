@@ -44,6 +44,7 @@ cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
 coloredlogs = "*"
 docker = "*"  # used in runway.cfngin.hooks
+dunamai = { version = "^1.5", optional = true }  # docs
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 importlib-metadata = { version = "*", python = "<3.8" }
@@ -103,6 +104,7 @@ extras = [
   "cloudformation",
   "cloudfront",
   "cognito-idp",
+  "dunamai",
   "dynamodb",
   "ec2",
   "ecr",
