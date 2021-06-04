@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Dict, List
+import subprocess
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import hcl
 import hcl2
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
 
     from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
+    from pytest_subprocess import FakeProcess
 
 MODULE = "runway.env_mgr.tfenv"
 
@@ -174,6 +176,44 @@ class TestTFEnvManager:
 
         mocker.patch.object(tfenv, "terraform_block", {"required_version": "~>0.12.0"})
         assert tfenv.get_min_required() == "0.12.0"
+
+    @pytest.mark.parametrize(
+        "output, expected",
+        [
+            ("", None),
+            ("Terraform v0.15.5\non darwin_amd64", (0, 15, 5)),
+            (
+                "Terraform v0.10.3\n\n"
+                "Your version of Terraform is out of date! The latest version\n"
+                "is 0.15.5. You can update by downloading from www.terraform.io",
+                (0, 10, 3),
+            ),
+            ("Terraform v0.15.0-alpha.13", (0, 15, 0)),
+        ],
+    )
+    def test_get_version_from_executable(
+        self,
+        expected: Optional[Tuple[str, ...]],
+        fake_process: FakeProcess,
+        output: str,
+    ) -> None:
+        """Test get_version_from_executable."""
+        fake_process.register_subprocess(
+            ["usr/tfenv/terraform", "--version"], stdout=output
+        )
+        assert (
+            TFEnvManager.get_version_from_executable("usr/tfenv/terraform") == expected
+        )
+
+    def test_get_version_from_executable_raise(self, fake_process: FakeProcess) -> None:
+        """Test get_version_from_executable raise exception."""
+        fake_process.register_subprocess(
+            ["usr/tfenv/terraform", "--version"], returncode=1
+        )
+        with pytest.raises(
+            subprocess.CalledProcessError, match="returned non-zero exit status 1"
+        ):
+            TFEnvManager.get_version_from_executable("usr/tfenv/terraform")
 
     def test_get_version_from_file(self, tmp_path: Path) -> None:
         """Test get_version_from_file."""
@@ -384,6 +424,26 @@ class TestTFEnvManager:
             )
         else:
             mock_load_terraform_module.assert_called_once_with(hcl2, tmp_path)
+
+    @pytest.mark.parametrize(
+        "current, expected",
+        [
+            (None, None),
+            ("0.15.2", (0, 15, 2)),
+            ("0.13", (0, 13)),
+            ("0.15.0-alpha.13", (0, 15, 0)),
+        ],
+    )
+    def test_version(
+        self,
+        current: Optional[str],
+        expected: Optional[Tuple[int, ...]],
+        tmp_path: Path,
+    ) -> None:
+        """Test version."""
+        tfenv = TFEnvManager(tmp_path)
+        tfenv.current_version = current
+        assert tfenv.version == expected
 
     def test_version_file(self, tmp_path: Path) -> None:
         """Test version_file."""

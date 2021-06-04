@@ -7,17 +7,29 @@ import os
 import platform
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import zipfile
 from distutils.version import LooseVersion
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import hcl
 import hcl2
 import requests
+from typing_extensions import Final
 
 from ..compat import cached_property
 from ..exceptions import HclParserError
@@ -139,6 +151,10 @@ class TFEnvManager(EnvManager):
 
     """
 
+    VERSION_REGEX: Final[
+        str
+    ] = r"^Terraform v(?P<version>[0-9]*\.[0-9]*\.[0-9]*)(?P<suffix>-.*)?"
+
     def __init__(self, path: Optional[Path] = None) -> None:
         """Initialize class."""
         super().__init__("terraform", "tfenv", path)
@@ -220,6 +236,14 @@ class TFEnvManager(EnvManager):
         if isinstance(result, list):
             return _flatten_lists({k: v for i in result for k, v in i.items()})
         return _flatten_lists(result)
+
+    @cached_property
+    def version(self) -> Optional[Tuple[int, ...]]:
+        """Terraform version."""
+        if not self.current_version:
+            return None
+        rm_suffix = self.current_version.split("-")[0]
+        return tuple(int(i) for i in rm_suffix.split("."))
 
     @cached_property
     def version_file(self) -> Optional[Path]:
@@ -337,3 +361,30 @@ class TFEnvManager(EnvManager):
         LOGGER.verbose("downloaded Terraform %s successfully", version)
         self.current_version = version
         return str(self.bin)
+
+    @classmethod
+    def get_version_from_executable(
+        cls,
+        bin_path: Union[Path, str],
+        *,
+        cwd: Optional[Union[Path, str]] = None,
+        env: Optional[Dict[str, str]] = None,
+    ) -> Optional[Tuple[int, ...]]:
+        """Get Terraform version from an executable.
+
+        Args:
+            bin_path: Path to the Terraform binary to retrieve the version from.
+            cwd: Current working directory to use when calling the executable.
+            env: Environment variable overrides.
+
+        Returns:
+            Version that has been parsed into a tuple of intigers.
+
+        """
+        output = subprocess.check_output(
+            [str(bin_path), "--version"], cwd=cwd, env=env
+        ).decode()
+        match = re.search(cls.VERSION_REGEX, output)
+        if not match:
+            return None
+        return tuple(int(i) for i in match.group("version").split("."))
