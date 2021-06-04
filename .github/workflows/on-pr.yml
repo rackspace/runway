@@ -8,20 +8,13 @@ on:
 jobs:
   branch-name:
     name: Enforce Branch Name
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: deepakputhraya/action-branch-name@v1.0.0
+      - uses: deepakputhraya/action-branch-name@v1.0.0  # cspell:ignore deepakputhraya
         with:
-          # Regex the branch should match. This example enforces grouping
           regex: ([a-z])+\/([a-zA-Z0-9\-\_])+
-          # All branches should start with the given prefix
-          allowed_prefixes: bugfix,chore,dependabot,docs,enhancement,feat,feature,fix,hotfix,maint,maintain,maintenance,release
-          # Ignore exactly matching branch names from convention
-          ignore: master,release,develop,v0_47_fixes,v1,v2
-          # Min length of the branch name
-          min_length: 5
-          # Max length of the branch name
-          max_length: 50
+          allowed_prefixes: bugfix,chore,dependabot,docs,feat,feature,fix,hotfix,maint,maintain,maintenance,release
+          ignore: develop,master,release,v0_47_fixes
   label-pr:
     name: Label PR
     # Skip running the job from forks.
