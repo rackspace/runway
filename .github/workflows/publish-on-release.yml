@@ -260,6 +260,10 @@ jobs:
       - build-pypi
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo (complete)
+        uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       - name: Download Distribution Artifact
         uses: actions/download-artifact@v1.0.0
         with:
@@ -270,6 +274,16 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
+      - run: make version
       - name: Publish Distribution 📦 to PyPI
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
