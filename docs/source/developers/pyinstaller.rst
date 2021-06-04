@@ -12,11 +12,9 @@ These are built by Travis CI for distribution to ensure a consistent environment
 Prerequisites
 *************
 
-These need to be installed globally so they are not included in the Pipfile.
+These need to be installed globally.
 
-- ``setuptools==45.2.0``
-- ``virtualenv==16.7.9``
-- ``pipenv==2018.11.26``
+- `poetry <https://python-poetry.org/>`__
 
 
 *******

@@ -6,7 +6,7 @@ const execAsync = util.promisify(exec);
 (async () => {
   let env = "dev";
   try {
-    dev = execAsync("pipenv run runway whichenv");
+    dev = execAsync("poetry run runway whichenv");
   } catch (err) {
     console.error(err);
     return;

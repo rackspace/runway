@@ -7,7 +7,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 from pathlib import Path
 
-from pkg_resources import get_distribution
+from dunamai import Style, Version
 
 DOCS_DIR = Path(__file__).parent.parent.resolve()
 ROOT_DIR = DOCS_DIR.parent
@@ -19,9 +19,7 @@ SRC_DIR = DOCS_DIR / "source"
 project = "Runway"
 copyright = "2021, Onica Group"
 author = "Onica Group"
-release = get_distribution(  # full version, including alpha/beta/rc tags
-    "runway"
-).version
+release = Version.from_git().serialize(bump=True, metadata=False, style=Style.SemVer)
 version = ".".join(release.split(".")[:2])  # short X.Y version
 
 

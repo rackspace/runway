@@ -1,5 +1,7 @@
 """Update Runway release URLs."""
 # pylint: disable=no-member
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -7,12 +9,8 @@ import boto3
 import click
 from semver import VersionInfo
 
-if TYPE_CHECKING:  # only req boto3-stubs as a dev dependency
-    from mypy_boto3.boto3_session import Session
+if TYPE_CHECKING:
     from mypy_boto3_dynamodb.service_resource import Table
-else:
-    Session = object
-    Table = object
 
 LOGGER = logging.getLogger("update_urls")
 HDLR = logging.StreamHandler()
@@ -150,7 +148,7 @@ def command(
     logging.basicConfig(level=logging.INFO, handlers=[HDLR])
     logging.getLogger("botocore").setLevel(logging.ERROR)
 
-    session: Session = boto3.session.Session(region_name=table_region)
+    session = boto3.Session(region_name=table_region)
     table: Table = session.resource("dynamodb").Table(table_name)
 
     handler(table, bucket_name, bucket_region, version, latest)

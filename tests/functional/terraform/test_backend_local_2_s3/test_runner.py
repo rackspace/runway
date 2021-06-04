@@ -73,7 +73,6 @@ def test_deploy_local_backend_result(deploy_local_backend_result: Result) -> Non
     assert deploy_local_backend_result.exit_code == 0
 
 
-@pytest.mark.order(after="test_deploy_local_backend_result")
 def test_deploy_s3_backend_result(deploy_s3_backend_result: Result) -> None:
     """Test deploy s3 backend result."""
     # currently, this is expected to fail - Terraform prompts for user confirmation

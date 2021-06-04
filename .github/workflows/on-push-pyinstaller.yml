@@ -4,31 +4,23 @@ name: Pyinstaller (on_push)
 on:
   push:
     paths:
-      - .github/requirements/build-pyinstaller.txt
       - .github/scripts/cicd/build_pyinstaller.sh
       - .github/workflows/on-push-pyinstaller.yml
       - runway/*
-      - Pipfile
-      - Pipfile.lock
       - poetry.lock
       - pyproject.toml
       - runway.file.spec
       - runway.folder.spec
-      - setup.py
 
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-  PIPENV_NOSPIN: true
-  PIPENV_VENV_IN_PROJECT: true
-  PIPENV_YES: true
 
 
 jobs:
   build-pyinstaller-onefile:
     name: Pyinstaller "One File" Build
     strategy:
-      fail-fast: true
       matrix:
         os: [macos-10.15, ubuntu-18.04, windows-latest]
         python-version: [3.7]
@@ -43,8 +35,8 @@ jobs:
         uses: actions/checkout@v2.3.2
         with:
           fetch-depth: 0
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
       # Remove apt repos that are known to break from time to time
@@ -59,39 +51,16 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - name: Pip Cache (macOS)
-        uses: actions/cache@v1
-        if: matrix.os == 'macos-10.15'
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/Library/Caches/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
-        with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Pip Cache (windows)
-        uses: actions/cache@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        working-directory: .github/requirements
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -r requirements.txt
-      - name: Setup Python Virtual Environment
-        # our version of pipenv does not respect versions in a requirements file
-        # so we have to use pip within a venv to process it correctly
-        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - name: Run Build
         run: make build-pyinstaller-file
       - name: Upload Artifacts
@@ -102,7 +71,6 @@ jobs:
   build-pyinstaller-onefolder:
     name: Pyinstaller "One Folder" Build
     strategy:
-      fail-fast: true
       matrix:
         os: [macos-10.15, ubuntu-18.04, windows-latest]
         python-version: [3.7]
@@ -117,8 +85,8 @@ jobs:
         uses: actions/checkout@v2.3.2
         with:
           fetch-depth: 0
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
       # Remove apt repos that are known to break from time to time
@@ -133,39 +101,16 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - name: Pip Cache (macOS)
-        uses: actions/cache@v1
-        if: matrix.os == 'macos-10.15'
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/Library/Caches/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
-        with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Pip Cache (windows)
-        uses: actions/cache@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        working-directory: .github/requirements
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install -r requirements.txt
-      - name: Setup Python Virtual Environment
-        # our version of pipenv does not respect versions in a requirements file
-        # so we have to use pip within a venv to process it correctly
-        run: pipenv run pip install -r .github/requirements/build-pyinstaller.txt
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - name: Run Build
         run: make build-pyinstaller-folder
       - name: Upload Artifacts
@@ -197,14 +142,12 @@ jobs:
         continue-on-error: true
         run: bash ./check_distance_from_tag.sh
         working-directory: .github/scripts/cicd
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        if: steps.check_distance.outcome == 'success'
-        uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Node ${{ env.NODE_VERSION }} on ${{ matrix.os }}
+      - uses: actions/setup-node@v1.4.4
         if: steps.check_distance.outcome == 'success'
-        uses: actions/setup-node@v1.4.4
         with:
           always-auth: true
           node-version: ${{ env.NODE_VERSION }}
@@ -219,19 +162,16 @@ jobs:
       - name: Install Dependencies (ubuntu)
         if: steps.check_distance.outcome == 'success'
         run: sudo apt-get update && sudo apt-get install sed tree -y
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        if: steps.check_distance.outcome == 'success'
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "setuptools-scm~=3.5.0" wheel
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - name: Download Artifacts (macOS)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v1.0.0

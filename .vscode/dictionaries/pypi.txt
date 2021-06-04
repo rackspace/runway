@@ -2,11 +2,14 @@ awscli
 backports
 boto
 botocore
+botocore's
 cfnlint
 cfnlintrc
 coloredlogs
 ctypes
 distutils
+dunamai
+gitpython
 isort
 moto
 numpy
@@ -21,6 +24,7 @@ pyhcl
 pyinstaller
 pylint
 pywin
+pyyaml
 runpy
 setuptools
 testfixtures

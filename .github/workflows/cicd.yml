@@ -15,9 +15,6 @@ defaults:
 
 env:
   AWS_DEFAULT_REGION: us-east-1
-  PIPENV_NOSPIN: true
-  PIPENV_VENV_IN_PROJECT: true
-  PIPENV_YES: true
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
 
 
@@ -60,24 +57,20 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2.3.2
-      - name: Install Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: 3.8
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - name: Setup Python Virtual Environment
-        run: pipenv sync
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -97,53 +90,49 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - uses: pre-commit/action@v2.0.0
   test-functional:
     name: Functional Tests
     needs: deploy-test-infrastructure
-    if: github.repository == 'onicagroup/runway'  # will fail if run from forks
+    # will fail if run from forks
+    if: |
+      always() &&
+      github.repository == 'onicagroup/runway' &&
+      (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2.3.2
-      - name: Install Node
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: '14'  # testing with npm < 7
-      - name: Install Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: 3.8
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -202,14 +191,10 @@ jobs:
           key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26"
+      - uses: Gr1N/setup-poetry@v4
+      - run: poetry install -vv
       - name: Install Node Dependencies
         run: make npm-install
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
       - name: Run Linters
         run: make lint
       - name: Run Integration & Unit Tests
@@ -218,48 +203,36 @@ jobs:
         run: make test
   build-pypi:
     name: Build PyPi 📦
-    if: github.ref == 'refs/heads/master'
     needs:
       - pre-commit
       - test-python
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo (complete)
         uses: actions/checkout@v2.3.2
         with:
           fetch-depth: 0
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.8
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
-        if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
-        if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
-      - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
-        if: startsWith( matrix.os, 'ubuntu' )
+      - uses: Gr1N/setup-poetry@v4
+      - uses: actions/cache@v1
+        id: cache
         with:
-          path: ~/.cache/pip
-          key: ${{ matrix.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ matrix.os }}-pip-${{ matrix.python-version }}
-      - name: Install Global Python Packages
-        run: |
-          python -m pip install --upgrade pip setuptools
-          pip install "virtualenv==16.7.9" "pipenv==2018.11.26" wheel
-      - name: Setup Python Virtual Environment
-        run: pipenv sync --dev
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure Cache Is Healthy
+        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
+        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+      - run: poetry install -vv
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact

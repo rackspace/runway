@@ -50,7 +50,7 @@ Perform the following to install/configure Python & package management tools.
 
 2. Install python package managers::
 
-        pip3 install --user pipenv pipx
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 
 Package Installation
 --------------------
@@ -68,14 +68,14 @@ Global CLIs & utilities, like the AWS CLI, can be installed via
 
         pipx install awscli
 
-pipenv
+poetry
 ~~~~~~
 
 Utilities used in a project should generally have their versions stored in the
 project repository, so users (now and in the future) and remote build systems
 use the same versions specified in the repo.
 
-`pipenv <https://github.com/pipxproject/pipx>`_ works similarly to pipx, but
+`poetry <https://python-poetry.org/>`_ works similarly to pipx, but
 creates a lockfile that can be checked into a repo::
 
-        pipenv install runway
+        poetry add --dev runway

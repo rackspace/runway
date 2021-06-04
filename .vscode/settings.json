@@ -25,7 +25,7 @@
         "**/.hg": true,
         "**/.mypy_cache": true,
         "**/.pytest_cache": true,
-        "**/.runway": false,
+        "**/.runway": true,
         "**/.runway_cache": true,
         "**/.serverless": true,
         "**/.svn": true,

@@ -1,3 +1,145 @@
+[tool.poetry]
+name = "runway"
+version = "2.0.0-dev"  # do not change
+description = "Simplify infrastructure/app testing/deployment"
+license = "Apache-2.0"
+authors = [
+  "Onica Group LLC <opensource@onica.com>",
+]
+maintainers = [
+  "Kyle Finley <kyle@finley.sh>",
+]
+readme = "README.md"
+homepage = "https://github.com/onicagroup/runway"
+repository = "https://github.com/onicagroup/runway"
+documentation = "https://docs.onica.com/projects/runway"
+keywords = ["cli"]
+classifiers = [
+  "Intended Audience :: Developers",
+  "Topic :: Utilities",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+]
+packages = [
+  { include = "runway" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7, <4"
+
+# dependencies needed for building docs are included here.
+# they are marked as "optional" and are installed as the extra "docs".
+# this is a workaround for ReadTheDocs to work with poetry until fill support
+# is added or poetry dependency groups are added.
+
+"backports.cached_property" = { version = "*", python = "<3.8" }
+awacs = "*"
+boto3 = "^1.16"
+botocore = "^1.19"
+cfn-lint = "*"
+cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
+click = "^8.0"
+coloredlogs = "*"
+docker = "*"  # used in runway.cfngin.hooks
+dunamai = { version = "^1.5", optional = true }  # docs
+formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
+gitpython = "*"
+importlib-metadata = { version = "*", python = "<3.8" }
+jinja2 = "^2.7"  # used in runway.cfngin.blueprints.raw
+jsx-lexer = { version = "^1.0", optional = true }  # docs
+packaging = "*"  # component of setuptools needed for version compare
+pyOpenSSL = "*"  # For embedded hook & associated script usage
+pydantic = "^1.4"
+pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
+python-hcl2 = "^2.0"
+pyyaml = "^5"
+requests = "*"
+send2trash = "*"
+sphinx = { version = "^3.5", optional = true }  # docs
+sphinx-github-changelog = { version = "^1.0", optional = true }# docs
+sphinx-rtd-theme = { version = "^0.5", optional = true } # docs
+sphinx-tabs = { version = "^3.0", optional = true }# docs
+sphinxcontrib-apidoc = { version = "^0.3", optional = true } # docs
+sphinxcontrib-programoutput = { version = "^0.17", optional = true } # docs
+troposphere = "^2.4"
+typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
+urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
+yamllint = "*"
+zgitignore = "*"  # only used in runway.cfngin.hooks.staticsite.utils
+
+[tool.poetry.dev-dependencies]
+black = "21.5b1"  # since its pre-release, it has to be pinned this way
+coverage = { version = "^5.5", extras = ["toml"] }
+doc8 = "^0.8"  # for linting with vscode rst extension
+dunamai = "^1.5"  # determine project version
+flake8 = "^3.9"
+flake8-docstrings = "^1.6"  # flake8 plugin
+isort = "^5.8"
+mock = "^4.0"
+moto = { version = "^2.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
+mypy-boto3 = "^1.16"  # importable boto3 type annotations
+pep8-naming = "^0.11"  # flake8 plugin
+pipenv = "^2021.5"  # only used in tests
+pre-commit = "^2.11"
+pydocstyle = "^6.0"  # flake8 plugin
+pyinstaller = "^4.3"  # stuck till this is resolved https://github.com/pyinstaller/pyinstaller/issues/4674
+pylint = "^2.8"
+pytest = "^6.2"
+pytest-cov = "^2.10"  # pytest plugin
+pytest-mock = "^3.5"  # pytest plugin
+pytest-order = "^1"  # pytest plugin
+pytest-subprocess = "^1.0"  # pytest plugin
+pytest-sugar = "^0.9"  # pytest plugin
+pytest-xdist = "^2.2"  # pytest plugin
+semver = "^2.13"  # only used in .github/scripts/urlshortener
+testfixtures = "^4.10"  # TODO remove use of this dependency - was inherited
+
+[tool.poetry.dev-dependencies.boto3-stubs]
+extras = [
+  "acm",
+  "awslambda",
+  "cloudformation",
+  "cloudfront",
+  "cognito-idp",
+  "dunamai",
+  "dynamodb",
+  "ec2",
+  "ecr",
+  "ecs",
+  "iam",
+  "kms",
+  "route53",
+  "s3",
+  "ssm",
+  "sts",
+]
+version = "^1.16"
+
+[tool.poetry.extras]
+docs = [
+  "jsx-lexer",
+  "sphinx",
+  "sphinx-github-changelog",
+  "sphinx-rtd-theme",
+  "sphinx-tabs",
+  "sphinxcontrib-apidoc",
+  "sphinxcontrib-programoutput",
+]
+
+[tool.poetry.scripts]
+runway = "runway._cli.main:cli"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/onicagroup/runway/issues"
+
+[build-system]
+requires = ["poetry_core>=1.0.3"]
+build-backend = "poetry.core.masonry.api"
+
+
 [tool.black]
 force-exclude = '''
 /(
@@ -13,7 +155,6 @@ force-exclude = '''
   | build
   | dist
   | npm
-  | quickstarts
   | runway/aws_sso_botocore
 )/
 '''
@@ -24,49 +165,49 @@ target-version = ["py37", "py38", "py39"]
 
 [tool.coverage.report]
 exclude_lines = [
-    "cov: ignore",  # standard exclude comment
-    "if TYPE_CHECKING:",  # excluded blocks
-    "if __name__ == .__main__.:",
-    "raise AssertionError",  # defensive exceptions
-    "raise NotImplimentedError",
-    "from pathlib import Path",
-    "@overload",
+  "cov: ignore",  # standard exclude comment
+  "if TYPE_CHECKING:",  # excluded blocks
+  "if __name__ == .__main__.:",
+  "raise AssertionError",  # defensive exceptions
+  "raise NotImplimentedError",
+  "from pathlib import Path",
+  "@overload",
 ]
 
 
 [tool.coverage.run]
 concurrency = [
-    "multiprocess",
-    "thread",
+  "multiprocess",
+  "thread",
 ]
 omit = [
-    "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
-    "*/runway/cfngin/hooks/staticsite/auth_at_edge/templates/*",
-    "*/compat.py",
-    "*/type_defs.py",
+  "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
+  "*/runway/cfngin/hooks/staticsite/auth_at_edge/templates/*",
+  "*/compat.py",
+  "*/type_defs.py",
 ]
 
 [tool.isort]
 profile = "black"
 known_local_folder = [
-    "jwks_rsa",
-    "shared",
-    "update_urls",
+  "jwks_rsa",
+  "shared",
+  "update_urls",
 ]
 skip = [
-    ".demo",
-    ".eggs",
-    ".git",
-    ".mypy_cache",
-    ".runway",
-    ".runway_cache",
-    ".venv",
-    "_build",
-    "build",
-    "dist",
-    "integration_tests",
-    "node_modules",
-    "venv",
+  ".demo",
+  ".eggs",
+  ".git",
+  ".mypy_cache",
+  ".runway",
+  ".runway_cache",
+  ".venv",
+  "_build",
+  "build",
+  "dist",
+  "integration_tests",
+  "node_modules",
+  "venv",
 ]
 
 
@@ -75,44 +216,44 @@ skip = [
 attr-rgx = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
 attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
 good-names = [
-    "_",
-    "a",
-    "b",
-    "ci",
-    "db",
-    "f",
-    "fn",
-    "gb",
-    "i",
-    "id",
-    "j",
-    "k",
-    "kb",
-    "mb",
-    "ok",
-    "os",
-    "ui",
-    "v",
+  "_",
+  "a",
+  "b",
+  "ci",
+  "db",
+  "f",
+  "fn",
+  "gb",
+  "i",
+  "id",
+  "j",
+  "k",
+  "kb",
+  "mb",
+  "ok",
+  "os",
+  "ui",
+  "v",
 ]
 
 [tool.pylint.classes]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#classes-checker
 defining-attr-methods = [
-    "__init__",
-    "__new__",
-    "setUp",
+  "__init__",
+  "__new__",
+  "setUp",
 ]
 exclude-protected=[
-    "_asdict",
-    "_fields",
-    "_replace",
-    "_source",
-    "_make",
-    "_session",  # for boto3.session.Session
-    "_prompter",
-    "_client_config",  # boto3.client.Client._client_config contains info like region
-    "_endpoint",  # boto3.client.Client._endpoint contains s3 endpoint info
-    "_validate_props"  # called on troposphere resources
+  "_asdict",
+  "_fields",
+  "_replace",
+  "_source",
+  "_make",
+  "_session",  # for boto3.session.Session
+  "_prompter",
+  "_client_config",  # boto3.client.Client._client_config contains info like region
+  "_endpoint",  # boto3.client.Client._endpoint contains s3 endpoint info
+  "_validate_props"  # called on troposphere resources
 ]
 
 [tool.pylint.design]
@@ -144,10 +285,10 @@ logging-format-style = "old"  # TODO update to new
 [tool.pylint.master]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#general-options
 extension-pkg-whitelist = [
-    "pydantic",  # https://github.com/samuelcolvin/pydantic/issues/992#issuecomment-553545180
+  "pydantic",  # https://github.com/samuelcolvin/pydantic/issues/992#issuecomment-553545180
 ]
 ignore-patterns = [
-    ".+py[ci]$"
+  ".+py[ci]$",
 ]
 jobs = 0
 
@@ -158,35 +299,35 @@ notes = ["FIXME"]
 [tool.pylint.message_control]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#messages-control-options
 disable = [
-    "line-too-long",  # flake8 overlap
-    "missing-class-docstring",  # flake8 (pydocstyle) overlap
-    "missing-function-docstring",  # flake8 (pydocstyle) overlap
-    "missing-module-docstring",  # flake8 (pydocstyle) overlap
-    "similarities",  # black overcomplicated this
-    "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
+  "line-too-long",  # flake8 overlap
+  "missing-class-docstring",  # flake8 (pydocstyle) overlap
+  "missing-function-docstring",  # flake8 (pydocstyle) overlap
+  "missing-module-docstring",  # flake8 (pydocstyle) overlap
+  "similarities",  # black overcomplicated this
+  "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
 ]
 
 [tool.pylint.typecheck]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#typecheck-checker
 ignored-classes = [
-    "runway.config.ConfigComponent",
-    "runway.utils.MutableMap"
+  "runway.config.ConfigComponent",
+  "runway.utils.MutableMap",
 ]
 ignored-modules = ["distutils"]
 
 
 [tool.pytest.ini_options]
 addopts = [
-    "--cov-config=pyproject.toml",
-    "--force-sugar",
-    "--no-cov-on-fail",
+  "--cov-config=pyproject.toml",
+  "--force-sugar",
+  "--no-cov-on-fail",
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::pytest_mock.PytestMockWarning",
+  "ignore::DeprecationWarning",
+  "ignore::pytest_mock.PytestMockWarning",
 ]
 markers = [
-    "wip: isolate tests currently being worked on.",
+  "wip: isolate tests currently being worked on.",
 ]
 minversion = 6.0
 python_classes = ["Test*"]

@@ -12,10 +12,6 @@ pre_deploy:
       prefix: lambda_functions/${namespace}/
       functions:
         dockerize:
-          # this won't actually use docker at the moment.
-          # it will take additional work to get docker running in codebuild for this.
-          # but, for the time being we are at least testing the use of pipenv.
-          # note: leaving it set to `non-linux` will allow local testing to use docker even though codebuild testing does not.
           dockerize_pip: true
           use_pipenv: true
           runtime: python3.8

@@ -38,8 +38,6 @@ Python Example
 .. code-block::
 
   .
-  ├── Pipfile
-  ├── Pipfile.lock
   ├── app.py
   ├── cdk.json
   ├── hello
@@ -47,7 +45,9 @@ Python Example
   │   ├── hello_construct.py
   │   └── hello_stack.py
   ├── package.json
-  └── package-lock.json
+  ├── package-lock.json
+  ├── poetry.lock
+  └── pyproject.toml
 
 
 ******************

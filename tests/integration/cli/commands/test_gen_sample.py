@@ -63,8 +63,8 @@ def test_cdk_py(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         ".gitignore",
         "app.py",
         "package.json",
-        "Pipfile",
-        "Pipfile.lock",
+        "pyproject.toml",
+        "poetry.lock",
         "runway.module.yml",
     ]
 
@@ -266,8 +266,8 @@ def test_sls_py(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         "__init__.py",
         "config-dev-us-east-1.json",
         "package.json",
-        "Pipfile",
-        "Pipfile.lock",
+        "pyproject.toml",
+        "poetry.lock",
         "serverless.yml",
     ]
 

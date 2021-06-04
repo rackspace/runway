@@ -1,4 +1,3 @@
----
 # See full syntax at https://github.com/onicagroup/runway
 
 deployments:
@@ -8,12 +7,11 @@ deployments:
           dev: true
       - path: frontend
         type: static
-        environments:
-          dev:
-            namespace: realworld-dev
+        parameters:
+          namespace: realworld-dev
         options:
           pre_build_steps:
-            - pipenv run python update_env_endpoint.py
+            - poetry run python update_env_endpoint.py
           build_steps:
             - npm install
             - npm run build

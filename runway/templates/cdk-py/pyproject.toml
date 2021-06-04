@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "runway-sample-cdk-py"
+version = "0.0.0"
+description = "Runway Sample"
+authors = ["Onica Group LLC <opensource@onica.com>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+"aws-cdk.core" = "^1.13"
+"aws-cdk.aws_iam" = "^1.13"
+"aws-cdk.aws_sqs" = "^1.13"
+"aws-cdk.aws_sns" = "^1.13"
+"aws-cdk.aws_sns_subscriptions" = "^1.13"
+"aws-cdk.aws_s3" = "^1.13"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
