@@ -6,6 +6,15 @@ on:
 
 
 jobs:
+  branch-name:
+    name: Enforce Branch Name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-branch-name@v1.0.0  # cspell:ignore deepakputhraya
+        with:
+          regex: ([a-z])+\/([a-zA-Z0-9\-\_])+
+          allowed_prefixes: bugfix,chore,dependabot,docs,feat,feature,fix,hotfix,maint,maintain,maintenance,release
+          ignore: develop,master,release,v0_47_fixes
   label-pr:
     name: Label PR
     # Skip running the job from forks.
