@@ -5,6 +5,9 @@
   - name: bug
     color: d73a4a
     description: Something isn't working
+  - name: cloudformation
+    color: ffffff
+    description: Changes to CloudFormation templates
   - name: dependencies
     color: 0366d6
     description: Pull request that updates a dependency file
