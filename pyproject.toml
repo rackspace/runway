@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runway"
-version = "2.0.0"  # do not change
+version = "2.0.0-dev"  # do not change
 description = "Simplify infrastructure/app testing/deployment"
 license = "Apache-2.0"
 authors = [
