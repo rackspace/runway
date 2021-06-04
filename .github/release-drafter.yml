@@ -14,14 +14,25 @@ autolabeler:  # cspell:ignore autolabeler
     branch: [/^(docs)\/.*/]
   - label: feature
     branch: [/^(enhancement|feat|feature)\/.*/]
+  - label: github_actions
+    files:
+      - .github/workflows/*.yml
   - label: maintenance
     branch: [/^(chore|maint|maintain|maintenance)\/.*/]
+  - label: npm
+    files:
+      - npm/.npmignore
+      - npm/postinstall.js
+      - npm/preuninstall.js
+      - package-lock.json
+      - package.json
   - label: patch
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
   - label: poetry
     files:
       - poetry.lock
       - poetry.toml
+      - pyproject.toml
   - label: pyinstaller
     files:
       - runway.file.spec
@@ -34,9 +45,6 @@ autolabeler:  # cspell:ignore autolabeler
       - setup.cfg
   - label: release
     branch: [/^(release)\/.*/]
-  - label: workflows
-    files:
-      - .github/workflows/*.yml
 categories:
   - title: 🚀 Features
     labels:
