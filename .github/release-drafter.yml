@@ -17,6 +17,11 @@ autolabeler:  # cspell:ignore autolabeler
   - label: github_actions
     files:
       - .github/workflows/*.yml
+  - label: javascript
+    files:
+      - '**/*.js'
+      - '**/package-lock.json'
+      - '**/package.json'
   - label: maintenance
     branch: [/^(chore|maint|maintain|maintenance)\/.*/]
   - label: npm
@@ -24,8 +29,6 @@ autolabeler:  # cspell:ignore autolabeler
       - npm/.npmignore
       - npm/postinstall.js
       - npm/preuninstall.js
-      - package-lock.json
-      - package.json
   - label: patch
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
   - label: poetry
