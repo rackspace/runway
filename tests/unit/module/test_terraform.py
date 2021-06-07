@@ -511,20 +511,39 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         mock_gen_command.assert_called_with("apply", expected_arg_list)
         assert mock_run_command.call_count == 2
 
+    @pytest.mark.parametrize(
+        "version, expected_subcmd, expected_options",
+        [
+            (VersionTuple(0, 15, 5), "apply", ["-destroy", "-auto-approve"]),
+            (VersionTuple(0, 15, 2), "apply", ["-destroy", "-auto-approve"]),
+            (VersionTuple(0, 15, 1), "destroy", ["-auto-approve"]),
+            (VersionTuple(0, 12, 3), "destroy", ["-auto-approve"]),
+            (VersionTuple(0, 11, 2), "destroy", ["-force"]),
+        ],
+    )
     def test_terraform_destroy(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+        self,
+        expected_options: List[str],
+        expected_subcmd: str,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+        version: VersionTuple,
     ) -> None:
         """Test terraform_destroy."""
         mock_gen_command = mocker.patch.object(
             Terraform, "gen_command", return_value=["mock_gen_command"]
         )
-        mock_run_command = mocker.patch(f"{MODULE}.run_module_command")
+        mocker.patch.object(Terraform, "version", version)
+        mock_run_command = mocker.patch(
+            f"{MODULE}.run_module_command", return_value=None
+        )
         obj = Terraform(runway_context, module_root=tmp_path)
         mocker.patch.object(obj, "env_file", ["env_file"])
 
-        expected_arg_list = ["-force", "env_file"]
+        expected_options.append("env_file")
         assert not obj.terraform_destroy()
-        mock_gen_command.assert_called_once_with("destroy", expected_arg_list)
+        mock_gen_command.assert_called_once_with(expected_subcmd, expected_options)
         mock_run_command.assert_called_once_with(
             ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )

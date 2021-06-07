@@ -425,7 +425,7 @@ class TFEnvManager(EnvManager):
 
         """
         output = subprocess.check_output(
-            [str(bin_path), "--version"], cwd=cwd, env=env
+            [str(bin_path), "-version"], cwd=cwd, env=env
         ).decode()
         match = re.search(cls.VERSION_OUTPUT_REGEX, output)
         if not match:

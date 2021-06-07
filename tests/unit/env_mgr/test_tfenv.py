@@ -201,7 +201,7 @@ class TestTFEnvManager:
     ) -> None:
         """Test get_version_from_executable."""
         fake_process.register_subprocess(
-            ["usr/tfenv/terraform", "--version"], stdout=output
+            ["usr/tfenv/terraform", "-version"], stdout=output
         )
         assert (
             TFEnvManager.get_version_from_executable("usr/tfenv/terraform") == expected
@@ -210,7 +210,7 @@ class TestTFEnvManager:
     def test_get_version_from_executable_raise(self, fake_process: FakeProcess) -> None:
         """Test get_version_from_executable raise exception."""
         fake_process.register_subprocess(
-            ["usr/tfenv/terraform", "--version"], returncode=1
+            ["usr/tfenv/terraform", "-version"], returncode=1
         )
         with pytest.raises(
             subprocess.CalledProcessError, match="returned non-zero exit status 1"

@@ -364,7 +364,43 @@ class Terraform(RunwayModule):
         https://www.terraform.io/docs/cli/commands/destroy.html
 
         """
-        run_module_command(
+        if self.version >= (0, 15, 2):
+            return self._terraform_destroy_15_2()
+        if self.version >= (0, 12):
+            return self._terraform_destroy_12()
+        return self._terraform_destroy_legacy()
+
+    def _terraform_destroy_12(self) -> None:
+        """Execute ``terraform destroy -auto-approve`` command.
+
+        Compatible with Terraform >=0.12.0, <0.15.2.
+
+        """
+        return run_module_command(
+            self.gen_command("destroy", ["-auto-approve"] + self.env_file),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+
+    def _terraform_destroy_15_2(self) -> None:
+        """Execute ``terraform apply -destroy -auto-approve`` command.
+
+        Compatible with Terraform >=0.15.2.
+
+        """
+        return run_module_command(
+            self.gen_command("apply", ["-destroy", "-auto-approve"] + self.env_file),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+
+    def _terraform_destroy_legacy(self) -> None:
+        """Execute ``terraform destroy -force`` command.
+
+        Compatible with Terrafrom <0.12.0.
+
+        """
+        return run_module_command(
             self.gen_command("destroy", ["-force"] + self.env_file),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
