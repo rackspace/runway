@@ -400,6 +400,8 @@ class TFEnvManager(EnvManager):
                 ``<major>.<minor>.<patch>`` with an optional ``-<prerelease>``.
 
         """
+        if self.current_version == version:
+            return
         self.current_version = version
         try:
             del self.version

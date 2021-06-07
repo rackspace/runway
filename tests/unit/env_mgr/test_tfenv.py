@@ -326,6 +326,15 @@ class TestTFEnvManager:
         assert tfenv.version == version
         assert tfenv.current_version == str(version)
 
+    def test_set_version_same(self, mocker: MockerFixture, tmp_path: Path) -> None:
+        """Test set_version same."""
+        version = mocker.patch.object(TFEnvManager, "version")
+        tfenv = TFEnvManager(tmp_path)
+        tfenv.current_version = "0.15.5"
+        assert not tfenv.set_version("0.15.5")
+        assert tfenv.current_version == "0.15.5"
+        assert tfenv.version == version
+
     @pytest.mark.parametrize(
         "response, expected",
         [  # type: ignore
