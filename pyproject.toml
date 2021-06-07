@@ -319,7 +319,6 @@ ignored-modules = ["distutils"]
 [tool.pytest.ini_options]
 addopts = [
   "--cov-config=pyproject.toml",
-  "--force-sugar",
   "--no-cov-on-fail",
 ]
 filterwarnings = [

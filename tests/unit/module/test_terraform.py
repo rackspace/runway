@@ -9,9 +9,10 @@ import subprocess
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, Mock
 
 from runway._logging import LogLevels
+from runway.env_mgr.tfenv import VersionTuple
 from runway.module.terraform import (
     Terraform,
     TerraformBackendConfig,
@@ -70,8 +71,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
     ) -> None:
         """Test auto_tfvars."""
         caplog.set_level(LogLevels.DEBUG, logger=MODULE)
-        mock_tfenv = MagicMock(current_version="0.12.0")
-        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
+        mocker.patch.object(Terraform, "version", VersionTuple(0, 15, 5))
         options = {
             "terraform_write_auto_tfvars": True,
         }
@@ -94,26 +94,6 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         obj.parameters = {}
         assert not obj.auto_tfvars.exists()  # type: ignore
 
-    def test_auto_tfvars_invalid_version(
-        self,
-        caplog: LogCaptureFixture,
-        mocker: MockerFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
-    ) -> None:
-        """Test auto_tfvars with a version that cannot be converted to int."""
-        caplog.set_level(LogLevels.DEBUG, logger=MODULE)
-        mock_tfenv = MagicMock(current_version="v0.12.0")
-        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
-        options = {"terraform_write_auto_tfvars": True}
-        parameters = {"key": "val"}
-        obj = Terraform(
-            runway_context, module_root=tmp_path, options=options, parameters=parameters
-        )
-        assert obj.auto_tfvars.is_file()
-        assert json.loads(obj.auto_tfvars.read_text()) == parameters
-        assert "unable to parse current version" in "\n".join(caplog.messages)
-
     def test_auto_tfvars_unsupported_version(
         self,
         caplog: LogCaptureFixture,
@@ -123,8 +103,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
     ) -> None:
         """Test auto_tfvars with a version that does not support it."""
         caplog.set_level(LogLevels.WARNING, logger=MODULE)
-        mock_tfenv = MagicMock(current_version="0.9.0")
-        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
+        mocker.patch.object(Terraform, "version", VersionTuple(0, 9, 0))
         options = {"terraform_write_auto_tfvars": True}
         parameters = {"key": "val"}
         obj = Terraform(
@@ -532,20 +511,39 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         mock_gen_command.assert_called_with("apply", expected_arg_list)
         assert mock_run_command.call_count == 2
 
+    @pytest.mark.parametrize(
+        "version, expected_subcmd, expected_options",
+        [
+            (VersionTuple(0, 15, 5), "apply", ["-destroy", "-auto-approve"]),
+            (VersionTuple(0, 15, 2), "apply", ["-destroy", "-auto-approve"]),
+            (VersionTuple(0, 15, 1), "destroy", ["-auto-approve"]),
+            (VersionTuple(0, 12, 3), "destroy", ["-auto-approve"]),
+            (VersionTuple(0, 11, 2), "destroy", ["-force"]),
+        ],
+    )
     def test_terraform_destroy(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+        self,
+        expected_options: List[str],
+        expected_subcmd: str,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+        version: VersionTuple,
     ) -> None:
         """Test terraform_destroy."""
         mock_gen_command = mocker.patch.object(
             Terraform, "gen_command", return_value=["mock_gen_command"]
         )
-        mock_run_command = mocker.patch(f"{MODULE}.run_module_command")
+        mocker.patch.object(Terraform, "version", version)
+        mock_run_command = mocker.patch(
+            f"{MODULE}.run_module_command", return_value=None
+        )
         obj = Terraform(runway_context, module_root=tmp_path)
         mocker.patch.object(obj, "env_file", ["env_file"])
 
-        expected_arg_list = ["-force", "env_file"]
+        expected_options.append("env_file")
         assert not obj.terraform_destroy()
-        mock_gen_command.assert_called_once_with("destroy", expected_arg_list)
+        mock_gen_command.assert_called_once_with(expected_subcmd, expected_options)
         mock_run_command.assert_called_once_with(
             ["mock_gen_command"], env_vars=obj.ctx.env.vars, logger=obj.logger
         )
@@ -788,6 +786,58 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
         assert not obj[action]()
         obj.terraform_workspace_new.assert_called_once_with("test")
+
+    def test_version(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test version."""
+        version = VersionTuple(0, 15, 5)
+        tfenv = Mock(current_version="0.15.5", version=version)
+        mocker.patch.object(Terraform, "tfenv", tfenv)
+        assert Terraform(runway_context, module_root=tmp_path).version == version
+
+    def test_version_from_executable(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test version from executable."""
+        version = VersionTuple(0, 15, 5)
+        tfenv = Mock(current_version=None, version=None)
+        tfenv.get_version_from_executable.return_value = version
+        mocker.patch.object(Terraform, "tfenv", tfenv)
+        mocker.patch.object(Terraform, "tf_bin", "/bin/terraform")
+        obj = Terraform(runway_context, module_root=tmp_path)
+        assert obj.version == version
+        tfenv.get_version_from_executable.assert_called_once_with(obj.tf_bin)
+
+    def test_version_from_options(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test version from options."""
+        version = VersionTuple(0, 15, 5)
+        tfenv = Mock(current_version=None, version=version)
+        mocker.patch.object(Terraform, "tfenv", tfenv)
+        assert (
+            Terraform(
+                runway_context,
+                module_root=tmp_path,
+                options={"terraform_version": "0.15.5"},
+            ).version
+            == version
+        )
+        tfenv.set_version.assert_called_once_with("0.15.5")
+
+    def test_version_raise_value_error(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test version."""
+        tfenv = Mock(current_version=None, version=None)
+        tfenv.get_version_from_executable.return_value = None
+        mocker.patch.object(Terraform, "tfenv", tfenv)
+        mocker.patch.object(Terraform, "tf_bin", "/bin/terraform")
+        with pytest.raises(
+            ValueError, match="unable to retrieve version from /bin/terraform"
+        ):
+            assert Terraform(runway_context, module_root=tmp_path).version
 
 
 class TestTerraformOptions:

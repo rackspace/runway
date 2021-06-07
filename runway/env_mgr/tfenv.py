@@ -7,17 +7,29 @@ import os
 import platform
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import zipfile
 from distutils.version import LooseVersion
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    NamedTuple,
+    Optional,
+    Union,
+    cast,
+    overload,
+)
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import hcl
 import hcl2
 import requests
+from typing_extensions import Final
 
 from ..compat import cached_property
 from ..exceptions import HclParserError
@@ -132,12 +144,47 @@ def load_terraform_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
     return result
 
 
+class VersionTuple(NamedTuple):
+    """Terraform version tuple.
+
+    Attributes:
+        major: Major release version number.
+        minor: Minor release version number.
+        patch: Patch release version number.
+        prerelease: Prerelease identifier (e.g. ``beta2``).
+
+    """
+
+    major: int
+    minor: int
+    patch: int
+    prerelease: Optional[str] = None
+    prerelease_number: Optional[int] = None
+
+    def __str__(self) -> str:
+        """Format as string."""
+        result = f"{self.major}.{self.minor}.{self.patch}"
+        if self.prerelease:
+            result += f"-{self.prerelease}"
+        if self.prerelease_number:
+            result += str(self.prerelease_number)
+        return result
+
+
 class TFEnvManager(EnvManager):
     """Terraform version management.
 
     Designed to be compatible with https://github.com/tfutils/tfenv.
 
     """
+
+    VERSION_REGEX: Final[str] = (
+        r"^(?P<major>[0-9]*)\.(?P<minor>[0-9]*)\.(?P<patch>[0-9]*)"
+        r"(\-(?P<prerelease>alpha|beta|oci|rc)(?P<prerelease_number>[0-9]*)?)?"
+    )
+    VERSION_OUTPUT_REGEX: Final[
+        str
+    ] = r"^Terraform v(?P<version>[0-9]*\.[0-9]*\.[0-9]*)(?P<suffix>-.*)?"
 
     def __init__(self, path: Optional[Path] = None) -> None:
         """Initialize class."""
@@ -222,6 +269,47 @@ class TFEnvManager(EnvManager):
         return _flatten_lists(result)
 
     @cached_property
+    def version(self) -> Optional[VersionTuple]:
+        """Terraform version."""
+        version_requested = self.current_version or self.get_version_from_file()
+
+        if not version_requested:
+            return None
+
+        if re.match(r"^min-required$", version_requested):
+            LOGGER.debug("tfenv: detecting minimal required version")
+            version_requested = self.get_min_required()
+
+        if re.match(r"^latest:.*$", version_requested):
+            regex = re.search(r"latest:(.*)", version_requested).group(  # type: ignore
+                1
+            )
+            include_prerelease_versions = False
+        elif re.match(r"^latest$", version_requested):
+            regex = r"^[0-9]+\.[0-9]+\.[0-9]+$"
+            include_prerelease_versions = False
+        else:
+            regex = "^%s$" % version_requested
+            include_prerelease_versions = True
+            # Return early (i.e before reaching out to the internet) if the
+            # matching version is already installed
+            if (self.versions_dir / version_requested).is_dir():
+                self.current_version = version_requested
+                return self.parse_version_string(self.current_version)
+
+        try:
+            version = next(
+                i
+                for i in get_available_tf_versions(include_prerelease_versions)
+                if re.match(regex, i)
+            )
+        except StopIteration:
+            LOGGER.error("unable to find a Terraform version matching regex: %s", regex)
+            sys.exit(1)
+        self.current_version = version
+        return self.parse_version_string(self.current_version)
+
+    @cached_property
     def version_file(self) -> Optional[Path]:
         """Find and return a ".terraform-version" file if one is present.
 
@@ -279,61 +367,89 @@ class TFEnvManager(EnvManager):
 
     def install(self, version_requested: Optional[str] = None) -> str:
         """Ensure Terraform is available."""
-        version_requested = version_requested or self.get_version_from_file()
+        if version_requested:
+            self.set_version(version_requested)
 
-        if not version_requested:
+        if not self.version:
             raise ValueError(
                 "version not provided and unable to find a {} file".format(
                     TF_VERSION_FILENAME
                 )
             )
 
-        if re.match(r"^min-required$", version_requested):
-            LOGGER.debug("tfenv: detecting minimal required version")
-            version_requested = self.get_min_required()
-
-        if re.match(r"^latest:.*$", version_requested):
-            regex = re.search(r"latest:(.*)", version_requested).group(  # type: ignore
-                1
-            )
-            include_prerelease_versions = False
-        elif re.match(r"^latest$", version_requested):
-            regex = r"^[0-9]+\.[0-9]+\.[0-9]+$"
-            include_prerelease_versions = False
-        else:
-            regex = "^%s$" % version_requested
-            include_prerelease_versions = True
-            # Return early (i.e before reaching out to the internet) if the
-            # matching version is already installed
-            if (self.versions_dir / version_requested).is_dir():
-                LOGGER.verbose(
-                    "Terraform version %s already installed; using it...",
-                    version_requested,
-                )
-                self.current_version = version_requested
-                return str(self.bin)
-
-        try:
-            version = next(
-                i
-                for i in get_available_tf_versions(include_prerelease_versions)
-                if re.match(regex, i)
-            )
-        except StopIteration:
-            LOGGER.error("unable to find a Terraform version matching regex: %s", regex)
-            sys.exit(1)
-
         # Now that a version has been selected, skip downloading if it's
         # already been downloaded
-        if (self.versions_dir / version).is_dir():
+        if (self.versions_dir / str(self.version)).is_dir():
             LOGGER.verbose(
-                "Terraform version %s already installed; using it...", version
+                "Terraform version %s already installed; using it...", self.version
             )
-            self.current_version = version
             return str(self.bin)
 
-        LOGGER.info("downloading and using Terraform version %s ...", version)
-        download_tf_release(version, self.versions_dir, self.command_suffix)
-        LOGGER.verbose("downloaded Terraform %s successfully", version)
-        self.current_version = version
+        LOGGER.info("downloading and using Terraform version %s ...", self.version)
+        download_tf_release(str(self.version), self.versions_dir, self.command_suffix)
+        LOGGER.verbose("downloaded Terraform %s successfully", self.version)
         return str(self.bin)
+
+    def set_version(self, version: str) -> None:
+        """Set current version.
+
+        Clears cached values as needed.
+
+        Args:
+            version: Version string. Must be in the format of
+                ``<major>.<minor>.<patch>`` with an optional ``-<prerelease>``.
+
+        """
+        if self.current_version == version:
+            return
+        self.current_version = version
+        try:
+            del self.version
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    @classmethod
+    def get_version_from_executable(
+        cls,
+        bin_path: Union[Path, str],
+        *,
+        cwd: Optional[Union[Path, str]] = None,
+        env: Optional[Dict[str, str]] = None,
+    ) -> Optional[VersionTuple]:
+        """Get Terraform version from an executable.
+
+        Args:
+            bin_path: Path to the Terraform binary to retrieve the version from.
+            cwd: Current working directory to use when calling the executable.
+            env: Environment variable overrides.
+
+        """
+        output = subprocess.check_output(
+            [str(bin_path), "-version"], cwd=cwd, env=env
+        ).decode()
+        match = re.search(cls.VERSION_OUTPUT_REGEX, output)
+        if not match:
+            return None
+        return cls.parse_version_string(match.group("version"))
+
+    @classmethod
+    def parse_version_string(cls, version: str) -> VersionTuple:
+        """Parse version string into a :class:`VersionTuple`.
+
+        Args:
+            version: Version string to parse. Must be in the format of
+                ``<major>.<minor>.<patch>`` with an optional ``-<prerelease>``.
+
+        """
+        match = re.search(cls.VERSION_REGEX, version)
+        if not match:
+            raise ValueError(
+                f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
+            )
+        return VersionTuple(
+            major=int(match.group("major")),
+            minor=int(match.group("minor")),
+            patch=int(match.group("patch")),
+            prerelease=match.group("prerelease") or None,
+            prerelease_number=int(match.group("prerelease_number") or 0) or None,
+        )

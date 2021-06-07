@@ -20,8 +20,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(
     autouse=True,
-    # TODO add 0.15 after implimenting https://github.com/onicagroup/runway/issues/597
-    params=["0.11.15", "0.12.31", "0.13.7", "0.14.11"],
+    params=["0.11.15", "0.12.31", "0.13.7", "0.14.11", "0.15.5"],
     scope="module",
 )
 def tf_version(request: SubRequest) -> Generator[str, None, None]:

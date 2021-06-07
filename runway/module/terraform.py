@@ -19,7 +19,7 @@ from ..config.models.runway.options.terraform import (
     RunwayTerraformBackendConfigDataModel,
     RunwayTerraformModuleOptionsDataModel,
 )
-from ..env_mgr.tfenv import TFEnvManager
+from ..env_mgr.tfenv import TFEnvManager, VersionTuple
 from ..utils import DOC_SITE, which
 from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
@@ -133,18 +133,11 @@ class Terraform(RunwayModule):
         """Return auto.tfvars file if one is being used."""
         file_path = self.path / "runway-parameters.auto.tfvars.json"
         if self.parameters and self.options.write_auto_tfvars:
-            try:
-                if self.tfenv.current_version:
-                    current_version = tuple(
-                        int(i) for i in self.tfenv.current_version.split(".")
-                    )
-                    if current_version < (0, 10):
-                        self.logger.warning(
-                            "Terraform version does not support the use of "
-                            "*.auto.tfvars; some variables may be missing"
-                        )
-            except Exception:  # pylint: disable=broad-except
-                self.logger.debug("unable to parse current version", exc_info=True)
+            if self.version < (0, 10):
+                self.logger.warning(
+                    "Terraform version does not support the use of "
+                    "*.auto.tfvars; some variables may be missing"
+                )
             file_path.write_text(json.dumps(self.parameters, indent=4))
         return file_path
 
@@ -211,6 +204,18 @@ class Terraform(RunwayModule):
             DOC_SITE,
         )
         sys.exit(1)
+
+    @cached_property
+    def version(self) -> VersionTuple:
+        """Version of Terraform being used."""
+        if not self.tfenv.current_version and self.options.version:
+            self.tfenv.set_version(self.options.version)
+        if self.tfenv.version:
+            return self.tfenv.version
+        version = self.tfenv.get_version_from_executable(self.tf_bin)
+        if version:
+            return version
+        raise ValueError(f"unable to retrieve version from {self.tf_bin}")
 
     def cleanup_dot_terraform(self) -> None:
         """Remove .terraform excluding the plugins directly.
@@ -359,7 +364,43 @@ class Terraform(RunwayModule):
         https://www.terraform.io/docs/cli/commands/destroy.html
 
         """
-        run_module_command(
+        if self.version >= (0, 15, 2):
+            return self._terraform_destroy_15_2()
+        if self.version >= (0, 12):
+            return self._terraform_destroy_12()
+        return self._terraform_destroy_legacy()
+
+    def _terraform_destroy_12(self) -> None:
+        """Execute ``terraform destroy -auto-approve`` command.
+
+        Compatible with Terraform >=0.12.0, <0.15.2.
+
+        """
+        return run_module_command(
+            self.gen_command("destroy", ["-auto-approve"] + self.env_file),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+
+    def _terraform_destroy_15_2(self) -> None:
+        """Execute ``terraform apply -destroy -auto-approve`` command.
+
+        Compatible with Terraform >=0.15.2.
+
+        """
+        return run_module_command(
+            self.gen_command("apply", ["-destroy", "-auto-approve"] + self.env_file),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+
+    def _terraform_destroy_legacy(self) -> None:
+        """Execute ``terraform destroy -force`` command.
+
+        Compatible with Terrafrom <0.12.0.
+
+        """
+        return run_module_command(
             self.gen_command("destroy", ["-force"] + self.env_file),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
