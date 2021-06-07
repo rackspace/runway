@@ -282,6 +282,7 @@ sssz
 strtobool
 stubber
 stubbers
+subcmd
 subdirs
 submodules
 subpackages
