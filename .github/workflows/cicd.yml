@@ -15,6 +15,7 @@ defaults:
 
 env:
   AWS_DEFAULT_REGION: us-east-1
+  PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
 
 
