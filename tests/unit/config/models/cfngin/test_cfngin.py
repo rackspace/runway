@@ -199,6 +199,7 @@ class TestCfnginStackDefinitionModel:
         assert obj.tags == {}
         assert not obj.template_path
         assert not obj.termination_protection
+        assert not obj.timeout
         assert obj.variables == {}
 
     def test_required_fields(self) -> None:

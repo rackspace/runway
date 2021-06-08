@@ -615,13 +615,16 @@ class TestProviderDefaultMode(unittest.TestCase):
             stack_name, parameters, tags, template
         )
         expected_args["EnableTerminationProtection"] = False
+        expected_args["TimeoutInMinutes"] = 60
 
         self.stubber.add_response(
             "create_stack", {"StackId": stack_name}, expected_args
         )
 
         with self.stubber:
-            self.provider.create_stack(stack_name, template, parameters, tags)
+            self.provider.create_stack(
+                stack_name, template, parameters, tags, timeout=60
+            )
         self.stubber.assert_no_pending_responses()
 
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")

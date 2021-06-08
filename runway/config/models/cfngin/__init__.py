@@ -116,6 +116,11 @@ class CfnginStackDefinitionModel(ConfigProperty):
         False,
         description="Set the value of termination protection on the CloudFormation stack.",
     )
+    timeout: Optional[int] = Field(
+        None,
+        description="The amount of time (in minutes) that can pass before the "
+        "Stack status becomes CREATE_FAILED.",
+    )
     variables: Dict[str, Any] = Field(
         {},
         description="Parameter values that will be passed to the "

@@ -918,9 +918,11 @@ class Provider(BaseProvider):
         template: Template,
         parameters: List[ParameterTypeDef],
         tags: List[TagTypeDef],
+        *,
         force_change_set: bool = False,
         stack_policy: Optional[Template] = None,
         termination_protection: bool = False,
+        timeout: Optional[int] = None,
         **kwargs: Any,
     ) -> None:
         """Create a new Cloudformation stack.
@@ -936,6 +938,8 @@ class Provider(BaseProvider):
             stack_policy: A template object representing a stack policy.
             termination_protection: End state of the stack's termination
                 protection.
+            timeout: The amount of time that can pass before the stack status becomes
+                ``CREATE_FAILED``.
 
         """
         LOGGER.debug(
@@ -971,9 +975,11 @@ class Provider(BaseProvider):
                 service_role=self.service_role,
                 stack_policy=stack_policy,
             )
-            # this arg is only valid for stack creation so its not part of
+            # these args are only valid for stack creation so they are not part of
             # generate_cloudformation_args.
             args["EnableTerminationProtection"] = termination_protection
+            if timeout:
+                args["TimeoutInMinutes"] = timeout
 
             try:
                 self.cloudformation.create_stack(**args)

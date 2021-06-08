@@ -695,6 +695,24 @@ Stack
         - name: another-stack
           termination_protection: ${termination_protection_another_stack}
 
+  .. attribute:: timeout
+    :type: Optional[int]
+    :value: None
+
+    Specifies the amount of time, in minutes, that CloudFormation should allot before timing out stack creation operations.
+    If CloudFormation can't create the entire stack in the time allotted, it fails the stack creation due to timeout and rolls back the stack.
+
+    By default, there is no timeout for stack creation.
+    However, individual resources may have their own timeouts based on the nature of the service they implement.
+    For example, if an individual resource in your stack times out, stack creation also times out even if the timeout you specified for stack creation hasn't yet been reached.
+
+    .. rubric:: Example
+    .. code-block:: yaml
+
+      stacks:
+        - name: example-stack
+          timeout: 120
+
   .. attribute:: variables
     :type: Optional[Dict[str, Any]]
     :value: {}
