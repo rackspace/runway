@@ -27,7 +27,10 @@ def get_cdk_stacks(
     LOGGER.debug("listing stacks in the CDK app prior to diff...")
     result = subprocess.check_output(
         generate_node_command(
-            command="cdk", command_opts=["list"] + context_opts, path=module_path
+            command="cdk",
+            command_opts=["list"] + context_opts,
+            package="aws-cdk",
+            path=module_path,
         ),
         env=env_vars,
     ).decode()
@@ -130,8 +133,11 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                             self.path, self.ctx.env.vars, cdk_context_opts
                         ):
                             subprocess.call(
-                                generate_node_command(
-                                    "cdk", cdk_opts + [i], self.path  # 'diff <stack>'
+                                generate_node_command(  # 'diff <stack>'
+                                    command="cdk",
+                                    command_opts=cdk_opts + [i],
+                                    package="aws-cdk",
+                                    path=self.path,
                                 ),
                                 env=self.ctx.env.vars,
                             )
@@ -146,11 +152,12 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                                 cdk_opts.append("--ci")
                                 cdk_opts.append("--require-approval=never")
                             bootstrap_command = generate_node_command(
-                                "cdk",
-                                ["bootstrap"]
+                                command="cdk",
+                                command_opts=["bootstrap"]
                                 + cdk_context_opts
                                 + (["--no-color"] if self.ctx.no_color else []),
-                                self.path,
+                                package="aws-cdk",
+                                path=self.path,
                             )
                             self.logger.info("bootstrap (in progress)")
                             run_module_command(
@@ -161,7 +168,12 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                             self.logger.info("bootstrap (complete)")
                         elif command == "destroy" and self.ctx.is_noninteractive:
                             cdk_opts.append("-f")  # Don't prompt
-                        cdk_command = generate_node_command("cdk", cdk_opts, self.path)
+                        cdk_command = generate_node_command(
+                            command="cdk",
+                            command_opts=cdk_opts,
+                            package="aws-cdk",
+                            path=self.path,
+                        )
                         self.logger.info("%s (in progress)", command)
                         run_module_command(
                             cmd_list=cdk_command,
