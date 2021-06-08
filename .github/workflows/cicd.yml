@@ -112,6 +112,7 @@ jobs:
     if: |
       always() &&
       github.repository == 'onicagroup/runway' &&
+      github.actor != 'dependabot[bot]' &&
       (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
