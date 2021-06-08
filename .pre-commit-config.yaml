@@ -42,7 +42,7 @@ repos:
         args: [--implicit_start, --mapping, '2', --offset, '2', --sequence, '4']
         files: |
           (?x)^(
-            \.github/.*\.(yaml|yml)|
+            \.github/(?!dependabot).*\.(yaml|yml)|
             \.markdownlint.yml|
             \.pre-commit-config.yaml|
             \.readthedocs.yml|
