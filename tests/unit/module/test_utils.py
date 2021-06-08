@@ -58,6 +58,21 @@ def test_format_npm_command_for_logging_windows(
 
 
 @pytest.mark.parametrize(
+    "command, opts", [("test", []), ("test", ["arg1"]), ("test", ["arg1", "arg2"])]
+)
+def test_generate_node_command(
+    command: str, mocker: MockerFixture, opts: List[str], tmp_path: Path
+) -> None:
+    """Test generate_node_command."""
+    mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
+    assert generate_node_command(command, opts, tmp_path) == [
+        str(tmp_path / "node_modules" / ".bin" / command),
+        *opts,
+    ]
+    mock_which.assert_called_once_with(NPX_BIN)
+
+
+@pytest.mark.parametrize(
     "command, opts, expected",
     [
         ("test", [], [NPX_BIN, "-c", "test"]),
@@ -78,18 +93,20 @@ def test_generate_node_command_npx(
     mock_which.assert_called_once_with(NPX_BIN)
 
 
-@pytest.mark.parametrize(
-    "command, opts", [("test", []), ("test", ["arg1"]), ("test", ["arg1", "arg2"])]
-)
-def test_generate_node_command(
-    command: str, mocker: MockerFixture, opts: List[str], tmp_path: Path
+def test_generate_node_command_npx_package(
+    mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test generate_node_command."""
-    mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
-    assert generate_node_command(command, opts, tmp_path) == [
-        str(tmp_path / "node_modules" / ".bin" / command),
-        *opts,
-    ]
+    mock_which = mocker.patch(f"{MODULE}.which", return_value=True)
+    assert (
+        generate_node_command(
+            command="cdk",
+            command_opts=["--context", "key=val"],
+            package="aws-cdk",
+            path=tmp_path,
+        )
+        == [NPX_BIN, "--package", "aws-cdk", "cdk", "--context", "key=val"]
+    )
     mock_which.assert_called_once_with(NPX_BIN)
 
 

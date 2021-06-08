@@ -7,7 +7,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from ..utils import which
 
@@ -32,12 +32,38 @@ def generate_node_command(
     command: str,
     command_opts: List[str],
     path: Path,
+    *,
     logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+    package: Optional[str] = None,
 ) -> List[str]:
-    """Return node bin command list for subprocess execution."""
+    """Return node bin command list for subprocess execution.
+
+    Args:
+        command: Command to execute from a local ``node_modules/.bin``.
+        command_opts: Options to include with the command.
+        path: Current working directory. Used to construct a "fall-back" command
+            when ``npx`` is not available/included as part of npm.
+        logger: A specific logger to use when logging the constructed command.
+        package: Name of the npm package containing the binary to execute.
+            This is recommended when the name of the binary does not match the
+            name of the npm package.
+
+    """
     if which(NPX_BIN):
         # Use npx if available (npm v5.2+)
-        cmd_list = [NPX_BIN, "-c", f"{command} {' '.join(command_opts)}".strip()]
+        cmd_list = [NPX_BIN]
+        if package:
+            cmd_list.extend(
+                [
+                    "--package",
+                    package,
+                    command,
+                    *command_opts,
+                ]
+            )
+        else:
+            cmd_list.append("-c")
+            cmd_list.append(f"{command} {' '.join(command_opts)}".strip())
     else:
         logger.debug("npx not found; falling back to invoking shell script directly")
         cmd_list = [str(path / "node_modules" / ".bin" / command), *command_opts]
