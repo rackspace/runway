@@ -438,7 +438,6 @@ class Action(BaseAction):
                     force_change_set=force_change_set,
                     stack_policy=stack_policy,
                     termination_protection=stack.termination_protection,
-                    timeout=stack.definition.timeout,
                 )
 
                 LOGGER.debug("%s:updating existing stack", stack.fqn)
