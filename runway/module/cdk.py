@@ -122,7 +122,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                         self.logger.info("build steps (complete)")
                     cdk_context_opts: List[str] = []
                     for key, val in cast(Dict[str, str], self.parameters).items():
-                        cdk_context_opts.extend(["-context", "%s=%s" % (key, val)])
+                        cdk_context_opts.extend(["--context", "%s=%s" % (key, val)])
                     cdk_opts.extend(cdk_context_opts)
                     if command == "diff":
                         self.logger.info("plan (in progress)")
