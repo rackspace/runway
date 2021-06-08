@@ -173,6 +173,9 @@ exclude_lines = [
   "from pathlib import Path",
   "@overload",
 ]
+fail_under = 85
+precision = 2
+show_missing = true
 
 
 [tool.coverage.run]

@@ -405,6 +405,7 @@ class Action(BaseAction):
                 tags,
                 stack_policy=stack_policy,
                 termination_protection=stack.termination_protection,
+                timeout=stack.definition.timeout,
             )
             return SubmittedStatus("re-creating stack")
         if not provider_stack:
@@ -414,9 +415,10 @@ class Action(BaseAction):
                 template,
                 parameters,
                 tags,
-                force_change_set,
+                force_change_set=force_change_set,
                 stack_policy=stack_policy,
                 termination_protection=stack.termination_protection,
+                timeout=stack.definition.timeout,
             )
             return SubmittedStatus("creating new stack")
 
