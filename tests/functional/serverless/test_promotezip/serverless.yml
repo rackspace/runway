@@ -26,3 +26,15 @@ functions:
   helloWorld1:
     handler: frontend/func/handler.hello1
     name: ${self:custom.namespace}-${self:custom.environment}-sls-promotezip-frontend
+
+resources:
+  Outputs:
+    ServerlessDeploymentBucketName:
+      Export:
+        Name: !Sub ${AWS::StackName}-ServerlessDeploymentBucketName
+    HelloWorld0LambdaFunctionQualifiedArn:
+      Export:
+        Name: !Sub ${AWS::StackName}-HelloWorld0LambdaFunctionQualifiedArn
+    HelloWorld1LambdaFunctionQualifiedArn:
+      Export:
+        Name: !Sub ${AWS::StackName}-HelloWorld1LambdaFunctionQualifiedArn
