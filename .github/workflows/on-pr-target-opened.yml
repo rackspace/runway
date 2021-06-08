@@ -11,6 +11,7 @@ on:
 jobs:
   assign-author:
     name: Assign Author to PR
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: technote-space/assign-author@v1  # cspell:ignore technote
