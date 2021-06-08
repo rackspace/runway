@@ -238,7 +238,7 @@ jobs:
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v2.2.3
         with:
           name: pypi-dist
           path: dist
