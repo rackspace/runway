@@ -63,7 +63,7 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v4
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2.1.6
         id: cache
         with:
           path: .venv
@@ -95,7 +95,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v4
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2.1.6
         id: cache
         with:
           path: .venv
@@ -126,7 +126,7 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v4
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2.1.6
         id: cache
         with:
           path: .venv
@@ -178,7 +178,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install make sed
       - name: Pip Cache (ubuntu)
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.6
         if: startsWith( matrix.os, 'ubuntu' )
         with:
           path: ~/.cache/pip
@@ -186,7 +186,7 @@ jobs:
           restore-keys: |
             ${{ matrix.os }}-pip-${{ matrix.python-version }}
       - name: Pip Cache (windows)
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.6
         if: matrix.os == 'windows-latest'
         with:
           path: ~\AppData\Local\pip\Cache
@@ -226,7 +226,7 @@ jobs:
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
       - uses: Gr1N/setup-poetry@v4
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2.1.6
         id: cache
         with:
           path: .venv
