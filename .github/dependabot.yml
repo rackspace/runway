@@ -15,6 +15,9 @@ updates:
       time: "08:00"
       timezone: America/New_York
   - directory: /
+    labels:
+      - maintenance
+      - javascript
     open-pull-requests-limit: 5
     package-ecosystem: npm
     reviewers:
