@@ -357,7 +357,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         self._data = {
             k: self.parse_obj(v, variable_type=variable_type) for k, v in data.items()
         }
-        self.variable_type = variable_type
+        self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
     def dependencies(self) -> Set[str]:
@@ -452,7 +452,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         self._data: List[VariableValue] = [
             self.parse_obj(i, variable_type=variable_type) for i in iterable
         ]
-        self.variable_type = variable_type
+        self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
     def dependencies(self) -> Set[str]:
@@ -568,7 +568,7 @@ class VariableValueLiteral(Generic[_LiteralValue], VariableValue):
 
         """
         self._data = value
-        self.variable_type = variable_type
+        self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
     def resolved(self) -> bool:
@@ -610,7 +610,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
 
         """
         self._data = list(iterable)
-        self.variable_type = variable_type
+        self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
     def dependencies(self) -> Set[str]:
@@ -778,7 +778,7 @@ class VariableValueLookup(VariableValue):
         self._data = None
 
         self.lookup_name = lookup_name
-        self.variable_type = variable_type
+        self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
         if isinstance(lookup_query, str):
             lookup_query = VariableValueLiteral(lookup_query)

@@ -84,7 +84,9 @@ class RuntimeConfig:
             "multipart_chunksize": multipart_chunksize,
             "multipart_threshold": multipart_threshold,
         }
-        runtime_config.update(**{k: v for k, v in kwargs.items() if v is not None})
+        runtime_config.update(  # type: ignore
+            **{k: v for k, v in kwargs.items() if v is not None}
+        )
         cls._convert_human_readable_sizes(runtime_config)
         cls._convert_human_readable_rates(runtime_config)
         cls._validate_config(runtime_config)

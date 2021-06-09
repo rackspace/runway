@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
 
 import awacs.awslambda
 import awacs.iam
@@ -53,7 +53,7 @@ class _IndexRewriteFunctionInfoTypeDef(TypedDict, total=False):
 class StaticSite(Blueprint):
     """CFNgin blueprint for creating S3 bucket and CloudFront distribution."""
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "AcmCertificateArn": {
             "type": str,
             "default": "",

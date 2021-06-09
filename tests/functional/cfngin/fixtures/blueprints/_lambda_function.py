@@ -1,7 +1,7 @@
 """Blueprint for creating a Lambda Function."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, ClassVar, Dict
 
 import awacs.awslambda
 import awacs.dynamodb
@@ -9,7 +9,6 @@ import awacs.logs
 import awacs.sts
 from awacs.aws import Allow, Policy, Principal, Statement
 from troposphere import AccountId, GetAtt, Join, Partition, Region, awslambda, iam
-from typing_extensions import Final
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNString
@@ -22,7 +21,7 @@ if TYPE_CHECKING:
 class LambdaFunction(Blueprint):
     """Blueprint for creating a Lambda Function."""
 
-    VARIABLES: Final[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "AppName": {"type": str, "description": "Name of app"},
         "Code": {
             "type": awslambda.Code,

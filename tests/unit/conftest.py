@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
 
 import pytest
 import yaml
@@ -108,7 +108,9 @@ def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
     `YAML_FIXTURES` variable of the module.
 
     """
-    file_paths = getattr(cast("Module", request.module), "YAML_FIXTURES", [])
+    file_paths: List[str] = getattr(
+        cast("Module", request.module), "YAML_FIXTURES", []  # type: ignore
+    )
     result: Dict[str, Any] = {}
     for file_path in file_paths:
         with open(os.path.join(fixture_dir, file_path)) as _file:
@@ -190,7 +192,7 @@ def runway_context(request: FixtureRequest) -> MockRunwayContext:
         "AWS_SESSION_TOKEN": "test_session_token",
     }
     env_vars.update(getattr(cast("Module", request.module), "AWS_CREDENTIALS", creds))
-    env_vars.update(getattr(cast("Module", request.module), "ENV_VARS", {}))
+    env_vars.update(getattr(cast("Module", request.module), "ENV_VARS", {}))  # type: ignore
     return MockRunwayContext(
         command="test",
         deploy_environment=DeployEnvironment(environ=env_vars, explicit_name="test"),

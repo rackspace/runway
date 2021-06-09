@@ -1,7 +1,7 @@
 """CFNgin exceptions."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from ..exceptions import RunwayError
 
@@ -19,7 +19,7 @@ class CfnginError(RunwayError):
 class CancelExecution(CfnginError):
     """Raised when we want to cancel executing the plan."""
 
-    message: ClassVar[str] = "Plan canceled"
+    message: str = "Plan canceled"
 
 
 class ChangesetDidNotStabilize(CfnginError):
@@ -346,7 +346,7 @@ class PlanFailed(CfnginError):
 class StackDidNotChange(CfnginError):
     """Raised when there are no changes to be made by the provider."""
 
-    message: ClassVar[str] = "Stack did not change"
+    message: str = "Stack did not change"
 
 
 class StackDoesNotExist(CfnginError):

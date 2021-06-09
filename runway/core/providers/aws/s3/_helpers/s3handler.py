@@ -248,10 +248,10 @@ class BaseTransferRequestSubmitter:
 
     """
 
-    REQUEST_MAPPER_METHOD: Optional[
-        Callable[[Dict[Any, Any], Dict[Any, Any]], Any]
+    REQUEST_MAPPER_METHOD: ClassVar[
+        Optional[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]]
     ] = None
-    RESULT_SUBSCRIBER_CLASS: Optional[Type[BaseSubscriber]] = None
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Optional[Type[BaseSubscriber]]] = None
 
     def __init__(
         self,
@@ -313,7 +313,8 @@ class BaseTransferRequestSubmitter:
         extra_args: Dict[Any, Any] = {}
         if self.REQUEST_MAPPER_METHOD:
             # pylint: disable=not-callable
-            self.REQUEST_MAPPER_METHOD(extra_args, self._config_params.dict())
+            # TODO revisit in future releases of pyright - not seeing second arg
+            self.REQUEST_MAPPER_METHOD(extra_args, self._config_params.dict())  # type: ignore
         subscribers: List[BaseSubscriber] = []
         self._add_additional_subscribers(subscribers, fileinfo)
         # The result subscriber class should always be the last registered
@@ -792,10 +793,10 @@ class DeleteRequestSubmitter(BaseTransferRequestSubmitter):
 class LocalDeleteRequestSubmitter(BaseTransferRequestSubmitter):
     """Local delete request submitter."""
 
-    REQUEST_MAPPER_METHOD: Optional[
-        Callable[[Dict[Any, Any], Dict[Any, Any]], Any]
+    REQUEST_MAPPER_METHOD: ClassVar[
+        Optional[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]]
     ] = None
-    RESULT_SUBSCRIBER_CLASS: Optional[Type[BaseSubscriber]] = None
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Optional[Type[BaseSubscriber]]] = None
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.

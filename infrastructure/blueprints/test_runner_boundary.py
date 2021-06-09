@@ -2,13 +2,12 @@
 # pylint: disable=no-self-use
 from __future__ import annotations
 
-from typing import List
+from typing import ClassVar, List
 
 import awacs.iam
 import awacs.s3
 from awacs.aws import Action, Deny, Statement
 from troposphere import Sub
-from typing_extensions import Final
 
 from runway.compat import cached_property
 
@@ -18,8 +17,8 @@ from .prevent_privilege_escalation import AdminPreventPrivilegeEscalation
 class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
     """Blueprint for IAM permission boundary that prevents privilege escalation."""
 
-    DESCRIPTION: Final[str] = "Permission boundary for the test runner user."
-    POLICY_NAME: Final[str] = "TestRunnerBoundary"
+    DESCRIPTION: ClassVar[str] = "Permission boundary for the test runner user."
+    POLICY_NAME: ClassVar[str] = "TestRunnerBoundary"
 
     @cached_property
     def statement_deny_cloudtrail(self) -> Statement:
