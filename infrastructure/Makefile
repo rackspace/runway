@@ -1,5 +1,3 @@
-.PHONY: blueprints public test test-alt
-
 SHELL := /bin/bash
 
 install:
