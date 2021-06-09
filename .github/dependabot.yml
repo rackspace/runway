@@ -26,3 +26,17 @@ updates:
       interval: daily
       time: "08:00"
       timezone: America/New_York
+  - directory: /
+    labels:
+      - dependencies
+      - poetry
+      - python
+    open-pull-requests-limit: 5
+    package-ecosystem: pip
+    reviewers:
+      - ITProKyle
+    schedule:
+      interval: daily
+      time: "08:00"
+      timezone: America/New_York
+    versioning-strategy: lockfile-only
