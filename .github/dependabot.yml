@@ -14,3 +14,12 @@ updates:
       interval: daily
       time: "08:00"
       timezone: America/New_York
+  - directory: /
+    open-pull-requests-limit: 5
+    package-ecosystem: npm
+    reviewers:
+      - ITProKyle
+    schedule:
+      interval: daily
+      time: "08:00"
+      timezone: America/New_York
