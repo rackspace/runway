@@ -7,7 +7,7 @@ https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-h
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
 
 import awacs.logs
 import awacs.s3
@@ -58,7 +58,7 @@ class AuthAtEdge(StaticSite):
         },
     }
     IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {}
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {}
 
     def __init__(
         self,

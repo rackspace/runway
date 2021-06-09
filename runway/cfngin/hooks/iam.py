@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Union, cast
 
 from awacs import ecs
 from awacs.aws import Allow, Policy, Statement
@@ -77,8 +77,12 @@ def _get_cert_arn_from_response(
     result = copy.deepcopy(response)
     # GET response returns this extra key
     if "ServerCertificate" in response:
-        return response["ServerCertificate"]["ServerCertificateMetadata"]["Arn"]
-    return result["ServerCertificateMetadata"]["Arn"]  # type: ignore
+        return cast("GetServerCertificateResponseTypeDef", result)["ServerCertificate"][
+            "ServerCertificateMetadata"
+        ]["Arn"]
+    return cast("UploadServerCertificateResponseTypeDef", result)[
+        "ServerCertificateMetadata"
+    ]["Arn"]
 
 
 def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,11 +1,10 @@
 """Broken Blueprints."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, ClassVar, Dict
 
 from troposphere import Ref
 from troposphere.cloudformation import WaitCondition, WaitConditionHandle
-from typing_extensions import Final
 
 from runway.cfngin.blueprints.base import Blueprint
 
@@ -20,7 +19,7 @@ class Broken(Blueprint):
 
     """
 
-    VARIABLES: Final[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 

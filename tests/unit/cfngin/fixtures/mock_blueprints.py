@@ -1,7 +1,7 @@
 """Mock blueprints."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, ClassVar, Dict
 
 import awacs
 import awacs.cloudformation
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 class FunctionalTests(Blueprint):
     """Creates a stack with an IAM user and access key for functional tests."""
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "Namespace": {
             "type": CFNString,
             "description": "The namespace that the tests will use. "
@@ -175,7 +175,7 @@ class FunctionalTests(Blueprint):
 class Dummy(Blueprint):
     """Dummy blueprint."""
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 
@@ -193,7 +193,7 @@ class Dummy2(Blueprint):
 
     """
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 
@@ -213,7 +213,7 @@ class LongRunningDummy(Blueprint):
 
     """
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "Count": {
             "type": int,
             "description": "The # of WaitConditionHandles to create.",
@@ -270,7 +270,7 @@ class Broken(Blueprint):
 
     """
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 
@@ -293,7 +293,7 @@ class Broken(Blueprint):
 class VPC(Blueprint):
     """VPC blueprint."""
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "AZCount": {"type": int, "default": 2},
         "PrivateSubnets": {
             "type": CFNCommaDelimitedList,
@@ -350,7 +350,7 @@ class VPC(Blueprint):
 class DiffTester(Blueprint):
     """Diff test blueprint."""
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "InstanceType": {
             "type": CFNString,
             "description": "NAT EC2 instance type.",
@@ -372,7 +372,7 @@ class DiffTester(Blueprint):
 class Bastion(Blueprint):
     """Bastion blueprint."""
 
-    VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "VpcId": {"type": EC2VPCId, "description": "Vpc Id"},
         "DefaultSG": {
             "type": EC2SecurityGroupId,
@@ -426,7 +426,7 @@ class Bastion(Blueprint):
 class PreOneOhBastion(Blueprint):
     """Used to ensure old blueprints won't be usable in 1.0."""
 
-    PARAMETERS: Dict[str, BlueprintVariableTypeDef] = {
+    PARAMETERS: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "VpcId": {"type": "AWS::EC2::VPC::Id", "description": "Vpc Id"},
         "DefaultSG": {
             "type": "AWS::EC2::SecurityGroup::Id",

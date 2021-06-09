@@ -1,9 +1,7 @@
 """Bastion Blueprints."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
-
-from typing_extensions import Final
+from typing import TYPE_CHECKING, ClassVar, Dict
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import (
@@ -23,7 +21,7 @@ if TYPE_CHECKING:
 class FakeBastion(Blueprint):
     """Fake Bastion."""
 
-    VARIABLES: Final[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "VpcId": {"type": EC2VPCId, "description": "Vpc Id"},
         "DefaultSG": {
             "type": EC2SecurityGroupId,

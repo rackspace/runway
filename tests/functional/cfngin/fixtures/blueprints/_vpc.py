@@ -1,10 +1,9 @@
 """VPC Blueprints."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, ClassVar, Dict
 
 from troposphere.cloudformation import WaitConditionHandle
-from typing_extensions import Final
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import CFNCommaDelimitedList, CFNString
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 class FakeVPC(Blueprint):
     """Fake VPC."""
 
-    VARIABLES: Final[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "AZCount": {"type": int, "default": 2},
         "PrivateSubnets": {
             "type": CFNCommaDelimitedList,

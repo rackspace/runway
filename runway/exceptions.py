@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -67,7 +67,7 @@ class FailedLookup(RunwayError):
 
     cause: Exception
     lookup: VariableValueLookup
-    message: ClassVar[str] = "Failed lookup"
+    message: str = "Failed lookup"
 
     def __init__(
         self, lookup: VariableValueLookup, cause: Exception, *args: Any, **kwargs: Any
@@ -259,7 +259,7 @@ class UnresolvedVariableValue(RunwayError):
     """
 
     lookup: VariableValueLookup
-    message: ClassVar[str] = "Unresolved lookup"
+    message: str = "Unresolved lookup"
 
     def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.

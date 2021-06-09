@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, ContextManager, Dict, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, ContextManager, Optional, Type, cast
+
+from typing_extensions import TypedDict
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -15,6 +17,10 @@ if TYPE_CHECKING:
 
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
+
+_KwargsTypeDef = TypedDict(
+    "_KwargsTypeDef", DurationSeconds=int, RoleArn=str, RoleSessionName=str
+)
 
 
 class AssumeRole(ContextManager["AssumeRole"]):
@@ -61,12 +67,12 @@ class AssumeRole(ContextManager["AssumeRole"]):
         self.session_name = session_name or "runway"
 
     @property
-    def _kwargs(self) -> Dict[str, Optional[Union[int, str]]]:
+    def _kwargs(self) -> _KwargsTypeDef:
         """Construct keyword arguments to pass to boto3 call."""
         return {
-            "RoleArn": self.role_arn,
-            "RoleSessionName": self.session_name,
             "DurationSeconds": self.duration_seconds,
+            "RoleArn": self.role_arn or "",
+            "RoleSessionName": self.session_name,
         }
 
     def assume(self) -> None:

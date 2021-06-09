@@ -127,7 +127,7 @@ class TestLambdaHooks(unittest.TestCase):
         }
         real_kwargs.update(kwargs)
 
-        return upload_lambda_functions(**real_kwargs)
+        return upload_lambda_functions(**real_kwargs)  # type: ignore
 
     @mock_s3
     def test_bucket_default(self) -> None:

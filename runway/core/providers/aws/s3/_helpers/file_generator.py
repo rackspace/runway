@@ -191,15 +191,16 @@ class FileGenerator:
         )
         for src_path, extra_information in file_iterator:
             dest_path, compare_key = find_dest_path_comp_key(files, src_path)
-            file_stat_kwargs = {
+            file_stat_kwargs: FileStatsDict = {
                 "compare_key": compare_key,
-                "dest_type": files["dest"]["type"],
                 "dest": dest_path,
+                "dest_type": files["dest"]["type"],
                 "last_update": extra_information.get("LastModified", EPOCH_TIME),
                 "operation_name": self.operation_name,
+                "response_data": None,
                 "size": extra_information.get("Size", 0),
-                "src_type": files["src"]["type"],
                 "src": src_path,
+                "src_type": files["src"]["type"],
             }
             if files["src"]["type"] == "s3":
                 file_stat_kwargs["response_data"] = extra_information

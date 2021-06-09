@@ -865,7 +865,7 @@ class TestVariableValueLookup:
         obj = VariableValueLookup(
             VariableValueLiteral("test"), VariableValueLiteral("query")
         )
-        assert not obj.resolve(**kwargs)
+        assert not obj.resolve(**kwargs)  # type: ignore
         mock_resolve_query.assert_called_once_with(**kwargs)
         mock_handle.assert_called_once_with("query", **kwargs)
         mock_resolve.assert_called_once_with("resolved")
