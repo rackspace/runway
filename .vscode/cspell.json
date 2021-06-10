@@ -62,6 +62,7 @@
     "maxNumberOfProblems": 100,
     "version": "0.1",
     "words": [
+        "codecov",
         "Ngin"
     ]
 }

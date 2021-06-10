@@ -1,6 +1,7 @@
 # Runway
 
 [![CI/CD](https://github.com/onicagroup/runway/workflows/CI/CD/badge.svg?branch=master)](https://github.com/onicagroup/runway/actions?query=workflow%3ACI%2FCD)
+[![codecov](https://codecov.io/gh/onicagroup/runway/branch/master/graph/badge.svg?token=Ku28I0RY80)](https://codecov.io/gh/onicagroup/runway)
 [![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
 [![npm](https://img.shields.io/npm/v/@onica/runway?style=flat)](https://www.npmjs.com/package/@onica/runway)
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)

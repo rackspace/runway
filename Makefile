@@ -44,6 +44,14 @@ cov-report: ## display a report in the terminal of files missing coverage
 		--skip-empty \
 		--rcfile=pyproject.toml
 
+cov-xml: ## convert .coverage to coverage.xml for use with codecov
+	@poetry run coverage xml \
+		--ignore-errors \
+		--rcfile=pyproject.toml
+	@echo ""
+	@echo ".coverage converted to coverage.xml"
+	@echo ""
+
 create-tfenv-ver-file: ## create a tfenv version file using the latest version
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
 
