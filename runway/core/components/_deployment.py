@@ -22,6 +22,7 @@ from ._module import Module
 if TYPE_CHECKING:
     from ...config.components.runway import RunwayDeploymentDefinition
     from ...context import RunwayContext
+    from ..type_defs import RunwayActionTypeDef
 
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -144,7 +145,7 @@ class Deployment:
             )
         return self.__sync("plan")
 
-    def run(self, action: str, region: str) -> None:
+    def run(self, action: RunwayActionTypeDef, region: str) -> None:
         """Run a single deployment in a single region.
 
         Low level API access to run a deployment object.
@@ -222,7 +223,7 @@ class Deployment:
             )
             self.ctx.env.vars = merge_dicts(self.ctx.env.vars, self.env_vars_config)
 
-    def __async(self, action: str) -> None:
+    def __async(self, action: RunwayActionTypeDef) -> None:
         """Execute asynchronously.
 
         Args:
@@ -242,7 +243,7 @@ class Deployment:
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
-    def __sync(self, action: str) -> None:
+    def __sync(self, action: RunwayActionTypeDef) -> None:
         """Execute synchronously.
 
         Args:
@@ -257,7 +258,7 @@ class Deployment:
     @classmethod
     def run_list(
         cls,
-        action: str,
+        action: RunwayActionTypeDef,
         context: RunwayContext,
         deployments: List[RunwayDeploymentDefinition],
         future: RunwayFutureDefinitionModel,

@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
+    from runway.core.type_defs import RunwayActionTypeDef
+
     from ...factories import MockRunwayContext, YamlLoaderDeployment
 
 MODULE = "runway.core.components._deployment"
@@ -424,7 +426,10 @@ class TestDeployment:
 
     @pytest.mark.parametrize("action", [("deploy"), ("destroy")])
     def test_run_list(
-        self, action: str, mocker: MockerFixture, runway_context: MockRunwayContext
+        self,
+        action: RunwayActionTypeDef,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
     ) -> None:
         """Test run_list."""
         dep0 = MagicMock()

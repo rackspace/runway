@@ -14,7 +14,7 @@ from .._logging import RunwayLogger as _RunwayLogger
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
 from ..utils import DOC_SITE
 from ..utils import YamlDumper as _YamlDumper
-from . import components, providers
+from . import components, providers, type_defs
 
 if TYPE_CHECKING:
     from ..config import RunwayConfig
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast(_RunwayLogger, _logging.getLogger(__name__))
 
-__all__ = ["Runway", "components", "providers"]
+__all__ = ["Runway", "components", "providers", "type_defs"]
 
 
 class Runway:
@@ -101,6 +101,20 @@ class Runway:
             )
             result.update(obj.env_vars_config)
         return result
+
+    def init(
+        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
+    ) -> None:
+        """Init action.
+
+        Args:
+            deployments: List of deployments to run. If not provided,
+                all deployments in the config will be run.
+
+        """
+        self.__run_action(
+            "init", deployments if deployments is not None else self.deployments
+        )
 
     def plan(
         self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
@@ -226,7 +240,9 @@ class Runway:
         _sys.exit(1)
 
     def __run_action(
-        self, action: str, deployments: Optional[List[RunwayDeploymentDefinition]]
+        self,
+        action: type_defs.RunwayActionTypeDef,
+        deployments: Optional[List[RunwayDeploymentDefinition]],
     ) -> None:
         """Run an action on a list of deployments.
 
