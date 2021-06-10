@@ -161,7 +161,7 @@ update: ## update project python environment
 	@poetry update
 
 version: ## set project version using distance from last tag
-	@VERSION=$$(poetry run dunamai from git --style semver --no-metadata --bump) && \
+	@VERSION=$$(poetry run dunamai from git --style semver --no-metadata) && \
 	echo setting version to $${VERSION}... && \
 	poetry version $${VERSION} && \
 	npm version $${VERSION} --allow-same-version --no-git-tag-version

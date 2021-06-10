@@ -242,20 +242,3 @@ jobs:
         with:
           name: pypi-dist
           path: dist
-  # publish-pypi:
-  #   name: Publish 📦 To PyPI
-  #   if: github.ref == 'refs/heads/master'
-  #   needs:
-  #     - build-pypi
-  #   runs-on: ubuntu-18.04
-  #   steps:
-  #     - name: Download Distribution Artifact
-  #       uses: actions/download-artifact@v1.0.0
-  #       with:
-  #         name: pypi-dist
-  #         path: dist
-  #     - name: Publish Distribution 📦 to Test PyPI
-  #       uses: pypa/gh-action-pypi-publish@v1.1.0
-  #       with:
-  #         password: ${{ secrets.test_pypi_password }}
-  #         repository_url: https://test.pypi.org/legacy/

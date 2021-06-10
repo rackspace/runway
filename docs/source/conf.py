@@ -19,7 +19,7 @@ SRC_DIR = DOCS_DIR / "source"
 project = "Runway"
 copyright = "2021, Onica Group"
 author = "Onica Group"
-release = Version.from_git().serialize(bump=True, metadata=False, style=Style.SemVer)
+release = Version.from_git().serialize(metadata=False, style=Style.SemVer)
 version = ".".join(release.split(".")[:2])  # short X.Y version
 
 
