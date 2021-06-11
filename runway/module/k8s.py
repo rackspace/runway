@@ -97,28 +97,28 @@ class K8s(RunwayModule):
             return {"skipped_configs": True}
 
         if self.options.kubectl_version:
-            self.logger.debug("using kubectl version from the module definition")
+            self.logger.verbose("using kubectl version from the module definition")
             k8s_bin = KBEnvManager(self.path).install(self.options.kubectl_version)
-        elif (self.options.kustomize_config / KB_VERSION_FILENAME).is_file():
-            self.logger.debug(
+        elif (self.options.overlay_path / KB_VERSION_FILENAME).is_file():
+            self.logger.verbose(
                 "using kubectl version from the overlay directory: %s",
-                self.options.kustomize_config,
+                self.options.overlay_path,
             )
-            k8s_bin = KBEnvManager(self.options.kustomize_config).install()
+            k8s_bin = KBEnvManager(self.options.overlay_path).install()
         elif (self.path / KB_VERSION_FILENAME).is_file():
-            self.logger.debug(
+            self.logger.verbose(
                 "using kubectl version from the module directory: %s", self.path
             )
             k8s_bin = KBEnvManager(self.path).install()
         elif (self.ctx.env.root_dir / KB_VERSION_FILENAME).is_file():
             file_path = self.ctx.env.root_dir / KB_VERSION_FILENAME
-            self.logger.debug(
+            self.logger.verbose(
                 "using kubectl version from the project's root directory: %s",
                 file_path,
             )
             k8s_bin = KBEnvManager(self.ctx.env.root_dir).install()
         else:
-            self.logger.debug("kubectl version not specified; checking path")
+            self.logger.verbose("kubectl version not specified; checking path")
             if not which("kubectl"):
                 self.logger.error(
                     "kubectl not available and a version to install not specified"
@@ -131,7 +131,7 @@ class K8s(RunwayModule):
                 sys.exit(1)
             k8s_bin = "kubectl"
 
-        kustomize_cmd = [k8s_bin, "kustomize", str(self.options.kustomize_config)]
+        kustomize_cmd = [k8s_bin, "kustomize", str(self.options.overlay_path)]
         self.logger.debug("running kubectl command: %s", " ".join(kustomize_cmd))
         kustomize_yml = subprocess.check_output(
             kustomize_cmd, env=self.ctx.env.vars
@@ -144,7 +144,7 @@ class K8s(RunwayModule):
             kubectl_command = [k8s_bin, command]
             if command == "delete":
                 kubectl_command.append("--ignore-not-found=true")
-            kubectl_command.extend(["-k", str(self.options.kustomize_config)])
+            kubectl_command.extend(["-k", str(self.options.overlay_path)])
 
             self.logger.info("%s (in progress)", command)
             self.logger.debug("running kubectl command: %s", " ".join(kubectl_command))
