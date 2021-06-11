@@ -445,7 +445,7 @@ xray = ["mypy-boto3-xray (==1.17.91)"]
 
 [[package]]
 name = "botocore"
-version = "1.20.91"
+version = "1.20.92"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -2224,8 +2224,8 @@ boto3-stubs = [
     {file = "boto3_stubs-1.17.91-py3-none-any.whl", hash = "sha256:05bed6e5b18f61a7ec0819897c5f4514c13c9169ebad27daed6ea90b40efb594"},
 ]
 botocore = [
-    {file = "botocore-1.20.91-py2.py3-none-any.whl", hash = "sha256:cbd0d5d57ec96319f8629347631b00cde72a9ae8826d36ad172c2ab61b299cb1"},
-    {file = "botocore-1.20.91.tar.gz", hash = "sha256:462e75419e6537efb2709b7eb5b8c7ade007d30209416f0476bd7c51a2ddc78d"},
+    {file = "botocore-1.20.92-py2.py3-none-any.whl", hash = "sha256:950ff7d4985427f8dfbb90aa1a8b48da98506d25319f1af1fe20341be3365633"},
+    {file = "botocore-1.20.92.tar.gz", hash = "sha256:5adb6679e3bf7b5ea0ca3363118a0111d087dce18a94fc7a5a542fcc5cba0ddc"},
 ]
 botocore-stubs = [
     {file = "botocore-stubs-1.20.91.tar.gz", hash = "sha256:1034abc7cb34d4cbd5a2601e368e0e3225192d539c47ed990525657eee2c47c1"},
