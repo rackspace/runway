@@ -191,8 +191,10 @@ jobs:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     steps:
-      - name: Checkout Repo
+      - name: Checkout Repo (complete)
         uses: actions/checkout@v2.3.2
+        with:
+          fetch-depth: 0
       - name: Install Node
         uses: actions/setup-node@v2
         with:
