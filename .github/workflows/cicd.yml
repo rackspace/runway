@@ -71,7 +71,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
+      - run: poetry install --extras docs -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -113,7 +113,7 @@ jobs:
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - uses: Gr1N/setup-poetry@v4
-      - run: poetry install -vv
+      - run: poetry install --extras docs -vv
       - name: Install Node Dependencies
         run: make npm-ci
       - name: Run Linters
@@ -139,7 +139,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
+      - run: poetry install --extras docs -vv
       - uses: pre-commit/action@v2.0.3
   test-functional:
     name: Functional Tests
@@ -170,7 +170,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
+      - run: poetry install --extras docs -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -212,7 +212,7 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - uses: Gr1N/setup-poetry@v4
-      - run: poetry install -vv
+      - run: poetry install --extras docs -vv
       - name: Install Node Dependencies
         run: make npm-install
       - name: Run Integration & Unit Tests
@@ -252,7 +252,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
+      - run: poetry install --extras docs -vv
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact
