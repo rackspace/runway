@@ -37,7 +37,7 @@ def test_init(
     mocker: MockerFixture,
 ) -> None:
     """Test init."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     caplog.set_level(logging.INFO, logger="runway")
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
@@ -95,7 +95,7 @@ def test_init_options_ci(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init option --ci."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     assert runner.invoke(cli, ["init", "--ci"]).exit_code == 0
@@ -109,7 +109,7 @@ def test_init_options_deploy_environment(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init option -e, --deploy-environment."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     assert runner.invoke(cli, ["init", "-e", "e-option"]).exit_code == 0
@@ -131,7 +131,7 @@ def test_init_options_tag(
     mocker: MockerFixture,
 ) -> None:
     """Test init option --tag."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.init")
     cp_config("tagged_modules", cd_tmp_path)
     runner = CliRunner()
@@ -158,7 +158,7 @@ def test_init_select_deployment(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init select from two deployments."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # first value entered is out of range
@@ -173,7 +173,7 @@ def test_init_select_deployment_all(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init select all deployments."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # first value entered is out of range
@@ -190,7 +190,7 @@ def test_init_select_module(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init select from two modules."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # 2nd deployment, out of range, select second module
@@ -205,7 +205,7 @@ def test_init_select_module_all(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init select all modules."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # 2nd deployment, select all
@@ -221,7 +221,7 @@ def test_init_select_module_child_modules(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init select child module."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("simple_child_modules.1", cd_tmp_path)
     runner = CliRunner()
     # 2nd module, first child
@@ -236,7 +236,7 @@ def test_init_select_module_child_modules_all(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test init select all child module."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", spec=Runway, spec_set=True)
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("simple_child_modules.1", cd_tmp_path)
     runner = CliRunner()
     # 2nd module, first child
