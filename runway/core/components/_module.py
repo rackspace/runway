@@ -190,6 +190,18 @@ class Module:
             return self.__async("destroy")
         return self.__sync("destroy")
 
+    def init(self) -> None:
+        """Initialize/bootstrap module.
+
+        High level method for running a deployment.
+
+        """
+        if not self.child_modules:
+            return self.run("init")
+        if self.use_async:
+            return self.__async("init")
+        return self.__sync("init")
+
     def plan(self) -> None:
         """Plan for the next deploy of the module.
 
