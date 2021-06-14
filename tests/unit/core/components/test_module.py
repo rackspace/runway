@@ -33,8 +33,8 @@ def empty_opts_from_file(mocker: MockerFixture) -> None:
 class TestModule:
     """Test runway.core.components._module.Module."""
 
-    def test_init(self) -> None:
-        """Test init."""
+    def test___init__(self) -> None:
+        """Test __init__."""
         mock_ctx = MagicMock()
         mock_def = MagicMock()
         mock_def.name = "module-name"
@@ -430,6 +430,50 @@ class TestModule:
         )
         assert mod.destroy()
         mock_run.assert_called_once_with("destroy")
+        mock_async.assert_not_called()
+        mock_sync.assert_not_called()
+
+    @pytest.mark.parametrize("async_used", [(True), (False)])
+    def test_init(
+        self,
+        async_used: bool,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test init."""
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mocker.patch.object(Module, "use_async", async_used)
+        mod = Module(
+            context=runway_context,
+            definition=fx_deployments.load("simple_parallel_module").modules[0],
+        )
+        assert mod.init()
+
+        if async_used:
+            mock_async.assert_called_once_with("init")
+            mock_sync.assert_not_called()
+        else:
+            mock_async.assert_not_called()
+            mock_sync.assert_called_once_with("init")
+
+    def test_init_no_children(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test init with no child modules."""
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mock_run = mocker.patch.object(Module, "run")
+        mod = Module(
+            context=runway_context,
+            definition=fx_deployments.load("min_required").modules[0],
+        )
+        assert mod.init()
+        mock_run.assert_called_once_with("init")
         mock_async.assert_not_called()
         mock_sync.assert_not_called()
 

@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
+    from runway.core.type_defs import RunwayActionTypeDef
+
     from ...factories import MockRunwayContext, YamlLoaderDeployment
 
 MODULE = "runway.core.components._deployment"
@@ -30,13 +32,13 @@ MODULE = "runway.core.components._deployment"
 class TestDeployment:
     """Test runway.core.components.deployment.Deployment."""
 
-    def test_init(
+    def test___init__(
         self,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
     ) -> None:
-        """Test init."""
+        """Test __init__."""
         definition = fx_deployments.load("min_required")
         mock_merge = MagicMock()
         mocker.patch.object(Deployment, "_Deployment__merge_env_vars", mock_merge)
@@ -50,10 +52,10 @@ class TestDeployment:
         assert obj.name == "unnamed_deployment"
         mock_merge.assert_called_once_with()
 
-    def test_init_args(
+    def test___init___args(
         self, fx_deployments: YamlLoaderDeployment, runway_context: MockRunwayContext
     ) -> None:
-        """Test init with args."""
+        """Test __init__ with args."""
         definition = fx_deployments.load("simple_env_vars")
         future = RunwayFutureDefinitionModel()
         variables = RunwayVariablesDefinition.parse_obj({"some_key": "val"})
@@ -290,6 +292,35 @@ class TestDeployment:
             mock_sync.assert_called_once_with("destroy")
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
+    def test_init(
+        self,
+        async_used: bool,
+        caplog: LogCaptureFixture,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test init."""
+        caplog.set_level(logging.INFO, logger="runway")
+        mock_async = MagicMock()
+        mocker.patch.object(Deployment, "_Deployment__async", mock_async)
+        mock_sync = MagicMock()
+        mocker.patch.object(Deployment, "_Deployment__sync", mock_sync)
+        runway_context._use_concurrent = async_used
+        obj = Deployment(
+            context=runway_context,
+            definition=fx_deployments.load("simple_parallel_regions"),
+        )
+        assert obj.init()
+
+        if async_used:
+            mock_async.assert_called_once_with("init")
+            mock_sync.assert_not_called()
+        else:
+            mock_async.assert_not_called()
+            mock_sync.assert_called_once_with("init")
+
+    @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_plan(
         self,
         async_used: bool,
@@ -424,7 +455,10 @@ class TestDeployment:
 
     @pytest.mark.parametrize("action", [("deploy"), ("destroy")])
     def test_run_list(
-        self, action: str, mocker: MockerFixture, runway_context: MockRunwayContext
+        self,
+        action: RunwayActionTypeDef,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
     ) -> None:
         """Test run_list."""
         dep0 = MagicMock()

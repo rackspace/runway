@@ -12,6 +12,7 @@ from ._base import BaseContext
 
 if TYPE_CHECKING:
     from .._logging import PrefixAdaptor, RunwayLogger
+    from ..core.type_defs import RunwayActionTypeDef
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -19,14 +20,14 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 class RunwayContext(BaseContext):
     """Runway context object."""
 
-    command: Optional[str]
+    command: Optional[RunwayActionTypeDef]
     env: DeployEnvironment
     logger: Union[PrefixAdaptor, RunwayLogger]
 
     def __init__(
         self,
         *,
-        command: Optional[str] = None,
+        command: Optional[RunwayActionTypeDef] = None,
         deploy_environment: Optional[DeployEnvironment] = None,
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
         **_: Any,

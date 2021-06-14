@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     )
     from ...config.models.runway import RunwayEnvironmentsType
     from ...context import RunwayContext
+    from ..type_defs import RunwayActionTypeDef
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
@@ -189,6 +190,18 @@ class Module:
             return self.__async("destroy")
         return self.__sync("destroy")
 
+    def init(self) -> None:
+        """Initialize/bootstrap module.
+
+        High level method for running a deployment.
+
+        """
+        if not self.child_modules:
+            return self.run("init")
+        if self.use_async:
+            return self.__async("init")
+        return self.__sync("init")
+
     def plan(self) -> None:
         """Plan for the next deploy of the module.
 
@@ -203,7 +216,7 @@ class Module:
             )
         return self.__sync("plan")
 
-    def run(self, action: str) -> None:
+    def run(self, action: RunwayActionTypeDef) -> None:
         """Run a single module.
 
         Low level API access to run a module object.
@@ -234,7 +247,7 @@ class Module:
             "processing module in %s (complete)", self.ctx.env.aws_region
         )
 
-    def __async(self, action: str) -> None:
+    def __async(self, action: RunwayActionTypeDef) -> None:
         """Execute asynchronously.
 
         Args:
@@ -257,7 +270,7 @@ class Module:
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
-    def __sync(self, action: str) -> None:
+    def __sync(self, action: RunwayActionTypeDef) -> None:
         """Execute synchronously.
 
         Args:
@@ -284,7 +297,7 @@ class Module:
     @classmethod
     def run_list(
         cls,
-        action: str,
+        action: RunwayActionTypeDef,
         context: RunwayContext,
         modules: List[RunwayModuleDefinition],
         variables: RunwayVariablesDefinition,

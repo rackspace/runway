@@ -23,10 +23,10 @@ MODULE = "runway.core"
 class TestRunway:
     """Test runway.core.Runway."""
 
-    def test_init(
+    def test___init___(
         self, runway_config: MockRunwayConfig, runway_context: MockRunwayContext
     ) -> None:
-        """Test init default values."""
+        """Test __init__ default values."""
         result = Runway(runway_config, runway_context)  # type: ignore
 
         assert result.deployments == runway_config.deployments
@@ -36,26 +36,26 @@ class TestRunway:
         assert result.variables == runway_config.variables
         assert result.ctx == runway_context
 
-    def test_init_undetermined_version(
+    def test___init___undetermined_version(
         self,
         caplog: LogCaptureFixture,
         monkeypatch: MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
-        """Test init with unsupported version."""
+        """Test __init__ with unsupported version."""
         monkeypatch.setattr(MODULE + ".__version__", "0.1.0-dev1")
         caplog.set_level(logging.WARNING, logger=MODULE)
         assert Runway(runway_config, runway_context)  # type: ignore
         assert "shallow clone of the repo" in "\n".join(caplog.messages)
 
-    def test_init_unsupported_version(
+    def test___init___unsupported_version(
         self,
         monkeypatch: MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
-        """Test init with unsupported version."""
+        """Test __init__ with unsupported version."""
         monkeypatch.setattr(MODULE + ".__version__", "1.3")
         with pytest.raises(SystemExit) as excinfo:
             assert not Runway(runway_config, runway_context)  # type: ignore
@@ -145,6 +145,35 @@ class TestRunway:
         mock_deployment.assert_called_once_with(
             context=runway_context,
             definition="deployment_1",
+            variables=runway_config.variables,
+        )
+
+    def test_init(
+        self,
+        mocker: MockerFixture,
+        runway_config: MockRunwayConfig,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test init."""
+        mock_deployment = mocker.patch(f"{MODULE}.components.Deployment")
+        deployments = MagicMock()
+        obj = Runway(runway_config, runway_context)  # type: ignore
+
+        assert not obj.init()
+        assert runway_context.command == "init"
+        mock_deployment.run_list.assert_called_once_with(
+            action="init",
+            context=runway_context,
+            deployments=runway_config.deployments,
+            future=runway_config.future,
+            variables=runway_config.variables,
+        )
+        assert not obj.init(deployments)
+        mock_deployment.run_list.assert_called_with(
+            action="init",
+            context=runway_context,
+            deployments=deployments,
+            future=runway_config.future,
             variables=runway_config.variables,
         )
 

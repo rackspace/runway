@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from runway.config import CfnginConfig
+    from runway.core.type_defs import RunwayActionTypeDef
 
 
 class MockBoto3Session:
@@ -203,7 +204,11 @@ class MockRunwayContext(RunwayContext):
     _use_concurrent: bool
 
     def __init__(
-        self, *, command: Optional[str] = None, deploy_environment: Any = None, **_: Any
+        self,
+        *,
+        command: Optional[RunwayActionTypeDef] = None,
+        deploy_environment: Any = None,
+        **_: Any,
     ) -> None:
         """Instantiate class."""
         if not deploy_environment:
