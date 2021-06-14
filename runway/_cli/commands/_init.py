@@ -14,7 +14,7 @@ from ..utils import select_deployments
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command("init", short_help="coming soon")
+@click.command("init", short_help="initialize/bootstrap things")
 @options.ci
 @options.debug
 @options.deploy_environment
