@@ -74,6 +74,7 @@ zgitignore = "*"  # only used in runway.cfngin.hooks.staticsite.utils
 black = "21.5b1"  # since its pre-release, it has to be pinned this way
 coverage = { version = "^5.5", extras = ["toml"] }
 doc8 = "^0.8"  # for linting with vscode rst extension
+dunamai = "^1.5"
 flake8 = "^3.9"
 flake8-docstrings = "^1.6"  # flake8 plugin
 isort = "^5.8"

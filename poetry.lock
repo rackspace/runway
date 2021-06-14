@@ -505,7 +505,7 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.50.0"
+version = "0.51.0"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
@@ -657,7 +657,7 @@ name = "dunamai"
 version = "1.5.5"
 description = "Dynamic version generation"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5,<4.0"
 
 [[package]]
@@ -2154,7 +2154,7 @@ docs = ["dunamai", "jsx-lexer", "sphinx", "sphinx-github-changelog", "sphinx-rtd
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <4"
-content-hash = "b41a693af9b8b5c2ad36fb6416d3de81fab3c59349b743d93f7df36ffb7334fa"
+content-hash = "15cb35e78373df1ffb8c3774b92212ed6dba1abf66e80f55def1260af021c0a6"
 
 [metadata.files]
 alabaster = [
@@ -2280,8 +2280,8 @@ cfn-flip = [
     {file = "cfn_flip-1.2.3.tar.gz", hash = "sha256:2bed32a1f4dca26dc64178d52511fd4ef778b5ccbcf32559cac884ace75bde6a"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.50.0.tar.gz", hash = "sha256:72805f5af3fd870b443979d652723d9c450c31b6bca8b36b88001767901d7ddb"},
-    {file = "cfn_lint-0.50.0-py3-none-any.whl", hash = "sha256:7ce1abdb118327387fffe58fbfd78036f09cad4ed6b39a2235d77bc8bf61aa5d"},
+    {file = "cfn-lint-0.51.0.tar.gz", hash = "sha256:453c759de8372062174e40d3bce8f7e3472767074873429b2f2f6037b7f74b7d"},
+    {file = "cfn_lint-0.51.0-py3-none-any.whl", hash = "sha256:80ece1e41057d0231a14c6100bbe9ebc9a26b755f860881dc6160d3bc28c0daa"},
 ]
 chardet = [
     {file = "chardet-4.0.0-py2.py3-none-any.whl", hash = "sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5"},
