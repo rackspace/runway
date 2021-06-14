@@ -458,6 +458,25 @@ class TestModule:
             mock_async.assert_not_called()
             mock_sync.assert_called_once_with("init")
 
+    def test_init_no_children(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test init with no child modules."""
+        mock_async = mocker.patch.object(Module, "_Module__async")
+        mock_sync = mocker.patch.object(Module, "_Module__sync")
+        mock_run = mocker.patch.object(Module, "run")
+        mod = Module(
+            context=runway_context,
+            definition=fx_deployments.load("min_required").modules[0],
+        )
+        assert mod.init()
+        mock_run.assert_called_once_with("init")
+        mock_async.assert_not_called()
+        mock_sync.assert_not_called()
+
     @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_plan(
         self,
