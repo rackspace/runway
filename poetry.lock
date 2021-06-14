@@ -2160,12 +2160,12 @@ docs = ["sphinx", "jaraco.packaging (>=8.2)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pytest-cov", "pytest-enabler", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy"]
 
 [extras]
-docs = ["jsx-lexer", "sphinx", "sphinx-github-changelog", "sphinx-rtd-theme", "sphinx-tabs", "sphinxcontrib-apidoc", "sphinxcontrib-programoutput"]
+docs = ["dunamai", "jsx-lexer", "sphinx", "sphinx-github-changelog", "sphinx-rtd-theme", "sphinx-tabs", "sphinxcontrib-apidoc", "sphinxcontrib-programoutput"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <4"
-content-hash = "b58ac8498909b2f70a7b42071f7cf680469f57ac3e770f9e3747c73086240d94"
+content-hash = "791a8153c42eefb5e6392c1e388710c08846c821e78bbb095e6ea0dd788a42da"
 
 [metadata.files]
 alabaster = [

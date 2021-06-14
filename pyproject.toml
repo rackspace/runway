@@ -104,7 +104,6 @@ extras = [
   "cloudformation",
   "cloudfront",
   "cognito-idp",
-  "dunamai",
   "dynamodb",
   "ec2",
   "ecr",
@@ -120,6 +119,7 @@ version = "^1.16"
 
 [tool.poetry.extras]
 docs = [
+  "dunamai",
   "jsx-lexer",
   "sphinx",
   "sphinx-github-changelog",
