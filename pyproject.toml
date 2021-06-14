@@ -176,7 +176,6 @@ exclude_lines = [
 fail_under = 85
 precision = 2
 show_missing = true
-source = ["runway"]
 
 
 [tool.coverage.run]
