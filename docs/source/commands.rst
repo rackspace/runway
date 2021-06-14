@@ -143,6 +143,8 @@ init
 .. code-block:: sh
 
   $ runway init
+  $ runway init --ci --deploy-environment example
+  $ runway init --tag tag1 --tag tag2
 
 ----
 
