@@ -42,7 +42,7 @@ botocore = "^1.19"
 cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
-coloredlogs = "*"
+coloredlogs = "*, !=15.0.1"
 docker = "*"  # used in runway.cfngin.hooks
 dunamai = { version = "^1.5", optional = true }  # docs
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
@@ -74,7 +74,6 @@ zgitignore = "*"  # only used in runway.cfngin.hooks.staticsite.utils
 black = "21.5b1"  # since its pre-release, it has to be pinned this way
 coverage = { version = "^5.5", extras = ["toml"] }
 doc8 = "^0.8"  # for linting with vscode rst extension
-dunamai = "^1.5"  # determine project version
 flake8 = "^3.9"
 flake8-docstrings = "^1.6"  # flake8 plugin
 isort = "^5.8"
@@ -176,6 +175,7 @@ exclude_lines = [
 fail_under = 85
 precision = 2
 show_missing = true
+source = ["runway"]
 
 
 [tool.coverage.run]
