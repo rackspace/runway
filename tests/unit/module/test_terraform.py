@@ -62,6 +62,31 @@ def test_update_env_vars_with_tf_var_values() -> None:
 class TestTerraform:  # pylint: disable=too-many-public-methods
     """Test runway.module.terraform.Terraform."""
 
+    def test___init__(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+        """Test __init__."""
+        parameters = {"key1": "val1"}
+        obj = Terraform(
+            runway_context,
+            explicitly_enabled=True,
+            module_root=tmp_path,
+            parameters=parameters,
+        )
+
+        assert obj.logger
+        assert obj.path == tmp_path
+        assert obj.explicitly_enabled
+        assert isinstance(obj.options, TerraformOptions)
+        assert obj.parameters == parameters
+        assert obj.required_workspace == runway_context.env.name
+
+    def test___init___options_workspace(
+        self, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test __init__ with workspace option."""
+        options = {"terraform_workspace": "default"}
+        obj = Terraform(runway_context, module_root=tmp_path, options=options)
+        assert obj.required_workspace == options["terraform_workspace"]
+
     def test_auto_tfvars(
         self,
         caplog: LogCaptureFixture,
@@ -116,6 +141,37 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
             "*.auto.tfvars; some variables may be missing"
         ) in "\n".join(caplog.messages)
 
+    def test_cleanup_dot_terraform(
+        self,
+        caplog: LogCaptureFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test cleanup_dot_terraform."""
+        caplog.set_level(logging.DEBUG, logger=MODULE)
+        obj = Terraform(runway_context, module_root=tmp_path)
+
+        obj.cleanup_dot_terraform()
+        assert "skipped cleanup" in "\n".join(caplog.messages)
+
+        dot_tf = tmp_path / ".terraform"
+        dot_tf_modules = dot_tf / "modules"
+        dot_tf_modules.mkdir(parents=True)
+        (dot_tf_modules / "some_file").touch()
+        dot_tf_plugins = dot_tf / "plugins"
+        dot_tf_plugins.mkdir(parents=True)
+        (dot_tf_plugins / "some_file").touch()
+        dot_tf_tfstate = dot_tf / "terraform.tfstate"
+        dot_tf_tfstate.touch()
+
+        obj.cleanup_dot_terraform()
+        assert dot_tf.exists()
+        assert not dot_tf_modules.exists()
+        assert dot_tf_plugins.exists()
+        assert (dot_tf_plugins / "some_file").exists()
+        assert not dot_tf_tfstate.exists()
+        assert "removing some of its contents" in "\n".join(caplog.messages)
+
     def test_current_workspace(
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
@@ -158,153 +214,87 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         else:
             assert not obj.env_file
 
-    def test_init(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
-        """Test class instantiation."""
-        parameters = {"key1": "val1"}
-        obj = Terraform(
-            runway_context,
-            explicitly_enabled=True,
-            module_root=tmp_path,
-            parameters=parameters,
-        )
-
-        assert obj.logger
-        assert obj.path == tmp_path
-        assert obj.explicitly_enabled
-        assert isinstance(obj.options, TerraformOptions)
-        assert obj.parameters == parameters
-        assert obj.required_workspace == runway_context.env.name
-
-    def test_init_options_workspace(
-        self, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
-        """Test class instantiation with workspace option."""
-        options = {"terraform_workspace": "default"}
-        obj = Terraform(runway_context, module_root=tmp_path, options=options)
-        assert obj.required_workspace == options["terraform_workspace"]
-
-    @pytest.mark.parametrize(
-        "env, param, expected",
-        [
-            (False, False, True),
-            (True, False, False),
-            (False, True, False),
-            (True, True, False),
-        ],
-    )
-    def test_skip(
+    @pytest.mark.parametrize("action", ["deploy", "destroy", "plan"])
+    def test_execute(
         self,
-        env: bool,
-        param: bool,
-        expected: bool,
-        mocker: MockerFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
-    ) -> None:
-        """Test skip."""
-        mocker.patch.object(Terraform, "env_file", env)
-        obj = Terraform(runway_context, module_root=tmp_path)
-        obj.parameters = param  # type: ignore
-        assert obj.skip == expected
-
-    def test_tfenv(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
-        """Test tfenv."""
-        mock_tfenv = mocker.patch(f"{MODULE}.TFEnvManager", return_value="tfenv")
-        obj = Terraform(runway_context, module_root=tmp_path)
-
-        assert obj.tfenv == "tfenv"
-        mock_tfenv.assert_called_once_with(tmp_path)
-
-    def test_tf_bin_file(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
-        """Test tf_bin version in file."""
-        mock_tfenv = MagicMock(version_file=True)
-        mock_tfenv.install.return_value = "success"
-        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
-        obj = Terraform(runway_context, module_root=tmp_path)
-        assert obj.tf_bin == "success"
-        mock_tfenv.install.assert_called_once_with(None)
-
-    def test_tf_bin_global(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
-        """Test tf_bin from global install."""
-        mocker.patch.object(
-            Terraform, "tfenv", MagicMock(install=MagicMock(side_effect=ValueError))
-        )
-        mock_which = mocker.patch(f"{MODULE}.which", return_value=True)
-        obj = Terraform(runway_context, module_root=tmp_path)
-        assert obj.tf_bin == "terraform"
-        mock_which.assert_called_once_with("terraform")
-
-    def test_tf_bin_missing(
-        self,
+        action: str,
         caplog: LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
-        """Test tf_bin missing."""
-        caplog.set_level(LogLevels.ERROR, logger=MODULE)
-        mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
+        """Test executing a Runway action."""
+        caplog.set_level(LogLevels.DEBUG, logger=MODULE)
+        mocker.patch.object(Terraform, "handle_backend", MagicMock())
+        mocker.patch.object(Terraform, "skip", True)
+        mocker.patch.object(Terraform, "cleanup_dot_terraform", MagicMock())
+        mocker.patch.object(Terraform, "handle_parameters", MagicMock())
+        mocker.patch.object(Terraform, "terraform_init", MagicMock())
+        mocker.patch.object(Terraform, "current_workspace", "test")
         mocker.patch.object(
-            Terraform, "tfenv", MagicMock(install=MagicMock(side_effect=ValueError))
+            Terraform, "terraform_workspace_list", MagicMock(return_value="* test")
         )
-        obj = Terraform(runway_context, module_root=tmp_path)
-        with pytest.raises(SystemExit) as excinfo:
-            assert obj.tf_bin
-        assert excinfo.value.code == 1
-        mock_which.assert_called_once_with("terraform")
-        assert (
-            "terraform not available and a version to install not specified"
-            in "\n".join(caplog.messages)
+        mocker.patch.object(Terraform, "terraform_workspace_select", MagicMock())
+        mocker.patch.object(Terraform, "terraform_workspace_new", MagicMock())
+        mocker.patch.object(Terraform, "terraform_get", MagicMock())
+        mocker.patch.object(Terraform, "terraform_apply", MagicMock())
+        mocker.patch.object(Terraform, "terraform_destroy", MagicMock())
+        mocker.patch.object(Terraform, "terraform_plan", MagicMock())
+        mocker.patch.object(
+            Terraform,
+            "auto_tfvars",
+            MagicMock(exists=MagicMock(return_value=True), unlink=MagicMock()),
         )
+        command = "apply" if action == "deploy" else action
 
-    def test_tf_bin_options(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
-        """Test tf_bin version in options."""
-        mock_tfenv = MagicMock()
-        mock_tfenv.install.return_value = "success"
-        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
-        options = {"terraform_version": "0.12.0"}
-        obj = Terraform(runway_context, module_root=tmp_path, options=options)
-        assert obj.tf_bin == "success"
-        mock_tfenv.install.assert_called_once_with("0.12.0")
-
-    def test_cleanup_dot_terraform(
-        self,
-        caplog: LogCaptureFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
-    ) -> None:
-        """Test cleanup_dot_terraform."""
-        caplog.set_level(logging.DEBUG, logger=MODULE)
+        # pylint: disable=no-member
+        # module is skipped
         obj = Terraform(runway_context, module_root=tmp_path)
+        assert not obj[action]()
+        obj.handle_backend.assert_called_once_with()
+        obj.cleanup_dot_terraform.assert_not_called()
+        obj.handle_parameters.assert_not_called()
+        obj.auto_tfvars.exists.assert_called_once_with()
+        obj.auto_tfvars.unlink.assert_called_once_with()
+        caplog.clear()
 
-        obj.cleanup_dot_terraform()
-        assert "skipped cleanup" in "\n".join(caplog.messages)
+        # module is run; workspace matches
+        obj.auto_tfvars.exists.return_value = False
+        mocker.patch.object(obj, "skip", False)
+        assert not obj[action]()
+        obj.cleanup_dot_terraform.assert_called_once_with()
+        obj.handle_parameters.assert_called_once_with()
+        obj.terraform_init.assert_called_once_with()
+        obj.terraform_workspace_list.assert_not_called()
+        obj.terraform_workspace_select.assert_not_called()
+        obj.terraform_workspace_new.assert_not_called()
+        obj.terraform_get.assert_called_once_with()
+        obj["terraform_" + command].assert_called_once_with()
+        assert obj.auto_tfvars.exists.call_count == 2
+        assert obj.auto_tfvars.unlink.call_count == 1
+        logs = "\n".join(caplog.messages)
+        assert "init (in progress)" in logs
+        assert "init (complete)" in logs
+        assert "re-running init after workspace change..." not in logs
+        assert "{} (in progress)".format(command) in logs
+        assert "{} (complete)".format(command) in logs
+        caplog.clear()
 
-        dot_tf = tmp_path / ".terraform"
-        dot_tf_modules = dot_tf / "modules"
-        dot_tf_modules.mkdir(parents=True)
-        (dot_tf_modules / "some_file").touch()
-        dot_tf_plugins = dot_tf / "plugins"
-        dot_tf_plugins.mkdir(parents=True)
-        (dot_tf_plugins / "some_file").touch()
-        dot_tf_tfstate = dot_tf / "terraform.tfstate"
-        dot_tf_tfstate.touch()
+        # module is run; switch to workspace
+        mocker.patch.object(Terraform, "current_workspace", "default")
+        assert not obj[action]()
+        obj.terraform_workspace_list.assert_called_once_with()
+        obj.terraform_workspace_select.assert_called_once_with("test")
+        obj.terraform_workspace_new.assert_not_called()
+        logs = "\n".join(caplog.messages)
+        assert "re-running init after workspace change..." in logs
 
-        obj.cleanup_dot_terraform()
-        assert dot_tf.exists()
-        assert not dot_tf_modules.exists()
-        assert dot_tf_plugins.exists()
-        assert (dot_tf_plugins / "some_file").exists()
-        assert not dot_tf_tfstate.exists()
-        assert "removing some of its contents" in "\n".join(caplog.messages)
+        # module is run; create workspace
+        mocker.patch.object(
+            Terraform, "terraform_workspace_list", MagicMock(return_value="")
+        )
+        assert not obj[action]()
+        obj.terraform_workspace_new.assert_called_once_with("test")
 
     @pytest.mark.parametrize(
         "command, args_list, expected",
@@ -485,6 +475,112 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.handle_parameters()
         mock_update_envvars.assert_called_once_with(runway_context.env.vars, {})
         assert obj.ctx.env.vars == {"result": "success"}
+
+    def test_init(
+        self,
+        caplog: LogCaptureFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test init."""
+        caplog.set_level(logging.WARNING, logger=MODULE)
+        obj = Terraform(runway_context, module_root=tmp_path)
+        assert not obj.init()
+        assert (
+            f"init not currently supported for {Terraform.__name__}" in caplog.messages
+        )
+
+    @pytest.mark.parametrize(
+        "env, param, expected",
+        [
+            (False, False, True),
+            (True, False, False),
+            (False, True, False),
+            (True, True, False),
+        ],
+    )
+    def test_skip(
+        self,
+        env: bool,
+        param: bool,
+        expected: bool,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test skip."""
+        mocker.patch.object(Terraform, "env_file", env)
+        obj = Terraform(runway_context, module_root=tmp_path)
+        obj.parameters = param  # type: ignore
+        assert obj.skip == expected
+
+    def test_tfenv(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test tfenv."""
+        mock_tfenv = mocker.patch(f"{MODULE}.TFEnvManager", return_value="tfenv")
+        obj = Terraform(runway_context, module_root=tmp_path)
+
+        assert obj.tfenv == "tfenv"
+        mock_tfenv.assert_called_once_with(tmp_path)
+
+    def test_tf_bin_file(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test tf_bin version in file."""
+        mock_tfenv = MagicMock(version_file=True)
+        mock_tfenv.install.return_value = "success"
+        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
+        obj = Terraform(runway_context, module_root=tmp_path)
+        assert obj.tf_bin == "success"
+        mock_tfenv.install.assert_called_once_with(None)
+
+    def test_tf_bin_global(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test tf_bin from global install."""
+        mocker.patch.object(
+            Terraform, "tfenv", MagicMock(install=MagicMock(side_effect=ValueError))
+        )
+        mock_which = mocker.patch(f"{MODULE}.which", return_value=True)
+        obj = Terraform(runway_context, module_root=tmp_path)
+        assert obj.tf_bin == "terraform"
+        mock_which.assert_called_once_with("terraform")
+
+    def test_tf_bin_missing(
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test tf_bin missing."""
+        caplog.set_level(LogLevels.ERROR, logger=MODULE)
+        mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
+        mocker.patch.object(
+            Terraform, "tfenv", MagicMock(install=MagicMock(side_effect=ValueError))
+        )
+        obj = Terraform(runway_context, module_root=tmp_path)
+        with pytest.raises(SystemExit) as excinfo:
+            assert obj.tf_bin
+        assert excinfo.value.code == 1
+        mock_which.assert_called_once_with("terraform")
+        assert (
+            "terraform not available and a version to install not specified"
+            in "\n".join(caplog.messages)
+        )
+
+    def test_tf_bin_options(
+        self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
+    ) -> None:
+        """Test tf_bin version in options."""
+        mock_tfenv = MagicMock()
+        mock_tfenv.install.return_value = "success"
+        mocker.patch.object(Terraform, "tfenv", mock_tfenv)
+        options = {"terraform_version": "0.12.0"}
+        obj = Terraform(runway_context, module_root=tmp_path, options=options)
+        assert obj.tf_bin == "success"
+        mock_tfenv.install.assert_called_once_with("0.12.0")
 
     def test_terraform_apply(
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
@@ -704,88 +800,6 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
         check_output_result.strip.assert_called_once_with()
         check_output_result.strip.return_value.decode.assert_called_once_with()
-
-    @pytest.mark.parametrize("action", ["deploy", "destroy", "plan"])
-    def test_execute(
-        self,
-        action: str,
-        caplog: LogCaptureFixture,
-        mocker: MockerFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
-    ) -> None:
-        """Test executing a Runway action."""
-        caplog.set_level(LogLevels.DEBUG, logger=MODULE)
-        mocker.patch.object(Terraform, "handle_backend", MagicMock())
-        mocker.patch.object(Terraform, "skip", True)
-        mocker.patch.object(Terraform, "cleanup_dot_terraform", MagicMock())
-        mocker.patch.object(Terraform, "handle_parameters", MagicMock())
-        mocker.patch.object(Terraform, "terraform_init", MagicMock())
-        mocker.patch.object(Terraform, "current_workspace", "test")
-        mocker.patch.object(
-            Terraform, "terraform_workspace_list", MagicMock(return_value="* test")
-        )
-        mocker.patch.object(Terraform, "terraform_workspace_select", MagicMock())
-        mocker.patch.object(Terraform, "terraform_workspace_new", MagicMock())
-        mocker.patch.object(Terraform, "terraform_get", MagicMock())
-        mocker.patch.object(Terraform, "terraform_apply", MagicMock())
-        mocker.patch.object(Terraform, "terraform_destroy", MagicMock())
-        mocker.patch.object(Terraform, "terraform_plan", MagicMock())
-        mocker.patch.object(
-            Terraform,
-            "auto_tfvars",
-            MagicMock(exists=MagicMock(return_value=True), unlink=MagicMock()),
-        )
-        command = "apply" if action == "deploy" else action
-
-        # pylint: disable=no-member
-        # module is skipped
-        obj = Terraform(runway_context, module_root=tmp_path)
-        assert not obj[action]()
-        obj.handle_backend.assert_called_once_with()
-        obj.cleanup_dot_terraform.assert_not_called()
-        obj.handle_parameters.assert_not_called()
-        obj.auto_tfvars.exists.assert_called_once_with()
-        obj.auto_tfvars.unlink.assert_called_once_with()
-        caplog.clear()
-
-        # module is run; workspace matches
-        obj.auto_tfvars.exists.return_value = False
-        mocker.patch.object(obj, "skip", False)
-        assert not obj[action]()
-        obj.cleanup_dot_terraform.assert_called_once_with()
-        obj.handle_parameters.assert_called_once_with()
-        obj.terraform_init.assert_called_once_with()
-        obj.terraform_workspace_list.assert_not_called()
-        obj.terraform_workspace_select.assert_not_called()
-        obj.terraform_workspace_new.assert_not_called()
-        obj.terraform_get.assert_called_once_with()
-        obj["terraform_" + command].assert_called_once_with()
-        assert obj.auto_tfvars.exists.call_count == 2
-        assert obj.auto_tfvars.unlink.call_count == 1
-        logs = "\n".join(caplog.messages)
-        assert "init (in progress)" in logs
-        assert "init (complete)" in logs
-        assert "re-running init after workspace change..." not in logs
-        assert "{} (in progress)".format(command) in logs
-        assert "{} (complete)".format(command) in logs
-        caplog.clear()
-
-        # module is run; switch to workspace
-        mocker.patch.object(Terraform, "current_workspace", "default")
-        assert not obj[action]()
-        obj.terraform_workspace_list.assert_called_once_with()
-        obj.terraform_workspace_select.assert_called_once_with("test")
-        obj.terraform_workspace_new.assert_not_called()
-        logs = "\n".join(caplog.messages)
-        assert "re-running init after workspace change..." in logs
-
-        # module is run; create workspace
-        mocker.patch.object(
-            Terraform, "terraform_workspace_list", MagicMock(return_value="")
-        )
-        assert not obj[action]()
-        obj.terraform_workspace_new.assert_called_once_with("test")
 
     def test_version(
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path

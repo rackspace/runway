@@ -556,10 +556,6 @@ class Terraform(RunwayModule):
             if self.auto_tfvars.exists():
                 self.auto_tfvars.unlink()
 
-    def plan(self) -> None:
-        """Run Terraform plan."""
-        self.run("plan")
-
     def deploy(self) -> None:
         """Run Terraform apply."""
         self.run("apply")
@@ -567,6 +563,14 @@ class Terraform(RunwayModule):
     def destroy(self) -> None:
         """Run Terraform destroy."""
         self.run("destroy")
+
+    def init(self) -> None:
+        """Run init."""
+        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+
+    def plan(self) -> None:
+        """Run Terraform plan."""
+        self.run("plan")
 
 
 class TerraformOptions(ModuleOptions):

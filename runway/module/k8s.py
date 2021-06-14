@@ -152,10 +152,6 @@ class K8s(RunwayModule):
             self.logger.info("%s (complete)", command)
         return {"skipped_configs": False}
 
-    def plan(self) -> None:
-        """Run kustomize build and display generated plan."""
-        self.run_kubectl(command="plan")
-
     def deploy(self) -> None:
         """Run kubectl apply."""
         self.run_kubectl(command="apply")
@@ -163,6 +159,14 @@ class K8s(RunwayModule):
     def destroy(self) -> None:
         """Run kubectl delete."""
         self.run_kubectl(command="delete")
+
+    def init(self) -> None:
+        """Run init."""
+        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+
+    def plan(self) -> None:
+        """Run kustomize build and display generated plan."""
+        self.run_kubectl(command="plan")
 
 
 class K8sOptions(ModuleOptions):

@@ -386,10 +386,6 @@ class Serverless(RunwayModuleNpm):
             sys.exit(proc.returncode)
         self.logger.info("destroy (complete)")
 
-    def plan(self) -> None:
-        """Entrypoint for Runway's plan action."""
-        self.logger.info("plan not currently supported for Serverless")
-
     def deploy(self) -> None:
         """Entrypoint for Runway's deploy action."""
         if self.skip:
@@ -407,6 +403,14 @@ class Serverless(RunwayModuleNpm):
             self.extend_serverless_yml(self.sls_remove)
         else:
             self.sls_remove()
+
+    def init(self) -> None:
+        """Run init."""
+        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+
+    def plan(self) -> None:
+        """Entrypoint for Runway's plan action."""
+        self.logger.info("plan not currently supported for Serverless")
 
 
 class ServerlessOptions(ModuleOptions):

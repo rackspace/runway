@@ -3,6 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Dict
 
 from runway.core.components import DeployEnvironment
@@ -13,7 +14,13 @@ from ..factories import MockRunwayContext
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
+
+    from runway.context import RunwayContext
+
+
+MODULE = "runway.module.cloudformation"
 
 
 class TestCloudFormation:
@@ -50,6 +57,18 @@ class TestCloudFormation:
         )
         module.destroy()
         mock_action.assert_called_once()
+
+    def test_init(
+        self, caplog: LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
+    ) -> None:
+        """Test init."""
+        caplog.set_level(logging.WARNING, logger=MODULE)
+        obj = CloudFormation(runway_context, module_root=tmp_path)
+        assert not obj.init()
+        assert (
+            f"init not currently supported for {CloudFormation.__name__}"
+            in caplog.messages
+        )
 
     def test_plan(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test plan."""
