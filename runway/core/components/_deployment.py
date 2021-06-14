@@ -123,11 +123,24 @@ class Deployment:
 
         """
         self.logger.verbose(
-            "attempting to destroy in regions(s): %s", ", ".join(self.regions)
+            "attempting to destroy in region(s): %s", ", ".join(self.regions)
         )
         if self.use_async:
             return self.__async("destroy")
         return self.__sync("destroy")
+
+    def init(self) -> None:
+        """Initialize/bootstrap deployment.
+
+        High level method for running a deployment.
+
+        """
+        self.logger.verbose(
+            "attempting to initialize region(s): %s", ", ".join(self.regions)
+        )
+        if self.use_async:
+            return self.__async("init")
+        return self.__sync("init")
 
     def plan(self) -> None:
         """Plan for the next deploy of the deployment.
