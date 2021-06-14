@@ -80,13 +80,6 @@ class StaticSite(RunwayModule):
         self._ensure_cloudfront_with_auth_at_edge()
         self._ensure_correct_region_with_auth_at_edge()
 
-    def plan(self) -> None:
-        """Create website CFN module and run CFNgin.diff."""
-        if self.parameters:
-            self._setup_website_module(command="plan")
-        else:
-            self.logger.info("skipped; environment required but not defined")
-
     def deploy(self) -> None:
         """Create website CFN module and run CFNgin.deploy."""
         if self.parameters:
@@ -122,6 +115,17 @@ class StaticSite(RunwayModule):
         """Create website CFN module and run CFNgin.destroy."""
         if self.parameters:
             self._setup_website_module(command="destroy")
+        else:
+            self.logger.info("skipped; environment required but not defined")
+
+    def init(self) -> None:
+        """Run init."""
+        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+
+    def plan(self) -> None:
+        """Create website CFN module and run CFNgin.diff."""
+        if self.parameters:
+            self._setup_website_module(command="plan")
         else:
             self.logger.info("skipped; environment required but not defined")
 

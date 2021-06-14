@@ -25,10 +25,28 @@ if TYPE_CHECKING:
 
     from ..factories import MockRunwayContext
 
+MODULE = "runway.module.serverless"
+
 
 @pytest.mark.usefixtures("patch_module_npm")
 class TestServerless:
     """Test runway.module.serverless.Serverless."""
+
+    def test___init__(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+        """Test __init__ and the attributes set in __init__."""
+        obj = Serverless(
+            runway_context, module_root=tmp_path, options={"skip_npm_ci": True}
+        )
+        assert isinstance(obj.options, ServerlessOptions)
+        assert obj.region == runway_context.env.aws_region
+        assert obj.stage == runway_context.env.name
+
+        with pytest.raises(ValidationError):
+            assert not Serverless(
+                runway_context,
+                module_root=tmp_path,
+                options={"promotezip": {"invalid": "value"}},
+            )
 
     def test_cli_args(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test cli_args."""
@@ -244,21 +262,19 @@ class TestServerless:
             command="sls", command_opts=expected_opts, logger=obj.logger, path=tmp_path
         )
 
-    def test_init(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
-        """Test init and the attributes set in init."""
-        obj = Serverless(
-            runway_context, module_root=tmp_path, options={"skip_npm_ci": True}
+    def test_init(
+        self,
+        caplog: LogCaptureFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test init."""
+        caplog.set_level(logging.WARNING, logger=MODULE)
+        obj = Serverless(runway_context, module_root=tmp_path)
+        assert not obj.init()
+        assert (
+            f"init not currently supported for {Serverless.__name__}" in caplog.messages
         )
-        assert isinstance(obj.options, ServerlessOptions)
-        assert obj.region == runway_context.env.aws_region
-        assert obj.stage == runway_context.env.name
-
-        with pytest.raises(ValidationError):
-            assert not Serverless(
-                runway_context,
-                module_root=tmp_path,
-                options={"promotezip": {"invalid": "value"}},
-            )
 
     def test_plan(
         self,

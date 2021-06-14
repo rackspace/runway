@@ -4,53 +4,48 @@
 Custom Plugin Support
 #####################
 
-Need to expand Runway to wrap other tools? Yes - you can do that with custom
-plugin support.
+Need to expand Runway to wrap other tools?
+Yes - you can do that with custom plugin support.
 
 
 ********
 Overview
 ********
 
-Runway can import Python modules that can perform custom deployments with your
-own set of Runway modules. Let's say for example you want to have Runway
-execute an Ansible playbook to create an EC2 security group as one of the steps
-in the middle of your Runway deployment list - this is possible with your own
-plugin. The custom plugin support allows you to mix-and-match natively
-supported modules (e.g. CloudFormation, Terraform) with plugins you write
-providing additional support for non-native modules. Although written in
-Python, these plugins can natively execute non Python binaries.
+Runway can import Python modules that can perform custom deployments with your own set of Runway modules.
+Let's say for example you want to have Runway execute an Ansible playbook to create an EC2 security group as one of the steps in the middle of your Runway deployment list - this is possible with your own plugin.
+The custom plugin support allows you to mix-and-match natively supported modules (e.g. CloudFormation, Terraform) with plugins you write providing additional support for non-native modules.
+Although written in Python, these plugins can natively execute non-Python binaries.
 
 
 ******************
 RunwayModule Class
 ******************
 
-Runway provides a Python Class named ``RunwayModule`` that can be imported
-into your custom plugin/Python module. This base class will give you the
-ability to write your own module that can be added to your runway.yml
-deployment list (More info on runway.yml below). There are three required
-functions:
-
-**plan**
-  This code block gets called when ``runway taxi`` executes
+Runway provides :class:`~runway.module.base.RunwayModule` to use as the base class of all module handler classes.
+This base class will give you the ability to write your own module handler class that can be added to your runway.yml deployment list (More info on runway.yml below).
+There are four methods that need to be defined for the class:
 
 **deploy**
-  This code block gets called when ``runway takeoff`` executes
+  This method is called when ``runway deploy`` is run.
 
 **destroy**
-  This code block gets called when ``runway destroy`` executes
+  This method is called when ``runway destroy`` is run.
 
-All of these functions are required, but are permitted to be empty no-op/pass
-statements if applicable.
+**init**
+  This method is called when ``runway init`` is run.
+
+**plan**
+  This method is called when ``runway plan`` is run.
 
 
 **************
 Context Object
 **************
 
-``self.ctx`` includes many helpful resources for use in your Python
-module. Some notable examples are::
+``self.ctx`` includes many helpful resources for use in your Python module.
+
+Some notable examples are:
 
 - ``self.ctx.env.name`` - name of the environment
 - ``self.ctx.env.aws_region`` - region in which the module is being executed
@@ -131,10 +126,6 @@ skipped. This matches the behavior of the Runway's native modules.
   class DeployToAWS(RunwayModule):
       """Ansible Runway Module."""
 
-      def plan(self) -> None:
-          """Skip plan."""
-          LOGGER.info("plan not currently supported for Ansible")
-
       def deploy(self) -> None:
           """Run ansible-playbook."""
           if not which("ansible-playbook"):
@@ -152,7 +143,15 @@ skipped. This matches the behavior of the Runway's native modules.
 
       def destroy(self) -> None:
           """Skip destroy."""
-          LOGGER.info("Destroy not currently supported for Ansible")
+          LOGGER.info("destroy not currently supported for Ansible")
+
+      def init(self) -> None:
+          """Skip init."""
+          LOGGER.info("init not currently supported for Ansible")
+
+      def plan(self) -> None:
+          """Skip plan."""
+          LOGGER.info("plan not currently supported for Ansible")
 
 
 And below is the example Ansible playbook itself, saved as ``dev-us-east-1.yaml`` in the security_group.ansible folder:

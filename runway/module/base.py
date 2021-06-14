@@ -73,6 +73,10 @@ class RunwayModule:
         """Abstract method called when running destroy."""
         raise NotImplementedError("You must implement the destroy() method yourself!")
 
+    def init(self) -> None:
+        """Abstract method called when running init."""
+        raise NotImplementedError("You must implement the init() method yourself!")
+
     def plan(self) -> None:
         """Abstract method called when running plan."""
         raise NotImplementedError("You must implement the plan() method yourself!")

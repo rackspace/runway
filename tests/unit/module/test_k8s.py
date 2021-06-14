@@ -3,6 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, List
 
 import pytest
@@ -13,6 +14,7 @@ from runway.module.k8s import K8s, K8sOptions
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from ..factories import MockRunwayContext
@@ -22,6 +24,18 @@ MODULE = "runway.module.k8s"
 
 class TestK8s:
     """Test runway.module.k8s.K8s."""
+
+    def test_init(
+        self,
+        caplog: LogCaptureFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test init."""
+        caplog.set_level(logging.WARNING, logger=MODULE)
+        obj = K8s(runway_context, module_root=tmp_path)
+        assert not obj.init()
+        assert f"init not currently supported for {K8s.__name__}" in caplog.messages
 
     def test_skip(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test skip."""

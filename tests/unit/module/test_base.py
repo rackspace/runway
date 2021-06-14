@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 
 import pytest
@@ -14,6 +13,8 @@ from runway.exceptions import NpmNotFound
 from runway.module.base import NPM_BIN, ModuleOptions, RunwayModule, RunwayModuleNpm
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
@@ -256,22 +257,7 @@ class TestRunwayModuleNpm:
 class TestRunwayModule:
     """Test runway.module.base.RunwayModule."""
 
-    def test_deploy(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
-        """Test deploy."""
-        with pytest.raises(NotImplementedError):
-            RunwayModule(runway_context, module_root=tmp_path).deploy()
-
-    def test_destroy(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
-        """Test destroy."""
-        with pytest.raises(NotImplementedError):
-            RunwayModule(runway_context, module_root=tmp_path).destroy()
-
-    def test_getitem(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
-        """Test __getitem__."""
-        obj = RunwayModule(runway_context, module_root=tmp_path)
-        assert obj["path"] == tmp_path
-
-    def test_init_default(
+    def test___init___default(
         self, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test __init__ default values."""
@@ -282,7 +268,7 @@ class TestRunwayModule:
         assert obj.options == {}
         assert obj.parameters == {}
 
-    def test_init(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+    def test___init__(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test __init__."""
         obj = RunwayModule(
             runway_context,
@@ -301,6 +287,26 @@ class TestRunwayModule:
         assert obj.parameters == {"parameters": "test"}
         assert obj.path == tmp_path
         assert not hasattr(obj, "something")
+
+    def test_deploy(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+        """Test deploy."""
+        with pytest.raises(NotImplementedError):
+            RunwayModule(runway_context, module_root=tmp_path).deploy()
+
+    def test_destroy(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+        """Test destroy."""
+        with pytest.raises(NotImplementedError):
+            RunwayModule(runway_context, module_root=tmp_path).destroy()
+
+    def test_getitem(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+        """Test __getitem__."""
+        obj = RunwayModule(runway_context, module_root=tmp_path)
+        assert obj["path"] == tmp_path
+
+    def test_init(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
+        """Test init."""
+        with pytest.raises(NotImplementedError):
+            RunwayModule(runway_context, module_root=tmp_path).init()
 
     def test_plan(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test plan."""

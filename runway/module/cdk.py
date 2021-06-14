@@ -191,10 +191,6 @@ class CloudDevelopmentKit(RunwayModuleNpm):
             response["skipped_configs"] = True
         return response
 
-    def plan(self) -> None:
-        """Run cdk diff."""
-        self.run_cdk(command="diff")
-
     def deploy(self) -> None:
         """Run cdk deploy."""
         self.run_cdk(command="deploy")
@@ -202,6 +198,14 @@ class CloudDevelopmentKit(RunwayModuleNpm):
     def destroy(self) -> None:
         """Run cdk destroy."""
         self.run_cdk(command="destroy")
+
+    def init(self) -> None:
+        """Run cdk init."""
+        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+
+    def plan(self) -> None:
+        """Run cdk diff."""
+        self.run_cdk(command="diff")
 
 
 class CloudDevelopmentKitOptions(ModuleOptions):
