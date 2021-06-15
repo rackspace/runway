@@ -8,11 +8,12 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Final, NamedTuple, Optional, cast
+from typing import TYPE_CHECKING, NamedTuple, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import requests
+from typing_extensions import Final
 
 from ..compat import cached_property
 from ..utils import get_file_hash
