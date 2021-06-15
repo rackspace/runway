@@ -2,14 +2,17 @@
 from __future__ import annotations
 
 import logging
+import platform
 import subprocess
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
+from typing_extensions import Literal
+
 from .._logging import PrefixAdaptor
+from ..compat import cached_property
 from ..config.models.runway.options.cdk import RunwayCdkModuleOptionsDataModel
-from ..utils import change_dir, run_commands, which
+from ..utils import fix_windows_command_list
 from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 
@@ -19,24 +22,19 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
-
-def get_cdk_stacks(
-    module_path: Path, env_vars: Dict[str, str], context_opts: List[str]
-) -> List[str]:
-    """Return list of CDK stacks."""
-    LOGGER.debug("listing stacks in the CDK app prior to diff...")
-    result = subprocess.check_output(
-        generate_node_command(
-            command="cdk",
-            command_opts=["list"] + context_opts,
-            package="aws-cdk",
-            path=module_path,
-        ),
-        env=env_vars,
-    ).decode()
-    result = result.strip().split("\n")
-    LOGGER.debug("found stacks: %s", result)
-    return result
+CdkCommandTypeDef = Literal[
+    "bootstrap",
+    "context",
+    "deploy",
+    "destroy",
+    "diff",
+    "docs",
+    "doctor",
+    "init",
+    "list",
+    "metadata",
+    "synthesize",
+]
 
 
 class CloudDevelopmentKit(RunwayModuleNpm):
@@ -85,119 +83,151 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
 
-    def run_cdk(  # pylint: disable=too-many-branches
-        self, command: str = "deploy"
-    ) -> Dict[str, bool]:
-        """Run CDK."""
-        response = {"skipped_configs": False}
-        cdk_opts = [command]
+    @cached_property
+    def cli_args(self) -> List[str]:
+        """Generate CLI args from self used in all CDK commands."""
+        result: List[str] = []
         if self.ctx.no_color:
-            cdk_opts.append("--no-color")
+            result.append("--no-color")
+        if self.ctx.env.debug:
+            result.append("--debug")
+        elif self.ctx.env.verbose:
+            result.append("--verbose")
+        return result
 
-        if not which("npm"):
-            self.logger.error(
-                '"npm" not found in path or is not executable; '
-                "please ensure it is installed correctly."
+    @cached_property
+    def cli_args_context(self) -> List[str]:
+        """Generate CLI args from self passed to CDK commands as ``--context``."""
+        result: List[str] = []
+        args = {"environment": self.ctx.env.name}
+        args.update(self.parameters)
+        for key, val in args.items():
+            result.extend(["--context", f"{key}={val}"])
+        return result
+
+    @cached_property
+    def skip(self) -> bool:
+        """Determine if the module should be skipped."""
+        if self.package_json_missing():
+            self.logger.info(
+                'skipped; package.json with "aws-cdk" in dependencies or '
+                "devDependencies is required for this module type"
             )
-            sys.exit(1)
-
-        if "DEBUG" in self.ctx.env.vars:
-            cdk_opts.append("-v")  # Increase logging if requested
-
-        if self.explicitly_enabled:
-            if not self.package_json_missing():
-                with change_dir(self.path):
-                    self.npm_install()
-                    if self.options.build_steps:
-                        self.logger.info("build steps (in progress)")
-                        run_commands(
-                            commands=cast(
-                                List[
-                                    Union[
-                                        str, List[str], Dict[str, Union[str, List[str]]]
-                                    ]
-                                ],
-                                self.options.build_steps,
-                            ),
-                            directory=self.path,
-                            env=self.ctx.env.vars,
-                        )
-                        self.logger.info("build steps (complete)")
-                    cdk_context_opts: List[str] = []
-                    for key, val in cast(Dict[str, str], self.parameters).items():
-                        cdk_context_opts.extend(["--context", "%s=%s" % (key, val)])
-                    cdk_opts.extend(cdk_context_opts)
-                    if command == "diff":
-                        self.logger.info("plan (in progress)")
-                        for i in get_cdk_stacks(
-                            self.path, self.ctx.env.vars, cdk_context_opts
-                        ):
-                            subprocess.call(
-                                generate_node_command(  # 'diff <stack>'
-                                    command="cdk",
-                                    command_opts=cdk_opts + [i],
-                                    package="aws-cdk",
-                                    path=self.path,
-                                ),
-                                env=self.ctx.env.vars,
-                            )
-                        self.logger.info("plan (complete)")
-                    else:
-                        # Make sure we're targeting all stacks
-                        if command in ["deploy", "destroy"]:
-                            cdk_opts.append('"*"')
-
-                        if command == "deploy":
-                            if "CI" in self.ctx.env.vars:
-                                cdk_opts.append("--ci")
-                                cdk_opts.append("--require-approval=never")
-                            bootstrap_command = generate_node_command(
-                                command="cdk",
-                                command_opts=["bootstrap"]
-                                + cdk_context_opts
-                                + (["--no-color"] if self.ctx.no_color else []),
-                                package="aws-cdk",
-                                path=self.path,
-                            )
-                            self.logger.info("bootstrap (in progress)")
-                            run_module_command(
-                                cmd_list=bootstrap_command,
-                                env_vars=self.ctx.env.vars,
-                                logger=self.logger,
-                            )
-                            self.logger.info("bootstrap (complete)")
-                        elif command == "destroy" and self.ctx.is_noninteractive:
-                            cdk_opts.append("-f")  # Don't prompt
-                        cdk_command = generate_node_command(
-                            command="cdk",
-                            command_opts=cdk_opts,
-                            package="aws-cdk",
-                            path=self.path,
-                        )
-                        self.logger.info("%s (in progress)", command)
-                        run_module_command(
-                            cmd_list=cdk_command,
-                            env_vars=self.ctx.env.vars,
-                            logger=self.logger,
-                        )
-                        self.logger.info("%s (complete)", command)
-            else:
-                self.logger.info(
-                    'skipped; package.json with "aws-cdk" in devDependencies is '
-                    "required for this module type"
-                )
-        else:
+            return True
+        if not self.explicitly_enabled:
             self.logger.info("skipped; environment required but not defined")
-            response["skipped_configs"] = True
-        return response
+            return True
+        return False
+
+    def cdk_bootstrap(self) -> None:
+        """Execute ``cdk bootstrap`` command."""
+        self.logger.info("init (in progress)")
+        run_module_command(
+            cmd_list=self.gen_cmd("bootstrap", include_context=True),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+        self.logger.info("init (complete)")
+
+    def cdk_deploy(self) -> None:
+        """Execute ``cdk deploy`` command."""
+        self.logger.info("deploy (in progress)")
+        run_module_command(
+            cmd_list=self.gen_cmd("deploy", ['"*"'], include_context=True),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+        self.logger.info("deploy (complete)")
+
+    def cdk_destroy(self) -> None:
+        """Execute ``cdk destroy`` command."""
+        self.logger.info("destroy (in progress)")
+        run_module_command(
+            cmd_list=self.gen_cmd("destroy", ['"*"'], include_context=True),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+        self.logger.info("destroy (complete)")
+
+    def cdk_diff(self, stack_name: Optional[str] = None) -> None:
+        """Execute ``cdk diff`` command."""
+        self.logger.info("plan (in progress)")
+        run_module_command(
+            cmd_list=self.gen_cmd(
+                "diff",
+                args_list=[stack_name] if stack_name else None,
+                include_context=True,
+            ),
+            env_vars=self.ctx.env.vars,
+            exit_on_error=False,
+            logger=self.logger,
+        )
+        self.logger.info("plan (complete)")
+
+    def cdk_list(self) -> List[str]:
+        """Execute ``cdk list`` command."""
+        result = subprocess.check_output(
+            self.gen_cmd("list", include_context=True),
+            env=self.ctx.env.vars,
+        ).decode()
+        result = result.strip().split("\n")
+        LOGGER.debug("found stacks: %s", result)
+        return result
 
     def deploy(self) -> None:
         """Run cdk deploy."""
-        self.run_cdk(command="deploy")
+        if self.skip:
+            return
+        self.npm_install()
+        self.run_build_steps()
+        self.cdk_bootstrap()
+        self.cdk_deploy()
 
     def destroy(self) -> None:
         """Run cdk destroy."""
-        self.run_cdk(command="destroy")
+        if self.skip:
+            return
+        self.npm_install()
+        self.run_build_steps()
+        self.cdk_destroy()
+
+    def gen_cmd(
+        self,
+        command: CdkCommandTypeDef,
+        args_list: Optional[List[str]] = None,
+        *,
+        include_context: bool = False,
+    ) -> List[str]:
+        """Generate and log a CDK command.
+
+        This does not execute the command, only prepares it for use.
+
+        Args:
+            command: The CDK command to be executed.
+            args_list: Additional arguments to include in the generated command.
+            include_context: Optionally, pass context to the CLI. Context is not
+                valid for all commands.
+
+        Returns:
+            The full command to be passed into a subprocess.
+
+        """
+        args = [command] + self.cli_args
+        args.extend(args_list or [])
+        if include_context:
+            args.extend(self.cli_args_context)
+        if self.ctx.env.ci:  # append options that remove interaction
+            if command == "deploy":
+                args.extend(["--ci", "--require-approval=never"])
+            if command == "destroy":
+                args.append("--force")
+        return generate_node_command(
+            command="cdk",
+            command_opts=args,
+            logger=self.logger,
+            package="aws-cdk",
+            path=self.path,
+        )
 
     def init(self) -> None:
         """Run cdk init."""
@@ -205,7 +235,31 @@ class CloudDevelopmentKit(RunwayModuleNpm):
 
     def plan(self) -> None:
         """Run cdk diff."""
-        self.run_cdk(command="diff")
+        if self.skip:
+            return
+        self.npm_install()
+        self.run_build_steps()
+        for stack_name in self.cdk_list():
+            self.cdk_diff(stack_name)
+
+    def run_build_steps(self) -> None:
+        """Run build steps."""
+        if not self.options.build_steps:
+            return
+        self.logger.info("build steps (in progress)")
+        for step in self.options.build_steps:
+            cmd_list = step.split(" ")
+            if platform.system() == "Windows":
+                cmd_list = fix_windows_command_list(cmd_list)
+            try:
+                subprocess.check_call(cmd_list, env=self.ctx.env.vars, cwd=self.path)
+            except FileNotFoundError:
+                self.logger.error(
+                    'attempted to run "%s" but failed to find it (are you sure it '
+                    "is installed and available in your PATH?)"
+                )
+                raise
+        self.logger.info("build steps (complete)")
 
 
 class CloudDevelopmentKitOptions(ModuleOptions):

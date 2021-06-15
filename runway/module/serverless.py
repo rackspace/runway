@@ -292,8 +292,8 @@ class Serverless(RunwayModuleNpm):
         """Execute ``sls deploy`` command.
 
         Args:
-            skip_install: Skip ``npm install`` before running the
-                Serverless command. (*default:* ``False``)
+            skip_install: Skip ``npm ci|install`` before running the
+                Serverless command.
 
         """
         if not skip_install:
@@ -328,8 +328,7 @@ class Serverless(RunwayModuleNpm):
 
         Keyword Args:
             item_path: Period-separated path to print a sub-value (eg: "provider.name").
-            skip_install: Skip ``npm install`` before running the Serverless command.
-                (*default:* ``False``)
+            skip_install: Skip ``npm ci|install`` before running the Serverless command.
 
         Returns:
             Resolved Serverless config file.
@@ -362,8 +361,7 @@ class Serverless(RunwayModuleNpm):
         """Execute ``sls remove`` command.
 
         Args:
-            skip_install: Skip ``npm install`` before running the Serverless command.
-                (*default:* ``False``)
+            skip_install: Skip ``npm ci|install`` before running the Serverless command.
 
         """
         if not skip_install:
