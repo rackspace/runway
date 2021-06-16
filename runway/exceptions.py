@@ -4,6 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
+from .utils import DOC_SITE
+
 if TYPE_CHECKING:
     from types import ModuleType
 
@@ -170,6 +172,24 @@ class InvalidLookupConcatenation(RunwayError):
             f"expected return value of type {str} but received "
             f'{type(invalid_lookup.value)} for lookup "{invalid_lookup}" '
             f'in "{concat_lookups}"'
+        )
+        super().__init__(*args, **kwargs)
+
+
+class KubectlVersionNotSpecified(RunwayError):
+    """kubectl version is required but was not specified.
+
+    Version can be specified by using a file or option.
+
+    """
+
+    message: str
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Instantiate class."""
+        self.message = (
+            "kubectl version not specified. Learn how to use Runway to manage kubectl versions "
+            f"at {DOC_SITE}/page/kubernetes/advanced_features.html#version-management"
         )
         super().__init__(*args, **kwargs)
 

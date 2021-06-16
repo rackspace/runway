@@ -4,15 +4,19 @@ from __future__ import annotations
 import logging
 import os
 import platform
+import re
 import shutil
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, NamedTuple, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import requests
+from typing_extensions import Final
 
+from ..compat import cached_property
+from ..exceptions import KubectlVersionNotSpecified
 from ..utils import get_file_hash
 from . import EnvManager, handle_bin_download_error
 
@@ -146,18 +150,32 @@ def download_kb_release(
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
-def get_version_requested(path: Path) -> str:
-    """Return string listing requested kubectl version."""
-    kb_version_path = path / KB_VERSION_FILENAME
-    if not kb_version_path.is_file():
-        LOGGER.error(
-            "kubectl install attempted and no %s file present to "
-            "dictate the version; please create it. (e.g. write "
-            '"1.14.0", without quotes, to the file and try again)',
-            KB_VERSION_FILENAME,
-        )
-        sys.exit(1)
-    return kb_version_path.read_text().strip()
+class VersionTuple(NamedTuple):
+    """Terraform version tuple.
+
+    Attributes:
+        major: Major release version number.
+        minor: Minor release version number.
+        patch: Patch release version number.
+        prerelease: Prerelease identifier (e.g. ``beta``).
+        prerelease_number: Prerelease number (e.g. ``.3``).
+
+    """
+
+    major: int
+    minor: int
+    patch: int
+    prerelease: Optional[str] = None
+    prerelease_number: Optional[int] = None
+
+    def __str__(self) -> str:
+        """Format as string."""
+        result = f"v{self.major}.{self.minor}.{self.patch}"
+        if self.prerelease:
+            result += f"-{self.prerelease}"
+        if self.prerelease_number:
+            result += f".{self.prerelease_number}"
+        return result
 
 
 class KBEnvManager(EnvManager):
@@ -167,14 +185,75 @@ class KBEnvManager(EnvManager):
 
     """
 
-    def __init__(self, path: Optional[Path] = None) -> None:
-        """Initialize class."""
+    VERSION_REGEX: Final[str] = (
+        r"^(v)?(?P<major>[0-9]*)\.(?P<minor>[0-9]*)\.(?P<patch>[0-9]*)"
+        r"(\-(?P<prerelease>alpha|beta|oci|rc)(\.)?(?P<prerelease_number>[0-9]*)?)?"
+    )
+
+    def __init__(
+        self, path: Optional[Path] = None, *, overlay_path: Optional[Path] = None
+    ) -> None:
+        """Initialize class.
+
+        Args:
+            path: Module path.
+            overlay_path: Path to Kustomize overlay.
+
+        """
         super().__init__("kubectl", "kbenv", path)
+        self.overlay_path = overlay_path
+
+    @cached_property
+    def version(self) -> Optional[VersionTuple]:
+        """Terraform version."""
+        if not self.current_version:
+            self.current_version = self.get_version_from_file()
+        if not self.current_version:
+            return None
+        return self.parse_version_string(self.current_version)
+
+    @cached_property
+    def version_file(self) -> Optional[Path]:
+        """Find and return a ".kubectl-version" file if one is present.
+
+        Returns:
+            Path to the kubectl version file.
+
+        """
+        path_list = [self.path, self.path.parent]
+        if self.overlay_path:
+            path_list.insert(0, self.overlay_path)
+        for path in path_list:
+            tmp_path = path / KB_VERSION_FILENAME
+            if tmp_path.is_file():
+                LOGGER.debug("using version file: %s", tmp_path)
+                return tmp_path
+        return None
+
+    def get_version_from_file(self, file_path: Optional[Path] = None) -> Optional[str]:
+        """Get kubectl version from a file.
+
+        Args:
+            file_path: Path to file that will be read.
+
+        """
+        file_path = file_path or self.version_file
+        if file_path and file_path.is_file():
+            return file_path.read_text().strip()
+        LOGGER.debug("file path not provided and version file could not be found")
+        return None
 
     def install(self, version_requested: Optional[str] = None) -> str:
         """Ensure kubectl is available."""
         if not version_requested:
-            version_requested = get_version_requested(self.path)
+            if self.version:
+                version_requested = str(self.version)
+            else:
+                LOGGER.warning(
+                    "kubectl version not specified and %s file not found",
+                    KB_VERSION_FILENAME,
+                )
+                raise KubectlVersionNotSpecified
 
         if not version_requested.startswith("v"):
             version_requested = "v" + version_requested
@@ -193,3 +272,43 @@ class KBEnvManager(EnvManager):
         LOGGER.verbose("downloaded kubectl %s successfully", version_requested)
         self.current_version = version_requested
         return str(self.bin)
+
+    def set_version(self, version: str) -> None:
+        """Set current version.
+
+        Clears cached values as needed.
+
+        Args:
+            version: Version string. Must be in the format of
+                ``v<major>.<minor>.<patch>`` with an optional ``-<prerelease>``.
+
+        """
+        if self.current_version == version:
+            return
+        self.current_version = version
+        try:
+            del self.version
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    @classmethod
+    def parse_version_string(cls, version: str) -> VersionTuple:
+        """Parse version string into a :class:`VersionTuple`.
+
+        Args:
+            version: Version string to parse. Must be in the format of
+                ``<major>.<minor>.<patch>`` with an optional ``-<prerelease>``.
+
+        """
+        match = re.search(cls.VERSION_REGEX, version)
+        if not match:
+            raise ValueError(
+                f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
+            )
+        return VersionTuple(
+            major=int(match.group("major")),
+            minor=int(match.group("minor")),
+            patch=int(match.group("patch")),
+            prerelease=match.group("prerelease") or None,
+            prerelease_number=int(match.group("prerelease_number") or 0) or None,
+        )
