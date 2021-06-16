@@ -16,6 +16,7 @@ import requests
 from typing_extensions import Final
 
 from ..compat import cached_property
+from ..exceptions import KubectlVersionNotSpecified
 from ..utils import get_file_hash
 from . import EnvManager, handle_bin_download_error
 
@@ -248,13 +249,11 @@ class KBEnvManager(EnvManager):
             if self.version:
                 version_requested = str(self.version)
             else:
-                LOGGER.error(
-                    "kubectl install attempted and no %s file present to "
-                    "dictate the version; please create it. (e.g. write "
-                    '"1.14.0", without quotes, to the file and try again)',
+                LOGGER.warning(
+                    "kubectl version not specified and %s file not found",
                     KB_VERSION_FILENAME,
                 )
-                raise ValueError("version required but not specified")
+                raise KubectlVersionNotSpecified
 
         if not version_requested.startswith("v"):
             version_requested = "v" + version_requested
