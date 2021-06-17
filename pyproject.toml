@@ -38,7 +38,6 @@ python = ">=3.7, <4"
 "backports.cached_property" = { version = "*", python = "<3.8" }
 awacs = "*"
 boto3 = "^1.16"
-botocore = "^1.19"
 cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
