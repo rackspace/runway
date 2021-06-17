@@ -100,8 +100,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '15'
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/cache@v2.1.6
@@ -199,8 +199,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '15'
-      - name: Install Python ${{ matrix.python-version }} on ${{ matrix.os }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
+        id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/cache@v2.1.6
