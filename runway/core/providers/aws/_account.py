@@ -39,7 +39,10 @@ class AccountDetails:
     @cached_property
     def id(self) -> str:
         """Get the ID of the AWS account."""
-        return self.__session.client("sts").get_caller_identity()["Account"]
+        account_id = self.__session.client("sts").get_caller_identity().get("Account")
+        if account_id:
+            return account_id
+        raise ValueError("get_caller_identity did not return Account")
 
     @cached_property
     def __session(self) -> boto3.Session:

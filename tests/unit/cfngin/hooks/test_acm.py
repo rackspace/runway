@@ -342,10 +342,9 @@ class TestCertificate:
         )
 
         with acm_stubber:
-            assert (
-                cert.get_validation_record(status=status)
-                == gen_domain_validation_option()["ResourceRecord"]
-            )
+            assert cert.get_validation_record(
+                status=status
+            ) == gen_domain_validation_option().get("ResourceRecord")
         acm_stubber.assert_no_pending_responses()
 
     @pytest.mark.parametrize(
@@ -522,7 +521,9 @@ class TestCertificate:
                                 gen_record_set(
                                     use_resource_record=True,
                                     TTL=cert.args.ttl,
-                                    **gen_domain_validation_option()["ResourceRecord"],
+                                    **gen_domain_validation_option().get(
+                                        "ResourceRecord", {}
+                                    ),
                                 ),
                             ),
                         )

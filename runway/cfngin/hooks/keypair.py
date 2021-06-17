@@ -36,17 +36,21 @@ def get_existing_key_pair(ec2: EC2Client, keypair_name: str) -> Optional[KeyPair
     """Get existing keypair."""
     resp = ec2.describe_key_pairs()
     keypair = next(
-        (kp for kp in resp["KeyPairs"] if kp["KeyName"] == keypair_name), None
+        (kp for kp in resp.get("KeyPairs", {}) if kp.get("KeyName") == keypair_name),
+        None,
     )
 
     if keypair:
         LOGGER.info(
-            KEYPAIR_LOG_MESSAGE, keypair["KeyName"], keypair["KeyFingerprint"], "exists"
+            KEYPAIR_LOG_MESSAGE,
+            keypair.get("KeyName"),
+            keypair.get("KeyFingerprint"),
+            "exists",
         )
         return {
             "status": "exists",
-            "key_name": keypair["KeyName"],
-            "fingerprint": keypair["KeyFingerprint"],
+            "key_name": keypair.get("KeyName", ""),
+            "fingerprint": keypair.get("KeyFingerprint", ""),
         }
 
     LOGGER.info('keypair "%s" not found', keypair_name)
@@ -61,7 +65,10 @@ def import_key_pair(
         KeyName=keypair_name, PublicKeyMaterial=public_key_data.strip(), DryRun=False
     )
     LOGGER.info(
-        KEYPAIR_LOG_MESSAGE, keypair["KeyName"], keypair["KeyFingerprint"], "imported"
+        KEYPAIR_LOG_MESSAGE,
+        keypair.get("KeyName"),
+        keypair.get("KeyFingerprint"),
+        "imported",
     )
     return keypair
 
@@ -92,8 +99,8 @@ def create_key_pair_from_public_key_file(
     keypair = import_key_pair(ec2, keypair_name, public_key_data)
     return {
         "status": "imported",
-        "key_name": keypair["KeyName"],
-        "fingerprint": keypair["KeyFingerprint"],
+        "key_name": keypair.get("KeyName", ""),
+        "fingerprint": keypair.get("KeyFingerprint", ""),
     }
 
 
@@ -141,8 +148,8 @@ def create_key_pair_in_ssm(
 
     return {
         "status": "created",
-        "key_name": keypair["KeyName"],
-        "fingerprint": keypair["KeyFingerprint"],
+        "key_name": keypair.get("KeyName", ""),
+        "fingerprint": keypair.get("KeyFingerprint", ""),
     }
 
 
@@ -150,7 +157,10 @@ def create_key_pair(ec2: EC2Client, keypair_name: str) -> KeyPairTypeDef:
     """Create keypair."""
     keypair = ec2.create_key_pair(KeyName=keypair_name, DryRun=False)
     LOGGER.info(
-        KEYPAIR_LOG_MESSAGE, keypair["KeyName"], keypair["KeyFingerprint"], "created"
+        KEYPAIR_LOG_MESSAGE,
+        keypair.get("KeyName"),
+        keypair.get("KeyFingerprint"),
+        "created",
     )
     return keypair
 
@@ -171,12 +181,12 @@ def create_key_pair_local(
         return None
 
     keypair = create_key_pair(ec2, keypair_name)
-    key_path.write_text(keypair["KeyMaterial"], encoding="ascii")
+    key_path.write_text(keypair.get("KeyMaterial", ""), encoding="ascii")
 
     return {
         "status": "created",
-        "key_name": keypair["KeyName"],
-        "fingerprint": keypair["KeyFingerprint"],
+        "key_name": keypair.get("KeyName", ""),
+        "fingerprint": keypair.get("KeyFingerprint", ""),
         "file_path": key_path,
     }
 

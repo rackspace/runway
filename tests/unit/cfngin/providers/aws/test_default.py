@@ -228,7 +228,9 @@ class TestMethods(unittest.TestCase):
         replacement = requires_replacement(changeset)
         self.assertEqual(len(replacement), 2)
         for resource in replacement:
-            self.assertEqual(resource["ResourceChange"]["Replacement"], "True")
+            self.assertEqual(
+                resource.get("ResourceChange", {}).get("Replacement"), "True"
+            )
 
     def test_summarize_params_diff(self) -> None:
         """Test summarize params diff."""
@@ -1015,7 +1017,8 @@ class TestProviderDefaultMode(unittest.TestCase):
                 self.provider.tail_stack(stack, threading.Event())
             except ClientError as exc:
                 self.assertEqual(
-                    exc.response["ResponseMetadata"]["attempt"], MAX_TAIL_RETRIES
+                    exc.response.get("ResponseMetadata", {}).get("attempt"),
+                    MAX_TAIL_RETRIES,
                 )
 
     def test_tail_stack_retry_on_missing_stack_eventual_success(self) -> None:

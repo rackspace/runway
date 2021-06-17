@@ -145,7 +145,8 @@ class BucketLister:
             contents = page.get("Contents", [])
             for content in contents:
                 source_path = bucket + "/" + content.get("Key", "")
-                content["LastModified"] = self._date_parser(content["LastModified"])
+                if "LastModified" in content:
+                    content["LastModified"] = self._date_parser(content["LastModified"])
                 yield source_path, content
 
 

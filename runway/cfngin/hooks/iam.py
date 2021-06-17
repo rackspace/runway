@@ -80,9 +80,11 @@ def _get_cert_arn_from_response(
         return cast("GetServerCertificateResponseTypeDef", result)["ServerCertificate"][
             "ServerCertificateMetadata"
         ]["Arn"]
-    return cast("UploadServerCertificateResponseTypeDef", result)[
-        "ServerCertificateMetadata"
-    ]["Arn"]
+    return (
+        cast("UploadServerCertificateResponseTypeDef", result)
+        .get("ServerCertificateMetadata", {})
+        .get("Arn", "")
+    )
 
 
 def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:

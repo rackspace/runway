@@ -86,16 +86,19 @@ class AssumeRole(ContextManager["AssumeRole"]):
         LOGGER.info("assuming role %s...", self.role_arn)
         response = sts_client.assume_role(**self._kwargs)
         LOGGER.debug("sts.assume_role respsone: %s", response)
-        self.assumed_role_user.update(response["AssumedRoleUser"])
-        self.credentials.update(response["Credentials"])
-        self.ctx.env.vars.update(
-            {
-                "AWS_ACCESS_KEY_ID": response["Credentials"]["AccessKeyId"],
-                "AWS_SECRET_ACCESS_KEY": response["Credentials"]["SecretAccessKey"],
-                "AWS_SESSION_TOKEN": response["Credentials"]["SessionToken"],
-            }
-        )
-        LOGGER.verbose("updated environment with assumed credentials")
+        if "Credentials" in response:
+            self.assumed_role_user.update(response.get("AssumedRoleUser", {}))
+            self.credentials.update(response["Credentials"])
+            self.ctx.env.vars.update(
+                {
+                    "AWS_ACCESS_KEY_ID": response["Credentials"]["AccessKeyId"],
+                    "AWS_SECRET_ACCESS_KEY": response["Credentials"]["SecretAccessKey"],
+                    "AWS_SESSION_TOKEN": response["Credentials"]["SessionToken"],
+                }
+            )
+            LOGGER.verbose("updated environment with assumed credentials")
+        else:
+            raise ValueError("assume_role did not return Credentials")
 
     def restore_existing_iam_env_vars(self) -> None:
         """Restore backed up IAM environment variables."""

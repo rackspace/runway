@@ -203,7 +203,10 @@ class FileGenerator:
                 "src_type": files["src"]["type"],
             }
             if files["src"]["type"] == "s3":
-                file_stat_kwargs["response_data"] = extra_information
+                file_stat_kwargs["response_data"] = cast(
+                    Optional[Union["HeadObjectOutputTypeDef", "ObjectTypeDef"]],
+                    extra_information,
+                )
             yield FileStats(**file_stat_kwargs)
 
     def list_files(

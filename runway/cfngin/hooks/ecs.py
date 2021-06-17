@@ -44,5 +44,5 @@ def create_clusters(
     for cluster in clusters:
         LOGGER.debug("creating ECS cluster: %s", cluster)
         response = conn.create_cluster(clusterName=cluster)
-        cluster_info[response["cluster"]["clusterName"]] = response
+        cluster_info[response.get("cluster", {}).get("clusterName", "")] = response
     return {"clusters": cluster_info}

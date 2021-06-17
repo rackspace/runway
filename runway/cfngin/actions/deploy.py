@@ -167,7 +167,9 @@ def _handle_missing_parameters(
     missing_params = list(set(all_params) - set(parameter_values.keys()))
     if existing_stack and "Parameters" in existing_stack:
         stack_parameters = [
-            param["ParameterKey"] for param in existing_stack["Parameters"]
+            param["ParameterKey"]
+            for param in existing_stack["Parameters"]
+            if "ParameterKey" in param
         ]
         for param in missing_params:
             if param in stack_parameters:

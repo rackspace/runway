@@ -7,6 +7,8 @@ import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+import pytest
+
 from runway.core.providers.aws import AssumeRole
 
 if TYPE_CHECKING:
@@ -110,3 +112,19 @@ def test_assume_role_no_role(
         assert not result.credentials["SessionToken"]
         assert not result.role_arn
     assert "no role to assume" in caplog.messages
+
+
+def test_assume_role_raise_value_error(runway_context: MockRunwayContext) -> None:
+    """Test AssumeRole raise ValueError."""
+    stubber = runway_context.add_stubber("sts")
+    stubber.add_response(
+        "assume_role",
+        {},
+        {"RoleArn": ROLE_ARN, "RoleSessionName": "runway", "DurationSeconds": 3600},
+    )
+
+    with stubber, pytest.raises(
+        ValueError, match="assume_role did not return Credentials"
+    ):
+        with AssumeRole(runway_context, role_arn=ROLE_ARN):
+            assert False

@@ -162,7 +162,7 @@ class StaticSite(Blueprint):
                 index_rewrite = self._get_index_rewrite_role_function_and_version()
                 lambda_function_associations = (
                     self.get_directory_index_lambda_association(
-                        lambda_function_associations, index_rewrite["version"]
+                        lambda_function_associations, index_rewrite.get("version", "")
                     )
                 )
 
@@ -608,9 +608,11 @@ class StaticSite(Blueprint):
             )
         }
 
-        res["function"] = self.add_cloudfront_directory_index_rewrite(res["role"])
+        res["function"] = self.add_cloudfront_directory_index_rewrite(
+            res.get("role", "")
+        )
         res["version"] = self.add_cloudfront_directory_index_rewrite_version(
-            res["function"]
+            res.get("function", "")
         )
         return res
 

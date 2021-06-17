@@ -200,7 +200,7 @@ class Certificate(Hook):
         )["StackResources"]
         if response:
             # can be returned without having a PhysicalResourceId
-            if response[0].get("PhysicalResourceId"):
+            if "PhysicalResourceId" in response[0]:
                 return response[0]["PhysicalResourceId"]
         LOGGER.debug("waiting for certificate to be created...")
         time.sleep(interval)
@@ -227,9 +227,9 @@ class Certificate(Hook):
         """
         if not cert_arn:
             cert_arn = self.get_certificate()
-        cert = self.acm_client.describe_certificate(CertificateArn=cert_arn)[
-            "Certificate"
-        ]
+        cert = self.acm_client.describe_certificate(CertificateArn=cert_arn).get(
+            "Certificate", {}
+        )
 
         try:
             domain_validation = [
@@ -298,14 +298,14 @@ class Certificate(Hook):
         """
         if not records:
             cert_arn = self.get_certificate()
-            cert = self.acm_client.describe_certificate(CertificateArn=cert_arn)[
-                "Certificate"
-            ]
+            cert = self.acm_client.describe_certificate(CertificateArn=cert_arn).get(
+                "Certificate", {}
+            )
 
             records = [
                 opt["ResourceRecord"]
                 for opt in cert.get("DomainValidationOptions", [])
-                if opt["ValidationMethod"] == "DNS"
+                if opt.get("ValidationMethod") == "DNS" and "ResourceRecord" in opt
             ]
         LOGGER.info(
             "removing %i validation record(s) from hosted zone: %s",

@@ -28,7 +28,7 @@ class TestECSHooks(unittest.TestCase):
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
-            self.assertEqual(len(response["clusterArns"]), 0)
+            self.assertEqual(len(response.get("clusterArns", [""])), 0)
             with LogCapture(logger) as logs:
                 cluster = "test-cluster"
                 self.assertTrue(
@@ -40,7 +40,7 @@ class TestECSHooks(unittest.TestCase):
                 logs.check((logger, "DEBUG", "creating ECS cluster: %s" % cluster))
 
             response = client.list_clusters()
-            self.assertEqual(len(response["clusterArns"]), 1)
+            self.assertEqual(len(response.get("clusterArns", [])), 1)
 
     def test_create_multiple_clusters(self) -> None:
         """Test create multiple clusters."""
@@ -50,7 +50,7 @@ class TestECSHooks(unittest.TestCase):
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
-            self.assertEqual(len(response["clusterArns"]), 0)
+            self.assertEqual(len(response.get("clusterArns", [""])), 0)
             for cluster in clusters:
                 with LogCapture(logger) as logs:
                     self.assertTrue(
@@ -64,7 +64,7 @@ class TestECSHooks(unittest.TestCase):
                     logs.check((logger, "DEBUG", "creating ECS cluster: %s" % cluster))
 
             response = client.list_clusters()
-            self.assertEqual(len(response["clusterArns"]), 2)
+            self.assertEqual(len(response.get("clusterArns", [])), 2)
 
     def test_fail_create_cluster(self) -> None:
         """Test fail create cluster."""
@@ -72,6 +72,6 @@ class TestECSHooks(unittest.TestCase):
             client = boto3.client("ecs", region_name=REGION)
             response = client.list_clusters()
 
-            self.assertEqual(len(response["clusterArns"]), 0)
+            self.assertEqual(len(response.get("clusterArns", [""])), 0)
             with self.assertRaises(TypeError):
                 create_clusters(context=self.context)  # type: ignore pylint: disable=E
