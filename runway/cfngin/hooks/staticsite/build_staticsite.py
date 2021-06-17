@@ -45,15 +45,21 @@ def zip_and_upload(
     os.remove(temp_file)
 
 
-class OptionsArgTypeDef(TypedDict, total=False):
-    """Options argument type definition."""
+_RequiredOptionsArgTypeDef = TypedDict(
+    "OptionsArgTypeDef", name=str, namespace=str, path=str
+)
+
+
+class _OptionalOptionsArgTypeDef(TypedDict, total=False):
+    """Optional OptionsArgTypeDef fields."""
 
     build_output: str
     build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
-    name: str
-    namespace: str
-    path: str
     pre_build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+
+
+class OptionsArgTypeDef(_OptionalOptionsArgTypeDef, _RequiredOptionsArgTypeDef):
+    """Options argument type definition."""
 
 
 def build(
@@ -66,14 +72,18 @@ def build(
 ) -> Dict[str, Any]:
     """Build static site."""
     session = context.get_session()
-    options = options or {}
+    options = options or {
+        "name": "undefined",
+        "namespace": context.namespace,
+        "path": str(context.config_path),
+    }
     context_dict: Dict[str, Any] = {
         "artifact_key_prefix": "{}-{}-".format(options["namespace"], options["name"])
     }
 
     default_param_name = "%shash" % context_dict["artifact_key_prefix"]
 
-    if options.get("build_output"):
+    if "build_output" in options:
         build_output = os.path.join(options["path"], options["build_output"])
     else:
         build_output = options["path"]
@@ -82,7 +92,7 @@ def build(
         artifact_bucket_rxref_lookup, provider=provider, context=context
     )
 
-    if options.get("pre_build_steps"):
+    if "pre_build_steps" in options and options["pre_build_steps"]:
         run_commands(options["pre_build_steps"], options["path"])
 
     context_dict["hash"] = get_hash_of_files(
@@ -133,7 +143,7 @@ def build(
             session,
         )
     else:
-        if options.get("build_steps"):
+        if "build_steps" in options and options["build_steps"]:
             LOGGER.info("build steps (in progress)")
             run_commands(options["build_steps"], options["path"])
             LOGGER.info("build steps (complete)")

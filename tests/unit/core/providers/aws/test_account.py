@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 from runway.core.providers.aws import AccountDetails
 
 if TYPE_CHECKING:
@@ -37,3 +39,18 @@ class TestAccountDetails:
         account = AccountDetails(runway_context)
         with stubber:
             assert account.id == account_id
+
+    def test_id_raise_value_error(self, runway_context: MockRunwayContext) -> None:
+        """Test id raise ValueError."""
+        account_id = "123456789012"
+        arn = "arn:aws:iam::{}:user/test-user".format(account_id)
+        stubber = runway_context.add_stubber("sts")
+        stubber.add_response(
+            "get_caller_identity",
+            {"UserId": "test-user", "Arn": arn},
+        )
+        account = AccountDetails(runway_context)
+        with stubber, pytest.raises(
+            ValueError, match="get_caller_identity did not return Account"
+        ):
+            assert not account.id

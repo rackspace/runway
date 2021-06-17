@@ -213,7 +213,7 @@ def get_matching_s3_objects(
                 return
 
             for obj in contents:
-                if obj["Key"].endswith(suffix):
+                if "Key" in obj and obj["Key"].endswith(suffix):
                     yield obj
 
 
@@ -233,4 +233,5 @@ def get_matching_s3_keys(
 
     """
     for obj in get_matching_s3_objects(bucket, prefix, suffix, session):
-        yield obj["Key"]
+        if "Key" in obj:
+            yield obj["Key"]

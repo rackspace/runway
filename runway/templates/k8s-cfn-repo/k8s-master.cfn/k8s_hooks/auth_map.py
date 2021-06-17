@@ -27,7 +27,7 @@ def get_principal_arn(context: CfnginContext) -> str:
     # looking up caller identity
     session = context.get_session()
     sts_client = session.client("sts")
-    caller_identity_arn = sts_client.get_caller_identity()["Arn"]
+    caller_identity_arn = sts_client.get_caller_identity().get("Arn", "")
     if caller_identity_arn.split(":")[2] == "iam" and (
         caller_identity_arn.split(":")[5].startswith("user/")
     ):

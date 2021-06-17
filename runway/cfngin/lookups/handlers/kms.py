@@ -74,7 +74,7 @@ class KmsLookup(LookupHandler):
         decoded = codecs.decode(value.encode(), "base64")
 
         # decrypt and return the plain text raw value.
-        decrypted = kms.decrypt(CiphertextBlob=decoded)["Plaintext"]
+        decrypted = kms.decrypt(CiphertextBlob=decoded).get("Plaintext", b"")
         if isinstance(decrypted, bytes):
             return decrypted.decode()
         return decrypted.read().decode()

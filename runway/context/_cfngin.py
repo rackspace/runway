@@ -511,13 +511,9 @@ class CfnginContext(BaseContext):
                 pass
             self._persistent_graph_lock_code = None
             self.logger.info(
-                'unlocked persistent graph "%s"',
-                "/".join(
-                    [
-                        self.persistent_graph_location["Bucket"],
-                        self.persistent_graph_location["Key"],
-                    ]
-                ),
+                'unlocked persistent graph "%s/%s"',
+                self.persistent_graph_location.get("Bucket"),
+                self.persistent_graph_location.get("Key"),
             )
             return True
         raise PersistentGraphCannotUnlock(

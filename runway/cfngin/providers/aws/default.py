@@ -166,7 +166,9 @@ def requires_replacement(changeset: List[ChangeTypeDef]) -> List[ChangeTypeDef]:
 
     """
     return [
-        r for r in changeset if r["ResourceChange"].get("Replacement", False) == "True"
+        r
+        for r in changeset
+        if r.get("ResourceChange", {}).get("Replacement", False) == "True"
     ]
 
 
@@ -270,12 +272,11 @@ def output_summary(
     replacements: List[Any] = []
     changes: List[Any] = []
     for change in changeset:
-        resource = change["ResourceChange"]
-        replacement = cast(str, resource.get("Replacement", "")) == "True"
-        summary = "- %s %s (%s)" % (
-            resource["Action"],
-            resource["LogicalResourceId"],
-            resource["ResourceType"],
+        resource = change.get("ResourceChange", {})
+        replacement = resource.get("Replacement", "") == "True"
+        summary = (
+            f"- {resource.get('Action')} {resource.get('LogicalResourceId')} "
+            f"({resource.get('ResourceType')})"
         )
         if replacement:
             replacements.append(summary)
@@ -718,14 +719,15 @@ class Provider(BaseProvider):
         def _log_func(event: StackEventTypeDef) -> None:
             template = "[%s] %s %s %s"
             event_args = [
-                event["LogicalResourceId"],
-                event["ResourceType"],
-                event["ResourceStatus"],
+                event.get("LogicalResourceId"),
+                event.get("ResourceType"),
+                event.get("ResourceStatus"),
             ]
             if event.get("ResourceStatusReason"):
                 template += " (%s)"
-                event_args.append(event["ResourceStatusReason"])
-            LOGGER.verbose(template, *([stack.fqn] + event_args))
+                event_args.append(event.get("ResourceStatusReason"))
+            event_args.insert(0, stack.fqn)
+            LOGGER.verbose(template, *event_args)
 
         log_func = log_func or _log_func
         retries = retries or MAX_TAIL_RETRIES
@@ -762,7 +764,11 @@ class Provider(BaseProvider):
     def _tail_print(event: StackEventTypeDef) -> None:
         print(
             "%s %s %s"
-            % (event["ResourceStatus"], event["ResourceType"], event["EventId"])
+            % (
+                event.get("ResourceStatus"),
+                event.get("ResourceType"),
+                event.get("EventId"),
+            )
         )
 
     def get_delete_failed_status_reason(self, stack_name: str) -> Optional[str]:
@@ -1163,7 +1169,7 @@ class Provider(BaseProvider):
         """
         stack = self.get_stack(fqn)
 
-        if stack["EnableTerminationProtection"] != termination_protection:
+        if stack.get("EnableTerminationProtection", False) != termination_protection:
             LOGGER.debug(
                 '%s:updating termination protection of stack to "%s"',
                 fqn,
@@ -1279,10 +1285,8 @@ class Provider(BaseProvider):
                 x
                 if "ParameterValue" in x
                 else {
-                    "ParameterKey": x["ParameterKey"],
-                    "ParameterValue": cast(
-                        str, old_parameters_as_dict[x["ParameterKey"]]
-                    ),
+                    "ParameterKey": x["ParameterKey"],  # type: ignore
+                    "ParameterValue": old_parameters_as_dict[x["ParameterKey"]],  # type: ignore
                 }
                 for x in parameters
             ]
@@ -1443,7 +1447,7 @@ class Provider(BaseProvider):
     @staticmethod
     def get_stack_tags(stack: StackTypeDef) -> List[TagTypeDef]:
         """Get stack tags."""
-        return stack["Tags"]
+        return stack.get("Tags", [])
 
     def get_outputs(
         self, stack_name: str, *_args: Any, **_kwargs: Any
@@ -1463,7 +1467,7 @@ class Provider(BaseProvider):
         self, stack: StackTypeDef
     ) -> Tuple[str, Dict[str, Union[List[str], str]]]:
         """Get the template and parameters of the stack currently in AWS."""
-        stack_name = stack["StackId"]
+        stack_name = stack.get("StackId", "None")
 
         try:
             template = self.cloudformation.get_template(StackName=stack_name)[
@@ -1530,8 +1534,8 @@ class Provider(BaseProvider):
                 x
                 if "ParameterValue" in x
                 else {
-                    "ParameterKey": x["ParameterKey"],
-                    "ParameterValue": cast(str, old_params[x["ParameterKey"]]),
+                    "ParameterKey": x["ParameterKey"],  # type: ignore
+                    "ParameterValue": old_params[x["ParameterKey"]],  # type: ignore
                 }
                 for x in parameters
             ]
@@ -1571,9 +1575,13 @@ class Provider(BaseProvider):
             if resc_change.get("Type") == "Add":
                 continue  # we don't care about anything new
             # scope of changes that can invalidate a change
-            if resc_change and (
-                resc_change.get("Replacement") == "True"
-                or "Properties" in resc_change["Scope"]
+            if (
+                resc_change
+                and (
+                    resc_change.get("Replacement") == "True"
+                    or "Properties" in resc_change.get("Scope", {})
+                )
+                and "LogicalResourceId" in resc_change
             ):
                 LOGGER.debug(
                     "%s:added to invalidation list: %s",
@@ -1627,5 +1635,6 @@ class Provider(BaseProvider):
     ) -> Dict[str, Union[List[str], str]]:
         """Parameters as dict."""
         return {
-            param["ParameterKey"]: param["ParameterValue"] for param in parameters_list
+            param["ParameterKey"]: param["ParameterValue"]  # type: ignore
+            for param in parameters_list
         }

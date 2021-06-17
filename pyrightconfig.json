@@ -23,7 +23,6 @@
     "reportIncompatibleMethodOverride": "warning",
     "reportMissingTypeStubs": "none",
     "reportPrivateUsage": "none",
-    "reportTypedDictNotRequiredAccess": "information",
     "reportUnknownMemberType": "none",
     "reportUnnecessaryIsInstance": "warning",
     "reportUnusedImport": "none",

@@ -104,7 +104,7 @@ def sync(
         bucket.sync_from_local(
             build_context["app_directory"],
             delete=True,
-            exclude=[f["name"] for f in extra_files],
+            exclude=[f["name"] for f in extra_files if "name" in f],
         )
         invalidate_cache = True
 
@@ -304,16 +304,17 @@ def calculate_hash_of_extra_files(extra_files: List[ExtraFileTypeDef]) -> str:
     file_hash = hashlib.md5()
 
     for extra_file in sorted(extra_files, key=lambda extra_file: extra_file["name"]):  # type: ignore  # noqa
-        file_hash.update((extra_file["name"] + "\0").encode())
+        file_name = extra_file.get("name", "")
+        file_hash.update((file_name + "\0").encode())
 
-        if extra_file.get("content_type"):
-            file_hash.update((cast(str, extra_file["content_type"]) + "\0").encode())
+        if "content_type" in extra_file and extra_file["content_type"]:
+            file_hash.update((extra_file["content_type"] + "\0").encode())
 
-        if extra_file.get("content"):
-            LOGGER.debug("hashing content: %s", extra_file["name"])
+        if "content" in extra_file and extra_file["content"]:
+            LOGGER.debug("hashing content: %s", file_name)
             file_hash.update((cast(str, extra_file["content"]) + "\0").encode())
 
-        if extra_file.get("file"):
+        if "file" in extra_file and extra_file["file"]:
             with open(cast("Path", extra_file["file"]), "rb") as f:
                 LOGGER.debug("hashing file: %s", extra_file["file"])
                 for chunk in iter(
@@ -413,9 +414,9 @@ def sync_extra_files(
             return []
 
     for extra_file in extra_files:
-        filename = extra_file["name"]
-        content_type = extra_file["content_type"]
-        content = extra_file["content"]
+        filename = extra_file.get("name", "")
+        content_type = extra_file.get("content_type")
+        content = extra_file.get("content", "")
         source = extra_file.get("file")
 
         if content:

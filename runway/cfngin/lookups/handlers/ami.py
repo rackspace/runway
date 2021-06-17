@@ -105,11 +105,16 @@ class AmiLookup(LookupHandler):
         result = ec2.describe_images(**describe_args)
 
         images = sorted(
-            result["Images"], key=operator.itemgetter("CreationDate"), reverse=True
+            result.get("Images", []),
+            key=operator.itemgetter("CreationDate"),
+            reverse=True,
         )
         for image in images:
             # sometimes we get ARI/AKI in response - these don't have a 'Name'
-            if re.match("^%s$" % name_regex, image.get("Name", "")):
+            if (
+                re.match("^%s$" % name_regex, image.get("Name", ""))
+                and "ImageId" in image
+            ):
                 return image["ImageId"]
 
         raise ImageNotFound(value)

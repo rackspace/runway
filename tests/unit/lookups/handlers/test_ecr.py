@@ -70,6 +70,19 @@ class TestEcrLookup:
         cfngin_stubber.assert_no_pending_responses()
         runway_stubber.assert_no_pending_responses()
 
+    def test_get_login_password_raise_value_error(
+        self, runway_context: MockRunwayContext
+    ) -> None:
+        """Test get_login_password."""
+        runway_stubber = runway_context.add_stubber("ecr")
+        runway_stubber.add_response("get_authorization_token", {}, {})
+        with runway_stubber, pytest.raises(
+            ValueError, match="get_authorization_token did not return authorizationData"
+        ):
+            assert EcrLookup.get_login_password(
+                runway_context.get_session().client("ecr")  # type: ignore
+            )
+
     def test_handle_login_password(
         self,
         mock_format_results: MagicMock,

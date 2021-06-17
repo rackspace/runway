@@ -162,8 +162,8 @@ class SOARecord:
     def __init__(self, record: ResourceRecordSetTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
-        self.text = SOARecordText(record["ResourceRecords"][0]["Value"])
-        self.ttl = record["TTL"]
+        self.text = SOARecordText(record.get("ResourceRecords", [{}])[0]["Value"])
+        self.ttl = record.get("TTL", 0)
 
 
 def get_soa_record(client: Route53Client, zone_id: str, zone_name: str) -> SOARecord:

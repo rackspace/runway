@@ -22,13 +22,14 @@ def delete_ecr_images(
     response = client.batch_delete_image(
         repositoryName=repository_name, imageIds=image_ids
     )
-    if response.get("failures"):
+    if "failures" in response and response["failures"]:
         for msg in response["failures"]:
             LOGGER.info(
                 "failed to delete image %s: (%s) %s",
-                msg["imageId"].get("imageDigest") or msg["imageId"].get("imageTag"),
-                msg["failureCode"],
-                msg["failureReason"],
+                msg.get("imageId", {}).get("imageDigest")
+                or msg.get("imageId", {}).get("imageTag"),
+                msg.get("failureCode"),
+                msg.get("failureReason"),
             )
         raise ValueError("failures present in response")
 

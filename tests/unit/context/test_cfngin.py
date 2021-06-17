@@ -351,9 +351,9 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             }
         )
         obj = CfnginContext(config=config)
-        assert obj.persistent_graph_location["Bucket"] == config.cfngin_bucket
+        assert obj.persistent_graph_location.get("Bucket") == config.cfngin_bucket
         assert (
-            obj.persistent_graph_location["Key"]
+            obj.persistent_graph_location.get("Key")
             == f"persistent_graphs/{config.namespace}/{config.persistent_graph_key}.json"
         )
 
@@ -379,9 +379,9 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             }
         )
         obj = CfnginContext(config=config)
-        assert obj.persistent_graph_location["Bucket"] == config.cfngin_bucket
+        assert obj.persistent_graph_location.get("Bucket") == config.cfngin_bucket
         assert (
-            obj.persistent_graph_location["Key"]
+            obj.persistent_graph_location.get("Key")
             == f"persistent_graphs/{config.namespace}/{config.persistent_graph_key}"
         )
 
