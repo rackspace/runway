@@ -181,8 +181,8 @@ class CFNgin:
             config.load()
             return self._get_context(config, config_path)
         except ConstructorError as err:
-            if err.problem.startswith(
-                "could not determine a constructor " "for the tag '!"
+            if str(err.problem).startswith(  # could be NoneType
+                "could not determine a constructor for the tag '!"
             ):
                 LOGGER.error(
                     '"%s" is located in the module\'s root directory '

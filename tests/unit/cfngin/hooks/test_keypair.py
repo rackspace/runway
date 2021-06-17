@@ -187,7 +187,7 @@ def test_interactive_non_terminal_input(context: CfnginContext) -> None:
 
 def test_interactive_retry_cancel(context: CfnginContext) -> None:
     """Test interactive retry cancel."""
-    lines = ["garbage", "cancel"]
+    lines = ("garbage", "cancel")
     with mock_input(lines) as _input:
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
         assert _input.call_count == 2
@@ -201,7 +201,7 @@ def test_interactive_import(
     key_file = tmp_path / "id_rsa.pub"
     key_file.write_bytes(ssh_key.public_key)
 
-    lines = ["import", str(key_file)]
+    lines = ("import", str(key_file))
     with mock_input(lines):
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
@@ -217,7 +217,7 @@ def test_interactive_create(
     key_dir.mkdir(parents=True, exist_ok=True)
     key_file = key_dir / f"{KEY_PAIR_NAME}.pem"
 
-    lines = ["create", str(key_dir)]
+    lines = ("create", str(key_dir))
     with mock_input(lines):
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
@@ -231,7 +231,7 @@ def test_interactive_create_bad_dir(tmp_path: Path, context: CfnginContext) -> N
     """Test interactive create bad dir."""
     key_dir = tmp_path / "missing"
 
-    lines = ["create", str(key_dir)]
+    lines = ("create", str(key_dir))
     with mock_input(lines):
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
@@ -247,7 +247,7 @@ def test_interactive_create_existing_file(
     key_file = key_dir / f"{KEY_PAIR_NAME}.pem"
     key_file.touch()
 
-    lines = ["create", str(key_dir)]
+    lines = ("create", str(key_dir))
     with mock_input(lines):
         result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
 
