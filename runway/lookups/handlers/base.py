@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Set, Tuple, Uni
 
 import yaml
 from troposphere import BaseAWSObject
+from typing_extensions import Literal
 
 from ...cfngin.utils import read_value_from_path
 from ...utils import MutableMap
@@ -18,6 +19,8 @@ if TYPE_CHECKING:
     from ...variables import VariableValue
 
 LOGGER = logging.getLogger(__name__)
+
+TransformToTypeLiteral = Literal["bool", "str"]
 
 
 class LookupHandler:
@@ -38,7 +41,7 @@ class LookupHandler:
         value: Any,
         get: Optional[str] = None,
         load: Optional[str] = None,
-        transform: Optional[str] = None,
+        transform: Optional[TransformToTypeLiteral] = None,
         **kwargs: Any,
     ) -> Any:
         """Format results to be returned by a lookup.
@@ -60,7 +63,9 @@ class LookupHandler:
         1. :meth:`load` if ``load`` is provided.
         2. :meth:`runway.util.MutableMap.find` or :meth:`dict.get` depending
            on the data type if ``get`` is provided.
-        3. :meth:`transform` if ``transform`` is provided.
+        3. Convert null value string to ``NoneType`` object. This includes string
+           values of "None" and "null". This conversion is case insensitive.
+        4. :meth:`transform` if ``transform`` is provided.
 
         """
         if load:
@@ -76,6 +81,12 @@ class LookupHandler:
                         type(value)
                     )
                 )
+        if (
+            isinstance(value, str)
+            and value.lower() in ["none", "null"]
+            and transform != "str"  # retain string "as is" if should be str
+        ):
+            value = None
         if transform:
             return cls.transform(value, to_type=transform, **kwargs)
         if isinstance(value, MutableMap):
@@ -226,7 +237,11 @@ class LookupHandler:
 
     @classmethod
     def transform(
-        cls, value: Any, *, to_type: Optional[str] = "str", **kwargs: Any
+        cls,
+        value: Any,
+        *,
+        to_type: Optional[TransformToTypeLiteral] = "str",
+        **kwargs: Any,
     ) -> Any:
         """Transform the result of a lookup into another datatype.
 
