@@ -76,6 +76,28 @@ class TestLookupHandler:
         with pytest.raises(TypeError):
             LookupHandler.format_results(["something"], get="key")
 
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            ("", ""),
+            ("None", None),
+            ("NoneType", "NoneType"),
+            ("Null", None),
+            ("none", None),
+            ("null", None),
+            ("undefined", "undefined"),
+        ],
+    )
+    def test_format_results_handle_none(
+        self, value: str, expected: Optional[str]
+    ) -> None:
+        """Test format_results."""
+        assert LookupHandler.format_results(value) == expected
+        if isinstance(expected, str):
+            assert LookupHandler.format_results(value, transform="str") == expected
+        else:  # value should be returned "as is"
+            assert LookupHandler.format_results(value, transform="str") == value
+
     def test_load_no_parser(self) -> None:
         """Test load with no parser."""
         assert LookupHandler.load("something") == "something"
