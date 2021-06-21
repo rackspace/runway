@@ -996,7 +996,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "moto"
-version = "2.0.9"
+version = "2.0.10"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -2566,8 +2566,8 @@ more-itertools = [
     {file = "more_itertools-8.8.0-py3-none-any.whl", hash = "sha256:2cf89ec599962f2ddc4d568a05defc40e0a587fbc10d5989713638864c36be4d"},
 ]
 moto = [
-    {file = "moto-2.0.9-py2.py3-none-any.whl", hash = "sha256:93f820d56c69ba4b34a54e3b97723c8202b33524a0bf8e47ccbab2eed9bb7f41"},
-    {file = "moto-2.0.9.tar.gz", hash = "sha256:d46023795ce991c5cbbb3e68666133d57eb5d2b59805585f54eec7d40be8d05f"},
+    {file = "moto-2.0.10-py2.py3-none-any.whl", hash = "sha256:fe7b8b15b7dea9de56fa88a0e3f53ce54f8d584590161b210cce71d01cc97899"},
+    {file = "moto-2.0.10.tar.gz", hash = "sha256:f205da54d5e9442450a519dbe5bb49c31d9f496b551a84648afa01a360fd4b82"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.17.93.tar.gz", hash = "sha256:e778e002192dca5001c1b7e8cc942ccca3941ccacb2dc125a5be708d5e1e51ec"},
