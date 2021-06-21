@@ -95,7 +95,9 @@ html_css_files = ["css/custom.css"]  # files relative to html_static_path
 html_favicon = None
 html_logo = None
 html_theme = "sphinx_rtd_theme"  # theme to use for HTML and HTML Help pages
-html_theme_options = {}
+html_theme_options = {
+    "navigation_depth": -1,  # unlimited depth
+}
 html_short_title = f"{project} v{release}"
 html_title = f"{project} v{release}"
 html_show_copyright = True
