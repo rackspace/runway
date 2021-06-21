@@ -7,8 +7,10 @@ import os
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, cast
 
+from pydantic import Extra, Field
+
 from ...exceptions import FailedVariableLookup
-from ...utils import load_object_from_string
+from ...utils import BaseModel, load_object_from_string
 from ...variables import Variable, resolve_variables
 from ..blueprints.base import Blueprint
 
@@ -25,6 +27,19 @@ class BlankBlueprint(Blueprint):
 
     def create_template(self) -> None:
         """Create template without raising NotImplementedError."""
+
+
+class TagDataModel(BaseModel):
+    """AWS Resource Tag data model."""
+
+    key: str = Field(..., alias="Key")
+    value: str = Field(..., alias="Value")
+
+    class Config:
+        """Model configuration."""
+
+        allow_population_by_field_name = True
+        extra = Extra.forbid
 
 
 def full_path(path: str) -> str:
