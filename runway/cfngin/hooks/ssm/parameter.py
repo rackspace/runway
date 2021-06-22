@@ -141,7 +141,7 @@ class _Parameter:
             self.client.delete_parameter(Name=self.args.name)
             LOGGER.info("deleted SSM Parameter %s", self.args.name)
         except self.client.exceptions.ParameterNotFound:
-            LOGGER.warning("delete parameter skipped; %s not found", self.args.name)
+            LOGGER.info("delete parameter skipped; %s not found", self.args.name)
         return True
 
     def get(self) -> ParameterTypeDef:
@@ -153,7 +153,7 @@ class _Parameter:
                 Name=self.args.name, WithDecryption=True
             ).get("Parameter", {})
         except self.client.exceptions.ParameterNotFound:
-            LOGGER.info("parameter %s does not exist", self.args.name)
+            LOGGER.verbose("parameter %s does not exist", self.args.name)
             return {}
 
     def get_current_tags(self) -> List[TagTypeDef]:
@@ -191,18 +191,29 @@ class _Parameter:
     def put(self) -> PutParameterResultTypeDef:
         """Put parameter."""
         if not self.args.value:
-            LOGGER.warning(
+            LOGGER.info(
                 "skipped putting SSM Parameter; value provided for %s is falsy",
                 self.args.name,
             )
             return {"Tier": self.args.tier, "Version": 0}
         current_param = self.get()
         if current_param.get("Value") != self.args.value:
-            result: PutParameterResultTypeDef = self.client.put_parameter(
-                **self.args.dict(
-                    by_alias=True, exclude_none=True, exclude={"force", "tags"}
+            try:
+                result: PutParameterResultTypeDef = self.client.put_parameter(
+                    **self.args.dict(
+                        by_alias=True, exclude_none=True, exclude={"force", "tags"}
+                    )
                 )
-            )
+            except self.client.exceptions.ParameterAlreadyExists:
+                LOGGER.warning(
+                    "parameter %s already exists; to overwrite it's value, "
+                    'set the overwrite field to "true"',
+                    self.args.name,
+                )
+                return {
+                    "Tier": current_param.get("Tier", self.args.tier),
+                    "Version": current_param.get("Version", 0),
+                }
         else:
             result = {
                 "Tier": current_param.get("Tier", self.args.tier),

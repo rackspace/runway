@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import json
-import logging
 from typing import TYPE_CHECKING
 
 import pytest
 from botocore.exceptions import ClientError
 from pydantic import ValidationError
 
+from runway._logging import LogLevels
 from runway.cfngin.hooks.ssm.parameter import ArgsDataModel, SecureString
 from runway.cfngin.hooks.ssm.parameter import _Parameter as Parameter
 from runway.cfngin.hooks.utils import TagDataModel
@@ -143,7 +143,7 @@ class TestParameter:
         ssm_stubber: Stubber,
     ) -> None:
         """Test delete."""
-        caplog.set_level(logging.INFO, logger=MODULE)
+        caplog.set_level(LogLevels.INFO, logger=MODULE)
         ssm_stubber.add_response("delete_parameter", {}, {"Name": "test"})
         with ssm_stubber:
             assert Parameter(cfngin_context, name="test", type="String").delete()
@@ -157,7 +157,7 @@ class TestParameter:
         ssm_stubber: Stubber,
     ) -> None:
         """Test delete."""
-        caplog.set_level(logging.INFO, logger=MODULE)
+        caplog.set_level(LogLevels.INFO, logger=MODULE)
         ssm_stubber.add_client_error("delete_parameter", "ParameterNotFound")
         with ssm_stubber:
             assert Parameter(cfngin_context, name="test", type="String").delete()
@@ -226,7 +226,7 @@ class TestParameter:
         ssm_stubber: Stubber,
     ) -> None:
         """Test get."""
-        caplog.set_level(logging.INFO, logger=MODULE)
+        caplog.set_level(LogLevels.VERBOSE, logger=MODULE)
         ssm_stubber.add_client_error("get_parameter", "ParameterNotFound")
         with ssm_stubber:
             assert Parameter(cfngin_context, name="test", type="String").get() == {}
@@ -368,7 +368,7 @@ class TestParameter:
         ssm_stubber: Stubber,
     ) -> None:
         """Test put."""
-        caplog.set_level(logging.INFO, MODULE)
+        caplog.set_level(LogLevels.INFO, MODULE)
         expected = {"Tier": "Standard", "Version": 1}
         mock_get = mocker.patch.object(Parameter, "get", return_value={})
         ssm_stubber.add_response(
@@ -397,13 +397,35 @@ class TestParameter:
         ssm_stubber.assert_no_pending_responses()
         assert "put SSM Parameter test" in caplog.messages
 
+    def test_put_handle_parameter_already_exists(
+        self,
+        caplog: LogCaptureFixture,
+        cfngin_context: CfnginContext,
+        mocker: MockerFixture,
+        ssm_stubber: Stubber,
+    ) -> None:
+        """Test put."""
+        caplog.set_level(LogLevels.WARNING, MODULE)
+        expected = {"Tier": "Standard", "Version": 1}
+        mocker.patch.object(Parameter, "get", return_value=expected)
+        ssm_stubber.add_client_error("put_parameter", "ParameterAlreadyExists")
+        with ssm_stubber:
+            assert (
+                Parameter(cfngin_context, name="test", type="String", value="foo").put()
+                == expected
+            )
+        assert (
+            "parameter test already exists; to overwrite it's value, "
+            'set the overwrite field to "true"' in caplog.messages
+        )
+
     def test_put_no_value(
         self,
         caplog: LogCaptureFixture,
         cfngin_context: CfnginContext,
     ) -> None:
         """Test put."""
-        caplog.set_level(logging.WARNING, MODULE)
+        caplog.set_level(LogLevels.INFO, MODULE)
         assert Parameter(
             cfngin_context, name="test", type="String", value=None
         ).put() == {"Tier": "Standard", "Version": 0}

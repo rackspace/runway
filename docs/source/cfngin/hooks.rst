@@ -1430,7 +1430,7 @@ When used in the :attr:`~cfngin.config.pre_destroy` or :attr:`~cfngin.config.pos
   :noindex:
 
   Allow overwriting an existing parameter.
-  If this is set to ``False`` and the parameter already exists, an error will be raised.
+  If this is set to ``False`` and the parameter already exists, the parameter will not be updated and a warning will be logged.
 
 .. data:: policies
   :type: Optional[Union[List[Dict[str, Any]], str]]
