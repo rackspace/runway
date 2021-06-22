@@ -319,6 +319,74 @@ This Lookup supports all :ref:`Common Lookup Arguments`.
 ----
 
 
+.. _random.string lookup:
+
+*************
+random.string
+*************
+
+Generate a random string of the given length.
+The ``<query>`` of this lookup is the desired length of the random string.
+
+.. rubric:: Arguments
+.. data:: digits
+  :type: bool
+  :value: True
+  :noindex:
+
+  When generating the random string, the string may contain digits (``[0-9]``).
+  If the string can contain digits, it will always contain at least one.
+
+.. data:: lowercase
+  :type: bool
+  :value: True
+  :noindex:
+
+  When generating the random string, the string may contain lowercase letters (``[a-z]``).
+  If the string can contain lowercase letters, it will always contain at least one.
+
+.. data:: punctuation
+  :type: bool
+  :value: False
+  :noindex:
+
+  When generating the random string, the string may contain ASCII punctuation (``[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]``).
+  If the string can contain ASCII punctuation, it will always contain at least one.
+
+.. data:: uppercase
+  :type: bool
+  :value: True
+  :noindex:
+
+  When generating the random string, the string may contain uppercase letters (``[A-Z]``).
+  If the string can contain uppercase letters, it will always contain at least one.
+
+
+This Lookup supports all :ref:`Common Lookup Arguments` but, the following have limited or no effect:
+
+- default
+- get
+- indent
+- load
+- region
+
+.. rubric:: Example
+.. code-block:: yaml
+
+  deployment:
+    - modules:
+      - path: sampleapp.cfn
+        parameters:
+          secret_value: ${random.string 32::punctuation=true}
+      env_vars:
+        SOME_VARIABLE: ${random.string 8::digits=false}
+
+.. versionadded:: 2.2.0
+
+
+----
+
+
 .. _var lookup:
 .. _var-lookup:
 
