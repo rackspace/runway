@@ -28,7 +28,7 @@ VARIABLES = MutableMap(**VALUES)
 def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
     """Test autoloaded lookup handlers."""
     mocker.patch.dict(RUNWAY_LOOKUP_HANDLERS, {})
-    handlers = ["cfn", "ecr", "env", "ssm", "var"]
+    handlers = ["cfn", "ecr", "env", "random.string", "ssm", "var"]
     for handler in handlers:
         assert (
             handler in RUNWAY_LOOKUP_HANDLERS
@@ -74,6 +74,9 @@ def test_unregister_lookup_handler(mocker: MockerFixture) -> None:
     assert "test" not in RUNWAY_LOOKUP_HANDLERS
 
 
+SUPPORTS_DEFAULT = ["env", "var"]
+
+
 class TestCommonLookupFunctionality:
     """Test common lookup functionally.
 
@@ -86,10 +89,9 @@ class TestCommonLookupFunctionality:
     def test_handle_default(self, runway_context: MockRunwayContext) -> None:
         """Verify default value is handled by lookups."""
         lookup_handlers = RUNWAY_LOOKUP_HANDLERS.copy()
-        lookup_handlers.pop("cfn")  # requires special testing
-        lookup_handlers.pop("ecr")  # requires special testing
-        lookup_handlers.pop("ssm")  # requires special testing
-        for _, lookup in lookup_handlers.items():
+        for name, lookup in lookup_handlers.items():
+            if name not in SUPPORTS_DEFAULT:
+                continue
             result = lookup.handle(
                 "NOT_VALID::default=default value",
                 context=runway_context,
@@ -101,12 +103,11 @@ class TestCommonLookupFunctionality:
     def test_handle_transform(self, runway_context: MockRunwayContext) -> None:
         """Verify transform is handled by lookup."""
         lookup_handlers = RUNWAY_LOOKUP_HANDLERS.copy()
-        lookup_handlers.pop("cfn")  # requires special testing
-        lookup_handlers.pop("ecr")  # requires special testing
-        lookup_handlers.pop("ssm")  # requires special testing
         runway_context.env.vars.update(VALUES)
 
-        for _, lookup in lookup_handlers.items():
+        for name, lookup in lookup_handlers.items():
+            if name not in SUPPORTS_DEFAULT:
+                continue
             result = lookup.handle(
                 "NOT_VALID::default=false, transform=bool",
                 context=runway_context,
