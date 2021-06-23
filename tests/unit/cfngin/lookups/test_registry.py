@@ -32,6 +32,7 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
         "hook_data",
         "kms",
         "output",
+        "random.string",
         "rxref",
         "split",
         "ssm",

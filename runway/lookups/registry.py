@@ -5,7 +5,7 @@ import logging
 from typing import Dict, Type, Union, cast
 
 from ..utils import load_object_from_string
-from .handlers import cfn, ecr, env, ssm, var
+from .handlers import cfn, ecr, env, random_string, ssm, var
 from .handlers.base import LookupHandler
 
 RUNWAY_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
@@ -57,5 +57,6 @@ def unregister_lookup_handler(lookup_type: str) -> None:
 register_lookup_handler(cfn.TYPE_NAME, cfn.CfnLookup)
 register_lookup_handler(ecr.TYPE_NAME, ecr.EcrLookup)
 register_lookup_handler(env.TYPE_NAME, env.EnvLookup)
+register_lookup_handler(random_string.TYPE_NAME, random_string.RandomStringLookup)
 register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
 register_lookup_handler(var.TYPE_NAME, var.VarLookup)

@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Dict, Type, Union, cast
 
-from ...lookups.handlers import cfn, ecr, ssm
+from ...lookups.handlers import cfn, ecr, random_string, ssm
 from ...lookups.handlers.base import LookupHandler
 from ...utils import DOC_SITE, load_object_from_string
 from .handlers import ami, default, dynamodb, envvar
@@ -75,6 +75,7 @@ register_lookup_handler(file_handler.TYPE_NAME, file_handler.FileLookup)
 register_lookup_handler(hook_data.TYPE_NAME, hook_data.HookDataLookup)
 register_lookup_handler(kms.TYPE_NAME, kms.KmsLookup)
 register_lookup_handler(output.TYPE_NAME, output.OutputLookup)
+register_lookup_handler(random_string.TYPE_NAME, random_string.RandomStringLookup)
 register_lookup_handler(rxref.TYPE_NAME, rxref.RxrefLookup)
 register_lookup_handler(split.TYPE_NAME, split.SplitLookup)
 register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
