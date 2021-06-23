@@ -161,7 +161,7 @@ class TestCfnLookup:
             ) in caplog.messages
         else:
             if isinstance(exception, (ClientError, StackDoesNotExist)):
-                with pytest.raises(exception.__class__):
+                with pytest.raises(type(exception)):
                     assert not CfnLookup.handle(raw_query, mock_context)
             else:
                 with pytest.raises(OutputDoesNotExist) as excinfo:
@@ -221,7 +221,7 @@ class TestCfnLookup:
             ) in caplog.messages
         else:
             if isinstance(exception, (ClientError, StackDoesNotExist)):
-                with pytest.raises(exception.__class__):
+                with pytest.raises(type(exception)):
                     assert not CfnLookup.handle(
                         raw_query, context=runway_context, provider=mock_provider
                     )
