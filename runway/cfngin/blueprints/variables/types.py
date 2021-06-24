@@ -341,8 +341,8 @@ class EC2SubnetIdList(CFNType):
     """An array of subnet IDs, such as subnet-123a351e, subnet-456b351e."""
 
     parameter_type: ClassVar[
-        Literal["List<AWS::EC2::SecurityGroup::Id>"]
-    ] = "List<AWS::EC2::SecurityGroup::Id>"
+        Literal["List<AWS::EC2::Subnet::Id>"]
+    ] = "List<AWS::EC2::Subnet::Id>"
 
 
 class EC2VolumeIdList(CFNType):
