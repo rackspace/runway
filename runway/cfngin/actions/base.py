@@ -86,6 +86,7 @@ class BaseAction:
 
     Attributes:
         DESCRIPTION: Description used when creating a plan for an action.
+        NAME: Name of the action.
         bucket_name: S3 bucket used by the action.
         bucket_region: AWS region where S3 bucket is located.
         cancel: Cancel handler.
