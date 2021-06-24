@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Union
 
 import botocore.exceptions
 
@@ -96,8 +96,8 @@ class BaseAction:
 
     """
 
-    DESCRIPTION: str = "Base action"
-    NAME: Optional[str] = None
+    DESCRIPTION: ClassVar[str] = "Base action"
+    NAME: ClassVar[Optional[str]] = None
 
     bucket_name: Optional[str]
     bucket_region: Optional[str]
@@ -185,6 +185,7 @@ class BaseAction:
         force: bool = False,
         outline: bool = False,
         tail: bool = False,
+        upload_disabled: bool = False,
         **_kwargs: Any,
     ) -> None:
         """Abstract method for running the action."""
