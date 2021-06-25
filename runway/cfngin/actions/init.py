@@ -113,7 +113,7 @@ class Action(BaseAction):
             LOGGER.info("cfngin_bucket %s already exists", self.cfngin_bucket.name)
             return
         if self.context.get_stack("cfngin-bucket"):
-            LOGGER.info(
+            LOGGER.verbose(
                 "found stack for creating cfngin_bucket: cfngin-bucket",
             )
             self.context.stack_names = ["cfngin-bucket"]

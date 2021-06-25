@@ -144,7 +144,7 @@ class TestAction:
         mocker: MockerFixture,
     ) -> None:
         """Test run."""
-        caplog.set_level(LogLevels.INFO, logger=MODULE)
+        caplog.set_level(LogLevels.VERBOSE, logger=MODULE)
         cancel = Mock()
         mock_deploy = mocker.patch(f"{MODULE}.deploy")
         provider_builder = Mock()
