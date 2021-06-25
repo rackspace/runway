@@ -64,6 +64,7 @@ class CloudFormation(RunwayModule):
     def deploy(self) -> None:
         """Run deploy."""
         cfngin = CFNgin(self.ctx, parameters=self.parameters, sys_path=self.path)
+        cfngin.init(force=bool(self.parameters or self.explicitly_enabled))
         cfngin.deploy(force=bool(self.parameters or self.explicitly_enabled))
 
     def destroy(self) -> None:

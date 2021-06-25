@@ -40,12 +40,14 @@ class TestCloudFormation:
 
     def test_deploy(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test deploy."""
-        mock_action = mocker.patch("runway.cfngin.cfngin.CFNgin.deploy")
+        mock_deploy = mocker.patch("runway.cfngin.cfngin.CFNgin.deploy")
+        mock_init = mocker.patch("runway.cfngin.cfngin.CFNgin.init")
         module = CloudFormation(
             self.get_context(), module_root=tmp_path, parameters=self.generic_parameters
         )
         assert not module.deploy()
-        mock_action.assert_called_once()
+        mock_init.assert_called_once()
+        mock_deploy.assert_called_once()
 
     def test_destroy(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test destroy."""
