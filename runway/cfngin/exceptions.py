@@ -320,7 +320,7 @@ class PersistentGraphLocked(CfnginError):
     message: str
 
     def __init__(
-        self, message: Optional[str] = None, reason: Optional[str] = None
+        self, *, message: Optional[str] = None, reason: Optional[str] = None
     ) -> None:
         """Instantiate class."""
         if message:
