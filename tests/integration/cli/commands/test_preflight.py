@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
-from mock import MagicMock
+from mock import Mock
 
 from runway._cli import cli
 from runway._cli.commands import test
@@ -27,7 +27,7 @@ def test_preflight(
     """Test ``runway preflight``."""
     cp_config("min_required", cd_tmp_path)
     caplog.set_level(logging.DEBUG, logger="runway.cli.commands.preflight")
-    mock_forward = MagicMock()
+    mock_forward = Mock()
     monkeypatch.setattr("click.Context.forward", mock_forward)
 
     runner = CliRunner()

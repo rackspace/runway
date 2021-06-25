@@ -10,7 +10,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
-from mock import patch
+from mock import Mock
 
 from runway._cli import cli
 from runway.config import RunwayConfig
@@ -20,19 +20,19 @@ from runway.core import Runway
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from mock import MagicMock
     from pytest import LogCaptureFixture
+    from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
 
 MODULE = "runway._cli.commands._plan"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     result = runner.invoke(cli, ["plan"])
@@ -47,11 +47,11 @@ def test_plan(
     assert len(inst.plan.call_args.args[0]) == 1
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_options_ci(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan option --ci."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     assert runner.invoke(cli, ["plan", "--ci"]).exit_code == 0
@@ -61,11 +61,11 @@ def test_plan_options_ci(
     assert mock_runway.call_args.args[1].env.ci is False
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_options_deploy_environment(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan option -e, --deploy-environment."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     assert runner.invoke(cli, ["plan", "-e", "e-option"]).exit_code == 0
@@ -80,15 +80,15 @@ def test_plan_options_deploy_environment(
     assert mock_runway.call_args.args[1].env.name == "deploy-environment-option"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_options_tag(
-    mock_runway: MagicMock,
     caplog: LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
 ) -> None:
     """Test plan option --tag."""
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.plan")
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("tagged_modules", cd_tmp_path)
     runner = CliRunner()
     assert (
@@ -114,11 +114,11 @@ def test_plan_options_tag(
     assert "No modules found with the provided tag(s): no-match" in caplog.messages
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_select_deployment(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan select from two deployments."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # first value entered is out of range
@@ -129,11 +129,11 @@ def test_plan_select_deployment(
     assert deployments[0].name == "deployment_1"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_select_deployment_all(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan select all deployments."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # first value entered is out of range
@@ -146,11 +146,11 @@ def test_plan_select_deployment_all(
     assert len(deployments[1].modules) == 2
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_select_module(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan select from two modules."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # 2nd deployment, out of range, select second module
@@ -161,11 +161,11 @@ def test_plan_select_module(
     assert deployment.modules[0].name == "sampleapp-03.cfn"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_select_module_all(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan select all modules."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required_multi", cd_tmp_path)
     runner = CliRunner()
     # 2nd deployment, select all
@@ -177,11 +177,11 @@ def test_plan_select_module_all(
     assert deployment.modules[1].name == "sampleapp-03.cfn"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_select_module_child_modules(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan select child module."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("simple_child_modules.1", cd_tmp_path)
     runner = CliRunner()
     # 2nd module, first child
@@ -192,11 +192,11 @@ def test_plan_select_module_child_modules(
     assert deployment.modules[0].name == "parallel-sampleapp-01.cfn"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_plan_select_module_child_modules_all(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test plan select all child module."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("simple_child_modules.1", cd_tmp_path)
     runner = CliRunner()
     # 2nd module, first child

@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
-from mock import MagicMock
+from mock import Mock
 
 from runway._cli import cli
 
@@ -32,7 +32,7 @@ def test_envvars(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
 ) -> None:
     """Test envvars."""
-    monkeypatch.setattr("platform.system", MagicMock(return_value="Darwin"))
+    monkeypatch.setattr("platform.system", Mock(return_value="Darwin"))
     cp_config("simple_env_vars", cd_tmp_path)
     runner = CliRunner()
     result = runner.invoke(cli, ["envvars"])
@@ -44,7 +44,7 @@ def test_envvar_windows(
     cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
 ) -> None:
     """Test envvars for Windows."""
-    monkeypatch.setattr("platform.system", MagicMock(return_value="Windows"))
+    monkeypatch.setattr("platform.system", Mock(return_value="Windows"))
     monkeypatch.delenv("MSYSTEM", raising=False)
     cp_config("simple_env_vars", cd_tmp_path)
     runner = CliRunner()

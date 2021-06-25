@@ -10,7 +10,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
-from mock import MagicMock, patch
+from mock import Mock
 
 from runway._cli import cli
 from runway.config import RunwayConfig
@@ -21,17 +21,18 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest import LogCaptureFixture, MonkeyPatch
+    from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
 
 MODULE = "runway._cli.commands._destroy"
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_destroy(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test destroy."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     result = runner.invoke(cli, ["destroy"], input="y\ny\n")
@@ -60,11 +61,11 @@ def test_destroy_no(cd_tmp_path: Path, cp_config: CpConfigTypeDef) -> None:
     )
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_destroy_options_ci(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test destroy option --ci."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     assert runner.invoke(cli, ["destroy", "--ci"]).exit_code == 0
@@ -74,11 +75,11 @@ def test_destroy_options_ci(
     assert mock_runway.call_args.args[1].env.ci is False
 
 
-@patch(MODULE + ".Runway", spec=Runway, spec_set=True)
 def test_destroy_options_deploy_environment(
-    mock_runway: MagicMock, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
 ) -> None:
     """Test destroy option -e, --deploy-environment."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     assert (
@@ -106,7 +107,7 @@ def test_destroy_options_tag(
     """Test destroy option --tag."""
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.destroy")
     cp_config("tagged_modules", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     assert (
@@ -142,7 +143,7 @@ def test_destroy_select_deployment(
 ) -> None:
     """Test destroy select from two deployments."""
     cp_config("min_required_multi", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     # first value entered is out of range
@@ -160,7 +161,7 @@ def test_destroy_select_deployment_all(
 ) -> None:
     """Test destroy select all deployments."""
     cp_config("min_required_multi", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     # first value entered is out of range
@@ -178,7 +179,7 @@ def test_destroy_select_module(
 ) -> None:
     """Test destroy select from two modules."""
     cp_config("min_required_multi", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     # 2nd deployment, out of range, select second module
@@ -194,7 +195,7 @@ def test_destroy_select_module_all(
 ) -> None:
     """Test destroy select all modules."""
     cp_config("min_required_multi", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     # 2nd deployment, select all
@@ -211,7 +212,7 @@ def test_destroy_select_module_child_modules(
 ) -> None:
     """Test destroy select child module."""
     cp_config("simple_child_modules.1", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     # 2nd module, first child
@@ -227,7 +228,7 @@ def test_destroy_select_module_child_modules_all(
 ) -> None:
     """Test destroy select all child module."""
     cp_config("simple_child_modules.1", cd_tmp_path)
-    mock_destroy = MagicMock()
+    mock_destroy = Mock()
     monkeypatch.setattr(MODULE + ".Runway.destroy", mock_destroy)
     runner = CliRunner()
     # 2nd module, first child
