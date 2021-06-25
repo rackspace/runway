@@ -47,6 +47,29 @@ class CfnginBucketAccessDenied(CfnginError):
         super().__init__()
 
 
+class CfnginBucketNotFound(CfnginError):
+    """CFNgin bucket specified or default bucket being used but it does not exist.
+
+    This can occur when using a custom stack to deploy the CFNgin bucket but the
+    custom stack does not create bucket that is expected.
+
+    """
+
+    bucket_name: str
+    message: str
+
+    def __init__(self, *, bucket_name: str) -> None:
+        """Instantiate class.
+
+        Args:
+            bucket_name: Name of the CFNgin bucket.
+
+        """
+        self.bucket_name = bucket_name
+        self.message = f"cfngin_bucket does not exist {bucket_name}"
+        super().__init__()
+
+
 class CfnginBucketRequired(CfnginError):
     """CFNgin bucket is required to use a feature but it not provided/disabled."""
 

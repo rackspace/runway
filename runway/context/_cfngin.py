@@ -265,6 +265,7 @@ class CfnginContext(BaseContext):
                 self.s3_client,
                 self.bucket_name,
                 self.bucket_region,
+                create=False,
                 persist_graph=bool(self.persistent_graph_location),
             )
             self._s3_bucket_verified = True

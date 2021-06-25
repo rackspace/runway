@@ -435,6 +435,8 @@ def ensure_s3_bucket(
     s3_client: S3Client,
     bucket_name: str,
     bucket_region: Optional[str] = None,
+    *,
+    create: bool = True,
     persist_graph: bool = False,
 ) -> None:
     """Ensure an s3 bucket exists, if it does not then create it.
@@ -444,6 +446,7 @@ def ensure_s3_bucket(
         bucket_name: The bucket being checked/created.
         bucket_region: The region to create the bucket in.
             If not provided, will be determined by s3_client's region.
+        create: Whether to create the bucket if it does not exist.
         persist_graph: Check bucket for recommended settings.
             If creating a new bucket, it will be created with recommended
             settings.
@@ -469,10 +472,10 @@ def ensure_s3_bucket(
                     bucket_name,
                 )
     except botocore.exceptions.ClientError as err:
-        if err.response["Error"]["Message"] == "Not Found":
+        if err.response["Error"]["Message"] == "Not Found" and create:
             # can't use s3_client.exceptions.NoSuchBucket here.
             # it does not work if the bucket was recently deleted.
-            LOGGER.debug("Creating bucket %s.", bucket_name)
+            LOGGER.debug("creating bucket %s", bucket_name)
             create_args: Dict[str, Any] = {"Bucket": bucket_name}
             location_constraint = s3_bucket_location_constraint(bucket_region)
             if location_constraint:
@@ -491,7 +494,7 @@ def ensure_s3_bucket(
                 "to use a globally unique name?",
                 bucket_name,
             )
-        else:
+        elif err.response["Error"]["Message"] != "Not Found":
             LOGGER.exception('error creating bucket "%s"', bucket_name)
         raise
 

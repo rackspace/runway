@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Union
 import botocore.exceptions
 
 from ..dag import ThreadedWalker, UnlimitedSemaphore, walk
-from ..exceptions import PlanFailed
+from ..exceptions import CfnginBucketNotFound, PlanFailed
 from ..plan import Graph, Plan, Step, merge_graphs
 from ..utils import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
 
@@ -156,7 +156,12 @@ class BaseAction:
     def ensure_cfn_bucket(self) -> None:
         """CloudFormation bucket where templates will be stored."""
         if self.bucket_name:
-            ensure_s3_bucket(self.s3_conn, self.bucket_name, self.bucket_region)
+            try:
+                ensure_s3_bucket(
+                    self.s3_conn, self.bucket_name, self.bucket_region, create=False
+                )
+            except botocore.exceptions.ClientError:
+                raise CfnginBucketNotFound(bucket_name=self.bucket_name) from None
 
     def execute(self, **kwargs: Any) -> None:
         """Run the action with pre and post steps."""
