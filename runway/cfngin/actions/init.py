@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union, cast
 from ...compat import cached_property
 from ...config.models.cfngin import CfnginStackDefinitionModel
 from ...core.providers.aws.s3 import Bucket
-from ..exceptions import CfnginBucketAccessDenied, CfnginBucketRequired
+from ..exceptions import CfnginBucketAccessDenied
 from . import deploy
 from .base import BaseAction
 
@@ -56,7 +56,7 @@ class Action(BaseAction):
         return None
 
     @cached_property
-    def cfngin_bucket(self) -> Bucket:
+    def cfngin_bucket(self) -> Optional[Bucket]:
         """CFNgin bucket.
 
         Raises:
@@ -64,7 +64,7 @@ class Action(BaseAction):
 
         """
         if not self.context.bucket_name:
-            raise CfnginBucketRequired
+            return None
         return Bucket(
             self.context,
             name=self.context.bucket_name,
@@ -107,6 +107,9 @@ class Action(BaseAction):
             CfnginBucketAccessDenied: Could not head cfngin_bucket.
 
         """
+        if not self.cfngin_bucket:
+            LOGGER.info("skipped; cfngin_bucket not defined")
+            return
         if self.cfngin_bucket.forbidden:
             raise CfnginBucketAccessDenied(bucket_name=self.cfngin_bucket.name)
         if self.cfngin_bucket.exists:

@@ -9,7 +9,7 @@ from mock import Mock
 
 from runway._logging import LogLevels
 from runway.cfngin.actions.init import Action
-from runway.cfngin.exceptions import CfnginBucketAccessDenied, CfnginBucketRequired
+from runway.cfngin.exceptions import CfnginBucketAccessDenied
 from runway.config.models.cfngin import CfnginStackDefinitionModel
 
 if TYPE_CHECKING:
@@ -64,8 +64,7 @@ class TestAction:
         bucket = mocker.patch(f"{MODULE}.Bucket")
         mocker.patch.object(cfngin_context, "bucket_name", None)
         mocker.patch.object(cfngin_context, "bucket_region", "bucket_region")
-        with pytest.raises(CfnginBucketRequired):
-            assert not Action(cfngin_context).cfngin_bucket
+        assert not Action(cfngin_context).cfngin_bucket
         bucket.assert_not_called()
 
     def test_default_cfngin_bucket_stack(
@@ -167,3 +166,15 @@ class TestAction:
             tail=False,
             upload_disabled=True,
         )
+
+    def test_run_no_cfngin_bucket(
+        self,
+        caplog: LogCaptureFixture,
+        cfngin_context: CfnginContext,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test run."""
+        caplog.set_level(LogLevels.INFO, logger=MODULE)
+        mocker.patch.object(Action, "cfngin_bucket", None)
+        assert not Action(cfngin_context).run()
+        assert "skipped; cfngin_bucket not defined" in caplog.messages
