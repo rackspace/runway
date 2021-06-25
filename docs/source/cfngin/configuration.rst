@@ -117,12 +117,35 @@ Top-Level Fields
 
     To change this, define a value for this field.
 
-    The bucket will be created in the same region that the stacks will be launched in.
-    If you want to change this, or if you already have an existing bucket in a different region, you can set the :attr:`~cfngin.config.cfngin_bucket_region` to the region where you want to create the bucket.
+    If the bucket does not exists, CFNgin will try to create it in the same region that the stacks will be launched in.
+    The bucket will be created by deploying a CloudFormation stack named ``${namespace}-cfngin-bucket`` where the namespace is :attr:`~cfngin.config.namespace`.
+    If there is a stack named ``cfngin-bucket`` found defined in the :attr:`~cfngin.config.stacks` field, it will be used in place of default :class:`~cfngin.stack` & Blueprint (:class:`runway.cfngin.blueprints.cfngin_bucket.CfnginBucket`) provided by CFNgin.
+    When using a custom stack, it is the user's responsibility to ensure that a bucket with the correct name is created by this stack.
 
     If you want CFNgin to upload templates directly to CloudFormation instead of first uploading to S3, you can set this field to an empty string.
     However, the template size is greatly limited when uploading directly.
     See the `CloudFormation Limits Reference <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html>`__.
+
+    .. tip::
+      Defining a :class:`~cfngin.stack` that uses the Blueprint provided by CFNgin allows for easy customization of stack fields such as :attr:`~cfngin.stack.tags`.
+      It also allows the stack to be deleted as part of the normal deletion process.
+      If it is not defined as a stack, CFNgin won't delete the stack or bucket.
+
+      .. code-block:: yaml
+
+        namespace: ${namespace}
+        cfngin_bucket: cfngin-${namespace}-${region}
+
+        stacks:
+          - name: cfngin-bucket
+            class_path: runway.cfngin.blueprints.cfngin_bucket.CfnginBucket
+            variables:
+              BucketName: cfngin-${namespace}-${region}
+
+        pre_destroy:
+          - path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+            args:
+              bucket_name: cfngin-${namespace}-${region}
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -142,6 +165,8 @@ Top-Level Fields
     :value: None
 
     AWS Region where :attr:`~cfngin.config.cfngin_bucket` is located.
+    This can be different than the region currently being deployed to but, ensure to account for all AWS limitations before manually setting this value.
+
     If not provided, the current region is used.
 
     .. rubric:: Example
@@ -299,6 +324,9 @@ Top-Level Fields
 
     .. versionchanged:: 2.0.0
       *post_build* renamed to *post_deploy*.
+
+    .. versionchanged:: 2.2.0
+      The CFNgin bucket is now created using a CloudFormation stack.
 
   .. attribute:: post_destroy
     :type: Optional[List[cfngin.hook]]
