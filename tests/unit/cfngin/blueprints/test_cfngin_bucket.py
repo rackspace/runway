@@ -61,7 +61,7 @@ class TestCfnginBucket:
             BucketName=bucket_name,
             OwnershipControls=ANY,  # troposphere objects can't be compared atm
             Tags=bucket_tags,
-            VersioningConfiguration="Ref(VersioningStatus)",
+            VersioningConfiguration=ANY,  # troposphere objects can't be compared atm
         )
         assert "BucketArn" in obj.template.outputs
         assert "BucketDomainName" in obj.template.outputs

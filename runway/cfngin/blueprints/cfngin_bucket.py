@@ -58,7 +58,9 @@ class CfnginBucket(Blueprint):
                 Rules=[s3.OwnershipControlsRule(ObjectOwnership="BucketOwnerPreferred")]
             ),
             Tags=self.bucket_tags,
-            VersioningConfiguration=self.variables["VersioningStatus"].ref,
+            VersioningConfiguration=s3.VersioningConfiguration(
+                Status=self.variables["VersioningStatus"].ref
+            ),
         )
         self.add_output("BucketArn", bucket.get_att("Arn"))
         self.add_output("BucketDomainName", bucket.get_att("DomainName"))
