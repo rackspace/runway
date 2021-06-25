@@ -128,6 +128,8 @@ class Action(BaseAction):
                 del self.context.stacks_dict
             with suppress(AttributeError):
                 del self.context.stacks
+        if self.provider_builder:
+            self.provider_builder.region = self.context.bucket_region
         deploy.Action(
             context=self.context,
             provider_builder=self.provider_builder,

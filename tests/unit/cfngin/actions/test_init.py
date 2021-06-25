@@ -55,7 +55,7 @@ class TestAction:
             cfngin_context, name=bucket_name, region=bucket_region
         )
 
-    def test_cfngin_bucket_raise_cfngin_bucket_required(
+    def test_cfngin_bucket_handle_no_bucket(
         self, cfngin_context: CfnginContext, mocker: MockerFixture
     ) -> None:
         """Test cfngin_bucket."""
@@ -103,6 +103,38 @@ class TestAction:
         assert not obj.run(concurrency=3, tail=True, upload_disabled=False)
         assert "using default blueprint to create cfngin_bucket..." in caplog.messages
         assert cfngin_context.config.stacks == [obj.default_cfngin_bucket_stack]
+        mock_deploy.Action.assert_called_once_with(
+            context=cfngin_context, provider_builder=provider_builder, cancel=cancel
+        )
+        mock_deploy.Action.return_value.run.assert_called_once_with(
+            concurrency=3,
+            tail=True,
+            upload_disabled=True,
+        )
+
+    def test_run_cfngin_bucket_region(
+        self,
+        caplog: LogCaptureFixture,
+        cfngin_context: CfnginContext,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test run."""
+        caplog.set_level(LogLevels.NOTICE, logger=MODULE)
+        cancel = Mock()
+        mock_deploy = mocker.patch(f"{MODULE}.deploy")
+        provider_builder = Mock(region=None)
+        mocker.patch.object(cfngin_context, "copy", return_value=cfngin_context)
+        mocker.patch.object(cfngin_context, "get_stack", return_value=None)
+        mocker.patch.object(cfngin_context, "s3_client", return_value=Mock())
+        mocker.patch.object(
+            Action, "cfngin_bucket", Mock(exists=False, forbidden=False)
+        )
+        cfngin_context.bucket_region = "ca-central-1"
+        obj = Action(cfngin_context, provider_builder, cancel)
+        assert not obj.run(concurrency=3, tail=True, upload_disabled=False)
+        assert "using default blueprint to create cfngin_bucket..." in caplog.messages
+        assert cfngin_context.config.stacks == [obj.default_cfngin_bucket_stack]
+        assert provider_builder.region == "ca-central-1"
         mock_deploy.Action.assert_called_once_with(
             context=cfngin_context, provider_builder=provider_builder, cancel=cancel
         )
