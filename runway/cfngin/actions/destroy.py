@@ -111,6 +111,7 @@ class Action(BaseAction):
         force: bool = False,
         outline: bool = False,  # pylint: disable=unused-argument
         tail: bool = False,
+        upload_disabled: bool = False,  # pylint: disable=unused-argument
         **_kwargs: Any,
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""

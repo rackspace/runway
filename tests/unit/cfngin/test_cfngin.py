@@ -6,7 +6,8 @@ import shutil
 from typing import TYPE_CHECKING
 
 import pytest
-from mock import MagicMock, call, patch
+from mock import Mock, call
+from yaml.constructor import ConstructorError
 
 from runway.cfngin.cfngin import CFNgin
 from runway.core.components import DeployEnvironment
@@ -36,7 +37,7 @@ def copy_basic_fixtures(cfngin_fixtures: Path, tmp_path: Path) -> None:
 
 
 @pytest.fixture(scope="function")
-def patch_safehaven(mocker: MockerFixture) -> MagicMock:
+def patch_safehaven(mocker: MockerFixture) -> Mock:
     """Patch SafeHaven."""
     mock_haven = mocker.patch("runway.cfngin.cfngin.SafeHaven")
     mock_haven.return_value = mock_haven
@@ -47,11 +48,11 @@ class TestCFNgin:
     """Test runway.cfngin.CFNgin."""
 
     @staticmethod
-    def configure_mock_action_instance(mock_action: MagicMock) -> MagicMock:
+    def configure_mock_action_instance(mock_action: Mock) -> Mock:
         """Configure a mock action."""
-        mock_instance = MagicMock(return_value=None)
+        mock_instance = Mock(return_value=None)
         mock_action.return_value = mock_instance
-        mock_instance.execute = MagicMock()
+        mock_instance.execute = Mock()
         return mock_instance
 
     @staticmethod
@@ -91,15 +92,15 @@ class TestCFNgin:
         )
         assert result.env_file["test_value"] == "lab-ca-central-1"
 
-    @patch("runway.cfngin.actions.deploy.Action")
     def test_deploy(
         self,
-        mock_action: MagicMock,
         cfngin_fixtures: Path,
+        mocker: MockerFixture,
         tmp_path: Path,
-        patch_safehaven: MagicMock,
+        patch_safehaven: Mock,
     ) -> None:
         """Test deploy with two files & class init."""
+        mock_action = mocker.patch("runway.cfngin.actions.deploy.Action", Mock())
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
         copy_fixture(
@@ -150,15 +151,31 @@ class TestCFNgin:
             ]
         )
 
-    @patch("runway.cfngin.actions.destroy.Action")
+    def test_deploy_skip(
+        self,
+        mocker: MockerFixture,
+        tmp_path: Path,
+        patch_safehaven: Mock,
+    ) -> None:
+        """Test deploy skip."""
+        should_skip = mocker.patch.object(CFNgin, "should_skip", return_value=True)
+        cfngin = CFNgin(
+            ctx=self.get_context(),
+            sys_path=tmp_path,
+        )
+        cfngin.deploy()
+        should_skip.assert_called_once_with(False)
+        patch_safehaven.assert_not_called()
+
     def test_destroy(
         self,
-        mock_action: MagicMock,
         cfngin_fixtures: Path,
+        mocker: MockerFixture,
         tmp_path: Path,
-        patch_safehaven: MagicMock,
+        patch_safehaven: Mock,
     ) -> None:
         """Test destroy."""
+        mock_action = mocker.patch("runway.cfngin.actions.destroy.Action", Mock())
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
 
@@ -180,6 +197,70 @@ class TestCFNgin:
                 call.__exit__(None, None, None),
             ]
         )
+
+    def test_destroy_skip(
+        self,
+        mocker: MockerFixture,
+        tmp_path: Path,
+        patch_safehaven: Mock,
+    ) -> None:
+        """Test destroy skip."""
+        should_skip = mocker.patch.object(CFNgin, "should_skip", return_value=True)
+        cfngin = CFNgin(
+            ctx=self.get_context(),
+            sys_path=tmp_path,
+        )
+        cfngin.destroy()
+        should_skip.assert_called_once_with(False)
+        patch_safehaven.assert_not_called()
+
+    def test_init(
+        self,
+        cfngin_fixtures: Path,
+        mocker: MockerFixture,
+        patch_safehaven: Mock,
+        tmp_path: Path,
+    ) -> None:
+        """Test init."""
+        mock_action = mocker.patch("runway.cfngin.actions.init.Action", Mock())
+        mock_instance = self.configure_mock_action_instance(mock_action)
+        copy_basic_fixtures(cfngin_fixtures, tmp_path)
+
+        context = self.get_context()
+        cfngin = CFNgin(ctx=context, sys_path=tmp_path)
+        cfngin.init()
+
+        mock_action.assert_called_once()
+        mock_instance.execute.assert_called_once_with(concurrency=0, tail=False)
+        patch_safehaven.assert_has_calls(
+            [
+                call(
+                    environ=context.env.vars,
+                    sys_modules_exclude=["awacs", "troposphere"],
+                ),
+                call.__enter__(),
+                call(sys_modules_exclude=["awacs", "troposphere"]),
+                call.__enter__(),
+                call.__exit__(None, None, None),
+                call.__exit__(None, None, None),
+            ]
+        )
+
+    def test_init_skip(
+        self,
+        mocker: MockerFixture,
+        tmp_path: Path,
+        patch_safehaven: Mock,
+    ) -> None:
+        """Test init skip."""
+        should_skip = mocker.patch.object(CFNgin, "should_skip", return_value=True)
+        cfngin = CFNgin(
+            ctx=self.get_context(),
+            sys_path=tmp_path,
+        )
+        cfngin.init()
+        should_skip.assert_called_once_with(False)
+        patch_safehaven.assert_not_called()
 
     def test_load(self, cfngin_fixtures: Path, tmp_path: Path) -> None:
         """Test load."""
@@ -205,15 +286,25 @@ class TestCFNgin:
 
         assert "appears to be a CloudFormation template" in caplog.text
 
-    @patch("runway.cfngin.actions.diff.Action")
+    def test_load_raise_constructor_error(
+        self, mocker: MockerFixture, tmp_path: Path
+    ) -> None:
+        """Test load raise ConstructorError."""
+        config = Mock(load=Mock(side_effect=ConstructorError(problem="something else")))
+        get_config = mocker.patch.object(CFNgin, "_get_config", return_value=config)
+        with pytest.raises(ConstructorError, match="something else"):
+            assert CFNgin(ctx=self.get_context(), sys_path=tmp_path).load(tmp_path)
+        get_config.assert_called_once_with(tmp_path)
+
     def test_plan(
         self,
-        mock_action: MagicMock,
         cfngin_fixtures: Path,
+        mocker: MockerFixture,
         tmp_path: Path,
-        patch_safehaven: MagicMock,
+        patch_safehaven: Mock,
     ) -> None:
         """Test plan."""
+        mock_action = mocker.patch("runway.cfngin.actions.diff.Action", Mock())
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
 
@@ -233,6 +324,22 @@ class TestCFNgin:
                 call.__exit__(None, None, None),
             ]
         )
+
+    def test_plan_skip(
+        self,
+        mocker: MockerFixture,
+        tmp_path: Path,
+        patch_safehaven: Mock,
+    ) -> None:
+        """Test plan skip."""
+        should_skip = mocker.patch.object(CFNgin, "should_skip", return_value=True)
+        cfngin = CFNgin(
+            ctx=self.get_context(),
+            sys_path=tmp_path,
+        )
+        cfngin.plan()
+        should_skip.assert_called_once_with(False)
+        patch_safehaven.assert_not_called()
 
     def test_should_skip(self, cfngin_fixtures: Path, tmp_path: Path) -> None:
         """Test should_skip."""
@@ -256,8 +363,8 @@ class TestCFNgin:
         del cfngin.env_file  # clear cached value and force load
         assert not cfngin.should_skip(force=True)  # does not repopulate env_file
 
-    @patch("runway.cfngin.cfngin.CfnginConfig")
-    def test_find_config_files(self, mock_config: MagicMock, tmp_path: Path) -> None:
+    def test_find_config_files(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test find_config_files."""
+        mock_config = mocker.patch("runway.cfngin.cfngin.CfnginConfig", Mock())
         CFNgin.find_config_files(sys_path=tmp_path, exclude=["file"])
         mock_config.find_config_file.assert_called_once_with(tmp_path, exclude=["file"])

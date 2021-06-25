@@ -5,12 +5,12 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Union
 
 import botocore.exceptions
 
 from ..dag import ThreadedWalker, UnlimitedSemaphore, walk
-from ..exceptions import PlanFailed
+from ..exceptions import CfnginBucketNotFound, PlanFailed
 from ..plan import Graph, Plan, Step, merge_graphs
 from ..utils import ensure_s3_bucket, get_s3_endpoint, stack_template_key_name
 
@@ -86,6 +86,7 @@ class BaseAction:
 
     Attributes:
         DESCRIPTION: Description used when creating a plan for an action.
+        NAME: Name of the action.
         bucket_name: S3 bucket used by the action.
         bucket_region: AWS region where S3 bucket is located.
         cancel: Cancel handler.
@@ -96,8 +97,8 @@ class BaseAction:
 
     """
 
-    DESCRIPTION: str = "Base action"
-    NAME: Optional[str] = None
+    DESCRIPTION: ClassVar[str] = "Base action"
+    NAME: ClassVar[Optional[str]] = None
 
     bucket_name: Optional[str]
     bucket_region: Optional[str]
@@ -155,7 +156,12 @@ class BaseAction:
     def ensure_cfn_bucket(self) -> None:
         """CloudFormation bucket where templates will be stored."""
         if self.bucket_name:
-            ensure_s3_bucket(self.s3_conn, self.bucket_name, self.bucket_region)
+            try:
+                ensure_s3_bucket(
+                    self.s3_conn, self.bucket_name, self.bucket_region, create=False
+                )
+            except botocore.exceptions.ClientError:
+                raise CfnginBucketNotFound(bucket_name=self.bucket_name) from None
 
     def execute(self, **kwargs: Any) -> None:
         """Run the action with pre and post steps."""
@@ -185,6 +191,7 @@ class BaseAction:
         force: bool = False,
         outline: bool = False,
         tail: bool = False,
+        upload_disabled: bool = False,
         **_kwargs: Any,
     ) -> None:
         """Abstract method for running the action."""

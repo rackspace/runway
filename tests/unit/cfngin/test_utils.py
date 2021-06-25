@@ -3,13 +3,16 @@
 # pyright: basic
 from __future__ import annotations
 
+import logging
 import unittest
 from pathlib import Path
-from typing import Any, Dict, List, cast
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import boto3
 import mock
 import pytest
+from botocore.exceptions import ClientError
+from botocore.stub import Stubber
 from pydantic import ValidationError
 
 from runway.cfngin.utils import (
@@ -20,6 +23,7 @@ from runway.cfngin.utils import (
     ZipExtractor,
     camel_to_snake,
     cf_safe_name,
+    ensure_s3_bucket,
     get_client_region,
     get_s3_endpoint,
     parse_cloudformation_template,
@@ -28,6 +32,10 @@ from runway.cfngin.utils import (
     yaml_to_ordered_dict,
 )
 from runway.config.models.cfngin import GitCfnginPackageSourceDefinitionModel
+
+if TYPE_CHECKING:
+    from pytest import LogCaptureFixture
+    from pytest_mock import MockerFixture
 
 AWS_REGIONS = [
     "us-east-1",
@@ -42,6 +50,7 @@ AWS_REGIONS = [
     "eu-central-1",
     "sa-east-1",
 ]
+MODULE = "runway.cfngin.utils"
 
 
 def mock_create_cache_directories(self: Any, **kwargs: Any) -> int:
@@ -51,6 +60,152 @@ def mock_create_cache_directories(self: Any, **kwargs: Any) -> int:
 
     """
     return 1
+
+
+def test_ensure_s3_bucket() -> None:
+    """Test ensure_s3_bucket."""
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
+    with stubber:
+        assert not ensure_s3_bucket(s3_client, "test-bucket")
+    stubber.assert_no_pending_responses()
+
+
+def test_ensure_s3_bucket_forbidden(caplog: LogCaptureFixture) -> None:
+    """Test ensure_s3_bucket."""
+    caplog.set_level(logging.ERROR, logger=MODULE)
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_client_error("head_bucket", service_message="Forbidden")
+    with stubber, pytest.raises(ClientError, match="Forbidden"):
+        assert ensure_s3_bucket(s3_client, "test-bucket")
+    stubber.assert_no_pending_responses()
+    assert (
+        "Access denied for bucket test-bucket. Did you remember to use a globally unique name?"
+        in "\n".join(caplog.messages)
+    )
+
+
+def test_ensure_s3_bucket_not_found(mocker: MockerFixture) -> None:
+    """Test ensure_s3_bucket."""
+    mock_s3_bucket_location_constraint = mocker.patch(
+        f"{MODULE}.s3_bucket_location_constraint", return_value="something"
+    )
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_client_error("head_bucket", service_message="Not Found")
+    stubber.add_response(
+        "create_bucket",
+        {},
+        {
+            "Bucket": "test-bucket",
+            "CreateBucketConfiguration": {
+                "LocationConstraint": mock_s3_bucket_location_constraint.return_value
+            },
+        },
+    )
+    with stubber:
+        assert not ensure_s3_bucket(s3_client, "test-bucket", "us-east-1")
+    stubber.assert_no_pending_responses()
+    mock_s3_bucket_location_constraint.assert_called_once_with("us-east-1")
+
+
+def test_ensure_s3_bucket_not_found_not_create() -> None:
+    """Test ensure_s3_bucket."""
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_client_error("head_bucket", service_message="Not Found")
+    with stubber, pytest.raises(ClientError, match="Not Found"):
+        assert not ensure_s3_bucket(s3_client, "test-bucket", create=False)
+    stubber.assert_no_pending_responses()
+
+
+def test_ensure_s3_bucket_not_found_persist_graph() -> None:
+    """Test ensure_s3_bucket."""
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_client_error("head_bucket", service_message="Not Found")
+    stubber.add_response("create_bucket", {}, {"Bucket": "test-bucket"})
+    stubber.add_response(
+        "put_bucket_versioning",
+        {},
+        {"Bucket": "test-bucket", "VersioningConfiguration": {"Status": "Enabled"}},
+    )
+    with stubber:
+        assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
+    stubber.assert_no_pending_responses()
+
+
+def test_ensure_s3_bucket_persist_graph(caplog: LogCaptureFixture) -> None:
+    """Test ensure_s3_bucket."""
+    caplog.set_level(logging.WARNING, logger=MODULE)
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
+    stubber.add_response(
+        "get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"}
+    )
+    with stubber:
+        assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
+    stubber.assert_no_pending_responses()
+    assert not caplog.messages
+
+
+def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: LogCaptureFixture) -> None:
+    """Test ensure_s3_bucket."""
+    caplog.set_level(logging.WARNING, logger=MODULE)
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
+    stubber.add_response(
+        "get_bucket_versioning",
+        {"Status": "Enabled", "MFADelete": "Enabled"},
+        {"Bucket": "test-bucket"},
+    )
+    with stubber:
+        assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
+    stubber.assert_no_pending_responses()
+    assert (
+        'MFADelete must be disabled on bucket "test-bucket" when using persistent '
+        "graphs to allow for propper management of the graphs"
+        in "\n".join(caplog.messages)
+    )
+
+
+@pytest.mark.parametrize(
+    "versioning_response", [{"Status": "Disabled"}, {"Status": "Suspended"}, {}]
+)
+def test_ensure_s3_bucket_persist_graph_versioning_not_enabled(
+    caplog: LogCaptureFixture, versioning_response: Dict[str, Any]
+) -> None:
+    """Test ensure_s3_bucket."""
+    caplog.set_level(logging.WARNING, logger=MODULE)
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
+    stubber.add_response(
+        "get_bucket_versioning", versioning_response, {"Bucket": "test-bucket"}
+    )
+    with stubber:
+        assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
+    stubber.assert_no_pending_responses()
+    assert (
+        "it is recommended to enable versioning when using persistent graphs"
+        in "\n".join(caplog.messages)
+    )
+
+
+def test_ensure_s3_bucket_raise_client_error(caplog: LogCaptureFixture) -> None:
+    """Test ensure_s3_bucket."""
+    caplog.set_level(logging.ERROR, logger=MODULE)
+    s3_client = boto3.client("s3")
+    stubber = Stubber(s3_client)
+    stubber.add_client_error("head_bucket")
+    with stubber, pytest.raises(ClientError):
+        assert not ensure_s3_bucket(s3_client, "test-bucket")
+    stubber.assert_no_pending_responses()
+    assert 'error creating bucket "test-bucket"' in caplog.messages
 
 
 def test_read_value_from_path_abs(tmp_path: Path) -> None:

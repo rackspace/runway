@@ -14,7 +14,7 @@ from ..compat import cached_property
 from ..config import CfnginConfig
 from ..context import CfnginContext
 from ..utils import MutableMap, SafeHaven
-from .actions import deploy, destroy, diff
+from .actions import deploy, destroy, diff, init
 from .environment import parse_environment
 from .providers.aws.default import ProviderBuilder
 
@@ -112,8 +112,7 @@ class CFNgin:
         """
         if self.should_skip(force):
             return
-        if not sys_path:
-            sys_path = self.sys_path
+        sys_path = sys_path or self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
 
         with SafeHaven(
@@ -145,8 +144,7 @@ class CFNgin:
         """
         if self.should_skip(force):
             return
-        if not sys_path:
-            sys_path = self.sys_path
+        sys_path = sys_path or self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
         # destroy should run in reverse to handle dependencies
         config_file_paths.reverse()
@@ -167,6 +165,30 @@ class CFNgin:
                         concurrency=self.concurrency, force=True, tail=self.tail
                     )
                 logger.success("destroy (complete)")
+
+    def init(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
+        """Initialize environment."""
+        if self.should_skip(force):
+            return
+        sys_path = sys_path or self.sys_path
+        config_file_paths = self.find_config_files(sys_path=sys_path)
+
+        with SafeHaven(
+            environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]
+        ):
+            for config_path in config_file_paths:
+                logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
+                logger.notice("init (in progress)")
+                with SafeHaven(sys_modules_exclude=["awacs", "troposphere"]):
+                    ctx = self.load(config_path)
+                    action = init.Action(
+                        context=ctx,
+                        provider_builder=self._get_provider_builder(
+                            ctx.config.service_role
+                        ),
+                    )
+                    action.execute(concurrency=self.concurrency, tail=self.tail)
+                logger.success("init (complete)")
 
     def load(self, config_path: Path) -> CfnginContext:
         """Load a CFNgin config into a context object.
@@ -205,8 +227,7 @@ class CFNgin:
         """
         if self.should_skip(force):
             return
-        if not sys_path:
-            sys_path = self.sys_path
+        sys_path = sys_path or self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
         with SafeHaven(environ=self.__ctx.env.vars):
             for config_path in config_file_paths:

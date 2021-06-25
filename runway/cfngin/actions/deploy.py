@@ -8,6 +8,7 @@ from typing_extensions import Literal
 
 from ..exceptions import (
     CancelExecution,
+    CfnginBucketRequired,
     MissingParameterException,
     StackDidNotChange,
     StackDoesNotExist,
@@ -221,10 +222,41 @@ class Action(BaseAction):
     - Submitting either a create or update of the given stack to the
       :class:`runway.cfngin.providers.base.BaseProvider`.
 
+    Attributes:
+        upload_explicitly_disabled: Explicitly disable uploading rendered templates
+            to S3.
+
     """
 
     DESCRIPTION = "Create/Update stacks"
     NAME = "deploy"
+
+    upload_explicitly_disabled: bool = False
+
+    @property
+    def upload_disabled(self) -> bool:
+        """Whether the CloudFormation template should be uploaded to S3."""
+        if self.upload_explicitly_disabled:
+            return True
+        if not self.bucket_name:
+            return True
+        return False
+
+    @upload_disabled.setter
+    def upload_disabled(self, value: bool) -> None:
+        """Set the value of upload_disabled.
+
+        Raises:
+            CfnginBucketRequired: Attempted to explicitly enable upload but cfngin_bucket
+                not defined.
+
+        """
+        if not value and not self.bucket_name:
+            raise CfnginBucketRequired(
+                config_path=self.context.config_path,
+                reason="upload_disabled explicitly set to False",
+            )
+        self.upload_explicitly_disabled = value
 
     @staticmethod
     def build_parameters(
@@ -465,11 +497,9 @@ class Action(BaseAction):
         If not bucket is set, then the template will be inlined.
 
         """
-        return (
-            Template(url=self.s3_stack_push(blueprint))
-            if self.bucket_name
-            else Template(body=blueprint.rendered)
-        )
+        if self.upload_disabled:
+            return Template(body=blueprint.rendered)
+        return Template(url=self.s3_stack_push(blueprint))
 
     @staticmethod
     def _stack_policy(stack: Stack) -> Optional[Template]:
@@ -549,13 +579,25 @@ class Action(BaseAction):
         force: bool = False,  # pylint: disable=unused-argument
         outline: bool = False,
         tail: bool = False,
+        upload_disabled: bool = False,
         **_kwargs: Any,
     ) -> None:
         """Kicks off the create/update of the stacks in the stack_definitions.
 
         This is the main entry point for the action.
 
+        Args:
+            concurrency: The maximum number of concurrent deployments.
+            dump: Dump the plan rather than execute it.
+            force: Not used by this action.
+            outline: Outline the plan rather than execute it.
+            tail: Tail the stack's events.
+            upload_disabled: Whether to explicitly disable uploading the CloudFormation
+                template to S3.
+
         """
+        if upload_disabled:
+            self.upload_disabled = upload_disabled
         plan = self.__generate_plan(tail=tail)
         if not plan.keys():
             LOGGER.warning("no stacks detected (error in config?)")

@@ -4,11 +4,11 @@
 import unittest
 
 import botocore.exceptions
-from botocore.stub import ANY, Stubber
 from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin.actions.base import BaseAction
 from runway.cfngin.blueprints.base import Blueprint
+from runway.cfngin.exceptions import CfnginBucketNotFound
 from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.session_cache import get_session
@@ -58,86 +58,39 @@ class TestBaseAction(unittest.TestCase):
             ],
         }
 
-    def test_ensure_cfn_bucket_exists(self) -> None:
+    @patch("runway.cfngin.actions.base.ensure_s3_bucket")
+    def test_ensure_cfn_bucket_exists(self, mock_ensure_s3_bucket: MagicMock) -> None:
         """Test ensure cfn bucket exists."""
-        session = get_session("us-east-1")
-        provider = Provider(session)
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider=provider),
+            provider_builder=MockProviderBuilder(
+                provider=Provider(get_session("us-east-1"))
+            ),
         )
-        stubber = Stubber(action.s3_conn)
-        stubber.add_response(
-            "head_bucket", service_response={}, expected_params={"Bucket": ANY}
+        assert not action.ensure_cfn_bucket()
+        mock_ensure_s3_bucket.assert_called_once_with(
+            action.s3_conn, action.bucket_name, None, create=False
         )
-        with stubber:
-            action.ensure_cfn_bucket()
 
-    def test_ensure_cfn_bucket_does_not_exist_us_east(self) -> None:
-        """Test ensure cfn bucket does not exist us east."""
-        session = get_session("us-east-1")
-        provider = Provider(session)
+    @patch("runway.cfngin.actions.base.ensure_s3_bucket")
+    def test_ensure_cfn_bucket_exists_raise_cfngin_bucket_not_found(
+        self, mock_ensure_s3_bucket: MagicMock
+    ) -> None:
+        """Test ensure cfn bucket exists."""
+        mock_ensure_s3_bucket.side_effect = botocore.exceptions.ClientError(
+            {}, "head_bucket"  # type: ignore
+        )
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider=provider),
+            provider_builder=MockProviderBuilder(
+                provider=Provider(get_session("us-east-1"))
+            ),
         )
-        stubber = Stubber(action.s3_conn)
-        stubber.add_client_error(
-            "head_bucket",
-            service_error_code="NoSuchBucket",
-            service_message="Not Found",
-            http_status_code=404,
+        with self.assertRaises(CfnginBucketNotFound):
+            assert action.ensure_cfn_bucket()
+        mock_ensure_s3_bucket.assert_called_once_with(
+            action.s3_conn, action.bucket_name, None, create=False
         )
-        stubber.add_response(
-            "create_bucket", service_response={}, expected_params={"Bucket": ANY}
-        )
-        with stubber:
-            action.ensure_cfn_bucket()
-
-    def test_ensure_cfn_bucket_does_not_exist_us_west(self) -> None:
-        """Test ensure cfn bucket does not exist us west."""
-        session = get_session("us-west-1")
-        provider = Provider(session)
-        action = BaseAction(
-            context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider=provider, region="us-west-1"),
-        )
-        stubber = Stubber(action.s3_conn)
-        stubber.add_client_error(
-            "head_bucket",
-            service_error_code="NoSuchBucket",
-            service_message="Not Found",
-            http_status_code=404,
-        )
-        stubber.add_response(
-            "create_bucket",
-            service_response={},
-            expected_params={
-                "Bucket": ANY,
-                "CreateBucketConfiguration": {"LocationConstraint": "us-west-1"},
-            },
-        )
-        with stubber:
-            action.ensure_cfn_bucket()
-
-    def test_ensure_cfn_forbidden(self) -> None:
-        """Test ensure cfn forbidden."""
-        session = get_session("us-west-1")
-        provider = Provider(session)
-        action = BaseAction(
-            context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(provider=provider),
-        )
-        stubber = Stubber(action.s3_conn)
-        stubber.add_client_error(
-            "head_bucket",
-            service_error_code="AccessDenied",
-            service_message="Forbidden",
-            http_status_code=403,
-        )
-        with stubber:
-            with self.assertRaises(botocore.exceptions.ClientError):
-                action.ensure_cfn_bucket()
 
     @patch(
         "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock

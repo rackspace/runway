@@ -7,17 +7,23 @@ import unittest
 from collections import namedtuple
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
+import pytest
 from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin import exceptions
 from runway.cfngin.actions import deploy
 from runway.cfngin.actions.deploy import (
+    Action,
     UsePreviousParameterValue,
     _handle_missing_parameters,
     _resolve_parameters,
 )
 from runway.cfngin.blueprints.variables.types import CFNString
-from runway.cfngin.exceptions import StackDidNotChange, StackDoesNotExist
+from runway.cfngin.exceptions import (
+    CfnginBucketRequired,
+    StackDidNotChange,
+    StackDoesNotExist,
+)
 from runway.cfngin.plan import Graph, Plan, Step
 from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.providers.base import BaseProvider
@@ -38,6 +44,7 @@ from ..factories import MockProviderBuilder, MockThreadingEvent
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import StackTypeDef
+    from pytest_mock import MockerFixture
 
     from runway.cfngin.status import Status
 
@@ -99,7 +106,58 @@ class MockStack:
         self.requires = []
 
 
-class TestBuildAction(unittest.TestCase):
+class TestAction:
+    """Test Action."""
+
+    @pytest.mark.parametrize(
+        "bucket_name, explicit, expected",
+        [
+            (None, False, True),
+            (None, True, True),
+            ("something", False, False),
+            ("something", True, True),
+        ],
+    )
+    def test_upload_disabled(
+        self,
+        bucket_name: Optional[str],
+        cfngin_context: CfnginContext,
+        explicit: bool,
+        expected: bool,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test upload_disabled."""
+        mocker.patch.object(cfngin_context, "bucket_name", bucket_name)
+        obj = Action(cfngin_context)
+        obj.upload_explicitly_disabled = explicit
+        assert obj.upload_disabled is expected
+
+    def test_upload_disabled_setter(
+        self, cfngin_context: CfnginContext, mocker: MockerFixture
+    ) -> None:
+        """Test upload_disabled."""
+        mocker.patch.object(cfngin_context, "bucket_name", "something")
+        obj = Action(cfngin_context)
+        obj.upload_disabled = False
+        assert not obj.upload_disabled
+        assert not obj.upload_explicitly_disabled
+
+        obj.upload_disabled = True
+        assert obj.upload_disabled
+        assert obj.upload_explicitly_disabled
+
+    def test_upload_disabled_setter_raise_cfngin_bucket_required(
+        self, cfngin_context: CfnginContext, mocker: MockerFixture
+    ) -> None:
+        """Test upload_disabled."""
+        mocker.patch.object(cfngin_context, "bucket_name", None)
+        with pytest.raises(CfnginBucketRequired):
+            Action(cfngin_context).upload_disabled = False
+
+
+class TestBuildAction(
+    unittest.TestCase
+):  # TODO: refactor tests into the TestAction class
     """Tests for runway.cfngin.actions.deploy.BuildAction."""
 
     def setUp(self) -> None:
@@ -362,7 +420,7 @@ class TestBuildAction(unittest.TestCase):
             self.assertEqual(deploy.should_submit(mock_stack), test.result)  # type: ignore
 
 
-class TestLaunchStack(TestBuildAction):
+class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tests
     """Tests for runway.cfngin.actions.deploy.BuildAction launch stack."""
 
     def setUp(self) -> None:
@@ -542,7 +600,7 @@ class TestLaunchStack(TestBuildAction):
         self._advance("UPDATE_COMPLETE", COMPLETE, "updating existing stack")
 
 
-class TestFunctions(unittest.TestCase):
+class TestFunctions(unittest.TestCase):  # TODO: refactor tests to be pytest tests
     """Tests for runway.cfngin.actions.deploy module level functions."""
 
     def setUp(self) -> None:

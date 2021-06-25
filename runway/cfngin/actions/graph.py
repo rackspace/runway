@@ -89,6 +89,7 @@ class Action(BaseAction):
         force: bool = False,  # pylint: disable=unused-argument
         outline: bool = False,  # pylint: disable=unused-argument
         tail: bool = False,  # pylint: disable=unused-argument
+        upload_disabled: bool = False,  # pylint: disable=unused-argument
         **kwargs: Any,
     ) -> None:
         """Generate the underlying graph and prints it."""

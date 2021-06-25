@@ -1,11 +1,13 @@
 """CFNgin exceptions."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from ..exceptions import RunwayError
 
 if TYPE_CHECKING:
+    from ..type_defs import AnyPath
     from ..variables import Variable
     from .plan import Step
 
@@ -20,6 +22,79 @@ class CancelExecution(CfnginError):
     """Raised when we want to cancel executing the plan."""
 
     message: str = "Plan canceled"
+
+
+class CfnginBucketAccessDenied(CfnginError):
+    """Access denied to CFNgin bucket.
+
+    This can occur when the bucket exists in another AWS account and/or the
+    credentials being used do not have adequate permissions to access the bucket.
+
+    """
+
+    bucket_name: str
+    message: str
+
+    def __init__(self, *, bucket_name: str) -> None:
+        """Instantiate class.
+
+        Args:
+            bucket_name: Name of the CFNgin bucket.
+
+        """
+        self.bucket_name = bucket_name
+        self.message = f"access denied for cfngin_bucket {bucket_name}"
+        super().__init__()
+
+
+class CfnginBucketNotFound(CfnginError):
+    """CFNgin bucket specified or default bucket being used but it does not exist.
+
+    This can occur when using a custom stack to deploy the CFNgin bucket but the
+    custom stack does not create bucket that is expected.
+
+    """
+
+    bucket_name: str
+    message: str
+
+    def __init__(self, *, bucket_name: str) -> None:
+        """Instantiate class.
+
+        Args:
+            bucket_name: Name of the CFNgin bucket.
+
+        """
+        self.bucket_name = bucket_name
+        self.message = f"cfngin_bucket does not exist {bucket_name}"
+        super().__init__()
+
+
+class CfnginBucketRequired(CfnginError):
+    """CFNgin bucket is required to use a feature but it not provided/disabled."""
+
+    config_path: Optional[Path]
+    message: str
+
+    def __init__(
+        self, *, config_path: Optional[AnyPath] = None, reason: Optional[str] = None
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            config_path: Path to the CFNgin config file.
+            reason: Reason why CFNgin bucket is needed.
+
+        """
+        self.message = "cfngin_bucket is required"
+        if reason:
+            self.message += f"; {reason}"
+        if isinstance(config_path, str):
+            config_path = Path(config_path)
+        if config_path:
+            self.message += f" ({config_path})"
+        self.config_path = config_path
+        super().__init__()
 
 
 class ChangesetDidNotStabilize(CfnginError):
@@ -268,7 +343,7 @@ class PersistentGraphLocked(CfnginError):
     message: str
 
     def __init__(
-        self, message: Optional[str] = None, reason: Optional[str] = None
+        self, *, message: Optional[str] = None, reason: Optional[str] = None
     ) -> None:
         """Instantiate class."""
         if message:

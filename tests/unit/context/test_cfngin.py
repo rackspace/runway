@@ -545,7 +545,11 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.s3_bucket_verified is True
         assert obj.s3_bucket_verified is True  # value should be cached
         mock_ensure_s3_bucket.assert_called_once_with(
-            obj.s3_client, obj.bucket_name, obj.bucket_region, persist_graph=False
+            obj.s3_client,
+            obj.bucket_name,
+            obj.bucket_region,
+            create=False,
+            persist_graph=False,
         )
 
     def test_s3_client(self, mocker: MockerFixture) -> None:
