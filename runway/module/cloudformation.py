@@ -73,7 +73,8 @@ class CloudFormation(RunwayModule):
 
     def init(self) -> None:
         """Run init."""
-        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+        cfngin = CFNgin(self.ctx, parameters=self.parameters, sys_path=self.path)
+        cfngin.init(force=bool(self.parameters or self.explicitly_enabled))
 
     def plan(self) -> None:
         """Run diff."""

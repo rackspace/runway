@@ -3,7 +3,6 @@
 # pyright: basic
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any, Dict
 
 from runway.core.components import DeployEnvironment
@@ -14,7 +13,6 @@ from ..factories import MockRunwayContext
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.context import RunwayContext
@@ -46,7 +44,7 @@ class TestCloudFormation:
         module = CloudFormation(
             self.get_context(), module_root=tmp_path, parameters=self.generic_parameters
         )
-        module.deploy()
+        assert not module.deploy()
         mock_action.assert_called_once()
 
     def test_destroy(self, tmp_path: Path, mocker: MockerFixture) -> None:
@@ -55,20 +53,17 @@ class TestCloudFormation:
         module = CloudFormation(
             self.get_context(), module_root=tmp_path, parameters=self.generic_parameters
         )
-        module.destroy()
+        assert not module.destroy()
         mock_action.assert_called_once()
 
     def test_init(
-        self, caplog: LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
+        self, mocker: MockerFixture, runway_context: RunwayContext, tmp_path: Path
     ) -> None:
         """Test init."""
-        caplog.set_level(logging.WARNING, logger=MODULE)
+        mock_action = mocker.patch("runway.cfngin.cfngin.CFNgin.init")
         obj = CloudFormation(runway_context, module_root=tmp_path)
         assert not obj.init()
-        assert (
-            f"init not currently supported for {CloudFormation.__name__}"
-            in caplog.messages
-        )
+        mock_action.assert_called_once()
 
     def test_plan(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test plan."""
@@ -76,5 +71,5 @@ class TestCloudFormation:
         module = CloudFormation(
             self.get_context(), module_root=tmp_path, parameters=self.generic_parameters
         )
-        module.plan()
+        assert not module.plan()
         mock_action.assert_called_once()
