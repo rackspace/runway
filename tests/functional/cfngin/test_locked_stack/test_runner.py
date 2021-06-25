@@ -34,6 +34,9 @@ def test_deploy_log_messages(deploy_result: Result) -> None:
     """Test deploy log messages."""
     expected_lines = [
         "00-bootstrap.yaml:deploy (complete)",
+        "01-locked-stack.yaml:init (in progress)",
+        "skipped; cfngin_bucket not defined",
+        "01-locked-stack.yaml:init (complete)",
         "01-locked-stack.yaml:deploy (in progress)",
         "locked-stack-vpc:skipped (locked)",
         "locked-stack-bastion:submitted (creating new stack)",
