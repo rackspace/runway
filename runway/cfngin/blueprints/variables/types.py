@@ -231,9 +231,7 @@ class EC2ImageId(CFNType):
 
     """
 
-    parameter_type: ClassVar[
-        Literal["AWS::EC2::AvailabilityZone::Name"]
-    ] = "AWS::EC2::AvailabilityZone::Name"
+    parameter_type: ClassVar[Literal["AWS::EC2::Image::Id"]] = "AWS::EC2::Image::Id"
 
 
 class EC2InstanceId(CFNType):
@@ -264,8 +262,8 @@ class EC2SecurityGroupId(CFNType):
     """A security group ID, such as sg-a123fd85."""
 
     parameter_type: ClassVar[
-        Literal["AWS::EC2::SecurityGroup::GroupName"]
-    ] = "AWS::EC2::SecurityGroup::GroupName"
+        Literal["AWS::EC2::SecurityGroup::Id"]
+    ] = "AWS::EC2::SecurityGroup::Id"
 
 
 class EC2SubnetId(CFNType):
@@ -310,23 +308,25 @@ class EC2ImageIdList(CFNType):
 
     """
 
-    parameter_type: ClassVar[Literal["EC2ImageIdList"]] = "EC2ImageIdList"
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::Image::Id>"]
+    ] = "List<AWS::EC2::Image::Id>"
 
 
 class EC2InstanceIdList(CFNType):
     """An array of Amazon EC2 instance IDs, such as i-1e731a32, i-1e731a34."""
 
     parameter_type: ClassVar[
-        Literal["List<AWS::EC2::Image::Id>"]
-    ] = "List<AWS::EC2::Image::Id>"
+        Literal["List<AWS::EC2::Instance::Id>"]
+    ] = "List<AWS::EC2::Instance::Id>"
 
 
 class EC2SecurityGroupGroupNameList(CFNType):
     """An array of EC2-Classic or default VPC security group names."""
 
     parameter_type: ClassVar[
-        Literal["List<AWS::EC2::Instance::Id>"]
-    ] = "List<AWS::EC2::Instance::Id>"
+        Literal["List<AWS::EC2::SecurityGroup::GroupName>"]
+    ] = "List<AWS::EC2::SecurityGroup::GroupName>"
 
 
 class EC2SecurityGroupIdList(CFNType):
@@ -348,13 +348,17 @@ class EC2SubnetIdList(CFNType):
 class EC2VolumeIdList(CFNType):
     """An array of Amazon EBS volume IDs, such as vol-3cdd3f56, vol-4cdd3f56."""
 
-    parameter_type: ClassVar[Literal["EC2VolumeIdList"]] = "EC2VolumeIdList"
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::Volume::Id>"]
+    ] = "List<AWS::EC2::Volume::Id>"
 
 
 class EC2VPCIdList(CFNType):
     """An array of VPC IDs, such as vpc-a123baa3, vpc-b456baa3."""
 
-    parameter_type: ClassVar[Literal["EC2VPCIdList"]] = "EC2VPCIdList"
+    parameter_type: ClassVar[
+        Literal["List<AWS::EC2::VPC::Id>"]
+    ] = "List<AWS::EC2::VPC::Id>"
 
 
 class Route53HostedZoneIdList(CFNType):
