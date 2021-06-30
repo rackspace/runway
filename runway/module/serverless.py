@@ -5,11 +5,11 @@ import argparse
 import logging
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
 import uuid
+from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 import yaml
@@ -20,16 +20,16 @@ from ..compat import cached_property
 from ..config.models.runway.options.serverless import (
     RunwayServerlessModuleOptionsDataModel,
 )
-from ..s3_utils import does_s3_object_exist, download, ensure_bucket_exists, upload
+from ..constants import DOT_RUNWAY_DIR
+from ..s3_utils import does_s3_object_exist, download, upload
 from ..utils import YamlDumper, merge_dicts
 from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from .._logging import RunwayLogger
     from ..context import RunwayContext
+    from ..type_defs import AnyPath, AnyPathConstrained
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -45,108 +45,6 @@ def gen_sls_config_files(stage: str, region: str) -> List[str]:
         names.append(os.path.join("env", "%s.%s" % (stage, ext)))
         names.append("config-%s.%s" % (stage, ext))
     return names
-
-
-def run_sls_print(
-    sls_opts: List[str], env_vars: Dict[str, str], path: Path
-) -> Dict[str, Any]:
-    """Run sls print command."""
-    sls_info_opts = list(sls_opts)
-    sls_info_opts[0] = "print"
-    sls_info_opts.extend(["--format", "yaml"])
-    sls_info_cmd = generate_node_command(
-        command="sls", command_opts=sls_info_opts, path=path
-    )
-    return yaml.safe_load(
-        subprocess.check_output(
-            sls_info_cmd, env={"SLS_DEPRECATION_DISABLE": "*", **env_vars}
-        )
-    )
-
-
-def get_src_hash(sls_config: Dict[str, Any], path: Path) -> Dict[str, str]:
-    """Get hash(es) of serverless source."""
-    funcs = sls_config["functions"]
-
-    if sls_config.get("package", {"": ""}).get("individually"):
-        return {
-            key: get_hash_of_files(path / os.path.dirname(funcs[key].get("handler")))
-            for key in funcs.keys()
-        }
-    directories: List[Dict[str, Union[List[str], str]]] = []
-    for _key, value in funcs.items():
-        func_path = {"path": os.path.dirname(value.get("handler"))}
-        if func_path not in directories:
-            directories.append(func_path)
-    if isinstance(sls_config["service"], dict):
-        # handle sls<3.0.0 potential service property object notation
-        return {sls_config["service"]["name"]: get_hash_of_files(path, directories)}
-    return {sls_config["service"]: get_hash_of_files(path, directories)}
-
-
-def deploy_package(
-    sls_opts: List[str],
-    bucketname: str,
-    context: RunwayContext,
-    path: Path,
-    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
-) -> None:
-    """Run sls package command.
-
-    Args:
-        sls_opts: List of options for Serverless CLI.
-        bucketname: S3 Bucket name.
-        context: Runway context object.
-        path: Module path.
-        logger: A more granular logger for log messages.
-
-    """
-    package_dir = tempfile.mkdtemp()
-    logger.debug("package directory: %s", package_dir)
-
-    ensure_bucket_exists(bucketname, context.env.aws_region)
-    sls_config = run_sls_print(sls_opts, context.env.vars, path)
-    hashes = get_src_hash(sls_config, path)
-
-    sls_opts[0] = "package"
-    sls_opts.extend(["--package", package_dir])
-    sls_package_cmd = generate_node_command(
-        command="sls", command_opts=sls_opts, path=path
-    )
-
-    logger.info("package %s (in progress)", path.name)
-    run_module_command(
-        cmd_list=sls_package_cmd, env_vars=context.env.vars, logger=logger
-    )
-    logger.info("package %s (complete)", path.name)
-
-    for key in hashes.keys():
-        hash_zip = hashes[key] + ".zip"
-        func_zip = os.path.basename(key) + ".zip"
-        if does_s3_object_exist(bucketname, hash_zip):
-            logger.info("found existing package for %s", key)
-            download(bucketname, hash_zip, os.path.join(package_dir, func_zip))
-        else:
-            logger.info("no existing package found for %s", key)
-            zip_name = os.path.join(package_dir, func_zip)
-            upload(bucketname, hash_zip, zip_name)
-
-    sls_opts[0] = "deploy"
-    # --package must be provided to "deploy" as a relative path to support
-    # serverless@<1.70.0. the fix to support absolute path was implimented
-    # somewhere between 1.60.0 and 1.70.0.
-    sls_opts[-1] = os.path.relpath(package_dir)
-    sls_deploy_cmd = generate_node_command(
-        command="sls", command_opts=sls_opts, path=path
-    )
-
-    logger.info("deploy (in progress)")
-    run_module_command(
-        cmd_list=sls_deploy_cmd, env_vars=context.env.vars, logger=logger
-    )
-    logger.info("deploy (complete)")
-
-    shutil.rmtree(package_dir)
 
 
 class Serverless(RunwayModuleNpm):
@@ -282,47 +180,61 @@ class Serverless(RunwayModuleNpm):
         args.extend(args_list or [])
         if self.ctx.no_color and "--no-color" not in args:
             args.append("--no-color")
-        if command not in ["remove", "print"] and self.ctx.is_noninteractive:
+        if command not in ["remove", "package", "print"] and self.ctx.is_noninteractive:
             args.append("--conceal")  # hide secrets from serverless output
         return generate_node_command(
             command="sls", command_opts=args, path=self.path, logger=self.logger
         )
 
-    def sls_deploy(self, skip_install: bool = False) -> None:
+    def sls_deploy(
+        self, *, package: Optional[AnyPath] = None, skip_install: bool = False
+    ) -> None:
         """Execute ``sls deploy`` command.
 
         Args:
+            package: Path to Serverless package to deploy.
             skip_install: Skip ``npm ci|install`` before running the
                 Serverless command.
 
         """
         if not skip_install:
             self.npm_install()
-
-        if self.options.promotezip:
-            # TODO refactor deploy_package to be part of the class
-            self.path.absolute()
-            sls_opts = ["deploy"] + self.cli_args + self.options.args
-            if self.ctx.no_color and "--no-color" not in sls_opts:
-                sls_opts.append("--no-color")
-            deploy_package(
-                sls_opts,
-                self.options.promotezip["bucketname"],
-                self.ctx,
-                self.path,
-                self.logger,
-            )
-            return
-        self.logger.info("deploy (in progress)")
         run_module_command(
-            cmd_list=self.gen_cmd("deploy"),
+            cmd_list=self.gen_cmd(
+                "deploy", args_list=["--package", str(package)] if package else []
+            ),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
-        self.logger.info("deploy (complete)")
+
+    def sls_package(
+        self,
+        *,
+        output_path: Optional[AnyPathConstrained] = None,
+        skip_install: bool = False,
+    ) -> Optional[AnyPathConstrained]:
+        """Execute ``sls package`` command.
+
+        Args:
+            output_path: Path where the package should be output.
+            skip_install: Skip ``npm ci|install`` before running the
+                Serverless command.
+
+        """
+        if not skip_install:
+            self.npm_install()
+        run_module_command(
+            cmd_list=self.gen_cmd(
+                "package",
+                args_list=["--package", str(output_path)] if output_path else [],
+            ),
+            env_vars=self.ctx.env.vars,
+            logger=self.logger,
+        )
+        return output_path
 
     def sls_print(
-        self, item_path: Optional[str] = None, skip_install: bool = False
+        self, *, item_path: Optional[str] = None, skip_install: bool = False
     ) -> Dict[str, Any]:
         """Execute ``sls print`` command.
 
@@ -357,7 +269,7 @@ class Serverless(RunwayModuleNpm):
             )
         return result
 
-    def sls_remove(self, skip_install: bool = False) -> None:
+    def sls_remove(self, *, skip_install: bool = False) -> None:
         """Execute ``sls remove`` command.
 
         Args:
@@ -389,9 +301,32 @@ class Serverless(RunwayModuleNpm):
         if self.skip:
             return
         if self.options.extend_serverless_yml:
-            self.extend_serverless_yml(self.sls_deploy)
+            self.extend_serverless_yml(self._deploy_package)
         else:
+            self._deploy_package()
+
+    def _deploy_package(self) -> None:
+        """Deploy Serverless package."""
+        if self.options.promotezip.bucketname:
+            with tempfile.TemporaryDirectory(dir=DOT_RUNWAY_DIR) as tmp_dir:
+                artifact = ServerlessArtifact(
+                    self.ctx,
+                    self.sls_print(),
+                    logger=self.logger,
+                    package_path=tmp_dir,
+                    path=self.path,
+                )
+                self.logger.info("package (in progress)")
+                self.sls_package(output_path=artifact.package_path, skip_install=True)
+                self.logger.info("package (complete)")
+                artifact.sync_with_s3(self.options.promotezip.bucketname)
+                self.logger.info("deploy (in progress)")
+                self.sls_deploy(package=artifact.package_path, skip_install=True)
+                self.logger.info("deploy (complete)")
+        else:
+            self.logger.info("deploy (in progress)")
             self.sls_deploy()
+            self.logger.info("deploy (complete)")
 
     def destroy(self) -> None:
         """Entrypoint for Runway's destroy action."""
@@ -404,11 +339,105 @@ class Serverless(RunwayModuleNpm):
 
     def init(self) -> None:
         """Run init."""
-        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+        self.logger.warning(
+            "init not currently supported for %s", self.__class__.__name__
+        )
 
     def plan(self) -> None:
         """Entrypoint for Runway's plan action."""
         self.logger.info("plan not currently supported for Serverless")
+
+
+class ServerlessArtifact:
+    """Object for interacting with a Serverless artifact directory."""
+
+    def __init__(
+        self,
+        context: RunwayContext,
+        config: Dict[str, Any],
+        *,
+        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+        package_path: AnyPath,
+        path: AnyPath,
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            context: Runway context object.
+            config: Rendered Serverless config file.
+            logger: Logger this object will log to. If not probided, the logger
+                in the local module will be used.
+            package_path: Local path to the artifact directory.
+            path: Root directory of the Serverless project.
+
+        """
+        self.ctx = context
+        self.config = config
+        self.logger = logger
+        self.package_path = (
+            Path(package_path) if isinstance(package_path, str) else package_path
+        )
+        self.path = Path(path) if isinstance(path, str) else path
+
+    @cached_property
+    def source_hash(self) -> Dict[str, str]:
+        """File hash(es) of each service's source code."""
+        if self.config.get("package", {"": ""}).get("individually"):
+            return {
+                name: get_hash_of_files(
+                    self.path / os.path.dirname(detail.get("handler"))
+                )
+                for name, detail in self.config.get("functions", {}).items()
+            }
+        directories: List[Dict[str, Union[List[str], str]]] = []
+        for _name, detail in self.config.get("functions", {}).items():
+            func_path = {"path": os.path.dirname(detail.get("handler"))}
+            if func_path not in directories:
+                directories.append(func_path)
+        if isinstance(self.config["service"], dict):
+            # handle sls<3.0.0 potential service property object notation
+            return {
+                self.config["service"]["name"]: get_hash_of_files(
+                    self.path, directories
+                )
+            }
+        return {self.config["service"]: get_hash_of_files(self.path, directories)}
+
+    def sync_with_s3(self, bucket_name: str) -> None:
+        """Sync local archive files with S3 bucket.
+
+        Args:
+            bucket_name: Name of S3 bucket to upload files to.
+
+        """
+        session = self.ctx.get_session()
+        for name, file_hash in self.source_hash.items():
+            file_path = self.package_path / f"{name}.zip"
+            obj_key = f"{file_hash}.zip"
+            if does_s3_object_exist(
+                bucket_name,
+                obj_key,
+                session=session,
+                region=self.ctx.env.aws_region,
+            ):
+                self.logger.info("found existing package for %s", name)
+                download(
+                    bucket=bucket_name,
+                    key=obj_key,
+                    file_path=str(file_path),
+                    session=session,
+                )
+            else:
+                self.logger.info("no existing package found for %s", name)
+                if not file_path.is_file():
+                    self.logger.info("local file not found for %s", name)
+                    continue
+                upload(
+                    bucket=bucket_name,
+                    key=obj_key,
+                    filename=str(file_path),
+                    session=session,
+                )
 
 
 class ServerlessOptions(ModuleOptions):
