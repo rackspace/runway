@@ -6,7 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from pydantic import Extra, Field, validator
-from typing_extensions import Literal
+from typing_extensions import Literal, TypedDict
 
 from ....compat import cached_property
 from ....utils import BaseModel, JsonEncoder
@@ -14,16 +14,19 @@ from ..utils import TagDataModel
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm.client import SSMClient
-    from mypy_boto3_ssm.type_defs import (
-        ParameterTypeDef,
-        PutParameterResultTypeDef,
-        TagTypeDef,
-    )
+    from mypy_boto3_ssm.type_defs import ParameterTierType, ParameterTypeDef, TagTypeDef
 
     from ...._logging import RunwayLogger
     from ....context import CfnginContext
+else:
+    ParameterTierType = Literal["Advanced", "Intelligent-Tiering", "Standard"]
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
+
+# PutParameterResultTypeDef but without metadata
+_PutParameterResultTypeDef = TypedDict(
+    "_PutParameterResultTypeDef", {"Tier": ParameterTierType, "Version": int}
+)
 
 
 class ArgsDataModel(BaseModel):
@@ -65,9 +68,7 @@ class ArgsDataModel(BaseModel):
     overwrite: bool = Field(True, alias="Overwrite")
     policies: Optional[str] = Field(None, alias="Policies")
     tags: Optional[List[TagDataModel]] = Field(None, alias="Tags")
-    tier: Literal["Advanced", "Intelligent-Tiering", "Standard"] = Field(
-        "Standard", alias="Tier"
-    )
+    tier: ParameterTierType = Field("Standard", alias="Tier")
     type: Literal["String", "StringList", "SecureString"] = Field(..., alias="Type")
     value: Optional[str] = Field(None, alias="Value")
 
@@ -168,7 +169,7 @@ class _Parameter:
         ):
             return []
 
-    def post_deploy(self) -> PutParameterResultTypeDef:
+    def post_deploy(self) -> _PutParameterResultTypeDef:
         """Run during the *post_deploy* stage."""
         result = self.put()
         self.update_tags()
@@ -178,7 +179,7 @@ class _Parameter:
         """Run during the *post_destroy* stage."""
         return self.delete()
 
-    def pre_deploy(self) -> PutParameterResultTypeDef:
+    def pre_deploy(self) -> _PutParameterResultTypeDef:
         """Run during the *pre_deploy* stage."""
         result = self.put()
         self.update_tags()
@@ -188,7 +189,7 @@ class _Parameter:
         """Run during the *pre_destroy* stage."""
         return self.delete()
 
-    def put(self) -> PutParameterResultTypeDef:
+    def put(self) -> _PutParameterResultTypeDef:
         """Put parameter."""
         if not self.args.value:
             LOGGER.info(
@@ -199,7 +200,7 @@ class _Parameter:
         current_param = self.get()
         if current_param.get("Value") != self.args.value:
             try:
-                result: PutParameterResultTypeDef = self.client.put_parameter(
+                result = self.client.put_parameter(
                     **self.args.dict(
                         by_alias=True, exclude_none=True, exclude={"force", "tags"}
                     )
@@ -215,7 +216,7 @@ class _Parameter:
                     "Version": current_param.get("Version", 0),
                 }
         else:
-            result = {
+            result: _PutParameterResultTypeDef = {
                 "Tier": current_param.get("Tier", self.args.tier),
                 "Version": current_param.get("Version", 0),
             }

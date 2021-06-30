@@ -39,4 +39,6 @@ class Action(BaseAction):
             LOGGER.info("%s:", stack.fqn)
             if "Outputs" in provider_stack:
                 for output in provider_stack["Outputs"]:
-                    LOGGER.info("\t%s: %s", output["OutputKey"], output["OutputValue"])
+                    LOGGER.info(
+                        "\t%s: %s", output.get("OutputKey"), output.get("OutputValue")
+                    )

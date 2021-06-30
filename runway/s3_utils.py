@@ -148,7 +148,7 @@ def upload(
     """Upload file to S3 bucket."""
     s3_client = _get_client(session)
     LOGGER.info("uploading %s to s3://%s/%s...", filename, bucket, key)
-    s3_client.upload_file(filename, bucket, key)
+    s3_client.upload_file(Filename=filename, Bucket=bucket, Key=key)
 
 
 def download(
