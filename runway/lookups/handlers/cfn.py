@@ -68,7 +68,8 @@ class CfnLookup(LookupHandler):
         LOGGER.debug("describing stack: %s", query.stack_name)
         stack = client.describe_stacks(StackName=query.stack_name)["Stacks"][0]
         outputs = {
-            output["OutputKey"]: output["OutputValue"]
+            # these should always exist even though the schema says they are not required
+            output["OutputKey"]: output["OutputValue"]  # type: ignore
             for output in stack.get("Outputs", [])
         }
         LOGGER.debug("%s stack outputs: %s", stack["StackName"], json.dumps(outputs))

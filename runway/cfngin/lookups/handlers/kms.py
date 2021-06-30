@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import codecs
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, BinaryIO, Union, cast
 
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
@@ -74,7 +74,10 @@ class KmsLookup(LookupHandler):
         decoded = codecs.decode(value.encode(), "base64")
 
         # decrypt and return the plain text raw value.
-        decrypted = kms.decrypt(CiphertextBlob=decoded).get("Plaintext", b"")
+        decrypted = cast(
+            Union[BinaryIO, bytes],
+            kms.decrypt(CiphertextBlob=decoded).get("Plaintext", b""),
+        )
         if isinstance(decrypted, bytes):
             return decrypted.decode()
         return decrypted.read().decode()

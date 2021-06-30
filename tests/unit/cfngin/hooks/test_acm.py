@@ -98,7 +98,7 @@ def gen_change_resource_record_sets(
         "Comment": "placeholder_comment",
     }
     data.update(kwargs)  # type: ignore
-    return {"ChangeInfo": data}
+    return {"ChangeInfo": data}  # type: ignore
 
 
 def gen_domain_validation_option(**kwargs: Any) -> DomainValidationTypeDef:

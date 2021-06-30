@@ -100,7 +100,8 @@ def get_output_dict(stack: StackTypeDef) -> Dict[str, str]:
     if not stack.get("Outputs"):
         return {}
     outputs = {
-        output["OutputKey"]: output["OutputValue"]
+        # both of these should exist even if the schema says they may not
+        output["OutputKey"]: output["OutputValue"]  # type: ignore
         for output in stack.get("Outputs", [])
     }
     LOGGER.debug("%s stack outputs: %s", stack["StackName"], json.dumps(outputs))

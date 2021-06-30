@@ -708,7 +708,9 @@ class SourceProcessor:
                     str(extra_s3_args),
                 )
                 session.resource("s3").Bucket(config.bucket).download_file(
-                    config.key, str(extractor.archive), ExtraArgs=extra_s3_args
+                    Key=config.key,
+                    Filename=str(extractor.archive),
+                    ExtraArgs=extra_s3_args,
                 )
                 LOGGER.debug(
                     "download complete; extracting downloaded package to %s",

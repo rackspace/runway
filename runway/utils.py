@@ -701,8 +701,8 @@ def find_cfn_output(key: str, outputs: List[OutputTypeDef]) -> Optional[str]:
 
     """
     for i in outputs:
-        if i["OutputKey"] == key:
-            return i["OutputValue"]
+        if i.get("OutputKey") == key:
+            return i.get("OutputValue")
     return None
 
 
