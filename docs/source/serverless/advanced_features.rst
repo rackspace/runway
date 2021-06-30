@@ -115,7 +115,7 @@ Promoting Builds Through Environments
 Serverless build ``.zips`` can be used between environments by setting the ``promotezip`` module option and providing a bucket name in which to cache the builds.
 
 The first time the Serverless module is deployed using this option, it will build/deploy as normal and cache the artifact on S3.
-On subsequent deploys, Runway will used that cached artifact (finding it by comparing the module source code).
+On subsequent deploys, Runway will use the cached artifact (finding it by comparing the module source code).
 
 This enables a common build account to deploy new builds in a dev/test environment, and then promote that same zip through other environments.
 Any of these environments can be in the same or different AWS accounts.

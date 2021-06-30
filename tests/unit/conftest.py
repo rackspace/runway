@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
 
 import pytest
 import yaml
+from mock import MagicMock
 
 from runway.config import RunwayConfig
 from runway.core.components import DeployEnvironment
@@ -98,6 +99,15 @@ def fx_deployments() -> YamlLoaderDeployment:
 def mock_docker_client() -> DockerClient:
     """Create a docker client with mock API backend."""
     return make_fake_client()
+
+
+@pytest.fixture(scope="function")
+def tempfile_temporary_directory(mocker: MockerFixture, tmp_path: Path) -> MagicMock:
+    """Mock tempfile.TemporaryDirectory."""
+    return mocker.patch(
+        "tempfile.TemporaryDirectory",
+        return_value=MagicMock(__enter__=MagicMock(return_value=str(tmp_path))),
+    )
 
 
 @pytest.fixture(scope="module")
