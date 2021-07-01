@@ -25,8 +25,7 @@ repos:
         args: [--autofix, --indent, '4']
         files: |
           (?x)^(
-            \.vscode/.*\.json|
-            pyrightconfig.json
+            \.vscode/.*\.json
           )$
       - id: pretty-format-json
         args: [--autofix, --indent, '2']

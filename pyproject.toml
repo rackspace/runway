@@ -318,6 +318,42 @@ ignored-classes = [
 ignored-modules = ["distutils"]
 
 
+[tool.pyright]
+exclude = [
+  "**/__pycache__",
+  "**/.demo",
+  "**/.eggs",
+  "**/.git",
+  "**/.runway",
+  "**/.venv",
+  "**/docs",
+  "**/node_modules",
+  "**/typings",
+  "**/runway/aws_sso_botocore",
+  "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
+  "**/runway/templates/cdk-py",
+  "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src",
+]
+extraPaths = [
+  "./.github/scripts/urlshortener",
+]
+pythonVersion = "3.8"
+reportDuplicateImport = "none"
+reportImportCycles = "none"
+reportIncompatibleMethodOverride = "warning"
+reportMissingTypeStubs = "none"
+reportPrivateUsage = "none"
+reportUnknownMemberType = "none"
+reportUnnecessaryIsInstance = "warning"
+reportUnusedImport = "none"
+reportUnusedVariable = "none"
+reportWildcardImportFromLibrary = "none"
+strictParameterNoneValue = false
+typeCheckingMode = "strict"
+useLibraryCodeForTypes = true
+venv = ".venv"
+
+
 [tool.pytest.ini_options]
 addopts = [
   "--cov-config=pyproject.toml",
