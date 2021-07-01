@@ -127,4 +127,4 @@ def test_assume_role_raise_value_error(runway_context: MockRunwayContext) -> Non
         ValueError, match="assume_role did not return Credentials"
     ):
         with AssumeRole(runway_context, role_arn=ROLE_ARN):
-            assert False
+            raise AssertionError

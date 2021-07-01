@@ -125,8 +125,7 @@ def copydir(
         try:
             LOGGER.debug('copying file "%s" to "%s"', src, dest)
             copyfile(src, dest)
-        # python2 raises an IOError here
-        except (IOError, OSError):
+        except OSError:
             _mkdir(os.path.dirname(dest))
             copyfile(src, dest)
 

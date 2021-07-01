@@ -148,7 +148,7 @@ class DAG:
         """Build a new graph with the edges reversed."""
         graph = self.graph
         transposed = DAG()
-        for node, edges in graph.items():
+        for node, _edges in graph.items():
             transposed.add_node(node)
         for node, edges in graph.items():
             # for each edge A -> B, transpose it so that B -> A

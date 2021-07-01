@@ -83,7 +83,7 @@ def read_public_key_file(path: Path) -> Optional[bytes]:
                 "keys format (beginning with `ssh-rsa`)"
             )
         return data.strip()
-    except (ValueError, IOError, OSError) as err:
+    except (ValueError, OSError) as err:
         LOGGER.error('failed to read public key file :%s": %s', path, str(err))
         return None
 

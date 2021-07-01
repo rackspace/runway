@@ -55,7 +55,7 @@ class CFNgin:
         self,
         ctx: RunwayContext,
         parameters: Optional[Dict[str, Any]] = None,
-        sys_path: Path = Path.cwd(),
+        sys_path: Optional[Path] = None,
     ) -> None:
         """Instantiate class.
 
@@ -72,7 +72,7 @@ class CFNgin:
         self.parameters = MutableMap()
         self.recreate_failed = ctx.is_noninteractive
         self.region = ctx.env.aws_region
-        self.sys_path = sys_path
+        self.sys_path = sys_path or Path.cwd()
         self.tail = bool(ctx.env.debug or ctx.env.verbose)
 
         self.parameters.update(self.env_file)

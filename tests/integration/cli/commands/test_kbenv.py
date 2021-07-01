@@ -27,7 +27,7 @@ def test_kbenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     result = runner.invoke(cli, ["kbenv", "install"])
     assert result.exit_code == 0
 
-    kb_bin = Path(caplog.messages[-1].strip("kubectl path: "))
+    kb_bin = Path(caplog.messages[-1].replace("kubectl path: ", ""))
     assert kb_bin.exists()
 
 
@@ -57,7 +57,7 @@ def test_kbenv_install_version(caplog: LogCaptureFixture) -> None:
     result = runner.invoke(cli, ["kbenv", "install", "v1.14.0"])
     assert result.exit_code == 0
 
-    kb_bin = Path(caplog.messages[-1].strip("kubectl path: "))
+    kb_bin = Path(caplog.messages[-1].replace("kubectl path: ", ""))
     assert kb_bin.exists()
 
 
