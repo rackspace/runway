@@ -97,7 +97,7 @@ class TestGraph(unittest.TestCase):
         """Run before tests."""
         self.context = mock_context()
         self.graph_dict: Dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
-        self.graph_dict_expected = {"stack1": set(), "stack2": set(["stack1"])}
+        self.graph_dict_expected = {"stack1": set(), "stack2": {"stack1"}}
         self.steps = Step.from_persistent_graph(self.graph_dict, self.context)
 
     def test_add_steps(self) -> None:
@@ -178,9 +178,7 @@ class TestPlan(unittest.TestCase):
         graph = Graph.from_steps([Step(vpc, fn=None), Step(bastion, fn=None)])
         plan = Plan(description="Test", graph=graph)
 
-        self.assertEqual(
-            plan.graph.to_dict(), {"bastion.1": set(["vpc.1"]), "vpc.1": set([])}
-        )
+        self.assertEqual(plan.graph.to_dict(), {"bastion.1": {"vpc.1"}, "vpc.1": set()})
 
     def test_plan_reverse(self) -> None:
         """Test plan reverse."""
@@ -195,7 +193,7 @@ class TestPlan(unittest.TestCase):
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
         self.assertEqual(set(), result_graph_dict.get("bastion.1"))
-        self.assertEqual(set(["bastion.1"]), result_graph_dict.get("vpc.1"))
+        self.assertEqual({"bastion.1"}, result_graph_dict.get("vpc.1"))
 
     def test_plan_targeted(self) -> None:
         """Test plan targeted."""
@@ -256,7 +254,7 @@ class TestPlan(unittest.TestCase):
         result_graph_dict = context.persistent_graph.to_dict()  # type: ignore
         self.assertEqual(2, len(result_graph_dict))
         self.assertEqual(set(), result_graph_dict.get("vpc.1"))
-        self.assertEqual(set(["vpc.1"]), result_graph_dict.get("bastion.1"))
+        self.assertEqual({"vpc.1"}, result_graph_dict.get("bastion.1"))
         self.assertIsNone(result_graph_dict.get("namespace-removed.1"))
 
     def test_execute_plan_no_persist(self) -> None:

@@ -228,7 +228,7 @@ class _Parameter:
         current_tags = self.get_current_tags()
         if self.args.tags and current_tags:
             diff_tag_keys = list(
-                set(i["Key"] for i in current_tags) ^ set(i.key for i in self.args.tags)
+                {i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags}
             )
         elif self.args.tags:
             diff_tag_keys = []

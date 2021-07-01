@@ -26,12 +26,7 @@ def test_transpose(basic_dag: DAG) -> None:
     dag = basic_dag
 
     transposed = dag.transpose()
-    assert transposed.graph == {
-        "d": set(["c", "b"]),
-        "c": set(["a"]),
-        "b": set(["a"]),
-        "a": set([]),
-    }
+    assert transposed.graph == {"d": {"c", "b"}, "c": {"a"}, "b": {"a"}, "a": set()}
 
 
 def test_add_edge(empty_dag: DAG) -> None:
@@ -49,7 +44,7 @@ def test_from_dict(empty_dag: DAG) -> None:
     dag = empty_dag
 
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
-    assert dag.graph == {"a": set(["b", "c"]), "b": set("d"), "c": set("d"), "d": set()}
+    assert dag.graph == {"a": {"b", "c"}, "b": {"d"}, "c": {"d"}, "d": set()}
 
 
 def test_reset_graph(empty_dag: DAG) -> None:
@@ -109,7 +104,7 @@ def test_failed_validation(empty_dag: DAG) -> None:
 def test_downstream(basic_dag: DAG) -> None:
     """Test downstream."""
     dag = basic_dag
-    assert set(dag.downstream("a")) == set(["b", "c"])
+    assert set(dag.downstream("a")) == {"b", "c"}
 
 
 def test_all_downstreams(basic_dag: DAG) -> None:
@@ -134,10 +129,10 @@ def test_predecessors(basic_dag: DAG) -> None:
     """Test predecessors."""
     dag = basic_dag
 
-    assert set(dag.predecessors("a")) == set([])
-    assert set(dag.predecessors("b")) == set(["a"])
-    assert set(dag.predecessors("c")) == set(["a"])
-    assert set(dag.predecessors("d")) == set(["b", "c"])
+    assert set(dag.predecessors("a")) == set()
+    assert set(dag.predecessors("b")) == {"a"}
+    assert set(dag.predecessors("c")) == {"a"}
+    assert set(dag.predecessors("d")) == {"b", "c"}
 
 
 def test_filter(basic_dag: DAG) -> None:
@@ -169,7 +164,7 @@ def test_transitive_reduction_no_reduction(empty_dag: DAG) -> None:
     dag = empty_dag
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
     dag.transitive_reduction()
-    assert dag.graph == {"a": set(["b", "c"]), "b": set("d"), "c": set("d"), "d": set()}
+    assert dag.graph == {"a": {"b", "c"}, "b": {"d"}, "c": {"d"}, "d": set()}
 
 
 def test_transitive_reduction(empty_dag: DAG) -> None:
@@ -182,10 +177,10 @@ def test_transitive_reduction(empty_dag: DAG) -> None:
     dag.transitive_reduction()
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-Gprime.svg
     assert dag.graph == {
-        "a": set(["b", "c"]),
-        "b": set("d"),
-        "c": set("d"),
-        "d": set("e"),
+        "a": {"b", "c"},
+        "b": {"d"},
+        "c": {"d"},
+        "d": {"e"},
         "e": set(),
     }
 
