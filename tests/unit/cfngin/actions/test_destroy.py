@@ -69,11 +69,11 @@ class TestDestroyAction(unittest.TestCase):
         plan = self.action._generate_plan(reverse=True)
         self.assertEqual(
             {
-                "vpc": set(["db", "instance", "bastion"]),
-                "other": set([]),
-                "bastion": set(["instance", "db"]),
-                "instance": set(["db"]),
-                "db": set(["other"]),
+                "vpc": {"db", "instance", "bastion"},
+                "other": set(),
+                "bastion": {"instance", "db"},
+                "instance": {"db"},
+                "db": {"other"},
             },
             plan.graph.to_dict(),
         )

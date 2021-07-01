@@ -259,8 +259,8 @@ class TestBuildAction(
         self.assertEqual(set(), result_graph_dict["other"])
         self.assertEqual(set(), result_graph_dict["removed"])
         self.assertEqual(set(), result_graph_dict["vpc"])
-        self.assertEqual(set(["vpc"]), result_graph_dict["bastion"])
-        self.assertEqual(set(["bastion", "vpc"]), result_graph_dict["db"])
+        self.assertEqual({"vpc"}, result_graph_dict["bastion"])
+        self.assertEqual({"bastion", "vpc"}, result_graph_dict["db"])
         self.assertEqual(deploy_action._destroy_stack, plan.graph.steps["removed"].fn)
         self.assertEqual(deploy_action._launch_stack, plan.graph.steps["vpc"].fn)
         self.assertEqual(deploy_action._launch_stack, plan.graph.steps["bastion"].fn)
@@ -281,7 +281,7 @@ class TestBuildAction(
         result = _handle_missing_parameters(
             parameter_values, all_params, required, existing_stack_params
         )
-        self.assertEqual(sorted(result), sorted(list(expected_params.items())))
+        self.assertEqual(sorted(result), sorted(expected_params.items()))
 
     def test_missing_params_no_existing_stack(self) -> None:
         """Test missing params no existing stack."""
@@ -303,7 +303,7 @@ class TestBuildAction(
         result = _handle_missing_parameters(
             parameter_values, all_params, required, existing_stack_params
         )
-        self.assertEqual(sorted(result), sorted(list(parameter_values.items())))
+        self.assertEqual(sorted(result), sorted(parameter_values.items()))
 
     def test_generate_plan(self) -> None:
         """Test generate plan."""
@@ -312,10 +312,10 @@ class TestBuildAction(
         plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
         self.assertEqual(
             {
-                "db": set(["bastion", "vpc"]),
-                "bastion": set(["vpc"]),
-                "other": set([]),
-                "vpc": set([]),
+                "db": {"bastion", "vpc"},
+                "bastion": {"vpc"},
+                "other": set(),
+                "vpc": set(),
             },
             plan.graph.to_dict(),
         )

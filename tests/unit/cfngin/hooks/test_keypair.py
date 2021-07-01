@@ -118,11 +118,11 @@ def test_keypair_exists(context: CfnginContext) -> None:
     keypair = ec2.create_key_pair(KeyName=KEY_PAIR_NAME)
 
     result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME)
-    expected = dict(  # type: ignore
-        status="exists",
-        key_name=KEY_PAIR_NAME,
-        fingerprint=keypair.get("KeyFingerprint"),
-    )
+    expected = {
+        "status": "exists",
+        "key_name": KEY_PAIR_NAME,
+        "fingerprint": keypair.get("KeyFingerprint"),
+    }
     assert result == expected
 
 

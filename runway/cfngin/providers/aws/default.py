@@ -83,7 +83,7 @@ DEFAULT_CAPABILITIES = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
 def get_cloudformation_client(session: boto3.Session) -> CloudFormationClient:
     """Get CloudFormaiton boto3 client."""
-    config = Config(retries=dict(max_attempts=MAX_ATTEMPTS))
+    config = Config(retries={"max_attempts": MAX_ATTEMPTS})
     return session.client("cloudformation", config=config)
 
 
