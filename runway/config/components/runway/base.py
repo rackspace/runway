@@ -65,11 +65,7 @@ class ConfigComponentDefinition:
             variables: Object containing values to resolve the ``var`` lookup.
 
         """
-        logger = (
-            PrefixAdaptor(getattr(self, "name"), LOGGER)
-            if hasattr(self, "name")
-            else LOGGER
-        )
+        logger = PrefixAdaptor(self.name, LOGGER) if hasattr(self, "name") else LOGGER
 
         if pre_process:
             logger.verbose("resolving variables for pre-processing...")

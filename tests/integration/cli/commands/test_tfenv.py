@@ -26,7 +26,7 @@ def test_tfenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     result = runner.invoke(cli, ["tfenv", "install"])
     assert result.exit_code == 0
 
-    tf_bin = Path(caplog.messages[-1].strip("terraform path: "))
+    tf_bin = Path(caplog.messages[-1].replace("terraform path: ", ""))
     assert tf_bin.exists()
 
 
@@ -53,7 +53,7 @@ def test_tfenv_install_version(caplog: LogCaptureFixture) -> None:
     result = runner.invoke(cli, ["tfenv", "install", "0.12.1"])
     assert result.exit_code == 0
 
-    kb_bin = Path(caplog.messages[-1].strip("terraform path: "))
+    kb_bin = Path(caplog.messages[-1].replace("terraform path: ", ""))
     assert kb_bin.exists()
 
 

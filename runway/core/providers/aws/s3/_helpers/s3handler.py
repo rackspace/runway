@@ -843,9 +843,7 @@ class LocalDeleteRequestSubmitter(BaseTransferRequestSubmitter):
             self._result_queue.put(SuccessResult(**result_kwargs))
         except Exception as exc:  # pylint: disable=broad-except
             self._result_queue.put(FailureResult(exception=exc, **result_kwargs))
-        finally:
-            # Return True to indicate that the transfer was submitted
-            return True  # pylint: disable=lost-exception
+        return True
 
     def _format_src_dest(
         self, fileinfo: FileInfo
