@@ -450,8 +450,6 @@ class TestPlan(unittest.TestCase):
         context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         context._persistent_graph_lock_code = "1111"
         plan = Plan(description="Test", graph=Graph(), context=context)
-        print(plan.locked)
-
         with self.assertRaises(PersistentGraphLocked):
             plan.execute()
 

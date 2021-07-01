@@ -620,4 +620,6 @@ class StaticSite(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    print(StaticSite("test", CfnginContext(parameters={"namespace": "test"})).to_json())
+    print(  # noqa: T001
+        StaticSite("test", CfnginContext(parameters={"namespace": "test"})).to_json()
+    )
