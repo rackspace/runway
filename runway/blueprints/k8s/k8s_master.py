@@ -160,4 +160,6 @@ class Cluster(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(Cluster("test", CfnginContext(parameters={"namespace": "test"})).to_json())
+    print(  # noqa: T001
+        Cluster("test", CfnginContext(parameters={"namespace": "test"})).to_json()
+    )

@@ -953,12 +953,9 @@ def uni_print(statement: str, out_file: Optional[TextIO] = None) -> None:
     try:
         out_file.write(statement)
     except UnicodeEncodeError:
-        print("caught")
         new_encoding = getattr(out_file, "encoding", "ascii")
-        print(f"new_encoding: {new_encoding}")
         if not new_encoding:
             new_encoding = "ascii"
-        print(f"new_encoding: {new_encoding}")
         new_statement = statement.encode(new_encoding, "replace").decode(new_encoding)
         out_file.write(new_statement)
     out_file.flush()

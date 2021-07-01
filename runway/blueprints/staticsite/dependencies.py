@@ -198,6 +198,6 @@ class Dependencies(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(
+    print(  # noqa: T001
         Dependencies("test", CfnginContext(parameters={"namespace": "test"})).to_json()
     )

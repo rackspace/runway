@@ -360,4 +360,6 @@ class NodeGroup(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(NodeGroup("test", CfnginContext(parameters={"namespace": "test"})).to_json())
+    print(  # noqa: T001
+        NodeGroup("test", CfnginContext(parameters={"namespace": "test"})).to_json()
+    )
