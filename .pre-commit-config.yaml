@@ -53,13 +53,11 @@ repos:
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
-    rev: 21.5b1
+    rev: 21.6b0
     hooks:
       - id: black
         args:
-          - --check
           - --color
-          - --diff
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
