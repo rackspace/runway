@@ -53,5 +53,5 @@ class EcrLookup(LookupHandler):
         if query == "login-password":
             result = cls.get_login_password(client)
         else:
-            raise ValueError("ecr lookup does not support '{}'".format(query))
+            raise ValueError(f"ecr lookup does not support '{query}'")
         return cls.format_results(result, **args)

@@ -112,7 +112,7 @@ class Module:
         """Fully qualified name."""
         if not self.__deployment:
             return self.name
-        return "{}.{}".format(self.__deployment.name, self.name)
+        return f"{self.__deployment.name}.{self.name}"
 
     @cached_property
     def opts_from_file(self) -> Dict[str, Any]:
@@ -369,7 +369,7 @@ def validate_environment(
 
     account = aws.AccountDetails(context)
     accepted_values = [
-        "{}/{}".format(account.id, context.env.aws_region),
+        f"{account.id}/{context.env.aws_region}",
         account.id,
         context.env.aws_region,
         int(account.id),

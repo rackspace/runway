@@ -506,7 +506,7 @@ def ensure_file_is_executable(path: str) -> None:
     if platform.system() != "Windows" and (
         not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
     ):
-        print("Error: File %s is not executable" % path)  # noqa: T001
+        print(f"Error: File {path} is not executable")  # noqa: T001
         sys.exit(1)
 
 
@@ -547,7 +547,7 @@ def json_serial(obj: Any) -> Any:
     """JSON serializer for objects not serializable by default json code."""
     if isinstance(obj, MutableMap):
         return obj.data
-    raise TypeError("Type %s not serializable" % type(obj))
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 
 def load_object_from_string(
@@ -723,7 +723,7 @@ def get_hash_for_filename(filename: str, hashfile_path: str) -> str:
                     break
     if filehash:
         return filehash
-    raise AttributeError("Filename %s not found in hash file" % filename)
+    raise AttributeError(f"Filename {filename} not found in hash file")
 
 
 @contextmanager
@@ -772,7 +772,7 @@ def run_commands(
             )
             raw_command = step["command"]
         else:
-            raise AttributeError("Invalid command step: %s" % step)
+            raise AttributeError(f"Invalid command step: {step}")
         command_list = (
             raw_command.split(" ") if isinstance(raw_command, str) else raw_command
         )
@@ -781,8 +781,8 @@ def run_commands(
 
         with change_dir(execution_dir):
             failed_to_find_error = (
-                'Attempted to run "%s" and failed to find it (are you sure it is '
-                "installed and added to your PATH?)" % command_list[0]
+                f'Attempted to run "{command_list[0]}" and failed to find it (are you sure it is '
+                "installed and added to your PATH?)"
             )
             try:
                 check_call(command_list, env=env)

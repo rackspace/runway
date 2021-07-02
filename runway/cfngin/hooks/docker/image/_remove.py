@@ -112,7 +112,7 @@ def remove(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     docker_hook_data = DockerHookData.from_cfngin_context(context)
     LOGGER.info("removing local image %s...", args.repo)
     for tag in args.tags:
-        image = "{}:{}".format(args.repo, tag)
+        image = f"{args.repo}:{tag}"
         try:
             docker_hook_data.client.images.remove(
                 image=image, force=args.force, noprune=args.noprune

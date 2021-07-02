@@ -31,7 +31,7 @@ def update_api_endpoint():
     with open(environment_file, "r") as stream:
         content = stream.read()
     content = re.sub(
-        r"api_url: \'.*\'$", "api_url: '%s/api'" % endpoint, content, flags=re.M
+        r"api_url: \'.*\'$", f"api_url: '{endpoint}/api'", content, flags=re.M
     )
     with open(environment_file, "w") as stream:
         stream.write(content)

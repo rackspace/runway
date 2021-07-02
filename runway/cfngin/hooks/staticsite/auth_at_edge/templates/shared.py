@@ -44,11 +44,10 @@ def get_config():
         user_pool_region = region_match.groups()[0]
 
     config["cloud_front_headers"] = as_cloud_front_headers(config["http_headers"])
-    config["token_issuer"] = "https://cognito-idp.%s.amazonaws.com/%s" % (
-        user_pool_region,
-        config["user_pool_id"],
-    )
-    config["token_jwks_uri"] = "%s/.well-known/jwks.json" % config["token_issuer"]
+    config[
+        "token_issuer"
+    ] = f"https://cognito-idp.{user_pool_region}.amazonaws.com/{config['user_pool_id']}"
+    config["token_jwks_uri"] = f"{config['token_issuer']}/.well-known/jwks.json"
     return config
 
 
@@ -151,24 +150,24 @@ def with_cookie_domain(distribution_domain_name, cookie_settings):
         return cookie_settings
     except ValueError:
         # Add leading dot for compatibility with Amplify (js-cookie)
-        return "%s; Domain=.%s" % (cookie_settings, distribution_domain_name)
+        return f"{cookie_settings}; Domain=.{distribution_domain_name}"
 
 
 def get_amplify_cookie_names(client_id, cookies_or_username):
     """Return mapping dict for cookie names for amplify."""
-    key_prefix = "CognitoIdentityServiceProvider.%s" % client_id
-    last_user_key = "%s.LastAuthUser" % key_prefix
+    key_prefix = f"CognitoIdentityServiceProvider.{client_id}"
+    last_user_key = f"{key_prefix}.LastAuthUser"
     if isinstance(cookies_or_username, str):
         token_user_name = cookies_or_username
     else:
         token_user_name = cookies_or_username.get(last_user_key)
     return {
         "last_user_key": last_user_key,
-        "user_data_key": "%s.%s.userData" % (key_prefix, token_user_name),
-        "scope_key": "%s.%s.tokenScopesString" % (key_prefix, token_user_name),
-        "id_token_key": "%s.%s.idToken" % (key_prefix, token_user_name),
-        "access_token_key": "%s.%s.accessToken" % (key_prefix, token_user_name),
-        "refresh_token_key": "%s.%s.refreshToken" % (key_prefix, token_user_name),
+        "user_data_key": f"{key_prefix}.{token_user_name}.userData",
+        "scope_key": f"{key_prefix}.{token_user_name}.tokenScopesString",
+        "id_token_key": f"{key_prefix}.{token_user_name}.idToken",
+        "access_token_key": f"{key_prefix}.{token_user_name}.accessToken",
+        "refresh_token_key": f"{key_prefix}.{token_user_name}.refreshToken",
     }
 
 
@@ -243,20 +242,21 @@ def generate_cookie_headers(
     elif cookie_compatibility == "elasticsearch":
         cookie_names = get_elasticsearch_cookie_names()
         cookies = {
-            cookie_names["cognito_enabled_key"]: "True; %s"
-            % with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled")),
+            cookie_names["cognito_enabled_key"]: "True; "
+            + str(
+                with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled"))
+            ),
         }
-    cookies[cookie_names["id_token_key"]] = "%s; %s" % (
-        tokens.get("id_token"),
+    cookies[cookie_names["id_token_key"]] = f"{tokens.get('id_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("idToken")),
     )
-    cookies[cookie_names["access_token_key"]] = "%s; %s" % (
-        tokens.get("access_token"),
+    cookies[cookie_names["access_token_key"]] = f"{tokens.get('access_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
     )
-    cookies[cookie_names["refresh_token_key"]] = "%s; %s" % (
-        tokens.get("refresh_token"),
-        with_cookie_domain(domain_name, cookie_settings.get("refreshToken")),
+    cookies[
+        cookie_names["refresh_token_key"]
+    ] = f"{tokens.get('refresh_token')}; " + str(
+        with_cookie_domain(domain_name, cookie_settings.get("refreshToken"))
     )
 
     if event == "sign_out":
@@ -274,8 +274,7 @@ def generate_cookie_headers(
 
     # Return cookies in the form of CF headers
     return [
-        {"key": "set-cookie", "value": "%s=%s" % (key, val)}
-        for key, val in cookies.items()
+        {"key": "set-cookie", "value": f"{key}={val}"} for key, val in cookies.items()
     ]
 
 
@@ -304,7 +303,7 @@ def expire_cookie(cookie):
     listed = list(filtered)
     _, settings = listed[0], listed[1:]
     settings.insert(0, "")
-    settings.append("Expires=%s" % datetime.utcnow())
+    settings.append(f"Expires={datetime.utcnow()}")
     return "; ".join(settings)
 
 
@@ -358,12 +357,12 @@ def create_error_html(title, message, link_uri, link_text):
         + "<html lang='en'>"
         + "    <head>"
         + "        <meta charset='utf-8'>"
-        + "        <title>%s</title>" % title
+        + f"        <title>{title}</title>"
         + "    </head>"
         + "    <body>"
-        + "        <h1>%s</h1>" % title
-        + "        <p>%s</p>" % message
-        + "        <a href='%s'>%s</a>" % (link_uri, link_text)
+        + f"        <h1>{title}</h1>"
+        + f"        <p>{message}</p>"
+        + f"        <a href='{link_uri}'>{link_text}</a>"
         + "    </body>"
         + "</html>"
     )

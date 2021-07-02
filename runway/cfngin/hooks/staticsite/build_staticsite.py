@@ -78,10 +78,10 @@ def build(
         "path": str(context.config_path),
     }
     context_dict: Dict[str, Any] = {
-        "artifact_key_prefix": "{}-{}-".format(options["namespace"], options["name"])
+        "artifact_key_prefix": f"{options['namespace']}-{options['name']}-"
     }
 
-    default_param_name = "%shash" % context_dict["artifact_key_prefix"]
+    default_param_name = f"{context_dict['artifact_key_prefix']}hash"
 
     if "build_output" in options:
         build_output = os.path.join(options["path"], options["build_output"])

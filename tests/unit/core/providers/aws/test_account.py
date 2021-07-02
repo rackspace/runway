@@ -30,7 +30,7 @@ class TestAccountDetails:
     def test_id(self, runway_context: MockRunwayContext) -> None:
         """Test id."""
         account_id = "123456789012"
-        arn = "arn:aws:iam::{}:user/test-user".format(account_id)
+        arn = f"arn:aws:iam::{account_id}:user/test-user"
         stubber = runway_context.add_stubber("sts")
         stubber.add_response(
             "get_caller_identity",
@@ -43,7 +43,7 @@ class TestAccountDetails:
     def test_id_raise_value_error(self, runway_context: MockRunwayContext) -> None:
         """Test id raise ValueError."""
         account_id = "123456789012"
-        arn = "arn:aws:iam::{}:user/test-user".format(account_id)
+        arn = f"arn:aws:iam::{account_id}:user/test-user"
         stubber = runway_context.add_stubber("sts")
         stubber.add_response(
             "get_caller_identity",

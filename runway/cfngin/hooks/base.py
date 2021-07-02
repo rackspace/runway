@@ -179,9 +179,9 @@ class Hook:
             status: The status being logged.
 
         """
-        msg = "{}:{}".format(stack.name, status.name)
+        msg = f"{stack.name}:{status.name}"
         if status.reason:
-            msg += " (%s)" % status.reason
+            msg += f" ({status.reason})"
         if status.code == SUBMITTED.code:
             LOGGER.notice(msg)
         elif status.code == COMPLETE.code:

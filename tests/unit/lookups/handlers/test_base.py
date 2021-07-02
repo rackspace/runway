@@ -136,7 +136,7 @@ class TestLookupHandler:
         expected_args: Dict[str, str],
     ) -> None:
         """Test parse."""
-        value = "{}::{}".format(query, raw_args)
+        value = f"{query}::{raw_args}"
         result_query, result_args = LookupHandler.parse(value if raw_args else query)
         assert result_query == query
         assert result_args == expected_args

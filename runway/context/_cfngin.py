@@ -163,7 +163,7 @@ class CfnginContext(BaseContext):
 
         return {
             "Bucket": self.bucket_name,
-            "Key": "persistent_graphs/{namespace}/{key}".format(
+            "Key": "persistent_graphs/{namespace}/{key}".format(  # noqa: FS002
                 namespace=self.config.namespace,
                 key=(
                     self.config.persistent_graph_key + ".json"
@@ -440,7 +440,7 @@ class CfnginContext(BaseContext):
             ServerSideEncryption="AES256",
             ACL="bucket-owner-full-control",
             ContentType="application/json",
-            Tagging="{}={}".format(self._persistent_graph_lock_tag, lock_code),
+            Tagging=f"{self._persistent_graph_lock_tag}={lock_code}",
             **self.persistent_graph_location,
         )
         self.logger.debug(

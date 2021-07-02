@@ -285,8 +285,8 @@ class SSOProvider(CredentialProvider):
             missing = ", ".join(missing_config_vars)
             raise InvalidConfigError(
                 error_msg=(
-                    'The profile "%s" is configured to use SSO but is missing '
-                    "required configuration: %s" % (profile_name, missing)
+                    f'The profile "{profile_name}" is configured to use SSO but is missing '
+                    f"required configuration: {missing}"
                 )
             )
 

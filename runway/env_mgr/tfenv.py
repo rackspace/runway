@@ -64,7 +64,7 @@ def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branch
         tfver_os = tf_platform + "_" + arch
     else:
         if platform.system().startswith("Darwin"):
-            tfver_os = "darwin_%s" % arch
+            tfver_os = f"darwin_{arch}"
         elif platform.system().startswith("Windows") or (
             platform.system().startswith("MINGW64")
             or (
@@ -72,13 +72,13 @@ def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branch
                 or platform.system().startswith("CYGWIN_NT")
             )
         ):
-            tfver_os = "windows_%s" % arch
+            tfver_os = f"windows_{arch}"
         else:
-            tfver_os = "linux_%s" % arch
+            tfver_os = f"linux_{arch}"
 
     download_dir = tempfile.mkdtemp()
-    filename = "terraform_%s_%s.zip" % (version, tfver_os)
-    shasums_name = "terraform_%s_SHA256SUMS" % version
+    filename = f"terraform_{version}_{tfver_os}.zip"
+    shasums_name = f"terraform_{version}_SHA256SUMS"
     tf_url = "https://releases.hashicorp.com/terraform/" + version
 
     try:
@@ -289,7 +289,7 @@ class TFEnvManager(EnvManager):
             regex = r"^[0-9]+\.[0-9]+\.[0-9]+$"
             include_prerelease_versions = False
         else:
-            regex = "^%s$" % version_requested
+            regex = f"^{version_requested}$"
             include_prerelease_versions = True
             # Return early (i.e before reaching out to the internet) if the
             # matching version is already installed
@@ -372,9 +372,7 @@ class TFEnvManager(EnvManager):
 
         if not self.version:
             raise ValueError(
-                "version not provided and unable to find a {} file".format(
-                    TF_VERSION_FILENAME
-                )
+                f"version not provided and unable to find a {TF_VERSION_FILENAME} file"
             )
 
         # Now that a version has been selected, skip downloading if it's

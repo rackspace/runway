@@ -25,7 +25,7 @@ def get_parameter_response(
     version: int = 1,
 ) -> Dict[str, Any]:
     """Generate a mock ssm.get_parameter response."""
-    selector = "{}/{}".format(name, label or version)
+    selector = f"{name}/{label or version}"
     return {
         "Parameter": {
             "Name": name,
@@ -58,8 +58,8 @@ class TestSsmLookup:
         value = "test value"
         cfngin_stubber = cfngin_context.add_stubber("ssm")
         runway_stubber = runway_context.add_stubber("ssm")
-        cfngin_var = Variable("test_var", "${ssm %s}" % name, variable_type="cfngin")
-        runway_var = Variable("test_var", "${ssm %s}" % name, variable_type="runway")
+        cfngin_var = Variable("test_var", f"${{ssm {name}}}", variable_type="cfngin")
+        runway_var = Variable("test_var", f"${{ssm {name}}}", variable_type="runway")
 
         for stubber in [cfngin_stubber, runway_stubber]:
             stubber.add_response(
@@ -85,7 +85,7 @@ class TestSsmLookup:
         stubber = runway_context.add_stubber("ssm")
         var = Variable(
             "test_var",
-            "${ssm /test/invalid::load=json, default=${ssm %s}}" % name,
+            f"${{ssm /test/invalid::load=json, default=${{ssm {name}}}}}",
             variable_type="runway",
         )
 
@@ -111,7 +111,7 @@ class TestSsmLookup:
         value = "test value"
         stubber = runway_context.add_stubber("ssm", region="us-west-2")
         var = Variable(
-            "test_var", "${ssm %s::region=us-west-2}" % name, variable_type="runway"
+            "test_var", f"${{ssm {name}::region=us-west-2}}", variable_type="runway"
         )
 
         stubber.add_response(
@@ -153,7 +153,7 @@ class TestSsmLookup:
         for parser in parsers:
             for test in tests:
                 var = Variable(
-                    "test_var.{}".format(parser),
+                    f"test_var.{parser}",
                     test["lookup"].format(name=name, parser=parser),  # type: ignore
                     variable_type="runway",
                 )
@@ -179,7 +179,7 @@ class TestSsmLookup:
         """Test raises ParameterNotFound."""
         name = "/test/param"
         stubber = runway_context.add_stubber("ssm")
-        var = Variable("test_var", "${ssm %s}" % name, variable_type="runway")
+        var = Variable("test_var", f"${{ssm {name}}}", variable_type="runway")
 
         stubber.add_client_error(
             "get_parameter",

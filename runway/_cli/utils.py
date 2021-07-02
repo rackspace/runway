@@ -158,7 +158,7 @@ class CliContext:
     def __str__(self) -> str:
         """Return string representation of the object."""
         # ignore coverage for standard implimentation
-        return "CliContext({})".format(self.__dict__)  # cov: ignore
+        return f"CliContext({self.__dict__})"  # cov: ignore
 
 
 def select_deployments(

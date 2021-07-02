@@ -156,7 +156,7 @@ def get_change_set_name() -> str:
     And must be unique across all change sets.
 
     """
-    return "change-set-{}".format(int(time.time()))
+    return f"change-set-{int(time.time())}"
 
 
 def requires_replacement(changeset: List[ChangeTypeDef]) -> List[ChangeTypeDef]:
@@ -195,7 +195,7 @@ def output_full_changeset(
     if answer == "n":
         return
     if answer in ["y", "v"]:
-        msg = "%s full changeset" % (fqn) if fqn else "Full changeset"
+        msg = f"{fqn if fqn else 'Full changeset'} full changeset"
         if params_diff:
             LOGGER.info(
                 "%s:\n\n%s\n%s",
@@ -234,7 +234,7 @@ def ask_for_approval(
         approval_options.append("v")
 
     approve = ui.ask(
-        "Execute the above changes? [{}] ".format("/".join(approval_options))
+        f"Execute the above changes? [{'/'.join(approval_options)}] "
     ).lower()
 
     if include_verbose and approve == "v":
@@ -294,7 +294,7 @@ def output_summary(
     if changes:
         if summary:
             summary += "\n"
-        summary += "Changes:\n%s" % ("\n".join(changes))
+        summary += "Changes:\n" + "\n".join(changes)
     LOGGER.info("%s %s:\n%s", fqn, action, summary)
 
 
@@ -309,15 +309,15 @@ def summarize_params_diff(params_diff: List[DictValue[Any, Any]]) -> str:
 
     added_summary = [v.key for v in params_diff if v.status() is DictValue.ADDED]
     if added_summary:
-        summary += "Parameters Added: %s\n" % ", ".join(added_summary)
+        summary += f"Parameters Added: {', '.join(added_summary)}\n"
 
     removed_summary = [v.key for v in params_diff if v.status() is DictValue.REMOVED]
     if removed_summary:
-        summary += "Parameters Removed: %s\n" % ", ".join(removed_summary)
+        summary += f"Parameters Removed: {', '.join(removed_summary)}\n"
 
     modified_summary = [v.key for v in params_diff if v.status() is DictValue.MODIFIED]
     if modified_summary:
-        summary += "Parameters Modified: %s\n" % ", ".join(modified_summary)
+        summary += f"Parameters Modified: {', '.join(modified_summary)}\n"
 
     return summary
 
@@ -561,7 +561,7 @@ class ProviderBuilder:
         """Get or create the provider for the given region and profile."""
         with self.lock:
             # memorization lookup key derived from region + profile.
-            key = "{}-{}".format(profile, region)
+            key = f"{profile}-{region}"
             try:
                 # assume provider is in provider dictionary.
                 provider = self.providers[key]
@@ -1086,10 +1086,10 @@ class Provider(BaseProvider):
 
         if self.interactive:
             sys.stdout.write(
-                'The "%s" stack is in a failed state (%s).\n'
+                f'The "{stack_name}" stack is in a failed state ({stack_status}).\n'
                 "It cannot be updated, but it can be deleted and re-created.\n"
                 "All its current resources will IRREVERSIBLY DESTROYED.\n"
-                "Proceed carefully!\n\n" % (stack_name, stack_status)
+                "Proceed carefully!\n\n"
             )
             sys.stdout.flush()
 
@@ -1215,17 +1215,12 @@ class Provider(BaseProvider):
 
         approval_options = ["y", "n"]
         with ui:
+            description = "temporary " if action == "diff" else ""
+            detail = " created to generate a change set" if action == "diff" else ""
             approval = (
                 approval
                 or ui.ask(
-                    "Destroy {description}stack '{fqn}'{detail}? [{opts}] ".format(
-                        description="temporary " if action == "diff" else "",
-                        fqn=fqn,
-                        detail=" created to generate a change set"
-                        if action == "diff"
-                        else "",
-                        opts="/".join(approval_options),
-                    )
+                    f"Destroy {description}stack '{fqn}'{detail}? [{'/'.join(approval_options)}] "
                 ).lower()
             )
 
@@ -1238,9 +1233,9 @@ class Provider(BaseProvider):
             if "TerminationProtection" in err.response["Error"]["Message"]:
                 approval = ui.ask(
                     "Termination protection is enabled for "
-                    "stack '{}'.\nWould you like to disable it "
+                    f"stack '{fqn}'.\nWould you like to disable it "
                     "and try destroying the stack again? "
-                    "[{}] ".format(fqn, "/".join(approval_options))
+                    f"[{'/'.join(approval_options)}] "
                 ).lower()
                 if approval == "y":
                     self.update_termination_protection(fqn, False)
@@ -1606,9 +1601,7 @@ class Provider(BaseProvider):
             if output_name not in self._outputs[stack.fqn]:
                 self._outputs[stack.fqn][
                     output_name
-                ] = "<inferred-change: {}.{}={}>".format(
-                    stack.fqn, output_name, str(output_params["Value"])
-                )
+                ] = f"<inferred-change: {stack.fqn}.{output_name}={output_params['Value']}>"
 
         # when creating a changeset for a new stack, CFN creates a temporary
         # stack with a status of REVIEW_IN_PROGRESS. this is only removed if

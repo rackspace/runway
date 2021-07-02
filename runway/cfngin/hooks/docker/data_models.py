@@ -184,9 +184,7 @@ class BaseModel:
                 return value
             for i in value:
                 if not isinstance(i, str):
-                    raise TypeError(
-                        "expected List[str] not List[{}]".format(type(i).__name__)
-                    )
+                    raise TypeError(f"expected List[str] not List[{type(i).__name__}]")
         return cls._validate_list_str(  # type: ignore
             list(value), optional=optional, required=required
         )
@@ -203,13 +201,9 @@ class BaseModel:
         if isinstance(value, str):
             value = Path(value)
         if not isinstance(value, Path):
-            raise TypeError(
-                "expected Union[Path, str] not {}".format(type(value).__name__)
-            )
+            raise TypeError(f"expected Union[Path, str] not {type(value).__name__}")
         if must_exist and not value.exists():
-            raise ValueError(
-                "provided path does not exist: {}".format(str(value.resolve()))
-            )
+            raise ValueError(f"provided path does not exist: {value.resolve()}")
         return value
 
     @classmethod
@@ -225,7 +219,7 @@ class BaseModel:
         if isinstance(value, str):
             return value
         if isinstance(value, (dict, list, set, tuple)):
-            raise TypeError("value can't be {}".format(type(value).__name__))  # type: ignore
+            raise TypeError(f"value can't be {type(value).__name__}")  # type: ignore
         return cls._validate_str(str(value), optional=optional, required=required)
 
     @classmethod
@@ -238,9 +232,7 @@ class BaseModel:
                 obj = dict(obj)
             except (TypeError, ValueError):
                 raise TypeError(
-                    "{} expected dict not {}".format(
-                        cls.__name__, obj.__class__.__name__
-                    )
+                    f"{cls.__name__} expected dict not {obj.__class__.__name__}"
                 ) from None
         return cls(context=context, **obj)
 

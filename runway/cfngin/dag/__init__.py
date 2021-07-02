@@ -51,7 +51,7 @@ class DAG:
         """
         graph = self.graph
         if node_name in graph:
-            raise KeyError("node %s already exists" % node_name)
+            raise KeyError(f"node {node_name} already exists")
         graph[node_name] = cast(Set[str], set())
 
     def add_node_if_not_exists(self, node_name: str) -> None:
@@ -78,7 +78,7 @@ class DAG:
         """
         graph = self.graph
         if node_name not in graph:
-            raise KeyError("node %s does not exist" % node_name)
+            raise KeyError(f"node {node_name} does not exist")
         graph.pop(node_name)
 
         for _node, edges in graph.items():
@@ -114,9 +114,9 @@ class DAG:
         """
         graph = self.graph
         if ind_node not in graph:
-            raise KeyError("independent node %s does not exist" % ind_node)
+            raise KeyError(f"independent node {ind_node} does not exist")
         if dep_node not in graph:
-            raise KeyError("dependent node %s does not exist" % dep_node)
+            raise KeyError(f"dependent node {dep_node} does not exist")
         test_graph = deepcopy(graph)
         test_graph[ind_node].add(dep_node)
         test_dag = DAG()
@@ -141,7 +141,7 @@ class DAG:
         """
         graph = self.graph
         if dep_node not in graph.get(ind_node, []):
-            raise KeyError("No edge exists between %s and %s." % (ind_node, dep_node))
+            raise KeyError(f"No edge exists between {ind_node} and {dep_node}.")
         graph[ind_node].remove(dep_node)
 
     def transpose(self) -> DAG:
@@ -249,7 +249,7 @@ class DAG:
         """
         graph = self.graph
         if node not in graph:
-            raise KeyError("node %s is not in graph" % node)
+            raise KeyError(f"node {node} is not in graph")
         return list(graph[node])
 
     def all_downstreams(self, node: str) -> List[str]:
@@ -316,7 +316,7 @@ class DAG:
             self.add_node(new_node)
         for ind_node, dep_nodes in graph_dict.items():
             if not isinstance(dep_nodes, collections.Iterable):
-                raise TypeError("%s: dict values must be lists" % ind_node)
+                raise TypeError(f"{ind_node}: dict values must be lists")
             for dep_node in dep_nodes:
                 self.add_edge(ind_node, dep_node)
 

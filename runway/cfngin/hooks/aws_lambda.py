@@ -442,7 +442,7 @@ def dockerized_pip(
 
     if docker_file:
         if not os.path.isfile(docker_file):
-            raise ValueError('could not find docker_file "%s"' % docker_file)
+            raise ValueError(f'could not find docker_file "{docker_file}"')
         LOGGER.info('building docker image from "%s"', docker_file)
         response = cast(
             Union[Image, Tuple[Image, Iterator[Dict[str, str]]]],
@@ -465,11 +465,9 @@ def dockerized_pip(
     if runtime:
         if runtime not in SUPPORTED_RUNTIMES:
             raise ValueError(
-                'invalid runtime "{}" must be one of {}'.format(
-                    runtime, str(SUPPORTED_RUNTIMES)
-                )
+                f'invalid runtime "{runtime}" must be one of {SUPPORTED_RUNTIMES}'
             )
-        docker_image = "lambci/lambda:build-%s" % runtime
+        docker_image = f"lambci/lambda:build-{runtime}"
         LOGGER.debug(
             'selected docker image "%s" based on provided runtime', docker_image
         )
@@ -637,7 +635,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
                 [
                     "import runpy",
                     "from runway.utils imports argv",
-                    "with argv(*{}):".format(json.dumps(pip_cmd[2:])),
+                    f"with argv(*{json.dumps(pip_cmd[2:])}):",
                     '   runpy.run_module("pip", run_name="__main__")\n',
                 ]
             )
@@ -752,7 +750,7 @@ def _upload_code(
 
     """
     LOGGER.debug("ZIP hash: %s", content_hash)
-    key = "{}lambda-{}-{}.zip".format(prefix, name, content_hash)
+    key = f"{prefix}lambda-{name}-{content_hash}.zip"
 
     if _head_object(s3_conn, bucket, key):
         LOGGER.info("object already exists; not uploading: %s", key)
@@ -803,8 +801,7 @@ def _check_pattern_list(
         return patterns
 
     raise ValueError(
-        "Invalid file patterns in key '{}': must be a string or "
-        "list of strings".format(key)
+        f"Invalid file patterns in key '{key}': must be a string or " "list of strings"
     )
 
 
@@ -864,7 +861,7 @@ def _upload_function(
         root = os.path.expanduser(options["path"])
     except KeyError as exc:
         raise ValueError(
-            "missing required property '{}' in function '{}'".format(exc.args[0], name)
+            f"missing required property '{exc.args[0]}' in function '{name}'"
         ) from exc
 
     includes = _check_pattern_list(options.get("include"), "include", default=["**"])

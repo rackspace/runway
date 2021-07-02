@@ -79,6 +79,7 @@ flake8-bugbear = "^21.4.3"  # flake8 plugin
 flake8-comprehensions = "^3.5.0"  # flake8 plugin
 flake8-docstrings = "^1.6"  # flake8 plugin
 flake8-print = "^4.0.0"  # flake8 plugin
+flake8-use-fstring = "^1.1"  # flake8 plugin
 isort = "^5.8"
 mock = "^4.0"
 moto = { version = "^2.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }

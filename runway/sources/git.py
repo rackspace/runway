@@ -79,13 +79,13 @@ class Git(Source):
             commit_id = ls_remote_output.split(b"\t")[0].decode()
             LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id
-        raise ValueError('Ref "%s" not found for repo %s.' % (ref, self.uri))
+        raise ValueError(f'Ref "{ref}" not found for repo {self.uri}.')
 
     def __determine_git_ls_remote_ref(self) -> str:
         """Determine remote ref, defaulting to HEAD unless a branch is found."""
         ref = "HEAD"
         if self.args.get("branch"):
-            ref = "refs/heads/%s" % self.args["branch"]
+            ref = f"refs/heads/{self.args['branch']}"
         return ref
 
     def __determine_git_ref(self) -> str:

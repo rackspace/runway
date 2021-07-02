@@ -52,14 +52,14 @@ def check_bool_is_true(val: Any) -> bool:
     """Check if a value is a true bool."""
     if val and isinstance(val, bool):
         return True
-    raise ValueError('Value should be "True"; got {}'.format(val))
+    raise ValueError(f'Value should be "True"; got {val}')
 
 
 def check_bool_is_false(val: Any) -> bool:
     """Check if a value is a false bool."""
     if not val and isinstance(val, bool):
         return True
-    raise ValueError('Value should be "False"; got {}'.format(val))
+    raise ValueError(f'Value should be "False"; got {val}')
 
 
 def gen_certificate(**kwargs: Any) -> Dict[str, Any]:
@@ -67,8 +67,6 @@ def gen_certificate(**kwargs: Any) -> Dict[str, Any]:
     data = {
         "CertificateArn": kwargs.pop("CertificateArn"),
         "DomainName": "place_holder_domain_name",
-        # 'SubjectAlternativeNames': [],
-        # 'DomainValidationOptions': []
     }
     data.update(kwargs)
     return {"Certificate": data}
@@ -894,9 +892,7 @@ class TestCertificate:
 
         def raise_stack_not_exist(_records: Any) -> NoReturn:
             """Raise ClientError mimicing stack not existing."""
-            raise build_client_error(
-                "Stack with id {} does not exist".format(cert.stack.fqn)
-            )
+            raise build_client_error(f"Stack with id {cert.stack.fqn} does not exist")
 
         def raise_other(_records: Any) -> NoReturn:
             """Raise other ClientError."""

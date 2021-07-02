@@ -25,7 +25,7 @@ def handler(event, _context):
     """
     request = event["Records"][0]["cf"]["request"]
     domain_name = request["headers"]["host"][0]["value"]
-    redirected_from_uri = "https://%s" % domain_name
+    redirected_from_uri = f"https://{domain_name}"
 
     try:
         parsed_qs = parse_qs(request.get("querystring"))
@@ -54,7 +54,7 @@ def handler(event, _context):
                 "refresh_token": tokens.get("refresh_token"),
             }
             res = http_post_with_retry(
-                ("https://%s/oauth2/token" % CONFIG["cognito_auth_domain"]),
+                f"https://{CONFIG['cognito_auth_domain']}/oauth2/token",
                 body,
                 headers,
             )
@@ -94,7 +94,7 @@ def handler(event, _context):
         response = {
             "body": create_error_html(
                 "Refresh issue",
-                "Your sign-in refresh failed due to a technical issue: %s" % err,
+                f"Your sign-in refresh failed due to a technical issue: {err}",
                 redirected_from_uri,
                 "Try Again",
             ),
@@ -135,6 +135,6 @@ def validate_refresh_request(current_nonce, original_nonce, tokens):
 
     for token_type, token in tokens.items():
         if not token:
-            msg = "Missing %s" % token_type
+            msg = f"Missing {token_type}"
             LOGGER.error(msg)
             raise Exception(msg)

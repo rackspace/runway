@@ -65,6 +65,7 @@ repos:
           - flake8-bugbear
           - flake8-docstrings
           - flake8-print
+          - flake8-use-fstring
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.27.1
     hooks:

@@ -168,7 +168,7 @@ class TestSafeHaven:
         expected_val = dict(os.environ)
         expected_logs = [
             "entering a safe haven...",
-            "resetting os.environ: %s" % json.dumps(orig_val),
+            f"resetting os.environ: {json.dumps(orig_val)}",
             "leaving the safe haven...",
         ]
 
@@ -221,7 +221,7 @@ class TestSafeHaven:
         expected_val = provided if isinstance(provided, list) else list(sys.argv)
         expected_logs = [
             "entering a safe haven...",
-            "resetting sys.argv: %s" % json.dumps(orig_val),
+            f"resetting sys.argv: {json.dumps(orig_val)}",
             "leaving the safe haven...",
         ]
 
@@ -284,7 +284,7 @@ class TestSafeHaven:
         expected_val = provided if isinstance(provided, list) else list(sys.path)
         expected_logs = [
             "entering a safe haven...",
-            "resetting sys.path: %s" % json.dumps(orig_val),
+            f"resetting sys.path: {json.dumps(orig_val)}",
             "leaving the safe haven...",
         ]
 

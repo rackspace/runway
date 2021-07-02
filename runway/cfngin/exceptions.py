@@ -110,9 +110,7 @@ class ChangesetDidNotStabilize(CfnginError):
 
         """
         self.id = change_set_id
-        self.message = "Changeset '%s' did not reach a completed state." % (
-            change_set_id
-        )
+        self.message = f"Changeset '{change_set_id}' did not reach a completed state."
         super().__init__()
 
 
@@ -135,9 +133,8 @@ class GraphError(CfnginError):
         self.dependency = dependency
         self.exception = exception
         self.message = (
-            "Error detected when adding '{}' as a dependency of '{}': {}".format(
-                dependency, stack, str(exception)
-            )
+            f"Error detected when adding '{dependency}' "
+            f"as a dependency of '{stack}': {exception}"
         )
         super().__init__()
 
@@ -147,15 +144,15 @@ class ImproperlyConfigured(CfnginError):
 
     message: str
 
-    def __init__(self, cls: Any, error: Exception, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, kls: Any, error: Exception, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
-            cls: The class that was improperly configured.
+            kls: The class that was improperly configured.
             error: The exception that was raised when trying to use cls.
 
         """
-        self.message = 'Class "%s" is improperly configured: %s' % (cls, error)
+        self.message = f'Class "{kls}" is improperly configured: {error}'
         super().__init__(*args, **kwargs)
 
 
@@ -237,7 +234,7 @@ class MissingEnvironment(CfnginError):
 
         """
         self.key = key
-        self.message = "Environment missing key %s." % (key,)
+        self.message = f"Environment missing key {key}."
         super().__init__(*args, **kwargs)
 
 
@@ -318,7 +315,7 @@ class PersistentGraphCannotLock(CfnginError):
 
     def __init__(self, reason: str) -> None:
         """Instantiate class."""
-        self.message = "Could not lock persistent graph; %s" % reason
+        self.message = f"Could not lock persistent graph; {reason}"
         super().__init__()
 
 
@@ -329,7 +326,7 @@ class PersistentGraphCannotUnlock(CfnginError):
 
     def __init__(self, reason: Union[Exception, str]) -> None:
         """Instantiate class."""
-        self.message = "Could not unlock persistent graph; %s" % reason
+        self.message = f"Could not unlock persistent graph; {reason}"
         super().__init__()
 
 
@@ -349,10 +346,11 @@ class PersistentGraphLocked(CfnginError):
         if message:
             self.message = message
         else:
-            self.message = "Persistant graph is locked. {}".format(
+            reason = (
                 reason
-                or ("This action requires the graph to be unlocked to be executed.")
+                or "This action requires the graph to be unlocked to be executed."
             )
+            self.message = f"Persistant graph is locked. {reason}"
         super().__init__()
 
 
@@ -391,10 +389,10 @@ class PersistentGraphUnlocked(CfnginError):
         if message:
             self.message = message
         else:
-            self.message = "Persistant graph is unlocked. {}".format(
-                reason
-                or ("This action requires the graph to be locked to be executed.")
+            reason = (
+                reason or "This action requires the graph to be locked to be executed."
             )
+            self.message = f"Persistant graph is unlocked. {reason}"
         super().__init__()
 
 

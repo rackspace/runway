@@ -30,7 +30,7 @@ from shared import (  # noqa pylint: disable=import-error
 
 LOGGER = logging.getLogger(__name__)
 CONFIG = get_config()
-COGNITO_TOKEN_ENDPOINT = "https://%s/oauth2/token" % CONFIG["cognito_auth_domain"]
+COGNITO_TOKEN_ENDPOINT = f"https://{CONFIG['cognito_auth_domain']}/oauth2/token"
 NONCE_MAX_AGE = 60 * 60 * 24
 
 
@@ -53,9 +53,7 @@ def validate_querystring_and_cookies(request, cookies):
     state = json.loads(base64.urlsafe_b64decode(qsp.get("state")[0]).decode())
 
     if qsp.get("error"):
-        raise Exception(
-            "[Cognito] %s: %s" % (qsp["error"], qsp.get("error_description"))
-        )
+        raise Exception(f"[Cognito] {qsp['error']}: {qsp.get('error_description')}")
 
     # Missing required components
     if not code or not state:
@@ -125,7 +123,7 @@ def handler(event, _context):
     """
     request = event["Records"][0]["cf"]["request"]
     domain_name = request["headers"]["host"][0]["value"]
-    redirected_from_uri = "https://%s" % domain_name
+    redirected_from_uri = f"https://{domain_name}"
     id_token = None
 
     # Attempt to parse the request and retrieve authorization
@@ -211,7 +209,7 @@ def handler(event, _context):
         if isinstance(err, RequiresConfirmationError):
             html_params = [
                 "Confirm sign-in",
-                "We need your confirmation to sign you (%s)" % str(err),
+                f"We need your confirmation to sign you ({err})",
                 redirected_from_uri,
                 "Confirm",
             ]
@@ -225,7 +223,7 @@ def handler(event, _context):
         else:
             html_params = [
                 "Sign-in issue",
-                "Sign-in unsuccessful because of a technical problem: %s" % str(err),
+                f"Sign-in unsuccessful because of a technical problem: {err}",
                 redirected_from_uri,
                 "Try Again",
             ]

@@ -40,7 +40,7 @@ class BlueprintTestCase(unittest.TestCase):
         ``test/fixtures/blueprints/${blueprint.name}.json``.
 
         """
-        expected_output = "%s/%s.json" % (self.OUTPUT_PATH, blueprint.name)
+        expected_output = f"{self.OUTPUT_PATH}/{blueprint.name}.json"
 
         rendered_dict = blueprint.template.to_dict()
         rendered_text = json.dumps(rendered_dict, indent=4, sort_keys=True)
@@ -131,9 +131,7 @@ class YamlDirTestGenerator:
         # Search for tests in given paths
         configs: List[str] = []
         for directory in self.yaml_dirs:
-            configs.extend(
-                glob("%s/%s/%s" % (self.classdir, directory, self.yaml_filename))
-            )
+            configs.extend(glob(f"{self.classdir}/{directory}/{self.yaml_filename}"))
 
         class ConfigTest(self.base_class):  # type: ignore
             """Config test."""
@@ -149,7 +147,7 @@ class YamlDirTestGenerator:
                 """Instantiate class."""
                 self.config = config
                 self.stack = stack
-                self.description = "%s (%s)" % (stack.name, filepath)
+                self.description = f"{stack.name} ({filepath})"
 
             def __call__(self) -> None:  # pylint: disable=arguments-differ
                 """Run when the class instance is called directly."""

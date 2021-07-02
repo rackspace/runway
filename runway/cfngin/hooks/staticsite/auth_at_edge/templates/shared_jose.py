@@ -20,7 +20,7 @@ def prepad_signed(hex_str):
     """
     msb = hex_str[0]
     if msb < "0" or msb > "7":
-        return "00%s" % hex_str
+        return f"00{hex_str}"
     return hex_str
 
 
@@ -33,7 +33,7 @@ def to_hex(number):
     """
     n_str = format(int(number), "x")
     if len(n_str) % 2:
-        return "0%s" % n_str
+        return f"0{n_str}"
     return n_str
 
 
@@ -130,7 +130,7 @@ class JwksClient:
             key = next(x for x in keys if x.get("kid") == kid)
             return key
         except StopIteration as exc:
-            raise Exception("Was not able to locate a key with kid %s" % kid) from exc
+            raise Exception(f"Was not able to locate a key with kid {kid}") from exc
 
     def get_signing_keys(self):
         """Given a set of keys find all that are signing keys."""

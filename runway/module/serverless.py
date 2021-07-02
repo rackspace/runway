@@ -39,11 +39,11 @@ def gen_sls_config_files(stage: str, region: str) -> List[str]:
     names: List[str] = []
     for ext in ["yml", "json"]:
         # Give preference to explicit stage-region files
-        names.append(os.path.join("env", "%s-%s.%s" % (stage, region, ext)))
-        names.append("config-%s-%s.%s" % (stage, region, ext))
+        names.append(os.path.join("env", f"{stage}-{region}.{ext}"))
+        names.append(f"config-{stage}-{region}.{ext}")
         # Fallback to stage name only
-        names.append(os.path.join("env", "%s.%s" % (stage, ext)))
-        names.append("config-%s.%s" % (stage, ext))
+        names.append(os.path.join("env", f"{stage}.{ext}"))
+        names.append(f"config-{stage}.{ext}")
     return names
 
 
@@ -141,7 +141,7 @@ class Serverless(RunwayModuleNpm):
             self.sls_print(skip_install=True), self.options.extend_serverless_yml
         )
         # using a unique name to prevent collisions when run in parallel
-        tmp_file = self.path / "{}.tmp.serverless.yml".format(uuid.uuid4())
+        tmp_file = self.path / f"{uuid.uuid4()}.tmp.serverless.yml"
 
         try:
             tmp_file.write_text(yaml.safe_dump(final_yml))
@@ -478,7 +478,7 @@ class ServerlessOptions(ModuleOptions):
         known_args: List[str] = []
         for key, val in self._cli_args.items():
             if isinstance(val, str):
-                known_args.extend(["--%s" % key, val])
+                known_args.extend([f"--{key}", val])
         return known_args + self._unknown_cli_args
 
     def update_args(self, key: str, value: str) -> None:

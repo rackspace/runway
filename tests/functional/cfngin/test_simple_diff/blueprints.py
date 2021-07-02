@@ -31,4 +31,4 @@ class DiffTester(Blueprint):
     def create_template(self) -> None:
         """Create template."""
         for i in range(self.variables["WaitConditionCount"]):
-            self.template.add_resource(WaitConditionHandle("VPC%d" % i))
+            self.template.add_resource(WaitConditionHandle(f"VPC{i}"))

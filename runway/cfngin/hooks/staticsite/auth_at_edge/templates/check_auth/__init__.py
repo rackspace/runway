@@ -49,8 +49,8 @@ def handler(event, _context):
     request = event["Records"][0]["cf"]["request"]
     domain_name = request["headers"]["host"][0]["value"]
     querystring = request.get("querystring")
-    request_query_string = ("?%s" % querystring) if querystring else ""
-    requested_uri = "%s%s" % (request["uri"], request_query_string)
+    request_query_string = f"?{querystring}" if querystring else ""
+    requested_uri = f"{request['uri']}{request_query_string}"
 
     try:
         # Extract the cookies received from Cognito

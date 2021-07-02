@@ -224,7 +224,7 @@ class OutputDoesNotExist(RunwayError):
         self.stack_name = stack_name
         self.output = output
 
-        self.message = "Output %s does not exist on stack %s" % (output, stack_name)
+        self.message = f"Output {output} does not exist on stack {stack_name}"
         super().__init__(*args, **kwargs)
 
 

@@ -25,7 +25,7 @@ def handler(event, _context):
             "body": create_error_html(
                 "Signed out",
                 "You are already signed out",
-                "https://%s%s" % (domain_name, CONFIG["redirect_path_sign_out"]),
+                f"https://{domain_name}{CONFIG['redirect_path_sign_out']}",
                 "Proceed",
             ),
             "status": "200",
@@ -44,7 +44,7 @@ def handler(event, _context):
         "refresh_token": extracted["refresh_token"],
     }
     query_string = {
-        "logout_uri": "https://%s%s" % (domain_name, CONFIG["redirect_path_sign_out"]),
+        "logout_uri": f"https://{domain_name}{CONFIG['redirect_path_sign_out']}",
         "client_id": CONFIG["client_id"],
     }
 

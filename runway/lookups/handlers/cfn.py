@@ -104,7 +104,7 @@ class CfnLookup(LookupHandler):
             query = OutputQuery(*raw_query.split("."))
         except TypeError as exc:
             raise ValueError(
-                'query must be <stack-name>.<output-name>; got "{}"'.format(raw_query)
+                f'query must be <stack-name>.<output-name>; got "{raw_query}"'
             ) from exc
 
         try:

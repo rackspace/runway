@@ -180,9 +180,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
                     with open(template_path, "r") as template:
                         self._rendered = template.read()
             else:
-                raise InvalidConfig(
-                    "Could not find template %s" % self.raw_template_path
-                )
+                raise InvalidConfig(f"Could not find template {self.raw_template_path}")
             # clear cached properties that rely on this property
             try:
                 del self.parameter_definitions

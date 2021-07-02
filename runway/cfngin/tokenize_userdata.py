@@ -6,8 +6,8 @@ from troposphere import GetAtt, Ref
 
 HELPERS = {"Ref": Ref, "Fn::GetAtt": GetAtt}
 
-SPLIT_STRING = "(" + "|".join(r"%s\([^)]+\)" % h for h in HELPERS) + ")"
-REPLACE_STRING = r"(?P<helper>%s)\((?P<args>['\"]?[^)]+['\"]?)+\)" % "|".join(HELPERS)
+SPLIT_STRING = "(" + "|".join(fr"{h}\([^)]+\)" for h in HELPERS) + ")"
+REPLACE_STRING = fr"(?P<helper>{'|'.join(HELPERS)})\((?P<args>['\"]?[^)]+['\"]?)+\)"
 
 SPLIT_RE = re.compile(SPLIT_STRING)
 REPLACE_RE = re.compile(REPLACE_STRING)

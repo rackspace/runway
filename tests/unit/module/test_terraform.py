@@ -276,8 +276,8 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert "init (in progress)" in logs
         assert "init (complete)" in logs
         assert "re-running init after workspace change..." not in logs
-        assert "{} (in progress)".format(command) in logs
-        assert "{} (complete)".format(command) in logs
+        assert f"{command} (in progress)" in logs
+        assert f"{command} (complete)" in logs
         caplog.clear()
 
         # module is run; switch to workspace

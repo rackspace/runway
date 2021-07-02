@@ -592,7 +592,7 @@ class TestModule:
         (
             {"invalid"},
             False,
-            ['skipped; unsupported type for environments "%s"' % type(set())],  # type: ignore
+            [f'skipped; unsupported type for environments "{type(set())}"'],  # type: ignore
         ),
         (True, True, ["explicitly enabled"]),
         (False, False, ["skipped; explicitly disabled"]),

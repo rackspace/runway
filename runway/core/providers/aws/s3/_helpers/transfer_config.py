@@ -127,7 +127,7 @@ class RuntimeConfig:
     @staticmethod
     def _error_positive_value(name: str, value: int) -> NoReturn:
         raise InvalidConfigError(
-            "Value for %s must be a positive integer: %s" % (name, value)
+            f"Value for {name} must be a positive integer: {value}"
         )
 
 
