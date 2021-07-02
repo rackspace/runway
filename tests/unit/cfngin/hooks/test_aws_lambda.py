@@ -105,10 +105,10 @@ class TestLambdaHooks(unittest.TestCase):
         try:
             self.s3.head_bucket(Bucket=bucket)
             if not present:
-                self.fail("s3: bucket {} should not exist".format(bucket))
+                self.fail(f"s3: bucket {bucket} should not exist")
         except ClientError as err:
             if err.response["Error"]["Code"] == "404" and present:
-                self.fail("s3: bucket {} does not exist".format(bucket))
+                self.fail(f"s3: bucket {bucket} does not exist")
 
     def setUp(self) -> None:
         """Run before tests."""

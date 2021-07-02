@@ -147,7 +147,7 @@ class Certificate(Hook):
         cert = blueprint.template.add_resource(
             CertificateResource("Certificate", **self.properties.data)
         )
-        blueprint.add_output("%sArn" % cert.title, cert.ref())
+        blueprint.add_output(f"{cert.title}Arn", cert.ref())
         blueprint.add_output("ValidateRecordTTL", Ref("ValidateRecordTTL"))
         blueprint.add_output("DomainName", Ref("DomainName"))
         return blueprint
@@ -249,16 +249,12 @@ class Certificate(Hook):
 
         if not domain_validation:
             raise ValueError(
-                'No validations with status "{}" found for "{}"'.format(
-                    status, self.args.domain
-                )
+                f'No validations with status "{status}" found for "{self.args.domain}"'
             )
         if len(domain_validation) > 1:
             raise ValueError(
-                'Found {} validation options of status "{}" for "{}"; only one '
-                "option is supported".format(
-                    len(domain_validation), status, self.args.domain
-                )
+                f"Found {len(domain_validation)} validation options of status "
+                f'"{status}" for "{self.args.domain}"; only one option is supported'
             )
         try:
             # the validation option can exists before the record set is ready
@@ -455,7 +451,7 @@ class Certificate(Hook):
                 )
             except ClientError as err:
                 if err.response["Error"]["Message"] != (
-                    "Stack with id {} does not exist".format(self.stack.fqn)
+                    f"Stack with id {self.stack.fqn} does not exist"
                 ):
                     raise
                 LOGGER.warning(

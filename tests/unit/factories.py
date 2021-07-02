@@ -62,7 +62,7 @@ class MockBoto3Session:
 
     def assert_client_called_with(self, service_name: str, **kwargs: Any) -> None:
         """Assert a client was created with the provided kwargs."""
-        key = "{}.{}".format(service_name, kwargs.get("region_name", self.region_name))
+        key = f"{service_name}.{kwargs.get('region_name', self.region_name)}"
         assert self._client_calls[key] == kwargs
 
     def client(self, service_name: str, **kwargs: Any) -> BaseClient:
@@ -78,7 +78,7 @@ class MockBoto3Session:
             KeyError: Client was not stubbed from Context before trying to use.
 
         """
-        key = "{}.{}".format(service_name, kwargs.get("region_name", self.region_name))
+        key = f"{service_name}.{kwargs.get('region_name', self.region_name)}"
         self._client_calls[key] = kwargs
         return self._clients[key]
 
@@ -92,7 +92,7 @@ class MockBoto3Session:
             region_name: AWS region.
 
         """
-        key = "{}.{}".format(service_name, region_name or self.region_name)
+        key = f"{service_name}.{region_name or self.region_name}"
         client = boto3.client(  # type: ignore
             service_name, region_name=region_name or self.region_name
         )
@@ -144,7 +144,7 @@ class MockCFNginContext(CfnginContext):
             region: AWS region.
 
         """
-        key = "{}.{}".format(service_name, region or self.env.aws_region)
+        key = f"{service_name}.{region or self.env.aws_region}"
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
             service_name, region_name=region or self.env.aws_region
@@ -226,7 +226,7 @@ class MockRunwayContext(RunwayContext):
             region: AWS region name.
 
         """
-        key = "{}.{}".format(service_name, region or self.env.aws_region)
+        key = f"{service_name}.{region or self.env.aws_region}"
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
             service_name,
@@ -323,7 +323,7 @@ class YamlLoader:
             return self.load_class(self.get(file_name))
         if self.load_type == "kwargs":
             return self.load_class(**self.get(file_name))
-        raise ValueError('invalid load_type; "{}"'.format(self.load_type))
+        raise ValueError(f'invalid load_type; "{self.load_type}"')
 
 
 class YamlLoaderDeployment(YamlLoader):

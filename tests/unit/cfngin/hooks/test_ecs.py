@@ -37,7 +37,7 @@ class TestECSHooks(unittest.TestCase):
                     )
                 )
 
-                logs.check((logger, "DEBUG", "creating ECS cluster: %s" % cluster))
+                logs.check((logger, "DEBUG", f"creating ECS cluster: {cluster}"))
 
             response = client.list_clusters()
             self.assertEqual(len(response.get("clusterArns", [])), 1)
@@ -61,7 +61,7 @@ class TestECSHooks(unittest.TestCase):
                         )
                     )
 
-                    logs.check((logger, "DEBUG", "creating ECS cluster: %s" % cluster))
+                    logs.check((logger, "DEBUG", f"creating ECS cluster: {cluster}"))
 
             response = client.list_clusters()
             self.assertEqual(len(response.get("clusterArns", [])), 2)

@@ -69,7 +69,7 @@ class TestAction:
                 action.pre_run()
             assert excinfo.value.code == 1
             assert (
-                "access denied for CFNgin bucket: %s" % bucket_name
+                f"access denied for CFNgin bucket: {bucket_name}"
             ) in caplog.messages
             return
 
@@ -141,25 +141,23 @@ class TestDictValueFormat(unittest.TestCase):
     def test_format(self) -> None:
         """Test format."""
         added = DictValue("k0", None, "value_0")
-        self.assertEqual(added.changes(), ["+%s = %s" % (added.key, added.new_value)])
+        self.assertEqual(added.changes(), [f"+{added.key} = {added.new_value}"])
         removed = DictValue("k1", "value_1", None)
-        self.assertEqual(
-            removed.changes(), ["-%s = %s" % (removed.key, removed.old_value)]
-        )
+        self.assertEqual(removed.changes(), [f"-{removed.key} = {removed.old_value}"])
         modified = DictValue("k2", "value_1", "value_2")
         self.assertEqual(
             modified.changes(),
             [
-                "-%s = %s" % (modified.key, modified.old_value),
-                "+%s = %s" % (modified.key, modified.new_value),
+                f"-{modified.key} = {modified.old_value}",
+                f"+{modified.key} = {modified.new_value}",
             ],
         )
         unmodified = DictValue("k3", "value_1", "value_1")
         self.assertEqual(
-            unmodified.changes(), [" %s = %s" % (unmodified.key, unmodified.old_value)]
+            unmodified.changes(), [f" {unmodified.key} = {unmodified.old_value}"]
         )
         self.assertEqual(
-            unmodified.changes(), [" %s = %s" % (unmodified.key, unmodified.new_value)]
+            unmodified.changes(), [f" {unmodified.key} = {unmodified.new_value}"]
         )
 
 

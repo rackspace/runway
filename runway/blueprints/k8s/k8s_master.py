@@ -121,17 +121,17 @@ class Cluster(Blueprint):
         )
         template.add_output(
             Output(
-                "%sName" % ekscluster.title,
+                f"{ekscluster.title}Name",
                 Description="EKS Cluster Name",
-                Export=Export(Sub("${AWS::StackName}-%sName" % ekscluster.title)),
+                Export=Export(Sub(f"${{AWS::StackName}}-{ekscluster.title}Name")),
                 Value=ekscluster.ref(),
             )
         )
         template.add_output(
             Output(
-                "%sEndpoint" % ekscluster.title,
+                f"{ekscluster.title}Endpoint",
                 Description="EKS Cluster Endpoint",
-                Export=Export(Sub("${AWS::StackName}-%sEndpoint" % ekscluster.title)),
+                Export=Export(Sub(f"${{AWS::StackName}}-{ekscluster.title}Endpoint")),
                 Value=ekscluster.get_att("Endpoint"),
             )
         )

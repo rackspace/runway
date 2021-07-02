@@ -21,8 +21,8 @@ def get_redirect_uris(
 ) -> Dict[str, List[str]]:
     """Create dict of redirect URIs for AppClient."""
     return {
-        "sign_in": ["%s%s" % (domain, redirect_path_sign_in) for domain in domains],
-        "sign_out": ["%s%s" % (domain, redirect_path_sign_out) for domain in domains],
+        "sign_in": [f"{domain}{redirect_path_sign_in}" for domain in domains],
+        "sign_out": [f"{domain}{redirect_path_sign_out}" for domain in domains],
     }
 
 

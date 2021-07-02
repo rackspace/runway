@@ -43,9 +43,9 @@ def test_cdk_csharp(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (module / file_).is_file()
 
     assert caplog.messages == [
-        "Sample C# CDK module created at {}".format(str(module)),
-        "To finish it's setup, change to the {} directory and execute "
-        '"npm install" to generate it\'s lockfile.'.format(str(module)),
+        f"Sample C# CDK module created at {module}",
+        f"To finish it's setup, change to the {module} directory and execute "
+        '"npm install" to generate it\'s lockfile.',
     ]
 
 
@@ -75,9 +75,9 @@ def test_cdk_py(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (module / file_).is_file()
 
     assert caplog.messages == [
-        "Sample CDK module created at {}".format(str(module)),
-        "To finish it's setup, change to the {} directory and execute "
-        '"npm install" to generate it\'s lockfile.'.format(str(module)),
+        f"Sample CDK module created at {module}",
+        f"To finish it's setup, change to the {module} directory and execute "
+        '"npm install" to generate it\'s lockfile.',
     ]
 
 
@@ -107,9 +107,9 @@ def test_cdk_tsc(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (module / file_).is_file()
 
     assert caplog.messages == [
-        "Sample CDK module created at {}".format(str(module)),
-        "To finish it's setup, change to the {} directory and execute "
-        '"npm install" to generate it\'s lockfile.'.format(str(module)),
+        f"Sample CDK module created at {module}",
+        f"To finish it's setup, change to the {module} directory and execute "
+        '"npm install" to generate it\'s lockfile.',
     ]
 
 
@@ -128,9 +128,7 @@ def test_cfn(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     for file_ in files:
         assert (module / file_).is_file()
 
-    assert caplog.messages == [
-        "Sample CloudFormation module created at {}".format(str(module))
-    ]
+    assert caplog.messages == [f"Sample CloudFormation module created at {module}"]
 
 
 def test_cfngin(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
@@ -153,7 +151,7 @@ def test_cfngin(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     for file_ in files:
         assert (module / file_).is_file()
 
-    assert caplog.messages == ["Sample CFNgin module created at {}".format(str(module))]
+    assert caplog.messages == [f"Sample CFNgin module created at {module}"]
 
 
 def test_k8s_cfn_repo(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
@@ -202,7 +200,7 @@ def test_k8s_cfn_repo(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (repo / file_).is_file()
 
     assert caplog.messages == [
-        "Sample k8s infrastructure repo created at {}".format(str(repo)),
+        f"Sample k8s infrastructure repo created at {repo}",
         "See the README for setup and deployment instructions.",
     ]
 
@@ -248,7 +246,7 @@ def test_k8s_tf_repo(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (repo / file_).is_file()
 
     assert caplog.messages == [
-        "Sample k8s infrastructure repo created at {}".format(str(repo)),
+        f"Sample k8s infrastructure repo created at {repo}",
         "See the README for setup and deployment instructions.",
     ]
 
@@ -278,9 +276,9 @@ def test_sls_py(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (module / file_).is_file()
 
     assert caplog.messages == [
-        "Sample Serverless module created at {}".format(str(module)),
-        "To finish it's setup, change to the {} directory and execute "
-        '"npm install" to generate it\'s lockfile.'.format(str(module)),
+        f"Sample Serverless module created at {module}",
+        f"To finish it's setup, change to the {module} directory and execute "
+        '"npm install" to generate it\'s lockfile.',
     ]
 
 
@@ -311,9 +309,9 @@ def test_sls_tsc(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (module / file_).is_file()
 
     assert caplog.messages == [
-        "Sample Serverless module created at {}".format(str(module)),
-        "To finish it's setup, change to the {} directory and execute "
-        '"npm install" to generate it\'s lockfile.'.format(str(module)),
+        f"Sample Serverless module created at {module}",
+        f"To finish it's setup, change to the {module} directory and execute "
+        '"npm install" to generate it\'s lockfile.',
     ]
 
 
@@ -366,7 +364,7 @@ def test_static_angular(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (repo / file_).is_file()
 
     assert caplog.messages == [
-        "Sample static Angular site repo created at {}".format(str(repo)),
+        f"Sample static Angular site repo created at {repo}",
         "See the README for setup and deployment instructions.",
     ]
 
@@ -406,7 +404,7 @@ def test_static_react(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
         assert (repo / file_).is_file()
 
     assert caplog.messages == [
-        "Sample static React site repo created at {}".format(str(repo)),
+        f"Sample static React site repo created at {repo}",
         "See the README for setup and deployment instructions.",
     ]
 
@@ -431,7 +429,7 @@ def test_tf(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     for file_ in files:
         assert (module / file_).is_file()
 
-    assert caplog.messages == ["Sample Terraform app created at {}".format(str(module))]
+    assert caplog.messages == [f"Sample Terraform app created at {module}"]
 
 
 @pytest.mark.parametrize(
@@ -463,4 +461,4 @@ def test_dir_exists(
     result = runner.invoke(cli, ["gen-sample", command])
 
     assert result.exit_code == 1
-    assert caplog.messages == ["Directory {} already exists!".format(dir_path)]
+    assert caplog.messages == [f"Directory {dir_path} already exists!"]

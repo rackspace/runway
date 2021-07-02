@@ -30,7 +30,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
         eks_cluster_name = kwargs["cluster-name"]
     else:
         eks_cluster_name = OutputLookup.handle(
-            "%s::EksClusterName" % kwargs["stack"], context=context
+            f"{kwargs['stack']}::EksClusterName", context=context
         )
     LOGGER.info("writing kubeconfig...")
     subprocess.check_output(

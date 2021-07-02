@@ -109,7 +109,7 @@ def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         if value is not None:
             continue
 
-        path = input("Path to %s (skip): " % (key,))
+        path = input(f"Path to {key} (skip): ")
         if path == "skip" or not path.strip():
             continue
 
@@ -164,7 +164,7 @@ def ensure_server_cert_exists(
     except ClientError:
         if prompt:
             upload = input(
-                "Certificate '%s' wasn't found. Upload it now? (yes/no) " % (cert_name,)
+                f"Certificate '{cert_name}' wasn't found. Upload it now? (yes/no) "
             )
             if upload != "yes":
                 return {}

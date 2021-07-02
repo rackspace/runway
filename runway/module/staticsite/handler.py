@@ -190,7 +190,7 @@ class StaticSite(RunwayModule):
                         "args": {
                             "user_pool_arn": self.parameters.user_pool_arn,
                             "aliases": self.parameters.aliases,
-                            "stack_name": "${namespace}-%s-dependencies" % self.name,
+                            "stack_name": f"${{namespace}}-{self.name}-dependencies",
                         },
                     }
                 )
@@ -254,15 +254,15 @@ class StaticSite(RunwayModule):
         # Default parameter name matches build_staticsite hook
         if not self.options.source_hashing.parameter:
             self.options.source_hashing.parameter = f"${{namespace}}-{self.name}-hash"
-        nonce_secret_param = "${namespace}-%s-nonce-secret" % self.name
+        nonce_secret_param = f"${{namespace}}-{self.name}-nonce-secret"
 
         build_staticsite_args: Dict[str, Any] = {
             # ensures yaml.safe_load will work by using JSON to convert objects
             "options": json.loads(self.options.data.json(by_alias=True))
         }
-        build_staticsite_args["artifact_bucket_rxref_lookup"] = (
-            "%s-dependencies::ArtifactsBucketName" % self.name
-        )
+        build_staticsite_args[
+            "artifact_bucket_rxref_lookup"
+        ] = f"{self.name}-dependencies::ArtifactsBucketName"
         build_staticsite_args["options"]["namespace"] = "${namespace}"  # type: ignore
         build_staticsite_args["options"]["name"] = self.name  # type: ignore
         build_staticsite_args["options"]["path"] = os.path.join(  # type: ignore
@@ -325,7 +325,7 @@ class StaticSite(RunwayModule):
             for i in [
                 self.options.source_hashing.parameter,
                 nonce_secret_param,
-                "%sextra" % self.options.source_hashing.parameter,
+                f"{self.options.source_hashing.parameter}extra",
             ]
         ]
 
@@ -391,7 +391,7 @@ class StaticSite(RunwayModule):
             "pre_deploy": pre_deploy,
             "stacks": {
                 self.name: {
-                    "class_path": "runway.blueprints.staticsite.%s" % class_path,
+                    "class_path": f"runway.blueprints.staticsite.{class_path}",
                     "variables": site_stack_variables,
                 }
             },
@@ -446,9 +446,9 @@ class StaticSite(RunwayModule):
             site_stack_variables["AcmCertificateArn"] = self.parameters.acmcert_arn
 
         if self.parameters.enable_cf_logging:
-            site_stack_variables["LogBucketName"] = (
-                "${rxref %s-dependencies::AWSLogBucketName}" % self.name
-            )
+            site_stack_variables[
+                "LogBucketName"
+            ] = f"${{rxref {self.name}-dependencies::AWSLogBucketName}}"
 
         if self.parameters.auth_at_edge:
             self._ensure_auth_at_edge_requirements()
@@ -507,14 +507,14 @@ class StaticSite(RunwayModule):
         if self.parameters.create_user_pool:
             args[
                 "created_user_pool_id"
-            ] = "${rxref %s-dependencies::AuthAtEdgeUserPoolId}" % (self.name)
+            ] = f"${{rxref {self.name}-dependencies::AuthAtEdgeUserPoolId}}"
 
         return args
 
     def _get_domain_updater_variables(self) -> Dict[str, str]:
         return {
-            "client_id_output_lookup": "%s-dependencies::AuthAtEdgeClient" % self.name,
-            "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
+            "client_id_output_lookup": f"{self.name}-dependencies::AuthAtEdgeClient",
+            "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
         }
 
     def _get_lambda_config_variables(
@@ -524,8 +524,8 @@ class StaticSite(RunwayModule):
         required_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         return {
-            "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
-            "bucket": "${rxref %s-dependencies::ArtifactsBucketName}" % self.name,
+            "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
+            "bucket": f"${{rxref {self.name}-dependencies::ArtifactsBucketName}}",
             "cookie_settings": site_stack_variables["CookieSettings"],
             "http_headers": site_stack_variables["HttpHeaders"],
             "nonce_signing_secret_param_name": nonce_secret_param,
@@ -542,8 +542,8 @@ class StaticSite(RunwayModule):
         aliases = [add_url_scheme(x) for x in site_stack_variables["Aliases"]]
         return {
             "alternate_domains": aliases,
-            "client_id": "${rxref %s-dependencies::AuthAtEdgeClient}" % self.name,
-            "distribution_domain": "${rxref %s::CFDistributionDomainName}" % name,
+            "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
+            "distribution_domain": f"${{rxref {name}::CFDistributionDomainName}}",
             "oauth_scopes": site_stack_variables["OAuthScopes"],
             "redirect_path_sign_in": site_stack_variables["RedirectPathSignIn"],
             "redirect_path_sign_out": site_stack_variables["RedirectPathSignOut"],

@@ -89,7 +89,7 @@ def deconstruct(value: str) -> OutputQuery:
         stack_name, output_name = value.split("::")
     except ValueError:
         raise ValueError(
-            "output handler requires syntax of <stack>::<output>. Got: %s" % value
+            f"output handler requires syntax of <stack>::<output>. Got: {value}"
         ) from None
 
     return OutputQuery(stack_name, output_name)

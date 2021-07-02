@@ -59,7 +59,7 @@ def generate(
     overlay_path.mkdir(parents=True, exist_ok=True)
     principal_arn = get_principal_arn(context)
     node_instancerole_arn = OutputLookup.handle(
-        "%s::NodeInstanceRoleArn" % stack, context=context
+        f"{stack}::NodeInstanceRoleArn", context=context
     )
     aws_authmap_template = (Path(__file__).parent / "aws-auth-cm.yaml").read_text()
     file_path.write_text(

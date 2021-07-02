@@ -99,4 +99,4 @@ def test_tfenv_run_version(cd_tmp_path: Path, capfd: CaptureFixture[str]) -> Non
     result = runner.invoke(cli, ["tfenv", "run", "--version"])
     captured = capfd.readouterr()  # capfd required for subprocess
     assert result.exit_code == 0
-    assert "Terraform v{}".format(version) in captured.out
+    assert f"Terraform v{version}" in captured.out

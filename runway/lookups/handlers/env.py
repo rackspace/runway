@@ -43,4 +43,4 @@ class EnvLookup(LookupHandler):
         if result != "":  # allows for False bool and NoneType results
             return cls.format_results(result, **args)
 
-        raise ValueError('"{}" does not exist in the environment'.format(value))
+        raise ValueError(f'"{value}" does not exist in the environment')

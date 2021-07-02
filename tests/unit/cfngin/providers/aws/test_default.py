@@ -687,7 +687,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.add_client_error(
             "describe_stacks",
             service_error_code="ValidationError",
-            service_message="Stack with id %s does not exist" % stack_name,
+            service_message=f"Stack with id {stack_name} does not exist",
             expected_params={"StackName": stack_name},
         )
 
@@ -925,9 +925,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             full_changeset=changes, params_diff=[], fqn=stack_name, answer="y"
         )
         expected_outputs = {
-            "FakeOutput": "<inferred-change: MockStack.FakeOutput={}>".format(
-                str({"Ref": "FakeResource"})
-            )
+            "FakeOutput": "<inferred-change: MockStack.FakeOutput={'Ref': 'FakeResource'}>"
         }
         self.assertEqual(self.provider.get_outputs(stack_name), expected_outputs)
         self.assertEqual(result, expected_outputs)
@@ -998,7 +996,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         """Test tail stack retry on missing stack."""
         stack_name = "SlowToCreateStack"
         stack = MagicMock(spec=Stack)
-        stack.fqn = "my-namespace-{}".format(stack_name)
+        stack.fqn = f"my-namespace-{stack_name}"
 
         default.TAIL_RETRY_SLEEP = 0.01
 
@@ -1007,7 +1005,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             self.stubber.add_client_error(
                 "describe_stack_events",
                 service_error_code="ValidationError",
-                service_message="Stack [{}] does not exist".format(stack_name),
+                service_message=f"Stack [{stack_name}] does not exist",
                 http_status_code=400,
                 response_meta={"attempt": i + 1},
             )
@@ -1025,7 +1023,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         """Test tail stack retry on missing stack eventual success."""
         stack_name = "SlowToCreateStack"
         stack = MagicMock(spec=Stack)
-        stack.fqn = "my-namespace-{}".format(stack_name)
+        stack.fqn = f"my-namespace-{stack_name}"
 
         default.TAIL_RETRY_SLEEP = 0.01
         default.GET_EVENTS_SLEEP = 0.01
@@ -1052,7 +1050,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             self.stubber.add_client_error(
                 "describe_stack_events",
                 service_error_code="ValidationError",
-                service_message="Stack [{}] does not exist".format(stack_name),
+                service_message=f"Stack [{stack_name}] does not exist",
                 http_status_code=400,
                 response_meta={"attempt": i + 1},
             )

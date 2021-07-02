@@ -243,7 +243,7 @@ class Step:
         """Construct a log message for a set and log it to the UI."""
         msg = self.status.name
         if self.status.reason:
-            msg += " (%s)" % self.status.reason
+            msg += f" ({self.status.reason})"
         if self.status.code == SUBMITTED.code:
             ui.log(LogLevels.NOTICE, msg, logger=self.logger)
         elif self.status.code == COMPLETE.code:
@@ -322,7 +322,7 @@ class Step:
 
     def __repr__(self) -> str:
         """Object represented as a string."""
-        return "<CFNgin.plan.Step:%s>" % (self.stack.name,)
+        return f"<CFNgin.plan.Step:{self.stack.name}>"
 
     def __str__(self) -> str:
         """Object displayed as a string."""

@@ -44,4 +44,4 @@ class VarLookup(LookupHandler):
         if result != "":  # allows for False bool and NoneType results
             return cls.format_results(result, **args)
 
-        raise ValueError('"{}" does not exist in the variable definition'.format(query))
+        raise ValueError(f'"{query}" does not exist in the variable definition')

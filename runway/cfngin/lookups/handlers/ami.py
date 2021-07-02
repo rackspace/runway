@@ -112,7 +112,7 @@ class AmiLookup(LookupHandler):
         for image in images:
             # sometimes we get ARI/AKI in response - these don't have a 'Name'
             if (
-                re.match("^%s$" % name_regex, image.get("Name", ""))
+                re.match(f"^{name_regex}$", image.get("Name", ""))
                 and "ImageId" in image
             ):
                 return image["ImageId"]

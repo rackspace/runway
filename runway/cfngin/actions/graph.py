@@ -39,10 +39,10 @@ def dot_format(out: TextIO, graph: Graph, name: str = "digraph") -> None:
         name: Name of the graph.
 
     """
-    out.write("digraph %s {\n" % name)
+    out.write(f"digraph {name} {{\n")
     for step, deps in each_step(graph):
         for dep in deps:
-            out.write('  "%s" -> "%s";\n' % (step, dep))
+            out.write(f'  "{step}" -> "{dep}";\n')
 
     out.write("}\n")
 

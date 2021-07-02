@@ -89,7 +89,7 @@ class TestCfnLookup:
         raw_query = "test-stack.output1"
         query = OutputQuery(*raw_query.split("."))
         region = "us-west-2"
-        args = "::region={region}".format(region=region)
+        args = f"::region={region}"
         value = raw_query + args
         mock_parse = mocker.patch.object(
             CfnLookup, "parse", return_value=(raw_query, {"region": region})
@@ -157,7 +157,7 @@ class TestCfnLookup:
             mock_should_use.assert_called_once_with({"default": default}, None)
             assert (
                 "unable to resolve lookup for CloudFormation Stack output "
-                '"{}"; using default'.format(raw_query)
+                f'"{raw_query}"; using default'
             ) in caplog.messages
         else:
             if isinstance(exception, (ClientError, StackDoesNotExist)):
@@ -217,7 +217,7 @@ class TestCfnLookup:
             mock_should_use.assert_called_once_with({"default": default}, mock_provider)
             assert (
                 "unable to resolve lookup for CloudFormation Stack output "
-                '"{}"; using default'.format(raw_query)
+                f'"{raw_query}"; using default'
             ) in caplog.messages
         else:
             if isinstance(exception, (ClientError, StackDoesNotExist)):
@@ -262,11 +262,8 @@ class TestCfnLookup:
             assert CfnLookup.get_stack_output(client, query) == "val1"
 
         stubber.assert_no_pending_responses()
-        assert "describing stack: %s" % stack_name in caplog.messages
-        assert (
-            "{} stack outputs: {}".format(stack_name, json.dumps(outputs))
-            in caplog.messages
-        )
+        assert f"describing stack: {stack_name}" in caplog.messages
+        assert f"{stack_name} stack outputs: {json.dumps(outputs)}" in caplog.messages
 
     def test_get_stack_output_clienterror(self, caplog: LogCaptureFixture) -> None:
         """Test get_stack_output raising ClientError."""
@@ -278,7 +275,7 @@ class TestCfnLookup:
         stubber.add_client_error(
             "describe_stacks",
             service_error_code="ValidationError",
-            service_message="Stack %s does not exist" % stack_name,
+            service_message=f"Stack {stack_name} does not exist",
             expected_params={"StackName": stack_name},
         )
 
@@ -286,7 +283,7 @@ class TestCfnLookup:
             assert CfnLookup.get_stack_output(client, query)
 
         stubber.assert_no_pending_responses()
-        assert "describing stack: %s" % stack_name in caplog.messages
+        assert f"describing stack: {stack_name}" in caplog.messages
 
     def test_get_stack_output_keyerror(self, caplog: LogCaptureFixture) -> None:
         """Test get_stack_output raising KeyError."""
@@ -306,11 +303,8 @@ class TestCfnLookup:
             assert CfnLookup.get_stack_output(client, query)
 
         stubber.assert_no_pending_responses()
-        assert "describing stack: %s" % stack_name in caplog.messages
-        assert (
-            "{} stack outputs: {}".format(stack_name, json.dumps(outputs))
-            in caplog.messages
-        )
+        assert f"describing stack: {stack_name}" in caplog.messages
+        assert f"{stack_name} stack outputs: {json.dumps(outputs)}" in caplog.messages
 
     @pytest.mark.parametrize(
         "args, provider",

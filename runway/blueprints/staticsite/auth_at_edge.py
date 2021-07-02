@@ -208,8 +208,8 @@ class AuthAtEdge(StaticSite):
 
         self.template.add_output(
             Output(
-                "Lambda%sArn" % title,
-                Description="Arn For the %s Lambda Function" % title,
+                f"Lambda{title}Arn",
+                Description=f"Arn For the {title} Lambda Function",
                 Value=lamb.get_att("Arn"),
             )
         )

@@ -509,9 +509,9 @@ class UploadRequestSubmitter(BaseTransferRequestSubmitter):
         """Warn if too large."""
         if fileinfo.size and fileinfo.size > MAX_UPLOAD_SIZE:
             file_path = relative_path(fileinfo.src)
-            warning_message = "File %s exceeds s3 upload limit of %s." % (
-                file_path,
-                human_readable_size(MAX_UPLOAD_SIZE),
+            warning_message = (
+                f"File {file_path} exceeds s3 upload limit of "
+                f"{human_readable_size(MAX_UPLOAD_SIZE)}."
             )
             warning = create_warning(file_path, warning_message, skip_file=False)
             self._result_queue.put(warning)

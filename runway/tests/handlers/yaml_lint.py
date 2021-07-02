@@ -54,7 +54,7 @@ class YamllintHandler(TestHandler):
             )
 
         yamllint_options = [
-            "--config-file=%s" % yamllint_config,
+            f"--config-file={yamllint_config}",
             *cls.get_yamllint_options(base_dir),
         ]
 

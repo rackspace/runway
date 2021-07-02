@@ -133,7 +133,7 @@ def download_kb_release(
 
     download_dir = tempfile.mkdtemp()
     filename = "kubectl.exe" if kb_platform == "windows" else "kubectl"
-    kb_url = "%s/%s/bin/%s/%s" % (RELEASE_URI, version, kb_platform, arch)
+    kb_url = f"{RELEASE_URI}/{version}/bin/{kb_platform}/{arch}"
 
     try:
         LOGGER.verbose("downloading kubectl from %s...", kb_url)

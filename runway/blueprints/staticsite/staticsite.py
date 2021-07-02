@@ -426,7 +426,7 @@ class StaticSite(Blueprint):
                 AccountId,
                 ":log-group:/aws/lambda/",
                 StackName,
-                "-%s-*" % function_name,
+                f"-{function_name}-*",
             ],
         )
 
@@ -439,7 +439,7 @@ class StaticSite(Blueprint):
                 AccountId,
                 ":log-group:/aws/lambda/*.",
                 StackName,
-                "-%s-*" % function_name,
+                f"-{function_name}-*",
             ],
         )
 

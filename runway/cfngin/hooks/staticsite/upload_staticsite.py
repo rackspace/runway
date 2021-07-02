@@ -283,7 +283,7 @@ def get_content(extra_file: ExtraFileTypeDef) -> Optional[str]:
             )
 
         if not isinstance(content, str):
-            raise TypeError("unsupported content: %s" % type(content))
+            raise TypeError(f"unsupported content: {type(content)}")
 
     return cast(Optional[str], content)
 
@@ -400,7 +400,7 @@ def sync_extra_files(
 
     # calculate a hash of the extra_files
     if hash_param:
-        hash_param = "%sextra" % hash_param
+        hash_param = f"{hash_param}extra"
 
         hash_old = get_ssm_value(session, hash_param)
 

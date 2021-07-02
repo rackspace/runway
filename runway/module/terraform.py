@@ -36,9 +36,9 @@ def gen_workspace_tfvars_files(environment: str, region: str) -> List[str]:
     """Generate possible Terraform workspace tfvars filenames."""
     return [
         # Give preference to explicit environment-region files
-        "%s-%s.tfvars" % (environment, region),
+        f"{environment}-{region}.tfvars",
         # Fallback to environment name only
-        "%s.tfvars" % environment,
+        f"{environment}.tfvars",
     ]
 
 
@@ -50,19 +50,15 @@ def update_env_vars_with_tf_var_values(
     # https://www.terraform.io/docs/commands/environment-variables.html#tf_var_name
     for key, val in tf_vars.items():
         if isinstance(val, dict):
-            os_env_vars["TF_VAR_%s" % key] = "{ %s }" % str(
-                # e.g. TF_VAR_map='{ foo = "bar", baz = "qux" }'
-                ", ".join(
-                    [
-                        nestedkey + ' = "' + nestedval + '"'
-                        for (nestedkey, nestedval) in val.items()
-                    ]
-                )
+            value = ", ".join(
+                nestedkey + ' = "' + nestedval + '"'
+                for (nestedkey, nestedval) in val.items()
             )
+            os_env_vars[f"TF_VAR_{key}"] = f"{{ {value} }}"
         elif isinstance(val, list):
-            os_env_vars["TF_VAR_%s" % key] = json.dumps(val)
+            os_env_vars[f"TF_VAR_{key}"] = json.dumps(val)
         else:
-            os_env_vars["TF_VAR_%s" % key] = val
+            os_env_vars[f"TF_VAR_{key}"] = val
     return os_env_vars
 
 
@@ -271,7 +267,7 @@ class Terraform(RunwayModule):
                 "will be applied"
             )
             return
-        handler = "_%s_backend_handler" % self.tfenv.backend["type"]
+        handler = f"_{self.tfenv.backend['type']}_backend_handler"
         if hasattr(self, handler):
             self.tfenv.backend["config"].update(
                 self.options.backend_config.get_full_configuration()
@@ -282,7 +278,7 @@ class Terraform(RunwayModule):
             self.logger.verbose(
                 "handling use of backend config: %s", self.tfenv.backend["type"]
             )
-            self["_%s_backend_handler" % self.tfenv.backend["type"]]()
+            self[f"_{self.tfenv.backend['type']}_backend_handler"]()
         else:
             self.logger.verbose(
                 'backed "%s" does not require special handling',
@@ -539,7 +535,7 @@ class Terraform(RunwayModule):
             self.logger.info("init (in progress)")
             self.terraform_init()
             if self.current_workspace != self.required_workspace:
-                if re.compile("^[*\\s]\\s%s$" % self.required_workspace, re.M).search(
+                if re.compile(f"^[*\\s]\\s{self.required_workspace}$", re.M).search(
                     self.terraform_workspace_list()
                 ):
                     self.terraform_workspace_select(self.required_workspace)

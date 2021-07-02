@@ -147,8 +147,8 @@ def validate_variable_type(
     else:
         if not isinstance(value, var_type):
             raise TypeError(
-                "Value for variable %s must be of type %s. Actual "
-                "type: %s." % (var_name, var_type, type(value))
+                f"Value for variable {var_name} must be of type {var_type}. Actual "
+                f"type: {type(value)}"
             )
     return value
 
@@ -355,12 +355,12 @@ class Blueprint:
 
         if hasattr(self, "PARAMETERS") or hasattr(self, "LOCAL_PARAMETERS"):
             raise AttributeError(
-                "DEPRECATION WARNING: Blueprint %s uses "
+                f"DEPRECATION WARNING: Blueprint {name} uses "
                 "deprecated PARAMETERS or "
                 "LOCAL_PARAMETERS, rather than VARIABLES. "
                 "Please update your blueprints. See "
                 "https://docs.onica.com/projects/runway/page/cfngin/blueprints.html#variables "
-                "for additional information." % name
+                "for additional information."
             )
 
     @cached_property

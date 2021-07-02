@@ -45,7 +45,7 @@ class HookDataLookup(LookupHandler):
             args["load"] = "troposphere"
 
         if not result:
-            raise ValueError('Could not find a value for "%s"' % value)
+            raise ValueError(f'Could not find a value for "{value}"')
 
         if result == args.get("default"):
             # assume default value has already been processed so no need to

@@ -88,8 +88,8 @@ class CFNgin:
         """Contents of a CFNgin environment file."""
         result: Dict[str, Any] = {}
         supported_names = [
-            "{}.env".format(self.__ctx.env.name),
-            "{}-{}.env".format(self.__ctx.env.name, self.region),
+            f"{self.__ctx.env.name}.env",
+            f"{self.__ctx.env.name}-{self.region}.env",
         ]
         for _, file_name in enumerate(supported_names):
             file_path = os.path.join(self.sys_path, file_name)

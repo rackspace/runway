@@ -144,15 +144,17 @@ class SOARecordText:
         ) = record_text.split()
 
     def __str__(self) -> str:
-        """Contert an instance of this class to a string."""
-        return "%s %s %s %s %s %s %s" % (
-            self.nameserver,
-            self.contact,
-            self.serial,
-            self.refresh,
-            self.retry,
-            self.expire,
-            self.min_ttl,
+        """Convert an instance of this class to a string."""
+        return " ".join(
+            [
+                self.nameserver,
+                self.contact,
+                self.serial,
+                self.refresh,
+                self.retry,
+                self.expire,
+                self.min_ttl,
+            ]
         )
 
 
@@ -271,9 +273,9 @@ def yaml_to_ordered_dict(
                     a = val[0]
                     b = mapping.get(a.value, None)
                     if b:
-                        msg = "{} mapping cannot have duplicate keys {} {}"
                         raise ConstructorError(
-                            msg.format(node_name, b.start_mark, a.start_mark)
+                            f"{node_name} mapping cannot have duplicate keys "
+                            f"{b.start_mark} {a.start_mark}"
                         )
                     mapping[a.value] = a
 
@@ -298,14 +300,14 @@ def yaml_to_ordered_dict(
                     raise ConstructorError(
                         "while constructing a mapping",
                         node.start_mark,
-                        "found unhashable key (%s)" % exc,
+                        f"found unhashable key ({exc})",
                         key_node.start_mark,
                     ) from exc
                 # prevent duplicate sibling keys for certain "keywords".
                 if key in mapping and key in self.NO_DUPE_SIBLINGS:
-                    msg = "{} key cannot have duplicate siblings {} {}"
                     raise ConstructorError(
-                        msg.format(key, node.start_mark, key_node.start_mark)
+                        f"{key} key cannot have duplicate siblings "
+                        f"{node.start_mark} {key_node.start_mark}"
                     )
                 if key in self.NO_DUPE_CHILDREN:
                     # prevent duplicate children keys for this mapping.
@@ -650,14 +652,14 @@ class SourceProcessor:
                     config.bucket,
                 )
                 dir_name = self.sanitize_uri_path(
-                    "s3-%s-%s" % (config.bucket, config.key[: -len(suffix)])
+                    f"s3-{config.bucket}-{config.key[: -len(suffix)]}"
                 )
                 break
 
         if extractor is None:
             raise ValueError(
-                'Archive type could not be determined for S3 object "%s" '
-                "in bucket %s." % (config.key, config.bucket)
+                f'Archive type could not be determined for S3 object "{config.key}" '
+                f"in bucket {config.bucket}."
             )
 
         session = get_session(region=None)
@@ -685,7 +687,7 @@ class SourceProcessor:
                     client_error,
                 )
                 sys.exit(1)
-            dir_name += "-%s" % modified_date.strftime(self.ISO8601_FORMAT)
+            dir_name += f"-{modified_date.strftime(self.ISO8601_FORMAT)}"
         cached_dir_path = self.package_cache_dir / dir_name
         if not cached_dir_path.is_dir():
             LOGGER.debug(
@@ -832,7 +834,7 @@ class SourceProcessor:
             commit_id = ls_remote_output.split(b"\t")[0]
             LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id.decode()
-        raise ValueError('Ref "%s" not found for repo %s.' % (ref, uri))
+        raise ValueError(f'Ref "{ref}" not found for repo {uri}.')
 
     @staticmethod
     def determine_git_ls_remote_ref(
@@ -899,7 +901,7 @@ class SourceProcessor:
             dir_name = uri
         dir_name = self.sanitize_uri_path(dir_name)
         if ref is not None:
-            dir_name += "-%s" % ref
+            dir_name += f"-{ref}"
         return dir_name
 
 
@@ -914,8 +916,4 @@ def stack_template_key_name(blueprint: Blueprint) -> str:
 
     """
     name = blueprint.name
-    return "stack_templates/%s/%s-%s.json" % (
-        blueprint.context.get_fqn(name),
-        name,
-        blueprint.version,
-    )
+    return f"stack_templates/{blueprint.context.get_fqn(name)}/{name}-{blueprint.version}.json"

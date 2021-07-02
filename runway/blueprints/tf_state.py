@@ -46,7 +46,7 @@ class TfState(Blueprint):
         # Conditions
         for i in ["BucketName", "TableName"]:
             self.template.add_condition(
-                "%sOmitted" % i,
+                f"{i}Omitted",
                 Or(
                     Equals(self.variables[i].ref, ""),
                     Equals(self.variables[i].ref, "undefined"),
@@ -73,7 +73,7 @@ class TfState(Blueprint):
         )
         self.template.add_output(
             Output(
-                "%sName" % terraformlocktable.title,
+                f"{terraformlocktable.title}Name",
                 Description="Name of DynamoDB table for Terraform state",
                 Value=terraformlocktable.ref(),
             )
@@ -99,14 +99,14 @@ class TfState(Blueprint):
         )
         self.template.add_output(
             Output(
-                "%sName" % terraformstatebucket.title,
+                f"{terraformstatebucket.title}Name",
                 Description="Name of bucket storing Terraform state",
                 Value=terraformstatebucket.ref(),
             )
         )
         self.template.add_output(
             Output(
-                "%sArn" % terraformstatebucket.title,
+                f"{terraformstatebucket.title}Arn",
                 Description="Arn of bucket storing Terraform state",
                 Value=terraformstatebucket.get_att("Arn"),
             )

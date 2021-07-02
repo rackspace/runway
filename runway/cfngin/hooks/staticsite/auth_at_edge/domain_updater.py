@@ -43,7 +43,7 @@ def update(
         return context_dict
 
     try:
-        domain_prefix = ("%s-%s" % (user_pool_hash, client_id)).lower()
+        domain_prefix = (f"{user_pool_hash}-{client_id}").lower()
 
         cognito_client.create_user_pool_domain(
             Domain=domain_prefix, UserPoolId=user_pool_id
@@ -75,7 +75,7 @@ def delete(
 
     user_pool_id = context.hook_data["aae_user_pool_id_retriever"]["id"]
     _, user_pool_hash = user_pool_id.split("_")
-    domain_prefix = ("%s-%s" % (user_pool_hash, client_id)).lower()
+    domain_prefix = (f"{user_pool_hash}-{client_id}").lower()
 
     try:
         cognito_client.delete_user_pool_domain(
@@ -98,4 +98,4 @@ def get_user_pool_domain(prefix: str, region: str) -> str:
         region: The region in which the pool resides.
 
     """
-    return "%s.auth.%s.amazoncognito.com" % (prefix, region)
+    return f"{prefix}.auth.{region}.amazoncognito.com"

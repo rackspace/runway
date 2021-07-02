@@ -77,9 +77,7 @@ class LookupHandler:
                 value = value.get(get)
             else:
                 raise TypeError(
-                    'value must be dict type to use "get"; got type "{}"'.format(
-                        type(value)
-                    )
+                    f'value must be dict type to use "get"; got type "{type(value)}"'
                 )
         if (
             isinstance(value, str)
@@ -282,9 +280,7 @@ class LookupHandler:
         if isinstance(value, str):
             return bool(strtobool(value))
         raise TypeError(
-            "Value must be a string or bool to use transform=bool. Got type {}.".format(
-                type(value)
-            )
+            f"Value must be a string or bool to use transform=bool. Got type {type(value)}."
         )
 
     @classmethod
@@ -304,7 +300,7 @@ class LookupHandler:
 
         """
         if isinstance(value, (list, set, tuple)):
-            return "{}".format(delimiter).join(cast(Sequence[str], value))
+            return f"{delimiter}".join(cast(Sequence[str], value))
         if isinstance(value, MutableMap):
             # convert into a dict with protected attrs removed
             value = value.data

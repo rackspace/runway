@@ -20,9 +20,9 @@ def bootstrap_value(value: str, context: CfnginContext, **kwargs: Any) -> str:
         stack_name, bootstrap_val, post_bootstrap_val = value.split("::")
     except ValueError:
         raise ValueError(
-            "Invalid value for bootstrap_value lookup: %s. Must "
+            f"Invalid value for bootstrap_value lookup: {value}. Must "
             "be in <stack>::<bootstrap value>::"
-            "<post_bootstrap val> format." % value
+            "<post_bootstrap val> format."
         )
 
     stack = next(i for i in context.stacks_dict.values() if i.name == stack_name)

@@ -139,10 +139,9 @@ class Stack:
         for variable in self.variables:
             deps = variable.dependencies
             if self.name in deps:
-                message = "Variable {} in stack {} has a circular reference".format(
-                    variable.name, self.name
+                raise ValueError(
+                    f"Variable {variable.name} in stack {self.name} has a circular reference"
                 )
-                raise ValueError(message)
             requires.update(deps)
         return requires
 
@@ -167,9 +166,7 @@ class Stack:
                 blueprint_class = load_object_from_string(class_path)
                 if not hasattr(blueprint_class, "rendered"):
                     raise AttributeError(
-                        'Stack class {} does not have a "rendered" attribute.'.format(
-                            class_path
-                        )
+                        f'Stack class {class_path} does not have a "rendered" attribute.'
                     )
             elif self.definition.template_path:
                 blueprint_class = RawTemplateBlueprint

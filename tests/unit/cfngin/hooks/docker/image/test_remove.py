@@ -34,9 +34,7 @@ def test_remove(
     """Test remove."""
     repo = "dkr.test.com/image"
     tags = ["latest", "oldest"]
-    mock_image = MagicMock(
-        spec=DockerImage, tags=["{}:{}".format(repo, tag) for tag in tags]
-    )
+    mock_image = MagicMock(spec=DockerImage, tags=[f"{repo}:{tag}" for tag in tags])
     mock_image.attrs = {"RepoTags": mock_image.tags}
     args = ImageRemoveArgs(force=True, image=mock_image, tags=["latest", "oldest"])
     mocker.patch.object(ImageRemoveArgs, "parse_obj", return_value=args)
@@ -59,7 +57,7 @@ def test_remove(
     mock_from_cfngin_context.assert_called_once_with(cfngin_context)
     docker_hook_data.client.api.remove_image.assert_has_calls(  # pylint: disable=no-member
         [
-            call(force=True, image="{}:{}".format(args.repo, tag), noprune=False)
+            call(force=True, image=f"{args.repo}:{tag}", noprune=False)
             for tag in args.tags
         ]
     )
@@ -90,7 +88,7 @@ def test_remove_image_not_found(
     assert remove(context=cfngin_context, **args.dict()) == docker_hook_data
     docker_hook_data.client.api.remove_image.assert_has_calls(  # pylint: disable=no-member
         [
-            call(force=False, image="{}:{}".format(args.repo, tag), noprune=False)
+            call(force=False, image=f"{args.repo}:{tag}", noprune=False)
             for tag in args.tags
         ]
     )

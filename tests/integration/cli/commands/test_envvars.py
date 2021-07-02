@@ -64,11 +64,10 @@ def test_envvars_no_config(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None
     result = runner.invoke(cli, ["envvars"])
     assert result.exit_code == 1
 
-    template = (
-        "config file not found at path {path}; looking for one of "
+    assert (
+        f"config file not found at path {cd_tmp_path}; looking for one of "
         "['runway.yml', 'runway.yaml']"
-    )
-    assert template.format(path=cd_tmp_path) in caplog.messages
+    ) in caplog.messages
 
 
 def test_envvars_no_env_vars(
@@ -80,6 +79,4 @@ def test_envvars_no_env_vars(
     runner = CliRunner()
     result = runner.invoke(cli, ["envvars"])
     assert result.exit_code == 1
-    assert (
-        "No env_vars defined in %s" % str(cd_tmp_path / "runway.yml") in caplog.messages
-    )
+    assert f"No env_vars defined in {cd_tmp_path / 'runway.yml'}" in caplog.messages

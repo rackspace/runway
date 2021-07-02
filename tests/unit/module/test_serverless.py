@@ -321,8 +321,8 @@ class TestServerless:
         )
         assert not obj.extend_serverless_yml(mock_func)
         assert (
-            "{}:encountered an error when trying to delete the "
-            "temporary Serverless config".format(tmp_path.name) in caplog.messages
+            f"{tmp_path.name}:encountered an error when trying to delete the "
+            "temporary Serverless config" in caplog.messages
         )
 
     @pytest.mark.parametrize("command", [("deploy"), ("remove"), ("print")])
@@ -413,18 +413,16 @@ class TestServerless:
 
         assert obj.skip
         assert [
-            '{}:skipped; package.json with "serverless" in devDependencies'
-            " is required for this module type".format(tmp_path.name)
+            f'{tmp_path.name}:skipped; package.json with "serverless" in devDependencies'
+            " is required for this module type"
         ] == caplog.messages
         caplog.clear()
 
         mocker.patch.object(obj, "package_json_missing", lambda: False)
         assert obj.skip
         assert [
-            "{}:skipped; config file for this stage/region not found"
-            " -- looking for one of: {}".format(
-                tmp_path.name, ", ".join(gen_sls_config_files(obj.stage, obj.region))
-            )
+            f"{tmp_path.name}:skipped; config file for this stage/region not found"
+            f" -- looking for one of: {', '.join(gen_sls_config_files(obj.stage, obj.region))}"
         ] == caplog.messages
         caplog.clear()
 

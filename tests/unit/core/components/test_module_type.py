@@ -66,9 +66,7 @@ class TestRunwayModuleType:
             assert not RunwayModuleType(cd_tmp_path)
         assert excinfo.value.code == 1
         assert (
-            'module class could not be determined from path "{}"'.format(
-                cd_tmp_path.name
-            )
+            f'module class could not be determined from path "{cd_tmp_path.name}"'
             in caplog.messages
         )
 

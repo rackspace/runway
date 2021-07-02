@@ -86,7 +86,7 @@ def mock_lookup(
 ) -> Lookup:
     """Mock lookup."""
     if raw is None:
-        raw = "%s %s" % (lookup_type, lookup_input)
+        raw = f"{lookup_type} {lookup_input}"
     return Lookup(type=lookup_type, input=lookup_input, raw=raw)
 
 

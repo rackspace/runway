@@ -156,7 +156,7 @@ class FileLookup(LookupHandler):
             codec, path = value.split(":", 1)
         except ValueError:
             raise TypeError(
-                'File value must be of the format "<codec>:<path>" (got %s)' % (value)
+                f'File value must be of the format "<codec>:<path>" (got {value})'
             ) from None
         return CODECS[codec](read_value_from_path(path))
 

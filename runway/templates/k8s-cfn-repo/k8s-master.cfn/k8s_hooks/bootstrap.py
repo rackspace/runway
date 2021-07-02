@@ -16,7 +16,7 @@ def copy_template_to_env(path: Path, env: str, region: str):
     template_dir = overlays_dir / "template"
     env_dir = overlays_dir / env
     if template_dir.is_dir():
-        if env_dir.is_dir() or (os.path.isdir("%s-%s" % (env_dir, region))):
+        if env_dir.is_dir() or (os.path.isdir(f"{env_dir}-{region}")):
             LOGGER.info(
                 'Bootstrap of k8s module at "%s" skipped; module '
                 "already has a config for this environment",

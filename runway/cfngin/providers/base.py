@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 def not_implemented(method: str) -> None:
     """Wrap NotImplimentedError with a formatted message."""
-    raise NotImplementedError("Provider does not support '%s' method." % method)
+    raise NotImplementedError(f"Provider does not support '{method}' method.")
 
 
 class BaseProviderBuilder:

@@ -24,7 +24,7 @@ def format_npm_command_for_logging(command: List[str]) -> str:
     if platform.system().lower() == "windows" and (
         command[0] == "npx.cmd" and command[1] == "-c"
     ):
-        return 'npx.cmd -c "%s"' % " ".join(command[2:])
+        return f'npx.cmd -c "{" ".join(command[2:])}"'
     return " ".join(command)
 
 
