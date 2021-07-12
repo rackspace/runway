@@ -104,6 +104,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: Gr1N/setup-poetry@v4
       - uses: actions/cache@v2.1.6
         id: cache
         with:
@@ -112,7 +113,6 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - uses: Gr1N/setup-poetry@v4
       - run: poetry install --extras docs -vv
       - name: Install Node Dependencies
         run: make npm-ci
@@ -203,6 +203,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: Gr1N/setup-poetry@v4
       - uses: actions/cache@v2.1.6
         id: cache
         with:
@@ -211,7 +212,6 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - uses: Gr1N/setup-poetry@v4
       - run: poetry install --extras docs -vv
       - name: Install Node Dependencies
         run: make npm-install
