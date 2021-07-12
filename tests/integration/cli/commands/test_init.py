@@ -63,7 +63,7 @@ def test_init_handle_validation_error(
         f"{MODULE}.Runway",
         spec=Runway,
         spec_set=True,
-        init=Mock(side_effect=ValidationError([], Mock())),
+        init=Mock(side_effect=ValidationError([], Mock())),  # type: ignore
     )
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()

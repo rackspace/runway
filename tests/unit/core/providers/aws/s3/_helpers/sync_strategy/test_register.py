@@ -50,5 +50,5 @@ def test_register_sync_strategy() -> None:
 def test_register_sync_strategy_default() -> None:
     """Test register_sync_strategy."""
     strategy_cls = Mock()
-    assert not register_sync_strategy(Mock(), strategy_cls)
+    assert not register_sync_strategy(Mock(), strategy_cls)  # type: ignore
     strategy_cls.assert_called_once_with("file_at_src_and_dest")
