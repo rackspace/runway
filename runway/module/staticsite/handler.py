@@ -293,7 +293,7 @@ class StaticSite(RunwayModule):
                     "extra_files": [i.dict() for i in self.options.extra_files],
                     "cf_disabled": site_stack_variables["DisableCloudFront"],
                     "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId"
-                    "::default=undefined}}",
+                    "::default=undefined}",
                     "distribution_domain": f"${{cfn ${{namespace}}-{self.name}."
                     "CFDistributionDomainName::default=undefined}}",
                 },
