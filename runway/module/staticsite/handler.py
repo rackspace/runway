@@ -429,6 +429,7 @@ class StaticSite(RunwayModule):
     def _get_site_stack_variables(self) -> Dict[str, Any]:
         site_stack_variables: Dict[str, Any] = {
             "Aliases": [],
+            "Compresss": self.parameters.compress,
             "DisableCloudFront": self.parameters.cf_disable,
             "RewriteDirectoryIndex": self.parameters.rewrite_directory_index or "",
             "RedirectPathSignIn": "${default staticsite_redirect_path_sign_in::/parseauth}",

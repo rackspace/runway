@@ -62,6 +62,8 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
             an authorization wall.
         cf_disable: Wether deployment of the CloudFront Distribution should be
             disabled.
+        compress: Whether the CloudFront default cache behavior will automatically
+            compress certain files.
         cookie_settings: The default cookie settings for retrieved tokens and
             generated nonce’s.
         create_user_pool: Wether to create a User Pool for the Auth@Edge
@@ -104,6 +106,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     aliases: List[str] = Field([], alias="staticsite_aliases")
     auth_at_edge: bool = Field(False, alias="staticsite_auth_at_edge")
     cf_disable: bool = Field(False, alias="staticsite_cf_disable")
+    compress: bool = Field(True, alias="staticsite_compress")
     cookie_settings: Dict[str, str] = Field(
         {
             "idToken": "Path=/; Secure; SameSite=Lax",

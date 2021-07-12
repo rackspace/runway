@@ -64,6 +64,12 @@ class StaticSite(Blueprint):
             "default": [],
             "description": "(Optional) Domain aliases the " "distribution",
         },
+        "Compress": {
+            "type": bool,
+            "default": True,
+            "description": "Whether the CloudFront default cache behavior will "
+            "automatically compress certain files.",
+        },
         "DisableCloudFront": {
             "type": bool,
             "default": False,
@@ -245,7 +251,7 @@ class StaticSite(Blueprint):
             ],
             "DefaultCacheBehavior": cloudfront.DefaultCacheBehavior(
                 AllowedMethods=["GET", "HEAD"],
-                Compress=False,
+                Compress=self.variables.get("Compress", True),
                 DefaultTTL="86400",
                 ForwardedValues=cloudfront.ForwardedValues(
                     Cookies=cloudfront.Cookies(Forward="none"), QueryString=False

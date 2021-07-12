@@ -212,6 +212,19 @@ Parameters
 
   .. versionadded:: 1.5.0
 
+.. data:: staticsite_compress
+  :type: Optional[bool]
+  :value: True
+  :noindex:
+
+  Whether the CloudFront default cache behavior will automatically compress certain files.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    parameters:
+      staticsite_compress: false
+
 .. data:: staticsite_cookie_settings
   :type: Optional[Dict[str, str]]
   :value: {"idToken": "Path=/; Secure; SameSite=Lax", "accessToken": "Path=/; Secure; SameSite=Lax", "refreshToken": "Path=/; Secure; SameSite=Lax", "nonce": "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax"}
