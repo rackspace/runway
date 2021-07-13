@@ -336,7 +336,7 @@ class AuthAtEdge(StaticSite):
             ],
             "DefaultCacheBehavior": cloudfront.DefaultCacheBehavior(
                 AllowedMethods=["GET", "HEAD"],
-                Compress=True,
+                Compress=self.variables.get("Compress", True),
                 DefaultTTL="86400",
                 ForwardedValues=cloudfront.ForwardedValues(QueryString=True),
                 LambdaFunctionAssociations=default_cache_behavior_lambdas,
