@@ -65,6 +65,7 @@
         "codecov",
         "FQDNs",
         "fstring",
-        "Ngin"
+        "Ngin",
+        "rglob"
     ]
 }
