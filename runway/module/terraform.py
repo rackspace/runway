@@ -239,6 +239,14 @@ class Terraform(RunwayModule):
             self.logger.debug("removing: %s", child)
             send2trash(str(child))  # does not support Path objects
 
+    def deploy(self) -> None:
+        """Run Terraform apply."""
+        self.run("apply")
+
+    def destroy(self) -> None:
+        """Run Terraform destroy."""
+        self.run("destroy")
+
     def gen_command(
         self,
         command: Union[List[str], str, Tuple[str, ...]],
@@ -336,6 +344,14 @@ class Terraform(RunwayModule):
         self.ctx.env.vars = update_env_vars_with_tf_var_values(
             self.ctx.env.vars, self.parameters
         )
+
+    def init(self) -> None:
+        """Run init."""
+        self.run("init")
+
+    def plan(self) -> None:
+        """Run Terraform plan."""
+        self.run("plan")
 
     def terraform_apply(self) -> None:
         """Execute ``terraform apply`` command.
@@ -543,30 +559,15 @@ class Terraform(RunwayModule):
                     self.terraform_workspace_new(self.required_workspace)
                 self.logger.verbose("re-running init after workspace change...")
                 self.terraform_init()
-            self.logger.info("init (complete)")
             self.terraform_get()
-            self.logger.info("%s (in progress)", action)
-            self["terraform_" + action]()
-            self.logger.info("%s (complete)", action)
+            self.logger.info("init (complete)")
+            if action != "init":
+                self.logger.info("%s (in progress)", action)
+                self["terraform_" + action]()
+                self.logger.info("%s (complete)", action)
         finally:
             if self.auto_tfvars.exists():
                 self.auto_tfvars.unlink()
-
-    def deploy(self) -> None:
-        """Run Terraform apply."""
-        self.run("apply")
-
-    def destroy(self) -> None:
-        """Run Terraform destroy."""
-        self.run("destroy")
-
-    def init(self) -> None:
-        """Run init."""
-        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
-
-    def plan(self) -> None:
-        """Run Terraform plan."""
-        self.run("plan")
 
 
 class TerraformOptions(ModuleOptions):
