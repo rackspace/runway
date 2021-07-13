@@ -435,17 +435,28 @@ class TestCloudDevelopmentKit:
             path=obj.path,
         )
 
+    @pytest.mark.parametrize("skip", [False, True])
     def test_init(
-        self, caplog: LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
+        self,
+        mocker: MockerFixture,
+        runway_context: RunwayContext,
+        skip: bool,
+        tmp_path: Path,
     ) -> None:
         """Test init."""
-        caplog.set_level(logging.WARNING, logger=MODULE)
-        obj = CloudDevelopmentKit(runway_context, module_root=tmp_path)
-        assert not obj.init()
-        assert (
-            f"init not currently supported for {CloudDevelopmentKit.__name__}"
-            in caplog.messages
-        )
+        mocker.patch.object(CloudDevelopmentKit, "skip", skip)
+        cdk_bootstrap = mocker.patch.object(CloudDevelopmentKit, "cdk_bootstrap")
+        npm_install = mocker.patch.object(CloudDevelopmentKit, "npm_install")
+        run_build_steps = mocker.patch.object(CloudDevelopmentKit, "run_build_steps")
+        assert not CloudDevelopmentKit(runway_context, module_root=tmp_path).init()
+        if skip:
+            cdk_bootstrap.assert_not_called()
+            npm_install.assert_not_called()
+            run_build_steps.assert_not_called()
+        else:
+            cdk_bootstrap.assert_called_once_with()
+            npm_install.assert_called_once_with()
+            run_build_steps.assert_called_once_with()
 
     @pytest.mark.parametrize("skip", [False, True])
     def test_plan(
