@@ -214,7 +214,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         else:
             assert not obj.env_file
 
-    @pytest.mark.parametrize("action", ["deploy", "destroy", "plan"])
+    @pytest.mark.parametrize("action", ["deploy", "destroy", "init", "plan"])
     def test_execute(
         self,
         action: str,
@@ -475,20 +475,6 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         assert not obj.handle_parameters()
         mock_update_envvars.assert_called_once_with(runway_context.env.vars, {})
         assert obj.ctx.env.vars == {"result": "success"}
-
-    def test_init(
-        self,
-        caplog: LogCaptureFixture,
-        runway_context: MockRunwayContext,
-        tmp_path: Path,
-    ) -> None:
-        """Test init."""
-        caplog.set_level(logging.WARNING, logger=MODULE)
-        obj = Terraform(runway_context, module_root=tmp_path)
-        assert not obj.init()
-        assert (
-            f"init not currently supported for {Terraform.__name__}" in caplog.messages
-        )
 
     @pytest.mark.parametrize(
         "env, param, expected",

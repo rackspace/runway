@@ -26,6 +26,8 @@ def deploy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> 
     """Deploy infrastructure as code.
 
     \b
+    Process
+    -------
     1. Determines the deploy environment.
         - "-e, --deploy-environment" option
         - "DEPLOY_ENVIRONMENT" environment variable

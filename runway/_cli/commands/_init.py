@@ -26,6 +26,8 @@ def init(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
     """Run initialization/bootstrap steps.
 
     \b
+    Process
+    -------
     1. Determines the deploy environment.
         - "-e, --deploy-environment" option
         - "DEPLOY_ENVIRONMENT" environment variable
@@ -39,6 +41,15 @@ def init(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
         - (non-interactive) all
     3. Initializes/bootstraps selected deployments/modules in the order defined.
        (e.g. "cdk bootstrap", "terraform init")
+
+    \b
+    Steps By Module Type
+    --------------------
+    - AWS CDK: Runs "cdk bootstrap".
+    - CFNgin: Creates the "cfngin_bucket" if needed.
+    - Terraform: Runs "terraform init", changes the workspace if needed, runs
+      "terraform init" again if the workspace was changed, and finally
+      downloads/updates Terraform modules.
 
     """  # noqa: D301
     try:

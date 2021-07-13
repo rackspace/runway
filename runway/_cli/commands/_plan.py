@@ -26,6 +26,8 @@ def plan(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
     """Determine what infrastructure changes will occur during the next deploy.
 
     \b
+    Process
+    -------
     1. Determines the deploy environment.
         - "-e, --deploy-environment" option
         - "DEPLOY_ENVIRONMENT" environment variable
