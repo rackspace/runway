@@ -230,8 +230,12 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         )
 
     def init(self) -> None:
-        """Run cdk init."""
-        LOGGER.warning("init not currently supported for %s", self.__class__.__name__)
+        """Run cdk bootstrap."""
+        if self.skip:
+            return
+        self.npm_install()
+        self.run_build_steps()
+        self.cdk_bootstrap()
 
     def plan(self) -> None:
         """Run cdk diff."""
