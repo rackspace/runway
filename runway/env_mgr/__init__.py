@@ -144,7 +144,15 @@ class EnvManager:
         raise NotImplementedError
 
     def uninstall(self, version: str) -> bool:
-        """Uninstall a version of the managed binary."""
+        """Uninstall a version of the managed binary.
+
+        Args:
+            version: Version of binary to uninstall.
+
+        Returns:
+            Whether a version of the binary was uninstalled or not.
+
+        """
         version_dir = self.versions_dir / version
         if version_dir.is_dir():
             LOGGER.notice(
