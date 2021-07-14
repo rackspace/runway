@@ -17,7 +17,7 @@ IAM_POLICY_ARN_PREFIX = "arn:aws:iam::aws:policy/"
 
 
 class Cluster(Blueprint):
-    """Stacker blueprint for creating k8s cluster resources."""
+    """CFNgin blueprint for creating k8s cluster resources."""
 
     VARIABLES = {
         "EksClusterName": {
@@ -38,7 +38,7 @@ class Cluster(Blueprint):
     }
 
     def create_template(self) -> None:
-        """Create template (main function called by Stacker)."""
+        """Create template (main function called by CFNgin)."""
         template = self.template
         template.add_version("2010-09-09")
         template.add_description("Kubernetes Master via EKS - V1.0.0")

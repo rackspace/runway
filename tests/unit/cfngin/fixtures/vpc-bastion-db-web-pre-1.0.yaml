@@ -48,7 +48,7 @@ stacks:
     parameters:
       # Extends the parameters dict with the contents of the vpc_parameters
       # anchor. Basically we're including all VPC Outputs in the parameters
-      # of the bastion stack. Note: Stacker figures out, automatically, which
+      # of the bastion stack. Note: CFNgin figures out, automatically, which
       # parameters the stack actually needs and only submits those to each
       # stack. For example, most stacks are in the PrivateSubnets, but not
       # the PublicSubnets, but cfngin deals with it for you.

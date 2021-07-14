@@ -18,7 +18,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 class CloudFormation(RunwayModule):
-    """CloudFormation (Stacker) Runway Module."""
+    """CloudFormation (CFNgin) Runway Module."""
 
     def __init__(
         self,

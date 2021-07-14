@@ -12,10 +12,10 @@ IAM_POLICY_ARN_PREFIX = "arn:aws:iam::aws:policy/"
 
 
 class Iam(Blueprint):
-    """Stacker blueprint for creating k8s IAM resources."""
+    """CFNgin blueprint for creating k8s IAM resources."""
 
     def create_template(self) -> None:
-        """Create template (main function called by Stacker)."""
+        """Create template (main function called by CFNgin)."""
         template = self.template
         template.add_version("2010-09-09")
         template.add_description("Kubernetes IAM policies - V1.0.0")

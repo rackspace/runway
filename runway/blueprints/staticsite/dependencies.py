@@ -14,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Dependencies(Blueprint):
-    """Stacker blueprint for creating static website buckets."""
+    """CFNgin blueprint for creating static website buckets."""
 
     VARIABLES = {
         "Aliases": {
@@ -67,7 +67,7 @@ class Dependencies(Blueprint):
     }
 
     def create_template(self) -> None:
-        """Create template (main function called by Stacker)."""
+        """Create template (main function called by CFNgin)."""
         template = self.template
         template.set_version("2010-09-09")
         template.set_description("Static Website - Dependencies")

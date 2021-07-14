@@ -27,7 +27,7 @@ Its main goals are to encourage GitOps best-practices, avoid convoluted Makefile
 * AWS CDK
 * Kubectl
 * Serverless Framework
-* Stacker (CloudFormation)
+* CFNgin (CloudFormation)
 * Static websites (build & deploy to S3+CloudFront)
 * Terraform
 
