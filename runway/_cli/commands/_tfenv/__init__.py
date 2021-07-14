@@ -8,10 +8,11 @@ from ... import options
 from ._install import install
 from ._list import list_installed
 from ._run import run
+from ._uninstall import uninstall
 
-__all__ = ["install", "list_installed", "run"]
+__all__ = ["install", "list_installed", "run", "uninstall"]
 
-COMMANDS = [install, list_installed, run]
+COMMANDS = [install, list_installed, run, uninstall]
 
 
 @click.group("tfenv", short_help="terraform (install|run)")
