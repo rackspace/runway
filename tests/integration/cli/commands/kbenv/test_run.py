@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
@@ -12,6 +11,8 @@ from runway._cli import cli
 from runway.env_mgr.kbenv import KB_VERSION_FILENAME
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest import CaptureFixture, LogCaptureFixture
 
 

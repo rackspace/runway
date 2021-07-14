@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
@@ -11,6 +10,8 @@ from click.testing import CliRunner
 from runway._cli import cli
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest import CaptureFixture, LogCaptureFixture
 
 
@@ -22,7 +23,6 @@ def test_tfenv_run_no_version_file(
     runner = CliRunner()
     result = runner.invoke(cli, ["tfenv", "run", "--", "--help"])
     assert result.exit_code == 1
-
     assert "unable to find a .terraform-version file" in "\n".join(caplog.messages)
 
 
