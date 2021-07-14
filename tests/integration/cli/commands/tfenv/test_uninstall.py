@@ -101,6 +101,13 @@ def test_tfenv_uninstall_no_version(
     assert "version not specified" in caplog.messages
 
 
+def test_tfenv_uninstall_not_installed(cd_tmp_path: Path) -> None:
+    """Test ``runway tfenv uninstall`` not installed."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["tfenv", "uninstall", "1.0.0"])
+    assert result.exit_code != 0
+
+
 def test_tfenv_uninstall_version_file(cd_tmp_path: Path) -> None:
     """Test ``runway tfenv uninstall`` version file."""
     version = "1.0.0"
