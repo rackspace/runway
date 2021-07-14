@@ -21,6 +21,8 @@ def pytest_ignore_collect(path: Any, config: Config) -> bool:
     """Determine if this directory should have its tests collected."""
     if config.option.functional:
         return True
+    if config.option.markexpr and "wip" in config.option.markexpr:
+        return False  # collect when looking for markers
     return not (config.option.integration or config.option.integration_only)
 
 

@@ -8,7 +8,7 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import TYPE_CHECKING, NamedTuple, Optional, cast
+from typing import TYPE_CHECKING, Generator, NamedTuple, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -272,6 +272,16 @@ class KBEnvManager(EnvManager):
         LOGGER.verbose("downloaded kubectl %s successfully", version_requested)
         self.current_version = version_requested
         return str(self.bin)
+
+    def list_installed(self) -> Generator[Path, None, None]:
+        """List installed versions of kubectl.
+
+        Only lists versions of kubectl that have been installed by an instance
+        if this class or by kbenv.
+
+        """
+        LOGGER.verbose("checking %s for kubectl versions...", self.versions_dir)
+        return self.versions_dir.rglob("v*.*.*")
 
     def set_version(self, version: str) -> None:
         """Set current version.

@@ -65,6 +65,7 @@
         "codecov",
         "FQDNs",
         "fstring",
+        "markexpr",
         "Ngin",
         "rglob"
     ]
