@@ -35,7 +35,7 @@ def get_valid_instance_types() -> Any:
 
 
 class NodeGroup(Blueprint):
-    """Stacker blueprint for creating k8s nodegroup."""
+    """CFNgin blueprint for creating k8s nodegroup."""
 
     VARIABLES = {
         "KeyName": {
@@ -122,7 +122,7 @@ class NodeGroup(Blueprint):
     }
 
     def create_template(self) -> None:
-        """Create template (main function called by Stacker)."""
+        """Create template (main function called by CFNgin)."""
         template = self.template
         template.add_version("2010-09-09")
         template.add_description(

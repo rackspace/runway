@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class TfState(Blueprint):
-    """Stacker blueprint for creating Terraform state resources."""
+    """CFNgin blueprint for creating Terraform state resources."""
 
     VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
         "BucketDeletionPolicy": {
@@ -39,7 +39,7 @@ class TfState(Blueprint):
     }
 
     def create_template(self) -> None:
-        """Create template (main function called by Stacker)."""
+        """Create template (main function called by CFNgin)."""
         self.template.set_version("2010-09-09")
         self.template.set_description("Terraform State Resources")
 
