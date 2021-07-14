@@ -6,11 +6,12 @@ import click
 
 from ... import options
 from ._install import install
+from ._list import list_installed
 from ._run import run
 
-__all__ = ["install", "run"]
+__all__ = ["install", "list_installed", "run"]
 
-COMMANDS = [install, run]
+COMMANDS = [install, list_installed, run]
 
 
 @click.group("tfenv", short_help="terraform (install|run)")

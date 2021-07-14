@@ -288,6 +288,22 @@ class TestTFEnvManager:
         ):
             tfenv.install()
 
+    def test_list_installed(self, mocker: MockerFixture, tmp_path: Path) -> None:
+        """Test list_installed."""
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
+        version_dirs = [tmp_path / "0.13.0", tmp_path / "1.0.0"]
+        for v_dir in version_dirs:
+            v_dir.mkdir()
+        (tmp_path / "something.txt").touch()
+        result = list(TFEnvManager().list_installed())  # convert generator to list
+        result.sort()  # sort list for comparison
+        assert result == version_dirs
+
+    def test_list_installed_none(self, mocker: MockerFixture, tmp_path: Path) -> None:
+        """Test list_installed."""
+        mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
+        assert list(TFEnvManager().list_installed()) == []
+
     @pytest.mark.parametrize(
         "provided, expected",
         [

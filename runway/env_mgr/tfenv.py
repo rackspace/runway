@@ -16,6 +16,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Generator,
     List,
     NamedTuple,
     Optional,
@@ -387,6 +388,16 @@ class TFEnvManager(EnvManager):
         download_tf_release(str(self.version), self.versions_dir, self.command_suffix)
         LOGGER.verbose("downloaded Terraform %s successfully", self.version)
         return str(self.bin)
+
+    def list_installed(self) -> Generator[Path, None, None]:
+        """List installed versions of Terraform.
+
+        Only lists versions of Terraform that have been installed by an instance
+        if this class or by tfenv.
+
+        """
+        LOGGER.verbose("checking %s for Terraform versions...", self.versions_dir)
+        return self.versions_dir.rglob("*.*.*")
 
     def set_version(self, version: str) -> None:
         """Set current version.
