@@ -6,12 +6,21 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import pytest
 from click.testing import CliRunner
 
 from runway._cli import cli
+from runway.env_mgr.tfenv import TFEnvManager
 
 if TYPE_CHECKING:
     from pytest import LogCaptureFixture
+    from pytest_mock import MockerFixture
+
+
+@pytest.fixture(autouse=True, scope="function")
+def patch_versions_dir(mocker: MockerFixture, tmp_path: Path) -> None:
+    """Patch TFEnvManager.versions_dir."""
+    mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
 
 
 def test_tfenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:

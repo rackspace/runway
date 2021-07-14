@@ -169,6 +169,25 @@ kbenv install
 ----
 
 
+.. _command-kbenv-list:
+
+**********
+kbenv list
+**********
+
+.. file://./../../runway/_cli/commands/_kbenv/_list.py
+
+.. command-output:: runway kbenv list --help
+
+.. rubric:: Example
+.. code-block:: sh
+
+  $ runway kbenv list
+
+
+----
+
+
 .. _command-kbenv-run:
 
 *********

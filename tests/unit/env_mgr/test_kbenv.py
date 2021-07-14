@@ -33,6 +33,22 @@ class TestKBEnvManager:
         version_file.write_text("v1.22.0")
         assert obj.get_version_from_file(version_file) == "v1.22.0"
 
+    def test_list_installed(self, mocker: MockerFixture, tmp_path: Path) -> None:
+        """Test list_installed."""
+        mocker.patch.object(KBEnvManager, "versions_dir", tmp_path)
+        version_dirs = [tmp_path / "v1.14.0", tmp_path / "v1.21.0"]
+        for v_dir in version_dirs:
+            v_dir.mkdir()
+        (tmp_path / "something.txt").touch()
+        result = list(KBEnvManager().list_installed())  # convert generator to list
+        result.sort()  # sort list for comparison
+        assert result == version_dirs
+
+    def test_list_installed_none(self, mocker: MockerFixture, tmp_path: Path) -> None:
+        """Test list_installed."""
+        mocker.patch.object(KBEnvManager, "versions_dir", tmp_path)
+        assert list(KBEnvManager().list_installed()) == []
+
     @pytest.mark.parametrize(
         "provided, expected",
         [
