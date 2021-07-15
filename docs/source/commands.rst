@@ -440,6 +440,25 @@ tfenv run
 ----
 
 
+.. _command-tfenv-uninstall:
+
+*********
+tfenv uninstall
+*********
+
+.. file://./../../runway/_cli/commands/_tfenv/_uninstall.py
+
+.. command-output:: runway tfenv uninstall --help
+
+.. rubric:: Example
+.. code-block:: sh
+
+  $ runway tfenv uninstall 1.0.0
+  $ runway tfenv uninstall --all
+
+----
+
+
 .. _command-whichenv:
 
 ********

@@ -4,16 +4,19 @@ from __future__ import annotations
 import logging
 import os
 import platform
+import shutil
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Generator, Optional, cast
 
 from ..compat import cached_property
 
 if TYPE_CHECKING:
     from urllib.error import URLError
 
-LOGGER = logging.getLogger(__name__)
+    from runway._logging import RunwayLogger
+
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 def handle_bin_download_error(exc: URLError, name: str) -> None:
@@ -121,3 +124,45 @@ class EnvManager:
 
         """
         return self.env_dir / "versions"
+
+    @cached_property
+    def version_file(self) -> Optional[Path]:
+        """Find and return a "<bin version file>" file if one is present.
+
+        Returns:
+            Path to the <bin> version file.
+
+        """
+        raise NotImplementedError
+
+    def install(self, version_requested: Optional[str] = None) -> str:
+        """Ensure <bin> is installed."""
+        raise NotImplementedError
+
+    def list_installed(self) -> Generator[Path, None, None]:
+        """List installed versions of <bin>."""
+        raise NotImplementedError
+
+    def uninstall(self, version: str) -> bool:
+        """Uninstall a version of the managed binary.
+
+        Args:
+            version: Version of binary to uninstall.
+
+        Returns:
+            Whether a version of the binary was uninstalled or not.
+
+        """
+        version_dir = self.versions_dir / version
+        if version_dir.is_dir():
+            LOGGER.notice(
+                "uninstalling %s %s from %s...",
+                self._bin_name,
+                version,
+                self.versions_dir,
+            )
+            shutil.rmtree(version_dir)
+            LOGGER.success("uninstalled %s %s", self._bin_name, version)
+            return True
+        LOGGER.error("%s %s not installed", self._bin_name, version)
+        return False
