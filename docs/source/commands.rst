@@ -184,7 +184,6 @@ kbenv list
 
   $ runway kbenv list
 
-
 ----
 
 
@@ -204,6 +203,24 @@ kbenv run
   $ runway kbenv run version --client
   $ runway kbenv run -- --help
 
+----
+
+
+.. _command-kbenv-uninstall:
+
+***************
+kbenv uninstall
+***************
+
+.. file://./../../runway/_cli/commands/_kbenv/_uninstall.py
+
+.. command-output:: runway kbenv uninstall --help
+
+.. rubric:: Example
+.. code-block:: sh
+
+  $ runway kbenv uninstall v1.21.0
+  $ runway kbenv uninstall --all
 
 ----
 
@@ -223,7 +240,6 @@ new
 
   $ runway new
   $ runway new --debug
-
 
 ----
 
@@ -265,7 +281,6 @@ preflight
 
   $ runway preflight
 
-
 ----
 
 
@@ -283,7 +298,6 @@ run-python
 .. code-block:: sh
 
   $ runway run-python my_script.py
-
 
 ----
 
@@ -303,7 +317,6 @@ schema cfngin
 
   $ runway schema cfngin --output cfngin-schema.json
 
-
 ----
 
 
@@ -321,7 +334,6 @@ schema runway
 .. code-block:: sh
 
   $ runway schema runway --output runway-schema.json
-
 
 ----
 
@@ -442,9 +454,9 @@ tfenv run
 
 .. _command-tfenv-uninstall:
 
-*********
+***************
 tfenv uninstall
-*********
+***************
 
 .. file://./../../runway/_cli/commands/_tfenv/_uninstall.py
 
