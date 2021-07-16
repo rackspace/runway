@@ -7,7 +7,7 @@ import platform
 import shutil
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, Optional, cast
+from typing import TYPE_CHECKING, Any, Generator, Optional, Tuple, Union, cast
 
 from ..compat import cached_property
 
@@ -143,7 +143,7 @@ class EnvManager:
         """List installed versions of <bin>."""
         raise NotImplementedError
 
-    def uninstall(self, version: str) -> bool:
+    def uninstall(self, version: Union[str, Tuple[Any, ...]]) -> bool:
         """Uninstall a version of the managed binary.
 
         Args:
@@ -153,7 +153,7 @@ class EnvManager:
             Whether a version of the binary was uninstalled or not.
 
         """
-        version_dir = self.versions_dir / version
+        version_dir = self.versions_dir / str(version)
         if version_dir.is_dir():
             LOGGER.notice(
                 "uninstalling %s %s from %s...",
