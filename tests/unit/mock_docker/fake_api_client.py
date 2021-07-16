@@ -60,6 +60,6 @@ def make_fake_api_client(
 
 def make_fake_client(overrides: Optional[Dict[str, Any]] = None) -> docker.DockerClient:
     """Return a Client with a fake APIClient."""
-    client = docker.DockerClient()
+    client = docker.DockerClient(version=DEFAULT_DOCKER_API_VERSION)
     client.api = make_fake_api_client(overrides)
     return client
