@@ -219,7 +219,7 @@ jobs:
         # assertions assume linux so some fail when run on windows
         run: make test cov-xml
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v1.5.2
+        uses: codecov/codecov-action@v2.0.1
         with:
           fail_ci_if_error: true
   build-pypi:
